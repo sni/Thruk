@@ -1,0 +1,16 @@
+[% USE date %]
+<table class='infoBox' border="1" cellspacing="0" cellpadding="0">
+  <tr>
+    <td class='infoBox'>
+      <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
+      Last Updated: [% date.format(now(), '%a %b %e %H:%M:%S %Z %Y') %]<br />
+      Updated every [% refresh_rate %] seconds<br />
+      Nagios&reg; Core&trade; 3.2.0 - <a href='http://www.nagios.org' target='_blank' class='homepageURL'>www.nagios.org</a><br />
+      Logged in as <i>[% remote_user %]</i><br />
+      <!--
+      <div class='infoBoxBadProcStatus'> - Notifications are disabled</div>
+      <div class='infoBoxBadProcStatus'> - Service checks are disabled </div>
+      -->
+    </td>
+  </tr>
+</table>

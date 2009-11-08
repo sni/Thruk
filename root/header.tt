@@ -1,0 +1,11 @@
+[%~ USE date ~%]
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/ico" />
+    <title>[% title %]</title>
+    <link rel='stylesheet' type='text/css' href='/stylesheets/common.css' />
+    <link rel='stylesheet' type='text/css' href='/stylesheets/[% page %].css' />
+  </head>
+  <body class='[% page %]'>
+<!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->

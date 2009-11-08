@@ -1,0 +1,576 @@
+[% INCLUDE header.tt %]
+    <!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
+    <p align="left">
+    <table border="0" align="left" width="100%" cellspacing="4" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="50%">
+            [% infobox.tt %]
+        </td>
+        <td align="right" valign="bottom" width="50%">
+          <table border="0" cellspacing="0" cellspadding="0">
+            <tr>
+              <td valign="bottom" align="right"></td>
+              <td>
+                <table border="0" cellspacing="4" cellspadding="0">
+                  <tr>
+                    <td class='perfTitle'>
+
+                      &nbsp;<a href='extinfo.cgi?type=4' class='perfTitle'>Monitoring Performance</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <table border="0" cellspacing="0" cellspadding="0">
+                        <tr>
+                          <td class='perfBox'>
+
+                            <table border="0" cellspacing="4" cellspadding="0">
+                              <tr>
+                                <td align="left" valign="center" class='perfItem'>
+                                  <a href='extinfo.cgi?type=4' class='perfItem'>Service Check Execution Time:</a>
+                                </td>
+                                <td valign="top" class='perfValue' nowrap>
+                                  <a href='extinfo.cgi?type=4' class='perfValue'>1.01 / 1.12 / 1.014 sec</a>
+                                </td>
+
+                              </tr>
+                              <tr>
+                                <td align="left" valign="center" class='perfItem'>
+                                  <a href='extinfo.cgi?type=4' class='perfItem'>Service Check Latency:</a>
+                                </td>
+                                <td valign="top" class='perfValue' nowrap>
+                                  <a href='extinfo.cgi?type=4' class='perfValue'>0.00 / 0.26 / 0.126 sec</a>
+                                </td>
+
+                              </tr>
+                              <tr>
+                                <td align="left" valign="center" class='perfItem'>
+                                  <a href='extinfo.cgi?type=4' class='perfItem'>Host Check Execution Time:</a>
+                                </td>
+                                <td valign="top" class='perfValue' nowrap>
+                                  <a href='extinfo.cgi?type=4' class='perfValue'>1.01 / 1.08 / 1.017 sec</a>
+                                </td>
+
+                              </tr>
+                              <tr>
+                                <td align="left" valign="center" class='perfItem'>
+                                  <a href='extinfo.cgi?type=4' class='perfItem'>Host Check Latency:</a>
+                                </td>
+                                <td valign="top" class='perfValue' nowrap>
+                                  <a href='extinfo.cgi?type=4' class='perfValue'>0.02 / 0.26 / 0.136 sec</a>
+                                </td>
+
+                              </tr>
+                              <tr>
+                                <td align="left" valign="center" class='perfItem'>
+                                  <a href='status.cgi?host=all&amp;serviceprops=131072' class='perfItem'># Active Host / Service Checks:</a>
+                                </td>
+                                <td valign="top" class='perfValue' nowrap>
+                                  <a href='status.cgi?hostgroup=all&amp;hostprops=131072&amp;style=hostdetail' class='perfValue'>10</a> / <a href='status.cgi?host=all&amp;serviceprops=131072' class='perfValue'>200</a>
+
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align="left" valign="center" class='perfItem'>
+                                  <a href='status.cgi?host=all&amp;serviceprops=65536' class='perfItem'># Passive Host / Service Checks:</a>
+                                </td>
+                                <td valign="top" class='perfValue' nowrap>
+                                  <a href='status.cgi?hostgroup=all&amp;hostprops=65536&amp;style=hostdetail' class='perfValue'>0</a> / <a href='status.cgi?host=all&amp;serviceprops=65536' class='perfValue'>0</a>
+
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    </p>
+    <br clear="all">
+    <br>
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+      <tr>
+
+        <td valign="top" align="left" width="50%">
+          <table class='tac' width="125" cellspacing="4" cellpadding="0" border="0">
+            <tr>
+              <td colspan="1" height="20" class='outageTitle'>
+                &nbsp;Network Outages
+              </td>
+            </tr>
+            <tr>
+              <td class='outageHeader' width="125">
+
+                <a href='outages.cgi' class='outageHeader'>0 Outages</a>
+              </td>
+            </tr>
+            <tr>
+              <td valign="top">
+                <table border="0" width="125" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td valign="bottom" width="25">
+
+                      &nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td width="10">
+                      &nbsp;
+                    </td>
+                    <td valign="top" width="100%">
+                      <table border="0" width="100%"></table>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td valign="top" align="right" width="50%">
+          <table border="0" cellspacing="0" cellspadding="0">
+            <tr>
+              <td>
+
+                <table border="0" cellspacing="4" cellspadding="0">
+                  <tr>
+                    <td class='healthTitle'>
+                      &nbsp;Network Health
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <table border="0" cellspacing="0" cellspadding="0">
+
+                        <tr>
+                          <td class='healthBox'>
+                            <table border="0" cellspacing="4" cellspadding="0">
+                              <tr>
+                                <td align="left" valign="center" class='healthItem'>
+                                  Host Health:
+                                </td>
+                                <td valign="top" width="100" class='healthBar'>
+                                  <img src='/images/thermok.png' border="0" width="100" height="20" alt='100.0% Health' title='100.0% Health'>
+
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align="left" valign="center" class='healthItem'>
+                                  Service Health:
+                                </td>
+                                <td valign="top" width="100" class='healthBar'>
+                                  <img src='/images/thermok.png' border="0" width="100" height="20" alt='100.0% Health' title='100.0% Health'>
+                                </td>
+
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <table class='tac' width="516" cellspacing="4" cellpadding="0" border="0">
+      <tr>
+        <td colspan="4" height="20" class='hostTitle'>
+          &nbsp;Hosts
+        </td>
+
+      </tr>
+      <tr>
+        <td class='hostHeader' width="125">
+          <a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4' class='hostHeader'>0 Down</a>
+        </td>
+        <td class='hostHeader' width="125">
+          <a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8' class='hostHeader'>0 Unreachable</a>
+        </td>
+
+        <td class='hostHeader' width="125">
+          <a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2' class='hostHeader'>10 Up</a>
+        </td>
+        <td class='hostHeader' width="125">
+          <a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=1' class='hostHeader'>0 Pending</a>
+        </td>
+      </tr>
+      <tr>
+
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;&nbsp;&nbsp;
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+            <tr>
+
+              <td valign="bottom" width="25">
+                &nbsp;
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+              </td>
+
+            </tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;
+              </td>
+
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <table class='tac' width="641" cellspacing="4" cellpadding="0" border="0">
+
+      <tr>
+        <td colspan="5" height="20" class='serviceTitle'>
+          &nbsp;Services
+        </td>
+      </tr>
+      <tr>
+        <td class='serviceHeader' width="125">
+          <a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=16' class='serviceHeader'>0 Critical</a>
+        </td>
+
+        <td class='serviceHeader' width="125">
+          <a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=4' class='serviceHeader'>0 Warning</a>
+        </td>
+        <td class='serviceHeader' width="125">
+          <a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=8' class='serviceHeader'>0 Unknown</a>
+        </td>
+        <td class='serviceHeader' width="125">
+          <a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=2' class='serviceHeader'>200 Ok</a>
+
+        </td>
+        <td class='serviceHeader' width="125">
+          <a href='status.cgi?host=all&amp;stye=detail&amp;servicestatustypes=1' class='serviceHeader'>0 Pending</a>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;&nbsp;&nbsp;
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;
+
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;
+              </td>
+              <td width="10">
+                &nbsp;
+
+              </td>
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="125" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="bottom" width="25">
+                &nbsp;
+
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%">
+                <table border="0" width="100%"></table>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+    <table class='tac' cellspacing="4" cellpadding="0" border="0">
+      <tr>
+        <td colspan="5" height="20" class='featureTitle'>
+          &nbsp;Monitoring Features
+        </td>
+      </tr>
+
+      <tr>
+        <td class='featureHeader' width="135">
+          Flap Detection
+        </td>
+        <td class='featureHeader' width="135">
+          Notifications
+        </td>
+        <td class='featureHeader' width="135">
+          Event Handlers
+        </td>
+
+        <td class='featureHeader' width="135">
+          Active Checks
+        </td>
+        <td class='featureHeader' width="135">
+          Passive Checks
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <table border="0" width="135" cellspacing="0" cellpadding="0">
+
+            <tr>
+              <td valign="top">
+                <a href='cmd.cgi?cmd_typ=62'><img src='/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled'></a>
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%" class='featureEnabledFlapDetection'>
+                <table border="0" width="100%">
+
+                  <tr>
+                    <td width="100%" class='featureItemEnabledServiceFlapDetection'>
+                      All Services Enabled
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="100%" class='featureItemServicesNotFlapping'>
+                      No Services Flapping
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td width="100%" class='featureItemEnabledHostFlapDetection'>
+                      All Hosts Enabled
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="100%" class='featureItemHostsNotFlapping'>
+                      No Hosts Flapping
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="135" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="top">
+
+                <a href='cmd.cgi?cmd_typ=11'><img src='/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled'></a>
+              </td>
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%" class='featureEnabledNotifications'>
+                <table border="0" width="100%">
+                  <tr>
+                    <td width="100%" class='featureItemEnabledServiceNotifications'>
+
+                      All Services Enabled
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="100%" class='featureItemEnabledHostNotifications'>
+                      All Hosts Enabled
+                    </td>
+                  </tr>
+                </table>
+              </td>
+
+            </tr>
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="135" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="top">
+                <a href='cmd.cgi?cmd_typ=42'><img src='/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled'></a>
+              </td>
+
+              <td width="10">
+                &nbsp;
+              </td>
+              <td valign="top" width="100%" class='featureEnabledHandlers'>
+                <table border="0" width="100%">
+                  <tr>
+                    <td width="100%" class='featureItemEnabledServiceHandlers'>
+                      All Services Enabled
+                    </td>
+
+                  </tr>
+                  <tr>
+                    <td width="100%" class='featureItemEnabledHostHandlers'>
+                      All Hosts Enabled
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+        <td valign="top">
+          <table border="0" width="135" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="top">
+                <a href='extinfo.cgi?type=0'><img src='/images/tacenabled.png' border='0' alt='Active Checks Enabled' title='Active Checks Enabled'></a>
+              </td>
+              <td width="10">
+
+                &nbsp;
+              </td>
+              <td valign="top" width="100%" class='featureEnabledActiveChecks'>
+                <table border="0" width="100%">
+                  <tr>
+                    <td width="100%" class='featureItemEnabledActiveServiceChecks'>
+                      All Services Enabled
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td width="100%" class='featureItemEnabledActiveHostChecks'>
+                      All Hosts Enabled
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+        <td valign="top">
+          <table border="0" width="135" cellspacing="0" cellpadding="0">
+            <tr>
+              <td valign="top">
+                <a href='extinfo.cgi?type=0'><img src='/images/tacenabled.png' border='0' alt='Passive Checks Enabled' title='Passive Checks Enabled'></a>
+              </td>
+              <td width="10">
+                &nbsp;
+
+              </td>
+              <td valign="top" width="100%" class='featureEnabledPassiveChecks'>
+                <table border="0" width="100%">
+                  <tr>
+                    <td width="100%" class='featureItemEnabledPassiveServiceChecks'>
+                      All Services Enabled
+                    </td>
+                  </tr>
+                  <tr>
+
+                    <td width="100%" class='featureItemEnabledPassiveHostChecks'>
+                      All Hosts Enabled
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+      </tr>
+    </table><!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
+  </body>
+</html>

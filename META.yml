@@ -1,0 +1,29 @@
+---
+abstract: 'Catalyst based application'
+author:
+  - sven,,,
+distribution_type: module
+generated_by: 'Module::Install version 0.77'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Nagios-Web
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  Authen::Htpasswd: 0
+  Catalyst::Action::RenderView: 0
+  Catalyst::Plugin::Authentication::Store::Htpasswd: 0
+  Catalyst::Plugin::ConfigLoader: 0
+  Catalyst::Plugin::StackTrace: 0
+  Catalyst::Plugin::Static::Simple: 0
+  Catalyst::Runtime: 5.7015
+  Config::General: 0
+  Nagios::MKLivestatus: 0.15
+  parent: 0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.10_1

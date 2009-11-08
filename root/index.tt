@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <title>Nagios</title>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/ico" />
+  </head>
+  <frameset cols="180,*">
+    <frame src="side.html" name="side" frameborder="0" id="side" />
+    <frame src="main.html" name="main" frameborder="0" id="main" />
+    <noframes>
+      <!-- This page requires a web browser which supports frames. -->
+      <body>
+        <h2>Nagios</h2>
+        <p align="center">
+          <a href="http://www.nagios.org/">www.nagios.org</a><br />
+          Copyright (c) 1999-2009 Ethan Galstad<br />
+        </p>
+        <p>
+          <i>Note: These pages require a browser which supports frames</i>
+        </p>
+      </body>
+    </noframes>
+  </frameset>
+</html>
