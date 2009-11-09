@@ -15,6 +15,7 @@ requires 'parent';
 requires 'Config::General';
 requires 'Authen::Htpasswd';
 requires 'Nagios::MKLivestatus' => '0.16';
+requires 'Catalyst::View::TT';
 catalyst;
 install_script glob('script/*.pl');
 auto_install;
