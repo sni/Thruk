@@ -1,0 +1,7 @@
+Todo List:
+
+- write static pages out on startup: side.html, index.html, main.html
+- create models for cgi.cfg
+- create roles from cgi.cfg
+- create models for hosts / services / contacts
+- add authentication module based on Catalyst::Authentication::Credential::Remote
