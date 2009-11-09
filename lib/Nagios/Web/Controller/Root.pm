@@ -53,7 +53,8 @@ sub side : Path('side.html') {
 
 sub cmd : Path('nagios/cgi-bin/cmd.cgi') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
-    $c->stash->{template} = 'cmd.tt';
+    $c->detach('/cmd');
+    #$c->stash->{template} = 'cmd.tt';
 }
 
 sub status : Path('nagios/cgi-bin/status.cgi') :MyAction('AddDefaults') {
@@ -67,6 +68,7 @@ sub status : Path('nagios/cgi-bin/status.cgi') :MyAction('AddDefaults') {
 
 sub extinfo : Path('nagios/cgi-bin/extinfo.cgi') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
+    $c->detach('/extcgi');
     #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
     #print Dumper($c);
     #print Dumper($self);
@@ -107,6 +109,9 @@ sub get_livestatus {
     #print Dumper($res);
 }
 
+sub auto : Private {
+    my ( $self, $c ) = @_;
+}
 
 =head2 end
 

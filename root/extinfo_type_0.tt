@@ -1,3 +1,5 @@
+[% title = '' %]
+
 [% INCLUDE header.tt %]
 
     <table border="0" width="100%">

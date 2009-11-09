@@ -35,22 +35,22 @@ __PACKAGE__->config('Plugin::ConfigLoader' => { file => 'nagios_web.conf' },
                     name => 'Nagios::Web',
 #see:
 # http://search.cpan.org/~bobtfish/Catalyst-Authentication-Store-Htpasswd-1.003/lib/Catalyst/Authentication/Store/Htpasswd.pm
-                    authentication => {
-                        default_realm => 'Nagios',
-                        realms => {
-                            test => {
-                                credential => {
-                                    class          => 'Password',
-                                    password_field => 'password',
-                                    password_type  => 'self_check',
-                                },
-                                store => {
-                                    class => 'Htpasswd',
-                                    file => 'htpasswd',
-                                },
-                            },
-                        },
-                    },
+#                    authentication => {
+#                        default_realm => 'Nagios',
+#                        realms => {
+#                            test => {
+#                                credential => {
+#                                    class          => 'Password',
+#                                    password_field => 'password',
+#                                    password_type  => 'self_check',
+#                                },
+#                                store => {
+#                                    class => 'Htpasswd',
+#                                    file => 'htpasswd',
+#                                },
+#                            },
+#                        },
+#                    },
  );
 
 
