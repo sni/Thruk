@@ -51,21 +51,38 @@ sub side : Path('side.html') {
     $c->stash->{template} = 'side.tt';
 }
 
-sub cmd : Path('nagios/cgi-bin/cmd.cgi') {
+sub cmd : Path('nagios/cgi-bin/cmd.cgi') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'cmd.tt';
 }
 
-sub extinfo : Path('nagios/cgi-bin/extinfo.cgi') {
+sub status : Path('nagios/cgi-bin/status.cgi') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
-    $c->stash->{template} = 'extinfo.tt';
+    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'hostdetail';
+    $c->stash->{title}          = 'Current Network Status';
+    $c->stash->{infoBoxTitle}   = 'Current Network Status';
+    $c->stash->{page}           = 'status';
+    $c->stash->{template}       = 'status_'.$style.'.tt';
 }
 
-sub tac : Path('nagios/cgi-bin/tac.cgi') {
+sub extinfo : Path('nagios/cgi-bin/extinfo.cgi') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
-    print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
+    #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
+    #print Dumper($c);
+    #print Dumper($self);
+    #exit;
+    my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
+    $c->stash->{title}          = 'Extended Information';
+    $c->stash->{infoBoxTitle}   = 'Nagios Process Information';
+    $c->stash->{page}           = 'extinfo';
+    $c->stash->{template}       = 'extinfo_type_'.$type.'.tt';
+}
+
+sub tac : Path('nagios/cgi-bin/tac.cgi') :MyAction('AddDefaults') {
+    my ( $self, $c ) = @_;
+    #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
     my $livestatus = $self->get_livestatus();
-    print Dumper($livestatus);
+    #print Dumper($livestatus);
     $c->stash->{title}          = 'Nagios Tactical Monitoring Overview';
     $c->stash->{infoBoxTitle}   = 'Tactical Monitoring Overview';
     $c->stash->{page}           = 'tac';
@@ -75,24 +92,19 @@ sub tac : Path('nagios/cgi-bin/tac.cgi') {
 sub get_livestatus {
     my $self = shift;
 
-    my $livestatus = Nagios::MKLivestatus->new(
-                                'socket'   => Nagios::Web->config->{livesocket_path},
-                                'verbose'  => Nagios::Web->config->{'livesocket_verbose'},
-    );
-
-    my $res = $livestatus->selectall_arrayref("GET services
-Stats: flap_detection_enabled = 1
-Stats: flap_detection_enabled = 0
-Stats: notifications_enabled = 1
-Stats: notifications_enabled = 0
-Stats: event_handler_enabled = 1
-Stats: event_handler_enabled = 0
-Stats: checks_enabled = 1
-Stats: checks_enabled = 0
-Stats: accept_passive_service_checks = 1
-Stats: accept_passive_service_checks = 0
-");
-    print Dumper($res);
+#    my $res = $livestatus->selectall_arrayref("GET services
+#Stats: flap_detection_enabled = 1
+#Stats: flap_detection_enabled = 0
+#Stats: notifications_enabled = 1
+#Stats: notifications_enabled = 0
+#Stats: event_handler_enabled = 1
+#Stats: event_handler_enabled = 0
+#Stats: checks_enabled = 1
+#Stats: checks_enabled = 0
+#Stats: accept_passive_service_checks = 1
+#Stats: accept_passive_service_checks = 0
+#");
+    #print Dumper($res);
 }
 
 
@@ -102,11 +114,14 @@ Attempt to render a view, if needed.
 
 =cut
 
-sub end : ActionClass('RenderView') {}
+sub end : ActionClass('RenderView') {
+    # force catalyst to quit after each request while debugging
+    #exit;
+}
 
 =head1 AUTHOR
 
-sven,,,
+Sven Nierlein, 2009, <nierlein@cpan.org>
 
 =head1 LICENSE
 

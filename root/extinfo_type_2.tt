@@ -1,0 +1,305 @@
+[% INCLUDE header.tt %]
+
+  <body class='extinfo'>
+
+    <!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          <table class='infoBox' border="1" cellspacing="0" cellpadding="0">
+            <tr>
+              <td class='infoBox'>
+                <div class='infoBoxTitle'>Service Information</div>Last Updated: [% date.format(now(), '%a %b %e %H:%M:%S %Y') %]<br>
+                Updated every 300 seconds<br>
+                Nagios&reg; 3.0.6 - <a href='http://www.nagios.org' target='_blank' class='homepageURL'>www.nagios.org</a><br>
+                Logged in as <i>[% REMOTE_USER %]</i><br>
+                <div class='infoBoxBadProcStatus'> - Notifications are disabled</div>
+                <div class='infoBoxBadProcStatus'> - Service checks are disabled </div>
+              </td>
+            </tr>
+          </table>
+          <script language="JavaScript" type="text/javascript">
+          <!--
+          function nagios_get_host_name()
+          {
+              return "[% host_name %]";
+          }
+          function nagios_get_host_address()
+          {
+              return "[% host_address %]";
+          }
+          function nagios_get_service_description()
+          {
+              return "[% description %]";
+          }
+          //-->
+          </script>
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                <a href='extinfo.cgi?type=1&amp;host=[% host_name %]'>View Information For This Host</a><br>
+                <a href='status.cgi?host=[% host_name %]'>View Status Detail For This Host</a><br>
+                <a href='history.cgi?host=[% host_name %]&amp;service=[% description %]'>View Alert History For This Service</a><br>
+                <a href='avail.cgi?host=[% host_name %]&amp;service=[% description %]&amp;show_log_entries'>View Availability Report For This Service</a><br>
+                <a href='notifications.cgi?host=[% host_name %]&amp;service=[% description %]'>View Notifications For This Service</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+        <td align="center" width="33%">
+          <div class='data'>Service</div>
+          <div class='dataTitle'>[% description %]</div>
+          <div class='data'>On Host</div>
+
+          <div class='dataTitle'>[% host_name %]</div>
+          <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% host_name %]'>[% host_name %]</a>)</div><br>
+          <div class='data'> Member of </div>
+          <div class='dataTitle'>
+            <a href='status.cgi?servicegroup=project_swdb&amp;style=overview'>project_swdb</a>, <a href='status.cgi?servicegroup=webinfrastructure&amp;style=overview'>webinfrastructure</a>
+          </div><br>
+          <div class='data'>[% host_address %]</div>
+        </td>
+        <td align="right" valign="bottom" width="33%">
+
+          <a href='http://nagios.muc/cgi-bin/info.pl?pattern=[% description %]&amp;host=[% host_name %]' target='_blank'><img src='/nagios/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service'></a><br clear="all">
+          <font size="-1"><i>Extra Actions</i></font><br clear="all">
+          <br clear="all">
+          <a href='http://webinfodb.muc:5304/webwiki/tiki-index.php?page=Nagios%20Event%20IDs#0171' target='_blank'><img src='/nagios/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service'></a><br clear="all">
+          <font size="-1"><i>Extra Notes</i></font><br clear="all">
+          <br clear="all">
+          <table border='0'></table>
+        </td>
+
+      </tr>
+    </table><br>
+
+    <div align="center">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td align="center" valign="top" class='stateInfoPanel'>
+            <div class='dataTitle'>Service State Information</div>
+            <table border="0">
+              <tr>
+                <td>
+                  <table border="1" cellspacing="0" cellpadding="0">
+
+                    <tr>
+                      <td class='stateInfoTable1'>
+                        <table border="0">
+                          <tr>
+                            <td class='dataVar'>Current Status:</td>
+                            <td class='dataVal'> <div class='serviceCRITICAL'> &nbsp;&nbsp;CRITICAL&nbsp;&nbsp; </div>&nbsp;(for 9d 5h 30m 48s) </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar' valign='top'> Status Information: </td>
+                            <td class='dataVal'>[% plugin_output %]<br>[% long_plugin_output %]</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar' valign='top'>Performance Data:</td>
+                            <td class='dataVal'>[% perf_data %]</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Current Attempt:</td>
+                            <td class='dataVal'>[% current_attempt %]/[% max_check_attempts %]&nbsp;&nbsp;(HARD state)</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last Check Time:</td>
+                            <td class='dataVal'>28-10-2009 17:18:43</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Check Type:</td>
+                            <td class='dataVal'>ACTIVE</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar' nowrap>Check Latency / Duration:</td>
+                            <td class='dataVal'>0.959&nbsp;/&nbsp;0.174 seconds</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Next Scheduled Check:&nbsp;&nbsp;</td>
+                            <td class='dataVal'>06-11-2009 18:13:50</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last State Change:</td>
+                            <td class='dataVal'>28-10-2009 11:45:49</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last Notification:</td>
+                            <td class='dataVal'>N/A&nbsp;(notification 0)</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Is This Service Flapping?</td>
+                            <td class='dataVal'>N/A</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>In Scheduled Downtime?</td>
+                            <td class='dataVal'><div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last Update:</td>
+                            <td class='dataVal'>06-11-2009 17:16:32&nbsp;&nbsp;( 0d 0h 0m 5s ago)</td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table border="1" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td class='stateInfoTable2'>
+                        <table border="0">
+                          <tr>
+                            <td class='dataVar'>Active Checks:</td>
+                            <td class='dataVal'><div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div></td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Passive Checks:</td>
+                            <td class='dataVal'><div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div></td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Obsessing:</td>
+                            <td class='dataVal'><div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div></td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Notifications:</td>
+                            <td class='dataVal'><div class='notificationsENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Event Handler:</td>
+                            <td class='dataVal'><div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Flap Detection:</td>
+                            <td class='dataVal'><div class='flapdetectionENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td align="center" valign="top">
+
+            <table border='0' cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center" valign="top" class='commandPanel'>
+                  <div class='dataTitle'>
+                    Service Commands
+                  </div>
+                  <table border='1' cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>
+
+                        <table border="0" cellspacing="0" cellpadding="0" class='command'>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=6&amp;host=[% host_name %]&amp;service=[% description %]'>Disable active checks of this service</a></td>
+                          </tr>
+                          <tr class='data'>
+                            <td><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=7&amp;host=[% host_name %]&amp;service=[% description %]&amp;force_check'>Re-schedule the next check of this service</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Service' title='Submit Passive Check Result For This Service'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=30&amp;host=[% host_name %]&amp;service=[% description %]'>Submit passive check result for this service</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service'></td>
+                            <td class='command' nowrap><a href='cmd.cgi?cmd_typ=40&amp;host=[% host_name %]&amp;service=[% description %]'>Stop accepting passive checks for this service</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over This Service' title='Stop Obsessing Over This Service'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=100&amp;host=[% host_name %]&amp;service=[% description %]'>Stop obsessing over this service</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/ack.gif' border="0" alt='Acknowledge This Service Problem' title='Acknowledge This Service Problem'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=34&amp;host=[% host_name %]&amp;service=[% description %]'>Acknowledge this service problem</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For This Service' title='Disable Notifications For This Service'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=23&amp;host=[% host_name %]&amp;service=[% description %]'>Disable notifications for this service</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/delay.gif' border="0" alt='Delay Next Service Notification' title='Delay Next Service Notification'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=9&amp;host=[% host_name %]&amp;service=[% description %]'>Delay next service notification</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=160&amp;host=[% host_name %]&amp;service=[% description %]'>Send custom service notification</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For This Service' title='Schedule Downtime For This Service'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=56&amp;host=[% host_name %]&amp;service=[% description %]'>Schedule downtime for this service</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handler For This Service' title='Disable Event Handler For This Service'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=46&amp;host=[% host_name %]&amp;service=[% description %]'>Disable event handler for this service</a></td>
+                          </tr>
+                          <tr class='command'>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection For This Service' title='Disable Flap Detection For This Service'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=60&amp;host=[% host_name %]&amp;service=[% description %]'>Disable flap detection for this service</a></td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+
+        </tr>
+        <tr>
+          <td colspan="2">
+            <br>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center" valign="top" class='commentPanel'>
+            <a name="comments" id="comments"></a>
+            <div class='commentTitle'>Service Comments</div>
+            <table border="0">
+              <tr>
+                <td valign="middle"><img src='/nagios/images/comment.gif' border="0" alt="#########"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=3&amp;host=[% host_name %]&amp;service=[% description %]' class='comment'>Add a new comment</a></td>
+                <td valign="middle"><img src='/nagios/images/delete.gif' border="0" alt="#########"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% host_name %]&amp;service=[% description %]' class='comment'>Delete all comments</a></td>
+              </tr>
+            </table>
+
+            <div align="center">
+              <table border="0" class='comment'>
+                <tr class='comment'>
+                  <th class='comment'>Entry Time</th>
+                  <th class='comment'>Author</th>
+                  <th class='comment'>Comment</th>
+                  <th class='comment'>Comment ID</th>
+                  <th class='comment'>Persistent</th>
+                  <th class='comment'>Type</th>
+                  <th class='comment'>Expires</th>
+                  <th class='comment'>Actions</th>
+                </tr>
+                <tr class='commentOdd'>
+                  <td class='commentOdd' colspan='10'>
+                    This service has no comments associated with it
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+
+          </td>
+        </tr>
+      </table>
+    </div>
+
+[% INCLUDE footer.tt %]

@@ -1,7 +1,7 @@
 ---
 abstract: 'Catalyst based application'
 author:
-  - sven,,,
+  - Sven Nierlein, 2009, <nierlein@cpan.org>
 distribution_type: module
 generated_by: 'Module::Install version 0.77'
 license: perl
@@ -22,7 +22,7 @@ requires:
   Catalyst::Plugin::Static::Simple: 0
   Catalyst::Runtime: 5.7015
   Config::General: 0
-  Nagios::MKLivestatus: 0.15
+  Nagios::MKLivestatus: 0.16
   parent: 0
 resources:
   license: http://dev.perl.org/licenses/

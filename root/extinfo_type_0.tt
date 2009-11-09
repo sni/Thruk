@@ -1,0 +1,310 @@
+[% INCLUDE header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% INCLUDE infobox.tt %]
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="bottom" width="33%"></td>
+      </tr>
+    </table><br>
+    <br>
+    <div align="center">
+      <table border="0" cellpadding="20">
+        <tr>
+
+          <td valign="top">
+            <div class='dataTitle'>
+              Process Information
+            </div>
+            <table border="1" cellspacing="0" cellpadding="0" class='data'>
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr>
+
+                      <td class='dataVar'>
+                        Program Version:
+                      </td>
+                      <td class='dataVal'>
+                        3.2.0
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Program Start Time:
+                      </td>
+
+                      <td class='dataVal'>
+                        2009-11-08 13:09:55
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Total Running Time:
+                      </td>
+                      <td class='dataVal'>
+                        0d 19h 15m 27s
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Last External Command Check:
+                      </td>
+                      <td class='dataVal'>
+                        N/A
+                      </td>
+                    </tr>
+                    <tr>
+
+                      <td class='dataVar'>
+                        Last Log File Rotation:
+                      </td>
+                      <td class='dataVal'>
+                        2009-11-09 00:00:00
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Nagios PID
+                      </td>
+
+                      <td class='dataval'>
+                        30809
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Notifications Enabled?
+                      </td>
+                      <td class='dataVal'>
+                        <div class='notificationsENABLED'>
+
+                          &nbsp;&nbsp;YES&nbsp;&nbsp;
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Service Checks Being Executed?
+                      </td>
+                      <td class='dataVal'>
+
+                        <div class='checksENABLED'>
+                          &nbsp;&nbsp;YES&nbsp;&nbsp;
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Passive Service Checks Being Accepted?
+                      </td>
+
+                      <td class='dataVal'>
+                        <div class='checksENABLED'>
+                          &nbsp;&nbsp;YES&nbsp;&nbsp;
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+
+                        Host Checks Being Executed?
+                      </td>
+                      <td class='dataVal'>
+                        <div class='checksENABLED'>
+                          &nbsp;&nbsp;YES&nbsp;&nbsp;
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+
+                      <td class='dataVar'>
+                        Passive Host Checks Being Accepted?
+                      </td>
+                      <td class='dataVal'>
+                        <div class='checksENABLED'>
+                          &nbsp;&nbsp;YES&nbsp;&nbsp;
+                        </div>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td class='dataVar'>
+                        Event Handlers Enabled?
+                      </td>
+                      <td class='dataVal'>
+                        Yes
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+
+                        Obsessing Over Services?
+                      </td>
+                      <td class='dataVal'>
+                        No
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Obsessing Over Hosts?
+                      </td>
+
+                      <td class='dataVal'>
+                        No
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Flap Detection Enabled?
+                      </td>
+                      <td class='dataVal'>
+                        Yes
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>
+                        Performance Data Being Processed?
+                      </td>
+                      <td class='dataVal'>
+                        No
+                      </td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top">
+            <div class='commandTitle'>
+              Process Commands
+            </div>
+            <table border="1" cellpadding="0" cellspacing="0" class='command'>
+
+              <tr>
+                <td>
+                  <table border="0" cellpadding="0" cellspacing="0" class='command'>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/stop.gif' border="0" alt='Shutdown the Nagios Process' title='Shutdown the Nagios Process'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=14'>Shutdown the Nagios process</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/restart.gif' border="0" alt='Restart the Nagios Process' title='Restart the Nagios Process'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=13'>Restart the Nagios process</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=11'>Disable notifications</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=36'>Stop executing service checks</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=89'>Stop executing host checks</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=91'>Stop accepting passive host checks</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=42'>Disable event handlers</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=49'>Start obsessing over services</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=94'>Start obsessing over hosts</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=62'>Disable flap detection</a>
+
+                      </td>
+                    </tr>
+                    <tr class='command'>
+                      <td>
+                        <img src='/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data'>
+                      </td>
+                      <td class='command'>
+                        <a href='cmd.cgi?cmd_typ=82'>Enable performance data</a>
+
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+
+[% INCLUDE footer.tt %]

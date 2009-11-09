@@ -4,7 +4,7 @@
     <table border="0" align="left" width="100%" cellspacing="4" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="50%">
-            [% infobox.tt %]
+            [% INCLUDE infobox.tt %]
         </td>
         <td align="right" valign="bottom" width="50%">
           <table border="0" cellspacing="0" cellspadding="0">
@@ -571,6 +571,5 @@
         </td>
 
       </tr>
-    </table><!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
-  </body>
-</html>
+    </table>
+[% INCLUDE footer.tt %]
