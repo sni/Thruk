@@ -1,4 +1,4 @@
-package Nagios::Web::Controller::extinfo;
+package Nagios::Web::Controller::tac;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use parent 'Catalyst::Controller';
 
 =head1 NAME
 
-Nagios::Web::Controller::extinfo - Catalyst Controller
+Nagios::Web::Controller::tac - Catalyst Controller
 
 =head1 DESCRIPTION
 
@@ -25,14 +25,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
-    #print Dumper($c);
-    #print Dumper($self);
-    #exit;
-    my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
-    $c->stash->{title}          = 'Extended Information';
-    $c->stash->{infoBoxTitle}   = 'Nagios Process Information';
-    $c->stash->{page}           = 'extinfo';
-    $c->stash->{template}       = 'extinfo_type_'.$type.'.tt';
+    #my $livestatus = $self->get_livestatus();
+    #print Dumper($livestatus);
+    $c->stash->{title}          = 'Nagios Tactical Monitoring Overview';
+    $c->stash->{infoBoxTitle}   = 'Tactical Monitoring Overview';
+    $c->stash->{page}           = 'tac';
+    $c->stash->{template}       = 'tac.tt';
 }
 
 

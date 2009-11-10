@@ -41,72 +41,98 @@ sub index :Path :Args(0) {
     $c->stash->{template} = 'index.tt';
 }
 # main.html
-sub main : Path('main.html') {
+sub main_html : Path('main.html') {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'main.tt';
 }
 # side.html
-sub side : Path('side.html') {
+sub side_html : Path('side.html') {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'side.tt';
 }
 
-sub cmd : Path('nagios/cgi-bin/cmd.cgi') :MyAction('AddDefaults') {
+# tac
+sub tac_cgi : Path('nagios/cgi-bin/tac.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/cmd');
-    #$c->stash->{template} = 'cmd.tt';
+    $c->detach('/tac/index');
 }
 
-sub status : Path('nagios/cgi-bin/status.cgi') :MyAction('AddDefaults') {
+# statusmap
+sub statusmap_cgi : Path('nagios/cgi-bin/statusmap.cgi') {
     my ( $self, $c ) = @_;
-    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'hostdetail';
-    $c->stash->{title}          = 'Current Network Status';
-    $c->stash->{infoBoxTitle}   = 'Current Network Status';
-    $c->stash->{page}           = 'status';
-    $c->stash->{template}       = 'status_'.$style.'.tt';
+    $c->detach('/statusmap/index');
 }
 
-sub extinfo : Path('nagios/cgi-bin/extinfo.cgi') :MyAction('AddDefaults') {
+# status
+sub status_cgi : Path('nagios/cgi-bin/status.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/extcgi');
-    #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
-    #print Dumper($c);
-    #print Dumper($self);
-    #exit;
-    my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
-    $c->stash->{title}          = 'Extended Information';
-    $c->stash->{infoBoxTitle}   = 'Nagios Process Information';
-    $c->stash->{page}           = 'extinfo';
-    $c->stash->{template}       = 'extinfo_type_'.$type.'.tt';
+    $c->detach('/status/index');
 }
 
-sub tac : Path('nagios/cgi-bin/tac.cgi') :MyAction('AddDefaults') {
+# commands
+sub cmd_cgi : Path('nagios/cgi-bin/cmd.cgi') {
     my ( $self, $c ) = @_;
-    #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
-    my $livestatus = $self->get_livestatus();
-    #print Dumper($livestatus);
-    $c->stash->{title}          = 'Nagios Tactical Monitoring Overview';
-    $c->stash->{infoBoxTitle}   = 'Tactical Monitoring Overview';
-    $c->stash->{page}           = 'tac';
-    $c->stash->{template}       = 'tac.tt';
+    $c->detach('/cmd/index');
 }
 
-sub get_livestatus {
-    my $self = shift;
+# outages
+sub outages_cgi : Path('nagios/cgi-bin/outages.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/outages/index');
+}
 
-#    my $res = $livestatus->selectall_arrayref("GET services
-#Stats: flap_detection_enabled = 1
-#Stats: flap_detection_enabled = 0
-#Stats: notifications_enabled = 1
-#Stats: notifications_enabled = 0
-#Stats: event_handler_enabled = 1
-#Stats: event_handler_enabled = 0
-#Stats: checks_enabled = 1
-#Stats: checks_enabled = 0
-#Stats: accept_passive_service_checks = 1
-#Stats: accept_passive_service_checks = 0
-#");
-    #print Dumper($res);
+# avail
+sub avail_cgi : Path('nagios/cgi-bin/avail.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/avail/index');
+}
+
+# trends
+sub trends_cgi : Path('nagios/cgi-bin/trends.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/trends/index');
+}
+
+# history
+sub history_cgi : Path('nagios/cgi-bin/history.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/history/index');
+}
+
+# summary
+sub summary_cgi : Path('nagios/cgi-bin/summary.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/summary/index');
+}
+
+# histogram
+sub histogram_cgi : Path('nagios/cgi-bin/histogram.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/histogram/index');
+}
+
+# notifications
+sub notifications_cgi : Path('nagios/cgi-bin/notifications.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/notifications/index');
+}
+
+# showlog
+sub showlog_cgi : Path('nagios/cgi-bin/showlog.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/showlog/index');
+}
+
+# extinfo
+sub extinfo_cgi : Path('nagios/cgi-bin/extinfo.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/extinfo/index');
+}
+
+# config
+sub config_cgi : Path('nagios/cgi-bin/config.cgi') {
+    my ( $self, $c ) = @_;
+    $c->detach('/config/index');
 }
 
 sub auto : Private {
@@ -120,8 +146,6 @@ Attempt to render a view, if needed.
 =cut
 
 sub end : ActionClass('RenderView') {
-    # force catalyst to quit after each request while debugging
-    #exit;
 }
 
 =head1 AUTHOR
