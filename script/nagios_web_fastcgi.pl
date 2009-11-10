@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 BEGIN { $ENV{CATALYST_ENGINE} ||= 'FastCGI' }
 
@@ -12,7 +12,7 @@ use Nagios::Web;
 
 my $help = 0;
 my ( $listen, $nproc, $pidfile, $manager, $detach, $keep_stderr );
- 
+
 GetOptions(
     'help|?'      => \$help,
     'listen|l=s'  => \$listen,
@@ -25,13 +25,13 @@ GetOptions(
 
 pod2usage(1) if $help;
 
-Nagios::Web->run( 
-    $listen, 
+Nagios::Web->run(
+    $listen,
     {   nproc   => $nproc,
-        pidfile => $pidfile, 
+        pidfile => $pidfile,
         manager => $manager,
         detach  => $detach,
-	keep_stderr => $keep_stderr,
+        keep_stderr => $keep_stderr,
     }
 );
 
@@ -44,7 +44,7 @@ nagios_web_fastcgi.pl - Catalyst FastCGI
 =head1 SYNOPSIS
 
 nagios_web_fastcgi.pl [options]
- 
+
  Options:
    -? -help      display this help and exits
    -l -listen    Socket path to listen on
@@ -73,7 +73,7 @@ Catalyst Contributors, see Catalyst.pm
 
 =head1 COPYRIGHT
 
-This library is free software, you can redistribute it and/or modify
+This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
