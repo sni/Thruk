@@ -76,7 +76,7 @@ L<Nagios::Web::Controller::Root>, L<Catalyst>
 
 =head1 AUTHOR
 
-sven,,,
+Sven Nierlein, 2009, <nierlein@cpan.org>
 
 =head1 LICENSE
 
