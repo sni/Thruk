@@ -15,7 +15,7 @@ use Nagios::MKLivestatus;
 #                 directory
 
 use parent qw/Catalyst/;
-use Catalyst qw/-Debug
+use Catalyst qw/
                 Authentication
                 ConfigLoader
                 StackTrace

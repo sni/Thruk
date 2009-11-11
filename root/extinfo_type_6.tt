@@ -1,0 +1,129 @@
+[% INCLUDE header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% INCLUDE infobox.tt %]
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="bottom" width="33%"></td>
+      </tr>
+    </table><br>
+    <br>
+    <div class='downtimeNav'>[&nbsp;<a href='#HOSTDOWNTIME' class='downtimeNav'>Host Downtime</a>&nbsp;|&nbsp;<a href='#SERVICEDOWNTIME' class='downtimeNav'>Service Downtime</a>&nbsp;]</div><br>
+
+    <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
+    <div class='downtimeTitle'>Scheduled Host Downtime</div>
+    <div class='comment'><img src='/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
+    <div align="center">
+      <table border="0" class='downtime'>
+        <tr class='downtime'>
+          <th class='downtime'>Host Name</th>
+          <th class='downtime'>Entry Time</th>
+          <th class='downtime'>Author</th>
+
+          <th class='downtime'>Comment</th>
+          <th class='downtime'>Start Time</th>
+          <th class='downtime'>End Time</th>
+          <th class='downtime'>Type</th>
+          <th class='downtime'>Duration</th>
+          <th class='downtime'>Downtime ID</th>
+          <th class='downtime'>Trigger ID</th>
+          <th class='downtime'>Actions</th>
+        </tr>
+        <tr class='downtimeEven'>
+          <td class='downtimeEven'><a href='extinfo.cgi?type=1&amp;host=test_host_2'>test_host_2</a></td>
+          <td class='downtimeEven'>2009-11-11 09:28:49</td>
+          <td class='downtimeEven'>admin</td>
+          <td class='downtimeEven'>test</td>
+          <td class='downtimeEven'>2009-11-11 09:28:46</td>
+          <td class='downtimeEven'>2009-11-11 11:28:46</td>
+          <td class='downtimeEven'>Fixed</td>
+          <td class='downtimeEven'>0d 2h 0m 0s</td>
+          <td class='downtimeEven'>3</td>
+          <td class='downtimeEven'>N/A</td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=3'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+        </tr>
+        <tr class='downtimeOdd'>
+          <td class='downtimeOdd'><a href='extinfo.cgi?type=1&amp;host=test_host_3'>test_host_3</a></td>
+          <td class='downtimeOdd'>2009-11-11 09:29:11</td>
+          <td class='downtimeOdd'>admin</td>
+          <td class='downtimeOdd'>test</td>
+          <td class='downtimeOdd'>2009-11-11 09:29:00</td>
+          <td class='downtimeOdd'>2019-11-11 11:29:00</td>
+          <td class='downtimeOdd'>Fixed</td>
+          <td class='downtimeOdd'>3652d 2h 0m 0s</td>
+          <td class='downtimeOdd'>4</td>
+          <td class='downtimeOdd'>N/A</td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=4'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+        </tr>
+        <tr class='downtimeEven'>
+          <td class='downtimeEven'><a href='extinfo.cgi?type=1&amp;host=test_host_5'>test_host_5</a></td>
+          <td class='downtimeEven'>2009-11-11 09:29:29</td>
+          <td class='downtimeEven'>admin</td>
+          <td class='downtimeEven'>blahb lahsdsf afdasd</td>
+          <td class='downtimeEven'>2009-11-11 09:29:21</td>
+          <td class='downtimeEven'>2019-11-11 11:29:21</td>
+          <td class='downtimeEven'>Fixed</td>
+          <td class='downtimeEven'>3652d 2h 0m 0s</td>
+          <td class='downtimeEven'>5</td>
+          <td class='downtimeEven'>N/A</td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=5'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+        </tr>
+      </table>
+    </div><br>
+    <br>
+    <br>
+    <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
+    <div class='downtimeTitle'>Scheduled Service Downtime</div>
+    <div class='comment'><img src='/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
+    <div align="center">
+      <table border="0" class='downtime'>
+        <tr class='downtime'>
+          <th class='downtime'>Host Name</th>
+          <th class='downtime'>Service</th>
+          <th class='downtime'>Entry Time</th>
+          <th class='downtime'>Author</th>
+          <th class='downtime'>Comment</th>
+          <th class='downtime'>Start Time</th>
+          <th class='downtime'>End Time</th>
+          <th class='downtime'>Type</th>
+          <th class='downtime'>Duration</th>
+          <th class='downtime'>Downtime ID</th>
+          <th class='downtime'>Trigger ID</th>
+          <th class='downtime'>Actions</th>
+        </tr>
+        <tr class='downtimeOdd'>
+          <td class='downtimeOdd'><a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a></td>
+          <td class='downtimeOdd'><a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_10'>test_service_10</a></td>
+          <td class='downtimeOdd'>2009-11-11 09:28:10</td>
+          <td class='downtimeOdd'>admin</td>
+          <td class='downtimeOdd'>test service</td>
+          <td class='downtimeOdd'>2009-11-11 09:26:38</td>
+          <td class='downtimeOdd'>2009-11-11 11:26:38</td>
+          <td class='downtimeOdd'>Fixed</td>
+          <td class='downtimeOdd'>0d 2h 0m 0s</td>
+          <td class='downtimeOdd'>1</td>
+          <td class='downtimeOdd'>N/A</td>
+          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=1'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+        </tr>
+
+        <tr class='downtimeEven'>
+          <td class='downtimeEven'><a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a></td>
+          <td class='downtimeEven'><a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_18'>test_service_18</a></td>
+          <td class='downtimeEven'>2009-11-11 09:28:31</td>
+          <td class='downtimeEven'>admin</td>
+          <td class='downtimeEven'>blah</td>
+          <td class='downtimeEven'>2009-11-11 09:28:27</td>
+          <td class='downtimeEven'>2009-11-11 11:28:27</td>
+          <td class='downtimeEven'>Fixed</td>
+          <td class='downtimeEven'>0d 2h 0m 0s</td>
+          <td class='downtimeEven'>2</td>
+          <td class='downtimeEven'>N/A</td>
+          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=2'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+        </tr>
+      </table>
+
+    </div>
+
+[% INCLUDE footer.tt %]
