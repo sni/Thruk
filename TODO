@@ -5,3 +5,4 @@ Todo List:
 - create roles from cgi.cfg
 - create models for hosts / services / contacts
 - add authentication module based on Catalyst::Authentication::Credential::Remote
+- separate static content from templates
