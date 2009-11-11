@@ -19,6 +19,7 @@ Nagios::Web::Controller::Root - Root Controller for Nagios::Web
 use strict;
 use warnings;
 use Moose;
+use Carp;
 use Nagios::MKLivestatus;
 use Data::Dumper;
 use Config::General;

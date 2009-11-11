@@ -12,6 +12,7 @@ requires 'Catalyst::Plugin::Static::Simple';
 requires 'Catalyst::Plugin::StackTrace';
 requires 'Catalyst::Plugin::Authentication::Store::Htpasswd';
 requires 'parent';
+requires 'Carp';
 requires 'Config::General';
 requires 'Authen::Htpasswd';
 requires 'Nagios::MKLivestatus' => '0.16';
