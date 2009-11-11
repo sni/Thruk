@@ -11,8 +11,10 @@ requires 'Catalyst::Plugin::ConfigLoader';
 requires 'Catalyst::Plugin::Static::Simple';
 requires 'Catalyst::Plugin::StackTrace';
 requires 'Catalyst::Plugin::Authentication::Store::Htpasswd';
+requires 'Class::Data::Inheritable'; # needed by Catalyst::Plugin::Static::Simple
 requires 'parent';
 requires 'Carp';
+requires 'File::Copy::Recursive';
 requires 'Config::General';
 requires 'Authen::Htpasswd';
 requires 'Nagios::MKLivestatus' => '0.16';
