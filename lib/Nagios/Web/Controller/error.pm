@@ -2,6 +2,7 @@ package Nagios::Web::Controller::error;
 
 use strict;
 use warnings;
+use Data::Dumper;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -21,13 +22,21 @@ Catalyst Controller.
 =cut
 
 sub index :Path :Args(1) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+    my ( $self, $c, $arg1 ) = @_;
 
-    my $errorMessage     = 'It appears as though you do not have permission to view process information...';
-    my $errorDescription = 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.';
+    my $errors = {
+        '1'  => {
+            'mess' => 'It appears as though you do not have permission to view process information...',
+            'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
+        },
+        '2'  => {
+            'mess' => 'It appears as though you do not have permission to view the log file...',
+            'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
+        },
+    };
 
-    $c->stash->{errorMessage}       = $errorMessage;
-    $c->stash->{errorDescription}   = $errorDescription;
+    $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};
+    $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
 
     #$c->stash->{title}              = 'Current Network Status';
     #$c->stash->{infoBoxTitle}       = 'Current Network Status';
@@ -35,7 +44,7 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
 
     Nagios::Web->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
     Nagios::Web->config->{'custom-error-message'}->{'response-status'}   = 403;
-    $c->error($errorMessage);
+    $c->error($errors->{$arg1}->{'mess'});
 }
 
 

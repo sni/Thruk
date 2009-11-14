@@ -28,9 +28,11 @@ Nagios::Web::Controller::Root - Root Controller for Nagios::Web
 
 =cut
 
+######################################
+# begin, running at the begin of every req
 sub begin : Private {
     my ( $self, $c ) = @_;
-print Dumper($c);
+
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
         $c->log->debug("user does not exist");
@@ -40,123 +42,135 @@ print Dumper($c);
             $c->detach('/error/index/1');
         };
     }
-    $c->log->debug("user authenticated");
+    $c->log->debug("user authenticated as: ".$c->{'user'});
 }
 
-sub auto : Private {
-    my ( $self, $c ) = @_;
+######################################
+# auto, runs on every request
+#sub auto : Private {
+#    my ( $self, $c ) = @_;
+#
+#}
 
-    #if(!$c->authenticate()) {
-    #    $c->detach('/error/index');
-    #}
-
-    # ensure the user is logged in somehow
-    #if(!$c->{'user'}) {
-    #    $c->detach('/error/index');
-    #}
-}
-
+######################################
+# default page
 sub default :Path {
     my ( $self, $c ) = @_;
     $c->response->body( 'Page not found' );
     $c->response->status(404);
-
 }
 
+######################################
 # index page
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'index.tt';
 }
+######################################
 # main.html
 sub main_html : Path('main.html') {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'main.tt';
 }
+######################################
 # side.html
 sub side_html : Path('side.html') {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'side.tt';
 }
 
+######################################
 # tac
 sub tac_cgi : Path('nagios/cgi-bin/tac.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/tac/index');
 }
 
+######################################
 # statusmap
 sub statusmap_cgi : Path('nagios/cgi-bin/statusmap.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/statusmap/index');
 }
 
+######################################
 # status
 sub status_cgi : Path('nagios/cgi-bin/status.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/status/index');
 }
 
+######################################
 # commands
 sub cmd_cgi : Path('nagios/cgi-bin/cmd.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/cmd/index');
 }
 
+######################################
 # outages
 sub outages_cgi : Path('nagios/cgi-bin/outages.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/outages/index');
 }
 
+######################################
 # avail
 sub avail_cgi : Path('nagios/cgi-bin/avail.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/avail/index');
 }
 
+######################################
 # trends
 sub trends_cgi : Path('nagios/cgi-bin/trends.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/trends/index');
 }
 
+######################################
 # history
 sub history_cgi : Path('nagios/cgi-bin/history.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/history/index');
 }
 
+######################################
 # summary
 sub summary_cgi : Path('nagios/cgi-bin/summary.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/summary/index');
 }
 
+######################################
 # histogram
 sub histogram_cgi : Path('nagios/cgi-bin/histogram.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/histogram/index');
 }
 
+######################################
 # notifications
 sub notifications_cgi : Path('nagios/cgi-bin/notifications.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/notifications/index');
 }
 
+######################################
 # showlog
 sub showlog_cgi : Path('nagios/cgi-bin/showlog.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/showlog/index');
 }
 
+######################################
 # extinfo
 sub extinfo_cgi : Path('nagios/cgi-bin/extinfo.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/extinfo/index');
 }
 
+######################################
 # config
 sub config_cgi : Path('nagios/cgi-bin/config.cgi') {
     my ( $self, $c ) = @_;

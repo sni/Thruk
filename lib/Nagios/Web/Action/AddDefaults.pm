@@ -23,6 +23,7 @@ use Carp;
 use Nagios::MKLivestatus;
 use Data::Dumper;
 use Config::General;
+use Nagios::Web::Helper;
 
 extends 'Catalyst::Action';
 
@@ -32,25 +33,26 @@ before 'execute' => sub {
 
     ###############################
     # parse cgi.cfg
-    $c->{'cgi_cfg'} = $self->_parse_config_file(Nagios::Web->config->{'cgi_cfg'});
+    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
 
-    ###############################
-    my $live_socket_path    = Nagios::Web->config->{livesocket_path};
-    my $live_socket_verbose = Nagios::Web->config->{livesocket_verbose} || 0;
-    if(!defined $live_socket_path) {
-        croak('no main_config_file defined in '.Nagios::Web->config->{'cgi_cfg'}) if ! defined $c->{'cgi_cfg'}->{'main_config_file'};
-        $live_socket_path = $self->_get_livesocket_path_from_nagios_cfg($c->{'cgi_cfg'}->{'main_config_file'});
+    ################################
+    #my $live_socket_path    = Nagios::Web->config->{livesocket_path};
+    #my $live_socket_verbose = Nagios::Web->config->{livesocket_verbose} || 0;
+    #if(!defined $live_socket_path) {
+    #    croak('no main_config_file defined in '.Nagios::Web->config->{'cgi_cfg'}) if ! defined $c->{'cgi_cfg'}->{'main_config_file'};
+    #    $live_socket_path = $self->_get_livesocket_path_from_nagios_cfg($c->{'cgi_cfg'}->{'main_config_file'});
 
-        if(!defined $live_socket_path) {
-            croak("no livesocket broker module found in ".$c->{'cgi_cfg'}->{'main_config_file'}.". NEB Module not loaded?");
-        }
-    }
+    #    if(!defined $live_socket_path) {
+    #        $c->log->error("no livesocket broker module found in ".$c->{'cgi_cfg'}->{'main_config_file'}.". NEB Module not loaded?");
+    #        return;
+    #    }
+    #}
 
-    ###############################
-    $c->{'live'} = Nagios::MKLivestatus->new(
-                                'socket'   => $live_socket_path,
-                                'verbose'  => $live_socket_verbose,
-    );
+    ################################
+    #$c->{'live'} = Nagios::MKLivestatus->new(
+    #                            'socket'   => $live_socket_path,
+    #                            'verbose'  => $live_socket_verbose,
+    #);
 
     ###############################
     $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
@@ -67,42 +69,42 @@ before 'execute' => sub {
 
 
 ########################################
-sub _parse_config_file {
-    my $self = shift;
-    my $file = shift;
-    if(!defined $file) { die('no file'); }
-    if(! -r $file)     { croak("cannot open file (".$file."): $!"); }
-
-    my $conf = new Config::General($file);
-    my %config = $conf->getall;
-
-    return(\%config);
-}
+#sub _parse_config_file {
+#    my $self = shift;
+#    my $file = shift;
+#    if(!defined $file) { die('no file'); }
+#    if(! -r $file)     { croak("cannot open file (".$file."): $!"); }
+#
+#    my $conf = new Config::General($file);
+#    my %config = $conf->getall;
+#
+#    return(\%config);
+#}
 
 ########################################
-sub _get_livesocket_path_from_nagios_cfg {
-    my $self            = shift;
-    my $nagios_cfg_path = shift;
-
-    # read nagios.cfg
-    my $nagios_cfg = $self->_parse_config_file($nagios_cfg_path);
-
-    return if !defined $nagios_cfg->{'broker_module'};
-
-    my @broker;
-    if(ref $nagios_cfg->{'broker_module'} eq 'ARRAY') {
-        @broker = [$nagios_cfg->{'broker_module'}];
-    }else {
-        push @broker, $nagios_cfg->{'broker_module'};
-    }
-
-    for my $neb_line (@broker) {
-        if($neb_line =~ m/livestatus.o\s+(.*?)$/) {
-            my $livesocket_path = $1;
-            return($livesocket_path);
-        }
-    }
-}
+#sub _get_livesocket_path_from_nagios_cfg {
+#    my $self            = shift;
+#    my $nagios_cfg_path = shift;
+#
+#    # read nagios.cfg
+#    my $nagios_cfg = $self->_parse_config_file($nagios_cfg_path);
+#
+#    return if !defined $nagios_cfg->{'broker_module'};
+#
+#    my @broker;
+#    if(ref $nagios_cfg->{'broker_module'} eq 'ARRAY') {
+#        @broker = [$nagios_cfg->{'broker_module'}];
+#    }else {
+#        push @broker, $nagios_cfg->{'broker_module'};
+#    }
+#
+#    for my $neb_line (@broker) {
+#        if($neb_line =~ m/livestatus.o\s+(.*?)$/) {
+#            my $livesocket_path = $1;
+#            return($livesocket_path);
+#        }
+#    }
+#}
 
 
 
