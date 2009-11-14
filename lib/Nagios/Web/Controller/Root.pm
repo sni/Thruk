@@ -28,6 +28,34 @@ Nagios::Web::Controller::Root - Root Controller for Nagios::Web
 
 =cut
 
+sub begin : Private {
+    my ( $self, $c ) = @_;
+print Dumper($c);
+    $c->log->debug("checking auth");
+    unless ($c->user_exists) {
+        $c->log->debug("user does not exist");
+        unless ($c->authenticate( {} )) {
+            # return 403 forbidden or kick out the user in other way
+            $c->log->debug("user is not authenticated");
+            $c->detach('/error/index/1');
+        };
+    }
+    $c->log->debug("user authenticated");
+}
+
+sub auto : Private {
+    my ( $self, $c ) = @_;
+
+    #if(!$c->authenticate()) {
+    #    $c->detach('/error/index');
+    #}
+
+    # ensure the user is logged in somehow
+    #if(!$c->{'user'}) {
+    #    $c->detach('/error/index');
+    #}
+}
+
 sub default :Path {
     my ( $self, $c ) = @_;
     $c->response->body( 'Page not found' );
@@ -133,10 +161,6 @@ sub extinfo_cgi : Path('nagios/cgi-bin/extinfo.cgi') {
 sub config_cgi : Path('nagios/cgi-bin/config.cgi') {
     my ( $self, $c ) = @_;
     $c->detach('/config/index');
-}
-
-sub auto : Private {
-    my ( $self, $c ) = @_;
 }
 
 =head2 end

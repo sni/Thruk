@@ -1,0 +1,15 @@
+[% INCLUDE header.tt %]
+
+  <table border="0" width="100%">
+    <tr>
+      <td align="left" valign="top" width="33%">
+        [% INCLUDE infobox.tt %]
+      </td>
+      <td align="center" valign="middle" width="33%"></td>
+      <td align="right" valign="bottom" width="33%"></td>
+    </tr>
+  </table><br>
+  <div class='errorMessage'>[% errorMessage %]</div>
+  <div class='errorDescription'>[% errorDescription %]</div>
+
+[% INCLUDE footer.tt %]

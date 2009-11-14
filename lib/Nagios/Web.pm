@@ -17,6 +17,7 @@ use Nagios::MKLivestatus;
 use parent qw/Catalyst/;
 use Catalyst qw/
                 Authentication
+                CustomErrorMessage
                 ConfigLoader
                 StackTrace
                 Static::Simple/;
@@ -35,22 +36,27 @@ __PACKAGE__->config('Plugin::ConfigLoader' => { file => 'nagios_web.conf' },
                     name => 'Nagios::Web',
 #see:
 # http://search.cpan.org/~bobtfish/Catalyst-Authentication-Store-Htpasswd-1.003/lib/Catalyst/Authentication/Store/Htpasswd.pm
-#                    authentication => {
-#                        default_realm => 'Nagios',
-#                        realms => {
-#                            test => {
-#                                credential => {
-#                                    class          => 'Password',
-#                                    password_field => 'password',
-#                                    password_type  => 'self_check',
-#                                },
-#                                store => {
-#                                    class => 'Htpasswd',
-#                                    file => 'htpasswd',
-#                                },
-#                            },
-#                        },
-#                    },
+# http://search.cpan.org/~bobtfish/Catalyst-Plugin-Authentication-0.10015/lib/Catalyst/Plugin/Authentication.pm
+# http://search.cpan.org/~bobtfish/Catalyst-Plugin-Authentication-0.10015/lib/Catalyst/Authentication/Credential/Remote.pm
+                    'Plugin::Authentication' => {
+                        default_realm => 'Nagios',
+                        realms => {
+                            Nagios => {
+                                credential => {
+                                    class => 'Nagios',
+                                },
+                                store => {
+                                    class => 'Null',
+                                },
+                                #store => {
+                                #    class       => 'FromSub', # or 'Object'
+                                #    user_type   => 'Hash',
+                                #    model_class => 'UserAuth',
+                                #    id_field    => 'user_id',
+                                #}
+                            }
+                        }
+                    },
  );
 
 

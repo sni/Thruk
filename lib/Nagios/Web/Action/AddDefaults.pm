@@ -54,7 +54,7 @@ before 'execute' => sub {
 
     ###############################
     $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
-    $c->stash->{'remote_user'}  = 'admin';
+    $c->stash->{'remote_user'}  = $c->{'user'};
 
     $c->response->headers->header('refresh' => $c->{'cgi_cfg'}->{'refresh_rate'}) if defined $c->{'cgi_cfg'}->{'refresh_rate'};
 };

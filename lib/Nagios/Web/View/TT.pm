@@ -3,7 +3,11 @@ package Nagios::Web::View::TT;
 use strict;
 use base 'Catalyst::View::TT';
 
-__PACKAGE__->config(TEMPLATE_EXTENSION => '.tt');
+__PACKAGE__->config(
+                    TEMPLATE_EXTENSION => '.tt',
+                    ENCODING           => 'utf8',
+                    INCLUDE_PATH       =>  'templates',
+                    );
 
 =head1 NAME
 
@@ -11,7 +15,7 @@ Nagios::Web::View::TT - TT View for Nagios::Web
 
 =head1 DESCRIPTION
 
-TT View for Nagios::Web. 
+TT View for Nagios::Web.
 
 =head1 AUTHOR
 
