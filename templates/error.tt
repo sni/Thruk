@@ -9,7 +9,12 @@
       <td align="right" valign="bottom" width="33%"></td>
     </tr>
   </table><br>
+  [% IF errorMessage %]
   <div class='errorMessage'>[% errorMessage %]</div>
   <div class='errorDescription'>[% errorDescription %]</div>
+  [% ELSE %]
+  <div class='errorMessage'>internal server error</div>
+  <div class='errorDescription'>internal server error occured, please look at your catalyst logfile</div>
+  [% END %]
 
 [% INCLUDE footer.tt %]

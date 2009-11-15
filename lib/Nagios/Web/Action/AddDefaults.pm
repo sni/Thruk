@@ -33,53 +33,14 @@ before 'execute' => sub {
 
     ###############################
     # parse cgi.cfg
-    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
-
-    ################################
-    #my $live_socket_path    = Nagios::Web->config->{livesocket_path};
-    #my $live_socket_verbose = Nagios::Web->config->{livesocket_verbose} || 0;
-    #if(!defined $live_socket_path) {
-    #    croak('no main_config_file defined in '.Nagios::Web->config->{'cgi_cfg'}) if ! defined $c->{'cgi_cfg'}->{'main_config_file'};
-    #    $live_socket_path = $self->_get_livesocket_path_from_nagios_cfg($c->{'cgi_cfg'}->{'main_config_file'});
-
-    #    if(!defined $live_socket_path) {
-    #        $c->log->error("no livesocket broker module found in ".$c->{'cgi_cfg'}->{'main_config_file'}.". NEB Module not loaded?");
-    #        return;
-    #    }
-    #}
-
-    ################################
-    #$c->{'live'} = Nagios::MKLivestatus->new(
-    #                            'socket'   => $live_socket_path,
-    #                            'verbose'  => $live_socket_verbose,
-    #);
+    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg();
 
     ###############################
     $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
-    $c->stash->{'remote_user'}  = $c->{'user'};
+    $c->stash->{'remote_user'}  = $c->user->get('username');
 
     $c->response->headers->header('refresh' => $c->{'cgi_cfg'}->{'refresh_rate'}) if defined $c->{'cgi_cfg'}->{'refresh_rate'};
 };
-
-########################################
-#after 'execute' => sub {
-#    my ( $self, $controller, $c, $test ) = @_;
-#    $c->stash->{foo} = 'bar';
-#};
-
-
-########################################
-#sub _parse_config_file {
-#    my $self = shift;
-#    my $file = shift;
-#    if(!defined $file) { die('no file'); }
-#    if(! -r $file)     { croak("cannot open file (".$file."): $!"); }
-#
-#    my $conf = new Config::General($file);
-#    my %config = $conf->getall;
-#
-#    return(\%config);
-#}
 
 ########################################
 #sub _get_livesocket_path_from_nagios_cfg {

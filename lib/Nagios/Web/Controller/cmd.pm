@@ -21,8 +21,14 @@ Catalyst Controller.
 
 =cut
 
+######################################
+# index page
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
+
+use Data::Dumper;
+    print Dumper($c->{'cgi_cfg'});
+#    print Dumper($c);
 
     $c->response->body('Matched Nagios::Web::Controller::cmd in cmd.');
 }

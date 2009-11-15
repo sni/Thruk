@@ -33,6 +33,10 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
             'mess' => 'It appears as though you do not have permission to view the log file...',
             'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
         },
+        '3'  => {
+            'mess' => 'Sorry Dave, I can\'t let you do that...',
+            'dscr' => 'It seems that you have chosen to not use the authentication functionality of the CGIs.<br><br>I don\'t want to be personally responsible for what may happen as a result of allowing unauthorized users to issue commands to Nagios,so you\'ll have to disable this safeguard if you are really stubborn and want to invite trouble.<br><br><strong>Read the section on CGI authentication in the HTML documentation to learn how you can enable authentication and why you should want to.',
+        },
     };
 
     $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};

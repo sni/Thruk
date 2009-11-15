@@ -14,7 +14,7 @@
 
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Host Downtime</div>
-    <div class='comment'><img src='/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
+    <div class='comment'><img src='/nagios/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
@@ -42,7 +42,7 @@
           <td class='downtimeEven'>0d 2h 0m 0s</td>
           <td class='downtimeEven'>3</td>
           <td class='downtimeEven'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=3'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=3'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
         <tr class='downtimeOdd'>
           <td class='downtimeOdd'><a href='extinfo.cgi?type=1&amp;host=test_host_3'>test_host_3</a></td>
@@ -55,7 +55,7 @@
           <td class='downtimeOdd'>3652d 2h 0m 0s</td>
           <td class='downtimeOdd'>4</td>
           <td class='downtimeOdd'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=4'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=4'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
         <tr class='downtimeEven'>
           <td class='downtimeEven'><a href='extinfo.cgi?type=1&amp;host=test_host_5'>test_host_5</a></td>
@@ -68,7 +68,7 @@
           <td class='downtimeEven'>3652d 2h 0m 0s</td>
           <td class='downtimeEven'>5</td>
           <td class='downtimeEven'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=5'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=5'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
       </table>
     </div><br>
@@ -76,7 +76,7 @@
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtime</div>
-    <div class='comment'><img src='/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
+    <div class='comment'><img src='/nagios/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
@@ -105,7 +105,7 @@
           <td class='downtimeOdd'>0d 2h 0m 0s</td>
           <td class='downtimeOdd'>1</td>
           <td class='downtimeOdd'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=1'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=1'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
 
         <tr class='downtimeEven'>
@@ -120,7 +120,7 @@
           <td class='downtimeEven'>0d 2h 0m 0s</td>
           <td class='downtimeEven'>2</td>
           <td class='downtimeEven'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=2'><img src='/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=2'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
       </table>
 

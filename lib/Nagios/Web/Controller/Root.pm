@@ -5,6 +5,7 @@ use warnings;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use Nagios::MKLivestatus;
+use Nagios::Web::Helper;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -33,6 +34,8 @@ Nagios::Web::Controller::Root - Root Controller for Nagios::Web
 sub begin : Private {
     my ( $self, $c ) = @_;
 
+    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
+
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
         $c->log->debug("user does not exist");
@@ -42,7 +45,7 @@ sub begin : Private {
             $c->detach('/error/index/1');
         };
     }
-    $c->log->debug("user authenticated as: ".$c->{'user'});
+    $c->log->debug("user authenticated as: ".$c->user->get('username'));
 }
 
 ######################################

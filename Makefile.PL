@@ -17,7 +17,7 @@ requires 'parent';
 requires 'Carp';
 requires 'File::Copy::Recursive';
 requires 'Config::General';
-requires 'Nagios::MKLivestatus' => '0.16';
+requires 'Nagios::MKLivestatus' => '0.18';
 catalyst;
 install_script glob('script/*.pl');
 auto_install;

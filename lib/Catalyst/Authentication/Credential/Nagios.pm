@@ -18,48 +18,49 @@ sub new {
     my $self = { };
     bless $self, $class;
 
-	$self->realm($realm);
+    $self->realm($realm);
     return $self;
 }
 
 sub authenticate {
     my ( $self, $c, $realm, $authinfo ) = @_;
-	my $username;
+    my $username;
+	my $authenticated = 0;
 
-    #$c->log->debug("authenticate()");
-    #$c->log->debug(Dumper($realm));
-    #$c->log->debug(Dumper($authinfo));
-
-	my $cgi_cfg = Nagios::Web::Helper->get_cgi_cfg($c);
+    my $cgi_cfg = $c->{'cgi_cfg'};
 
     # authenticated by ssl
-    if(defined $cgi_cfg->{'use_ssl_authentication'} and $cgi_cfg->{'use_ssl_authentication'} == 1) {
+    if(defined $cgi_cfg->{'use_ssl_authentication'} and $cgi_cfg->{'use_ssl_authentication'} >= 1) {
         if(defined $c->engine->env->{'SSL_CLIENT_S_DN_CN'}) {
-			$username = $c->engine->env->{'SSL_CLIENT_S_DN_CN'};
-		}
+            $username = $c->engine->env->{'SSL_CLIENT_S_DN_CN'};
+        }
     }
 
     # basic authentication
-    elsif(defined $cgi_cfg->{'use_authentication'} and $cgi_cfg->{'use_authentication'} == 1) {
+    else {
         if(defined $c->engine->env->{'REMOTE_USER'}) {
-			$username = $c->engine->env->{'REMOTE_USER'};
-		}
+            $username = $c->engine->env->{'REMOTE_USER'};
+        }
     }
 
-    # authenticated by default_user_name
-    elsif(defined $cgi_cfg->{'default_user_name'} and $cgi_cfg->{'use_authentication'} == 0) {
+    # default_user_name?
+    if(!defined $username and defined $cgi_cfg->{'default_user_name'}) {
         $username = $cgi_cfg->{'default_user_name'};
     }
 
-	if(!defined $username or $username eq '') {
-		$c->log->error('got no or empty username from env');
-		return;
-	}
+    if(!defined $username or $username eq '') {
+	    return;
+    }
 
     $authinfo->{ username } = $username;
     my $user_obj = $realm->find_user( $authinfo, $c );
-	$c->{'user'} = $username;
-    return ref($user_obj) ? $user_obj : undef;
+
+    if ( ref $user_obj ) {
+        return $user_obj;
+    } else {
+        $c->log->debug("Nagios like authentication failed to load with find_user; bad user_class? Try 'Null.'") if $self->debug;
+        return;
+    }
 }
 
 1;

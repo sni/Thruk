@@ -193,7 +193,7 @@
                   <table border="0" cellpadding="0" cellspacing="0" class='command'>
                     <tr class='command'>
                       <td>
-                        <img src='/images/stop.gif' border="0" alt='Shutdown the Nagios Process' title='Shutdown the Nagios Process'>
+                        <img src='/nagios/images/stop.gif' border="0" alt='Shutdown the Nagios Process' title='Shutdown the Nagios Process'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=14'>Shutdown the Nagios process</a>
@@ -202,7 +202,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/restart.gif' border="0" alt='Restart the Nagios Process' title='Restart the Nagios Process'>
+                        <img src='/nagios/images/restart.gif' border="0" alt='Restart the Nagios Process' title='Restart the Nagios Process'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=13'>Restart the Nagios process</a>
@@ -211,7 +211,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications'>
+                        <img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=11'>Disable notifications</a>
@@ -220,7 +220,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks'>
+                        <img src='/nagios/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=36'>Stop executing service checks</a>
@@ -229,7 +229,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks'>
+                        <img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a>
@@ -238,7 +238,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks'>
+                        <img src='/nagios/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=89'>Stop executing host checks</a>
@@ -247,7 +247,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks'>
+                        <img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=91'>Stop accepting passive host checks</a>
@@ -256,7 +256,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers'>
+                        <img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=42'>Disable event handlers</a>
@@ -265,7 +265,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services'>
+                        <img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=49'>Start obsessing over services</a>
@@ -274,7 +274,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts'>
+                        <img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=94'>Start obsessing over hosts</a>
@@ -283,7 +283,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection'>
+                        <img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=62'>Disable flap detection</a>
@@ -292,7 +292,7 @@
                     </tr>
                     <tr class='command'>
                       <td>
-                        <img src='/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data'>
+                        <img src='/nagios/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data'>
                       </td>
                       <td class='command'>
                         <a href='cmd.cgi?cmd_typ=82'>Enable performance data</a>

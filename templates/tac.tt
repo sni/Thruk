@@ -156,7 +156,7 @@
                                   Host Health:
                                 </td>
                                 <td valign="top" width="100" class='healthBar'>
-                                  <img src='/images/thermok.png' border="0" width="100" height="20" alt='100.0% Health' title='100.0% Health'>
+                                  <img src='/nagios/images/thermok.png' border="0" width="100" height="20" alt='100.0% Health' title='100.0% Health'>
 
                                 </td>
                               </tr>
@@ -165,7 +165,7 @@
                                   Service Health:
                                 </td>
                                 <td valign="top" width="100" class='healthBar'>
-                                  <img src='/images/thermok.png' border="0" width="100" height="20" alt='100.0% Health' title='100.0% Health'>
+                                  <img src='/nagios/images/thermok.png' border="0" width="100" height="20" alt='100.0% Health' title='100.0% Health'>
                                 </td>
 
                               </tr>
@@ -419,7 +419,7 @@
 
             <tr>
               <td valign="top">
-                <a href='cmd.cgi?cmd_typ=62'><img src='/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled'></a>
+                <a href='cmd.cgi?cmd_typ=62'><img src='/nagios/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled'></a>
               </td>
               <td width="10">
                 &nbsp;
@@ -459,7 +459,7 @@
             <tr>
               <td valign="top">
 
-                <a href='cmd.cgi?cmd_typ=11'><img src='/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled'></a>
+                <a href='cmd.cgi?cmd_typ=11'><img src='/nagios/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled'></a>
               </td>
               <td width="10">
                 &nbsp;
@@ -487,7 +487,7 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               <td valign="top">
-                <a href='cmd.cgi?cmd_typ=42'><img src='/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled'></a>
+                <a href='cmd.cgi?cmd_typ=42'><img src='/nagios/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled'></a>
               </td>
 
               <td width="10">
@@ -516,7 +516,7 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               <td valign="top">
-                <a href='extinfo.cgi?type=0'><img src='/images/tacenabled.png' border='0' alt='Active Checks Enabled' title='Active Checks Enabled'></a>
+                <a href='extinfo.cgi?type=0'><img src='/nagios/images/tacenabled.png' border='0' alt='Active Checks Enabled' title='Active Checks Enabled'></a>
               </td>
               <td width="10">
 
@@ -545,7 +545,7 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               <td valign="top">
-                <a href='extinfo.cgi?type=0'><img src='/images/tacenabled.png' border='0' alt='Passive Checks Enabled' title='Passive Checks Enabled'></a>
+                <a href='extinfo.cgi?type=0'><img src='/nagios/images/tacenabled.png' border='0' alt='Passive Checks Enabled' title='Passive Checks Enabled'></a>
               </td>
               <td width="10">
                 &nbsp;

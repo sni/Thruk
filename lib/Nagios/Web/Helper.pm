@@ -8,9 +8,9 @@ use Carp;
 ######################################
 # parse the cgi.cg
 sub get_cgi_cfg {
-    my ( $self, $c ) = @_;
+    my ( $self ) = @_;
 
-    my $file = $c->{'cgi_cfg'};
+    my $file = Nagios::Web->config->{'cgi_cfg'};
 
     if(!defined $file) { die('no file'); }
     if(! -r $file)     { croak("cannot open file (".$file."): $!"); }

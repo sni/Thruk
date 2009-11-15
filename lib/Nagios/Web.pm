@@ -1,5 +1,6 @@
 package Nagios::Web;
 
+use 5.008000;
 use strict;
 use warnings;
 
@@ -32,30 +33,19 @@ our $VERSION = '0.10_1';
 # with a external configuration file acting as an override for
 # local deployment.
 
-__PACKAGE__->config('Plugin::ConfigLoader' => { file => 'nagios_web.conf' },
-                    name => 'Nagios::Web',
-#see:
-# http://search.cpan.org/~bobtfish/Catalyst-Authentication-Store-Htpasswd-1.003/lib/Catalyst/Authentication/Store/Htpasswd.pm
-# http://search.cpan.org/~bobtfish/Catalyst-Plugin-Authentication-0.10015/lib/Catalyst/Plugin/Authentication.pm
-# http://search.cpan.org/~bobtfish/Catalyst-Plugin-Authentication-0.10015/lib/Catalyst/Authentication/Credential/Remote.pm
+__PACKAGE__->config('name'                   => 'Nagios::Web',
+                    'Plugin::ConfigLoader'   => { file => 'nagios_web.conf' },
                     'Plugin::Authentication' => {
                         default_realm => 'Nagios',
                         realms => {
-                            Nagios => {
-                                credential => {
-                                    class => 'Nagios',
-                                },
-                                store => {
-                                    class => 'Null',
-                                },
-                                #store => {
-                                #    class       => 'FromSub', # or 'Object'
-                                #    user_type   => 'Hash',
-                                #    model_class => 'UserAuth',
-                                #    id_field    => 'user_id',
-                                #}
+                            Nagios => { credential => { class => 'Nagios' },
+                                        store      => { class => 'Null'   },
                             }
                         }
+                    },
+                    'custom-error-message' => {
+                        'error-template'    => 'error.tt',
+                        'response-status'   => 500,
                     },
  );
 
