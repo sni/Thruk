@@ -47,6 +47,9 @@ __PACKAGE__->config('name'                   => 'Nagios::Web',
                         'error-template'    => 'error.tt',
                         'response-status'   => 500,
                     },
+                    'static' => {
+                        'ignore_extensions' => [ qw/tpl tt tt2/ ],
+                    },
  );
 
 

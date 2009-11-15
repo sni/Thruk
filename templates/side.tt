@@ -15,7 +15,7 @@
       <div class="navsectionlinks">
         <ul class="navsectionlinks">
           <li><a href="main.html" target="main">Home</a></li>
-          <li><a href="docs/" target="main">Documentation</a></li>
+          <li><a href="/nagios/docs/index.html" target="main">Documentation</a></li>
         </ul>
       </div>
     </div>

@@ -4,7 +4,7 @@
   <head>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>Nagios</title>
-    <link rel="shortcut icon" href="images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="/nagios/images/favicon.ico" type="image/ico" />
   </head>
   <frameset cols="180,*">
     <frame src="side.html" name="side" frameborder="0" id="side" />
