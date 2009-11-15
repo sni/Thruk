@@ -33,12 +33,17 @@ before 'execute' => sub {
 
     ###############################
     # parse cgi.cfg
-    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg();
+    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
 
     ###############################
     $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
-    $c->stash->{'remote_user'}  = $c->user->get('username');
+    if($c->user_exists) {
+        $c->stash->{'remote_user'}  = $c->user->get('username');
+    } else {
+        $c->stash->{'remote_user'}  = '?';
+    }
 
+    $c->stash->{'page'} = 'status'; # set a default page, so at least some css is loaded
     $c->response->headers->header('refresh' => $c->{'cgi_cfg'}->{'refresh_rate'}) if defined $c->{'cgi_cfg'}->{'refresh_rate'};
 };
 
