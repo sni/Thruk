@@ -24,7 +24,7 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'hostdetail';
+    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'detail';
     $c->stash->{title}          = 'Current Network Status';
     $c->stash->{infoBoxTitle}   = 'Current Network Status';
     $c->stash->{page}           = 'status';
