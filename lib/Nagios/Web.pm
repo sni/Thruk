@@ -22,7 +22,7 @@ use Catalyst qw/
                 ConfigLoader
                 StackTrace
                 Static::Simple/;
-our $VERSION = '0.10_1';
+our $VERSION = '0.10_2';
 
 # Configure the application.
 #
@@ -38,8 +38,8 @@ __PACKAGE__->config('name'                   => 'Nagios::Web',
                     'Plugin::Authentication' => {
                         default_realm => 'Nagios',
                         realms => {
-                            Nagios => { credential => { class => 'Nagios' },
-                                        store      => { class => 'Null'   },
+                            Nagios => { credential => { class => 'Nagios'      },
+                                        store      => { class => 'FromCGIConf' },
                             }
                         }
                     },
