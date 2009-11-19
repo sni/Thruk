@@ -36,6 +36,10 @@ before 'execute' => sub {
     $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
 
     ###############################
+    # get livesocket object
+    $c->{'live'} = Nagios::Web::Helper->get_livesocket($c);
+
+    ###############################
     $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
     if($c->user_exists) {
         $c->stash->{'remote_user'}  = $c->user->get('username');
@@ -46,31 +50,6 @@ before 'execute' => sub {
     $c->stash->{'page'} = 'status'; # set a default page, so at least some css is loaded
     $c->response->headers->header('refresh' => $c->{'cgi_cfg'}->{'refresh_rate'}) if defined $c->{'cgi_cfg'}->{'refresh_rate'};
 };
-
-########################################
-#sub _get_livesocket_path_from_nagios_cfg {
-#    my $self            = shift;
-#    my $nagios_cfg_path = shift;
-#
-#    # read nagios.cfg
-#    my $nagios_cfg = $self->_parse_config_file($nagios_cfg_path);
-#
-#    return if !defined $nagios_cfg->{'broker_module'};
-#
-#    my @broker;
-#    if(ref $nagios_cfg->{'broker_module'} eq 'ARRAY') {
-#        @broker = [$nagios_cfg->{'broker_module'}];
-#    }else {
-#        push @broker, $nagios_cfg->{'broker_module'};
-#    }
-#
-#    for my $neb_line (@broker) {
-#        if($neb_line =~ m/livestatus.o\s+(.*?)$/) {
-#            my $livesocket_path = $1;
-#            return($livesocket_path);
-#        }
-#    }
-#}
 
 
 

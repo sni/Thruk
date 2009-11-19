@@ -5,6 +5,7 @@ use inc::Module::Install;
 name 'Nagios-Web';
 all_from 'lib/Nagios/Web.pm';
 
+requires 'Template' => '2.22';
 requires 'Catalyst::Runtime' => '5.7015';
 requires 'Catalyst::Action::RenderView';
 requires 'Catalyst::Plugin::ConfigLoader';

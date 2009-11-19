@@ -1,4 +1,5 @@
 [% INCLUDE header.tt %]
+[% USE date %]
 
     <table border="0" width="100%">
       <tr>
@@ -10,8 +11,14 @@
       </tr>
     </table><br>
     <div align="center" class='statusSort'>
-      Entries sorted by <b>next check time</b> (ascending)
+      Entries sorted by <b>[% sortkey %]</b>
+      [% IF order == 'ASC' %]
+      (ascending)
+      [% ELSE %]
+      (descending)
+      [% END %]
     </div>
+    <br>
 
     <div align="center">
       <table border="0" class='queue'>
@@ -24,42 +31,58 @@
           <th class='queue'>Active Checks</th>
           <th class='queue'>Actions</th>
         </tr>
-        <tr class='queueOdd'>
-          <td class='queueOdd'><a href='extinfo.cgi?type=1&amp;host=test_host_8'>test_host_8</a></td>
-          <td class='queueOdd'><a href='extinfo.cgi?type=2&amp;host=test_host_8&amp;service=test_service_18'>test_service_18</a></td>
-          <td class='queueOdd'>2009-11-11 09:37:14</td>
-          <td class='queueOdd'>2009-11-11 09:47:14</td>
-          <td class='queueOdd'>Normal</td>
+        [%  FOREACH q = queue %]
+        [% SET class = 'queueEven' IF loop.even %]
+        [% SET class = 'queueOdd'  IF loop.odd %]
+        <tr class='[% class %]'>
+
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% q.host_name %]'>[% q.host_name %]</a></td>
+
+          [% IF q.description %]
+          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% q.host_name %]&amp;service=[% q.description %]'>[% q.description %]</a></td>
+          [% ELSE %]
+          <td class='[% class %]'></td>
+          [% END %]
+
+          <td class='[% class %]'>[% date.format(q.last_check, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(q.next_check, '%Y-%m-%d  %H:%M:%S') %]</td>
+
+          [% IF q.check_options == 0 %]
+          <td class='[% class %]'>Normal</td>
+          [% ELSIF q.check_options == 1 %]
+          <td class='[% class %]'>Forced</td>
+          [% ELSIF q.check_options == 2 %]
+          <td class='[% class %]'>Freshness</td>
+          [% ELSIF q.check_options == 4 %]
+          <td class='[% class %]'>Orphan</td>
+          [% END %]
+
+          [% IF q.active_checks_enabled %]
           <td class='queueENABLED'>ENABLED</td>
-          <td class='queueOdd'><a href='cmd.cgi?cmd_typ=6&amp;host=test_host_8&amp;service=test_service_18'><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></a> <a href='cmd.cgi?cmd_typ=7&amp;host=test_host_8&amp;service=test_service_18&amp;force_check'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check'></a></td>
-        </tr>
-        <tr class='queueEven'>
-          <td class='queueEven'><a href='extinfo.cgi?type=1&amp;host=test_host_3'>test_host_3</a></td>
-          <td class='queueEven'><a href='extinfo.cgi?type=2&amp;host=test_host_3&amp;service=test_service_10'>test_service_10</a></td>
-          <td class='queueEven'>2009-11-11 09:37:15</td>
-          <td class='queueEven'>2009-11-11 09:47:15</td>
-          <td class='queueEven'>Normal</td>
-          <td class='queueENABLED'>ENABLED</td>
-          <td class='queueEven'><a href='cmd.cgi?cmd_typ=6&amp;host=test_host_3&amp;service=test_service_10'><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></a> <a href='cmd.cgi?cmd_typ=7&amp;host=test_host_3&amp;service=test_service_10&amp;force_check'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check'></a></td>
-        </tr>
-        <tr class='queueOdd'>
-          <td class='queueOdd'><a href='extinfo.cgi?type=1&amp;host=test_host_9'>test_host_9</a></td>
-          <td class='queueOdd'><a href='extinfo.cgi?type=2&amp;host=test_host_9&amp;service=test_service_4'>test_service_4</a></td>
-          <td class='queueOdd'>2009-11-11 09:37:17</td>
-          <td class='queueOdd'>2009-11-11 09:47:17</td>
-          <td class='queueOdd'>Normal</td>
-          <td class='queueENABLED'>ENABLED</td>
-          <td class='queueOdd'><a href='cmd.cgi?cmd_typ=6&amp;host=test_host_9&amp;service=test_service_4'><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></a> <a href='cmd.cgi?cmd_typ=7&amp;host=test_host_9&amp;service=test_service_4&amp;force_check'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check'></a></td>
-        </tr>
-        <tr class='queueEven'>
-          <td class='queueEven'><a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a></td>
-          <td class='queueEven'><a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_14'>test_service_14</a></td>
-          <td class='queueEven'>2009-11-11 09:23:26</td>
-          <td class='queueEven'>2019-11-11 09:43:57</td>
-          <td class='queueEven'>Forced</td>
+          [% ELSE %]
           <td class='queueDISABLED'>DISABLED</td>
-          <td class='queueEven'><a href='cmd.cgi?cmd_typ=5&amp;host=test_host_0&amp;service=test_service_14'><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service'></a> <a href='cmd.cgi?cmd_typ=7&amp;host=test_host_0&amp;service=test_service_14'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check'></a></td>
+          [% END %]
+
+          <td class='[% class %]'>
+          [% IF q.description %]
+            [% IF q.active_checks_enabled %]
+            <a href='cmd.cgi?cmd_typ=6&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></a>
+            [% ELSE %]
+            <a href='cmd.cgi?cmd_typ=5&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service'></a>
+            [% END %]
+            <a href='cmd.cgi?cmd_typ=7&amp;host=[% q.host_name %]&amp;service=[% q.description %]&amp;force_check'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check'></a>
+          [% ELSE %]
+            [% IF q.active_checks_enabled %]
+            <a href='cmd.cgi?cmd_typ=4&amp;host=[% q.host_name %]'><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host'></a>
+            [% ELSE %]
+            <a href='cmd.cgi?cmd_typ=47&amp;host=[% q.host_name %]'><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host'></a>
+            [% END %]
+            <a href='cmd.cgi?cmd_typ=96&amp;host=[% q.host_name %]&amp;force_check'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Host Check' title='Re-schedule This Host Check'></a>
+          [% END %]
+          </td>
         </tr>
+        [%  END %]
+
       </table>
     </div>
 
