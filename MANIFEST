@@ -6,7 +6,6 @@ inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
-inc/Module/Install/Catalyst.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
@@ -14,6 +13,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+INSTALL
 lib/Catalyst/Authentication/Credential/Nagios.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
 lib/Nagios/Web.pm
@@ -318,6 +318,8 @@ script/nagios_web_test.pl
 t/01app.t
 t/02pod.t
 t/03podcoverage.t
+t/98-Pod-Coverage.t
+t/99-Perl-Critic.t
 t/controller_avail.t
 t/controller_cmd.t
 t/controller_config.t
@@ -333,6 +335,7 @@ t/controller_status.t
 t/controller_statusmap.t
 t/controller_summary.t
 t/controller_tac.t
+t/perlcriticrc
 t/view_TT.t
 templates/error.tt
 templates/extinfo_type_0.tt

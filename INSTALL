@@ -1,0 +1,25 @@
+INSTALLATION
+============
+
+the easiest way to install will be using local::lib:
+
+Install local::lib
+------------------
+
+    wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
+    tar zxvf local-lib-1.004009.tar.gz
+    cd local-lib-1.004009
+    perl Makefile.PL --bootstrap && make install
+
+
+Install Nagios-Web-Catalyst
+---------------------------
+
+    git clone git@github.com:sni/Nagios-Web-Catalyst.git
+    cd Nagios-Web-Catalyst
+    perl Makefile.PL
+    make installdeps
+
+After running these steps successfully, you should be able to test your installation:
+
+    ./script/nagios_web_server.pl
