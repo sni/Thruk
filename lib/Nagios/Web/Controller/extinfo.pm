@@ -22,18 +22,16 @@ Catalyst Controller.
 
 =cut
 
+##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
     my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
 
-    #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
-    #print Dumper($c);
-    #print Dumper($self);
-    #exit;
-
     my $infoBoxTitle;
     if($type == 0) {
         $infoBoxTitle = 'Nagios Process Information';
+        $c->detach('/error/index/1') unless $c->check_user_roles( "authorized_for_system_information" );
+        $self->_process_process_info_page($c);
     }
     if($type == 1) {
         $infoBoxTitle = 'Host Information';
@@ -55,27 +53,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 7) {
         $infoBoxTitle = 'Check Scheduling Queue';
-
-        my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
-        my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 7;
-
-        my $order = "ASC";
-        $order = "DESC" if $sorttype == 2;
-
-        my $sortoptions = {
-                    '1' => [ 'host_name',   'host name'       ],
-                    '2' => [ 'description', 'service name'    ],
-                    '4' => [ 'last_check',  'last check time' ],
-                    '7' => [ 'next_check',  'next check time' ],
-        };
-        $sortoption = 7 if !defined $sortoptions->{$sortoption};
-
-        my $services = $c->{'live'}->selectall_arrayref("GET services\nColumns: host_name description next_check last_check check_options active_checks_enabled", { Slice => {} });
-        my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name next_check last_check check_options active_checks_enabled", { Slice => {}, rename => { 'name' => 'host_name' } });
-        my $queue    = Nagios::Web::Helper->sort($c, [@{$hosts}, @{$services}], $sortoptions->{$sortoption}->[0], $order);
-        $c->stash->{'queue'}   = $queue;
-        $c->stash->{'order'}   = $order;
-        $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];
+        $self->_process_scheduling_page($c);
     }
     if($type == 8) {
         $infoBoxTitle = 'Servicegroup Information';
@@ -85,6 +63,45 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{infoBoxTitle}   = $infoBoxTitle;
     $c->stash->{page}           = 'extinfo';
     $c->stash->{template}       = 'extinfo_type_'.$type.'.tt';
+}
+
+
+##########################################################
+# SUBS
+##########################################################
+
+##########################################################
+# create the scheduling page
+sub _process_scheduling_page {
+    my ( $self, $c ) = @_;
+
+    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
+    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 7;
+
+    my $order = "ASC";
+    $order = "DESC" if $sorttype == 2;
+
+    my $sortoptions = {
+                '1' => [ ['host_name', 'description'],   'host name'       ],
+                '2' => [ 'description',                  'service name'    ],
+                '4' => [ 'last_check',                   'last check time' ],
+                '7' => [ 'next_check',                   'next check time' ],
+    };
+    $sortoption = 7 if !defined $sortoptions->{$sortoption};
+
+    my $services = $c->{'live'}->selectall_arrayref("GET services\nColumns: host_name description next_check last_check check_options active_checks_enabled", { Slice => {} });
+    my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name next_check last_check check_options active_checks_enabled", { Slice => {}, rename => { 'name' => 'host_name' } });
+    my $queue    = Nagios::Web::Helper->sort($c, [@{$hosts}, @{$services}], $sortoptions->{$sortoption}->[0], $order);
+    $c->stash->{'queue'}   = $queue;
+    $c->stash->{'order'}   = $order;
+    $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];
+}
+
+
+##########################################################
+# create the process info page
+sub _process_process_info_page {
+    my ( $self, $c ) = @_;
 }
 
 

@@ -18,6 +18,7 @@ use Nagios::MKLivestatus;
 use parent qw/Catalyst/;
 use Catalyst qw/
                 Authentication
+                Authorization::Roles
                 CustomErrorMessage
                 ConfigLoader
                 StackTrace

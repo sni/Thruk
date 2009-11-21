@@ -14,9 +14,9 @@ sub new {
 }
 
 sub from_session {
-	my ( $self, $c, $username ) = @_;
-	return $username if ref $username;
-	$self->find_user( { username => $username } );
+    my ( $self, $c, $username ) = @_;
+    return $username if ref $username;
+    $self->find_user( { username => $username } );
 }
 
 sub find_user {

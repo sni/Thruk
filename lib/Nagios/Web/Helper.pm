@@ -76,23 +76,32 @@ sub sort {
 
     $order = "ASC" if !defined $order;
 
-    # sort numeric
-    if($data->[0]->{$key} =~ m/^\d+$/xm) {
-        if(uc $order eq 'ASC') {
-            @sorted = sort { $a->{$key} <=> $b->{$key} } @{$data};
-        } else {
-            @sorted = reverse sort { $a->{$key} <=> $b->{$key} } @{$data};
-        }
+    my @keys;
+    if(ref($key) eq 'ARRAY') {
+        @keys = @{$key};
     } else {
-    # sort alphanumeric
-        if(uc $order eq 'ASC') {
-            @sorted = sort { $a->{$key} cmp $b->{$key} } @{$data};
-        } else {
-            @sorted = reverse sort { $a->{$key} cmp $b->{$key} } @{$data};
-        }
+        @keys = ($key);
     }
 
-    $c->log->debug("ordering by: ".$key." ".$order);
+    my @compares;
+    for my $key (@keys) {
+        # sort numeric
+        if(!defined or $data->[0]->{$key} =~ m/^\d+$/xm) {
+            push @compares, '$a->{'.$key.'} <=> $b->{'.$key.'}';
+        }
+        # sort alphanumeric
+        else {
+            push @compares, '$a->{'.$key.'} cmp $b->{'.$key.'}';
+        }
+    }
+    my $sortstring = join(' || ', @compares);
+    $c->log->debug("ordering by: ".$sortstring);
+
+    if(uc $order eq 'ASC') {
+        eval '@sorted = sort { '.$sortstring.' } @{$data};';
+    } else {
+        eval '@sorted = reverse sort { '.$sortstring.' } @{$data};';
+    }
 
     return(\@sorted);
 }
