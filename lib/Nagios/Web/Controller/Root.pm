@@ -64,6 +64,13 @@ sub default :Path {
 }
 
 ######################################
+# index page
+sub index :Path {
+    my ( $self, $c ) = @_;
+    $c->redirect("/index.html");
+}
+
+######################################
 # tac
 sub tac_cgi : Path('nagios/cgi-bin/tac.cgi') {
     my ( $self, $c ) = @_;

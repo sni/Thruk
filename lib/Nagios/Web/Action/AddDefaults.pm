@@ -22,9 +22,6 @@ use strict;
 use warnings;
 use Moose;
 use Carp;
-use Nagios::MKLivestatus;
-use Data::Dumper;
-use Config::General;
 use Nagios::Web::Helper;
 
 extends 'Catalyst::Action';

@@ -82,11 +82,13 @@ sub _process_host_page {
     my $host = $c->{'live'}->selectrow_hashref("GET hosts\nFilter: name = $hostname");
     $c->detach('/error/index/5') unless defined $host;
 
-    use Data::Dumper;
-    $Data::Dumper::Sortkeys = 1;
-    print Dumper($host);
+    $c->stash->{'host'}     = $host;
 
-    $c->stash->{'host'} = $host;
+    #my $comments = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: host_name = $hostname", { Slice => {} });
+    #use Data::Dumper;
+    #$Data::Dumper::Sortkeys = 1;
+    #print Dumper($comments);
+    #$c->stash->{'comments'} = $comments;
 }
 
 ##########################################################

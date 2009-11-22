@@ -1,34 +1,44 @@
 package Nagios::Web::View::TT;
 
 use strict;
-use MRO::Compat;
-use Digest::MD5 'md5_hex';
 use base 'Catalyst::View::TT';
 
 __PACKAGE__->config(
                     TEMPLATE_EXTENSION => '.tt',
                     ENCODING           => 'utf8',
                     INCLUDE_PATH       =>  'templates',
+                    FILTERS            => {
+                                            "duration"  => \&filter_duration,
+                                       },
                     );
 
-sub process {
-    my $self = shift;
-    my $c = $_[0];
+##############################################
+# calculate a duration in the
+# format: 0d 0h 29m 43s
+sub filter_duration {
+    my $date     = shift;
+    my $duration = time() - $date;
 
-    $self->next::method(@_) or return 0;
-
-    my $method = $c->request->method;
-    return 1 if $method ne 'GET' and $method ne 'HEAD' or $c->stash->{nocache};    # disable caching explicitely
-
-    my $body = $c->response->body;
-    if ($body) {
-        utf8::encode($body) if utf8::is_utf8($body);
-        $c->response->headers->etag(md5_hex($body));
+    my $days    = 0;
+    my $hours   = 0;
+    my $minutes = 0;
+    my $seconds = 0;
+    if($duration > 86400) {
+        $days     = int($duration/86400);
+        $duration = $duration%86400;
     }
+    if($duration > 3600) {
+        $hours    = int($duration/3600);
+        $duration = $duration%3600;
+    }
+    if($duration > 60) {
+        $minutes  = int($duration/60);
+        $duration = $duration%60;
+    }
+    $seconds = $duration;
 
-    return 1;
+    return($days."d ".$hours."h ".$minutes."m ".$seconds."s");
 }
-
 
 =head1 NAME
 

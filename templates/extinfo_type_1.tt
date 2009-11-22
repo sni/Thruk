@@ -1,4 +1,5 @@
 [% INCLUDE header.tt %]
+[% USE date %]
 
     <table border="0" width="100%">
       <tr>
@@ -55,10 +56,7 @@
       <table border="0" cellpadding="0" width="100%">
         <tr>
           <td align="center" valign="top" class='stateInfoPanel'>
-            <div class='dataTitle'>
-              Host State Information
-            </div>
-
+            <div class='dataTitle'>Host State Information</div>
             <table border="0">
               <tr>
                 <td>
@@ -67,124 +65,107 @@
                       <td class='stateInfoTable1'>
                         <table border="0">
                           <tr>
-                            <td class='dataVar'>
-
-                              Host Status:
-                            </td>
+                            <td class='dataVar'>Host Status:</td>
                             <td class='dataVal'>
-                              <div class='hostUP'>
-                                &nbsp;&nbsp;UP&nbsp;&nbsp;
-                              </div>&nbsp;(for 5d 15h 4m 5s)
+                              [% IF host.state == 0 %]
+                              <div class='hostUP'>&nbsp;&nbsp;UP&nbsp;&nbsp;</div>
+                              [% ELSIF host.state == 1 %]
+                              <div class='hostDOWN'>&nbsp;&nbsp;DOWN&nbsp;&nbsp;</div>
+                              [% ELSIF host.state == 2 %]
+                              <div class='hostUNREACHABLE'>&nbsp;&nbsp;UNREACHABLE&nbsp;&nbsp;</div>
+                              [% END %]
+                              &nbsp;(for [% FILTER duration %][% host.last_state_change %][% END %])
+                              [% IF host.acknowledged %]
+                              &nbsp;(Has been acknowledged)
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
-
-                            <td class='dataVar' valign='top'>
-                              Status Information:
-                            </td>
+                            <td class='dataVar' valign='top'>Status Information:</td>
                             <td class='dataVal'>
-                              mo UP: random hostcheck unchanged
+                              [% host.plugin_output %]
+                              [% IF host.long_plugin_output %]
+                              <br>[% host.long_plugin_output %]
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
-                            <td class='dataVar' valign='top'>
-                              Performance Data:
-                            </td>
-
-                            <td class='dataVal'></td>
+                            <td class='dataVar' valign='top'>Performance Data:</td>
+                            <td class='dataVal'>[% host.perf_data %]</td>
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-                              Current Attempt:
-                            </td>
-                            <td class='dataVal'>
-                              1/5&nbsp;&nbsp;(HARD state)
-                            </td>
-
+                            <td class='dataVar'>Current Attempt:</td>
+                            <td class='dataVal'>[% host.current_attempt %]/[% host.max_check_attempts %]&nbsp;&nbsp;([% IF host.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td>
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-                              Last Check Time:
-                            </td>
-                            <td class='dataVal'>
-                              2009-11-20 23:36:51
-                            </td>
+                            <td class='dataVar'>Last Check Time:</td>
+                            <td class='dataVal'>[% date.format(host.last_check, '%Y-%m-%d  %H:%M:%S') %]</td>
                           </tr>
                           <tr>
-
-                            <td class='dataVar'>
-                              Check Type:
-                            </td>
+                            <td class='dataVar'>Check Type:</td>
+                            <td class='dataVal'>[% IF host.check_type == 0 %]ACTIVE[% ELSE %]PASSIVE[% END %]</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar' nowrap>Check Latency / Duration:</td>
                             <td class='dataVal'>
-                              ACTIVE
+                              [% IF host.check_type == 0 %]
+                                [% FILTER format('%.3f') %][% host.latency %][% END %]
+                              [% ELSE %]
+                                N/A
+                              [% END %]
+                              &nbsp;/&nbsp;
+                              [% FILTER format('%.3f') %][% host.execution_time %][% END %] seconds
                             </td>
                           </tr>
                           <tr>
-                            <td class='dataVar' nowrap>
-                              Check Latency / Duration:
-                            </td>
-
-                            <td class='dataVal'>
-                              0.714&nbsp;/&nbsp;0.147 seconds
-                            </td>
+                            <td class='dataVar'>Next Scheduled Active Check:&nbsp;&nbsp;</td>
+                            <td class='dataVal'>N/A</td>
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-                              Next Scheduled Active Check:&nbsp;&nbsp;
-                            </td>
-
+                            <td class='dataVar'>Last State Change:</td>
+                            <td class='dataVal'>[% date.format(host.last_state_change, '%Y-%m-%d  %H:%M:%S') %]</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Last Notification:</td>
                             <td class='dataVal'>
+                              [% IF host.last_notification != 0 %]
+                              [% date.format(host.last_notification, '%Y-%m-%d  %H:%M:%S') %]
+                              [% ELSE %]
                               N/A
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>
-                              Last State Change:
-                            </td>
-                            <td class='dataVal'>
-                              2009-11-16 22:14:32
-                            </td>
-
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>
-                              Last Notification:
-                            </td>
-                            <td class='dataVal'>
-                              N/A&nbsp;(notification 0)
+                              [% END %]
+                              &nbsp;(notification [% host.current_notification_number %])
                             </td>
                           </tr>
 
                           <tr>
-                            <td class='dataVar'>
-                              Is This Host Flapping?
-                            </td>
+                            <td class='dataVar'>Is This Host Flapping?</td>
                             <td class='dataVal'>
-                              <div class='notflapping'>
-                                &nbsp;&nbsp;NO&nbsp;&nbsp;
-                              </div>&nbsp;(0.00% state change)
+                              [% IF host.flap_detection_enabled %]
+                                [% IF host.is_flapping %]
+                                <div class='flapping'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                [% ELSE %]
+                                <div class='notflapping'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                [% END %]
+                                &nbsp;([% FILTER format('%.2f') %][% host.percent_state_change %][% END %]% state change)
+                              [% ELSE %]
+                                N/A
+                              [% END %]
                             </td>
 
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-                              In Scheduled Downtime?
-                            </td>
+                            <td class='dataVar'>In Scheduled Downtime?</td>
                             <td class='dataVal'>
-                              <div class='downtimeINACTIVE'>
-                                &nbsp;&nbsp;NO&nbsp;&nbsp;
-                              </div>
-
+                              [% IF host.scheduled_downtime_depth > 0 %]
+                              <div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-                              Last Update:
-                            </td>
-                            <td class='dataVal'>
-                              2009-11-22 13:18:18&nbsp;&nbsp;( 0d 0h 0m 19s ago)
-                            </td>
-
+                            <td class='dataVar'>Last Update:</td>
+                            <td class='dataVal'>[% date.format(now(), '%Y-%m-%d  %H:%M:%S') %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>
                         </table>
                       </td>
@@ -194,76 +175,68 @@
               </tr>
               <tr>
                 <td>
-
                   <table border="1" cellspacing="0" cellpadding="0">
                     <tr>
                       <td class='stateInfoTable2'>
                         <table border="0">
                           <tr>
-                            <td class='dataVar'>
-                              Active Checks:
-                            </td>
+                            <td class='dataVar'>Active Checks:</td>
                             <td class='dataVal'>
-
-                              <div class='checksDISABLED'>
-                                &nbsp;&nbsp;DISABLED&nbsp;&nbsp;
-                              </div>
+                              [% IF host.checks_enabled %]
+                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-                              Passive Checks:
-                            </td>
-
+                            <td class='dataVar'>Passive Checks:</td>
                             <td class='dataVal'>
-                              <div class='checksENABLED'>
-                                &nbsp;&nbsp;ENABLED&nbsp;&nbsp;
-                              </div>
+                              [% IF host.accept_passive_checks %]
+                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-
-                              Obsessing:
-                            </td>
+                            <td class='dataVar'>Obsessing:</td>
                             <td class='dataVal'>
-                              <div class='checksENABLED'>
-                                &nbsp;&nbsp;ENABLED&nbsp;&nbsp;
-                              </div>
+                              [% IF host.obsess_over_host %]
+                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
-
-                            <td class='dataVar'>
-                              Notifications:
-                            </td>
+                            <td class='dataVar'>Notifications:</td>
                             <td class='dataVal'>
-                              <div class='notificationsENABLED'>
-                                &nbsp;&nbsp;ENABLED&nbsp;&nbsp;
-                              </div>
+                              [% IF host.notifications_enabled %]
+                              <div class='notificationsENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='notificationsDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
                             </td>
                           </tr>
-
                           <tr>
-                            <td class='dataVar'>
-                              Event Handler:
-                            </td>
+                            <td class='dataVar'>Event Handler:</td>
                             <td class='dataVal'>
-                              <div class='eventhandlersENABLED'>
-                                &nbsp;&nbsp;ENABLED&nbsp;&nbsp;
-                              </div>
+                              [% IF host.event_handler_enabled %]
+                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='eventhandlersDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+                              [% END %]
                             </td>
-
                           </tr>
                           <tr>
-                            <td class='dataVar'>
-                              Flap Detection:
-                            </td>
+                            <td class='dataVar'>Flap Detection:</td>
                             <td class='dataVal'>
-                              <div class='flapdetectionENABLED'>
-                                &nbsp;&nbsp;ENABLED&nbsp;&nbsp;
-                              </div>
-
+                              [% IF host.flap_detection_enabled %]
+                              <div class='flapdetectionENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp; </div>
+                              [% ELSE %]
+                              <div class='flapdetectionDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp; </div>
+                              [% END %]
                             </td>
                           </tr>
                         </table>
@@ -279,231 +252,197 @@
             <table border="0" cellpadding="0" cellspacing="0">
               <tr>
                 <td align="center" valign="top" class='commandPanel'>
-                  <div class='commandTitle'>
-                    Host Commands
-                  </div>
+                  <div class='commandTitle'>Host Commands</div>
                   <table border='1' cellpadding="0" cellspacing="0">
-
                     <tr>
                       <td>
+                        [% IF c.check_user_roles('is_authorized_for_read_only') %]
+                        <div align=center class='infoMessage'>Your account does not have permissions to execute commands.<br>
+                        [% ELSE %]
                         <table border="0" cellspacing="0" cellpadding="0" class='command'>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map'>
-                            </td>
-                            <td class='command'>
-                              <a href='statusmap.cgi?host=[% host.name %]'>Locate host on map</a>
-
-                            </td>
+                            <td><img src='/nagios/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map'></td>
+                            <td class='command'><a href='statusmap.cgi?host=[% host.name %]'>Locate host on map</a></td>
                           </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=47&amp;host=[% host.name %]'>Enable active checks of this host</a>
-
-                            </td>
+                            [% IF host.checks_enabled %]
+                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=48&amp;host=[% host.name %]'>Disable active checks of this host</a></td>
+                            [% ELSE %]
+                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=47&amp;host=[% host.name %]'>Enable active checks of this host</a></td>
+                            [% END %]
                           </tr>
                           <tr class='data'>
-                            <td>
-                              <img src='/nagios/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name %]'>Re-schedule the next check of this host</a>
-
-                            </td>
+                            <td><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name %][% IF host.checks_enabled %]&force_check[% END %]'>Re-schedule the next check of this host</a></td>
+                          </tr>
+                          [% IF host.accept_passive_checks %]
+                          <tr class='command'>
+                            <td><img src='/nagios/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Host' title='Submit Passive Check Result For This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=87&amp;host=[% host.name %]'>Submit passive check result for this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Host' title='Submit Passive Check Result For This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=87&amp;host=[% host.name %]'>Submit passive check result for this host</a>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Host' title='Stop Accepting Passive Checks For This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=93&amp;host=[% host.name %]'>Stop accepting passive checks for this host</a></td>
+                          </tr>
+                          [% ELSE %]
+                          <tr class='command'>
+                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Host' title='Start Accepting Passive Checks For This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=92&amp;host=[% host.name %]'>Start accepting passive checks for this host</a></td>
+                          </tr>
+                          [% END %]
 
-                            </td>
+                          <tr class='command'>
+                            [% IF host.obsess_over_host %]
+                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over This Host' title='Stop Obsessing Over This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=102&amp;host=[% host.name %]'>Stop obsessing over this host</a></td>
+                            [% ELSE %]
+                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over This Host' title='Start Obsessing Over This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=101&amp;host=[% host.name %]'>Start obsessing over this host</a></td>
+                            [% END %]
+                          </tr>
+
+
+                          [% IF host.state >= 1 %]
+                          <tr class='command'>
+                            [% IF host.acknowledged %]
+                              <td><img src='/nagios/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=51&amp;host=[% host.name %]'>Remove problem acknowledgement</a></td>
+                            [% ELSE %]
+                              <td><img src='/nagios/images/ack.gif' border="0" alt='Acknowledge This Host Problem' title='Acknowledge This Host Problem'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=33&amp;host=[% host.name %]'>Acknowledge this host problem</a></td>
+                            [% END %]
+                          </tr>
+                          [% END %]
+
+
+                          <tr class='command'>
+                            [% IF host.notifications_enabled %]
+                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For This Host' title='Disable Notifications For This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=25&amp;host=[% host.name %]'>Disable notifications for this host</a></td>
+                            [% ELSE %]
+                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications For This Host' title='Enable Notifications For This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=24&amp;host=[% host.name %]'>Enable notifications for this host</a></td>
+                            [% END %]
+                          </tr>
+
+                          <tr class='command'>
+                            <td><img src='/nagios/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=159&amp;host=[% host.name %]'>Send custom host notification</a></td>
+                          </tr>
+
+                          [% IF host.state >= 1 %]
+                          <tr class='command'>
+                            <td><img src='/nagios/images/delay.gif' border="0" alt='Delay Next Host Notification' title='Delay Next Host Notification'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=10&amp;host=[% host.name %]'>Delay next host notification</a></td>
+                          </tr>
+                          [% END %]
+
+                          <tr class='command'>
+                            <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For This Host' title='Schedule Downtime For This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name %]'>Schedule downtime for this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Host' title='Stop Accepting Passive Checks For This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=93&amp;host=[% host.name %]'>Stop accepting passive checks for this host</a>
-
-                            </td>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For All Services On This Host' title='Disable Notifications For All Services On This Host'></td>
+                            <td class='command' nowrap><a href='cmd.cgi?cmd_typ=29&amp;host=[% host.name %]'>Disable notifications for all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over This Host' title='Stop Obsessing Over This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=102&amp;host=[% host.name %]'>Stop obsessing over this host</a>
-
-                            </td>
+                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications For All Services On This Host' title='Enable Notifications For All Services On This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=28&amp;host=[% host.name %]'>Enable notifications for all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For This Host' title='Disable Notifications For This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=25&amp;host=[% host.name %]'>Disable notifications for this host</a>
-
-                            </td>
+                            <td><img src='/nagios/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name %]'>Schedule a check of all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=159&amp;host=[% host.name %]'>Send custom host notification</a>
-
-                            </td>
+                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Checks Of All Services On This Host' title='Disable Checks Of All Services On This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=16&amp;host=[% host.name %]'>Disable checks of all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For This Host' title='Schedule Downtime For This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name %]'>Schedule downtime for this host</a>
-
-                            </td>
+                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Checks Of All Services On This Host' title='Enable Checks Of All Services On This Host'></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=15&amp;host=[% host.name %]'>Enable checks of all services on this host</a></td>
                           </tr>
-                          <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For All Services On This Host' title='Disable Notifications For All Services On This Host'>
-                            </td>
-                            <td class='command' nowrap>
-                              <a href='cmd.cgi?cmd_typ=29&amp;host=[% host.name %]'>Disable notifications for all services on this host</a>
 
-                            </td>
+                          <tr class='command'>
+                            [% IF host.event_handler_enabled %]
+                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=44&amp;host=[% host.name %]'>Disable event handler for this host</a></td>
+                            [% ELSE %]
+                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Event Handler For This Host' title='Enable Event Handler For This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=43&amp;host=[% host.name %]'>Enable event handler for this host</a></td>
+                            [% END %]
                           </tr>
-                          <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications For All Services On This Host' title='Enable Notifications For All Services On This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=28&amp;host=[% host.name %]'>Enable notifications for all services on this host</a>
 
-                            </td>
-                          </tr>
                           <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name %]'>Schedule a check of all services on this host</a>
-
-                            </td>
-                          </tr>
-                          <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/disabled.gif' border="0" alt='Disable Checks Of All Services On This Host' title='Disable Checks Of All Services On This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=16&amp;host=[% host.name %]'>Disable checks of all services on this host</a>
-
-                            </td>
-                          </tr>
-                          <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/enabled.gif' border="0" alt='Enable Checks Of All Services On This Host' title='Enable Checks Of All Services On This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=15&amp;host=[% host.name %]'>Enable checks of all services on this host</a>
-
-                            </td>
-                          </tr>
-                          <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=44&amp;host=[% host.name %]'>Disable event handler for this host</a>
-
-                            </td>
-                          </tr>
-                          <tr class='command'>
-                            <td>
-                              <img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection For This Host' title='Disable Flap Detection For This Host'>
-                            </td>
-                            <td class='command'>
-                              <a href='cmd.cgi?cmd_typ=58&amp;host=[% host.name %]'>Disable flap detection for this host</a>
-
-                            </td>
+                            [% IF host.event_handler_enabled %]
+                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection For This Host' title='Disable Flap Detection For This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=58&amp;host=[% host.name %]'>Disable flap detection for this host</a></td>
+                            [% ELSE %]
+                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Flap Detection For This Host' title='Enable Flap Detection For This Host'></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=57&amp;host=[% host.name %]'>Enable flap detection for this host</a></td>
+                            [% END %]
                           </tr>
                         </table>
+                        [% END %]
                       </td>
                     </tr>
                   </table>
                 </td>
               </tr>
             </table>
-
           </td>
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
+          [% IF c.check_user_roles('is_authorized_for_read_only') %]
+          [% ELSE %]
             <a name="comments" id="comments"></a>
-            <div class='commentTitle'>
-              Host Comments
-            </div>
+            <div class='commentTitle'>Host Comments</div>
             <table border="0">
-
               <tr>
-                <td valign="middle">
-                  <img src='/nagios/images/comment.gif' border="0" align="center" alt="#########">
-                </td>
-                <td class='comment'>
-                  <a href='cmd.cgi?cmd_typ=1&amp;host=[% host.name %]' class='comment'>Add a new comment</a>
-                </td>
-                <td valign="middle">
-
-                  <img src='/nagios/images/delete.gif' border="0" align="center" alt="#########">
-                </td>
-                <td class='comment'>
-                  <a href='cmd.cgi?cmd_typ=20&amp;host=[% host.name %]' class='comment'>Delete all comments</a>
-                </td>
+                <td valign="middle"><img src='/nagios/images/comment.gif' border="0" align="center" alt="#########"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=1&amp;host=[% host.name %]' class='comment'>Add a new comment</a></td>
+                <td valign="middle"><img src='/nagios/images/delete.gif' border="0" align="center" alt="#########"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=20&amp;host=[% host.name %]' class='comment'>Delete all comments</a></td>
               </tr>
             </table>
             <div align="center">
-
               <table border="0" class='comment'>
                 <tr class='comment'>
-                  <th class='comment'>
-                    Entry Time
-                  </th>
-                  <th class='comment'>
-                    Author
-                  </th>
-                  <th class='comment'>
-                    Comment
-                  </th>
-
-                  <th class='comment'>
-                    Comment ID
-                  </th>
-                  <th class='comment'>
-                    Persistent
-                  </th>
-                  <th class='comment'>
-                    Type
-                  </th>
-                  <th class='comment'>
-
-                    Expires
-                  </th>
-                  <th class='comment'>
-                    Actions
-                  </th>
+                  <th class='comment'>Entry Time</th>
+                  <th class='comment'>Author</th>
+                  <th class='comment'>Comment</th>
+                  <th class='comment'>Comment ID</th>
+                  <th class='comment'>Persistent</th>
+                  <th class='comment'>Type</th>
+                  <th class='comment'>Expires</th>
+                  <th class='comment'>Actions</th>
                 </tr>
-                <tr class='commentOdd'>
-                  <td class='commentOdd' colspan='9'>
-                    This host has no comments associated with it
-                  </td>
-
+                [% IF comments %]
+                  [% FOREACH comment IN comments %]
+                  [% SET class = 'commentEven' IF loop.even %]
+                  [% SET class = 'commentOdd'  IF loop.odd %]
+                  <tr class='[% class %]'>
+                    <td class='[% class %]'>[% date.format(comment.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+                    <td class='[% class %]'>[% comment.author %]</td>
+                    <td class='[% class %]'>[% comment.comment %]</td>
+                    <td class='[% class %]'>[% comment.id %]</td>
+                    <td class='[% class %]'>[% comment.persistant %]</td>
+                    <td class='[% class %]'>[% comment.type %]</td>
+                    <td class='[% class %]'>[% comment.expires %]</td>
+                    <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
+                  </tr>
+                  [% END %]
+                [% ELSE %]
+                  <tr class='commentOdd'>
+                    <td class='commentOdd' colspan='9'>This host has no comments associated with it</td>
+                  </tr>
+                [% END %]
                 </tr>
               </table>
             </div>
+          [% END %]
           </td>
         </tr>
       </table>

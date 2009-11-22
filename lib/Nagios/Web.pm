@@ -22,7 +22,8 @@ use Catalyst qw/
                 CustomErrorMessage
                 ConfigLoader
                 StackTrace
-                Static::Simple/;
+                Static::Simple
+                Redirect/;
 our $VERSION = '0.10_2';
 
 # Configure the application.

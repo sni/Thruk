@@ -48,6 +48,10 @@ sub find_user {
             push @{$user->{'roles'}}, $role if defined $contacts{$username};
         }
     }
+	# TODO:
+	if(0) {
+        push @{$user->{'roles'}}, 'is_authorized_for_read_only';
+	}
 
     return bless $user, "Catalyst::Authentication::User::Hash";
 }

@@ -4,3 +4,5 @@ Todo List:
 - create models for hosts / services / contacts
 - separate static content from templates
 - reload cgi.cfg if changed
+- is_authorized_for_read_only in Catalyst::Authentication::Store::FromCGIConf
+- comments on extinfo type 1
