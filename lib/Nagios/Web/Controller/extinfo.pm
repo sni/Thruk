@@ -35,6 +35,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 1) {
         $infoBoxTitle = 'Host Information';
+        $self->_process_host_page($c);
     }
     if($type == 2) {
         $infoBoxTitle = 'Service Information';
@@ -71,6 +72,24 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 ##########################################################
 
 ##########################################################
+# create the process info page
+sub _process_host_page {
+    my ( $self, $c ) = @_;
+
+    my $hostname = $c->{'request'}->{'parameters'}->{'host'};
+    $c->detach('/error/index/5') unless defined $hostname;
+
+    my $host = $c->{'live'}->selectrow_hashref("GET hosts\nFilter: name = $hostname");
+    $c->detach('/error/index/5') unless defined $host;
+
+    use Data::Dumper;
+    $Data::Dumper::Sortkeys = 1;
+    print Dumper($host);
+
+    $c->stash->{'host'} = $host;
+}
+
+##########################################################
 # create the scheduling page
 sub _process_scheduling_page {
     my ( $self, $c ) = @_;
@@ -89,8 +108,8 @@ sub _process_scheduling_page {
     };
     $sortoption = 7 if !defined $sortoptions->{$sortoption};
 
-    my $services = $c->{'live'}->selectall_arrayref("GET services\nColumns: host_name description next_check last_check check_options active_checks_enabled", { Slice => {} });
-    my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name next_check last_check check_options active_checks_enabled", { Slice => {}, rename => { 'name' => 'host_name' } });
+    my $services = $c->{'live'}->selectall_arrayref("GET services\nColumns: host_name description next_check last_check check_options active_checks_enabled\nFilter: active_checks_enabled = 1\ncheck_options != 0\nOr: 2", { Slice => {} });
+    my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name next_check last_check check_options active_checks_enabled\nFilter: active_checks_enabled = 1\ncheck_options != 0\nOr: 2", { Slice => {}, rename => { 'name' => 'host_name' } });
     my $queue    = Nagios::Web::Helper->sort($c, [@{$hosts}, @{$services}], $sortoptions->{$sortoption}->[0], $order);
     $c->stash->{'queue'}   = $queue;
     $c->stash->{'order'}   = $order;

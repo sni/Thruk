@@ -50,18 +50,28 @@ sub get_livesocket {
     }
     $c->log->debug("creating new livestatus");
 
-    my $livesocket_path = Nagios::Web->config->{'livesocket_path'};
+    my $livesocket_path = Nagios::Web->config->{'livesocket'};
     if(!defined $livesocket_path) {
         $livesocket_path = $self->_get_livesocket_path_from_nagios_cfg(Nagios::Web->config->{'cgi_cfg'});
     }
 
     $c->log->debug("connecting via: ".$livesocket_path);
 
-    $livesocket = Nagios::MKLivestatus->new(
-                            socket      => $livesocket_path,
-                            verbose     => Nagios::Web->config->{'livesocket_verbose'},
-                            keepalive   => 1,
-    );
+    if($livesocket_path =~ m/:/mx) {
+        $livesocket = Nagios::MKLivestatus->new(
+                                server           => $livesocket_path,
+                                verbose          => Nagios::Web->config->{'livesocket_verbose'},
+                                keepalive        => 1,
+#                                errors_are_fatal => 0,
+        );
+    } else {
+        $livesocket = Nagios::MKLivestatus->new(
+                                socket          => $livesocket_path,
+                                verbose         => Nagios::Web->config->{'livesocket_verbose'},
+                                keepalive       => 1,
+#                                errors_are_fatal => 0,
+        );
+    }
     return($livesocket);
 }
 

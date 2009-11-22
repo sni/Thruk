@@ -64,25 +64,6 @@ sub default :Path {
 }
 
 ######################################
-# index page
-sub index :Path :Args(0) {
-    my ( $self, $c ) = @_;
-    $c->stash->{template} = 'index.tt';
-}
-######################################
-# main.html
-sub main_html : Path('main.html') {
-    my ( $self, $c ) = @_;
-    $c->stash->{template} = 'main.tt';
-}
-######################################
-# side.html
-sub side_html : Path('side.html') {
-    my ( $self, $c ) = @_;
-    $c->stash->{template} = 'side.tt';
-}
-
-######################################
 # tac
 sub tac_cgi : Path('nagios/cgi-bin/tac.cgi') {
     my ( $self, $c ) = @_;
@@ -187,6 +168,7 @@ Attempt to render a view, if needed.
 =cut
 
 sub end : ActionClass('RenderView') {
+    my ( $self, $c ) = @_;
 }
 
 =head1 AUTHOR

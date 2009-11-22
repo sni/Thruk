@@ -51,8 +51,7 @@ __PACKAGE__->config('name'                   => 'Nagios::Web',
                     'static' => {
                         'ignore_extensions' => [ qw/tpl tt tt2/ ],
                     },
- );
-
+);
 
 # Start the application
 __PACKAGE__->setup();

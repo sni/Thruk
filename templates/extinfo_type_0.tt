@@ -1,5 +1,3 @@
-[% title = '' %]
-
 [% INCLUDE header.tt %]
 
     <table border="0" width="100%">
@@ -17,9 +15,7 @@
         <tr>
 
           <td valign="top">
-            <div class='dataTitle'>
-              Process Information
-            </div>
+            <div class='dataTitle'>Process Information</div>
             <table border="1" cellspacing="0" cellpadding="0" class='data'>
               <tr>
                 <td class='stateInfoTable1'>

@@ -2,11 +2,13 @@ package Nagios::Web::Action::AddDefaults;
 
 =head1 NAME
 
-Nagios::Web::Controller::Root - Root Controller for Nagios::Web
+Nagios::Web::Action::AddDefaults - Add Defaults to the context
 
 =head1 DESCRIPTION
 
-[enter your description here]
+loads cgi.cfg
+
+creates MKLivestatus object
 
 =head1 METHODS
 
