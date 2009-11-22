@@ -6,6 +6,7 @@ inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
+inc/Module/Install/Catalyst.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
@@ -41,6 +42,8 @@ META.yml
 nagios_web.conf
 README
 root/favicon.ico
+root/index.html
+root/main.html
 root/nagios/docs/about.html
 root/nagios/docs/activechecks.html
 root/nagios/docs/adaptive.html
@@ -310,6 +313,7 @@ root/nagios/stylesheets/statusmap.css
 root/nagios/stylesheets/summary.css
 root/nagios/stylesheets/tac.css
 root/nagios/stylesheets/trends.css
+root/side.html
 script/nagios_web_cgi.pl
 script/nagios_web_create.pl
 script/nagios_web_fastcgi.pl
@@ -339,17 +343,15 @@ t/perlcriticrc
 t/view_TT.t
 templates/error.tt
 templates/extinfo_type_0.tt
+templates/extinfo_type_1.tt
 templates/extinfo_type_2.tt
 templates/extinfo_type_6.tt
 templates/extinfo_type_7.tt
 templates/footer.tt
 templates/header.tt
 templates/host_status_details_box.tt
-templates/index.tt
 templates/infobox.tt
-templates/main.tt
 templates/service_status_details_box.tt
-templates/side.tt
 templates/status_detail.tt
 templates/status_hostdetail.tt
 templates/tac.tt
