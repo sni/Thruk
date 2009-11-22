@@ -1,4 +1,5 @@
 [% INCLUDE header.tt %]
+[% USE date %]
 
     <table border="0" width="100%">
       <tr>
@@ -21,7 +22,6 @@
           <th class='downtime'>Host Name</th>
           <th class='downtime'>Entry Time</th>
           <th class='downtime'>Author</th>
-
           <th class='downtime'>Comment</th>
           <th class='downtime'>Start Time</th>
           <th class='downtime'>End Time</th>
@@ -31,45 +31,23 @@
           <th class='downtime'>Trigger ID</th>
           <th class='downtime'>Actions</th>
         </tr>
-        <tr class='downtimeEven'>
-          <td class='downtimeEven'><a href='extinfo.cgi?type=1&amp;host=test_host_2'>test_host_2</a></td>
-          <td class='downtimeEven'>2009-11-11 09:28:49</td>
-          <td class='downtimeEven'>admin</td>
-          <td class='downtimeEven'>test</td>
-          <td class='downtimeEven'>2009-11-11 09:28:46</td>
-          <td class='downtimeEven'>2009-11-11 11:28:46</td>
-          <td class='downtimeEven'>Fixed</td>
-          <td class='downtimeEven'>0d 2h 0m 0s</td>
-          <td class='downtimeEven'>3</td>
-          <td class='downtimeEven'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=3'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+        [%  FOREACH d = hostdowntimes %]
+        [% SET class = 'downtimeOdd' IF loop.even %]
+        [% SET class = 'downtimeEven'  IF loop.odd %]
+        <tr class='[% class %]'>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
+          <td class='[% class %]'>[% date.format(d.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% d.author %]</td>
+          <td class='[% class %]'>[% d.comment %]</td>
+          <td class='[% class %]'>[% date.format(d.start_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(d.end_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
+          <td class='[% class %]'>[% FILTER duration %][% d.end_time - d.start_time %][% END %]</td>
+          <td class='[% class %]'>[% d.id %]</td>
+          <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
-        <tr class='downtimeOdd'>
-          <td class='downtimeOdd'><a href='extinfo.cgi?type=1&amp;host=test_host_3'>test_host_3</a></td>
-          <td class='downtimeOdd'>2009-11-11 09:29:11</td>
-          <td class='downtimeOdd'>admin</td>
-          <td class='downtimeOdd'>test</td>
-          <td class='downtimeOdd'>2009-11-11 09:29:00</td>
-          <td class='downtimeOdd'>2019-11-11 11:29:00</td>
-          <td class='downtimeOdd'>Fixed</td>
-          <td class='downtimeOdd'>3652d 2h 0m 0s</td>
-          <td class='downtimeOdd'>4</td>
-          <td class='downtimeOdd'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=4'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
-        </tr>
-        <tr class='downtimeEven'>
-          <td class='downtimeEven'><a href='extinfo.cgi?type=1&amp;host=test_host_5'>test_host_5</a></td>
-          <td class='downtimeEven'>2009-11-11 09:29:29</td>
-          <td class='downtimeEven'>admin</td>
-          <td class='downtimeEven'>blahb lahsdsf afdasd</td>
-          <td class='downtimeEven'>2009-11-11 09:29:21</td>
-          <td class='downtimeEven'>2019-11-11 11:29:21</td>
-          <td class='downtimeEven'>Fixed</td>
-          <td class='downtimeEven'>3652d 2h 0m 0s</td>
-          <td class='downtimeEven'>5</td>
-          <td class='downtimeEven'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=5'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
-        </tr>
+        [% END %]
       </table>
     </div><br>
     <br>
@@ -93,35 +71,24 @@
           <th class='downtime'>Trigger ID</th>
           <th class='downtime'>Actions</th>
         </tr>
-        <tr class='downtimeOdd'>
-          <td class='downtimeOdd'><a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a></td>
-          <td class='downtimeOdd'><a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_10'>test_service_10</a></td>
-          <td class='downtimeOdd'>2009-11-11 09:28:10</td>
-          <td class='downtimeOdd'>admin</td>
-          <td class='downtimeOdd'>test service</td>
-          <td class='downtimeOdd'>2009-11-11 09:26:38</td>
-          <td class='downtimeOdd'>2009-11-11 11:26:38</td>
-          <td class='downtimeOdd'>Fixed</td>
-          <td class='downtimeOdd'>0d 2h 0m 0s</td>
-          <td class='downtimeOdd'>1</td>
-          <td class='downtimeOdd'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=1'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+        [%  FOREACH d = servicedowntimes %]
+        [% SET class = 'downtimeOdd' IF loop.even %]
+        [% SET class = 'downtimeEven'  IF loop.odd %]
+        <tr class='[% class %]'>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name %]&amp;service=[% d.service_description %]'>[% d.service_description %]</a></td>
+          <td class='[% class %]'>[% date.format(d.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% d.author %]</td>
+          <td class='[% class %]'>[% d.comment %]</td>
+          <td class='[% class %]'>[% date.format(d.start_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(d.end_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
+          <td class='[% class %]'>[% FILTER duration %][% d.end_time - d.start_time %][% END %]</td>
+          <td class='[% class %]'>[% d.id %]</td>
+          <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
+          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
-
-        <tr class='downtimeEven'>
-          <td class='downtimeEven'><a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a></td>
-          <td class='downtimeEven'><a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_18'>test_service_18</a></td>
-          <td class='downtimeEven'>2009-11-11 09:28:31</td>
-          <td class='downtimeEven'>admin</td>
-          <td class='downtimeEven'>blah</td>
-          <td class='downtimeEven'>2009-11-11 09:28:27</td>
-          <td class='downtimeEven'>2009-11-11 11:28:27</td>
-          <td class='downtimeEven'>Fixed</td>
-          <td class='downtimeEven'>0d 2h 0m 0s</td>
-          <td class='downtimeEven'>2</td>
-          <td class='downtimeEven'>N/A</td>
-          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=2'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
-        </tr>
+        [% END %]
       </table>
 
     </div>

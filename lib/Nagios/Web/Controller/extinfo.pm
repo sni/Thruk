@@ -51,6 +51,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 6) {
         $infoBoxTitle = 'All Host and Service Scheduled Downtime';
+        $self->_process_downtimes_page($c);
     }
     if($type == 7) {
         $infoBoxTitle = 'Check Scheduling Queue';
@@ -71,6 +72,20 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 # SUBS
 ##########################################################
 
+##########################################################
+# create the downtimes page
+sub _process_downtimes_page {
+    my ( $self, $c ) = @_;
+
+    my $hostdowntimes    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = ", { Slice => {} });
+    my $servicedowntimes = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != ", { Slice => {} });
+    #use Data::Dumper;
+    #$Data::Dumper::Sortkeys = 1;
+    #print Dumper($comments);
+    $c->stash->{'hostdowntimes'}    = $hostdowntimes;
+    $c->stash->{'servicedowntimes'} = $servicedowntimes;
+
+}
 ##########################################################
 # create the process info page
 sub _process_host_page {

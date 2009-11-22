@@ -16,8 +16,9 @@ __PACKAGE__->config(
 # calculate a duration in the
 # format: 0d 0h 29m 43s
 sub filter_duration {
-    my $date     = shift;
-    my $duration = time() - $date;
+    my $duration = shift;
+
+    if($duration < 0) { $duration = time() + $duration; }
 
     my $days    = 0;
     my $hours   = 0;
