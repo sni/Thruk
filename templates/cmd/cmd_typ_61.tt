@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to enable flap detection for hosts and services'
+   description = 'This command is used to enable flap detection for hosts and services on a program-wide basis. Individual hosts and services may have flap detection disabled.'
+%]
+<tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
+
+[% END %]

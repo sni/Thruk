@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to cancel scheduled downtime for a particular service'
+   description = 'This command is used to cancel active or pending scheduled downtime for the specified service.'
+%]
+<tr><td class='optBoxRequiredItem'>Scheduled Downtime ID:</td><td><b><input type='text' name='down_id' value='0'></b></td></tr>
+
+[% END %]

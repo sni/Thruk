@@ -1,0 +1,9 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to delay a service notification'
+   description = 'This command is used to delay the next problem notification that is sent out for the specified service. The notification delay will be disregarded if the service changes state before the next notification is scheduled to be sent out. This command has no effect if the service is currently in an OK state.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Notification Delay (minutes from now):</td><td><b><input type='text' name='not_dly' value='0'></b></td></tr>
+
+[% END %]

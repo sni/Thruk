@@ -1,0 +1,10 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to schedule a service check'
+   description = 'This command is used to schedule the next check of a particular service. Nagios will re-queue the service to be checked at the time you specify. If you select the <i>force check</i> option, Nagios will force a check of the service regardless of both what time the scheduled check occurs and whether or not checks are enabled for the service.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Check Time:</td><td><b><input type='text' name='start_time' value= '2009-11-22 22:26:46'></b></td></tr>
+<tr><td class='optBoxItem'>Force Check:</td><td><b><input type='checkbox' name='force_check'></b></td></tr>
+
+[% END %]

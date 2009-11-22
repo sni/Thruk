@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to restart the Nagios process'
+   description = 'This command is used to restart the Nagios process. Executing a restart command is equivalent to sending the process a HUP signal. All information will be flushed from memory, the configuration files will be re-read, and Nagios will start monitoring with the new configuration information.'
+%]
+<tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
+
+[% END %]

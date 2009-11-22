@@ -1,0 +1,55 @@
+[% INCLUDE header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% INCLUDE infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%"></td>
+        <td align="right" valign="bottom" width="33%"></td>
+      </tr>
+    </table>
+    <div align="center" class='cmdType'>[% request %]</div><br>
+    <div align='center'>
+      <table border="0" width="90%">
+        <tr>
+          <td align="center" valign="top">
+            <div align="center" class='optBoxTitle'>Command Options</div>
+            <table cellspacing="0" cellpadding="0" border="1" class='optBox'>
+              <tr>
+                <td class='optBoxItem'>
+                  <form method='post' action='cmd.cgi'>
+                    <table cellspacing="0" cellpadding="0" class='optBox'>
+                      [% content %]
+                      <tr>
+                        <td class='optBoxItem' colspan="2"></td>
+                      </tr>
+                      <tr>
+                        <td class='optBoxItem'></td>
+                        <td class='optBoxItem'><input type='submit' name='btnSubmit' value='Commit'> <input type='reset' value='Reset'></td>
+                      </tr>
+                    </table>
+                  </form>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td align="center" valign="top" width="50%">
+            <div align="center" class='descriptionTitle'>Command Description</div>
+            <table border="1" cellspacing="0" cellpadding="0" class='commandDescription'>
+              <tr>
+                <td class='commandDescription'>[% description %]</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <br>
+    <div class='infoMessage'>
+      Please enter all required information before committing the command.<br>
+      Required fields are marked in red.<br>
+      Failure to supply all required values will result in an error.
+    </div>
+
+[% INCLUDE footer.tt %]

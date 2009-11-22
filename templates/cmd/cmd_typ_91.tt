@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to stop accepting passive host checks'
+   description = 'This command is used to stop Nagios from obsessing over host checks.'
+%]
+<tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
+
+[% END %]

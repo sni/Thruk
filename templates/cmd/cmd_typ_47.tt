@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to enable active checks of a particular host'
+   description = 'This command is used to enable active checks of this host.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+
+[% END %]

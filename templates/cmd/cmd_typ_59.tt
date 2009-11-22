@@ -1,0 +1,8 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to enable flap detection for a particular service'
+   description = 'This command is used to enable flap detection for a specific service. If flap detection is disabled on a program-wide basis, this will have no effect,'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value=''></b></td></tr>
+
+[% END %]

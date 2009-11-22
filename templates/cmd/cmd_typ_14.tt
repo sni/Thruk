@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to shutdown the Nagios process'
+   description = 'This command is used to shutdown the Nagios process. Note: Once the Nagios has been shutdown, it cannot be restarted via the web interface!'
+%]
+<tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
+
+[% END %]

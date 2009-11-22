@@ -1,0 +1,13 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to acknowledge a service problem'
+   description = 'This command is used to acknowledge a service problem. When a service problem is acknowledged, future notifications about problems are temporarily disabled until the service changes from its current state. If you want acknowledgement to disable notifications until the service recovers, check the 'Sticky Acknowledgement' checkbox. Contacts for this service will receive a notification about the acknowledgement, so they are aware that someone is working on the problem. Additionally, a comment will also be added to the service. Make sure to enter your name and fill in a brief description of what you are doing in the comment field. If you would like the service comment to remain once the acknowledgement is removed, check the 'Persistent Comment' checkbox. If you do not want an acknowledgement notification sent out to the appropriate contacts, uncheck the 'Send Notification' checkbox.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value=''></b></td></tr>
+<tr><td class='optBoxItem'>Sticky Acknowledgement:</td><td><b><input type='checkbox' name='sticky_ack' checked></b></td></tr>
+<tr><td class='optBoxItem'>Send Notification:</td><td><b><input type='checkbox' name='send_notification' checked ></b></td></tr>
+<tr><td class='optBoxItem'>Persistent Comment:</td><td><b><input type='checkbox' name='persistent'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='nagiosadmin' readonly disabled></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
+
+[% END %]

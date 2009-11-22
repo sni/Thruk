@@ -24,7 +24,10 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->response->body('Matched Nagios::Web::Controller::outages in outages.');
+    $c->stash->{title}          = 'Network Outages';
+    $c->stash->{infoBoxTitle}   = 'Network Outages';
+    $c->stash->{page}           = 'outages';
+    $c->stash->{template}       = 'outages.tt';
 }
 
 

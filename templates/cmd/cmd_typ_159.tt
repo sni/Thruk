@@ -1,0 +1,11 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to send a custom host notification'
+   description = 'This command is used to send a custom notification about the specified host. Useful in emergencies when you need to notify admins of an issue regarding a monitored system or service. Custom notifications normally follow the regular notification logic in Nagios. Selecting the <i>Forced</i> option will force the notification to be sent out, regardless of the time restrictions, whether or not notifications are enabled, etc. Selecting the <i>Broadcast</i> option causes the notification to be sent out to all normal (non-escalated) and escalated contacts. These options allow you to override the normal notification logic if you need to get an important message out.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxItem'>Forced:</td><td><b><input type='checkbox' name='force_notification'></b></td></tr>
+<tr><td class='optBoxItem'>Broadcast:</td><td><b><input type='checkbox' name= 'broadcast_notification'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='nagiosadmin' readonly disabled></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
+
+[% END %]

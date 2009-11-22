@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to enable notifications for all hosts in a particular hostgroup'
+   description = 'This command is used to enable notifications for all hosts in the specified hostgroup. Notifications will only be sent out for the host state types you defined in your host definitions.'
+%]
+<tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value=''></b></td></tr>
+
+[% END %]

@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to stop executing active service checks'
+   description = 'This command is used to temporarily stop Nagios from actively executing any service checks. This will have the side effect of preventing any notifications from being sent out (for any and all services and hosts). Service checks will not be executed again until you issue a command to resume service check execution.'
+%]
+<tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
+
+[% END %]

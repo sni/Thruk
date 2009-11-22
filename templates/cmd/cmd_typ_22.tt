@@ -1,0 +1,8 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to enable notifications for a service'
+   description = 'This command is used to enable notifications for the specified service. Notifications will only be sent out for the service state types you defined in your service definition.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value=''></b></td></tr>
+
+[% END %]

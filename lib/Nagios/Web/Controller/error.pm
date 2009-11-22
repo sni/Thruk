@@ -48,6 +48,10 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
             'mess' => 'It appears as though you do not have permission to view information for this host...',
             'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
         },
+        '6'  => {
+            'mess' => 'Error: No command was specified',
+            'dscr' => '',
+        },
     };
 
     $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};

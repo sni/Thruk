@@ -23,14 +23,24 @@ Catalyst Controller.
 
 ######################################
 # index page
-sub index :Path :Args(0) {
+sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-use Data::Dumper;
-    print Dumper($c->{'cgi_cfg'});
-#    print Dumper($c);
+    $c->stash->{infoBoxTitle}   = "External Command Interface";
+    $c->stash->{no_auto_reload} = 1;
+    $c->stash->{page}           = 'cmd';
 
-    $c->response->body('Matched Nagios::Web::Controller::cmd in cmd.');
+
+    my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
+    $c->detach('/error/index/6') unless defined $cmd_typ;
+
+    my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
+    if(defined $cmd_mod) {
+        use Data::Dumper;
+        $c->log->debug(Dumper($c->{'request'}->{'parameters'}));
+    }
+
+    $c->stash->{template} = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
 }
 
 

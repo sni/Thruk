@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to start executing active service checks'
+   description = 'This command is used to resume execution of active service checks on a program-wide basis. Individual services which are disabled will still not be checked.'
+%]
+<tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
+
+[% END %]

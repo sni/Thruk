@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to disable notifications for all hosts in a particular servicegroup'
+   description = 'This command is used to prevent notifications from being sent out for all hosts in the specified servicegroup. You will have to re-enable notifications for all hosts in this servicegroup before any alerts can be sent out in the future.'
+%]
+<tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value=''></b></td></tr>
+
+[% END %]

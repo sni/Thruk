@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to delete a host comment'
+   description = 'This command is used to delete a specific host comment.'
+%]
+<tr><td class='optBoxRequiredItem'>Comment ID:</td><td><b><input type='text' name='com_id' value='0'></b></td></tr>
+
+[% END %]

@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to disable active checks of a particular host'
+   description = 'This command is used to temporarily prevent Nagios from actively checking the status of a particular host. If Nagios needs to check the status of this host, it will assume that it is in the same state that it was in before checks were disabled.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+
+[% END %]

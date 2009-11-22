@@ -1,0 +1,7 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to stop accepting passive service checks'
+   description = 'This command is use to make Nagios stop accepting passive service check results that it finds in the external command file. All passive check results that are found will be ignored.'
+%]
+<tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
+
+[% END %]

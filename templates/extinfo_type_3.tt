@@ -1,0 +1,308 @@
+[% INCLUDE header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% INCLUDE infobox.tt %]
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="bottom" width="33%"></td>
+      </tr>
+    </table><br>
+    <br>
+    <div class='commentNav'>
+      [&nbsp;<a href='#HOSTCOMMENTS' class='commentNav'>Host Comments</a>&nbsp;|&nbsp;<a href='#SERVICECOMMENTS' class='commentNav'>Service Comments</a>&nbsp;]
+    </div><br>
+
+    <a name="HOSTCOMMENTS" id="HOSTCOMMENTS"></a>
+    <div class='commentTitle'>
+      Host Comments
+    </div>
+    <div class='comment'>
+      <img src='/nagios/images/comment.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a>
+    </div><br>
+    <div align="center">
+      <table border="0" class='comment'>
+
+        <tr class='comment'>
+          <th class='comment'>Host Name</th>
+          <th class='comment'>Entry Time</th>
+          <th class='comment'>Author</th>
+          <th class='comment'>Comment</th>
+          <th class='comment'>Comment ID</th>
+          <th class='comment'>Persistent</th>
+          <th class='comment'>Type</th>
+          <th class='comment'>Expires</th>
+          <th class='comment'>Actions</th>
+        </tr>
+        <tr class='commentEven'>
+          <td class='commentEven'><a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a></td>
+          <td class='commentEven'>2009-11-22 18:46:58</td>
+          <td class='commentEven'>(Nagios Process)</td>
+          <td class='commentEven'>This host has been scheduled for fixed downtime from 2009-11-17 20:32:39 to 2019-11-17 22:32:39. Notifications for the host will not be sent out during that time period.</td>
+          <td class='commentEven'>246</td>
+          <td class='commentEven'>No</td>
+          <td class='commentEven'>Scheduled Downtime</td>
+          <td class='commentEven'>N/A</td>
+          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=246'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
+        </tr>
+        <tr class='commentOdd'>
+
+          <td class='commentOdd'>
+            <a href='extinfo.cgi?type=1&amp;host=test_host_1'>test_host_1</a>
+          </td>
+          <td class='commentOdd'>
+            2009-11-22 18:49:31
+          </td>
+          <td class='commentOdd'>
+            nagiosadmin
+          </td>
+
+          <td class='commentOdd'>
+            blah
+          </td>
+          <td class='commentOdd'>
+            249
+          </td>
+          <td class='commentOdd'>
+            No
+          </td>
+          <td class='commentOdd'>
+
+            Acknowledgement
+          </td>
+          <td class='commentOdd'>
+            N/A
+          </td>
+          <td>
+            <a href='cmd.cgi?cmd_typ=2&amp;com_id=249'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a>
+          </td>
+        </tr>
+        <tr class='commentEven'>
+
+          <td class='commentEven'>
+            <a href='extinfo.cgi?type=1&amp;host=test_host_1'>test_host_1</a>
+          </td>
+          <td class='commentEven'>
+            2009-11-22 20:13:02
+          </td>
+          <td class='commentEven'>
+            (Nagios Process)
+          </td>
+
+          <td class='commentEven'>
+            This host has been scheduled for fixed downtime from 2009-11-22 20:12:50 to 2009-11-23 22:12:50. Notifications for the host will not be sent out during that time period.
+          </td>
+          <td class='commentEven'>
+            251
+          </td>
+          <td class='commentEven'>
+            No
+          </td>
+          <td class='commentEven'>
+
+            Scheduled Downtime
+          </td>
+          <td class='commentEven'>
+            N/A
+          </td>
+          <td>
+            <a href='cmd.cgi?cmd_typ=2&amp;com_id=251'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a>
+          </td>
+        </tr>
+      </table>
+
+    </div><br>
+    <br>
+    <br>
+    <a name="SERVICECOMMENTS" id="SERVICECOMMENTS"></a>
+    <div class='commentTitle'>
+      Service Comments
+    </div>
+    <div class='comment'>
+      <img src='/nagios/images/comment.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a>
+
+    </div><br>
+    <div align="center">
+      <table border="0" class='comment'>
+        <tr class='comment'>
+          <th class='comment'>
+            Host Name
+          </th>
+          <th class='comment'>
+            Service
+          </th>
+
+          <th class='comment'>
+            Entry Time
+          </th>
+          <th class='comment'>
+            Author
+          </th>
+          <th class='comment'>
+            Comment
+          </th>
+          <th class='comment'>
+
+            Comment ID
+          </th>
+          <th class='comment'>
+            Persistent
+          </th>
+          <th class='comment'>
+            Type
+          </th>
+          <th class='comment'>
+            Expires
+          </th>
+
+          <th class='comment'>
+            Actions
+          </th>
+        </tr>
+        <tr class='commentOdd'>
+          <td class='commentOdd'>
+            <a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a>
+          </td>
+          <td class='commentOdd'>
+
+            <a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_1'>test_service_1</a>
+          </td>
+          <td class='commentOdd'>
+            2009-11-22 18:46:58
+          </td>
+          <td class='commentOdd'>
+            (Nagios Process)
+          </td>
+          <td class='commentOdd'>
+
+            This service has been scheduled for fixed downtime from 2009-11-17 20:32:53 to 2019-11-17 22:32:53. Notifications for the service will not be sent out during that time period.
+          </td>
+          <td class='commentOdd'>
+            247
+          </td>
+          <td class='commentOdd'>
+            No
+          </td>
+          <td class='commentOdd'>
+            Scheduled Downtime
+          </td>
+
+          <td class='commentOdd'>
+            N/A
+          </td>
+          <td>
+            <a href='cmd.cgi?cmd_typ=4&amp;com_id=247'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a>
+          </td>
+        </tr>
+        <tr class='commentEven'>
+          <td class='commentEven'>
+
+            <a href='extinfo.cgi?type=1&amp;host=test_host_1'>test_host_1</a>
+          </td>
+          <td class='commentEven'>
+            <a href='extinfo.cgi?type=2&amp;host=test_host_1&amp;service=test_service_0'>test_service_0</a>
+          </td>
+          <td class='commentEven'>
+            2009-11-22 20:03:48
+          </td>
+
+          <td class='commentEven'>
+            (Nagios Process)
+          </td>
+          <td class='commentEven'>
+            Notifications for this service are being suppressed because it was detected as having been flapping between different states (22.0% change &gt;= 20.0% threshold). When the service state stabilizes and the flapping stops, notifications will be re-enabled.
+          </td>
+          <td class='commentEven'>
+            250
+          </td>
+          <td class='commentEven'>
+
+            No
+          </td>
+          <td class='commentEven'>
+            Flap Detection
+          </td>
+          <td class='commentEven'>
+            N/A
+          </td>
+          <td>
+            <a href='cmd.cgi?cmd_typ=4&amp;com_id=250'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a>
+
+          </td>
+        </tr>
+        <tr class='commentOdd'>
+          <td class='commentOdd'>
+            <a href='extinfo.cgi?type=1&amp;host=test_host_1'>test_host_1</a>
+          </td>
+          <td class='commentOdd'>
+            <a href='extinfo.cgi?type=2&amp;host=test_host_1&amp;service=test_service_1'>test_service_1</a>
+
+          </td>
+          <td class='commentOdd'>
+            2009-11-22 20:13:17
+          </td>
+          <td class='commentOdd'>
+            (Nagios Process)
+          </td>
+          <td class='commentOdd'>
+            This service has been scheduled for fixed downtime from 2009-11-22 20:13:10 to 2009-11-22 22:13:10. Notifications for the service will not be sent out during that time period.
+          </td>
+
+          <td class='commentOdd'>
+            252
+          </td>
+          <td class='commentOdd'>
+            No
+          </td>
+          <td class='commentOdd'>
+            Scheduled Downtime
+          </td>
+          <td class='commentOdd'>
+
+            N/A
+          </td>
+          <td>
+            <a href='cmd.cgi?cmd_typ=4&amp;com_id=252'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a>
+          </td>
+        </tr>
+        <tr class='commentEven'>
+          <td class='commentEven'>
+            <a href='extinfo.cgi?type=1&amp;host=test_host_0'>test_host_0</a>
+
+          </td>
+          <td class='commentEven'>
+            <a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_0'>test_service_0</a>
+          </td>
+          <td class='commentEven'>
+            2009-11-22 20:13:51
+          </td>
+          <td class='commentEven'>
+            (Nagios Process)
+          </td>
+
+          <td class='commentEven'>
+            This service has been scheduled for flexible downtime starting between 2009-11-22 20:13:29 and 2009-11-22 22:13:29 and lasting for a period of 2 hours and 0 minutes. Notifications for the service will not be sent out during that time period.
+          </td>
+          <td class='commentEven'>
+            253
+          </td>
+          <td class='commentEven'>
+            No
+          </td>
+          <td class='commentEven'>
+
+            Scheduled Downtime
+          </td>
+          <td class='commentEven'>
+            N/A
+          </td>
+          <td>
+            <a href='cmd.cgi?cmd_typ=4&amp;com_id=253'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+
+[% INCLUDE footer.tt %]

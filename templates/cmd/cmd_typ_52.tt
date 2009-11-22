@@ -1,0 +1,8 @@
+[% WRAPPER cmd.tt
+   request = 'You are requesting to remove a service acknowledgement'
+   description = 'This command is used to remove an acknowledgement for a particular service problem. Once the acknowledgement is removed, notifications may start being sent out about the service problem.'
+%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value=''></b></td></tr>
+
+[% END %]
