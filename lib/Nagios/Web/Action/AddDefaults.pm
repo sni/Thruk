@@ -46,13 +46,16 @@ before 'execute' => sub {
     }
 
     $c->stash->{'page'} = 'status'; # set a default page, so at least some css is loaded
-    if(defined $c->{'cgi_cfg'}->{'refresh_rate'} and !defined $c->stash->{'no_auto_reload'} or !$c->stash->{'no_auto_reload'}) {
+};
+
+########################################
+after 'execute' => sub {
+    my ( $self, $controller, $c, $test ) = @_;
+    if(defined $c->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
         $c->response->headers->header('refresh' => $c->{'cgi_cfg'}->{'refresh_rate'})
     }
 };
-
-
 
 __PACKAGE__->meta->make_immutable;
 

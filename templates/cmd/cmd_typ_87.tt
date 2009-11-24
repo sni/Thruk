@@ -2,7 +2,7 @@
    request = 'You are requesting to submit a passive check result for a particular host'
    description = 'This command is used to submit a passive check result for a particular host.'
 %]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Check Result:</td><td><b><select name='plugin_state'><option value="0" selected> UP </option><option value="1"> DOWN </option><option value="2"> UNREACHABLE </option></select></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Check Output:</td><td><b><input type='text' name='plugin_output' value=''></b></td></tr>
 <tr><td class='optBoxItem'>Performance Data:</td><td><b><input type='text' name='performance_data' value= ''></b></td></tr>

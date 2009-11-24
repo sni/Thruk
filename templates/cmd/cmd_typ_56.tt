@@ -1,16 +1,17 @@
+[% USE date %]
 [% WRAPPER cmd.tt
    request = 'You are requesting to schedule downtime for a particular service'
    description = 'This command is used to schedule downtime for a particular service. During the specified downtime, Nagios will not send notifications out about the service. When the scheduled downtime expires, Nagios will send out notifications for this service as it normally would. Scheduled downtimes are preserved across program shutdowns and restarts. Both the start and end times should be specified in the following format: <b>mm/dd/yyyy hh:mm:ss</b>. option, Nagios will treat this as "flexible" downtime. Flexible downtime starts when the service enters a non-OK state (sometime between the start and end times you specified) and lasts as long as the duration of time you enter. The duration fields do not apply for fixed downtime.'
 %]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value=''></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='nagiosadmin' readonly disabled></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value='[% c.request.parameters.service %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
 <tr><td class='optBoxItem'><br></td></tr>
-<tr><td class='optBoxItem'>Triggered By:</td><td><select name='trigger'><option value='0'> N/A </option><option value='3'> ID: 3, Host 'test_host_0' starting @ 2009-11-17 20:32:39 </option><option value='23'> ID: 23, Host 'test_host_1' starting @ 2009-11-22 20:12:50 </option><option value='4'> ID: 4, Service 'test_service_1' on host 'test_host_0' starting @ 2009-11-17 20:32:53 </option><option value='25'> ID: 25, Service 'test_service_0' on host 'test_host_0' starting @ 2009-11-22 20:13:29 </option></select></td></tr>
+<tr><td class='optBoxItem'>Triggered By:</td><td><select name='trigger'><option value='0'> N/A </option>[% FOREACH d = hostdowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Host '[% d.host_name %]' starting @ [% date.format(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %][% FOREACH d = servicedowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Service '[% d.service_description %]' on host '[% d.host_name %]' starting @ [% date.format(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %]</select></td></tr>
 <tr><td class='optBoxItem'><br></td></tr>
-<tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' value= '2009-11-22 22:26:47'></b></td></tr>
-<tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' value= '2009-11-23 00:26:47'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' value='[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' value='[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]'></b></td></tr>
 <tr><td class='optBoxItem'>Type:</td><td><b><select name='fixed'><option value="1"> Fixed </option><option value="0"> Flexible </option></select></b></td></tr>
 <tr><td class='optBoxItem'>If Flexible, Duration:</td><td><table border="0"><tr><td align="right"><input type='text' name='hours' value='2' size= "2" maxlength="2"></td><td align="left">Hours</td><td align="right"><input type='text' name='minutes' value='0' size= "2" maxlength="2"></td><td align="left">Minutes</td></tr>
 </table></td></tr>

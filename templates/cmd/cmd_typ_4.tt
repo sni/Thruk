@@ -2,6 +2,6 @@
    request = 'You are requesting to delete a service comment'
    description = 'This command is used to delete a specific service comment.'
 %]
-<tr><td class='optBoxRequiredItem'>Comment ID:</td><td><b><input type='text' name='com_id' value='0'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Comment ID:</td><td><b><input type='text' name='com_id' value='[% c.request.parameters.com_id %]'></b></td></tr>
 
 [% END %]

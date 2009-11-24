@@ -76,15 +76,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 # create the downtimes page
 sub _process_downtimes_page {
     my ( $self, $c ) = @_;
-
-    my $hostdowntimes    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = ", { Slice => {} });
-    my $servicedowntimes = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != ", { Slice => {} });
-    #use Data::Dumper;
-    #$Data::Dumper::Sortkeys = 1;
-    #print Dumper($comments);
-    $c->stash->{'hostdowntimes'}    = $hostdowntimes;
-    $c->stash->{'servicedowntimes'} = $servicedowntimes;
-
+    $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = ", { Slice => {} });
+    $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != ", { Slice => {} });
 }
 ##########################################################
 # create the process info page

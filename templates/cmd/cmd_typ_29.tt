@@ -2,7 +2,7 @@
    request = 'You are requesting to disable notifications for all services on a host'
    description = 'This command is used to prevent notifications from being sent out for all services on the specified host. You will have to re-enable notifications for all services associated with this host before any alerts can be sent out in the future. This <i>does not</i> prevent notifications from being sent out about the host unless you check the 'Disable for host too' option.'
 %]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxItem'>Disable For Host Too:</td><td><b><input type='checkbox' name='ahas'></b></td></tr>
 
 [% END %]

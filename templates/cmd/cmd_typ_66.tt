@@ -2,6 +2,6 @@
    request = 'You are requesting to disable notifications for all hosts in a particular hostgroup'
    description = 'This command is used to prevent notifications from being sent out for all hosts in the specified hostgroup. You will have to re-enable notifications for all hosts in this hostgroup before any alerts can be sent out in the future.'
 %]
-<tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value='[% c.request.parameters.hostgroup %]'></b></td></tr>
 
 [% END %]

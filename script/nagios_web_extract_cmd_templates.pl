@@ -119,6 +119,7 @@ for my $file (@opt_files) {
     #print Dumper($text);
 
     my($commandDescription, $commandRequest, $commandForm);
+    my $date = '';
     if($text =~ m/<td\ class='commandDescription'>(.*?)<\/td>/gmx) {
         $commandDescription = $1;
     }
@@ -130,6 +131,38 @@ for my $file (@opt_files) {
     if($text =~ m/<input\s*type=\s*'hidden'\s*name='cmd_mod'\s*value='2'>\s*<\/td>\s*<\/tr>(.*)<tr>\s*<td\s*class='optBoxItem'\s*colspan="2">\s*<\/td>\s*<\/tr>.*?<input\s*type='submit'/mx) {
         $commandForm = $1;
         $commandForm =~ s/<\/tr>/<\/tr>\n/gmx;
+
+        # replace some default values
+        my $replace_cgi_vars = {
+            'down_id'       => 'down_id',
+            'com_id'        => 'com_id',
+            'host'          => 'host',
+            'service'       => 'service',
+            'servicegroup'  => 'servicegroup',
+            'hostgroup'     => 'hostgroup',
+        };
+        for my $name (keys %{$replace_cgi_vars}) {
+            $commandForm =~ s/type='text'\s+name='$name'\s+value='[^']*'/type='text'\ name='$name'\ value='[%\ c.request.parameters.$replace_cgi_vars->{$name} %]'/gmx;
+        }
+
+        # replace start time
+        if($commandForm =~ s/type='text'\s+name='start_time'\s+value=\s*'[^']+'/type='text'\ name='start_time'\ value='[%\ date.format(date.now,\ '%Y-%m-%d\ %H:%M:%S')\ %]'/gmx) {
+            $date = "[% USE date %]\n";
+        }
+
+        # replace end time
+        if($commandForm =~ s/type='text'\s+name='end_time'\s+value=\s*'[^']+'/type='text'\ name='end_time'\ value='[%\ date.format(date.now+7200,\ '%Y-%m-%d\ %H:%M:%S')\ %]'/gmx) {
+            $date = "[% USE date %]\n";
+        }
+
+        # replace (locked) author
+        $commandForm =~ s/type='text'\ name='com_author'\ value='nagiosadmin'\ readonly\ disabled/type='text'\ name='com_author'\ value='[%\ comment_author\ %]'[%\ IF\ c.cgi_cfg.lock_author_names\ %]\ readonly\ disabled[%\ END\ %]/gmx;
+
+        # replace downtime trigger
+        if($commandForm =~ s/<tr><td\ class='optBoxItem'>Triggered\ By:<\/td>.*?<\/option><\/select><\/td><\/tr>/<tr><td\ class='optBoxItem'>Triggered\ By:<\/td><td><select\ name='trigger'><option\ value='0'>\ N\/A\ <\/option>[%\ FOREACH\ d\ =\ hostdowntimes\ %]<option\ value='[%\ d.id\ %]'>\ ID:\ [%\ d.id\ %],\ Host\ '[%\ d.host_name %]'\ starting\ @\ [%\ date.format(d.start_time,\ '%Y-%m-%d\ %H:%M:%S')\ %]\ <\/option>[%\ END\ %][%\ FOREACH\ d\ =\ servicedowntimes\ %]<option\ value='[% d.id %]'>\ ID:\ [%\ d.id\ %],\ Service\ '[%\ d.service_description\ %]'\ on\ host\ '[%\ d.host_name\ %]'\ starting\ @\ [%\ date.format(d.start_time,\ '%Y-%m-%d\ %H:%M:%S') %]\ <\/option>[%\ END\ %]<\/select><\/td><\/tr>/gmx) {
+            $date = "[% USE date %]\n";
+        }
+
         #print $commandForm;
     }
 
@@ -137,7 +170,7 @@ for my $file (@opt_files) {
         die("error in $file");
     }
 
-    my $newContent = "[% WRAPPER cmd.tt
+    my $newContent = $date."[% WRAPPER cmd.tt
    request = '".$commandRequest."'
    description = '".$commandDescription."'
 %]

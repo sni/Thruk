@@ -2,7 +2,7 @@
    request = 'You are requesting to delay a host notification'
    description = 'This command is used to delay the next problem notification that is sent out for the specified host. The notification delay will be disregarded if the host changes state before the next notification is scheduled to be sent out. This command has no effect if the host is currently UP.'
 %]
-<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Notification Delay (minutes from now):</td><td><b><input type='text' name='not_dly' value='0'></b></td></tr>
 
 [% END %]

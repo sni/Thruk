@@ -26,10 +26,10 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+    $c->stash->{title}          = "External Command Interface";
     $c->stash->{infoBoxTitle}   = "External Command Interface";
     $c->stash->{no_auto_reload} = 1;
     $c->stash->{page}           = 'cmd';
-
 
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     $c->detach('/error/index/6') unless defined $cmd_typ;
@@ -40,7 +40,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->log->debug(Dumper($c->{'request'}->{'parameters'}));
     }
 
-    $c->stash->{template} = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
+    if($cmd_typ == 55 or $cmd_typ == 56) {
+        $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = ", { Slice => {} });
+        $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != ", { Slice => {} });
+    }
+
+    my $comment_author          = $c->user->username;
+    $comment_author             = $c->user->alias if defined $c->user->alias;
+    $c->stash->{comment_author} = $comment_author;
+    $c->stash->{template}       = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
 }
 
 

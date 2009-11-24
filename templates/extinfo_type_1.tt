@@ -165,7 +165,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Update:</td>
-                            <td class='dataVal'>[% date.format(now(), '%Y-%m-%d  %H:%M:%S') %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
+                            <td class='dataVal'>[% date.format(date.now, '%Y-%m-%d  %H:%M:%S') %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>
                         </table>
                       </td>

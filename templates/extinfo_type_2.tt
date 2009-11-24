@@ -9,7 +9,7 @@
           <table class='infoBox' border="1" cellspacing="0" cellpadding="0">
             <tr>
               <td class='infoBox'>
-                <div class='infoBoxTitle'>Service Information</div>Last Updated: [% date.format(now(), '%a %b %e %H:%M:%S %Y') %]<br>
+                <div class='infoBoxTitle'>Service Information</div>Last Updated: [% date.format(date.now, '%a %b %e %H:%M:%S %Y') %]<br>
                 Updated every 300 seconds<br>
                 Nagios&reg; 3.0.6 - <a href='http://www.nagios.org' target='_blank' class='homepageURL'>www.nagios.org</a><br>
                 Logged in as <i>[% REMOTE_USER %]</i><br>

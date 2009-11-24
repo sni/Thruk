@@ -2,7 +2,7 @@
    request = 'You are requesting to enable notifications for all services in a particular servicegroup'
    description = 'This command is used to enable notifications for all services in the specified servicegroup. Notifications will only be sent out for the service state types you defined in your service definitions. This <i>does not</i> enable notifications for the hosts in this servicegroup unless you check the 'Enable for hosts too' option.'
 %]
-<tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value=''></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value='[% c.request.parameters.servicegroup %]'></b></td></tr>
 <tr><td class='optBoxItem'>Enable For Hosts Too:</td><td><b><input type='checkbox' name='ahas'></b></td></tr>
 
 [% END %]
