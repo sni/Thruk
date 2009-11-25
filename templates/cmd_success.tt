@@ -1,0 +1,19 @@
+[% INCLUDE header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% INCLUDE infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%"></td>
+        <td align="right" valign="bottom" width="33%"></td>
+      </tr>
+    </table>
+    <div class='infoMessage'>Your command request was successfully submitted to Nagios for processing.<br>
+      <br>
+      Note: It may take a while before the command is actually processed.<br>
+      <br>
+      <a href='javascript:window.history.go(-2)'>Done</a>
+    </div>
+
+[% INCLUDE footer.tt %]

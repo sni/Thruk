@@ -28,6 +28,10 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
     if(!defined $c->{'cgi_cfg'} or scalar keys %{$c->{'cgi_cfg'}} == 0) { $arg1 = 4; }
 
     my $errors = {
+        '0'  => {
+            'mess' => 'unknown error: '.$arg1,
+            'dscr' => 'this is a internal error',
+        },
         '1'  => {
             'mess' => 'It appears as though you do not have permission to view process information...',
             'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
@@ -52,8 +56,13 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
             'mess' => 'Error: No command was specified',
             'dscr' => '',
         },
+        '7'  => {
+            'mess' => 'You are requesting to execute an unknown command. Shame on you!',
+            'dscr' => '',
+        },
     };
 
+    $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
     $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};
     $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
 

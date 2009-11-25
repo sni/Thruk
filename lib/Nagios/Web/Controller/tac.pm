@@ -24,9 +24,27 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    #print "HTTP 200 OK\nContent-Type: text/html\n\n<pre>\n";
-    #my $livestatus = $self->get_livestatus();
-    #print Dumper($livestatus);
+print "200 OK\n";
+    my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nStats: state = 4", { Slice => {}, rename => { 'name' => 'host_name' } });
+    $c->{'live'}->verbose(1);
+    my $services = $c->{'live'}->selectall_arrayref("GET services
+Stats: state = 0
+Stats: state = 1
+Stats: state = 2
+Stats: state = 3
+Stats: state = 4
+Stats: host_state != 0
+Stats: state = 1
+StatsAnd: 2
+Stats: host_state != 0
+Stats: state = 2
+StatsAnd: 2
+Stats: host_state != 0
+Stats: state = 3
+StatsAnd: 2", { Slice => {}, rename => { 'name' => 'host_name' } });
+    use Data::Dumper;
+    $Data::Dumper::Sortkeys = 1;
+    print Dumper($services);
     $c->stash->{title}          = 'Nagios Tactical Monitoring Overview';
     $c->stash->{infoBoxTitle}   = 'Tactical Monitoring Overview';
     $c->stash->{page}           = 'tac';

@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Config::General;
 use Carp;
+use Date::Calc qw(Date_to_Time Timezone);
 
 ######################################
 # parse the cgi.cg
@@ -114,6 +115,30 @@ sub sort {
     }
 
     return(\@sorted);
+}
+
+############################################################
+# str2time
+#
+# Returns: timestamp for time definition
+#
+# Args: time definition like: "2007-05-10 12:00"
+#
+
+sub str2time {
+    my $timedef = shift;
+    $timedef =~ m/(\d+)-(\d+)-(\d+) (\d+):(\d+)/;
+    my $timestamp = Date_to_Time($1,$2,$3,$4,$5,0);
+
+    # get difference to utc time
+    my $shifthours = scalar Timezone;
+
+    # add one hour for our local Timezone
+    $shifthours++;
+
+    $timestamp = $timestamp - $shifthours * 3600;
+
+    return($timestamp);
 }
 
 ########################################
