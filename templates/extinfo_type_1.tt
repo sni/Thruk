@@ -375,7 +375,7 @@
                           </tr>
 
                           <tr class='command'>
-                            [% IF host.event_handler_enabled %]
+                            [% IF host.flap_detection_enabled %]
                               <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection For This Host' title='Disable Flap Detection For This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=58&amp;host=[% host.name %]'>Disable flap detection for this host</a></td>
                             [% ELSE %]
