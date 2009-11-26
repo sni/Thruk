@@ -6,3 +6,5 @@ Todo List:
 - reload cgi.cfg if changed
 - is_authorized_for_read_only in Catalyst::Authentication::Store::FromCGIConf
 - comments on extinfo type 1
+- * in the cgi.cfg
+- no commands if authorization is disabled

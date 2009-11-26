@@ -1,8 +1,32 @@
 [% USE date %]
-[% WRAPPER cmd.tt
-   request = 'You are requesting to schedule downtime for a particular service'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_service_commands') && !c.check_permissions('service', c.request.parameters.service))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to schedule downtime for a particular service'
    description = 'This command is used to schedule downtime for a particular service. During the specified downtime, Nagios will not send notifications out about the service. When the scheduled downtime expires, Nagios will send out notifications for this service as it normally would. Scheduled downtimes are preserved across program shutdowns and restarts. Both the start and end times should be specified in the following format: <b>mm/dd/yyyy hh:mm:ss</b>. option, Nagios will treat this as "flexible" downtime. Flexible downtime starts when the service enters a non-OK state (sometime between the start and end times you specified) and lasts as long as the duration of time you enter. The duration fields do not apply for fixed downtime.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% IF c.request.parameters.fixed %][% fixed = 1 %][% ELSE %][% fixed = 0 %][% END %]
+    [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
+    [% end_time             = date.format( c.request.parameters.end_time, '%s') %]
+    [% duration             = c.request.parameters.hour * 3600 + c.request.parameters.minutes * 60 %]
+    [% triggered_by         = c.request.parameters.trigger %]
+    [% comment_data         = c.request.parameters.com_data %]
+    [% service_desc         = c.request.parameters.service %]
+    [% host_name            = c.request.parameters.host %]
+    [% comment_author       = c.request.parameters.com_author %]
+
+    SCHEDULE_SVC_DOWNTIME;[% sprintf("%s;%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,service_desc,start_time,end_time,fixed,triggered_by,duration,comment_author,comment_data) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value='[% c.request.parameters.service %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
@@ -18,4 +42,5 @@
 <tr><td class='optBoxItem'><br></td></tr>
 <tr><td class='optBoxItem'><br></td></tr>
 
+[% END %]
 [% END %]

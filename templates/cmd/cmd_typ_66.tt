@@ -1,7 +1,24 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to disable notifications for all hosts in a particular hostgroup'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_host_commands') && !c.check_permissions('hostgroup', c.request.parameters.hostgroup))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to disable notifications for all hosts in a particular hostgroup'
    description = 'This command is used to prevent notifications from being sent out for all hosts in the specified hostgroup. You will have to re-enable notifications for all hosts in this hostgroup before any alerts can be sent out in the future.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% hostgroup_name       = c.request.parameters.hostgroup %]
+
+    DISABLE_HOSTGROUP_HOST_NOTIFICATIONS;[% sprintf("%s",hostgroup_name) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value='[% c.request.parameters.hostgroup %]'></b></td></tr>
 
+[% END %]
 [% END %]

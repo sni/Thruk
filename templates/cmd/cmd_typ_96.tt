@@ -1,10 +1,28 @@
 [% USE date %]
-[% WRAPPER cmd.tt
-   request = 'You are requesting to schedule a host check'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_host_commands') && !c.check_permissions('host', c.request.parameters.host))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to schedule a host check'
    description = 'This command is used to schedule the next check of a particular host. Nagios will re-queue the host to be checked at the time you specify. If you select the <i>force check</i> option, Nagios will force a check of the host regardless of both what time the scheduled check occurs and whether or not checks are enabled for the host.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
+    [% host_name            = c.request.parameters.host %]
+
+    SCHEDULE_HOST_CHECK;[% sprintf("%s;%lu",host_name,start_time) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Check Time:</td><td><b><input type='text' name='start_time' value='[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]'></b></td></tr>
 <tr><td class='optBoxItem'>Force Check:</td><td><b><input type='checkbox' name='force_check'></b></td></tr>
 
+[% END %]
 [% END %]

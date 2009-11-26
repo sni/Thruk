@@ -6,6 +6,7 @@ use warnings;
 
 use Catalyst::Runtime '5.70';
 use Nagios::MKLivestatus;
+use Nagios::Web::Helper;
 
 # Set flags and add plugins for the application
 #
@@ -36,6 +37,18 @@ our $VERSION = '0.10_2';
 # local deployment.
 
 __PACKAGE__->config('name'                   => 'Nagios::Web',
+                    'View::TT'               => {
+                        TEMPLATE_EXTENSION => '.tt',
+                        ENCODING           => 'utf8',
+                        INCLUDE_PATH       =>  'templates',
+                        FILTERS            => {
+                                                "duration"  => \&Nagios::Web::Helper::filter_duration,
+                                            },
+                        PRE_DEFINE         => {
+                                                "sprintf"   => sub { my $format = shift; sprintf $format, @_; },
+                                            },
+#                        DEBUG => 'all',
+                    },
                     'Plugin::ConfigLoader'   => { file => 'nagios_web.conf' },
                     'Plugin::Authentication' => {
                         default_realm => 'Nagios',

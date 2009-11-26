@@ -1,11 +1,32 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to submit a passive check result for a particular service'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_service_commands') && !c.check_permissions('service', c.request.parameters.service))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to submit a passive check result for a particular service'
    description = 'This command is used to submit a passive check result for a particular service. It is particularly useful for resetting security-related services to OK states once they have been dealt with.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% plugin_output        = c.request.parameters.plugin_output %]
+    [% service_desc         = c.request.parameters.service %]
+    [% host_name            = c.request.parameters.host %]
+    [% performance_data     = c.request.parameters.performance_data %]
+    [% plugin_state         = c.request.parameters.plugin_state %]
+
+    PROCESS_SERVICE_CHECK_RESULT;[% sprintf("%s;%s;%d;%s|%s",host_name,service_desc,plugin_state,plugin_output,performance_data) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value='[% c.request.parameters.service %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Check Result:</td><td><b><select name='plugin_state'><option value="0" selected> OK </option><option value="1"> WARNING </option><option value="3"> UNKNOWN </option><option value="2"> CRITICAL </option></select></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Check Output:</td><td><b><input type='text' name='plugin_output' value=''></b></td></tr>
 <tr><td class='optBoxItem'>Performance Data:</td><td><b><input type='text' name='performance_data' value= ''></b></td></tr>
 
+[% END %]
 [% END %]

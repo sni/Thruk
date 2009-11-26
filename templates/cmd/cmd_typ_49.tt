@@ -1,7 +1,23 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to start obsessing over service checks'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_system_commands'))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to start obsessing over service checks'
    description = 'This command is used to have Nagios start obsessing over service checks. Read the documentation on distributed monitoring for more information on this.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+
+    START_OBSESSING_OVER_SVC_CHECKS
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxItem' colspan="2">There are no options for this command.<br> Click the 'Commit' button to submit the command.</td></tr>
 
+[% END %]
 [% END %]

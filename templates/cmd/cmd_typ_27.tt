@@ -1,7 +1,24 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to disable notifications for all hosts and services beyond a host'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_host_commands') && !c.check_permissions('host', c.request.parameters.host))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to disable notifications for all hosts and services beyond a host'
    description = 'This command is used to temporarily prevent notifications from being sent out for all hosts and services that lie "beyone" the specified host (from the view of Nagios).'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% host_name            = c.request.parameters.host %]
+
+    DISABLE_ALL_NOTIFICATIONS_BEYOND_HOST;[% sprintf("%s",host_name) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 
+[% END %]
 [% END %]

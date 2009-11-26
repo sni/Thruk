@@ -1,8 +1,25 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to disable active checks of all services in a particular servicegroup'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_service_commands') && !c.check_permissions('servicegroup', c.request.parameters.servicegroup))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to disable active checks of all services in a particular servicegroup'
    description = 'This command is used to disable active checks of all services in the specified servicegroup. This <i>does not</i> disable checks of the hosts in the servicegroup unless you check the 'Disable for hosts too' option.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% servicegroup_name    = c.request.parameters.servicegroup %]
+
+    [% IF c.request.parameters.ahas %]DISABLE_SERVICEGROUP_HOST_CHECKS[% ELSE %]DISABLE_SERVICEGROUP_SVC_CHECKS[% END %];[% sprintf("%s",servicegroup_name) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value='[% c.request.parameters.servicegroup %]'></b></td></tr>
 <tr><td class='optBoxItem'>Disable For Hosts Too:</td><td><b><input type='checkbox' name='ahas'></b></td></tr>
 
+[% END %]
 [% END %]

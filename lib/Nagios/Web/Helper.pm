@@ -6,6 +6,36 @@ use Config::General;
 use Carp;
 use Date::Calc qw(Date_to_Time Timezone);
 
+
+##############################################
+# calculate a duration in the
+# format: 0d 0h 29m 43s
+sub filter_duration {
+    my $duration = shift;
+
+    if($duration < 0) { $duration = time() + $duration; }
+
+    my $days    = 0;
+    my $hours   = 0;
+    my $minutes = 0;
+    my $seconds = 0;
+    if($duration > 86400) {
+        $days     = int($duration/86400);
+        $duration = $duration%86400;
+    }
+    if($duration > 3600) {
+        $hours    = int($duration/3600);
+        $duration = $duration%3600;
+    }
+    if($duration > 60) {
+        $minutes  = int($duration/60);
+        $duration = $duration%60;
+    }
+    $seconds = $duration;
+
+    return($days."d ".$hours."h ".$minutes."m ".$seconds."s");
+}
+
 ######################################
 # parse the cgi.cg
 sub get_cgi_cfg {

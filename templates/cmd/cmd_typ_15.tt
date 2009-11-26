@@ -1,8 +1,25 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to enable active checks of all services on a host'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_host_commands') && !c.check_permissions('host', c.request.parameters.host))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to enable active checks of all services on a host'
    description = 'This command is used to enable active checks of all services associated with the specified host. This <i>does not</i> enable checks of the host unless you check the 'Enable for host too' option.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% host_name            = c.request.parameters.host %]
+
+    [% IF c.request.parameters.ahas %]ENABLE_HOST_CHECK[% ELSE %]ENABLE_HOST_SVC_CHECKS[% END %];[% sprintf("%s",host_name) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxItem'>Enable For Host Too:</td><td><b><input type='checkbox' name='ahas'></b></td></tr>
 
+[% END %]
 [% END %]

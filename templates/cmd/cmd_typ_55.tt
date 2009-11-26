@@ -1,8 +1,31 @@
 [% USE date %]
-[% WRAPPER cmd.tt
-   request = 'You are requesting to schedule downtime for a particular host'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_host_commands') && !c.check_permissions('host', c.request.parameters.host))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to schedule downtime for a particular host'
    description = 'This command is used to schedule downtime for a particular host. During the specified downtime, Nagios will not send notifications out about the host. When the scheduled downtime expires, Nagios will send out notifications for this host as it normally would. Scheduled downtimes are preserved across program shutdowns and restarts. Both the start and end times should be specified in the following format: <b>mm/dd/yyyy hh:mm:ss</b>. If you select the <i>fixed</i> option, the downtime will be in effect between the start and end times you specify. If you do not select the <i>fixed</i> option, Nagios will treat this as "flexible" downtime. Flexible downtime starts when the host goes down or becomes unreachable (sometime between the start and end times you specified) and lasts as long as the duration of time you enter. The duration fields do not apply for fixed downtime.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% IF c.request.parameters.fixed %][% fixed = 1 %][% ELSE %][% fixed = 0 %][% END %]
+    [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
+    [% end_time             = date.format( c.request.parameters.end_time, '%s') %]
+    [% duration             = c.request.parameters.hour * 3600 + c.request.parameters.minutes * 60 %]
+    [% triggered_by         = c.request.parameters.trigger %]
+    [% comment_data         = c.request.parameters.com_data %]
+    [% host_name            = c.request.parameters.host %]
+    [% comment_author       = c.request.parameters.com_author %]
+
+    SCHEDULE_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time,end_time,fixed,triggered_by,duration,comment_author,comment_data) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
@@ -18,4 +41,5 @@
 <tr><td class='optBoxItem'>Child Hosts:</td><td><b><select name='childoptions'><option value='0'> Do nothing with child hosts </option><option value='1'> Schedule triggered downtime for all child hosts </option><option value='2'> Schedule non-triggered downtime for all child hosts </option></select></b></td></tr>
 <tr><td class='optBoxItem'><br></td></tr>
 
+[% END %]
 [% END %]

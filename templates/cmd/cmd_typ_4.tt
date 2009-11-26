@@ -1,7 +1,24 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to delete a service comment'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_system_commands'))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to delete a service comment'
    description = 'This command is used to delete a specific service comment.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% comment_id           = c.request.parameters.com_id %]
+
+    DEL_SVC_COMMENT;[% sprintf("%lu",comment_id) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Comment ID:</td><td><b><input type='text' name='com_id' value='[% c.request.parameters.com_id %]'></b></td></tr>
 
+[% END %]
 [% END %]

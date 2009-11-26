@@ -1,8 +1,30 @@
 [% USE date %]
-[% WRAPPER cmd.tt
-   request = 'You are requesting to schedule downtime for all services in a particular servicegroup'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_service_commands') && !c.check_permissions('servicegroup', c.request.parameters.servicegroup))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to schedule downtime for all services in a particular servicegroup'
    description = 'This command is used to schedule downtime for all services in a particular servicegroup. During the specified downtime, Nagios will not send notifications out about the services. When the scheduled downtime expires, Nagios will send out notifications for the services as it normally would. Scheduled downtimes are preserved across program shutdowns and restarts. Both the start and end times should be specified in the following format: <b>mm/dd/yyyy hh:mm:ss</b>. If you select the <i>fixed</i> option, the downtime will be in effect between the start and end times you specify. If you do not select the <i>fixed</i> option, Nagios will treat this as "flexible" downtime. Flexible downtime starts when a service enters a non-OK state (sometime between the start and end times you specified) and lasts as long as the duration of time you enter. The duration fields do not apply for fixed dowtime. Note that scheduling downtime for services does not automatically schedule downtime for the hosts those services are associated with. If you want to also schedule downtime for all hosts in the servicegroup, check the 'Schedule downtime for hosts too' option.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% IF c.request.parameters.fixed %][% fixed = 1 %][% ELSE %][% fixed = 0 %][% END %]
+    [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
+    [% end_time             = date.format( c.request.parameters.end_time, '%s') %]
+    [% duration             = c.request.parameters.hour * 3600 + c.request.parameters.minutes * 60 %]
+    [% comment_data         = c.request.parameters.com_data %]
+    [% servicegroup_name    = c.request.parameters.servicegroup %]
+    [% comment_author       = c.request.parameters.com_author %]
+
+    [% IF c.request.parameters.ahas %]SCHEDULE_SERVICEGROUP_HOST_DOWNTIME[% ELSE %]SCHEDULE_SERVICEGROUP_SVC_DOWNTIME[% END %];[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",servicegroup_name,start_time,end_time,fixed,duration,comment_author,comment_data) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value='[% c.request.parameters.servicegroup %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
@@ -13,4 +35,5 @@
 </table></td></tr>
 <tr><td class='optBoxItem'>Schedule Downtime For Hosts Too:</td><td><b><input type='checkbox' name='ahas'></b></td></tr>
 
+[% END %]
 [% END %]

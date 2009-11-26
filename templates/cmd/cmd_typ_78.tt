@@ -1,7 +1,24 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to cancel scheduled downtime for a particular host'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_system_commands'))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to cancel scheduled downtime for a particular host'
    description = 'This command is used to cancel active or pending scheduled downtime for the specified host.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% downtime_id          = c.request.parameters.down_id %]
+
+    DEL_HOST_DOWNTIME;[% sprintf("%lu",downtime_id) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Scheduled Downtime ID:</td><td><b><input type='text' name='down_id' value='[% c.request.parameters.down_id %]'></b></td></tr>
 
+[% END %]
 [% END %]

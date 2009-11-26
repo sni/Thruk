@@ -1,8 +1,25 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to enable notifications for all services on a host'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_host_commands') && !c.check_permissions('host', c.request.parameters.host))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to enable notifications for all services on a host'
    description = 'This command is used to enable notifications for all services on the specified host. Notifications will only be sent out for the service state types you defined in your service definition. This <i>does not</i> enable notifications for the host unless you check the 'Enable for host too' option.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% host_name            = c.request.parameters.host %]
+
+    [% IF c.request.parameters.ahas %]ENABLE_HOST_NOTIFICATIONS[% ELSE %]ENABLE_HOST_SVC_NOTIFICATIONS[% END %];[% sprintf("%s",host_name) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxItem'>Enable For Host Too:</td><td><b><input type='checkbox' name='ahas'></b></td></tr>
 
+[% END %]
 [% END %]

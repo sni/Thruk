@@ -1,8 +1,25 @@
-[% WRAPPER cmd.tt
-   request = 'You are requesting to disable notifications for a host'
+[%# which one is authorized? #%]
+[% IF c.check_user_roles('is_authorized_for_read_only')
+   || (!c.check_user_roles('authorized_for_all_host_commands') && !c.check_permissions('host', c.request.parameters.host))
+%]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to disable notifications for a host'
    description = 'This command is used to prevent notifications from being sent out for the specified host. You will have to re-enable notifications for this host before any alerts can be sent out in the future. Note that this command <i>does not</i> disable notifications for services associated with this host.'
 %]
+
+[%# definition of the command send to nagios #%]
+[% BLOCK action%]
+    [% host_name            = c.request.parameters.host %]
+
+    [% IF c.request.parameters.ptc %]DISABLE_HOST_AND_CHILD_NOTIFICATIONS[% ELSE %]DISABLE_HOST_NOTIFICATIONS[% END %];[% sprintf("%s",host_name) %]
+[% END %]
+
+[%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxItem'>Disable Notifications For Child Hosts Too:</td><td><b><input type='checkbox' name='ptc'></b></td></tr>
 
+[% END %]
 [% END %]
