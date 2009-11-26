@@ -34,7 +34,6 @@ requires 'Catalyst::Plugin::CustomErrorMessage';
 requires 'Catalyst::Plugin::Redirect';
 requires 'Class::C3';
 requires 'Algorithm::C3';
-requires 'Date::Calc';
 catalyst;
 install_script glob('script/*.pl');
 auto_install;
