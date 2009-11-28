@@ -1,7 +1,11 @@
 This file documents the revision history for Perl extension Nagios::Web.
 
+0.10_3  Sat Nov 28 12:12:11 CET 2009
+          - completed status hostdetail page
+
 0.10_2  Thu Nov 19 09:10:38 CET 2009
           - completed authentication with roles from cgi.cfg
+          - completed scheduling page
 
 0.10_1  2009-11-08 16:10:34
           - added basic functions, authentication, views and models

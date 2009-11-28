@@ -11,11 +11,11 @@
           <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15'>Pending</a></th>
         </tr>
         <tr>
-          <td class='serviceTotalsOK'>157</td>
-          <td class='serviceTotals'>0</td>
-          <td class='serviceTotals'>0</td>
-          <td class='serviceTotalsCRITICAL'>43</td>
-          <td class='serviceTotals'>0</td>
+          <td class='[% IF service_stats.ok > 0 %]serviceTotalsOK[% ELSE %]serviceTotals[% END %]'>[% service_stats.ok %]</td>
+          <td class='[% IF service_stats.warning > 0 %]serviceTotalsWARNING[% ELSE %]serviceTotals[% END %]'>[% service_stats.warning %]</td>
+          <td class='[% IF service_stats.unknown > 0 %]serviceTotalsUNKNOWN[% ELSE %]serviceTotals[% END %]'>[% service_stats.unknown %]</td>
+          <td class='[% IF service_stats.critical > 0 %]serviceTotalsCRITICAL[% ELSE %]serviceTotals[% END %]'>[% service_stats.critical %]</td>
+          <td class='[% IF service_stats.pending > 0 %]serviceTotalsPENDING[% ELSE %]serviceTotals[% END %]'>[% service_stats.pending %]</td>
         </tr>
       </table>
     </td>
@@ -24,12 +24,14 @@
     <td align="center">
       <table border="1" class='serviceTotals'>
         <tr>
+          [% totalProblems = service_stats.warning + service_stats.critical + service_stats.unknown %]
+          [% total         = service_stats.ok + totalProblems %]
           <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=28&amp;hoststatustypes=15'><i>All Problems</i></a></th>
           <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;hoststatustypes=15'><i>All Types</i></a></th>
         </tr>
         <tr>
-          <td class='serviceTotalsPROBLEMS'>43</td>
-          <td class='serviceTotals'>200</td>
+          <td class='[% IF totalProblems > 0 %]serviceTotalsPROBLEMS[% ELSE %]serviceTotals[% END %]'>[% totalProblems %]</td>
+          <td class='serviceTotals'>[% total %]</td>
         </tr>
       </table>
     </td>

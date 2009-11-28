@@ -9,3 +9,6 @@ Todo List:
 - * in the cgi.cfg
 - no commands if authorization is disabled
 - overload role authentication
+- check for required fields on sending commands
+- add comments on status_hostdetails page
+- add authorization part to all querys

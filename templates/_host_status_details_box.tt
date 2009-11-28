@@ -10,10 +10,10 @@
           <th class='hostTotals'><a class='hostTotals' href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=1'>Pending</a></th>
         </tr>
         <tr>
-          <td class='hostTotalsUP'>9</td>
-          <td class='hostTotalsDOWN'>1</td>
-          <td class='hostTotals'>0</td>
-          <td class='hostTotals'>0</td>
+          <td class='[% IF host_stats.up > 0 %]hostTotalsUP[% ELSE %]hostTotals[% END %]'>[% host_stats.up %]</td>
+          <td class='[% IF host_stats.down > 0 %]hostTotalsDOWN[% ELSE %]hostTotals[% END %]'>[% host_stats.down %]</td>
+          <td class='[% IF host_stats.unreachable > 0 %]hostTotalsUNREACHABLE[% ELSE %]hostTotals[% END %]'>[% host_stats.unreachable %]</td>
+          <td class='[% IF host_stats.pending > 0 %]hostTotalsPENDING[% ELSE %]hostTotals[% END %]'>[% host_stats.pending %]</td>
         </tr>
       </table>
     </td>
@@ -26,8 +26,8 @@
           <th class='hostTotals'><a class='hostTotals' href='status.cgi?hostgroup=all&amp;style=hostdetail'><i>All Types</i></a></th>
         </tr>
         <tr>
-          <td class='hostTotalsPROBLEMS'>1</td>
-          <td class='hostTotals'>10</td>
+          <td class='[% IF host_stats.down + host_stats.unreachable > 0 %]hostTotalsPROBLEMS[% ELSE %]hostTotals[% END %]'>[% host_stats.down + host_stats.unreachable %]</td>
+          <td class='hostTotals'>[% host_stats.up + host_stats.down + host_stats.unreachable + host_stats.pending %]</td>
         </tr>
       </table>
     </td>

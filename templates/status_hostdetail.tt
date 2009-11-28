@@ -1,23 +1,31 @@
-[% INCLUDE header.tt %]
+[% USE date %]
+[% INCLUDE _header.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
-            [% INCLUDE infobox.tt %]
+            [% INCLUDE _infobox.tt %]
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
+                [% IF hostgroup == 'all' %]
                 <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
                 <a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a><br>
                 <a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a><br>
                 <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
-
+                [% ELSE %]
+                <a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail'>View Service Status Detail For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=overview'>View Status Overview For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                [% END %]
               </td>
             </tr>
           </table>
         </td>
-        <td align="center" valign="top" width="33%">[% INCLUDE host_status_details_box.tt %]</td>
-        <td align="center" valign="top" width="33%">[% INCLUDE service_status_details_box.tt %]</td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _host_status_details_box.tt %]</td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _service_status_details_box.tt %]</td>
         <td align="right" valign="bottom"></td>
       </tr>
     </table>
@@ -26,7 +34,11 @@
       <tr>
         <td valign="top" align="left" width="33%"></td>
         <td valign="top" align="center" width="33%">
-          <div align="center" class='statusTitle'>Host Status Details For All Host Groups</div><br>
+          <div align="center" class='statusTitle'>Host Status Details For [% IF hostgroup == 'all' %]All Host Groups[% ELSE %]Host Group '[% hostgroup %]'[% END %]</div>
+          [% IF c.request.parameters.sortoption %]
+          <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+          [% END %]
+          <br>
         </td>
         <td valign="top" align="right" width="33%"></td>
       </tr>
@@ -34,447 +46,82 @@
     <div align='center'>
       <table border="0" class='status' width="100%">
         <tr>
-          <th class='status'>Host&nbsp;<a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=1'><img src='/nagios/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=1'><img src='/nagios/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
-          <th class='status'>Status&nbsp;<a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=8'><img src='/nagios/images/up.gif' border="0" alt='Sort by host status (ascending)' title='Sort by host status (ascending)'></a><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=8'><img src='/nagios/images/down.gif' border="0" alt='Sort by host status (descending)' title='Sort by host status (descending)'></a></th>
-          <th class='status'>Last Check&nbsp;<a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=4'><img src='/nagios/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=4'><img src='/nagios/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
-          <th class='status'>Duration&nbsp;<a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=6'><img src='/nagios/images/up.gif' border="0" alt='Sort by state duration (ascending)' title='Sort by state duration (ascending)'></a><a href='status.cgi?hostgroup=all&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=6'><img src='/nagios/images/down.gif' border="0" alt='Sort by state duration time (descending)' title='Sort by state duration time (descending)'></a></th>
+          <th class='status'>Host&nbsp;<a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=1'><img src='/nagios/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=1'><img src='/nagios/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
+          <th class='status'>Status&nbsp;<a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=8'><img src='/nagios/images/up.gif' border="0" alt='Sort by host status (ascending)' title='Sort by host status (ascending)'></a><a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=8'><img src='/nagios/images/down.gif' border="0" alt='Sort by host status (descending)' title='Sort by host status (descending)'></a></th>
+          <th class='status'>Last Check&nbsp;<a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=4'><img src='/nagios/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=4'><img src='/nagios/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
+          <th class='status'>Duration&nbsp;<a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=1&amp;sortoption=6'><img src='/nagios/images/up.gif' border="0" alt='Sort by state duration (ascending)' title='Sort by state duration (ascending)'></a><a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;sorttype=2&amp;sortoption=6'><img src='/nagios/images/down.gif' border="0" alt='Sort by state duration time (descending)' title='Sort by state duration time (descending)'></a></th>
           <th class='status'>Status Information</th>
         </tr>
 
+        [%  FOREACH h = hosts %]
+        [% SET class = 'statusEven' IF loop.even %]
+        [% SET class = 'statusOdd'  IF loop.odd %]
+
+        [% IF h.has_been_checked == 0 %]
+          [% statusClass='statusHOSTPENDING' %]
+          [% status ='PENDING' %]
+        [% ELSIF h.state == 0 %]
+          [% statusClass='statusHOSTUP' %]
+          [% status ='UP' %]
+        [% ELSIF h.state == 1 %]
+          [% statusClass='statusHOSTDOWN' %]
+          [% status ='DOWN' %]
+          [% class = 'statusBGDOWN' %]
+        [% ELSIF h.state == 2 %]
+          [% statusClass='statusHOSTUNREACHABLE' %]
+          [% status ='UNREACHABLE' %]
+          [% class = 'statusBGDOWN' %]
+        [% END %]
+
         <tr>
-          <td class='statusHOSTUP'>
+          <td class='[% statusClass %]'>
             <table border="0" width='100%' cellpadding="0" cellspacing="0">
               <tr>
                 <td align="left">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'><a href='extinfo.cgi?type=1&amp;host=test_host_0' title='127.0.0.0'>test_host_0</a>&nbsp;</td>
+                      <td align="left" valign="center" class='[% statusClass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name %]' title='127.0.0.0'>[% h.name %]</a>&nbsp;</td>
                     </tr>
                   </table>
                 </td>
                 <td align="right" valign="center">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=test_host_0#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a></td>
-                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=test_host_0'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>
-                      <td><a href='status.cgi?host=test_host_0'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a></td>
+                      [% IF h.acknowledged %]
+                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]#comments"><img src="/nagios/images/ack.gif" alt="This host problem has been acknowledged" title="This host problem has been acknowledged" border="0" height="20" width="20"></a></td>
+                      [% END %]
+                      [% IF h.comment_count > 0 %]
+                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]#comments"><img src="/nagios/images/comment.gif" alt="This host has [% h.comment_count %] comment associated with it" title="This host has [% h.comment_count %] comment associated with it" border="0" height="20" width="20"></a></td>
+                      [% END %]
+                      [% IF h.notifications_enabled == 0 %]
+                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20"></a></td>
+                      [% END %]
+                      [% IF h.active_checks_enabled == 0 %]
+                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20"></a></td>
+                      [% END %]
+                      [% IF h.is_flapping %]
+                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>
+                      [% END %]
+                      [% IF h.scheduled_downtime_depth > 0 %]
+                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" title="This host is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>
+                      [% END %]
+                      <td><a href='status.cgi?host=[% h.name %]'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a></td>
                     </tr>
                   </table>
                 </td>
               </tr>
             </table>
           </td>
-          <td class='statusHOSTUP'>UP</td>
-          <td class='statusEven' nowrap>2009-11-16 17:42:04</td>
-          <td class='statusEven' nowrap>0d 0h 34m 11s</td>
-          <td class='statusEven' valign='center'>OK: random hostcheck ok (UP/1848/4087407)&nbsp;</td>
+          <td class='[% statusClass %]'>[% status %]</td>
+          <td class='[% class %]' nowrap>[% date.format(h.last_check, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]' nowrap>[% FILTER duration %][% 0 - h.last_state_change %][% END %]</td>
+          <td class='[% class %]' valign='center'>[% IF h.has_been_checked == 0 %]Host check scheduled for [% date.format(h.next_check, '%a %b %e %H:%M:%S %Z %Y') %][% ELSE %][% h.plugin_output %][% END %]&nbsp;</td>
         </tr>
-
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'><a href='extinfo.cgi?type=1&amp;host=test_host_1' title='127.0.0.1'>test_host_1</a>&nbsp;</td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=test_host_1#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a></td>
-                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=test_host_1'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>
-                      <td><a href='status.cgi?host=test_host_1'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a></td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>UP</td>
-          <td class='statusOdd' nowrap>2009-11-16 17:43:34</td>
-          <td class='statusOdd' nowrap>0d 0h 3m 23s</td>
-          <td class='statusOdd' valign='center'>OK: random hostcheck ok (UP/90/4682187)&nbsp;</td>
-        </tr>
-
-        <tr>
-          <td class='statusHOSTDOWN'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTDOWN'><a href='extinfo.cgi?type=1&amp;host=test_host_2' title='127.0.0.2'>test_host_2</a>&nbsp;</td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=test_host_2#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a></td>
-                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=test_host_2'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>
-                      <td><a href='status.cgi?host=test_host_2'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a></td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTDOWN'>DOWN</td>
-          <td class='statusBGDOWN' nowrap>2009-11-16 17:44:44</td>
-          <td class='statusBGDOWN' nowrap>0d 0h 0m 33s</td>
-          <td class='statusBGDOWN' valign='center'>(null)&nbsp;</td>
-        </tr>
-
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'>
-
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_3' title='127.0.0.3'>test_host_3</a>&nbsp;
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_3#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a>
-                      </td>
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_3'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a>
-                      </td>
-                      <td>
-                        <a href='status.cgi?host=test_host_3'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                      </td>
-
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>
-            UP
-          </td>
-
-          <td class='statusOdd' nowrap>
-            2009-11-16 17:40:34
-          </td>
-          <td class='statusOdd' nowrap>
-            0d 0h 4m 43s
-          </td>
-          <td class='statusOdd' valign='center'>
-            OK: random hostcheck ok (DOWN/40/6816095)&nbsp;
-          </td>
-
-        </tr>
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'>
-
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_4' title='127.0.0.4'>test_host_4</a>&nbsp;
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_4#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a>
-                      </td>
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_4'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a>
-                      </td>
-                      <td>
-                        <a href='status.cgi?host=test_host_4'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                      </td>
-
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>
-            UP
-          </td>
-
-          <td class='statusEven' nowrap>
-            2009-11-16 17:41:34
-          </td>
-          <td class='statusEven' nowrap>
-            0d 0h 7m 3s
-          </td>
-          <td class='statusEven' valign='center'>
-            OK: random hostcheck ok (UP/190/3619809)&nbsp;
-          </td>
-
-        </tr>
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'>
-
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_5' title='127.0.0.5'>test_host_5</a>&nbsp;
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_5#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a>
-                      </td>
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_5'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a>
-                      </td>
-                      <td>
-                        <a href='status.cgi?host=test_host_5'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                      </td>
-
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>
-            UP
-          </td>
-
-          <td class='statusOdd' nowrap>
-            2009-11-16 17:40:34
-          </td>
-          <td class='statusOdd' nowrap>
-            0d 0h 9m 33s
-          </td>
-          <td class='statusOdd' valign='center'>
-            OK: random hostcheck ok (UP/280/7270661)&nbsp;
-          </td>
-
-        </tr>
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'>
-
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_6' title='127.0.0.6'>test_host_6</a>&nbsp;
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_6#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a>
-                      </td>
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_6'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a>
-                      </td>
-                      <td>
-                        <a href='status.cgi?host=test_host_6'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                      </td>
-
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>
-            UP
-          </td>
-
-          <td class='statusEven' nowrap>
-            2009-11-16 17:44:54
-          </td>
-          <td class='statusEven' nowrap>
-            0d 0h 3m 23s
-          </td>
-          <td class='statusEven' valign='center'>
-            OK: random hostcheck ok (UP/170/3925323)&nbsp;
-          </td>
-
-        </tr>
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'>
-
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_7' title='127.0.0.7'>test_host_7</a>&nbsp;
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_7#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a>
-                      </td>
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_7'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a>
-                      </td>
-                      <td>
-                        <a href='status.cgi?host=test_host_7'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                      </td>
-
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>
-            UP
-          </td>
-
-          <td class='statusOdd' nowrap>
-            2009-11-16 17:42:24
-          </td>
-          <td class='statusOdd' nowrap>
-            0d 0h 39m 51s
-          </td>
-          <td class='statusOdd' valign='center'>
-            OK: random hostcheck ok (UP/2208/8796294)&nbsp;
-          </td>
-
-        </tr>
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'>
-
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_8' title='127.0.0.8'>test_host_8</a>&nbsp;
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_8#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a>
-                      </td>
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_8'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a>
-                      </td>
-                      <td>
-                        <a href='status.cgi?host=test_host_8'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                      </td>
-
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>
-            UP
-          </td>
-
-          <td class='statusEven' nowrap>
-            2009-11-16 17:44:24
-          </td>
-          <td class='statusEven' nowrap>
-            0d 0h 21m 20s
-          </td>
-          <td class='statusEven' valign='center'>
-            OK: random hostcheck ok (UP/1217/4898555)&nbsp;
-          </td>
-
-        </tr>
-        <tr>
-          <td class='statusHOSTUP'>
-            <table border="0" width='100%' cellpadding="0" cellspacing="0">
-              <tr>
-                <td align="left">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="left" valign="center" class='statusHOSTUP'>
-
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_9' title='127.0.0.9'>test_host_9</a>&nbsp;
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td align="right" valign="center">
-                  <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_9#comments'><img src='/nagios/images/comment.gif' border="0" width="20" height="20" alt='This host has 1 comment associated with it' title='This host has 1 comment associated with it'></a>
-                      </td>
-                      <td align="center" valign="center">
-                        <a href='extinfo.cgi?type=1&amp;host=test_host_9'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a>
-                      </td>
-                      <td>
-                        <a href='status.cgi?host=test_host_9'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                      </td>
-
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td class='statusHOSTUP'>
-            UP
-          </td>
-
-          <td class='statusOdd' nowrap>
-            2009-11-16 17:44:24
-          </td>
-          <td class='statusOdd' nowrap>
-            0d 0h 0m 53s
-          </td>
-          <td class='statusOdd' valign='center'>
-            OK: random hostcheck ok (DOWN/50/5167143)&nbsp;
-          </td>
-
-        </tr>
+    [% IF loop.last %]
       </table>
     </div><br>
-    <div class='itemTotalsTitle'>
-      10 Matching Host Entries Displayed
-    </div>
+    <div class='itemTotalsTitle'>[% loop.count %] Matching Host Entries Displayed</div>
+    [% END %]
+        [% END %]
 
-[% INCLUDE footer.tt %]
+[% INCLUDE _footer.tt %]

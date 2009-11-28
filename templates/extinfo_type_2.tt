@@ -1,4 +1,4 @@
-[% INCLUDE header.tt %]
+[% INCLUDE _header.tt %]
 
   <body class='extinfo'>
 
@@ -6,18 +6,7 @@
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
-          <table class='infoBox' border="1" cellspacing="0" cellpadding="0">
-            <tr>
-              <td class='infoBox'>
-                <div class='infoBoxTitle'>Service Information</div>Last Updated: [% date.format(date.now, '%a %b %e %H:%M:%S %Y') %]<br>
-                Updated every 300 seconds<br>
-                Nagios&reg; 3.0.6 - <a href='http://www.nagios.org' target='_blank' class='homepageURL'>www.nagios.org</a><br>
-                Logged in as <i>[% REMOTE_USER %]</i><br>
-                <div class='infoBoxBadProcStatus'> - Notifications are disabled</div>
-                <div class='infoBoxBadProcStatus'> - Service checks are disabled </div>
-              </td>
-            </tr>
-          </table>
+          [% INCLUDE _infobox.tt %]
           <script language="JavaScript" type="text/javascript">
           <!--
           function nagios_get_host_name()
@@ -302,4 +291,4 @@
       </table>
     </div>
 
-[% INCLUDE footer.tt %]
+[% INCLUDE _footer.tt %]

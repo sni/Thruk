@@ -1,9 +1,10 @@
-[% INCLUDE header.tt %]
+[% USE date %]
+[% INCLUDE _header.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
-          [% INCLUDE infobox.tt %]
+          [% INCLUDE _infobox.tt %]
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
@@ -15,8 +16,8 @@
             </tr>
           </table>
         </td>
-        <td align="center" valign="top" width="33%">[% INCLUDE host_status_details_box.tt %]</td>
-        <td align="center" valign="top" width="33%">[% INCLUDE service_status_details_box.tt %]</td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _host_status_details_box.tt %]</td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _service_status_details_box.tt %]</td>
         <td align="right" valign="bottom"></td>
       </tr>
     </table>
@@ -28,7 +29,6 @@
       </tr>
     </table>
     <table border="0" width="100%" class='status'>
-
       <tr>
         <th class='status'>Host&nbsp;<a href='status.cgi?hostgroup=all&amp;style=detail&amp;sorttype=1&amp;sortoption=1'><img src='/nagios/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='status.cgi?hostgroup=all&amp;style=detail&amp;sorttype=2&amp;sortoption=1'><img src='/nagios/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
         <th class='status'>Service&nbsp;<a href='status.cgi?hostgroup=all&amp;style=detail&amp;sorttype=1&amp;sortoption=2'><img src='/nagios/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='status.cgi?hostgroup=all&amp;style=detail&amp;sorttype=2&amp;sortoption=2'><img src='/nagios/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
@@ -38,15 +38,18 @@
         <th class='status'>Attempt&nbsp;<a href='status.cgi?hostgroup=all&amp;style=detail&amp;sorttype=1&amp;sortoption=5'><img src='/nagios/images/up.gif' border="0" alt='Sort by current attempt (ascending)' title='Sort by current attempt (ascending)'></a><a href='status.cgi?hostgroup=all&amp;style=detail&amp;sorttype=2&amp;sortoption=5'><img src='/nagios/images/down.gif' border="0" alt='Sort by current attempt (descending)' title='Sort by current attempt (descending)'></a></th>
         <th class='status'>Status Information</th>
       </tr>
-      <tr>
 
+      [%  FOREACH s = services %]
+      [% SET class = 'queueEven' IF loop.even %]
+      [% SET class = 'queueOdd'  IF loop.odd %]
+      <tr>
         <td class='statusEven'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
               <td align="left">
                 <table border="0" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td align="left" valign="center" class='statusEven'><a href='extinfo.cgi?type=1&amp;host=test_host_0' title='127.0.0.0'>test_host_0</a></td>
+                    <td align="left" valign="center" class='statusEven'><a href='extinfo.cgi?type=1&amp;host=test_host_0' title='127.0.0.0'>[% h.name %]</a></td>
                   </tr>
                 </table>
               </td>
@@ -67,10 +70,7 @@
               <td align="left">
                 <table border="0" cellspacing="0" cellpadding="0">
                   <tr>
-                    <td align="left" valign="center" class='statusEven'>
-                      <a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_0'>test_service_0</a>
-
-                    </td>
+                    <td align="left" valign="center" class='statusEven'><a href='extinfo.cgi?type=2&amp;host=test_host_0&amp;service=test_service_0'>test_service_0</a></td>
                   </tr>
                 </table>
               </td>
@@ -79,30 +79,19 @@
                   <tr>
                     <td></td>
                   </tr>
-
                 </table>
               </td>
             </tr>
           </table>
         </td>
-        <td class='statusOK'>
-          OK
-        </td>
-        <td class='statusEven' nowrap>
-
-          2009-11-16 17:48:57
-        </td>
-        <td class='statusEven' nowrap>
-          0d 0h 47m 28s
-        </td>
-        <td class='statusEven'>
-          1/3
-        </td>
-        <td class='statusEven' valign='center'>
-          OK: random servicecheck ok (OK/2400/75119129)&nbsp;
-
-        </td>
+        <td class='statusOK'>OK</td>
+        <td class='statusEven' nowrap>[% date.format(h.last_check, '%Y-%m-%d  %H:%M:%S') %]</td>
+        <td class='statusEven' nowrap>[% FILTER duration %][% 0 - h.last_state_change %][% END %]</td>
+        <td class='statusEven'>1/3</td>
+        <td class='statusEven' valign='center'>OK: random servicecheck ok (OK/2400/75119129)&nbsp;</td>
       </tr>
+      [% END %]
+
       <tr>
         <td></td>
         <td class='statusBGCRITICAL'>
@@ -9471,4 +9460,4 @@
       200 Matching Service Entries Displayed
     </div>
 
-[% INCLUDE footer.tt %]
+[% INCLUDE _footer.tt %]
