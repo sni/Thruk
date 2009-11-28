@@ -8,3 +8,4 @@ Todo List:
 - comments on extinfo type 1
 - * in the cgi.cfg
 - no commands if authorization is disabled
+- overload role authentication

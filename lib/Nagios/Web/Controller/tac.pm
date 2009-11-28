@@ -16,7 +16,6 @@ Catalyst Controller.
 
 =cut
 
-
 =head2 index
 
 =cut
@@ -24,27 +23,65 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-print "200 OK\n";
-    my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\nStats: state = 0\nStats: state = 1\nStats: state = 2\nStats: state = 3\nStats: state = 4", { Slice => {}, rename => { 'name' => 'host_name' } });
-    $c->{'live'}->verbose(1);
-    my $services = $c->{'live'}->selectall_arrayref("GET services
+    my $host_stats    = $c->{'live'}->selectrow_hashref("GET hosts
+Stats: name !=  as total
+Stats: check_type = 0 as total_active
+Stats: check_type = 1 as total_passive
+
+Stats: state = 0 as up
+Stats: state = 1 as down
+Stats: state = 2 as unreachable
+Stats: state = 3 as unknown
+Stats: state = 4 as pending
+
 Stats: state = 0
+Stats: active_checks_enabled = 0
+StatsAnd: 2 as up_and_disabled
+
 Stats: state = 1
-Stats: state = 2
-Stats: state = 3
-Stats: state = 4
+Stats: acknowledged = 1
+StatsAnd: 2 as down_and_ack
+
+Stats: state = 1
+Stats: scheduled_downtime_depth > 0
+StatsAnd: 2 as down_and_scheduled
+
+Stats: state = 1
+Stats: active_checks_enabled = 0
+StatsAnd: 2 as down_and_disabled
+
+Stats: state = 1
+Stats: active_checks_enabled = 1
+Stats: acknowledged = 0
+Stats: scheduled_downtime_depth = 0
+StatsAnd: 4 as down_and_unhandled
+",
+    { Slice => {}});
+    my $service_stats = $c->{'live'}->selectrow_hashref("GET services
+Stats: description !=  as total
+Stats: check_type = 0 as total_active
+Stats: check_type = 1 as total_passive
+
+Stats: state = 0 as ok
+Stats: state = 1 as warning
+Stats: state = 2 as critical
+Stats: state = 3 as unknown
+Stats: state = 4 as pending
+
 Stats: host_state != 0
 Stats: state = 1
-StatsAnd: 2
+StatsAnd: 2 as warning_on_down_host
+
 Stats: host_state != 0
 Stats: state = 2
-StatsAnd: 2
+StatsAnd: 2 as critical_on_down_host
+
 Stats: host_state != 0
-Stats: state = 3
-StatsAnd: 2", { Slice => {}, rename => { 'name' => 'host_name' } });
-    use Data::Dumper;
-    $Data::Dumper::Sortkeys = 1;
-    print Dumper($services);
+Stats: state = 3 as unknown_on_down_host
+StatsAnd: 2",
+    { Slice => {} } );
+    $c->stash->{host_stats}     = $host_stats;
+    $c->stash->{service_stats}  = $service_stats;
     $c->stash->{title}          = 'Nagios Tactical Monitoring Overview';
     $c->stash->{infoBoxTitle}   = 'Tactical Monitoring Overview';
     $c->stash->{page}           = 'tac';

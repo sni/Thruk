@@ -38,7 +38,7 @@ sub begin : Private {
 
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
-        $c->log->debug("user does not exist");
+        $c->log->debug("user not authenticated yet");
         unless ($c->authenticate( {} )) {
             # return 403 forbidden or kick out the user in other way
             $c->log->debug("user is not authenticated");
