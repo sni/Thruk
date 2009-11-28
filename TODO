@@ -12,3 +12,4 @@ Todo List:
 - check for required fields on sending commands
 - add comments on status_hostdetails page
 - add authorization part to all querys
+- fix pending state on host details page (should be just a empty message)

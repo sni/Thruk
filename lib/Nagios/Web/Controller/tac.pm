@@ -28,11 +28,23 @@ Stats: name !=  as total
 Stats: check_type = 0 as total_active
 Stats: check_type = 1 as total_passive
 
-Stats: state = 0 as up
-Stats: state = 1 as down
-Stats: state = 2 as unreachable
-Stats: state = 3 as unknown
-Stats: state = 4 as pending
+Stats: has_been_checked = 1
+Stats: state = 0
+StatsAnd: 2 as up
+
+Stats: has_been_checked = 1
+Stats: state = 1
+StatsAnd: 2 as down
+
+Stats: has_been_checked = 1
+Stats: state = 2
+StatsAnd: 2 as unreachable
+
+Stats: has_been_checked = 1
+Stats: state = 3
+StatsAnd: 2 as unknown
+
+Stats: has_been_checked = 0 as pending
 
 Stats: state = 0
 Stats: active_checks_enabled = 0

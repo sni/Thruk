@@ -117,6 +117,9 @@ sub sort {
 
     $order = "ASC" if !defined $order;
 
+    return if !defined $data;
+    return if scalar @{$data} == 0;
+
     my @keys;
     if(ref($key) eq 'ARRAY') {
         @keys = @{$key};
