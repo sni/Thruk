@@ -7,10 +7,8 @@
       [% IF ! no_auto_reload %]Updated every [% refresh_rate %] seconds<br />[% END %]
       Nagios&reg; Core&trade; 3.2.0 - <a href='http://www.nagios.org' target='_blank' class='homepageURL'>www.nagios.org</a><br />
       Logged in as <i>[% remote_user %]</i><br />
-      <!--
-      <div class='infoBoxBadProcStatus'> - Notifications are disabled</div>
-      <div class='infoBoxBadProcStatus'> - Service checks are disabled </div>
-      -->
+      [% IF pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
+      [% IF pi.execute_service_checks == 0 %]<div class='infoBoxBadProcStatus'> - Service checks are disabled </div>[% END %]
     </td>
   </tr>
 </table>

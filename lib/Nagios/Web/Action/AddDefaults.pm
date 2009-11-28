@@ -45,6 +45,11 @@ before 'execute' => sub {
         $c->stash->{'remote_user'}  = '?';
     }
 
+    ###############################
+    # add program status
+    my $processinfo = $c->{'live'}->selectrow_hashref("GET status\nColumns: accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start");
+    $c->stash->{'pi'} = $processinfo;
+
     $c->stash->{'page'} = 'status'; # set a default page, so at least some css is loaded
 };
 

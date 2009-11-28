@@ -19,6 +19,7 @@
               <tr>
                 <td class='optBoxItem'>
                   <form method='post' action='cmd.cgi'>
+                    <input type="hidden" name="referer" value="[% referer %]">
                     <table cellspacing="0" cellpadding="0" class='optBox'>
                       <tr><td><input type='hidden' name='cmd_typ' value='[% c.request.parameters.cmd_typ %]'><input type='hidden' name='cmd_mod' value='2'></td></tr>
                       [% content %]

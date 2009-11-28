@@ -131,6 +131,8 @@ sub _process_scheduling_page {
 # create the process info page
 sub _process_process_info_page {
     my ( $self, $c ) = @_;
+
+    # all data is already set in addDefaults
 }
 
 
