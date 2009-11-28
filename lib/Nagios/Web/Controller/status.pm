@@ -105,10 +105,10 @@ Stats: has_been_checked = 0 as pending
     my $order = "ASC";
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
-                '1' => [ 'name',                'host name'       ],
-                '4' => [ 'last_check',          'last check time' ],
-                '6' => [ 'last_state_change',   'state duration'  ],
-                '8' => [ 'state',               'host status'     ],
+                '1' => [ 'name',                         'host name'       ],
+                '4' => [ ['last_check', 'name'],         'last check time' ],
+                '6' => [ ['last_state_change', 'name'],  'state duration'  ],
+                '8' => [ ['state', 'name'],              'host status'     ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     my $sortedhosts = Nagios::Web::Helper->sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
