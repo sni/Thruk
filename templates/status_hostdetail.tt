@@ -52,11 +52,11 @@
                   </tr>
                   <tr>
                     <td valign="top" align="left" class='filterName'>Service Status Types:</td>
-                    <td valign="top" align="left" class='filterValue'>All</td>
+                    <td valign="top" align="left" class='filterValue'>[% service_statustype_filtername %]</td>
                   </tr>
                   <tr>
                     <td valign="top" align="left" class='filterName'>Service Properties:</td>
-                    <td valign="top" align="left" class='filterValue'>Any</td>
+                    <td valign="top" align="left" class='filterValue'>[% service_prop_filtername %]</td>
                   </tr>
                 </table>
               </td>

@@ -224,6 +224,21 @@ sub _extend_filter {
     $c->stash->{'host_prop_filtername'} = $host_prop_filtername;
 
 
+    # service statustype filter (ok,warning,...)
+    my($service_statustype_filtername,$service_statustype_filter_service)
+            = $self->_get_service_statustype_filter($c->{'request'}->{'parameters'}->{'servicestatustypes'});
+    $servicefilter .= $service_statustype_filter_service;
+
+    $c->stash->{'show_filter_table'}             = 1 if $service_statustype_filter_service ne '';
+    $c->stash->{'service_statustype_filtername'} = $service_statustype_filtername;
+
+    # service props filter (downtime, acknowledged...)
+    my($service_prop_filtername,$service_prop_filter_service) = $self->_get_service_prop_filter($c->{'request'}->{'parameters'}->{'serviceprops'});
+    $servicefilter .= $service_prop_filter_service;
+
+    $c->stash->{'show_filter_table'}       = 1 if $service_prop_filter_service ne '';
+    $c->stash->{'service_prop_filtername'} = $service_prop_filtername;
+
     return($hostfilter,$servicefilter);
 }
 
@@ -248,17 +263,17 @@ sub _get_host_statustype_filter {
         }
         if($bits[1]) {  # 2 - up
             push @hoststatusfilter,    "Filter: state = 0\nFilter: has_been_checked = 1\nAnd: 2";
-            push @servicestatusfilter, "Filter: host_state = 0\nFilter: has_been_checked = 1\nAnd: 2";
+            push @servicestatusfilter, "Filter: host_state = 0\nFilter: host_has_been_checked = 1\nAnd: 2";
             push @hoststatusfiltername, 'Up';
         }
         if($bits[2]) {  # 4 - down
             push @hoststatusfilter,    "Filter: state = 1\nFilter: has_been_checked = 1\nAnd: 2";
-            push @servicestatusfilter, "Filter: host_state = 1\nFilter: has_been_checked = 1\nAnd: 2";
+            push @servicestatusfilter, "Filter: host_state = 1\nFilter: host_has_been_checked = 1\nAnd: 2";
             push @hoststatusfiltername, 'Down';
         }
-        if($bits[3]) {  # 4 - unreachable
+        if($bits[3]) {  # 8 - unreachable
             push @hoststatusfilter,    "Filter: state = 2\nFilter: has_been_checked = 1\nAnd: 2";
-            push @servicestatusfilter, "Filter: host_state = 2\nFilter: has_been_checked = 1\nAnd: 2";
+            push @servicestatusfilter, "Filter: host_state = 2\nFilter: host_has_been_checked = 1\nAnd: 2";
             push @hoststatusfiltername, 'Unreachable';
         }
         $hoststatusfiltername = join(' | ', @hoststatusfiltername);
@@ -403,6 +418,156 @@ sub _get_host_prop_filter {
         }
     }
     return($host_prop_filtername,$hostfilter,$servicefilter);
+}
+
+##########################################################
+sub _get_service_statustype_filter {
+    my ( $self, $number ) = @_;
+
+    $number = 31 if !defined $number or $number <= 0 or $number > 31;
+    my $servicestatusfiltername = 'All';
+    my $servicefilter           = '';
+    if($number and $number != 31) {
+        my @servicestatusfilter;
+        my @servicestatusfiltername;
+        my @bits = reverse split(/ */, unpack("B*", pack("n", int($number))));
+
+        if($bits[0]) {  # 1 - pending
+            push @servicestatusfilter, "Filter: has_been_checked = 0";
+            push @servicestatusfiltername, 'Pending';
+        }
+        if($bits[1]) {  # 2 - ok
+            push @servicestatusfilter, "Filter: state = 0\nFilter: has_been_checked = 1\nAnd: 2";
+            push @servicestatusfiltername, 'Ok';
+        }
+        if($bits[2]) {  # 4 - warning
+            push @servicestatusfilter, "Filter: state = 1\nFilter: has_been_checked = 1\nAnd: 2";
+            push @servicestatusfiltername, 'Warning';
+        }
+        if($bits[3]) {  # 8 - unknown
+            push @servicestatusfilter, "Filter: state = 3\nFilter: has_been_checked = 1\nAnd: 2";
+            push @servicestatusfiltername, 'Unknown';
+        }
+        if($bits[4]) {  # 16 - critical
+            push @servicestatusfilter, "Filter: state = 2\nFilter: has_been_checked = 1\nAnd: 2";
+            push @servicestatusfiltername, 'Critical';
+        }
+        $servicestatusfiltername = join(' | ', @servicestatusfiltername);
+        $servicestatusfiltername = 'All problems' if $number == 28;
+
+        if(scalar @servicestatusfilter > 1) {
+            $servicefilter .= join("\n", @servicestatusfilter)."\nOr: ".(scalar @servicestatusfilter)."\n";
+        }
+        elsif(scalar @servicestatusfilter == 1) {
+            $servicefilter .= $servicestatusfilter[0]."\n";
+        }
+    }
+    return($servicestatusfiltername,$servicefilter);
+}
+
+##########################################################
+sub _get_service_prop_filter {
+    my ( $self, $number ) = @_;
+
+    $number = 0 if !defined $number or $number <= 0 or $number > 1048575;
+    my $service_prop_filtername = 'Any';
+    my $servicefilter           = '';
+    if($number > 0) {
+        my @service_prop_filter;
+        my @service_prop_filtername;
+        my @bits = reverse split(/ */, unpack("B*", pack("N", int($number))));
+
+        if($bits[0]) {  # 1 - In Scheduled Downtime
+            push @service_prop_filter,         "Filter: scheduled_downtime_depth > 0";
+            push @service_prop_filtername,     'In Scheduled Downtime';
+        }
+        if($bits[1]) {  # 2 - Not In Scheduled Downtime
+            push @service_prop_filter,         "Filter: scheduled_downtime_depth = 0";
+            push @service_prop_filtername,     'Not In Scheduled Downtime';
+        }
+        if($bits[2]) {  # 4 - Has Been Acknowledged
+            push @service_prop_filter,         "Filter: acknowledged = 1";
+            push @service_prop_filtername,     'Has Been Acknowledged';
+        }
+        if($bits[3]) {  # 8 - Has Not Been Acknowledged
+            push @service_prop_filter,         "Filter: acknowledged = 0";
+            push @service_prop_filtername,     'Has Not Been Acknowledged';
+        }
+        if($bits[4]) {  # 16 - Checks Disabled
+            push @service_prop_filter,         "Filter: checks_enabled = 0";
+            push @service_prop_filtername,     'Active Checks Disabled';
+        }
+        if($bits[5]) {  # 32 - Checks Enabled
+            push @service_prop_filter,         "Filter: checks_enabled = 1";
+            push @service_prop_filtername,     'Active Checks Enabled';
+        }
+        if($bits[6]) {  # 64 - Event Handler Disabled
+            push @service_prop_filter,         "Filter: event_handler_enabled = 0";
+            push @service_prop_filtername,     'Event Handler Disabled';
+        }
+        if($bits[7]) {  # 128 - Event Handler Enabled
+            push @service_prop_filter,         "Filter: event_handler_enabled = 1";
+            push @service_prop_filtername,     'Event Handler Enabled';
+        }
+        if($bits[8]) {  # 256 - Flap Detection Enabled
+            push @service_prop_filter,         "Filter: flap_detection_enabled = 1";
+            push @service_prop_filtername,     'Flap Detection Enabled';
+        }
+        if($bits[9]) {  # 512 - Flap Detection Disabled
+            push @service_prop_filter,         "Filter: flap_detection_enabled = 0";
+            push @service_prop_filtername,     'Flap Detection Disabled';
+        }
+        if($bits[10]) {  # 1024 - Is Flapping
+            push @service_prop_filter,         "Filter: is_flapping = 1";
+            push @service_prop_filtername,     'Is Flapping';
+        }
+        if($bits[11]) {  # 2048 - Is Not Flapping
+            push @service_prop_filter,         "Filter: is_flapping = 0";
+            push @service_prop_filtername,     'Is Not Flapping';
+        }
+        if($bits[12]) {  # 4096 - Notifications Disabled
+            push @service_prop_filter,         "Filter: notifications_enabled = 0";
+            push @service_prop_filtername,     'Notifications Disabled';
+        }
+        if($bits[13]) {  # 8192 - Notifications Enabled
+            push @service_prop_filter,         "Filter: notifications_enabled = 1";
+            push @service_prop_filtername,     'Notifications Enabled';
+        }
+        if($bits[14]) {  # 16384 - Passive Checks Disabled
+            push @service_prop_filter,         "Filter: accept_passive_checks = 0";
+            push @service_prop_filtername,     'Passive Checks Disabled';
+        }
+        if($bits[15]) {  # 32768 - Passive Checks Enabled
+            push @service_prop_filter,         "Filter: accept_passive_checks = 1";
+            push @service_prop_filtername,     'Passive Checks Enabled';
+        }
+        if($bits[16]) {  # 65536 - Passive Checks
+            push @service_prop_filter,         "Filter: check_type = 1";
+            push @service_prop_filtername,     'Passive Checks';
+        }
+        if($bits[17]) {  # 131072 - Active Checks
+            push @service_prop_filter,         "Filter: check_type = 0";
+            push @service_prop_filtername,     'Active Checks';
+        }
+        if($bits[18]) {  # 262144 - In Hard State
+            push @service_prop_filter,         "Filter: state_type = 1";
+            push @service_prop_filtername,     'In Hard State';
+        }
+        if($bits[19]) {  # 524288 - In Soft State
+            push @service_prop_filter,         "Filter: state_type = 0";
+            push @service_prop_filtername,     'In Soft State';
+        }
+
+        $service_prop_filtername = join(' & ', @service_prop_filtername);
+
+        if(scalar @service_prop_filter > 1) {
+            $servicefilter .= join("\n", @service_prop_filter)."\nAnd: ".(scalar @service_prop_filter)."\n";
+        }
+        elsif(scalar @service_prop_filter == 1) {
+            $servicefilter .= $service_prop_filter[0]."\n";
+        }
+    }
+    return($service_prop_filtername,$servicefilter);
 }
 
 =head1 AUTHOR

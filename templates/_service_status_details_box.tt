@@ -4,11 +4,11 @@
     <td>
       <table border="1" class='serviceTotals'>
         <tr>
-          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15'>Ok</a></th>
-          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15'>Warning</a></th>
-          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15'>Unknown</a></th>
-          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15'>Critical</a></th>
-          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15'>Pending</a></th>
+          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15'>Ok</a></th>
+          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15'>Warning</a></th>
+          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15'>Unknown</a></th>
+          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15'>Critical</a></th>
+          <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15'>Pending</a></th>
         </tr>
         <tr>
           <td class='[% IF service_stats.ok > 0 %]serviceTotalsOK[% ELSE %]serviceTotals[% END %]'>[% service_stats.ok %]</td>

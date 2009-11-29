@@ -115,7 +115,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Current Attempt:</td>
-                            <td class='dataVal'>[% service.current_attempt %]/[% service.max_check_attempts %]&nbsp;&nbsp;([% IF service.state_type != 0 %]HARD[% ELSE %]SOFT[% END%] state)</td>
+                            <td class='dataVal'>[% service.current_attempt %]/[% service.max_check_attempts %]&nbsp;&nbsp;([% IF service.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Check Time:</td>
