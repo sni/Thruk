@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 use Template;
+use Time::HiRes qw( usleep );
 
 =head1 NAME
 
@@ -50,6 +51,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $comment_author          = $c->user->username;
         $comment_author             = $c->user->alias if defined $c->user->alias;
         $c->stash->{comment_author} = $comment_author;
+        $c->stash->{referer}        = $c->{'request'}->{'headers'}->{'referer'} || '';
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
     }
@@ -88,13 +90,15 @@ sub _do_send_command {
     $c->log->info("sending: $cmd");
     $c->{'live'}->do($cmd);
 
-    # view our success page
-    $c->stash->{template} = 'cmd_success.tt';
-
-    # send a dummy command because livestatus breaks after a command
-    #eval {
-    #    my $dummy = $c->{'live'}->selectall_arrayref("GET downtimes", { Slice => {} });
-    #};
+    # view our success page or redirect to referer
+    my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';
+    if($referer ne '') {
+        # wait 0.3 seconds, so the command is probably already processed
+        usleep(300000);
+        $c->redirect($referer);
+    } else {
+        $c->stash->{template} = 'cmd_success.tt';
+    }
 }
 
 =head1 AUTHOR
