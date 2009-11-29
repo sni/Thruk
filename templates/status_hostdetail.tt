@@ -85,9 +85,11 @@
           <th class='status'>Status Information</th>
         </tr>
 
+        [% host_count = 0 %]
         [%  FOREACH h = hosts %]
-        [% SET class = 'statusEven' IF loop.even %]
-        [% SET class = 'statusOdd'  IF loop.odd %]
+        [% host_count = host_count + 1 %]
+        [% SET class = 'statusEven' IF loop.odd %]
+        [% SET class = 'statusOdd'  IF loop.even %]
 
         [% IF h.has_been_checked == 0 %]
           [% statusClass='statusHOSTPENDING' %]
@@ -119,24 +121,12 @@
                 <td align="right" valign="center">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      [% IF h.acknowledged %]
-                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]#comments"><img src="/nagios/images/ack.gif" alt="This host problem has been acknowledged" title="This host problem has been acknowledged" border="0" height="20" width="20"></a></td>
-                      [% END %]
-                      [% IF h.comment_count > 0 %]
-                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]#comments"><img src="/nagios/images/comment.gif" alt="This host has [% h.comment_count %] comment associated with it" title="This host has [% h.comment_count %] comment associated with it" border="0" height="20" width="20"></a></td>
-                      [% END %]
-                      [% IF h.notifications_enabled == 0 %]
-                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20"></a></td>
-                      [% END %]
-                      [% IF h.active_checks_enabled == 0 %]
-                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20"></a></td>
-                      [% END %]
-                      [% IF h.is_flapping %]
-                      <td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>
-                      [% END %]
-                      [% IF h.scheduled_downtime_depth > 0 %]
-                      <td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" title="This host is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>
-                      [% END %]
+                      [% IF h.acknowledged                 %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]#comments"><img src="/nagios/images/ack.gif" alt="This host problem has been acknowledged" title="This host problem has been acknowledged" border="0" height="20" width="20"></a></td>[% END %]
+                      [% IF h.comment_count > 0            %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]#comments"><img src="/nagios/images/comment.gif" alt="This host has [% h.comment_count %] comment associated with it" title="This host has [% h.comment_count %] comment associated with it" border="0" height="20" width="20"></a></td>[% END %]
+                      [% IF h.notifications_enabled == 0   %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
+                      [% IF h.active_checks_enabled == 0   %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
+                      [% IF h.is_flapping                  %]<td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>[% END %]
+                      [% IF h.scheduled_downtime_depth > 0 %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]"><img src="/nagios/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" title="This host is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>[% END %]
                       <td><a href='status.cgi?host=[% h.name %]'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a></td>
                     </tr>
                   </table>
@@ -146,14 +136,13 @@
           </td>
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]' nowrap>[% date.format(h.last_check, '%Y-%m-%d  %H:%M:%S') %]</td>
-          <td class='[% class %]' nowrap>[% FILTER duration %][% 0 - h.last_state_change %][% END %]</td>
+          <td class='[% class %]' nowrap>[% IF h.last_state_change %][% FILTER duration %][% 0 - h.last_state_change %][% END %][% ELSE %][% FILTER duration %][% 0 - pi.program_start %][% END %]+[% END %]</td>
           <td class='[% class %]' valign='center'>[% IF h.has_been_checked == 0 %]Host check scheduled for [% date.format(h.next_check, '%a %b %e %H:%M:%S %Z %Y') %][% ELSE %][% h.plugin_output %][% END %]&nbsp;</td>
         </tr>
-    [% IF loop.last %]
+        [% END %]
+
       </table>
     </div><br>
-    <div class='itemTotalsTitle'>[% loop.count %] Matching Host Entries Displayed</div>
-    [% END %]
-        [% END %]
+    <div class='itemTotalsTitle'>[% host_count %] Matching Host Entries Displayed</div>
 
 [% INCLUDE _footer.tt %]

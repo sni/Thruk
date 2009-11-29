@@ -39,6 +39,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 2) {
         $infoBoxTitle = 'Service Information';
+        $self->_process_service_page($c);
     }
     if($type == 3) {
         $infoBoxTitle = 'All Host and Service Comments';
@@ -79,8 +80,9 @@ sub _process_downtimes_page {
     $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = ", { Slice => {} });
     $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != ", { Slice => {} });
 }
+
 ##########################################################
-# create the process info page
+# create the host info page
 sub _process_host_page {
     my ( $self, $c ) = @_;
 
@@ -90,13 +92,24 @@ sub _process_host_page {
     my $host = $c->{'live'}->selectrow_hashref("GET hosts\nFilter: name = $hostname");
     $c->detach('/error/index/5') unless defined $host;
 
-    $c->stash->{'host'}     = $host;
+    $c->stash->{'host'} = $host;
+}
 
-    #my $comments = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: host_name = $hostname", { Slice => {} });
-    #use Data::Dumper;
-    #$Data::Dumper::Sortkeys = 1;
-    #print Dumper($comments);
-    #$c->stash->{'comments'} = $comments;
+##########################################################
+# create the service info page
+sub _process_service_page {
+    my ( $self, $c ) = @_;
+
+    my $hostname = $c->{'request'}->{'parameters'}->{'host'};
+    $c->detach('/error/index/5') unless defined $hostname;
+
+    my $servicename = $c->{'request'}->{'parameters'}->{'service'};
+    $c->detach('/error/index/5') unless defined $servicename;
+
+    my $service = $c->{'live'}->selectrow_hashref("GET services\nFilter: host_name = $hostname\nFilter: description = $servicename");
+    $c->detach('/error/index/5') unless defined $service;
+
+    $c->stash->{'service'} = $service;
 }
 
 ##########################################################

@@ -5,7 +5,7 @@ Todo List:
 - separate static content from templates
 - reload cgi.cfg if changed
 - is_authorized_for_read_only in Catalyst::Authentication::Store::FromCGIConf
-- comments on extinfo type 1
+- comments on extinfo type 1/2
 - * in the cgi.cfg
 - no commands if authorization is disabled
 - overload role authentication

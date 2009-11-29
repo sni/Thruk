@@ -42,6 +42,65 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 }
 
 ##########################################################
+# create the status details page
+sub _process_details_page {
+    my ( $self, $c ) = @_;
+
+    # which host to display?
+    my $host          = $c->{'request'}->{'parameters'}->{'host'} || 'all';
+    my $hostfilter    = "";
+    my $servicefilter = "";
+    if($host ne 'all') {
+        $hostfilter    = "Filter: name = $host\n";
+        $servicefilter = "Filter: host_name = $host\n";
+    }
+
+    # fill the host/service totals box
+    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
+
+    # then add some more filter based on get parameter
+    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
+
+    # TODO: add comments into hosts.comments and hosts.comment_count and services.comments and services.comment_count
+    my $services = $c->{'live'}->selectall_arrayref("GET services\n$servicefilter", { Slice => {} });
+    for my $services (@{$services}) {
+        $services->{'comment_count'}      = 0;
+        $services->{'host_comment_count'} = 0;
+
+        # ordering by duration needs this
+        $services->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
+        $services->{'last_state_change_plus'} = $services->{'last_state_change'} if $services->{'last_state_change'};
+    }
+
+    # do the sort
+    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
+    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $order = "ASC";
+    $order = "DESC" if $sorttype == 2;
+    my $sortoptions = {
+                '1' => [ ['host_name', 'description'],                              'host name'       ],
+                '2' => [ ['description', 'host_name'],                              'service name'    ],
+                '3' => [ ['has_been_checked', 'state', 'host_name', 'description'], 'service status'  ],
+                '4' => [ ['last_check', 'host_name', 'description'],                'last check time' ],
+                '5' => [ ['current_attempt', 'host_name', 'description'],           'attempt number'  ],
+                '6' => [ ['last_state_change_plus', 'host_name', 'description'],    'state duration'  ],
+    };
+    $sortoption = 1 if !defined $sortoptions->{$sortoption};
+    my $sortedservices = Nagios::Web::Helper->sort($c, $services, $sortoptions->{$sortoption}->[0], $order);
+    if($sortoption == 6) { @{$sortedservices} = reverse @{$sortedservices}; }
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($sortedservices);
+#for my $ser (@{$sortedservices}) {
+#    print $ser->{'last_state_change'}." ".$ser->{'host_name'}." ".$ser->{'description'}."<br>\n";
+#}
+    $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'orderdir'}      = $order;
+    $c->stash->{'host'}          = $host;
+    $c->stash->{'services'}      = $sortedservices;
+}
+
+##########################################################
 # create the hostdetails page
 sub _process_hostdetails_page {
     my ( $self, $c ) = @_;
@@ -65,6 +124,10 @@ sub _process_hostdetails_page {
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n$hostfilter", { Slice => {} });
     for my $host (@{$hosts}) {
         $host->{'comment_count'} = 0;
+
+        # ordering by duration needs this
+        $host->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
+        $host->{'last_state_change_plus'} = $host->{'last_state_change'} if $host->{'last_state_change'};
     }
 
     # do the sort
@@ -73,13 +136,14 @@ sub _process_hostdetails_page {
     my $order = "ASC";
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
-                '1' => [ 'name',                         'host name'       ],
-                '4' => [ ['last_check', 'name'],         'last check time' ],
-                '6' => [ ['last_state_change', 'name'],  'state duration'  ],
-                '8' => [ ['state', 'name'],              'host status'     ],
+                '1' => [ 'name',                                 'host name'       ],
+                '4' => [ ['last_check', 'name'],                 'last check time' ],
+                '6' => [ ['last_state_change_plus', 'name'],     'state duration'  ],
+                '8' => [ ['has_been_checkend', 'state', 'name'], 'host status'     ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     my $sortedhosts = Nagios::Web::Helper->sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
+    if($sortoption == 6) { @{$sortedhosts} = reverse @{$sortedhosts}; }
 
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;

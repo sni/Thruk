@@ -25,7 +25,7 @@
       <table border="1" class='serviceTotals'>
         <tr>
           [% totalProblems = service_stats.warning + service_stats.critical + service_stats.unknown %]
-          [% total         = service_stats.ok + totalProblems %]
+          [% total         = service_stats.ok + totalProblems + service_stats.pending %]
           <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail&amp;servicestatustypes=28&amp;hoststatustypes=15'><i>All Problems</i></a></th>
           <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail&amp;hoststatustypes=15'><i>All Types</i></a></th>
         </tr>
