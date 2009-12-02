@@ -28,6 +28,10 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
     if(!defined $c->{'cgi_cfg'} or scalar keys %{$c->{'cgi_cfg'}} == 0) { $arg1 = 4; }
 
     my $errors = {
+        '99'  => {
+            'mess' => '',
+            'dscr' => '',
+        },
         '0'  => {
             'mess' => 'unknown error: '.$arg1,
             'dscr' => 'this is a internal error',
@@ -63,12 +67,10 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
-    $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};
-    $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
-
-    #$c->stash->{title}              = 'Current Network Status';
-    #$c->stash->{infoBoxTitle}       = 'Current Network Status';
-    #$c->stash->{page}               = 'status';
+    if($arg1 != 99) {
+        $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};
+        $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
+    }
 
     Nagios::Web->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
     Nagios::Web->config->{'custom-error-message'}->{'response-status'}   = 403;

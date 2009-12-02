@@ -167,8 +167,8 @@
                 <table border="0" width="100%">
                   [% IF host_stats.down_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=42">[% host_stats.down_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
                   [% IF host_stats.down_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=1">[% host_stats.down_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
-                  [% IF host_stats.down_and_ack > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=4">[% host_stats.down_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
-                  [% IF host_stats.down_and_disabled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=16">[% host_stats.down_and_disabled %] Disabled</a></td></tr></tbody>[% END %]
+                  [% IF host_stats.down_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=4">[% host_stats.down_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
+                  [% IF host_stats.down_and_disabled > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=4&amp;hostprops=16">[% host_stats.down_and_disabled %] Disabled</a></td></tr></tbody>[% END %]
                 </table>
               </td>
             </tr>
@@ -181,9 +181,10 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF host_stats.unreachable > 0 %]
-                  <tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=42">[% host_stats.unreachable %] Unhandled Problems</a></td></tr></tbody>
-                  [% END %]
+                  [% IF host_stats.unreachable_and_unhandled > 0 %]<tbody><tr><td class="hostImportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=42">[% host_stats.unreachable_and_unhandled %] Unhandled Problems</a></td></tr></tbody>[% END %]
+                  [% IF host_stats.unreachable_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=1">[% host_stats.unreachable_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
+                  [% IF host_stats.unreachable_and_ack > 0       %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=4">[% host_stats.unreachable_and_ack %] Acknowledged</a></td></tr></tbody>[% END %]
+                  [% IF host_stats.unreachable_and_disabled > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=8&amp;hostprops=16">[% host_stats.unreachable_and_disabled %] Disabled</a></td></tr></tbody>[% END %]
                 </table>
               </td>
             </tr>
@@ -196,9 +197,8 @@
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
                 <table border="0" width="100%">
-                  [% IF host_stats.up_and_disabled > 0 %]
-                  <tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2&amp;hostprops=16">[% host_stats.up_and_disabled %] Disabled</a></td></tr>
-                  [% END %]
+                  [% IF host_stats.up_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2&amp;hostprops=1">[% host_stats.up_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
+                  [% IF host_stats.up_and_disabled > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=2&amp;hostprops=16">[% host_stats.up_and_disabled %] Disabled</a></td></tr></tbody>[% END %]
                 </table>
               </td>
             </tr>
@@ -210,7 +210,10 @@
               <td valign="bottom" width="25">&nbsp;</td>
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
-                <table border="0" width="100%"></table>
+                <table border="0" width="100%">
+                  [% IF host_stats.pending_and_scheduled > 0 %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=1&amp;hostprops=1">[% host_stats.pending_and_scheduled %] Scheduled</a></td></tr></tbody>[% END %]
+                  [% IF host_stats.pending_and_disabled > 0  %]<tbody><tr><td class="hostUnimportantProblem" width="100%"><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=1&amp;hostprops=16">[% host_stats.pending_and_disabled %] Disabled</a></td></tr></tbody>[% END %]
+                </table>
               </td>
             </tr>
           </table>
@@ -235,7 +238,13 @@
               <td valign="bottom" width="25">&nbsp;&nbsp;&nbsp;</td>
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
-                <table border="0" width="100%"></table>
+                <table border="0" width="100%">
+                  [% IF service_stats.critical_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;hoststatustypes=3&amp;serviceprops=42'>[% service_stats.critical_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF service_stats.critical_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;hoststatustypes=12'>[% service_stats.critical_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
+                  [% IF service_stats.critical_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=1'>[% service_stats.critical_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF service_stats.critical_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=4'>[% service_stats.critical_and_ack %] Acknowledged</a></td></tr>[% END %]
+                  [% IF service_stats.critical_and_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=16&amp;serviceprops=16'>[% service_stats.critical_and_disabled %] Disabled</a></td></tr>[% END %]
+                </table>
               </td>
             </tr>
           </table>
@@ -246,7 +255,13 @@
               <td valign="bottom" width="25">&nbsp;</td>
               <td width="10">&nbsp; </td>
               <td valign="top" width="100%">
-                <table border="0" width="100%"></table>
+                <table border="0" width="100%">
+                  [% IF service_stats.warning_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;hoststatustypes=3&amp;serviceprops=42'>[% service_stats.warning_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF service_stats.warning_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;hoststatustypes=12'>[% service_stats.warning_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
+                  [% IF service_stats.warning_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=1'>[% service_stats.warning_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF service_stats.warning_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=4'>[% service_stats.warning_and_ack %] Acknowledged</a></td></tr>[% END %]
+                  [% IF service_stats.warning_and_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=4&amp;serviceprops=16'>[% service_stats.warning_and_disabled %] Disabled</a></td></tr>[% END %]
+                </table>
               </td>
             </tr>
           </table>
@@ -257,7 +272,13 @@
               <td valign="bottom" width="25">&nbsp;</td>
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
-                <table border="0" width="100%"></table>
+                <table border="0" width="100%">
+                  [% IF service_stats.unknown_and_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;hoststatustypes=3&amp;serviceprops=42'>[% service_stats.unknown_and_unhandled %] Unhandled Problems</a></td></tr>[% END %]
+                  [% IF service_stats.unknown_on_down_host > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;hoststatustypes=12'>[% service_stats.unknown_on_down_host %] on Problem Hosts</a></td></tr>[% END %]
+                  [% IF service_stats.unknown_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=1'>[% service_stats.unknown_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF service_stats.unknown_and_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=4'>[% service_stats.unknown_and_ack %] Acknowledged</a></td></tr>[% END %]
+                  [% IF service_stats.unknown_and_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=8&amp;serviceprops=16'>[% service_stats.unknown_and_disabled %] Disabled</a></td></tr>[% END %]
+                </table>
               </td>
             </tr>
           </table>
@@ -268,7 +289,10 @@
               <td valign="bottom" width="25">&nbsp;</td>
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
-                <table border="0" width="100%"></table>
+                <table border="0" width="100%">
+                  [% IF service_stats.ok_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=2&amp;serviceprops=1'>[% service_stats.ok_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF service_stats.ok_and_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=2&amp;serviceprops=16'>[% service_stats.ok_and_disabled %] Disabled</a></td></tr>[% END %]
+                </table>
               </td>
             </tr>
           </table>
@@ -279,7 +303,10 @@
               <td valign="bottom" width="25">&nbsp;</td>
               <td width="10">&nbsp;</td>
               <td valign="top" width="100%">
-                <table border="0" width="100%"></table>
+                <table border="0" width="100%">
+                  [% IF service_stats.pending_and_scheduled > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=1&amp;serviceprops=1'>[% service_stats.pending_and_scheduled %] Scheduled</a></td></tr>[% END %]
+                  [% IF service_stats.pending_and_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?host=all&amp;type=detail&amp;servicestatustypes=1&amp;serviceprops=16'>[% service_stats.pending_and_disabled %] Disabled</a></td></tr>[% END %]
+                </table>
               </td>
             </tr>
           </table>
@@ -301,96 +328,186 @@
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
+              [% IF pi.enable_flap_detection == 1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='/nagios/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled'></a></td>
+              [% ELSE %]
+              <td valign="top"><a href='cmd.cgi?cmd_typ=61'><img src='/nagios/images/tacdisabled.png' border="0" alt='Flap Detection Disabled' title='Flap Detection Disabled'></a></td>
+              [% END %]
               <td width="10">&nbsp;</td>
+
+              [% IF pi.enable_flap_detection == 0 %]
+              <td valign="center" width="100%" class='featureDisabledFlapDetection'>N/A</td>
+              [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledFlapDetection'>
                 <table border="0" width="100%">
                   <tr>
+                    [% IF service_stats.flapping_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledServiceFlapDetection'>All Services Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledServiceFlapDetection'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=512'>[% service_stats.flapping_disabled %] Service Disabled</a></td>
+                    [% END %]
                   </tr>
                   <tr>
+                    [% IF service_stats.flapping > 0 %]
+                    <td width="100%" class='featureItemServicesFlapping'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=1024'>[% service_stats.flapping %] Services Flapping</a></td>
+                    [% ELSE %]
                     <td width="100%" class='featureItemServicesNotFlapping'>No Services Flapping</td>
+                    [% END %]
                   </tr>
                   <tr>
+                    [% IF host_stats.flapping_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostFlapDetection'>All Hosts Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledHostFlapDetection'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=256'>[% host_stats.flapping_disabled %] Host Disabled</a></td>
+                    [% END %]
                   </tr>
                   <tr>
+                    [% IF host_stats.flapping %]
+                    <td width="100%" class='featureItemHostsFlapping'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=1024'>[% host_stats.flapping %] Hosts Flapping</a></td>
+                    [% ELSE %]
                     <td width="100%" class='featureItemHostsNotFlapping'>No Hosts Flapping</td>
+                    [% END %]
                   </tr>
                 </table>
               </td>
+              [% END %]
             </tr>
           </table>
         </td>
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
+              [% IF pi.enable_notifications == 1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='/nagios/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled'></a></td>
+              [% ELSE %]
+              <td valign="top"><a href='cmd.cgi?cmd_typ=12'><img src='/nagios/images/tacdisabled.png' border="0" alt='Notifications Disabled' title='Notifications Disabled'></a></td>
+              [% END %]
               <td width="10">&nbsp;</td>
+              [% IF pi.enable_notifications == 0 %]
+              <td valign="center" width="100%" class='featureDisabledNotifications'>N/A</td>
+              [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledNotifications'>
                 <table border="0" width="100%">
                   <tr>
+                    [% IF service_stats.notifications_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledServiceNotifications'>All Services Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledServiceNotifications'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=4096'>[% service_stats.notifications_disabled %] Services Disabled</a></td>
+                    [% END %]
                   </tr>
                   <tr>
+                    [% IF host_stats.notifications_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostNotifications'>All Hosts Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledHostNotifications'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=4096'>[% host_stats.notifications_disabled %] Host Disabled</a></td>
+                    [% END %]
                   </tr>
                 </table>
               </td>
+              [% END %]
             </tr>
           </table>
         </td>
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
+              [% IF pi.enable_event_handlers == 1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='/nagios/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled'></a></td>
+              [% ELSE %]
+              <td valign="top"><a href='cmd.cgi?cmd_typ=41'><img src='/nagios/images/tacdisabled.png' border="0" alt='Event Handlers Disabled' title='Event Handlers Disabled'></a></td>
+              [% END %]
               <td width="10">&nbsp;</td>
+
+              [% IF pi.enable_event_handlers == 0 %]
+              <td valign="center" width="100%" class='featureDisabledHandlers'>N/A</td>
+              [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledHandlers'>
                 <table border="0" width="100%">
                   <tr>
+                    [% IF service_stats.eventhandler_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledServiceHandlers'>All Services Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledServiceHandlers'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=64'>[% service_stats.eventhandler_disabled %] Service Disabled</a></td>
+                    [% END %]
                   </tr>
                   <tr>
+                    [% IF host_stats.eventhandler_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostHandlers'>All Hosts Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledHostHandlers'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=64'>[% host_stats.eventhandler_disabled %] Hosts Disabled</a></td>
+                    [% END %]
                   </tr>
                 </table>
               </td>
+              [% END %]
             </tr>
           </table>
         </td>
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
+              [% IF pi.execute_service_checks == 1 %]
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacenabled.png' border='0' alt='Active Checks Enabled' title='Active Checks Enabled'></a></td>
+              [% ELSE %]
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacdisabled.png' border='0' alt='Active Checks Disabled' title='Active Checks Disabled'></a></td>
+              [% END %]
               <td width="10">&nbsp;</td>
+              [% IF pi.execute_service_checks == 0 %]
+              <td valign="center" width="100%" class='featureDisabledActiveChecks'>N/A</td>
+              [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledActiveChecks'>
                 <table border="0" width="100%">
                   <tr>
+                    [% IF service_stats.active_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledActiveServiceChecks'>All Services Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledActiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=16'>[% service_stats.active_checks_disabled %] Services Disabled</a></td
+                    [% END %]
                   </tr>
                   <tr>
+                    [% IF host_stats.active_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledActiveHostChecks'>All Hosts Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledActiveHostChecks'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=16'>[% host_stats.active_checks_disabled %] Hosts Disabled</a></td>
+                    [% END %]
                   </tr>
                 </table>
               </td>
+              [% END %]
             </tr>
           </table>
         </td>
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
+              [% IF pi.accept_passive_service_checks == 1 %]
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacenabled.png' border='0' alt='Passive Checks Enabled' title='Passive Checks Enabled'></a></td>
+              [% ELSE %]
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacdisabled.png' border='0' alt='Passive Checks Disabled' title='Passive Checks Disabled'></a></td>
+              [% END %]
               <td width="10">&nbsp;</td>
+              [% IF pi.accept_passive_service_checks == 0 %]
+              <td valign="center" width="100%" class='featureDisabledPassiveChecks'>N/A</td>
+              [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledPassiveChecks'>
                 <table border="0" width="100%">
                   <tr>
+                    [% IF service_stats.passive_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledPassiveServiceChecks'>All Services Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledPassiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=16384'>[% service_stats.passive_checks_disabled %] Service Disabled</a></td>
+                    [% END %]
                   </tr>
                   <tr>
+                    [% IF host_stats.passive_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledPassiveHostChecks'>All Hosts Enabled</td>
+                    [% ELSE %]
+                    <td width="100%" class='featureItemDisabledPassiveHostChecks'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=16384'>[% host_stats.passive_checks_disabled %] Host Disabled</a></td>
+                    [% END %]
                   </tr>
                 </table>
               </td>
+              [% END %]
             </tr>
           </table>
         </td>
