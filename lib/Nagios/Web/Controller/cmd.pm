@@ -39,8 +39,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
 
     # command commited?
-    if(defined $cmd_mod) {
-        $self->_do_send_command($c);
+    if(defined $cmd_mod and $self->_do_send_command($c)) {
+        # success page is already displayed
     } else {
         # no command submited, view commands page
         if($cmd_typ == 55 or $cmd_typ == 56) {
@@ -51,7 +51,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $comment_author          = $c->user->username;
         $comment_author             = $c->user->alias if defined $c->user->alias;
         $c->stash->{comment_author} = $comment_author;
-        $c->stash->{referer}        = $c->{'request'}->{'headers'}->{'referer'} || '';
+        $c->stash->{referer}        = $c->{'request'}->{'parameters'}->{'referer'} || $c->{'request'}->{'headers'}->{'referer'} || '';
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
     }
@@ -85,6 +85,25 @@ sub _do_send_command {
     # unauthorized?
     $c->detach('/error/index/8') unless $cmd ne '';
 
+    # check for required fields
+    my($form,@errors);
+    $tt->process( 'cmd/cmd_typ_'.$cmd_typ.'.tt', { c => $c, cmd_tt => '_get_content.tt' }, \$form ) || die $tt->error();
+    if(my @matches = $form =~ m/class='(optBoxRequiredItem|optBoxItem)'>(.*?):<\/td>.*?input\s+type='.*?'\s+name='(.*?)'/gmx ) {
+        while(scalar @matches > 0) {
+            my $req  = shift @matches;
+            my $name = shift @matches;
+            my $key  = shift @matches;
+            if($req eq 'optBoxRequiredItem' and ( !defined $c->{'request'}->{'parameters'}->{$key} or $c->{'request'}->{'parameters'}->{$key} =~ m/^\s*$/mx)) {
+                push @errors, { message => $name.' is a required field' };
+            }
+        }
+        if(scalar @errors > 0) {
+            delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+            $c->stash->{'form_errors'} = \@errors;
+            return(0);
+        }
+    }
+
     # send the command
     $cmd = "COMMAND [".time()."] $cmd";
     $c->log->info("sending: $cmd");
@@ -99,6 +118,7 @@ sub _do_send_command {
     } else {
         $c->stash->{template} = 'cmd_success.tt';
     }
+    return(1);
 }
 
 =head1 AUTHOR

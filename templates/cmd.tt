@@ -9,6 +9,15 @@
         <td align="right" valign="bottom" width="33%"></td>
       </tr>
     </table>
+    [% error_count = 0 %]
+    [% FOREACH e = form_errors %]
+    [% error_count = error_count + 1 %]
+    <div class='errorMessage'>[% e.message %]</div>
+    [% END %]
+    [% IF error_count > 0 %]
+    <br>
+    <div align='center'>Please correct the errors above[% IF referer %] or <a href="[% referer %]">go back</a>[% END %]</div><br>
+    [% END %]
     <div align="center" class='cmdType'>[% request %]</div><br>
     <div align='center'>
       <table border="0" width="90%">
