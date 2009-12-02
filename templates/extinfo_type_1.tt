@@ -119,7 +119,10 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Next Scheduled Active Check:&nbsp;&nbsp;</td>
-                            <td class='dataVal'>[% IF host.next_check %][% date.format(host.next_check, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
+                            <td class='dataVal'>
+                              [% IF host.next_check %][% date.format(host.next_check, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]
+                              [% IF host.is_executing > 0 %]<img src="/nagios/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20">[% END %]
+                            </td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Last State Change:</td>

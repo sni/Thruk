@@ -17,7 +17,7 @@
     [% service_desc         = c.request.parameters.service %]
     [% host_name            = c.request.parameters.host %]
 
-    SCHEDULE_SVC_CHECK;[% sprintf("%s;%s;%lu",host_name,service_desc,start_time) %]
+    [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_SVC_CHECK[% ELSE %]SCHEDULE_SVC_CHECK[% END %];[% sprintf("%s;%s;%lu",host_name,service_desc,start_time) %]
 [% END %]
 
 [%# definition of the html form data #%]

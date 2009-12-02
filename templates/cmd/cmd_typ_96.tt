@@ -16,7 +16,7 @@
     [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
     [% host_name            = c.request.parameters.host %]
 
-    SCHEDULE_HOST_CHECK;[% sprintf("%s;%lu",host_name,start_time) %]
+    [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_HOST_CHECK[% ELSE %]SCHEDULE_HOST_CHECK[% END %];[% sprintf("%s;%lu",host_name,start_time) %]
 [% END %]
 
 [%# definition of the html form data #%]

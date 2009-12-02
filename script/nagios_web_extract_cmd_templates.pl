@@ -391,7 +391,7 @@ for my $file (sort @opt_files) {
                 } else {
                     warn("commands with 'force_check' checkbox have to be defined explicitly ($number)");
                 }
-                #$cmd = "[% IF c.request.parameters.force_check %]".$choice[0]."[% ELSE %]".$choice[1]."[% END %]" if defined $choice[0];
+                $cmd = "[% IF c.request.parameters.force_check %]".$choice[0]."[% ELSE %]".$choice[1]."[% END %]" if defined $choice[0];
             }
 
             $command_args = ';'.$command_args if $command_args ne '';
