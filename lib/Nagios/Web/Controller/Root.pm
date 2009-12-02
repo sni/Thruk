@@ -65,9 +65,20 @@ sub default :Path {
 
 ######################################
 # index page
+# we dont want index.html in the url
 sub index :Path {
     my ( $self, $c ) = @_;
-    $c->redirect("/index.html");
+    $c->redirect("/nagios/");
+}
+# we dont want index.html in the url
+sub index_html : Path('index.html') {
+    my ( $self, $c ) = @_;
+    $c->redirect('/nagios/');
+}
+# but if used not via fastcgi/apache, there is no way around
+sub nagios_index_html : Path('/nagios/') {
+    my ( $self, $c ) = @_;
+    $c->redirect('/nagios/index.html');
 }
 
 ######################################

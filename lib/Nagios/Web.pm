@@ -42,10 +42,11 @@ __PACKAGE__->config('name'                   => 'Nagios::Web',
                         ENCODING           => 'utf8',
                         INCLUDE_PATH       =>  'templates',
                         FILTERS            => {
-                                                "duration"  => \&Nagios::Web::Helper::filter_duration,
+                                                'duration'  => \&Nagios::Web::Helper::filter_duration,
                                             },
                         PRE_DEFINE         => {
-                                                "sprintf"   => sub { my $format = shift; sprintf $format, @_; },
+                                                'sprintf'   => sub { my $format = shift; sprintf $format, @_; },
+                                                'duration'  => \&Nagios::Web::Helper::filter_duration,
                                             },
 #                        DEBUG => 'all',
                     },

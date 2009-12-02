@@ -168,7 +168,7 @@
         </td>
         <td class='status[% state %]'>[% state %]</td>
         <td class='[% serviceclass %]' nowrap>[% date.format(s.last_check, '%Y-%m-%d  %H:%M:%S') %]</td>
-        <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% FILTER duration %][% 0 - s.last_state_change %][% END %][% ELSE %][% FILTER duration %][% 0 - pi.program_start %][% END %]+[% END %]</td>
+        <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(0 - s.last_state_change) %][% ELSE %][% duration(0 - pi.program_start) %]+[% END %]</td>
         <td class='[% serviceclass %]'>[% s.current_attempt %]/[% s.max_check_attempts %]</td>
         <td class='[% serviceclass %]' valign='center'>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, '%a %b %e %H:%M:%S %Z %Y') %][% ELSE %][% s.plugin_output %][% END %]&nbsp;</td>
       </tr>

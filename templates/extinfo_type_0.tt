@@ -30,7 +30,7 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>Total Running Time:</td>
-                      <td class='dataVal'>[% FILTER duration %][% date.now - pi.program_start %][% END %]</td>
+                      <td class='dataVal'>[% duration(date.now - pi.program_start) %]</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Last External Command Check:</td>
