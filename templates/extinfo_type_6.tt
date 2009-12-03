@@ -83,7 +83,7 @@
           <td class='[% class %]'>[% date.format(d.start_time, '%Y-%m-%d  %H:%M:%S') %]</td>
           <td class='[% class %]'>[% date.format(d.end_time, '%Y-%m-%d  %H:%M:%S') %]</td>
           <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
-          <td class='[% class %]'>[% duration(d.end_time - d.start_time %]</td>
+          <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
           <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
