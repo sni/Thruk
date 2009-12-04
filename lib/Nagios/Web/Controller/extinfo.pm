@@ -49,6 +49,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 5) {
         $infoBoxTitle = 'Hostgroup Information';
+        $self->_process_hostgroup_cmd_page($c);
     }
     if($type == 6) {
         $infoBoxTitle = 'All Host and Service Scheduled Downtime';
@@ -60,6 +61,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 8) {
         $infoBoxTitle = 'Servicegroup Information';
+        $self->_process_servicegroup_cmd_page($c);
     }
 
     $c->stash->{title}          = 'Extended Information';
@@ -96,6 +98,21 @@ sub _process_host_page {
 }
 
 ##########################################################
+# create the hostgroup cmd page
+sub _process_hostgroup_cmd_page {
+    my ( $self, $c ) = @_;
+
+    my $hostgroup = $c->{'request'}->{'parameters'}->{'hostgroup'};
+    $c->detach('/error/index/5') unless defined $hostgroup;
+
+    my($hostgroup_name,$hostgroup_alias) = $c->{'live'}->selectrow_array("GET hostgroups\nColumns: name alias\nFilter: name = $hostgroup\nLimit: 1");
+    $c->detach('/error/index/5') unless defined $hostgroup_name;
+
+    $c->stash->{'hostgroup'}       = $hostgroup_name;
+    $c->stash->{'hostgroup_alias'} = $hostgroup_alias;
+}
+
+##########################################################
 # create the service info page
 sub _process_service_page {
     my ( $self, $c ) = @_;
@@ -110,6 +127,21 @@ sub _process_service_page {
     $c->detach('/error/index/5') unless defined $service;
 
     $c->stash->{'service'} = $service;
+}
+
+##########################################################
+# create the servicegroup cmd page
+sub _process_servicegroup_cmd_page {
+    my ( $self, $c ) = @_;
+
+    my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'};
+    $c->detach('/error/index/5') unless defined $servicegroup;
+
+    my($servicegroup_name,$servicegroup_alias) = $c->{'live'}->selectrow_array("GET servicegroups\nColumns: name alias\nFilter: name = $servicegroup\nLimit: 1");
+    $c->detach('/error/index/5') unless defined $servicegroup_name;
+
+    $c->stash->{'servicegroup'}       = $servicegroup_name;
+    $c->stash->{'servicegroup_alias'} = $servicegroup_alias;
 }
 
 ##########################################################

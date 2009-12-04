@@ -1,0 +1,83 @@
+[% INCLUDE _header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% INCLUDE _infobox.tt %]
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=detail'>View Status Detail For This Servicegroup</a><br>
+                <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=overview'>View Status Overview For This Servicegroup</a><br>
+                <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=grid'>View Status Grid For This Servicegroup</a><br>
+                <a href='avail.cgi?servicegroup=[% servicegroup %]'>View Availability For This Servicegroup</a><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td align="center" valign="middle" width="33%">
+          <div class='data'>Servicegroup</div>
+          <div class='dataTitle'>[% servicegroup_alias %]</div>
+          <div class='dataTitle'>([% servicegroup %])</div>
+        </td>
+        <td align="right" valign="bottom" width="33%">
+          <table border='0'></table>
+        </td>
+      </tr>
+    </table><br>
+    <div align="center">
+      <table border="0" width="100%">
+        <tr>
+          <td align="center" valign="top" class='stateInfoPanel'></td>
+          <td align="center" valign="top" class='stateInfoPanel' rowspan="2">
+            <div class='dataTitle'>Servicegroup Commands</div>
+            <table border="1" cellspacing="0" cellpadding="0" class='command'>
+              <tr>
+                <td>
+                  <table border="0" cellspacing="0" cellpadding="0" class='command'>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Servicegroup' title='Schedule Downtime For All Hosts In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=121&amp;servicegroup=[% servicegroup %]'>Schedule downtime for all hosts in this servicegroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Servicegroup' title='Schedule Downtime For All Services In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=122&amp;servicegroup=[% servicegroup %]'>Schedule downtime for all services in this servicegroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Servicegroup' title='Enable Notifications For All Hosts In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=111&amp;servicegroup=[% servicegroup %]'>Enable notifications for all hosts in this servicegroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Servicegroup' title='Disable Notifications For All Hosts In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=112&amp;servicegroup=[% servicegroup %]'>Disable notifications for all hosts in this servicegroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Servicegroup' title='Enable Notifications For All Services In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=109&amp;servicegroup=[% servicegroup %]'>Enable notifications for all services in this servicegroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Servicegroup' title='Disable Notifications For All Services In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=110&amp;servicegroup=[% servicegroup %]'>Disable notifications for all services in this servicegroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Servicegroup' title='Enable Active Checks Of All Services In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=113&amp;servicegroup=[% servicegroup %]'>Enable active checks of all services in this servicegroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Servicegroup' title='Disable Active Checks Of All Services In This Servicegroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=114&amp;servicegroup=[% servicegroup %]'>Disable active checks of all services in this servicegroup</a></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="top" class='stateInfoPanel'></td>
+        </tr>
+      </table>
+    </div>
+    <table>
+
+[% INCLUDE _footer.tt %]

@@ -17,159 +17,16 @@
             </tr>
           </table>
         </td>
-        <td align="center" valign="top" width="33%">
-          <div class='hostTotals'>
-            Host Status Totals
-          </div>
-          <table border="0" cellspacing="0" cellpadding="0">
-
-            <tr>
-              <td>
-                <table border="1" class='hostTotals'>
-                  <tr>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?hostgroup=all&amp;hoststatustypes=2'>Up</a>
-                    </th>
-                    <th class='hostTotals'>
-
-                      <a class='hostTotals' href='status.cgi?hostgroup=all&amp;hoststatustypes=4'>Down</a>
-                    </th>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?hostgroup=all&amp;hoststatustypes=8'>Unreachable</a>
-                    </th>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?hostgroup=all&amp;hoststatustypes=1'>Pending</a>
-
-                    </th>
-                  </tr>
-                  <tr>
-                    <td class='hostTotalsUP'>
-                      1
-                    </td>
-                    <td class='hostTotalsDOWN'>
-                      1
-                    </td>
-                    <td class='hostTotals'>
-
-                      0
-                    </td>
-                    <td class='hostTotals'>
-                      0
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-
-              <td align="center">
-                <table border="1" class='hostTotals'>
-                  <tr>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?hostgroup=all&amp;hoststatustypes=12'><i>All Problems</i></a>
-                    </th>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?hostgroup=all'><i>All Types</i></a>
-
-                    </th>
-                  </tr>
-                  <tr>
-                    <td class='hostTotalsPROBLEMS'>
-                      1
-                    </td>
-                    <td class='hostTotals'>
-                      2
-                    </td>
-                  </tr>
-
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-        <td align="center" valign="top" width="33%">
-          <div class='serviceTotals'>
-            Service Status Totals
-          </div>
-
-          <table border="0" cellspacing="0" cellpadding="0">
-            <tr>
-              <td>
-                <table border="1" class='serviceTotals'>
-                  <tr>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15'>Ok</a>
-                    </th>
-
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15'>Warning</a>
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15'>Unknown</a>
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15'>Critical</a>
-
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15'>Pending</a>
-                    </th>
-                  </tr>
-                  <tr>
-                    <td class='serviceTotalsOK'>
-                      3
-                    </td>
-
-                    <td class='serviceTotals'>
-                      0
-                    </td>
-                    <td class='serviceTotals'>
-                      0
-                    </td>
-                    <td class='serviceTotalsCRITICAL'>
-                      1
-                    </td>
-                    <td class='serviceTotals'>
-
-                      0
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td align="center">
-                <table border="1" class='serviceTotals'>
-
-                  <tr>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;servicestatustypes=28&amp;hoststatustypes=15'><i>All Problems</i></a>
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?hostgroup=all&amp;style=detail&amp;hoststatustypes=15'><i>All Types</i></a>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <td class='serviceTotalsPROBLEMS'>
-                      1
-                    </td>
-                    <td class='serviceTotals'>
-                      4
-                    </td>
-                  </tr>
-                </table>
-              </td>
-
-            </tr>
-          </table>
-        </td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _host_status_details_box.tt %]</td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _service_status_details_box.tt %]</td>
         <td align="right" valign="bottom"></td>
       </tr>
     </table>
     <table border="0" width="100%">
       <tr>
-        <td valign="top" align="left" width="33%"></td>
+        <td valign="top" align="left" width="33%">
+          [% INCLUDE _status_filter.tt %]
+        </td>
 
         <td valign="top" align="center" width="33%">
           <div align="center" class='statusTitle'>

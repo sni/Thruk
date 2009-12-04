@@ -4,176 +4,38 @@
       <tr>
         <td align="left" valign="top" width="33%">
         [% INCLUDE _infobox.tt %]
-
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
-                <a href='status.cgi?servicegroup=all&amp;style=detail'>View Service Status Detail For All Service Groups</a><br>
-                <a href='status.cgi?servicegroup=all&amp;style=summary'>View Status Summary For All Service Groups</a><br>
-                <a href='status.cgi?servicegroup=all&amp;style=grid'>View Service Status Grid For All Service Groups</a><br>
-              </td>
-
-            </tr>
-          </table>
-        </td>
-        <td align="center" valign="top" width="33%">
-          <div class='hostTotals'>
-            Host Status Totals
-          </div>
-          <table border="0" cellspacing="0" cellpadding="0">
-            <tr>
-
-              <td>
-                <table border="1" class='hostTotals'>
-                  <tr>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?servicegroup=all&amp;hoststatustypes=2'>Up</a>
-                    </th>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?servicegroup=all&amp;hoststatustypes=4'>Down</a>
-
-                    </th>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?servicegroup=all&amp;hoststatustypes=8'>Unreachable</a>
-                    </th>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?servicegroup=all&amp;hoststatustypes=1'>Pending</a>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <td class='hostTotalsUP'>
-                      1
-                    </td>
-                    <td class='hostTotalsDOWN'>
-                      1
-                    </td>
-                    <td class='hostTotals'>
-                      0
-                    </td>
-
-                    <td class='hostTotals'>
-                      0
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td align="center">
-
-                <table border="1" class='hostTotals'>
-                  <tr>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?servicegroup=all&amp;hoststatustypes=12'><i>All Problems</i></a>
-                    </th>
-                    <th class='hostTotals'>
-                      <a class='hostTotals' href='status.cgi?servicegroup=all'><i>All Types</i></a>
-                    </th>
-
-                  </tr>
-                  <tr>
-                    <td class='hostTotalsPROBLEMS'>
-                      1
-                    </td>
-                    <td class='hostTotals'>
-                      2
-                    </td>
-                  </tr>
-                </table>
-
+                [% IF hostgroup == 'all' %]
+                  <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
+                  <a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a><br>
+                  <a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a><br>
+                  <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
+                [% ELSIF hostgroup != '' %]
+                  <a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail'>View Service Status Detail For This Host Group</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                [% END %]
               </td>
             </tr>
           </table>
         </td>
-        <td align="center" valign="top" width="33%">
-          <div class='serviceTotals'>
-            Service Status Totals
-          </div>
-          <table border="0" cellspacing="0" cellpadding="0">
-
-            <tr>
-              <td>
-                <table border="1" class='serviceTotals'>
-                  <tr>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?servicegroup=all&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15'>Ok</a>
-                    </th>
-                    <th class='serviceTotals'>
-
-                      <a class='serviceTotals' href='status.cgi?servicegroup=all&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15'>Warning</a>
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?servicegroup=all&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15'>Unknown</a>
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?servicegroup=all&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15'>Critical</a>
-
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?servicegroup=all&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15'>Pending</a>
-                    </th>
-                  </tr>
-                  <tr>
-                    <td class='serviceTotalsOK'>
-                      3
-                    </td>
-
-                    <td class='serviceTotals'>
-                      0
-                    </td>
-                    <td class='serviceTotals'>
-                      0
-                    </td>
-                    <td class='serviceTotalsCRITICAL'>
-                      1
-                    </td>
-                    <td class='serviceTotals'>
-
-                      0
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td align="center">
-                <table border="1" class='serviceTotals'>
-
-                  <tr>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?servicegroup=all&amp;style=detail&amp;servicestatustypes=28&amp;hoststatustypes=15'><i>All Problems</i></a>
-                    </th>
-                    <th class='serviceTotals'>
-                      <a class='serviceTotals' href='status.cgi?servicegroup=all&amp;style=detail&amp;hoststatustypes=15'><i>All Types</i></a>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <td class='serviceTotalsPROBLEMS'>
-                      1
-                    </td>
-                    <td class='serviceTotals'>
-                      4
-                    </td>
-                  </tr>
-                </table>
-              </td>
-
-            </tr>
-          </table>
-        </td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _host_status_details_box.tt %]</td>
+        <td align="center" valign="top" width="33%">[% INCLUDE _service_status_details_box.tt %]</td>
         <td align="right" valign="bottom"></td>
       </tr>
     </table>
     <table border="0" width="100%">
       <tr>
-        <td valign="top" align="left" width="33%"></td>
+        <td valign="top" align="left" width="33%">
+          [% INCLUDE _status_filter.tt %]
+        </td>
 
         <td valign="top" align="center" width="33%">
-          <div align="center" class='statusTitle'>
-            Service Overview For All Service Groups
-          </div><br>
+          <div align="center" class='statusTitle'>Service Overview For All Host Groups</div><br>
         </td>
         <td valign="top" align="right" width="33%"></td>
       </tr>
@@ -182,199 +44,67 @@
 
       <table border="0" cellpadding="10">
         <tr>
+          [% FOREACH g = groups %]
           <td valign="top" align="center">
-            <div class='status'>
-              <a href='status.cgi?servicegroup=servicegroup_01&amp;style=detail'>servicegroup_alias_01</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=servicegroup_01'>servicegroup_01</a>)
-            </div>
-            <div class='status'>
-
-              <table border="1" class='status'>
-                <tr>
-                  <th class='status'>
-                    Host
-                  </th>
-                  <th class='status'>
-                    Status
-                  </th>
-                  <th class='status'>
-                    Services
-                  </th>
-
-                  <th class='status'>
-                    Actions
-                  </th>
-                </tr>
-                <tr class='statusEven'>
-                  <td class='statusEven'>
-                    <table border="0" width="100%" cellpadding="0" cellspacing="0">
-                      <tr class='statusEven'>
-                        <td class='statusEven'>
-
-                          <a href='status.cgi?host=test_host_0&amp;style=detail' title='127.0.0.0'>test_host_0</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td class='statusHOSTUP'>
-                    UP
-                  </td>
-                  <td class='statusEven'>
-
-                    <table border="0" width="100%">
-                      <tr>
-                        <td class='miniStatusOK'>
-                          <a href='status.cgi?servicegroup=servicegroup_01&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>1 OK</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-
-                  <td valign="center" class='statusEven'>
-                    <a href='extinfo.cgi?type=1&amp;host=test_host_0'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a> <a href='status.cgi?host=test_host_0'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a> <a href='statusmap.cgi?host=test_host_0'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
-                  </td>
-                </tr>
-                <tr class='statusHOSTDOWN'>
-                  <td class='statusHOSTDOWN'>
-                    <table border="0" width="100%" cellpadding="0" cellspacing="0">
-                      <tr class='statusHOSTDOWN'>
-
-                        <td class='statusHOSTDOWN'>
-                          <a href='status.cgi?host=test_host_1&amp;style=detail' title='127.0.0.1'>test_host_1</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td class='statusHOSTDOWN'>
-                    DOWN
-                  </td>
-
-                  <td class='statusHOSTDOWN'>
-                    <table border="0" width="100%">
-                      <tr>
-                        <td class='miniStatusCRITICAL'>
-                          <a href='status.cgi?servicegroup=servicegroup_01&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>1 CRITICAL</a>
-                        </td>
-                      </tr>
-                    </table>
-
-                  </td>
-                  <td valign="center" class='statusHOSTDOWN'>
-                    <a href='extinfo.cgi?type=1&amp;host=test_host_1'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a> <a href='status.cgi?host=test_host_1'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a> <a href='statusmap.cgi?host=test_host_1'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
-                  </td>
-                </tr>
-              </table>
-            </div>
-          </td>
-
-          <td valign="top" align="center">
-            <div class='status'>
-              <a href='status.cgi?servicegroup=servicegroup_02&amp;style=detail'>servicegroup_alias_02</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=servicegroup_02'>servicegroup_02</a>)
-            </div>
+            <div class='status'><a href='status.cgi?hostgroup=[% g.name %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% g.name %]'>[% g.name %]</a>)</div>
             <div class='status'>
               <table border="1" class='status'>
                 <tr>
-
-                  <th class='status'>
-                    Host
-                  </th>
-                  <th class='status'>
-                    Status
-                  </th>
-                  <th class='status'>
-                    Services
-                  </th>
-                  <th class='status'>
-
-                    Actions
-                  </th>
+                  <th class='status'>Host</th>
+                  <th class='status'>Status</th>
+                  <th class='status'>Services</th>
+                  <th class='status'>Actions</th>
                 </tr>
-                <tr class='statusEven'>
-                  <td class='statusEven'>
+                [% FOREACH h = g.hosts %]
+                [% SET hostclass = 'statusEven' IF loop.even                 %]
+                [% SET hostclass = 'statusOdd'  IF loop.odd                  %]
+                [% SET hostname  = h.host_name                               %]
+                [% SET host      = host_data.$hostname                       %]
+                [% IF host.state == 1 %]
+                  [% hostclass = 'statusHOSTDOWN' %]
+                [% ELSIF host.state == 2 %]
+                  [% hostclass = 'statusHOSTUNREACHABLE' %]
+                [% END %]
+                <tr class='[% hostclass %]'>
+                  <td class='[% hostclass %]'>
                     <table border="0" width="100%" cellpadding="0" cellspacing="0">
-                      <tr class='statusEven'>
-                        <td class='statusEven'>
-                          <a href='status.cgi?host=test_host_0&amp;style=detail' title='127.0.0.0'>test_host_0</a>
-
-                        </td>
+                      <tr class='[% hostclass %]'>
+                        <td class='[% hostclass %]'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail' title='[% host.address %]'>[% h.host_name %]</a></td>
                       </tr>
                     </table>
                   </td>
-                  <td class='statusHOSTUP'>
-                    UP
-                  </td>
-                  <td class='statusEven'>
+                  [% IF host.has_been_checked == 0 %]
+                  <td class='statusHOSTPENDING'>PENDING</td>
+                  [% ELSIF host.state == 0 %]
+                  <td class='statusHOSTUP'>UP</td>
+                  [% ELSIF host.state == 1 %]
+                  <td class='statusHOSTDOWN'>DOWN</td>
+                  [% ELSIF host.state == 2 %]
+                  <td class='statusHOSTUNREACHABLE'>UNREACHABLE</td>
+                  [% END %]
+                  <td class='[% hostclass %]'>
                     <table border="0" width="100%">
-
-                      <tr>
-                        <td class='miniStatusOK'>
-                          <a href='status.cgi?servicegroup=servicegroup_02&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>1 OK</a>
-                        </td>
-                      </tr>
+                      [% IF h.ok       > 0 %]<tr><td class='miniStatusOK'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.ok %] OK</a></td></tr>[% END %]
+                      [% IF h.warning  > 0 %]<tr><td class='miniStatusWARNING'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.warning %] WARNING</a></td></tr>[% END %]
+                      [% IF h.unknown  > 0 %]<tr><td class='miniStatusUNKNOWN'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.unknown %] UNKNOWN</a></td></tr>[% END %]
+                      [% IF h.critical > 0 %]<tr><td class='miniStatusCRITICAL'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.critical %] CRITICAL</a></td></tr>[% END %]
+                      [% IF h.pending  > 0 %]<tr><td class='miniStatusPENDING'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.pending %] PENDING</a></td></tr>[% END %]
                     </table>
                   </td>
-                  <td valign="center" class='statusEven'>
-
-                    <a href='extinfo.cgi?type=1&amp;host=test_host_0'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a> <a href='status.cgi?host=test_host_0'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a> <a href='statusmap.cgi?host=test_host_0'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
+                  <td class='[% hostclass %]'>
+                    <a href='extinfo.cgi?type=1&amp;host=[% h.host_name %]'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a> <a href='status.cgi?host=[% h.host_name %]'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a> <a href='statusmap.cgi?host=[% h.host_name %]'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
                   </td>
                 </tr>
-                <tr class='statusHOSTDOWN'>
-                  <td class='statusHOSTDOWN'>
-                    <table border="0" width="100%" cellpadding="0" cellspacing="0">
-                      <tr class='statusHOSTDOWN'>
-                        <td class='statusHOSTDOWN'>
-
-                          <a href='status.cgi?host=test_host_1&amp;style=detail' title='127.0.0.1'>test_host_1</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td class='statusHOSTDOWN'>
-                    DOWN
-                  </td>
-                  <td class='statusHOSTDOWN'>
-
-                    <table border="0" width="100%">
-                      <tr>
-                        <td class='miniStatusOK'>
-                          <a href='status.cgi?servicegroup=servicegroup_02&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>1 OK</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-
-                  <td valign="center" class='statusHOSTDOWN'>
-                    <a href='extinfo.cgi?type=1&amp;host=test_host_1'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a> <a href='status.cgi?host=test_host_1'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a> <a href='statusmap.cgi?host=test_host_1'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
-                  </td>
-                </tr>
+                [% END %]
               </table>
             </div>
           </td>
-          <td valign="top" align="center">
-
-            <div class='status'>
-              <a href='status.cgi?servicegroup=servicegroup_03&amp;style=detail'>servicegroup_alias_03</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=servicegroup_03'>servicegroup_03</a>)
-            </div>
-            <div class='status'>
-              <table border="1" class='status'>
-                <tr>
-                  <th class='status'>
-
-                    Host
-                  </th>
-                  <th class='status'>
-                    Status
-                  </th>
-                  <th class='status'>
-                    Services
-                  </th>
-                  <th class='status'>
-                    Actions
-                  </th>
-
-                </tr>
-              </table>
-            </div>
-          </td>
+          [%# every 3rd group is in a new table row #%]
+          [% IF loop.index % 3 == 2 %]
+            </tr>
+            <tr>
+          [% END %]
+          [% END %]
         </tr>
       </table>
     </div>

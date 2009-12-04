@@ -9,5 +9,5 @@ Todo List:
 - overload role authentication
 - add comments on status_hostdetails page
 - add authorization part to all querys
-- fix pending state on host details page (should be just a empty message)
+- fix pending state on host/service details page (should be just a empty message)
 - network outage on toc page

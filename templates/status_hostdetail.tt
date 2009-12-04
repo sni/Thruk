@@ -33,37 +33,7 @@
     <table border="0" width="100%">
       <tr>
         <td valign="top" align="left" width="33%">
-
-          [% IF show_filter_table %]
-          <table border="1" class='filter' cellspacing="0" cellpadding="0">
-            <tr>
-              <td class='filter'>
-                <table border="0" cellspacing="2" cellpadding="0">
-                  <tr>
-                    <td colspan="2" valign="top" align="left" class='filterTitle'>Display Filters:</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Host Status Types:</td>
-                    <td valign="top" align="left" class='filterValue'>[% host_statustype_filtername %]</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Host Properties:</td>
-                    <td valign="top" align="left" class='filterValue'>[% host_prop_filtername %]</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Service Status Types:</td>
-                    <td valign="top" align="left" class='filterValue'>[% service_statustype_filtername %]</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Service Properties:</td>
-                    <td valign="top" align="left" class='filterValue'>[% service_prop_filtername %]</td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-          [% END %]
-
+          [% INCLUDE _status_filter.tt %]
         </td>
         <td valign="top" align="center" width="33%">
           <div align="center" class='statusTitle'>Host Status Details For [% IF hostgroup == 'all' %]All Host Groups[% ELSE %]Host Group '[% hostgroup %]'[% END %]</div>

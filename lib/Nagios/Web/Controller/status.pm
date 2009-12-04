@@ -34,6 +34,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     elsif($style eq 'hostdetail') {
         $self->_process_hostdetails_page($c);
     }
+    elsif($style eq 'overview') {
+        $self->_process_overview_page($c);
+    }
 
     $c->stash->{title}          = 'Current Network Status';
     $c->stash->{infoBoxTitle}   = 'Current Network Status';
@@ -47,12 +50,17 @@ sub _process_details_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
-    my $host          = $c->{'request'}->{'parameters'}->{'host'} || 'all';
+    my $host          = $c->{'request'}->{'parameters'}->{'host'}      || 'all';
+    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'} || '';
     my $hostfilter    = "";
     my $servicefilter = "";
     if($host ne 'all') {
         $hostfilter    = "Filter: name = $host\n";
         $servicefilter = "Filter: host_name = $host\n";
+    }
+    elsif($hostgroup ne 'all' and $hostgroup ne '') {
+        $hostfilter    = "Filter: groups >= $hostgroup\n";
+        $servicefilter = "Filter: host_groups >= $hostgroup\n";
     }
 
     # fill the host/service totals box
@@ -97,6 +105,7 @@ sub _process_details_page {
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'host'}          = $host;
+    $c->stash->{'hostgroup'}     = $hostgroup;
     $c->stash->{'services'}      = $sortedservices;
 }
 
@@ -139,7 +148,7 @@ sub _process_hostdetails_page {
                 '1' => [ 'name',                                 'host name'       ],
                 '4' => [ ['last_check', 'name'],                 'last check time' ],
                 '6' => [ ['last_state_change_plus', 'name'],     'state duration'  ],
-                '8' => [ ['has_been_checkend', 'state', 'name'], 'host status'     ],
+                '8' => [ ['has_been_checked', 'state', 'name'],  'host status'     ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     my $sortedhosts = Nagios::Web::Helper->sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
@@ -151,6 +160,67 @@ sub _process_hostdetails_page {
     $c->stash->{'hosts'}         = $sortedhosts;
 }
 
+##########################################################
+# create the status details page
+sub _process_overview_page {
+    my ( $self, $c ) = @_;
+
+    # which host to display?
+    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'} || '';
+    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'};
+
+    my $hostfilter      = "";
+    my $servicefilter   = "";
+    my $hostgroupfilter = "";
+    if($hostgroup ne '' and $hostgroup ne 'all') {
+        $hostfilter      = "Filter: groups >= $hostgroup\n";
+        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
+        $hostgroupfilter = "Filter: name = $hostgroup\n";
+    }
+
+    # fill the host/service totals box
+    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
+
+    # then add some more filter based on get parameter
+    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
+
+    # we need the hostname, address and the
+    my $host_data = $c->{'live'}->selectall_hashref("GET hosts
+Columns: name address state has_been_checked
+$hostfilter", 'name' );
+
+    # get all hostgroups
+    my $hostgroups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$hostgroupfilter\nColumns: name alias\nStatsGroupBy: name", { Slice => {} });
+    for my $hostgroup (@{$hostgroups}) {
+        $hostgroup->{'hosts'} = $c->{'live'}->selectall_arrayref("GET services
+Filter: host_groups >= $hostgroup->{'name'}
+
+Stats: has_been_checked = 0 as pending
+
+Stats: state = 0
+Stats: has_been_checked = 1
+StatsAnd: 2 as ok
+
+Stats: state = 1
+Stats: has_been_checked = 1
+StatsAnd: 2 as warning
+
+Stats: state = 2
+Stats: has_been_checked = 1
+StatsAnd: 2 as critical
+
+Stats: state = 3
+Stats: has_been_checked = 1
+StatsAnd: 2 as unknown
+
+StatsGroupBy: host_name
+", { Slice => {} });
+    }
+
+    $c->stash->{'host_data'}    = $host_data;
+    $c->stash->{'hostgroup'}    = $hostgroup;
+    $c->stash->{'groups'}       = $hostgroups;
+}
 
 ##########################################################
 sub _fill_totals_box {

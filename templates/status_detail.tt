@@ -8,7 +8,13 @@
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
-                [% IF host == 'all' %]
+                [% IF hostgroup %]
+                <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=overview'>View Status Overview For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                [% ELSIF host == 'all' %]
                 <a href='history.cgi?host=all'>View History For all hosts</a><br>
                 <a href='notifications.cgi?host=all'>View Notifications For All Hosts</a><br>
                 <a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Hosts</a>
@@ -29,39 +35,18 @@
     <table border="0" width="100%">
       <tr>
         <td valign="top" align="left" width="33%">
-          [% IF show_filter_table %]
-          <br>
-          <table border="1" class='filter' cellspacing="0" cellpadding="0">
-            <tr>
-              <td class='filter'>
-                <table border="0" cellspacing="2" cellpadding="0">
-                  <tr>
-                    <td colspan="2" valign="top" align="left" class='filterTitle'>Display Filters:</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Host Status Types:</td>
-                    <td valign="top" align="left" class='filterValue'>[% host_statustype_filtername %]</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Host Properties:</td>
-                    <td valign="top" align="left" class='filterValue'>[% host_prop_filtername %]</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Service Status Types:</td>
-                    <td valign="top" align="left" class='filterValue'>[% service_statustype_filtername %]</td>
-                  </tr>
-                  <tr>
-                    <td valign="top" align="left" class='filterName'>Service Properties:</td>
-                    <td valign="top" align="left" class='filterValue'>[% service_prop_filtername %]</td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-          [% END %]
+          [% INCLUDE _status_filter.tt %]
         </td>
         <td valign="top" align="center" width="33%"><br>
-          <div align="center" class='statusTitle'>Service Status Details For [% IF host == 'all' %]All Host[% ELSE %]Host '[% host %]'[% END %]</div>
+          <div align="center" class='statusTitle'>Service Status Details For
+          [% IF hostgroup %]
+          Host Group '[% hostgroup %]'
+          [% ELSIF host == 'all' %]
+          All Host
+          [% ELSE %]
+          Host '[% host %]'
+          [% END %]
+          </div>
           [% IF c.request.parameters.sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
@@ -119,20 +104,20 @@
               <td align="left">
                 <table border="0" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td align="left" valign="center" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name %]' title='[% s.host_address %]'>[% s.host_name %]</a></td>
+                    <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name %]' title='[% s.host_address %]'>[% s.host_name %]</a></td>
                   </tr>
                 </table>
               </td>
-              <td align="right" valign="center">
+              <td align="right">
                 <table border="0" cellpadding="0" cellspacing="0">
                   <tr>
-                    [% IF s.host_acknowledged                 %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]#comments"><img src="/nagios/images/ack.gif" alt="This host problem has been acknowledged" title="This host problem has been acknowledged" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.host_comment_count > 0            %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]#comments"><img src="/nagios/images/comment.gif" alt="This host has [% s.host_comment_count %] comment associated with it" title="This host has [% s.host_comment_count %] comment associated with it" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.host_notifications_enabled == 0   %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.host_active_checks_enabled == 0   %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.host_is_flapping                  %]<td align="center" valign="center"><a href='extinfo.cgi?type=1&amp;host=[% s.host_name %]'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>[% END %]
-                    [% IF s.host_scheduled_downtime_depth > 0 %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" title="This host is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.host_is_executing > 0             %]<td align="center" valign="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.host_acknowledged                 %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]#comments"><img src="/nagios/images/ack.gif" alt="This host problem has been acknowledged" title="This host problem has been acknowledged" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.host_comment_count > 0            %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]#comments"><img src="/nagios/images/comment.gif" alt="This host has [% s.host_comment_count %] comment associated with it" title="This host has [% s.host_comment_count %] comment associated with it" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.host_notifications_enabled == 0   %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.host_active_checks_enabled == 0   %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.host_is_flapping                  %]<td align="center"><a href='extinfo.cgi?type=1&amp;host=[% s.host_name %]'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>[% END %]
+                    [% IF s.host_scheduled_downtime_depth > 0 %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" title="This host is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.host_is_executing > 0             %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name %]"><img src="/nagios/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20"></a></td>[% END %]
                     <td></td>
                   </tr>
                 </table>
@@ -147,20 +132,20 @@
               <td align="left">
                 <table border="0" cellspacing="0" cellpadding="0">
                   <tr>
-                    <td align="left" valign="center" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]'>[% s.description %]</a></td>
+                    <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]'>[% s.description %]</a></td>
                   </tr>
                 </table>
               </td>
               <td align="right" class='[% serviceclass %]'>
                 <table border="0" cellspacing="0" cellpadding="0">
                   <tr>
-                    [% IF s.acknowledged                 %]<td align="center" valign="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]#comments"><img src="/nagios/images/ack.gif" alt="This service problem has been acknowledged" title="This service problem has been acknowledged" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.comment_count > 0            %]<td align="center" valign="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]#comments"><img src="/nagios/images/comment.gif" alt="This service has [% s.comment_count %] comment associated with it" title="This service has [% s.comment_count %] comment associated with it" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.notifications_enabled == 0   %]<td align="center" valign="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/ndisabled.gif" alt="Notifications for this service have been disabled" title="Notifications for this service have been disabled" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.active_checks_enabled == 0   %]<td align="center" valign="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/disabled.gif" alt="Checks of this service have been disabled" title="Checks of this service have been disabled" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.is_flapping                  %]<td align="center" valign="center"><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This service is flapping between states' title='This service is flapping between states'></a></td>[% END %]
-                    [% IF s.scheduled_downtime_depth > 0 %]<td align="center" valign="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" title="This service is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF s.is_executing > 0             %]<td align="center" valign="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.acknowledged                 %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]#comments"><img src="/nagios/images/ack.gif" alt="This service problem has been acknowledged" title="This service problem has been acknowledged" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.comment_count > 0            %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]#comments"><img src="/nagios/images/comment.gif" alt="This service has [% s.comment_count %] comment associated with it" title="This service has [% s.comment_count %] comment associated with it" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.notifications_enabled == 0   %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/ndisabled.gif" alt="Notifications for this service have been disabled" title="Notifications for this service have been disabled" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.active_checks_enabled == 0   %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/disabled.gif" alt="Checks of this service have been disabled" title="Checks of this service have been disabled" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.is_flapping                  %]<td align="center"><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]'><img src='/nagios/images/flapping.gif' border="0" width="20" height="20" alt='This service is flapping between states' title='This service is flapping between states'></a></td>[% END %]
+                    [% IF s.scheduled_downtime_depth > 0 %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" title="This service is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.is_executing > 0             %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/nagios/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20"></a></td>[% END %]
                     <td></td>
                   </tr>
                 </table>
@@ -172,7 +157,7 @@
         <td class='[% serviceclass %]' nowrap>[% date.format(s.last_check, '%Y-%m-%d  %H:%M:%S') %]</td>
         <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(0 - s.last_state_change) %][% ELSE %][% duration(0 - pi.program_start) %]+[% END %]</td>
         <td class='[% serviceclass %]'>[% s.current_attempt %]/[% s.max_check_attempts %]</td>
-        <td class='[% serviceclass %]' valign='center'>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, '%a %b %e %H:%M:%S %Z %Y') %][% ELSE %][% s.plugin_output %][% END %]&nbsp;</td>
+        <td class='[% serviceclass %]'>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, '%a %b %e %H:%M:%S %Z %Y') %][% ELSE %][% s.plugin_output %][% END %]&nbsp;</td>
       </tr>
       [% SET lasthost = s.host_name %]
       [% END %]

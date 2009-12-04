@@ -1,0 +1,83 @@
+[% INCLUDE _header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% INCLUDE _infobox.tt %]
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail'>View Status Detail For This Hostgroup</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=overview'>View Status Overview For This Hostgroup</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=grid'>View Status Grid For This Hostgroup</a><br>
+                <a href='avail.cgi?hostgroup=[% hostgroup %]'>View Availability For This Hostgroup</a><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td align="center" valign="middle" width="33%">
+          <div class='data'>Hostgroup</div>
+          <div class='dataTitle'>[% hostgroup_alias %]</div>
+          <div class='dataTitle'>([% hostgroup %])</div>
+        </td>
+        <td align="right" valign="bottom" width="33%">
+          <table border='0'></table>
+        </td>
+      </tr>
+    </table><br>
+    <div align="center">
+      <table border="0" width="100%">
+        <tr>
+          <td align="center" valign="top" class='stateInfoPanel'></td>
+          <td align="center" valign="top" class='stateInfoPanel' rowspan="2">
+            <div class='dataTitle'>Hostgroup Commands</div>
+            <table border="1" cellspacing="0" cellpadding="0" class='command'>
+              <tr>
+                <td>
+                  <table border="0" cellspacing="0" cellpadding="0" class='command'>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Hostgroup' title='Schedule Downtime For All Hosts In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=84&amp;hostgroup=[% hostgroup %]'>Schedule downtime for all hosts in this hostgroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Hostgroup' title='Schedule Downtime For All Services In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=85&amp;hostgroup=[% hostgroup %]'>Schedule downtime for all services in this hostgroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Hostgroup' title='Enable Notifications For All Hosts In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=65&amp;hostgroup=[% hostgroup %]'>Enable notifications for all hosts in this hostgroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Hostgroup' title='Disable Notifications For All Hosts In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=66&amp;hostgroup=[% hostgroup %]'>Disable notifications for all hosts in this hostgroup</a> </td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Hostgroup' title='Enable Notifications For All Services In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=63&amp;hostgroup=[% hostgroup %]'>Enable notifications for all services in this hostgroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Hostgroup' title='Disable Notifications For All Services In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=64&amp;hostgroup=[% hostgroup %]'>Disable notifications for all services in this hostgroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Hostgroup' title='Enable Active Checks Of All Services In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=67&amp;hostgroup=[% hostgroup %]'>Enable active checks of all services in this hostgroup</a></td>
+                    </tr>
+                    <tr class='command'>
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Hostgroup' title='Disable Active Checks Of All Services In This Hostgroup'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=68&amp;hostgroup=[% hostgroup %]'>Disable active checks of all services in this hostgroup</a></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="top" class='stateInfoPanel'></td>
+        </tr>
+      </table>
+    </div>
+    <table>
+
+[% INCLUDE _footer.tt %]
