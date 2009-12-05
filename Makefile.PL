@@ -17,7 +17,7 @@ requires 'parent';
 requires 'Moose';
 requires 'MooseX::MethodAttributes::Inheritable';
 requires 'MooseX::Role::WithOverloading';
-requires 'Nagios::MKLivestatus' => '0.20';
+requires 'Nagios::MKLivestatus' => '0.26';
 requires 'LWP';
 requires 'Config::Any';
 requires 'Template' => '2.20';

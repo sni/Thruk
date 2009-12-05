@@ -18,6 +18,15 @@
                   <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
                   <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
                   <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                [% ELSIF servicegroup == 'all' %]
+                  <a href='status.cgi?servicegroup=all&style=detail'>View Service Status Detail For All Service Groups</a><br>
+                  <a href='status.cgi?servicegroup=all&style=summary'>View Status Summary For All Service Groups</a><br>
+                  <a href='status.cgi?servicegroup=all&style=grid'>View Service Status Grid For All Service Groups</a><br>
+                [% ELSIF servicegroup != '' %]
+                  <a href='status.cgi?servicegroup=[% servicegroup %]&style=detail'>View Service Status Detail For This Service Group</a><br>
+                  <a href='status.cgi?servicegroup=[% servicegroup %]&style=summary'>View Status Summary For This Service Group</a><br>
+                  <a href='status.cgi?servicegroup=[% servicegroup %]&style=grid'>View Service Status Grid For This Service Group</a><br>
+                  <a href='status.cgi?servicegroup=all&style=overview'>View Status Overview For All Service Groups</a><br>
                 [% END %]
               </td>
             </tr>
@@ -35,7 +44,15 @@
         </td>
 
         <td valign="top" align="center" width="33%">
+          [% IF hostgroup == 'all' %]
           <div align="center" class='statusTitle'>Service Overview For All Host Groups</div><br>
+          [% ELSIF hostgroup != '' %]
+          <div align="center" class='statusTitle'>Service Overview For Host Group '[% hostgroup %]'</div><br>
+          [% ELSIF servicegroup == 'all' %]
+          <div align="center" class='statusTitle'>Service Overview For All Service Groups</div><br>
+          [% ELSIF servicegroup != '' %]
+          <div align="center" class='statusTitle'>Service Overview For Service Group '[% servicegroup %]'</div><br>
+          [% END %]
         </td>
         <td valign="top" align="right" width="33%"></td>
       </tr>

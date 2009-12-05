@@ -88,21 +88,13 @@ sub get_livesocket {
 
     $c->log->debug("connecting via: ".$livesocket_path);
 
-    if($livesocket_path =~ m/:/mx) {
-        $livesocket = Nagios::MKLivestatus->new(
-                                server           => $livesocket_path,
-                                verbose          => Nagios::Web->config->{'livesocket_verbose'},
-                                keepalive        => 1,
-#                                errors_are_fatal => 0,
-        );
-    } else {
-        $livesocket = Nagios::MKLivestatus->new(
-                                socket          => $livesocket_path,
-                                verbose         => Nagios::Web->config->{'livesocket_verbose'},
-                                keepalive       => 1,
-#                                errors_are_fatal => 0,
-        );
-    }
+    $livesocket = Nagios::MKLivestatus->new(
+                            peer             => $livesocket_path,
+                            verbose          => Nagios::Web->config->{'livesocket_verbose'},
+                            keepalive        => 1,
+#                            errors_are_fatal => 0,
+    );
+
     return($livesocket);
 }
 

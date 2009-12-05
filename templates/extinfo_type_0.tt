@@ -45,6 +45,10 @@
                       <td class='dataval'>[% pi.nagios_pid %]</td>
                     </tr>
                     <tr>
+                      <td class='dataVar'>Nagios Data Source:</td>
+                      <td class='dataVal'>[% nagios_data_source %]</td>
+                    </tr>
+                    <tr>
                       <td class='dataVar'>Notifications Enabled?</td>
                       <td class='dataVal'>
                         [% IF pi.enable_notifications %]

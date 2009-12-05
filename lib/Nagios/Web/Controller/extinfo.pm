@@ -177,7 +177,8 @@ sub _process_scheduling_page {
 sub _process_process_info_page {
     my ( $self, $c ) = @_;
 
-    # all data is already set in addDefaults
+    # all other data is already set in addDefaults
+    $c->stash->{'nagios_data_source'} = $c->{'live'}->peer_name();
 }
 
 
