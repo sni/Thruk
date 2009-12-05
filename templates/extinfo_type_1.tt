@@ -46,9 +46,32 @@
           </div><br>
 
           <div class='data'>[% host.address %]</div>
+          [% IF host.icon_image %]
+          <img src='/nagios/images/logos/[% host.icon_image %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
+          [% END %]
+          [% IF host.notes %]<p>[% host.notes %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%">
-          <table border='0'></table>
+          <table border='0'>
+          [% IF host.action_url %]
+            <tr>
+              <td align='right'>
+                <a href='[% host.action_url %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/nagios/images/action.gif' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host'></a><br clear="all">
+                <font size="-1"><i>Extra Actions</i></font><br clear="all">
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          [% IF host.notes_url %]
+            <tr>
+              <td align='right'>
+                <a href='[% host.notes_url %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/nagios/images/notes.gif' border="0" alt='View Additional Notes For This Host' title='View Additional Notes For This Host'></a><br clear="all">
+                <font size="-1"><i>Extra Notes</i></font><br clear="all">
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          </table>
         </td>
       </tr>
     </table><br>

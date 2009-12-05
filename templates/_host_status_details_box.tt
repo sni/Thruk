@@ -4,10 +4,17 @@
     <td>
       <table border="1" class='hostTotals'>
         <tr>
-          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=hostdetail&amp;hoststatustypes=2'>Up</a></th>
-          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=hostdetail&amp;hoststatustypes=4'>Down</a></th>
-          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=hostdetail&amp;hoststatustypes=8'>Unreachable</a></th>
-          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% IF hostgroup %]hostgroup=[% hostgroup %][% ELSIF host %]host=[% host %][% END %]&amp;style=hostdetail&amp;hoststatustypes=1'>Pending</a></th>
+          [% SET sfilter = '&amp;style=hostdetail'        IF style == 'hostdetail' %]
+          [% SET filter  = 'hostgroup=' _ hostgroup       IF hostgroup             %]
+          [% SET filter  = 'servicegroup=' _ servicegroup IF servicegroup          %]
+          [% SET filter  = 'host=' _ host                 IF host                  %]
+
+          [% SET sfilter = sfilter _ '&amp;servicestatustypes=' _ servicestatustypes IF servicestatustypes %]
+
+          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% filter %][% sfilter %]&amp;hoststatustypes=2'>Up</a></th>
+          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% filter %][% sfilter %]&amp;hoststatustypes=4'>Down</a></th>
+          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% filter %][% sfilter %]&amp;hoststatustypes=8'>Unreachable</a></th>
+          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% filter %][% sfilter %]&amp;hoststatustypes=1'>Pending</a></th>
         </tr>
         <tr>
           <td class='[% IF host_stats.up > 0 %]hostTotalsUP[% ELSE %]hostTotals[% END %]'>[% host_stats.up %]</td>

@@ -44,6 +44,7 @@
         </td>
 
         <td valign="top" align="center" width="33%">
+          <br>
           [% IF hostgroup == 'all' %]
           <div align="center" class='statusTitle'>Service Overview For All Host Groups</div><br>
           [% ELSIF hostgroup != '' %]
@@ -63,7 +64,11 @@
         <tr>
           [% FOREACH g = groups %]
           <td valign="top" align="center">
+            [% IF hostgroup != '' %]
             <div class='status'><a href='status.cgi?hostgroup=[% g.name %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% g.name %]'>[% g.name %]</a>)</div>
+            [% ELSIF servicegroup != '' %]
+            <div class='status'><a href='status.cgi?servicegroup=[% g.name %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% g.name %]'>[% g.name %]</a>)</div>
+            [% END %]
             <div class='status'>
               <table border="1" class='status'>
                 <tr>
@@ -73,8 +78,8 @@
                   <th class='status'>Actions</th>
                 </tr>
                 [% FOREACH h = g.hosts %]
-                [% SET hostclass = 'statusEven' IF loop.even                 %]
-                [% SET hostclass = 'statusOdd'  IF loop.odd                  %]
+                [% SET hostclass = 'statusEven' IF loop.odd                  %]
+                [% SET hostclass = 'statusOdd'  IF loop.even                 %]
                 [% SET hostname  = h.host_name                               %]
                 [% SET host      = host_data.$hostname                       %]
                 [% IF host.state == 1 %]
@@ -87,6 +92,12 @@
                     <table border="0" width="100%" cellpadding="0" cellspacing="0">
                       <tr class='[% hostclass %]'>
                         <td class='[% hostclass %]'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail' title='[% host.address %]'>[% h.host_name %]</a></td>
+
+                        [% IF host.icon_image %]
+                        <td class='[% hostclass %]' width="5"></td>
+                        <td class='[% hostclass %]' align="right"><a href='extinfo.cgi?type=1&amp;host=[% host.name %]'><img src='/nagios/images/logos/[% host.icon_image %]' border="0" width="20" height="20" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'></a></td>
+                        [% END %]
+
                       </tr>
                     </table>
                   </td>
@@ -101,15 +112,27 @@
                   [% END %]
                   <td class='[% hostclass %]'>
                     <table border="0" width="100%">
-                      [% IF h.ok       > 0 %]<tr><td class='miniStatusOK'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.ok %] OK</a></td></tr>[% END %]
-                      [% IF h.warning  > 0 %]<tr><td class='miniStatusWARNING'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.warning %] WARNING</a></td></tr>[% END %]
-                      [% IF h.unknown  > 0 %]<tr><td class='miniStatusUNKNOWN'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.unknown %] UNKNOWN</a></td></tr>[% END %]
-                      [% IF h.critical > 0 %]<tr><td class='miniStatusCRITICAL'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.critical %] CRITICAL</a></td></tr>[% END %]
-                      [% IF h.pending  > 0 %]<tr><td class='miniStatusPENDING'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.pending %] PENDING</a></td></tr>[% END %]
+                      [% IF h.ok || h.warning || h.unknown || h.critical || h.pending %]
+                      [% IF h.ok       %]<tr><td class='miniStatusOK'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.ok %] OK</a></td></tr>[% END %]
+                      [% IF h.warning  %]<tr><td class='miniStatusWARNING'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.warning %] WARNING</a></td></tr>[% END %]
+                      [% IF h.unknown  %]<tr><td class='miniStatusUNKNOWN'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.unknown %] UNKNOWN</a></td></tr>[% END %]
+                      [% IF h.critical %]<tr><td class='miniStatusCRITICAL'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.critical %] CRITICAL</a></td></tr>[% END %]
+                      [% IF h.pending  %]<tr><td class='miniStatusPENDING'><a href='status.cgi?host=[% h.host_name %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.pending %] PENDING</a></td></tr>[% END %]
+                      [% ELSE %]
+                      No matching services
+                      [% END %]
                     </table>
                   </td>
                   <td class='[% hostclass %]'>
-                    <a href='extinfo.cgi?type=1&amp;host=[% h.host_name %]'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a> <a href='status.cgi?host=[% h.host_name %]'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a> <a href='statusmap.cgi?host=[% h.host_name %]'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
+                    <a href='extinfo.cgi?type=1&amp;host=[% h.host_name %]'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a>
+                    [% IF host.notes_url %]
+                    <a href='[% host.notes_url %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/nagios/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
+                    [% END %]
+                    [% IF host.action_url %]
+                    <a href='[% host.action_url %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/nagios/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a>
+                    [% END %]
+                    <a href='status.cgi?host=[% h.host_name %]'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
+                    <a href='statusmap.cgi?host=[% h.host_name %]'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
                   </td>
                 </tr>
                 [% END %]

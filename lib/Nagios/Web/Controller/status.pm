@@ -50,17 +50,22 @@ sub _process_details_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
-    my $host          = $c->{'request'}->{'parameters'}->{'host'}      || 'all';
-    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'} || '';
+    my $host          = $c->{'request'}->{'parameters'}->{'host'}         || '';
+    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
+    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
     my $hostfilter    = "";
     my $servicefilter = "";
-    if($host ne 'all') {
+    if($host ne 'all' and $host ne '') {
         $hostfilter    = "Filter: name = $host\n";
         $servicefilter = "Filter: host_name = $host\n";
     }
     elsif($hostgroup ne 'all' and $hostgroup ne '') {
         $hostfilter    = "Filter: groups >= $hostgroup\n";
         $servicefilter = "Filter: host_groups >= $hostgroup\n";
+    }
+    elsif($servicegroup ne 'all' and $servicegroup ne '') {
+        #$hostfilter    = "Filter: groups >= $hostgroup\n";
+        $servicefilter = "Filter: groups >= $servicegroup\n";
     }
 
     # fill the host/service totals box
@@ -106,7 +111,9 @@ sub _process_details_page {
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'host'}          = $host;
     $c->stash->{'hostgroup'}     = $hostgroup;
+    $c->stash->{'servicegroup'}  = $servicegroup;
     $c->stash->{'services'}      = $sortedservices;
+    $c->stash->{'style'}         = 'detail';
 }
 
 ##########################################################
@@ -158,6 +165,7 @@ sub _process_hostdetails_page {
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'hostgroup'}     = $hostgroup;
     $c->stash->{'hosts'}         = $sortedhosts;
+    $c->stash->{'style'}         = 'hostdetail';
 }
 
 ##########################################################
@@ -166,16 +174,21 @@ sub _process_overview_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
-    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'} || '';
-    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'};
+    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
+    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
 
     my $hostfilter      = "";
     my $servicefilter   = "";
-    my $hostgroupfilter = "";
+    my $groupfilter     = "";
     if($hostgroup ne '' and $hostgroup ne 'all') {
         $hostfilter      = "Filter: groups >= $hostgroup\n";
         $servicefilter   = "Filter: host_groups >= $hostgroup\n";
-        $hostgroupfilter = "Filter: name = $hostgroup\n";
+        $groupfilter     = "Filter: name = $hostgroup\n";
+    }
+    elsif($servicegroup ne '' and $servicegroup ne 'all') {
+        #$hostfilter      = "Filter: groups >= $hostgroup\n";
+        $servicefilter   = "Filter: groups >= $servicegroup\n";
+        $groupfilter     = "Filter: name = $servicegroup\n";
     }
 
     # fill the host/service totals box
@@ -184,16 +197,41 @@ sub _process_overview_page {
     # then add some more filter based on get parameter
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
-    # we need the hostname, address and the
+    # we need the hostname, address etc...
     my $host_data = $c->{'live'}->selectall_hashref("GET hosts
-Columns: name address state has_been_checked
+Columns: name address state has_been_checked notes_url action_url icon_image icon_image_alt
 $hostfilter", 'name' );
 
-    # get all hostgroups
-    my $hostgroups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$hostgroupfilter\nColumns: name alias\nStatsGroupBy: name", { Slice => {} });
-    for my $hostgroup (@{$hostgroups}) {
-        $hostgroup->{'hosts'} = $c->{'live'}->selectall_arrayref("GET services
-Filter: host_groups >= $hostgroup->{'name'}
+    # get all host/service groups
+    my $groups;
+    if($hostgroup) {
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$groupfilter\nColumns: name alias", { Slice => {} });
+    }
+    elsif($servicegroup) {
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n$groupfilter\nColumns: name alias", { Slice => {} });
+    }
+
+    for my $group (@{$groups}) {
+        my $extra_filter;
+        if($hostgroup) {
+            $extra_filter = "Filter: host_groups >= ".$group->{'name'};
+        }
+        elsif($servicegroup) {
+            $extra_filter = "Filter: groups >= ".$group->{'name'};
+        }
+
+        # for the case, when there are hosts without services
+        my $hosts = [];
+        if($hostgroup) {
+            $hosts = $c->{'live'}->selectall_arrayref("GET hosts
+Columns: name
+Filter: groups >= ".$group->{'name'}."
+Filter: num_services = 0
+", { Slice => {}, rename => { name => 'host_name'} });
+        }
+
+        $group->{'hosts'} = [@{$hosts}, @{$c->{'live'}->selectall_arrayref("GET services
+$extra_filter
 
 Stats: has_been_checked = 0 as pending
 
@@ -214,12 +252,14 @@ Stats: has_been_checked = 1
 StatsAnd: 2 as unknown
 
 StatsGroupBy: host_name
-", { Slice => {} });
+", { Slice => {} })}];
     }
 
     $c->stash->{'host_data'}    = $host_data;
     $c->stash->{'hostgroup'}    = $hostgroup;
-    $c->stash->{'groups'}       = $hostgroups;
+    $c->stash->{'servicegroup'} = $servicegroup;
+    $c->stash->{'groups'}       = $groups;
+    $c->stash->{'style'}        = 'overview';
 }
 
 ##########################################################
@@ -308,6 +348,9 @@ sub _extend_filter {
 
     $c->stash->{'show_filter_table'}       = 1 if $service_prop_filter_service ne '';
     $c->stash->{'service_prop_filtername'} = $service_prop_filtername;
+
+    $c->stash->{'servicestatustypes'} = $c->{'request'}->{'parameters'}->{'servicestatustypes'};
+    $c->stash->{'hoststatustypes'}    = $c->{'request'}->{'parameters'}->{'hoststatustypes'};
 
     return($hostfilter,$servicefilter);
 }
