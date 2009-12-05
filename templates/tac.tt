@@ -71,7 +71,7 @@
               <td colspan="1" height="20" class='outageTitle'>&nbsp;Network Outages</td>
             </tr>
             <tr>
-              <td class='outageHeader' width="125"><a href='outages.cgi' class='outageHeader'>0 Outages</a></td>
+              <td class='outageHeader' width="125"><a href='outages.cgi' class='outageHeader'>[% host_stats.outages %] Outages</a></td>
             </tr>
             <tr>
               <td valign="top">
@@ -80,7 +80,11 @@
                     <td valign="bottom" width="25">&nbsp;&nbsp;&nbsp;</td>
                     <td width="10">&nbsp;</td>
                     <td valign="top" width="100%">
-                      <table border="0" width="100%"></table>
+                      <table border="0" width="100%">
+                      [% IF host_stats.outages > 0 %]
+                      <tr><td width="100%" class='outageImportantProblem'><a href='outages.cgi'>[% host_stats.outages %] Blocking Outages</a></td></tr>
+                      [% END %]
+                      </table>
                     </td>
                   </tr>
                 </table>

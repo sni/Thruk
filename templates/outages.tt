@@ -10,43 +10,44 @@
       </tr>
     </table>
     <div align="center">
-      <div class='dataTitle'>
-        Blocking Outages
-      </div>
-
+      <br>
+      <div class='dataTitle'>Blocking Outages</div>
       <table border="0" class='data'>
         <tr>
-          <th class='data'>
-            Severity
-          </th>
-          <th class='data'>
-            Host
-          </th>
-          <th class='data'>
-            State
-          </th>
-
-          <th class='data'>
-            Notes
-          </th>
-          <th class='data'>
-            State Duration
-          </th>
-          <th class='data'>
-            # Hosts Affected
-          </th>
-          <th class='data'>
-
-            # Services Affected
-          </th>
-          <th class='data'>
-            Actions
-          </th>
+          <th class='data'>Severity</th>
+          <th class='data'>Host</th>
+          <th class='data'>State</th>
+          <th class='data'>Notes</th>
+          <th class='data'>State Duration</th>
+          <th class='data'># Hosts Affected</th>
+          <th class='data'># Services Affected</th>
+          <th class='data'>Actions</th>
         </tr>
+        [% SET num = 0 %]
+        [% FOREACH host = outages %]
+        [% SET num = num + 1 %]
+        [% SET class = 'dataOdd'  IF loop.odd %]
+        [% SET class = 'dataEven' IF loop.even %]
+        <tr class='[% class %]'>
+          <td class='[% class %]'>[% host.severity %]</td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name %]'>[% host.name %]</a></td>
+          <td class='hostDOWN'>DOWN</td>
+          <td class='[% class %]'>N/A</td>
+          <td class='[% class %]'>[% duration(0 - host.last_state_change) %]</td>
+          <td class='[% class %]'>[% host.affected_hosts %]</td>
+          <td class='[% class %]'>[% host.affected_services %]</td>
+          <td class='[% class %]'>
+            <a href='status.cgi?host=[% host.name %]'><img src='/nagios/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host'></a>
+            <a href='statusmap.cgi?host=[% host.name %]'><img src='/nagios/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children'></a>
+            <a href='statuswrl.cgi?host=[% host.name %]'><img src='/nagios/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children'></a>
+            <a href='trends.cgi?host=[% host.name %]'><img src='/nagios/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host'></a>
+            <a href='history.cgi?host=[% host.name %]'><img src='/nagios/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host'></a>
+            <a href='notifications.cgi?host=[% host.name %]'><img src='/nagios/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host'></a></td>
+        </tr>
+        [% END %]
       </table>
     </div>
-    <div class='itemTotalsTitle'>
-      0 Blocking Outages Displayed
-    </div>
+
+    <div class='itemTotalsTitle'>[% num %] Blocking Outages Displayed</div>
 
 [% INCLUDE _footer.tt %]

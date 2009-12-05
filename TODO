@@ -10,6 +10,6 @@ Todo List:
 - add comments on status_hostdetails page
 - add authorization part to all querys
 - fix pending state on host/service details page (should be just a empty message)
-- network outage on toc page
+- comments on outage page
 - speed up status overview page (too many queries)
 - verify macros is action_url, icon_url and notes_url

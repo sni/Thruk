@@ -24,12 +24,63 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+
+    my $outages = $c->{'live'}->selectall_arrayref("GET hosts
+Columns: name last_state_change childs
+Filter: state = 1
+Filter: childs !=
+And: 2
+", { Slice => 1 });
+
+    if(scalar @{$outages} > 0) {
+        my $all_hosts = $c->{'live'}->selectall_hashref("GET hosts
+Columns: name childs num_services
+", 'name');
+
+        for my $host (@{$outages}) {
+            # count number of affected hosts / services
+            my($affected_hosts,$affected_services) = $self->_count_affected_hosts_and_services($c, $host->{'name'}, $all_hosts);
+            $host->{'affected_hosts'}    = $affected_hosts;
+            $host->{'affected_services'} = $affected_services;
+
+            $host->{'severity'} = int($affected_hosts + $affected_services/4);
+        }
+    }
+
+    # sort by severity
+    my $sortedoutages = Nagios::Web::Helper->sort($c, $outages, 'severity', 'DESC');
+
+    $c->stash->{outages}        = $sortedoutages;
     $c->stash->{title}          = 'Network Outages';
     $c->stash->{infoBoxTitle}   = 'Network Outages';
     $c->stash->{page}           = 'outages';
     $c->stash->{template}       = 'outages.tt';
 }
 
+##########################################################
+# create the status details page
+sub _count_affected_hosts_and_services {
+    my($self, $c, $host, $all_hosts ) = @_;
+
+    my $affected_hosts    = 0;
+    my $affected_services = 0;
+
+    if(defined $all_hosts->{$host}->{'childs'} and $all_hosts->{$host}->{'childs'} ne '') {
+        for my $child (split/,/, $all_hosts->{$host}->{'childs'}) {
+            my($child_affected_hosts,$child_affected_services) = $self->_count_affected_hosts_and_services($c, $child, $all_hosts);
+            $affected_hosts    += $child_affected_hosts;
+            $affected_services += $child_affected_services;
+        }
+    }
+
+    # add number of directly affected hosts
+    $affected_hosts++;
+
+    # add number of directly affected services
+    $affected_services += $all_hosts->{$host}->{'num_services'};
+
+    return($affected_hosts, $affected_services);
+}
 
 =head1 AUTHOR
 

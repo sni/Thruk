@@ -114,6 +114,10 @@ Stats: event_handler_enabled = 0 as eventhandler_disabled
 Stats: active_checks_enabled = 0 as active_checks_disabled
 
 Stats: accept_passive_checks = 0 as passive_checks_disabled
+
+Stats: state = 1
+Stats: childs !=
+StatsAnd: 2 as outages
 ",
     { Slice => {}});
     my $service_stats = $c->{'live'}->selectrow_hashref("GET services
@@ -262,6 +266,7 @@ Stats: active_checks_enabled = 0 as active_checks_disabled
 Stats: accept_passive_checks = 0 as passive_checks_disabled
 ",
     { Slice => {} } );
+
     $c->stash->{host_stats}     = $host_stats;
     $c->stash->{service_stats}  = $service_stats;
     $c->stash->{title}          = 'Nagios Tactical Monitoring Overview';
