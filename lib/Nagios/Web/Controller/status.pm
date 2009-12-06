@@ -74,7 +74,6 @@ sub _process_details_page {
         $servicefilter = "Filter: host_groups >= $hostgroup\n";
     }
     elsif($servicegroup ne 'all' and $servicegroup ne '') {
-        #$hostfilter    = "Filter: groups >= $hostgroup\n";
         $servicefilter = "Filter: groups >= $servicegroup\n";
     }
 
@@ -111,12 +110,7 @@ sub _process_details_page {
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     my $sortedservices = Nagios::Web::Helper->sort($c, $services, $sortoptions->{$sortoption}->[0], $order);
     if($sortoption == 6) { @{$sortedservices} = reverse @{$sortedservices}; }
-#use Data::Dumper;
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($sortedservices);
-#for my $ser (@{$sortedservices}) {
-#    print $ser->{'last_state_change'}." ".$ser->{'host_name'}." ".$ser->{'description'}."<br>\n";
-#}
+
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'host'}          = $host;

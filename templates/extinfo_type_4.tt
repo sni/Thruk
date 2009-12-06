@@ -1,0 +1,438 @@
+[% INCLUDE _header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+            [% INCLUDE _infobox.tt %]
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="bottom" width="33%"></td>
+      </tr>
+    </table><br>
+    <div align="center">
+      <div class='dataTitle'>Program-Wide Performance Information</div>
+
+      <table border='0' cellpadding='10'>
+        <tr>
+          <td valign="middle"><div class='perfTypeTitle'>Services Actively Checked:</div></td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Time Frame</th>
+                      <th class='data'>Services Checked</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 minute:</td>
+                      <td class='dataVal'>[% stats.services.active_1_min %] ([% sprintf('%.1f',stats.services.active_1_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 5 minutes:</td>
+                      <td class='dataVal'>[% stats.services.active_5_min %] ([% sprintf('%.1f',stats.services.active_5_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 15 minutes:</td>
+                      <td class='dataVal'>[% stats.services.active_15_min %] ([% sprintf('%.1f',stats.services.active_15_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 hour:</td>
+                      <td class='dataVal'>[% stats.services.active_60_min %] ([% sprintf('%.1f',stats.services.active_60_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% stats.services.active_all_min %] ([% sprintf('%.1f',stats.services.active_all_min_perc) %]%)</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable2'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Metric</th>
+                      <th class='data'>Min.</th>
+                      <th class='data'>Max.</th>
+                      <th class='data'>Average</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Check Execution Time:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.execution_time_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.execution_time_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.services.execution_time_avg) %] sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Check Latency:</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.latency_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.latency_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.services.latency_avg) %] sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Percent State Change:</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.active_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.active_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.active_state_change_avg) %]%</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><div class='perfTypeTitle'>Services Passively Checked:</div></td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Time Frame</th>
+                      <th class='data'>Services Checked</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 minute:</td>
+                      <td class='dataVal'>[% stats.services.passive_1_min %] ([% sprintf('%.1f',stats.services.passive_1_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 5 minutes:</td>
+                      <td class='dataVal'>[% stats.services.passive_5_min %] ([% sprintf('%.1f',stats.services.passive_5_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 15 minutes:</td>
+                      <td class='dataVal'>[% stats.services.passive_15_min %] ([% sprintf('%.1f',stats.services.passive_15_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 hour:</td>
+                      <td class='dataVal'>[% stats.services.passive_60_min %] ([% sprintf('%.1f',stats.services.passive_60_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% stats.services.passive_all_min %] ([% sprintf('%.1f',stats.services.passive_all_min_perc) %]%)</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable2'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Metric</th>
+                      <th class='data'>Min.</th>
+                      <th class='data'>Max.</th>
+                      <th class='data'>Average</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Percent State Change:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.passive_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.passive_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services.passive_state_change_avg) %]%</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><div class='perfTypeTitle'>Hosts Actively Checked:</div></td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Time Frame</th>
+                      <th class='data'>Hosts Checked</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 minute:</td>
+                      <td class='dataVal'>[% stats.hosts.active_1_min %] ([% sprintf('%.1f',stats.hosts.active_1_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 5 minutes:</td>
+                      <td class='dataVal'>[% stats.hosts.active_5_min %] ([% sprintf('%.1f',stats.hosts.active_5_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 15 minutes:</td>
+                      <td class='dataVal'>[% stats.hosts.active_15_min %] ([% sprintf('%.1f',stats.hosts.active_15_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 hour:</td>
+                      <td class='dataVal'>[% stats.hosts.active_60_min %] ([% sprintf('%.1f',stats.hosts.active_60_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% stats.hosts.active_all_min %] ([% sprintf('%.1f',stats.hosts.active_all_min_perc) %]%)</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable2'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Metric</th>
+                      <th class='data'>Min.</th>
+                      <th class='data'>Max.</th>
+                      <th class='data'>Average</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Check Execution Time:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.execution_time_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.execution_time_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.hosts.execution_time_avg) %] sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Check Latency:</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.latency_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.latency_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.hosts.latency_avg) %] sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Percent State Change:</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.active_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.active_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.active_state_change_avg) %]%</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><div class='perfTypeTitle'>Hosts Passively Checked:</div></td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Time Frame</th>
+                      <th class='data'>Hosts Checked</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 minute:</td>
+                      <td class='dataVal'>[% stats.hosts.passive_1_min %] ([% sprintf('%.1f',stats.hosts.passive_1_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 5 minutes:</td>
+                      <td class='dataVal'>[% stats.hosts.passive_5_min %] ([% sprintf('%.1f',stats.hosts.passive_5_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 15 minutes:</td>
+                      <td class='dataVal'>[% stats.hosts.passive_15_min %] ([% sprintf('%.1f',stats.hosts.passive_15_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>&lt;= 1 hour:</td>
+                      <td class='dataVal'>[% stats.hosts.passive_60_min %] ([% sprintf('%.1f',stats.hosts.passive_60_min_perc) %]%)</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% stats.hosts.passive_all_min %] ([% sprintf('%.1f',stats.hosts.passive_all_min_perc) %]%)</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable2'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Metric</th>
+                      <th class='data'>Min.</th>
+                      <th class='data'>Max.</th>
+                      <th class='data'>Average</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Percent State Change:&nbsp;&nbsp;</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.passive_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.passive_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.passive_state_change_avg) %]%</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+
+
+        <tr>
+          <td valign="middle"><div class='perfTypeTitle'>Livestatus Statistics:</div></td>
+          <td valign="top">
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Type</th>
+                      <th class='data'>Total</th>
+                      <th class='data'>Rate</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Servicechecks:</td>
+                      <td class='dataVal'>[% live_stats.service_checks %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',live_stats.service_checks_rate) %] /sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Hostchecks:</td>
+                      <td class='dataVal'>[% live_stats.host_checks %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',live_stats.host_checks_rate) %] /sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Connections:</td>
+                      <td class='dataVal'>[% live_stats.connections %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',live_stats.connections_rate) %] /sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Requests:</td>
+                      <td class='dataVal'>[% live_stats.requests %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',live_stats.requests_rate) %] /sec</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>NEB Callbacks:</td>
+                      <td class='dataVal'>[% live_stats.neb_callbacks %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',live_stats.neb_callbacks_rate) %] /sec</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top"></td>
+        </tr>
+
+<!--
+        <tr>
+          <td valign="center"><div class='perfTypeTitle'>Check Statistics:</div></td>
+          <td valign="top" colspan='2'>
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'>
+                      <th class='data'>Type</th>
+                      <th class='data'>Last 1 Min</th>
+                      <th class='data'>Last 5 Min</th>
+                      <th class='data'>Last 15 Min</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Active Scheduled Host Checks</td>
+                      <td class='dataVal'>1</td>
+                      <td class='dataVal'>19</td>
+                      <td class='dataVal'>120</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Active On-Demand Host Checks</td>
+                      <td class='dataVal'>262</td>
+                      <td class='dataVal'>1298</td>
+                      <td class='dataVal'>3682</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Parallel Host Checks</td>
+                      <td class='dataVal'>255</td>
+                      <td class='dataVal'>1253</td>
+                      <td class='dataVal'>3647</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Serial Host Checks</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Cached Host Checks</td>
+                      <td class='dataVal'>9</td>
+                      <td class='dataVal'>64</td>
+                      <td class='dataVal'>155</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Passive Host Checks</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Active Scheduled Service Checks</td>
+                      <td class='dataVal'>345</td>
+                      <td class='dataVal'>1817</td>
+                      <td class='dataVal'>5392</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Active On-Demand Service Checks</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Cached Service Checks</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Passive Service Checks</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>External Commands</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="center"><div class='perfTypeTitle'>Buffer Usage:</div></td>
+          <td valign="top" colspan='2'>
+            <table border="1" cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='stateInfoTable1'>
+                  <table border="0">
+                    <tr class='data'><th class='data'>Type</th>
+                      <th class='data'>In Use</th>
+                      <th class='data'>Max Used</th>
+                      <th class='data'>Total Available</th>
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>External Commands&nbsp;</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>0</td>
+                      <td class='dataVal'>4096</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+-->
+      </table>
+    </div>
+
+[% INCLUDE _footer.tt %]

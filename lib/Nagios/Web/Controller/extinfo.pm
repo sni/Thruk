@@ -46,6 +46,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 4) {
         $infoBoxTitle = 'Performance Information';
+        $self->_process_perf_info_page($c);
     }
     if($type == 5) {
         $infoBoxTitle = 'Hostgroup Information';
@@ -179,6 +180,178 @@ sub _process_process_info_page {
 
     # all other data is already set in addDefaults
     $c->stash->{'nagios_data_source'} = $c->{'live'}->peer_name();
+}
+
+##########################################################
+# create the performance info page
+sub _process_perf_info_page {
+    my ( $self, $c ) = @_;
+
+    my $now    = time();
+    my $min1   = $now - 60;
+    my $min5   = $now - 300;
+    my $min15  = $now - 900;
+    my $min60  = $now - 3600;
+    my $minall = $c->stash->{'pi'}->{'program_start'};
+
+    my $check_stats;
+    for my $type (qw{hosts services}) {
+        $check_stats->{$type} = {
+            'active_sum'                => 0,
+            'active_1_min'              => 0,
+            'active_5_min'              => 0,
+            'active_15_min'             => 0,
+            'active_60_min'             => 0,
+            'active_all_min'            => 0,
+
+            'active_1_min_perc'         => 0,
+            'active_5_min_perc'         => 0,
+            'active_15_min_perc'        => 0,
+            'active_60_min_perc'        => 0,
+            'active_all_min_perc'       => 0,
+
+            'execution_time_min'        => undef,
+            'execution_time_max'        => undef,
+            'execution_time_avg'        => 0,
+            'execution_time_sum'        => 0,
+
+            'latency_min'               => undef,
+            'latency_max'               => undef,
+            'latency_avg'               => 0,
+            'latency_sum'               => 0,
+
+            'active_state_change_min'   => undef,
+            'active_state_change_max'   => undef,
+            'active_state_change_avg'   => 0,
+            'active_state_change_sum'   => 0,
+
+            'passive_sum'               => 0,
+            'passive_1_min'             => 0,
+            'passive_5_min'             => 0,
+            'passive_15_min'            => 0,
+            'passive_60_min'            => 0,
+            'passive_all_min'           => 0,
+
+            'passive_1_min_perc'        => 0,
+            'passive_5_min_perc'        => 0,
+            'passive_15_min_perc'       => 0,
+            'passive_60_min_perc'       => 0,
+            'passive_all_min_perc'      => 0,
+
+            'passive_state_change_min'  => undef,
+            'passive_state_change_max'  => undef,
+            'passive_state_change_avg'  => 0,
+            'passive_state_change_sum'  => 0,
+        };
+
+        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1 })}) {
+            if($data->{'check_type'} == 0) {
+                $check_stats->{$type}->{'active_sum'}++;
+            } else {
+                $check_stats->{$type}->{'passive_sum'}++;
+            }
+
+            if($data->{'has_been_checked'}) {
+
+                # active checks
+                if($data->{'check_type'} == 0) {
+                    if($data->{'last_check'} >= $min1)   { $check_stats->{$type}->{'active_1_min'}++;   }
+                    if($data->{'last_check'} >= $min5)   { $check_stats->{$type}->{'active_5_min'}++;   }
+                    if($data->{'last_check'} >= $min15)  { $check_stats->{$type}->{'active_15_min'}++;  }
+                    if($data->{'last_check'} >= $min60)  { $check_stats->{$type}->{'active_60_min'}++;  }
+                    if($data->{'last_check'} >= $minall) { $check_stats->{$type}->{'active_all_min'}++; }
+
+                    # sum up all values to calculate averages later
+                    $check_stats->{$type}->{'execution_time_sum'}       += $data->{'execution_time'};
+                    $check_stats->{$type}->{'latency_sum'}              += $data->{'latency'};
+                    $check_stats->{$type}->{'active_state_change_sum'}  += $data->{'percent_state_change'};
+
+                    # check min/max values
+                    if(!defined $check_stats->{$type}->{'execution_time_min'} or $check_stats->{$type}->{'execution_time_min'} > $data->{'execution_time'}) {
+                        $check_stats->{$type}->{'execution_time_min'} = $data->{'execution_time'};
+                    }
+                    if(!defined $check_stats->{$type}->{'execution_time_max'} or $check_stats->{$type}->{'execution_time_max'} < $data->{'execution_time'}) {
+                        $check_stats->{$type}->{'execution_time_max'} = $data->{'execution_time'};
+                    }
+
+                    if(!defined $check_stats->{$type}->{'latency_min'} or $check_stats->{$type}->{'latency_min'} > $data->{'latency'}) {
+                        $check_stats->{$type}->{'latency_min'} = $data->{'latency'};
+                    }
+                    if(!defined $check_stats->{$type}->{'latency_max'} or $check_stats->{$type}->{'latency_max'} < $data->{'latency'}) {
+                        $check_stats->{$type}->{'latency_max'} = $data->{'latency'};
+                    }
+
+                    if(!defined $check_stats->{$type}->{'active_state_change_min'} or $check_stats->{$type}->{'active_state_change_min'} > $data->{'percent_state_change'}) {
+                        $check_stats->{$type}->{'active_state_change_min'} = $data->{'percent_state_change'};
+                    }
+                    if(!defined $check_stats->{$type}->{'active_state_change_max'} or $check_stats->{$type}->{'active_state_change_max'} < $data->{'percent_state_change'}) {
+                        $check_stats->{$type}->{'active_state_change_max'} = $data->{'percent_state_change'};
+                    }
+                }
+                # passive checks
+                else {
+                    $check_stats->{$type}->{'passive_sum'}++;
+                    if($data->{'last_check'} >= $min1)   { $check_stats->{$type}->{'passive_1_min'}++;   }
+                    if($data->{'last_check'} >= $min5)   { $check_stats->{$type}->{'passive_5_min'}++;   }
+                    if($data->{'last_check'} >= $min15)  { $check_stats->{$type}->{'passive_15_min'}++;  }
+                    if($data->{'last_check'} >= $min60)  { $check_stats->{$type}->{'passive_60_min'}++;  }
+                    if($data->{'last_check'} >= $minall) { $check_stats->{$type}->{'passive_all_min'}++; }
+
+                    # sum up all values to calculate averages later
+                    $check_stats->{$type}->{'passive_state_change_sum'} += $data->{'percent_state_change'};
+
+                    # check min/max values
+                    if(!defined $check_stats->{$type}->{'passive_state_change_min'} or $check_stats->{$type}->{'passive_state_change_min'} > $data->{'percent_state_change'}) {
+                        $check_stats->{$type}->{'active_state_change_min'} = $data->{'percent_state_change'};
+                    }
+                    if(!defined $check_stats->{$type}->{'passive_state_change_max'} or $check_stats->{$type}->{'passive_state_change_max'} < $data->{'percent_state_change'}) {
+                        $check_stats->{$type}->{'passive_state_change_max'} = $data->{'percent_state_change'};
+                    }
+                }
+            }
+        }
+
+        # calculate averages
+        if($check_stats->{$type}->{'active_sum'} > 0) {
+            $check_stats->{$type}->{'execution_time_avg'}       = $check_stats->{$type}->{'execution_time_sum'}       / $check_stats->{$type}->{'active_sum'};
+            $check_stats->{$type}->{'latency_avg'}              = $check_stats->{$type}->{'latency_sum'}              / $check_stats->{$type}->{'active_sum'};
+            $check_stats->{$type}->{'active_state_change_avg'}  = $check_stats->{$type}->{'active_state_change_sum'}  / $check_stats->{$type}->{'active_sum'};
+        } else {
+            $check_stats->{$type}->{'execution_time_avg'}       = 0;
+            $check_stats->{$type}->{'latency_avg'}              = 0;
+            $check_stats->{$type}->{'active_state_change_avg'}  = 0;
+        }
+        if($check_stats->{$type}->{'passive_sum'} > 0) {
+            $check_stats->{$type}->{'passive_state_change_avg'} = $check_stats->{$type}->{'passive_state_change_sum'} / $check_stats->{$type}->{'passive_sum'};
+        } else {
+            $check_stats->{$type}->{'passive_state_change_avg'} = 0;
+        }
+
+        # calculate percentages
+        if($check_stats->{$type}->{'active_sum'} > 0) {
+            $check_stats->{$type}->{'active_1_min_perc'}   = $check_stats->{$type}->{'active_1_min'}   / $check_stats->{$type}->{'active_sum'} * 100;
+            $check_stats->{$type}->{'active_5_min_perc'}   = $check_stats->{$type}->{'active_5_min'}   / $check_stats->{$type}->{'active_sum'} * 100;
+            $check_stats->{$type}->{'active_15_min_perc'}  = $check_stats->{$type}->{'active_15_min'}  / $check_stats->{$type}->{'active_sum'} * 100;
+            $check_stats->{$type}->{'active_60_min_perc'}  = $check_stats->{$type}->{'active_60_min'}  / $check_stats->{$type}->{'active_sum'} * 100;
+            $check_stats->{$type}->{'active_all_min_perc'} = $check_stats->{$type}->{'active_all_min'} / $check_stats->{$type}->{'active_sum'} * 100;
+        }
+
+        if($check_stats->{$type}->{'passive_sum'} > 0) {
+            $check_stats->{$type}->{'passive_1_min_perc'}   = $check_stats->{$type}->{'passive_1_min'}   / $check_stats->{$type}->{'passive_sum'} * 100;
+            $check_stats->{$type}->{'passive_5_min_perc'}   = $check_stats->{$type}->{'passive_5_min'}   / $check_stats->{$type}->{'passive_sum'} * 100;
+            $check_stats->{$type}->{'passive_15_min_perc'}  = $check_stats->{$type}->{'passive_15_min'}  / $check_stats->{$type}->{'passive_sum'} * 100;
+            $check_stats->{$type}->{'passive_60_min_perc'}  = $check_stats->{$type}->{'passive_60_min'}  / $check_stats->{$type}->{'passive_sum'} * 100;
+            $check_stats->{$type}->{'passive_all_min_perc'} = $check_stats->{$type}->{'passive_all_min'} / $check_stats->{$type}->{'passive_sum'} * 100;
+        }
+    }
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($check_stats);
+
+    $c->stash->{'stats'}      = $check_stats;
+
+    $c->stash->{'live_stats'} = $c->{'live'}->selectrow_arrayref("GET status\nColumns: connections connections_rate host_checks host_checks_rate requests requests_rate service_checks service_checks_rate neb_callbacks neb_callbacks_rate", { Slice => 1 });
+
 }
 
 
