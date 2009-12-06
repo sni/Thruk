@@ -25,7 +25,17 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     my $allowed_subpages = {'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summmary' => 1};
-    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'detail';
+    my $style = $c->{'request'}->{'parameters'}->{'style'};
+
+    if(!defined $style) {
+        if(defined $c->{'request'}->{'parameters'}->{'hostgroup'} and $c->{'request'}->{'parameters'}->{'hostgroup'} ne '') {
+            $style = 'overview';
+        }
+        if(defined $c->{'request'}->{'parameters'}->{'servicegroup'} and $c->{'request'}->{'parameters'}->{'servicegroup'} ne '') {
+            $style = 'overview';
+        }
+    }
+
     $style = 'detail' unless defined $allowed_subpages->{$style};
 
     if($style eq 'detail') {
@@ -186,7 +196,6 @@ sub _process_overview_page {
         $groupfilter     = "Filter: name = $hostgroup\n";
     }
     elsif($servicegroup ne '' and $servicegroup ne 'all') {
-        #$hostfilter      = "Filter: groups >= $hostgroup\n";
         $servicefilter   = "Filter: groups >= $servicegroup\n";
         $groupfilter     = "Filter: name = $servicegroup\n";
     }
@@ -198,64 +207,76 @@ sub _process_overview_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # we need the hostname, address etc...
-    my $host_data = $c->{'live'}->selectall_hashref("GET hosts
-Columns: name address state has_been_checked notes_url action_url icon_image icon_image_alt
-$hostfilter", 'name' );
+    my $host_data;
+    my $services_data;
+    if($hostgroup) {
+        $host_data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt num_services_ok as ok num_services_unknown as unknown num_services_warn as warning num_services_crit as critical num_services_pending as pending\n$hostfilter", 'name' );
+    }
+    elsif($servicegroup) {
+        $host_data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt\n$hostfilter", 'name' );
+
+        # we have to sort in all services and states
+        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state description host_name\nFilter: groups !=", { Slice => {} })}) {
+            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+        }
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($services_data);
+    }
 
     # get all host/service groups
     my $groups;
     if($hostgroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$groupfilter\nColumns: name alias", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
     elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n$groupfilter\nColumns: name alias", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
 
     for my $group (@{$groups}) {
-        my $extra_filter;
         if($hostgroup) {
-            $extra_filter = "Filter: host_groups >= ".$group->{'name'};
+            for my $member (split /,/, $group->{'members'}) {
+                push @{$group->{'hosts'}}, $host_data->{$member};
+            }
         }
         elsif($servicegroup) {
-            $extra_filter = "Filter: groups >= ".$group->{'name'};
+            my %hosts;
+            for my $member (split /,/, $group->{'members'}) {
+                my($hostname,$servicename) = split/\|/, $member, 2;
+                next unless defined $host_data->{$hostname};
+                if(!defined $hosts{$hostname}) {
+                    # clone hash data
+                    for my $key (keys %{$host_data->{$hostname}}) {
+                        $hosts{$hostname}->{$key}   = $host_data->{$hostname}->{$key};
+                    }
+                    $hosts{$hostname}->{'pending'}  = 0;
+                    $hosts{$hostname}->{'ok'}       = 0;
+                    $hosts{$hostname}->{'warning'}  = 0;
+                    $hosts{$hostname}->{'unknown'}  = 0;
+                    $hosts{$hostname}->{'critical'} = 0;
+                }
+
+                my $state            = $services_data->{$hostname}->{$servicename}->{'state'};
+                my $has_been_checked = $services_data->{$hostname}->{$servicename}->{'has_been_checked'};
+                if(!$has_been_checked) {
+                    $hosts{$hostname}->{'pending'}++;
+                } elsif($state == 0) {
+                    $hosts{$hostname}->{'ok'}++;
+                } elsif($state == 1) {
+                    $hosts{$hostname}->{'warning'}++;
+                } elsif($state == 2) {
+                    $hosts{$hostname}->{'critical'}++;
+                } elsif($state == 3) {
+                    $hosts{$hostname}->{'unknown'}++;
+                }
+            }
+
+            for my $hostname (sort keys %hosts) {
+                push @{$group->{'hosts'}}, $hosts{$hostname};
+            }
         }
-
-        # for the case, when there are hosts without services
-        my $hosts = [];
-        if($hostgroup) {
-            $hosts = $c->{'live'}->selectall_arrayref("GET hosts
-Columns: name
-Filter: groups >= ".$group->{'name'}."
-Filter: num_services = 0
-", { Slice => {}, rename => { name => 'host_name'} });
-        }
-
-        $group->{'hosts'} = [@{$hosts}, @{$c->{'live'}->selectall_arrayref("GET services
-$extra_filter
-
-Stats: has_been_checked = 0 as pending
-
-Stats: state = 0
-Stats: has_been_checked = 1
-StatsAnd: 2 as ok
-
-Stats: state = 1
-Stats: has_been_checked = 1
-StatsAnd: 2 as warning
-
-Stats: state = 2
-Stats: has_been_checked = 1
-StatsAnd: 2 as critical
-
-Stats: state = 3
-Stats: has_been_checked = 1
-StatsAnd: 2 as unknown
-
-StatsGroupBy: host_name
-", { Slice => {} })}];
     }
 
-    $c->stash->{'host_data'}    = $host_data;
     $c->stash->{'hostgroup'}    = $hostgroup;
     $c->stash->{'servicegroup'} = $servicegroup;
     $c->stash->{'groups'}       = $groups;

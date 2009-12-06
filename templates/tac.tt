@@ -124,7 +124,11 @@
                               </tr>
                               <tr>
                                 <td align="left" valign="center" class='healthItem'>Service Health:</td>
-                                [% service_health = (service_stats.ok*2 + service_stats.warning + service_stats.unknown) / ((service_stats.total-service_stats.pending)*2) * 100 %]
+                                [% IF (service_stats.total-service_stats.pending) == 0 %]
+                                  [% service_health = 0 %]
+                                [% ELSE %]
+                                  [% service_health = (service_stats.ok*2 + service_stats.warning + service_stats.unknown) / ((service_stats.total-service_stats.pending)*2) * 100 %]
+                                [% END %]
                                 [% service_perc = sprintf('%i', service_health) %]
                                 [% IF service_health >= 90 %]
                                 [% service_health_pic = 'thermok.png' %]

@@ -29,8 +29,8 @@
     <td align="center">
       <table border="1" class='hostTotals'>
         <tr>
-          <th class='hostTotals'><a class='hostTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail&amp;hoststatustypes=12'><i>All Problems</i></a></th>
-          <th class='hostTotals'><a class='hostTotals' href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail'><i>All Types</i></a></th>
+          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% filter %][% sfilter %]&amp;hoststatustypes=12'><i>All Problems</i></a></th>
+          <th class='hostTotals'><a class='hostTotals' href='status.cgi?[% filter %][% sfilter %]'><i>All Types</i></a></th>
         </tr>
         <tr>
           <td class='[% IF host_stats.down + host_stats.unreachable > 0 %]hostTotalsPROBLEMS[% ELSE %]hostTotals[% END %]'>[% host_stats.down + host_stats.unreachable %]</td>
