@@ -78,8 +78,8 @@
                   <th class='status'>Actions</th>
                 </tr>
                 [% FOREACH h = g.hosts %]
-                [% SET hostclass = 'statusEven' IF loop.odd                  %]
-                [% SET hostclass = 'statusOdd'  IF loop.even                 %]
+                [% SET hostclass = 'statusEven' IF loop.odd  %]
+                [% SET hostclass = 'statusOdd'  IF loop.even %]
                 [% IF h.state == 1 %]
                   [% hostclass = 'statusHOSTDOWN' %]
                 [% ELSIF h.state == 2 %]

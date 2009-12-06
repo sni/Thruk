@@ -47,6 +47,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     elsif($style eq 'overview') {
         $self->_process_overview_page($c);
     }
+    elsif($style eq 'grid') {
+        $self->_process_grid_page($c);
+    }
 
     $c->stash->{title}          = 'Current Network Status';
     $c->stash->{infoBoxTitle}   = 'Current Network Status';
@@ -213,9 +216,6 @@ sub _process_overview_page {
         for my $service (@{$c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state description host_name\nFilter: groups !=", { Slice => {} })}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
         }
-#use Data::Dumper;
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($services_data);
     }
 
     # get all host/service groups
@@ -276,6 +276,102 @@ sub _process_overview_page {
     $c->stash->{'groups'}       = $groups;
     $c->stash->{'style'}        = 'overview';
 }
+
+##########################################################
+# create the status grid page
+sub _process_grid_page {
+    my ( $self, $c ) = @_;
+
+    # which host to display?
+    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
+    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+
+    my $hostfilter      = "";
+    my $servicefilter   = "";
+    my $groupfilter     = "";
+    if($hostgroup ne '' and $hostgroup ne 'all') {
+        $hostfilter      = "Filter: groups >= $hostgroup\n";
+        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
+        $groupfilter     = "Filter: name = $hostgroup\n";
+    }
+    elsif($servicegroup ne '' and $servicegroup ne 'all') {
+        $servicefilter   = "Filter: groups >= $servicegroup\n";
+        $groupfilter     = "Filter: name = $servicegroup\n";
+    }
+
+    # fill the host/service totals box
+    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
+
+    # then add some more filter based on get parameter
+    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
+
+    # we need the hostname, address etc...
+    my $host_data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt\n$hostfilter", 'name' );
+
+    # create a hash of all services
+    my $services_data;
+    for my $service (@{$c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} })}) {
+        $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+    }
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($services_data);
+
+    # get all host/service groups
+    my $groups;
+    if($hostgroup) {
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
+    }
+    elsif($servicegroup) {
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
+    }
+
+    # sort in hosts / services
+    for my $group (@{$groups}) {
+        my %hosts;
+
+        for my $member (split /,/, $group->{'members'}) {
+            my($hostname,$servicename);
+            if($hostgroup) {
+                $hostname = $member;
+            }
+            if($servicegroup) {
+                ($hostname,$servicename) = split/\|/, $member, 2;
+            }
+
+            if(!defined $hosts{$hostname}) {
+                # clone host data
+                for my $key (keys %{$host_data->{$hostname}}) {
+                    $hosts{$hostname}->{$key}   = $host_data->{$hostname}->{$key};
+                }
+            }
+
+            # add all services
+            if($hostgroup) {
+                for my $service (sort keys %{$services_data->{$hostname}}) {
+                    push @{$hosts{$hostname}->{'services'}}, $services_data->{$hostname}->{$service};
+                }
+            }
+            elsif($servicegroup) {
+                push @{$hosts{$hostname}->{'services'}}, $services_data->{$hostname}->{$servicename};
+            }
+        }
+
+        # create an array of hashes
+        for my $hostname (sort keys %hosts) {
+            push @{$group->{'hosts'}}, $hosts{$hostname};
+        }
+    }
+
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($groups);
+    $c->stash->{'hostgroup'}    = $hostgroup;
+    $c->stash->{'servicegroup'} = $servicegroup;
+    $c->stash->{'groups'}       = $groups;
+    $c->stash->{'style'}        = 'grid';
+}
+
 
 ##########################################################
 sub _fill_totals_box {

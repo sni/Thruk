@@ -13,3 +13,6 @@ Todo List:
 - comments on outage page
 - verify macros is action_url, icon_url and notes_url
 - finish performance data on extinfo type 4
+- extinfo type 3
+- config.cgi
+- reports / logs
