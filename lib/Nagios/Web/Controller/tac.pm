@@ -267,6 +267,7 @@ Stats: accept_passive_checks = 0 as passive_checks_disabled
 ",
     { Slice => {} } );
 
+    $c->stash->{'stats'}        = Nagios::Web::Helper->get_service_exectution_stats($c);
     $c->stash->{host_stats}     = $host_stats;
     $c->stash->{service_stats}  = $service_stats;
     $c->stash->{title}          = 'Nagios Tactical Monitoring Overview';

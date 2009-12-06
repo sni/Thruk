@@ -23,19 +23,19 @@
                             <table border="0" cellspacing="4" cellspadding="0">
                               <tr>
                                 <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Execution Time:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>1.01 / 1.12 / 1.014 sec</a></td>
+                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services.execution_time_min) %] / [% sprintf('%.2f',stats.services.execution_time_max) %] / [% sprintf('%.3f',stats.services.execution_time_avg) %] sec</a></td>
                               </tr>
                               <tr>
                                 <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Latency:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>0.00 / 0.26 / 0.126 sec</a></td>
+                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services.latency_min) %] / [% sprintf('%.2f',stats.services.latency_max) %] / [% sprintf('%.3f',stats.services.latency_avg) %] sec</a></td>
                               </tr>
                               <tr>
                                 <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Execution Time:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>1.01 / 1.08 / 1.017 sec</a></td>
+                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts.execution_time_min) %] / [% sprintf('%.2f',stats.hosts.execution_time_max) %] / [% sprintf('%.3f',stats.hosts.execution_time_avg) %] sec</a></td>
                               </tr>
                               <tr>
                                 <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Latency:</a></td>
-                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>0.02 / 0.26 / 0.136 sec</a></td>
+                                <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts.latency_min) %] / [% sprintf('%.2f',stats.hosts.latency_max) %] / [% sprintf('%.3f',stats.hosts.latency_avg) %] sec</a></td>
                               </tr>
                               <tr>
                                 <td align="left" valign="center" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=131072' class='perfItem'># Active Host / Service Checks:</a></td>
