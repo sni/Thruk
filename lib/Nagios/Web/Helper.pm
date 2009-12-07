@@ -313,6 +313,35 @@ sub get_service_exectution_stats {
 }
 
 ########################################
+sub _get_hostcomments {
+    my $self            = shift;
+    my $c               = shift;
+    my $filter          = shift;
+    $filter = '' unless defined $filter;
+    my $hostcomments;
+    my $comments    = $c->{'live'}->selectall_arrayref("GET comments\n$filter\nFilter: service_description =\nColumns: host_name id", { Slice => 1 });
+
+    for my $comment (@{$comments}) {
+        $hostcomments->{$comment->{'host_name'}}->{$comment->{'id'}} = $comment;
+    }
+    return $hostcomments;
+}
+
+########################################
+sub _get_servicecomments {
+    my $self            = shift;
+    my $c               = shift;
+    my $filter          = shift;
+    my $servicecomments;
+    my $comments = $c->{'live'}->selectall_arrayref("GET comments\n$filter\nFilter: service_description !=\nColumns: host_name service_description id", { Slice => 1 });
+
+    for my $comment (@{$comments}) {
+        $servicecomments->{$comment->{'host_name'}}->{$comment->{'service_description'}}->{$comment->{'id'}} = $comment;
+    }
+    return $servicecomments;
+}
+
+########################################
 sub _get_livesocket_path_from_nagios_cfg {
     my $self            = shift;
     my $nagios_cfg_path = shift;

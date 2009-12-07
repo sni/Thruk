@@ -129,16 +129,27 @@ sub _process_details_page {
     # then add some more filter based on get parameter
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
-    # TODO: add comments into hosts.comments and hosts.comment_count and services.comments and services.comment_count
+    my $hostcomments    = Nagios::Web::Helper->_get_hostcomments($c, $servicefilter);
+    my $servicecomments = Nagios::Web::Helper->_get_servicecomments($c, $servicefilter);
+
+    # add comments into hosts.comments and hosts.comment_count and services.comments and services.comment_count
     $c->log->debug("GET services\n$servicefilter");
     my $services = $c->{'live'}->selectall_arrayref("GET services\n$servicefilter", { Slice => {} });
-    for my $services (@{$services}) {
-        $services->{'comment_count'}      = 0;
-        $services->{'host_comment_count'} = 0;
+    for my $service (@{$services}) {
+        $service->{'comment_count'}      = 0;
+        $service->{'host_comment_count'} = 0;
+
+        if(defined $hostcomments->{$service->{'host_name'}}) {
+            $service->{'host_comment_count'} = scalar keys %{$hostcomments->{$service->{'host_name'}}};
+        }
+
+        if(defined $servicecomments->{$service->{'host_name'}}->{$service->{'description'}}) {
+            $service->{'comment_count'} = scalar keys %{$servicecomments->{$service->{'host_name'}}->{$service->{'description'}}};
+        }
 
         # ordering by duration needs this
-        $services->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
-        $services->{'last_state_change_plus'} = $services->{'last_state_change'} if $services->{'last_state_change'};
+        $service->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
+        $service->{'last_state_change_plus'} = $service->{'last_state_change'} if $service->{'last_state_change'};
     }
 
     # do the sort
@@ -187,10 +198,15 @@ sub _process_hostdetails_page {
     # then add some more filter based on get parameter
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
-    # TODO: add comments into hosts.comments and hosts.comment_count
+    # add comments into hosts.comments and hosts.comment_count
+    my $hostcomments = Nagios::Web::Helper->_get_hostcomments($c, $servicefilter);
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n$hostfilter", { Slice => {} });
     for my $host (@{$hosts}) {
         $host->{'comment_count'} = 0;
+
+        if(defined $hostcomments->{$host->{'name'}}) {
+            $host->{'comment_count'} = scalar keys %{$hostcomments->{$host->{'name'}}};
+        }
 
         # ordering by duration needs this
         $host->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};

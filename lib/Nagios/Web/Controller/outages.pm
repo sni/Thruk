@@ -33,11 +33,19 @@ And: 2
 ", { Slice => 1 });
 
     if(scalar @{$outages} > 0) {
+        my $hostcomments = Nagios::Web::Helper->_get_hostcomments($c);
         my $all_hosts = $c->{'live'}->selectall_hashref("GET hosts
 Columns: name childs num_services
 ", 'name');
 
         for my $host (@{$outages}) {
+
+            # get number of comments
+            $host->{'comment_count'} = 0;
+            if(defined $hostcomments->{$host->{'name'}}) {
+                $host->{'comment_count'} = scalar keys %{$hostcomments->{$host->{'name'}}};
+            }
+
             # count number of affected hosts / services
             my($affected_hosts,$affected_services) = $self->_count_affected_hosts_and_services($c, $host->{'name'}, $all_hosts);
             $host->{'affected_hosts'}    = $affected_hosts;
