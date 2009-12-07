@@ -6,6 +6,7 @@ This file documents the revision history for Perl extension Nagios::Web.
           - completed outages page
           - added extinfo type 4 page
           - completed status grid page
+          - completed search
 
 0.10_3  Sat Nov 28 12:12:11 CET 2009
           - completed status hostdetail page

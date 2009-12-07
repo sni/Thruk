@@ -24,8 +24,9 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+    # which style to display?
     my $allowed_subpages = {'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summmary' => 1};
-    my $style = $c->{'request'}->{'parameters'}->{'style'};
+    my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
 
     if(!defined $style) {
         if(defined $c->{'request'}->{'parameters'}->{'hostgroup'} and $c->{'request'}->{'parameters'}->{'hostgroup'} ne '') {
@@ -37,6 +38,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     $style = 'detail' unless defined $allowed_subpages->{$style};
+
+    # did we get a search request?
+    if(defined $c->{'request'}->{'parameters'}->{'navbarsearch'} and $c->{'request'}->{'parameters'}->{'navbarsearch'} eq '1') {
+        $style = $self->_process_search_request($c);
+    }
 
     if($style eq 'detail') {
         $self->_process_details_page($c);
@@ -58,6 +64,33 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 }
 
 ##########################################################
+# check for search results
+sub _process_search_request {
+    my ( $self, $c ) = @_;
+
+    # search pattern is in host param
+    my $host = $c->{'request'}->{'parameters'}->{'host'};
+
+    return('detail') unless defined $host;
+
+    # is there a servicegroup with this name?
+    my $servicegroupname = $c->{'live'}->select_scalar_value("GET servicegroups\nColumns: name\nFilter: name = $host\nLimit: 1");
+    if(defined $servicegroupname and $servicegroupname ne '') {
+        $c->{'request'}->{'parameters'}->{'servicegroup'} = $servicegroupname;
+        return('overview');
+    }
+
+    # is there a hostgroup with this name?
+    my $hostgroupname = $c->{'live'}->select_scalar_value("GET hostgroups\nColumns: name\nFilter: name = $host\nLimit: 1");
+    if(defined $hostgroupname and $hostgroupname ne '') {
+        $c->{'request'}->{'parameters'}->{'hostgroup'} = $hostgroupname;
+        return('overview');
+    }
+
+    return('detail');
+}
+
+##########################################################
 # create the status details page
 sub _process_details_page {
     my ( $self, $c ) = @_;
@@ -71,6 +104,16 @@ sub _process_details_page {
     if($host ne 'all' and $host ne '') {
         $hostfilter    = "Filter: name = $host\n";
         $servicefilter = "Filter: host_name = $host\n";
+
+        # check for wildcards
+        if(index($host, '*') >= 0) {
+            # convert wildcards into real regexp
+            my $searchhost = $host;
+            $searchhost =~ s/\.\*/*/gmx;
+            $searchhost =~ s/\*/.*/gmx;
+            $hostfilter    = "Filter: name ~~ $searchhost\n";
+            $servicefilter = "Filter: host_name ~~ $searchhost\n";
+        }
     }
     elsif($hostgroup ne 'all' and $hostgroup ne '') {
         $hostfilter    = "Filter: groups >= $hostgroup\n";
@@ -87,6 +130,7 @@ sub _process_details_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # TODO: add comments into hosts.comments and hosts.comment_count and services.comments and services.comment_count
+    $c->log->debug("GET services\n$servicefilter");
     my $services = $c->{'live'}->selectall_arrayref("GET services\n$servicefilter", { Slice => {} });
     for my $services (@{$services}) {
         $services->{'comment_count'}      = 0;
