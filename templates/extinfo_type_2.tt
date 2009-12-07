@@ -52,6 +52,11 @@
             [% END %]
           </div><br>
           <div class='data'>[% service.host_address %]</div>
+          [% IF service.icon_image %]
+          <img src='/nagios/images/logos/[% service.icon_image %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
+          [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt %] )</i></font>[% END %]
+          [% END %]
+          [% IF service.notes %]<p>[% service.notes %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%">
           [% IF service.action_url %]
@@ -428,11 +433,11 @@
                   <tr class='[% class %]'>
                     <td class='[% class %]'>[% date.format(comment.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
                     <td class='[% class %]'>[% comment.author %]</td>
-                    <td class='[% class %]'>[% comment.comment %]</td>
+                    <td class='[% class %]'>[% comment.comment_data %]</td>
                     <td class='[% class %]'>[% comment.id %]</td>
-                    <td class='[% class %]'>[% comment.persistant %]</td>
-                    <td class='[% class %]'>[% comment.type %]</td>
-                    <td class='[% class %]'>[% comment.expires %]</td>
+                    <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
+                    <td class='[% class %]'>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
+                    <td class='[% class %]'>[% IF comment.expires %][% date.format(comment.expires_time, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
                     <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% comment.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
                   </tr>
                   [% END %]

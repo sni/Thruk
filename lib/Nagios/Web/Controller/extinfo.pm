@@ -95,7 +95,11 @@ sub _process_host_page {
     my $host = $c->{'live'}->selectrow_hashref("GET hosts\nFilter: name = $hostname");
     $c->detach('/error/index/5') unless defined $host;
 
-    $c->stash->{'host'} = $host;
+    $c->stash->{'host'}     = $host;
+
+    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description =\nColumns: author id comment_data comment_type entry_time entry_type expire_time expires persistent source", { Slice => 1 });
+    my $sortedcomments = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
+    $c->stash->{'comments'} = $sortedcomments;
 }
 
 ##########################################################
@@ -128,6 +132,10 @@ sub _process_service_page {
     $c->detach('/error/index/5') unless defined $service;
 
     $c->stash->{'service'} = $service;
+
+    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description = $servicename\nColumns: author id comment_data comment_type entry_time entry_type expire_time expires persistent source", { Slice => 1 });
+    my $sortedcomments = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
+    $c->stash->{'comments'} = $sortedcomments;
 }
 
 ##########################################################
