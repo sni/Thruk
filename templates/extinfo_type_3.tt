@@ -33,9 +33,12 @@
           <th class='comment'>Expires</th>
           <th class='comment'>Actions</th>
         </tr>
+
+        [% SET hostcommentscount = 0 %]
         [%  FOREACH c = hostcomments %]
         [% SET class = 'commentOdd'  IF loop.even %]
         [% SET class = 'commentEven' IF loop.odd %]
+        [% SET hostcommentscount = hostcommentscount + 1 %]
         <tr class='[% class %]'>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% c.host_name %]'>[% c.host_name %]</a></td>
           <td class='[% class %]'>[% date.format(c.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
@@ -46,6 +49,11 @@
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
           <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% c.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
+        </tr>
+        [% END %]
+        [% IF hostcommentscount == 0 %]
+        <tr class='commentOdd'>
+          <td class='commentOdd' colspan="9">There are no host comments</td>
         </tr>
         [% END %]
       </table>
@@ -70,9 +78,11 @@
           <th class='comment'>Expires</th>
           <th class='comment'>Actions</th>
         </tr>
+        [% SET servicecommentscount = 0 %]
         [%  FOREACH c = servicecomments %]
         [% SET class = 'commentOdd'  IF loop.even %]
         [% SET class = 'commentEven' IF loop.odd %]
+        [% SET servicecommentscount = servicecommentscount + 1 %]
         <tr class='[% class %]'>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% c.host_name %]'>[% c.host_name %]</a></td>
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% c.host_name %]&amp;service=[% c.service_description %]'>[% c.service_description %]</a></td>
@@ -84,6 +94,11 @@
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
           <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% c.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
+        </tr>
+        [% END %]
+        [% IF servicecommentscount == 0 %]
+        <tr class='commentOdd'>
+          <td class='commentOdd' colspan="10">There are no service comments</td>
         </tr>
         [% END %]
       </table>

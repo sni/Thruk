@@ -5,11 +5,10 @@ Todo List:
 - is_authorized_for_read_only in Catalyst::Authentication::Store::FromCGIConf
 - * in the cgi.cfg
 - no commands if authorization is disabled
-- overload role authentication
+- overload role authentication ( to add host/service role checks )
 - add authorization part to all querys
 - fix pending state on host/service details page (should be just a empty message)
 - verify macros is action_url, icon_url and notes_url
 - finish performance data on extinfo type 4
-- extinfo type 3 (comments overview page)
 - config.cgi
 - reports / logs
