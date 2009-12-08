@@ -34,7 +34,13 @@ Nagios::Web::Controller::Root - Root Controller for Nagios::Web
 sub begin : Private {
     my ( $self, $c ) = @_;
 
+    ###############################
+    # parse cgi.cfg
     $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
+
+    ###############################
+    # get livesocket object
+    $c->{'live'} = Nagios::Web::Helper->get_livesocket($c);
 
     $c->log->debug("checking auth");
     unless ($c->user_exists) {

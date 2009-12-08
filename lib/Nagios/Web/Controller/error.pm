@@ -64,6 +64,10 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
             'mess' => 'You are requesting to execute an unknown command. Shame on you!',
             'dscr' => '',
         },
+        '8'  => {
+            'mess' => 'It appears as though you do not have permission to view the configuration information you requested...',
+            'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

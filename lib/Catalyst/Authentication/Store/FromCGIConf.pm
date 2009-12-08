@@ -45,11 +45,14 @@ sub find_user {
     for my $role (@{$possible_roles}) {
         if(defined $cgi_cfg->{$role}) {
             my %contacts = map { $_ => 1 } split/,/,$cgi_cfg->{$role};
-            push @{$user->{'roles'}}, $role if defined $contacts{$username};
+            push @{$user->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'});
         }
     }
-	# TODO:
-	if(0) {
+
+	# is the contact allowed to send commands?
+    my $can_submit_commands = $c->{'live'}->select_scalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {} }) || 0;
+	$c->log->debug("can_submit_commands: $can_submit_commands");
+	if($can_submit_commands != 1) {
         push @{$user->{'roles'}}, 'is_authorized_for_read_only';
 	}
 

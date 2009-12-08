@@ -36,6 +36,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     $c->detach('/error/index/6') unless defined $cmd_typ;
 
+    # read only user?
+    $c->detach('/error/index/6') if $c->check_user_roles('is_authorized_for_read_only');
+
     my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
 
     # command commited?

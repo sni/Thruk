@@ -31,14 +31,6 @@ before 'execute' => sub {
     my ( $self, $controller, $c, $test ) = @_;
 
     ###############################
-    # parse cgi.cfg
-    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
-
-    ###############################
-    # get livesocket object
-    $c->{'live'} = Nagios::Web::Helper->get_livesocket($c);
-
-    ###############################
     if($c->user_exists) {
         $c->stash->{'remote_user'}  = $c->user->get('username');
     } else {
