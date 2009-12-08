@@ -45,11 +45,7 @@
           <div class='dataTitle'>[% service.host_alias %]</div>
           <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name %]'>[% service.host_name %]</a>)</div><br>
           <div class='data'> Member of </div>
-          <div class='dataTitle'>
-            [% FOREACH group IN service.groups.split(',') %]
-              [% IF !loop.first() %] , [% END %]
-              <a href='status.cgi?servicegroup=[% group %]&amp;style=overview'>[% group %]</a>
-            [% END %]
+          <div class='dataTitle'>[% FOREACH group IN service.groups.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?servicegroup=[% group %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
           <div class='data'>[% service.host_address %]</div>
           [% IF service.icon_image %]

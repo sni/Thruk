@@ -37,12 +37,15 @@
           <div class='data'>Host</div>
           <div class='dataTitle'>[% host.alias %]</div>
           <div class='dataTitle'>([% host.name %])</div><br>
+          [% IF host.parents %]
+          <div class='data'>Parents:</div>
+          <div class='dataTitle'>
+            [% FOREACH parent IN host.parents.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent %]'>[% parent %]</a>[% END %]
+          </div><br>
+          [% END %]
           <div class='data'>Member of</div>
           <div class='dataTitle'>
-            [% FOREACH group IN host.groups.split(',') %]
-              [% IF !loop.first() %] , [% END %]
-              <a href='status.cgi?hostgroup=[% group %]&amp;style=overview'>[% group %]</a>
-            [% END %]
+            [% FOREACH group IN host.groups.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
 
           <div class='data'>[% host.address %]</div>
