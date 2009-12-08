@@ -43,6 +43,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if($type == 3) {
         $infoBoxTitle = 'All Host and Service Comments';
+        $self->_process_comments_page($c);
     }
     if($type == 4) {
         $infoBoxTitle = 'Performance Information';
@@ -75,6 +76,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 ##########################################################
 # SUBS
 ##########################################################
+
+##########################################################
+# create the downtimes page
+sub _process_comments_page {
+    my ( $self, $c ) = @_;
+    $c->stash->{'hostcomments'}    = $c->{'live'}->selectall_arrayref("GET comments\nFilter: service_description = ", { Slice => {} });
+    $c->stash->{'servicecomments'} = $c->{'live'}->selectall_arrayref("GET comments\nFilter: service_description != ", { Slice => {} });
+}
 
 ##########################################################
 # create the downtimes page
