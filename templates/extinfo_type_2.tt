@@ -429,7 +429,7 @@
                   <tr class='[% class %]'>
                     <td class='[% class %]'>[% date.format(comment.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
                     <td class='[% class %]'>[% comment.author %]</td>
-                    <td class='[% class %]'>[% comment.comment_data %]</td>
+                    <td class='[% class %]'>[% comment.comment %]</td>
                     <td class='[% class %]'>[% comment.id %]</td>
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]'>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>

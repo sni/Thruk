@@ -81,8 +81,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 # create the downtimes page
 sub _process_comments_page {
     my ( $self, $c ) = @_;
-    $c->stash->{'hostcomments'}    = $c->{'live'}->selectall_arrayref("GET comments\nFilter: service_description = ", { Slice => {} });
-    $c->stash->{'servicecomments'} = $c->{'live'}->selectall_arrayref("GET comments\nFilter: service_description != ", { Slice => {} });
+    $c->stash->{'hostcomments'}    = $c->{'live'}->selectall_arrayref("GET comments\nColumns: host_name id source type author comment entry_time entry_type expire_time expires\nFilter: service_description = ", { Slice => {} });
+    $c->stash->{'servicecomments'} = $c->{'live'}->selectall_arrayref("GET comments\nColumns: host_name service_description id source type author comment entry_time entry_type expire_time expires\nFilter: service_description != ", { Slice => {} });
 }
 
 ##########################################################
@@ -106,7 +106,7 @@ sub _process_host_page {
 
     $c->stash->{'host'}     = $host;
 
-    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description =\nColumns: author id comment_data comment_type entry_time entry_type expire_time expires persistent source", { Slice => 1 });
+    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description =\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
     my $sortedcomments = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
     $c->stash->{'comments'} = $sortedcomments;
 }
@@ -142,7 +142,7 @@ sub _process_service_page {
 
     $c->stash->{'service'} = $service;
 
-    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description = $servicename\nColumns: author id comment_data comment_type entry_time entry_type expire_time expires persistent source", { Slice => 1 });
+    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description = $servicename\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
     my $sortedcomments = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
     $c->stash->{'comments'} = $sortedcomments;
 }

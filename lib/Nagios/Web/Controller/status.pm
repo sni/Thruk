@@ -106,7 +106,7 @@ sub _process_details_page {
         $servicefilter = "Filter: host_name = $host\n";
 
         # check for wildcards
-        if(&index($host, '*') >= 0) {
+        if(index($host, '*') >= 0) {
             # convert wildcards into real regexp
             my $searchhost = $host;
             $searchhost =~ s/\.\*/*/gmx;

@@ -122,7 +122,7 @@ sub sort {
     my @compares;
     for my $key (@keys) {
         # sort numeric
-        if(!defined or $data->[0]->{$key} =~ m/^\d+$/xm) {
+        if(defined $data->[0]->{$key} and $data->[0]->{$key} =~ m/^\d+$/xm) {
             push @compares, '$a->{'.$key.'} <=> $b->{'.$key.'}';
         }
         # sort alphanumeric

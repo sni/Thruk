@@ -22,7 +22,7 @@
                   <table border="0">
                     <tr>
                       <td class='dataVar'>Program Version:</td>
-                      <td class='dataVal'>3.2.0</td>
+                      <td class='dataVal'>[% pi.program_version %]</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Program Start Time:</td>
