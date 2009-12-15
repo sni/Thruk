@@ -41,6 +41,8 @@ sub filter_duration {
 sub get_cgi_cfg {
     my ( $self, $c ) = @_;
 
+    $c->stats->profile(begin => "Helper::get_cgi_cfg()");
+
     # read only once per request
     our(%config, $cgi_config_already_read);
 
@@ -65,6 +67,8 @@ sub get_cgi_cfg {
     my $conf = new Config::General($file);
     %config  = $conf->getall;
 
+    $c->stats->profile(end => "Helper::get_cgi_cfg()");
+
     return(\%config);
 }
 
@@ -72,6 +76,8 @@ sub get_cgi_cfg {
 # return the livestatus object
 sub get_livesocket {
     my ( $self, $c ) = @_;
+
+    $c->stats->profile(begin => "Helper::get_livesocket()");
 
     our $livesocket;
 
@@ -86,14 +92,18 @@ sub get_livesocket {
         $livesocket_path = $self->_get_livesocket_path_from_nagios_cfg(Nagios::Web->config->{'cgi_cfg'});
     }
 
-    $c->log->debug("connecting via: ".$livesocket_path);
+    $c->log->debug("connecting via: ".join(', ', @{$livesocket_path})) if ref $livesocket_path eq 'ARRAY';
+    $c->log->debug("connecting via: ".$livesocket_path)                if ref $livesocket_path ne 'ARRAY';
 
-    $livesocket = Nagios::MKLivestatus->new(
+    $livesocket = Nagios::MKLivestatus::MULTI->new(
                             peer             => $livesocket_path,
                             verbose          => Nagios::Web->config->{'livesocket_verbose'},
                             keepalive        => 1,
+                            logger           => $c->log,
 #                            errors_are_fatal => 0,
     );
+
+    $c->stats->profile(end => "Helper::get_livesocket()");
 
     return($livesocket);
 }
@@ -106,6 +116,8 @@ sub sort {
     my $key   = shift;
     my $order = shift;
     my @sorted;
+
+    $c->stats->profile(begin => "Helper::sort()");
 
     $order = "ASC" if !defined $order;
 
@@ -139,6 +151,8 @@ sub sort {
         eval '@sorted = reverse sort { '.$sortstring.' } @{$data};';
     }
 
+    $c->stats->profile(end => "Helper::sort()");
+
     return(\@sorted);
 }
 
@@ -151,12 +165,13 @@ sub get_service_exectution_stats {
     my $self            = shift;
     my $c               = shift;
 
+    $c->stats->profile(begin => "Helper::get_service_exectution_stats()");
+
     my $now    = time();
     my $min1   = $now - 60;
     my $min5   = $now - 300;
     my $min15  = $now - 900;
     my $min60  = $now - 3600;
-    my $minall = $c->stash->{'pi'}->{'program_start'};
 
     my $check_stats;
     for my $type (qw{hosts services}) {
@@ -208,7 +223,9 @@ sub get_service_exectution_stats {
             'passive_state_change_sum'  => 0,
         };
 
-        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1 })}) {
+        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 })}) {
+            my $minall = $c->stash->{'pi_detail'}->{$data->{'peer_name'}}->{'program_start'};
+
             if($data->{'check_type'} == 0) {
                 $check_stats->{$type}->{'active_sum'}++;
             } else {
@@ -309,6 +326,8 @@ sub get_service_exectution_stats {
         }
     }
 
+    $c->stats->profile(end => "Helper::get_service_exectution_stats()");
+
     return($check_stats);
 }
 
@@ -317,6 +336,9 @@ sub _get_hostcomments {
     my $self            = shift;
     my $c               = shift;
     my $filter          = shift;
+
+    $c->stats->profile(begin => "Helper::_get_hostcomments()");
+
     $filter = '' unless defined $filter;
     my $hostcomments;
     my $comments    = $c->{'live'}->selectall_arrayref("GET comments\n$filter\nFilter: service_description =\nColumns: host_name id", { Slice => 1 });
@@ -324,6 +346,9 @@ sub _get_hostcomments {
     for my $comment (@{$comments}) {
         $hostcomments->{$comment->{'host_name'}}->{$comment->{'id'}} = $comment;
     }
+
+    $c->stats->profile(end => "Helper::_get_hostcomments()");
+
     return $hostcomments;
 }
 
@@ -332,12 +357,18 @@ sub _get_servicecomments {
     my $self            = shift;
     my $c               = shift;
     my $filter          = shift;
+
+    $c->stats->profile(begin => "Helper::_get_servicecomments()");
+
     my $servicecomments;
     my $comments = $c->{'live'}->selectall_arrayref("GET comments\n$filter\nFilter: service_description !=\nColumns: host_name service_description id", { Slice => 1 });
 
     for my $comment (@{$comments}) {
         $servicecomments->{$comment->{'host_name'}}->{$comment->{'service_description'}}->{$comment->{'id'}} = $comment;
     }
+
+    $c->stats->profile(end => "Helper::_get_servicecomments()");
+
     return $servicecomments;
 }
 
@@ -375,5 +406,29 @@ sub _get_livesocket_path_from_nagios_cfg {
     confess('cannot find a livestatus socket path in your '.$nagios_cfg_path.'. No livestatus broker module loaded?');
 }
 
+########################################
+sub _calculate_overall_processinfo {
+    my $self = shift;
+    my $pi   = shift;
+    my $return;
+    for my $peer (keys %{$pi}) {
+        for my $key (keys %{$pi->{$peer}}) {
+            my $value = $pi->{$peer}->{$key};
+            if($value eq "0" or $value eq "1") {
+                if(!defined $return->{$key}) {
+                    $return->{$key} = $value;
+                }elsif($return->{$key} == -1) {
+                    # do nothing, result already varies
+                }elsif($return->{$key} == $value) {
+                    # do nothing, result is the same
+                }elsif($return->{$key} != $value) {
+                    # set result to vary
+                    $return->{$key} = -1;
+                }
+            }
+        }
+    }
+    return($return);
+}
 
 1;
