@@ -100,7 +100,6 @@ sub get_livesocket {
                             verbose          => Nagios::Web->config->{'livesocket_verbose'},
                             keepalive        => 1,
                             logger           => $c->log,
-#                            errors_are_fatal => 0,
     );
 
     $c->stats->profile(end => "Helper::get_livesocket()");
