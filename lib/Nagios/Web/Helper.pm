@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Config::General;
 use Carp;
-#use Date::Calc qw(Date_to_Time Timezone);
+use Nagios::MKLivestatus::MULTI;
 
 
 ##############################################
@@ -100,6 +100,7 @@ sub get_livesocket {
                             verbose          => Nagios::Web->config->{'livesocket_verbose'},
                             keepalive        => 1,
                             logger           => $c->log,
+                            use_threads      => 0,
 #                            errors_are_fatal => 0,
     );
 
