@@ -1,13 +1,17 @@
 INSTALLATION
 ============
 
-the easiest way to install will be using local::lib:
+the proper way to install will be using local::lib:
 
 Install local::lib
 ------------------
 
+Follow the steps on http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique
+
+quick guide:
+
     wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
-    tar zxvf local-lib-1.004009.tar.gz
+    tar zxf local-lib-1.004009.tar.gz
     cd local-lib-1.004009
     perl Makefile.PL --bootstrap && make install
 
