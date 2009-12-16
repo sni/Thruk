@@ -35,6 +35,8 @@ requires 'Catalyst::Plugin::Redirect';
 requires 'Class::C3';
 requires 'Algorithm::C3';
 requires 'Time::HiRes';
+requires 'threads' => '1.75';
+requires 'Thread::Queue' => '2.11';
 
 if(defined $ENV{'TEST_AUTHOR'}) {
     requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
