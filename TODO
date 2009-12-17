@@ -2,7 +2,6 @@ Todo List:
 
 - create models for hosts / services / contacts
 - reload cgi.cfg if changed
-- no commands if authorization is disabled
 - overload role authentication ( to add host/service role checks )
 - add authorization part to all querys
 - fix pending state on host/service details page (should be just a empty message)

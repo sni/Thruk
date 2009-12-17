@@ -33,6 +33,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{no_auto_reload} = 1;
     $c->stash->{page}           = 'cmd';
 
+    # check if authorization is enabled
+    if($c->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
+        $c->detach('/error/index/3');
+    }
+
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     $c->detach('/error/index/6') unless defined $cmd_typ;
 
