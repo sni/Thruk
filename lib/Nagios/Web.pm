@@ -45,7 +45,7 @@ __PACKAGE__->config('name'                   => 'Nagios::Web',
                                                 'duration'  => \&Nagios::Web::Helper::filter_duration,
                                             },
                         PRE_DEFINE         => {
-                                                'sprintf'   => sub { my $format = shift; sprintf $format, @_; },
+                                                'sprintf'   => sub { my $format = shift; sprintf $format, @_ },
                                                 'duration'  => \&Nagios::Web::Helper::filter_duration,
                                             },
 #                        DEBUG => 'all',

@@ -129,24 +129,10 @@ sub _process_details_page {
     # then add some more filter based on get parameter
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
-    my $hostcomments    = Nagios::Web::Helper->_get_hostcomments($c, $servicefilter);
-    my $servicecomments = Nagios::Web::Helper->_get_servicecomments($c, $servicefilter);
-
     # add comments into hosts.comments and hosts.comment_count and services.comments and services.comment_count
-    $c->log->debug("GET services\n$servicefilter");
-    my $services = $c->{'live'}->selectall_arrayref("GET services\n$servicefilter", { Slice => {} });
+    my $services = $c->{'live'}->selectall_arrayref("GET services\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url host_action_url host_icon_image host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url action_url icon_image icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output", { Slice => {}, AddPeer => 1 });
+
     for my $service (@{$services}) {
-        $service->{'comment_count'}      = 0;
-        $service->{'host_comment_count'} = 0;
-
-        if(defined $hostcomments->{$service->{'host_name'}}) {
-            $service->{'host_comment_count'} = scalar keys %{$hostcomments->{$service->{'host_name'}}};
-        }
-
-        if(defined $servicecomments->{$service->{'host_name'}}->{$service->{'description'}}) {
-            $service->{'comment_count'} = scalar keys %{$servicecomments->{$service->{'host_name'}}->{$service->{'description'}}};
-        }
-
         # ordering by duration needs this
         $service->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
         $service->{'last_state_change_plus'} = $service->{'last_state_change'} if $service->{'last_state_change'};
@@ -199,15 +185,8 @@ sub _process_hostdetails_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # add comments into hosts.comments and hosts.comment_count
-    my $hostcomments = Nagios::Web::Helper->_get_hostcomments($c, $servicefilter);
-    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n$hostfilter", { Slice => {} });
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n$hostfilter\nColumns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url action_url icon_image icon_image_alt last_check last_state_change plugin_output next_check", { Slice => {}, AddPeer => 1 });
     for my $host (@{$hosts}) {
-        $host->{'comment_count'} = 0;
-
-        if(defined $hostcomments->{$host->{'name'}}) {
-            $host->{'comment_count'} = scalar keys %{$hostcomments->{$host->{'name'}}};
-        }
-
         # ordering by duration needs this
         $host->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
         $host->{'last_state_change_plus'} = $host->{'last_state_change'} if $host->{'last_state_change'};
@@ -288,6 +267,7 @@ sub _process_overview_page {
     }
 
     for my $group (@{$groups}) {
+
         if($hostgroup) {
             for my $member (split /,/, $group->{'members'}) {
                 push @{$group->{'hosts'}}, $host_data->{$member};

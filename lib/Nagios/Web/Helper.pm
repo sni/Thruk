@@ -323,6 +323,12 @@ sub get_service_exectution_stats {
             $check_stats->{$type}->{'passive_60_min_perc'}  = $check_stats->{$type}->{'passive_60_min'}  / $check_stats->{$type}->{'passive_sum'} * 100;
             $check_stats->{$type}->{'passive_all_min_perc'} = $check_stats->{$type}->{'passive_all_min'} / $check_stats->{$type}->{'passive_sum'} * 100;
         }
+
+        # set possible undefs to zero if still undef
+        for my $key (qw{execution_time_min execution_time_max latency_min latency_max active_state_change_min
+                          active_state_change_max passive_state_change_min passive_state_change_max}) {
+            $check_stats->{$type}->{$key} = 0 unless defined $check_stats->{$type}->{$key};
+        }
     }
 
     $c->stats->profile(end => "Helper::get_service_exectution_stats()");
