@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 13;
+use Test::More tests => 22;
 
 BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
 BEGIN { use_ok 'Nagios::Web::Controller::extinfo' }
@@ -19,4 +19,6 @@ for(0..8) {
 
     my $request = request('/nagios/cgi-bin/extinfo.cgi?type='.$type.$extra);
     ok( $request->is_success, 'Extinfo Type '.$type.' Request should succeed' ) or diag(Dumper($request));
+    my $content = $request->content;
+    unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
 }

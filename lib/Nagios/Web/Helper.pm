@@ -95,12 +95,14 @@ sub get_livesocket {
     $c->log->debug("connecting via: ".join(', ', @{$livesocket_path})) if ref $livesocket_path eq 'ARRAY';
     $c->log->debug("connecting via: ".$livesocket_path)                if ref $livesocket_path ne 'ARRAY';
 
-    $livesocket = Nagios::MKLivestatus::MULTI->new(
-                            peer             => $livesocket_path,
-                            verbose          => Nagios::Web->config->{'livesocket_verbose'},
-                            keepalive        => 1,
-                            logger           => $c->log,
-    );
+    my $options = [
+        peer             => $livesocket_path,
+        verbose          => Nagios::Web->config->{'livesocket_verbose'},
+        keepalive        => 1,
+    ];
+    $options->{'logger'} = $c->log if Nagios::Web->config->{'livesocket_verbose'};
+
+    $livesocket = Nagios::MKLivestatus::MULTI->new($options);
 
     $c->stats->profile(end => "Helper::get_livesocket()");
 

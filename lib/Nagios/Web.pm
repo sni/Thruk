@@ -73,6 +73,12 @@ __PACKAGE__->config('name'                   => 'Nagios::Web',
 # Start the application
 __PACKAGE__->setup();
 
+if(__PACKAGE__->debug) {
+    __PACKAGE__->log->debug("debug mode");
+} else {
+    __PACKAGE__->log->levels( 'warn', 'error', 'fatal' );
+}
+
 
 =head1 NAME
 

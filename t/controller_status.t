@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 52;
+use Test::More tests => 100;
 
 BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
 BEGIN { use_ok 'Nagios::Web::Controller::status' }
@@ -45,4 +45,6 @@ for my $url (@{$pages}) {
     ok( $request->is_success, 'Request '.$url.' should succeed' );
     my $content = $request->content;
     like($content, qr/statusTitle/mx, "Content contains: statusTitle");
+    like($content, qr/Current Network Status/, "Content contains: Current Network Status");
+    unlike($content, qr/errorMessage/, "Content doesnt contains: errorMessage");
 }

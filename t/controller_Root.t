@@ -1,6 +1,7 @@
 use strict;
 use warnings;
-use Test::More tests => 8;
+use Data::Dumper;
+use Test::More tests => 13;
 
 BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
 BEGIN { use_ok 'Nagios::Web::Controller::Root' }
@@ -11,6 +12,7 @@ my $redirects = [
     '/nagios/',
 ];
 my $pages = [
+    '/nagios/docs/index.html',
     '/nagios/index.html',
     '/nagios/main.html',
     '/nagios/side.html',
@@ -20,5 +22,8 @@ for my $url (@{$redirects}) {
     ok( request($url)->is_redirect, 'Request '.$url.' should redirect' );
 }
 for my $url (@{$pages}) {
-    ok( request($url)->is_success, 'Request '.$url.' should succeed' );
+    my $request = request($url);
+    ok( $request->is_success, 'Request '.$url.' should succeed' ) or diag(Dumper($request));
+    my $content = $request->content;
+    unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
 }
