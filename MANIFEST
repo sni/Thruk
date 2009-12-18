@@ -1,6 +1,19 @@
 cgi.cfg
 Changes
 DEVELOPMENT
+inc/Module/AutoInstall.pm
+inc/Module/Install.pm
+inc/Module/Install/AutoInstall.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Catalyst.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Include.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/Scripts.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
 INSTALL
 lib/Catalyst/Authentication/Credential/Nagios.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
@@ -19,7 +32,6 @@ lib/Nagios/Web/Controller/Root.pm
 lib/Nagios/Web/Controller/showlog.pm
 lib/Nagios/Web/Controller/status.pm
 lib/Nagios/Web/Controller/statusmap.pm
-lib/Nagios/Web/Controller/summary.pm
 lib/Nagios/Web/Controller/tac.pm
 lib/Nagios/Web/Helper.pm
 lib/Nagios/Web/View/TT.pm
@@ -266,6 +278,7 @@ root/nagios/images/status4.gif
 root/nagios/images/stop.gif
 root/nagios/images/tacdisabled.jpg
 root/nagios/images/tacdisabled.png
+root/nagios/images/tacdiverse.png
 root/nagios/images/tacenabled.jpg
 root/nagios/images/tacenabled.png
 root/nagios/images/thermcrit.png
@@ -325,7 +338,6 @@ t/controller_Root.t
 t/controller_showlog.t
 t/controller_status.t
 t/controller_statusmap.t
-t/controller_summary.t
 t/controller_tac.t
 t/perlcriticrc
 t/view_TT.t
@@ -335,6 +347,8 @@ templates/_header.tt
 templates/_host_status_details_box.tt
 templates/_infobox.tt
 templates/_service_status_details_box.tt
+templates/_status_filter.tt
+templates/cmd.tar
 templates/cmd.tt
 templates/cmd/cmd_typ_1.tt
 templates/cmd/cmd_typ_10.tt
@@ -436,8 +450,11 @@ templates/extinfo_type_0.tt
 templates/extinfo_type_1.tt
 templates/extinfo_type_2.tt
 templates/extinfo_type_3.tt
+templates/extinfo_type_4.tt
+templates/extinfo_type_5.tt
 templates/extinfo_type_6.tt
 templates/extinfo_type_7.tt
+templates/extinfo_type_8.tt
 templates/outages.tt
 templates/status_detail.tt
 templates/status_grid.tt
@@ -445,3 +462,11 @@ templates/status_hostdetail.tt
 templates/status_overview.tt
 templates/status_summary.tt
 templates/tac.tt
+tmp/comment.txt
+tmp/contacts.txt
+tmp/host.txt
+tmp/hostgroup.txt
+tmp/service.txt
+tmp/servicegroup.txt
+tmp/status.txt
+TODO
