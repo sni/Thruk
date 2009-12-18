@@ -9,5 +9,5 @@ Todo List:
 - finish performance data on extinfo type 4
 - config.cgi
 - reports / logs
-- status summary
 - combine host/servicegroups in host/statusgroups grid / overview
+- write tests

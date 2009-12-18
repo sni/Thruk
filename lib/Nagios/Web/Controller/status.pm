@@ -25,10 +25,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     # which style to display?
-    my $allowed_subpages = {'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summmary' => 1};
+    my $allowed_subpages = {'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summary' => 1};
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
 
-    if(!defined $style) {
+    if($style eq '') {
         if(defined $c->{'request'}->{'parameters'}->{'hostgroup'} and $c->{'request'}->{'parameters'}->{'hostgroup'} ne '') {
             $style = 'overview';
         }
@@ -44,7 +44,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $style = $self->_process_search_request($c);
     }
 
-    if($style eq 'detail') {
+    # normal pages
+    elsif($style eq 'detail') {
         $self->_process_details_page($c);
     }
     elsif($style eq 'hostdetail') {
@@ -55,6 +56,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     elsif($style eq 'grid') {
         $self->_process_grid_page($c);
+    }
+    elsif($style eq 'summary') {
+        $self->_process_summary_page($c);
     }
 
     $c->stash->{title}          = 'Current Network Status';
@@ -317,6 +321,7 @@ sub _process_overview_page {
     $c->stash->{'style'}        = 'overview';
 }
 
+
 ##########################################################
 # create the status grid page
 sub _process_grid_page {
@@ -353,9 +358,6 @@ sub _process_grid_page {
     for my $service (@{$c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} })}) {
         $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
     }
-#use Data::Dumper;
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($services_data);
 
     # get all host/service groups
     my $groups;
@@ -403,15 +405,182 @@ sub _process_grid_page {
         }
     }
 
-#use Data::Dumper;
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($groups);
     $c->stash->{'hostgroup'}    = $hostgroup;
     $c->stash->{'servicegroup'} = $servicegroup;
     $c->stash->{'groups'}       = $groups;
     $c->stash->{'style'}        = 'grid';
 }
 
+
+##########################################################
+# create the status summary page
+sub _process_summary_page {
+    my ( $self, $c ) = @_;
+
+    # which host to display?
+    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
+    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+
+    my $hostfilter      = "";
+    my $servicefilter   = "";
+    my $groupfilter     = "";
+    if($hostgroup ne '' and $hostgroup ne 'all') {
+        $hostfilter      = "Filter: groups >= $hostgroup\n";
+        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
+        $groupfilter     = "Filter: name = $hostgroup\n";
+    }
+    elsif($servicegroup ne '' and $servicegroup ne 'all') {
+        $servicefilter   = "Filter: groups >= $servicegroup\n";
+        $groupfilter     = "Filter: name = $servicegroup\n";
+    }
+
+    # fill the host/service totals box
+    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
+
+    # then add some more filter based on get parameter
+    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
+
+    # get all host/service groups
+    my $groups;
+    if($hostgroup) {
+        $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n$groupfilter\nColumns: name alias members", 'name');
+    }
+    elsif($servicegroup) {
+        $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n$groupfilter\nColumns: name alias members", 'name');
+    }
+
+    # set defaults for all groups
+    for my $group (values %{$groups}) {
+        $group->{'hosts_pending'}               = 0;
+        $group->{'hosts_up'}                    = 0;
+        $group->{'hosts_down'}                  = 0;
+        $group->{'hosts_down_unhandled'}        = 0;
+        $group->{'hosts_down_downtime'}         = 0;
+        $group->{'hosts_down_ack'}              = 0;
+        $group->{'hosts_down_disabled'}         = 0;
+        $group->{'hosts_unreachable'}           = 0;
+        $group->{'hosts_unreachable_unhandled'} = 0;
+        $group->{'hosts_unreachable_downtime'}  = 0;
+        $group->{'hosts_unreachable_ack'}       = 0;
+        $group->{'hosts_unreachable_disabled'}  = 0;
+
+        $group->{'services_pending'}            = 0;
+        $group->{'services_ok'}                 = 0;
+        $group->{'services_warning'}            = 0;
+        $group->{'services_warning_unhandled'}  = 0;
+        $group->{'services_warning_downtime'}   = 0;
+        $group->{'services_warning_prob_host'}  = 0;
+        $group->{'services_warning_ack'}        = 0;
+        $group->{'services_warning_disabled'}   = 0;
+        $group->{'services_unknown'}            = 0;
+        $group->{'services_unknown_unhandled'}  = 0;
+        $group->{'services_unknown_downtime'}   = 0;
+        $group->{'services_unknown_prob_host'}  = 0;
+        $group->{'services_unknown_ack'}        = 0;
+        $group->{'services_unknown_disabled'}   = 0;
+        $group->{'services_critical'}           = 0;
+        $group->{'services_critical_unhandled'} = 0;
+        $group->{'services_critical_downtime'}  = 0;
+        $group->{'services_critical_prob_host'} = 0;
+        $group->{'services_critical_ack'}       = 0;
+        $group->{'services_critical_disabled'}  = 0;
+    }
+
+    my $services_data;
+    my $groupsname = "host_groups";
+    if($hostgroup) {
+        # we need the hosts data
+        my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name groups state checks_enabled acknowledged scheduled_downtime_depth has_been_checked\n$hostfilter", { Slice => 1 } );
+
+        # create a hash of all services
+        $services_data = $c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth\n$servicefilter", { Slice => {} });
+
+        for my $host (@{$host_data}) {
+            for my $group (split/,/, $host->{'groups'}) {
+                next if !defined $groups->{$group};
+                $self->_summary_add_host_stats("", $groups->{$group}, $host);
+            }
+        }
+    }
+
+    if($servicegroup) {
+        # create a hash of all services
+        $services_data = $c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth host_name host_state host_checks_enabled host_acknowledged host_scheduled_downtime_depth host_has_been_checked\n$servicefilter", { Slice => {} });
+
+        $groupsname = "groups";
+    }
+
+    my %host_already_added;
+    for my $service (@{$services_data}) {
+        for my $group (split/,/, $service->{$groupsname}) {
+            next if !defined $groups->{$group};
+
+            if($servicegroup) {
+                if(!defined $host_already_added{$service->{'host_name'}}) {
+                    $self->_summary_add_host_stats("host_", $groups->{$group}, $service);
+                    $host_already_added{$service->{'host_name'}} = 1;
+                }
+            }
+
+            if($service->{'has_been_checked'} == 0) { $groups->{$group}->{'services_pending'}++; }
+            elsif($service->{'state'} == 0)         { $groups->{$group}->{'services_ok'}++; }
+            elsif($service->{'state'} == 1)         { $groups->{$group}->{'services_warning'}++; }
+            elsif($service->{'state'} == 2)         { $groups->{$group}->{'services_critical'}++; }
+            elsif($service->{'state'} == 3)         { $groups->{$group}->{'services_unknown'}++; }
+
+            if($service->{'state'} == 1 and $service->{'scheduled_downtime_depth'} > 0) { $groups->{$group}->{'services_warning_downtime'}++; }
+            if($service->{'state'} == 1 and $service->{'acknowledged'}            == 1) { $groups->{$group}->{'services_warning_ack'}++; }
+            if($service->{'state'} == 1 and $service->{'checks_enabled'}          == 0) { $groups->{$group}->{'services_warning_disabled'}++; }
+            if($service->{'state'} == 1 and $service->{'host_state'}               > 0) { $groups->{$group}->{'services_warning_prob_host'}++; }
+            elsif($service->{'state'} == 1 and $service->{'checks_enabled'}       == 1 and $service->{'host_state'} == 0 and $service->{'acknowledged'} == 0 and $service->{'scheduled_downtime_depth'} == 0) { $groups->{$group}->{'services_warning_unhandled'}++; }
+
+            if($service->{'state'} == 2 and $service->{'scheduled_downtime_depth'} > 0) { $groups->{$group}->{'services_critical_downtime'}++; }
+            if($service->{'state'} == 2 and $service->{'acknowledged'}            == 1) { $groups->{$group}->{'services_critical_ack'}++; }
+            if($service->{'state'} == 2 and $service->{'checks_enabled'}          == 0) { $groups->{$group}->{'services_critical_disabled'}++; }
+            if($service->{'state'} == 2 and $service->{'host_state'}               > 0) { $groups->{$group}->{'services_critical_prob_host'}++; }
+            elsif($service->{'state'} == 2 and $service->{'checks_enabled'}       == 1 and $service->{'host_state'} == 0 and $service->{'acknowledged'} == 0 and $service->{'scheduled_downtime_depth'} == 0) { $groups->{$group}->{'services_critical_unhandled'}++; }
+
+            if($service->{'state'} == 3 and $service->{'scheduled_downtime_depth'} > 0) { $groups->{$group}->{'services_unknown_downtime'}++; }
+            if($service->{'state'} == 3 and $service->{'acknowledged'}            == 1) { $groups->{$group}->{'services_unknown_ack'}++; }
+            if($service->{'state'} == 3 and $service->{'checks_enabled'}          == 0) { $groups->{$group}->{'services_unknown_disabled'}++; }
+            if($service->{'state'} == 3 and $service->{'host_state'}               > 0) { $groups->{$group}->{'services_unknown_prob_host'}++; }
+            elsif($service->{'state'} == 3 and $service->{'checks_enabled'}       == 1 and $service->{'host_state'} == 0 and $service->{'acknowledged'} == 0 and $service->{'scheduled_downtime_depth'} == 0) { $groups->{$group}->{'services_unknown_unhandled'}++; }
+        }
+    }
+
+#use Data::Dumper;
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($groups);
+    $c->stash->{'hostgroup'}    = $hostgroup;
+    $c->stash->{'servicegroup'} = $servicegroup;
+    $c->stash->{'groups'}       = $groups;
+    $c->stash->{'style'}        = 'summary';
+}
+
+##########################################################
+sub _summary_add_host_stats {
+    my $self   = shift;
+    my $prefix = shift;
+    my $group  = shift;
+    my $host   = shift;
+
+    if($host->{$prefix.'has_been_checked'} == 0) { $group->{'hosts_pending'}++; }
+    elsif($host->{$prefix.'state'} == 0)         { $group->{'hosts_up'}++; }
+    elsif($host->{$prefix.'state'} == 1)         { $group->{'hosts_down'}++; }
+    elsif($host->{$prefix.'state'} == 2)         { $group->{'hosts_unreachable'}++; }
+
+    if($host->{$prefix.'state'} == 1 and $host->{$prefix.'scheduled_downtime_depth'} > 0) { $group->{'hosts_down_downtime'}++; }
+    if($host->{$prefix.'state'} == 1 and $host->{$prefix.'acknowledged'}            == 1) { $group->{'hosts_down_ack'}++; }
+    if($host->{$prefix.'state'} == 1 and $host->{$prefix.'checks_enabled'}          == 0) { $group->{'hosts_down_disabled'}++; }
+    if($host->{$prefix.'state'} == 1 and $host->{$prefix.'checks_enabled'}          == 1 and $host->{$prefix.'acknowledged'} == 0 and $host->{$prefix.'scheduled_downtime_depth'} == 0) { $group->{'hosts_down_unhandled'}++; }
+
+    if($host->{$prefix.'state'} == 2 and $host->{$prefix.'scheduled_downtime_depth'} > 0) { $group->{'hosts_unreachable_downtime'}++; }
+    if($host->{$prefix.'state'} == 2 and $host->{$prefix.'acknowledged'}            == 1) { $group->{'hosts_unreachable_ack'}++; }
+    if($host->{$prefix.'state'} == 2 and $host->{$prefix.'checks_enabled'}          == 0) { $group->{'hosts_unreachable_disabled'}++; }
+    if($host->{$prefix.'state'} == 2 and $host->{$prefix.'checks_enabled'}          == 1 and $host->{$prefix.'acknowledged'} == 0 and $host->{$prefix.'scheduled_downtime_depth'} == 0) { $group->{'hosts_unreachable_unhandled'}++; }
+
+    return;
+}
 
 ##########################################################
 sub _fill_totals_box {

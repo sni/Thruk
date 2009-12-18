@@ -55,7 +55,7 @@ before 'execute' => sub {
 after 'execute' => sub {
     my ( $self, $controller, $c, $test ) = @_;
 
-    $c->stats->profile(begin => "AddDefaults after");
+    $c->stats->profile(begin => "AddDefaults::after");
 
     if(defined $c->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
