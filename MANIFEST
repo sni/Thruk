@@ -1,6 +1,15 @@
 cgi.cfg
 Changes
-DEVELOPMENT
+docs/development/README
+docs/development/tables/comment.txt
+docs/development/tables/contacts.txt
+docs/development/tables/host.txt
+docs/development/tables/hostgroup.txt
+docs/development/tables/service.txt
+docs/development/tables/servicegroup.txt
+docs/development/tables/status.txt
+docs/INSTALL
+docs/TODO
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -14,7 +23,6 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
-INSTALL
 lib/Catalyst/Authentication/Credential/Nagios.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
 lib/Nagios/Web.pm
@@ -321,8 +329,7 @@ script/nagios_web_fastcgi.pl
 script/nagios_web_server.pl
 script/nagios_web_test.pl
 t/01app.t
-t/02pod.t
-t/03podcoverage.t
+t/97-Pod.t
 t/98-Pod-Coverage.t
 t/99-Perl-Critic.t
 t/controller_avail.t
@@ -462,11 +469,3 @@ templates/status_hostdetail.tt
 templates/status_overview.tt
 templates/status_summary.tt
 templates/tac.tt
-tmp/comment.txt
-tmp/contacts.txt
-tmp/host.txt
-tmp/hostgroup.txt
-tmp/service.txt
-tmp/servicegroup.txt
-tmp/status.txt
-TODO
