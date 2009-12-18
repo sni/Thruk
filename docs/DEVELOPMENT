@@ -1,6 +1,12 @@
 Test Nagios Installation
 ========================
 
+There are many way of setting up a test nagios instance:
+
+
+Install a Clean Nagios From Source
+----------------------------------
+
 -----
 use this command line to setup a test nagios installation
 
@@ -12,3 +18,9 @@ export TARGET_DIR=/Users/sven/projects/nagios/nagios3.2.0
             --with-httpd-conf=$TARGET_DIR/apache.conf.d/
 make all && make install
 -----
+
+
+Generate a Test Configuration
+-----------------------------
+
+you may use Nagios::Generator::TestConfig for this step

@@ -24,6 +24,29 @@ Install Nagios-Web-Catalyst
     perl Makefile.PL
     make installdeps
 
+make sure all dependencies are installed properly
+
+
+
+Configuration
+=============
+open "nagios_web.conf" and adjust the livestatus settings to your needs.
+
+
+
+Test
+====
+
+verify installation with the packaged perl test
+
+    make test
+
+
+
+Start Server
+============
 After running these steps successfully, you should be able to test your installation:
 
     ./script/nagios_web_server.pl
+
+Open your browser and open http://<your_nagios_host>:3000 
