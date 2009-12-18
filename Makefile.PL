@@ -38,9 +38,12 @@ requires 'Time::HiRes';
 requires 'threads' => '1.75';
 requires 'Thread::Queue' => '2.11';
 
-if(defined $ENV{'TEST_AUTHOR'}) {
-    requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
-}
+
+test_requires 'Catalyst::Devel';
+test_requires 'Test::Pod' => 1.14;
+test_requires 'Test::Perl::Critic';
+test_requires 'Test::Pod::Coverage';
+test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
 
 catalyst;
 install_script glob('script/*.pl');
