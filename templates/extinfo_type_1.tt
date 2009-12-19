@@ -37,6 +37,22 @@
           <div class='data'>Host</div>
           <div class='dataTitle'>[% host.alias %]</div>
           <div class='dataTitle'>([% host.name %])</div><br>
+          [% IF backends.size > 1 %]
+          <div class='data'>
+            <form action="extinfo.cgi" method="GET">
+              <input type="hidden" name="type" value="1">
+              <input type="hidden" name="host" value="[% host.name %]">
+              This host is ambiguous:
+              <select name="backend">
+                [% FOREACH b IN backends %]
+                [% SET name = pi_detail.$b.peer_name %]
+                <option value="[% b %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
+                [% END %]
+              </select>
+              <input type="submit" name="go" value="go">
+            </form>
+          </div>
+          [% END %]
           [% IF host.parents %]
           <div class='data'>Parents:</div>
           <div class='dataTitle'>
@@ -94,7 +110,9 @@
                           <tr>
                             <td class='dataVar'>Host Status:</td>
                             <td class='dataVal'>
-                              [% IF host.state == 0 %]
+                              [% IF host.has_been_checked == 0 %]
+                              <div class='hostPENDING'>&nbsp;&nbsp;PENDING&nbsp;&nbsp;</div>
+                              [% ELSIF host.state == 0 %]
                               <div class='hostUP'>&nbsp;&nbsp;UP&nbsp;&nbsp;</div>
                               [% ELSIF host.state == 1 %]
                               <div class='hostDOWN'>&nbsp;&nbsp;DOWN&nbsp;&nbsp;</div>
@@ -110,6 +128,7 @@
                           <tr>
                             <td class='dataVar' valign='top'>Status Information:</td>
                             <td class='dataVal'>
+                              [% IF host.has_been_checked == 0 %]host has not been checked yet[% END %]
                               [% host.plugin_output %]
                               [% IF host.long_plugin_output %]
                               <br>[% host.long_plugin_output %]
@@ -194,6 +213,10 @@
                           <tr>
                             <td class='dataVar'>Last Update:</td>
                             <td class='dataVal'>[% date.format(date.now, '%Y-%m-%d  %H:%M:%S') %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Monitored by:</td>
+                            <td class='dataVal'>[% host.peer_name %]</td>
                           </tr>
                         </table>
                       </td>

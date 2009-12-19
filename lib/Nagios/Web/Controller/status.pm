@@ -516,9 +516,9 @@ sub _process_summary_page {
             next if !defined $groups->{$group};
 
             if($servicegroup) {
-                if(!defined $host_already_added{$service->{'host_name'}}) {
+                if(!defined $host_already_added{$group}->{$service->{'host_name'}}) {
                     $self->_summary_add_host_stats("host_", $groups->{$group}, $service);
-                    $host_already_added{$service->{'host_name'}} = 1;
+                    $host_already_added{$group}->{$service->{'host_name'}} = 1;
                 }
             }
 

@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Config::General;
 use Carp;
+use Data::Dumper;
 use Nagios::MKLivestatus::MULTI;
 
 
@@ -87,22 +88,23 @@ sub get_livesocket {
     }
     $c->log->debug("creating new livestatus");
 
-    my $livesocket_path = Nagios::Web->config->{'livesocket'};
-    if(!defined $livesocket_path) {
-        $livesocket_path = $self->_get_livesocket_path_from_nagios_cfg(Nagios::Web->config->{'cgi_cfg'});
+    my $livesocket_config = Nagios::Web->config->{'Nagios::MKLivestatus'};
+    if(!defined $livesocket_config) {
+        my $livesocket_path = $self->_get_livesocket_path_from_nagios_cfg(Nagios::Web->config->{'cgi_cfg'});
+        my $options = {
+            peer             => $livesocket_path,
+            verbose          => 0,
+            keepalive        => 1,
+        };
+        $livesocket = Nagios::MKLivestatus::MULTI->new(%{$options});
+    } else {
+        $c->log->debug("livestatus config: ".Dumper($livesocket_config));
+
+        if(defined $livesocket_config->{'verbose'} and $livesocket_config->{'verbose'}) {
+            $livesocket_config->{'logger'} = $c->log
+        }
+        $livesocket = Nagios::MKLivestatus::MULTI->new(%{$livesocket_config});
     }
-
-    $c->log->debug("connecting via: ".join(', ', @{$livesocket_path})) if ref $livesocket_path eq 'ARRAY';
-    $c->log->debug("connecting via: ".$livesocket_path)                if ref $livesocket_path ne 'ARRAY';
-
-    my $options = [
-        peer             => $livesocket_path,
-        verbose          => Nagios::Web->config->{'livesocket_verbose'},
-        keepalive        => 1,
-    ];
-    $options->{'logger'} = $c->log if Nagios::Web->config->{'livesocket_verbose'};
-
-    $livesocket = Nagios::MKLivestatus::MULTI->new($options);
 
     $c->stats->profile(end => "Helper::get_livesocket()");
 
@@ -225,7 +227,7 @@ sub get_service_exectution_stats {
         };
 
         for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 })}) {
-            my $minall = $c->stash->{'pi_detail'}->{$data->{'peer_name'}}->{'program_start'};
+            my $minall = $c->stash->{'pi_detail'}->{$data->{'peer_key'}}->{'program_start'};
 
             if($data->{'check_type'} == 0) {
                 $check_stats->{$type}->{'active_sum'}++;

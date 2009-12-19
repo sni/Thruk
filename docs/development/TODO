@@ -4,7 +4,6 @@ Todo List:
 - reload cgi.cfg if changed
 - overload role authentication ( to add host/service role checks )
 - add authorization part to all querys
-- fix pending state on host/service details page (should be just a empty message)
 - verify macros is action_url, icon_url and notes_url
 - finish performance data on extinfo type 4
 - config.cgi

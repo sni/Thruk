@@ -59,8 +59,8 @@
         [% SET class = 'statusEven' IF loop.odd %]
         [% SET class = 'statusOdd'  IF loop.even %]
 
-        [% SET peer_name     = h.peer_name %]
-        [% SET program_start = pi_detail.$peer_name.program_start %]
+        [% SET peer_key      = h.peer_key %]
+        [% SET program_start = pi_detail.$peer_key.program_start %]
 
         [% SET comment_count = h.comments.split(',').size %]
 

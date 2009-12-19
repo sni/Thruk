@@ -44,6 +44,23 @@
           <div class='data'>On Host</div>
           <div class='dataTitle'>[% service.host_alias %]</div>
           <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name %]'>[% service.host_name %]</a>)</div><br>
+          [% IF backends.size > 1 %]
+          <div class='data'>
+            <form action="extinfo.cgi" method="GET">
+              <input type="hidden" name="type" value="1">
+              <input type="hidden" name="host" value="[% service.host_name %]">
+              <input type="hidden" name="description" value="[% service.description %]">
+              This service is ambiguous:
+              <select name="backend">
+                [% FOREACH b IN backends %]
+                [% SET name = pi_detail.$b.peer_name %]
+                <option value="[% b %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
+                [% END %]
+              </select>
+              <input type="submit" name="go" value="go">
+            </form>
+          </div>
+          [% END %]
           <div class='data'> Member of </div>
           <div class='dataTitle'>[% FOREACH group IN service.groups.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?servicegroup=[% group %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
@@ -87,7 +104,9 @@
                           <tr>
                             <td class='dataVar'>Current Status:</td>
                             <td class='dataVal'>
-                              [% IF service.state == 0 %]
+                              [% IF service.has_been_checked == 0 %]
+                              <div class='servicePENDING'>&nbsp;&nbsp;PENDING&nbsp;&nbsp;</div>
+                              [% ELSIF service.state == 0 %]
                               <div class='serviceOK'>&nbsp;&nbsp;OK&nbsp;&nbsp;</div>
                               [% ELSIF service.state == 1 %]
                               <div class='serviceWARNING'>&nbsp;&nbsp;WARNING&nbsp;&nbsp;</div>
@@ -104,10 +123,12 @@
                           </tr>
                           <tr>
                             <td class='dataVar' valign='top'> Status Information: </td>
-                            <td class='dataVal'>[% service.plugin_output %]
-                            [% IF service.long_plugin_output %]
-                            <br>[% service.long_plugin_output %]
-                            [% END %]
+                            <td class='dataVal'>
+                              [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
+                              [% service.plugin_output %]
+                              [% IF service.long_plugin_output %]
+                              <br>[% service.long_plugin_output %]
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
@@ -188,6 +209,10 @@
                           <tr>
                             <td class='dataVar'>Last Update:</td>
                             <td class='dataVal'>[% date.format(date.now, '%Y-%m-%d  %H:%M:%S') %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>Monitored by:</td>
+                            <td class='dataVal'>[% service.peer_name %]</td>
                           </tr>
                         </table>
                       </td>

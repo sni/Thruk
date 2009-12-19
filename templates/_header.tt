@@ -5,6 +5,7 @@
     <title>[% title %]</title>
     <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/common.css' />
     <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/[% page %].css' />
+    <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/nagios_web_catalyst.css' />
   </head>
   <body class='[% page %]'>
 <!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->

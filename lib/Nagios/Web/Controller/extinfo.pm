@@ -89,25 +89,43 @@ sub _process_comments_page {
 # create the downtimes page
 sub _process_downtimes_page {
     my ( $self, $c ) = @_;
-    $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = ", { Slice => {} });
-    $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != ", { Slice => {} });
+    $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = \nColumns: author comment end_time entry_time fixed host_name id start_time triggered_by", { Slice => {} });
+    $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != \nColumns: author comment end_time entry_time fixed host_name id service_description start_time triggered_by", { Slice => {} });
 }
 
 ##########################################################
 # create the host info page
 sub _process_host_page {
     my ( $self, $c ) = @_;
+    my $host;
 
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     $c->detach('/error/index/5') unless defined $hostname;
+    my $hosts = $c->{'live'}->selectall_hashref("GET hosts\nFilter: name = $hostname\nColumns: has_been_checked accept_passive_checks acknowledged action_url address alias checks_enabled check_type current_attempt current_notification_number event_handler_enabled execution_time flap_detection_enabled groups icon_image icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts name next_check notes notes_url notifications_enabled obsess_over_host parents percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
 
-    my $host = $c->{'live'}->selectrow_hashref("GET hosts\nFilter: name = $hostname");
+    # we only got one host
+    if(scalar keys %{$hosts} == 1) {
+        my @data = values(%{$hosts});
+        $host = $data[0];
+    }
+    else {
+        if(defined $backend and defined $hosts->{$backend}) {
+            $host = $hosts->{$backend};
+        } else {
+            my @data = values(%{$hosts});
+            $host = $data[0];
+        }
+    }
+
     $c->detach('/error/index/5') unless defined $host;
 
-    $c->stash->{'host'}     = $host;
+    my @backends = keys %{$hosts};
+    $self->_set_backend_selector($c, \@backends, $host->{'peer_key'});
 
-    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description =\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
-    my $sortedcomments = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
+    $c->stash->{'host'}     = $host;
+    my $comments            = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description =\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
+    my $sortedcomments      = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
     $c->stash->{'comments'} = $sortedcomments;
 }
 
@@ -119,17 +137,20 @@ sub _process_hostgroup_cmd_page {
     my $hostgroup = $c->{'request'}->{'parameters'}->{'hostgroup'};
     $c->detach('/error/index/5') unless defined $hostgroup;
 
-    my($hostgroup_name,$hostgroup_alias) = $c->{'live'}->selectrow_array("GET hostgroups\nColumns: name alias\nFilter: name = $hostgroup\nLimit: 1");
-    $c->detach('/error/index/5') unless defined $hostgroup_name;
+    my $groups = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name alias\nFilter: name = $hostgroup\nLimit: 1", 'name');
+    my @groups = values %{$groups};
+    $c->detach('/error/index/5') unless defined $groups[0];
 
-    $c->stash->{'hostgroup'}       = $hostgroup_name;
-    $c->stash->{'hostgroup_alias'} = $hostgroup_alias;
+    $c->stash->{'hostgroup'}       = $groups[0]->{'name'};
+    $c->stash->{'hostgroup_alias'} = $groups[0]->{'alias'};
 }
 
 ##########################################################
 # create the service info page
 sub _process_service_page {
     my ( $self, $c ) = @_;
+    my $service;
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
 
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     $c->detach('/error/index/5') unless defined $hostname;
@@ -137,13 +158,30 @@ sub _process_service_page {
     my $servicename = $c->{'request'}->{'parameters'}->{'service'};
     $c->detach('/error/index/5') unless defined $servicename;
 
-    my $service = $c->{'live'}->selectrow_hashref("GET services\nFilter: host_name = $hostname\nFilter: description = $servicename");
+    my $services = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = $hostname\nFilter: description = $servicename\nColumns: has_been_checked accept_passive_checks acknowledged action_url checks_enabled check_type current_attempt current_notification_number description event_handler_enabled execution_time flap_detection_enabled groups host_address host_alias host_name icon_image icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts next_check notes notes_url notifications_enabled obsess_over_service percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
+
+    # we only got one service
+    if(scalar keys %{$services} == 1) {
+        my @data = values(%{$services});
+        $service = $data[0];
+    }
+    else {
+        if(defined $backend and defined $services->{$backend}) {
+            $service = $services->{$backend};
+        } else {
+            my @data = values(%{$services});
+            $service = $data[0];
+        }
+    }
+
     $c->detach('/error/index/5') unless defined $service;
 
-    $c->stash->{'service'} = $service;
+    my @backends = keys %{$services};
+    $self->_set_backend_selector($c, \@backends, $service->{'peer_key'});
 
-    my $comments       = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description = $servicename\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
-    my $sortedcomments = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
+    $c->stash->{'service'}  = $service;
+    my $comments            = $c->{'live'}->selectall_arrayref("GET comments\nFilter: host_name = $hostname\nFilter: service_description = $servicename\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
+    my $sortedcomments      = Nagios::Web::Helper->sort($c, $comments, 'id', 'DESC');
     $c->stash->{'comments'} = $sortedcomments;
 }
 
@@ -155,11 +193,12 @@ sub _process_servicegroup_cmd_page {
     my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'};
     $c->detach('/error/index/5') unless defined $servicegroup;
 
-    my($servicegroup_name,$servicegroup_alias) = $c->{'live'}->selectrow_array("GET servicegroups\nColumns: name alias\nFilter: name = $servicegroup\nLimit: 1");
-    $c->detach('/error/index/5') unless defined $servicegroup_name;
+    my $groups = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name alias\nFilter: name = $servicegroup\nLimit: 1", 'name');
+    my @groups = values %{$groups};
+    $c->detach('/error/index/5') unless defined $groups[0];
 
-    $c->stash->{'servicegroup'}       = $servicegroup_name;
-    $c->stash->{'servicegroup_alias'} = $servicegroup_alias;
+    $c->stash->{'servicegroup'}       = $groups[0]->{'name'};
+    $c->stash->{'servicegroup_alias'} = $groups[0]->{'alias'};
 }
 
 ##########################################################
@@ -196,6 +235,8 @@ sub _process_process_info_page {
     my ( $self, $c ) = @_;
 
     # all other data is already set in addDefaults
+    my @possible_backends             = $c->{'live'}->peer_key();
+    $c->stash->{'backends'}           = \@possible_backends;
     $c->stash->{'nagios_data_source'} = $c->{'live'}->peer_name();
 }
 
@@ -211,6 +252,22 @@ sub _process_perf_info_page {
     $c->stash->{'live_stats'} = $live_stats;
 }
 
+##########################################################
+# show backend selector
+sub _set_backend_selector {
+    my ( $self, $c, $backends, $selected ) = @_;
+    my %backends = map { $_ => 1 } @{$backends};
+
+    my @backends;
+    my @possible_backends = $c->{'live'}->peer_key();
+    for my $back (@possible_backends) {
+        next if !defined $backends{$back};
+        push @backends, $back;
+    }
+
+    $c->stash->{'backends'} = \@backends;
+    $c->stash->{'backend'}  = $selected;
+}
 
 =head1 AUTHOR
 

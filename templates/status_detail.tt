@@ -100,8 +100,8 @@
       [% END %]
 
       [% SET comment_count = s.comments.split(',').size %]
-      [% SET peer_name     = s.peer_name %]
-      [% SET program_start = pi_detail.$peer_name.program_start %]
+      [% SET peer_key      = s.peer_key %]
+      [% SET program_start = pi_detail.$peer_key.program_start %]
 
       [% IF lasthost != '' && lasthost != s.host_name %]
       <tr><td colspan="6"></td></tr>
@@ -149,7 +149,7 @@
               <td align="left">
                 <table border="0" cellspacing="0" cellpadding="0">
                   <tr>
-                    <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]'>[% s.description %]</a></td>
+                    <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]&backend=[% s.peer_key %]'>[% s.description %]</a></td>
                   </tr>
                 </table>
               </td>
