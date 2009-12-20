@@ -60,7 +60,8 @@
     </table>
     <div align="center">
 
-      [% FOREACH g = groups %]
+      [% FOR groupname IN groups.keys.sort %]
+      [% SET g = groups.$groupname %]
       [% IF hostgroup != '' %]
       <div class='status'><a href='status.cgi?hostgroup=[% g.name %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% g.name %]'>[% g.name %]</a>)</div>
       [% ELSIF servicegroup != '' %]
@@ -72,7 +73,8 @@
           <th class='status'>Services</th>
           <th class='status'>Actions</th>
         </tr>
-        [% FOREACH h = g.hosts %]
+        [% FOR hostname IN g.hosts.keys.sort %]
+        [% SET h = g.hosts.$hostname %]
         [% SET hostclass = 'statusEven' IF loop.odd  %]
         [% SET hostclass = 'statusOdd'  IF loop.even %]
         [% IF h.state == 1 %]
@@ -106,7 +108,8 @@
             </table>
           </td>
           <td class='[% hostclass %]'>
-            [% FOREACH s = h.services %]
+            [% FOR servicename IN h.services.keys.sort %]
+            [% SET s = h.services.$servicename %]
             [% IF s.has_been_checked == 0 %]
               [% SET s_status = 'statusPENDING' %]
             [% ELSIF s.state == 0 %]

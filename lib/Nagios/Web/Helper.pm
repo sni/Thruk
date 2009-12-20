@@ -98,6 +98,13 @@ sub get_livesocket {
         };
         $livesocket = Nagios::MKLivestatus::MULTI->new(%{$options});
     } else {
+        # with only on peer, we have to convert to an array
+        if(defined $livesocket_config->{'peer'} and ref $livesocket_config->{'peer'} eq 'HASH') {
+            my $peer = $livesocket_config->{'peer'};
+            delete $livesocket_config->{'peer'};
+            push @{$livesocket_config->{'peer'}}, $peer;
+        }
+
         $c->log->debug("livestatus config: ".Dumper($livesocket_config));
 
         if(defined $livesocket_config->{'verbose'} and $livesocket_config->{'verbose'}) {

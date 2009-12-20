@@ -369,8 +369,14 @@ sub _process_grid_page {
     }
 
     # sort in hosts / services
+    my %joined_groups;
     for my $group (@{$groups}) {
-        my %hosts;
+        my $name = $group->{'name'};
+        if(!defined $joined_groups{$name}) {
+            $joined_groups{$name}->{'name'}  = $group->{'name'};
+            $joined_groups{$name}->{'alias'} = $group->{'alias'};
+            $joined_groups{$name}->{'hosts'} = {};
+        }
 
         for my $member (split /,/, $group->{'members'}) {
             my($hostname,$servicename);
@@ -381,33 +387,28 @@ sub _process_grid_page {
                 ($hostname,$servicename) = split/\|/, $member, 2;
             }
 
-            if(!defined $hosts{$hostname}) {
+            if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
                 # clone host data
                 for my $key (keys %{$host_data->{$hostname}}) {
-                    $hosts{$hostname}->{$key}   = $host_data->{$hostname}->{$key};
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{$key} = $host_data->{$hostname}->{$key};
                 }
             }
 
             # add all services
             if($hostgroup) {
                 for my $service (sort keys %{$services_data->{$hostname}}) {
-                    push @{$hosts{$hostname}->{'services'}}, $services_data->{$hostname}->{$service};
+                     $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$services_data->{$hostname}->{$service}->{'description'}} = $services_data->{$hostname}->{$service};
                 }
             }
             elsif($servicegroup) {
-                push @{$hosts{$hostname}->{'services'}}, $services_data->{$hostname}->{$servicename};
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$services_data->{$hostname}->{$servicename}->{'description'}} = $services_data->{$hostname}->{$servicename};
             }
-        }
-
-        # create an array of hashes
-        for my $hostname (sort keys %hosts) {
-            push @{$group->{'hosts'}}, $hosts{$hostname};
         }
     }
 
     $c->stash->{'hostgroup'}    = $hostgroup;
     $c->stash->{'servicegroup'} = $servicegroup;
-    $c->stash->{'groups'}       = $groups;
+    $c->stash->{'groups'}       = \%joined_groups;
     $c->stash->{'style'}        = 'grid';
 }
 
