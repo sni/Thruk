@@ -8,6 +8,5 @@ Todo List:
 - finish performance data on extinfo type 4
 - config.cgi
 - reports / logs
-- combine host/servicegroups in host/statusgroups grid / overview
 - add backend selector to cmds
 - write tests

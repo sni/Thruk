@@ -270,54 +270,76 @@ sub _process_overview_page {
         $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
 
+    # join our groups together
+    my %joined_groups;
     for my $group (@{$groups}) {
 
+        my $name = $group->{'name'};
+        if(!defined $joined_groups{$name}) {
+            $joined_groups{$name}->{'name'}  = $group->{'name'};
+            $joined_groups{$name}->{'alias'} = $group->{'alias'};
+            $joined_groups{$name}->{'hosts'} = {};
+        }
+
+        my($hostname,$servicename);
         if($hostgroup) {
-            for my $member (split /,/, $group->{'members'}) {
-                push @{$group->{'hosts'}}, $host_data->{$member};
+            for my $hostname (split /,/, $group->{'members'}) {
+                if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
+                    # clone hash data
+                    for my $key (keys %{$host_data->{$hostname}}) {
+                        $joined_groups{$name}->{'hosts'}->{$hostname}->{$key} = $host_data->{$hostname}->{$key};
+                    }
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}  = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}       = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}  = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}  = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} = 0;
+                }
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}  += $host_data->{$hostname}->{'pending'};
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}       += $host_data->{$hostname}->{'ok'};
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}  += $host_data->{$hostname}->{'warning'};
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}  += $host_data->{$hostname}->{'unknown'};
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} += $host_data->{$hostname}->{'critical'};
             }
         }
         elsif($servicegroup) {
-            my %hosts;
             for my $member (split /,/, $group->{'members'}) {
                 my($hostname,$servicename) = split/\|/, $member, 2;
                 next unless defined $host_data->{$hostname};
-                if(!defined $hosts{$hostname}) {
+
+                if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
                     # clone hash data
                     for my $key (keys %{$host_data->{$hostname}}) {
-                        $hosts{$hostname}->{$key}   = $host_data->{$hostname}->{$key};
+                        $joined_groups{$name}->{'hosts'}->{$hostname}->{$key} = $host_data->{$hostname}->{$key};
                     }
-                    $hosts{$hostname}->{'pending'}  = 0;
-                    $hosts{$hostname}->{'ok'}       = 0;
-                    $hosts{$hostname}->{'warning'}  = 0;
-                    $hosts{$hostname}->{'unknown'}  = 0;
-                    $hosts{$hostname}->{'critical'} = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}  = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}       = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}  = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}  = 0;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} = 0;
                 }
 
                 my $state            = $services_data->{$hostname}->{$servicename}->{'state'};
                 my $has_been_checked = $services_data->{$hostname}->{$servicename}->{'has_been_checked'};
                 if(!$has_been_checked) {
-                    $hosts{$hostname}->{'pending'}++;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}++;
                 } elsif($state == 0) {
-                    $hosts{$hostname}->{'ok'}++;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}++;
                 } elsif($state == 1) {
-                    $hosts{$hostname}->{'warning'}++;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}++;
                 } elsif($state == 2) {
-                    $hosts{$hostname}->{'critical'}++;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'}++;
                 } elsif($state == 3) {
-                    $hosts{$hostname}->{'unknown'}++;
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}++;
                 }
-            }
-
-            for my $hostname (sort keys %hosts) {
-                push @{$group->{'hosts'}}, $hosts{$hostname};
             }
         }
     }
-
+#use Data::Dumper;
+#print Dumper(\%joined_groups);
     $c->stash->{'hostgroup'}    = $hostgroup;
     $c->stash->{'servicegroup'} = $servicegroup;
-    $c->stash->{'groups'}       = $groups;
+    $c->stash->{'groups'}       = \%joined_groups;
     $c->stash->{'style'}        = 'overview';
 }
 
