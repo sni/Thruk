@@ -56,6 +56,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} });
         }
 
+        my @possible_backends       = $c->{'live'}->peer_key();
+        $c->stash->{'backends'}     = \@possible_backends;
+        $c->stash->{'backend'}      = $c->{'request'}->{'parameters'}->{'backend'} || '';
+
         my $comment_author          = $c->user->username;
         $comment_author             = $c->user->alias if defined $c->user->alias;
         $c->stash->{comment_author} = $comment_author;
@@ -112,10 +116,24 @@ sub _do_send_command {
         }
     }
 
+    # is a backend selected?
+    my $backends          = $c->{'request'}->{'parameters'}->{'backend'};
+    my @possible_backends = $c->{'live'}->peer_key();
+    if(scalar @possible_backends > 1 and !defined $backends) {
+            delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+            push @errors, { message => 'please select a backend' };
+            $c->stash->{'form_errors'} = \@errors;
+            return(0);
+    }
+
     # send the command
     $cmd = "COMMAND [".time()."] $cmd";
     $c->log->info("sending: $cmd");
-    $c->{'live'}->do($cmd);
+    if(defined $backends) {
+        $c->{'live'}->do($cmd, { peers => $backends });
+    } else {
+        $c->{'live'}->do($cmd);
+    }
 
     # view our success page or redirect to referer
     my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';

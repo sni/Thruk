@@ -33,8 +33,26 @@
                       <tr><td><input type='hidden' name='cmd_typ' value='[% c.request.parameters.cmd_typ %]'><input type='hidden' name='cmd_mod' value='2'></td></tr>
                       [% content %]
                       <tr>
-                        <td class='optBoxItem' colspan="2"></td>
+                        <td class='optBoxItem' colspan="2">&nbsp;</td>
                       </tr>
+                      [% IF backends.size > 1 %]
+                      <tr>
+                        <td>Send command to backend:</td>
+                        <td>
+                          <form action="extinfo.cgi" method="GET">
+                            <select name="backend" size="5" multiple>
+                              [% FOREACH b IN backends %]
+                              [% SET name = pi_detail.$b.peer_name %]
+                              <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% name %]</option>
+                              [% END %]
+                            </select>
+                          </form>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class='optBoxItem' colspan="2">&nbsp;</td>
+                      </tr>
+                      [% END %]
                       <tr>
                         <td class='optBoxItem'></td>
                         <td class='optBoxItem'><input type='submit' name='btnSubmit' value='Commit'> <input type='reset' value='Reset'></td>

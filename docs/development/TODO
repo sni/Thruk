@@ -8,5 +8,5 @@ Todo List:
 - finish performance data on extinfo type 4
 - config.cgi
 - reports / logs
-- add backend selector to cmds
+- add gzip compression for huge pages
 - write tests
