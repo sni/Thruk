@@ -32,6 +32,7 @@ requires 'Catalyst::Plugin::Authentication';
 requires 'Catalyst::Plugin::Authorization::Roles';
 requires 'Catalyst::Plugin::CustomErrorMessage';
 requires 'Catalyst::Plugin::Redirect';
+requires 'Catalyst::Plugin::Compress::Gzip';
 requires 'Class::C3';
 requires 'Algorithm::C3';
 requires 'Time::HiRes';
