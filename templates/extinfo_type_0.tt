@@ -21,9 +21,15 @@
                 <td class='stateInfoTable1'>
                   <table border="0">
                     <tr>
-                      <td class='dataVar'>Nagios Data Source:</td>
+                      <td class='dataVar'>Nagios Name:</td>
                       [% FOREACH pd IN backends %]
                       <td class='dataVal'>[% pi_detail.$pd.peer_name %]</td>
+                      [% END %]
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Data Source:</td>
+                      [% FOREACH pd IN backends %]
+                      <td class='dataVal'>[% pi_detail.$pd.peer_addr %]</td>
                       [% END %]
                     </tr>
                     <tr>
@@ -171,96 +177,137 @@
                       <td><img src='/nagios/images/restart.gif' border="0" alt='Restart the Nagios Process' title='Restart the Nagios Process'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=13'>Restart the Nagios process</a></td>
                     </tr>
+
+                    [% IF pi.enable_notifications != 0 %]
                     <tr class='command'>
-                      [% IF pi.enable_notifications %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=11'>Disable notifications</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications' title='Enable Notifications'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=12'>Enable notifications</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=11'>Disable notifications</a></td>
                     </tr>
+                    [% END %]
+                    [% IF pi.enable_notifications != 1 %]
                     <tr class='command'>
-                      [% IF pi.execute_service_checks %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=36'>Stop executing service checks</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Executing Service Checks' title='Start Executing Service Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=35'>Start executing service checks</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications' title='Enable Notifications'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=12'>Enable notifications</a></td>
                     </tr>
+                    [% END %]
+
+                    [% IF pi.execute_service_checks != 0 %]
                     <tr class='command'>
-                      [% IF pi.accept_passive_service_checks %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Accepting Passive Service Checks' title='Start Accepting Passive Service Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=37'>Start accepting passive service checks</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=36'>Stop executing service checks</a></td>
                     </tr>
+                    [% END %]
+                    [% IF pi.execute_service_checks != 1 %]
                     <tr class='command'>
-                      [% IF pi.execute_host_checks %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=89'>Stop executing host checks</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Executing Host Checks' title='Start Executing Host Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=88'>Start executing host checks</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Executing Service Checks' title='Start Executing Service Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=35'>Start executing service checks</a></td>
                     </tr>
+                    [% END %]
+
+                    [% IF pi.accept_passive_service_checks != 0 %]
                     <tr class='command'>
-                      [% IF pi.accept_passive_host_checks %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=91'>Stop accepting passive host checks</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Accepting Passive Host Checks' title='Start Accepting Passive Host Checks'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=90'>Start accepting passive host checks</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a></td>
                     </tr>
+                    [% END %]
+                    [% IF pi.accept_passive_service_checks != 1 %]
                     <tr class='command'>
-                      [% IF pi.enable_event_handlers %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=42'>Disable event handlers</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Event Handlers' title='Enable Event Handlers'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=41'>Enable event handlers</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Accepting Passive Service Checks' title='Start Accepting Passive Service Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=37'>Start accepting passive service checks</a></td>
                     </tr>
+                    [% END %]
+
+                    [% IF pi.execute_host_checks != 0 %]
                     <tr class='command'>
-                      [% IF pi.obsess_over_services %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over Services' title='Stop Obsessing Over Services'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=50'>Stop obsessing over services</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=49'>Start obsessing over services</a></td>
-                        [% END %]
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=89'>Stop executing host checks</a></td>
                     </tr>
+                    [% END %]
+                    [% IF pi.execute_host_checks != 1 %]
                     <tr class='command'>
-                      [% IF pi.obsess_over_hosts %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over Hosts' title='Stop Obsessing Over Hosts'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=95'>Stop obsessing over hosts</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=94'>Start obsessing over hosts</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Executing Host Checks' title='Start Executing Host Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=88'>Start executing host checks</a></td>
                     </tr>
+                    [% END %]
+
+                    [% IF pi.accept_passive_host_checks != 0 %]
                     <tr class='command'>
-                      [% IF pi.enable_flap_detection %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=62'>Disable flap detection</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Flap Detection' title='Enable Flap Detection'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=61'>Enable flap detection</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=91'>Stop accepting passive host checks</a></td>
                     </tr>
+                    [% END %]
+                    [% IF pi.accept_passive_host_checks != 1 %]
                     <tr class='command'>
-                      [% IF pi.process_performance_data %]
-                        <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Performance Data' title='Disable Performance Data'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=83'>Disable performance data</a></td>
-                      [% ELSE %]
-                        <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data'></td>
-                        <td class='command'><a href='cmd.cgi?cmd_typ=82'>Enable performance data</a></td>
-                      [% END %]
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Accepting Passive Host Checks' title='Start Accepting Passive Host Checks'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=90'>Start accepting passive host checks</a></td>
                     </tr>
+                    [% END %]
+
+                    [% IF pi.enable_event_handlers != 0 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=42'>Disable event handlers</a></td>
+                    </tr>
+                    [% END %]
+                    [% IF pi.enable_event_handlers != 1 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Event Handlers' title='Enable Event Handlers'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=41'>Enable event handlers</a></td>
+                    </tr>
+                    [% END %]
+
+                    [% IF pi.obsess_over_services != 0 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over Services' title='Stop Obsessing Over Services'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=50'>Stop obsessing over services</a></td>
+                    </tr>
+                    [% END %]
+                    [% IF pi.obsess_over_services != 1 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=49'>Start obsessing over services</a></td>
+                    </tr>
+                    [% END %]
+
+                    [% IF pi.obsess_over_hosts != 0 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over Hosts' title='Stop Obsessing Over Hosts'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=95'>Stop obsessing over hosts</a></td>
+                    </tr>
+                    [% END %]
+                    [% IF pi.obsess_over_hosts != 1 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=94'>Start obsessing over hosts</a></td>
+                    </tr>
+                    [% END %]
+
+                    [% IF pi.enable_flap_detection != 0 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=62'>Disable flap detection</a></td>
+                    </tr>
+                    [% END %]
+                    [% IF pi.enable_flap_detection != 1 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Flap Detection' title='Enable Flap Detection'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=61'>Enable flap detection</a></td>
+                    </tr>
+                    [% END %]
+
+                    [% IF pi.process_performance_data != 0 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Performance Data' title='Disable Performance Data'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=83'>Disable performance data</a></td>
+                    </tr>
+                    [% END %]
+                    [% IF pi.process_performance_data != 1 %]
+                    <tr class='command'>
+                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data'></td>
+                      <td class='command'><a href='cmd.cgi?cmd_typ=82'>Enable performance data</a></td>
+                    </tr>
+                    [% END %]
+
                   </table>
                 </td>
               </tr>
