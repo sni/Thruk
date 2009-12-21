@@ -78,14 +78,14 @@ sub _process_search_request {
     return('detail') unless defined $host;
 
     # is there a servicegroup with this name?
-    my $servicegroupname = $c->{'live'}->select_scalar_value("GET servicegroups\nColumns: name\nFilter: name = $host\nLimit: 1");
+    my $servicegroupname = $c->{'live'}->select_scalar_value("GET servicegroups\n".Nagios::Web::Helper::get_auth_filter($c, 'servicegroups')."\nColumns: name\nFilter: name = $host\nLimit: 1");
     if(defined $servicegroupname and $servicegroupname ne '') {
         $c->{'request'}->{'parameters'}->{'servicegroup'} = $servicegroupname;
         return('overview');
     }
 
     # is there a hostgroup with this name?
-    my $hostgroupname = $c->{'live'}->select_scalar_value("GET hostgroups\nColumns: name\nFilter: name = $host\nLimit: 1");
+    my $hostgroupname = $c->{'live'}->select_scalar_value("GET hostgroups\n".Nagios::Web::Helper::get_auth_filter($c, 'hostgroups')."\nColumns: name\nFilter: name = $host\nLimit: 1");
     if(defined $hostgroupname and $hostgroupname ne '') {
         $c->{'request'}->{'parameters'}->{'hostgroup'} = $hostgroupname;
         return('overview');
@@ -133,8 +133,8 @@ sub _process_details_page {
     # then add some more filter based on get parameter
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
-    # add comments into hosts.comments and hosts.comment_count and services.comments and services.comment_count
-    my $services = $c->{'live'}->selectall_arrayref("GET services\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url host_action_url host_icon_image host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url action_url icon_image icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output", { Slice => {}, AddPeer => 1 });
+    # get all services
+    my $services = $c->{'live'}->selectall_arrayref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url host_action_url host_icon_image host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url action_url icon_image icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output", { Slice => {}, AddPeer => 1 });
 
     for my $service (@{$services}) {
         # ordering by duration needs this
@@ -189,7 +189,7 @@ sub _process_hostdetails_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # add comments into hosts.comments and hosts.comment_count
-    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n$hostfilter\nColumns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url action_url icon_image icon_image_alt last_check last_state_change plugin_output next_check", { Slice => {}, AddPeer => 1 });
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\n$hostfilter\nColumns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url action_url icon_image icon_image_alt last_check last_state_change plugin_output next_check", { Slice => {}, AddPeer => 1 });
     for my $host (@{$hosts}) {
         # ordering by duration needs this
         $host->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
@@ -250,13 +250,13 @@ sub _process_overview_page {
     my $host_data;
     my $services_data;
     if($hostgroup) {
-        $host_data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt num_services_ok as ok num_services_unknown as unknown num_services_warn as warning num_services_crit as critical num_services_pending as pending\n$hostfilter", 'name' );
+        $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt num_services_ok as ok num_services_unknown as unknown num_services_warn as warning num_services_crit as critical num_services_pending as pending\n$hostfilter", 'name' );
     }
     elsif($servicegroup) {
-        $host_data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt\n$hostfilter", 'name' );
+        $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt\n$hostfilter", 'name' );
 
         # we have to sort in all services and states
-        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state description host_name\nFilter: groups !=", { Slice => {} })}) {
+        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name\nFilter: groups !=", { Slice => {} })}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
         }
     }
@@ -264,10 +264,10 @@ sub _process_overview_page {
     # get all host/service groups
     my $groups;
     if($hostgroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Nagios::Web::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
     elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Nagios::Web::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
 
     # join our groups together
@@ -284,6 +284,9 @@ sub _process_overview_page {
         my($hostname,$servicename);
         if($hostgroup) {
             for my $hostname (split /,/, $group->{'members'}) {
+                # show only hosts with proper authorization
+                next unless defined $host_data->{$hostname};
+
                 if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
                     # clone hash data
                     for my $key (keys %{$host_data->{$hostname}}) {
@@ -305,6 +308,7 @@ sub _process_overview_page {
         elsif($servicegroup) {
             for my $member (split /,/, $group->{'members'}) {
                 my($hostname,$servicename) = split/\|/, $member, 2;
+                # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
 
                 if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
@@ -333,6 +337,11 @@ sub _process_overview_page {
                     $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}++;
                 }
             }
+        }
+
+        # remove empty groups
+        if(scalar keys %{$joined_groups{$name}->{'hosts'}} == 0) {
+            delete $joined_groups{$name};
         }
     }
 #use Data::Dumper;
@@ -373,21 +382,21 @@ sub _process_grid_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # we need the hostname, address etc...
-    my $host_data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt\n$hostfilter", 'name' );
+    my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt\n$hostfilter", 'name' );
 
     # create a hash of all services
     my $services_data;
-    for my $service (@{$c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} })}) {
+    for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} })}) {
         $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
     }
 
     # get all host/service groups
     my $groups;
     if($hostgroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Nagios::Web::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
     elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Nagios::Web::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
 
     # sort in hosts / services
@@ -409,6 +418,8 @@ sub _process_grid_page {
                 ($hostname,$servicename) = split/\|/, $member, 2;
             }
 
+            next unless defined $host_data->{$hostname};
+
             if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
                 # clone host data
                 for my $key (keys %{$host_data->{$hostname}}) {
@@ -425,6 +436,11 @@ sub _process_grid_page {
             elsif($servicegroup) {
                 $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$services_data->{$hostname}->{$servicename}->{'description'}} = $services_data->{$hostname}->{$servicename};
             }
+        }
+
+        # remove empty groups
+        if(scalar keys %{$joined_groups{$name}->{'hosts'}} == 0) {
+            delete $joined_groups{$name};
         }
     }
 
@@ -466,10 +482,10 @@ sub _process_summary_page {
     # get all host/service groups
     my $groups;
     if($hostgroup) {
-        $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n$groupfilter\nColumns: name alias members", 'name');
+        $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n".Nagios::Web::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", 'name');
     }
     elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n$groupfilter\nColumns: name alias members", 'name');
+        $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n".Nagios::Web::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", 'name');
     }
 
     # set defaults for all groups
@@ -513,10 +529,10 @@ sub _process_summary_page {
     my $groupsname = "host_groups";
     if($hostgroup) {
         # we need the hosts data
-        my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name groups state checks_enabled acknowledged scheduled_downtime_depth has_been_checked\n$hostfilter", { Slice => 1 } );
+        my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\nColumns: name groups state checks_enabled acknowledged scheduled_downtime_depth has_been_checked\n$hostfilter", { Slice => 1 } );
 
         # create a hash of all services
-        $services_data = $c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth\n$servicefilter", { Slice => {} });
+        $services_data = $c->{'live'}->selectall_arrayref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth\n$servicefilter", { Slice => {} });
 
         for my $host (@{$host_data}) {
             for my $group (split/,/, $host->{'groups'}) {
@@ -528,7 +544,7 @@ sub _process_summary_page {
 
     if($servicegroup) {
         # create a hash of all services
-        $services_data = $c->{'live'}->selectall_arrayref("GET services\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth host_name host_state host_checks_enabled host_acknowledged host_scheduled_downtime_depth host_has_been_checked\n$servicefilter", { Slice => {} });
+        $services_data = $c->{'live'}->selectall_arrayref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth host_name host_state host_checks_enabled host_acknowledged host_scheduled_downtime_depth host_has_been_checked\n$servicefilter", { Slice => {} });
 
         $groupsname = "groups";
     }
@@ -544,6 +560,8 @@ sub _process_summary_page {
                     $host_already_added{$group}->{$service->{'host_name'}} = 1;
                 }
             }
+
+            $groups->{$group}->{'services_total'}++;
 
             if($service->{'has_been_checked'} == 0) { $groups->{$group}->{'services_pending'}++; }
             elsif($service->{'state'} == 0)         { $groups->{$group}->{'services_ok'}++; }
@@ -571,6 +589,15 @@ sub _process_summary_page {
         }
     }
 
+    for my $group (values %{$groups}) {
+        # remove empty groups
+        $group->{'services_total'} = 0 unless defined $group->{'services_total'};
+        $group->{'hosts_total'}    = 0 unless defined $group->{'hosts_total'};
+        if($group->{'services_total'} + $group->{'hosts_total'} == 0) {
+            delete $groups->{$group->{'name'}};
+        }
+    }
+
 #use Data::Dumper;
 #$Data::Dumper::Sortkeys = 1;
 #print Dumper($groups);
@@ -586,6 +613,8 @@ sub _summary_add_host_stats {
     my $prefix = shift;
     my $group  = shift;
     my $host   = shift;
+
+    $group->{'hosts_total'}++;
 
     if($host->{$prefix.'has_been_checked'} == 0) { $group->{'hosts_pending'}++; }
     elsif($host->{$prefix.'state'} == 0)         { $group->{'hosts_up'}++; }
@@ -609,7 +638,7 @@ sub _summary_add_host_stats {
 sub _fill_totals_box {
     my ( $self, $c, $hostfilter, $servicefilter ) = @_;
     # host status box
-    my $host_stats = $c->{'live'}->selectrow_hashref("GET hosts
+    my $host_stats = $c->{'live'}->selectrow_hashref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."
 $hostfilter
 Stats: has_been_checked = 1
 Stats: state = 0
@@ -627,7 +656,7 @@ Stats: has_been_checked = 0 as pending
 ");
 
     # services status box
-    my $service_stats = $c->{'live'}->selectrow_hashref("GET services
+    my $service_stats = $c->{'live'}->selectrow_hashref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."
 $servicefilter
 Stats: has_been_checked = 1
 Stats: state = 0

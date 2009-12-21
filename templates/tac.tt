@@ -107,7 +107,11 @@
                             <table border="0" cellspacing="4" cellspadding="0">
                               <tr>
                                 <td align="left" valign="center" class='healthItem'>Host Health:</td>
-                                [% host_health = host_stats.up / (host_stats.total-host_stats.pending) * 100 %]
+                                [% IF (host_stats.total-host_stats.pending) == 0 %]
+                                  [% host_health = 0 %]
+                                [% ELSE %]
+                                  [% host_health = host_stats.up / (host_stats.total-host_stats.pending) * 100 %]
+                                [% END %]
                                 [% health_perc = sprintf('%i', host_health) %]
                                 [% IF health_perc >= 90 %]
                                 [% host_health_pic = 'thermok.png' %]

@@ -25,7 +25,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
 
-    my $outages = $c->{'live'}->selectall_arrayref("GET hosts
+    my $outages = $c->{'live'}->selectall_arrayref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."
 Columns: name last_state_change childs
 Filter: state = 1
 Filter: childs !=
@@ -34,7 +34,7 @@ And: 2
 
     if(scalar @{$outages} > 0) {
         my $hostcomments = Nagios::Web::Helper->_get_hostcomments($c);
-        my $all_hosts = $c->{'live'}->selectall_hashref("GET hosts
+        my $all_hosts = $c->{'live'}->selectall_hashref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."
 Columns: name childs num_services
 ", 'name');
 

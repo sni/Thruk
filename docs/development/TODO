@@ -3,10 +3,11 @@ Todo List:
 - create models for hosts / services / contacts
 - reload cgi.cfg if changed
 - overload role authentication ( to add host/service role checks )
-- add authorization part to all querys
+- fix authorization ( check services by host_contacts, comments/downtimes )
+- fix groups with authorization
 - verify macros is action_url, icon_url and notes_url
 - finish performance data on extinfo type 4
 - config.cgi
 - reports / logs
-- add gzip compression for huge pages
 - write tests
+- change logging to log4perl

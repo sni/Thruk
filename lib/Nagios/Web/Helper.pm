@@ -9,6 +9,72 @@ use Nagios::MKLivestatus::MULTI;
 
 
 ##############################################
+# returns a filter which can be used for authorization
+sub get_auth_filter {
+    my $c    = shift;
+    my $type = shift;
+
+    return("") if $type eq 'status';
+
+    # authentication is disabled
+    if($c->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
+        return("");
+    }
+
+    if($c->check_user_roles('authorized_for_all_hosts') and $c->check_user_roles('authorized_for_all_services')) {
+        return("");
+    }
+
+    if($type eq 'hosts') {
+        if($c->check_user_roles('authorized_for_all_hosts')) {
+            return("");
+        }
+        return("Filter: contacts >= ".$c->user->get('username'));
+    }
+    elsif($type eq 'hostgroups') {
+        #if($c->check_user_roles('authorized_for_all_hosts')) {
+            return("");
+        #}
+        #return("Filter: host_contacts >= ".$c->user->get('username'));
+    }
+    elsif($type eq 'services') {
+        if($c->check_user_roles('authorized_for_all_services')) {
+            return("");
+        }
+        return("Filter: contacts >= ".$c->user->get('username')."\nFilter: host_contacts >= ".$c->user->get('username')."\nOr: 2");
+    }
+    elsif($type eq 'servicegroups') {
+        #if($c->check_user_roles('authorized_for_all_services')) {
+            return("");
+        #}
+        #return("Filter: host_contacts >= ".$c->user->get('username')."\nFilter: service_contacts >= ".$c->user->get('username')."\nOr: 2");
+    }
+    elsif($type eq 'comments' or $type eq 'downtimes') {
+        return("");
+        my @filter;
+        if(!$c->check_user_roles('authorized_for_all_services')) {
+            push @filter, "Filter: service_contacts >= ".$c->user->get('username')."\n";
+        }
+        if(!$c->check_user_roles('authorized_for_all_hosts')) {
+            push @filter, "Filter: host_contacts >= ".$c->user->get('username')."\n";
+        }
+        if(scalar @filter == 0) {
+            return("");
+        }
+        if(scalar @filter == 1) {
+            return($filter[0]);
+        }
+        return(join("\n", @filter)."\nOr: ".scalar @filter);
+    }
+    else {
+        croak("type $type not supported");
+    }
+
+    croak("cannot authorize query");
+    return;
+}
+
+##############################################
 # calculate a duration in the
 # format: 0d 0h 29m 43s
 sub filter_duration {
@@ -233,7 +299,7 @@ sub get_service_exectution_stats {
             'passive_state_change_sum'  => 0,
         };
 
-        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 })}) {
+        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\n".Nagios::Web::Helper::get_auth_filter($c, $type)."\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 })}) {
             my $minall = $c->stash->{'pi_detail'}->{$data->{'peer_key'}}->{'program_start'};
 
             if($data->{'check_type'} == 0) {
@@ -357,7 +423,7 @@ sub _get_hostcomments {
 
     $filter = '' unless defined $filter;
     my $hostcomments;
-    my $comments    = $c->{'live'}->selectall_arrayref("GET comments\n$filter\nFilter: service_description =\nColumns: host_name id", { Slice => 1 });
+    my $comments    = $c->{'live'}->selectall_arrayref("GET comments\n".Nagios::Web::Helper::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description =\nColumns: host_name id", { Slice => 1 });
 
     for my $comment (@{$comments}) {
         $hostcomments->{$comment->{'host_name'}}->{$comment->{'id'}} = $comment;
@@ -377,7 +443,7 @@ sub _get_servicecomments {
     $c->stats->profile(begin => "Helper::_get_servicecomments()");
 
     my $servicecomments;
-    my $comments = $c->{'live'}->selectall_arrayref("GET comments\n$filter\nFilter: service_description !=\nColumns: host_name service_description id", { Slice => 1 });
+    my $comments = $c->{'live'}->selectall_arrayref("GET comments\n".Nagios::Web::Helper::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description !=\nColumns: host_name service_description id", { Slice => 1 });
 
     for my $comment (@{$comments}) {
         $servicecomments->{$comment->{'host_name'}}->{$comment->{'service_description'}}->{$comment->{'id'}} = $comment;

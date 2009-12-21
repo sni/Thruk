@@ -52,8 +52,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     } else {
         # no command submited, view commands page
         if($cmd_typ == 55 or $cmd_typ == 56) {
-            $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description = \nColumns: id host_name start_time", { Slice => {} });
-            $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} });
+            $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\n".Nagios::Web::Helper::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: id host_name start_time", { Slice => {} });
+            $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\n".Nagios::Web::Helper::get_auth_filter($c, 'downtimes')."\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} });
         }
 
         my @possible_backends       = $c->{'live'}->peer_key();
