@@ -25,5 +25,5 @@ for my $url (@{$pages}) {
     my $request = request($url);
     ok( $request->is_success, 'Request '.$url.' should succeed' ) or diag(Dumper($request));
     my $content = $request->content;
-    unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
+    unlike($content, qr/internal\ server\ error/mx, "Content contains error");
 }

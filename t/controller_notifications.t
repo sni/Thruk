@@ -13,4 +13,4 @@ TODO: {
     local $TODO = "needs to be implemented";
     like($content, qr/Contact Notifications/, "Content contains: Contact Notifications");
 };
-unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
+unlike($content, qr/internal\ server\ error/mx, "Content contains error");

@@ -20,5 +20,5 @@ for(0..8) {
     my $request = request('/nagios/cgi-bin/extinfo.cgi?type='.$type.$extra);
     ok( $request->is_success, 'Extinfo Type '.$type.' Request should succeed' ) or diag(Dumper($request));
     my $content = $request->content;
-    unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
+    unlike($content, qr/internal\ server\ error/mx, "Content contains error");
 }

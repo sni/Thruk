@@ -141,7 +141,7 @@
                                 [% service_health_pic = 'thermcrit.png' %]
                                 [% ELSE %]
                                 [% service_health_pic = 'thermcrit.png' %]
-                                [% service_health = 5 %]
+                                [% service_perc = 5 %]
                                 [% END %]
                                 <td valign="top" width="100" class='healthBar'><img src='/nagios/images/[% service_health_pic %]' border="0" width="[% service_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health'></td>
                               </tr>

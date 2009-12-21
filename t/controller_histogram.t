@@ -13,4 +13,4 @@ TODO: {
     local $TODO = "needs to be implemented";
     like($content, qr/Host and Service Alert Histogram/, "Content contains: Host and Service Alert Histogram");
 };
-unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
+unlike($content, qr/internal\ server\ error/mx, "Content contains error");

@@ -73,6 +73,8 @@ sub _count_affected_hosts_and_services {
     my $affected_hosts    = 0;
     my $affected_services = 0;
 
+    return(0,0) if !defined $all_hosts->{$host};
+
     if(defined $all_hosts->{$host}->{'childs'} and $all_hosts->{$host}->{'childs'} ne '') {
         for my $child (split/,/, $all_hosts->{$host}->{'childs'}) {
             my($child_affected_hosts,$child_affected_services) = $self->_count_affected_hosts_and_services($c, $child, $all_hosts);

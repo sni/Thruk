@@ -10,4 +10,4 @@ my $request = request('/nagios/cgi-bin/outages.cgi');
 ok( $request->is_success, 'Outages Request should succeed' );
 my $content = $request->content;
 like($content, qr/Network Outages/, "Content contains: Network Outages");
-unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
+unlike($content, qr/internal\ server\ error/mx, "Content contains error");

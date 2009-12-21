@@ -46,5 +46,5 @@ for my $url (@{$pages}) {
     my $content = $request->content;
     like($content, qr/statusTitle/mx, "Content contains: statusTitle");
     like($content, qr/Current Network Status/, "Content contains: Current Network Status");
-    unlike($content, qr/errorMessage/, "Content doesnt contains: errorMessage");
+    unlike($content, qr/internal\ server\ error/mx, "Content contains error");
 }

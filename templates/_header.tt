@@ -4,6 +4,7 @@
     <link rel="shortcut icon" href="/nagios/images/favicon.ico" type="image/ico" />
     <title>[% title %]</title>
     <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/common.css' />
+    [% SET page = 'status' IF page == '' %]
     <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/[% page %].css' />
     <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/nagios_web_catalyst.css' />
   </head>

@@ -11,7 +11,7 @@ for my $file (glob("templates/cmd/*")) {
         my $request = request('/cmd?cmd_typ='.$1);
         ok( $request->is_success, 'Request should succeed: cmd typ: '.$1 );
         my $content = $request->content;
-        unlike($content, qr/errorMessage/mx, "Content doesnt contains: errorMessage");
+        unlike($content, qr/internal\ server\ error/mx, "Content contains error");
     }
     else {
         BAIL_OUT("found file which does not match cmd template: ".$file);
