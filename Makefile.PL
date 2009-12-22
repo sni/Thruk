@@ -38,6 +38,7 @@ requires 'Algorithm::C3';
 requires 'Time::HiRes';
 requires 'threads'                                => '1.75';
 requires 'Thread::Queue'                          => '2.11';
+requires 'Date::Calc';
 
 
 test_requires 'Catalyst::Devel';

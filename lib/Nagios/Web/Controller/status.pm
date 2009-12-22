@@ -45,7 +45,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     # normal pages
-    elsif($style eq 'detail') {
+    if($style eq 'detail') {
         $self->_process_details_page($c);
     }
     elsif($style eq 'hostdetail') {
@@ -78,16 +78,16 @@ sub _process_search_request {
     return('detail') unless defined $host;
 
     # is there a servicegroup with this name?
-    my $servicegroupname = $c->{'live'}->select_scalar_value("GET servicegroups\n".Nagios::Web::Helper::get_auth_filter($c, 'servicegroups')."\nColumns: name\nFilter: name = $host\nLimit: 1");
-    if(defined $servicegroupname and $servicegroupname ne '') {
-        $c->{'request'}->{'parameters'}->{'servicegroup'} = $servicegroupname;
+    my $servicegroups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Nagios::Web::Helper::get_auth_filter($c, 'servicegroups')."\nColumns: name\nFilter: name = $host");
+    if(scalar @{$servicegroups} > 0) {
+        $c->{'request'}->{'parameters'}->{'servicegroup'} = $host;
         return('overview');
     }
 
     # is there a hostgroup with this name?
-    my $hostgroupname = $c->{'live'}->select_scalar_value("GET hostgroups\n".Nagios::Web::Helper::get_auth_filter($c, 'hostgroups')."\nColumns: name\nFilter: name = $host\nLimit: 1");
-    if(defined $hostgroupname and $hostgroupname ne '') {
-        $c->{'request'}->{'parameters'}->{'hostgroup'} = $hostgroupname;
+    my $hostgroups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Nagios::Web::Helper::get_auth_filter($c, 'hostgroups')."\nColumns: name\nFilter: name = $host");
+    if(scalar @{$hostgroups} > 0) {
+        $c->{'request'}->{'parameters'}->{'hostgroup'} = $host;
         return('overview');
     }
 
@@ -105,6 +105,7 @@ sub _process_details_page {
     my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
     my $hostfilter    = "";
     my $servicefilter = "";
+
     if($host ne 'all' and $host ne '') {
         $hostfilter    = "Filter: name = $host\n";
         $servicefilter = "Filter: host_name = $host\n";
@@ -654,6 +655,7 @@ StatsAnd: 2 as unreachable
 
 Stats: has_been_checked = 0 as pending
 ");
+
 
     # services status box
     my $service_stats = $c->{'live'}->selectrow_hashref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."

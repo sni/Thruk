@@ -38,6 +38,10 @@ my $pages = [
     '/nagios/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28',
     '/nagios/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12',
     '/nagios/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42',
+# Search
+    '/nagios/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
+    '/nagios/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=hostgroup_01',
+    '/nagios/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=servicegroup_01',
 ];
 
 for my $url (@{$pages}) {

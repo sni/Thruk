@@ -313,6 +313,11 @@
                       <td class='dataVal'>[% live_stats.neb_callbacks %]</td>
                       <td class='dataVal'>[% sprintf('%.2f',live_stats.neb_callbacks_rate) %] /sec</td>
                     </tr>
+                    <tr>
+                      <td class='dataVar'>Cached Log Messages:</td>
+                      <td class='dataVal'>[% live_stats.cached_log_messages %]</td>
+                      <td class='dataVal'></td>
+                    </tr>
                   </table>
                 </td>
               </tr>

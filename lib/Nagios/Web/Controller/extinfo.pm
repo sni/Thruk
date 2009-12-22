@@ -234,9 +234,19 @@ sub _process_scheduling_page {
 sub _process_process_info_page {
     my ( $self, $c ) = @_;
 
+    $c->detach('/error/index/1') unless $c->check_user_roles( "authorized_for_system_information" );
+
     # all other data is already set in addDefaults
     my @possible_backends             = $c->{'live'}->peer_key();
+    my %backend_detail;
+    for my $back (@possible_backends) {
+        $backend_detail{$back} = {
+            "name" => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
+            "addr" => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
+        };
+    }
     $c->stash->{'backends'}           = \@possible_backends;
+    $c->stash->{'backend_detail'}     = \%backend_detail;
     $c->stash->{'nagios_data_source'} = $c->{'live'}->peer_name();
 }
 
@@ -246,7 +256,7 @@ sub _process_perf_info_page {
     my ( $self, $c ) = @_;
 
     my $stats      = Nagios::Web::Helper->get_service_exectution_stats($c);
-    my $live_stats = $c->{'live'}->selectrow_arrayref("GET status\n".Nagios::Web::Helper::get_auth_filter($c, 'status')."\nColumns: connections connections_rate host_checks host_checks_rate requests requests_rate service_checks service_checks_rate neb_callbacks neb_callbacks_rate", { Slice => 1, Sum => 1 });
+    my $live_stats = $c->{'live'}->selectrow_arrayref("GET status\n".Nagios::Web::Helper::get_auth_filter($c, 'status')."\nColumns: cached_log_messages connections connections_rate host_checks host_checks_rate requests requests_rate service_checks service_checks_rate neb_callbacks neb_callbacks_rate", { Slice => 1, Sum => 1 });
 
     $c->stash->{'stats'}      = $stats;
     $c->stash->{'live_stats'} = $live_stats;

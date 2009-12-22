@@ -23,13 +23,13 @@
                     <tr>
                       <td class='dataVar'>Nagios Name:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% pi_detail.$pd.peer_name %]</td>
-                      [% END %]
-                    </tr>
-                    <tr>
-                      <td class='dataVar'>Data Source:</td>
-                      [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% pi_detail.$pd.peer_addr %]</td>
+                      <td class='dataVal'>
+                        [% IF pi_detail.$pd.program_start %]
+                          [% pi_detail.$pd.peer_name %]
+                        [% ELSIF backend_detail.$pd.name %]
+                          [% backend_detail.$pd.name %]
+                        [% END %]
+                      </td>
                       [% END %]
                     </tr>
                     <tr>
@@ -41,41 +41,49 @@
                     <tr>
                       <td class='dataVar'>Program Start Time:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% date.format(pi_detail.$pd.program_start, '%Y-%m-%d  %H:%M:%S') %]</td>
+                        <td class='dataVal'>
+                          [% IF pi_detail.$pd.program_start %]
+                            [% date.format(pi_detail.$pd.program_start, '%Y-%m-%d  %H:%M:%S') %]
+                          [% ELSE %]
+                          <div class='peerDOWN'>&nbsp;&nbsp;DOWN</div>
+                          [% END %]
+                        </td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Total Running Time:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% duration(date.now - pi_detail.$pd.program_start) %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% duration(date.now - pi_detail.$pd.program_start) %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Last External Command Check:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% IF pi_detail.$pd.last_command_check %][% date.format(pi_detail.$pd.last_command_check, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.last_command_check %][% date.format(pi_detail.$pd.last_command_check, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Last Log File Rotation:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% IF pi_detail.$pd.last_log_rotation %][% date.format(pi_detail.$pd.last_log_rotation, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.last_log_rotation %][% date.format(pi_detail.$pd.last_log_rotation, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Nagios PID</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataval'>[% pi_detail.$pd.nagios_pid %]</td>
+                      <td class='dataval'>[% IF pi_detail.$pd.program_start %][% pi_detail.$pd.nagios_pid %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Notifications Enabled?</td>
                       [% FOREACH pd IN backends %]
                       <td class='dataVal'>
-                        [% IF pi_detail.$pd.enable_notifications %]
-                        <div class='notificationsENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                        [% ELSE %]
-                        <div class='notificationsDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% IF pi_detail.$pd.program_start %]
+                          [% IF pi_detail.$pd.enable_notifications %]
+                          <div class='notificationsENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                          [% ELSE %]
+                          <div class='notificationsDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]
@@ -84,10 +92,12 @@
                       <td class='dataVar'>Service Checks Being Executed?</td>
                       [% FOREACH pd IN backends %]
                       <td class='dataVal'>
-                        [% IF pi_detail.$pd.execute_service_checks %]
-                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                        [% ELSE %]
-                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% IF pi_detail.$pd.program_start %]
+                          [% IF pi_detail.$pd.execute_service_checks %]
+                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                          [% ELSE %]
+                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]
@@ -96,10 +106,12 @@
                       <td class='dataVar'>Passive Service Checks Being Accepted?</td>
                       [% FOREACH pd IN backends %]
                       <td class='dataVal'>
-                        [% IF pi_detail.$pd.accept_passive_service_checks %]
-                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                        [% ELSE %]
-                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% IF pi_detail.$pd.program_start %]
+                          [% IF pi_detail.$pd.accept_passive_service_checks %]
+                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                          [% ELSE %]
+                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]
@@ -108,10 +120,12 @@
                       <td class='dataVar'>Host Checks Being Executed?</td>
                       [% FOREACH pd IN backends %]
                       <td class='dataVal'>
-                        [% IF pi_detail.$pd.execute_host_checks %]
-                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                        [% ELSE %]
-                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% IF pi_detail.$pd.program_start %]
+                          [% IF pi_detail.$pd.execute_host_checks %]
+                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                          [% ELSE %]
+                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]
@@ -120,10 +134,12 @@
                       <td class='dataVar'>Passive Host Checks Being Accepted?</td>
                       [% FOREACH pd IN backends %]
                       <td class='dataVal'>
-                        [% IF pi_detail.$pd.accept_passive_host_checks %]
-                        <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
-                        [% ELSE %]
-                        <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                        [% IF pi_detail.$pd.program_start %]
+                          [% IF pi_detail.$pd.accept_passive_host_checks %]
+                          <div class='checksENABLED'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                          [% ELSE %]
+                          <div class='checksDISABLED'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                          [% END %]
                         [% END %]
                       </td>
                       [% END %]
@@ -131,31 +147,49 @@
                     <tr>
                       <td class='dataVar'>Event Handlers Enabled?</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% IF pi_detail.$pd.enable_event_handlers %]Yes[% ELSE %]No[% END %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.enable_event_handlers %]Yes[% ELSE %]No[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Obsessing Over Services?</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% IF pi_detail.$pd.obsess_over_services %]Yes[% ELSE %]No[% END %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.obsess_over_services %]Yes[% ELSE %]No[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Obsessing Over Hosts?</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% IF pi_detail.$pd.obsess_over_hosts %]Yes[% ELSE %]No[% END %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.obsess_over_hosts %]Yes[% ELSE %]No[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Flap Detection Enabled?</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% IF pi_detail.$pd.enable_flap_detection %]Yes[% ELSE %]No[% END %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.enable_flap_detection %]Yes[% ELSE %]No[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar'>Performance Data Being Processed?</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>[% IF pi_detail.$pd.process_performance_data %]Yes[% ELSE %]No[% END %]</td>
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.process_performance_data %]Yes[% ELSE %]No[% END %][% END %]</td>
+                      [% END %]
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Livestatus Source:</td>
+                      [% FOREACH pd IN backends %]
+                      <td class='dataVal'>
+                        [% IF pi_detail.$pd.program_start %]
+                          [% pi_detail.$pd.peer_addr %]
+                        [% ELSIF backend_detail.$pd.addr %]
+                          [% backend_detail.$pd.addr %]
+                        [% END %]
+                      </td>
+                      [% END %]
+                    </tr>
+                    <tr>
+                      <td class='dataVar'>Livestatus Version:</td>
+                      [% FOREACH pd IN backends %]
+                      <td class='dataVal'>[% IF pi_detail.$pd.program_start %][% pi_detail.$pd.livestatus_version %][% END %]</td>
                       [% END %]
                     </tr>
                   </table>

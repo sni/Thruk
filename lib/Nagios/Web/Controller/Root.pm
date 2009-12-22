@@ -40,7 +40,7 @@ sub begin : Private {
 
     ###############################
     # get livesocket object
-    $c->{'live'} = Nagios::Web::Helper->get_livesocket($c);
+    $c->{'live'} = Nagios::Web::Helper->get_livestatus($c);
 
     $c->log->debug("checking auth");
     unless ($c->user_exists) {

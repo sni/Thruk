@@ -16,41 +16,44 @@ sub get_auth_filter {
 
     return("") if $type eq 'status';
 
-    # authentication is disabled
+    # if authentication is completly disabled
     if($c->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
         return("");
     }
 
+    # if the user has access to everthing
     if($c->check_user_roles('authorized_for_all_hosts') and $c->check_user_roles('authorized_for_all_services')) {
         return("");
     }
 
+    # host authorization
     if($type eq 'hosts') {
         if($c->check_user_roles('authorized_for_all_hosts')) {
             return("");
         }
         return("Filter: contacts >= ".$c->user->get('username'));
     }
+
+    # hostgroups authorization
     elsif($type eq 'hostgroups') {
-        #if($c->check_user_roles('authorized_for_all_hosts')) {
-            return("");
-        #}
-        #return("Filter: host_contacts >= ".$c->user->get('username'));
+        return("");
     }
+
+    # service authorization
     elsif($type eq 'services') {
         if($c->check_user_roles('authorized_for_all_services')) {
             return("");
         }
         return("Filter: contacts >= ".$c->user->get('username')."\nFilter: host_contacts >= ".$c->user->get('username')."\nOr: 2");
     }
+
+    # servicegroups authorization
     elsif($type eq 'servicegroups') {
-        #if($c->check_user_roles('authorized_for_all_services')) {
-            return("");
-        #}
-        #return("Filter: host_contacts >= ".$c->user->get('username')."\nFilter: service_contacts >= ".$c->user->get('username')."\nOr: 2");
-    }
-    elsif($type eq 'comments' or $type eq 'downtimes') {
         return("");
+    }
+
+    # comments / downtimes authorization
+    elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;
         if(!$c->check_user_roles('authorized_for_all_services')) {
             push @filter, "Filter: service_contacts >= ".$c->user->get('username')."\n";
@@ -66,6 +69,25 @@ sub get_auth_filter {
         }
         return(join("\n", @filter)."\nOr: ".scalar @filter);
     }
+
+    # logfile authorization
+    elsif($type eq 'log') {
+        my @filter;
+        if(!$c->check_user_roles('authorized_for_all_services')) {
+            push @filter, "Filter: current_service_contacts >= ".$c->user->get('username')."\n";
+        }
+        if(!$c->check_user_roles('authorized_for_all_hosts')) {
+            push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\n";
+        }
+        if(scalar @filter == 0) {
+            return("");
+        }
+        if(scalar @filter == 1) {
+            return($filter[0]);
+        }
+        return(join("\n", @filter)."\nOr: ".scalar @filter);
+    }
+
     else {
         croak("type $type not supported");
     }
@@ -141,47 +163,38 @@ sub get_cgi_cfg {
 
 ######################################
 # return the livestatus object
-sub get_livesocket {
+sub get_livestatus {
     my ( $self, $c ) = @_;
 
-    $c->stats->profile(begin => "Helper::get_livesocket()");
+    $c->stats->profile(begin => "Helper::get_livestatus()");
 
-    our $livesocket;
+    our $livestatus;
 
-    if(defined $livesocket) {
+    if(defined $livestatus) {
         $c->log->debug("got livestatus from cache");
-        return($livesocket);
+        return($livestatus);
     }
     $c->log->debug("creating new livestatus");
 
-    my $livesocket_config = Nagios::Web->config->{'Nagios::MKLivestatus'};
-    if(!defined $livesocket_config) {
+    my $livestatus_config = $self->get_livestatus_conf($c);
+    if(!defined $livestatus_config) {
         my $livesocket_path = $self->_get_livesocket_path_from_nagios_cfg(Nagios::Web->config->{'cgi_cfg'});
         my $options = {
             peer             => $livesocket_path,
             verbose          => 0,
             keepalive        => 1,
         };
-        $livesocket = Nagios::MKLivestatus::MULTI->new(%{$options});
+        $livestatus = Nagios::MKLivestatus::MULTI->new(%{$options});
     } else {
-        # with only on peer, we have to convert to an array
-        if(defined $livesocket_config->{'peer'} and ref $livesocket_config->{'peer'} eq 'HASH') {
-            my $peer = $livesocket_config->{'peer'};
-            delete $livesocket_config->{'peer'};
-            push @{$livesocket_config->{'peer'}}, $peer;
+        if(defined $livestatus_config->{'verbose'} and $livestatus_config->{'verbose'}) {
+            $livestatus_config->{'logger'} = $c->log
         }
-
-        $c->log->debug("livestatus config: ".Dumper($livesocket_config));
-
-        if(defined $livesocket_config->{'verbose'} and $livesocket_config->{'verbose'}) {
-            $livesocket_config->{'logger'} = $c->log
-        }
-        $livesocket = Nagios::MKLivestatus::MULTI->new(%{$livesocket_config});
+        $livestatus = Nagios::MKLivestatus::MULTI->new(%{$livestatus_config});
     }
 
-    $c->stats->profile(end => "Helper::get_livesocket()");
+    $c->stats->profile(end => "Helper::get_livestatus()");
 
-    return($livesocket);
+    return($livestatus);
 }
 
 ########################################
@@ -231,6 +244,29 @@ sub sort {
 
     return(\@sorted);
 }
+
+
+########################################
+# returns config for livestatus backends
+sub get_livestatus_conf {
+    my ( $self, $c ) = @_;
+
+    my $livestatus_config = Nagios::Web->config->{'Nagios::MKLivestatus'};
+
+    if(defined $livestatus_config) {
+        # with only on peer, we have to convert to an array
+        if(defined $livestatus_config->{'peer'} and ref $livestatus_config->{'peer'} eq 'HASH') {
+            my $peer = $livestatus_config->{'peer'};
+            delete $livestatus_config->{'peer'};
+            push @{$livestatus_config->{'peer'}}, $peer;
+        }
+    }
+
+    $c->log->debug("livestatus config: ".Dumper($livestatus_config));
+
+    return($livestatus_config);
+}
+
 
 ############################################################
 # get_service_exectution_stats

@@ -183,6 +183,6 @@
       [% END %]
 
     </table><br>
-    <div class='itemTotalsTitle'>[% services.size %] Matching Service Entries Displayed</div>
+    <div class='itemTotalsTitle'>[% IF services.size %][% services.size %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
 
 [% INCLUDE _footer.tt %]

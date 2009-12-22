@@ -1,13 +1,45 @@
 Todo List:
+=========================================================
 
-- create models for hosts / services / contacts
-- reload cgi.cfg if changed
-- overload role authentication ( to add host/service role checks )
-- fix authorization ( check services by host_contacts, comments/downtimes )
-- fix groups with authorization
-- verify macros is action_url, icon_url and notes_url
-- finish performance data on extinfo type 4
-- config.cgi
-- reports / logs
-- write tests
-- change logging to log4perl
+for version 1.0
+general
+    - create models for hosts / services / contacts
+    - reload cgi.cfg if changed
+    - overload role authentication ( to add host/service role checks )
+    - fix authorization ( check services by host_contacts, comments/downtimes )
+    - fix groups with authorization
+    - change logging to log4perl
+    - write tests
+
+extinfo:
+    - verify macros is action_url, icon_url and notes_url
+    - finish performance data on extinfo type 4
+
+notifications:
+    - fix notification type selection
+   - add timeperiod selector (day, week, month, custom)
+
+config:
+    - missing completly
+
+avail:
+    - missing completly
+
+showlogs:
+    - missing completly
+
+trends:
+    - missing completly
+
+history:
+    - missing completly
+
+histogram:
+    - missing completly
+
+
+
+=========================================================
+after 1.0
+    - proper search
+    - proper logfile page
