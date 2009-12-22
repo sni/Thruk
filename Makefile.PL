@@ -22,7 +22,7 @@ requires 'LWP';
 requires 'Config::Any';
 requires 'Template'                               => '2.22';
 requires 'Class::Accessor::Fast';
-requires 'Catalyst::Runtime'                      => '5.80014';
+requires 'Catalyst::Runtime'                      => '5.80016';
 requires 'Catalyst::Action::RenderView';
 requires 'Catalyst::Plugin::ConfigLoader';
 requires 'Catalyst::Plugin::Static::Simple';

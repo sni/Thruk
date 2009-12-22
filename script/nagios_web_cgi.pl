@@ -1,14 +1,7 @@
 #!/usr/bin/env perl
 
-BEGIN { $ENV{CATALYST_ENGINE} ||= 'CGI' }
-
-use strict;
-use warnings;
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-use Nagios::Web;
-
-Nagios::Web->run;
+use Catalyst::ScriptRunner;
+Catalyst::ScriptRunner->run('Nagios::Web', 'CGI');
 
 1;
 
@@ -30,8 +23,8 @@ Catalyst Contributors, see Catalyst.pm
 
 =head1 COPYRIGHT
 
-
 This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+

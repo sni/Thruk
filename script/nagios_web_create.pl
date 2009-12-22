@@ -2,37 +2,9 @@
 
 use strict;
 use warnings;
-use Getopt::Long;
-use Pod::Usage;
-eval "use Catalyst::Helper;";
 
-if ($@) {
-  die <<END;
-To use the Catalyst development tools including catalyst.pl and the
-generated script/myapp_create.pl you need Catalyst::Helper, which is
-part of the Catalyst-Devel distribution. Please install this via a
-vendor package or by running one of -
-
-  perl -MCPAN -e 'install Catalyst::Devel'
-  perl -MCPANPLUS -e 'install Catalyst::Devel'
-END
-}
-
-my $force = 0;
-my $mech  = 0;
-my $help  = 0;
-
-GetOptions(
-    'nonew|force'    => \$force,
-    'mech|mechanize' => \$mech,
-    'help|?'         => \$help
- );
-
-pod2usage(1) if ( $help || !$ARGV[0] );
-
-my $helper = Catalyst::Helper->new( { '.newfiles' => !$force, mech => $mech } );
-
-pod2usage(1) unless $helper->mk_component( 'Nagios::Web', @ARGV );
+use Catalyst::ScriptRunner;
+Catalyst::ScriptRunner->run('Nagios::Web', 'Create');
 
 1;
 
@@ -45,9 +17,9 @@ nagios_web_create.pl - Create a new Catalyst Component
 nagios_web_create.pl [options] model|view|controller name [helper] [options]
 
  Options:
-   -force        don't create a .new file where a file to be created exists
-   -mechanize    use Test::WWW::Mechanize::Catalyst for tests if available
-   -help         display this help and exits
+   --force        don't create a .new file where a file to be created exists
+   --mechanize    use Test::WWW::Mechanize::Catalyst for tests if available
+   --help         display this help and exits
 
  Examples:
    nagios_web_create.pl controller My::Controller
