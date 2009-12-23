@@ -19,12 +19,16 @@ quick guide:
 Install Nagios-Web-Catalyst
 ---------------------------
 
+You may have to install the "Module::Install" perl module prior this installation.
+
     git clone git@github.com:sni/Nagios-Web-Catalyst.git
     cd Nagios-Web-Catalyst
     perl Makefile.PL
     make installdeps
 
-make sure all dependencies are installed properly
+run perl Makefile.PL again to see if all dependecies are now installed properly.
+
+    perl Makefile.PL
 
 
 
@@ -50,3 +54,63 @@ After running these steps successfully, you should be able to test your installa
     ./script/nagios_web_server.pl
 
 Open your browser and open http://<your_nagios_host>:3000 
+
+
+FastCGI Server
+==============
+
+you will need three additional perl modules:
+FCGI, FCGI::ProcManager and Catalyst::Engine::FastCGI
+
+start your fcgi server:
+
+    %>./script/nagios_web_fastcgi.pl -n 5 \
+                -l /tmp/nagios-web.socket \
+                -p /tmp/nagios-web.pid
+
+
+Apache Configuration
+--------------------
+
+use this apache example configuration:
+
+ - replace /home/nagios/Nagios-Web with your installation path
+ - replace your-nagios-host.local with your hostname
+ - create a /home/nagios/Nagios-Web/htpasswd.users with htpasswd2
+ - make sure the /home/nagios/Nagios-Web/logs/ directory exists
+
+--------------------------------
+<VirtualHost *:80>
+    ServerName   your-nagios-host.local
+
+    DocumentRoot /home/nagios/Nagios-Web/root/
+    CustomLog    /home/nagios/Nagios-Web/logs/access.log combined
+    ErrorLog     /home/nagios/Nagios-Web/logs/error.log
+
+    # authorization
+    <Location "/">
+        AuthName "Nagios Access"
+        AuthType Basic
+        AuthUserFile /home/nagios/Nagios-Web/htpasswd.users
+        Order Allow,Deny
+        Allow from all
+        require valid-user
+    </Location>
+
+    # Load fastcgi module unless already loaded
+    LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
+
+    # fastcgi configuration
+    FastCGIExternalServer /tmp/nagios-web.fcgi -socket /tmp/nagios-web.socket
+
+    # Load rewrite module unless already loaded
+    LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
+
+    # rewrite configuration
+    RewriteEngine On
+    RewriteCond %{HTTP:Authorization} ^(.+)
+    RewriteRule ^(.*)$ $1 [E=HTTP_AUTHORIZATION:%1]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/(.*)$ /tmp/nagios-web.fcgi/$1 [QSA,L]
+</VirtualHost>
+--------------------------------
