@@ -48,7 +48,7 @@ sub begin : Private {
         unless ($c->authenticate( {} )) {
             # return 403 forbidden or kick out the user in other way
             $c->log->debug("user is not authenticated");
-            $c->detach('/error/index/1');
+            $c->detach('/error/index/10');
         };
     }
     $c->log->debug("user authenticated as: ".$c->user->get('username'));

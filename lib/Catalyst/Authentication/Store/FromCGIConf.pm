@@ -50,7 +50,17 @@ sub find_user {
     }
 
     # is the contact allowed to send commands?
-    my $can_submit_commands = $c->{'live'}->select_scalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 }) || 1;
+    my $can_submit_commands;
+    eval {
+        $can_submit_commands = $c->{'live'}->select_scalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
+    };
+    if($@) {
+        $c->detach('/error/index/9');
+    }
+    if(!defined $can_submit_commands) {
+        $can_submit_commands = Nagios::Web->config->{'can_submit_commands'} || 0;
+    }
+
     $c->log->debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
         push @{$user->{'roles'}}, 'is_authorized_for_read_only';

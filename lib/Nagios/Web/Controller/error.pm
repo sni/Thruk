@@ -21,7 +21,8 @@ Catalyst Controller.
 
 =cut
 
-sub index :Path :Args(1) :MyAction('AddDefaults') {
+#sub index :Path :Args(1) :MyAction('AddDefaults') {
+sub index :Path :Args(1) {
     my ( $self, $c, $arg1 ) = @_;
 
     # if there is no cgi config, always return the cgi error
@@ -68,6 +69,14 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
             'mess' => 'It appears as though you do not have permission to view the configuration information you requested...',
             'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
         },
+        '9'  => {
+            'mess' => 'No Backend available',
+            'dscr' => 'None of the configured Backends could be reached, please have a look at the logfile for more information.',
+        },
+        '10' => {
+            'mess' => 'You are not authorized.',
+            'dscr' => 'It seems like you are not authorized.',
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};
@@ -79,6 +88,13 @@ sub index :Path :Args(1) :MyAction('AddDefaults') {
     Nagios::Web->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
     Nagios::Web->config->{'custom-error-message'}->{'response-status'}   = 403;
     $c->error($errors->{$arg1}->{'mess'});
+
+    ###############################
+    if($c->user_exists) {
+        $c->stash->{'remote_user'}  = $c->user->get('username');
+    } else {
+        $c->stash->{'remote_user'}  = '?';
+    }
 }
 
 
