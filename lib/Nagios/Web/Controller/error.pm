@@ -77,6 +77,10 @@ sub index :Path :Args(1) {
             'mess' => 'You are not authorized.',
             'dscr' => 'It seems like you are not authorized.',
         },
+        '11' => {
+            'mess' => 'It appears as though you do not have permission to send commands...',
+            'dscr' => 'If you believe this is an error, check the configuration.',
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

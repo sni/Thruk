@@ -43,7 +43,9 @@
                             <select name="backend" size="5" multiple>
                               [% FOREACH b IN backends %]
                               [% SET name = pi_detail.$b.peer_name %]
-                              <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% name %]</option>
+                                [% IF name %]
+                                  <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% name %]</option>
+                                [% END %]
                               [% END %]
                             </select>
                           </form>

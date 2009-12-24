@@ -24,7 +24,30 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->response->body('Matched Nagios::Web::Controller::showlog in showlog.');
+    my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
+    my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
+
+    my $query = "GET log\nLimit: 100\n";
+#    $query   .= "Columns: message host_name service_description plugin_output state time command_name contact_name\n";
+    $query   .= Nagios::Web::Helper::get_auth_filter($c, 'log');
+
+    my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
+#use Data::Dumper;
+#print "HTTP/1.1 200 OK\n\n<html><pre>";
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($query);
+#print Dumper($logs);
+
+    if(!$oldestfirst) {
+        @{$logs} = reverse @{$logs};
+    }
+
+    $c->stash->{logs}             = $logs;
+    $c->stash->{title}            = 'Nagios Log File';
+    $c->stash->{infoBoxTitle}     = 'Event Log';
+    $c->stash->{page}             = 'showlog';
+    $c->stash->{template}         = 'showlog.tt';
+    $c->stash->{'no_auto_reload'} = 1;
 }
 
 

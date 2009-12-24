@@ -1,0 +1,86 @@
+[% USE date %]
+[% INCLUDE _header.tt %]
+
+    <table border="0" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% INCLUDE _infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%">
+          <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
+            <tr>
+              <td align="center" valign="middle" class='navBoxItem'>
+                Previous Day<br>
+                <a href='notifications.cgi?[% link %]&amp;archive=[% archive + 1 %]'><img src='/nagios/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
+              </td>
+              <td width="15"></td>
+              <td align="center" class='navBoxDate'>
+                <div class='navBoxTitle'>Log File Navigation</div>
+                [% date.format(start, '%a %b %e %H:%M:%S %Z %Y') %]<br>
+                to<br>
+                [% IF endname %]
+                  [% endname %]
+                [% ELSE %]
+                  [% date.format(end, '%a %b %e %H:%M:%S %Z %Y') %]<br>
+                [% END %]
+              </td>
+              <td width="15"></td>
+              [% IF archive >= 1 %]
+              <td align="center" valign="middle" class='navBoxItem'>
+                Next Day<br>
+                <a href='notifications.cgi?[% link %]&amp;archive=[% archive - 1 %]'><img src='/nagios/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
+              </td>
+              [% ELSE %]
+              <td><img src='/nagios/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
+              [% END %]
+            </tr>
+          </table>
+          <br>
+        </td>
+        <td align="right" valign="top" width="33%">
+          <form method='get' action='showlog.cgi'>
+            [% IF archive %]<input type='hidden' name='archive' value='[% archive %]'>[% END %]
+            <table border="0" cellspacing="0" cellpadding="0" class='optBox'>
+              <tr>
+                <td align="left" valign="bottom" class='optBoxItem'>
+                  <input type='checkbox' name='oldestfirst'> Older Entries First:
+                </td>
+              </tr>
+              <tr>
+                <td align="left" valign="bottom" class='optBoxItem'>
+                  <input type='submit' value='Update'>
+                </td>
+              </tr>
+              <tr>
+                <td align="right"></td>
+              </tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+
+<center><font size="+2" color="red">This page is not yet completed</font></center>
+
+
+    <div class='logEntries'>
+      <br clear='all'>
+      <div class='dateTimeBreak'>
+        <table border="0" width="95%">
+          <tr>
+            <td width="40%"><hr width="100%"></td>
+            <td align="center" class='dateTimeBreak'>December 23, 2009 22:00</td>
+            <td width="40%"><hr width="100%"></td>
+          </tr>
+        </table>
+      </div>
+      <br clear='all'>
+      <div class='logEntries'>
+
+[% FOREACH l = logs %]
+<img align='left' src='/nagios/images/info.png' alt='Informational Message' title='Informational Message'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.message %][% IF l.host_name %] [% l.host_name %];[% END %][% IF l.service_description %][% l.service_description %];[% END %][% IF l.plugin_output %][% l.plugin_output %];[% END %]<br clear='all'>
+[% END %]
+      </div>
+      <hr>
+    </div>
+[% INCLUDE _footer.tt %]
