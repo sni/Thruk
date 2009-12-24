@@ -7,9 +7,13 @@ general
     - reload cgi.cfg if changed
     - overload role authentication ( to add host/service role checks )
     - fix authorization ( check services by host_contacts, comments/downtimes )
-    - fix groups with authorization
+    - fix host/servicegroups pages with authorization
     - change logging to log4perl
+    - check TT strict option
     - write tests
+
+main.html
+    - remove nagios core stuff
 
 extinfo:
     - verify macros is action_url, icon_url and notes_url
@@ -20,7 +24,7 @@ notifications:
    - add timeperiod selector (day, week, month, custom)
 
 config:
-    - missing completly
+    - add missing values
 
 avail:
     - missing completly
@@ -37,7 +41,19 @@ history:
 histogram:
     - missing completly
 
-
+livestatus:
+    - StatsSum: ( needed by tac and extinfo 4 )
+    - Status: interval_length
+    - Contacts: Service Notification Options, Host Notification Options, Retention Options, Service Notification Commands, Host Notification Commands
+    - Hosts: Freshness Threshold, Contact Groups, Notification Options, Event Handler, Stalking Options, Flap Detection Options, Enable Failure Prediction, Retention Options
+    - Tables:
+        - Contact Groups
+        - Host Dependencies
+        - Host Escalations
+        - Service Dependencies
+        - Service Escalations
+        - Contact Groups
+        - Timeperiods
 
 =========================================================
 after 1.0

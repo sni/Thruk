@@ -1,0 +1,48 @@
+[% INCLUDE _header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="50%">
+        [% INCLUDE _infobox.tt %]
+        </td>
+        <td align="right" valign="bottom" width="50%"></td>
+      </tr>
+    </table><br>
+    <br>
+    <div align="center" class='reportSelectTitle'>Select Type of Config Data You Wish To View</div>
+    <br><br>
+
+    <form method="get" action="config.cgi">
+      <div align="center">
+        <table border="0">
+          <tr>
+            <td align="left" class='reportSelectSubTitle'>Object Type:</td>
+          </tr>
+          <tr>
+            <td align="left" class='reportSelectItem'>
+              <select name='type'>
+                <option value='hosts'>Hosts</option>
+                <option value='hostdependencies'>Host Dependencies</option>
+                <option value='hostescalations'>Host Escalations</option>
+                <option value='hostgroups'>Host Groups</option>
+                <option value='services'>Services</option>
+                <option value='servicegroups'>Service Groups</option>
+                <option value='servicedependencies'>Service Dependencies</option>
+                <option value='serviceescalations'>Service Escalations</option>
+                <option value='contacts'>Contacts</option>
+                <option value='contactgroups'>Contact Groups</option>
+                <option value='timeperiods'>Timeperiods</option>
+                <option value='commands'>Commands</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectItem'>
+              <input type='submit' value='Continue'>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </form>
+
+[% INCLUDE _footer.tt %]

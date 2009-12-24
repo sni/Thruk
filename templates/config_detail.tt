@@ -1,0 +1,47 @@
+[% INCLUDE _header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="50%">
+          [% INCLUDE _infobox.tt %]
+        </td>
+        <td align="right" valign="bottom" width="50%">
+          <form method="get" action="config.cgi">
+            <table border="0">
+              <tr>
+                <td align="left" class='reportSelectSubTitle'>Object Type:</td>
+              </tr>
+              <tr>
+                <td align="left" class='reportSelectItem'>
+                  <select name='type'>
+                    <option value='hosts'[%               IF type == 'hosts'               %] selected [% END %]>Hosts</option>
+                    <option value='hostdependencies'[%    IF type == 'hostdependencies'    %] selected [% END %]>Host Dependencies</option>
+                    <option value='hostescalations'[%     IF type == 'hostescalations'     %] selected [% END %]>Host Escalations</option>
+                    <option value='hostgroups'[%          IF type == 'hostgroups'          %] selected [% END %]>Host Groups</option>
+                    <option value='services'[%            IF type == 'services'            %] selected [% END %]>Services</option>
+                    <option value='servicegroups'[%       IF type == 'servicegroups'       %] selected [% END %]>Service Groups</option>
+                    <option value='servicedependencies'[% IF type == 'servicedependencies' %] selected [% END %]>Service Dependencies</option>
+                    <option value='serviceescalations'[%  IF type == 'serviceescalations'  %] selected [% END %]>Service Escalations</option>
+                    <option value='contacts'[%            IF type == 'contacts'            %] selected [% END %]>Contacts</option>
+                    <option value='contactgroups'[%       IF type == 'contactgroups'       %] selected [% END %]>Contact Groups</option>
+                    <option value='timeperiods'[%         IF type == 'timeperiods'         %] selected [% END %]>Timeperiods</option>
+                    <option value='commands'[%            IF type == 'commands'            %] selected [% END %]>Commands</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td class='reportSelectItem'>
+                  <input type='submit' value='Update'>
+                </td>
+              </tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+    <br>
+    <div align="center" class='dataTitle'>[% dataTitle %]</div>
+    <br>
+    <div align="center">[% content %]</div>
+
+[% INCLUDE _footer.tt %]

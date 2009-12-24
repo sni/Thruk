@@ -1,0 +1,39 @@
+[% WRAPPER config_detail.tt
+   dataTitle = 'Commands'
+%]
+
+<table border="0" class='data'>
+    <tr>
+    <th class='data'>Contact Name</th>
+    <th class='data'>Alias</th>
+    <th class='data'>Email Address</th>
+    <th class='data'>Pager Address/Number</th>
+    <th class='data'>Service Notification Options</th>
+    <th class='data'>Host Notification Options</th>
+    <th class='data'>Service Notification Period</th>
+    <th class='data'>Host Notification Period</th>
+    <th class='data'>Service Notification Commands</th>
+    <th class='data'>Host Notification Commands</th>
+    <th class='data'>Retention Options</th>
+  </tr>
+  [% FOREACH name = data.keys.sort %]
+  [% SET d = data.$name %]
+  [% SET class = 'dataOdd'  IF loop.odd %]
+  [% SET class = 'dataEven' IF loop.even %]
+  <tr class='[% class %]'>
+    <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.alias %]</td>
+    <td class='[% class %]'><a href="mailto:[% d.email %]">[% d.email %]</a></td>
+    <td class='[% class %]'>[% d.pager %]</td>
+    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.service_notification_period %]">[% d.service_notification_period %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.host_notification_period %]">[% d.host_notification_period %]</a></td>
+    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'>TODO</td>
+  </tr>
+  [% END %]
+</table>
+
+[% END %]
