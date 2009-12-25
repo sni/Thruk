@@ -1,5 +1,5 @@
 [% WRAPPER config_detail.tt
-   dataTitle = 'Commands'
+   dataTitle = 'Hosts'
 %]
 
 <table border="0" class='data'>

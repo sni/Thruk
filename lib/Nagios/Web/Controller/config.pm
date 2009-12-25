@@ -44,9 +44,22 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{template} = 'config_contacts.tt';
     }
     elsif($type eq 'hosts') {
-        $c->stash->{commands} = $c->{'live'}->selectall_hashref("GET commands\nColumns: name line", 'name');
         $c->stash->{data}     = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name alias address parents max_check_attempts check_interval retry_interval check_command check_period obsess_over_host active_checks_enabled accept_passive_checks check_freshness contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", 'name', { AddPeer => 1 });
         $c->stash->{template} = 'config_hosts.tt';
+    }
+    elsif($type eq 'hostgroups') {
+        my $data = $c->{'live'}->selectall_arrayref("GET hostgroups\nColumns: name alias members", { Slice => 1 });
+        my $hostgroups = {};
+        for my $hostgroup (@{$data}) {
+            if(!defined $hostgroups->{$hostgroup->{'name'}}) {
+                $hostgroups->{$hostgroup->{'name'}} = $hostgroup;
+                @{$hostgroups->{$hostgroup->{'name'}}->{'members_array'}} = split /,/, $hostgroup->{'members'};
+            } else {
+                @{$hostgroups->{$hostgroup->{'name'}}->{'members_array'}} = [ @{$hostgroups->{$hostgroup->{'name'}}->{'members'}}, split /,/, $hostgroup->{'members'}];
+            }
+        }
+        $c->stash->{data}     = $hostgroups;
+        $c->stash->{template} = 'config_hostgroups.tt';
     }
 }
 
