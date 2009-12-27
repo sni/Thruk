@@ -101,7 +101,7 @@ sub get_auth_filter {
 # format: 0d 0h 29m 43s
 sub filter_duration {
     my $duration = shift;
-    my $days     = shift || 1;
+    my $withdays = shift || 1;
 
     if($duration < 0) { $duration = time() + $duration; }
 
@@ -109,7 +109,7 @@ sub filter_duration {
     my $hours   = 0;
     my $minutes = 0;
     my $seconds = 0;
-    if($days) {
+    if($withdays) {
         if($duration > 86400) {
             $days     = int($duration/86400);
             $duration = $duration%86400;
@@ -125,7 +125,7 @@ sub filter_duration {
     }
     $seconds = $duration;
 
-    if($days) {
+    if($withdays) {
         return($days."d ".$hours."h ".$minutes."m ".$seconds."s");
     }
     return($hours."h ".$minutes."m ".$seconds."s");

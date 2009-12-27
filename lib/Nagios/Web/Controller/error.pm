@@ -21,7 +21,6 @@ Catalyst Controller.
 
 =cut
 
-#sub index :Path :Args(1) :MyAction('AddDefaults') {
 sub index :Path :Args(1) {
     my ( $self, $c, $arg1 ) = @_;
 
