@@ -31,28 +31,9 @@ Nagios::Web::Controller::Root - Root Controller for Nagios::Web
 
 ######################################
 # begin, running at the begin of every req
-sub begin : Private {
-    my ( $self, $c ) = @_;
-
-    ###############################
-    # parse cgi.cfg
-    $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
-
-    ###############################
-    # get livesocket object
-    $c->{'live'} = Nagios::Web::Helper->get_livestatus($c);
-
-    $c->log->debug("checking auth");
-    unless ($c->user_exists) {
-        $c->log->debug("user not authenticated yet");
-        unless ($c->authenticate( {} )) {
-            # return 403 forbidden or kick out the user in other way
-            $c->log->debug("user is not authenticated");
-            $c->detach('/error/index/10');
-        };
-    }
-    $c->log->debug("user authenticated as: ".$c->user->get('username'));
-}
+#sub begin : Private {
+#    my ( $self, $c ) = @_;
+#}
 
 ######################################
 # auto, runs on every request
