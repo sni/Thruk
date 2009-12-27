@@ -62,6 +62,29 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{data}     = $hostgroups;
         $c->stash->{template} = 'config_hostgroups.tt';
     }
+    elsif($type eq 'servicegroups') {
+        my $data = $c->{'live'}->selectall_arrayref("GET servicegroups\nColumns: name alias members", { Slice => 1 });
+        my $servicegroups = {};
+        for my $servicegroup (@{$data}) {
+            if(!defined $servicegroups->{$servicegroup->{'name'}}) {
+                $servicegroups->{$servicegroup->{'name'}} = $servicegroup;
+                @{$servicegroups->{$servicegroup->{'name'}}->{'members_array'}} = split /,/, $servicegroup->{'members'};
+            } else {
+                @{$servicegroups->{$servicegroup->{'name'}}->{'members_array'}} = [ @{$servicegroups->{$servicegroup->{'name'}}->{'members'}}, split /,/, $servicegroup->{'members'}];
+            }
+        }
+        for my $group (values %{$servicegroups}) {
+            for my $service (sort @{$group->{'members_array'}}) {
+                my @split = split(/\|/,$service);
+                push @{$group->{'members_split'}}, \@split;
+            }
+        }
+#use Data::Dumper;
+#print "HTTP/1.1 200 OK\n\n<html><pre>";
+#print Dumper($servicegroups);
+        $c->stash->{data}     = $servicegroups;
+        $c->stash->{template} = 'config_servicegroups.tt';
+    }
 }
 
 

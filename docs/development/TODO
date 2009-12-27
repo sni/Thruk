@@ -21,7 +21,7 @@ extinfo:
 
 notifications:
     - fix notification type selection
-   - add timeperiod selector (day, week, month, custom)
+    - add timeperiod selector (day, week, month, custom)
 
 config:
     - add missing values

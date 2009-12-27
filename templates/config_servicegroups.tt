@@ -1,0 +1,36 @@
+[% WRAPPER config_detail.tt
+   dataTitle = 'Host Groups'
+%]
+
+<table border="0" class='data'>
+  <tr>
+    <th class='data'>Group Name</th>
+    <th class='data'>Description</th>
+    <th class='data'>Host Members</th>
+    <th class='data'>Notes</th>
+    <th class='data'>Notes URL</th>
+    <th class='data'>Action URL</th>
+  </tr>
+
+  [% FOREACH name = data.keys.sort %]
+  [% SET d = data.$name %]
+  [% SET pd = d.peer_key %]
+  [% SET class = 'dataOdd'  IF loop.even %]
+  [% SET class = 'dataEven' IF loop.odd %]
+  <tr class='[% class %]'>
+    <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.alias %]</td>
+    <td class='[% class %]'>
+      [% FOREACH service = d.members_split %]
+        [% IF !loop.first() %] , [% END %]
+        <a href="config.cgi?type=hosts#[% service.0 %]">[% service.0 %]</a> / <a href="config.cgi?type=services#[% service.0 %];[% service.1 %]">[% service.1 %]</a>
+      [% END %]
+    </td>
+    <td class='[% class %]'>[% d.notes %]</td>
+    <td class='[% class %]'>[% d.notes_url %]</td>
+    <td class='[% class %]'>[% d.action_url %]</td>
+  </tr>
+  [% END %]
+</table>
+
+[% END %]
