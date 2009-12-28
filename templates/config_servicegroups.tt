@@ -1,5 +1,5 @@
 [% WRAPPER config_detail.tt
-   dataTitle = 'Host Groups'
+   dataTitle = 'Service Groups'
 %]
 
 <table border="0" class='data'>
@@ -23,7 +23,7 @@
     <td class='[% class %]'>
       [% FOREACH service = d.members_split %]
         [% IF !loop.first() %] , [% END %]
-        <a href="config.cgi?type=hosts#[% service.0 %]">[% service.0 %]</a> / <a href="config.cgi?type=services#[% service.0 %];[% service.1 %]">[% service.1 %]</a>
+        <a href="config.cgi?type=hosts#[% service.0 %]">[% service.0 %]</a> / <a href="config.cgi?type=services#[% service.0 %]_[% service.1 %]">[% service.1 %]</a>
       [% END %]
     </td>
     <td class='[% class %]'>[% d.notes %]</td>

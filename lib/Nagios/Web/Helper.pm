@@ -5,8 +5,25 @@ use warnings;
 use Config::General;
 use Carp;
 use Data::Dumper;
+use Digest::MD5  qw(md5_hex);
 use Nagios::MKLivestatus::MULTI;
 
+##############################################
+# SUBS
+#
+# get_auth_filter
+# filter_duration
+# get_cgi_cfg
+# get_livestatus
+# sort
+# remove_duplicates
+# get_livestatus_conf
+# get_service_exectution_stats
+# _get_hostcomments
+# _get_servicecomments
+# _get_livesocket_path_from_nagios_cfg
+# _calculate_overall_processinfo
+##############################################
 
 ##############################################
 # returns a filter which can be used for authorization
@@ -101,7 +118,9 @@ sub get_auth_filter {
 # format: 0d 0h 29m 43s
 sub filter_duration {
     my $duration = shift;
-    my $withdays = shift || 1;
+    my $withdays = shift;
+
+    $withdays = 1 unless defined $withdays;
 
     if($duration < 0) { $duration = time() + $duration; }
 
@@ -212,6 +231,8 @@ sub sort {
     my $order = shift;
     my @sorted;
 
+    if(!defined $key) { $c->error('missing options in sort()'); }
+
     $c->stats->profile(begin => "Helper::sort()");
 
     $order = "ASC" if !defined $order;
@@ -251,6 +272,61 @@ sub sort {
     return(\@sorted);
 }
 
+
+########################################
+# removes duplicate entries
+sub remove_duplicates {
+    my ( $self, $c, $data ) = @_;
+
+    # only needed when using multiple backends
+    return $data unless scalar @{$c->stash->{'backends'}} > 1;
+
+    $c->stats->profile(begin => "Helper::remove_duplicates()");
+
+    # calculate md5 sums
+    my $uniq = {};
+    for my $dat (@{$data}) {
+        my $peer_key  = $dat->{'peer_key'};  delete $dat->{'peer_key'};
+        my $peer_name = $dat->{'peer_name'}; delete $dat->{'peer_name'};
+        my $peer_addr = $dat->{'peer_addr'}; delete $dat->{'peer_addr'};
+        my $md5 = md5_hex(join(';', values %{$dat}));
+        if(!defined $uniq->{$md5}) {
+            $dat->{'peer_key'}  = $peer_key;
+            $dat->{'peer_name'} = $peer_name;
+            $dat->{'peer_addr'} = $peer_addr;
+
+            $uniq->{$md5} = {
+                              'data'      => $dat,
+                              'peer_key'  => [ $peer_key ],
+                              'peer_name' => [ $peer_name ],
+                              'peer_addr' => [ $peer_addr ],
+                            };
+        } else {
+            push @{$uniq->{$md5}->{'peer_key'}},  $peer_key;
+            push @{$uniq->{$md5}->{'peer_name'}}, $peer_name;
+            push @{$uniq->{$md5}->{'peer_addr'}}, $peer_addr;
+        }
+    }
+
+    my $return = [];
+    for my $data (values %{$uniq}) {
+        $data->{'data'}->{'backend'} = {
+            'peer_key'  => $data->{'peer_key'},
+            'peer_name' => $data->{'peer_name'},
+            'peer_addr' => $data->{'peer_addr'},
+        };
+        push @{$return}, $data->{'data'};
+
+    }
+
+#use Data::Dumper;
+#print "HTTP/1.1 200 OK\n\n<html><pre>";
+#$Data::Dumper::Sortkeys = 1;
+#print Dumper($return);
+
+    $c->stats->profile(end => "Helper::remove_duplicates()");
+    return($return);
+}
 
 ########################################
 # returns config for livestatus backends

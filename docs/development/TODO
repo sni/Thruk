@@ -25,6 +25,7 @@ notifications:
 
 config:
     - add missing values
+    - only remove different duplicate entries
 
 avail:
     - missing completly
@@ -46,6 +47,7 @@ livestatus:
     - Status: interval_length
     - Contacts: Service Notification Options, Host Notification Options, Retention Options, Service Notification Commands, Host Notification Commands
     - Hosts: Freshness Threshold, Contact Groups, Notification Options, Event Handler, Stalking Options, Flap Detection Options, Enable Failure Prediction, Retention Options
+    - Services: Parallelize, Volatile, Check Freshness, Freshness Threshold, Contact Groups, Notification Options, Stalking Options, Flap Detection Options, Enable Failure Prediction, Failure Prediction Options, Retention Options
     - Tables:
         - Contact Groups
         - Host Dependencies

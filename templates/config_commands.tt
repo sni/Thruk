@@ -4,14 +4,25 @@
 
 <table border="0" class='data'>
   <tr>
+    [% IF backends.size > 1 %]
+      <th class='data'>Backend</th>
+    [% END %]
     <th class='data'>Command Name</th>
     <th class='data'>Command Line</th>
   </tr>
-  [% FOREACH name = data.keys.sort %]
-  [% SET d = data.$name %]
+  [% FOREACH d = data %]
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
   <tr class='[% class %]'>
+    [% IF backends.size > 1 %]
+      <td class='[% class %]'>
+        [% IF d.backend.peer_name.size < backends.size %]
+          [% d.backend.peer_name.join(', ') %]
+        [% ELSE %]
+        <i>all</i>
+        [% END %]
+      </td>
+    [% END %]
     <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.line %]</td>
   </tr>

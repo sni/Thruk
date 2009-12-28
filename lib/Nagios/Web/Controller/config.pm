@@ -36,18 +36,44 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $type = $c->{'request'}->{'parameters'}->{'type'};
     $c->stash->{type}             = $type;
     return unless defined $type;
+
+    # commands
     if($type eq 'commands') {
-        $c->stash->{data}     = $c->{'live'}->selectall_hashref("GET commands\nColumns: name line", 'name');
+        my $data = $c->{'live'}->selectall_arrayref("GET commands\nColumns: name line", { Slice => 1, AddPeer => 1 });
+        $data    = Nagios::Web::Helper->remove_duplicates($c, $data);
+        $data    = Nagios::Web::Helper->sort($c, $data, 'name');
+        $c->stash->{data}     = $data;
         $c->stash->{template} = 'config_commands.tt';
     }
+
+    # contacts
     elsif($type eq 'contacts') {
-        $c->stash->{data}     = $c->{'live'}->selectall_hashref("GET contacts\nColumns: name alias email pager service_notification_period host_notification_period", 'name');
+        my $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: name alias email pager service_notification_period host_notification_period", { Slice => 1, AddPeer => 1 });
+        $data    = Nagios::Web::Helper->remove_duplicates($c, $data);
+        $data    = Nagios::Web::Helper->sort($c, $data, 'name');
+        $c->stash->{data}     = $data;
         $c->stash->{template} = 'config_contacts.tt';
     }
+
+    # hosts
     elsif($type eq 'hosts') {
-        $c->stash->{data}     = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name alias address parents max_check_attempts check_interval retry_interval check_command check_period obsess_over_host active_checks_enabled accept_passive_checks check_freshness contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", 'name', { AddPeer => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name alias address parents max_check_attempts check_interval retry_interval check_command check_period obsess_over_host active_checks_enabled accept_passive_checks check_freshness contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", { Slice => 1, AddPeer => 1 });
+        $data    = Nagios::Web::Helper->remove_duplicates($c, $data);
+        $data    = Nagios::Web::Helper->sort($c, $data, 'name');
+        $c->stash->{data}     = $data;
         $c->stash->{template} = 'config_hosts.tt';
     }
+
+    # services
+    elsif($type eq 'services') {
+        my $data = $c->{'live'}->selectall_arrayref("GET services\nColumns: host_name description notifications_enabled max_check_attempts check_interval retry_interval check_command check_period obsess_over_service active_checks_enabled accept_passive_checks contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", { Slice => 1, AddPeer => 1 });
+        $data = Nagios::Web::Helper->remove_duplicates($c, $data);
+        $data = Nagios::Web::Helper->sort($c, $data, [ 'host_name', 'description' ]);
+        $c->stash->{data}     = $data;
+        $c->stash->{template} = 'config_services.tt';
+    }
+
+    # hostgroups
     elsif($type eq 'hostgroups') {
         my $data = $c->{'live'}->selectall_arrayref("GET hostgroups\nColumns: name alias members", { Slice => 1 });
         my $hostgroups = {};
@@ -56,12 +82,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $hostgroups->{$hostgroup->{'name'}} = $hostgroup;
                 @{$hostgroups->{$hostgroup->{'name'}}->{'members_array'}} = split /,/, $hostgroup->{'members'};
             } else {
-                @{$hostgroups->{$hostgroup->{'name'}}->{'members_array'}} = [ @{$hostgroups->{$hostgroup->{'name'}}->{'members'}}, split /,/, $hostgroup->{'members'}];
+                push @{$hostgroups->{$hostgroup->{'name'}}->{'members_array'}}, split /,/, $hostgroup->{'members'};
             }
         }
         $c->stash->{data}     = $hostgroups;
         $c->stash->{template} = 'config_hostgroups.tt';
     }
+
+    # servicegroups
     elsif($type eq 'servicegroups') {
         my $data = $c->{'live'}->selectall_arrayref("GET servicegroups\nColumns: name alias members", { Slice => 1 });
         my $servicegroups = {};
@@ -70,7 +98,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $servicegroups->{$servicegroup->{'name'}} = $servicegroup;
                 @{$servicegroups->{$servicegroup->{'name'}}->{'members_array'}} = split /,/, $servicegroup->{'members'};
             } else {
-                @{$servicegroups->{$servicegroup->{'name'}}->{'members_array'}} = [ @{$servicegroups->{$servicegroup->{'name'}}->{'members'}}, split /,/, $servicegroup->{'members'}];
+                push @{$servicegroups->{$servicegroup->{'name'}}->{'members_array'}}, split /,/, $servicegroup->{'members'};
             }
         }
         for my $group (values %{$servicegroups}) {
@@ -79,9 +107,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 push @{$group->{'members_split'}}, \@split;
             }
         }
-#use Data::Dumper;
-#print "HTTP/1.1 200 OK\n\n<html><pre>";
-#print Dumper($servicegroups);
         $c->stash->{data}     = $servicegroups;
         $c->stash->{template} = 'config_servicegroups.tt';
     }

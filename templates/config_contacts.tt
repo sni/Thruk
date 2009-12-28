@@ -1,9 +1,12 @@
 [% WRAPPER config_detail.tt
-   dataTitle = 'Commands'
+   dataTitle = 'Contacts'
 %]
 
 <table border="0" class='data'>
-    <tr>
+  <tr>
+    [% IF backends.size > 1 %]
+      <th class='data'>Backend</th>
+    [% END %]
     <th class='data'>Contact Name</th>
     <th class='data'>Alias</th>
     <th class='data'>Email Address</th>
@@ -16,11 +19,19 @@
     <th class='data'>Host Notification Commands</th>
     <th class='data'>Retention Options</th>
   </tr>
-  [% FOREACH name = data.keys.sort %]
-  [% SET d = data.$name %]
+  [% FOREACH d = data %]
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
   <tr class='[% class %]'>
+    [% IF backends.size > 1 %]
+      <td class='[% class %]'>
+        [% IF d.backend.peer_name.size < backends.size %]
+          [% d.backend.peer_name.join(', ') %]
+        [% ELSE %]
+        <i>all</i>
+        [% END %]
+      </td>
+    [% END %]
     <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'><a href="mailto:[% d.email %]">[% d.email %]</a></td>
