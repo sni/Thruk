@@ -25,7 +25,6 @@ notifications:
 
 config:
     - add missing values
-    - only remove different duplicate entries
 
 avail:
     - missing completly
