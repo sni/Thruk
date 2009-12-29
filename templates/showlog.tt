@@ -11,7 +11,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem'>
                 Previous Day<br>
-                <a href='notifications.cgi?[% link %]&amp;archive=[% archive + 1 %]'><img src='/nagios/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
+                <a href='showlog.cgi?[% link %]&amp;archive=[% archive + 1 %]'><img src='/nagios/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
@@ -28,7 +28,7 @@
               [% IF archive >= 1 %]
               <td align="center" valign="middle" class='navBoxItem'>
                 Next Day<br>
-                <a href='notifications.cgi?[% link %]&amp;archive=[% archive - 1 %]'><img src='/nagios/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
+                <a href='showlog.cgi?[% link %]&amp;archive=[% archive - 1 %]'><img src='/nagios/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
               </td>
               [% ELSE %]
               <td><img src='/nagios/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
@@ -63,24 +63,31 @@
 <center><font size="+2" color="red">This page is not yet completed</font></center>
 
 
-    <div class='logEntries'>
+<div class='logEntries'>
+[% SET last_hour = '' %]
+[% FOREACH l = logs %]
+[% this_hour = date.format(l.time, '%Y-%m-%d  %H') _ ':00' %]
+[% IF this_hour != last_hour %]
+  [% SET last_hour = this_hour %]
+      </div>
       <br clear='all'>
       <div class='dateTimeBreak'>
         <table border="0" width="95%">
           <tr>
             <td width="40%"><hr width="100%"></td>
-            <td align="center" class='dateTimeBreak'>December 23, 2009 22:00</td>
+            <td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td>
             <td width="40%"><hr width="100%"></td>
           </tr>
         </table>
       </div>
       <br clear='all'>
       <div class='logEntries'>
-
-[% FOREACH l = logs %]
-<img align='left' src='/nagios/images/info.png' alt='Informational Message' title='Informational Message'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.message %][% IF l.host_name %] [% l.host_name %];[% END %][% IF l.service_description %][% l.service_description %];[% END %][% IF l.plugin_output %][% l.plugin_output %];[% END %]<br clear='all'>
+[% END %]
+<img align='left' src='/nagios/images/info.png' alt='Informational Message' title='Informational Message'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.line %]<br clear='all'>
 [% END %]
       </div>
       <hr>
     </div>
+
+
 [% INCLUDE _footer.tt %]

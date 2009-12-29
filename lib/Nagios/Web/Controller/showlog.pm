@@ -2,6 +2,7 @@ package Nagios::Web::Controller::showlog;
 
 use strict;
 use warnings;
+use Date::Calc qw/Localtime Mktime/;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -25,11 +26,27 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+    my $filter  = "Limit: 2500\n"; # just for debugging now...
+
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
     my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
 
-    my $query = "GET log\nLimit: 100\n";
-#    $query   .= "Columns: message host_name service_description plugin_output state time command_name contact_name\n";
+    # start with today 00:00
+    my $timeperiod = 86400;
+    my($endname);
+    if($archive == 0) {
+        $endname = 'Present..';
+    }
+    my ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+    $hour = 0; $min = 0; $sec = 0;
+    my $today = Mktime($year,$month,$day, $hour,$min,$sec);
+    my $end   = $today - ($timeperiod * ($archive-1));
+    my $start = $end - $timeperiod;
+
+    $filter .= "Filter: time >= $start\n";
+    $filter .= "Filter: time <= $end\n";
+
+    my $query = "GET log\nColumns: time line\n".$filter;
     $query   .= Nagios::Web::Helper::get_auth_filter($c, 'log');
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
@@ -44,6 +61,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     $c->stash->{logs}             = $logs;
+    $c->stash->{archive}          = $archive;
+    $c->stash->{start}            = $start;
+    $c->stash->{end}              = $end;
+    $c->stash->{endname}          = $endname;
     $c->stash->{title}            = 'Nagios Log File';
     $c->stash->{infoBoxTitle}     = 'Event Log';
     $c->stash->{page}             = 'showlog';

@@ -43,9 +43,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     my ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
     $hour = 0; $min = 0; $sec = 0;
-    my $start = Mktime($year,$month,$day, $hour,$min,$sec);
-    my $end   = $start - $timeperiod * ($archive + 1);
-    $start    = $end - $timeperiod;
+    my $today = Mktime($year,$month,$day, $hour,$min,$sec);
+    my $end   = $today - ($timeperiod * ($archive-1));
+    my $start = $end - $timeperiod;
 
 
     $filter .= "Filter: time >= $start\n";
