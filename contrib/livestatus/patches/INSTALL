@@ -1,0 +1,11 @@
+Livestatus Installation
+=======================
+
+run the following commands:
+
+    build.sh
+    ./configure
+    make
+
+if everything went fine, you can copy the "src/livestatus.o" to your nagios
+installation and use it as NEB module.
