@@ -33,7 +33,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $service     = $c->{'request'}->{'parameters'}->{'service'}     || '';
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
 
-    my $filter  = "Limit: 1000\n"; # just for debugging now...
+    my $filter  = "";
 
     # start with today 00:00
     my $timeperiod = 86400;
@@ -65,7 +65,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     my $query = "GET log\n$filter\n";
-    $query   .= "Columns: message host_name service_description plugin_output state time command_name contact_name\n";
+    $query   .= "Columns: message host_name service_description plugin_output state time command_name contact_name options\n";
     $query   .= "Filter: class = 3\n";
     $query   .= Nagios::Web::Helper::get_auth_filter($c, 'log');
 

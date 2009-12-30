@@ -26,7 +26,7 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    my $filter  = "Limit: 5500\n"; # just for debugging now...
+    my $filter  = "";
 
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
     my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
@@ -50,16 +50,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $query   .= Nagios::Web::Helper::get_auth_filter($c, 'log');
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
-    #my $hashlogs = $c->{'live'}->selectall_hashref($query, 'message', { AddPeer => 1});
-    #my $logs;
-    #for my $log (values %{$hashlogs}) {
-    #    push @{$logs}, $log;
-    #}
-#use Data::Dumper;
-#print "HTTP/1.1 200 OK\n\n<html><pre>";
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($query);
-#print Dumper($logs);
 
     if(!$oldestfirst) {
         @{$logs} = reverse @{$logs};
