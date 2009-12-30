@@ -20,7 +20,6 @@ extinfo:
     - finish performance data on extinfo type 4
 
 notifications:
-    - fix notification type selection
     - add timeperiod selector (day, week, month, custom)
 
 config:
@@ -30,7 +29,7 @@ avail:
     - missing completly
 
 showlogs:
-    - missing completly
+    - add timeperiod selector (day, week, month, custom)
 
 trends:
     - missing completly
@@ -43,7 +42,7 @@ histogram:
 
 livestatus:
     - StatsSum: ( needed by tac and extinfo 4 )
-    - Status: interval_length
+    - Status: interval_length from nagios.cfg
     - Contacts: Service Notification Options, Host Notification Options, Retention Options, Service Notification Commands, Host Notification Commands
     - Hosts: Freshness Threshold, Contact Groups, Notification Options, Event Handler, Stalking Options, Flap Detection Options, Enable Failure Prediction, Retention Options
     - Services: Parallelize, Volatile, Check Freshness, Freshness Threshold, Contact Groups, Notification Options, Stalking Options, Flap Detection Options, Enable Failure Prediction, Failure Prediction Options, Retention Options
