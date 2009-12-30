@@ -26,7 +26,7 @@ use Catalyst qw/
                 Static::Simple
                 Compress::Gzip
                 Redirect/;
-our $VERSION = '0.10_5';
+our $VERSION = '0.10_6';
 
 # Configure the application.
 #

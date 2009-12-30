@@ -26,7 +26,7 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    my $filter  = "Limit: 2500\n"; # just for debugging now...
+    my $filter  = "Limit: 5500\n"; # just for debugging now...
 
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
     my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
@@ -46,10 +46,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $filter .= "Filter: time >= $start\n";
     $filter .= "Filter: time <= $end\n";
 
-    my $query = "GET log\nColumns: time line\n".$filter;
+    my $query = "GET log\nColumns: time message options state\n".$filter;
     $query   .= Nagios::Web::Helper::get_auth_filter($c, 'log');
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
+    #my $hashlogs = $c->{'live'}->selectall_hashref($query, 'message', { AddPeer => 1});
+    #my $logs;
+    #for my $log (values %{$hashlogs}) {
+    #    push @{$logs}, $log;
+    #}
 #use Data::Dumper;
 #print "HTTP/1.1 200 OK\n\n<html><pre>";
 #$Data::Dumper::Sortkeys = 1;
