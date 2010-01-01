@@ -25,13 +25,13 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
-
     $c->stash->{title}            = 'Configuration';
     $c->stash->{infoBoxTitle}     = 'Configuration';
     $c->stash->{page}             = 'config';
     $c->stash->{template}         = 'config.tt';
     $c->stash->{'no_auto_reload'} = 1;
+
+    $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
 
     my $type = $c->{'request'}->{'parameters'}->{'type'};
     $c->stash->{type}             = $type;

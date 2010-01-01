@@ -52,7 +52,7 @@ sub find_user {
     # is the contact allowed to send commands?
     my $can_submit_commands;
     eval {
-        $can_submit_commands = $c->{'live'}->select_scalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
+        $can_submit_commands = $c->{'live'}->selectscalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
     };
     if($@) {
         $c->detach('/error/index/9');
@@ -106,8 +106,8 @@ Catalyst::Authentication::Store::FromCGIConf - Minimal authentication store with
                             members => {
                                 credential => { class => 'Nagios'      },
                                 store      => { class => 'FromCGIConf' }
-                	        }
-                    	}
+                            }
+                        }
                     }
     );
 

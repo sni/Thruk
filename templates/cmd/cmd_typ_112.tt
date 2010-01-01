@@ -2,6 +2,7 @@
 [% IF c.check_user_roles('is_authorized_for_read_only')
    || (!c.check_user_roles('authorized_for_all_service_commands') && !c.check_permissions('servicegroup', c.request.parameters.servicegroup))
 %]
+[% WRAPPER error.tt errorMessage = "you are not authorized for this command" errorDescription = "check your configuration if you believe this is an error" %][% END %]
 [% ELSE %]
 
 [%# description used by the commands page #%]

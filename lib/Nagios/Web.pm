@@ -19,7 +19,7 @@ use Nagios::Web::Helper;
 use parent qw/Catalyst/;
 use Catalyst qw/
                 Authentication
-                Authorization::Roles
+                Authorization::NagiosRoles
                 CustomErrorMessage
                 ConfigLoader
                 StackTrace

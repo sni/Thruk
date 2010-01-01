@@ -27,6 +27,8 @@ sub index :Path :Args(1) {
     # if there is no cgi config, always return the cgi error
     if(!defined $c->{'cgi_cfg'} or scalar keys %{$c->{'cgi_cfg'}} == 0) { $arg1 = 4; }
 
+    my $code = 200;
+
     my $errors = {
         '99'  => {
             'mess' => '',
@@ -35,6 +37,7 @@ sub index :Path :Args(1) {
         '0'  => {
             'mess' => 'unknown error: '.$arg1,
             'dscr' => 'this is a internal error',
+            'code' => 500,
         },
         '1'  => {
             'mess' => 'It appears as though you do not have permission to view process information...',
@@ -51,6 +54,7 @@ sub index :Path :Args(1) {
         '4'  => {
             'mess' => 'Error: Could not open CGI config file \''.Nagios::Web->config->{'cgi_cfg'}.'\' for reading!',
             'dscr' => 'Here are some things you should check in order to resolve this error:</p><p></p><ol><li>Make sure you\'ve installed a CGI config file in its proper location.  See the error message about for details on where the CGI is expecting to find the configuration file.  A sample CGI configuration file (named <b>cgi.cfg</b>) can be found in the <b>sample-config/</b> subdirectory of the Nagios source code distribution. </li><li>Make sure the user your web server is running as has permission to read the CGI config file.</li></ol><p></p><p>Make sure you read the documentation on installing and configuring Nagios thoroughly before continuing.  If all else fails, try sending a message to one of the mailing lists.  More information can be found at <a href="http://www.nagios.org">http://www.nagios.org</a>.</p> ',
+            'code' => 500,
         },
         '5'  => {
             'mess' => 'It appears as though you do not have permission to view information for this host...',
@@ -86,11 +90,17 @@ sub index :Path :Args(1) {
     if($arg1 != 99) {
         $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};
         $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
+        $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
     }
 
     Nagios::Web->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
-    Nagios::Web->config->{'custom-error-message'}->{'response-status'}   = 403;
-    $c->error($errors->{$arg1}->{'mess'});
+    Nagios::Web->config->{'custom-error-message'}->{'response-status'}   = $code;
+    if($code == 500) {
+        #$c->error($errors->{$arg1}->{'mess'});
+        $c->log->error($errors->{$arg1}->{'mess'});
+    } else {
+        $c->log->info($errors->{$arg1}->{'mess'});
+    }
 
     ###############################
     if($c->user_exists) {

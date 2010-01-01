@@ -5,7 +5,6 @@ for version 1.0
 general
     - create models for hosts / services / contacts
     - reload cgi.cfg if changed
-    - overload role authentication ( to add host/service role checks )
     - fix authorization ( check services by host_contacts, comments/downtimes )
     - fix host/servicegroups pages with authorization
     - change logging to log4perl
