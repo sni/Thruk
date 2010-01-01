@@ -18,22 +18,13 @@ extinfo:
     - verify macros is action_url, icon_url and notes_url
     - finish performance data on extinfo type 4
 
-notifications:
-    - add timeperiod selector (day, week, month, custom)
-
 config:
     - add missing values
 
 avail:
     - missing completly
 
-showlogs:
-    - add timeperiod selector (day, week, month, custom)
-
 trends:
-    - missing completly
-
-history:
     - missing completly
 
 histogram:
@@ -56,5 +47,16 @@ livestatus:
 
 =========================================================
 after 1.0
+
+status:
     - proper search
+
+showlog:
     - proper logfile page
+    - time period selector (day,week,month,custom)
+
+history:
+    - time period selector (day,week,month,custom)
+
+notifications:
+    - time period selector (day,week,month,custom)

@@ -1,17 +1,53 @@
 [% USE date %]
 [% INCLUDE _header.tt %]
 
-    <table border="0" width="100%" cellpadding="0" cellspacing="0">
+[% link = '' %]
+[% IF service    != '' %][% link = link _ '&amp;' _ 'service='    _ service    %][% END %]
+[% IF host       != '' %][% link = link _ '&amp;' _ 'host='       _ host       %][% END %]
+[% IF noflapping != '' %][% link = link _ '&amp;' _ 'noflapping=' _ noflapping %][% END %]
+[% IF nodowntime != '' %][% link = link _ '&amp;' _ 'nodowntime=' _ nodowntime %][% END %]
+[% IF nosystem   != '' %][% link = link _ '&amp;' _ 'nosystem='   _ nosystem   %][% END %]
+[% IF type       != '' %][% link = link _ '&amp;' _ 'type='       _ type       %][% END %]
+[% IF statetype  != '' %][% link = link _ '&amp;' _ 'statetype='  _ statetype  %][% END %]
+
+    <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
-        [% INCLUDE _infobox.tt %]
+          [% INCLUDE _infobox.tt %]
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                [% IF service != '' and host != '' %]
+                <a href='notifications.cgi?host=[% host %]&amp;service=[% service %]'>View Notifications For This Service</a><br>
+                <a href='trends.cgi?host=[% host %]&amp;service=[% service %]'>View Trends For This Service</a><br>
+                <a href='history.cgi?host=[% host %]'>View History For This Host</a>
+                [% ELSIF host != '' %]
+                <a href='status.cgi?host=[% host %]'>View Status Detail For This Host</a><br>
+                <a href='notifications.cgi?host=[% host %]'>View Notifications For This Host</a><br>
+                <a href='trends.cgi?host=[% host %]'>View Trends For This Host</a>
+                [% ELSE %]
+                <a href='status.cgi?host=all'>View Status Detail For All Hosts</a><br>
+                <a href='notifications.cgi?host=all'>View Notifications For All Hosts</a><br>
+                [% END %]
+              </td>
+            </tr>
+          </table>
         </td>
         <td align="center" valign="top" width="33%">
+          <div align="center" class='dataTitle'>
+            [% IF service != '' and host != '' %]
+            Service '[% service %]' On Host '[% host %]'
+            [% ELSIF host != '' %]
+            Host '[% host %]'
+            [% ELSE %]
+            All Hosts and Services
+            [% END %]
+          </div><br>
           <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
             <tr>
               <td align="center" valign="middle" class='navBoxItem'>
                 Previous Day<br>
-                <a href='showlog.cgi?archive=[% archive + 1 %]'><img src='/nagios/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
+                <a href='history.cgi?archive=[% archive + 1 %][% link %]'><img src='/nagios/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
@@ -25,31 +61,71 @@
                 [% END %]
               </td>
               <td width="15"></td>
+
+              <td>
               [% IF archive >= 1 %]
               <td align="center" valign="middle" class='navBoxItem'>
                 Next Day<br>
-                <a href='showlog.cgi?archive=[% archive - 1 %]'><img src='/nagios/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
+                <a href='history.cgi?archive=[% archive - 1 %][% link %]'><img src='/nagios/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
               </td>
               [% ELSE %]
               <td><img src='/nagios/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
               [% END %]
             </tr>
-          </table>
-          <br>
+          </table><br>
         </td>
+
         <td align="right" valign="top" width="33%">
-          <form method='get' action='showlog.cgi'>
-            [% IF archive %]<input type='hidden' name='archive' value='[% archive %]'>[% END %]
-            <table border="0" cellspacing="0" cellpadding="0" class='optBox'>
+          <form method="get" action="history.cgi">
+              [% IF host    %]<input type='hidden' name='host'    value='[% host    %]'>[% END %]
+              [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
+              [% IF archive %]<input type='hidden' name='archive' value='[% archive %]'>[% END %]
+            <table border="0" class='optBox'>
               <tr>
-                <td align="left" valign="bottom" class='optBoxItem'>
-                  <input type='checkbox' name='oldestfirst'> Older Entries First:
+                <td align="left" class='optBoxItem'>State type options:</td>
+              </tr>
+              <tr>
+                <td align="left" class='optBoxItem'>
+                  <select name='statetype'>
+                    <option value="0"[% IF statetype == 0 %] selected[% END %]>All state types</option>
+                    <option value="1"[% IF statetype == 1 %] selected[% END %]>Soft states</option>
+                    <option value="2"[% IF statetype == 2 %] selected[% END %]>Hard states</option>
+                  </select>
                 </td>
               </tr>
               <tr>
-                <td align="left" valign="bottom" class='optBoxItem'>
-                  <input type='submit' value='Update'>
+                <td align="left" class='optBoxItem'>History detail level for all hosts:</td>
+              </tr>
+              <tr>
+                <td align="left" class='optBoxItem'>
+                  <select name='type'>
+                    <option value="0"[% IF   type ==   0 %] selected[% END %]>All alerts</option>
+                    <option value="1"[% IF   type ==   1 %] selected[% END %]>All service alerts</option>
+                    <option value="2"[% IF   type ==   2 %] selected[% END %]>All host alerts</option>
+                    <option value="4"[% IF   type ==   4 %] selected[% END %]>Service warning</option>
+                    <option value="8"[% IF   type ==   8 %] selected[% END %]>Service unknown</option>
+                    <option value="16"[% IF  type ==  16 %] selected[% END %]>Service critical</option>
+                    <option value="32"[% IF  type ==  32 %] selected[% END %]>Service recovery</option>
+                    <option value="64"[% IF  type ==  64 %] selected[% END %]>Host down</option>
+                    <option value="128"[% IF type == 128 %] selected[% END %]>Host unreachable</option>
+                    <option value="256"[% IF type == 256 %] selected[% END %]>Host recovery</option>
+                  </select>
                 </td>
+              </tr>
+              <tr>
+                <td align="left" valign="bottom" class='optBoxItem'><input type='checkbox' name='noflapping'[% IF noflapping %] checked[% END %]> Hide Flapping Alerts</td>
+              </tr>
+              <tr>
+                <td align="left" valign="bottom" class='optBoxItem'><input type='checkbox' name='nodowntime'[% IF nodowntime %] checked[% END %]> Hide Downtime Alerts</td>
+              </tr>
+              <tr>
+                <td align="left" valign="bottom" class='optBoxItem'><input type='checkbox' name='nosystem'[% IF nosystem %] checked[% END %]> Hide Process Messages</td>
+              </tr>
+              <tr>
+                <td align="left" valign="bottom" class='optBoxItem'><input type='checkbox' name='oldestfirst'[% IF oldestfirst %] checked[% END %]> Older Entries First</td>
+              </tr>
+              <tr>
+                <td align="left" class='optBoxItem'><input type='submit' value='Update'></td>
               </tr>
               <tr>
                 <td align="right"></td>
@@ -131,9 +207,14 @@
 [% END %]
 <img align='left' src='/nagios/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.message %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 [% END %]
-      </div>
-      <hr>
     </div>
 
+  [% IF !logs.size %]
+  <hr>
+  <div class='warningMessage'>No history information was found for this service in the current log file</div>
+  [% END %]
+
+
+  <hr>
 
 [% INCLUDE _footer.tt %]
