@@ -40,6 +40,22 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     $c->detach('/error/index/6') unless defined $cmd_typ;
 
+    # command disabled by config?
+    my $not_allowed = Nagios::Web->config->{'command_disabled'};
+    if(defined $not_allowed) {
+        my %command_disabled;
+        if(ref $not_allowed eq 'ARRAY') {
+            for my $num (@{$not_allowed}) {
+                $command_disabled{$num} = 1;
+            }
+        } else {
+            $command_disabled{$not_allowed} = 1;
+        }
+        if(defined $command_disabled{$cmd_typ}) {
+            $c->detach('/error/index/12');
+        }
+    }
+
     # read only user?
     $c->detach('/error/index/11') if $c->check_user_roles('is_authorized_for_read_only');
 

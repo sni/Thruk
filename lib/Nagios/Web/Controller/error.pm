@@ -84,6 +84,10 @@ sub index :Path :Args(1) {
             'mess' => 'It appears as though you do not have permission to send commands...',
             'dscr' => 'If you believe this is an error, check the configuration.',
         },
+        '12' => {
+            'mess' => 'Sorry, I can\'t let you do that...',
+            'dscr' => 'This command has been disabled by configuration and therefor cannot be executed.',
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

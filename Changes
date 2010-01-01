@@ -2,6 +2,7 @@ This file documents the revision history for Perl extension Nagios::Web.
 
 0.11_0  Fri Jan  1 20:01:12 CET 2010
           - added history page
+          - commands can be disabled by configuration
           - fixed problem with group auth
           - fixed version in infobox
 
