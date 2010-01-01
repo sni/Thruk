@@ -108,6 +108,8 @@ sub index :Path :Args(1) {
     } else {
         $c->stash->{'remote_user'}  = '?';
     }
+
+    $c->stash->{'template'} = Nagios::Web->config->{'custom-error-message'}->{'error-template'};
 }
 
 
