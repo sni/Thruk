@@ -64,22 +64,26 @@
             <tr>
               <td align="left" colspan="2" class='optBoxItem'>
                 <select name='type'>
-                  <option value="0" selected>All notifications</option>
-                  <option value="1">All service notifications</option>
-                  <option value="2">All host notifications</option>
-                  <option value="8192">Service custom</option>
-                  <option value="512">Service acknowledgements</option>
-                  <option value="4">Service warning</option>
-                  <option value="8">Service unknown</option>
-                  <option value="16">Service critical</option>
-                  <option value="32">Service recovery</option>
-                  <option value="2048">Service flapping</option>
-                  <option value="16384">Host custom</option>
-                  <option value="1024">Host acknowledgements</option>
-                  <option value="64">Host down</option>
-                  <option value="128">Host unreachable</option>
-                  <option value="256">Host recovery</option>
-                  <option value="4096">Host flapping</option>
+                  <option value="0"[%     IF type == 0     %] selected[% END %]>All notifications</option>
+                  [% IF service == '' %]
+                  <option value="1"[%     IF type == 1     %] selected[% END %]>All service notifications</option>
+                  <option value="2"[%     IF type == 2     %] selected[% END %]>All host notifications</option>
+                  [% END %]
+                  <option value="8192"[%  IF type == 8192  %] selected[% END %]>Service custom</option>
+                  <option value="512"[%   IF type == 512   %] selected[% END %]>Service acknowledgements</option>
+                  <option value="4"[%     IF type == 4     %] selected[% END %]>Service warning</option>
+                  <option value="8"[%     IF type == 8     %] selected[% END %]>Service unknown</option>
+                  <option value="16"[%    IF type == 16    %] selected[% END %]>Service critical</option>
+                  <option value="32"[%    IF type == 32    %] selected[% END %]>Service recovery</option>
+                  <option value="2048"[%  IF type == 2048  %] selected[% END %]>Service flapping</option>
+                  [% IF service == '' %]
+                  <option value="16384"[% IF type == 16384 %] selected[% END %]>Host custom</option>
+                  <option value="1024"[%  IF type == 1024  %] selected[% END %]>Host acknowledgements</option>
+                  <option value="64"[%    IF type == 64    %] selected[% END %]>Host down</option>
+                  <option value="128"[%   IF type == 128   %] selected[% END %]>Host unreachable</option>
+                  <option value="256"[%   IF type == 256   %] selected[% END %]>Host recovery</option>
+                  <option value="4096"[%  IF type == 4096  %] selected[% END %]>Host flapping</option>
+                  [% END %]
                 </select>
               </td>
             </tr>
@@ -109,9 +113,6 @@
     </table>
     </form>
 
-<center><font size="+2" color="red">This page is not yet completed</font></center>
-
-
     <div align='center'>
       <table border="0" class='notifications'>
         <tr>
@@ -128,30 +129,31 @@
         [% SET class = 'notificationsOdd'  IF loop.even %]
         [% SET class = 'notificationsEven' IF loop.odd %]
 
-        [% IF n.service_description != '' %]
-            [% IF n.state == 0 %]
-                [% SET statusclass = 'notificationsOK' %]
-                [% SET status      = 'OK'              %]
-            [% ELSIF n.state == 1 %]
-                [% SET statusclass = 'notificationsWARNING' %]
-                [% SET status      = 'WARNING'              %]
-            [% ELSIF n.state == 2 %]
-                [% SET statusclass = 'notificationsCRITICAL' %]
-                [% SET status      = 'CRITICAL'              %]
-            [% ELSIF n.state == 3 %]
-                [% SET statusclass = 'notificationsUNKNOWN' %]
-                [% SET status      = 'UNKNOWN'              %]
+        [% options = n.options.split(';') %]
+
+        [% IF n.message == 'SERVICE NOTIFICATION' %]
+            [% SET level = options.3 %]
+            [%    IF level == 'OK'              %][% level = 'OK'        statusclass = 'notificationsOK' %]
+            [% ELSIF level == 'RECOVERY'        %][% level = 'OK'        statusclass = 'notificationsOK' %]
+            [% ELSIF level == 'WARNING'         %][% level = 'WARNING'   statusclass = 'notificationsWARNING' %]
+            [% ELSIF level == 'CRITICAL'        %][% level = 'CRITICAL'  statusclass = 'notificationsCRITICAL' %]
+            [% ELSIF level.search('CUSTOM\ \(') %][%                     statusclass = 'notificationsCUSTOM' %]
+            [% ELSIF level.search('ACKNOWLEDGEMENT\ \(') %][%            statusclass = 'notificationsACKNOWLEDGEMENT' %]
+            [% ELSIF level.search('FLAPPINGSTART\ \(')   %][% level = 'FLAPPING START' statusclass = 'notificationsUNKNOWN' %]
+            [% ELSIF level.search('FLAPPINGSTOP\ \(')    %][% level = 'FLAPPING STOP'  statusclass = 'notificationsUNKNOWN' %]
+            [% ELSE                                      %][%   statusclass = 'notificationsUNKNOWN' %]
             [% END %]
         [% ELSE %]
-            [% IF n.state == 0 %]
-                [% SET statusclass = 'notificationsHOSTUP' %]
-                [% SET status      = 'HOST UP'             %]
-            [% ELSIF n.state == 1 %]
-                [% SET statusclass = 'notificationsHOSTDOWN' %]
-                [% SET status      = 'HOST DOWN'             %]
-            [% ELSIF n.state == 2 %]
-                [% SET statusclass = 'notificationsHOSTUNREACHABLE' %]
-                [% SET status      = 'HOST UNREACHABLE'             %]
+            [% SET level = options.2 %]
+            [%    IF level == 'UP'          %][% level = 'HOST UP'          statusclass = 'notificationsHOSTUP' %]
+            [% ELSIF level == 'RECOVERY'    %][% level = 'HOST UP'          statusclass = 'notificationsHOSTUP' %]
+            [% ELSIF level == 'DOWN'        %][% level = 'HOST DOWN'        statusclass = 'notificationsHOSTDOWN' %]
+            [% ELSIF level == 'UNREACHABLE' %][% level = 'HOST UNREACHABLE' statusclass = 'notificationsHOSTUNREACHABLE' %]
+            [% ELSIF level.search('CUSTOM\ \(') %][%                        statusclass = 'notificationsHOSTCUSTOM' %]
+            [% ELSIF level.search('ACKNOWLEDGEMENT\ \(') %][%               statusclass = 'notificationsHOSTACKNOWLEDGEMENT' %]
+            [% ELSIF level.search('FLAPPINGSTART\ \(')   %][% level = 'FLAPPING START' statusclass = 'notificationsUNKNOWN' %]
+            [% ELSIF level.search('FLAPPINGSTOP\ \(')    %][% level = 'FLAPPING STOP'  statusclass = 'notificationsUNKNOWN' %]
+            [% ELSE                                      %][%    statusclass = 'notificationsUNKNOWN' %]
             [% END %]
         [% END %]
 
@@ -164,7 +166,7 @@
             N/A
             [% END %]
           </td>
-          <td class='[% statusclass %]'>[% status %]</td>
+          <td class='[% statusclass %]'>[% level %]</td>
           <td class='[% class %]'>[% date.format(n.time, '%Y-%m-%d  %H:%M:%S') %]</td>
           <td class='[% class %]'><a href='config.cgi?type=contacts#[% n.contact_name %]'>[% n.contact_name %]</a></td>
           <td class='[% class %]'><a href='config.cgi?type=commands#[% n.command_name %]'>[% n.command_name %]</a></td>

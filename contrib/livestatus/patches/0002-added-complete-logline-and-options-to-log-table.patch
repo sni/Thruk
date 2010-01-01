@@ -1,0 +1,242 @@
+From cdd92b0a08b5135ef1f5709dd3abff185afbe563 Mon Sep 17 00:00:00 2001
+From: Sven Nierlein <sven@nierlein.de>
+Date: Tue, 29 Dec 2009 22:38:31 +0100
+Subject: [PATCH] added complete logline and options to log table
+
+
+Signed-off-by: Sven Nierlein <sven@nierlein.de>
+---
+ livestatus/src/LogEntry.cc |   84 ++++++++++++++++++++-----------------------
+ livestatus/src/LogEntry.h  |   14 ++++---
+ livestatus/src/TableLog.cc |    4 ++
+ 3 files changed, 51 insertions(+), 51 deletions(-)
+
+diff --git a/livestatus/src/LogEntry.cc b/livestatus/src/LogEntry.cc
+index 162c177..3e71abe 100644
+--- a/livestatus/src/LogEntry.cc
++++ b/livestatus/src/LogEntry.cc
+@@ -23,12 +23,22 @@ LogEntry::LogEntry(char *line)
+     _time = atoi(_msg+1);
+     _text = _msg + 13; // also skip space after timestamp
+ 
++    // keep complete log line
++    _line = strdup(_text);
++
++	char *scan = _text;
++	_text = next_token(&scan, ':');
++	scan++;
++
++    // keep options part of log line
++    _options = strdup(scan);
++
+     // now classify the log message. Some messages
+     // refer to other table, some do not.
+-    if (handleStatusEntry() ||
+-	handleNotificationEntry() ||
+-	handlePassiveCheckEntry() ||
+-	handleExternalCommandEntry())
++    if (handleStatusEntry(_text, scan) ||
++	handleNotificationEntry(_text, scan) ||
++	handlePassiveCheckEntry(_text, scan) ||
++	handleExternalCommandEntry(_text, scan))
+     {
+ 	if (_host_name)
+ 	    _host = find_host(_host_name);
+@@ -40,27 +50,26 @@ LogEntry::LogEntry(char *line)
+ 	    _command = find_command(_command_name);
+     }
+     else
+-	handleProgrammEntry();
++	handleProgrammEntry(_text, scan);
+     // rest is LOGCLASS_INFO
+ }
+ 
+ LogEntry::~LogEntry()
+ {
+     free(_msg);
++    free(_line);
++    free(_options);
+ }
+ 
+ 
+-bool LogEntry::handleStatusEntry()
++bool LogEntry::handleStatusEntry(char *text, char *scan)
+ {
+     // HOST states
+-    if (!strncmp(_text, "INITIAL HOST STATE: ", 20)
+-       || !strncmp(_text, "CURRENT HOST STATE: ", 20)
+-       || !strncmp(_text, "HOST ALERT: ", 12))
++    if (!strcmp(text, "INITIAL HOST STATE")
++       || !strcmp(text, "CURRENT HOST STATE")
++       || !strcmp(text, "HOST ALERT"))
+     {
+ 	_logclass = LOGCLASS_STATE;
+-	char *scan = _text;
+-	_text = next_token(&scan, ':');
+-	scan++;
+ 
+ 	_host_name    = next_token(&scan);
+ 	_state        = hostStateToInt(next_token(&scan));
+@@ -69,13 +78,10 @@ bool LogEntry::handleStatusEntry()
+ 	_check_output = next_token(&scan);
+ 	return true;
+     }
+-    else if (!strncmp(_text, "HOST DOWNTIME ALERT: ", 21)
+-	    || !strncmp(_text, "HOST FLAPPING ALERT: ", 21))
++    else if (!strcmp(text, "HOST DOWNTIME ALERT")
++	    || !strcmp(text, "HOST FLAPPING ALERT"))
+     {
+ 	_logclass = LOGCLASS_STATE;
+-	char *scan = _text;
+-	_text = next_token(&scan, ':');
+-	scan++;
+ 	
+ 	_host_name    = next_token(&scan);
+ 	_state_type   = startedStoppedToInt(next_token(&scan));
+@@ -84,14 +90,11 @@ bool LogEntry::handleStatusEntry()
+     }
+ 
+     // SERVICE states
+-    else if (!strncmp(_text, "INITIAL SERVICE STATE: ", 23)
+-       || !strncmp(_text, "CURRENT SERVICE STATE: ", 23)
+-       || !strncmp(_text, "SERVICE ALERT: ", 15))
++    else if (!strcmp(text, "INITIAL SERVICE STATE")
++       || !strcmp(text, "CURRENT SERVICE STATE")
++       || !strcmp(text, "SERVICE ALERT"))
+     {
+ 	_logclass = LOGCLASS_STATE;
+-	char *scan = _text;
+-	_text = next_token(&scan, ':');
+-	scan++;
+ 
+ 	_host_name    = next_token(&scan);
+ 	_svc_desc     = next_token(&scan);
+@@ -101,13 +104,10 @@ bool LogEntry::handleStatusEntry()
+ 	_check_output = next_token(&scan);
+ 	return true;
+     }
+-    else if (!strncmp(_text, "SERVICE DOWNTIME ALERT: ", 24)
+-          || !strncmp(_text, "SERVICE FLAPPING ALERT: ", 24))
++    else if (!strcmp(text, "SERVICE DOWNTIME ALERT")
++          || !strcmp(text, "SERVICE FLAPPING ALERT"))
+     {
+ 	_logclass = LOGCLASS_STATE;
+-	char *scan = _text;
+-	_text = next_token(&scan, ':');
+-	scan++;
+ 	
+ 	_host_name    = next_token(&scan);
+ 	_svc_desc     = next_token(&scan);
+@@ -119,16 +119,13 @@ bool LogEntry::handleStatusEntry()
+ 
+ }
+ 
+-bool LogEntry::handleNotificationEntry()
++bool LogEntry::handleNotificationEntry(char *text, char *scan)
+ {
+-    if (!strncmp(_text, "HOST NOTIFICATION: ", 19)
+-        || !strncmp(_text, "SERVICE NOTIFICATION: ", 22))
++    if (!strcmp(text, "HOST NOTIFICATION")
++        || !strcmp(text, "SERVICE NOTIFICATION"))
+     {
+ 	_logclass = LOGCLASS_NOTIFICATION;
+-	bool svc = _text[0] == 'S';
+-	char *scan = _text;
+-	_text = next_token(&scan, ':');
+-	scan++;
++	bool svc = text[0] == 'S';
+ 	
+ 	_contact_name  = next_token(&scan);
+ 	_host_name     = next_token(&scan);
+@@ -145,16 +142,13 @@ bool LogEntry::handleNotificationEntry()
+     return false;
+ }
+ 
+-bool LogEntry::handlePassiveCheckEntry()
++bool LogEntry::handlePassiveCheckEntry(char *text, char *scan)
+ {
+-    if (!strncmp(_text, "PASSIVE SERVICE CHECK: ", 23)
+-       || !strncmp(_text, "PASSIVE HOST CHECK: ", 20))
++    if (!strcmp(text, "PASSIVE SERVICE CHECK")
++       || !strcmp(text, "PASSIVE HOST CHECK"))
+     {
+ 	_logclass = LOGCLASS_PASSIVECHECK;
+-	bool svc = _text[8] == 'S';
+-	char *scan = _text;
+-	_text = next_token(&scan, ':');
+-	scan++;
++	bool svc = text[8] == 'S';
+ 
+ 	_host_name    = next_token(&scan);
+ 	if (svc) 
+@@ -167,9 +161,9 @@ bool LogEntry::handlePassiveCheckEntry()
+     return false;
+ }
+ 
+-bool LogEntry::handleExternalCommandEntry()
++bool LogEntry::handleExternalCommandEntry(char *text, char *scan)
+ {
+-    if (!strncmp(_text, "EXTERNAL COMMAND:", 17)) 
++    if (!strcmp(text, "EXTERNAL COMMAND"))
+     {
+ 	_logclass = LOGCLASS_COMMAND;
+ 	_text = _text + 18;
+@@ -182,7 +176,7 @@ bool LogEntry::handleExternalCommandEntry()
+     return false;
+ }
+ 
+-bool LogEntry::handleProgrammEntry()
++bool LogEntry::handleProgrammEntry(char *text, char *scan)
+ {
+     return false;
+ }
+diff --git a/livestatus/src/LogEntry.h b/livestatus/src/LogEntry.h
+index 7d829cb..1a43509 100644
+--- a/livestatus/src/LogEntry.h
++++ b/livestatus/src/LogEntry.h
+@@ -16,6 +16,8 @@ struct LogEntry
+ {
+     time_t     _time;
+     unsigned   _logclass;
++    char      *_line;      // complete line without timestamp
++    char      *_options;   // options part of message
+     char      *_msg;       // split up with binary zeroes
+     unsigned   _msglen;    // size of _msg
+     char      *_text;      // points into msg
+@@ -38,12 +40,12 @@ struct LogEntry
+     ~LogEntry();
+ 
+ private:
+-    bool handleStatusEntry();
+-    bool handleNotificationEntry();
+-    bool handlePassiveCheckEntry();
+-    bool handleExternalCommandEntry();
+-    bool handleProgrammEntry();
+-    bool handleInfoEntry();
++    bool handleStatusEntry(char *text, char *scan);
++    bool handleNotificationEntry(char *text, char *scan);
++    bool handlePassiveCheckEntry(char *text, char *scan);
++    bool handleExternalCommandEntry(char *text, char *scan);
++    bool handleProgrammEntry(char *text, char *scan);
++    bool handleInfoEntry(char *text, char *scan);
+     int serviceStateToInt(char *s);
+     int hostStateToInt(char *s);
+     int stateTypeToInt(char *s);
+diff --git a/livestatus/src/TableLog.cc b/livestatus/src/TableLog.cc
+index b19455e..04dbc0a 100644
+--- a/livestatus/src/TableLog.cc
++++ b/livestatus/src/TableLog.cc
+@@ -69,6 +69,10 @@ TableLog::TableLog()
+ 
+     addColumn(new OffsetStringColumn("message", 
+ 		"The message (test)", (char *)&(ref->_text) - (char *)ref, -1));
++    addColumn(new OffsetStringColumn("options", 
++		"The options part of the log line", (char *)&(ref->_options) - (char *)ref, -1));
++    addColumn(new OffsetStringColumn("line", 
++		"The logline without timestamp", (char *)&(ref->_line) - (char *)ref, -1));
+     addColumn(new OffsetStringColumn("comment", 
+ 		"A comment field used in various message types", (char *)&(ref->_comment) - (char *)ref, -1));
+     addColumn(new OffsetStringColumn("plugin_output", 
+-- 
+1.6.0.4
+

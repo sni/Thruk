@@ -33,7 +33,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $service     = $c->{'request'}->{'parameters'}->{'service'}     || '';
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
 
-    my $filter  = "Limit: 1000\n"; # just for debugging now...
+    my $filter  = $self->_get_log_prop_filter($type);
 
     # start with today 00:00
     my $timeperiod = 86400;
@@ -43,9 +43,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     my ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
     $hour = 0; $min = 0; $sec = 0;
-    my $start = Mktime($year,$month,$day, $hour,$min,$sec);
-    my $end   = $start - $timeperiod * ($archive + 1);
-    $start    = $end - $timeperiod;
+    my $today = Mktime($year,$month,$day, $hour,$min,$sec);
+    my $end   = $today - ($timeperiod * ($archive-1));
+    my $start = $end - $timeperiod;
 
 
     $filter .= "Filter: time >= $start\n";
@@ -65,17 +65,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     my $query = "GET log\n$filter\n";
-    $query   .= "Columns: message host_name service_description plugin_output state time command_name contact_name\n";
+    $query   .= "Columns: message host_name service_description plugin_output state time command_name contact_name options\n";
     $query   .= "Filter: class = 3\n";
     $query   .= Nagios::Web::Helper::get_auth_filter($c, 'log');
 
     my $notifications = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
-#    $notifications = $c->{'live'}->selectall_hashref("GET log\nColumns: class message\nFilter: time >= $start\nFilter: time <= $end\n".Nagios::Web::Helper::get_auth_filter($c, 'log'), 'class');
-#use Data::Dumper;
-#print "HTTP/1.1 200 OK\n\n<html><pre>";
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($query);
-#print Dumper($notifications);
 
     if(!$oldestfirst) {
         @{$notifications} = reverse @{$notifications};
@@ -97,6 +91,72 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{'no_auto_reload'} = 1;
 }
 
+
+##########################################################
+sub _get_log_prop_filter {
+    my ( $self, $number ) = @_;
+
+    $number = 0 if !defined $number or $number <= 0 or $number > 32767;
+    my $filter = '';
+    if($number > 0) {
+        my @prop_filter;
+        my @bits = reverse split(/ */, unpack("B*", pack("N", int($number))));
+
+        if($bits[0]) {  # 1 - All service notifications
+            push @prop_filter, "Filter: service_description !=";
+        }
+        if($bits[1]) {  # 2 - All host notifications
+            push @prop_filter, "Filter: service_description = ";
+        }
+        if($bits[2]) {  # 4 - Service warning
+            push @prop_filter, "Filter: state = 1\nFilter: service_description != \nAnd: 2";
+        }
+        if($bits[3]) {  # 8 - Service unknown
+            push @prop_filter, "Filter: state = 3\nFilter: service_description != \nAnd: 2";
+        }
+        if($bits[4]) {  # 16 - Service critical
+            push @prop_filter, "Filter: state = 2\nFilter: service_description != \nAnd: 2";
+        }
+        if($bits[5]) {  # 32 - Service recovery
+            push @prop_filter, "Filter: state = 0\nFilter: service_description != \nAnd: 2";
+        }
+        if($bits[6]) {  # 64 - Host down
+            push @prop_filter, "Filter: state = 1\nFilter: service_description = \nAnd: 2";
+        }
+        if($bits[7]) {  # 128 - Host unreachable
+            push @prop_filter, "Filter: state = 2\nFilter: service_description = \nAnd: 2";
+        }
+        if($bits[8]) {  # 256 - Host recovery
+            push @prop_filter, "Filter: state = 0\nFilter: service_description = \nAnd: 2";
+        }
+        if($bits[9]) {  # 512 - Service acknowledgements
+            push @prop_filter, "Filter: service_description != \nFilter: options ~ ;ACKNOWLEDGEMENT\nAnd: 2";
+        }
+        if($bits[10]) {  # 1024 - Host acknowledgements
+            push @prop_filter, "Filter: service_description = \nFilter: options ~ ;ACKNOWLEDGEMENT\nAnd: 2";
+        }
+        if($bits[11]) {  # 2048 - Service flapping
+            push @prop_filter, "Filter: service_description != \nFilter: options ~ ;FLAPPING\nAnd: 2";
+        }
+        if($bits[12]) {  # 4096 - Host flapping
+            push @prop_filter, "Filter: service_description = \nFilter: options ~ ;FLAPPING\nAnd: 2";
+        }
+        if($bits[13]) {  # 8192 - Service custom
+            push @prop_filter, "Filter: service_description != \nFilter: options ~ ;CUSTOM\nAnd: 2";
+        }
+        if($bits[14]) {  # 16384 - Host custom
+            push @prop_filter, "Filter: service_description = \nFilter: options ~ ;CUSTOM\nAnd: 2";
+        }
+
+        if(scalar @prop_filter > 1) {
+            $filter .= join("\n", @prop_filter)."\nOr: ".(scalar @prop_filter)."\n";
+        }
+        elsif(scalar @prop_filter == 1) {
+            $filter .= $prop_filter[0]."\n";
+        }
+    }
+    return($filter);
+}
 
 =head1 AUTHOR
 
