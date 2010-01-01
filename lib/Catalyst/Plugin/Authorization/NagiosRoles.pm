@@ -20,7 +20,7 @@ sub check_permissions {
         $count = $c->{'live'}->selectscalar_value("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nStats: description = $value\nFilter: host_name = $value2", { Sum => 1 });
     }
     elsif($type eq 'hostgroup') {
-        my $count1 = $c->{'live'}->selectscalar_value("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\nStats: group >= $value", { Sum => 1 });
+        my $count1 = $c->{'live'}->selectscalar_value("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\nStats: groups >= $value", { Sum => 1 });
         my $count2 = $c->{'live'}->selectscalar_value("GET hosts\nStats: group >= $value", { Sum => 1 });
         $count = 0;
         if(defined $count1 and defined $count2 and $count1 == $count2 and $count2 != 0) {
@@ -28,7 +28,7 @@ sub check_permissions {
         }
     }
     elsif($type eq 'servicegroup') {
-        my $count1 = $c->{'live'}->selectscalar_value("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nStats: group >= $value", { Sum => 1 });
+        my $count1 = $c->{'live'}->selectscalar_value("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nStats: groups >= $value", { Sum => 1 });
         my $count2 = $c->{'live'}->selectscalar_value("GET services\nStats: group >= $value", { Sum => 1 });
         $count = 0;
         if(defined $count1 and defined $count2 and $count1 == $count2 and $count2 != 0) {

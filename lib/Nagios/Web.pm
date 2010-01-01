@@ -26,7 +26,7 @@ use Catalyst qw/
                 Static::Simple
                 Compress::Gzip
                 Redirect/;
-our $VERSION = '0.10_6';
+our $VERSION = '0.11_0';
 
 # Configure the application.
 #
@@ -38,6 +38,7 @@ our $VERSION = '0.10_6';
 # local deployment.
 
 __PACKAGE__->config('name'                   => 'Nagios::Web',
+                    'version'                => $VERSION,
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',
                         ENCODING           => 'utf8',

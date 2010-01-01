@@ -34,6 +34,9 @@ before 'execute' => sub {
 #    $c->stash->{'no_auto_reload'} = 0;
 
     ###############################
+    $c->stash->{'version'} = Nagios::Web->config->{'version'};
+
+    ###############################
     # parse cgi.cfg
     $c->{'cgi_cfg'} = Nagios::Web::Helper->get_cgi_cfg($c);
 
