@@ -75,6 +75,7 @@ sub index :Path :Args(1) {
         '9'  => {
             'mess' => 'No Backend available',
             'dscr' => 'None of the configured Backends could be reached, please have a look at the logfile for more information.',
+            'code' => 500,
         },
         '10' => {
             'mess' => 'You are not authorized.',

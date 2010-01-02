@@ -120,7 +120,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 
     my $query = "GET log\nColumns: time message options state\n".$filter;
-    $c->log->debug($query);
+    #$c->log->debug($query);
     $query   .= Nagios::Web::Helper::get_auth_filter($c, 'log');
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});

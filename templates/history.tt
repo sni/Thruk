@@ -136,25 +136,24 @@
       </tr>
     </table>
 
-<div class='logEntries'>
 [% SET last_hour = '' %]
 [% FOREACH l = logs %]
 [% this_hour = date.format(l.time, '%Y-%m-%d  %H') _ ':00' %]
 [% IF this_hour != last_hour %]
   [% SET last_hour = this_hour %]
-      </div>
-      <br clear='all'>
-      <div class='dateTimeBreak'>
-        <table border="0" width="95%">
-          <tr>
-            <td width="40%"><hr width="100%"></td>
-            <td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td>
-            <td width="40%"><hr width="100%"></td>
-          </tr>
-        </table>
-      </div>
-      <br clear='all'>
-      <div class='logEntries'>
+    [% IF ! loop.first %]</div>[% END %]
+    <br clear='all'>
+    <div class='dateTimeBreak'>
+      <table border="0" width="95%">
+        <tr>
+          <td width="40%"><hr width="100%"></td>
+          <td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td>
+          <td width="40%"><hr width="100%"></td>
+        </tr>
+      </table>
+    </div>
+    <br clear='all'>
+    <div class='logEntries'>
 [% END %]
 
 [%    IF l.message == 'SERVICE NOTIFICATION'         %][% SET pic = "notify.gif"        desc = "Service Notification" %]
@@ -213,7 +212,6 @@
   <hr>
   <div class='warningMessage'>No history information was found for this service in the current log file</div>
   [% END %]
-
 
   <hr>
 
