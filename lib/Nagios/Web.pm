@@ -24,8 +24,9 @@ use Catalyst qw/
                 ConfigLoader
                 StackTrace
                 Static::Simple
+                Redirect
                 Compress::Gzip
-                Redirect/;
+                /;
 our $VERSION = '0.11_0';
 
 # Configure the application.
