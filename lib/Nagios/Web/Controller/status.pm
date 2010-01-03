@@ -258,7 +258,8 @@ sub _process_overview_page {
         $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Nagios::Web::Helper::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url action_url icon_image icon_image_alt\n$hostfilter", 'name' );
 
         # we have to sort in all services and states
-        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name\nFilter: groups !=", { Slice => {} })}) {
+        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Nagios::Web::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name", { Slice => {} })}) {
+            next if $service->{'description'} eq '';
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
         }
     }
