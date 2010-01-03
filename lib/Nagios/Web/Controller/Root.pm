@@ -174,8 +174,9 @@ Attempt to render a view, if needed.
 
 sub end : ActionClass('RenderView') {
     my ( $self, $c ) = @_;
-    if($c->error) {
-        for my $error (@{$c->error}) {
+    my @errors = @{$c->error};
+    if(scalar @errors > 0) {
+        for my $error (@errors) {
             $c->log->error($error);
         }
         $c->detach('/error/index/13');

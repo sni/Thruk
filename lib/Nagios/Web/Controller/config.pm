@@ -37,6 +37,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{type}             = $type;
     return unless defined $type;
 
+    # timeperiods
+    if($type eq 'timeperiods') {
+        my $data = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name alias", { Slice => 1, AddPeer => 1 });
+        $data    = Nagios::Web::Helper->remove_duplicates($c, $data);
+        $data    = Nagios::Web::Helper->sort($c, $data, 'name');
+        $c->stash->{data}     = $data;
+        $c->stash->{template} = 'config_timeperiods.tt';
+    }
+
     # commands
     if($type eq 'commands') {
         my $data = $c->{'live'}->selectall_arrayref("GET commands\nColumns: name line", { Slice => 1, AddPeer => 1 });

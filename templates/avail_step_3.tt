@@ -1,0 +1,186 @@
+[% USE date %]
+[% INCLUDE _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% INCLUDE _infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%"></td>
+
+        <td align="right" valign="bottom" width="33%">
+          <table border="0" class='optBox'>
+            <tr>
+              <td></td>
+              <td align="right" valign="bottom"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <div align="center" class='dateSelectTitle'>Step 3: Select Report Options</div>
+    <div align="center">
+      <form method="get" action="avail.cgi">
+        [% IF report_type %]<input type='hidden' name='report_type' value='[% report_type %]'>[% END %]
+        [% IF hosts %]<input type='hidden' name='host' value='[% hosts %]'>[% END %]
+        [% IF hostgroups %]<input type='hidden' name='hostgroup' value='[% hostgroups %]'>[% END %]
+        [% IF services %]<input type='hidden' name='service' value='[% services %]'>[% END %]
+        [% IF servicegroups %]<input type='hidden' name='servicegroup' value='[% servicegroups %]'>[% END %]
+        <table border="0" cellpadding="5">
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>Report Period:</td>
+            <td valign="top" align="left" class='optBoxItem'>
+              <select name='timeperiod'>
+                <option value="today">Today</option>
+                <option value="last24hours">Last 24 Hours</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="thisweek">This Week</option>
+                <option value="last7days" selected>Last 7 Days</option>
+                <option value="lastweek">Last Week</option>
+                <option value="thismonth">This Month</option>
+                <option value="last31days">Last 31 Days</option>
+                <option value="lastmonth">Last Month</option>
+                <option value="thisyear">This Year</option>
+                <option value="lastyear">Last Year</option>
+                <option value="custom">* CUSTOM REPORT PERIOD *</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>If Custom Report Period...</td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>Start Date (Inclusive):</td>
+            <td align="left" valign="top" class='reportSelectItem'>
+              <select name='smon'>
+                <option value='1' selected>January</option>
+                <option value='2'>February</option>
+                <option value='3'>March</option>
+                <option value='4'>April</option>
+                <option value='5'>May</option>
+                <option value='6'>June</option>
+                <option value='7'>July</option>
+                <option value='8'>August</option>
+                <option value='9'>September</option>
+                <option value='10'>October</option>
+                <option value='11'>November</option>
+                <option value='12'>December</option>
+              </select>
+              [% SET yesterday = date.now - 86400 %]
+              <input type='text' size='2' maxlength='2' name='sday' value='[% date.format(yesterday, '%d') %]'>
+              <input type='text' size='4' maxlength='4' name='syear' value='[% date.format(yesterday, '%Y') %]'>
+              <input type='hidden' name='shour' value='0'>
+              <input type='hidden' name='smin' value='0'>
+              <input type='hidden' name='ssec' value='0'>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>End Date (Inclusive):</td>
+            <td align="left" valign="top" class='reportSelectItem'>
+              <select name='emon'>
+                <option value='1' selected>January</option>
+                <option value='2'>February</option>
+                <option value='3'>March</option>
+                <option value='4'>April</option>
+                <option value='5'>May</option>
+                <option value='6'>June</option>
+                <option value='7'>July</option>
+                <option value='8'>August</option>
+                <option value='9'>September</option>
+                <option value='10'>October</option>
+                <option value='11'>November</option>
+                <option value='12'>December</option>
+              </select>
+              <input type='text' size='2' maxlength='2' name='eday' value='[% date.format(date.now, '%d') %]'>
+              <input type='text' size='4' maxlength='4' name='eyear' value='[% date.format(date.now, '%Y') %]'>
+              <input type='hidden' name='ehour' value='24'>
+              <input type='hidden' name='emin' value='0'>
+              <input type='hidden' name='esec' value='0'>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><br></td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>Report time Period:</td>
+            <td valign="top" align="left" class='optBoxItem'>
+              <select name='rpttimeperiod'>
+                <option value="">None</option>
+                [% FOREACH t = timeperiods %]
+                <option value="[% t.name %]">[% t.name %]</option>
+                [% END %]
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><br></td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Assume Initial States:</td>
+            <td class='reportSelectItem'>
+              <select name='assumeinitialstates'>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Assume State Retention:</td>
+            <td class='reportSelectItem'>
+              <select name='assumestateretention'>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Assume States During Program Downtime:</td>
+            <td class='reportSelectItem'>
+              <select name='assumestatesduringnotrunning'>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Include Soft States:</td>
+            <td class='reportSelectItem'>
+              <select name='includesoftstates'>
+                <option value="yes">Yes</option>
+                <option value="no" selected>No</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">First Assumed Service State:</td>
+            <td class='reportSelectItem'>
+              <select name='initialassumedservicestate'>
+                <option value="0">Unspecified</option>
+                <option value="-1">Current State</option>
+                <option value="6">Service Ok</option>
+                <option value="8">Service Warning</option>
+                <option value="7">Service Unknown</option>
+                <option value="9">Service Critical</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Backtracked Archives (To Scan For Initial States):</td>
+            <td class='reportSelectItem'><input type='text' name='backtrack' size='2' maxlength='2' value='4'></td>
+          </tr>
+          [% IF report_type == 'hosts' and hosts == 'all' or report_type == 'services' and services == 'all' %]
+          <tr>'
+            <td valign="top" class='reportSelectSubTitle'>Output in CSV Format:</td>
+            <td valign="top" class='reportSelectItem'><input type='checkbox' name='csvoutput' value=''></td>
+          </tr>
+          [% END %]
+          <tr>
+            <td></td>
+            <td align="left" class='dateSelectItem'><input type='submit' value='Create Availability Report!'></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+
+[% INCLUDE _footer.tt %]
