@@ -1,0 +1,199 @@
+From f4ab4a1b0b9f5c7161ae439f931b15c9c69b778f Mon Sep 17 00:00:00 2001
+From: Sven Nierlein <sven@nierlein.de>
+Date: Sun, 3 Jan 2010 14:57:11 +0100
+Subject: [PATCH] added new table contactgroups
+
+
+Signed-off-by: Sven Nierlein <sven@nierlein.de>
+---
+ livestatus/src/ContactgroupsMemberColumn.cc |    9 ++++++
+ livestatus/src/ContactgroupsMemberColumn.h  |   18 +++++++++++++
+ livestatus/src/Makefile.am                  |    3 +-
+ livestatus/src/Store.cc                     |    2 +
+ livestatus/src/Store.h                      |    2 +
+ livestatus/src/TableContactgroups.cc        |   36 +++++++++++++++++++++++++++
+ livestatus/src/TableContactgroups.h         |   20 +++++++++++++++
+ livestatus/src/tables.h                     |    2 +
+ 8 files changed, 91 insertions(+), 1 deletions(-)
+ create mode 100644 livestatus/src/ContactgroupsMemberColumn.cc
+ create mode 100644 livestatus/src/ContactgroupsMemberColumn.h
+ create mode 100644 livestatus/src/TableContactgroups.cc
+ create mode 100644 livestatus/src/TableContactgroups.h
+
+diff --git a/livestatus/src/ContactgroupsMemberColumn.cc b/livestatus/src/ContactgroupsMemberColumn.cc
+new file mode 100644
+index 0000000..869ec0a
+--- /dev/null
++++ b/livestatus/src/ContactgroupsMemberColumn.cc
+@@ -0,0 +1,9 @@
++#include "nagios.h"
++#include "ContactgroupsMemberColumn.h"
++#include "logger.h"
++
++bool ContactgroupsMemberColumn::isNagiosMember(void *cg, void *ctc)
++{
++   return is_contact_member_of_contactgroup((contactgroup *)cg, (contact *)ctc);
++}
++
+diff --git a/livestatus/src/ContactgroupsMemberColumn.h b/livestatus/src/ContactgroupsMemberColumn.h
+new file mode 100644
+index 0000000..edb99aa
+--- /dev/null
++++ b/livestatus/src/ContactgroupsMemberColumn.h
+@@ -0,0 +1,18 @@
++#ifndef ContactgroupsMemberColumn_h
++#define ContactgroupsMemberColumn_h
++
++#include "config.h"
++
++#include "ContactsColumn.h"
++
++class ContactgroupsMemberColumn : public ContactsColumn
++{
++public:
++   ContactgroupsMemberColumn(string name, string description, int indirect_offset)
++      : ContactsColumn(name, description, indirect_offset) {};
++   int type() { return COLTYPE_LIST; };
++   bool isNagiosMember(void *data, void *member);
++};
++
++#endif // ContactgroupsMemberColumn_h
++
+diff --git a/livestatus/src/Makefile.am b/livestatus/src/Makefile.am
+index 3b7b218..1790764 100644
+--- a/livestatus/src/Makefile.am
++++ b/livestatus/src/Makefile.am
+@@ -41,7 +41,8 @@ livestatus_so_SOURCES = \
+ 	StringColumn.cc StringColumnFilter.cc strutil.cc Table.cc TableColumns.cc \
+ 	TableCommands.cc TableContacts.cc TableDownComm.cc TableHostgroups.cc \
+ 	TableHosts.cc TableServicegroups.cc TableServices.cc TableStatus.cc  \
+-	LogEntry.cc Logfile.cc TableLog.cc TableTimeperiods.cc \
++	LogEntry.cc Logfile.cc TableLog.cc TableTimeperiods.cc TableContactgroups.cc \
++	ContactgroupsMemberColumn.cc \
+ 	global_counters.c  module.c  logger.c 
+ 
+ livestatus_so_CXXFLAGS = -I$(top_srcdir)/nagios -fPIC
+diff --git a/livestatus/src/Store.cc b/livestatus/src/Store.cc
+index f791280..80b1a78 100644
+--- a/livestatus/src/Store.cc
++++ b/livestatus/src/Store.cc
+@@ -50,6 +50,7 @@ Store::Store()
+     _tables.insert(make_pair("status", &_table_status));
+     _tables.insert(make_pair("log", &_table_log));
+     _tables.insert(make_pair("timeperiods", &_table_timeperiods));
++    _tables.insert(make_pair("contactgroups", &_table_contactgroups));
+     _tables.insert(make_pair("columns", &_table_columns));
+ 
+     g_table_hosts = &_table_hosts;
+@@ -62,6 +63,7 @@ Store::Store()
+     g_table_comments = &_table_comments;
+     g_table_status = &_table_status;
+     g_table_timeperiods = &_table_timeperiods;
++    g_table_contactgroups = &_table_contactgroups;
+     g_table_log = &_table_log;
+     g_table_columns = &_table_columns;
+ 
+diff --git a/livestatus/src/Store.h b/livestatus/src/Store.h
+index 0fbcb14..1e97737 100644
+--- a/livestatus/src/Store.h
++++ b/livestatus/src/Store.h
+@@ -34,6 +34,7 @@
+ #include "TableContacts.h"
+ #include "TableCommands.h"
+ #include "TableTimeperiods.h"
++#include "TableContactgroups.h"
+ #include "TableDownComm.h"
+ #include "TableStatus.h"
+ #include "TableLog.h"
+@@ -50,6 +51,7 @@ class Store
+   TableHostgroups    _table_hostgroups;
+   TableServicegroups _table_servicegroups;
+   TableTimeperiods   _table_timeperiods;
++  TableContactgroups _table_contactgroups;
+   TableDownComm      _table_downtimes;
+   TableDownComm      _table_comments;
+   TableStatus        _table_status;
+diff --git a/livestatus/src/TableContactgroups.cc b/livestatus/src/TableContactgroups.cc
+new file mode 100644
+index 0000000..cb2cd08
+--- /dev/null
++++ b/livestatus/src/TableContactgroups.cc
+@@ -0,0 +1,36 @@
++#define NSCORE
++#include "nagios.h"
++#include "Query.h"
++#include "OffsetStringColumn.h"
++#include "TableContactgroups.h"
++#include "ContactgroupsMemberColumn.h"
++
++extern contactgroup *contactgroup_list;
++
++TableContactgroups::TableContactgroups()
++{
++    addColumns(this, "", -1);
++}
++
++
++void TableContactgroups::addColumns(Table *table, string prefix, int indirect_offset)
++{
++   contactgroup cg;
++   char *ref = (char *)&cg;
++   table->addColumn(new OffsetStringColumn(prefix + "name",
++      "The name of the contactgroup", (char *)(&cg.group_name) - ref, indirect_offset));
++   table->addColumn(new OffsetStringColumn(prefix + "alias",
++      "The alias of the contactgroup", (char *)(&cg.alias) - ref, indirect_offset));
++   table->addColumn(new ContactgroupsMemberColumn(prefix + "members",
++      "A list of all members of this contactgroup", indirect_offset));
++}
++
++
++void TableContactgroups::answerQuery(Query *query)
++{
++   contactgroup *cg = contactgroup_list;
++   while (cg) {
++      if (!query->processDataset(cg)) break;
++      cg = cg->next;
++   }
++}
+diff --git a/livestatus/src/TableContactgroups.h b/livestatus/src/TableContactgroups.h
+new file mode 100644
+index 0000000..2f9326c
+--- /dev/null
++++ b/livestatus/src/TableContactgroups.h
+@@ -0,0 +1,20 @@
++#ifndef TableContactgroups_h
++#define TableContactgroups_h
++
++#include "config.h"
++
++#include <set>
++#include "Table.h"
++#include "nagios/objects.h"
++
++class TableContactgroups : public Table
++{
++public:
++  TableContactgroups();
++  const char *name() { return "contactgroups"; };
++  void answerQuery(Query *query);
++  void addColumns(Table *table, string prefix, int indirect_offset);
++};
++
++#endif // TableContactgroups_h
++
+diff --git a/livestatus/src/tables.h b/livestatus/src/tables.h
+index c15f65d..450c488 100644
+--- a/livestatus/src/tables.h
++++ b/livestatus/src/tables.h
+@@ -23,6 +23,8 @@ class TableDownComm;
+ EXTERN TableDownComm      *g_table_comments;
+ class TableTimeperiods;
+ EXTERN TableTimeperiods   *g_table_timeperiods;
++class TableContactgroups;
++EXTERN TableContactgroups *g_table_contactgroups;
+ class TableStatus;
+ EXTERN TableStatus        *g_table_status;
+ class TableLog;
+-- 
+1.6.0.4
+
