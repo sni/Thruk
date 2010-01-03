@@ -32,18 +32,14 @@ histogram:
 
 livestatus:
     - StatsSum: ( needed by tac and extinfo 4 )
-    - Status: interval_length from nagios.cfg
     - Contacts: Service Notification Options, Host Notification Options, Retention Options, Service Notification Commands, Host Notification Commands
     - Hosts: Freshness Threshold, Contact Groups, Notification Options, Event Handler, Stalking Options, Flap Detection Options, Enable Failure Prediction, Retention Options
     - Services: Parallelize, Volatile, Check Freshness, Freshness Threshold, Contact Groups, Notification Options, Stalking Options, Flap Detection Options, Enable Failure Prediction, Failure Prediction Options, Retention Options
     - Tables:
-        - Contact Groups
         - Host Dependencies
         - Host Escalations
         - Service Dependencies
         - Service Escalations
-        - Contact Groups
-        - Timeperiods
 
 =========================================================
 after 1.0

@@ -1,0 +1,49 @@
+[% WRAPPER config_detail.tt
+   dataTitle = 'Time Periods'
+%]
+
+<table border="0" class='data'>
+  <tr>
+    [% IF backends.size > 1 %]
+      <th class='data'>Backend</th>
+    [% END %]
+    <th class='data'>Name</th>
+    <th class='data'>Alias/Description</th>
+    <th class='data'>Exclusions</th>
+    <th class='data'>Days/Dates</th>
+    <th class='data'>Times</th>
+  </tr>
+  [% FOREACH d = data %]
+  [% SET class = 'dataOdd'  IF loop.odd %]
+  [% SET class = 'dataEven' IF loop.even %]
+  <tr class='[% class %]'>
+    [% IF backends.size > 1 %]
+      <td class='[% class %]'>
+        [% IF d.backend.peer_name.size < backends.size %]
+          [% d.backend.peer_name.join(', ') %]
+        [% ELSE %]
+        <i>all</i>
+        [% END %]
+      </td>
+    [% END %]
+    <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.alias %]</td>
+    <td class='[% class %]'>TODO: [% d.exclusion %]</td>
+
+    [% has_days = 0 %]
+    [% FOREACH day IN [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ] %]
+    [% IF d.$day %]
+      [% IF has_days == 1 %]
+        <tr>
+          <td colspan='[% IF backends.size > 1 %]4[% ELSE %]3[% END %]'></td>
+      [% END %]
+        <td class='[% class %]'>[% day %]</td>
+        <td class='[% class %]'>[% d.$day %]&nbsp;</td>
+      </tr>
+      [% END %]
+      [% has_days = 1 %]
+    [% END %]
+  [% END %]
+</table>
+
+[% END %]
