@@ -1,0 +1,241 @@
+<html>
+<head>
+<link rel="shortcut icon" href="/nagios3/images/favicon.ico" type="image/ico">
+<title>
+Nagios Availability
+</title>
+<LINK REL='stylesheet' TYPE='text/css' HREF='/nagios3/stylesheets/common.css'>
+<LINK REL='stylesheet' TYPE='text/css' HREF='/nagios3/stylesheets/avail.css'>
+</head>
+<BODY CLASS='avail'>
+
+<!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
+<table border=0 width=100% cellspacing=0 cellpadding=0>
+<tr>
+<td align=left valign=top width=33%>
+<TABLE CLASS='infoBox' BORDER=1 CELLSPACING=0 CELLPADDING=0>
+<TR><TD CLASS='infoBox'>
+<DIV CLASS='infoBoxTitle'>Host Availability Report</DIV>
+
+Last Updated: Mon Jan 4 11:15:32 CET 2010<BR>
+Nagios&reg; Core&trade; 3.2.0 - <A HREF='http://www.nagios.org' TARGET='_new' CLASS='homepageURL'>www.nagios.org</A><BR>
+Logged in as <i>nagiosadmin</i><BR>
+</TD></TR>
+</TABLE>
+<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 CLASS='linkBox'>
+<TR><TD CLASS='linkBox'>
+<a href='avail.cgi?host=all&show_log_entries&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>View Availability Report For All Hosts</a><BR>
+
+<a href='trends.cgi?host=test_host_00&t1=1261995332&t2=1262600132&assumestateretention=no&assumeinitialstates=yes&includesoftstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&backtrack=4'>View Trends For This Host</a><BR>
+<a href='histogram.cgi?host=test_host_00&t1=1261995332&t2=1262600132&assumestateretention=yes'>View Alert Histogram For This Host</a><BR>
+<a href='status.cgi?host=test_host_00'>View Status Detail For This Host</a><BR>
+<a href='history.cgi?host=test_host_00'>View Alert History For This Host</a><BR>
+<a href='notifications.cgi?host=test_host_00'>View Notifications For This Host</a><BR>
+</TD></TR>
+</TABLE>
+</td>
+<td align=center valign=top width=33%>
+<DIV ALIGN=CENTER CLASS='dataTitle'>
+Host 'test_host_00'</DIV>
+
+<BR>
+<IMG SRC='/nagios3/images/trends.gif' BORDER=0 ALT='Availability Report' TITLE='Availability Report'>
+<BR CLEAR=ALL>
+<div align=center class='reportRange'>2009-12-28 11:15:32 to 2010-01-04 11:15:32</div>
+<div align=center class='reportDuration'>Duration: 7d 0h 0m 0s</div>
+</td>
+<td align=right valign=bottom width=33%>
+<table border=0 CLASS='optBox'>
+<form method="GET" action="avail.cgi">
+<input type='hidden' name='t1' value='1261995332'>
+<input type='hidden' name='t2' value='1262600132'>
+<input type='hidden' name='show_log_entries' value=''>
+<input type='hidden' name='host' value='test_host_00'>
+<input type='hidden' name='assumeinitialstates' value='yes'>
+<input type='hidden' name='assumestateretention' value='yes'>
+
+<input type='hidden' name='assumestatesduringnotrunning' value='yes'>
+<input type='hidden' name='includesoftstates' value='no'>
+<tr><td valign=top align=left class='optBoxItem'>First assumed host state:</td><td valign=top align=left class='optBoxItem'>First assumed service state</td></tr>
+<tr>
+<td valign=top align=left class='optBoxItem'>
+<select name='initialassumedhoststate'>
+<option value=0 SELECTED>Unspecified
+<option value=-1 >Current State
+<option value=3 >Host Up
+<option value=4 >Host Down
+<option value=5 >Host Unreachable
+</select>
+</td>
+<td CLASS='optBoxItem'>
+<select name='initialassumedservicestate'>
+
+<option value=0 SELECTED>Unspecified
+<option value=-1 >Current State
+<option value=6 >Service Ok
+<option value=8 >Service Warning
+<option value=7 >Service Unknown
+<option value=9 >Service Critical
+</select>
+</td>
+</tr>
+<tr><td valign=top align=left class='optBoxItem'>Report period:</td><td valign=top align=left class='optBoxItem'>Backtracked archives:</td></tr>
+<tr>
+<td valign=top align=left class='optBoxItem'>
+<select name='timeperiod'>
+<option SELECTED>[ Current time range ]
+<option value=today >Today
+
+<option value=last24hours >Last 24 Hours
+<option value=yesterday >Yesterday
+<option value=thisweek >This Week
+<option value=last7days SELECTED>Last 7 Days
+<option value=lastweek >Last Week
+<option value=thismonth >This Month
+<option value=last31days >Last 31 Days
+<option value=lastmonth >Last Month
+<option value=thisyear >This Year
+<option value=lastyear >Last Year
+</select>
+</td>
+<td valign=top align=left CLASS='optBoxItem'>
+<input type='text' size='2' maxlength='2' name='backtrack' value='4'>
+</td>
+</tr>
+<tr><td valign=top align=left></td>
+
+<td valign=top align=left CLASS='optBoxItem'>
+<input type='submit' value='Update'>
+</td>
+</tr>
+</form>
+<tr><td></td><td align=right valign=bottom>
+</td></tr>
+</table>
+</td>
+</tr>
+</table>
+<div align=center class='reportTime'>[ Availability report completed in 0 min 21 sec ]</div>
+<BR><BR>
+<DIV ALIGN=CENTER CLASS='dataTitle'>Host State Breakdowns:</DIV>
+<p align='center'>
+
+<a href='trends.cgi?host=test_host_00&t1=1261995332&t2=1262600132&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&backtrack=4'><img src='trends.cgi?createimage&smallimage&host=test_host_00&t1=1261995332&t2=1262600132&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&backtrack=4' border=1 alt='Host State Trends' title='Host State Trends' width='500' height='20'></a><br>
+</p>
+<DIV ALIGN=CENTER>
+<TABLE BORDER=0 CLASS='data'>
+<TR><TH CLASS='data'>State</TH><TH CLASS='data'>Type / Reason</TH><TH CLASS='data'>Time</TH><TH CLASS='data'>% Total Time</TH><TH CLASS='data'>% Known Time</TH></TR>
+<tr CLASS='dataEven'><td CLASS='hostUP' rowspan=3>UP</td><td CLASS='dataEven'>Unscheduled</td><td CLASS='dataEven'>0d 0h 0m 0s</td><td CLASS='dataEven'>0.000%</td><td class='dataEven'>0.000%</td></tr>
+<tr CLASS='dataEven'><td CLASS='dataEven'>Scheduled</td><td CLASS='dataEven'>0d 0h 0m 0s</td><td CLASS='dataEven'>0.000%</td><td class='dataEven'>0.000%</td></tr>
+
+<tr CLASS='hostUP'><td CLASS='hostUP'>Total</td><td CLASS='hostUP'>0d 0h 0m 0s</td><td CLASS='hostUP'>0.000%</td><td class='hostUP'>0.000%</td></tr>
+<tr CLASS='dataOdd'><td CLASS='hostDOWN' rowspan=3>DOWN</td><td CLASS='dataOdd'>Unscheduled</td><td CLASS='dataOdd'>0d 0h 0m 0s</td><td CLASS='dataOdd'>0.000%</td><td class='dataOdd'>0.000%</td></tr>
+<tr CLASS='dataOdd'><td CLASS='dataOdd'>Scheduled</td><td CLASS='dataOdd'>0d 0h 0m 0s</td><td CLASS='dataOdd'>0.000%</td><td class='dataOdd'>0.000%</td></tr>
+<tr CLASS='hostDOWN'><td CLASS='hostDOWN'>Total</td><td CLASS='hostDOWN'>0d 0h 0m 0s</td><td CLASS='hostDOWN'>0.000%</td><td class='hostDOWN'>0.000%</td></tr>
+
+<tr CLASS='dataEven'><td CLASS='hostUNREACHABLE' rowspan=3>UNREACHABLE</td><td CLASS='dataEven'>Unscheduled</td><td CLASS='dataEven'>2d 11h 49m 45s</td><td CLASS='dataEven'>100.000%</td><td class='dataEven'>100.000%</td></tr>
+<tr CLASS='dataEven'><td CLASS='dataEven'>Scheduled</td><td CLASS='dataEven'>0d 18h 10m 15s</td><td CLASS='dataEven'>23.296%</td><td class='dataEven'>23.296%</td></tr>
+<tr CLASS='hostUNREACHABLE'><td CLASS='hostUNREACHABLE'>Total</td><td CLASS='hostUNREACHABLE'>3d 6h 0m 0s</td><td CLASS='hostUNREACHABLE'>100.000%</td><td class='hostUNREACHABLE'>100.000%</td></tr>
+<tr CLASS='dataOdd'><td CLASS='dataOdd' rowspan=3>Undetermined</td><td CLASS='dataOdd'>Nagios Not Running</td><td CLASS='dataOdd'>0d 0h 0m 0s</td><td CLASS='dataOdd'>0.000%</td><td CLASS='dataOdd'></td></tr>
+
+<tr CLASS='dataOdd'><td CLASS='dataOdd'>Insufficient Data</td><td CLASS='dataOdd'>0d 0h 0m 0s</td><td CLASS='dataOdd'>0.000%</td><td CLASS='dataOdd'></td></tr>
+<tr CLASS='dataOdd'><td CLASS='dataOdd'>Total</td><td CLASS='dataOdd'>0d 0h 0m 0s</td><td CLASS='dataOdd'>0.000%</td><td CLASS='dataOdd'></td></tr>
+<tr><td colspan=3></td></tr>
+<tr CLASS='dataEven'><td CLASS='dataEven'>All</td><td class='dataEven'>Total</td><td CLASS='dataEven'>3d 6h 0m 0s</td><td CLASS='dataEven'>100.000%</td><td CLASS='dataEven'>100.000%</td></tr>
+</table>
+</DIV>
+
+<BR><BR>
+<DIV ALIGN=CENTER CLASS='dataTitle'>State Breakdowns For Host Services:</DIV>
+<DIV ALIGN=CENTER>
+<TABLE BORDER=0 CLASS='data'>
+<TR><TH CLASS='data'>Service</TH><TH CLASS='data'>% Time OK</TH><TH CLASS='data'>% Time Warning</TH><TH CLASS='data'>% Time Unknown</TH><TH CLASS='data'>% Time Critical</TH><TH CLASS='data'>% Time Undetermined</TH></TR>
+<tr CLASS='dataOdd'><td CLASS='dataOdd'><a href='avail.cgi?host=test_host_00&service=test_critical_03&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_critical_03</a></td><td CLASS='serviceOK'>0.000% (0.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>100.000% (100.000%)</td><td class='dataOdd'>0.000%</td></tr>
+
+<tr CLASS='dataEven'><td CLASS='dataEven'><a href='avail.cgi?host=test_host_00&service=test_ok_00&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_ok_00</a></td><td CLASS='serviceOK'>100.000% (100.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataEven'>0.000%</td></tr>
+<tr CLASS='dataOdd'><td CLASS='dataOdd'><a href='avail.cgi?host=test_host_00&service=test_ok_04&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_ok_04</a></td><td CLASS='serviceOK'>100.000% (100.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataOdd'>0.000%</td></tr>
+<tr CLASS='dataEven'><td CLASS='dataEven'><a href='avail.cgi?host=test_host_00&service=test_ok_06&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_ok_06</a></td><td CLASS='serviceOK'>100.000% (100.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataEven'>0.000%</td></tr>
+
+<tr CLASS='dataOdd'><td CLASS='dataOdd'><a href='avail.cgi?host=test_host_00&service=test_ok_07&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_ok_07</a></td><td CLASS='serviceOK'>100.000% (100.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataOdd'>0.000%</td></tr>
+<tr CLASS='dataEven'><td CLASS='dataEven'><a href='avail.cgi?host=test_host_00&service=test_ok_09&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_ok_09</a></td><td CLASS='serviceOK'>100.000% (100.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataEven'>0.000%</td></tr>
+<tr CLASS='dataOdd'><td CLASS='dataOdd'><a href='avail.cgi?host=test_host_00&service=test_pending_02&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_pending_02</a></td><td CLASS='serviceOK'>100.000% (100.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataOdd'>0.000%</td></tr>
+
+<tr CLASS='dataEven'><td CLASS='dataEven'><a href='avail.cgi?host=test_host_00&service=test_random_01&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_random_01</a></td><td CLASS='serviceOK'>91.673% (91.673%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>2.562% (2.562%)</td><td class='serviceCRITICAL'>5.765% (5.765%)</td><td class='dataEven'>0.000%</td></tr>
+<tr CLASS='dataOdd'><td CLASS='dataOdd'><a href='avail.cgi?host=test_host_00&service=test_random_08&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_random_08</a></td><td CLASS='serviceOK'>56.371% (56.371%)</td><td CLASS='serviceWARNING'>43.629% (43.629%)</td><td CLASS='serviceUNKNOWN'>0.000% (0.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataOdd'>0.000%</td></tr>
+<tr CLASS='dataEven'><td CLASS='dataEven'><a href='avail.cgi?host=test_host_00&service=test_unknown_05&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>test_unknown_05</a></td><td CLASS='serviceOK'>0.000% (0.000%)</td><td CLASS='serviceWARNING'>0.000% (0.000%)</td><td CLASS='serviceUNKNOWN'>100.000% (100.000%)</td><td class='serviceCRITICAL'>0.000% (0.000%)</td><td class='dataEven'>0.000%</td></tr>
+
+<tr CLASS='dataOdd'><td CLASS='dataOdd'>Average</td><td CLASS='serviceOK'>74.804% (74.804%)</td><td CLASS='serviceWARNING'>4.363% (4.363%)</td><td CLASS='serviceUNKNOWN'>10.256% (10.256%)</td><td class='serviceCRITICAL'>10.576% (10.576%)</td><td class='dataOdd'>0.000%</td></tr>
+</table>
+</DIV>
+<BR><BR>
+<DIV ALIGN=CENTER CLASS='dataTitle'>Host Log Entries:</DIV>
+<DIV ALIGN=CENTER CLASS='infoMessage'><a href='avail.cgi?host=test_host_00&show_log_entries&t1=1261995332&t2=1262600132&backtrack=4&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&initialassumedservicestate=0&show_log_entries&full_log_entries&showscheduleddowntime=yes&rpttimeperiod=6x13'>[ View full log entries ]</a></DIV>
+<DIV ALIGN=CENTER>
+<table border=1 cellspacing=0 cellpadding=3 class='logEntries'>
+<tr><th class='logEntries'>Event Start Time</th><th class='logEntries'>Event End Time</th><th class='logEntries'>Event Duration</th><th class='logEntries'>Event/State Type</th><th class='logEntries'>Event/State Information</th></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-24 00:00:00</td><td class='logEntriesEven'>2009-12-24 21:27:12</td><td class='logEntriesEven'>0d 21h 27m 12s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesEven'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-25 00:00:00</td><td class='logEntriesOdd'>2009-12-26 00:00:00</td><td class='logEntriesOdd'>1d 0h 0m 0s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesOdd'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-26 00:00:00</td><td class='logEntriesEven'>2009-12-26 13:13:56</td><td class='logEntriesEven'>0d 13h 13m 56s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesEven'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:00:00</td><td class='logEntriesOdd'>2009-12-28 00:12:53</td><td class='logEntriesOdd'>0d 0h 12m 53s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesOdd'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:13:37</td><td class='logEntriesEven'>2009-12-28 00:14:37</td><td class='logEntriesEven'>0d 0h 1m 0s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesEven'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:14:37</td><td class='logEntriesOdd'>2009-12-28 00:16:47</td><td class='logEntriesOdd'>0d 0h 2m 10s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesOdd'>End of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:16:53</td><td class='logEntriesEven'>2009-12-28 00:17:54</td><td class='logEntriesEven'>0d 0h 1m 1s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesEven'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:17:54</td><td class='logEntriesOdd'>2009-12-28 00:18:41</td><td class='logEntriesOdd'>0d 0h 0m 47s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesOdd'>End of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:18:48</td><td class='logEntriesEven'>2009-12-28 00:20:26</td><td class='logEntriesEven'>0d 0h 1m 38s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesEven'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:20:29</td><td class='logEntriesOdd'>2009-12-28 00:22:06</td><td class='logEntriesOdd'>0d 0h 1m 37s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:22:06</td><td class='logEntriesEven'>2009-12-28 00:22:32</td><td class='logEntriesEven'>0d 0h 0m 26s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:22:32</td><td class='logEntriesOdd'>2009-12-28 00:24:11</td><td class='logEntriesOdd'>0d 0h 1m 39s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:24:11</td><td class='logEntriesEven'>2009-12-28 00:25:19</td><td class='logEntriesEven'>0d 0h 1m 8s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:25:19</td><td class='logEntriesOdd'>2009-12-28 00:26:56</td><td class='logEntriesOdd'>0d 0h 1m 37s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:26:56</td><td class='logEntriesEven'>2009-12-28 00:27:29</td><td class='logEntriesEven'>0d 0h 0m 33s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:27:29</td><td class='logEntriesOdd'>2009-12-28 00:29:25</td><td class='logEntriesOdd'>0d 0h 1m 56s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:29:25</td><td class='logEntriesEven'>2009-12-28 00:30:37</td><td class='logEntriesEven'>0d 0h 1m 12s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:30:37</td><td class='logEntriesOdd'>2009-12-28 00:32:16</td><td class='logEntriesOdd'>0d 0h 1m 39s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:32:21</td><td class='logEntriesEven'>2009-12-28 00:33:06</td><td class='logEntriesEven'>0d 0h 0m 45s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesEven'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:33:09</td><td class='logEntriesOdd'>2009-12-28 00:33:17</td><td class='logEntriesOdd'>0d 0h 0m 8s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:33:21</td><td class='logEntriesEven'>2009-12-28 00:33:33</td><td class='logEntriesEven'>0d 0h 0m 12s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesEven'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-28 00:33:36</td><td class='logEntriesOdd'>2009-12-28 00:34:57</td><td class='logEntriesOdd'>0d 0h 1m 21s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-28 00:34:57</td><td class='logEntriesEven'>2009-12-28 14:26:01</td><td class='logEntriesEven'>0d 13h 51m 4s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-30 00:00:00</td><td class='logEntriesOdd'>2009-12-30 10:49:50</td><td class='logEntriesOdd'>0d 10h 49m 50s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesOdd'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-31 00:00:00</td><td class='logEntriesEven'>2009-12-31 17:43:28</td><td class='logEntriesEven'>0d 17h 43m 28s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesEven'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-31 17:43:39</td><td class='logEntriesOdd'>2009-12-31 17:44:50</td><td class='logEntriesOdd'>0d 0h 1m 11s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-31 17:44:50</td><td class='logEntriesEven'>2009-12-31 17:45:13</td><td class='logEntriesEven'>0d 0h 0m 23s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-31 17:48:16</td><td class='logEntriesOdd'>2009-12-31 17:50:28</td><td class='logEntriesOdd'>0d 0h 2m 12s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-31 17:50:28</td><td class='logEntriesEven'>2009-12-31 17:51:14</td><td class='logEntriesEven'>0d 0h 0m 46s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-31 17:51:14</td><td class='logEntriesOdd'>2009-12-31 17:52:57</td><td class='logEntriesOdd'>0d 0h 1m 43s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-31 17:52:57</td><td class='logEntriesEven'>2009-12-31 17:54:52</td><td class='logEntriesEven'>0d 0h 1m 55s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-31 17:57:06</td><td class='logEntriesOdd'>2009-12-31 17:58:39</td><td class='logEntriesOdd'>0d 0h 1m 33s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-31 17:58:39</td><td class='logEntriesEven'>2009-12-31 18:01:02</td><td class='logEntriesEven'>0d 0h 2m 23s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-31 18:01:02</td><td class='logEntriesOdd'>2009-12-31 18:02:35</td><td class='logEntriesOdd'>0d 0h 1m 33s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-31 18:02:35</td><td class='logEntriesEven'>2009-12-31 18:03:18</td><td class='logEntriesEven'>0d 0h 0m 43s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-31 18:04:22</td><td class='logEntriesOdd'>2009-12-31 18:06:04</td><td class='logEntriesOdd'>0d 0h 1m 42s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2009-12-31 18:06:04</td><td class='logEntriesEven'>2009-12-31 18:07:21</td><td class='logEntriesEven'>0d 0h 1m 17s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2009-12-31 18:08:05</td><td class='logEntriesOdd'>2009-12-31 18:10:51</td><td class='logEntriesOdd'>0d 0h 2m 46s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2010-01-01 00:00:00</td><td class='logEntriesEven'>2010-01-01 17:55:31</td><td class='logEntriesEven'>0d 17h 55m 31s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesEven'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2010-01-01 17:55:50</td><td class='logEntriesOdd'>2010-01-01 17:57:54</td><td class='logEntriesOdd'>0d 0h 2m 4s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td><td class='logEntriesOdd'>Start of scheduled downtime</td></tr>
+
+<tr class='logEntriesEven'><td class='logEntriesEven'>2010-01-01 17:57:54</td><td class='logEntriesEven'>2010-01-01 18:02:22</td><td class='logEntriesEven'>0d 0h 4m 28s</td><td class='logEntriesINDETERMINATE'>HOST DOWNTIME END</td><td class='logEntriesEven'>End of scheduled downtime</td></tr>
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2010-01-02 00:00:00</td><td class='logEntriesOdd'>2010-01-02 12:16:36</td><td class='logEntriesOdd'>0d 12h 16m 36s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesOdd'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+<tr class='logEntriesEven'><td class='logEntriesEven'>2010-01-03 00:00:00</td><td class='logEntriesEven'>2010-01-03 11:55:32</td><td class='logEntriesEven'>0d 11h 55m 32s</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesEven'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+
+<tr class='logEntriesOdd'><td class='logEntriesOdd'>2010-01-04 00:00:00</td><td class='logEntriesOdd'>2010-01-04 11:15:32</td><td class='logEntriesOdd'>0d 11h 15m 32s+</td><td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td><td class='logEntriesOdd'>mo DOWN&#58; flap hostcheck&#58; parent host down</td></tr>
+</table>
+</DIV>
+
+<!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
+</body>
+</html>

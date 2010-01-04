@@ -23,10 +23,10 @@
     <div align="center">
       <form method="get" action="avail.cgi">
         [% IF report_type %]<input type='hidden' name='report_type' value='[% report_type %]'>[% END %]
-        [% IF hosts %]<input type='hidden' name='host' value='[% hosts %]'>[% END %]
-        [% IF hostgroups %]<input type='hidden' name='hostgroup' value='[% hostgroups %]'>[% END %]
-        [% IF services %]<input type='hidden' name='service' value='[% services %]'>[% END %]
-        [% IF servicegroups %]<input type='hidden' name='servicegroup' value='[% servicegroups %]'>[% END %]
+        [% IF host %]<input type='hidden' name='host' value='[% host %]'>[% END %]
+        [% IF hostgroup %]<input type='hidden' name='hostgroup' value='[% hostgroup %]'>[% END %]
+        [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
+        [% IF servicegroup %]<input type='hidden' name='servicegroup' value='[% servicegroup %]'>[% END %]
         <table border="0" cellpadding="5">
           <tr>
             <td valign="top" class='reportSelectSubTitle'>Report Period:</td>

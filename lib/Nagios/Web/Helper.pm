@@ -6,6 +6,7 @@ use Config::General;
 use Carp;
 use Data::Dumper;
 use Digest::MD5  qw(md5_hex);
+use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
 use Nagios::MKLivestatus::MULTI;
 
 ##############################################
@@ -23,6 +24,7 @@ use Nagios::MKLivestatus::MULTI;
 # _get_servicecomments
 # _get_livesocket_path_from_nagios_cfg
 # _calculate_overall_processinfo
+# _get_start_end_for_timeperiod
 ##############################################
 
 ##############################################
@@ -129,16 +131,16 @@ sub filter_duration {
     my $minutes = 0;
     my $seconds = 0;
     if($withdays) {
-        if($duration > 86400) {
+        if($duration >= 86400) {
             $days     = int($duration/86400);
             $duration = $duration%86400;
         }
     }
-    if($duration > 3600) {
+    if($duration >= 3600) {
         $hours    = int($duration/3600);
         $duration = $duration%3600;
     }
-    if($duration > 60) {
+    if($duration >= 60) {
         $minutes  = int($duration/60);
         $duration = $duration%60;
     }
@@ -629,6 +631,88 @@ sub _calculate_overall_processinfo {
         }
     }
     return($return);
+}
+
+
+########################################
+sub _get_start_end_for_timeperiod {
+    my($self,$timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2) = @_;
+
+    my $start;
+    my $end;
+    if($timeperiod eq 'today') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        $start = Mktime($year,$month,$day,  0,0,0);
+        $end   = time();
+    }
+    elsif($timeperiod eq 'last24hours') {
+        $end   = time();
+        $start = $end - 86400;
+    }
+    elsif($timeperiod eq 'yesterday') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        $start = Mktime($year,$month,$day,  0,0,0) - 2* 86400;
+        $end   = $start + 86400;
+    }
+    elsif($timeperiod eq 'thisweek') {
+        # start on last sunday 0:00 till now
+        my @today  = Today();
+        my @monday = Monday_of_Week(Week_of_Year(@today));
+        $start     = Mktime(@monday,  0,0,0) - 86400;
+        $end       = time();
+    }
+    elsif($timeperiod eq 'last7days') {
+        $end   = time();
+        $start = $end - 7 * 86400;
+    }
+    elsif($timeperiod eq 'lastweek') {
+        # start on last weeks sunday 0:00 till last weeks saturday 24:00
+        my @today  = Today();
+        my @monday = Monday_of_Week(Week_of_Year(@today));
+        $end       = Mktime(@monday,  0,0,0) - 86400;
+        $start     = $end - 7*86400;
+    }
+    elsif($timeperiod eq 'thismonth') {
+        # start on first till now
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        $start = Mktime($year,$month,1,  0,0,0);
+        $end   = time();
+    }
+    elsif($timeperiod eq 'last31days') {
+        $end   = time();
+        $start = $end - 31 * 86400;
+    }
+    elsif($timeperiod eq 'lastmonth') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        $end   = Mktime($year,$month,1,  0,0,0);
+        my $lastmonth = $month - 1;
+        if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
+        $start = Mktime($year,$lastmonth,1,  0,0,0);
+    }
+    elsif($timeperiod eq 'thisyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        $start = Mktime($year,1,1,  0,0,0);
+        $end   = time();
+    }
+    elsif($timeperiod eq 'lastyear') {
+        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        $start = Mktime($year-1,1,1,  0,0,0);
+        $end   = Mktime($year,1,1,  0,0,0);
+    }
+    elsif($timeperiod eq 'custom') {
+        $start = $t1;
+        $end   = $t2;
+        if(!defined $start) {
+            $start = Mktime($syear,$smon,$sday, $shour,$smin,$ssec);
+        }
+        if(!defined $end) {
+            $end   = Mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
+        }
+    } else {
+        return(undef, undef);
+    }
+
+    return($start, $end);
 }
 
 1;

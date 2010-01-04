@@ -45,7 +45,7 @@
               [% END %]
             </td>
             <td align="left" valign="center" class='reportSelectItem'>
-              <select name='[% report_type %]'>
+              <select name='[% IF report_type == 'hosts' %]host[% ELSIF report_type == 'services' %]service[% ELSIF report_type == 'servicegroups' %]servicegroup[% ELSIF report_type == 'hostgroups' %]hostgroup[% END %]'>
                 <option value='all'>
                   [% IF report_type == 'hosts' %]
                   ** ALL HOSTS **

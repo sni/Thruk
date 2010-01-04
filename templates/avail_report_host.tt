@@ -1,0 +1,283 @@
+[% USE date %]
+[% INCLUDE _header.tt %]
+
+    <form method="GET" action="avail.cgi">
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% INCLUDE _infobox.tt %]
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                <a href='avail.cgi?host=all&amp;show_log_entries&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=4&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;show_log_entries&amp;showscheduleddowntime=yes&amp;rpttimeperiod=6x13'>View Availability Report For All Hosts</a><br>
+                <a href='trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=no&amp;assumeinitialstates=yes&amp;includesoftstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;backtrack=4'>View Trends For This Host</a><br>
+                <a href='histogram.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=yes'>View Alert Histogram For This Host</a><br>
+                <a href='status.cgi?host=[% host %]'>View Status Detail For This Host</a><br>
+                <a href='history.cgi?host=[% host %]'>View Alert History For This Host</a><br>
+                <a href='notifications.cgi?host=[% host %]'>View Notifications For This Host</a><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td align="center" valign="top" width="33%">
+          <div align="center" class='dataTitle'>
+            Host '[% host %]'
+          </div><br>
+
+          <img src='/nagios/images/trends.gif' border="0" alt='Availability Report' title='Availability Report'><br clear="all">
+          <div align="center" class='reportRange'>
+            [% date.format(start, '%Y-%m-%d  %H:%M:%S') %] to [% date.format(end, '%Y-%m-%d  %H:%M:%S') %]
+          </div>
+          <div align="center" class='reportDuration'>
+            Duration: [% SET dur = end - start %][% duration(dur) %]
+          </div>
+        </td>
+        <td align="right" valign="bottom" width="33%">
+            <input type='hidden' name='t1' value='[% start %]'>
+            <input type='hidden' name='t2' value='[% end %]'>
+            <input type='hidden' name='show_log_entries' value='[% show_log_entries %]'>
+            <input type='hidden' name='host' value='[% host %]'>
+            <input type='hidden' name='assumeinitialstates' value='[% assumeinitialstates %]'>
+            <input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
+            <input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
+            <input type='hidden' name='includesoftstates' value='[% includesoftstates %]'>
+            <input type='hidden' name='report_type' value='[% report_type %]'>
+          <table border="0" class='optBox'>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>First assumed host state:</td>
+              <td valign="top" align="left" class='optBoxItem'>First assumed service state</td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>
+                <select name='initialassumedhoststate'>
+                  <option value="0"[% IF  initialassumedhoststate ==  0 %] selected[% END %]>Unspecified</option>
+                  <option value="-1"[% IF initialassumedhoststate == -1 %] selected[% END %]>Current State</option>
+                  <option value="3"[% IF  initialassumedhoststate ==  3 %] selected[% END %]>Host Up</option>
+                  <option value="4"[% IF  initialassumedhoststate ==  4 %] selected[% END %]>Host Down</option>
+                  <option value="5"[% IF  initialassumedhoststate ==  5 %] selected[% END %]>Host Unreachable</option>
+                </select>
+              </td>
+              <td class='optBoxItem'>
+                <select name='initialassumedservicestate'>
+                  <option value="0"[% IF  initialassumedservicestate ==  0 %] selected[% END %]>Unspecified</option>
+                  <option value="-1"[% IF initialassumedservicestate == -1 %] selected[% END %]>Current State</option>
+                  <option value="6"[% IF  initialassumedservicestate ==  6 %] selected[% END %]>Service Ok</option>
+                  <option value="8"[% IF  initialassumedservicestate ==  8 %] selected[% END %]>Service Warning</option>
+                  <option value="7"[% IF  initialassumedservicestate ==  7 %] selected[% END %]>Service Unknown</option>
+                  <option value="9"[% IF  initialassumedservicestate ==  9 %] selected[% END %]>Service Critical</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>Report period:</td>
+              <td valign="top" align="left" class='optBoxItem'>Backtracked archives:</td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>
+                <select name='timeperiod'>
+                  <option value="current"[% IF     timeperiod == 'current'     %] selected[% END %]>[ Current time range ]</option>
+                  <option value="today"[% IF       timeperiod == 'today'       %] selected[% END %]>Today</option>
+                  <option value="last24hours"[% IF timeperiod == 'last24hours' %] selected[% END %]>Last 24 Hours</option>
+                  <option value="yesterday"[% IF   timeperiod == 'yesterday'   %] selected[% END %]>Yesterday</option>
+                  <option value="thisweek"[% IF    timeperiod == 'thisweek'    %] selected[% END %]>This Week</option>
+                  <option value="last7days"[% IF   timeperiod == 'last7days'   %] selected[% END %]>Last 7 Days</option>
+                  <option value="lastweek"[% IF    timeperiod == 'lastweek'    %] selected[% END %]>Last Week</option>
+                  <option value="thismonth"[% IF   timeperiod == 'thismonth'   %] selected[% END %]>This Month</option>
+                  <option value="last31days"[% IF  timeperiod == 'last31days'  %] selected[% END %]>Last 31 Days</option>
+                  <option value="lastmonth"[% IF   timeperiod == 'lastmonth'   %] selected[% END %]>Last Month</option>
+                  <option value="thisyear"[% IF    timeperiod == 'thisyear'    %] selected[% END %]>This Year</option>
+                  <option value="lastyear"[% IF    timeperiod == 'lastyear'    %] selected[% END %]>Last Year</option>
+                </select>
+              </td>
+              <td valign="top" align="left" class='optBoxItem'>
+                <input type='text' size='2' maxlength='2' name='backtrack' value='[% backtrack %]'>
+              </td>
+            </tr>
+            <tr>
+              <td valign="top" align="left"></td>
+              <td valign="top" align="left" class='optBoxItem'>
+                <input type='submit' value='Update'>
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td align="right" valign="bottom"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    </form>
+
+    <div align="center" class='reportTime'>[ Availability report completed in 0 min 21 sec ]</div><br>
+    <br>
+    <div align="center" class='dataTitle'>Host State Breakdowns:</div>
+    <p align='center'>
+      <a href='trends.cgi?host=[% host %]&amp;t1=1261995332&amp;t2=1262600132&amp;includesoftstates=no&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;backtrack=4'><img src='trends.cgi?createimage&amp;smallimage&amp;host=[% host %]&amp;t1=1261995332&amp;t2=1262600132&amp;includesoftstates=no&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;backtrack=4' border="1" alt='Host State Trends' title='Host State Trends' width='500' height='20'></a><br>
+    </p>
+    <div align="center">
+      <table border="0" class='data'>
+        <tr>
+          <th class='data'>State</th>
+          <th class='data'>Type / Reason</th>
+          <th class='data'>Time</th>
+          <th class='data'>% Total Time</th>
+          <th class='data'>% Known Time</th>
+        </tr>
+        <tr class='dataEven'>
+          <td class='hostUP' rowspan="3">UP</td>
+          <td class='dataEven'>Unscheduled</td>
+          <td class='dataEven'>0d 0h 0m 0s</td>
+          <td class='dataEven'>0.000%</td>
+          <td class='dataEven'>0.000%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'>Scheduled</td>
+          <td class='dataEven'>0d 0h 0m 0s</td>
+          <td class='dataEven'>0.000%</td>
+          <td class='dataEven'>0.000%</td>
+        </tr>
+        <tr class='hostUP'>
+          <td class='hostUP'>Total</td>
+          <td class='hostUP'>0d 0h 0m 0s</td>
+          <td class='hostUP'>0.000%</td>
+          <td class='hostUP'>0.000%</td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='hostDOWN' rowspan="3">DOWN</td>
+          <td class='dataOdd'>Unscheduled</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'>0.000%</td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd'>Scheduled</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'>0.000%</td>
+        </tr>
+        <tr class='hostDOWN'>
+          <td class='hostDOWN'>Total</td>
+          <td class='hostDOWN'>0d 0h 0m 0s</td>
+          <td class='hostDOWN'>0.000%</td>
+          <td class='hostDOWN'>0.000%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='hostUNREACHABLE' rowspan="3">UNREACHABLE</td>
+          <td class='dataEven'>Unscheduled</td>
+          <td class='dataEven'>2d 11h 49m 45s</td>
+          <td class='dataEven'>100.000%</td>
+          <td class='dataEven'>100.000%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'>Scheduled</td>
+          <td class='dataEven'>0d 18h 10m 15s</td>
+          <td class='dataEven'>23.296%</td>
+          <td class='dataEven'>23.296%</td>
+        </tr>
+        <tr class='hostUNREACHABLE'>
+          <td class='hostUNREACHABLE'>Total</td>
+          <td class='hostUNREACHABLE'>3d 6h 0m 0s</td>
+          <td class='hostUNREACHABLE'>100.000%</td>
+          <td class='hostUNREACHABLE'>100.000%</td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd' rowspan="3">Undetermined</td>
+          <td class='dataOdd'>Nagios Not Running</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'></td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd'>Insufficient Data</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'></td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd'>Total</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'></td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'>All</td>
+          <td class='dataEven'>Total</td>
+          <td class='dataEven'>3d 6h 0m 0s</td>
+          <td class='dataEven'>100.000%</td>
+          <td class='dataEven'>100.000%</td>
+        </tr>
+      </table>
+    </div><br>
+    <br>
+    <div align="center" class='dataTitle'>State Breakdowns For Host Services:</div>
+    <div align="center">
+      <table border="0" class='data'>
+        <tr>
+          <th class='data'>Service</th>
+          <th class='data'>% Time OK</th>
+          <th class='data'>% Time Warning</th>
+          <th class='data'>% Time Unknown</th>
+          <th class='data'>% Time Critical</th>
+          <th class='data'>% Time Undetermined</th>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd'><a href='avail.cgi?host=[% host %]&amp;service=test_critical_03&amp;t1=1261995332&amp;t2=1262600132&amp;backtrack=4&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;show_log_entries&amp;showscheduleddowntime=yes&amp;rpttimeperiod=6x13'>test_critical_03</a></td>
+          <td class='serviceOK'>0.000% (0.000%)</td>
+          <td class='serviceWARNING'>0.000% (0.000%)</td>
+          <td class='serviceUNKNOWN'>0.000% (0.000%)</td>
+          <td class='serviceCRITICAL'>100.000% (100.000%)</td>
+          <td class='dataOdd'>0.000%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'><a href='avail.cgi?host=[% host %]&amp;service=test_ok_00&amp;t1=1261995332&amp;t2=1262600132&amp;backtrack=4&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;show_log_entries&amp;showscheduleddowntime=yes&amp;rpttimeperiod=6x13'>test_ok_00</a></td>
+          <td class='serviceOK'>100.000% (100.000%)</td>
+          <td class='serviceWARNING'>0.000% (0.000%)</td>
+          <td class='serviceUNKNOWN'>0.000% (0.000%)</td>
+          <td class='serviceCRITICAL'>0.000% (0.000%)</td>
+          <td class='dataEven'>0.000%</td>
+        </tr>
+      </table>
+    </div><br>
+    <br>
+    <div align="center" class='dataTitle'>Host Log Entries:</div>
+    <div align="center" class='infoMessage'>
+      <a href='avail.cgi?host=[% host %]&amp;show_log_entries&amp;t1=1261995332&amp;t2=1262600132&amp;backtrack=4&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;show_log_entries&amp;full_log_entries&amp;showscheduleddowntime=yes&amp;rpttimeperiod=6x13'>[ View full log entries ]</a>
+    </div>
+    <div align="center">
+      <table border="1" cellspacing="0" cellpadding="3" class='logEntries'>
+        <tr>
+          <th class='logEntries'>Event Start Time</th>
+          <th class='logEntries'>Event End Time</th>
+          <th class='logEntries'>Event Duration</th>
+          <th class='logEntries'>Event/State Type</th>
+          <th class='logEntries'>Event/State Information</th>
+        </tr>
+        <tr class='logEntriesEven'>
+          <td class='logEntriesEven'>2009-12-24 00:00:00</td>
+          <td class='logEntriesEven'>2009-12-24 21:27:12</td>
+          <td class='logEntriesEven'>0d 21h 27m 12s</td>
+          <td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td>
+          <td class='logEntriesEven'>mo DOWN: flap hostcheck: parent host down</td>
+        </tr>
+        <tr class='logEntriesOdd'>
+          <td class='logEntriesOdd'>2009-12-25 00:00:00</td>
+          <td class='logEntriesOdd'>2009-12-26 00:00:00</td>
+          <td class='logEntriesOdd'>1d 0h 0m 0s</td>
+          <td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td>
+          <td class='logEntriesOdd'>mo DOWN: flap hostcheck: parent host down</td>
+        </tr>
+        <tr class='logEntriesEven'>
+          <td class='logEntriesEven'>2009-12-26 00:00:00</td>
+          <td class='logEntriesEven'>2009-12-26 13:13:56</td>
+          <td class='logEntriesEven'>0d 13h 13m 56s</td>
+          <td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td>
+          <td class='logEntriesEven'>mo DOWN: flap hostcheck: parent host down</td>
+        </tr>
+      </table>
+    </div>
+
+[% INCLUDE _footer.tt %]
