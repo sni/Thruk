@@ -130,7 +130,7 @@ sub filter_duration {
     my $hours   = 0;
     my $minutes = 0;
     my $seconds = 0;
-    if($withdays) {
+    if($withdays == 1) {
         if($duration >= 86400) {
             $days     = int($duration/86400);
             $duration = $duration%86400;
@@ -146,8 +146,11 @@ sub filter_duration {
     }
     $seconds = $duration;
 
-    if($withdays) {
+    if($withdays == 1) {
         return($days."d ".$hours."h ".$minutes."m ".$seconds."s");
+    }
+    if($withdays == 2) {
+        return($minutes."min ".$seconds."sec");
     }
     return($hours."h ".$minutes."m ".$seconds."s");
 }

@@ -109,7 +109,7 @@
     </table>
     </form>
 
-    <div align="center" class='reportTime'>[ Availability report completed in 0 min 21 sec ]</div><br>
+    <div align="center" class='reportTime'>[ Availability report completed in [% duration(time_token, 2) %] ]</div><br>
     <br>
     <div align="center" class='dataTitle'>Host State Breakdowns:</div>
     <p align='center'>

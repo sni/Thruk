@@ -142,6 +142,8 @@ sub _show_step_3 {
 sub _create_report {
     my ( $self, $c ) = @_;
 
+    my $start_time = time();
+
     # get timeperiod
     my $timeperiod                      = $c->{'request'}->{'parameters'}->{'timeperiod'};
     my $smon                            = $c->{'request'}->{'parameters'}->{'smon'};
@@ -190,7 +192,9 @@ sub _create_report {
     $c->stash->{backtrack}                    = $backtrack;
     $c->stash->{show_log_entries}             = $show_log_entries;
 
-    $c->stash->{template}    = 'avail_report_host.tt';
+
+    $c->stash->{time_token} = $start_time - time();
+    $c->stash->{template}   = 'avail_report_host.tt';
 
     return 1;
 }
