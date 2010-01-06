@@ -11,8 +11,25 @@ this guide uses the following:
 user:  thruk
 group: thruk
 
+
+Install / Patch Livestatus
+--------------------------
+
+Basically this script checks out the livestatus source with git and applies
+the needed patches.
+
+    %> contrib/livestatus/patches/create_patched_livestatus_source_dir.sh
+    %> cd /tmp/livestatus && ./build.sh && ./configure && make
+
+you can then add this to your nagios/icinga.cfg
+broker_module=/tmp/livestatus/src/livestatus.o /tmp/live.sock
+
+
+Thruk Monitoring Webinterface
+-----------------------------
+
 Install local::lib
-------------------
+^^^^^^^^^^^^^^^^^^
 
 IMPORTANT: all following steps should be done by the thruk user.
 
@@ -26,9 +43,12 @@ quick guide:
     %> cd local-lib-1.004009
     %> perl Makefile.PL --bootstrap && make install
 
+then add the following line to the thuk users .profile or .bashrc
+eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
 
-Install Thruk Monitoring Webinterface
--------------------------------------
+
+Download Thruk
+^^^^^^^^^^^^^^
 
     git clone git@github.com:sni/Thruk.git
     cd Thruk
@@ -41,13 +61,13 @@ run perl Makefile.PL again to see if all dependecies are now installed properly.
 
 
 Configuration
-=============
+^^^^^^^^^^^^^
 open "thruk.conf" and adjust the livestatus settings to your needs.
 
 
 
 Test
-====
+^^^^
 
 verify installation with the packaged perl test
 
@@ -56,7 +76,7 @@ verify installation with the packaged perl test
 
 
 Start Server
-============
+^^^^^^^^^^^^
 After running these steps successfully, you should be able to test your installation:
 
     ./script/thruk_server.pl
@@ -65,7 +85,7 @@ Open your browser and open http://<your_host>:3000
 
 
 FastCGI Server
-==============
+^^^^^^^^^^^^^^
 
 you will need three additional perl modules:
 FCGI, FCGI::ProcManager and Catalyst::Engine::FastCGI
@@ -78,7 +98,7 @@ start your fcgi server:
 
 
 Apache Configuration
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 use this apache example configuration:
 
