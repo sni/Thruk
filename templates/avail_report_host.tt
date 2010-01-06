@@ -24,7 +24,7 @@
             Host '[% host %]'
           </div><br>
 
-          <img src='/nagios/images/trends.gif' border="0" alt='Availability Report' title='Availability Report'><br clear="all">
+          <img src='/thruk/images/trends.gif' border="0" alt='Availability Report' title='Availability Report'><br clear="all">
           <div align="center" class='reportRange'>
             [% date.format(start, '%Y-%m-%d  %H:%M:%S') %] to [% date.format(end, '%Y-%m-%d  %H:%M:%S') %]
           </div>
@@ -183,7 +183,7 @@
         </tr>
         <tr class='dataOdd'>
           <td class='dataOdd' rowspan="3">Undetermined</td>
-          <td class='dataOdd'>Nagios Not Running</td>
+          <td class='dataOdd'>Monitoring Not Running</td>
           <td class='dataOdd'>0d 0h 0m 0s</td>
           <td class='dataOdd'>0.000%</td>
           <td class='dataOdd'></td>

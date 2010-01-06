@@ -47,7 +47,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem'>
                 Previous Day<br>
-                <a href='history.cgi?archive=[% archive + 1 %][% link %]'><img src='/nagios/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
+                <a href='history.cgi?archive=[% archive + 1 %][% link %]'><img src='/thruk/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
@@ -66,10 +66,10 @@
               [% IF archive >= 1 %]
               <td align="center" valign="middle" class='navBoxItem'>
                 Next Day<br>
-                <a href='history.cgi?archive=[% archive - 1 %][% link %]'><img src='/nagios/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
+                <a href='history.cgi?archive=[% archive - 1 %][% link %]'><img src='/thruk/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
               </td>
               [% ELSE %]
-              <td><img src='/nagios/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
+              <td><img src='/thruk/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
               [% END %]
             </tr>
           </table><br>
@@ -204,7 +204,7 @@
 [% ELSIF l.message.search('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
 [% ELSE                                              %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% END %]
-<img align='left' src='/nagios/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.message %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
+<img align='left' src='/thruk/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.message %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 [% END %]
     </div>
 

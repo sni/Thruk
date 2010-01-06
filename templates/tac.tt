@@ -123,7 +123,7 @@
                                 [% host_health_pic = 'thermcrit.png' %]
                                 [% health_perc = 5 %]
                                 [% END %]
-                                <td valign="top" width="100" class='healthBar'><img src='/nagios/images/[% host_health_pic %]' border="0" width="[% health_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health'></td>
+                                <td valign="top" width="100" class='healthBar'><img src='/thruk/images/[% host_health_pic %]' border="0" width="[% health_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health'></td>
                               </tr>
                               <tr>
                                 <td align="left" valign="center" class='healthItem'>Service Health:</td>
@@ -143,7 +143,7 @@
                                 [% service_health_pic = 'thermcrit.png' %]
                                 [% service_perc = 5 %]
                                 [% END %]
-                                <td valign="top" width="100" class='healthBar'><img src='/nagios/images/[% service_health_pic %]' border="0" width="[% service_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health'></td>
+                                <td valign="top" width="100" class='healthBar'><img src='/thruk/images/[% service_health_pic %]' border="0" width="[% service_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health'></td>
                               </tr>
                             </table>
                           </td>
@@ -340,11 +340,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.enable_flap_detection == 1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='/nagios/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='/thruk/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled'></a></td>
               [% ELSIF pi.enable_flap_detection == -1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='/nagios/images/tacdiverse.png' border="0" alt='Flap Detection Ambiguous' title='Flap Detection Ambiguous'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='/thruk/images/tacdiverse.png' border="0" alt='Flap Detection Ambiguous' title='Flap Detection Ambiguous'></a></td>
               [% ELSE %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=61'><img src='/nagios/images/tacdisabled.png' border="0" alt='Flap Detection Disabled' title='Flap Detection Disabled'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=61'><img src='/thruk/images/tacdisabled.png' border="0" alt='Flap Detection Disabled' title='Flap Detection Disabled'></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
 
@@ -391,11 +391,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.enable_notifications == 1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='/nagios/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='/thruk/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled'></a></td>
               [% ELSIF pi.enable_notifications == -1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='/nagios/images/tacdiverse.png' border="0" alt='Notifications Ambiguous' title='Notifications Ambiguous'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='/thruk/images/tacdiverse.png' border="0" alt='Notifications Ambiguous' title='Notifications Ambiguous'></a></td>
               [% ELSE %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=12'><img src='/nagios/images/tacdisabled.png' border="0" alt='Notifications Disabled' title='Notifications Disabled'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=12'><img src='/thruk/images/tacdisabled.png' border="0" alt='Notifications Disabled' title='Notifications Disabled'></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
               [% IF pi.enable_notifications == 0 %]
@@ -427,11 +427,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.enable_event_handlers == 1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='/nagios/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='/thruk/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled'></a></td>
               [% ELSIF pi.enable_event_handlers == -1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='/nagios/images/tacdiverse.png' border="0" alt='Event Handlers Ambiguous' title='Event Handlers Ambiguous'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='/thruk/images/tacdiverse.png' border="0" alt='Event Handlers Ambiguous' title='Event Handlers Ambiguous'></a></td>
               [% ELSE %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=41'><img src='/nagios/images/tacdisabled.png' border="0" alt='Event Handlers Disabled' title='Event Handlers Disabled'></a></td>
+              <td valign="top"><a href='cmd.cgi?cmd_typ=41'><img src='/thruk/images/tacdisabled.png' border="0" alt='Event Handlers Disabled' title='Event Handlers Disabled'></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
 
@@ -464,11 +464,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.execute_service_checks == 1 %]
-              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacenabled.png' border='0' alt='Active Checks Enabled' title='Active Checks Enabled'></a></td>
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/images/tacenabled.png' border='0' alt='Active Checks Enabled' title='Active Checks Enabled'></a></td>
               [% ELSIF pi.execute_service_checks == -1 %]
-              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacdiverse.png' border='0' alt='Active Checks Ambiguous' title='Active Checks Ambiguous'></a></td>
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/images/tacdiverse.png' border='0' alt='Active Checks Ambiguous' title='Active Checks Ambiguous'></a></td>
               [% ELSE %]
-              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacdisabled.png' border='0' alt='Active Checks Disabled' title='Active Checks Disabled'></a></td>
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/images/tacdisabled.png' border='0' alt='Active Checks Disabled' title='Active Checks Disabled'></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
               [% IF pi.execute_service_checks == 0 %]
@@ -500,11 +500,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.accept_passive_service_checks == 1 %]
-              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacenabled.png' border='0' alt='Passive Checks Enabled' title='Passive Checks Enabled'></a></td>
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/images/tacenabled.png' border='0' alt='Passive Checks Enabled' title='Passive Checks Enabled'></a></td>
               [% ELSIF pi.accept_passive_service_checks == -1 %]
-              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacdiverse.png' border='0' alt='Passive Checks Ambiguous' title='Passive Checks Ambiguous'></a></td>
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/images/tacdiverse.png' border='0' alt='Passive Checks Ambiguous' title='Passive Checks Ambiguous'></a></td>
               [% ELSE %]
-              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/nagios/images/tacdisabled.png' border='0' alt='Passive Checks Disabled' title='Passive Checks Disabled'></a></td>
+              <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/images/tacdisabled.png' border='0' alt='Passive Checks Disabled' title='Passive Checks Disabled'></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
               [% IF pi.accept_passive_service_checks == 0 %]

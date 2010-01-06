@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TMP_DIR="/tmp"
-PATCHDIR="/opt/projects/git/Nagios-Web/contrib/livestatus/patches"
+PATCHDIR=`dirname $0`
 
 cd $TMP_DIR || ( echo "cd $TMP_DIR failed"; exit 1 );
 

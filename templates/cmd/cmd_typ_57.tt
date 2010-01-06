@@ -11,7 +11,7 @@
    description = 'This command is used to enable flap detection for a specific host. If flap detection is disabled on a program-wide basis, this will have no effect,'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 

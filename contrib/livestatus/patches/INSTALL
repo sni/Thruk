@@ -7,5 +7,5 @@ run the following commands:
     ./configure
     make
 
-if everything went fine, you can copy the "src/livestatus.o" to your nagios
+if everything went fine, you can copy the "src/livestatus.o" to your nagios/incinga
 installation and use it as NEB module.

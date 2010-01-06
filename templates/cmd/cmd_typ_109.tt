@@ -11,7 +11,7 @@
    description = 'This command is used to enable notifications for all services in the specified servicegroup. Notifications will only be sent out for the service state types you defined in your service definitions. This <i>does not</i> enable notifications for the hosts in this servicegroup unless you check the 'Enable for hosts too' option.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% servicegroup_name    = c.request.parameters.servicegroup %]
 

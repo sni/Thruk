@@ -3,19 +3,19 @@ use warnings;
 use Data::Dumper;
 use Test::More tests => 13;
 
-BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
-BEGIN { use_ok 'Nagios::Web::Controller::Root' }
+BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN { use_ok 'Thruk::Controller::Root' }
 
 my $redirects = [
     '/',
-    '/nagios',
-    '/nagios/',
+    '/thuk',
+    '/thruk/',
 ];
 my $pages = [
-    '/nagios/docs/index.html',
-    '/nagios/index.html',
-    '/nagios/main.html',
-    '/nagios/side.html',
+    '/thruk/docs/index.html',
+    '/thruk/index.html',
+    '/thruk/main.html',
+    '/thruk/side.html',
 ];
 
 for my $url (@{$redirects}) {

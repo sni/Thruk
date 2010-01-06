@@ -5,20 +5,6 @@
       <tr>
         <td align="left" valign="top" width="33%">
           [% INCLUDE _infobox.tt %]
-
-          <script language="JavaScript" type="text/javascript">
-          <!--
-          function nagios_get_host_name()
-          {
-          return "[% host.name %]";
-          }
-          function nagios_get_host_address()
-          {
-          return "[% host.address %]";
-          }
-          //-->
-          </script>
-
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
@@ -66,7 +52,7 @@
 
           <div class='data'>[% host.address %]</div>
           [% IF host.icon_image %]
-          <img src='/nagios/images/logos/[% host.icon_image %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
+          <img src='/thruk/images/logos/[% host.icon_image %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
           [% IF host.icon_image_alt %]<font size="-1"><i>( [% host.icon_image_alt %] )</i></font>[% END %]
           [% END %]
           [% IF host.notes %]<p>[% host.notes %]</p>[% END %]
@@ -76,7 +62,7 @@
           [% IF host.action_url %]
             <tr>
               <td align='right'>
-                <a href='[% host.action_url %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/nagios/images/action.gif' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host'></a><br clear="all">
+                <a href='[% host.action_url %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/thruk/images/action.gif' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host'></a><br clear="all">
                 <font size="-1"><i>Extra Actions</i></font><br clear="all">
                 <br clear="all">
               </td>
@@ -85,7 +71,7 @@
           [% IF host.notes_url %]
             <tr>
               <td align='right'>
-                <a href='[% host.notes_url %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/nagios/images/notes.gif' border="0" alt='View Additional Notes For This Host' title='View Additional Notes For This Host'></a><br clear="all">
+                <a href='[% host.notes_url %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/thruk/images/notes.gif' border="0" alt='View Additional Notes For This Host' title='View Additional Notes For This Host'></a><br clear="all">
                 <font size="-1"><i>Extra Notes</i></font><br clear="all">
                 <br clear="all">
               </td>
@@ -167,7 +153,7 @@
                             <td class='dataVar'>Next Scheduled Active Check:&nbsp;&nbsp;</td>
                             <td class='dataVal'>
                               [% IF host.next_check %][% date.format(host.next_check, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]
-                              [% IF host.is_executing > 0 %]<img src="/nagios/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20">[% END %]
+                              [% IF host.is_executing > 0 %]<img src="/thruk/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20">[% END %]
                             </td>
                           </tr>
                           <tr>
@@ -312,44 +298,44 @@
                         [% ELSE %]
                         <table border="0" cellspacing="0" cellpadding="0" class='command'>
                           <tr class='command'>
-                            <td><img src='/nagios/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map'></td>
+                            <td><img src='/thruk/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map'></td>
                             <td class='command'><a href='statusmap.cgi?host=[% host.name %]'>Locate host on map</a></td>
                           </tr>
                           <tr class='command'>
                             [% IF host.checks_enabled %]
-                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host'></td>
+                              <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=48&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable active checks of this host</a></td>
                             [% ELSE %]
-                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host'></td>
+                              <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=47&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable active checks of this host</a></td>
                             [% END %]
                           </tr>
                           <tr class='data'>
-                            <td><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check'></td>
+                            <td><img src='/thruk/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name %][% IF host.checks_enabled %]&force_check[% END %]&amp;backend=[% host.peer_key %]'>Re-schedule the next check of this host</a></td>
                           </tr>
                           [% IF host.accept_passive_checks %]
                           <tr class='command'>
-                            <td><img src='/nagios/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Host' title='Submit Passive Check Result For This Host'></td>
+                            <td><img src='/thruk/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Host' title='Submit Passive Check Result For This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=87&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Submit passive check result for this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Host' title='Stop Accepting Passive Checks For This Host'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Host' title='Stop Accepting Passive Checks For This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=93&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Stop accepting passive checks for this host</a></td>
                           </tr>
                           [% ELSE %]
                           <tr class='command'>
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Host' title='Start Accepting Passive Checks For This Host'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Host' title='Start Accepting Passive Checks For This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=92&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Start accepting passive checks for this host</a></td>
                           </tr>
                           [% END %]
 
                           <tr class='command'>
                             [% IF host.obsess_over_host %]
-                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over This Host' title='Stop Obsessing Over This Host'></td>
+                              <td><img src='/thruk/images/disabled.gif' border="0" alt='Stop Obsessing Over This Host' title='Stop Obsessing Over This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=102&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Stop obsessing over this host</a></td>
                             [% ELSE %]
-                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over This Host' title='Start Obsessing Over This Host'></td>
+                              <td><img src='/thruk/images/enabled.gif' border="0" alt='Start Obsessing Over This Host' title='Start Obsessing Over This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=101&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Start obsessing over this host</a></td>
                             [% END %]
                           </tr>
@@ -358,10 +344,10 @@
                           [% IF host.state >= 1 %]
                           <tr class='command'>
                             [% IF host.acknowledged %]
-                              <td><img src='/nagios/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement'></td>
+                              <td><img src='/thruk/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=51&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Remove problem acknowledgement</a></td>
                             [% ELSE %]
-                              <td><img src='/nagios/images/ack.gif' border="0" alt='Acknowledge This Host Problem' title='Acknowledge This Host Problem'></td>
+                              <td><img src='/thruk/images/ack.gif' border="0" alt='Acknowledge This Host Problem' title='Acknowledge This Host Problem'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=33&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Acknowledge this host problem</a></td>
                             [% END %]
                           </tr>
@@ -370,67 +356,67 @@
 
                           <tr class='command'>
                             [% IF host.notifications_enabled %]
-                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For This Host' title='Disable Notifications For This Host'></td>
+                              <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Notifications For This Host' title='Disable Notifications For This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=25&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable notifications for this host</a></td>
                             [% ELSE %]
-                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications For This Host' title='Enable Notifications For This Host'></td>
+                              <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Notifications For This Host' title='Enable Notifications For This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=24&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable notifications for this host</a></td>
                             [% END %]
                           </tr>
 
                           <tr class='command'>
-                            <td><img src='/nagios/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification'></td>
+                            <td><img src='/thruk/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=159&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Send custom host notification</a></td>
                           </tr>
 
                           [% IF host.state >= 1 %]
                           <tr class='command'>
-                            <td><img src='/nagios/images/delay.gif' border="0" alt='Delay Next Host Notification' title='Delay Next Host Notification'></td>
+                            <td><img src='/thruk/images/delay.gif' border="0" alt='Delay Next Host Notification' title='Delay Next Host Notification'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=10&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Delay next host notification</a></td>
                           </tr>
                           [% END %]
 
                           <tr class='command'>
-                            <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For This Host' title='Schedule Downtime For This Host'></td>
+                            <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For This Host' title='Schedule Downtime For This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Schedule downtime for this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For All Services On This Host' title='Disable Notifications For All Services On This Host'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Notifications For All Services On This Host' title='Disable Notifications For All Services On This Host'></td>
                             <td class='command' nowrap><a href='cmd.cgi?cmd_typ=29&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable notifications for all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications For All Services On This Host' title='Enable Notifications For All Services On This Host'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Notifications For All Services On This Host' title='Enable Notifications For All Services On This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=28&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable notifications for all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host'></td>
+                            <td><img src='/thruk/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Schedule a check of all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Checks Of All Services On This Host' title='Disable Checks Of All Services On This Host'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Checks Of All Services On This Host' title='Disable Checks Of All Services On This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=16&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable checks of all services on this host</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Checks Of All Services On This Host' title='Enable Checks Of All Services On This Host'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Checks Of All Services On This Host' title='Enable Checks Of All Services On This Host'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=15&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable checks of all services on this host</a></td>
                           </tr>
 
                           <tr class='command'>
                             [% IF host.event_handler_enabled %]
-                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host'></td>
+                              <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=44&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable event handler for this host</a></td>
                             [% ELSE %]
-                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Event Handler For This Host' title='Enable Event Handler For This Host'></td>
+                              <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Event Handler For This Host' title='Enable Event Handler For This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=43&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable event handler for this host</a></td>
                             [% END %]
                           </tr>
 
                           <tr class='command'>
                             [% IF host.flap_detection_enabled %]
-                              <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection For This Host' title='Disable Flap Detection For This Host'></td>
+                              <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Flap Detection For This Host' title='Disable Flap Detection For This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=58&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable flap detection for this host</a></td>
                             [% ELSE %]
-                              <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Flap Detection For This Host' title='Enable Flap Detection For This Host'></td>
+                              <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Flap Detection For This Host' title='Enable Flap Detection For This Host'></td>
                               <td class='command'><a href='cmd.cgi?cmd_typ=57&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable flap detection for this host</a></td>
                             [% END %]
                           </tr>
@@ -452,9 +438,9 @@
             <div class='commentTitle'>Host Comments</div>
             <table border="0">
               <tr>
-                <td valign="middle"><img src='/nagios/images/comment.gif' border="0" align="center" alt="#########"></td>
+                <td valign="middle"><img src='/thruk/images/comment.gif' border="0" align="center" alt="#########"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=1&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new comment</a></td>
-                <td valign="middle"><img src='/nagios/images/delete.gif' border="0" align="center" alt="#########"></td>
+                <td valign="middle"><img src='/thruk/images/delete.gif' border="0" align="center" alt="#########"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=20&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]' class='comment'>Delete all comments</a></td>
               </tr>
             </table>
@@ -482,7 +468,7 @@
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]'>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
                     <td class='[% class %]'>[% IF comment.expires %][% date.format(comment.expires_time, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
+                    <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]

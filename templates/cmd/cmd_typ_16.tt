@@ -8,10 +8,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to disable active checks of all services on a host'
-   description = 'This command is used to disable active checks of all services associated with the specified host. When a service is disabled Nagios will not monitor the service. Doing this will prevent any notifications being sent out for the specified service while it is disabled. In order to have Nagios check the service in the future you will have to re-enable the service. Note that disabling service checks may not necessarily prevent notifications from being sent out about the host which those services are associated with. This <i>does not</i> disable checks of the host unless you check the 'Disable for host too' option.'
+   description = 'This command is used to disable active checks of all services associated with the specified host. When a service is disabled your Monitoring will not monitor the service. Doing this will prevent any notifications being sent out for the specified service while it is disabled. In order to have your Monitoring check the service in the future you will have to re-enable the service. Note that disabling service checks may not necessarily prevent notifications from being sent out about the host which those services are associated with. This <i>does not</i> disable checks of the host unless you check the 'Disable for host too' option.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 

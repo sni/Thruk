@@ -36,35 +36,35 @@
                 <td>
                   <table border="0" cellspacing="0" cellpadding="0" class='command'>
                     <tr class='command'>
-                      <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Hostgroup' title='Schedule Downtime For All Hosts In This Hostgroup'></td>
+                      <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Hostgroup' title='Schedule Downtime For All Hosts In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=84&amp;hostgroup=[% hostgroup %]'>Schedule downtime for all hosts in this hostgroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Hostgroup' title='Schedule Downtime For All Services In This Hostgroup'></td>
+                      <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Hostgroup' title='Schedule Downtime For All Services In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=85&amp;hostgroup=[% hostgroup %]'>Schedule downtime for all services in this hostgroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/nagios/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Hostgroup' title='Enable Notifications For All Hosts In This Hostgroup'></td>
+                      <td><img src='/thruk/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Hostgroup' title='Enable Notifications For All Hosts In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=65&amp;hostgroup=[% hostgroup %]'>Enable notifications for all hosts in this hostgroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/nagios/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Hostgroup' title='Disable Notifications For All Hosts In This Hostgroup'></td>
+                      <td><img src='/thruk/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Hostgroup' title='Disable Notifications For All Hosts In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=66&amp;hostgroup=[% hostgroup %]'>Disable notifications for all hosts in this hostgroup</a> </td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/nagios/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Hostgroup' title='Enable Notifications For All Services In This Hostgroup'></td>
+                      <td><img src='/thruk/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Hostgroup' title='Enable Notifications For All Services In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=63&amp;hostgroup=[% hostgroup %]'>Enable notifications for all services in this hostgroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/nagios/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Hostgroup' title='Disable Notifications For All Services In This Hostgroup'></td>
+                      <td><img src='/thruk/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Hostgroup' title='Disable Notifications For All Services In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=64&amp;hostgroup=[% hostgroup %]'>Disable notifications for all services in this hostgroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Hostgroup' title='Enable Active Checks Of All Services In This Hostgroup'></td>
+                      <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Hostgroup' title='Enable Active Checks Of All Services In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=67&amp;hostgroup=[% hostgroup %]'>Enable active checks of all services in this hostgroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Hostgroup' title='Disable Active Checks Of All Services In This Hostgroup'></td>
+                      <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Hostgroup' title='Disable Active Checks Of All Services In This Hostgroup'></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=68&amp;hostgroup=[% hostgroup %]'>Disable active checks of all services in this hostgroup</a></td>
                     </tr>
                   </table>

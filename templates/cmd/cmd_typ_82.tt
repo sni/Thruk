@@ -11,7 +11,7 @@
    description = 'This command is used to enable the processing of performance data for hosts and services on a program-wide basis. Individual hosts and services may have performance data processing disabled.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
 
     ENABLE_PERFORMANCE_DATA

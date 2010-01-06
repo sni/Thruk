@@ -15,7 +15,7 @@
 
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Host Downtime</div>
-    <div class='comment'><img src='/nagios/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
+    <div class='comment'><img src='/thruk/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
@@ -45,7 +45,7 @@
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
         [% END %]
       </table>
@@ -54,7 +54,7 @@
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtime</div>
-    <div class='comment'><img src='/nagios/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
+    <div class='comment'><img src='/thruk/images/downtime.gif' border="0" alt="#########">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
@@ -86,7 +86,7 @@
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
+          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry'></a></td>
         </tr>
         [% END %]
       </table>

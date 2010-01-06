@@ -2,11 +2,11 @@ use strict;
 use warnings;
 use Test::More tests => 6;
 
-BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
-BEGIN { use_ok 'Nagios::Web::Controller::trends' }
+BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN { use_ok 'Thruk::Controller::trends' }
 
 ok( request('/trends')->is_success, 'Trends Request should succeed' );
-my $request = request('/nagios/cgi-bin/trends.cgi');
+my $request = request('/thruk/cgi-bin/trends.cgi');
 ok( $request->is_success, 'Trends Request should succeed' );
 my $content = $request->content;
 TODO: {

@@ -1,4 +1,7 @@
-This file documents the revision history for Perl extension Nagios::Web.
+This file documents the revision history for Perl extension Thruk.
+
+0.20_0  Tue Jan  5 01:25:14 CET 2010
+          - renamed project to Thruk
 
 0.11_0  Fri Jan  1 20:01:12 CET 2010
           - added history page
@@ -10,7 +13,7 @@ This file documents the revision history for Perl extension Nagios::Web.
           - completed showlog page
 
 0.10_5  Sun Dec 20 00:09:43 CET 2009
-          - added multi nagios backend
+          - added multi monitoring backend
 
 0.10_4  Fri Dec  4 09:50:46 CET 2009
           - completed status overview page

@@ -2,25 +2,25 @@ use strict;
 use warnings;
 use Test::More tests => 42;
 
-BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
-BEGIN { use_ok 'Nagios::Web::Controller::config' }
+BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN { use_ok 'Thruk::Controller::config' }
 
 ok( request('/config')->is_success, 'Config Request should succeed' );
 
 my $pages = [
-    '/nagios/cgi-bin/config.cgi',
-    '/nagios/cgi-bin/config.cgi?type=hosts',
-    '/nagios/cgi-bin/config.cgi?type=hostdependencies',
-    '/nagios/cgi-bin/config.cgi?type=hostescalations',
-    '/nagios/cgi-bin/config.cgi?type=hostgroups',
-    '/nagios/cgi-bin/config.cgi?type=services',
-    '/nagios/cgi-bin/config.cgi?type=servicegroups',
-    '/nagios/cgi-bin/config.cgi?type=servicedependencies',
-    '/nagios/cgi-bin/config.cgi?type=serviceescalations',
-    '/nagios/cgi-bin/config.cgi?type=contacts',
-    '/nagios/cgi-bin/config.cgi?type=contactgroups',
-    '/nagios/cgi-bin/config.cgi?type=timeperiods',
-    '/nagios/cgi-bin/config.cgi?type=commands',
+    '/thruk/cgi-bin/config.cgi',
+    '/thruk/cgi-bin/config.cgi?type=hosts',
+    '/thruk/cgi-bin/config.cgi?type=hostdependencies',
+    '/thruk/cgi-bin/config.cgi?type=hostescalations',
+    '/thruk/cgi-bin/config.cgi?type=hostgroups',
+    '/thruk/cgi-bin/config.cgi?type=services',
+    '/thruk/cgi-bin/config.cgi?type=servicegroups',
+    '/thruk/cgi-bin/config.cgi?type=servicedependencies',
+    '/thruk/cgi-bin/config.cgi?type=serviceescalations',
+    '/thruk/cgi-bin/config.cgi?type=contacts',
+    '/thruk/cgi-bin/config.cgi?type=contactgroups',
+    '/thruk/cgi-bin/config.cgi?type=timeperiods',
+    '/thruk/cgi-bin/config.cgi?type=commands',
 ];
 
 for my $url (@{$pages}) {

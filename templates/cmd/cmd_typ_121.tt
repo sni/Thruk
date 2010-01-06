@@ -9,10 +9,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to schedule downtime for all hosts in a particular servicegroup'
-   description = 'This command is used to schedule downtime for all hosts in a particular servicegroup. During the specified downtime, Nagios will not send notifications out about the hosts. When the scheduled downtime expires, Nagios will send out notifications for the hosts as it normally would. Scheduled downtimes are preserved across program shutdowns and restarts. Both the start and end times should be specified in the following format: <b>mm/dd/yyyy hh:mm:ss</b>. If you select the <i>fixed</i> option, the downtime will be in effect between the start and end times you specify. If you do not select the <i>fixed</i> option, Nagios will treat this as "flexible" downtime. Flexible downtime starts when a host goes down or becomes unreachable (sometime between the start and end times you specified) and lasts as long as the duration of time you enter. The duration fields do not apply for fixed dowtime.'
+   description = 'This command is used to schedule downtime for all hosts in a particular servicegroup. During the specified downtime, your Monitoring will not send notifications out about the hosts. When the scheduled downtime expires, your Monitoring will send out notifications for the hosts as it normally would. Scheduled downtimes are preserved across program shutdowns and restarts. Both the start and end times should be specified in the following format: <b>mm/dd/yyyy hh:mm:ss</b>. If you select the <i>fixed</i> option, the downtime will be in effect between the start and end times you specify. If you do not select the <i>fixed</i> option, your Monitoring will treat this as "flexible" downtime. Flexible downtime starts when a host goes down or becomes unreachable (sometime between the start and end times you specified) and lasts as long as the duration of time you enter. The duration fields do not apply for fixed dowtime.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% IF c.request.parameters.fixed %][% fixed = 1 %][% ELSE %][% fixed = 0 %][% END %]
     [% start_time           = date.format( c.request.parameters.start_time, '%s') %]

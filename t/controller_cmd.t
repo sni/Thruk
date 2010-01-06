@@ -2,8 +2,8 @@ use strict;
 use warnings;
 use Test::More tests => 188;
 
-BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
-BEGIN { use_ok 'Nagios::Web::Controller::cmd' }
+BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN { use_ok 'Thruk::Controller::cmd' }
 
 for my $file (glob("templates/cmd/*")) {
     if($file eq '.' or $file eq '..') {}

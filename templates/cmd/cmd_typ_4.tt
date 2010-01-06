@@ -11,7 +11,7 @@
    description = 'This command is used to delete a specific service comment.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% comment_id           = c.request.parameters.com_id %]
 

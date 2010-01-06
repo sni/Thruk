@@ -23,10 +23,10 @@
     <div align="center">
       <table border="0" class='queue'>
         <tr class='queue'>
-          <th class='queue'>Host&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=1'><img src='/nagios/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=1'><img src='/nagios/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
-          <th class='queue'>Service&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=2'><img src='/nagios/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=2'><img src='/nagios/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
-          <th class='queue'>Last Check&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=4'><img src='/nagios/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=4'><img src='/nagios/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
-          <th class='queue'>Next Check&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=7'><img src='/nagios/images/up.gif' border="0" alt='Sort by next check time (ascending)' title='Sort by next check time (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=7'><img src='/nagios/images/down.gif' border="0" alt='Sort by next check time (descending)' title='Sort by next check time (descending)'></a></th>
+          <th class='queue'>Host&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=1'><img src='/thruk/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=1'><img src='/thruk/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
+          <th class='queue'>Service&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=2'><img src='/thruk/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=2'><img src='/thruk/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
+          <th class='queue'>Last Check&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=4'><img src='/thruk/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=4'><img src='/thruk/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
+          <th class='queue'>Next Check&nbsp;<a href='extinfo.cgi?type=7&amp;sorttype=1&amp;sortoption=7'><img src='/thruk/images/up.gif' border="0" alt='Sort by next check time (ascending)' title='Sort by next check time (ascending)'></a><a href='extinfo.cgi?type=7&amp;sorttype=2&amp;sortoption=7'><img src='/thruk/images/down.gif' border="0" alt='Sort by next check time (descending)' title='Sort by next check time (descending)'></a></th>
           <th class='queue'>Type</th>
           <th class='queue'>Active Checks</th>
           <th class='queue'>Actions</th>
@@ -66,18 +66,18 @@
           <td class='[% class %]'>
           [% IF q.description %]
             [% IF q.active_checks_enabled %]
-            <a href='cmd.cgi?cmd_typ=6&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></a>
+            <a href='cmd.cgi?cmd_typ=6&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/thruk/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></a>
             [% ELSE %]
-            <a href='cmd.cgi?cmd_typ=5&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service'></a>
+            <a href='cmd.cgi?cmd_typ=5&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/thruk/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service'></a>
             [% END %]
-            <a href='cmd.cgi?cmd_typ=7&amp;host=[% q.host_name %]&amp;service=[% q.description %]&amp;force_check'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check'></a>
+            <a href='cmd.cgi?cmd_typ=7&amp;host=[% q.host_name %]&amp;service=[% q.description %]&amp;force_check'><img src='/thruk/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check'></a>
           [% ELSE %]
             [% IF q.active_checks_enabled %]
-            <a href='cmd.cgi?cmd_typ=4&amp;host=[% q.host_name %]'><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host'></a>
+            <a href='cmd.cgi?cmd_typ=4&amp;host=[% q.host_name %]'><img src='/thruk/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host'></a>
             [% ELSE %]
-            <a href='cmd.cgi?cmd_typ=47&amp;host=[% q.host_name %]'><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host'></a>
+            <a href='cmd.cgi?cmd_typ=47&amp;host=[% q.host_name %]'><img src='/thruk/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host'></a>
             [% END %]
-            <a href='cmd.cgi?cmd_typ=96&amp;host=[% q.host_name %]&amp;force_check'><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule This Host Check' title='Re-schedule This Host Check'></a>
+            <a href='cmd.cgi?cmd_typ=96&amp;host=[% q.host_name %]&amp;force_check'><img src='/thruk/images/delay.gif' border="0" alt='Re-schedule This Host Check' title='Re-schedule This Host Check'></a>
           [% END %]
           </td>
         </tr>

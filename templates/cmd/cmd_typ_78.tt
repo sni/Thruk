@@ -11,7 +11,7 @@
    description = 'This command is used to cancel active or pending scheduled downtime for the specified host.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% downtime_id          = c.request.parameters.down_id %]
 

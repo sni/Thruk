@@ -8,10 +8,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to stop accepting passive service checks'
-   description = 'This command is use to make Nagios stop accepting passive service check results that it finds in the external command file. All passive check results that are found will be ignored.'
+   description = 'This command is use to make your Monitoring stop accepting passive service check results that it finds in the external command file. All passive check results that are found will be ignored.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
 
     STOP_ACCEPTING_PASSIVE_SVC_CHECKS

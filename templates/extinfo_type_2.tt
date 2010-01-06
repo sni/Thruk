@@ -1,29 +1,10 @@
 [% USE date %]
 [% INCLUDE _header.tt %]
 
-  <body class='extinfo'>
-
-    <!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
           [% INCLUDE _infobox.tt %]
-          <script language="JavaScript" type="text/javascript">
-          <!--
-          function nagios_get_host_name()
-          {
-              return "[% service.host_name %]";
-          }
-          function nagios_get_host_address()
-          {
-              return "[% service.host_address %]";
-          }
-          function nagios_get_service_description()
-          {
-              return "[% service.description %]";
-          }
-          //-->
-          </script>
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
@@ -66,19 +47,19 @@
           </div><br>
           <div class='data'>[% service.host_address %]</div>
           [% IF service.icon_image %]
-          <img src='/nagios/images/logos/[% service.icon_image %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
+          <img src='/thruk/images/logos/[% service.icon_image %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
           [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt %] )</i></font>[% END %]
           [% END %]
           [% IF service.notes %]<p>[% service.notes %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%">
           [% IF service.action_url %]
-          <a href='[% service.action_url %]' target='_blank'><img src='/nagios/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service'></a><br clear="all">
+          <a href='[% service.action_url %]' target='_blank'><img src='/thruk/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service'></a><br clear="all">
           <font size="-1"><i>Extra Actions</i></font><br clear="all">
           <br clear="all">
           [% END %]
           [% IF service.notes_url %]
-          <a href='[% service.notes_url %]' target='_blank'><img src='/nagios/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service'></a><br clear="all">
+          <a href='[% service.notes_url %]' target='_blank'><img src='/thruk/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service'></a><br clear="all">
           <font size="-1"><i>Extra Notes</i></font><br clear="all">
           <br clear="all">
           [% END %]
@@ -163,7 +144,7 @@
                             <td class='dataVar'>Next Scheduled Check:&nbsp;&nbsp;</td>
                             <td class='dataVal'>
                               [% IF service.next_check %][% date.format(service.next_check, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]
-                              [% IF service.is_executing > 0 %]<img src="/nagios/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]
+                              [% IF service.is_executing > 0 %]<img src="/thruk/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]
                             </td>
                           </tr>
                           <tr>
@@ -309,41 +290,41 @@
 
                           <tr class='command'>
                             [% IF service.checks_enabled %]
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=6&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Disable active checks of this service</a></td>
                             [% ELSE %]
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=5&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Enable active checks of this service</a></td>
                             [% END %]
                           </tr>
 
                           <tr class='data'>
-                            <td><img src='/nagios/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check'></td>
+                            <td><img src='/thruk/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=7&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;force_check&amp;backend=[% service.peer_key %]'>Re-schedule the next check of this service</a></td>
                           </tr>
 
                           [% IF service.accept_passive_checks %]
                           <tr class='command'>
-                            <td><img src='/nagios/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Service' title='Submit Passive Check Result For This Service'></td>
+                            <td><img src='/thruk/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Service' title='Submit Passive Check Result For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=30&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Submit passive check result for this service</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Service' title='Stop Accepting Passive Checks For This Service'></td>
                             <td class='command' nowrap><a href='cmd.cgi?cmd_typ=40&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Stop accepting passive checks for this service</a></td>
                           </tr>
                           [% ELSE %]
                           <tr class='command'>
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Service' title='Start Accepting Passive Checks For This Service'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Service' title='Start Accepting Passive Checks For This Service'></td>
                             <td class='command' nowrap><a href='cmd.cgi?cmd_typ=39&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Start accepting passive checks for this service</a></td>
                           </tr>
                           [% END %]
 
                           <tr class='command'>
                             [% IF service.obsess_over_service %]
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Stop Obsessing Over This Service' title='Stop Obsessing Over This Service'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Stop Obsessing Over This Service' title='Stop Obsessing Over This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=100&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Stop obsessing over this service</a></td>
                             [% ELSE %]
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Start Obsessing Over This Service' title='Start Obsessing Over This Service'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Start Obsessing Over This Service' title='Start Obsessing Over This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=99&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Start obsessing over this service</a></td>
                             [% END %]
                           </tr>
@@ -351,10 +332,10 @@
                           [% IF service.state >= 2 %]
                           <tr class='command'>
                             [% IF service.acknowledged %]
-                            <td><img src='/nagios/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement'></td>
+                            <td><img src='/thruk/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=52&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Remove problem acknowledgement</a></td>
                             [% ELSE %]
-                            <td><img src='/nagios/images/ack.gif' border="0" alt='Acknowledge This Service Problem' title='Acknowledge This Service Problem'></td>
+                            <td><img src='/thruk/images/ack.gif' border="0" alt='Acknowledge This Service Problem' title='Acknowledge This Service Problem'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=34&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Acknowledge this service problem</a></td>
                             [% END %]
                           </tr>
@@ -362,46 +343,46 @@
 
                           <tr class='command'>
                             [% IF service.notifications_enabled %]
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Notifications For This Service' title='Disable Notifications For This Service'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Notifications For This Service' title='Disable Notifications For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=23&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Disable notifications for this service</a></td>
                             [% ELSE %]
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Notifications For This Service' title='Enable Notifications For This Service'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Notifications For This Service' title='Enable Notifications For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=22&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Enable notifications for this service</a></td>
                             [% END %]
                           </tr>
 
                           [% IF service.state >= 1 %]
                           <tr class='command'>
-                            <td><img src='/nagios/images/delay.gif' border="0" alt='Delay Next Service Notification' title='Delay Next Service Notification'></td>
+                            <td><img src='/thruk/images/delay.gif' border="0" alt='Delay Next Service Notification' title='Delay Next Service Notification'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=9&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Delay next service notification</a></td>
                           </tr>
                           [% END %]
 
                           <tr class='command'>
-                            <td><img src='/nagios/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification'></td>
+                            <td><img src='/thruk/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=160&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Send custom service notification</a></td>
                           </tr>
                           <tr class='command'>
-                            <td><img src='/nagios/images/downtime.gif' border="0" alt='Schedule Downtime For This Service' title='Schedule Downtime For This Service'></td>
+                            <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For This Service' title='Schedule Downtime For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Schedule downtime for this service</a></td>
                           </tr>
 
                           <tr class='command'>
                             [% IF service.event_handler_enabled %]
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Event Handler For This Service' title='Disable Event Handler For This Service'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Event Handler For This Service' title='Disable Event Handler For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=46&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Disable event handler for this service</a></td>
                             [% ELSE %]
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Event Handler For This Service' title='Enable Event Handler For This Service'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Event Handler For This Service' title='Enable Event Handler For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=45&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Enable event handler for this service</a></td>
                             [% END %]
                           </tr>
 
                           <tr class='command'>
                             [% IF service.flap_detection_enabled %]
-                            <td><img src='/nagios/images/disabled.gif' border="0" alt='Disable Flap Detection For This Service' title='Disable Flap Detection For This Service'></td>
+                            <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Flap Detection For This Service' title='Disable Flap Detection For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=60&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Disable flap detection for this service</a></td>
                             [% ELSE %]
-                            <td><img src='/nagios/images/enabled.gif' border="0" alt='Enable Flap Detection For This Service' title='Enable Flap Detection For This Service'></td>
+                            <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Flap Detection For This Service' title='Enable Flap Detection For This Service'></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=59&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>Enable flap detection for this service</a></td>
                             [% END %]
                           </tr>
@@ -429,9 +410,9 @@
             <div class='commentTitle'>Service Comments</div>
             <table border="0">
               <tr>
-                <td valign="middle"><img src='/nagios/images/comment.gif' border="0" alt="#########"></td>
+                <td valign="middle"><img src='/thruk/images/comment.gif' border="0" alt="#########"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=3&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new comment</a></td>
-                <td valign="middle"><img src='/nagios/images/delete.gif' border="0" alt="#########"></td>
+                <td valign="middle"><img src='/thruk/images/delete.gif' border="0" alt="#########"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all comments</a></td>
               </tr>
             </table>
@@ -459,7 +440,7 @@
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]'>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
                     <td class='[% class %]'>[% IF comment.expires %][% date.format(comment.expires_time, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='/nagios/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
+                    <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment'></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]

@@ -12,7 +12,7 @@
    description = 'This command is used to delay the next problem notification that is sent out for the specified host. The notification delay will be disregarded if the host changes state before the next notification is scheduled to be sent out. This command has no effect if the host is currently UP.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% notification_time    = date.now() + c.request.parameters.not_dly * 60 %]
     [% host_name            = c.request.parameters.host %]

@@ -58,7 +58,7 @@ sub find_user {
         $c->detach('/error/index/9');
     }
     if(!defined $can_submit_commands) {
-        $can_submit_commands = Nagios::Web->config->{'can_submit_commands'} || 0;
+        $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;
     }
 
     $c->log->debug("can_submit_commands: $can_submit_commands");
@@ -104,7 +104,7 @@ Catalyst::Authentication::Store::FromCGIConf - Minimal authentication store with
                         default_realm => 'members',
                         realms => {
                             members => {
-                                credential => { class => 'Nagios'      },
+                                credential => { class => 'Thruk'       },
                                 store      => { class => 'FromCGIConf' }
                             }
                         }

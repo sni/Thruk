@@ -11,7 +11,7 @@
    description = 'This command is used to prevent notifications from being sent out for all hosts in the specified servicegroup. You will have to re-enable notifications for all hosts in this servicegroup before any alerts can be sent out in the future.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% servicegroup_name    = c.request.parameters.servicegroup %]
 

@@ -3,45 +3,45 @@ use warnings;
 use Data::Dumper;
 use Test::More tests => 112;
 
-BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
-BEGIN { use_ok 'Nagios::Web::Controller::status' }
+BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN { use_ok 'Thruk::Controller::status' }
 
 ok( request('/status')->is_success, 'Status Request should succeed' );
-ok( request('/nagios/cgi-bin/status.cgi')->is_success, 'Status Request should succeed' );
+ok( request('/thruk/cgi-bin/status.cgi')->is_success, 'Status Request should succeed' );
 
 my $pages = [
 # Host / Hostgroups
-    '/nagios/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
-    '/nagios/cgi-bin/status.cgi?hostgroup=all&style=detail',
-    '/nagios/cgi-bin/status.cgi?hostgroup=all&style=summary',
-    '/nagios/cgi-bin/status.cgi?hostgroup=all&style=grid',
-    '/nagios/cgi-bin/status.cgi?hostgroup=all&style=overview',
-    '/nagios/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=hostdetail',
-    '/nagios/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=detail',
-    '/nagios/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=summary',
-    '/nagios/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=overview',
-    '/nagios/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=grid',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=detail',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=summary',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=grid',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=overview',
+    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=hostdetail',
+    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=detail',
+    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=summary',
+    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=overview',
+    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=grid',
 # Services
-    '/nagios/cgi-bin/status.cgi?host=all',
-    '/nagios/cgi-bin/status.cgi?host=test_host_00',
+    '/thruk/cgi-bin/status.cgi?host=all',
+    '/thruk/cgi-bin/status.cgi?host=test_host_00',
 # Servicegroups
-    '/nagios/cgi-bin/status.cgi?servicegroup=all&style=detail',
-    '/nagios/cgi-bin/status.cgi?servicegroup=all&style=summary',
-    '/nagios/cgi-bin/status.cgi?servicegroup=all&style=grid',
-    '/nagios/cgi-bin/status.cgi?servicegroup=all&style=overview',
-    '/nagios/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=detail',
-    '/nagios/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=summary',
-    '/nagios/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=grid',
-    '/nagios/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=overview',
+    '/thruk/cgi-bin/status.cgi?servicegroup=all&style=detail',
+    '/thruk/cgi-bin/status.cgi?servicegroup=all&style=summary',
+    '/thruk/cgi-bin/status.cgi?servicegroup=all&style=grid',
+    '/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview',
+    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=detail',
+    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=summary',
+    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=grid',
+    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=overview',
 # Problems
-    '/nagios/cgi-bin/status.cgi?host=all&servicestatustypes=28',
-    '/nagios/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28',
-    '/nagios/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12',
-    '/nagios/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42',
+    '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28',
+    '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42',
 # Search
-    '/nagios/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
-    '/nagios/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=hostgroup_01',
-    '/nagios/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=servicegroup_01',
+    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
+    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=hostgroup_01',
+    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=servicegroup_01',
 ];
 
 for my $url (@{$pages}) {

@@ -2,8 +2,8 @@
 # expected.  you have been warned
 use inc::Module::Install;
 
-name 'Nagios-Web';
-all_from 'lib/Nagios/Web.pm';
+name 'Thruk';
+all_from 'lib/Thruk.pm';
 
 requires 'Carp';
 requires 'YAML::Tiny';

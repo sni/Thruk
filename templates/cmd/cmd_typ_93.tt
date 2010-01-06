@@ -8,10 +8,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to stop accepting passive checks for a particular host'
-   description = 'This command is used to stop Nagios from accepting passive host check results that it finds in the external command file for a particular host. All passive check results that are found for this host will be ignored.'
+   description = 'This command is used to stop your Monitoring from accepting passive host check results that it finds in the external command file for a particular host. All passive check results that are found for this host will be ignored.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 

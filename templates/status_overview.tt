@@ -95,7 +95,7 @@
 
                         [% IF h.icon_image %]
                         <td class='[% hostclass %]' width="5"></td>
-                        <td class='[% hostclass %]' align="right"><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/nagios/images/logos/[% h.icon_image %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a></td>
+                        <td class='[% hostclass %]' align="right"><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/thruk/images/logos/[% h.icon_image %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a></td>
                         [% END %]
 
                       </tr>
@@ -124,15 +124,15 @@
                     </table>
                   </td>
                   <td class='[% hostclass %]'>
-                    <a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/nagios/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a>
+                    <a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/thruk/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a>
                     [% IF h.notes_url %]
-                    <a href='[% h.notes_url %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/nagios/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
+                    <a href='[% h.notes_url %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/thruk/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
                     [% END %]
                     [% IF h.action_url %]
-                    <a href='[% h.action_url %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/nagios/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a>
+                    <a href='[% h.action_url %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/thruk/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a>
                     [% END %]
-                    <a href='status.cgi?host=[% h.name %]'><img src='/nagios/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
-                    <a href='statusmap.cgi?host=[% h.name %]'><img src='/nagios/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
+                    <a href='status.cgi?host=[% h.name %]'><img src='/thruk/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
+                    <a href='statusmap.cgi?host=[% h.name %]'><img src='/thruk/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
                   </td>
                 </tr>
                 [% END %]

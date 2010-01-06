@@ -11,7 +11,7 @@
    description = 'This command is used to submit a passive check result for a particular service. It is particularly useful for resetting security-related services to OK states once they have been dealt with.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% plugin_output        = c.request.parameters.plugin_output %]
     [% service_desc         = c.request.parameters.service %]

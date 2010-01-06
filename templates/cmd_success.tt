@@ -9,7 +9,7 @@
         <td align="right" valign="bottom" width="33%"></td>
       </tr>
     </table>
-    <div class='infoMessage'>Your command request was successfully submitted to Nagios for processing.<br>
+    <div class='infoMessage'>Your command request was successfully submitted to the Backend for processing.<br>
       <br>
       Note: It may take a while before the command is actually processed.<br>
       <br>

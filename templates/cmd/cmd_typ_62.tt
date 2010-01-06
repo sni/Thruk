@@ -11,7 +11,7 @@
    description = 'This command is used to disable flap detection for hosts and services on a program-wide basis.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
 
     DISABLE_FLAP_DETECTION

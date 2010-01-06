@@ -34,7 +34,7 @@ run perl Makefile.PL again to see if all dependecies are now installed properly.
 
 Configuration
 =============
-open "nagios_web.conf" and adjust the livestatus settings to your needs.
+open "thruk.conf" and adjust the livestatus settings to your needs.
 
 
 
@@ -51,7 +51,7 @@ Start Server
 ============
 After running these steps successfully, you should be able to test your installation:
 
-    ./script/nagios_web_server.pl
+    ./script/thruk_server.pl
 
 Open your browser and open http://<your_nagios_host>:3000 
 
@@ -64,7 +64,7 @@ FCGI, FCGI::ProcManager and Catalyst::Engine::FastCGI
 
 start your fcgi server:
 
-    %>./script/nagios_web_fastcgi.pl -n 5 \
+    %>./script/thuk_fastcgi.pl -n 5 \
                 -l /tmp/nagios-web.socket \
                 -p /tmp/nagios-web.pid
 
@@ -74,24 +74,24 @@ Apache Configuration
 
 use this apache example configuration:
 
- - replace /home/nagios/Nagios-Web with your installation path
- - replace your-nagios-host.local with your hostname
- - create a /home/nagios/Nagios-Web/htpasswd.users with htpasswd2
- - make sure the /home/nagios/Nagios-Web/logs/ directory exists
+ - replace /home/user/Thruk with your installation path
+ - replace your-web-host.local with your hostname
+ - create a /home/user/Thruk/htpasswd.users with htpasswd2
+ - make sure the /home/user/Thruk/logs/ directory exists
 
 --------------------------------
 <VirtualHost *:80>
-    ServerName   your-nagios-host.local
+    ServerName   your-host.local
 
-    DocumentRoot /home/nagios/Nagios-Web/root/
-    CustomLog    /home/nagios/Nagios-Web/logs/access.log combined
-    ErrorLog     /home/nagios/Nagios-Web/logs/error.log
+    DocumentRoot /home/user/Thruk/root/
+    CustomLog    /home/user/Thruk/logs/access.log combined
+    ErrorLog     /home/user/Thruk/logs/error.log
 
     # authorization
     <Location "/">
-        AuthName "Nagios Access"
+        AuthName "Monitoring Access"
         AuthType Basic
-        AuthUserFile /home/nagios/Nagios-Web/htpasswd.users
+        AuthUserFile /home/user/Thruk/htpasswd.users
         Order Allow,Deny
         Allow from all
         require valid-user
@@ -101,7 +101,7 @@ use this apache example configuration:
     LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
 
     # fastcgi configuration
-    FastCGIExternalServer /tmp/nagios-web.fcgi -socket /tmp/nagios-web.socket
+    FastCGIExternalServer /tmp/thruk.fcgi -socket /tmp/thruk.socket
 
     # Load rewrite module unless already loaded
     LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
@@ -111,6 +111,6 @@ use this apache example configuration:
     RewriteCond %{HTTP:Authorization} ^(.+)
     RewriteRule ^(.*)$ $1 [E=HTTP_AUTHORIZATION:%1]
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^/(.*)$ /tmp/nagios-web.fcgi/$1 [QSA,L]
+    RewriteRule ^/(.*)$ /tmp/thruk.fcgi/$1 [QSA,L]
 </VirtualHost>
 --------------------------------

@@ -3,11 +3,11 @@ use warnings;
 use Data::Dumper;
 use Test::More tests => 22;
 
-BEGIN { use_ok 'Catalyst::Test', 'Nagios::Web' }
-BEGIN { use_ok 'Nagios::Web::Controller::extinfo' }
+BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN { use_ok 'Thruk::Controller::extinfo' }
 
 ok( request('/extinfo')->is_success, 'Extinfo Request should succeed' );
-ok( request('/nagios/cgi-bin/extinfo.cgi')->is_success, 'Extinfo Request should succeed' );
+ok( request('/thruk/cgi-bin/extinfo.cgi')->is_success, 'Extinfo Request should succeed' );
 
 for(0..8) {
     my $type = $_;
@@ -17,7 +17,7 @@ for(0..8) {
     if($type == 5) { $extra = '&hostgroup=down';                       }
     if($type == 8) { $extra = '&servicegroup=flap';                    }
 
-    my $request = request('/nagios/cgi-bin/extinfo.cgi?type='.$type.$extra);
+    my $request = request('/thruk/cgi-bin/extinfo.cgi?type='.$type.$extra);
     ok( $request->is_success, 'Extinfo Type '.$type.' Request should succeed' ) or diag(Dumper($request));
     my $content = $request->content;
     unlike($content, qr/internal\ server\ error/mx, "Content contains error");

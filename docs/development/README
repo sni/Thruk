@@ -24,3 +24,13 @@ Generate a Test Configuration
 -----------------------------
 
 you may use Nagios::Generator::TestConfig for this step
+
+
+Logo
+----
+Logo has been rendered with
+http://cooltext.com/
+Text Color: 414141
+BG: FFFFFF
+Font: Futuristic Fonts -> Oscilloscope 4
+Size: 90

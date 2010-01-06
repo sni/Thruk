@@ -9,10 +9,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to schedule a check of all services for a host'
-   description = 'This command is used to scheduled the next check of all services on the specified host. If you select the <i>force check</i> option, Nagios will force a check of all services on the host regardless of both what time the scheduled checks occur and whether or not checks are enabled for those services.'
+   description = 'This command is used to scheduled the next check of all services on the specified host. If you select the <i>force check</i> option, your Monitoring will force a check of all services on the host regardless of both what time the scheduled checks occur and whether or not checks are enabled for those services.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% scheduled_time       = date.format( c.request.parameters.start_time, '%s') %]
     [% host_name            = c.request.parameters.host %]

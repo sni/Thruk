@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
-    <link rel="shortcut icon" href="/nagios/images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="/thruk/images/favicon.ico" type="image/ico" />
     <title>[% title %]</title>
-    <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/common.css' />
+    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/common.css' />
     [% SET page = 'status' IF page == '' %]
-    <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/[% page %].css' />
-    <link rel='stylesheet' type='text/css' href='/nagios/stylesheets/nagios_web_catalyst.css' />
+    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/[% page %].css' />
+    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk.css' />
   </head>
   <body class='[% page %]'>
-<!-- Produced by Nagios (http://www.nagios.org).  Copyright (c) 1999-2007 Ethan Galstad. -->
+<!-- Produced by Thruk (http://github.com/sni/Thruk). Copyright (c) 1999-2007 Ethan Galstad. -->

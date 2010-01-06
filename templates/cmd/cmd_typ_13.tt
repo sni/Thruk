@@ -7,11 +7,11 @@
 
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
-   request     = 'You are requesting to restart the Nagios process'
-   description = 'This command is used to restart the Nagios process. Executing a restart command is equivalent to sending the process a HUP signal. All information will be flushed from memory, the configuration files will be re-read, and Nagios will start monitoring with the new configuration information.'
+   request     = 'You are requesting to restart the Monitoring process'
+   description = 'This command is used to restart your Monitoring process. Executing a restart command is equivalent to sending the process a HUP signal. All information will be flushed from memory, the configuration files will be re-read, and your Monitoring will start monitoring with the new configuration information.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
 
     RESTART_PROCESS

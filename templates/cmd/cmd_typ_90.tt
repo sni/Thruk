@@ -8,10 +8,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to start accepting passive host checks'
-   description = 'This command is used to have Nagios start obsessing over host checks. Read the documentation on distributed monitoring for more information on this.'
+   description = 'This command is used to have your Monitoring start obsessing over host checks. Read the documentation on distributed monitoring for more information on this.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
 
     START_ACCEPTING_PASSIVE_HOST_CHECKS

@@ -11,7 +11,7 @@
    description = 'This command is used to enable host and service notifications on a program-wide basis.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
 
     ENABLE_NOTIFICATIONS

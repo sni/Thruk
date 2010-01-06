@@ -8,10 +8,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to enable the event handler for a particular host'
-   description = 'This command is used to allow Nagios to run the host event handler for a particular service when necessary (if one is defined).'
+   description = 'This command is used to allow your Monitoring to run the host event handler for a particular service when necessary (if one is defined).'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 

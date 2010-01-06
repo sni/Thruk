@@ -8,10 +8,10 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to stop executing active service checks'
-   description = 'This command is used to temporarily stop Nagios from actively executing any service checks. This will have the side effect of preventing any notifications from being sent out (for any and all services and hosts). Service checks will not be executed again until you issue a command to resume service check execution.'
+   description = 'This command is used to temporarily stop your Monitoring from actively executing any service checks. This will have the side effect of preventing any notifications from being sent out (for any and all services and hosts). Service checks will not be executed again until you issue a command to resume service check execution.'
 %]
 
-[%# definition of the command send to nagios #%]
+[%# definition of the command send to your backend #%]
 [% BLOCK action%]
 
     STOP_EXECUTING_SVC_CHECKS
