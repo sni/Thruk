@@ -8,7 +8,7 @@ BEGIN { use_ok 'Thruk::Controller::Root' }
 
 my $redirects = [
     '/',
-    '/thuk',
+    '/thruk',
     '/thruk/',
 ];
 my $pages = [

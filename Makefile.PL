@@ -39,7 +39,9 @@ requires 'Time::HiRes';
 requires 'threads'                                => '1.75';
 requires 'Thread::Queue'                          => '2.11';
 requires 'Date::Calc';
-
+requires 'FCGI';
+requires 'FCGI::ProcManager';
+requires 'Catalyst::Engine::FastCGI';
 
 test_requires 'Catalyst::Devel';
 test_requires 'Test::Pod'                         => 1.40;

@@ -48,9 +48,11 @@ echo "cleaned up"
 
 # check out fresh check_mk
 if [ -d "$EXPORT_DIR/check_mk" ]; then
+    echo "updating livestatus"
     cd $EXPORT_DIR/check_mk && git pull
     echo "updated check_mk"
 else
+    echo "cloning livestatus"
     git clone http://git.mathias-kettner.de/check_mk.git > /dev/null 2>&1
     cd check_mk
     echo "checked out check_mk"
@@ -82,4 +84,4 @@ echo ""
 echo "livestatus complete in: $EXPORT_DIR/livestatus"
 echo ""
 echo "you can build livestatus now with:"
-echo "cd $EXPORT_DIR/livestatus && ./build.sh && ./configure && make"
+echo "cd $EXPORT_DIR/livestatus && ./build.sh && ./configure && make && cd -"
