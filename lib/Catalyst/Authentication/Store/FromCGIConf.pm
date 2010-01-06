@@ -55,6 +55,7 @@ sub find_user {
         $can_submit_commands = $c->{'live'}->selectscalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
     };
     if($@) {
+        $c->log->error("$@");
         $c->detach('/error/index/9');
     }
     if(!defined $can_submit_commands) {

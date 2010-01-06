@@ -270,14 +270,7 @@ root/thruk/images/info.png
 root/thruk/images/left.gif
 root/thruk/images/logo_thruk.png
 root/thruk/images/logo_thruk_mid.png
-root/thruk/images/logofullsize.png
-root/thruk/images/logos/nagios.gd2
-root/thruk/images/logos/nagios.gif
-root/thruk/images/logos/nagiosvrml.png
-root/thruk/images/logos/unknown.gd2
-root/thruk/images/logos/unknown.gif
 root/thruk/images/logrotate.png
-root/thruk/images/NagiosEnterprises-whitebg-112x46.png
 root/thruk/images/ndisabled.gif
 root/thruk/images/noack.gif
 root/thruk/images/notes.gif
@@ -289,11 +282,7 @@ root/thruk/images/redudancy.png
 root/thruk/images/redundancy.png
 root/thruk/images/restart.gif
 root/thruk/images/right.gif
-root/thruk/images/sblogo.png
 root/thruk/images/serviceevent.gif
-root/thruk/images/sflogo.png
-root/thruk/images/splunk1.gif
-root/thruk/images/splunk2.gif
 root/thruk/images/start.gif
 root/thruk/images/status.gif
 root/thruk/images/status2.gif
@@ -315,7 +304,6 @@ root/thruk/images/unknown.png
 root/thruk/images/up.gif
 root/thruk/images/waiting.gif
 root/thruk/images/warning.png
-root/thruk/images/weblogo1.png
 root/thruk/images/zoom1.gif
 root/thruk/images/zoom2.gif
 root/thruk/index.html
@@ -341,6 +329,7 @@ root/thruk/stylesheets/thruk.css
 root/thruk/stylesheets/trends.css
 script/thruk_cgi.pl
 script/thruk_create.pl
+script/thruk_extract_cmd_templates.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_server.pl

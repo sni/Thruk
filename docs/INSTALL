@@ -1,35 +1,43 @@
 INSTALLATION
 ============
 
-the proper way to install will be using local::lib:
+the clean and proper way to install Thruk is to create a new local
+user and install the missing perl modules with local::lib.
+
+create new user
+---------------
+refer to your systems manual on howto add new user.
+this guide uses the following:
+user:  thruk
+group: thruk
 
 Install local::lib
 ------------------
+
+IMPORTANT: all following steps should be done by the thruk user.
 
 Follow the steps on http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique
 
 quick guide:
 
-    wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
-    tar zxf local-lib-1.004009.tar.gz
-    cd local-lib-1.004009
-    perl Makefile.PL --bootstrap && make install
+    %> su - thruk
+    %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
+    %> tar zxf local-lib-1.004009.tar.gz
+    %> cd local-lib-1.004009
+    %> perl Makefile.PL --bootstrap && make install
 
 
-Install Nagios-Web-Catalyst
----------------------------
+Install Thruk Monitoring Webinterface
+-------------------------------------
 
-You may have to install the "Module::Install" perl module prior this installation.
-
-    git clone git@github.com:sni/Nagios-Web-Catalyst.git
-    cd Nagios-Web-Catalyst
+    git clone git@github.com:sni/Thruk.git
+    cd Thruk
     perl Makefile.PL
-    make installdeps
+    make
 
 run perl Makefile.PL again to see if all dependecies are now installed properly.
 
     perl Makefile.PL
-
 
 
 Configuration
@@ -53,7 +61,7 @@ After running these steps successfully, you should be able to test your installa
 
     ./script/thruk_server.pl
 
-Open your browser and open http://<your_nagios_host>:3000 
+Open your browser and open http://<your_host>:3000 
 
 
 FastCGI Server
@@ -65,8 +73,8 @@ FCGI, FCGI::ProcManager and Catalyst::Engine::FastCGI
 start your fcgi server:
 
     %>./script/thuk_fastcgi.pl -n 5 \
-                -l /tmp/nagios-web.socket \
-                -p /tmp/nagios-web.pid
+                -l /tmp/thruk.socket \
+                -p /tmp/thruk.pid
 
 
 Apache Configuration
@@ -74,24 +82,24 @@ Apache Configuration
 
 use this apache example configuration:
 
- - replace /home/user/Thruk with your installation path
+ - replace /home/thruk/Thruk with your installation path
  - replace your-web-host.local with your hostname
- - create a /home/user/Thruk/htpasswd.users with htpasswd2
- - make sure the /home/user/Thruk/logs/ directory exists
+ - create a /home/thruk/Thruk/htpasswd.users with htpasswd2
+ - make sure the /home/thruk/Thruk/logs/ directory exists
 
 --------------------------------
 <VirtualHost *:80>
     ServerName   your-host.local
 
-    DocumentRoot /home/user/Thruk/root/
-    CustomLog    /home/user/Thruk/logs/access.log combined
-    ErrorLog     /home/user/Thruk/logs/error.log
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
 
     # authorization
     <Location "/">
         AuthName "Monitoring Access"
         AuthType Basic
-        AuthUserFile /home/user/Thruk/htpasswd.users
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
         Order Allow,Deny
         Allow from all
         require valid-user

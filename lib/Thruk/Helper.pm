@@ -7,7 +7,7 @@ use Carp;
 use Data::Dumper;
 use Digest::MD5  qw(md5_hex);
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
-use Nagios::MKLivestatus::MULTI;
+use Monitoring::Livestatus::MULTI;
 
 ##############################################
 # SUBS
@@ -213,7 +213,7 @@ sub get_livestatus {
     if(defined $livestatus_config->{'verbose'} and $livestatus_config->{'verbose'}) {
         $livestatus_config->{'logger'} = $c->log
     }
-    $livestatus = Nagios::MKLivestatus::MULTI->new(%{$livestatus_config});
+    $livestatus = Monitoring::Livestatus::MULTI->new(%{$livestatus_config});
 
     $c->stats->profile(end => "Helper::get_livestatus()");
 
@@ -331,7 +331,7 @@ sub remove_duplicates {
 sub get_livestatus_conf {
     my ( $self, $c ) = @_;
 
-    my $livestatus_config = Thruk->config->{'Nagios::MKLivestatus'};
+    my $livestatus_config = Thruk->config->{'Monitoring::Livestatus'};
 
     if(defined $livestatus_config) {
         # with only on peer, we have to convert to an array

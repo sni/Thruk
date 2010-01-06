@@ -71,6 +71,7 @@ before 'execute' => sub {
         $c->stash->{'pi_detail'} = $processinfo;
     };
     if($@) {
+        $c->log->error("$@");
         $c->detach('/error/index/9');
     }
 

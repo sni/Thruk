@@ -3,6 +3,5 @@ Makefile.old
 MANIFEST.bak
 META.yml
 blib
-inc
 pm_to_blib
 local-lib
