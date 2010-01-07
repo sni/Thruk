@@ -59,7 +59,7 @@ else
 fi
 
 # working version
-git checkout 45c3dd38cb36a7e394ec359e4242ec9d0d2ccfa6
+#git checkout 45c3dd38cb36a7e394ec359e4242ec9d0d2ccfa6
 
 mkdir "$EXPORT_DIR/livestatus"
 rsync -a livestatus/. "$EXPORT_DIR/livestatus"
