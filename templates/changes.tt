@@ -1,0 +1,16 @@
+[% PROCESS _header.tt %]
+
+   <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% PROCESS _infobox.tt %]
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="bottom" width="33%"></td>
+      </tr>
+    </table><br>
+
+<pre>
+[% INSERT Changes.txt %]
+</pre>
+[% PROCESS _footer.tt %]

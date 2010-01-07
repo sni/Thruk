@@ -68,6 +68,15 @@ sub thruk_index_html : Path('/thruk/') {
 }
 
 ######################################
+sub thruk_changes : Path('/thruk/changes.html') :MyAction('AddDefaults') {
+    my ( $self, $c ) = @_;
+    $c->stash->{infoBoxTitle}     = 'Change Log';
+    $c->stash->{page}             = 'extinfo';
+    $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'template'}       = 'changes.tt';
+}
+
+######################################
 # tac
 sub tac_cgi : Path('thruk/cgi-bin/tac.cgi') {
     my ( $self, $c ) = @_;
