@@ -3,6 +3,7 @@ package Thruk::Controller::error;
 use strict;
 use warnings;
 use Data::Dumper;
+use Carp;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -23,6 +24,10 @@ Catalyst Controller.
 
 sub index :Path :Args(1) :ActionClass('RenderView') {
     my ( $self, $c, $arg1 ) = @_;
+
+    if(!defined $c) {
+        confess("undefined c in error/index");
+    }
 
     # if there is no cgi config, always return the cgi error
     if(!defined $c->{'cgi_cfg'} or scalar keys %{$c->{'cgi_cfg'}} == 0) { $arg1 = 4; }
