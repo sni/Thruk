@@ -331,7 +331,6 @@ root/thruk/stylesheets/thruk.css
 root/thruk/stylesheets/trends.css
 script/thruk_cgi.pl
 script/thruk_create.pl
-script/thruk_extract_cmd_templates.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_server.pl

@@ -206,7 +206,7 @@ sub get_livestatus {
     $c->log->debug("creating new livestatus");
 
     my $livestatus_config = $self->get_livestatus_conf($c);
-    if(!defined $livestatus_config) {
+    if(!defined $livestatus_config or !defined $livestatus_config->{'peer'} ) {
         $c->detach("/error/index/14");
     }
 

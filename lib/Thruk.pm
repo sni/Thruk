@@ -85,11 +85,15 @@ if(!-d 'logs') { mkdir('logs') or die("failed to create logs directory: $!"); }
 # initialize Log4Perl
 use Catalyst::Log::Log4perl;
 
-my $log4perlconfig = join("\n", @{__PACKAGE__->config->{'Catalyst::Log::Log4perl'}->{'error'}})."\n";
-if(__PACKAGE__->debug) {
-    $log4perlconfig .= "\n".join("\n", @{__PACKAGE__->config->{'Catalyst::Log::Log4perl'}->{'debug'}})."\n";
+my $log4perlconfig;
+my $log4confarr = __PACKAGE__->config->{'Catalyst::Log::Log4perl'}->{'conf'};
+if(defined $log4confarr and ref $log4confarr eq 'ARRAY') {
+    $log4perlconfig .= join("\n", @{$log4confarr})."\n";
+    __PACKAGE__->log(Catalyst::Log::Log4perl->new(\$log4perlconfig));
 }
-__PACKAGE__->log(Catalyst::Log::Log4perl->new(\$log4perlconfig));
+elsif(!__PACKAGE__->debug) {
+    __PACKAGE__->log->levels( 'warn', 'error', 'fatal' );
+}
 
 ###################################################
 

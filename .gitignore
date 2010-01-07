@@ -8,3 +8,4 @@ local-lib
 logs/debug.log
 logs/error.log
 logs/access.log
+thruk_local.conf
