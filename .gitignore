@@ -5,3 +5,4 @@ META.yml
 blib
 pm_to_blib
 local-lib
+thruk_local.conf
