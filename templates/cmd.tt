@@ -1,9 +1,9 @@
-[% INCLUDE _header.tt %]
+[% PROCESS _header.tt %]
 
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
-        [% INCLUDE _infobox.tt %]
+        [% PROCESS _infobox.tt %]
         </td>
         <td align="center" valign="top" width="33%"></td>
         <td align="right" valign="bottom" width="33%"></td>
@@ -83,4 +83,4 @@
       Failure to supply all required values will result in an error.
     </div>
 
-[% INCLUDE _footer.tt %]
+[% PROCESS _footer.tt %]

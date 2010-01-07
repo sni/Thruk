@@ -1,10 +1,10 @@
 [% USE date %]
-[% INCLUDE _header.tt %]
+[% PROCESS _header.tt %]
 
     <table border="0" width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td align="left" valign="top" width="33%">
-        [% INCLUDE _infobox.tt %]
+        [% PROCESS _infobox.tt %]
         </td>
         <td align="center" valign="top" width="33%">
           <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
@@ -133,4 +133,4 @@
       </div>
       <hr>
 
-[% INCLUDE _footer.tt %]
+[% PROCESS _footer.tt %]

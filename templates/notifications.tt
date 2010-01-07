@@ -1,11 +1,11 @@
 [% USE date %]
-[% INCLUDE _header.tt %]
+[% PROCESS _header.tt %]
 
     <form method='get' action='notifications.cgi'>
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
-        [% INCLUDE _infobox.tt %]
+        [% PROCESS _infobox.tt %]
         </td>
         <td align="center" valign="top" width="33%">
           <div align="center" class='dataTitle'>
@@ -190,4 +190,4 @@
 [% END %]
 
 
-[% INCLUDE _footer.tt %]
+[% PROCESS _footer.tt %]

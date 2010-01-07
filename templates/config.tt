@@ -1,9 +1,9 @@
-[% INCLUDE _header.tt %]
+[% PROCESS _header.tt %]
 
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="50%">
-        [% INCLUDE _infobox.tt %]
+        [% PROCESS _infobox.tt %]
         </td>
         <td align="right" valign="bottom" width="50%"></td>
       </tr>
@@ -45,4 +45,4 @@
       </div>
     </form>
 
-[% INCLUDE _footer.tt %]
+[% PROCESS _footer.tt %]
