@@ -1,16 +1,5 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
-
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
-BEGIN { use_ok 'Thruk::Controller::summary' }
-
-ok( request('/summary')->is_success, 'Request should succeed' );
-
-
-
-use strict;
-use warnings;
 use Test::More tests => 6;
 
 BEGIN { use_ok 'Catalyst::Test', 'Thruk' }

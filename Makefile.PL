@@ -42,6 +42,8 @@ requires 'Date::Calc';
 requires 'FCGI';
 requires 'FCGI::ProcManager';
 requires 'Catalyst::Engine::FastCGI';
+requires 'Catalyst::Log::Log4perl';
+requires 'Log::Dispatch::File';
 
 test_requires 'Catalyst::Devel';
 test_requires 'Test::Pod'                         => 1.40;

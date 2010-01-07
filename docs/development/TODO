@@ -7,7 +7,6 @@ general
     - reload cgi.cfg if changed
     - fix authorization ( check services by host_contacts, comments/downtimes )
     - fix host/servicegroups pages with authorization
-    - change logging to log4perl
     - check TT strict option
     - write tests
 
