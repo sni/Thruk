@@ -11,9 +11,6 @@ general
     - check TT strict option
     - write tests
 
-main.html
-    - remove nagios core stuff
-
 extinfo:
     - verify macros is action_url, icon_url and notes_url
     - finish performance data on extinfo type 4
