@@ -14,7 +14,10 @@
 
 [%# definition of the command send to your backend #%]
 [% BLOCK action%]
-    [% IF c.request.parameters.fixed %][% fixed = 1 %][% ELSE %][% fixed = 0 %][% END %]
+    [% IF   c.request.parameters.fixed   %][% SET fixed = 1 %][% ELSE %][% SET fixed = 0 %][% END %]
+    [% IF ! c.request.parameters.hour    %][% SET c.request.parameters.hour = 0 %][% END %]
+    [% IF ! c.request.parameters.minutes %][% SET c.request.parameters.minutes = 0 %][% END %]
+    [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
     [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
     [% end_time             = date.format( c.request.parameters.end_time, '%s') %]
     [% duration             = c.request.parameters.hour * 3600 + c.request.parameters.minutes * 60 %]
