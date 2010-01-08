@@ -17,7 +17,7 @@ requires 'parent';
 requires 'Moose';
 requires 'MooseX::MethodAttributes::Inheritable';
 requires 'MooseX::Role::WithOverloading';
-requires 'Monitoring::Livestatus'                 => '0.30';
+requires 'Monitoring::Livestatus'                 => '0.31_2';
 requires 'HTTP::Body';
 requires 'LWP';
 requires 'Config::Any';

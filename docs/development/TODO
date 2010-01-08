@@ -9,6 +9,7 @@ general
     - fix host/servicegroups pages with authorization
     - check TT strict option
     - write tests
+    - fix sending commands to specific backend
 
 extinfo:
     - verify macros is action_url, icon_url and notes_url
