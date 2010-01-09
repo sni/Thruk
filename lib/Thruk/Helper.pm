@@ -317,11 +317,6 @@ sub remove_duplicates {
 
     }
 
-#use Data::Dumper;
-#print "HTTP/1.1 200 OK\n\n<html><pre>";
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($return);
-
     $c->stats->profile(end => "Helper::remove_duplicates()");
     return($return);
 }

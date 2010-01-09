@@ -10,6 +10,7 @@ general
     - check TT strict option
     - write tests
     - fix sending commands to specific backend
+    - make extinfo tests independent from test setup (host/servicenames)
 
 extinfo:
     - verify macros is action_url, icon_url and notes_url
