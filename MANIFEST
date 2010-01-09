@@ -21,6 +21,7 @@ docs/development/tables/servicegroup.txt
 docs/development/tables/status.txt
 docs/development/TODO
 docs/INSTALL
+docs/INSTALL.html
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -52,6 +53,7 @@ lib/Thruk/Controller/Root.pm
 lib/Thruk/Controller/showlog.pm
 lib/Thruk/Controller/status.pm
 lib/Thruk/Controller/statusmap.pm
+lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Helper.pm
@@ -329,11 +331,11 @@ root/thruk/stylesheets/thruk.css
 root/thruk/stylesheets/trends.css
 script/thruk_cgi.pl
 script/thruk_create.pl
-script/thruk_extract_cmd_templates.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_server.pl
 script/thruk_test.pl
+script/thruk_update_docs.sh
 t/01app.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
@@ -351,6 +353,7 @@ t/controller_Root.t
 t/controller_showlog.t
 t/controller_status.t
 t/controller_statusmap.t
+t/controller_summary.t
 t/controller_tac.t
 t/controller_trends.t
 t/perlcriticrc
@@ -366,6 +369,8 @@ templates/avail_report_host.tt
 templates/avail_step_1.tt
 templates/avail_step_2.tt
 templates/avail_step_3.tt
+templates/changes.tt
+templates/Changes.txt
 templates/cmd.tt
 templates/cmd/cmd_typ_1.tt
 templates/cmd/cmd_typ_10.tt

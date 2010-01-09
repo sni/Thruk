@@ -39,7 +39,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # timeperiods
     if($type eq 'timeperiods') {
-        my $data = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name alias", { Slice => 1, AddPeer => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name alias", { Slice => 1, AddPeer => 1, Deepcopy => 1, Deepcopy => 1 });
         $data    = Thruk::Helper->remove_duplicates($c, $data);
         $data    = Thruk::Helper->sort($c, $data, 'name');
         $c->stash->{data}     = $data;
@@ -48,7 +48,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # commands
     if($type eq 'commands') {
-        my $data = $c->{'live'}->selectall_arrayref("GET commands\nColumns: name line", { Slice => 1, AddPeer => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET commands\nColumns: name line", { Slice => 1, AddPeer => 1, Deepcopy => 1 });
         $data    = Thruk::Helper->remove_duplicates($c, $data);
         $data    = Thruk::Helper->sort($c, $data, 'name');
         $c->stash->{data}     = $data;
@@ -57,7 +57,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # contacts
     elsif($type eq 'contacts') {
-        my $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: name alias email pager service_notification_period host_notification_period", { Slice => 1, AddPeer => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: name alias email pager service_notification_period host_notification_period", { Slice => 1, AddPeer => 1, Deepcopy => 1 });
         $data    = Thruk::Helper->remove_duplicates($c, $data);
         $data    = Thruk::Helper->sort($c, $data, 'name');
         $c->stash->{data}     = $data;
@@ -66,7 +66,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # hosts
     elsif($type eq 'hosts') {
-        my $data = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name alias address parents max_check_attempts check_interval retry_interval check_command check_period obsess_over_host active_checks_enabled accept_passive_checks check_freshness contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", { Slice => 1, AddPeer => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name alias address parents max_check_attempts check_interval retry_interval check_command check_period obsess_over_host active_checks_enabled accept_passive_checks check_freshness contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", { Slice => 1, AddPeer => 1, Deepcopy => 1 });
         $data    = Thruk::Helper->remove_duplicates($c, $data);
         $data    = Thruk::Helper->sort($c, $data, 'name');
         $c->stash->{data}     = $data;
@@ -75,7 +75,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # services
     elsif($type eq 'services') {
-        my $data = $c->{'live'}->selectall_arrayref("GET services\nColumns: host_name description notifications_enabled max_check_attempts check_interval retry_interval check_command check_period obsess_over_service active_checks_enabled accept_passive_checks contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", { Slice => 1, AddPeer => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET services\nColumns: host_name description notifications_enabled max_check_attempts check_interval retry_interval check_command check_period obsess_over_service active_checks_enabled accept_passive_checks contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", { Slice => 1, AddPeer => 1, Deepcopy => 1 });
         $data = Thruk::Helper->remove_duplicates($c, $data);
         $data = Thruk::Helper->sort($c, $data, [ 'host_name', 'description' ]);
         $c->stash->{data}     = $data;
@@ -84,7 +84,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # hostgroups
     elsif($type eq 'hostgroups') {
-        my $data = $c->{'live'}->selectall_arrayref("GET hostgroups\nColumns: name alias members", { Slice => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET hostgroups\nColumns: name alias members", { Slice => 1, Deepcopy => 1 });
         my $hostgroups = {};
         for my $hostgroup (@{$data}) {
             if(!defined $hostgroups->{$hostgroup->{'name'}}) {
@@ -100,7 +100,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # servicegroups
     elsif($type eq 'servicegroups') {
-        my $data = $c->{'live'}->selectall_arrayref("GET servicegroups\nColumns: name alias members", { Slice => 1 });
+        my $data = $c->{'live'}->selectall_arrayref("GET servicegroups\nColumns: name alias members", { Slice => 1, Deepcopy => 1 });
         my $servicegroups = {};
         for my $servicegroup (@{$data}) {
             if(!defined $servicegroups->{$servicegroup->{'name'}}) {

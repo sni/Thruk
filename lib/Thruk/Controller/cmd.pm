@@ -3,6 +3,7 @@ package Thruk::Controller::cmd;
 use strict;
 use warnings;
 use parent 'Catalyst::Controller';
+use Data::Dumper;
 use Template;
 use Time::HiRes qw( usleep );
 
@@ -145,7 +146,8 @@ sub _do_send_command {
     $cmd = "COMMAND [".time()."] $cmd";
     $c->log->info("sending: $cmd");
     if(defined $backends) {
-        $c->{'live'}->do($cmd, { peers => $backends });
+        $c->log->debug("sending to backends: ".Dumper($backends));
+        $c->{'live'}->do($cmd, { Backends => $backends });
     } else {
         $c->{'live'}->do($cmd);
     }

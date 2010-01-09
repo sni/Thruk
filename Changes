@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.20_1  Thu Jan  7 19:55:36 CET 2010
+          - changed logging to log4perl
+
 0.20_0  Tue Jan  5 01:25:14 CET 2010
           - renamed project to Thruk
           - added changelog to start page

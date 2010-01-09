@@ -17,7 +17,8 @@ requires 'parent';
 requires 'Moose';
 requires 'MooseX::MethodAttributes::Inheritable';
 requires 'MooseX::Role::WithOverloading';
-requires 'Monitoring::Livestatus'                 => '0.30';
+requires 'Monitoring::Livestatus'                 => '0.32';
+requires 'HTTP::Body';
 requires 'LWP';
 requires 'Config::Any';
 requires 'Template'                               => '2.22';
@@ -42,6 +43,8 @@ requires 'Date::Calc';
 requires 'FCGI';
 requires 'FCGI::ProcManager';
 requires 'Catalyst::Engine::FastCGI';
+requires 'Catalyst::Log::Log4perl';
+requires 'Log::Dispatch::File';
 
 test_requires 'Catalyst::Devel';
 test_requires 'Test::Pod'                         => 1.40;

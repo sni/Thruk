@@ -71,7 +71,11 @@ before 'execute' => sub {
         $c->stash->{'pi_detail'} = $processinfo;
     };
     if($@) {
-        $c->log->error("$@");
+        $c->log->error("livestatus error: $@");
+        $c->detach('/error/index/9');
+    }
+    if(!defined $c->stash->{'pi_detail'}) {
+        $c->log->error("got no result from every backend, please check backend connection");
         $c->detach('/error/index/9');
     }
 

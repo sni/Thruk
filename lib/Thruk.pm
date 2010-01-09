@@ -7,13 +7,10 @@ use warnings;
 use Catalyst::Runtime '5.70';
 use Thruk::Helper;
 
+###################################################
 # Set flags and add plugins for the application
 #
 #         -Debug: activates the debug mode for very useful log messages
-#   ConfigLoader: will load the configuration from a Config::General file in the
-#                 application's home directory
-# Static::Simple: will serve static files from the application's root
-#                 directory
 
 use parent qw/Catalyst/;
 use Catalyst qw/
@@ -26,8 +23,9 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.20_0';
+our $VERSION = '0.20_1';
 
+###################################################
 # Configure the application.
 #
 # Note that settings in thruk.conf (or other external
@@ -73,14 +71,31 @@ __PACKAGE__->config('name'                   => 'Thruk',
                     },
 );
 
+###################################################
 # Start the application
 __PACKAGE__->setup();
 
-if(__PACKAGE__->debug) {
-    __PACKAGE__->log->debug("debug mode");
-} else {
+
+###################################################
+# Logging
+#
+# check if logdir exists
+if(!-d 'logs') { mkdir('logs') or die("failed to create logs directory: $!"); }
+
+# initialize Log4Perl
+use Catalyst::Log::Log4perl;
+
+my $log4perlconfig;
+my $log4confarr = __PACKAGE__->config->{'Catalyst::Log::Log4perl'}->{'conf'};
+if(defined $log4confarr and ref $log4confarr eq 'ARRAY') {
+    $log4perlconfig .= join("\n", @{$log4confarr})."\n";
+    __PACKAGE__->log(Catalyst::Log::Log4perl->new(\$log4perlconfig));
+}
+elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'warn', 'error', 'fatal' );
 }
+
+###################################################
 
 
 =head1 NAME

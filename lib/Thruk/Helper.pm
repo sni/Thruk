@@ -206,7 +206,7 @@ sub get_livestatus {
     $c->log->debug("creating new livestatus");
 
     my $livestatus_config = $self->get_livestatus_conf($c);
-    if(!defined $livestatus_config) {
+    if(!defined $livestatus_config or !defined $livestatus_config->{'peer'} ) {
         $c->detach("/error/index/14");
     }
 
@@ -316,11 +316,6 @@ sub remove_duplicates {
         push @{$return}, $data->{'data'};
 
     }
-
-#use Data::Dumper;
-#print "HTTP/1.1 200 OK\n\n<html><pre>";
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($return);
 
     $c->stats->profile(end => "Helper::remove_duplicates()");
     return($return);
