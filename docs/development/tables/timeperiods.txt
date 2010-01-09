@@ -1,0 +1,4 @@
+$VAR1 = {
+          'alias' => '24 Hours A Day, 7 Days A Week',
+          'name' => '24x7'
+        };

@@ -1,0 +1,6 @@
+$VAR1 = {
+          'description' => 'A description of the column',
+          'name' => 'description',
+          'table' => 'columns',
+          'type' => 'string'
+        };

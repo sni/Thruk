@@ -1,0 +1,4 @@
+$VAR1 = {
+          'line' => '$USER1$/test_hostcheck.pl --type=$ARG1$ --failchance=2% --previous-state=$HOSTSTATE$ --state-duration=$HOSTDURATIONSEC$',
+          'name' => 'check-host-alive'
+        };
