@@ -1,23 +1,21 @@
-$VAR1 = [
-          {
-            'address1' => '',
-            'address2' => '',
-            'address3' => '',
-            'address4' => '',
-            'address5' => '',
-            'address6' => '',
-            'alias' => 'test_contact_alias',
-            'can_submit_commands' => '1',
-            'custom_variable_names' => '',
-            'custom_variable_values' => '',
-            'email' => 'nobody@localhost',
-            'host_notification_period' => '24x7',
-            'host_notifications_enabled' => '1',
-            'in_host_notification_period' => '1',
-            'in_service_notification_period' => '1',
-            'name' => 'test_contact',
-            'pager' => '',
-            'service_notification_period' => '24x7',
-            'service_notifications_enabled' => '1'
-          }
-        ];
+$VAR1 = {
+          'address1' => '',
+          'address2' => '',
+          'address3' => '',
+          'address4' => '',
+          'address5' => '',
+          'address6' => '',
+          'alias' => 'test_contact_alias',
+          'can_submit_commands' => '1',
+          'custom_variable_names' => '',
+          'custom_variable_values' => '',
+          'email' => 'nobody@localhost',
+          'host_notification_period' => '24x7',
+          'host_notifications_enabled' => '1',
+          'in_host_notification_period' => '1',
+          'in_service_notification_period' => '1',
+          'name' => 'test_contact',
+          'pager' => '',
+          'service_notification_period' => '24x7',
+          'service_notifications_enabled' => '1'
+        };
