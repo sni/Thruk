@@ -65,7 +65,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     my $query = "GET log\n$filter\n";
-    $query   .= "Columns: message host_name service_description plugin_output state time command_name contact_name options\n";
+    $query   .= "Columns: type host_name service_description plugin_output state time command_name contact_name options\n";
     $query   .= "Filter: class = 3\n";
     $query   .= Thruk::Helper::get_auth_filter($c, 'log');
 

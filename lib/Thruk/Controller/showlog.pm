@@ -46,7 +46,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $filter .= "Filter: time >= $start\n";
     $filter .= "Filter: time <= $end\n";
 
-    my $query = "GET log\nColumns: time message options state\n".$filter;
+    my $query = "GET log\nColumns: time type options state\n".$filter;
     $query   .= Thruk::Helper::get_auth_filter($c, 'log');
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
