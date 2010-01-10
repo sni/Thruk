@@ -9,9 +9,6 @@ general
     - fix host/servicegroups pages with authorization
     - check TT strict option
     - write tests
-    - fix sending commands to specific backend
-    - make extinfo tests independent from test setup (host/servicenames)
-    - remove some divs from showlog
 
 extinfo:
     - finish performance data on extinfo type 4
