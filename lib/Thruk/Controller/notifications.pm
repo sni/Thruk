@@ -71,9 +71,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     my $notifications = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
 
-    if(!$oldestfirst) {
-        @{$notifications} = reverse @{$notifications};
+    my $order = "DESC";
+    if($oldestfirst) {
+        $order = "ASC";
     }
+    my $sortednotifications = Thruk::Helper->sort($c, $notifications, 'time', $order);
 
     $c->stash->{oldestfirst}      = $oldestfirst;
     $c->stash->{type}             = $type;
@@ -84,7 +86,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{host}             = $host;
     $c->stash->{service}          = $service;
     $c->stash->{contact}          = $contact;
-    $c->stash->{notifications}    = $notifications;
+    $c->stash->{notifications}    = $sortednotifications;
     $c->stash->{title}            = 'Alert Notifications';
     $c->stash->{page}             = 'notifications';
     $c->stash->{template}         = 'notifications.tt';

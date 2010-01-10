@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - using frames is no configurable
           - documentation is now replaceable
           - corrected valid html
+          - fixed order of logfiles
 
 0.20_1  Thu Jan  7 19:55:36 CET 2010
           - changed logging to log4perl

@@ -125,11 +125,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
 
-    if(!$oldestfirst) {
-        @{$logs} = reverse @{$logs};
+    my $order = "DESC";
+    if($oldestfirst) {
+        $order = "ASC";
     }
+    my $sortedlogs = Thruk::Helper->sort($c, $logs, 'time', $order);
 
-    $c->stash->{logs}             = $logs;
+    $c->stash->{logs}             = $sortedlogs;
     $c->stash->{archive}          = $archive;
     $c->stash->{type}             = $type;
     $c->stash->{statetype}        = $statetype;

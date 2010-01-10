@@ -1,12 +1,15 @@
 cgi.cfg
 Changes
-contrib/livestatus/patches/0001-fixed-state-id-for-notifications.patch
-contrib/livestatus/patches/0002-added-complete-logline-and-options-to-log-table.patch
-contrib/livestatus/patches/0003-added-recovery-state-fixed-hidden-external-commands.patch
-contrib/livestatus/patches/0004-log-every-request-input.patch.disabled
-contrib/livestatus/patches/0005-added-timeperiods-table.patch
-contrib/livestatus/patches/0006-added-new-table-contactgroups.patch
-contrib/livestatus/patches/0007-added-interval_length-to-status-table.patch
+contrib/livestatus/patches/0001-fixed-state-id-for-notifications.obsolete
+contrib/livestatus/patches/0002-added-complete-logline-and-options-to-log-table.obsolete
+contrib/livestatus/patches/0003-added-recovery-state-fixed-hidden-external-commands.obsolete
+contrib/livestatus/patches/0004-log-every-request-input.patch.obsolete
+contrib/livestatus/patches/0005-added-timeperiods-table.obsolete
+contrib/livestatus/patches/0006-added-new-table-contactgroups.obsolete
+contrib/livestatus/patches/0007-added-interval_length-to-status-table.obsolete
+contrib/livestatus/patches/0008-fixed-logentries-for-external-commands.patch
+contrib/livestatus/patches/0009-added-missing-icon_image_expanded-to-TableHosts.patch
+contrib/livestatus/patches/0010-added-icon_image_expanded-for-services.patch
 contrib/livestatus/patches/build.sh
 contrib/livestatus/patches/create_patched_livestatus_source_dir.sh
 contrib/livestatus/patches/INSTALL
@@ -30,6 +33,7 @@ docs/INSTALL
 docs/INSTALL.html
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
+inc/Module/Install/AuthorRequires.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -68,6 +72,7 @@ Makefile.PL
 MANIFEST			This list of files
 META.yml
 README
+root/INSTALL.html
 root/thruk/images/ack.gif
 root/thruk/images/action.gif
 root/thruk/images/catalyst_170pix.png

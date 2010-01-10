@@ -43,7 +43,7 @@
             <table border="0" cellspacing="0" cellpadding="0" class='optBox'>
               <tr>
                 <td align="left" valign="bottom" class='optBoxItem'>
-                  <input type='checkbox' name='oldestfirst'> Older Entries First:
+                  <input type='checkbox' name='oldestfirst'[% IF oldestfirst %] checked[% END %]> Older Entries First:
                 </td>
               </tr>
               <tr>
