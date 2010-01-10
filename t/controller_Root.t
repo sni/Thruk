@@ -1,17 +1,17 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 13;
+use Test::More tests => 15;
 
 BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 BEGIN { use_ok 'Thruk::Controller::Root' }
 
 my $redirects = [
     '/',
-    '/thruk',
-    '/thruk/',
 ];
 my $pages = [
+    '/thruk',
+    '/thruk/',
     '/thruk/docs/index.html',
     '/thruk/index.html',
     '/thruk/main.html',

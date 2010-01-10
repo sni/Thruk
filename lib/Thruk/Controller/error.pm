@@ -30,7 +30,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     }
 
     # if there is no cgi config, always return the cgi error
-    if(!defined $c->{'cgi_cfg'} or scalar keys %{$c->{'cgi_cfg'}} == 0) { $arg1 = 4; }
+    if(!defined $c->{'cgi_cfg'}) { $arg1 = 4; }
 
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
@@ -57,12 +57,12 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '3'  => {
             'mess' => 'Sorry Dave, I can\'t let you do that...',
-            'dscr' => 'It seems that you have chosen to not use the authentication functionality of the CGIs.<br><br>I don\'t want to be personally responsible for what may happen as a result of allowing unauthorized users to issue commands to your Monitoring,so you\'ll have to disable this safeguard if you are really stubborn and want to invite trouble.<br><br><strong>Read the section on CGI authentication in the HTML documentation to learn how you can enable authentication and why you should want to.',
+            'dscr' => 'It seems that you have chosen to not use the authentication functionality of the CGIs.<br><br>I don\'t want to be personally responsible for what may happen as a result of allowing unauthorized users to issue commands to your Monitoring, so you\'ll have to disable this safeguard if you are really stubborn and want to invite trouble.',
             'code' => 403, # forbidden
         },
         '4'  => {
             'mess' => 'Error: Could not open CGI config file \''.Thruk->config->{'cgi_cfg'}.'\' for reading!',
-            'dscr' => 'Here are some things you should check in order to resolve this error:</p><p></p><ol><li>Make sure you\'ve installed a CGI config file in its proper location.  See the error message about for details on where the CGI is expecting to find the configuration file. A CGI configuration file (named <b>cgi.cfg</b>) is shipped with your Thruk distribution. </li></ol></p> ',
+            'dscr' => 'Here are some things you should check in order to resolve this error:<br><ol><li>Make sure you\'ve installed a CGI config file in its proper location.  See the error message about for details on where the CGI is expecting to find the configuration file. A CGI configuration file (named <b>cgi.cfg</b>) is shipped with your Thruk distribution. </li></ol>',
             'code' => 500, # internal server error
         },
         '5'  => {

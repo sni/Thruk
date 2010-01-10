@@ -232,6 +232,16 @@ sub config_cgi : Path('thruk/cgi-bin/config.cgi') {
     $c->detach('/config/index');
 }
 
+######################################
+# errors
+sub error : Path('error/') {
+    my ( $self, $c ) = @_;
+    if(scalar @{$c->request->args} < 1) {
+        $c->detach("default");
+    }
+    $c->detach('/error/'.join('/', @{$c->request->args}));
+}
+
 =head2 end
 
 Attempt to render a view, if needed.

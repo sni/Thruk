@@ -3,17 +3,12 @@ abstract: 'Catalyst based monitoring web interface'
 author:
   - 'Sven Nierlein, 2009, <nierlein@cpan.org>'
 build_requires:
-  Catalyst::Devel: 0
   ExtUtils::MakeMaker: 6.42
-  Perl::Critic::Policy::Dynamic::NoIndirect: 0
-  Test::Perl::Critic: 0
-  Test::Pod: 1.4
-  Test::Pod::Coverage: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
 generated_by: 'Module::Install version 0.91'
-license: perl
+license: gpl3
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
@@ -65,5 +60,8 @@ requires:
   perl: 5.8.0
   threads: 1.75
 resources:
-  license: http://dev.perl.org/licenses/
+  bugtracker: http://github.com/sni/Thruk/issues
+  homepage: http://github.com/sni/Thruk
+  license: http://opensource.org/licenses/gpl-3.0.html
+  repository: http://github.com/sni/Thruk
 version: 0.20_2

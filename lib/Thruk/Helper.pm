@@ -166,8 +166,6 @@ sub get_cgi_cfg {
 
     return(\%config) if $cgi_config_already_read;
 
-    $cgi_config_already_read = 1;
-
     my $file = Thruk->config->{'cgi_cfg'};
 
     if(!defined $file or $file eq '') {
@@ -182,6 +180,7 @@ sub get_cgi_cfg {
         $c->detach('/error/index/4');
     }
 
+    $cgi_config_already_read = 1;
     my $conf = new Config::General($file);
     %config  = $conf->getall;
 

@@ -1,9 +1,22 @@
-# IMPORTANT: if you delete this file your app will not work as
-# expected.  you have been warned
-use inc::Module::Install;
+use strict;
+use warnings;
+use inc::Module::Install 0.91;
+{   # Ensure that these get used - yes, M::I loads them for us, but if you're
+    # in author mode and don't have them installed, then the error is tres
+    # cryptic.
+    no warnings 'redefine';
+    use Module::Install::AuthorRequires;
+}
 
 name 'Thruk';
 all_from 'lib/Thruk.pm';
+
+license 'gpl3';
+resources(
+    'homepage',   => 'http://github.com/sni/Thruk',
+    'bugtracker'  => 'http://github.com/sni/Thruk/issues',
+    'repository', => 'http://github.com/sni/Thruk',
+);
 
 requires 'Carp';
 requires 'YAML::Tiny';
@@ -46,13 +59,15 @@ requires 'Catalyst::Engine::FastCGI';
 requires 'Catalyst::Log::Log4perl';
 requires 'Log::Dispatch::File';
 
-test_requires 'Catalyst::Devel';
-test_requires 'Test::Pod'                         => 1.40;
-test_requires 'Test::Perl::Critic';
-test_requires 'Test::Pod::Coverage';
-test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
+author_requires 'Catalyst::Devel';
+author_requires 'Test::Pod'                         => 1.40;
+author_requires 'Test::Perl::Critic';
+author_requires 'Test::Pod::Coverage';
+author_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
 
 catalyst;
 install_script glob('script/*.pl');
 auto_install;
+auto_include;
 WriteAll;
+
