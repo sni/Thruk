@@ -78,6 +78,9 @@ sub index_html : Path('/index.html') {
 # but if used not via fastcgi/apache, there is no way around
 sub thruk_index : Path('/thruk/') {
     my ( $self, $c ) = @_;
+    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
+        $c->detach("default");
+    }
     if($c->stash->{'use_frames'}) {
         $c->detach("thruk_index_html");
     } else {
@@ -123,6 +126,9 @@ sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddDefaults') {
 ######################################
 sub thruk_docs : Path('/thruk/docs/') {
     my ( $self, $c ) = @_;
+    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
+        $c->detach("default");
+    }
     $c->stash->{'title'}          = 'Documentation';
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'template'}       = 'docs.tt';
