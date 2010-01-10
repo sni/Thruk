@@ -131,7 +131,7 @@
 
         [% options = n.options.split(';') %]
 
-        [% IF n.message == 'SERVICE NOTIFICATION' %]
+        [% IF n.type == 'SERVICE NOTIFICATION' %]
             [% SET level = options.3 %]
             [%    IF level == 'OK'              %][% level = 'OK'        statusclass = 'notificationsOK' %]
             [% ELSIF level == 'RECOVERY'        %][% level = 'OK'        statusclass = 'notificationsOK' %]

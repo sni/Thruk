@@ -46,20 +46,20 @@
           <div class='dataTitle'>[% FOREACH group IN service.groups.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?servicegroup=[% group %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
           <div class='data'>[% service.host_address %]</div>
-          [% IF service.icon_image %]
-          <img src='/thruk/images/logos/[% service.icon_image %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
+          [% IF service.icon_image_expanded %]
+          <img src='/thruk/images/logos/[% service.icon_image_expanded %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
           [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt %] )</i></font>[% END %]
           [% END %]
-          [% IF service.notes %]<p>[% service.notes %]</p>[% END %]
+          [% IF service.notes_expanded %]<p>[% service.notes_expanded %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%">
-          [% IF service.action_url %]
-          <a href='[% service.action_url %]' target='_blank'><img src='/thruk/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service'></a><br clear="all">
+          [% IF service.action_url_expanded %]
+          <a href='[% service.action_url_expanded %]' target='_blank'><img src='/thruk/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service'></a><br clear="all">
           <font size="-1"><i>Extra Actions</i></font><br clear="all">
           <br clear="all">
           [% END %]
-          [% IF service.notes_url %]
-          <a href='[% service.notes_url %]' target='_blank'><img src='/thruk/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service'></a><br clear="all">
+          [% IF service.notes_url_expanded %]
+          <a href='[% service.notes_url_expanded %]' target='_blank'><img src='/thruk/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service'></a><br clear="all">
           <font size="-1"><i>Extra Notes</i></font><br clear="all">
           <br clear="all">
           [% END %]

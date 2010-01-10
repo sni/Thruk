@@ -1,0 +1,27 @@
+From 6a60d5d332b288919021316017ef300db012e718 Mon Sep 17 00:00:00 2001
+From: Sven Nierlein <sven@nierlein.de>
+Date: Sun, 10 Jan 2010 12:10:50 +0100
+Subject: [PATCH] added missing icon_image_expanded to TableHosts
+
+
+Signed-off-by: Sven Nierlein <sven@nierlein.de>
+---
+ livestatus/src/TableHosts.cc |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/livestatus/src/TableHosts.cc b/livestatus/src/TableHosts.cc
+index 6198f90..4586508 100644
+--- a/livestatus/src/TableHosts.cc
++++ b/livestatus/src/TableHosts.cc
+@@ -86,6 +86,8 @@ void TableHosts::addColumns(Table *table, string prefix, int indirect_offset)
+ 	    "Optional performance data of the last host check", (char *)(&hst.perf_data) - ref, indirect_offset));
+    table->addColumn(new OffsetStringColumn(prefix + "icon_image", 
+ 	    "The name of an image file to be used in the web pages", (char *)(&hst.icon_image) - ref, indirect_offset));
++   table->addColumn(new OffsetStringHostMacroColumn(prefix + "icon_image_expanded", 
++	    "The same as icon_image, but with the most important macros expanded", (char *)(&hst.icon_image) - ref, indirect_offset));
+    table->addColumn(new OffsetStringColumn(prefix + "icon_image_alt",
+ 	    "Alternative text for the icon_image", (char *)(&hst.icon_image_alt) - ref, indirect_offset));
+    table->addColumn(new OffsetStringColumn(prefix + "statusmap_image", 
+-- 
+1.6.0.4
+

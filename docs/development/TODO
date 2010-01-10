@@ -14,7 +14,6 @@ general
     - remove some divs from showlog
 
 extinfo:
-    - verify macros is action_url, icon_url and notes_url
     - finish performance data on extinfo type 4
 
 config:

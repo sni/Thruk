@@ -68,28 +68,28 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # normal alerts
     my @prop_filter;
     if($statetype == 0) {
-        push @prop_filter, "Filter: message = SERVICE ALERT".$typefilter;
-        push @prop_filter, "Filter: message = HOST ALERT".$typefilter;
+        push @prop_filter, "Filter: type = SERVICE ALERT".$typefilter;
+        push @prop_filter, "Filter: type = HOST ALERT".$typefilter;
     }
     elsif($statetype == 1) {
-        push @prop_filter, "Filter: message = SERVICE ALERT\nFilter: options ~ ;SOFT;\nAnd: 2".$typefilter;
-        push @prop_filter, "Filter: message = HOST ALERT\nFilter: options ~ ;SOFT;\nAnd: 2".$typefilter;
+        push @prop_filter, "Filter: type = SERVICE ALERT\nFilter: options ~ ;SOFT;\nAnd: 2".$typefilter;
+        push @prop_filter, "Filter: type = HOST ALERT\nFilter: options ~ ;SOFT;\nAnd: 2".$typefilter;
     }
     if($statetype == 2) {
-        push @prop_filter, "Filter: message = SERVICE ALERT\nFilter: options ~ ;HARD;\nAnd: 2".$typefilter;
-        push @prop_filter, "Filter: message = HOST ALERT\nFilter: options ~ ;HARD;\nAnd: 2".$typefilter;
+        push @prop_filter, "Filter: type = SERVICE ALERT\nFilter: options ~ ;HARD;\nAnd: 2".$typefilter;
+        push @prop_filter, "Filter: type = HOST ALERT\nFilter: options ~ ;HARD;\nAnd: 2".$typefilter;
     }
 
     # add flapping messages
     unless($noflapping) {
-        push @prop_filter, "Filter: message = SERVICE FLAPPING ALERT";
-        push @prop_filter, "Filter: message = HOST FLAPPING ALERT";
+        push @prop_filter, "Filter: type = SERVICE FLAPPING ALERT";
+        push @prop_filter, "Filter: type = HOST FLAPPING ALERT";
     }
 
     # add downtime messages
     unless($nodowntime) {
-        push @prop_filter, "Filter: message = SERVICE DOWNTIME ALERT";
-        push @prop_filter, "Filter: message = HOST DOWNTIME ALERT";
+        push @prop_filter, "Filter: type = SERVICE DOWNTIME ALERT";
+        push @prop_filter, "Filter: type = HOST DOWNTIME ALERT";
     }
 
     # join type filter together
@@ -113,13 +113,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # add system messages
     unless($nosystem) {
-        $filter .= "Filter: message ~ starting\.\.\.\n";
-        $filter .= "Filter: message ~ shutting\ down\.\.\.\n";
+        $filter .= "Filter: type ~ starting\.\.\.\n";
+        $filter .= "Filter: type ~ shutting\ down\.\.\.\n";
         $filter .= "Or: 3\n";
     }
 
 
-    my $query = "GET log\nColumns: time message options state\n".$filter;
+    my $query = "GET log\nColumns: time type options state\n".$filter;
     #$c->log->debug($query);
     $query   .= Thruk::Helper::get_auth_filter($c, 'log');
 

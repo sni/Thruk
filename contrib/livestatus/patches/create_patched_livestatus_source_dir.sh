@@ -49,7 +49,7 @@ echo "cleaned up"
 # check out fresh check_mk
 if [ -d "$EXPORT_DIR/check_mk" ]; then
     echo "updating livestatus"
-    cd $EXPORT_DIR/check_mk && git pull
+    cd $EXPORT_DIR/check_mk && git checkout master && git pull
     echo "updated check_mk"
 else
     echo "cloning livestatus"
@@ -59,7 +59,8 @@ else
 fi
 
 # working version
-git checkout 45c3dd38cb36a7e394ec359e4242ec9d0d2ccfa6
+git checkout master
+git checkout b32d4d1aff78cc9499768c8a67f73fe164d403b7
 
 mkdir "$EXPORT_DIR/livestatus"
 rsync -a livestatus/. "$EXPORT_DIR/livestatus"
@@ -71,7 +72,7 @@ cp $PATCHDIR/build.sh "$EXPORT_DIR/livestatus/" && chmod 755 "$EXPORT_DIR/livest
 cp $PATCHDIR/INSTALL  "$EXPORT_DIR/livestatus/"
 
 cd "$EXPORT_DIR/livestatus"
-for patch in `ls -1 $PATCHDIR/*.patch`; do
+for patch in `ls -1 $PATCHDIR/*.patch 2>/dev/null`; do
     echo "applying $patch"
     patch -p2 < $patch || ( echo "patch $patch failed"; exit 1 )
 done

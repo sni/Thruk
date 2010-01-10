@@ -1,0 +1,28 @@
+From 5c5a25cf93ab2c7c5f41039a16fd4883d7f31933 Mon Sep 17 00:00:00 2001
+From: Sven Nierlein <sven@nierlein.de>
+Date: Sun, 10 Jan 2010 22:01:22 +0100
+Subject: [PATCH] fixed logentries for external commands
+
+
+Signed-off-by: Sven Nierlein <sven@nierlein.de>
+---
+ livestatus/src/LogEntry.cc |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/livestatus/src/LogEntry.cc b/livestatus/src/LogEntry.cc
+index 821d470..e64aeb4 100644
+--- a/livestatus/src/LogEntry.cc
++++ b/livestatus/src/LogEntry.cc
+@@ -200,7 +200,8 @@ bool LogEntry::handleExternalCommandEntry()
+     if (!strncmp(_text, "EXTERNAL COMMAND:", 17)) 
+     {
+ 	_logclass = LOGCLASS_COMMAND;
+-	_text = _text + 18;
++	char *scan = _text;
++	_text = next_token(&scan, ':');
+ 	return true; // TODO: join with host/service information?
+ 	/* Damit wir die restlichen Spalten ordentlich befuellen, braeuchten
+ 	   wir eine komplette Liste von allen external commands und
+-- 
+1.6.0.4
+

@@ -102,7 +102,7 @@ sub _process_host_page {
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     $c->detach('/error/index/5') unless defined $hostname;
-    my $hosts = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nFilter: name = $hostname\nColumns: has_been_checked accept_passive_checks acknowledged action_url address alias checks_enabled check_type current_attempt current_notification_number event_handler_enabled execution_time flap_detection_enabled groups icon_image icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts name next_check notes notes_url notifications_enabled obsess_over_host parents percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
+    my $hosts = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nFilter: name = $hostname\nColumns: has_been_checked accept_passive_checks acknowledged action_url_expanded address alias checks_enabled check_type current_attempt current_notification_number event_handler_enabled execution_time flap_detection_enabled groups icon_image_expanded icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts name next_check notes_expanded notes_url_expanded notifications_enabled obsess_over_host parents percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
 
     # we only got one host
     if(scalar keys %{$hosts} == 1) {
@@ -158,7 +158,7 @@ sub _process_service_page {
     my $servicename = $c->{'request'}->{'parameters'}->{'service'};
     $c->detach('/error/index/5') unless defined $servicename;
 
-    my $services = $c->{'live'}->selectall_hashref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nFilter: host_name = $hostname\nFilter: description = $servicename\nColumns: has_been_checked accept_passive_checks acknowledged action_url checks_enabled check_type current_attempt current_notification_number description event_handler_enabled execution_time flap_detection_enabled groups host_address host_alias host_name icon_image icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts next_check notes notes_url notifications_enabled obsess_over_service percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
+    my $services = $c->{'live'}->selectall_hashref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nFilter: host_name = $hostname\nFilter: description = $servicename\nColumns: has_been_checked accept_passive_checks acknowledged action_url_expanded checks_enabled check_type current_attempt current_notification_number description event_handler_enabled execution_time flap_detection_enabled groups host_address host_alias host_name icon_image_expanded icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts next_check notes_expanded notes_url_expanded notifications_enabled obsess_over_service percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
 
     # we only got one service
     if(scalar keys %{$services} == 1) {

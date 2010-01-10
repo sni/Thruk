@@ -1,0 +1,27 @@
+From 4b98ebfc0cb87df9dbff670357da0abb7116858b Mon Sep 17 00:00:00 2001
+From: Sven Nierlein <sven@nierlein.de>
+Date: Sun, 10 Jan 2010 22:18:16 +0100
+Subject: [PATCH] added icon_image_expanded for services
+
+
+Signed-off-by: Sven Nierlein <sven@nierlein.de>
+---
+ livestatus/src/TableServices.cc |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/livestatus/src/TableServices.cc b/livestatus/src/TableServices.cc
+index bfb8edc..85b69a0 100644
+--- a/livestatus/src/TableServices.cc
++++ b/livestatus/src/TableServices.cc
+@@ -141,6 +141,8 @@ void TableServices::addColumns(Table *table, string prefix, int indirect_offset,
+ 	    "The action_url with (the most important) macros expanded", (char *)(&svc.action_url) - ref, indirect_offset));
+    table->addColumn(new OffsetStringColumn(prefix + "icon_image", 
+ 	    "The name of an image to be used as icon in the web interface", (char *)(&svc.icon_image) - ref, indirect_offset));
++   table->addColumn(new OffsetStringServiceMacroColumn(prefix + "icon_image_expanded", 
++	    "The icon_image with (the most important) macros expanded", (char *)(&svc.icon_image) - ref, indirect_offset));
+    table->addColumn(new OffsetStringColumn(prefix + "icon_image_alt", 
+ 	    "An alternative text for the icon_image for browsers not displaying icons", (char *)(&svc.icon_image_alt) - ref, indirect_offset));
+ 
+-- 
+1.6.0.4
+
