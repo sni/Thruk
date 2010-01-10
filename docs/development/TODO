@@ -13,7 +13,6 @@ general
     - make extinfo tests independent from test setup (host/servicenames)
 
 extinfo:
-    - verify macros is action_url, icon_url and notes_url
     - finish performance data on extinfo type 4
 
 config:
