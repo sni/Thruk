@@ -33,7 +33,7 @@
         <input type='hidden' name='report_type' value="[% report_type %]">
         <table border="0" cellpadding="5">
           <tr>
-            <td class='reportSelectSubTitle' valign="center">
+            <td class='reportSelectSubTitle' valign="middle">
               [% IF report_type == 'hosts' %]
               Host(s):
               [% ELSIF report_type == 'hostgroups' %]
@@ -44,7 +44,7 @@
               Servicegroup(s):
               [% END %]
             </td>
-            <td align="left" valign="center" class='reportSelectItem'>
+            <td align="left" valign="middle" class='reportSelectItem'>
               <select name='[% IF report_type == 'hosts' %]host[% ELSIF report_type == 'services' %]service[% ELSIF report_type == 'servicegroups' %]servicegroup[% ELSIF report_type == 'hostgroups' %]hostgroup[% END %]'>
                 <option value='all'>
                   [% IF report_type == 'hosts' %]

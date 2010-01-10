@@ -112,16 +112,15 @@
                   [% END %]
                   <td class='[% hostclass %]'>
                     <table border="0" width="100%">
-                      [% IF h.ok || h.warning || h.unknown || h.critical || h.pending %]
                       [% IF h.ok       %]<tr><td class='miniStatusOK'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.ok %] OK</a></td></tr>[% END %]
                       [% IF h.warning  %]<tr><td class='miniStatusWARNING'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.warning %] WARNING</a></td></tr>[% END %]
                       [% IF h.unknown  %]<tr><td class='miniStatusUNKNOWN'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.unknown %] UNKNOWN</a></td></tr>[% END %]
                       [% IF h.critical %]<tr><td class='miniStatusCRITICAL'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.critical %] CRITICAL</a></td></tr>[% END %]
                       [% IF h.pending  %]<tr><td class='miniStatusPENDING'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.pending %] PENDING</a></td></tr>[% END %]
-                      [% ELSE %]
-                      No matching services
-                      [% END %]
                     </table>
+                    [% IF h.ok + h.warning + h.unknown + h.critical + h.pending == 0 %]
+                    No matching services
+                    [% END %]
                   </td>
                   <td class='[% hostclass %]'>
                     <a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/thruk/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a>

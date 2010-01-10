@@ -328,7 +328,7 @@
 
 <!--
         <tr>
-          <td valign="center"><div class='perfTypeTitle'>Check Statistics:</div></td>
+          <td valign="middle"><div class='perfTypeTitle'>Check Statistics:</div></td>
           <td valign="top" colspan='2'>
             <table border="1" cellspacing="0" cellpadding="0">
               <tr>
@@ -413,7 +413,7 @@
           </td>
         </tr>
         <tr>
-          <td valign="center"><div class='perfTypeTitle'>Buffer Usage:</div></td>
+          <td valign="middle"><div class='perfTypeTitle'>Buffer Usage:</div></td>
           <td valign="top" colspan='2'>
             <table border="1" cellspacing="0" cellpadding="0">
               <tr>

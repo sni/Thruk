@@ -5,44 +5,44 @@
             [% PROCESS _infobox.tt %]
         </td>
         <td align="right" valign="bottom" width="50%">
-          <table border="0" cellspacing="0" cellspadding="0">
+          <table border="0" cellspacing="0">
             <tr>
               <td valign="bottom" align="right"></td>
               <td>
-                <table border="0" cellspacing="4" cellspadding="0">
+                <table border="0" cellspacing="4">
                   <tr>
                     <td class='perfTitle'>&nbsp;<a href='extinfo.cgi?type=4' class='perfTitle'>Monitoring Performance</a></td>
                   </tr>
                   <tr>
                     <td>
-                      <table border="0" cellspacing="0" cellspadding="0">
+                      <table border="0" cellspacing="0">
                         <tr>
                           <td class='perfBox'>
-                            <table border="0" cellspacing="4" cellspadding="0">
+                            <table border="0" cellspacing="4">
                               <tr>
-                                <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Execution Time:</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Execution Time:</a></td>
                                 <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services.execution_time_min) %] / [% sprintf('%.2f',stats.services.execution_time_max) %] / [% sprintf('%.3f',stats.services.execution_time_avg) %] sec</a></td>
                               </tr>
                               <tr>
-                                <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Latency:</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Service Check Latency:</a></td>
                                 <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.services.latency_min) %] / [% sprintf('%.2f',stats.services.latency_max) %] / [% sprintf('%.3f',stats.services.latency_avg) %] sec</a></td>
                               </tr>
                               <tr>
-                                <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Execution Time:</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Execution Time:</a></td>
                                 <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts.execution_time_min) %] / [% sprintf('%.2f',stats.hosts.execution_time_max) %] / [% sprintf('%.3f',stats.hosts.execution_time_avg) %] sec</a></td>
                               </tr>
                               <tr>
-                                <td align="left" valign="center" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Latency:</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='extinfo.cgi?type=4' class='perfItem'>Host Check Latency:</a></td>
                                 <td valign="top" class='perfValue' nowrap><a href='extinfo.cgi?type=4' class='perfValue'>[% sprintf('%.2f',stats.hosts.latency_min) %] / [% sprintf('%.2f',stats.hosts.latency_max) %] / [% sprintf('%.3f',stats.hosts.latency_avg) %] sec</a></td>
                               </tr>
                               <tr>
-                                <td align="left" valign="center" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=131072' class='perfItem'># Active Host / Service Checks:</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=131072' class='perfItem'># Active Host / Service Checks:</a></td>
                                 <td valign="top" class='perfValue' nowrap>
                                   <a href='status.cgi?hostgroup=all&amp;hostprops=131072&amp;style=hostdetail' class='perfValue'>[% host_stats.total_active %]</a> / <a href='status.cgi?host=all&amp;serviceprops=131072' class='perfValue'>[% service_stats.total_active %]</a>
                                 </td>
                               </tr>
                               <tr>
-                                <td align="left" valign="center" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=65536' class='perfItem'># Passive Host / Service Checks:</a></td>
+                                <td align="left" valign="middle" class='perfItem'><a href='status.cgi?host=all&amp;serviceprops=65536' class='perfItem'># Passive Host / Service Checks:</a></td>
                                 <td valign="top" class='perfValue' nowrap><a href='status.cgi?hostgroup=all&amp;hostprops=65536&amp;style=hostdetail' class='perfValue'>[% host_stats.total_passive %]</a> / <a href='status.cgi?host=all&amp;serviceprops=65536' class='perfValue'>[% service_stats.total_passive %]</a></td>
                               </tr>
                             </table>
@@ -90,21 +90,21 @@
           </table>
         </td>
         <td valign="top" align="right" width="50%">
-          <table border="0" cellspacing="0" cellspadding="0">
+          <table border="0" cellspacing="0">
             <tr>
               <td>
-                <table border="0" cellspacing="4" cellspadding="0">
+                <table border="0" cellspacing="4">
                   <tr>
                     <td class='healthTitle'>&nbsp;Network Health</td>
                   </tr>
                   <tr>
                     <td>
-                      <table border="0" cellspacing="0" cellspadding="0">
+                      <table border="0" cellspacing="0">
                         <tr>
                           <td class='healthBox'>
-                            <table border="0" cellspacing="4" cellspadding="0">
+                            <table border="0" cellspacing="4">
                               <tr>
-                                <td align="left" valign="center" class='healthItem'>Host Health:</td>
+                                <td align="left" valign="middle" class='healthItem'>Host Health:</td>
                                 [% IF (host_stats.total-host_stats.pending) == 0 %]
                                   [% host_health = 0 %]
                                 [% ELSE %]
@@ -124,7 +124,7 @@
                                 <td valign="top" width="100" class='healthBar'><img src='/thruk/images/[% host_health_pic %]' border="0" width="[% health_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health'></td>
                               </tr>
                               <tr>
-                                <td align="left" valign="center" class='healthItem'>Service Health:</td>
+                                <td align="left" valign="middle" class='healthItem'>Service Health:</td>
                                 [% IF (service_stats.total-service_stats.pending) == 0 %]
                                   [% service_health = 0 %]
                                 [% ELSE %]
@@ -347,7 +347,7 @@
               <td width="10">&nbsp;</td>
 
               [% IF pi.enable_flap_detection == 0 %]
-              <td valign="center" width="100%" class='featureDisabledFlapDetection'>N/A</td>
+              <td valign="middle" width="100%" class='featureDisabledFlapDetection'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledFlapDetection'>
                 <table border="0" width="100%">
@@ -397,7 +397,7 @@
               [% END %]
               <td width="10">&nbsp;</td>
               [% IF pi.enable_notifications == 0 %]
-              <td valign="center" width="100%" class='featureDisabledNotifications'>N/A</td>
+              <td valign="middle" width="100%" class='featureDisabledNotifications'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledNotifications'>
                 <table border="0" width="100%">
@@ -434,7 +434,7 @@
               <td width="10">&nbsp;</td>
 
               [% IF pi.enable_event_handlers == 0 %]
-              <td valign="center" width="100%" class='featureDisabledHandlers'>N/A</td>
+              <td valign="middle" width="100%" class='featureDisabledHandlers'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledHandlers'>
                 <table border="0" width="100%">
@@ -470,7 +470,7 @@
               [% END %]
               <td width="10">&nbsp;</td>
               [% IF pi.execute_service_checks == 0 %]
-              <td valign="center" width="100%" class='featureDisabledActiveChecks'>N/A</td>
+              <td valign="middle" width="100%" class='featureDisabledActiveChecks'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledActiveChecks'>
                 <table border="0" width="100%">
@@ -506,7 +506,7 @@
               [% END %]
               <td width="10">&nbsp;</td>
               [% IF pi.accept_passive_service_checks == 0 %]
-              <td valign="center" width="100%" class='featureDisabledPassiveChecks'>N/A</td>
+              <td valign="middle" width="100%" class='featureDisabledPassiveChecks'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledPassiveChecks'>
                 <table border="0" width="100%">

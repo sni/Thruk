@@ -895,7 +895,7 @@ sub _get_host_prop_filter {
             push @host_prop_filtername,     'In Soft State';
         }
 
-        $host_prop_filtername = join(' & ', @host_prop_filtername);
+        $host_prop_filtername = join(' &amp; ', @host_prop_filtername);
 
         if(scalar @host_prop_filter > 1) {
             $hostfilter    .= join("\n", @host_prop_filter)."\nAnd: ".(scalar @host_prop_filter)."\n";
@@ -1047,7 +1047,7 @@ sub _get_service_prop_filter {
             push @service_prop_filtername,     'In Soft State';
         }
 
-        $service_prop_filtername = join(' & ', @service_prop_filtername);
+        $service_prop_filtername = join(' &amp; ', @service_prop_filtername);
 
         if(scalar @service_prop_filter > 1) {
             $servicefilter .= join("\n", @service_prop_filter)."\nAnd: ".(scalar @service_prop_filter)."\n";

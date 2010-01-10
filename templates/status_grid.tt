@@ -89,11 +89,11 @@
                 <td align="left">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td align="left" valign="center" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'>[% h.name %]</a></td>
+                      <td align="left" valign="middle" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'>[% h.name %]</a></td>
                     </tr>
                   </table>
                 </td>
-                <td align="right" valign="center" nowrap>
+                <td align="right" valign="middle" nowrap>
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
                       <td>
