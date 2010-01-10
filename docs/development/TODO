@@ -11,6 +11,7 @@ general
     - write tests
     - fix sending commands to specific backend
     - make extinfo tests independent from test setup (host/servicenames)
+    - remove some divs from showlog
 
 extinfo:
     - verify macros is action_url, icon_url and notes_url

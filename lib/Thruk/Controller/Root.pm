@@ -55,19 +55,36 @@ sub default :Path {
 ######################################
 # index page
 # we dont want index.html in the url
-sub index :Path {
+sub index :Path('/') {
     my ( $self, $c ) = @_;
     $c->redirect("/thruk/");
 }
 # we dont want index.html in the url
-sub index_html : Path('index.html') {
+sub index_html : Path('/index.html') {
     my ( $self, $c ) = @_;
-    $c->redirect('/thruk/');
+    if($c->stash->{'use_frames'}) {
+        $c->detach("thruk_index_html");
+    } else {
+        $c->detach("thruk_main_html");
+    }
 }
 # but if used not via fastcgi/apache, there is no way around
-sub thruk_index_html : Path('/thruk/') {
+sub thruk_index : Path('/thruk/') {
     my ( $self, $c ) = @_;
-    $c->redirect('/thruk/index.html');
+    if($c->stash->{'use_frames'}) {
+        $c->detach("thruk_index_html");
+    } else {
+        $c->detach("thruk_main_html");
+    }
+}
+
+# but if used not via fastcgi/apache, there is no way around
+sub thruk_index_html : Path('/thruk/index.html') {
+    my ( $self, $c ) = @_;
+    unless($c->stash->{'use_frames'}) {
+        $c->detach("thruk_main_html");
+    }
+    $c->stash->{'template'} = 'index.tt';
 }
 
 ######################################
@@ -79,6 +96,8 @@ sub thruk_side_html : Path('/thruk/side.html') {
 ######################################
 sub thruk_main_html : Path('/thruk/main.html') {
     my ( $self, $c ) = @_;
+    $c->stash->{'title'}     = 'Thruk Monitoring Webinterface';
+    $c->stash->{'page'}      = 'splashpage';
     $c->stash->{'version'}   = Thruk->config->{'version'};
     $c->stash->{'released'}  = Thruk->config->{'released'};
     $c->stash->{'template'}  = 'main.tt';

@@ -11,13 +11,10 @@
     <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes.css' />
     [% END %]
   </head>
-  <body class='[% page %]'>
+  <body class='[% page %]' id='[% page %]'>
   [% UNLESS use_frames %]
-  <table class="navtable">
-    <tr>
-      <td class='navbar'>
-        [% PROCESS side.tt %]
-      </td>
-      <td>
+  <div class="navbar">
+    [% PROCESS side.tt %]
+  </div>
   [% END %]
   <!-- Produced by Thruk (http://github.com/sni/Thruk). Copyright (c) 1999-2007 Ethan Galstad. -->

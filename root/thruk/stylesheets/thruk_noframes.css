@@ -1,21 +1,21 @@
 /* navbar */
-td.navbar {
+div.navbar {
   background-color: black;
   color: white;
   font-family: verdana,arial,serif;
-  border-top: 2px solid black;
-  border-bottom: 2px solid black;
-  border-left: 5px solid black;
-  border-right: 10px solid black;
-}
-
-table.navtable {
-  border-collapse: collapse;
-  border-style: none;
-  border: 0px;
-  float: left;
+  width: 150px;
+  height: 100%;
+  position:fixed;
+  z-index:100;
+  border: 5px solid black;
+  overflow:auto;
+  top: 0px;
+  left: 0px;
+  text-align: left;
 }
 
 body {
   margin: 0px;
+  margin-top: 2px;
+  margin-left: 162px;
 }

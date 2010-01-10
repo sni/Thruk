@@ -1,3 +1,5 @@
+[% PROCESS _header.tt %]
+[%#
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
@@ -7,6 +9,7 @@
     <link rel="shortcut icon" href="/thruk/images/favicon.ico" type="image/ico" />
   </head>
   <body id="splashpage">
+#%]
     <div id="mainbrandsplash">
       <div id="mainlogo"><a href="http://github.com/sni/Thruk" target="_blank"><img src="/thruk/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk"></a></div>
     </div>
@@ -38,5 +41,5 @@
         <a href="http://github.com" target="_blank"><img src="/thruk/images/github.png" width="100" height="45" border="0" alt="Github.com Logo"></a>
       </div>
     </div>
-  </body>
-</html>
+
+[% PROCESS _footer.tt %]

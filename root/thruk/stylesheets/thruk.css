@@ -1,3 +1,9 @@
 .peerDOWN { width:100px; font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; }
 .hostPENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
 .servicePENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
+
+div.navbarsearch form fieldset {
+  border: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
