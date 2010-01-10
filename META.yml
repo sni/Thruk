@@ -1,0 +1,69 @@
+---
+abstract: 'Catalyst based monitoring web interface'
+author:
+  - 'Sven Nierlein, 2009, <nierlein@cpan.org>'
+build_requires:
+  Catalyst::Devel: 0
+  ExtUtils::MakeMaker: 6.42
+  Perl::Critic::Policy::Dynamic::NoIndirect: 0
+  Test::Perl::Critic: 0
+  Test::Pod: 1.4
+  Test::Pod::Coverage: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
+distribution_type: module
+generated_by: 'Module::Install version 0.91'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Thruk
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  Algorithm::C3: 0
+  Carp: 0
+  Catalyst::Action::RenderView: 0
+  Catalyst::Engine::FastCGI: 0
+  Catalyst::Log::Log4perl: 0
+  Catalyst::Plugin::Authentication: 0
+  Catalyst::Plugin::Authorization::Roles: 0
+  Catalyst::Plugin::Compress::Gzip: 0
+  Catalyst::Plugin::ConfigLoader: 0
+  Catalyst::Plugin::CustomErrorMessage: 0
+  Catalyst::Plugin::Redirect: 0
+  Catalyst::Plugin::StackTrace: 0
+  Catalyst::Plugin::Static::Simple: 0
+  Catalyst::Runtime: 5.80016
+  Catalyst::View::TT: 0
+  Class::Accessor::Fast: 0
+  Class::C3: 0
+  Compress::Raw::Zlib: 2.023
+  Config::Any: 0
+  Config::General: 0
+  Date::Calc: 0
+  FCGI: 0
+  FCGI::ProcManager: 0
+  File::Copy::Recursive: 0
+  HTTP::Body: 0
+  LWP: 0
+  Log::Dispatch::File: 0
+  Monitoring::Livestatus: 0.34
+  Moose: 0
+  MooseX::MethodAttributes::Inheritable: 0
+  MooseX::Role::WithOverloading: 0
+  Path::Class: 0
+  Sub::Uplevel: 0
+  Template: 2.22
+  Thread::Queue: 2.11
+  Time::HiRes: 0
+  Variable::Magic: 0
+  YAML::Tiny: 0
+  parent: 0
+  perl: 5.8.0
+  threads: 1.75
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.20_2

@@ -1,6 +1,9 @@
-Makefile
+blib
+\.git
+^Makefile$
 Makefile.old
 MANIFEST.bak
+MANIFEST.SKIP
 blib
 pm_to_blib
 local-lib
@@ -8,3 +11,5 @@ logs/debug.log
 logs/error.log
 logs/access.log
 thruk_local.conf
+script/thruk_update_docs.sh
+script/thruk_update_table_docs.pl
