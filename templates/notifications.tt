@@ -189,5 +189,6 @@
 </div>
 [% END %]
 
+<div class="itemTotalsTitle">[% notifications.size %] Matching Notifications Displayed</div>
 
 [% PROCESS _footer.tt %]

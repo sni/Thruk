@@ -135,5 +135,6 @@
 [% END %]
       </div>
       <hr>
+<div class="itemTotalsTitle">[% logs.size %] Matching Log Entries Displayed</div>
 
 [% PROCESS _footer.tt %]
