@@ -232,7 +232,7 @@
                     </tr>
                     [% END %]
                     [% IF pi.execute_service_checks != 1 %]
-                    <tr class='command' nowrap>
+                    <tr class='command'>
                       <td><img src='/thruk/images/enabled.gif' border="0" alt='Start Executing Service Checks' title='Start Executing Service Checks'></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=35'>Start executing service checks</a></td>
                     </tr>
