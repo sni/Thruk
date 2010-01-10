@@ -208,13 +208,12 @@
 [% END %]
     </div>
 
-  [% IF !logs.size %]
   <hr>
+  [% IF !logs.size %]
   <div class='warningMessage'>No history information was found for this service in the current log file</div>
   [% ELSE %]
-  <div class="itemTotalsTitle">[% logs.size %] Matching Log Entries Displayed</div>
+  <div class="itemTotalsTitle">[% IF logs.size %][% logs.size %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>
   [% END %]
 
-  <hr>
 
 [% PROCESS _footer.tt %]

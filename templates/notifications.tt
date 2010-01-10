@@ -189,6 +189,6 @@
 </div>
 [% END %]
 
-<div class="itemTotalsTitle">[% notifications.size %] Matching Notifications Displayed</div>
+<div class="itemTotalsTitle">[% IF notifications.size %][% notifications.size %][% ELSE %]0[% END %] Matching Notifications Displayed</div>
 
 [% PROCESS _footer.tt %]
