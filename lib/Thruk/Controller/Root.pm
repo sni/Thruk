@@ -36,6 +36,10 @@ sub begin : Private {
     $use_frames = 1 unless defined $use_frames;
     $use_frames = !$c->{'request'}->{'parameters'}->{'nav'} if defined $c->{'request'}->{'parameters'}->{'nav'};
     $c->stash->{'use_frames'} = $use_frames;
+
+    my $doc_link = Thruk->config->{'documentation_link'};
+    $doc_link    = '/thruk/docs/index.html' unless defined $doc_link;
+    $c->stash->{'documentation_link'} = $doc_link;
 }
 
 ######################################
@@ -57,6 +61,9 @@ sub default :Path {
 # we dont want index.html in the url
 sub index :Path('/') {
     my ( $self, $c ) = @_;
+    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
+        $c->detach("default");
+    }
     $c->redirect("/thruk/");
 }
 # we dont want index.html in the url
@@ -90,6 +97,7 @@ sub thruk_index_html : Path('/thruk/index.html') {
 ######################################
 sub thruk_side_html : Path('/thruk/side.html') {
     my ( $self, $c ) = @_;
+
     $c->stash->{'template'} = 'side.tt';
 }
 
@@ -107,9 +115,17 @@ sub thruk_main_html : Path('/thruk/main.html') {
 sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
     $c->stash->{infoBoxTitle}     = 'Change Log';
-    $c->stash->{page}             = 'extinfo';
+    $c->stash->{'title'}          = 'Change Log';
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'template'}       = 'changes.tt';
+}
+
+######################################
+sub thruk_docs : Path('/thruk/docs/') {
+    my ( $self, $c ) = @_;
+    $c->stash->{'title'}          = 'Documentation';
+    $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'template'}       = 'docs.tt';
 }
 
 ######################################

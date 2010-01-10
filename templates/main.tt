@@ -1,15 +1,4 @@
 [% PROCESS _header.tt %]
-[%#
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-  <head>
-    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
-    <title>Thruk</title>
-    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/common.css'>
-    <link rel="shortcut icon" href="/thruk/images/favicon.ico" type="image/ico" />
-  </head>
-  <body id="splashpage">
-#%]
     <div id="mainbrandsplash">
       <div id="mainlogo"><a href="http://github.com/sni/Thruk" target="_blank"><img src="/thruk/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk"></a></div>
     </div>
@@ -21,7 +10,7 @@
         <a href="http://github.com/sni/Thruk" target="_blank">Check for updates</a>
       </div>
       <div class="whatsnew">
-        <a href="changes.html">Read what's new in Thruk</a>
+        <a href="/thruk/changes.html">Read what's new in Thruk</a>
       </div>
     </div>
     <div id="updateversioninfo"></div>

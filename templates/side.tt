@@ -18,7 +18,9 @@
       <div class="navsectionlinks">
         <ul class="navsectionlinks">
           <li><a href="/thruk/main.html" target="[% target %]">Home</a></li>
-          <li><a href="/thruk/docs/index.html" target="[% target %]">Documentation</a></li>
+          [% IF documentation_link %]
+          <li><a href="[% documentation_link %]" target="[% target %]">Documentation</a></li>
+          [% END %]
         </ul>
       </div>
     </div>
