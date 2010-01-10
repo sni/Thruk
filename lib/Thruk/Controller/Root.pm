@@ -30,15 +30,18 @@ Thruk::Controller::Root - Root Controller for Thruk
 
 ######################################
 # begin, running at the begin of every req
-#sub begin : Private {
-#    my ( $self, $c ) = @_;
-#}
+sub begin : Private {
+    my ( $self, $c ) = @_;
+    my $use_frames = Thruk->config->{'use_frames'};
+    $use_frames = 1 unless defined $use_frames;
+    $use_frames = !$c->{'request'}->{'parameters'}->{'nav'} if defined $c->{'request'}->{'parameters'}->{'nav'};
+    $c->stash->{'use_frames'} = $use_frames;
+}
 
 ######################################
 # auto, runs on every request
 #sub auto : Private {
 #    my ( $self, $c ) = @_;
-#
 #}
 
 ######################################
@@ -68,7 +71,21 @@ sub thruk_index_html : Path('/thruk/') {
 }
 
 ######################################
-sub thruk_changes : Path('/thruk/changes.html') :MyAction('AddDefaults') {
+sub thruk_side_html : Path('/thruk/side.html') {
+    my ( $self, $c ) = @_;
+    $c->stash->{'template'} = 'side.tt';
+}
+
+######################################
+sub thruk_main_html : Path('/thruk/main.html') {
+    my ( $self, $c ) = @_;
+    $c->stash->{'version'}   = Thruk->config->{'version'};
+    $c->stash->{'released'}  = Thruk->config->{'released'};
+    $c->stash->{'template'}  = 'main.tt';
+}
+
+######################################
+sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
     $c->stash->{infoBoxTitle}     = 'Change Log';
     $c->stash->{page}             = 'extinfo';

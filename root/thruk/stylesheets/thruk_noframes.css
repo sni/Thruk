@@ -1,0 +1,21 @@
+/* navbar */
+td.navbar {
+  background-color: black;
+  color: white;
+  font-family: verdana,arial,serif;
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+  border-left: 5px solid black;
+  border-right: 10px solid black;
+}
+
+table.navtable {
+  border-collapse: collapse;
+  border-style: none;
+  border: 0px;
+  float: left;
+}
+
+body {
+  margin: 0px;
+}

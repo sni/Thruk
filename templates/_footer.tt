@@ -1,3 +1,8 @@
+  [% UNLESS use_frames %]
+      </td>
+    </tr>
+  </table>
+  [% END %]
     <!-- Produced by Thruk (http://github.com/sni/Thruk). Copyright (c) 1999-2007 Ethan Galstad. -->
   </body>
 </html>

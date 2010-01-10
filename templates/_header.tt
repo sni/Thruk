@@ -7,6 +7,17 @@
     [% SET page = 'status' IF page == '' %]
     <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/[% page %].css' />
     <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk.css' />
+    [% UNLESS use_frames %]
+    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes.css' />
+    [% END %]
   </head>
   <body class='[% page %]'>
-<!-- Produced by Thruk (http://github.com/sni/Thruk). Copyright (c) 1999-2007 Ethan Galstad. -->
+  [% UNLESS use_frames %]
+  <table class="navtable">
+    <tr>
+      <td class='navbar'>
+        [% PROCESS side.tt %]
+      </td>
+      <td>
+  [% END %]
+  <!-- Produced by Thruk (http://github.com/sni/Thruk). Copyright (c) 1999-2007 Ethan Galstad. -->
