@@ -3,7 +3,7 @@ div.navbar {
   background-color: black;
   color: white;
   font-family: verdana,arial,serif;
-  width: 150px;
+  width: 160px;
   height: 100%;
   position:fixed;
   z-index:100;
@@ -17,5 +17,5 @@ div.navbar {
 body {
   margin: 0px;
   margin-top: 2px;
-  margin-left: 162px;
+  margin-left: 172px;
 }
