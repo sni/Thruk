@@ -157,6 +157,7 @@ root/thruk/stylesheets/summary.css
 root/thruk/stylesheets/tac.css
 root/thruk/stylesheets/thruk.css
 root/thruk/stylesheets/thruk_noframes.css
+root/thruk/stylesheets/thruk_noframes_ie_fix.css
 root/thruk/stylesheets/trends.css
 script/thruk_cgi.pl
 script/thruk_create.pl
@@ -316,6 +317,7 @@ templates/extinfo_type_5.tt
 templates/extinfo_type_6.tt
 templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
+templates/histogram.tt
 templates/history.tt
 templates/index.tt
 templates/main.tt
@@ -328,5 +330,7 @@ templates/status_grid.tt
 templates/status_hostdetail.tt
 templates/status_overview.tt
 templates/status_summary.tt
+templates/summary.tt
 templates/tac.tt
+templates/trends.tt
 thruk.conf
