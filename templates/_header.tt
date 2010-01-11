@@ -10,6 +10,13 @@
     <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk.css' />
     [% UNLESS use_frames %]
     <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes.css' />
+    <!--[if IE 5]>
+    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes_ie_fix.css' />
+    <![endif]-->
+    <!--[if IE 6]>
+    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes_ie_fix.css' />
+    <![endif]-->
+
     [% END %]
   </head>
   <body class='[% page %]' id='[% page %]'>
