@@ -70,6 +70,11 @@ sub get_auth_filter {
         return("");
     }
 
+    # servicegroups authorization
+    elsif($type eq 'timeperiods') {
+        return("");
+    }
+
     # comments / downtimes authorization
     elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;

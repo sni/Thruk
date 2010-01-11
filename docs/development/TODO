@@ -9,6 +9,7 @@ general
     - fix host/servicegroups pages with authorization
     - check TT strict option
     - write tests
+    - add backend name to logs
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -18,6 +19,7 @@ config:
 
 avail:
     - missing completly
+    - remove duplicates from timeperiods/groups list
 
 trends:
     - missing completly
