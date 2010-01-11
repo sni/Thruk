@@ -41,7 +41,7 @@
                     <tr>
                       <td class='dataVar' nowrap>Program Start Time:</td>
                       [% FOREACH pd IN backends %]
-                        <td class='dataVal'>
+                        <td class='dataVal' nowrap>
                           [% IF pi_detail.$pd.program_start %]
                             [% date.format(pi_detail.$pd.program_start, '%Y-%m-%d  %H:%M:%S') %]
                           [% ELSE %]
@@ -241,13 +241,13 @@
                     [% IF pi.accept_passive_service_checks != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks'></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a></td>
+                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a></td>
                     </tr>
                     [% END %]
                     [% IF pi.accept_passive_service_checks != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/images/enabled.gif' border="0" alt='Start Accepting Passive Service Checks' title='Start Accepting Passive Service Checks'></td>
-                      <td class='command'><a href='cmd.cgi?cmd_typ=37'>Start accepting passive service checks</a></td>
+                      <td class='command' nowrap><a href='cmd.cgi?cmd_typ=37'>Start accepting passive service checks</a></td>
                     </tr>
                     [% END %]
 
