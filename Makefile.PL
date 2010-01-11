@@ -68,6 +68,5 @@ author_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
 catalyst;
 install_script glob('script/*.pl');
 auto_install;
-auto_include;
 WriteAll;
 

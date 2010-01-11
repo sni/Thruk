@@ -71,6 +71,13 @@ logout and login again and verify that your perl env looks like this:
 -------
 
 
+Install Module::Install
+~~~~~~~~~~~~~~~~~~~~~~~
+-------
+  perl -MCPAN -e "install Module::Install::AuthorRequires"
+-------
+
+
 Git Clone Thruk
 ~~~~~~~~~~~~~~~
 
