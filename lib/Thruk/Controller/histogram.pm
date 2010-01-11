@@ -25,7 +25,7 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->response->body('Matched Thruk::Controller::histogram in histogram.');
+    $c->stash->{'template'} = 'histogram.tt';
 }
 
 
