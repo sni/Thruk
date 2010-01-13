@@ -220,8 +220,9 @@ sub _create_report {
     $c->stash->{show_log_entries}             = $show_log_entries;
 
     # get groups / hosts /services
-    my $groupfilter = "";
-    my $hostfilter  = "";
+    my $groupfilter   = "";
+    my $hostfilter    = "";
+    my $servicefilter = "";
 
     # a single host
     if(defined $host and $host ne 'all') {
@@ -291,6 +292,42 @@ sub _create_report {
 
     # one or all servicegroups
     elsif(defined $servicegroup and $servicegroup ne '') {
+        if($servicegroup ne '' and $servicegroup ne 'all') {
+            $groupfilter   = "Filter: name = $servicegroup\n";
+            $servicefilter = "Filter: groups >= $servicegroup\n";
+        }
+        my $services    = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $groups      = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
+
+        my $service_data;
+        for my $service (@{$services}) {
+            $service_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+        }
+
+        # join our groups together
+        my %joined_groups;
+        for my $group (@{$groups}) {
+            my $name = $group->{'name'};
+            if(!defined $joined_groups{$name}) {
+                $joined_groups{$name}->{'name'}     = $group->{'name'};
+                $joined_groups{$name}->{'services'} = {};
+            }
+
+            for my $member (split /,/, $group->{'members'}) {
+                my($hostname,$description) = split/\|/, $member, 2;
+                # show only services with proper authorization
+                next unless defined $service_data->{$hostname}->{$description};
+
+                if(!defined $joined_groups{$name}->{'services'}->{$hostname}->{$description}) {
+                    $joined_groups{$name}->{'services'}->{$hostname}->{$description} = 1;
+                }
+            }
+            # remove empty groups
+            if(scalar keys %{$joined_groups{$name}->{'services'}} == 0) {
+                delete $joined_groups{$name};
+            }
+        }
+        $c->stash->{'groups'} = \%joined_groups;
     }
 
     # finished
