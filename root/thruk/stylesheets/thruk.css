@@ -8,3 +8,8 @@ div.navbarsearch form fieldset {
   padding-top: 0px;
   padding-bottom: 0px;
 }
+
+table td {
+  padding: 2px;
+  margin: 3px;
+}

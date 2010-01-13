@@ -1,0 +1,216 @@
+[% USE date %]
+[% PROCESS _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% PROCESS _infobox.tt %]
+          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+            <tr>
+              <td class='linkBox'>
+                <a href='avail.cgi?host=[% host %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>View Availability Report For This Host</a><br>
+                <a href='avail.cgi?host=null&amp;service=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>View Availability Report For All Services</a><br>
+                <a href='trends.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=1262679226&amp;t2=1263284026&amp;assumestateretention=no&amp;includesoftstates=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedservicestate=0&amp;backtrack=4'>View Trends For This Service</a><br>
+                <a href='histogram.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]'>View Alert Histogram For This Service</a><br>
+                <a href='history.cgi?host=[% host %]&amp;service=[% service %]'>View Alert History For This Service</a><br>
+                <a href='notifications.cgi?host=[% host %]&amp;service=[% service %]'>View Notifications For This Service</a><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td align="center" valign="top" width="33%">
+          <div align="center" class='dataTitle'>Service '[% service %]' On Host '[% host %]'</div><br>
+          <img src='/thruk/images/trends.gif' border="0" alt='Availability Report' title='Availability Report'><br clear="all">
+          <div align="center" class='reportRange'>
+            [% date.format(start, '%Y-%m-%d  %H:%M:%S') %] to [% date.format(end, '%Y-%m-%d  %H:%M:%S') %]
+          </div>
+          <div align="center" class='reportDuration'>
+            Duration: [% SET dur = end - start %][% duration(dur) %]
+          </div>
+        </td>
+        <td align="right" valign="bottom" width="33%">
+          [% PROCESS avail_report_form_box.tt %]
+        </td>
+      </tr>
+
+    </table>
+    <div align="center" class='reportTime'>[ Availability report completed in [% duration(time_token, 2) %] ]</div><br>
+    <br>
+    <div align="center" class='dataTitle'>Service State Breakdowns:</div>
+    <p align='center'>
+      <a href='trends.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]'>
+        <img src='trends.cgi?createimage&amp;smallimage&amp;host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]' border="1" alt='Service State Trends' title='Service State Trends' width='500' height='20'>
+      </a><br>
+    </p>
+    <div align="center">
+      <table border="0" class='data'>
+        <tr>
+          <th class='data'>State</th>
+          <th class='data'>Type / Reason</th>
+          <th class='data'>Time</th>
+          <th class='data'>% Total Time</th>
+          <th class='data'>% Known Time</th>
+        </tr>
+        <tr class='dataEven'>
+          <td class='serviceOK' rowspan="3">OK</td>
+          <td class='dataEven'>Unscheduled</td>
+          <td class='dataEven'>1d 11h 51m 7s</td>
+          <td class='dataEven'>21.340%</td>
+          <td class='dataEven'>44.137%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'>Scheduled</td>
+          <td class='dataEven'>1d 21h 22m 39s</td>
+          <td class='dataEven'>27.010%</td>
+          <td class='dataEven'>55.863%</td>
+        </tr>
+        <tr class='serviceOK'>
+          <td class='serviceOK'>Total</td>
+          <td class='serviceOK'>3d 9h 13m 46s</td>
+          <td class='serviceOK'>48.351%</td>
+          <td class='serviceOK'>100.000%</td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='serviceWARNING' rowspan="3">WARNING</td>
+          <td class='dataOdd'>Unscheduled</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'>0.000%</td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd'>Scheduled</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'>0.000%</td>
+        </tr>
+        <tr class='serviceWARNING'>
+          <td class='serviceWARNING'>Total</td>
+          <td class='serviceWARNING'>0d 0h 0m 0s</td>
+          <td class='serviceWARNING'>0.000%</td>
+          <td class='serviceWARNING'>0.000%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='serviceUNKNOWN' rowspan="3">UNKNOWN</td>
+          <td class='dataEven'>Unscheduled</td>
+          <td class='dataEven'>0d 0h 0m 0s</td>
+          <td class='dataEven'>0.000%</td>
+          <td class='dataEven'>0.000%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'>Scheduled</td>
+          <td class='dataEven'>0d 0h 0m 0s</td>
+          <td class='dataEven'>0.000%</td>
+          <td class='dataEven'>0.000%</td>
+        </tr>
+        <tr class='serviceUNKNOWN'>
+          <td class='serviceUNKNOWN'>Total</td>
+          <td class='serviceUNKNOWN'>0d 0h 0m 0s</td>
+          <td class='serviceUNKNOWN'>0.000%</td>
+          <td class='serviceUNKNOWN'>0.000%</td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='serviceCRITICAL' rowspan="3">CRITICAL</td>
+          <td class='dataOdd'>Unscheduled</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'>0.000%</td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd'>Scheduled</td>
+          <td class='dataOdd'>0d 0h 0m 0s</td>
+          <td class='dataOdd'>0.000%</td>
+          <td class='dataOdd'>0.000%</td>
+        </tr>
+        <tr class='serviceCRITICAL'>
+          <td class='serviceCRITICAL'>Total</td>
+          <td class='serviceCRITICAL'>0d 0h 0m 0s</td>
+          <td class='serviceCRITICAL'>0.000%</td>
+          <td class='serviceCRITICAL'>0.000%</td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven' rowspan="3">Undetermined</td>
+          <td class='dataEven'>Nagios Not Running</td>
+          <td class='dataEven'>0d 0h 0m 0s</td>
+          <td class='dataEven'>0.000%</td>
+          <td class='dataEven'></td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'>Insufficient Data</td>
+          <td class='dataEven'>3d 14h 46m 14s</td>
+          <td class='dataEven'>51.649%</td>
+          <td class='dataEven'></td>
+        </tr>
+        <tr class='dataEven'>
+          <td class='dataEven'>Total</td>
+          <td class='dataEven'>3d 14h 46m 14s</td>
+          <td class='dataEven'>51.649%</td>
+          <td class='dataEven'></td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>
+        <tr class='dataOdd'>
+          <td class='dataOdd'>All</td>
+          <td class='dataOdd'>Total</td>
+          <td class='dataOdd'>7d 0h 0m 0s</td>
+          <td class='dataOdd'>100.000%</td>
+          <td class='dataOdd'>100.000%</td>
+        </tr>
+      </table>
+    </div>
+    <br>
+    <br>
+
+
+    <div align="center" class='dataTitle'>Service Log Entries:</div>
+    <div align="center" class='infoMessage'>
+      <a href='avail.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;full_log_entries&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[ View full log entries ]</a>
+    </div>
+    <div align="center">
+      <table border="1" cellspacing="0" cellpadding="3" class='logEntries'>
+        <tr>
+          <th class='logEntries'>Event Start Time</th>
+          <th class='logEntries'>Event End Time</th>
+          <th class='logEntries'>Event Duration</th>
+          <th class='logEntries'>Event/State Type</th>
+          <th class='logEntries'>Event/State Information</th>
+        </tr>
+        <tr class='logEntriesEven'>
+          <td class='logEntriesEven'>2010-01-09 00:00:00</td>
+          <td class='logEntriesEven'>2010-01-09 14:11:33</td>
+          <td class='logEntriesEven'>0d 14h 11m 33s</td>
+          <td class='logEntriesOK'>SERVICE OK (HARD)</td>
+          <td class='logEntriesEven'>n0_test_host_000 (checked by mo) OK: ok n0_test_ok_02</td>
+        </tr>
+        <tr class='logEntriesOdd'>
+          <td class='logEntriesOdd'>2010-01-09 14:11:33</td>
+          <td class='logEntriesOdd'>2010-01-09 14:13:31</td>
+          <td class='logEntriesOdd'>0d 0h 1m 58s</td>
+          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
+          <td class='logEntriesOdd'>Start of scheduled downtime</td>
+        </tr>
+        <tr class='logEntriesEven'>
+          <td class='logEntriesEven'>2010-01-09 14:13:49</td>
+          <td class='logEntriesEven'>2010-01-09 14:13:56</td>
+          <td class='logEntriesEven'>0d 0h 0m 7s</td>
+          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
+          <td class='logEntriesEven'>Start of scheduled downtime</td>
+        </tr>
+        <tr class='logEntriesOdd'>
+          <td class='logEntriesOdd'>2010-01-09 14:13:57</td>
+          <td class='logEntriesOdd'>2010-01-09 14:19:22</td>
+          <td class='logEntriesOdd'>0d 0h 5m 25s</td>
+          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
+          <td class='logEntriesOdd'>Start of scheduled downtime</td>
+        </tr>
+        <tr class='logEntriesEven'>
+          <td class='logEntriesEven'>2010-01-09 14:19:28</td>
+          <td class='logEntriesEven'>2010-01-09 14:19:54</td>
+          <td class='logEntriesEven'>0d 0h 0m 26s</td>
+          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
+          <td class='logEntriesEven'>Start of scheduled downtime</td>
+        </tr>
+      </table>
+    </div>
+
+[% PROCESS _footer.tt %]

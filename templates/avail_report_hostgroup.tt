@@ -1,0 +1,73 @@
+[% USE date %]
+[% PROCESS _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% PROCESS _infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%">
+          <div align="center" class='dataTitle'>
+          [% IF hostgroup == 'all' %]
+            All Hostgroups
+          [% ELSE %]
+            Hostgroup '[% hostgroup %]'
+          [% END %]
+          </div><br>
+          <img src='/thruk/images/trends.gif' border="0" alt='Availability Report' title='Availability Report'><br clear="all">
+          <div align="center" class='reportRange'>
+            [% date.format(start, '%Y-%m-%d  %H:%M:%S') %] to [% date.format(end, '%Y-%m-%d  %H:%M:%S') %]
+          </div>
+          <div align="center" class='reportDuration'>
+            Duration: [% SET dur = end - start %][% duration(dur) %]
+          </div>
+        </td>
+        <td align="right" valign="bottom" width="33%">
+          [% PROCESS avail_report_form_box.tt %]
+        </td>
+      </tr>
+    </table>
+
+    <div align="center" class='reportTime'>[ Availability report completed in [% duration(time_token, 2) %] ]</div><br>
+    <br>
+    <br>
+    <br>
+
+    [% FOR groupname IN groups.keys.sort %]
+    [% SET g = groups.$groupname %]
+    <div align="center" class='dataTitle'>Hostgroup '[% g.name %]' Host State Breakdowns:</div>
+    <div align="center">
+      <table border="0" class='data'>
+        <tr>
+          <th class='data'>Host</th>
+          <th class='data'>% Time Up</th>
+          <th class='data'>% Time Down</th>
+          <th class='data'>% Time Unreachable</th>
+          <th class='data'>% Time Undetermined</th>
+        </tr>
+        [% FOR hostname IN g.hosts.keys.sort %]
+        [% SET class = 'dataEven' IF loop.odd  %]
+        [% SET class = 'dataOdd'  IF loop.even %]
+        <tr class='[% class %]'>
+          <td class='[% class %]'><a href='avail.cgi?host=[% hostname %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% hostname %]</a></td>
+          <td class='hostUP'>0.000% (0.000%)</td>
+          <td class='hostDOWN'>46.291% (100.000%)</td>
+          <td class='hostUNREACHABLE'>0.000% (0.000%)</td>
+          <td class='[% class %]'>53.709%</td>
+        </tr>
+        [% END %]
+        [% SET avgClass = 'dataEven' IF class == 'dataOdd' %]
+        [% SET avgClass = 'dataOdd'  IF class == 'dataEven' %]
+        <tr class='[% avgClass %]'>
+          <td class='[% avgClass %]'>Average</td>
+          <td class='hostUP'>33.618% (79.613%)</td>
+          <td class='hostDOWN'>0.018% (0.038%)</td>
+          <td class='hostUNREACHABLE'>8.986% (18.921%)</td>
+          <td class='[% avgClass %]'>57.378%</td>
+        </tr>
+      </table>
+    </div>
+    <br><br>
+    [% END %]
+
+[% PROCESS _footer.tt %]

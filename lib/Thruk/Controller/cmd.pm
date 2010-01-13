@@ -144,13 +144,15 @@ sub _do_send_command {
 
     # send the command
     $cmd = "COMMAND [".time()."] $cmd";
-    $c->log->info("sending: $cmd");
+    $c->log->debug("sending $cmd");
+        my $comment_author          = $c->user->username;
     if(defined $backends) {
         $c->log->debug("sending to backends: ".Dumper($backends));
         $c->{'live'}->do($cmd, { Backends => $backends });
     } else {
         $c->{'live'}->do($cmd);
     }
+    $c->log->info("[".$c->user->username."] cmd: $cmd");
 
     # view our success page or redirect to referer
     my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';

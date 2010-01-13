@@ -126,7 +126,12 @@ sub filter_duration {
     my $duration = shift;
     my $withdays = shift;
 
+    croak("undef duration in filter_duration(): ".$duration) unless defined $duration;
+    $duration = $duration * -1 if $duration < 0;
+
     $withdays = 1 unless defined $withdays;
+
+    croak("unknown withdays in filter_duration(): ".$withdays) if($withdays != 1 and $withdays != 2);
 
     if($duration < 0) { $duration = time() + $duration; }
 

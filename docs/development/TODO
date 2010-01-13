@@ -46,6 +46,8 @@ general:
       result
     - _HTML field for hosts / services besides action_url/notes_url
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
+    - contacts authorized for hosts, should not see all services for
+      this host: http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=117591#post117591
 
 status:
     - proper search

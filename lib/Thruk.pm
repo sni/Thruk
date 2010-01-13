@@ -93,7 +93,7 @@ if(defined $log4confarr and ref $log4confarr eq 'ARRAY') {
     __PACKAGE__->log(Catalyst::Log::Log4perl->new(\$log4perlconfig));
 }
 elsif(!__PACKAGE__->debug) {
-    __PACKAGE__->log->levels( 'warn', 'error', 'fatal' );
+    __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );
 }
 
 ###################################################

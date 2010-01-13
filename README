@@ -1,12 +1,29 @@
-Thruk Monitoring Webinterface
+Thruk - Monitoring Webinterface
 =============================
 
-Thruk is a multibackend monitoring webinterface which currently
-supports nagios and icinga as backend using the mklivestatus addon.
+Thruk is an independent multibackend monitoring webinterface which
+currently supports Nagios and Icinga as backend using the MKLivestatus
+addon.
+
 
 
 DOCS
-====
+----
 all documentation is under docs/
 
 see docs/INSTALL on howto install thruk
+
+
+
+Main Advantages
+---------------
+ - multiple backends
+ - faster, no need to parse status.dat for every request
+ - live, no delay between core and gui
+ - independant from monitoring core, can be installed on remote host
+ - clusterable, can be clustered over hosts
+ - better logging, uses log4perl
+ - valid HTML code
+ - no frames ( can be reenabled for better addon integration)
+ - easy to extend (MVC Design)
+
