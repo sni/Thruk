@@ -65,24 +65,17 @@
 [% this_hour = date.format(l.time, '%Y-%m-%d  %H') _ ':00' %]
 [% IF this_hour != last_hour %]
   [% SET last_hour = this_hour %]
-  [% IF ! loop.first %]</div>[% END %]
 
-    <br clear='all'>
-    <div class='dateTimeBreak'>
-      <table border="0" width="95%">
-        <tr>
-          <td width="40%"><hr width="100%"></td>
-          <td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td>
-          <td width="40%"><hr width="100%"></td>
-        </tr>
-      </table>
-    </div>
-    <br clear='all'>
-    <div class='logEntries'>
+<br clear='all'>
+<div class='dateTimeBreak'><table border="0" width="95%"><tr><td width="40%"><hr width="100%"></td><td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td><td width="40%"><hr width="100%"></td></tr></table></div>
+[% IF ! loop.first %]</div>[% END %]
+<br clear='all'><div class='logEntries'>
 
 [% END %]
 
-[%    IF l.type == 'SERVICE NOTIFICATION'         %][% SET pic = "notify.gif"        desc = "Service Notification" %]
+[%    IF l.type == 'CURRENT SERVICE STATE'        %][% SET pic = "info.png"          desc = "Informational Message" %]
+[% ELSIF l.type == 'CURRENT HOST STATE'           %][% SET pic = "info.png"          desc = "Informational Message" %]
+[% ELSIF l.type == 'SERVICE NOTIFICATION'         %][% SET pic = "notify.gif"        desc = "Service Notification" %]
 [% ELSIF l.type == 'HOST NOTIFICATION'            %][% SET pic = "notify.gif"        desc = "Host Notification" %]
 [% ELSIF l.type == 'SERVICE ALERT'                %]
                             [%    IF l.state == 0 %][% SET pic = "recovery.png"      desc = "Service Ok" %]
@@ -128,9 +121,9 @@
 [% ELSIF l.type.search('Bailing\ out')            %][% SET pic = "stop.gif"          desc = "Program End" %]
 [% ELSIF l.type.search('active mode\.\.\.')       %][% SET pic = "active.gif"        desc = "Active Mode" %]
 [% ELSIF l.type.search('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
-[% ELSE                                              %][% SET pic = "info.png"          desc = "Informational Message" %]
+[% ELSE                                           %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% END %]
-<img align='left' src='/thruk/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width=20 height=20>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
+<img align='left' src='/thruk/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 
 [% END %]
       </div>

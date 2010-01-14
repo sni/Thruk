@@ -1,6 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-0.20_2  Sun Jan 10 14:13:14 CET 2010
+0.20_3  Thu Jan 14 21:29:54 CET 2010
+          - increased showlog performance
+
+0.20_3  Sun Jan 10 14:13:14 CET 2010
           - using frames is no configurable
           - documentation is now replaceable
           - corrected valid html

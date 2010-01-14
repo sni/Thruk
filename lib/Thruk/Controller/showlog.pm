@@ -49,7 +49,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $query = "GET log\nColumns: time type options state\n".$filter;
     $query   .= Thruk::Helper::get_auth_filter($c, 'log');
 
+    $c->stats->profile(begin => "showlog::fetch");
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
+    $c->stats->profile(end   => "showlog::fetch");
 
     my $order = "DESC";
     if($oldestfirst) {
