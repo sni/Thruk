@@ -9,7 +9,14 @@ div.navbarsearch form fieldset {
   padding-bottom: 0px;
 }
 
+table.infoBox {
+  margin-top: 5px;
+  margin-bottom: 2px;
+}
+
+/*
 table td {
   padding: 2px;
   margin: 3px;
 }
+*/
