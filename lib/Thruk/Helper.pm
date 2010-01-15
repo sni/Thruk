@@ -606,6 +606,7 @@ sub _get_start_end_for_timeperiod {
 
     my $start;
     my $end;
+    $timeperiod = 'custom' unless defined $timeperiod;
     if($timeperiod eq 'today') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         $start = Mktime($year,$month,$day,  0,0,0);

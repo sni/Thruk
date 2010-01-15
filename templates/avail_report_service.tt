@@ -162,55 +162,8 @@
     <br>
 
 
-    <div align="center" class='dataTitle'>Service Log Entries:</div>
-    <div align="center" class='infoMessage'>
-      <a href='avail.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;full_log_entries&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[ View full log entries ]</a>
-    </div>
-    <div align="center">
-      <table border="1" cellspacing="0" cellpadding="3" class='logEntries'>
-        <tr>
-          <th class='logEntries'>Event Start Time</th>
-          <th class='logEntries'>Event End Time</th>
-          <th class='logEntries'>Event Duration</th>
-          <th class='logEntries'>Event/State Type</th>
-          <th class='logEntries'>Event/State Information</th>
-        </tr>
-        <tr class='logEntriesEven'>
-          <td class='logEntriesEven'>2010-01-09 00:00:00</td>
-          <td class='logEntriesEven'>2010-01-09 14:11:33</td>
-          <td class='logEntriesEven'>0d 14h 11m 33s</td>
-          <td class='logEntriesOK'>SERVICE OK (HARD)</td>
-          <td class='logEntriesEven'>n0_test_host_000 (checked by mo) OK: ok n0_test_ok_02</td>
-        </tr>
-        <tr class='logEntriesOdd'>
-          <td class='logEntriesOdd'>2010-01-09 14:11:33</td>
-          <td class='logEntriesOdd'>2010-01-09 14:13:31</td>
-          <td class='logEntriesOdd'>0d 0h 1m 58s</td>
-          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
-          <td class='logEntriesOdd'>Start of scheduled downtime</td>
-        </tr>
-        <tr class='logEntriesEven'>
-          <td class='logEntriesEven'>2010-01-09 14:13:49</td>
-          <td class='logEntriesEven'>2010-01-09 14:13:56</td>
-          <td class='logEntriesEven'>0d 0h 0m 7s</td>
-          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
-          <td class='logEntriesEven'>Start of scheduled downtime</td>
-        </tr>
-        <tr class='logEntriesOdd'>
-          <td class='logEntriesOdd'>2010-01-09 14:13:57</td>
-          <td class='logEntriesOdd'>2010-01-09 14:19:22</td>
-          <td class='logEntriesOdd'>0d 0h 5m 25s</td>
-          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
-          <td class='logEntriesOdd'>Start of scheduled downtime</td>
-        </tr>
-        <tr class='logEntriesEven'>
-          <td class='logEntriesEven'>2010-01-09 14:19:28</td>
-          <td class='logEntriesEven'>2010-01-09 14:19:54</td>
-          <td class='logEntriesEven'>0d 0h 0m 26s</td>
-          <td class='logEntriesINDETERMINATE'>HOST DOWNTIME START</td>
-          <td class='logEntriesEven'>Start of scheduled downtime</td>
-        </tr>
-      </table>
-    </div>
+[% IF show_log_entries or full_log_entries %]
+    [% PROCESS avail_report_log_entries.tt %]
+[% END %]
 
 [% PROCESS _footer.tt %]

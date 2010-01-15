@@ -30,7 +30,6 @@
     <div align="center">
       <form method="GET" action="avail.cgi">
         <input type='hidden' name='get_date_parts'>
-        <input type='hidden' name='report_type' value="[% report_type %]">
         <table border="0" cellpadding="5">
           <tr>
             <td class='reportSelectSubTitle' valign="middle">

@@ -115,6 +115,11 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'dscr' => 'please specify at least one livestatus backend in your thruk_local.conf',
             'code' => 500, # internal server error
         },
+        '15'  => {
+            'mess' => 'It appears as though you do not have permission to view information for this service...',
+            'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
+            'code' => 403, # forbidden
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

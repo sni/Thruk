@@ -32,13 +32,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{'no_auto_reload'} = 1;
 
     # lookup parameters
-    my $report_type    = $c->{'request'}->{'parameters'}->{'report_type'};
+    my $report_type    = $c->{'request'}->{'parameters'}->{'report_type'}  || '';
     my $get_date_parts = $c->{'request'}->{'parameters'}->{'get_date_parts'};
-    my $host           = $c->{'request'}->{'parameters'}->{'host'};
-    my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'};
-    my $service        = $c->{'request'}->{'parameters'}->{'service'};
-    my $servicegroup   = $c->{'request'}->{'parameters'}->{'servicegroup'};
-    my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'};
+    my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'}   || '';
+    my $host           = $c->{'request'}->{'parameters'}->{'host'}         || '';
+    my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
+    my $service        = $c->{'request'}->{'parameters'}->{'service'}      || '';
+    my $servicegroup   = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
 
 
     # set them for our template
@@ -49,40 +49,38 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{servicegroup} = $servicegroup;
 
     # set infobox title
-    if(defined $report_type) {
-        if($report_type eq 'hosts') {
-            $c->stash->{infoBoxTitle} = 'Host Availability Report';
-        }
-        if($report_type eq 'hostgroups') {
-            $c->stash->{infoBoxTitle} = 'Hostgroup Availability Report';
-        }
-        if($report_type eq 'servicegroups') {
-            $c->stash->{infoBoxTitle} = 'Servicegroup Availability Report';
-        }
-        if($report_type eq 'services') {
-            $c->stash->{infoBoxTitle} = 'Service Availability Report';
-        }
+    if($report_type eq 'servicegroups'  or $servicegroup) {
+        $c->stash->{infoBoxTitle} = 'Servicegroup Availability Report';
+    }
+    elsif($report_type eq 'services'    or $service) {
+        $c->stash->{infoBoxTitle} = 'Service Availability Report';
+    }
+    elsif($report_type eq 'hosts'       or $host) {
+        $c->stash->{infoBoxTitle} = 'Host Availability Report';
+    }
+    elsif($report_type eq 'hostgroups'  or $hostgroup) {
+        $c->stash->{infoBoxTitle} = 'Hostgroup Availability Report';
     }
 
-    # Step 1 - select report type
-    if(!defined $timeperiod and !defined $get_date_parts and !defined $report_type and $self->_show_step_1($c)){
-    }
+
 
     # Step 2 - select specific host/service/group
-    if(!defined $timeperiod and !defined $get_date_parts and defined $report_type and $self->_show_step_2($c)) {
+    if($report_type and $self->_show_step_2($c, $report_type)) {
     }
 
     # Step 3 - select date parts
-    elsif(!defined $timeperiod and defined $get_date_parts and  $self->_show_step_3($c)) {
+    elsif(defined $get_date_parts and $self->_show_step_3($c)) {
     }
 
     # Step 4 - create report
-    elsif(defined $timeperiod
-          and (defined $host or defined $service or defined $servicegroup or defined $hostgroup)
-          and $self->_create_report($c)) {
+    elsif(!$report_type
+       and ($host or $service or $servicegroup or $hostgroup)
+       and $self->_create_report($c)) {
     }
 
-    # Fallback
+
+
+    # Step 1 - select report type
     else {
         $self->_show_step_1($c);
     }
@@ -92,49 +90,64 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 sub _show_step_1 {
     my ( $self, $c ) = @_;
 
+    $c->stats->profile(begin => "_show_step_1()");
     $c->stash->{template} = 'avail_step_1.tt';
+    $c->stats->profile(end => "_show_step_1()");
     return 1;
 }
 
 
 ##########################################################
 sub _show_step_2 {
-    my ( $self, $c ) = @_;
-    my $report_type = $c->{'request'}->{'parameters'}->{'report_type'};
+    my ( $self, $c, $report_type ) = @_;
+
+    $c->stats->profile(begin => "_show_step_2($report_type)");
 
     my $data;
     if($report_type eq 'hosts') {
-        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name".Thruk::Helper::get_auth_filter($c, 'hosts'), 'name');
+        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Helper::get_auth_filter($c, 'hosts'), 'name');
     }
-    if($report_type eq 'hostgroups') {
-        $data = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name".Thruk::Helper::get_auth_filter($c, 'hostgroups'), 'name');
+    elsif($report_type eq 'hostgroups') {
+        $data = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Helper::get_auth_filter($c, 'hostgroups'), 'name');
     }
-    if($report_type eq 'servicegroups') {
-        $data = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name".Thruk::Helper::get_auth_filter($c, 'servicegroups'), 'name');
+    elsif($report_type eq 'servicegroups') {
+        $data = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Helper::get_auth_filter($c, 'servicegroups'), 'name');
     }
-    if($report_type eq 'services') {
+    elsif($report_type eq 'services') {
         my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }
     }
-
-    if(defined $data) {
-        my @sorted = sort keys %{$data};
-        $c->stash->{data}        = \@sorted;
-        $c->stash->{template}    = 'avail_step_2.tt';
-        return 1;
+    else {
+        return 0;
     }
 
-    return 0;
+    my @sorted = sort keys %{$data};
+    $c->stash->{data}        = \@sorted;
+    $c->stash->{template}    = 'avail_step_2.tt';
+
+    $c->stats->profile(end => "_show_step_2($report_type)");
+    return 1;
 }
 
 ##########################################################
 sub _show_step_3 {
     my ( $self, $c ) = @_;
 
+    $c->stats->profile(begin => "_show_step_3()");
+
     $c->stash->{timeperiods} = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name".Thruk::Helper::get_auth_filter($c, 'timeperiods'), { Slice => 1});
     $c->stash->{template}    = 'avail_step_3.tt';
+
+    if($c->{'request'}->{'parameters'}->{'service'}) {
+        my($host,$service);
+        ($host,$service) = split/;/, $c->{'request'}->{'parameters'}->{'service'};
+        $c->stash->{host}    = $host;
+        $c->stash->{service} = $service;
+    }
+
+    $c->stats->profile(end => "_show_step_3()");
 
     return 1;
 }
@@ -144,6 +157,8 @@ sub _create_report {
     my ( $self, $c ) = @_;
     my $start_time   = time();
 
+    $c->stats->profile(begin => "_create_report()");
+
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
     my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'};
     my $service        = $c->{'request'}->{'parameters'}->{'service'};
@@ -151,13 +166,7 @@ sub _create_report {
 
     if(defined $host and $host eq 'null') { undef $host; }
 
-    if(defined $host and $host ne 'all') {
-        $c->stash->{template}   = 'avail_report_host.tt';
-    }
-    elsif(defined $host and $host eq 'all') {
-        $c->stash->{template}   = 'avail_report_hosts.tt';
-    }
-    elsif(defined $hostgroup and $hostgroup ne '') {
+    if(defined $hostgroup and $hostgroup ne '') {
         $c->stash->{template}   = 'avail_report_hostgroup.tt';
     }
     elsif(defined $service and $service ne 'all') {
@@ -168,26 +177,33 @@ sub _create_report {
     }
     elsif(defined $servicegroup and $servicegroup ne '') {
         $c->stash->{template}   = 'avail_report_servicegroup.tt';
-    } else {
+    }
+    elsif(defined $host and $host ne 'all') {
+        $c->stash->{template}   = 'avail_report_host.tt';
+    }
+    elsif(defined $host and $host eq 'all') {
+        $c->stash->{template}   = 'avail_report_hosts.tt';
+    }
+    else {
         return;
     }
 
     # get timeperiod
-    my $timeperiod                      = $c->{'request'}->{'parameters'}->{'timeperiod'};
-    my $smon                            = $c->{'request'}->{'parameters'}->{'smon'};
-    my $sday                            = $c->{'request'}->{'parameters'}->{'sday'};
-    my $syear                           = $c->{'request'}->{'parameters'}->{'syear'};
-    my $shour                           = $c->{'request'}->{'parameters'}->{'shour'};
-    my $smin                            = $c->{'request'}->{'parameters'}->{'smin'};
-    my $ssec                            = $c->{'request'}->{'parameters'}->{'ssec'};
-    my $emon                            = $c->{'request'}->{'parameters'}->{'emon'};
-    my $eday                            = $c->{'request'}->{'parameters'}->{'eday'};
-    my $eyear                           = $c->{'request'}->{'parameters'}->{'eyear'};
-    my $ehour                           = $c->{'request'}->{'parameters'}->{'ehour'};
-    my $emin                            = $c->{'request'}->{'parameters'}->{'emin'};
-    my $esec                            = $c->{'request'}->{'parameters'}->{'esec'};
-    my $t1                              = $c->{'request'}->{'parameters'}->{'t1'};
-    my $t2                              = $c->{'request'}->{'parameters'}->{'t2'};
+    my $timeperiod   = $c->{'request'}->{'parameters'}->{'timeperiod'};
+    my $smon         = $c->{'request'}->{'parameters'}->{'smon'};
+    my $sday         = $c->{'request'}->{'parameters'}->{'sday'};
+    my $syear        = $c->{'request'}->{'parameters'}->{'syear'};
+    my $shour        = $c->{'request'}->{'parameters'}->{'shour'};
+    my $smin         = $c->{'request'}->{'parameters'}->{'smin'};
+    my $ssec         = $c->{'request'}->{'parameters'}->{'ssec'};
+    my $emon         = $c->{'request'}->{'parameters'}->{'emon'};
+    my $eday         = $c->{'request'}->{'parameters'}->{'eday'};
+    my $eyear        = $c->{'request'}->{'parameters'}->{'eyear'};
+    my $ehour        = $c->{'request'}->{'parameters'}->{'ehour'};
+    my $emin         = $c->{'request'}->{'parameters'}->{'emin'};
+    my $esec         = $c->{'request'}->{'parameters'}->{'esec'};
+    my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
+    my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
 
     my($start,$end) = Thruk::Helper->_get_start_end_for_timeperiod($timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
 
@@ -208,6 +224,13 @@ sub _create_report {
     my $initialassumedservicestate   = $c->{'request'}->{'parameters'}->{'initialassumedservicestate'};
     my $backtrack                    = $c->{'request'}->{'parameters'}->{'backtrack'};
     my $show_log_entries             = $c->{'request'}->{'parameters'}->{'show_log_entries'};
+    my $full_log_entries             = $c->{'request'}->{'parameters'}->{'full_log_entries'};
+
+    # show_log_entries is true if it exists
+    $show_log_entries = 1 if exists $c->{'request'}->{'parameters'}->{'show_log_entries'};
+
+    # full_log_entries is true if it exists
+    $full_log_entries = 1 if exists $c->{'request'}->{'parameters'}->{'full_log_entries'};
 
     $c->stash->{rpttimeperiod}                = $rpttimeperiod;
     $c->stash->{assumeinitialstates}          = $assumeinitialstates;
@@ -218,41 +241,70 @@ sub _create_report {
     $c->stash->{initialassumedservicestate}   = $initialassumedservicestate;
     $c->stash->{backtrack}                    = $backtrack;
     $c->stash->{show_log_entries}             = $show_log_entries;
+    $c->stash->{full_log_entries}             = $full_log_entries;
 
     # get groups / hosts /services
     my $groupfilter      = "";
     my $hostfilter       = "";
-    my $loghostfilter    = "";
     my $servicefilter    = "";
-    my $logservicefilter = "";
+    my $logserviceheadfilter;
+    my $loghostheadfilter;
+
+    my $softlogs = "";
+    if(!$includesoftstates or $includesoftstates eq 'no') {
+        $softlogs = "Filter: options ~ ;HARD;\nAnd: 2\n"
+    }
 
     my $logs;
     my $logfilter = "Filter: time >= $start\n";
-    $logfilter   .= "Filter: time <= $end";
-    $logfilter   .= "Filter: class = 6";  # initial/current states
-    $logfilter   .= "Filter: class = 2";  # programm messages
-    $logfilter   .= "Filter: class = 1";  # alerts
-    $logfilter   .= "Or: 3";  # programm messages
+    $logfilter   .= "Filter: time <= $end\n";
+    $logfilter   .= "And: 2\n";
+
+    # a single service
+    if(defined $service and $service ne 'all') {
+        unless($c->check_permissions('service', $service, $host)) {
+            $c->detach('/error/index/15');
+        }
+        $logserviceheadfilter = "Filter: service_description = $service\n";
+        $loghostheadfilter    = "Filter: host_name = $host\n";
+    }
+
+    # all services
+    elsif(defined $service and $service eq 'all') {
+        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $services_data;
+        for my $service (@{$services}) {
+            $services_data->{$service->{'host_name'}.";".$service->{'description'}} = {
+                'host_name'   => $service->{'host_name'},
+                'description' => $service->{'description'},
+            };
+        }
+        $c->stash->{'services'} = $services_data;
+    }
 
     # a single host
-    if(defined $host and $host ne 'all') {
-        return unless $c->check_permissions('host', $host);
-        $logs = $c->{'live'}->selectall_arrayref("GET log\n".$logfilter."Filter: host_name = $host\n".Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: time type options" );
+    elsif(defined $host and $host ne 'all') {
+        unless($c->check_permissions('host', $host)) {
+            $c->detach('/error/index/5');
+        }
+        my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: description", 'description' );
+        $c->stash->{'services'} = $service_data;
+        $loghostheadfilter = "Filter: host_name = $host\n";
     }
 
     # all hosts
     elsif(defined $host and $host eq 'all') {
         my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' );
-        $logs = $c->{'live'}->selectall_arrayref("GET log\n".$logfilter."Filter: service_description =\n".Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: time type options" );
+        $logserviceheadfilter = "Filter: service_description =\n";
         $c->stash->{'hosts'} = $host_data;
     }
 
     # one or all hostgroups
     elsif(defined $hostgroup and $hostgroup ne '') {
         if($hostgroup ne '' and $hostgroup ne 'all') {
-            $groupfilter   = "Filter: name = $hostgroup\n";
-            $hostfilter    = "Filter: groups >= $hostgroup\n";
-            $loghostfilter = "Filter: current_host_groups >= $hostgroup\n";
+            $groupfilter       = "Filter: name = $hostgroup\n";
+            $hostfilter        = "Filter: groups >= $hostgroup\n";
+            $loghostheadfilter = "Filter: current_host_groups >= $hostgroup\n";
         }
         my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name\n$hostfilter", 'name' );
         my $groups    = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
@@ -280,38 +332,16 @@ sub _create_report {
             }
         }
         $c->stash->{'groups'} = \%joined_groups;
-        $logs = $c->{'live'}->selectall_arrayref("GET log\n".$logfilter.$loghostfilter."Filter: service_description =\n".Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: time type options" );
+        $logserviceheadfilter = "Filter: service_description =\n";
     }
 
-    # a single service
-    elsif(defined $service and $service ne 'all') {
-        ($host,$service) = split/;/,$service;
-        return unless $c->check_permissions('service', $service, $host);
-        $c->stash->{host}    = $host;
-        $c->stash->{service} = $service;
-        $logs = $c->{'live'}->selectall_arrayref("GET log\n".$logfilter."Filter: service_description = $service\nFilter: host_name = $host\n".Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: time type options" );
-    }
-
-    # all services
-    elsif(defined $service and $service eq 'all') {
-        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
-        my $services_data;
-        for my $service (@{$services}) {
-            $services_data->{$service->{'host_name'}.";".$service->{'description'}} = {
-                'host_name'   => $service->{'host_name'},
-                'description' => $service->{'description'},
-            };
-        }
-        $c->stash->{'services'} = $services_data;
-        $logs = $c->{'live'}->selectall_arrayref("GET log\n".$logfilter.Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: time type options" );
-    }
 
     # one or all servicegroups
     elsif(defined $servicegroup and $servicegroup ne '') {
         if($servicegroup ne '' and $servicegroup ne 'all') {
-            $groupfilter      = "Filter: name = $servicegroup\n";
-            $servicefilter    = "Filter: groups >= $servicegroup\n";
-            $logservicefilter = "Filter: current_service_groups >= $servicegroup\n";
+            $groupfilter          = "Filter: name = $servicegroup\n";
+            $servicefilter        = "Filter: groups >= $servicegroup\n";
+            $logserviceheadfilter = "Filter: current_service_groups >= $servicegroup\n";
         }
         my $services    = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
         my $groups      = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
@@ -345,15 +375,61 @@ sub _create_report {
             }
         }
         $c->stash->{'groups'} = \%joined_groups;
-        $logs = $c->{'live'}->selectall_arrayref("GET log\n".$logfilter.$logservicefilter.Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: time type options" );
     } else {
         croak("unknown report type: ".Dumper($c->{'request'}->{'parameters'}));
     }
 
+
+    ########################
+    # fetch logs
+    my(@loghostfilter,@logservicefilter);
+    unless($service) {
+        push @loghostfilter, "Filter: type = HOST ALERT\n".$softlogs;
+        push @loghostfilter, "Filter: type = INITIAL HOST STATE\n".$softlogs;
+        push @loghostfilter, "Filter: type = CURRENT HOST STATE\n".$softlogs;
+    }
+    push @loghostfilter, "Filter: type = HOST DOWNTIME ALERT\n";
+    if($service or $host or $servicegroup) {
+        push @logservicefilter, "Filter: type = SERVICE ALERT\n".$softlogs;
+        push @logservicefilter, "Filter: type = INITIAL SERVICE STATE\n".$softlogs;
+        push @logservicefilter, "Filter: type = CURRENT SERVICE STATE\n".$softlogs;
+        push @logservicefilter, "Filter: type = SERVICE DOWNTIME ALERT\n";
+    }
+    my @typefilter;
+    if(defined $loghostheadfilter) {
+        push @typefilter, $loghostheadfilter.join("\n", @loghostfilter)."\nOr: ".(scalar @loghostfilter)."\nAnd: 2";
+    } else {
+        push @typefilter, join("\n", @loghostfilter)."\nOr: ".(scalar @loghostfilter)."\n";
+    }
+    if(scalar @logservicefilter > 0) {
+        if(defined $logserviceheadfilter and defined $loghostheadfilter) {
+            push @typefilter, $loghostheadfilter.$logserviceheadfilter."\nAnd: 2\n".join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\nAnd: 2";
+        }
+        elsif(defined $logserviceheadfilter) {
+            push @typefilter, $logserviceheadfilter."\n".join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\nAnd: 2";
+        }
+        elsif(defined $loghostheadfilter) {
+            push @typefilter, $loghostheadfilter."\n".join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\nAnd: 2";
+        }
+        else {
+            push @typefilter, join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\n";
+        }
+    }
+    push @typefilter, "Filter: class = 2\n"; # programm messages
+    $logfilter .= join("\n", @typefilter)."\nOr: ".(scalar @typefilter);
+
+    my $log_query = "GET log\n".$logfilter.Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: class time type options state host_name service_description plugin_output";
+    $c->log->debug($log_query);
+    $c->stats->profile(begin => "avail.pm fetchlogs");
+    $logs = $c->{'live'}->selectall_arrayref($log_query, { Slice => 1} );
+    $c->stats->profile(end   => "avail.pm fetchlogs");
+
+    my $logs = Thruk::Helper->sort($c, $logs, 'time', 'ASC');
     $c->stash->{'logs'} = $logs;
 
     # finished
     $c->stash->{time_token} = time() - $start_time;
+    $c->stats->profile(end => "_create_report()");
 
     return 1;
 }

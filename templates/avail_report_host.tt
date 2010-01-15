@@ -154,60 +154,36 @@
           <th class='data'>% Time Critical</th>
           <th class='data'>% Time Undetermined</th>
         </tr>
-        <tr class='dataOdd'>
-          <td class='dataOdd'><a href='avail.cgi?host=[% host %]&amp;service=test_critical_03&amp;t1=1261995332&amp;t2=1262600132&amp;backtrack=4&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;show_log_entries&amp;showscheduleddowntime=yes&amp;rpttimeperiod=6x13'>test_critical_03</a></td>
+        [% FOR description IN services.keys.sort %]
+        [% SET class = 'dataEven' IF loop.odd  %]
+        [% SET class = 'dataOdd'  IF loop.even %]
+        <tr class='[% class %]'>
+          <td class='[% class %]'><a href='avail.cgi?host=[% host %]&amp;service=[% description %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]&amp;rpttimeperiod=[% rpttimeperiod %]'>[% description %]</a></td>
           <td class='serviceOK'>0.000% (0.000%)</td>
           <td class='serviceWARNING'>0.000% (0.000%)</td>
           <td class='serviceUNKNOWN'>0.000% (0.000%)</td>
           <td class='serviceCRITICAL'>100.000% (100.000%)</td>
-          <td class='dataOdd'>0.000%</td>
+          <td class='[% class %]'>0.000%</td>
         </tr>
-        <tr class='dataEven'>
-          <td class='dataEven'><a href='avail.cgi?host=[% host %]&amp;service=test_ok_00&amp;t1=1261995332&amp;t2=1262600132&amp;backtrack=4&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;show_log_entries&amp;showscheduleddowntime=yes&amp;rpttimeperiod=6x13'>test_ok_00</a></td>
-          <td class='serviceOK'>100.000% (100.000%)</td>
+        [% END %]
+        [% SET aclass = 'dataEven' IF class == 'dataOdd'  %]
+        [% SET aclass = 'dataOdd'  IF class == 'dataEven' %]
+        <tr class='[% aclass %]'>
+          <td class='[% aclass %]'>Average</a>
+          <td class='serviceOK'>0.000% (0.000%)</td>
           <td class='serviceWARNING'>0.000% (0.000%)</td>
           <td class='serviceUNKNOWN'>0.000% (0.000%)</td>
-          <td class='serviceCRITICAL'>0.000% (0.000%)</td>
-          <td class='dataEven'>0.000%</td>
+          <td class='serviceCRITICAL'>100.000% (100.000%)</td>
+          <td class='[% aclass %]'>0.000%</td>
         </tr>
       </table>
-    </div><br>
+    </div>
     <br>
-    <div align="center" class='dataTitle'>Host Log Entries:</div>
-    <div align="center" class='infoMessage'>
-      <a href='avail.cgi?host=[% host %]&amp;show_log_entries&amp;t1=1261995332&amp;t2=1262600132&amp;backtrack=4&amp;assumestateretention=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;show_log_entries&amp;full_log_entries&amp;showscheduleddowntime=yes&amp;rpttimeperiod=6x13'>[ View full log entries ]</a>
-    </div>
-    <div align="center">
-      <table border="1" cellspacing="0" cellpadding="3" class='logEntries'>
-        <tr>
-          <th class='logEntries'>Event Start Time</th>
-          <th class='logEntries'>Event End Time</th>
-          <th class='logEntries'>Event Duration</th>
-          <th class='logEntries'>Event/State Type</th>
-          <th class='logEntries'>Event/State Information</th>
-        </tr>
-        <tr class='logEntriesEven'>
-          <td class='logEntriesEven'>2009-12-24 00:00:00</td>
-          <td class='logEntriesEven'>2009-12-24 21:27:12</td>
-          <td class='logEntriesEven'>0d 21h 27m 12s</td>
-          <td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td>
-          <td class='logEntriesEven'>mo DOWN: flap hostcheck: parent host down</td>
-        </tr>
-        <tr class='logEntriesOdd'>
-          <td class='logEntriesOdd'>2009-12-25 00:00:00</td>
-          <td class='logEntriesOdd'>2009-12-26 00:00:00</td>
-          <td class='logEntriesOdd'>1d 0h 0m 0s</td>
-          <td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td>
-          <td class='logEntriesOdd'>mo DOWN: flap hostcheck: parent host down</td>
-        </tr>
-        <tr class='logEntriesEven'>
-          <td class='logEntriesEven'>2009-12-26 00:00:00</td>
-          <td class='logEntriesEven'>2009-12-26 13:13:56</td>
-          <td class='logEntriesEven'>0d 13h 13m 56s</td>
-          <td class='logEntriesUNREACHABLE'>HOST UNREACHABLE (HARD)</td>
-          <td class='logEntriesEven'>mo DOWN: flap hostcheck: parent host down</td>
-        </tr>
-      </table>
-    </div>
+    <br>
+
+
+[% IF show_log_entries or full_log_entries %]
+    [% PROCESS avail_report_log_entries.tt %]
+[% END %]
 
 [% PROCESS _footer.tt %]
