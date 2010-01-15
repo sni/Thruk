@@ -13,7 +13,7 @@ like($content, qr/Availability Report/, "Content contains: Availability Report")
 unlike($content, qr/internal\ server\ error/mx, "Content contains error");
 
 # get a sample host / service
-my $request = request('/thruk/cgi-bin/status.cgi?host=all');
+$request = request('/thruk/cgi-bin/status.cgi?host=all');
 ok( $request->is_success, 'Extinfo Tests need a proper status page' ) or diag(Dumper($request));
 my $page = $request->content;
 my($host,$service);

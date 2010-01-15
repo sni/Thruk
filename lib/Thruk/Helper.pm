@@ -131,7 +131,7 @@ sub filter_duration {
 
     $withdays = 1 unless defined $withdays;
 
-    croak("unknown withdays in filter_duration(): ".$withdays) if($withdays != 1 and $withdays != 2);
+    croak("unknown withdays in filter_duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
 
     if($duration < 0) { $duration = time() + $duration; }
 
