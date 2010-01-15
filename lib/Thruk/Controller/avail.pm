@@ -424,7 +424,7 @@ sub _create_report {
     $logs = $c->{'live'}->selectall_arrayref($log_query, { Slice => 1} );
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
-    my $logs = Thruk::Helper->sort($c, $logs, 'time', 'ASC');
+    $logs = Thruk::Helper->sort($c, $logs, 'time', 'ASC');
     $c->stash->{'logs'} = $logs;
 
     # finished

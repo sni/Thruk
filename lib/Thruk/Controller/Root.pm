@@ -40,6 +40,8 @@ sub begin : Private {
     my $doc_link = Thruk->config->{'documentation_link'};
     $doc_link    = '/thruk/docs/index.html' unless defined $doc_link;
     $c->stash->{'documentation_link'} = $doc_link;
+
+    $c->stash->{'use_feature_statusmap'} = 0;
 }
 
 ######################################

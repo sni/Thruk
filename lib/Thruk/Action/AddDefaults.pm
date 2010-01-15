@@ -31,7 +31,6 @@ before 'execute' => sub {
     my ( $self, $controller, $c, $test ) = @_;
 
     $c->stats->profile(begin => "AddDefaults::before");
-#    $c->stash->{'no_auto_reload'} = 0;
 
     ###############################
     $c->stash->{'version'} = Thruk->config->{'version'};

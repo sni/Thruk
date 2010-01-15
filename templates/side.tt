@@ -30,7 +30,9 @@
       <div class="navsectionlinks">
         <ul class="navsectionlinks">
           <li><a href="/thruk/cgi-bin/tac.cgi" target="[% target %]">Tactical Overview</a></li>
-          <!-- <li><a href="/thruk/cgi-bin/statusmap.cgi?host=all" target="[% target %]">Map</a></li> -->
+          [% IF use_feature_statusmap %]
+          <li><a href="/thruk/cgi-bin/statusmap.cgi?host=all" target="[% target %]">Map</a></li>
+          [% END %]
           <li><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail" target="[% target %]">Hosts</a></li>
           <li><a href="/thruk/cgi-bin/status.cgi?host=all" target="[% target %]">Services</a></li>
           <li>
