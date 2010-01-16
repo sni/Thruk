@@ -16,7 +16,11 @@
         </tr>
         [% FOR log IN logs %]
 
+
         [%# filter some logs out #%]
+        [%# logentry outside our timedefinition #%]
+        [% IF log.time > end or log.time < start %][% NEXT %][% END %]
+
         [% IF host and !service %]
           [%# filter out anything besides the host on hostmode #%]
           [% IF log.class != 2 and log.host_name != host         %][% NEXT %][% END %]
@@ -77,5 +81,3 @@
       </table>
     </div>
 [% END %]
-
-[% PROCESS _footer.tt %]

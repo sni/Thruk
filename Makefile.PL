@@ -31,6 +31,7 @@ requires 'Moose';
 requires 'MooseX::MethodAttributes::Inheritable';
 requires 'MooseX::Role::WithOverloading';
 requires 'Monitoring::Livestatus'                 => '0.34';
+requires 'Monitoring::Availability'               => '0.03';
 requires 'HTTP::Body';
 requires 'LWP';
 requires 'Config::Any';
@@ -69,4 +70,3 @@ catalyst;
 install_script glob('script/*.pl');
 auto_install;
 WriteAll;
-

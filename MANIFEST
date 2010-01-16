@@ -13,7 +13,6 @@ contrib/livestatus/patches/0010-added-icon_image_expanded-for-services.patch
 contrib/livestatus/patches/build.sh
 contrib/livestatus/patches/create_patched_livestatus_source_dir.sh
 contrib/livestatus/patches/INSTALL
-docs/development/git.txt
 docs/development/README
 docs/development/tables/columns.txt
 docs/development/tables/commands.txt
@@ -161,6 +160,7 @@ root/thruk/stylesheets/thruk_noframes_ie_fix.css
 root/thruk/stylesheets/trends.css
 script/thruk_cgi.pl
 script/thruk_create.pl
+script/thruk_extract_cmd_templates.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_server.pl
@@ -195,7 +195,14 @@ templates/_host_status_details_box.tt
 templates/_infobox.tt
 templates/_service_status_details_box.tt
 templates/_status_filter.tt
+templates/avail_report_form_box.tt
 templates/avail_report_host.tt
+templates/avail_report_hostgroup.tt
+templates/avail_report_hosts.tt
+templates/avail_report_log_entries.tt
+templates/avail_report_service.tt
+templates/avail_report_servicegroup.tt
+templates/avail_report_services.tt
 templates/avail_step_1.tt
 templates/avail_step_2.tt
 templates/avail_step_3.tt

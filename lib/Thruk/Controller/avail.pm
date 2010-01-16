@@ -2,6 +2,7 @@ package Thruk::Controller::avail;
 
 use strict;
 use warnings;
+use Data::Dumper;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -232,6 +233,10 @@ sub _create_report {
     # full_log_entries is true if it exists
     $full_log_entries = 1 if exists $c->{'request'}->{'parameters'}->{'full_log_entries'};
 
+    # default backtrack is 4 days
+    $backtrack = 4 unless defined $backtrack;
+    $backtrack = 4 if $backtrack < 0;
+
     $c->stash->{rpttimeperiod}                = $rpttimeperiod;
     $c->stash->{assumeinitialstates}          = $assumeinitialstates;
     $c->stash->{assumestateretention}         = $assumestateretention;
@@ -250,13 +255,17 @@ sub _create_report {
     my $logserviceheadfilter;
     my $loghostheadfilter;
 
+    # for which services do we need availability data?
+    my $hosts = [];
+    my $services = [];
+
     my $softlogs = "";
     if(!$includesoftstates or $includesoftstates eq 'no') {
         $softlogs = "Filter: options ~ ;HARD;\nAnd: 2\n"
     }
 
     my $logs;
-    my $logfilter = "Filter: time >= $start\n";
+    my $logfilter = "Filter: time >= ($start - $backtrack * 86400)\n";
     $logfilter   .= "Filter: time <= $end\n";
     $logfilter   .= "And: 2\n";
 
@@ -267,6 +276,7 @@ sub _create_report {
         }
         $logserviceheadfilter = "Filter: service_description = $service\n";
         $loghostheadfilter    = "Filter: host_name = $host\n";
+        push @{$services}, { 'host' => $host, 'service' => $service };
     }
 
     # all services
@@ -278,6 +288,7 @@ sub _create_report {
                 'host_name'   => $service->{'host_name'},
                 'description' => $service->{'description'},
             };
+            push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
         }
         $c->stash->{'services'} = $services_data;
     }
@@ -290,6 +301,11 @@ sub _create_report {
         my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: description", 'description' );
         $c->stash->{'services'} = $service_data;
         $loghostheadfilter = "Filter: host_name = $host\n";
+
+        for my $description (keys %{$service_data}) {
+            push @{$services}, { 'host' => $host, 'service' => $description };
+        }
+        push @{$hosts}, $host;
     }
 
     # all hosts
@@ -297,6 +313,7 @@ sub _create_report {
         my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' );
         $logserviceheadfilter = "Filter: service_description =\n";
         $c->stash->{'hosts'} = $host_data;
+        push @{$hosts}, keys %{$host_data};
     }
 
     # one or all hostgroups
@@ -333,6 +350,8 @@ sub _create_report {
         }
         $c->stash->{'groups'} = \%joined_groups;
         $logserviceheadfilter = "Filter: service_description =\n";
+
+        push @{$hosts}, keys %{$host_data};
     }
 
 
@@ -375,6 +394,13 @@ sub _create_report {
             }
         }
         $c->stash->{'groups'} = \%joined_groups;
+
+        my %tmp_hosts;
+        for my $service (@{$services}) {
+            $tmp_hosts{$service->{host_name}} = 1;
+            push @{$services}, { 'host_name' => $service->{host_name}, 'service' => $service->{'description'} };
+        }
+        push @{$hosts}, keys %tmp_hosts;
     } else {
         croak("unknown report type: ".Dumper($c->{'request'}->{'parameters'}));
     }
@@ -426,6 +452,38 @@ sub _create_report {
 
     $logs = Thruk::Helper->sort($c, $logs, 'time', 'ASC');
     $c->stash->{'logs'} = $logs;
+
+    #$Data::Dumper::Indent = 1;
+    #open(FH, '>', '/tmp/logs.txt') or die("cannot open logs.txt: $!");
+    #print FH Dumper($logs);
+    #for my $line (@{$logs}) {
+    #    print FH '['.$line->{'time'}.'] '.$line->{'type'};
+    #    print FH ': '.$line->{'options'} if(defined $line->{'options'} and $line->{'options'} ne '');
+    #    print FH "\n";
+    #}
+    #close(FH);
+
+    use Monitoring::Availability;
+    $c->stats->profile(begin => "calculate availability");
+    my $ma = Monitoring::Availability->new(
+        'rpttimeperiod'                => $rpttimeperiod,
+        'assumeinitialstates'          => $assumeinitialstates,
+        'assumestateretention'         => $assumestateretention,
+        'assumestatesduringnotrunning' => $assumestatesduringnotrunning,
+        'includesoftstates'            => $includesoftstates,
+        'initialassumedhoststate'      => $initialassumedhoststate,
+        'initialassumedservicestate'   => $initialassumedservicestate,
+        'backtrack'                    => $backtrack,
+    );
+    $c->stash->{avail_data} = $ma->calculate(
+        'start'                        => $start,
+        'end'                          => $end,
+        'log_livestatus'               => $logs,
+        'hosts'                        => $hosts,
+        'services'                     => $services,
+    );
+    $c->log->info(Dumper($c->stash->{avail_data}));
+    $c->stats->profile(end => "calculate availability");
 
     # finished
     $c->stash->{time_token} = time() - $start_time;

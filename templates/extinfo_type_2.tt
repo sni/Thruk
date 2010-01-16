@@ -428,6 +428,7 @@
                   <th class='comment'>Expires</th>
                   <th class='comment'>Actions</th>
                 </tr>
+
                 [% IF comments %]
                   [% FOREACH comment IN comments %]
                   [% SET class = 'commentEven' IF loop.even %]
@@ -448,7 +449,6 @@
                     <td class='commentOdd' colspan='9'>This Service has no comments associated with it</td>
                   </tr>
                 [% END %]
-                </tr>
               </table>
             </div>
           [% END %]
