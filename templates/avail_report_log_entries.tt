@@ -65,7 +65,7 @@
           [% NEXT %]
         [% END %]
 
-        [%# no nagios restarts in condensed mode #%]
+        [%# no process restarts in condensed mode #%]
         [% IF show_log_entries and log.class == 2 %]
           [% NEXT %]
         [% END %]
