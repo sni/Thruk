@@ -60,7 +60,7 @@ fi
 
 # working version
 git checkout master
-git checkout b32d4d1aff78cc9499768c8a67f73fe164d403b7
+git checkout -q a38b5d3c002171c70cd8688aad358436ba5c20d3
 
 mkdir "$EXPORT_DIR/livestatus"
 rsync -a livestatus/. "$EXPORT_DIR/livestatus"
