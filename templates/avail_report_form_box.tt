@@ -1,7 +1,11 @@
+<form method="GET" action="avail.cgi">
+[% IF host %]<input type='hidden' name='host' value='[% host %]'>[% END %]
+[% IF hostgroup %]<input type='hidden' name='hostgroup' value='[% hostgroup %]'>[% END %]
+[% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
+[% IF servicegroup %]<input type='hidden' name='servicegroup' value='[% servicegroup %]'>[% END %]
 <input type='hidden' name='t1' value='[% start %]'>
 <input type='hidden' name='t2' value='[% end %]'>
 <input type='hidden' name='show_log_entries' value='[% show_log_entries %]'>
-<input type='hidden' name='host' value='[% host %]'>
 <input type='hidden' name='assumeinitialstates' value='[% assumeinitialstates %]'>
 <input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
 <input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
@@ -73,3 +77,4 @@
     <td align="right" valign="bottom"></td>
   </tr>
 </table>
+</form>

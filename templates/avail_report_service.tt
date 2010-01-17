@@ -72,95 +72,95 @@
           <td class='serviceOK' rowspan="3">OK</td>
           <td class='dataEven'>Unscheduled</td>
           <td class='dataEven'>[% duration(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time * 100 ) %]%[% END %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataEven'>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_ok - avail_data.services.$host.$service.scheduled_time_ok) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataEven'>
           <td class='dataEven'>Scheduled</td>
           <td class='dataEven'>[% duration(avail_data.services.$host.$service.scheduled_time_ok) %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time * 100 ) %]%[% END %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataEven'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='serviceOK'>
           <td class='serviceOK'>Total</td>
           <td class='serviceOK'>[% duration(avail_data.services.$host.$service.time_ok) %]</td>
-          <td class='serviceOK'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time * 100) %]%[% END %]</td>
-          <td class='serviceOK'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time_known * 100) %]%[% END %]</td>
+          <td class='serviceOK'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='serviceOK'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_ok / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataOdd'>
           <td class='serviceWARNING' rowspan="3">WARNING</td>
           <td class='dataOdd'>Unscheduled</td>
           <td class='dataOdd'>[% duration(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time * 100) %]%[% END %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_warning - avail_data.services.$host.$service.scheduled_time_warning) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataOdd'>
           <td class='dataOdd'>Scheduled</td>
           <td class='dataOdd'>[% duration(avail_data.services.$host.$service.scheduled_time_warning) %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time * 100 ) %]%[% END %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='serviceWARNING'>
           <td class='serviceWARNING'>Total</td>
           <td class='serviceWARNING'>[% duration(avail_data.services.$host.$service.time_warning) %]</td>
-          <td class='serviceWARNING'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time * 100 ) %]%[% END %]</td>
-          <td class='serviceWARNING'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time_known * 100) %]%[% END %]</td>
+          <td class='serviceWARNING'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='serviceWARNING'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_warning / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataEven'>
           <td class='serviceUNKNOWN' rowspan="3">UNKNOWN</td>
           <td class='dataEven'>Unscheduled</td>
           <td class='dataEven'>[% duration(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time * 100) %]%[% END %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataEven'>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_unknown - avail_data.services.$host.$service.scheduled_time_unknown) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataEven'>
           <td class='dataEven'>Scheduled</td>
           <td class='dataEven'>[% duration(avail_data.services.$host.$service.scheduled_time_unknown) %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time * 100) %]%[% END %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataEven'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='serviceUNKNOWN'>
           <td class='serviceUNKNOWN'>Total</td>
           <td class='serviceUNKNOWN'>[% duration(avail_data.services.$host.$service.time_unknown) %]</td>
-          <td class='serviceUNKNOWN'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time * 100) %]%[% END %]</td>
-          <td class='serviceUNKNOWN'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time_known * 100) %]%[% END %]</td>
+          <td class='serviceUNKNOWN'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='serviceUNKNOWN'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_unknown / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataOdd'>
           <td class='serviceCRITICAL' rowspan="3">CRITICAL</td>
           <td class='dataOdd'>Unscheduled</td>
           <td class='dataOdd'>[% duration(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time * 100) %]%[% END %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time_known > 0 %][% sprintf('%2.3f',(avail_data.services.$host.$service.time_critical - avail_data.services.$host.$service.scheduled_time_critical) / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataOdd'>
           <td class='dataOdd'>Scheduled</td>
           <td class='dataOdd'>[% duration(avail_data.services.$host.$service.scheduled_time_critical) %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time * 100 ) %]%[% END %]</td>
-          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time_known * 100) %]%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='dataOdd'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.scheduled_time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='serviceCRITICAL'>
           <td class='serviceCRITICAL'>Total</td>
           <td class='serviceCRITICAL'>[% duration(avail_data.services.$host.$service.time_critical) %]</td>
-          <td class='serviceCRITICAL'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time * 100 ) %]%[% END %]</td>
-          <td class='serviceCRITICAL'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time_known * 100) %]%[% END %]</td>
+          <td class='serviceCRITICAL'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time * 100 ) %]%[% ELSE %]0.000%[% END %]</td>
+          <td class='serviceCRITICAL'>[% IF total_time_known > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_critical / total_time_known * 100) %]%[% ELSE %]0.000%[% END %]</td>
         </tr>
         <tr class='dataEven'>
           <td class='dataEven' rowspan="3">Undetermined</td>
           <td class='dataEven'>Monitoring Not Running</td>
           <td class='dataEven'>[% duration(avail_data.services.$host.$service.time_indeterminate_notrunning) %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_notrunning / total_time * 100) %]%[% END %]</td>
+          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_notrunning / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
           <td class='dataEven'></td>
         </tr>
         <tr class='dataEven'>
           <td class='dataEven'>Insufficient Data</td>
           <td class='dataEven'>[% duration(avail_data.services.$host.$service.time_indeterminate_nodata) %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_nodata / total_time * 100) %]%[% END %]</td>
+          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',avail_data.services.$host.$service.time_indeterminate_nodata / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
           <td class='dataEven'></td>
         </tr>
         <tr class='dataEven'>
           <td class='dataEven'>Total</td>
           <td class='dataEven'>[% duration(total_time_unknown) %]</td>
-          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% END %]</td>
+          <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
           <td class='dataEven'></td>
         </tr>
         <tr>
