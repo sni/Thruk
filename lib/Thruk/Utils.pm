@@ -1,4 +1,14 @@
-package Thruk::Helper;
+package Thruk::Utils;
+
+=head1 NAME
+
+Thruk::Utils - Utilities Collection for Thruk
+
+=head1 DESCRIPTION
+
+Utilities Collection for Thruk
+
+=cut
 
 use strict;
 use warnings;
@@ -9,25 +19,21 @@ use Digest::MD5  qw(md5_hex);
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
 use Monitoring::Livestatus::MULTI;
 
-##############################################
-# SUBS
-#
-# get_auth_filter
-# filter_duration
-# get_cgi_cfg
-# get_livestatus
-# sort
-# remove_duplicates
-# get_livestatus_conf
-# get_service_exectution_stats
-# _get_hostcomments
-# _get_servicecomments
-# _calculate_overall_processinfo
-# _get_start_end_for_timeperiod
-##############################################
 
 ##############################################
-# returns a filter which can be used for authorization
+=head1 METHODS
+
+=cut
+
+##############################################
+
+=head2 get_auth_filter
+
+  my $filter_string = get_auth_filter('hosts');
+
+returns a filter which can be used for authorization
+
+=cut
 sub get_auth_filter {
     my $c    = shift;
     my $type = shift;
@@ -119,9 +125,17 @@ sub get_auth_filter {
     return;
 }
 
+
 ##############################################
-# calculate a duration in the
-# format: 0d 0h 29m 43s
+
+=head2 filter_duration
+
+  my $string = filter_duration($seconds);
+
+formats a duration into the
+format: 0d 0h 29m 43s
+
+=cut
 sub filter_duration {
     my $duration = shift;
     my $withdays = shift;
@@ -164,12 +178,20 @@ sub filter_duration {
     return($hours."h ".$minutes."m ".$seconds."s");
 }
 
-######################################
-# parse the cgi.cg
-sub get_cgi_cfg {
-    my ( $self, $c ) = @_;
 
-    $c->stats->profile(begin => "Helper::get_cgi_cfg()");
+######################################
+
+=head2 get_cgi_cfg
+
+  my $conf = get_cgi_cfg($c);
+
+parse and return the cgi.cg as hash ref
+
+=cut
+sub get_cgi_cfg {
+    my $c = shift;
+
+    $c->stats->profile(begin => "Utils::get_cgi_cfg()");
 
     # read only once per request
     our(%config, $cgi_config_already_read);
@@ -194,17 +216,25 @@ sub get_cgi_cfg {
     my $conf = new Config::General($file);
     %config  = $conf->getall;
 
-    $c->stats->profile(end => "Helper::get_cgi_cfg()");
+    $c->stats->profile(end => "Utils::get_cgi_cfg()");
 
     return(\%config);
 }
 
-######################################
-# return the livestatus object
-sub get_livestatus {
-    my ( $self, $c ) = @_;
 
-    $c->stats->profile(begin => "Helper::get_livestatus()");
+######################################
+
+=head2 get_livestatus
+
+  my $conf = get_livestatus($c)
+
+return the livestatus object
+
+=cut
+sub get_livestatus {
+    my $c = shift;
+
+    $c->stats->profile(begin => "Utils::get_livestatus()");
 
     our $livestatus;
 
@@ -214,7 +244,7 @@ sub get_livestatus {
     }
     $c->log->debug("creating new livestatus");
 
-    my $livestatus_config = $self->get_livestatus_conf($c);
+    my $livestatus_config = Thruk::Utils::get_livestatus_conf($c);
     if(!defined $livestatus_config or !defined $livestatus_config->{'peer'} ) {
         $c->detach("/error/index/14");
     }
@@ -224,15 +254,23 @@ sub get_livestatus {
     }
     $livestatus = Monitoring::Livestatus::MULTI->new(%{$livestatus_config});
 
-    $c->stats->profile(end => "Helper::get_livestatus()");
+    $c->stats->profile(end => "Utils::get_livestatus()");
 
     return($livestatus);
 }
 
+
 ########################################
+
+=head2 sort
+
+  sort($c, $data, \@keys, $order)
+
+sort a array of hashes by hash keys
+
+=cut
 sub sort {
-    my $self  = shift;
-    my $c     = shift;
+    my $c = shift;
     my $data  = shift;
     my $key   = shift;
     my $order = shift;
@@ -240,7 +278,7 @@ sub sort {
 
     if(!defined $key) { $c->error('missing options in sort()'); }
 
-    $c->stats->profile(begin => "Helper::sort()");
+    $c->stats->profile(begin => "Utils::sort()") if defined $c;
 
     $order = "ASC" if !defined $order;
 
@@ -266,7 +304,7 @@ sub sort {
         }
     }
     my $sortstring = join(' || ', @compares);
-    $c->log->debug("ordering by: ".$sortstring);
+    $c->log->debug("ordering by: ".$sortstring) if defined $c;
 
     if(uc $order eq 'ASC') {
         eval '@sorted = sort { '.$sortstring.' } @{$data};';
@@ -274,21 +312,29 @@ sub sort {
         eval '@sorted = reverse sort { '.$sortstring.' } @{$data};';
     }
 
-    $c->stats->profile(end => "Helper::sort()");
+    $c->stats->profile(end => "Utils::sort()") if defined $c;
 
     return(\@sorted);
 }
 
 
 ########################################
-# removes duplicate entries
+
+=head2 remove_duplicates
+
+  remove_duplicates($c, $data)
+
+removes duplicate entries from a array of hashes
+
+=cut
 sub remove_duplicates {
-    my ( $self, $c, $data ) = @_;
+    my $c    = shift;
+    my $data = shift;
 
     # only needed when using multiple backends
     return $data unless scalar @{$c->stash->{'backends'}} > 1;
 
-    $c->stats->profile(begin => "Helper::remove_duplicates()");
+    $c->stats->profile(begin => "Utils::remove_duplicates()");
 
     # calculate md5 sums
     my $uniq = {};
@@ -326,14 +372,22 @@ sub remove_duplicates {
 
     }
 
-    $c->stats->profile(end => "Helper::remove_duplicates()");
+    $c->stats->profile(end => "Utils::remove_duplicates()");
     return($return);
 }
 
+
 ########################################
-# returns config for livestatus backends
+
+=head2 get_livestatus_conf
+
+  get_livestatus_conf($c)
+
+returns config for livestatus backends
+
+=cut
 sub get_livestatus_conf {
-    my ( $self, $c ) = @_;
+    my $c = shift;
 
     my $livestatus_config = Thruk->config->{'Monitoring::Livestatus'};
 
@@ -353,15 +407,18 @@ sub get_livestatus_conf {
 
 
 ############################################################
-# get_service_exectution_stats
-#
-# Returns a hash with statistical data
-#
-sub get_service_exectution_stats {
-    my $self            = shift;
-    my $c               = shift;
 
-    $c->stats->profile(begin => "Helper::get_service_exectution_stats()");
+=head2 get_service_exectution_stats
+
+  my $stats = get_service_exectution_stats($c);
+
+Returns a hash with statistical data
+
+=cut
+sub get_service_exectution_stats {
+    my $c = shift;
+
+    $c->stats->profile(begin => "Utils::get_service_exectution_stats()");
 
     my $now    = time();
     my $min1   = $now - 60;
@@ -419,7 +476,7 @@ sub get_service_exectution_stats {
             'passive_state_change_sum'  => 0,
         };
 
-        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\n".Thruk::Helper::get_auth_filter($c, $type)."\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 })}) {
+        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\n".Thruk::Utils::get_auth_filter($c, $type)."\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 })}) {
             my $minall = $c->stash->{'pi_detail'}->{$data->{'peer_key'}}->{'program_start'};
 
             if($data->{'check_type'} == 0) {
@@ -528,56 +585,80 @@ sub get_service_exectution_stats {
         }
     }
 
-    $c->stats->profile(end => "Helper::get_service_exectution_stats()");
+    $c->stats->profile(end => "Utils::get_service_exectution_stats()");
 
     return($check_stats);
 }
 
-########################################
-sub _get_hostcomments {
-    my $self            = shift;
-    my $c               = shift;
-    my $filter          = shift;
 
-    $c->stats->profile(begin => "Helper::_get_hostcomments()");
+########################################
+
+=head2 get_hostcomments
+
+  my $comments = get_hostcomments($c, $filter)
+
+return all host comments for a given filter
+
+=cut
+sub get_hostcomments {
+    my $c      = shift;
+    my $filter = shift;
+
+    $c->stats->profile(begin => "Utils::get_hostcomments()");
 
     $filter = '' unless defined $filter;
     my $hostcomments;
-    my $comments    = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Helper::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description =\nColumns: host_name id", { Slice => 1 });
+    my $comments    = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description =\nColumns: host_name id", { Slice => 1 });
 
     for my $comment (@{$comments}) {
         $hostcomments->{$comment->{'host_name'}}->{$comment->{'id'}} = $comment;
     }
 
-    $c->stats->profile(end => "Helper::_get_hostcomments()");
+    $c->stats->profile(end => "Utils::get_hostcomments()");
 
     return $hostcomments;
 }
 
-########################################
-sub _get_servicecomments {
-    my $self            = shift;
-    my $c               = shift;
-    my $filter          = shift;
 
-    $c->stats->profile(begin => "Helper::_get_servicecomments()");
+########################################
+
+=head2 get_servicecomments
+
+  my $comments = get_servicecomments($c, $filter);
+
+returns all comments for a given filter
+
+=cut
+sub get_servicecomments {
+    my $c      = shift;
+    my $filter = shift;
+
+    $c->stats->profile(begin => "Utils::get_servicecomments()");
 
     my $servicecomments;
-    my $comments = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Helper::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description !=\nColumns: host_name service_description id", { Slice => 1 });
+    my $comments = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description !=\nColumns: host_name service_description id", { Slice => 1 });
 
     for my $comment (@{$comments}) {
         $servicecomments->{$comment->{'host_name'}}->{$comment->{'service_description'}}->{$comment->{'id'}} = $comment;
     }
 
-    $c->stats->profile(end => "Helper::_get_servicecomments()");
+    $c->stats->profile(end => "Utils::get_servicecomments()");
 
     return $servicecomments;
 }
 
+
 ########################################
-sub _calculate_overall_processinfo {
-    my $self = shift;
-    my $pi   = shift;
+
+=head2 calculate_overall_processinfo
+
+  my $process_info = calculate_overall_processinfo($process_info)
+
+computes a combined status for process infos
+
+=cut
+sub calculate_overall_processinfo {
+    my $pi = shift;
     my $return;
     for my $peer (keys %{$pi}) {
         for my $key (keys %{$pi->{$peer}}) {
@@ -601,8 +682,30 @@ sub _calculate_overall_processinfo {
 
 
 ########################################
-sub _get_start_end_for_timeperiod {
-    my($self,$timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2) = @_;
+
+=head2 get_start_end_for_timeperiod
+
+  my($start, $end) = get_start_end_for_timeperiod($timeperiod,
+                                                  $smon,
+                                                  $sday,
+                                                  $syear,
+                                                  $shour,
+                                                  $smin,
+                                                  $ssec,
+                                                  $emon,
+                                                  $eday,
+                                                  $eyear,
+                                                  $ehour,
+                                                  $emin,
+                                                  $esec,
+                                                  $t1,
+                                                  $t2);
+
+returns a start and end timestamp for a report date definition
+
+=cut
+sub get_start_end_for_timeperiod {
+    my($timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2) = @_;
 
     my $start;
     my $end;
@@ -683,3 +786,14 @@ sub _get_start_end_for_timeperiod {
 }
 
 1;
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009, <nierlein@cpan.org>
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

@@ -26,6 +26,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     $c->response->body('Matched Thruk::Controller::statusmap in statusmap.');
+
+    return 1;
 }
 
 

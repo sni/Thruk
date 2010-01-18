@@ -65,7 +65,7 @@ lib/Thruk/Controller/statusmap.pm
 lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
-lib/Thruk/Helper.pm
+lib/Thruk/Utils.pm
 lib/Thruk/View/TT.pm
 Makefile.PL
 MANIFEST			This list of files
@@ -166,6 +166,7 @@ script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
 t/01app.t
+t/10-Thruk-Utils.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
 t/99-Perl-Critic.t

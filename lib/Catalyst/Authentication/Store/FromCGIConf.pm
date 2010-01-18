@@ -11,13 +11,15 @@ use base qw/Class::Accessor::Fast/;
 sub new {
     my ( $class, $config, $app, $realm) = @_;
 
-    bless { }, $class;
+    my $self = {};
+    bless $self, $class;
+    return $self;
 }
 
 sub from_session {
     my ( $self, $c, $username ) = @_;
     return $username if ref $username;
-    $self->find_user( { username => $username } );
+    return($self->find_user( { username => $username } ));
 }
 
 sub find_user {
@@ -45,7 +47,7 @@ sub find_user {
                     ];
     for my $role (@{$possible_roles}) {
         if(defined $cgi_cfg->{$role}) {
-            my %contacts = map { $_ => 1 } split/,/,$cgi_cfg->{$role};
+            my %contacts = map { $_ => 1 } split/,/mx,$cgi_cfg->{$role};
             push @{$user->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'});
         }
     }
@@ -79,7 +81,7 @@ sub user_supports {
     scalar keys %{ $self->userhash };
     ( undef, my $user ) = each %{ $self->userhash };
 
-    $user->supports(@_);
+    return($user->supports(@_));
 }
 
 
@@ -132,6 +134,8 @@ L<Catalyst::Plugin::Authentication> and is the method by which
 Catalyst::Authentication::Store::FromCGIConf is loaded as the
 user store. For this module to be used, this must be set to
 'FromCGIConf'.
+
+=back
 
 =head1 METHODS
 

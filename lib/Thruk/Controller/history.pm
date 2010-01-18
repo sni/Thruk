@@ -121,7 +121,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     my $query = "GET log\nColumns: time type options state\n".$filter;
     #$c->log->debug($query);
-    $query   .= Thruk::Helper::get_auth_filter($c, 'log');
+    $query   .= Thruk::Utils::get_auth_filter($c, 'log');
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
 
@@ -129,7 +129,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($oldestfirst) {
         $order = "ASC";
     }
-    my $sortedlogs = Thruk::Helper->sort($c, $logs, 'time', $order);
+    my $sortedlogs = Thruk::Utils::sort($c, $logs, 'time', $order);
 
     $c->stash->{logs}             = $sortedlogs;
     $c->stash->{archive}          = $archive;
@@ -148,6 +148,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}             = 'history';
     $c->stash->{template}         = 'history.tt';
     $c->stash->{'no_auto_reload'} = 1;
+
+    return 1;
 }
 
 ##########################################################
@@ -158,7 +160,7 @@ sub _get_log_type_filter {
     my $filter = '';
     if($number > 0) {
         my @prop_filter;
-        my @bits = reverse split(/ */, unpack("B*", pack("N", int($number))));
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("N", int($number))));
 
         if($bits[0]) {  # 1 - All service alerts
             push @prop_filter, "Filter: service_description !=";

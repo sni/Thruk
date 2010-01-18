@@ -149,6 +149,8 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     }
 
     $c->stash->{'template'} = Thruk->config->{'custom-error-message'}->{'error-template'};
+
+    return 1;
 }
 
 

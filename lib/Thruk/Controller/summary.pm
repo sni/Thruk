@@ -26,6 +26,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     $c->stash->{'template'} = 'summary.tt';
+
+    return 1;
 }
 
 

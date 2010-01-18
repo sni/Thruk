@@ -66,6 +66,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{infoBoxTitle}   = 'Current Network Status';
     $c->stash->{page}           = 'status';
     $c->stash->{template}       = 'status_'.$style.'.tt';
+
+    return 1;
 }
 
 ##########################################################
@@ -79,14 +81,14 @@ sub _process_search_request {
     return('detail') unless defined $host;
 
     # is there a servicegroup with this name?
-    my $servicegroups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\nColumns: name\nFilter: name = $host");
+    my $servicegroups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\nColumns: name\nFilter: name = $host");
     if(scalar @{$servicegroups} > 0) {
         $c->{'request'}->{'parameters'}->{'servicegroup'} = $host;
         return('overview');
     }
 
     # is there a hostgroup with this name?
-    my $hostgroups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Helper::get_auth_filter($c, 'hostgroups')."\nColumns: name\nFilter: name = $host");
+    my $hostgroups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\nColumns: name\nFilter: name = $host");
     if(scalar @{$hostgroups} > 0) {
         $c->{'request'}->{'parameters'}->{'hostgroup'} = $host;
         return('overview');
@@ -136,7 +138,7 @@ sub _process_details_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # get all services
-    my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output", { Slice => {}, AddPeer => 1 });
+    my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output", { Slice => {}, AddPeer => 1 });
 
     for my $service (@{$services}) {
         # ordering by duration needs this
@@ -158,7 +160,7 @@ sub _process_details_page {
                 '6' => [ ['last_state_change_plus', 'host_name', 'description'],    'state duration'  ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
-    my $sortedservices = Thruk::Helper->sort($c, $services, $sortoptions->{$sortoption}->[0], $order);
+    my $sortedservices = Thruk::Utils::sort($c, $services, $sortoptions->{$sortoption}->[0], $order);
     if($sortoption == 6) { @{$sortedservices} = reverse @{$sortedservices}; }
 
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
@@ -168,6 +170,8 @@ sub _process_details_page {
     $c->stash->{'servicegroup'}  = $servicegroup;
     $c->stash->{'services'}      = $sortedservices;
     $c->stash->{'style'}         = 'detail';
+
+    return 1;
 }
 
 ##########################################################
@@ -191,7 +195,7 @@ sub _process_hostdetails_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # add comments into hosts.comments and hosts.comment_count
-    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\n$hostfilter\nColumns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check", { Slice => {}, AddPeer => 1 });
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\n$hostfilter\nColumns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check", { Slice => {}, AddPeer => 1 });
     for my $host (@{$hosts}) {
         # ordering by duration needs this
         $host->{'last_state_change_plus'} = $c->stash->{pi}->{program_start};
@@ -210,7 +214,7 @@ sub _process_hostdetails_page {
                 '8' => [ ['has_been_checked', 'state', 'name'],  'host status'     ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
-    my $sortedhosts = Thruk::Helper->sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
+    my $sortedhosts = Thruk::Utils::sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
     if($sortoption == 6) { @{$sortedhosts} = reverse @{$sortedhosts}; }
 
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
@@ -218,6 +222,8 @@ sub _process_hostdetails_page {
     $c->stash->{'hostgroup'}     = $hostgroup;
     $c->stash->{'hosts'}         = $sortedhosts;
     $c->stash->{'style'}         = 'hostdetail';
+
+    return 1;
 }
 
 ##########################################################
@@ -252,13 +258,13 @@ sub _process_overview_page {
     my $host_data;
     my $services_data;
     if($hostgroup) {
-        $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt num_services_ok as ok num_services_unknown as unknown num_services_warn as warning num_services_crit as critical num_services_pending as pending\n$hostfilter", 'name' );
+        $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt num_services_ok as ok num_services_unknown as unknown num_services_warn as warning num_services_crit as critical num_services_pending as pending\n$hostfilter", 'name' );
     }
     elsif($servicegroup) {
-        $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
+        $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
 
         # we have to sort in all services and states
-        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name", { Slice => {} })}) {
+        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name", { Slice => {} })}) {
             next if $service->{'description'} eq '';
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
         }
@@ -267,10 +273,10 @@ sub _process_overview_page {
     # get all host/service groups
     my $groups;
     if($hostgroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
     elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
 
     # join our groups together
@@ -286,7 +292,7 @@ sub _process_overview_page {
 
         my($hostname,$servicename);
         if($hostgroup) {
-            for my $hostname (split /,/, $group->{'members'}) {
+            for my $hostname (split /,/mx, $group->{'members'}) {
                 # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
 
@@ -309,8 +315,8 @@ sub _process_overview_page {
             }
         }
         elsif($servicegroup) {
-            for my $member (split /,/, $group->{'members'}) {
-                my($hostname,$servicename) = split/\|/, $member, 2;
+            for my $member (split /,/mx, $group->{'members'}) {
+                my($hostname,$servicename) = split/\|/mx, $member, 2;
                 # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
 
@@ -353,6 +359,8 @@ sub _process_overview_page {
     $c->stash->{'servicegroup'} = $servicegroup;
     $c->stash->{'groups'}       = \%joined_groups;
     $c->stash->{'style'}        = 'overview';
+
+    return 1;
 }
 
 
@@ -385,21 +393,21 @@ sub _process_grid_page {
     ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # we need the hostname, address etc...
-    my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
+    my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
 
     # create a hash of all services
     my $services_data;
-    for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} })}) {
+    for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} })}) {
         $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
     }
 
     # get all host/service groups
     my $groups;
     if($hostgroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
     elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
     }
 
     # sort in hosts / services
@@ -412,13 +420,13 @@ sub _process_grid_page {
             $joined_groups{$name}->{'hosts'} = {};
         }
 
-        for my $member (split /,/, $group->{'members'}) {
+        for my $member (split /,/mx, $group->{'members'}) {
             my($hostname,$servicename);
             if($hostgroup) {
                 $hostname = $member;
             }
             if($servicegroup) {
-                ($hostname,$servicename) = split/\|/, $member, 2;
+                ($hostname,$servicename) = split/\|/mx, $member, 2;
             }
 
             next unless defined $host_data->{$hostname};
@@ -451,6 +459,8 @@ sub _process_grid_page {
     $c->stash->{'servicegroup'} = $servicegroup;
     $c->stash->{'groups'}       = \%joined_groups;
     $c->stash->{'style'}        = 'grid';
+
+    return 1;
 }
 
 
@@ -485,10 +495,10 @@ sub _process_summary_page {
     # get all host/service groups
     my $groups;
     if($hostgroup) {
-        $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", 'name');
+        $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", 'name');
     }
     elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", 'name');
+        $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", 'name');
     }
 
     # set defaults for all groups
@@ -532,13 +542,13 @@ sub _process_summary_page {
     my $groupsname = "host_groups";
     if($hostgroup) {
         # we need the hosts data
-        my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name groups state checks_enabled acknowledged scheduled_downtime_depth has_been_checked\n$hostfilter", { Slice => 1 } );
+        my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name groups state checks_enabled acknowledged scheduled_downtime_depth has_been_checked\n$hostfilter", { Slice => 1 } );
 
         # create a hash of all services
-        $services_data = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth\n$servicefilter", { Slice => {} });
+        $services_data = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth\n$servicefilter", { Slice => {} });
 
         for my $host (@{$host_data}) {
-            for my $group (split/,/, $host->{'groups'}) {
+            for my $group (split/,/mx, $host->{'groups'}) {
                 next if !defined $groups->{$group};
                 $self->_summary_add_host_stats("", $groups->{$group}, $host);
             }
@@ -547,14 +557,14 @@ sub _process_summary_page {
 
     if($servicegroup) {
         # create a hash of all services
-        $services_data = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth host_name host_state host_checks_enabled host_acknowledged host_scheduled_downtime_depth host_has_been_checked\n$servicefilter", { Slice => {} });
+        $services_data = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth host_name host_state host_checks_enabled host_acknowledged host_scheduled_downtime_depth host_has_been_checked\n$servicefilter", { Slice => {} });
 
         $groupsname = "groups";
     }
 
     my %host_already_added;
     for my $service (@{$services_data}) {
-        for my $group (split/,/, $service->{$groupsname}) {
+        for my $group (split/,/mx, $service->{$groupsname}) {
             next if !defined $groups->{$group};
 
             if($servicegroup) {
@@ -601,13 +611,12 @@ sub _process_summary_page {
         }
     }
 
-#use Data::Dumper;
-#$Data::Dumper::Sortkeys = 1;
-#print Dumper($groups);
     $c->stash->{'hostgroup'}    = $hostgroup;
     $c->stash->{'servicegroup'} = $servicegroup;
     $c->stash->{'groups'}       = $groups;
     $c->stash->{'style'}        = 'summary';
+
+    return 1;
 }
 
 ##########################################################
@@ -634,14 +643,14 @@ sub _summary_add_host_stats {
     if($host->{$prefix.'state'} == 2 and $host->{$prefix.'checks_enabled'}          == 0) { $group->{'hosts_unreachable_disabled'}++; }
     if($host->{$prefix.'state'} == 2 and $host->{$prefix.'checks_enabled'}          == 1 and $host->{$prefix.'acknowledged'} == 0 and $host->{$prefix.'scheduled_downtime_depth'} == 0) { $group->{'hosts_unreachable_unhandled'}++; }
 
-    return;
+    return 1;
 }
 
 ##########################################################
 sub _fill_totals_box {
     my ( $self, $c, $hostfilter, $servicefilter ) = @_;
     # host status box
-    my $host_stats = $c->{'live'}->selectrow_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."
+    my $host_stats = $c->{'live'}->selectrow_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."
 $hostfilter
 Stats: has_been_checked = 1
 Stats: state = 0
@@ -660,7 +669,7 @@ Stats: has_been_checked = 0 as pending
 
 
     # services status box
-    my $service_stats = $c->{'live'}->selectrow_hashref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."
+    my $service_stats = $c->{'live'}->selectrow_hashref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."
 $servicefilter
 Stats: has_been_checked = 1
 Stats: state = 0
@@ -683,6 +692,8 @@ Stats: has_been_checked = 0 as pending
 
     $c->stash->{'host_stats'}    = $host_stats;
     $c->stash->{'service_stats'} = $service_stats;
+
+    return 1;
 }
 
 ##########################################################
@@ -743,7 +754,7 @@ sub _get_host_statustype_filter {
         my @hoststatusfilter;
         my @servicestatusfilter;
         my @hoststatusfiltername;
-        my @bits = reverse split(/ */, unpack("B*", pack("n", int($number))));
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("n", int($number))));
 
         if($bits[0]) {  # 1 - pending
             push @hoststatusfilter,    "Filter: has_been_checked = 0";
@@ -792,7 +803,7 @@ sub _get_host_prop_filter {
         my @host_prop_filter;
         my @host_prop_filter_service;
         my @host_prop_filtername;
-        my @bits = reverse split(/ */, unpack("B*", pack("N", int($number))));
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("N", int($number))));
 
         if($bits[0]) {  # 1 - In Scheduled Downtime
             push @host_prop_filter,         "Filter: scheduled_downtime_depth > 0";
@@ -919,7 +930,7 @@ sub _get_service_statustype_filter {
     if($number and $number != 31) {
         my @servicestatusfilter;
         my @servicestatusfiltername;
-        my @bits = reverse split(/ */, unpack("B*", pack("n", int($number))));
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("n", int($number))));
 
         if($bits[0]) {  # 1 - pending
             push @servicestatusfilter, "Filter: has_been_checked = 0";
@@ -964,7 +975,7 @@ sub _get_service_prop_filter {
     if($number > 0) {
         my @service_prop_filter;
         my @service_prop_filtername;
-        my @bits = reverse split(/ */, unpack("B*", pack("N", int($number))));
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("N", int($number))));
 
         if($bits[0]) {  # 1 - In Scheduled Downtime
             push @service_prop_filter,         "Filter: scheduled_downtime_depth > 0";

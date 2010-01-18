@@ -68,8 +68,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     } else {
         # no command submited, view commands page
         if($cmd_typ == 55 or $cmd_typ == 56) {
-            $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Helper::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: id host_name start_time", { Slice => {} });
-            $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Helper::get_auth_filter($c, 'downtimes')."\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} });
+            $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: id host_name start_time", { Slice => {} });
+            $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} });
         }
 
         my @possible_backends       = $c->{'live'}->peer_key();
@@ -83,6 +83,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
     }
+
+    return 1;
 }
 
 
@@ -163,6 +165,7 @@ sub _do_send_command {
     } else {
         $c->stash->{template} = 'cmd_success.tt';
     }
+
     return(1);
 }
 

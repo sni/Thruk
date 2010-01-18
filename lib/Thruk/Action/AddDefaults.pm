@@ -22,7 +22,6 @@ use strict;
 use warnings;
 use Moose;
 use Carp;
-use Thruk::Helper;
 
 extends 'Catalyst::Action';
 
@@ -37,11 +36,11 @@ before 'execute' => sub {
 
     ###############################
     # parse cgi.cfg
-    $c->{'cgi_cfg'} = Thruk::Helper->get_cgi_cfg($c);
+    $c->{'cgi_cfg'} = Thruk::Utils::get_cgi_cfg($c);
 
     ###############################
     # get livesocket object
-    $c->{'live'} = Thruk::Helper->get_livestatus($c);
+    $c->{'live'} = Thruk::Utils::get_livestatus($c);
 
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
@@ -64,8 +63,8 @@ before 'execute' => sub {
     ###############################
     # add program status
     eval {
-        my $processinfo = $c->{'live'}->selectall_hashref("GET status\n".Thruk::Helper::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
-        my $overall_processinfo = Thruk::Helper->_calculate_overall_processinfo($processinfo);
+        my $processinfo = $c->{'live'}->selectall_hashref("GET status\n".Thruk::Utils::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
+        my $overall_processinfo = Thruk::Utils::calculate_overall_processinfo($processinfo);
         $c->stash->{'pi'}        = $overall_processinfo;
         $c->stash->{'pi_detail'} = $processinfo;
     };

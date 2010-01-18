@@ -67,7 +67,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $query = "GET log\n$filter\n";
     $query   .= "Columns: type host_name service_description plugin_output state time command_name contact_name options\n";
     $query   .= "Filter: class = 3\n";
-    $query   .= Thruk::Helper::get_auth_filter($c, 'log');
+    $query   .= Thruk::Utils::get_auth_filter($c, 'log');
 
     my $notifications = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
 
@@ -75,7 +75,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($oldestfirst) {
         $order = "ASC";
     }
-    my $sortednotifications = Thruk::Helper->sort($c, $notifications, 'time', $order);
+    my $sortednotifications = Thruk::Utils::sort($c, $notifications, 'time', $order);
 
     $c->stash->{oldestfirst}      = $oldestfirst;
     $c->stash->{type}             = $type;
@@ -91,6 +91,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}             = 'notifications';
     $c->stash->{template}         = 'notifications.tt';
     $c->stash->{'no_auto_reload'} = 1;
+
+    return 1;
 }
 
 
@@ -102,7 +104,7 @@ sub _get_log_prop_filter {
     my $filter = '';
     if($number > 0) {
         my @prop_filter;
-        my @bits = reverse split(/ */, unpack("B*", pack("N", int($number))));
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("N", int($number))));
 
         if($bits[0]) {  # 1 - All service notifications
             push @prop_filter, "Filter: service_description !=";

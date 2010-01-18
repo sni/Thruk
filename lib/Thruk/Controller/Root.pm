@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
-use Thruk::Helper;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -18,18 +17,21 @@ Thruk::Controller::Root - Root Controller for Thruk
 
 =head1 DESCRIPTION
 
-[enter your description here]
+Root Controller of the Thruk Monitoring Webinterface
 
 =head1 METHODS
 
 =cut
 
-=head2 index
-
-=cut
 
 ######################################
-# begin, running at the begin of every req
+
+=head2 begin
+
+sets the doc link and decides if frames are used
+begin, running at the begin of every req
+
+=cut
 sub begin : Private {
     my ( $self, $c ) = @_;
     my $use_frames = Thruk->config->{'use_frames'};
@@ -42,6 +44,8 @@ sub begin : Private {
     $c->stash->{'documentation_link'} = $doc_link;
 
     $c->stash->{'use_feature_statusmap'} = 0;
+
+    return 1;
 }
 
 ######################################
@@ -50,63 +54,121 @@ sub begin : Private {
 #    my ( $self, $c ) = @_;
 #}
 
+
 ######################################
-# default page
+
+=head2 default
+
+show our 404 error page
+
+=cut
 sub default :Path {
     my ( $self, $c ) = @_;
     $c->response->body( 'Page not found' );
-    $c->response->status(404);
+    return $c->response->status(404);
 }
 
+
 ######################################
-# index page
-# we dont want index.html in the url
+
+=head2 index
+
+redirect from /
+
+=cut
 sub index :Path('/') {
     my ( $self, $c ) = @_;
     if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
         $c->detach("default");
     }
-    $c->redirect("/thruk/");
+    return $c->redirect("/thruk/");
 }
-# we dont want index.html in the url
+
+
+######################################
+
+=head2 index_html
+
+redirect from /index.html
+
+beacuse we dont want index.html in the url
+
+=cut
 sub index_html : Path('/index.html') {
     my ( $self, $c ) = @_;
     if($c->stash->{'use_frames'}) {
-        $c->detach("thruk_index_html");
-    } else {
-        $c->detach("thruk_main_html");
+        return $c->detach("thruk_index_html");
     }
-}
-# but if used not via fastcgi/apache, there is no way around
-sub thruk_index : Path('/thruk/') {
-    my ( $self, $c ) = @_;
-    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
-        $c->detach("default");
-    }
-    if($c->stash->{'use_frames'}) {
-        $c->detach("thruk_index_html");
-    } else {
-        $c->detach("thruk_main_html");
+    else {
+        return $c->detach("thruk_main_html");
     }
 }
 
+
+######################################
+
+=head2 thruk_index
+
+redirect from /thruk/
+but if used not via fastcgi/apache, there is no way around
+
+=cut
+sub thruk_index : Path('/thruk/') {
+    my ( $self, $c ) = @_;
+    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
+        return $c->detach("default");
+    }
+    if($c->stash->{'use_frames'}) {
+        return $c->detach("thruk_index_html");
+    }
+    else {
+        return $c->detach("thruk_main_html");
+    }
+}
+
+
+######################################
+
+=head2 thruk_index_html
+
+page: /thruk/index.html
 # but if used not via fastcgi/apache, there is no way around
+
+=cut
 sub thruk_index_html : Path('/thruk/index.html') {
     my ( $self, $c ) = @_;
     unless($c->stash->{'use_frames'}) {
         $c->detach("thruk_main_html");
     }
     $c->stash->{'template'} = 'index.tt';
+
+    return 1;
 }
 
+
 ######################################
+
+=head2 thruk_side_html
+
+page: /thruk/side.html
+
+=cut
 sub thruk_side_html : Path('/thruk/side.html') {
     my ( $self, $c ) = @_;
 
     $c->stash->{'template'} = 'side.tt';
+
+    return 1;
 }
 
+
 ######################################
+
+=head2 thruk_main_html
+
+page: /thruk/main.html
+
+=cut
 sub thruk_main_html : Path('/thruk/main.html') {
     my ( $self, $c ) = @_;
     $c->stash->{'title'}     = 'Thruk Monitoring Webinterface';
@@ -114,18 +176,36 @@ sub thruk_main_html : Path('/thruk/main.html') {
     $c->stash->{'version'}   = Thruk->config->{'version'};
     $c->stash->{'released'}  = Thruk->config->{'released'};
     $c->stash->{'template'}  = 'main.tt';
+
+    return 1;
 }
 
+
 ######################################
+
+=head2 thruk_changes_html
+
+page: /thruk/changes.html
+
+=cut
 sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
     $c->stash->{infoBoxTitle}     = 'Change Log';
     $c->stash->{'title'}          = 'Change Log';
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'template'}       = 'changes.tt';
+
+    return 1;
 }
 
+
 ######################################
+
+=head2 thruk_docs
+
+page: /thruk/docs/
+
+=cut
 sub thruk_docs : Path('/thruk/docs/') {
     my ( $self, $c ) = @_;
     if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
@@ -134,122 +214,218 @@ sub thruk_docs : Path('/thruk/docs/') {
     $c->stash->{'title'}          = 'Documentation';
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'template'}       = 'docs.tt';
+
+    return 1;
 }
 
+
 ######################################
-# tac
-sub tac_cgi : Path('thruk/cgi-bin/tac.cgi') {
+
+=head2 tac_cgi
+
+page: /thruk/cgi-bin/tac.cgi
+
+=cut
+sub tac_cgi : Path('/thruk/cgi-bin/tac.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/tac/index');
+    return $c->detach('/tac/index');
 }
 
+
 ######################################
-# statusmap
-sub statusmap_cgi : Path('thruk/cgi-bin/statusmap.cgi') {
+
+=head2 statusmap_cgi
+
+page: /thruk/cgi-bin/statusmap.cgi
+
+=cut
+sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/statusmap/index');
+    return $c->detach('/statusmap/index');
 }
 
+
 ######################################
-# status
-sub status_cgi : Path('thruk/cgi-bin/status.cgi') {
+
+=head2 status_cgi
+
+page: /thruk/cgi-bin/status.cgi
+
+=cut
+sub status_cgi : Path('/thruk/cgi-bin/status.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/status/index');
+    return $c->detach('/status/index');
 }
 
+
 ######################################
-# commands
-sub cmd_cgi : Path('thruk/cgi-bin/cmd.cgi') {
+
+=head2 cmd_cgi
+
+page: /thruk/cgi-bin/cmd.cgi
+
+=cut
+sub cmd_cgi : Path('/thruk/cgi-bin/cmd.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/cmd/index');
+    return $c->detach('/cmd/index');
 }
 
+
 ######################################
-# outages
-sub outages_cgi : Path('thruk/cgi-bin/outages.cgi') {
+
+=head2 outages_cgi
+
+page: /thruk/cgi-bin/outages.cgi
+
+=cut
+sub outages_cgi : Path('/thruk/cgi-bin/outages.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/outages/index');
+    return $c->detach('/outages/index');
 }
 
+
 ######################################
-# avail
-sub avail_cgi : Path('thruk/cgi-bin/avail.cgi') {
+
+=head2 avail_cgi
+
+page: /thruk/cgi-bin/avail.cgi
+
+=cut
+sub avail_cgi : Path('/thruk/cgi-bin/avail.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/avail/index');
+    return $c->detach('/avail/index');
 }
 
+
 ######################################
-# trends
-sub trends_cgi : Path('thruk/cgi-bin/trends.cgi') {
+
+=head2 trends_cgi
+
+page: /thruk/cgi-bin/trends.cgi
+
+=cut
+sub trends_cgi : Path('/thruk/cgi-bin/trends.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/trends/index');
+    return $c->detach('/trends/index');
 }
 
+
 ######################################
-# history
-sub history_cgi : Path('thruk/cgi-bin/history.cgi') {
+
+=head2 history_cgi
+
+page: /thruk/cgi-bin/history.cgi
+
+=cut
+sub history_cgi : Path('/thruk/cgi-bin/history.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/history/index');
+    return $c->detach('/history/index');
 }
 
+
 ######################################
-# summary
-sub summary_cgi : Path('thruk/cgi-bin/summary.cgi') {
+
+=head2 summary_cgi
+
+page: /thruk/cgi-bin/summary.cgi
+
+=cut
+sub summary_cgi : Path('/thruk/cgi-bin/summary.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/summary/index');
+    return $c->detach('/summary/index');
 }
 
+
 ######################################
-# histogram
-sub histogram_cgi : Path('thruk/cgi-bin/histogram.cgi') {
+
+=head2 histogram_cgi
+
+page: /thruk/cgi-bin/histogram.cgi
+
+=cut
+sub histogram_cgi : Path('/thruk/cgi-bin/histogram.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/histogram/index');
+    return $c->detach('/histogram/index');
 }
 
+
 ######################################
-# notifications
-sub notifications_cgi : Path('thruk/cgi-bin/notifications.cgi') {
+
+=head2 notifications_cgi
+
+page: /thruk/cgi-bin/notifications.cgi
+
+=cut
+sub notifications_cgi : Path('/thruk/cgi-bin/notifications.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/notifications/index');
+    return $c->detach('/notifications/index');
 }
 
+
 ######################################
-# showlog
-sub showlog_cgi : Path('thruk/cgi-bin/showlog.cgi') {
+
+=head2 showlog_cgi
+
+page: /thruk/cgi-bin/showlog.cgi
+
+=cut
+sub showlog_cgi : Path('/thruk/cgi-bin/showlog.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/showlog/index');
+    return $c->detach('/showlog/index');
 }
 
+
 ######################################
-# extinfo
-sub extinfo_cgi : Path('thruk/cgi-bin/extinfo.cgi') {
+
+=head2 extinfo_cgi
+
+page: /thruk/cgi-bin/extinfo.cgi
+
+=cut
+sub extinfo_cgi : Path('/thruk/cgi-bin/extinfo.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/extinfo/index');
+    return $c->detach('/extinfo/index');
 }
 
+
 ######################################
-# config
-sub config_cgi : Path('thruk/cgi-bin/config.cgi') {
+
+=head2 config_cgi
+
+page: /thruk/cgi-bin/config.cgi
+
+=cut
+sub config_cgi : Path('/thruk/cgi-bin/config.cgi') {
     my ( $self, $c ) = @_;
-    $c->detach('/config/index');
+    return $c->detach('/config/index');
 }
 
+
 ######################################
-# errors
-sub error : Path('error/') {
+
+=head2 error
+
+page: /error/
+
+internal use only
+
+=cut
+sub error : Path('/error/') {
     my ( $self, $c ) = @_;
     if(scalar @{$c->request->args} < 1) {
-        $c->detach("default");
+        return $c->detach("default");
     }
-    $c->detach('/error/'.join('/', @{$c->request->args}));
+    return $c->detach('/error/'.join('/', @{$c->request->args}));
 }
+
+
+######################################
 
 =head2 end
 
-Attempt to render a view, if needed.
+check and display errors (if any)
 
 =cut
-
 sub end : ActionClass('RenderView') {
     my ( $self, $c ) = @_;
     my @errors = @{$c->error};
@@ -257,8 +433,9 @@ sub end : ActionClass('RenderView') {
         for my $error (@errors) {
             $c->log->error($error);
         }
-        $c->detach('/error/index/13');
+        return $c->detach('/error/index/13');
     }
+    return 1;
 }
 
 =head1 AUTHOR

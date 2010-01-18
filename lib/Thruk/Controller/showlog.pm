@@ -47,7 +47,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $filter .= "Filter: time <= $end\n";
 
     my $query = "GET log\nColumns: time type options state\n".$filter;
-    $query   .= Thruk::Helper::get_auth_filter($c, 'log');
+    $query   .= Thruk::Utils::get_auth_filter($c, 'log');
 
     $c->stats->profile(begin => "showlog::fetch");
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
@@ -57,7 +57,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($oldestfirst) {
         $order = "ASC";
     }
-    my $sortedlogs = Thruk::Helper->sort($c, $logs, 'time', $order);
+    my $sortedlogs = Thruk::Utils::sort($c, $logs, 'time', $order);
 
     $c->stash->{logs}             = $sortedlogs;
     $c->stash->{archive}          = $archive;
@@ -70,6 +70,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}             = 'showlog';
     $c->stash->{template}         = 'showlog.tt';
     $c->stash->{'no_auto_reload'} = 1;
+
+    return 1;
 }
 
 

@@ -4,8 +4,8 @@ use 5.008000;
 use strict;
 use warnings;
 
+use Thruk::Utils;
 use Catalyst::Runtime '5.70';
-use Thruk::Helper;
 
 ###################################################
 # Set flags and add plugins for the application
@@ -23,7 +23,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.20_3';
+our $VERSION = '0.21_1';
 
 ###################################################
 # Configure the application.
@@ -37,17 +37,17 @@ our $VERSION = '0.20_3';
 
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'January 14, 2010',
+                    'released'               => 'January 18, 2010',
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',
                         ENCODING           => 'utf8',
                         INCLUDE_PATH       =>  'templates',
                         FILTERS            => {
-                                                'duration'  => \&Thruk::Helper::filter_duration,
+                                                'duration'  => \&Thruk::Utils::filter_duration,
                                             },
                         PRE_DEFINE         => {
                                                 'sprintf'   => sub { my $format = shift; sprintf $format, @_ },
-                                                'duration'  => \&Thruk::Helper::filter_duration,
+                                                'duration'  => \&Thruk::Utils::filter_duration,
                                             },
                         PRE_CHOMP          => 1,
                         POST_CHOMP         => 1,

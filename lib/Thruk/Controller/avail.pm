@@ -85,6 +85,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     else {
         $self->_show_step_1($c);
     }
+
+    return 1;
 }
 
 ##########################################################
@@ -94,6 +96,7 @@ sub _show_step_1 {
     $c->stats->profile(begin => "_show_step_1()");
     $c->stash->{template} = 'avail_step_1.tt';
     $c->stats->profile(end => "_show_step_1()");
+
     return 1;
 }
 
@@ -106,16 +109,16 @@ sub _show_step_2 {
 
     my $data;
     if($report_type eq 'hosts') {
-        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Helper::get_auth_filter($c, 'hosts'), 'name');
+        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hosts'), 'name');
     }
     elsif($report_type eq 'hostgroups') {
-        $data = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Helper::get_auth_filter($c, 'hostgroups'), 'name');
+        $data = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hostgroups'), 'name');
     }
     elsif($report_type eq 'servicegroups') {
-        $data = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Helper::get_auth_filter($c, 'servicegroups'), 'name');
+        $data = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'servicegroups'), 'name');
     }
     elsif($report_type eq 'services') {
-        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }
@@ -129,6 +132,7 @@ sub _show_step_2 {
     $c->stash->{template}    = 'avail_step_2.tt';
 
     $c->stats->profile(end => "_show_step_2($report_type)");
+
     return 1;
 }
 
@@ -138,12 +142,12 @@ sub _show_step_3 {
 
     $c->stats->profile(begin => "_show_step_3()");
 
-    $c->stash->{timeperiods} = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name".Thruk::Helper::get_auth_filter($c, 'timeperiods'), { Slice => 1});
+    $c->stash->{timeperiods} = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name".Thruk::Utils::get_auth_filter($c, 'timeperiods'), { Slice => 1});
     $c->stash->{template}    = 'avail_step_3.tt';
 
     if($c->{'request'}->{'parameters'}->{'service'}) {
         my($host,$service);
-        ($host,$service) = split/;/, $c->{'request'}->{'parameters'}->{'service'};
+        ($host,$service) = split/;/mx, $c->{'request'}->{'parameters'}->{'service'};
         $c->stash->{host}    = $host;
         $c->stash->{service} = $service;
     }
@@ -206,7 +210,7 @@ sub _create_report {
     my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
     my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
 
-    my($start,$end) = Thruk::Helper->_get_start_end_for_timeperiod($timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
+    my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod($timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
 
     $c->log->debug("start: ".$start." - ".(scalar localtime($start)));
     $c->log->debug("end  : ".$end." - ".(scalar localtime($end)));
@@ -281,7 +285,7 @@ sub _create_report {
 
     # all services
     elsif(defined $service and $service eq 'all') {
-        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
         my $services_data;
         for my $service (@{$services}) {
             $services_data->{$service->{'host_name'}.";".$service->{'description'}} = {
@@ -298,7 +302,7 @@ sub _create_report {
         unless($c->check_permissions('host', $host)) {
             $c->detach('/error/index/5');
         }
-        my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: description", 'description' );
+        my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description' );
         $c->stash->{'services'} = $service_data;
         $loghostheadfilter = "Filter: host_name = $host\n";
 
@@ -310,7 +314,7 @@ sub _create_report {
 
     # all hosts
     elsif(defined $host and $host eq 'all') {
-        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' );
+        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' );
         $logserviceheadfilter = "Filter: service_description =\n";
         $c->stash->{'hosts'} = $host_data;
         push @{$hosts}, keys %{$host_data};
@@ -323,8 +327,8 @@ sub _create_report {
             $hostfilter        = "Filter: groups >= $hostgroup\n";
             $loghostheadfilter = "Filter: current_host_groups >= $hostgroup\n";
         }
-        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Helper::get_auth_filter($c, 'hosts')."\nColumns: name\n$hostfilter", 'name' );
-        my $groups    = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Helper::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
+        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name\n$hostfilter", 'name' );
+        my $groups    = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
 
         # join our groups together
         my %joined_groups;
@@ -335,7 +339,7 @@ sub _create_report {
                 $joined_groups{$name}->{'hosts'} = {};
             }
 
-            for my $hostname (split /,/, $group->{'members'}) {
+            for my $hostname (split /,/mx, $group->{'members'}) {
                 # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
 
@@ -362,8 +366,8 @@ sub _create_report {
             $servicefilter        = "Filter: groups >= $servicegroup\n";
             $logserviceheadfilter = "Filter: current_service_groups >= $servicegroup\n";
         }
-        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
-        my $groups       = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
+        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $groups       = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
 
         my $service_data;
         for my $service (@{$all_services}) {
@@ -379,8 +383,8 @@ sub _create_report {
                 $joined_groups{$name}->{'services'} = {};
             }
 
-            for my $member (split /,/, $group->{'members'}) {
-                my($hostname,$description) = split/\|/, $member, 2;
+            for my $member (split /,/mx, $group->{'members'}) {
+                my($hostname,$description) = split/\|/mx, $member, 2;
                 # show only services with proper authorization
                 next unless defined $service_data->{$hostname}->{$description};
 
@@ -444,13 +448,13 @@ sub _create_report {
     push @typefilter, "Filter: class = 2\n"; # programm messages
     $logfilter .= join("\n", @typefilter)."\nOr: ".(scalar @typefilter);
 
-    my $log_query = "GET log\n".$logfilter.Thruk::Helper::get_auth_filter($c, 'log')."\nColumns: class time type options state host_name service_description plugin_output";
+    my $log_query = "GET log\n".$logfilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: class time type options state host_name service_description plugin_output";
     $c->log->debug($log_query);
     $c->stats->profile(begin => "avail.pm fetchlogs");
     $logs = $c->{'live'}->selectall_arrayref($log_query, { Slice => 1} );
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
-    $logs = Thruk::Helper->sort($c, $logs, 'time', 'ASC');
+    $logs = Thruk::Utils::sort($c, $logs, 'time', 'ASC');
     $c->stash->{'logs'} = $logs;
 
     #$Data::Dumper::Indent = 1;

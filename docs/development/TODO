@@ -10,6 +10,8 @@ general
     - check TT strict option
     - write tests
     - add backend name to logs
+    - remove $self from Thruk::Utils or replace with $c->{'utils'}
+    - remove eval from Thruk::Utils->sort
 
 extinfo:
     - finish performance data on extinfo type 4
