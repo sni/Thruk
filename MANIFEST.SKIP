@@ -14,3 +14,4 @@ thruk_local.conf
 docs/development/git.txt
 script/thruk_update_docs.sh
 script/thruk_update_table_docs.pl
+script/thruk_extract_cmd_templates.pl

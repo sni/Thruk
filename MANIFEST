@@ -7,9 +7,9 @@ contrib/livestatus/patches/0004-log-every-request-input.patch.obsolete
 contrib/livestatus/patches/0005-added-timeperiods-table.obsolete
 contrib/livestatus/patches/0006-added-new-table-contactgroups.obsolete
 contrib/livestatus/patches/0007-added-interval_length-to-status-table.obsolete
-contrib/livestatus/patches/0008-fixed-logentries-for-external-commands.patch
-contrib/livestatus/patches/0009-added-missing-icon_image_expanded-to-TableHosts.patch
-contrib/livestatus/patches/0010-added-icon_image_expanded-for-services.patch
+contrib/livestatus/patches/0008-fixed-logentries-for-external-commands.obsolete
+contrib/livestatus/patches/0009-added-missing-icon_image_expanded-to-TableHosts.obsolete
+contrib/livestatus/patches/0010-added-icon_image_expanded-for-services.obsolete
 contrib/livestatus/patches/build.sh
 contrib/livestatus/patches/create_patched_livestatus_source_dir.sh
 contrib/livestatus/patches/INSTALL
@@ -160,7 +160,6 @@ root/thruk/stylesheets/thruk_noframes_ie_fix.css
 root/thruk/stylesheets/trends.css
 script/thruk_cgi.pl
 script/thruk_create.pl
-script/thruk_extract_cmd_templates.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_server.pl
