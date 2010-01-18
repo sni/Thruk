@@ -362,11 +362,11 @@ sub _create_report {
             $servicefilter        = "Filter: groups >= $servicegroup\n";
             $logserviceheadfilter = "Filter: current_service_groups >= $servicegroup\n";
         }
-        my $services    = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
-        my $groups      = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
+        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Helper::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $groups       = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Helper::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
 
         my $service_data;
-        for my $service (@{$services}) {
+        for my $service (@{$all_services}) {
             $service_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
         }
 
@@ -396,9 +396,9 @@ sub _create_report {
         $c->stash->{'groups'} = \%joined_groups;
 
         my %tmp_hosts;
-        for my $service (@{$services}) {
+        for my $service (@{$all_services}) {
             $tmp_hosts{$service->{host_name}} = 1;
-            push @{$services}, { 'host_name' => $service->{host_name}, 'service' => $service->{'description'} };
+            push @{$services}, { 'host' => $service->{host_name}, 'service' => $service->{'description'} };
         }
         push @{$hosts}, keys %tmp_hosts;
     } else {
@@ -462,7 +462,6 @@ sub _create_report {
     #    print FH "\n";
     #}
     #close(FH);
-
     use Monitoring::Availability;
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new(
@@ -474,6 +473,8 @@ sub _create_report {
         'initialassumedhoststate'      => $initialassumedhoststate,
         'initialassumedservicestate'   => $initialassumedservicestate,
         'backtrack'                    => $backtrack,
+        #'verbose'                      => 1,
+        #'logger'                       => $c->log,
     );
     $c->stash->{avail_data} = $ma->calculate(
         'start'                        => $start,
@@ -482,7 +483,7 @@ sub _create_report {
         'hosts'                        => $hosts,
         'services'                     => $services,
     );
-    $c->log->info(Dumper($c->stash->{avail_data}));
+    #$c->log->info(Dumper($c->stash->{avail_data}));
     $c->stats->profile(end => "calculate availability");
 
     # finished
