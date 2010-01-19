@@ -721,7 +721,7 @@ sub get_start_end_for_timeperiod {
     }
     elsif($timeperiod eq 'yesterday') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
-        $start = Mktime($year,$month,$day,  0,0,0) - 2* 86400;
+        $start = Mktime($year,$month,$day,  0,0,0) - 86400;
         $end   = $start + 86400;
     }
     elsif($timeperiod eq 'thisweek') {
