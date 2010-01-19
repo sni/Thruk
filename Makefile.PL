@@ -60,11 +60,11 @@ requires 'Catalyst::Engine::FastCGI';
 requires 'Catalyst::Log::Log4perl';
 requires 'Log::Dispatch::File';
 
-author_requires 'Catalyst::Devel';
-author_requires 'Test::Pod'                         => 1.40;
-author_requires 'Test::Perl::Critic';
-author_requires 'Test::Pod::Coverage';
-author_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
+#author_requires 'Catalyst::Devel';
+#author_requires 'Test::Pod'                         => 1.40;
+#author_requires 'Test::Perl::Critic';
+#author_requires 'Test::Pod::Coverage';
+#author_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
 
 catalyst;
 install_script glob('script/*.pl');

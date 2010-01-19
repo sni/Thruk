@@ -145,8 +145,9 @@ sub _show_step_3 {
     $c->stash->{timeperiods} = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name".Thruk::Utils::get_auth_filter($c, 'timeperiods'), { Slice => 1});
     $c->stash->{template}    = 'avail_step_3.tt';
 
-    if($c->{'request'}->{'parameters'}->{'service'}) {
-        my($host,$service);
+    my($host,$service);
+    $service = $c->{'request'}->{'parameters'}->{'service'};
+    if($service and CORE::index($service, ';') > 0) {
         ($host,$service) = split/;/mx, $c->{'request'}->{'parameters'}->{'service'};
         $c->stash->{host}    = $host;
         $c->stash->{service} = $service;
@@ -168,6 +169,12 @@ sub _create_report {
     my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'};
     my $service        = $c->{'request'}->{'parameters'}->{'service'};
     my $servicegroup   = $c->{'request'}->{'parameters'}->{'servicegroup'};
+
+    if(defined $service and CORE::index($service, ';') > 0) {
+        ($host,$service) = split/;/mx, $service;
+        $c->stash->{host}    = $host;
+        $c->stash->{service} = $service;
+    }
 
     if(defined $host and $host eq 'null') { undef $host; }
 
@@ -285,13 +292,10 @@ sub _create_report {
 
     # all services
     elsif(defined $service and $service eq 'all') {
-        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
         my $services_data;
-        for my $service (@{$services}) {
-            $services_data->{$service->{'host_name'}.";".$service->{'description'}} = {
-                'host_name'   => $service->{'host_name'},
-                'description' => $service->{'description'},
-            };
+        for my $service (@{$all_services}) {
+            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
             push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
         }
         $c->stash->{'services'} = $services_data;
@@ -303,7 +307,7 @@ sub _create_report {
             $c->detach('/error/index/5');
         }
         my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description' );
-        $c->stash->{'services'} = $service_data;
+        $c->stash->{'services'} = { $host =>  $service_data };
         $loghostheadfilter = "Filter: host_name = $host\n";
 
         for my $description (keys %{$service_data}) {

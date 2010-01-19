@@ -33,92 +33,10 @@
     <br>
     <br>
 
-    [% FOR groupname IN groups.keys.sort %]
-    [% SET g = groups.$groupname %]
-    [% SET perc_up_total                = 0 %]
-    [% SET perc_down_total              = 0 %]
-    [% SET perc_unreachable_total       = 0 %]
-    [% SET perc_up_known_total          = 0 %]
-    [% SET perc_down_known_total        = 0 %]
-    [% SET perc_unreachable_known_total = 0 %]
-    [% SET perc_undetermined_total      = 0 %]
-    <div align="center" class='dataTitle'>Hostgroup '[% g.name %]' Host State Breakdowns:</div>
-    <div align="center">
-      <table border="0" class='data'>
-        <tr>
-          <th class='data'>Host</th>
-          <th class='data'>% Time Up</th>
-          <th class='data'>% Time Down</th>
-          <th class='data'>% Time Unreachable</th>
-          <th class='data'>% Time Undetermined</th>
-        </tr>
-        [% FOR hostname IN g.hosts.keys.sort %]
-        [% SET class = 'dataEven' IF loop.even %]
-        [% SET class = 'dataOdd'  IF loop.odd  %]
-        [% SET
-            total_time_unknown =
-                  avail_data.hosts.$hostname.time_indeterminate_nodata
-                + avail_data.hosts.$hostname.time_indeterminate_notrunning
-        %]
-        [% SET
-            total_time =
-                   avail_data.hosts.$hostname.time_up
-                + avail_data.hosts.$hostname.time_down
-                + avail_data.hosts.$hostname.time_unreachable
-                + avail_data.hosts.$hostname.time_indeterminate_nodata
-                + avail_data.hosts.$hostname.time_indeterminate_notrunning
-        %]
-        [% SET
-            total_time_known = total_time - total_time_unknown
-        %]
-        [% IF total_time > 0 %]
-          [% SET perc_up           = avail_data.hosts.$hostname.time_up / total_time * 100          %]
-          [% SET perc_down         = avail_data.hosts.$hostname.time_down / total_time * 100        %]
-          [% SET perc_unreachable  = avail_data.hosts.$hostname.time_unreachable / total_time * 100 %]
-          [% SET perc_undetermined = total_time_unknown / total_time * 100                          %]
-        [% ELSE %]
-          [% SET perc_up           = 0 %]
-          [% SET perc_down         = 0 %]
-          [% SET perc_unreachable  = 0 %]
-          [% SET perc_undetermined = 0 %]
-        [% END %]
-
-        [% IF total_time_known > 0 %]
-          [% SET perc_up_known          = avail_data.hosts.$hostname.time_up / total_time_known * 100          %]
-          [% SET perc_down_known        = avail_data.hosts.$hostname.time_down / total_time_known * 100        %]
-          [% SET perc_unreachable_known = avail_data.hosts.$hostname.time_unreachable / total_time_known * 100 %]
-        [% ELSE %]
-          [% SET perc_up_known          = 0 %]
-          [% SET perc_down_known        = 0 %]
-          [% SET perc_unreachable_known = 0 %]
-        [% END %]
-        [% SET perc_up_total                = perc_up_total + perc_up                               %]
-        [% SET perc_down_total              = perc_down_total + perc_down                           %]
-        [% SET perc_unreachable_total       = perc_unreachable_total + perc_unreachable             %]
-        [% SET perc_up_known_total          = perc_up_known_total + perc_up_known                   %]
-        [% SET perc_down_known_total        = perc_down_known_total + perc_down_known               %]
-        [% SET perc_unreachable_known_total = perc_unreachable_known_total + perc_unreachable_known %]
-        [% SET perc_undetermined_total      = perc_undetermined_total + perc_undetermined           %]
-        <tr class='[% class %]'>
-          <td class='[% class %]'><a href='avail.cgi?host=[% hostname %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% hostname %]</a></td>
-          <td class='hostUP'>[% sprintf('%2.3f', perc_up) %]% ([% sprintf('%2.3f', perc_up_known ) %]%)</td>
-          <td class='hostDOWN'>[% sprintf('%2.3f', perc_down) %]% ([% sprintf('%2.3f', perc_down_known ) %]%)</td>
-          <td class='hostUNREACHABLE'>[% sprintf('%2.3f', perc_unreachable) %]% ([% sprintf('%2.3f', perc_unreachable_known ) %]%)</td>
-          <td class='[% class %]'>[% sprintf('%2.3f', perc_undetermined) %]%</td>
-        </tr>
-        [% END %]
-        [% SET avgClass = 'dataEven' IF class == 'dataOdd' %]
-        [% SET avgClass = 'dataOdd'  IF class == 'dataEven' %]
-        <tr class='[% avgClass %]'>
-          <td class='[% avgClass %]'>Average</td>
-          <td class='hostUP'>[% sprintf('%2.3f', perc_up_total / g.hosts.size) %]% ([% sprintf('%2.3f', perc_up_known_total / g.hosts.size) %]%)</td>
-          <td class='hostDOWN'>[% sprintf('%2.3f', perc_down_total / g.hosts.size) %]% ([% sprintf('%2.3f', perc_down_known_total / g.hosts.size) %]%)</td>
-          <td class='hostUNREACHABLE'>[% sprintf('%2.3f', perc_unreachable_total / g.hosts.size) %]% ([% sprintf('%2.3f', perc_unreachable_known_total / g.hosts.size) %]%)</td>
-          <td class='[% avgClass %]'>[% sprintf('%2.3f', perc_undetermined_total / g.hosts.size) %]%</td>
-        </tr>
-      </table>
-    </div>
-    <br><br>
+    [% FOR groupname IN groups.keys.sort  %]
+        [% SET hostgroupname = groupname      %]
+        [% SET hosts         = g.hosts        %]
+        [% PROCESS avail_report_hosts_part.tt %]
     [% END %]
 
 [% PROCESS _footer.tt %]

@@ -28,47 +28,6 @@
     <br>
     <br>
 
-    <div align="center" class='dataTitle'>Service State Breakdowns:</div>
-    <div align="center">
-      <table border="0" class='data'>
-        <tr>
-          <th class='data'>Host</th>
-          <th class='data'>Service</th>
-          <th class='data'>% Time O </th>
-          <th class='data'>% Time Warning</th>
-          <th class='data'>% Time Unknown</th>
-          <th class='data'>% Time Critical</th>
-          <th class='data'>% Time Undetermined</th>
-        </tr>
-        [% SET lasthost = '' %]
-        [% FOR servicename IN services.keys.sort %]
-        [% SET s = services.$servicename %]
-        [% SET class = 'dataEven' IF loop.odd  %]
-        [% SET class = 'dataOdd'  IF loop.even %]
-        <tr class='[% class %]'>
-          <td class='[% class %]'>[% IF lasthost != s.host_name %]<a href='avail.cgi?host=[% s.host_name %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% s.host_name %]</a>[% END %]</td>
-          <td class='[% class %]'><a href='avail.cgi?host=[% s.host_name %]&amp;service=[% s.description %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% s.description %]</a></td>
-          <td class='serviceOK'>0.000% (0.000%)</td>
-          <td class='serviceWARNING'>0.000% (0.000%)</td>
-          <td class='serviceUNKNOWN'>0.000% (0.000%)</td>
-          <td class='serviceCRITICAL'>46.675% (100.000%)</td>
-          <td class='[% class %]'>53.325%</td>
-        </tr>
-        [% SET lasthost = s.host_name %]
-        [% END %]
-        [% SET avgClass = 'dataEven' IF class == 'dataOdd' %]
-        [% SET avgClass = 'dataOdd'  IF class == 'dataEven' %]
-        <tr class='[% avgClass %]'>
-          <td class='[% avgClass %]' colspan=2>Average</td>
-          <td class='serviceOK'>0.000% (0.000%)</td>
-          <td class='serviceWARNING'>0.000% (0.000%)</td>
-          <td class='serviceUNKNOWN'>0.000% (0.000%)</td>
-          <td class='serviceCRITICAL'>46.493% (100.000%)</td>
-          <td class='[% avgClass %]'>53.507%</td>
-        </tr>
-      </table>
-    </div>
-    <br>
-    <br>
+    [% PROCESS avail_report_services_part.tt %]
 
 [% PROCESS _footer.tt %]

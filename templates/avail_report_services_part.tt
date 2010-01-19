@@ -1,0 +1,119 @@
+    [% SET perc_ok_total                    = 0 %]
+    [% SET perc_warning_total               = 0 %]
+    [% SET perc_unknown_total               = 0 %]
+    [% SET perc_critical_total              = 0 %]
+    [% SET perc_ok_known_total              = 0 %]
+    [% SET perc_warning_known_total         = 0 %]
+    [% SET perc_unknown_known_total         = 0 %]
+    [% SET perc_critical_known_total        = 0 %]
+    [% SET perc_undetermined_services_total = 0 %]
+
+    [% IF servicegroupname %]
+        <div align="center" class='dataTitle'>Servicegroup '[% g.name %]' Service State Breakdowns:</div>
+    [% ELSIF host %]
+        <div align="center" class='dataTitle'>State Breakdowns For Host Services:</div>
+    [% ELSE %]
+        <div align="center" class='dataTitle'>Service State Breakdowns:</div>
+    [% END %]
+
+    <div align="center">
+      <table border="0" class='data'>
+        <tr>
+          [% UNLESS host %]
+          <th class='data'>Host</th>
+          [% END %]
+          <th class='data'>Service</th>
+          <th class='data'>% Time O </th>
+          <th class='data'>% Time Warning</th>
+          <th class='data'>% Time Unknown</th>
+          <th class='data'>% Time Critical</th>
+          <th class='data'>% Time Undetermined</th>
+        </tr>
+        [% SET lasthost     = '' %]
+        [% SET servicecount = 0 %]
+        [% FOR hostname IN services.keys.sort %]
+        [% FOR servicename IN services.$hostname.keys.sort %]
+        [% SET class = 'dataEven' IF loop.odd  %]
+        [% SET class = 'dataOdd'  IF loop.even %]
+        [% SET servicecount = servicecount + 1 %]
+
+        [% SET
+            total_time_unknown =
+                  avail_data.services.$hostname.$servicename.time_indeterminate_nodata
+                + avail_data.services.$hostname.$servicename.time_indeterminate_notrunning
+        %]
+        [% SET
+            total_time =
+                   avail_data.services.$hostname.$servicename.time_ok
+                + avail_data.services.$hostname.$servicename.time_warning
+                + avail_data.services.$hostname.$servicename.time_unknown
+                + avail_data.services.$hostname.$servicename.time_critical
+                + avail_data.services.$hostname.$servicename.time_indeterminate_nodata
+                + avail_data.services.$hostname.$servicename.time_indeterminate_notrunning
+        %]
+        [% SET
+            total_time_known = total_time - total_time_unknown
+        %]
+        [% IF total_time > 0 %]
+          [% SET perc_ok           = avail_data.services.$hostname.$servicename.time_ok / total_time * 100       %]
+          [% SET perc_warning      = avail_data.services.$hostname.$servicename.time_warning / total_time * 100  %]
+          [% SET perc_unknown      = avail_data.services.$hostname.$servicename.time_unknown / total_time * 100  %]
+          [% SET perc_critical     = avail_data.services.$hostname.$servicename.time_critical / total_time * 100 %]
+          [% SET perc_undetermined = total_time_unknown / total_time * 100                          %]
+        [% ELSE %]
+          [% SET perc_ok           = 0 %]
+          [% SET perc_warning      = 0 %]
+          [% SET perc_unknown      = 0 %]
+          [% SET perc_critical     = 0 %]
+          [% SET perc_undetermined = 0 %]
+        [% END %]
+
+        [% IF total_time_known > 0 %]
+          [% SET perc_ok_known       = avail_data.services.$hostname.$servicename.time_ok / total_time_known * 100       %]
+          [% SET perc_warning_known  = avail_data.services.$hostname.$servicename.time_warning / total_time_known * 100  %]
+          [% SET perc_unknown_known  = avail_data.services.$hostname.$servicename.time_unknown / total_time_known * 100  %]
+          [% SET perc_critical_known = avail_data.services.$hostname.$servicename.time_critical / total_time_known * 100 %]
+        [% ELSE %]
+          [% SET perc_ok_known       = 0 %]
+          [% SET perc_warning_known  = 0 %]
+          [% SET perc_unknown_known  = 0 %]
+          [% SET perc_critical_known = 0 %]
+        [% END %]
+        [% SET perc_ok_total                    = perc_ok_total + perc_ok                               %]
+        [% SET perc_warning_total               = perc_warning_total + perc_warning                     %]
+        [% SET perc_unknown_total               = perc_unknown_total + perc_unknown                     %]
+        [% SET perc_critical_total              = perc_critical_total + perc_critical                   %]
+        [% SET perc_ok_known_total              = perc_ok_known_total + perc_ok_known                   %]
+        [% SET perc_warning_known_total         = perc_warning_known_total + perc_warning_known         %]
+        [% SET perc_unknown_known_total         = perc_unknown_known_total + perc_unknown_known         %]
+        [% SET perc_critical_known_total        = perc_critical_known_total + perc_critical_known       %]
+        [% SET perc_undetermined_services_total = perc_undetermined_services_total + perc_undetermined  %]
+
+        <tr class='[% class %]'>
+          [% UNLESS host %]
+          <td class='[% class %]'>[% IF lasthost != hostname %]<a href='avail.cgi?host=[% hostname %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% hostname %]</a>[% END %]</td>
+          [% END %]
+          <td class='[% class %]'><a href='avail.cgi?host=[% hostname %]&amp;service=[% servicename %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% servicename %]</a></td>
+          <td class='serviceOK'>[% sprintf('%2.3f', perc_ok) %]% ([% sprintf('%2.3f', perc_ok_known ) %]%)</td>
+          <td class='serviceWARNING'>[% sprintf('%2.3f', perc_warning) %]% ([% sprintf('%2.3f', perc_warning_known ) %]%)</td>
+          <td class='serviceUNKNOWN'>[% sprintf('%2.3f', perc_unknown) %]% ([% sprintf('%2.3f', perc_unknown_known ) %]%)</td>
+          <td class='serviceCRITICAL'>[% sprintf('%2.3f', perc_critical) %]% ([% sprintf('%2.3f', perc_critical_known ) %]%)</td>
+          <td class='[% class %]'>[% sprintf('%2.3f', perc_undetermined) %]%</td>
+        </tr>
+        [% lasthost = hostname %]
+        [% END %]
+        [% END %]
+        [% SET avgClass = 'dataEven' IF class == 'dataOdd' %]
+        [% SET avgClass = 'dataOdd'  IF class == 'dataEven' %]
+        <tr class='[% avgClass %]'>
+          <td class='[% avgClass %]'[% UNLESS host %] colspan=2[% END %]>Average</td>
+          <td class='serviceOK'>[% sprintf('%2.3f', perc_ok_total / servicecount) %]% ([% sprintf('%2.3f', perc_ok_known_total / servicecount) %]%)</td>
+          <td class='serviceWARNING'>[% sprintf('%2.3f', perc_warning_total / servicecount) %]% ([% sprintf('%2.3f', perc_warning_known_total / servicecount) %]%)</td>
+          <td class='serviceUNKNOWN'>[% sprintf('%2.3f', perc_unknown_total / servicecount) %]% ([% sprintf('%2.3f', perc_unknown_known_total / servicecount) %]%)</td>
+          <td class='serviceCRITICAL'>[% sprintf('%2.3f', perc_critical_total / servicecount) %]% ([% sprintf('%2.3f', perc_critical_known_total / servicecount) %]%)</td>
+          <td class='[% avgClass %]'>[% sprintf('%2.3f', perc_undetermined_services_total / servicecount) %]%</td>
+        </tr>
+      </table>
+    </div>
+    <br>
+    <br>
