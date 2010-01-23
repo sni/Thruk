@@ -3,6 +3,7 @@ package Thruk::Controller::avail;
 use strict;
 use warnings;
 use Data::Dumper;
+use Monitoring::Availability;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -35,7 +36,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # lookup parameters
     my $report_type    = $c->{'request'}->{'parameters'}->{'report_type'}  || '';
     my $get_date_parts = $c->{'request'}->{'parameters'}->{'get_date_parts'};
-    my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'}   || '';
+    my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'};
     my $host           = $c->{'request'}->{'parameters'}->{'host'}         || '';
     my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $service        = $c->{'request'}->{'parameters'}->{'service'}      || '';
@@ -197,6 +198,7 @@ sub _create_report {
         $c->stash->{template}   = 'avail_report_hosts.tt';
     }
     else {
+        $c->log->debug("unknown report type");
         return;
     }
 
@@ -217,6 +219,7 @@ sub _create_report {
     my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
     my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
 
+    $timeperiod = 'last24hours' if(!defined $timeperiod and !defined $t1 and !defined $t2);
     my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod($timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
 
     $c->log->debug("start: ".$start." - ".(scalar localtime($start)));
@@ -247,6 +250,24 @@ sub _create_report {
     # default backtrack is 4 days
     $backtrack = 4 unless defined $backtrack;
     $backtrack = 4 if $backtrack < 0;
+
+    $assumeinitialstates          = 'no' unless $assumeinitialstates          eq 'yes';
+    $assumestateretention         = 'no' unless $assumestateretention         eq 'yes';
+    $assumestatesduringnotrunning = 'no' unless $assumestatesduringnotrunning eq 'yes';
+    $includesoftstates            = 'no' unless $includesoftstates            eq 'yes';
+
+    $initialassumedhoststate      = 0 unless $initialassumedhoststate ==  0  # Unspecified
+                                          or $initialassumedhoststate == -1  # Current State
+                                          or $initialassumedhoststate ==  3  # Host Up
+                                          or $initialassumedhoststate ==  4  # Host Down
+                                          or $initialassumedhoststate ==  5; # Host Unreachable
+
+    $initialassumedservicestate   = 0 unless $initialassumedservicestate ==  0  # Unspecified
+                                          or $initialassumedservicestate == -1  # Current State
+                                          or $initialassumedservicestate ==  6  # Service Ok
+                                          or $initialassumedservicestate ==  8  # Service Warning
+                                          or $initialassumedservicestate ==  7  # Service Unknown
+                                          or $initialassumedservicestate ==  9; # Service Critical
 
     $c->stash->{rpttimeperiod}                = $rpttimeperiod;
     $c->stash->{assumeinitialstates}          = $assumeinitialstates;
@@ -458,19 +479,15 @@ sub _create_report {
     $logs = $c->{'live'}->selectall_arrayref($log_query, { Slice => 1} );
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
-    $logs = Thruk::Utils::sort($c, $logs, 'time', 'ASC');
-    $c->stash->{'logs'} = $logs;
-
     #$Data::Dumper::Indent = 1;
     #open(FH, '>', '/tmp/logs.txt') or die("cannot open logs.txt: $!");
-    #print FH Dumper($logs);
+    ##print FH Dumper($logs);
     #for my $line (@{$logs}) {
     #    print FH '['.$line->{'time'}.'] '.$line->{'type'};
     #    print FH ': '.$line->{'options'} if(defined $line->{'options'} and $line->{'options'} ne '');
     #    print FH "\n";
     #}
     #close(FH);
-    use Monitoring::Availability;
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new(
         'rpttimeperiod'                => $rpttimeperiod,
@@ -478,11 +495,11 @@ sub _create_report {
         'assumestateretention'         => $assumestateretention,
         'assumestatesduringnotrunning' => $assumestatesduringnotrunning,
         'includesoftstates'            => $includesoftstates,
-        'initialassumedhoststate'      => $initialassumedhoststate,
-        'initialassumedservicestate'   => $initialassumedservicestate,
+        'initialassumedhoststate'      => $self->_initialassumedhoststate_to_state($initialassumedhoststate),
+        'initialassumedservicestate'   => $self->_initialassumedservicestate_to_state($initialassumedservicestate),
         'backtrack'                    => $backtrack,
-        #'verbose'                      => 1,
-        #'logger'                       => $c->log,
+#        'verbose'                      => 1,
+#        'logger'                       => $c->log,
     );
     $c->stash->{avail_data} = $ma->calculate(
         'start'                        => $start,
@@ -494,11 +511,47 @@ sub _create_report {
     #$c->log->info(Dumper($c->stash->{avail_data}));
     $c->stats->profile(end => "calculate availability");
 
+    if($full_log_entries) {
+        $c->stash->{'logs'} = $ma->get_full_logs();
+        #$c->log->debug("got full logs: ".Dumper($c->stash->{'logs'}));
+    }
+    elsif($show_log_entries) {
+        $c->stash->{'logs'} = $ma->get_condensed_logs();
+        #$c->log->debug("got condensed logs: ".Dumper($c->stash->{'logs'}));
+    }
+
+    $c->stats->profile(end => "got logs");
+
     # finished
     $c->stash->{time_token} = time() - $start_time;
     $c->stats->profile(end => "_create_report()");
 
     return 1;
+}
+
+##########################################################
+sub _initialassumedhoststate_to_state {
+    my $self                    = shift;
+    my $initialassumedhoststate = shift;
+
+    return 'unspecified' if $initialassumedhoststate ==  0; # Unspecified
+    return 'current'     if $initialassumedhoststate == -1; # Current State
+    return 'up'          if $initialassumedhoststate ==  3; # Host Up
+    return 'down'        if $initialassumedhoststate ==  4; # Host Down
+    return 'unreachable' if $initialassumedhoststate ==  5; # Host Unreachable
+}
+
+##########################################################
+sub _initialassumedservicestate_to_state {
+    my $self                       = shift;
+    my $initialassumedservicestate = shift;
+
+    return 'unspecified' if $initialassumedservicestate ==  0; # Unspecified
+    return 'current'     if $initialassumedservicestate == -1; # Current State
+    return 'ok'          if $initialassumedservicestate ==  6; # Service Ok
+    return 'warning'     if $initialassumedservicestate ==  8; # Service Warning
+    return 'unknown'     if $initialassumedservicestate ==  7; # Service Unknown
+    return 'critical'    if $initialassumedservicestate ==  9; # Service Critical
 }
 
 =head1 AUTHOR

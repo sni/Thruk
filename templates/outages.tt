@@ -1,3 +1,4 @@
+[% USE date %]
 [% PROCESS _header.tt %]
 
     <table border="0" width="100%">
@@ -39,7 +40,7 @@
             N/A
             [% END %]
           </td>
-          <td class='[% class %]'>[% duration(0 - host.last_state_change) %]</td>
+          <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
           <td class='[% class %]'>[% host.affected_hosts %]</td>
           <td class='[% class %]'>[% host.affected_services %]</td>
           <td class='[% class %]'>

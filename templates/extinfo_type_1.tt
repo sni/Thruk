@@ -105,7 +105,7 @@
                               [% ELSIF host.state == 2 %]
                               <div class='hostUNREACHABLE'>&nbsp;&nbsp;UNREACHABLE&nbsp;&nbsp;</div>
                               [% END %]
-                              &nbsp;(for [% duration(0 - host.last_state_change) %])
+                              &nbsp;(for [% duration(date.now - host.last_state_change) %])
                               [% IF host.acknowledged %]
                               &nbsp;(Has been acknowledged)
                               [% END %]

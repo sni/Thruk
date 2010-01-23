@@ -5,12 +5,13 @@
 [% IF servicegroup %]<input type='hidden' name='servicegroup' value='[% servicegroup %]'>[% END %]
 <input type='hidden' name='t1' value='[% start %]'>
 <input type='hidden' name='t2' value='[% end %]'>
-<input type='hidden' name='show_log_entries' value='[% show_log_entries %]'>
+[% IF show_log_entries %]<input type='hidden' name='show_log_entries' value='[% show_log_entries %]'>[% END %]
+[% IF full_log_entries %]<input type='hidden' name='full_log_entries' value='[% full_log_entries %]'>[% END %]
 <input type='hidden' name='assumeinitialstates' value='[% assumeinitialstates %]'>
 <input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
 <input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
 <input type='hidden' name='includesoftstates' value='[% includesoftstates %]'>
-<input type='hidden' name='report_type' value='[% report_type %]'>
+[% IF report_type %]<input type='hidden' name='report_type' value='[% report_type %]'>[% END %]
 <table border="0" class='optBox'>
   <tr>
     [% UNLESS service %]

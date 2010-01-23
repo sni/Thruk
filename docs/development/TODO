@@ -20,8 +20,8 @@ config:
     - add missing values
 
 avail:
-    - missing completly
-    - remove duplicates from timeperiods/groups list
+    - CSV output
+    - trends graph
 
 trends:
     - missing completly
@@ -31,14 +31,23 @@ histogram:
 
 livestatus:
     - StatsSum: ( needed by tac and extinfo 4 )
-    - Contacts: Service Notification Options, Host Notification Options, Retention Options, Service Notification Commands, Host Notification Commands
-    - Hosts: Freshness Threshold, Contact Groups, Notification Options, Event Handler, Stalking Options, Flap Detection Options, Enable Failure Prediction, Retention Options
-    - Services: Parallelize, Volatile, Check Freshness, Freshness Threshold, Contact Groups, Notification Options, Stalking Options, Flap Detection Options, Enable Failure Prediction, Failure Prediction Options, Retention Options
+    - Contacts: Service Notification Options, Host Notification Options,
+                Retention Options, Service Notification Commands,
+                Host Notification Commands
+    - Hosts:    Freshness Threshold, Contact Groups, Notification Options,
+                Event Handler, Stalking Options, Flap Detection Options,
+                Enable Failure Prediction, Retention Options
+    - Services: Parallelize, Volatile, Check Freshness, Freshness Threshold,
+                Contact Groups, Notification Options, Stalking Options,
+                Flap Detection Options, Enable Failure Prediction,
+                Failure Prediction Options, Retention Options
+    - Timeperiods:
+                Monday - Sunday, Exceptions
     - Tables:
-        - Host Dependencies
-        - Host Escalations
-        - Service Dependencies
-        - Service Escalations
+                Host Dependencies
+                Host Escalations
+                Service Dependencies
+                Service Escalations
 
 =========================================================
 after 1.0

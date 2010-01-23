@@ -33,9 +33,9 @@
     <br>
     <br>
 
-    [% FOR groupname IN groups.keys.sort  %]
-        [% SET hostgroupname = groupname      %]
-        [% SET hosts         = g.hosts        %]
+    [% FOR groupname IN groups.keys.sort %]
+        [% SET hostgroupname = groupname %]
+        [% SET hosts         = groups.$groupname.hosts %]
         [% PROCESS avail_report_hosts_part.tt %]
     [% END %]
 

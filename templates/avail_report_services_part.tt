@@ -23,7 +23,7 @@
           <th class='data'>Host</th>
           [% END %]
           <th class='data'>Service</th>
-          <th class='data'>% Time O </th>
+          <th class='data'>% Time Ok</th>
           <th class='data'>% Time Warning</th>
           <th class='data'>% Time Unknown</th>
           <th class='data'>% Time Critical</th>

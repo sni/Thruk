@@ -3,7 +3,7 @@
 [% IF show_log_entries or full_log_entries %]
     <div align="center" class='dataTitle'>[% IF service %]Service[% ELSE %]Host[% END %] Log Entries:</div><br>
     <div align="center" class='infoMessage'>
-      <a href='avail.cgi?t1=[% start %]&amp;t2=[% end %][% IF host %]&amp;host=[% host %][% END %][% IF service %]&amp;service=[% service %][% END %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]full_log_entries[% END %]&amp;[% IF full_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[ View [% IF full_log_entries %]condensed[% ELSE %]full[% END %] log entries ]</a>
+      <a href='avail.cgi?t1=[% start %]&amp;t2=[% end %][% IF host %]&amp;host=[% host %][% END %][% IF service %]&amp;service=[% service %][% END %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF full_log_entries %]show_log_entries[% ELSE %]full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[ View [% IF full_log_entries %]condensed[% ELSE %]full[% END %] log entries ]</a>
     </div>
     <div align="center">
       <table border="1" cellspacing="0" cellpadding="3" class='logEntries'>
@@ -15,67 +15,14 @@
           <th class='logEntries'>Event/State Information</th>
         </tr>
         [% FOR log IN logs %]
-
-
-        [%# filter some logs out #%]
-        [%# logentry outside our timedefinition #%]
-        [% IF log.time > end or log.time < start %][% NEXT %][% END %]
-
-        [% IF host and !service %]
-          [%# filter out anything besides the host on hostmode #%]
-          [% IF log.class != 2 and log.host_name != host         %][% NEXT %][% END %]
-          [% IF log.class != 2 and log.service_description != '' %][% NEXT %][% END %]
-        [% END %]
-
-
         [% SET class = 'logEntriesEven' IF loop.odd  %]
         [% SET class = 'logEntriesOdd'  IF loop.even %]
-        [% SET message       = log.type %]
-        [% SET plugin_output = log.plugin_output %]
-        [% IF log.type == 'CURRENT SERVICE STATE' or log.type == 'INITIAL SERVICE STATE' or log.type == 'SERVICE ALERT' %]
-          [% IF log.state == 0 %][% SET mclass = "OK"       message = 'SERVICE OK'       %]
-          [% ELSIF log.state == 1 %][% SET mclass = "WARNING"  message = 'SERVICE WARNING'  %]
-          [% ELSIF log.state == 2 %][% SET mclass = "UNKNOWN"  message = 'SERVICE UNKNOWN'  %]
-          [% ELSIF log.state == 3 %][% SET mclass = "CRITICAL" message = 'SERVICE CRITICAL' %]
-          [% END %]
-
-          [% IF log.options.search(';HARD;') %][% SET message = message _ ' (HARD)' %][% ELSE %][% SET message = message _ ' (SOFT)' %][% END %]
-        [% ELSIF log.type == 'CURRENT HOST STATE' or log.type == 'INITIAL HOST STATE' or log.type == 'HOST ALERT' %]
-          [% IF log.state == 0 %][% SET mclass = "UP"          message = 'HOST UP'          %]
-          [% ELSIF log.state == 1 %][% SET mclass = "DOWN"        message = 'HOST DOWN'        %]
-          [% ELSIF log.state == 2 %][% SET mclass = "UNREACHABLE" message = 'HOST UNREACHABLE' %]
-          [% END %]
-
-          [% IF log.options.search(';HARD;') %][% SET message = message _ ' (HARD)' %][% ELSE %][% SET message = message _ ' (SOFT)' %][% END %]
-        [% ELSIF log.type == 'HOST DOWNTIME ALERT' %]
-          [% IF log.options.search(';STARTED;') %][% SET mclass = "INDETERMINATE" message = 'HOST DOWNTIME START'     plugin_output = 'Start of scheduled downtime' %][% END %]
-          [% IF log.options.search(';STOPPED;') %][% SET mclass = "INDETERMINATE" message = 'HOST DOWNTIME STOP'      plugin_output = 'End of scheduled downtime'   %][% END %]
-        [% ELSIF log.type == 'SERVICE DOWNTIME ALERT' %]
-          [% IF log.options.search(';STARTED;') %][% SET mclass = "INDETERMINATE" message = 'SERVICE DOWNTIME START'  plugin_output = 'Start of scheduled downtime' %][% END %]
-          [% IF log.options.search(';STOPPED;') %][% SET mclass = "INDETERMINATE" message = 'SERVICE DOWNTIME STOP'   plugin_output = 'End of scheduled downtime'   %][% END %]
-        [% ELSIF log.type.search(' starting\.\.\.') or log.type.search(' restarting\.\.\.') %]
-                                                  [% SET mclass = "INDETERMINATE" message = 'PROGRAM (RE)START'       plugin_output = 'Program start'               %]
-        [% ELSIF log.type.search(' shutting down\.\.\.') %]
-                                                  [% SET mclass = "INDETERMINATE" message = 'PROGRAM END'             plugin_output = 'Normal program termination'  %]
-        [% ELSIF log.type.search('Bailing out') %]
-                                                  [% SET mclass = "INDETERMINATE" message = 'PROGRAM END'             plugin_output = 'Abnormal program termination'  %]
-        [% ELSE %]
-          [%# SET message = 'SKIPPED!! ' _ message #%]
-          [%# SET plugin_output = 'SKIPPED!! ' _ plugin_output #%]
-          [% NEXT %]
-        [% END %]
-
-        [%# no process restarts in condensed mode #%]
-        [% IF show_log_entries and log.class == 2 %]
-          [% NEXT %]
-        [% END %]
-
         <tr class='[% class %]'>
-          <td class='[% class %]'>[% date.format(log.time, '%Y-%m-%d  %H:%M:%S') %]</td>
-          <td class='[% class %]'>2010-01-09 14:11:33</td>
-          <td class='[% class %]'>0d 14h 11m 33s</td>
-          <td class='logEntries[% mclass %]'>[% message %]</td>
-          <td class='[% class %]'>[% plugin_output %]</td>
+          <td class='[% class %]'>[% date.format(log.start, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(log.end, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% log.duration %]</td>
+          <td class='logEntries[% log.class %]'>[% log.type %]</td>
+          <td class='[% class %]'>[% log.plugin_output %]</td>
         </tr>
         [% END %]
       </table>

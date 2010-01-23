@@ -96,7 +96,7 @@
                               [% ELSIF service.state == 3 %]
                               <div class='serviceUNKNOWN'>&nbsp;&nbsp;UNKNOWN&nbsp;&nbsp;</div>
                               [% END %]
-                              &nbsp;(for [% duration(0 - service.last_state_change) %])
+                              &nbsp;(for [% duration(date.now - service.last_state_change) %])
                               [% IF service.acknowledged %]
                               &nbsp;(Has been acknowledged)
                               [% END %]
