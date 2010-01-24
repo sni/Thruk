@@ -408,17 +408,18 @@ sub get_livestatus_conf {
 
 ############################################################
 
-=head2 get_service_exectution_stats
+=head2 get_service_exectution_stats_old
 
-  my $stats = get_service_exectution_stats($c);
+  my $stats = get_service_exectution_stats_old($c);
 
-Returns a hash with statistical data
+Returns a hash with statistical data, calculation is obsolete
+with newer livestatus versions
 
 =cut
-sub get_service_exectution_stats {
+sub get_service_exectution_stats_old {
     my $c = shift;
 
-    $c->stats->profile(begin => "Utils::get_service_exectution_stats()");
+    $c->stats->profile(begin => "Utils::get_service_exectution_stats_old()");
 
     my $now    = time();
     my $min1   = $now - 60;
@@ -581,6 +582,80 @@ sub get_service_exectution_stats {
         # set possible undefs to zero if still undef
         for my $key (qw{execution_time_min execution_time_max latency_min latency_max active_state_change_min
                           active_state_change_max passive_state_change_min passive_state_change_max}) {
+            $check_stats->{$type}->{$key} = 0 unless defined $check_stats->{$type}->{$key};
+        }
+    }
+
+    $c->stats->profile(end => "Utils::get_service_exectution_stats_old()");
+
+    return($check_stats);
+}
+
+
+############################################################
+
+=head2 get_service_exectution_stats
+
+  my $stats = get_service_exectution_stats($c);
+
+Returns a hash with statistical data
+
+=cut
+sub get_service_exectution_stats {
+    my $c = shift;
+
+    $c->stats->profile(begin => "Utils::get_service_exectution_stats()");
+
+    my $now    = time();
+    my $min1   = $now - 60;
+    my $min5   = $now - 300;
+    my $min15  = $now - 900;
+    my $min60  = $now - 3600;
+
+    my $check_stats;
+    for my $type (qw{hosts services}) {
+        $check_stats->{$type} = {
+            'execution_time_min'        => undef,
+            'execution_time_max'        => undef,
+            'execution_time_avg'        => 0,
+            'execution_time_sum'        => 0,
+
+            'latency_min'               => undef,
+            'latency_max'               => undef,
+            'latency_avg'               => 0,
+            'latency_sum'               => 0,
+        };
+
+        my $query = "GET $type\n".Thruk::Utils::get_auth_filter($c, $type)."\n";
+        $query .= "Filter: has_been_checked = 1\n";
+        $query .= "Filter: check_type = 0\n";
+        $query .= "Stats: sum has_been_checked as has_been_checked\n";
+        $query .= "Stats: sum latency as latency_sum\n";
+        $query .= "Stats: sum execution_time as execution_time_sum\n";
+        $query .= "Stats: min latency as latency_min\n";
+        $query .= "Stats: min execution_time as execution_time_min\n";
+        $query .= "Stats: max latency as latency_max\n";
+        $query .= "Stats: max execution_time as execution_time_max\n";
+
+        my $data = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
+        for my $backend_result (@{$data}) {
+            $check_stats->{$type}->{'has_been_checked'}   += $backend_result->{'has_been_checked'};
+            $check_stats->{$type}->{'execution_time_sum'} += $backend_result->{'execution_time_sum'};
+            $check_stats->{$type}->{'latency_sum'}        += $backend_result->{'latency_sum'};
+            if(!defined $check_stats->{$type}->{'execution_time_min'} or $check_stats->{$type}->{'execution_time_min'} > $backend_result->{'execution_time_min'}) { $check_stats->{$type}->{'execution_time_min'} = $backend_result->{'execution_time_min'}; }
+            if(!defined $check_stats->{$type}->{'latency_min'} or $check_stats->{$type}->{'latency_min'} > $backend_result->{'latency_min'}) { $check_stats->{$type}->{'latency_min'} = $backend_result->{'latency_min'}; }
+            if(!defined $check_stats->{$type}->{'latency_max'} or $check_stats->{$type}->{'execution_time_max'} < $backend_result->{'execution_time_max'}) { $check_stats->{$type}->{'execution_time_max'} = $backend_result->{'execution_time_max'}; }
+            if(!defined $check_stats->{$type}->{'latency_max'} or $check_stats->{$type}->{'latency_max'} < $backend_result->{'latency_max'}) { $check_stats->{$type}->{'latency_max'} = $backend_result->{'latency_max'}; }
+        }
+        #$c->log->error(Dumper($data));
+
+        if($check_stats->{$type}->{'has_been_checked'} > 0) {
+            $check_stats->{$type}->{'execution_time_avg'} = $check_stats->{$type}->{'execution_time_sum'} / $check_stats->{$type}->{'has_been_checked'};
+            $check_stats->{$type}->{'latency_avg'}        = $check_stats->{$type}->{'latency_sum'}        / $check_stats->{$type}->{'has_been_checked'};
+        }
+
+        # set possible undefs to zero if still undef
+        for my $key (qw{execution_time_min execution_time_max latency_min latency_max }) {
             $check_stats->{$type}->{$key} = 0 unless defined $check_stats->{$type}->{$key};
         }
     }

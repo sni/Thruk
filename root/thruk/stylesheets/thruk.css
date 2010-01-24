@@ -9,6 +9,7 @@ div.navbarsearch form fieldset {
   padding-bottom: 0px;
 }
 
+/* fix for link box and infobox border */
 table.infoBox {
   margin-top: 5px;
   margin-bottom: 0px;
@@ -19,7 +20,6 @@ table.infoBox {
   border-collapse: separate;
   background-color: #C4C2C2;
 }
-
 table.infoBox td {
   padding: 2px;
   margin: 0px;
@@ -28,7 +28,6 @@ table.infoBox td {
   border-color: #C4C2C2;
   background-color: #C4C2C2;
 }
-
 table.linkBox {
   border-spacing: 2px;
   border-style: outset;
@@ -44,3 +43,9 @@ table.linkBox td {
   border-color: #DBDBDB;
   background-color: #DBDBDB;
 }
+
+/* fix for bold perf data on tac page top right */
+.perfValue {
+  font-weight: normal;
+}
+
