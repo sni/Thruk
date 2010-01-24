@@ -132,10 +132,12 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     Thruk->config->{'custom-error-message'}->{'error-template'}    = 'error.tt';
     Thruk->config->{'custom-error-message'}->{'response-status'}   = $code;
     $c->response->status($code);
-    if($code >= 500) {
-        $c->log->error($errors->{$arg1}->{'mess'});
-    } else {
-        $c->log->info($errors->{$arg1}->{'mess'});
+    unless(defined $ENV{'TEST_ERROR'}) { # supress error logging in test mode
+        if($code >= 500) {
+            $c->log->error($errors->{$arg1}->{'mess'});
+        } else {
+            $c->log->info($errors->{$arg1}->{'mess'});
+        }
     }
 
     # clear errors to avoid invinite loops

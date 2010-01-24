@@ -35,7 +35,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # lookup parameters
     my $report_type    = $c->{'request'}->{'parameters'}->{'report_type'}  || '';
-    my $get_date_parts = $c->{'request'}->{'parameters'}->{'get_date_parts'};
     my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'};
     my $host           = $c->{'request'}->{'parameters'}->{'host'}         || '';
     my $hostgroup      = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
@@ -71,7 +70,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     # Step 3 - select date parts
-    elsif(defined $get_date_parts and $self->_show_step_3($c)) {
+    elsif(exists $c->{'request'}->{'parameters'}->{'get_date_parts'} and $self->_show_step_3($c)) {
     }
 
     # Step 4 - create report
@@ -251,17 +250,26 @@ sub _create_report {
     $backtrack = 4 unless defined $backtrack;
     $backtrack = 4 if $backtrack < 0;
 
-    $assumeinitialstates          = 'no' unless $assumeinitialstates          eq 'yes';
-    $assumestateretention         = 'no' unless $assumestateretention         eq 'yes';
-    $assumestatesduringnotrunning = 'no' unless $assumestatesduringnotrunning eq 'yes';
-    $includesoftstates            = 'no' unless $includesoftstates            eq 'yes';
+    $assumeinitialstates          = 'yes' unless defined $assumeinitialstates;
+    $assumeinitialstates          = 'no'  unless $assumeinitialstates          eq 'yes';
 
+    $assumestateretention         = 'yes' unless defined $assumestateretention;
+    $assumestateretention         = 'no'  unless $assumestateretention         eq 'yes';
+
+    $assumestatesduringnotrunning = 'yes' unless defined $assumestatesduringnotrunning;
+    $assumestatesduringnotrunning = 'no'  unless $assumestatesduringnotrunning eq 'yes';
+
+    $includesoftstates            = 'no'  unless defined $includesoftstates;
+    $includesoftstates            = 'no'  unless $includesoftstates            eq 'yes';
+
+    $initialassumedhoststate      = 0 unless defined $initialassumedhoststate;
     $initialassumedhoststate      = 0 unless $initialassumedhoststate ==  0  # Unspecified
                                           or $initialassumedhoststate == -1  # Current State
                                           or $initialassumedhoststate ==  3  # Host Up
                                           or $initialassumedhoststate ==  4  # Host Down
                                           or $initialassumedhoststate ==  5; # Host Unreachable
 
+    $initialassumedservicestate   = 0 unless defined $initialassumedservicestate;
     $initialassumedservicestate   = 0 unless $initialassumedservicestate ==  0  # Unspecified
                                           or $initialassumedservicestate == -1  # Current State
                                           or $initialassumedservicestate ==  6  # Service Ok
@@ -286,6 +294,7 @@ sub _create_report {
     my $servicefilter    = "";
     my $logserviceheadfilter;
     my $loghostheadfilter;
+    my $initial_states = { 'hosts' => {}, 'services' => {} };
 
     # for which services do we need availability data?
     my $hosts = [];
@@ -309,15 +318,23 @@ sub _create_report {
         $logserviceheadfilter = "Filter: service_description = $service\n";
         $loghostheadfilter    = "Filter: host_name = $host\n";
         push @{$services}, { 'host' => $host, 'service' => $service };
+
+        if($initialassumedservicestate == -1) {
+            my $service_data = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: state\nLimit: 1", {Slice => 1});
+            $initial_states->{'services'}->{$host}->{$service} = $service_data->[0]->{'state'};
+        }
     }
 
     # all services
     elsif(defined $service and $service eq 'all') {
-        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description state", { Slice => 1});
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
             push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+            if($initialassumedservicestate == -1) {
+                $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
+            }
         }
         $c->stash->{'services'} = $services_data;
     }
@@ -327,22 +344,36 @@ sub _create_report {
         unless($c->check_permissions('host', $host)) {
             $c->detach('/error/index/5');
         }
-        my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description' );
+        my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description state", 'description' );
         $c->stash->{'services'} = { $host =>  $service_data };
         $loghostheadfilter = "Filter: host_name = $host\n";
 
         for my $description (keys %{$service_data}) {
             push @{$services}, { 'host' => $host, 'service' => $description };
         }
+        if($initialassumedservicestate == -1) {
+            for my $servicename (keys %{$service_data}) {
+                $initial_states->{'services'}->{$host}->{$servicename} = $service_data->{$servicename}->{'state'};
+            }
+        }
+        if($initialassumedhoststate == -1) {
+            my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\nFilter: name = $host\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state\nLimit: 1", {Slice => 1});
+            $initial_states->{'hosts'}->{$host} = $host_data->[0]->{'state'};
+        }
         push @{$hosts}, $host;
     }
 
     # all hosts
     elsif(defined $host and $host eq 'all') {
-        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' );
+        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name state", 'name' );
         $logserviceheadfilter = "Filter: service_description =\n";
         $c->stash->{'hosts'} = $host_data;
         push @{$hosts}, keys %{$host_data};
+        if($initialassumedhoststate == -1) {
+            for my $hostname (keys %{$host_data}) {
+                $initial_states->{'hosts'}->{$hostname} = $host_data->{$hostname}->{'state'};
+            }
+        }
     }
 
     # one or all hostgroups
@@ -352,7 +383,7 @@ sub _create_report {
             $hostfilter        = "Filter: groups >= $hostgroup\n";
             $loghostheadfilter = "Filter: current_host_groups >= $hostgroup\n";
         }
-        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name\n$hostfilter", 'name' );
+        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name state\n$hostfilter", 'name' );
         my $groups    = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
 
         # join our groups together
@@ -381,6 +412,12 @@ sub _create_report {
         $logserviceheadfilter = "Filter: service_description =\n";
 
         push @{$hosts}, keys %{$host_data};
+
+        if($initialassumedhoststate == -1) {
+            for my $hostname (keys %{$host_data}) {
+                $initial_states->{'hosts'}->{$hostname} = $host_data->{$hostname}->{'state'};
+            }
+        }
     }
 
 
@@ -391,7 +428,7 @@ sub _create_report {
             $servicefilter        = "Filter: groups >= $servicegroup\n";
             $logserviceheadfilter = "Filter: current_service_groups >= $servicegroup\n";
         }
-        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description state host_state", { Slice => 1});
         my $groups       = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
 
         my $service_data;
@@ -430,6 +467,17 @@ sub _create_report {
             push @{$services}, { 'host' => $service->{host_name}, 'service' => $service->{'description'} };
         }
         push @{$hosts}, keys %tmp_hosts;
+        if($initialassumedservicestate == -1) {
+            for my $service (@{$all_services}) {
+                $initial_states->{'services'}->{$service->{host_name}}->{$service->{'description'}} = $service->{'state'};
+            }
+        }
+        if($initialassumedhoststate == -1) {
+            for my $service (@{$all_services}) {
+                next if defined $initial_states->{'hosts'}->{$service->{host_name}};
+                $initial_states->{'hosts'}->{$service->{host_name}} = $service->{'host_state'};
+            }
+        }
     } else {
         croak("unknown report type: ".Dumper($c->{'request'}->{'parameters'}));
     }
@@ -488,6 +536,7 @@ sub _create_report {
     #    print FH "\n";
     #}
     #close(FH);
+
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new(
         'rpttimeperiod'                => $rpttimeperiod,
@@ -507,6 +556,7 @@ sub _create_report {
         'log_livestatus'               => $logs,
         'hosts'                        => $hosts,
         'services'                     => $services,
+        'initial_states'               => $initial_states,
     );
     #$c->log->info(Dumper($c->stash->{avail_data}));
     $c->stats->profile(end => "calculate availability");
@@ -539,6 +589,7 @@ sub _initialassumedhoststate_to_state {
     return 'up'          if $initialassumedhoststate ==  3; # Host Up
     return 'down'        if $initialassumedhoststate ==  4; # Host Down
     return 'unreachable' if $initialassumedhoststate ==  5; # Host Unreachable
+    croak('unknown state: '.$initialassumedhoststate);
 }
 
 ##########################################################
@@ -552,6 +603,7 @@ sub _initialassumedservicestate_to_state {
     return 'warning'     if $initialassumedservicestate ==  8; # Service Warning
     return 'unknown'     if $initialassumedservicestate ==  7; # Service Unknown
     return 'critical'    if $initialassumedservicestate ==  9; # Service Critical
+    croak('unknown state: '.$initialassumedservicestate);
 }
 
 =head1 AUTHOR

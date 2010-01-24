@@ -229,7 +229,7 @@ for my $file (sort @opt_files) {
             # check if we have all needed variable
             my %needed;
             if($command_args =~ m/sprintf\(".*"(.*)\)/mx) {
-                my @needed = split/,/, $1;
+                my @needed = split/,/mx, $1;
                 shift @needed;
                 for my $need (@needed) {
                     $needed{$need} = 1;
@@ -321,7 +321,7 @@ for my $file (sort @opt_files) {
 
             # check if we have all needed variable
             if($command_args =~ m/sprintf\(".*"(.*)\)/mx) {
-                my @needed = split/,/, $1;
+                my @needed = split/,/mx, $1;
                 shift @needed;
                 for my $need (@needed) {
                     print Dumper \%has_keys unless defined $has_keys{$need};

@@ -1,12 +1,6 @@
 use strict;
 use warnings;
-use inc::Module::Install 0.91;
-{   # Ensure that these get used - yes, M::I loads them for us, but if you're
-    # in author mode and don't have them installed, then the error is tres
-    # cryptic.
-    no warnings 'redefine';
-    use Module::Install::AuthorRequires;
-}
+use inc::Module::Install;
 
 name 'Thruk';
 all_from 'lib/Thruk.pm';
@@ -30,7 +24,7 @@ requires 'parent';
 requires 'Moose';
 requires 'MooseX::MethodAttributes::Inheritable';
 requires 'MooseX::Role::WithOverloading';
-requires 'Monitoring::Livestatus'                 => '0.34';
+requires 'Monitoring::Livestatus'                 => '0.36';
 requires 'Monitoring::Availability'               => '0.06';
 requires 'HTTP::Body';
 requires 'LWP';
@@ -60,11 +54,14 @@ requires 'Catalyst::Engine::FastCGI';
 requires 'Catalyst::Log::Log4perl';
 requires 'Log::Dispatch::File';
 
-#author_requires 'Catalyst::Devel';
-#author_requires 'Test::Pod'                         => 1.40;
-#author_requires 'Test::Perl::Critic';
-#author_requires 'Test::Pod::Coverage';
-#author_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
+# test requirements make it into the META.yml and will break
+# normal package installation
+# install them by hand if you plan author tests
+#test_requires 'Catalyst::Devel';
+#test_requires 'Test::Pod'                         => 1.40;
+#test_requires 'Test::Perl::Critic';
+#test_requires 'Test::Pod::Coverage';
+#test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
 
 catalyst;
 install_script glob('script/*.pl');

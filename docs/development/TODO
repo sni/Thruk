@@ -12,6 +12,8 @@ general
     - add backend name to logs
     - remove $self from Thruk::Utils or replace with $c->{'utils'}
     - remove eval from Thruk::Utils->sort
+    - make test independent from specific host/servicegroup (ex. avail.t)
+    - use_feature_trends to exclude all trends links
 
 extinfo:
     - finish performance data on extinfo type 4

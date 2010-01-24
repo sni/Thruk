@@ -37,7 +37,7 @@ our $VERSION = '0.21_1';
 
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'January 18, 2010',
+                    'released'               => 'January 24, 2010',
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',
                         ENCODING           => 'utf8',

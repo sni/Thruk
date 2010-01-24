@@ -32,7 +32,6 @@ docs/INSTALL
 docs/INSTALL.html
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
-inc/Module/Install/AuthorRequires.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -165,6 +164,7 @@ script/thruk_fastcgi.pl
 script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
+t/00_test_utils.pm
 t/01app.t
 t/10-Thruk-Utils.t
 t/97-Pod.t
@@ -199,10 +199,12 @@ templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt
 templates/avail_report_hosts.tt
+templates/avail_report_hosts_part.tt
 templates/avail_report_log_entries.tt
 templates/avail_report_service.tt
 templates/avail_report_servicegroup.tt
 templates/avail_report_services.tt
+templates/avail_report_services_part.tt
 templates/avail_step_1.tt
 templates/avail_step_2.tt
 templates/avail_step_3.tt
