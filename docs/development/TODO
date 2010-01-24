@@ -60,9 +60,14 @@ general:
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
     - contacts authorized for hosts, should not see all services for
       this host: http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=117591#post117591
+    - flexible report output
+        HTML, Text, CVS, XML, PDF
+    - add multiple notes url or action urls, maybe add an "_html" cust var
+    - add ability to display contacts for machine
 
 status:
     - proper search
+    - add new search page, with selector for all parameters
 
 showlog:
     - proper logfile page

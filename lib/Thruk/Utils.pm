@@ -769,7 +769,7 @@ sub get_start_end_for_timeperiod {
         $start = Mktime($year-1,1,1,  0,0,0);
         $end   = Mktime($year,1,1,  0,0,0);
     }
-    elsif($timeperiod eq 'custom' or $timeperiod eq 'current') {
+    elsif(defined $t1 and defined $t2) {
         $start = $t1;
         $end   = $t2;
         if(!defined $start) {

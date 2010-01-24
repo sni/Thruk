@@ -522,7 +522,7 @@ sub _create_report {
     $logfilter .= join("\n", @typefilter)."\nOr: ".(scalar @typefilter);
 
     my $log_query = "GET log\n".$logfilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: class time type options state host_name service_description plugin_output";
-    $c->log->debug($log_query);
+    #$c->log->debug($log_query);
     $c->stats->profile(begin => "avail.pm fetchlogs");
     $logs = $c->{'live'}->selectall_arrayref($log_query, { Slice => 1} );
     $c->stats->profile(end   => "avail.pm fetchlogs");

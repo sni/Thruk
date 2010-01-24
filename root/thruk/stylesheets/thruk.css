@@ -11,12 +11,36 @@ div.navbarsearch form fieldset {
 
 table.infoBox {
   margin-top: 5px;
-  margin-bottom: 2px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #C4C2C2;
+  border-collapse: separate;
+  background-color: #C4C2C2;
 }
 
-/*
-table td {
+table.infoBox td {
   padding: 2px;
-  margin: 3px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #C4C2C2;
+  background-color: #C4C2C2;
 }
-*/
+
+table.linkBox {
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #DBDBDB;
+  border-collapse: separate;
+  background-color: #DBDBDB;
+}
+table.linkBox td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #DBDBDB;
+  background-color: #DBDBDB;
+}
