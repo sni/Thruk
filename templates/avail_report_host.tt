@@ -10,7 +10,7 @@
             <tr>
               <td class='linkBox'>
                 <a href='avail.cgi?host=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]&amp;rpttimeperiod=[% rpttimeperiod %]'>View Availability Report For All Hosts</a><br>
-                <a href='trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]'>View Trends For This Host</a><br>
+                [% IF use_feature_trends %]<a href='trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]'>View Trends For This Host</a><br>[% END %]
                 <a href='histogram.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=yes'>View Alert Histogram For This Host</a><br>
                 <a href='status.cgi?host=[% host %]'>View Status Detail For This Host</a><br>
                 <a href='history.cgi?host=[% host %]'>View Alert History For This Host</a><br>
@@ -42,9 +42,11 @@
     <div align="center" class='reportTime'>[ Availability report completed in [% duration(time_token, 2) %] ]</div><br>
     <br>
     <div align="center" class='dataTitle'>Host State Breakdowns:</div>
+    [% IF use_feature_trends %]
     <p align='center'>
       <a href='trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]'><img src='trends.cgi?createimage&amp;smallimage&amp;host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]' border="1" alt='Host State Trends' title='Host State Trends' width='500' height='20'></a><br>
     </p>
+    [% END %]
     <div align="center">
 
     [% SET

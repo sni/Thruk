@@ -44,6 +44,8 @@ sub begin : Private {
     $c->stash->{'documentation_link'} = $doc_link;
 
     $c->stash->{'use_feature_statusmap'} = 0;
+    $c->stash->{'use_feature_statuswrl'} = 0;
+    $c->stash->{'use_feature_trends'}    = 0;
 
     return 1;
 }

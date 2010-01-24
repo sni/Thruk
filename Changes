@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.21_1  Sun Jan 24 09:18:54 CET 2010
           - added availability page
+          - trends, statusmap, statuswrl are optional and can be hidden
 
 0.20_3  Thu Jan 14 21:29:54 CET 2010
           - increased showlog performance

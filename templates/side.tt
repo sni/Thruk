@@ -76,7 +76,7 @@
       <div class="navsectionlinks">
         <ul class="navsectionlinks">
           <li><a href="/thruk/cgi-bin/avail.cgi" target="[% target %]">Availability</a></li>
-          <li><a href="/thruk/cgi-bin/trends.cgi" target="[% target %]">Trends</a></li>
+          [% IF use_feature_trends %]<li><a href="/thruk/cgi-bin/trends.cgi" target="[% target %]">Trends</a></li>[% END %]
           <li>
             <a href="/thruk/cgi-bin/history.cgi?host=all" target="[% target %]">Alerts</a>
             <ul>
