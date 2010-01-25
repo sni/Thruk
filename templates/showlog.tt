@@ -66,10 +66,10 @@
 [% IF this_hour != last_hour %]
   [% SET last_hour = this_hour %]
 
-<br clear='all'>
-<div class='dateTimeBreak'><table border="0" width="95%"><tr><td width="40%"><hr width="100%"></td><td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td><td width="40%"><hr width="100%"></td></tr></table></div>
 [% IF ! loop.first %]</div>[% END %]
-<br clear='all'><div class='logEntries'>
+<div class='logEntries'>
+<div class='dateTimeBreak'><table border="0" width="95%"><tr><td width="40%"><hr width="100%"></td><td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td><td width="40%"><hr width="100%"></td></tr></table></div>
+<br clear='all'>
 
 [% END %]
 
@@ -126,8 +126,8 @@
 <img align='left' src='/thruk/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 
 [% END %]
-      </div>
-      <hr>
+</div>
+<hr>
 <div class="itemTotalsTitle">[% IF logs.size %][% logs.size %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>
 
 [% PROCESS _footer.tt %]
