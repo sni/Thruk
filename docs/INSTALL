@@ -74,7 +74,7 @@ logout and login again and verify that your perl env looks like this:
 Install Module::Install
 ~~~~~~~~~~~~~~~~~~~~~~~
 -------
-  perl -MCPAN -e "install Module::Install::AuthorRequires"
+  perl -MCPAN -e "install Module::Install"
 -------
 
 
