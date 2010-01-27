@@ -1,15 +1,19 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 112;
+use Test::More tests => 147;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 BEGIN { use_ok 'Thruk::Controller::status' }
 
-ok( request('/status')->is_success, 'Status Request should succeed' );
-ok( request('/thruk/cgi-bin/status.cgi')->is_success, 'Status Request should succeed' );
-
 my $pages = [
+    '/status',
+    '/thruk/cgi-bin/status.cgi',
+
 # Host / Hostgroups
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=detail',
@@ -45,10 +49,9 @@ my $pages = [
 ];
 
 for my $url (@{$pages}) {
-    my $request = request($url);
-    ok( $request->is_success, 'Request '.$url.' should succeed' );
-    my $content = $request->content;
-    like($content, qr/statusTitle/mx, "Content contains: statusTitle");
-    like($content, qr/Current Network Status/, "Content contains: Current Network Status");
-    unlike($content, qr/internal\ server\ error/mx, "Content contains error");
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => [ 'Current Network Status', 'statusTitle' ],
+        'unlike'  => 'internal server error',
+    );
 }

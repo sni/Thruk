@@ -17,6 +17,7 @@ use Carp;
 use Data::Dumper;
 use Digest::MD5  qw(md5_hex);
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
+use Sort::Key::Natural qw/natkeysort_inplace rnatkeysort_inplace/;
 use Monitoring::Livestatus::MULTI;
 
 
@@ -270,7 +271,7 @@ sort a array of hashes by hash keys
 
 =cut
 sub sort {
-    my $c = shift;
+    my $c     = shift;
     my $data  = shift;
     my $key   = shift;
     my $order = shift;

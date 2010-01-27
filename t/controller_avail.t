@@ -1,30 +1,22 @@
 use strict;
 use warnings;
-use Test::More tests => 69;
+use Test::More tests => 93;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
 BEGIN { use_ok 'Thruk::Controller::avail' }
 
-ok( request('/avail')->is_success, 'Avail Request should succeed' );
-my $request = request('/thruk/cgi-bin/avail.cgi');
-ok( $request->is_success, 'Avail Request should succeed' );
-my $content = $request->content;
-like($content, qr/Availability Report/, "Content contains: Availability Report");
-unlike($content, qr/internal\ server\ error/mx, "Content contains error");
-
-# get a sample host / service
-$request = request('/thruk/cgi-bin/status.cgi?host=all');
-ok( $request->is_success, 'Extinfo Tests need a proper status page' ) or diag(Dumper($request));
-my $page = $request->content;
-my($host,$service);
-if($page =~ m/extinfo\.cgi\?type=2&amp;host=(.*?)&amp;service=(.*?)&/) {
-    $host    = $1;
-    $service = $2;
-}
-isnt($host, undef, "got a host from status.cgi");
-isnt($service, undef, "got a host from status.cgi");
+my($host,$service) = TestUtils::get_test_service();
 
 my $pages = [
+# Step 1
+    '/avail',
+    '/thruk/cgi-bin/avail.cgi',
+
 # Step 2
     '/thruk/cgi-bin/avail.cgi?report_type=hosts',
     '/thruk/cgi-bin/avail.cgi?report_type=hostgroups',
@@ -54,9 +46,9 @@ my $pages = [
 ];
 
 for my $url (@{$pages}) {
-    my $request = request($url);
-    ok( $request->is_success, 'Request '.$url.' should succeed' );
-    my $content = $request->content;
-    like($content, qr/Availability Report/, "Content contains: Availability Report");
-    unlike($content, qr/internal\ server\ error/mx, "Content contains error");
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => 'Availability Report',
+        'unlike'  => 'internal server error',
+    );
 }

@@ -1,14 +1,28 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 17;
+use Test::More tests => 32;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 BEGIN { use_ok 'Thruk::Controller::error' }
 
-$ENV{'TEST_ERROR'} = 1;
-ok( request('/error')->is_error, 'Request should fail' );
+my $pages = [
+    '/error',
+];
+
 for(1..14) {
-  ok( request('/error/'.$_)->is_error, 'Request should fail' );
+    push @{$pages}, '/error/'.$_;
+}
+
+$ENV{'TEST_ERROR'} = 1;
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'fail'    => 1,
+    );
 }
 delete $ENV{'TEST_ERROR'};

@@ -187,6 +187,7 @@ t/controller_summary.t
 t/controller_tac.t
 t/controller_trends.t
 t/perlcriticrc
+t/TestUtils.pm
 t/view_TT.t
 templates/_footer.tt
 templates/_get_content.tt

@@ -1,16 +1,44 @@
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 85;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 BEGIN { use_ok 'Thruk::Controller::notifications' }
 
-ok( request('/notifications')->is_success, 'Notifications Request should succeed' );
-my $request = request('/thruk/cgi-bin/notifications.cgi');
-ok( $request->is_success, 'Notifications Request should succeed' );
-my $content = $request->content;
-TODO: {
-    local $TODO = "needs to be implemented";
-    like($content, qr/Contact Notifications/, "Content contains: Contact Notifications");
-};
-unlike($content, qr/internal\ server\ error/mx, "Content contains error");
+my $testcontact     = TestUtils::get_test_user();
+my ($host,$service) = TestUtils::get_test_service();
+
+my $pages = [
+    { url => '/notifications',                                                      like => 'All Hosts and Services' },
+    { url => '/thruk/cgi-bin/notifications.cgi',                                    like => 'All Hosts and Services' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact='.$testcontact,              like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?host='.$host,                        like => 'Host Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?host='.$host."&service=".$service,   like => 'Service Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact='.$testcontact,              like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=0&archive=1',       like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=0',                 like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=2',                 like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=512',               like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=4',                 like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=8',                 like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=16',                like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=32',                like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=2048',              like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=1024',              like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=64',                like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=128',               like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=256',               like => 'Contact Notifications' },
+    { url => '/thruk/cgi-bin/notifications.cgi?contact=all&type=4096',              like => 'Contact Notifications' },
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'     => $url->{'url'},
+        'like'    => $url->{'like'},
+        'unlike'  => 'internal server error',
+    );
+}

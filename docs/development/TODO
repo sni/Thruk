@@ -13,6 +13,7 @@ general
     - remove $self from Thruk::Utils or replace with $c->{'utils'}
     - remove eval from Thruk::Utils->sort
     - make test independent from specific host/servicegroup (ex. avail.t)
+    - side menu text style changes between tac and avail
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -64,6 +65,8 @@ general:
         HTML, Text, CVS, XML, PDF
     - add multiple notes url or action urls, maybe add an "_html" cust var
     - add ability to display contacts for machine
+
+statusmap: http://search.cpan.org/~lbrocard/GraphViz/lib/GraphViz.pm
 
 status:
     - proper search

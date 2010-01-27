@@ -51,15 +51,20 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $filter .= "Filter: time >= $start\n";
     $filter .= "Filter: time <= $end\n";
 
+    if($host eq '' and $service eq '' and $contact eq '') {
+        $host = 'all';
+    }
+
     if($service ne '') {
         $c->stash->{infoBoxTitle}   = 'Service Notifications';
         $filter .= "Filter: host_name = $host\n" if $host ne 'all';
         $filter .= "Filter: service_description = $service\n";
     }
-    if($host ne '') {
+    elsif($host ne '') {
         $c->stash->{infoBoxTitle}   = 'Host Notifications';
         $filter .= "Filter: host_name = $host\n" if $host ne 'all';
-    } elsif($contact ne '') {
+    }
+    elsif($contact ne '') {
         $c->stash->{infoBoxTitle}   = 'Contact Notifications';
         $filter .= "Filter: contact_name = $contact\n" if $contact ne 'all';
     }

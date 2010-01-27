@@ -1,16 +1,24 @@
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 14;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 BEGIN { use_ok 'Thruk::Controller::showlog' }
 
-ok( request('/showlog')->is_success, 'Showlog Request should succeed' );
-my $request = request('/thruk/cgi-bin/showlog.cgi');
-ok( $request->is_success, 'Showlog Request should succeed' );
-my $content = $request->content;
-TODO: {
-    local $TODO = "needs to be implemented";
-    like($content, qr/Current Event Log/, "Content contains: Current Event Log");
-};
-unlike($content, qr/internal\ server\ error/mx, "Content contains error");
+my $pages = [
+    '/showlog',
+    '/thruk/cgi-bin/showlog.cgi',
+    '/thruk/cgi-bin/showlog.cgi?archive=1',
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => 'Event Log',
+        'unlike'  => 'internal server error',
+    );
+}

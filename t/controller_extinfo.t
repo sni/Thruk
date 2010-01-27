@@ -1,36 +1,36 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 25;
+use Test::More tests => 38;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 BEGIN { use_ok 'Thruk::Controller::extinfo' }
 
-ok( request('/extinfo')->is_success, 'Extinfo Request should succeed' );
-ok( request('/thruk/cgi-bin/extinfo.cgi')->is_success, 'Extinfo Request should succeed' );
+my $hostgroup      = TestUtils::get_test_hostgroup();
+my $servicegroup   = TestUtils::get_test_servicegroup();
+my($host,$service) = TestUtils::get_test_service();
 
-# get a sample host / service
-my $request = request('/thruk/cgi-bin/status.cgi?host=all');
-ok( $request->is_success, 'Extinfo Tests need a proper status page' ) or diag(Dumper($request));
-my $page = $request->content;
-my($host,$service);
-if($page =~ m/extinfo\.cgi\?type=2&amp;host=(.*?)&amp;service=(.*?)&/) {
-    $host    = $1;
-    $service = $2;
-}
-isnt($host, undef, "got a host from status.cgi");
-isnt($service, undef, "got a host from status.cgi");
+my $pages = [
+    '/extinfo',
+    '/thruk/cgi-bin/extinfo.cgi',
+    '/thruk/cgi-bin/extinfo.cgi?type=0',
+    '/thruk/cgi-bin/extinfo.cgi?type=1&host='.$host,
+    '/thruk/cgi-bin/extinfo.cgi?type=2&host='.$host.'&service='.$service,
+    '/thruk/cgi-bin/extinfo.cgi?type=3',
+    '/thruk/cgi-bin/extinfo.cgi?type=4',
+    '/thruk/cgi-bin/extinfo.cgi?type=5&hostgroup='.$hostgroup,
+    '/thruk/cgi-bin/extinfo.cgi?type=6',
+    '/thruk/cgi-bin/extinfo.cgi?type=7',
+    '/thruk/cgi-bin/extinfo.cgi?type=8&servicegroup='.$servicegroup,
+];
 
-for(0..8) {
-    my $type = $_;
-    my $extra = "";
-    if($type == 1) { $extra = '&host='.$host;                      }
-    if($type == 2) { $extra = '&host='.$host.'&service='.$service; }
-    if($type == 5) { $extra = '&hostgroup=down';                   }
-    if($type == 8) { $extra = '&servicegroup=flap';                }
-
-    my $request = request('/thruk/cgi-bin/extinfo.cgi?type='.$type.$extra);
-    ok( $request->is_success, 'Extinfo Type '.$type.' Request should succeed' ) or diag(Dumper($request));
-    my $content = $request->content;
-    unlike($content, qr/internal\ server\ error/mx, "Content contains error");
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'unlike'  => 'internal server error',
+    );
 }
