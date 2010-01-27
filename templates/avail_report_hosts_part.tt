@@ -82,10 +82,10 @@
     [% SET avgClass = 'dataOdd'  IF class == 'dataEven' %]
     <tr class='[% avgClass %]'>
       <td class='[% avgClass %]'>Average</td>
-      <td class='hostUP'>[% sprintf('%2.3f', perc_up_total / hosts.size) %]% ([% sprintf('%2.3f', perc_up_known_total / hosts.size) %]%)</td>
-      <td class='hostDOWN'>[% sprintf('%2.3f', perc_down_total / hosts.size) %]% ([% sprintf('%2.3f', perc_down_known_total / hosts.size) %]%)</td>
-      <td class='hostUNREACHABLE'>[% sprintf('%2.3f', perc_unreachable_total / hosts.size) %]% ([% sprintf('%2.3f', perc_unreachable_known_total / hosts.size) %]%)</td>
-      <td class='[% avgClass %]'>[% sprintf('%2.3f', perc_undetermined_hosts_total / hosts.size) %]%</td>
+      <td class='hostUP'>[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_up_total / hosts.size) %]% ([% sprintf('%2.3f', perc_up_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</td>
+      <td class='hostDOWN'>[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_down_total / hosts.size) %]% ([% sprintf('%2.3f', perc_down_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</td>
+      <td class='hostUNREACHABLE'>[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_unreachable_total / hosts.size) %]% ([% sprintf('%2.3f', perc_unreachable_known_total / hosts.size) %]%)[% ELSE %]00.000%[% END %]</td>
+      <td class='[% avgClass %]'>[% IF hosts.size > 0 %][% sprintf('%2.3f', perc_undetermined_hosts_total / hosts.size) %]%[% ELSE %]00.000%[% END %]</td>
     </tr>
   </table>
 </div>
