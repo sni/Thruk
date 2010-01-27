@@ -77,7 +77,7 @@ sub test_page {
     while(my $line = <$ph>) {
         if($line =~ m/(\d+)/) {
             my $rsize = sprintf("%.2f", $1/1024);
-            ok($rsize < 200, 'resident size ('.$rsize.'MB) higher than 100MB on '.$opts{'url'});
+            ok($rsize < 500, 'resident size ('.$rsize.'MB) higher than 500MB on '.$opts{'url'});
 #            print $fh $rsize." MB ".$opts{'url'}."\n";
 #            diag("rss: ".$rsize."MB");
         }

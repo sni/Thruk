@@ -164,7 +164,6 @@ script/thruk_fastcgi.pl
 script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
-t/00_test_utils.pm
 t/01app.t
 t/10-Thruk-Utils.t
 t/97-Pod.t
