@@ -10,7 +10,7 @@
           <div align="center" class='dataTitle'>All Hosts</div><br>
           <img src='/thruk/images/trends.gif' border="0" alt='Availability Report' title='Availability Report'><br clear="all">
           <div align="center" class='reportRange'>
-            [% date.format(start, '%Y-%m-%d  %H:%M:%S') %] to [% date.format(end, '%Y-%m-%d  %H:%M:%S') %]
+            [% date.format(start, datetime_format) %] to [% date.format(end, datetime_format) %]
           </div>
           <div align="center" class='reportDuration'>
             Duration: [% SET dur = end - start %][% duration(dur) %]

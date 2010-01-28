@@ -47,6 +47,10 @@ sub begin : Private {
     $c->stash->{'use_feature_statuswrl'} = 0;
     $c->stash->{'use_feature_trends'}    = 0;
 
+    $c->stash->{'datetime_format'}      = Thruk->config->{'datetime_format'};
+    $c->stash->{'datetime_format_long'} = Thruk->config->{'datetime_format_long'};
+    $c->stash->{'datetime_format_log'}  = Thruk->config->{'datetime_format_log'};
+
     return 1;
 }
 

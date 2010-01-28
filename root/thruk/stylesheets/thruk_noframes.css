@@ -2,7 +2,7 @@
 div.navbar {
   background-color: black;
   color: white;
-  font-family: verdana,arial,serif;
+  font-family:arial,serif;
   width: 160px;
   height: 100%;
   position:fixed;

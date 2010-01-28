@@ -52,12 +52,12 @@
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
                 <div class='navBoxTitle'>Log File Navigation</div>
-                [% date.format(start, '%a %b %e %H:%M:%S %Z %Y') %]<br>
+                [% date.format(start, datetime_format_long) %]<br>
                 to<br>
                 [% IF endname %]
                   [% endname %]
                 [% ELSE %]
-                  [% date.format(end, '%a %b %e %H:%M:%S %Z %Y') %]<br>
+                  [% date.format(end, datetime_format_long) %]<br>
                 [% END %]
               </td>
               <td width="15"></td>
@@ -147,7 +147,7 @@
       <table border="0" width="95%">
         <tr>
           <td width="40%"><hr width="100%"></td>
-          <td align="center" class='dateTimeBreak'>[% date.format(l.time, '%B %d, %Y  %H') _ ':00' %]</td>
+          <td align="center" class='dateTimeBreak'>[% date.format(l.time, datetime_format_log) _ ':00' %]</td>
           <td width="40%"><hr width="100%"></td>
         </tr>
       </table>
@@ -204,7 +204,7 @@
 [% ELSIF l.type.search('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
 [% ELSE                                              %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% END %]
-<img align='left' src='/thruk/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, '%Y-%m-%d  %H:%M:%S') %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
+<img align='left' src='/thruk/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, datetime_format) %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 [% END %]
     </div>
 

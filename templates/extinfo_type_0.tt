@@ -43,7 +43,7 @@
                       [% FOREACH pd IN backends %]
                         <td class='dataVal' nowrap>
                           [% IF pi_detail.$pd.program_start %]
-                            [% date.format(pi_detail.$pd.program_start, '%Y-%m-%d  %H:%M:%S') %]
+                            [% date.format(pi_detail.$pd.program_start, datetime_format) %]
                           [% ELSE %]
                           <div class='peerDOWN'>&nbsp;&nbsp;DOWN</div>
                           [% END %]
@@ -59,13 +59,13 @@
                     <tr>
                       <td class='dataVar' nowrap>Last External Command Check:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal' nowrap>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.last_command_check %][% date.format(pi_detail.$pd.last_command_check, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %][% END %]</td>
+                      <td class='dataVal' nowrap>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.last_command_check %][% date.format(pi_detail.$pd.last_command_check, datetime_format) %][% ELSE %]N/A[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>
                       <td class='dataVar' nowrap>Last Log File Rotation:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal' nowrap>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.last_log_rotation %][% date.format(pi_detail.$pd.last_log_rotation, '%Y-%m-%d  %H:%M:%S') %][% ELSE %]N/A[% END %][% END %]</td>
+                      <td class='dataVal' nowrap>[% IF pi_detail.$pd.program_start %][% IF pi_detail.$pd.last_log_rotation %][% date.format(pi_detail.$pd.last_log_rotation, datetime_format) %][% ELSE %]N/A[% END %][% END %]</td>
                       [% END %]
                     </tr>
                     <tr>

@@ -36,11 +36,11 @@
         [% SET class = 'downtimeEven'  IF loop.odd %]
         <tr class='[% class %]'>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
-          <td class='[% class %]'>[% date.format(d.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(d.entry_time, datetime_format) %]</td>
           <td class='[% class %]'>[% d.author %]</td>
           <td class='[% class %]'>[% d.comment %]</td>
-          <td class='[% class %]'>[% date.format(d.start_time, '%Y-%m-%d  %H:%M:%S') %]</td>
-          <td class='[% class %]'>[% date.format(d.end_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(d.start_time, datetime_format) %]</td>
+          <td class='[% class %]'>[% date.format(d.end_time, datetime_format) %]</td>
           <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
@@ -77,11 +77,11 @@
         <tr class='[% class %]'>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name %]&amp;service=[% d.service_description %]'>[% d.service_description %]</a></td>
-          <td class='[% class %]'>[% date.format(d.entry_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(d.entry_time, datetime_format) %]</td>
           <td class='[% class %]'>[% d.author %]</td>
           <td class='[% class %]'>[% d.comment %]</td>
-          <td class='[% class %]'>[% date.format(d.start_time, '%Y-%m-%d  %H:%M:%S') %]</td>
-          <td class='[% class %]'>[% date.format(d.end_time, '%Y-%m-%d  %H:%M:%S') %]</td>
+          <td class='[% class %]'>[% date.format(d.start_time, datetime_format) %]</td>
+          <td class='[% class %]'>[% date.format(d.end_time, datetime_format) %]</td>
           <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>

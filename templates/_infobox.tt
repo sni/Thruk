@@ -3,7 +3,7 @@
   <tr>
     <td class='infoBox'>
       <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
-      Last Updated: [% date.format(date.now, '%a %b %e %H:%M:%S %Z %Y') %]<br />
+      Last Updated: [% date.format(date.now, datetime_format_long) %]<br />
       [% IF ! no_auto_reload %]Updated every [% refresh_rate %] seconds<br />[% END %]
       Thruk [% version %] - <a href='http://github.com/sni/Thruk' target='_blank' class='homepageURL'>github.org</a><br />
       Logged in as <i>[% remote_user %]</i><br />
