@@ -46,7 +46,7 @@ requires:
   LWP: 0
   Log::Dispatch::File: 0
   Monitoring::Availability: 0.07
-  Monitoring::Livestatus: 0.36
+  Monitoring::Livestatus: 0.37
   Moose: 0
   MooseX::MethodAttributes::Inheritable: 0
   MooseX::Role::WithOverloading: 0
@@ -65,4 +65,4 @@ resources:
   homepage: http://github.com/sni/Thruk
   license: http://opensource.org/licenses/gpl-3.0.html
   repository: http://github.com/sni/Thruk
-version: 0.21_1
+version: 0.21_2

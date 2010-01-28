@@ -14,7 +14,8 @@ general
     - remove eval from Thruk::Utils->sort
     - make test independent from specific host/servicegroup (ex. avail.t)
     - side menu text style changes between tac and avail
-    - showlog performance is too slow
+    - showlog performance is still too slow (only firefox)
+    - make date format configurable through thruk.conf
 
 extinfo:
     - finish performance data on extinfo type 4
