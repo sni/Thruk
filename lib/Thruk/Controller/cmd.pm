@@ -150,7 +150,7 @@ sub _do_send_command {
         my $comment_author          = $c->user->username;
     if(defined $backends) {
         $c->log->debug("sending to backends: ".Dumper($backends));
-        $c->{'live'}->do($cmd, { Backends => $backends });
+        $c->{'live'}->do($cmd, { Backend => $backends });
     } else {
         $c->{'live'}->do($cmd);
     }

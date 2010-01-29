@@ -1,6 +1,9 @@
 [% PROCESS _header.tt %]
 [% USE date %]
 
+[% SET peer_key      = host.peer_key %]
+[% SET program_start = pi_detail.$peer_key.program_start %]
+
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -105,7 +108,7 @@
                               [% ELSIF host.state == 2 %]
                               <div class='hostUNREACHABLE'>&nbsp;&nbsp;UNREACHABLE&nbsp;&nbsp;</div>
                               [% END %]
-                              &nbsp;(for [% duration(date.now - host.last_state_change) %])
+                              &nbsp;(for [% IF host.last_state_change %][% duration(date.now - host.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])
                               [% IF host.acknowledged %]
                               &nbsp;(Has been acknowledged)
                               [% END %]

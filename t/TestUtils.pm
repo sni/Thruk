@@ -14,17 +14,41 @@ BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
 #########################
 sub get_test_servicegroup {
-    return('flap');
+    my $request = request('/thruk/cgi-bin/config.cgi?type=servicegroups');
+    ok( $request->is_success, 'get_test_servicegroup() needs a proper config page' ) or diag(Dumper($request));
+    my $page = $request->content;
+    my $group;
+    if($page =~ m/<td class='dataEven'><a name='(.*?)' id=".*?"><\/a>[^<]+<\/td>/) {
+        $group = $1;
+    }
+    isnt($group, undef, "got a servicegroup from config.cgi") or BAIL_OUT('got no test servicegroup, cannot test');
+    return($group);
 }
 
 #########################
 sub get_test_hostgroup {
-    return('down');
+    my $request = request('/thruk/cgi-bin/config.cgi?type=hostgroups');
+    ok( $request->is_success, 'get_test_hostgroup() needs a proper config page' ) or diag(Dumper($request));
+    my $page = $request->content;
+    my $group;
+    if($page =~ m/<td class='dataEven'><a name='(.*?)' id=".*?"><\/a>([^<]+)<\/td>/) {
+        $group = $1;
+    }
+    isnt($group, undef, "got a hostgroup from config.cgi") or BAIL_OUT('got no test hostgroup, cannot test');
+    return($group);
 }
 
 #########################
 sub get_test_user {
-    return('admin');
+    my $request = request('/thruk/cgi-bin/config.cgi');
+    ok( $request->is_success, 'get_test_user() needs a proper config page' ) or diag(Dumper($request));
+    my $page = $request->content;
+    my $user;
+    if($page =~ m/Logged in as <i>(.*?)<\/i>/) {
+        $user = $1;
+    }
+    isnt($user, undef, "got a user from config.cgi") or BAIL_OUT('got no test user, cannot test');
+    return($user);
 }
 
 #########################
@@ -72,7 +96,7 @@ sub test_page {
     }
 
     # memory usage
-    #open(my $fh, '>>', '/tmp/memory_stats.txt') or die('cannot write: '.$!);
+#    open(my $fh, '>>', '/tmp/memory_stats.txt') or die('cannot write: '.$!);
     open(my $ph, '-|', "ps -p $$ -o rss");
     while(my $line = <$ph>) {
         if($line =~ m/(\d+)/) {
@@ -83,7 +107,7 @@ sub test_page {
         }
     }
     close($ph);
-    #close($fh);
+#    close($fh);
 }
 #########################
 

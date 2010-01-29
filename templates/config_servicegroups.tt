@@ -30,6 +30,7 @@
     <td class='[% class %]'>[% d.notes_url %]</td>
     <td class='[% class %]'>[% d.action_url %]</td>
   </tr>
+
   [% END %]
 </table>
 

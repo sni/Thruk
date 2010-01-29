@@ -1,5 +1,7 @@
 [% USE date %]
 [% PROCESS _header.tt %]
+[% SET peer_key      = service.peer_key %]
+[% SET program_start = pi_detail.$peer_key.program_start %]
 
     <table border="0" width="100%">
       <tr>
@@ -96,7 +98,7 @@
                               [% ELSIF service.state == 3 %]
                               <div class='serviceUNKNOWN'>&nbsp;&nbsp;UNKNOWN&nbsp;&nbsp;</div>
                               [% END %]
-                              &nbsp;(for [% duration(date.now - service.last_state_change) %])
+                              &nbsp;(for [% IF service.last_state_change %][% duration(date.now - service.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])
                               [% IF service.acknowledged %]
                               &nbsp;(Has been acknowledged)
                               [% END %]
