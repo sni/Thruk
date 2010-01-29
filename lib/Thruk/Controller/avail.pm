@@ -178,6 +178,9 @@ sub _create_report {
 
     if(defined $host and $host eq 'null') { undef $host; }
 
+    my $csvoutput = 0;
+    $csvoutput = 1 if exists $c->{'request'}->{'parameters'}->{'csvoutput'};
+
     if(defined $hostgroup and $hostgroup ne '') {
         $c->stash->{template}   = 'avail_report_hostgroup.tt';
     }
@@ -185,7 +188,11 @@ sub _create_report {
         $c->stash->{template}   = 'avail_report_service.tt';
     }
     elsif(defined $service and $service eq 'all') {
-        $c->stash->{template}   = 'avail_report_services.tt';
+        if($csvoutput) {
+            $c->stash->{template} = 'avail_report_services_csv.tt';
+        } else {
+            $c->stash->{template} = 'avail_report_services.tt';
+        }
     }
     elsif(defined $servicegroup and $servicegroup ne '') {
         $c->stash->{template}   = 'avail_report_servicegroup.tt';
@@ -194,11 +201,21 @@ sub _create_report {
         $c->stash->{template}   = 'avail_report_host.tt';
     }
     elsif(defined $host and $host eq 'all') {
-        $c->stash->{template}   = 'avail_report_hosts.tt';
+        if($csvoutput) {
+            $c->stash->{template}   = 'avail_report_hosts_csv.tt';
+        } else {
+            $c->stash->{template}   = 'avail_report_hosts.tt';
+        }
     }
     else {
         $c->log->debug("unknown report type");
         return;
+    }
+
+    if($csvoutput) {
+        $c->response->header('Content-Type' => 'text/plain');
+        delete $c->{'request'}->{'parameters'}->{'show_log_entries'};
+        delete $c->{'request'}->{'parameters'}->{'full_log_entries'};
     }
 
     # get timeperiod

@@ -7,10 +7,10 @@ general
     - reload cgi.cfg if changed
     - fix authorization ( check services by host_contacts, comments/downtimes )
     - fix host/servicegroups pages with authorization
-    - check TT strict option
     - write tests
     - add backend name to logs
     - showlog performance is still too slow (only firefox)
+    - paging with Data::Page (http://bricas.vox.com/library/post/catalyst-tip-easy-paging-using-uri_with.html)
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -60,6 +60,7 @@ general:
       this host: http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=117591#post117591
     - flexible report output
         HTML, Text, CVS, XML, PDF
+        CSV output for single hosts/services,hostgroups/servicegroups
     - add multiple notes url or action urls, maybe add an "_html" cust var
     - add ability to display contacts for machine
 

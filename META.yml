@@ -45,8 +45,8 @@ requires:
   HTTP::Body: 0
   LWP: 0
   Log::Dispatch::File: 0
-  Monitoring::Availability: 0.06
-  Monitoring::Livestatus: 0.36
+  Monitoring::Availability: 0.08
+  Monitoring::Livestatus: 0.38
   Moose: 0
   MooseX::MethodAttributes::Inheritable: 0
   MooseX::Role::WithOverloading: 0
