@@ -49,3 +49,19 @@ table.linkBox td {
   font-weight: normal;
 }
 
+/* fix for bold features on tac page */
+td.featureEnabledFlapDetection {
+    font-weight: normal;
+}
+td.featureEnabledNotifications {
+    font-weight: normal;
+}
+td.featureEnabledHandlers {
+    font-weight: normal;
+}
+td.featureDisabledActiveChecks {
+    font-weight: normal;
+}
+td.featureEnabledPassiveChecks {
+    font-weight: normal;
+}
