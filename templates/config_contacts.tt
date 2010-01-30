@@ -32,7 +32,7 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
+    <td class='[% class %]'><a id="[% name2id(d.name, 'contact') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'><a href="mailto:[% d.email %]">[% d.email %]</a></td>
     <td class='[% class %]'>[% d.pager %]</td>

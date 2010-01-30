@@ -1,6 +1,6 @@
 [% PROCESS _header.tt %]
     <div id="mainbrandsplash">
-      <div id="mainlogo"><a href="http://github.com/sni/Thruk" target="_blank"><img src="/thruk/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk"></a></div>
+      <div id="mainlogo"><a href="http://github.com/sni/Thruk" target="_blank"><img src="/thruk/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     </div>
     <div id="currentversioninfo">
       <div class="product">Thruk Monitoring Webinterface</div>

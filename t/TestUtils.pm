@@ -18,7 +18,7 @@ sub get_test_servicegroup {
     ok( $request->is_success, 'get_test_servicegroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
-    if($page =~ m/<td class='dataEven'><a name='(.*?)' id=".*?"><\/a>[^<]+<\/td>/) {
+    if($page =~ m/<td class='dataEven'><a id="(.*?)"><\/a>[^<]+<\/td>/) {
         $group = $1;
     }
     isnt($group, undef, "got a servicegroup from config.cgi") or BAIL_OUT('got no test servicegroup, cannot test');
@@ -31,7 +31,7 @@ sub get_test_hostgroup {
     ok( $request->is_success, 'get_test_hostgroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
-    if($page =~ m/<td class='dataEven'><a name='(.*?)' id=".*?"><\/a>([^<]+)<\/td>/) {
+    if($page =~ m/<td class='dataEven'><a id="(.*?)"><\/a>([^<]+)<\/td>/) {
         $group = $1;
     }
     isnt($group, undef, "got a hostgroup from config.cgi") or BAIL_OUT('got no test hostgroup, cannot test');
@@ -101,14 +101,46 @@ sub test_page {
     while(my $line = <$ph>) {
         if($line =~ m/(\d+)/) {
             my $rsize = sprintf("%.2f", $1/1024);
-            ok($rsize < 500, 'resident size ('.$rsize.'MB) higher than 500MB on '.$opts{'url'});
+            ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 500MB on '.$opts{'url'});
 #            print $fh $rsize." MB ".$opts{'url'}."\n";
 #            diag("rss: ".$rsize."MB");
         }
     }
     close($ph);
 #    close($fh);
+
+    # html valitidy
+    SKIP: {
+        eval { require HTML::Lint };
+
+        skip "HTML::Lint not installed", 2 if $@;
+
+        my $lint = new HTML::Lint;
+        isa_ok( $lint, "HTML::Lint" );
+
+        $lint->parse( $content );
+        my @errors = $lint->errors;
+        @errors = diag_lint_errors_and_remove_some_exceptions($lint);
+        is( scalar @errors, 0, "No errors found in HTML" );
+        $lint->clear_errors();
+    }
 }
+
+#########################
+sub diag_lint_errors_and_remove_some_exceptions {
+    my $lint = shift;
+    my @return;
+    for my $error ( $lint->errors ) {
+        my $err_str = $error->as_string;
+        if($err_str =~ m/<IMG SRC="\/thruk\/images\/logos\/.*?">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes\./) {
+            next;
+        }
+        diag($error->as_string."\n");
+        push @return, $error;
+    }
+    return @return;
+}
+
 #########################
 
 1;

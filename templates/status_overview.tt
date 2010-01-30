@@ -123,14 +123,14 @@
                     [% END %]
                   </td>
                   <td class='[% hostclass %]'>
-                    <a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/thruk/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host'></a>
+                    <a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/thruk/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
                     [% IF h.notes_url_expanded %]
                     <a href='[% h.notes_url_expanded %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/thruk/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
                     [% END %]
                     [% IF h.action_url_expanded %]
                     <a href='[% h.action_url_expanded %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/thruk/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a>
                     [% END %]
-                    <a href='status.cgi?host=[% h.name %]'><img src='/thruk/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host'></a>
+                    <a href='status.cgi?host=[% h.name %]'><img src='/thruk/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
                     [% IF use_feature_statusmap %]
                     <a href='statusmap.cgi?host=[% h.name %]'><img src='/thruk/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
                     [% END %]

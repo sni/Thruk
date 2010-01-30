@@ -18,7 +18,7 @@
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
   <tr class='[% class %]'>
-    <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
+    <td class='[% class %]'><a id="[% name2id(d.name, 'servicegroup') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>
       [% FOREACH service = d.members_split %]

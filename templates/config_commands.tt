@@ -23,7 +23,7 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
+    <td class='[% class %]'><a id="[% name2id(d.name, 'command') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.line %]</td>
   </tr>
   [% END %]

@@ -860,6 +860,32 @@ sub get_start_end_for_timeperiod {
     return($start, $end);
 }
 
+
+########################################
+
+=head2 name2id
+
+  my $striped_string = name2id($name)
+
+returns a string which can be used as id in html elements
+
+An id must begin with a letter ([A-Za-z]) and may be followed
+by any number of letters, digits ([0-9]), hyphens ("-"),
+underscores ("_"), colons (":"), and periods (".").
+
+=cut
+sub name2id {
+    my $name       = shift;
+    my $opt_prefix = shift || '';
+    my $return = $name;
+    $return =~ s/[^a-zA-Z0-9\-_\.]*//g;
+    if($return =~ m/^\d+/) {
+        $return = $opt_prefix."_".$return;
+    }
+    return($return);
+}
+
+
 1;
 
 =head1 AUTHOR

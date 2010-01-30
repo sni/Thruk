@@ -62,7 +62,7 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a name='[% d.host_name %]_[% d.description %]' id="[% d.host_name %]_[% d.description %]"></a><a href="config.cgi?type=hosts#[% d.host_name %]">[% d.host_name %]</a></td>
+    <td class='[% class %]'><a id="[% name2id(d.host_name _ d.description, 'service') %]_[% d.description %]"></a><a href="config.cgi?type=hosts#[% d.host_name %]">[% d.host_name %]</a></td>
     <td class='[% class %]'>[% d.description %]</td>
     <td class='[% class %]'>[% d.max_check_attempts %]</td>
     <td class='[% class %]'>[% duration(d.check_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
@@ -95,7 +95,7 @@
     <td class='[% class %]'>[% d.notes %]</td>
     <td class='[% class %]'>[% d.notes_url %]</td>
     <td class='[% class %]'>[% d.action_url %]</td>
-    <td class='[% class %]' valign="middle">[% IF d.icon_image %]<img src="/thruk/images/logos/[% d.icon_image %]" border="0" height="20" width="20"> [% d.icon_image %][% END %]</td>
+    <td class='[% class %]' valign="middle">[% IF d.icon_image %]<img src="/thruk/images/logos/[% d.icon_image %]" border="0" height="20" width="20" alt="service icon"> [% d.icon_image %][% END %]</td>
     <td class='[% class %]'>[% d.icon_image_alt %]</td>
     <td class='[% class %]'>TODO</td>
   </tr>

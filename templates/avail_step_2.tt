@@ -57,7 +57,7 @@
                   [% END %]
                 </option>
 [% FOREACH opt = data %]
-<option>[% opt %]
+<option>[% opt %]</option>
 
 [% END %]
               </select>

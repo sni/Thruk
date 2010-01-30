@@ -36,35 +36,35 @@
                 <td>
                   <table border="0" cellspacing="0" cellpadding="0" class='command'>
                     <tr class='command'>
-                      <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Servicegroup' title='Schedule Downtime For All Hosts In This Servicegroup'></td>
+                      <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Servicegroup' title='Schedule Downtime For All Hosts In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=121&amp;servicegroup=[% servicegroup %]'>Schedule downtime for all hosts in this servicegroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Servicegroup' title='Schedule Downtime For All Services In This Servicegroup'></td>
+                      <td><img src='/thruk/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Servicegroup' title='Schedule Downtime For All Services In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=122&amp;servicegroup=[% servicegroup %]'>Schedule downtime for all services in this servicegroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/thruk/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Servicegroup' title='Enable Notifications For All Hosts In This Servicegroup'></td>
+                      <td><img src='/thruk/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Servicegroup' title='Enable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=111&amp;servicegroup=[% servicegroup %]'>Enable notifications for all hosts in this servicegroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/thruk/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Servicegroup' title='Disable Notifications For All Hosts In This Servicegroup'></td>
+                      <td><img src='/thruk/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Servicegroup' title='Disable Notifications For All Hosts In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=112&amp;servicegroup=[% servicegroup %]'>Disable notifications for all hosts in this servicegroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/thruk/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Servicegroup' title='Enable Notifications For All Services In This Servicegroup'></td>
+                      <td><img src='/thruk/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Servicegroup' title='Enable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=109&amp;servicegroup=[% servicegroup %]'>Enable notifications for all services in this servicegroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/thruk/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Servicegroup' title='Disable Notifications For All Services In This Servicegroup'></td>
+                      <td><img src='/thruk/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Servicegroup' title='Disable Notifications For All Services In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=110&amp;servicegroup=[% servicegroup %]'>Disable notifications for all services in this servicegroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Servicegroup' title='Enable Active Checks Of All Services In This Servicegroup'></td>
+                      <td><img src='/thruk/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Servicegroup' title='Enable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=113&amp;servicegroup=[% servicegroup %]'>Enable active checks of all services in this servicegroup</a></td>
                     </tr>
                     <tr class='command'>
-                      <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Servicegroup' title='Disable Active Checks Of All Services In This Servicegroup'></td>
+                      <td><img src='/thruk/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Servicegroup' title='Disable Active Checks Of All Services In This Servicegroup' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=114&amp;servicegroup=[% servicegroup %]'>Disable active checks of all services in this servicegroup</a></td>
                     </tr>
                   </table>
@@ -78,6 +78,5 @@
         </tr>
       </table>
     </div>
-    <table>
 
 [% PROCESS _footer.tt %]

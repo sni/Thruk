@@ -31,7 +31,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem'>
                 Previous Day<br>
-                <a href='notifications.cgi?[% link %]&amp;archive=[% archive + 1 %]'><img src='/thruk/images/left.gif' border="0" alt='Previous Day' title='Previous Day'></a>
+                <a href='notifications.cgi?[% link %]&amp;archive=[% archive + 1 %]'><img src='/thruk/images/left.gif' border="0" alt='Previous Day' title='Previous Day' width="36" height="32"></a>
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
@@ -48,7 +48,7 @@
               [% IF archive >= 1 %]
               <td align="center" valign="middle" class='navBoxItem'>
                 Next Day<br>
-                <a href='notifications.cgi?[% link %]&amp;archive=[% archive - 1 %]'><img src='/thruk/images/right.gif' border="0" alt='Next Day' title='Next Day'></a>
+                <a href='notifications.cgi?[% link %]&amp;archive=[% archive - 1 %]'><img src='/thruk/images/right.gif' border="0" alt='Next Day' title='Next Day' width="36" height="32"></a>
               </td>
               [% ELSE %]
               <td><img src='/thruk/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>

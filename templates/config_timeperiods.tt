@@ -26,22 +26,24 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a name='[% d.name %]' id="[% d.name %]"></a>[% d.name %]</td>
+    <td class='[% class %]'><a id="[% name2id(d.name, 'timeperiod') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>TODO: [% d.exclusion %]</td>
 
     [% has_days = 0 %]
     [% FOREACH day IN [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ] %]
-    [% IF d.$day %]
-      [% IF has_days == 1 %]
-        <tr>
-          <td colspan='[% IF backends.size > 1 %]4[% ELSE %]3[% END %]'></td>
-      [% END %]
-        <td class='[% class %]'>[% day %]</td>
+      [% IF d.$day %]
+        [% IF has_days == 1 %]
+          <tr>
+            <td colspan='[% IF backends.size > 1 %]4[% ELSE %]3[% END %]'></td>
+        [% END %]
+          <td class='[% class %]'>[% day %]</td>
         <td class='[% class %]'>[% d.$day %]&nbsp;</td>
       </tr>
       [% END %]
-      [% has_days = 1 %]
+    [% END %]
+    [% IF has_days == 0 %]
+  </tr>
     [% END %]
   [% END %]
 </table>

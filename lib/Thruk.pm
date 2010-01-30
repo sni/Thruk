@@ -23,7 +23,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.23_1';
+our $VERSION = '0.23_2';
 
 ###################################################
 # Configure the application.
@@ -48,6 +48,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                         PRE_DEFINE         => {
                                                 'sprintf'   => sub { my $format = shift; sprintf $format, @_ },
                                                 'duration'  => \&Thruk::Utils::filter_duration,
+                                                'name2id'   => \&Thruk::Utils::name2id,
                                             },
                         PRE_CHOMP          => 1,
                         POST_CHOMP         => 1,
