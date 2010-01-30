@@ -19,7 +19,6 @@ config:
     - add missing values
 
 avail:
-    - CSV output
     - trends graph
 
 trends:
