@@ -258,7 +258,7 @@ sub _process_process_info_page {
 sub _process_perf_info_page {
     my ( $self, $c ) = @_;
 
-    my $stats      = Thruk::Utils::get_service_exectution_stats_old($c);
+    my $stats      = Thruk::Utils::get_service_execution_stats_old($c);
     my $live_stats = $c->{'live'}->selectrow_arrayref("GET status\n".Thruk::Utils::get_auth_filter($c, 'status')."\nColumns: cached_log_messages connections connections_rate host_checks host_checks_rate requests requests_rate service_checks service_checks_rate neb_callbacks neb_callbacks_rate", { Slice => 1, Sum => 1 });
 
     $c->stash->{'stats'}      = $stats;

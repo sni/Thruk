@@ -268,7 +268,7 @@ Stats: accept_passive_checks = 0 as passive_checks_disabled
 ",
     { Slice => {} } );
 
-    $c->stash->{'stats'}        = Thruk::Utils::get_service_exectution_stats($c);
+    $c->stash->{'stats'}        = Thruk::Utils::get_service_execution_stats($c);
     $c->stash->{host_stats}     = $host_stats;
     $c->stash->{service_stats}  = $service_stats;
     $c->stash->{title}          = 'Tactical Monitoring Overview';

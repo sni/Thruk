@@ -409,18 +409,18 @@ sub get_livestatus_conf {
 
 ############################################################
 
-=head2 get_service_exectution_stats_old
+=head2 get_service_execution_stats_old
 
-  my $stats = get_service_exectution_stats_old($c);
+  my $stats = get_service_execution_stats_old($c);
 
 Returns a hash with statistical data, calculation is obsolete
 with newer livestatus versions
 
 =cut
-sub get_service_exectution_stats_old {
+sub get_service_execution_stats_old {
     my $c = shift;
 
-    $c->stats->profile(begin => "Utils::get_service_exectution_stats_old()");
+    $c->stats->profile(begin => "Utils::get_service_execution_stats_old()");
 
     my $now    = time();
     my $min1   = $now - 60;
@@ -587,7 +587,7 @@ sub get_service_exectution_stats_old {
         }
     }
 
-    $c->stats->profile(end => "Utils::get_service_exectution_stats_old()");
+    $c->stats->profile(end => "Utils::get_service_execution_stats_old()");
 
     return($check_stats);
 }
@@ -595,17 +595,17 @@ sub get_service_exectution_stats_old {
 
 ############################################################
 
-=head2 get_service_exectution_stats
+=head2 get_service_execution_stats
 
-  my $stats = get_service_exectution_stats($c);
+  my $stats = get_service_execution_stats($c);
 
 Returns a hash with statistical data
 
 =cut
-sub get_service_exectution_stats {
+sub get_service_execution_stats {
     my $c = shift;
 
-    $c->stats->profile(begin => "Utils::get_service_exectution_stats()");
+    $c->stats->profile(begin => "Utils::get_service_execution_stats()");
 
     my $now    = time();
     my $min1   = $now - 60;
@@ -661,7 +661,7 @@ sub get_service_exectution_stats {
         }
     }
 
-    $c->stats->profile(end => "Utils::get_service_exectution_stats()");
+    $c->stats->profile(end => "Utils::get_service_execution_stats()");
 
     return($check_stats);
 }
