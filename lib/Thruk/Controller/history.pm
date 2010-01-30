@@ -98,7 +98,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $filternum = 0;
 
     # service filter
-    if(defined $service) {
+    if(defined $service and $host ne 'all') {
         $filter .= "Filter: host_name = $host\n";
         $filter .= "Filter: service_description = $service\n";
         $filter .= "And: 3\n";

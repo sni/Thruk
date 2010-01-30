@@ -17,11 +17,11 @@
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
-                [% IF service != '' and host != '' %]
+                [% IF service != '' and host != 'all' %]
                 <a href='notifications.cgi?host=[% host %]&amp;service=[% service %]'>View Notifications For This Service</a><br>
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% host %]&amp;service=[% service %]'>View Trends For This Service</a><br>[% END %]
                 <a href='history.cgi?host=[% host %]'>View History For This Host</a>
-                [% ELSIF host != '' %]
+                [% ELSIF host != 'all' %]
                 <a href='status.cgi?host=[% host %]'>View Status Detail For This Host</a><br>
                 <a href='notifications.cgi?host=[% host %]'>View Notifications For This Host</a><br>
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% host %]'>View Trends For This Host</a>[% END %]
@@ -35,9 +35,9 @@
         </td>
         <td align="center" valign="top" width="33%">
           <div align="center" class='dataTitle'>
-            [% IF service != '' and host != '' %]
+            [% IF service != '' and host != 'all' %]
             Service '[% service %]' On Host '[% host %]'
-            [% ELSIF host != '' %]
+            [% ELSIF host != 'all' %]
             Host '[% host %]'
             [% ELSE %]
             All Hosts and Services
