@@ -1,16 +1,24 @@
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 10;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 BEGIN { use_ok 'Thruk::Controller::summary' }
 
-ok( request('/summary')->is_success, 'Summary Request should succeed' );
-my $request = request('/thruk/cgi-bin/summary.cgi');
-ok( $request->is_success, 'Summary Request should succeed' );
-my $content = $request->content;
-TODO: {
-    local $TODO = "needs to be implemented";
-    like($content, qr/Alert Summary Report/, "Content contains: Alert Summary Report");
-};
-unlike($content, qr/internal\ server\ error/mx, "Content contains error");
+my $pages = [
+# Step 1
+    '/summary',
+    '/thruk/cgi-bin/summary.cgi',
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => 'Alert Summary Report',
+        'unlike'  => 'internal server error',
+    );
+}

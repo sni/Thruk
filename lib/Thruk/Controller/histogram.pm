@@ -25,7 +25,26 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{'template'} = 'histogram.tt';
+    # set defaults
+    $c->stash->{title}            = 'Histogram';
+    $c->stash->{infoBoxTitle}     = 'Host and Service Alert Histogram';
+    $c->stash->{page}             = 'histogram';
+    $c->stash->{'no_auto_reload'} = 1;
+
+    # Step 1 - select report type
+    $self->_show_step_1($c);
+
+    return 1;
+}
+
+
+##########################################################
+sub _show_step_1 {
+    my ( $self, $c ) = @_;
+
+    $c->stats->profile(begin => "_show_step_1()");
+    $c->stash->{template} = 'histogram_step_1.tt';
+    $c->stats->profile(end => "_show_step_1()");
 
     return 1;
 }

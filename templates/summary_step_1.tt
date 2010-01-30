@@ -1,0 +1,234 @@
+[% USE date %]
+[% PROCESS _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% PROCESS _infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%"></td>
+        <td align="right" valign="bottom" width="33%">
+          <table border="0">
+            <tr>
+              <td></td>
+              <td align="right" valign="bottom"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <div align="center" class='dateSelectTitle'>Standard Reports: </div>
+    <div align="center">
+      <form method="get" action="summary.cgi">
+        <input type='hidden' name='report' value='1'>
+        <table border="0" cellpadding="5">
+          <tr>
+            <td class='reportSelectSubTitle' align="right">
+              Report Type:
+            </td>
+            <td class='reportSelectItem'>
+              <select name='standardreport'>
+                <option value="1">25 Most Recent Hard Alerts</option>
+                <option value="2">25 Most Recent Hard Host Alerts</option>
+                <option value="3">25 Most Recent Hard Service Alerts</option>
+                <option value="4">Top 25 Hard Host Alert Producers</option>
+                <option value="5">Top 25 Hard Service Alert Producers</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td align="left" class='dateSelectItem'><input type='submit' value='Create Summary Report!'></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <div align="center" class='dateSelectTitle'>Custom Report Options:</div>
+    <div align="center">
+      <form method="get" action="summary.cgi">
+        <input type='hidden' name='report' value='1'>
+        <table border="0" cellpadding="5">
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Report Type:</td>
+            <td class='reportSelectItem'>
+              <select name='displaytype'>
+                <option value="1">Most Recent Alerts</option>
+                <option value="2">Alert Totals</option>
+                <option value="4">Alert Totals By Hostgroup</option>
+                <option value="5">Alert Totals By Host</option>
+                <option value="7">Alert Totals By Servicegroup</option>
+                <option value="6">Alert Totals By Service</option>
+                <option value="3">Top Alert Producers</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>Report Period:</td>
+            <td valign="top" align="left" class='optBoxItem'>
+              <select name='timeperiod'>
+                <option value="today">Today</option>
+                <option value="last24hours">Last 24 Hours</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="thisweek">This Week</option>
+                <option value="last7days" selected>Last 7 Days</option>
+                <option value="lastweek">Last Week</option>
+                <option value="thismonth">This Month</option>
+                <option value="last31days">Last 31 Days</option>
+                <option value="lastmonth">Last Month</option>
+                <option value="thisyear">This Year</option>
+                <option value="lastyear">Last Year</option>
+                <option value="custom">* CUSTOM REPORT PERIOD *</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>If Custom Report Period...</td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>Start Date (Inclusive):</td>
+            <td align="left" valign="top" class='reportSelectItem'>
+              <select name='smon'>
+                <option value='1'[%  IF date.format(date.now, '%m') == "01" %] selected[% END %]>January</option>
+                <option value='2'[%  IF date.format(date.now, '%m') == "02" %] selected[% END %]>February</option>
+                <option value='3'[%  IF date.format(date.now, '%m') == "03" %] selected[% END %]>March</option>
+                <option value='4'[%  IF date.format(date.now, '%m') == "04" %] selected[% END %]>April</option>
+                <option value='5'[%  IF date.format(date.now, '%m') == "05" %] selected[% END %]>May</option>
+                <option value='6'[%  IF date.format(date.now, '%m') == "06" %] selected[% END %]>June</option>
+                <option value='7'[%  IF date.format(date.now, '%m') == "07" %] selected[% END %]>July</option>
+                <option value='8'[%  IF date.format(date.now, '%m') == "08" %] selected[% END %]>August</option>
+                <option value='9'[%  IF date.format(date.now, '%m') == "09" %] selected[% END %]>September</option>
+                <option value='10'[% IF date.format(date.now, '%m') == "10" %] selected[% END %]>October</option>
+                <option value='11'[% IF date.format(date.now, '%m') == "11" %] selected[% END %]>November</option>
+                <option value='12'[% IF date.format(date.now, '%m') == "12" %] selected[% END %]>December</option>
+              </select>
+              <input type='text' size='2' maxlength='2' name='sday' value='1'>
+              <input type='text' size='4' maxlength='4' name='syear' value='[% date.format(date.now, '%Y') %]'>
+              <input type='hidden' name='shour' value='0'>
+              <input type='hidden' name='smin' value='0'>
+              <input type='hidden' name='ssec' value='0'>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" class='reportSelectSubTitle'>End Date (Inclusive):</td>
+            <td align="left" valign="top" class='reportSelectItem'>
+              <select name='emon'>
+                <option value='1'[%  IF date.format(date.now, '%m') == "01" %] selected[% END %]>January</option>
+                <option value='2'[%  IF date.format(date.now, '%m') == "02" %] selected[% END %]>February</option>
+                <option value='3'[%  IF date.format(date.now, '%m') == "03" %] selected[% END %]>March</option>
+                <option value='4'[%  IF date.format(date.now, '%m') == "04" %] selected[% END %]>April</option>
+                <option value='5'[%  IF date.format(date.now, '%m') == "05" %] selected[% END %]>May</option>
+                <option value='6'[%  IF date.format(date.now, '%m') == "06" %] selected[% END %]>June</option>
+                <option value='7'[%  IF date.format(date.now, '%m') == "07" %] selected[% END %]>July</option>
+                <option value='8'[%  IF date.format(date.now, '%m') == "08" %] selected[% END %]>August</option>
+                <option value='9'[%  IF date.format(date.now, '%m') == "09" %] selected[% END %]>September</option>
+                <option value='10'[% IF date.format(date.now, '%m') == "10" %] selected[% END %]>October</option>
+                <option value='11'[% IF date.format(date.now, '%m') == "11" %] selected[% END %]>November</option>
+                <option value='12'[% IF date.format(date.now, '%m') == "12" %] selected[% END %]>December</option>
+              </select>
+              <input type='text' size='2' maxlength='2' name='eday' value='[% date.format(date.now, '%d') %]'>
+              <input type='text' size='4' maxlength='4' name='eyear' value='[% date.format(date.now, '%Y') %]'>
+              <input type='hidden' name='ehour' value='24'>
+              <input type='hidden' name='emin' value='0'>
+              <input type='hidden' name='esec' value='0'>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <br>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' valign="middle">Limit To Hostgroup:</td>
+            <td align="left" valign="middle" class='reportSelectItem'>
+              <select name='hostgroup'>
+                <option value='all'>** ALL HOSTGROUPS **</option>
+                [% FOREACH group = hostgroups %]
+                <option value="[% group %]">[% group %]</option>
+                [% END %]
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' valign="middle">Limit To Servicegroup:</td>
+            <td align="left" valign="middle" class='reportSelectItem'>
+              <select name='servicegroup'>
+                <option value='all'>** ALL SERVICEGROUPS **</option>
+                [% FOREACH group = servicegroups %]
+                <option value="[% group %]">[% group %]</option>
+                [% END %]
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' valign="middle">Limit To Host:</td>
+            <td align="left" valign="middle" class='reportSelectItem'>
+              <select name='host'>
+                <option value='all'>** ALL HOSTS **</option>
+                [% FOREACH host = hosts %]
+                <option value="[% host %]">[% host %]</option>
+                [% END %]
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Alert Types:</td>
+            <td class='reportSelectItem'>
+              <select name='alerttypes'>
+                <option value="3" selected>Host and Service Alerts</option>
+                <option value="1">Host Alerts</option>
+                <option value="2">Service Alerts</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">State Types:</td>
+            <td class='reportSelectItem'>
+              <select name='statetypes'>
+                <option value="3" selected>Hard and Soft States</option>
+                <option value="2">Hard States</option>
+                <option value="1">Soft States</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Host States:</td>
+            <td class='reportSelectItem'>
+              <select name='hoststates'>
+                <option value="7">All Host States</option>
+                <option value="3">Host Problem States</option>
+                <option value="4">Host Up States</option>
+                <option value="1">Host Down States</option>
+                <option value="2">Host Unreachable States</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Service States:</td>
+            <td class='reportSelectItem'>
+              <select name='servicestates'>
+                <option value="120">All Service States</option>
+                <option value="56">Service Problem States</option>
+                <option value="64">Service Ok States</option>
+                <option value="8">Service Warning States</option>
+                <option value="16">Service Unknown States</option>
+                <option value="32">Service Critical States</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='reportSelectSubTitle' align="right">Max List Items:</td>
+            <td class='reportSelectItem'>
+              <input type='text' name='limit' size='3' maxlength='3' value='25'>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td align="left" class='dateSelectItem'>
+              <input type='submit' value='Create Summary Report!'>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+
+[% PROCESS _footer.tt %]

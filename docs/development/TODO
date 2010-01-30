@@ -20,12 +20,16 @@ config:
 
 avail:
     - trends graph
+    - check availability calculation on multibackend (restarts)
 
 trends:
     - missing completly
 
+summary:
+    - add reports
+
 histogram:
-    - missing completly
+    - add reports
 
 livestatus:
     - StatsSum: ( needed by tac and extinfo 4 )

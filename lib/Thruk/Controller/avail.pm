@@ -142,7 +142,8 @@ sub _show_step_3 {
 
     $c->stats->profile(begin => "_show_step_3()");
 
-    $c->stash->{timeperiods} = $c->{'live'}->selectall_arrayref("GET timeperiods\nColumns: name".Thruk::Utils::get_auth_filter($c, 'timeperiods'), { Slice => 1});
+    my @timeperiods = sort keys %{$c->{'live'}->selectall_hashref("GET timeperiods\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'timeperiods'), 'name')};
+    $c->stash->{timeperiods} = \@timeperiods;
     $c->stash->{template}    = 'avail_step_3.tt';
 
     my($host,$service);

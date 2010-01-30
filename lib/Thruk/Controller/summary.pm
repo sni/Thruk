@@ -25,11 +25,38 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{'template'} = 'summary.tt';
+    # set defaults
+    $c->stash->{title}            = 'Event Summary';
+    $c->stash->{infoBoxTitle}     = 'Alert Summary Report';
+    $c->stash->{page}             = 'summary';
+    $c->stash->{'no_auto_reload'} = 1;
+
+    # Step 1 - select report type
+    $self->_show_step_1($c);
 
     return 1;
 }
 
+
+##########################################################
+sub _show_step_1 {
+    my ( $self, $c ) = @_;
+    $c->stats->profile(begin => "_show_step_1()");
+
+    my @hosts         = sort keys %{$c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hosts'), 'name')};
+    my @hostgroups    = sort keys %{$c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hostgroups'), 'name')};
+    my @servicegroups = sort keys %{$c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'servicegroups'), 'name')};
+
+    $c->stash->{hosts}         = \@hosts;
+    $c->stash->{hostgroups}    = \@hostgroups;
+    $c->stash->{servicegroups} = \@servicegroups;
+    $c->stash->{template}      = 'summary_step_1.tt';
+
+    $c->stats->profile(end => "_show_step_1()");
+    return 1;
+}
+
+##########################################################
 
 =head1 AUTHOR
 

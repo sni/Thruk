@@ -1,5 +1,0 @@
-[% PROCESS _header.tt %]
-
-summary has not yet been implemented...
-
-[% PROCESS _footer.tt %]
