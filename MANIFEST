@@ -199,11 +199,13 @@ templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt
 templates/avail_report_hosts.tt
+templates/avail_report_hosts_csv.tt
 templates/avail_report_hosts_part.tt
 templates/avail_report_log_entries.tt
 templates/avail_report_service.tt
 templates/avail_report_servicegroup.tt
 templates/avail_report_services.tt
+templates/avail_report_services_csv.tt
 templates/avail_report_services_part.tt
 templates/avail_step_1.tt
 templates/avail_step_2.tt
@@ -327,6 +329,7 @@ templates/extinfo_type_6.tt
 templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
 templates/histogram.tt
+templates/histogram_step_1.tt
 templates/history.tt
 templates/index.tt
 templates/main.tt
@@ -340,6 +343,7 @@ templates/status_hostdetail.tt
 templates/status_overview.tt
 templates/status_summary.tt
 templates/summary.tt
+templates/summary_step_1.tt
 templates/tac.tt
 templates/trends.tt
 thruk.conf
