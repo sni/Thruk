@@ -519,7 +519,31 @@ This guide uses the following:</p></div>
   group: thruk</tt></pre>
 </div></div>
 </div>
-<h2 id="_thruk_monitoring_webinterface">Thruk Monitoring Webinterface</h2>
+<h2 id="_quick_installation_guide_for_debian">Quick Installation Guide for Debian</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre><tt>1.  install debian netinst
+      - minimal inst, create user thruk
+2.  add "contrib non-free" to /etc/apt/sources.list
+3.  #&gt; apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl make gcc git git-core libcatalyst-modules-perl
+4.  #&gt; su - thruk
+5.  %&gt; cd /tmp
+6.  %&gt; wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
+7.  %&gt; tar zxvf local-lib-1.004009.tar.gz
+8.  %&gt; cd local-lib-1.004009
+9.  %&gt; perl Makefile.PL --bootstrap
+10. %&gt; make install
+11. %&gt; echo 'eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)' &gt;&gt;~/.bashrc
+12. %&gt; . ~/.bashrc
+13. %&gt; cd &amp;&amp; git clone http://github.com/sni/Thruk.git
+14. %&gt; cd Thruk
+15. %&gt; perl Makefile.PL &amp;&amp; make
+16. %&gt; cp thuk.conf thruk_local.conf &amp;&amp; vi thruk_local.conf
+17. %&gt; ./script/thruk_server.pl</tt></pre>
+</div></div>
+</div>
+<h2 id="_detailed_installation_steps">Detailed Installation Steps</h2>
 <div class="sectionbody">
 <div class="admonitionblock">
 <table><tr>
@@ -804,7 +828,7 @@ make sure the /home/thruk/Thruk/logs/ directory exists
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-01-26 18:12:38 CEST
+Last updated 2010-02-01 10:50:59 CEST
 </div>
 </div>
 </body>

@@ -27,8 +27,35 @@ This guide uses the following:
 -------
 
 
-Thruk Monitoring Webinterface
------------------------------
+
+Quick Installation Guide for Debian
+-----------------------------------
+
+----
+1.  install debian netinst
+      - minimal inst, create user thruk
+2.  add "contrib non-free" to /etc/apt/sources.list
+3.  #> apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl make gcc git git-core libcatalyst-modules-perl
+4.  #> su - thruk
+5.  %> cd /tmp
+6.  %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
+7.  %> tar zxvf local-lib-1.004009.tar.gz
+8.  %> cd local-lib-1.004009
+9.  %> perl Makefile.PL --bootstrap
+10. %> make install
+11. %> echo 'eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)' >>~/.bashrc
+12. %> . ~/.bashrc
+13. %> cd && git clone http://github.com/sni/Thruk.git
+14. %> cd Thruk
+15. %> perl Makefile.PL && make
+16. %> cp thuk.conf thruk_local.conf && vi thruk_local.conf
+17. %> ./script/thruk_server.pl
+----
+
+
+
+Detailed Installation Steps
+---------------------------
 
 IMPORTANT: all following steps should be done by the thruk user.
 
@@ -227,26 +254,3 @@ use this apache example configuration:
 
 
 
-Step By Step Installation on Debian
-===================================
-
-----
-1.  install debian netinst
-      - minimal inst, create user thruk
-2.  add "contrib non-free" to /etc/apt/sources.list
-3.  #> apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl make gcc git git-core libcatalyst-modules-perl
-4.  #> su - thruk
-5.  %> cd /tmp
-6.  %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
-7.  %> tar zxvf local-lib-1.004009.tar.gz
-8.  %> cd local-lib-1.004009
-9.  %> perl Makefile.PL --bootstrap
-10. %> make install
-11. %> echo 'eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)' >>~/.bashrc
-12. %> . ~/.bashrc
-13. %> cd && git clone http://github.com/sni/Thruk.git
-14. %> cd Thruk
-15. %> perl Makefile.PL && make
-16. %> cp thuk.conf thruk_local.conf && vi thruk_local.conf
-17. %> ./script/thruk_server.pl
-----
