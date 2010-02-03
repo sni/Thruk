@@ -3,6 +3,7 @@ package Thruk::Controller::extinfo;
 use strict;
 use warnings;
 use parent 'Catalyst::Controller';
+use Data::Page;
 
 =head1 NAME
 
@@ -233,7 +234,9 @@ sub _process_scheduling_page {
     my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description next_check last_check check_options active_checks_enabled\nFilter: active_checks_enabled = 1\nFilter: check_options != 0\nOr: 2", { Slice => {} });
     my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name next_check last_check check_options active_checks_enabled\nFilter: active_checks_enabled = 1\nFilter: check_options != 0\nOr: 2", { Slice => {}, rename => { 'name' => 'host_name' } });
     my $queue    = Thruk::Utils::sort($c, [@{$hosts}, @{$services}], $sortoptions->{$sortoption}->[0], $order);
-    $c->stash->{'queue'}   = $queue;
+
+    Thruk::Utils::page_data($c, $queue);
+
     $c->stash->{'order'}   = $order;
     $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];
 

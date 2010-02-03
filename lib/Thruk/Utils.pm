@@ -17,6 +17,7 @@ use Carp;
 use Data::Dumper;
 use Digest::MD5  qw(md5_hex);
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
+use Data::Page;
 use Monitoring::Livestatus::MULTI;
 
 
@@ -883,6 +884,100 @@ sub name2id {
         $return = $opt_prefix."_".$return;
     }
     return($return);
+}
+
+
+########################################
+
+=head2 page_data
+
+  page_data($c, $data)
+
+adds paged data set to the template stash.
+Data will be available as 'data'
+The pager itself as 'pager'
+
+=cut
+sub page_data {
+    my $c                   = shift;
+    my $data                = shift;
+    my $default_result_size = shift || 100;
+
+    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
+
+    if(exists $c->{'request'}->{'parameters'}->{'next'}) {
+        $page++;
+    }
+    elsif(exists $c->{'request'}->{'parameters'}->{'previous'}) {
+        $page-- if $page > 1;
+    }
+
+    my $pager = new Data::Page;
+    $pager->total_entries(scalar @{$data});
+
+    my $pages = int($pager->total_entries / $entries);
+    if($page < 0)      { $page = 1;      }
+    if($page > $pages) { $page = $pages; }
+
+    $c->stash->{'entries_per_page'} = $entries;
+    $c->stash->{'current_page'}     = $page;
+
+    if($entries eq 'all') {
+        $c->stash->{'data'}  = $data,
+    }
+    else {
+        $pager->entries_per_page($entries);
+        $pager->current_page($page);
+        my @data = $pager->splice($data);
+        $c->stash->{'data'}  = \@data,
+    }
+
+    $c->stash->{'pager'} = $pager;
+
+    return 1;
+}
+
+
+########################################
+
+=head2 uri
+
+  uri($c)
+
+returns a correct uri
+
+=cut
+sub uri {
+    my $c = shift;
+    my $uri = $c->request->uri();
+    $uri =~ s/&/&amp;/gmx;
+    return $uri;
+}
+
+
+########################################
+
+=head2 uri_with
+
+  uri_with($c, $data)
+
+returns a correct uri
+
+=cut
+sub uri_with {
+    my $c    = shift;
+    my $data = shift;
+
+    for my $key (keys %{$data}) {
+        $data->{$key} = undef if $data->{$key} eq 'undef';
+    }
+
+    my $uri = $c->request->uri_with($data);
+
+    $uri =~ s/&/&amp;/gmx;
+
+    return $uri;
 }
 
 

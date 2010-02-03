@@ -17,6 +17,9 @@
       [% ELSE %]
       (descending)
       [% END %]
+
+      <br>
+      [% PROCESS _pager.tt %]
     </div>
     <br>
 
@@ -31,7 +34,7 @@
           <th class='queue'>Active Checks</th>
           <th class='queue'>Actions</th>
         </tr>
-        [%  FOREACH q = queue %]
+        [%  FOREACH q = data %]
         [% SET class = 'queueEven' IF loop.even %]
         [% SET class = 'queueOdd'  IF loop.odd %]
         <tr class='[% class %]'>

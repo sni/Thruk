@@ -9,6 +9,15 @@ div.navbarsearch form fieldset {
   padding-bottom: 0px;
 }
 
+.pager_direct_link {
+  font-weight: normal;
+  color: #000000;
+}
+.pager_direct_link_current {
+  font-weight: bold;
+  color: #FF6600;
+}
+
 /* fix for link box and infobox border */
 table.infoBox {
   margin-top: 5px;

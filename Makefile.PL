@@ -53,6 +53,7 @@ requires 'FCGI::ProcManager';
 requires 'Catalyst::Engine::FastCGI';
 requires 'Catalyst::Log::Log4perl';
 requires 'Log::Dispatch::File';
+requires 'Data::Page';
 
 # test requirements make it into the META.yml and will break
 # normal package installation

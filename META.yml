@@ -38,6 +38,7 @@ requires:
   Compress::Raw::Zlib: 2.023
   Config::Any: 0
   Config::General: 0
+  Data::Page: 0
   Date::Calc: 0
   FCGI: 0
   FCGI::ProcManager: 0
