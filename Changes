@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.23_2  Wed Feb  3 13:31:33 CET 2010
           - added paging to extinfo type 7
+          - added config switch to disable paging
 
 0.21_2  Thu Jan 28 19:13:31 CET 2010
           - fixed fonts in menu

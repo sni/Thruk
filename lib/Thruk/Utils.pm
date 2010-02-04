@@ -903,8 +903,18 @@ sub page_data {
     my $data                = shift;
     my $default_result_size = shift || 100;
 
+    # we dont use paging at all?
+    unless($c->stash->{'use_pager'}) {
+        $c->stash->{'data'}  = $data,
+        return 1;
+    }
+
     my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
     my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
+
+    my $pager = new Data::Page;
+    $pager->total_entries(scalar @{$data});
+    my $pages = int($pager->total_entries / $entries);
 
     if(exists $c->{'request'}->{'parameters'}->{'next'}) {
         $page++;
@@ -912,11 +922,13 @@ sub page_data {
     elsif(exists $c->{'request'}->{'parameters'}->{'previous'}) {
         $page-- if $page > 1;
     }
+    elsif(exists $c->{'request'}->{'parameters'}->{'first'}) {
+        $page = 1;
+    }
+    elsif(exists $c->{'request'}->{'parameters'}->{'last'}) {
+        $page = $pages;
+    }
 
-    my $pager = new Data::Page;
-    $pager->total_entries(scalar @{$data});
-
-    my $pages = int($pager->total_entries / $entries);
     if($page < 0)      { $page = 1;      }
     if($page > $pages) { $page = $pages; }
 

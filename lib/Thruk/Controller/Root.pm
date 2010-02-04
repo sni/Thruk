@@ -39,10 +39,14 @@ sub begin : Private {
     $use_frames = !$c->{'request'}->{'parameters'}->{'nav'} if defined $c->{'request'}->{'parameters'}->{'nav'};
     $c->stash->{'use_frames'} = $use_frames;
 
+    # use pager?
+    $c->stash->{'use_pager'} = Thruk->config->{'use_pager'} || 1;
+
     my $doc_link = Thruk->config->{'documentation_link'};
     $doc_link    = '/thruk/docs/index.html' unless defined $doc_link;
     $c->stash->{'documentation_link'} = $doc_link;
 
+    # these features are not implemented yet
     $c->stash->{'use_feature_statusmap'} = 0;
     $c->stash->{'use_feature_statuswrl'} = 0;
     $c->stash->{'use_feature_trends'}    = 0;

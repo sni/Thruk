@@ -1,57 +1,69 @@
 [% USE Math %]
-<br>
-<form action="extinfo.cgi" method="GET">
-<input type="hidden" name="type" value="7">
-<input type="hidden" name="page" value="[% current_page %]">
-[% IF pager.previous_page %]
-<input type="submit" value="Previous Page" name="previous">&nbsp;
-[% END %]
 
-[% pages = Math.int(pager.total_entries / pager.entries_per_page) %]
+[% IF use_pager %]
+  <br>
+  <form action="/[% c.request.path %]" method="GET">
+  [% FOREACH par = c.request.query_params.keys %]
+    [% NEXT IF par == 'entries' %]
+    [% NEXT IF par == 'next' %]
+    [% NEXT IF par == 'next.x' %]
+    [% NEXT IF par == 'next.y' %]
+    [% NEXT IF par == 'previous' %]
+    [% NEXT IF par == 'previous.x' %]
+    [% NEXT IF par == 'previous.y' %]
+    [% NEXT IF par == 'page' %]
+    <input type="hidden" name="[% par %]" value="[% c.request.query_params.$par %]">
+  [% END %]
+  <input type="hidden" name="page" value="[% current_page %]">
+  [% IF pager.previous_page %]
+    <input type="image" src="/thruk/images/resultset_first.png" name="first" alt="first" value="1"><input type="image" src="/thruk/images/resultset_previous.png" name="previous" alt="previous" value="1">&nbsp;
+  [% END %]
 
-[% IF pages <= 13 %]
-  [% page  = 1 %]
-  [% WHILE page < pages %]
-    [% class = "pager_direct_link" %]
-    [% IF page == current_page %]
-      [% class = "pager_direct_link_current" %]
+  [% pages = Math.int(pager.total_entries / pager.entries_per_page) %]
+
+  [% IF pages <= 13 %]
+    [% page  = 1 %]
+    [% WHILE page < pages %]
+      [% class = "pager_direct_link" %]
+      [% IF page == current_page %]
+        [% class = "pager_direct_link_current" %]
+      [% END %]
+      <a class="[% class %]" href="[% uri_with(c, 'page' => page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef') %]">[% page %]</a>
+      [% page  = page + 1 %]
     [% END %]
-    <a class="[% class %]" href="[% uri_with(c, page => page, next => 'undef', previous => 'undef') %]">[% page %]</a>
-    [% page  = page + 1 %]
-  [% END %]
-[% ELSE %]
-  [% firstpage = current_page - 3 %]
-  [% IF firstpage <= 0 %][% firstpage = 1 %][% END %]
-  [% IF firstpage != 1 %]
-  <a class="pager_direct_link" href="[% uri_with(c, page => 1, next => 'undef', previous => 'undef') %]">1</a>
-  [% IF firstpage != 2 %]...[% END %]
-  [% END %]
-  [% lastpage  = firstpage + 10 %]
-  [% IF lastpage >= pages %][% lastpage = pages %][% firstpage = lastpage - 10 %][% END %]
-  [% page  = firstpage %]
-  [% WHILE page <= lastpage %]
-    [% class = "pager_direct_link" %]
-    [% IF page == current_page %]
-      [% class = "pager_direct_link_current" %]
+  [% ELSE %]
+    [% firstpage = current_page - 3 %]
+    [% IF firstpage <= 0 %][% firstpage = 1 %][% END %]
+    [% IF firstpage != 1 %]<a class="pager_direct_link" href="[% uri_with(c, page => 1, next => 'undef', previous => 'undef') %]">1</a>[% END %]
+    [% IF firstpage > 2 %]...[% END %]
+    [% lastpage  = firstpage + 9 %]
+    [% IF lastpage >= pages %][% lastpage = pages %][% firstpage = lastpage - 9 %][% END %]
+    [% page  = firstpage %]
+    [% WHILE page <= lastpage %]
+      [% class = "pager_direct_link" %]
+      [% IF page == current_page %]
+        [% class = "pager_direct_link_current" %]
+      [% END %]
+      <a class="[% class %]" href="[% uri_with(c, 'page' => page, 'next' => 'undef', 'next.x' => 'undef', 'next.y' => 'undef', 'previous' => 'undef', 'previous.x' => 'undef', 'previous.y' => 'undef', 'last' => 'undef', 'last.x' => 'undef', 'last.y' => 'undef', 'first' => 'undef', 'first.x' => 'undef', 'first.y' => 'undef') %]">[% page %]</a>
+      [% page  = page + 1 %]
     [% END %]
-    <a class="[% class %]" href="[% uri_with(c, page => page, next => 'undef', previous => 'undef') %]">[% page %]</a>
-    [% page  = page + 1 %]
+    [% IF lastpage < pages - 1 %]...[% END %]
+    [% IF lastpage != pages %]<a class="pager_direct_link" href="[% uri_with(c, page => pages, next => 'undef', previous => 'undef') %]">[% pages %]</a>[% END %]
   [% END %]
-  [% IF lastpage != pages %]
-  [% IF lastpage != pages - 1 %]...[% END %]
-  <a class="pager_direct_link" href="[% uri_with(c, page => pages, next => 'undef', previous => 'undef') %]">[% pages %]</a>
+
+  [% IF pager.next_page AND pages > 1 %]
+    &nbsp;<input type="image" src="/thruk/images/resultset_next.png" name="next" alt="next" value="1"><input type="image" src="/thruk/images/resultset_last.png" name="last" alt="last" value="1">
+  [% END %]
+
+  [% IF pager.total_entries > 100 %]
+    &nbsp;&nbsp;
+    <select name="entries" onChange="this.form.submit()">
+      <option value="100"[%  IF entries_per_page ==  100  %] selected[% END %]>100 per page</option>
+      <option value="500"[%  IF entries_per_page ==  500  %] selected[% END %]>500 per page</option>
+      <option value="1000"[% IF entries_per_page == 1000  %] selected[% END %]>1000 per page</option>
+      <option value="5000"[% IF entries_per_page == 5000  %] selected[% END %]>5000 per page</option>
+      <option value="all"[%  IF entries_per_page == "all" %] selected[% END %]>all on one page</option>
+    </select>
+    </form>
   [% END %]
 [% END %]
-
-[% IF pager.next_page %]
-&nbsp;<input type="submit" value="Next Page" name="next">
-[% END %]
-
-<select name="entries">
-  <option value="100"[%  IF entries_per_page ==  100  %] selected[% END %]>100 per page</option>
-  <option value="500"[%  IF entries_per_page ==  500  %] selected[% END %]>500 per page</option>
-  <option value="1000"[% IF entries_per_page == 1000  %] selected[% END %]>1000 per page</option>
-  <option value="1000"[% IF entries_per_page == 5000  %] selected[% END %]>5000 per page</option>
-  <option value="all"[%  IF entries_per_page == "all" %] selected[% END %]>all on one page</option>
-</select>
-</form>
