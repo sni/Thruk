@@ -166,3 +166,20 @@ th.data {
   font-size:10pt;
   text-align:left;
 }
+
+/* fix for filter box in status */
+table.filter {
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #DBDBDB;
+  border-collapse: separate;
+  background-color: #DBDBDB;
+}
+table.filter > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #DBDBDB;
+  background-color: #DBDBDB;
+}

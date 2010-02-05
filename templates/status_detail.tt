@@ -42,7 +42,7 @@
         <td valign="top" align="left" width="33%">
           [% PROCESS _status_filter.tt %]
         </td>
-        <td valign="top" align="center" width="33%"><br>
+        <td valign="top" align="center" width="33%" nowrap><br>
           <div align="center" class='statusTitle'>Service Status Details For
           [% IF hostgroup %]
           Host Group '[% hostgroup %]'
@@ -57,7 +57,9 @@
           [% IF c.request.parameters.sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
-          <br></td>
+          <br>
+          [% PROCESS _pager.tt %]
+          </td>
         <td valign="top" align="right" width="33%"></td>
       </tr>
     </table>
@@ -74,7 +76,7 @@
 
       [% SET lasthost = '' %]
 
-      [%  FOREACH s = services %]
+      [%  FOREACH s = data %]
       [% SET serviceclass = 'statusOdd'  IF loop.even %]
       [% SET serviceclass = 'statusEven' IF loop.odd %]
       [% SET hostclass = 'statusOdd'  IF loop.even %]
@@ -184,7 +186,12 @@
       [% SET lasthost = s.host_name %]
       [% END %]
 
-    </table><br>
-    <div class='itemTotalsTitle'>[% IF services.size %][% services.size %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
+    </table>
+    <div align="center">
+    [% PROCESS _pager.tt %]
+    </div>
+
+    <br>
+    <div class='itemTotalsTitle'>[% IF data.size %][% data.size %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
 
 [% PROCESS _footer.tt %]

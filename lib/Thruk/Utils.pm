@@ -901,7 +901,7 @@ The pager itself as 'pager'
 sub page_data {
     my $c                   = shift;
     my $data                = shift;
-    my $default_result_size = shift || 100;
+    my $default_result_size = shift || $c->stash->{'default_page_size'};
 
     # we dont use paging at all?
     unless($c->stash->{'use_pager'}) {

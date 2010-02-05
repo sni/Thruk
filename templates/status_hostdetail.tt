@@ -41,6 +41,7 @@
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
           <br>
+          [% PROCESS _pager.tt %]
         </td>
         <td valign="top" align="right" width="33%"></td>
       </tr>
@@ -55,7 +56,7 @@
           <th class='status'>Status Information</th>
         </tr>
 
-        [%  FOREACH h = hosts %]
+        [%  FOREACH h = data %]
         [% SET class = 'statusEven' IF loop.odd %]
         [% SET class = 'statusOdd'  IF loop.even %]
 
@@ -119,7 +120,10 @@
         [% END %]
 
       </table>
-    </div><br>
-    <div class='itemTotalsTitle'>[% hosts.size %] Matching Host Entries Displayed</div>
+      [% PROCESS _pager.tt %]
+    </div>
+
+    <br>
+    <div class='itemTotalsTitle'>[% IF data.size %][% data.size %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
 
 [% PROCESS _footer.tt %]

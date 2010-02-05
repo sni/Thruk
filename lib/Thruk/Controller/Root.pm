@@ -40,7 +40,9 @@ sub begin : Private {
     $c->stash->{'use_frames'} = $use_frames;
 
     # use pager?
-    $c->stash->{'use_pager'} = Thruk->config->{'use_pager'} || 1;
+    $c->stash->{'use_pager'} = Thruk->config->{'use_pager'}                 || 1;
+    $c->stash->{'default_page_size'} = Thruk->config->{'default_page_size'} || 100;
+    $c->stash->{'paging_steps'} = Thruk->config->{'paging_steps'}           || qw/100 500 1000 5000 all/;
 
     my $doc_link = Thruk->config->{'documentation_link'};
     $doc_link    = '/thruk/docs/index.html' unless defined $doc_link;

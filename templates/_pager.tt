@@ -1,6 +1,6 @@
 [% USE Math %]
 
-[% IF use_pager %]
+[% IF use_pager AND pager %]
   <br>
   <form action="/[% c.request.path %]" method="GET">
   [% FOREACH par = c.request.query_params.keys %]
@@ -23,7 +23,7 @@
 
   [% IF pages <= 13 %]
     [% page  = 1 %]
-    [% WHILE page < pages %]
+    [% WHILE page <= pages %]
       [% class = "pager_direct_link" %]
       [% IF page == current_page %]
         [% class = "pager_direct_link_current" %]
@@ -58,11 +58,13 @@
   [% IF pager.total_entries > 100 %]
     &nbsp;&nbsp;
     <select name="entries" onChange="this.form.submit()">
-      <option value="100"[%  IF entries_per_page ==  100  %] selected[% END %]>100 per page</option>
-      <option value="500"[%  IF entries_per_page ==  500  %] selected[% END %]>500 per page</option>
-      <option value="1000"[% IF entries_per_page == 1000  %] selected[% END %]>1000 per page</option>
-      <option value="5000"[% IF entries_per_page == 5000  %] selected[% END %]>5000 per page</option>
-      <option value="all"[%  IF entries_per_page == "all" %] selected[% END %]>all on one page</option>
+      [% FOR step = paging_steps %]
+        [% IF step == "all" %]
+          <option value="all"[%  IF entries_per_page == "all" %] selected[% END %]>all on one page</option>
+        [% ELSE %]
+          <option value="[% step %]"[% IF entries_per_page == step %] selected[% END %]>[% step %] per page</option>
+        [% END %]
+      [% END %]
     </select>
     </form>
   [% END %]

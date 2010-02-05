@@ -163,12 +163,13 @@ sub _process_details_page {
     my $sortedservices = Thruk::Utils::sort($c, $services, $sortoptions->{$sortoption}->[0], $order);
     if($sortoption == 6) { @{$sortedservices} = reverse @{$sortedservices}; }
 
+    Thruk::Utils::page_data($c, $sortedservices);
+
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'host'}          = $host;
     $c->stash->{'hostgroup'}     = $hostgroup;
     $c->stash->{'servicegroup'}  = $servicegroup;
-    $c->stash->{'services'}      = $sortedservices;
     $c->stash->{'style'}         = 'detail';
 
     return 1;
@@ -217,10 +218,11 @@ sub _process_hostdetails_page {
     my $sortedhosts = Thruk::Utils::sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
     if($sortoption == 6) { @{$sortedhosts} = reverse @{$sortedhosts}; }
 
+    Thruk::Utils::page_data($c, $sortedhosts);
+
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'hostgroup'}     = $hostgroup;
-    $c->stash->{'hosts'}         = $sortedhosts;
     $c->stash->{'style'}         = 'hostdetail';
 
     return 1;

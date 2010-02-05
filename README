@@ -26,4 +26,5 @@ Main Advantages
  - valid HTML code
  - no frames ( can be reenabled for better addon integration)
  - easy to extend (MVC Design)
+ - paging ( can be disabled or customized )
 
