@@ -10,7 +10,6 @@ general
     - write tests
     - add backend name to logs
     - showlog performance is still too slow (only firefox)
-    - paging with Data::Page (http://bricas.vox.com/library/post/catalyst-tip-easy-paging-using-uri_with.html)
 
 extinfo:
     - finish performance data on extinfo type 4

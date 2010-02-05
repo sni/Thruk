@@ -16,7 +16,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Services Actively Checked:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -50,7 +50,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -87,7 +87,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Services Passively Checked:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -121,7 +121,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -146,7 +146,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Hosts Actively Checked:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -180,7 +180,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -217,7 +217,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Hosts Passively Checked:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -251,7 +251,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -279,7 +279,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Livestatus Statistics:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -330,7 +330,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Check Statistics:</div></td>
           <td valign="top" colspan='2'>
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -415,7 +415,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Buffer Usage:</div></td>
           <td valign="top" colspan='2'>
-            <table border="1" cellspacing="0" cellpadding="0">
+            <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">

@@ -17,6 +17,9 @@
     <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes_ie_fix.css' />
     <![endif]-->
 
+    [% IF css %]<link href="[% css %]" rel="stylesheet" type="text/css">[% END %]
+    [% IF js %]<script type="text/javascript" src="[% js %]"></script>[% END %]
+
     [% END %]
   </head>
   <body class='[% page %]' id='[% page %]'>

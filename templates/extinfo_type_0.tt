@@ -202,7 +202,7 @@
             <table border="1" cellpadding="0" cellspacing="0" class='command'>
               <tr>
                 <td>
-                  <table border="0" cellpadding="0" cellspacing="0" class='command'>
+                  <table border="0" cellpadding="0" cellspacing="0">
                     <tr class='command'>
                       <td><img src='/thruk/images/stop.gif' border="0" alt='Shutdown the Backend Process' title='Shutdown the Backend Process' width="20" height="20"></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=14'>Shutdown the Backend process</a></td>

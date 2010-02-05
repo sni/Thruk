@@ -92,7 +92,7 @@
             <table border="0">
               <tr>
                 <td>
-                  <table border="1" cellspacing="0" cellpadding="0">
+                  <table border="1" cellspacing="0" cellpadding="0" class="data">
                     <tr>
                       <td class='stateInfoTable1'>
                         <table border="0">
@@ -215,7 +215,7 @@
               </tr>
               <tr>
                 <td>
-                  <table border="1" cellspacing="0" cellpadding="0">
+                  <table border="1" cellspacing="0" cellpadding="0" class="data">
                     <tr>
                       <td class='stateInfoTable2'>
                         <table border="0">
@@ -293,13 +293,13 @@
               <tr>
                 <td align="center" valign="top" class='commandPanel'>
                   <div class='commandTitle'>Host Commands</div>
-                  <table border='1' cellpadding="0" cellspacing="0">
+                  <table border='1' cellpadding="0" cellspacing="0" class="command">
                     <tr>
                       <td>
                         [% IF c.check_user_roles('is_authorized_for_read_only') %]
                         <div align=center class='infoMessage'>Your account does not have permissions to execute commands.<br>
                         [% ELSE %]
-                        <table border="0" cellspacing="0" cellpadding="0" class='command'>
+                        <table border="0" cellspacing="0" cellpadding="0">
                           [% IF use_feature_statusmap %]
                           <tr class='command'>
                             <td><img src='/thruk/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map' width="20" height="20"></td>

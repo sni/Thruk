@@ -74,3 +74,95 @@ td.featureDisabledActiveChecks {
 td.featureEnabledPassiveChecks {
     font-weight: normal;
 }
+
+/* fix for commando description box */
+table.commandDescription {
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #DBDBDB;
+  border-collapse: separate;
+  background-color: #DBDBDB;
+}
+table.commandDescription td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #DBDBDB;
+  background-color: #DBDBDB;
+}
+
+
+/* fix for link box and infobox border */
+body.cmd table.optBox {
+  margin-top: 5px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #C4C2C2;
+  border-collapse: separate;
+  background-color: #C4C2C2;
+}
+body.cmd table.optBox > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #C4C2C2;
+  background-color: #C4C2C2;
+}
+
+
+/* fix for state info boxes box */
+table.data {
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #DBDBDB;
+  border-collapse: separate;
+  background-color: #DBDBDB;
+}
+td.stateInfoTable1 {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #DBDBDB;
+  background-color: #DBDBDB;
+}
+td.stateInfoTable2 {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #C4C4C4;
+  background-color: #C4C4C4;
+}
+
+/* fix for extinfo command box */
+table.command {
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #DBDBDB;
+  border-collapse: separate;
+  background-color: #DBDBDB;
+}
+table.command > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #DBDBDB;
+  background-color: #DBDBDB;
+}
+
+/* performance data table header */
+th.data {
+  padding-left: 8px;
+  padding-right: 8px;
+  background-color:#999797;
+  color:#DCE5C1;
+  font-family:arial,serif;
+  font-size:10pt;
+  text-align:left;
+}

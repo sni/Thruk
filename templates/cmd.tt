@@ -1,4 +1,6 @@
-[% PROCESS _header.tt %]
+[% PROCESS _header.tt
+  js  = "/thruk/javascript/datetimepicker.js"
+%]
 
     <table border="0" width="100%">
       <tr>
