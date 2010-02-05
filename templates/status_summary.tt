@@ -57,7 +57,7 @@
       </tr>
     </table>
     <div align="center">
-      <table border="1" class='status'>
+      <table border="1" class='status statusgroups'>
         <tr>
           [% IF hostgroup != '' %]
           <th class='status'>Host Group</th>

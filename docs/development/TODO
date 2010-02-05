@@ -3,8 +3,6 @@ Todo List:
 
 for version 1.0
 general
-    - create models for hosts / services / contacts
-    - reload cgi.cfg if changed
     - fix authorization ( check services by host_contacts, comments/downtimes )
     - fix host/servicegroups pages with authorization
     - write tests
@@ -55,6 +53,8 @@ livestatus:
 after 1.0
 
 general:
+    - reload cgi.cfg if changed
+    - create models for hosts / services / contacts
     - webservice api, passthrough querys to livestatus and return json
       result
     - _HTML field for hosts / services besides action_url/notes_url
@@ -66,12 +66,13 @@ general:
         CSV output for single hosts/services,hostgroups/servicegroups
     - add multiple notes url or action urls, maybe add an "_html" cust var
     - add ability to display contacts for machine
+    - uc,lc option for auth user -> monitoring
 
 statusmap: http://search.cpan.org/~lbrocard/GraphViz/lib/GraphViz.pm
 
 status:
-    - proper search
-    - add new search page, with selector for all parameters
+    - proper search (maybe ajax)
+    - add new search page, with selector for all parameters 
 
 showlog:
     - proper logfile page

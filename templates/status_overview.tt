@@ -71,7 +71,7 @@
             <div class='status'><a href='status.cgi?servicegroup=[% g.name %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% g.name %]'>[% g.name %]</a>)</div>
             [% END %]
             <div class='status'>
-              <table border="1" class='status'>
+              <table border="1" class='status statusgroups'>
                 <tr>
                   <th class='status'>Host</th>
                   <th class='status'>Status</th>

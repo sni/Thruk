@@ -63,7 +63,7 @@
     [% SET
         total_time_known = total_time - total_time_unknown
     %]
-      <table border="0" class='data'>
+      <table border="1" class='data'>
         <tr>
           <th class='data'>State</th>
           <th class='data'>Type / Reason</th>
@@ -146,9 +146,6 @@
           <td class='dataOdd'>[% duration(total_time_unknown) %]</td>
           <td class='dataOdd'>[% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
           <td class='dataOdd'></td>
-        </tr>
-        <tr>
-          <td colspan="3"></td>
         </tr>
         <tr class='dataEven'>
           <td class='dataEven'>All</td>

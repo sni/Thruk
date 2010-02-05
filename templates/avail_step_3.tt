@@ -105,7 +105,7 @@
           <tr>
             <td valign="top" class='reportSelectSubTitle'>Report time Period:</td>
             <td valign="top" align="left" class='optBoxItem'>
-              <select name='rpttimeperiod'>
+              <select name='rpttimeperiod' disabled>
                 <option value="">None</option>
                 [% FOREACH t = timeperiods %]
                 <option value="[% t %]">[% t %]</option>

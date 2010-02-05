@@ -37,7 +37,7 @@
     <div align="center" class='reportTime'>[ Availability report completed in [% duration(time_token, 2) %] ]</div><br>
     <br>
     <div align="center" class='dataTitle'>Service State Breakdowns:</div>
-   [% IF use_feature_trends %] 
+   [% IF use_feature_trends %]
     <p align='center'>
       <a href='trends.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]'>
         <img src='trends.cgi?createimage&amp;smallimage&amp;host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]' border="1" alt='Service State Trends' title='Service State Trends' width='500' height='20'>
@@ -62,7 +62,7 @@
     [% SET
         total_time_known = total_time - total_time_unknown
     %]
-      <table border="0" class='data'>
+      <table border="1" class='data'>
         <tr>
           <th class='data'>State</th>
           <th class='data'>Type / Reason</th>
@@ -164,9 +164,6 @@
           <td class='dataEven'>[% duration(total_time_unknown) %]</td>
           <td class='dataEven'>[% IF total_time > 0 %][% sprintf('%2.3f',total_time_unknown / total_time * 100) %]%[% ELSE %]0.000%[% END %]</td>
           <td class='dataEven'></td>
-        </tr>
-        <tr>
-          <td colspan="3"></td>
         </tr>
         <tr class='dataOdd'>
           <td class='dataOdd'>All</td>

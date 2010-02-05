@@ -6,7 +6,7 @@
       <a href='avail.cgi?t1=[% start %]&amp;t2=[% end %][% IF host %]&amp;host=[% host %][% END %][% IF service %]&amp;service=[% service %][% END %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF full_log_entries %]show_log_entries[% ELSE %]full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[ View [% IF full_log_entries %]condensed[% ELSE %]full[% END %] log entries ]</a>
     </div>
     <div align="center">
-      <table border="1" cellspacing="0" cellpadding="3" class='logEntries'>
+      <table border="1" class='logEntries'>
         <tr>
           <th class='logEntries'>Event Start Time</th>
           <th class='logEntries'>Event End Time</th>

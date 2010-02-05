@@ -15,7 +15,7 @@
 [% END %]
 
 <div align="center">
-  <table border="0" class='data'>
+  <table border="1" class='data'>
     <tr>
       <th class='data'>Host</th>
       <th class='data'>% Time Up</th>

@@ -17,7 +17,7 @@
     [% END %]
 
     <div align="center">
-      <table border="0" class='data'>
+      <table border="1" class='data'>
         <tr>
           [% UNLESS host %]
           <th class='data'>Host</th>

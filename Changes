@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.23_3  Sat Feb  6 00:06:39 CET 2010
+          - added paging for hosts / services
+
 0.23_2  Wed Feb  3 13:31:33 CET 2010
           - added paging to extinfo type 7
           - added config switch to disable paging
