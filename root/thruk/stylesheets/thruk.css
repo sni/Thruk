@@ -117,6 +117,10 @@ body.cmd table.optBox > tbody > tr > td {
   border-color: #C4C2C2;
   background-color: #C4C2C2;
 }
+/* fix for calendar image in commands */
+body.cmd img {
+  vertical-align:text-bottom;
+}
 
 
 /* fix for state info boxes box */
