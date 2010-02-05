@@ -900,7 +900,7 @@ The pager itself as 'pager'
 =cut
 sub page_data {
     my $c                   = shift;
-    my $data                = shift;
+    my $data                = shift || [];
     my $default_result_size = shift || $c->stash->{'default_page_size'};
 
     # we dont use paging at all?
