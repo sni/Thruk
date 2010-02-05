@@ -10,6 +10,7 @@ general
     - write tests
     - add backend name to logs
     - showlog performance is still too slow (only firefox)
+    - show downtimes on extinfo 1/2 ( at least the downtime comment )
 
 extinfo:
     - finish performance data on extinfo type 4

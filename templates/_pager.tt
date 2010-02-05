@@ -16,7 +16,7 @@
   [% END %]
   <input type="hidden" name="page" value="[% current_page %]">
   [% IF pager.previous_page %]
-    <input type="image" src="/thruk/images/resultset_first.png" name="first" alt="first" value="1"><input type="image" src="/thruk/images/resultset_previous.png" name="previous" alt="previous" value="1">&nbsp;
+    <input type="image" src="/thruk/images/resultset_first.png" name="first" alt="first" value="1" class="pager_input_img"><input type="image" src="/thruk/images/resultset_previous.png" name="previous" alt="previous" value="1" class="pager_input_img">&nbsp;
   [% END %]
 
   [% pages = Math.int(pager.total_entries / pager.entries_per_page) %]
@@ -52,7 +52,7 @@
   [% END %]
 
   [% IF pager.next_page AND pages > 1 %]
-    &nbsp;<input type="image" src="/thruk/images/resultset_next.png" name="next" alt="next" value="1"><input type="image" src="/thruk/images/resultset_last.png" name="last" alt="last" value="1">
+    &nbsp;<input type="image" src="/thruk/images/resultset_next.png" name="next" alt="next" value="1" class="pager_input_img"><input type="image" src="/thruk/images/resultset_last.png" name="last" alt="last" value="1" class="pager_input_img">
   [% END %]
 
   [% IF pager.total_entries > 100 %]
@@ -66,6 +66,6 @@
         [% END %]
       [% END %]
     </select>
-    </form>
   [% END %]
+  </form>
 [% END %]

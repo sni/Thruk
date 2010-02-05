@@ -452,10 +452,10 @@
             <div align="center">
               <table border="0" class='comment'>
                 <tr class='comment'>
-                  <th class='comment'>Entry Time</th>
+                  <th class='comment' nowrap>Entry Time</th>
                   <th class='comment'>Author</th>
                   <th class='comment'>Comment</th>
-                  <th class='comment'>Comment ID</th>
+                  <th class='comment' nowrap>Comment ID</th>
                   <th class='comment'>Persistent</th>
                   <th class='comment'>Type</th>
                   <th class='comment'>Expires</th>
@@ -466,12 +466,12 @@
                   [% SET class = 'commentEven' IF loop.even %]
                   [% SET class = 'commentOdd'  IF loop.odd %]
                   <tr class='[% class %]'>
-                    <td class='[% class %]'>[% date.format(comment.entry_time, datetime_format) %]</td>
+                    <td class='[% class %]' nowrap>[% date.format(comment.entry_time, datetime_format) %]</td>
                     <td class='[% class %]'>[% comment.author %]</td>
                     <td class='[% class %]'>[% comment.comment %]</td>
                     <td class='[% class %]'>[% comment.id %]</td>
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
-                    <td class='[% class %]'>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
+                    <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
                     <td class='[% class %]'>[% IF comment.expires %][% date.format(comment.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
                     <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
                   </tr>
