@@ -240,7 +240,7 @@ use this apache example configuration:
     LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
 
     # fastcgi configuration
-    FastCGIExternalServer /tmp/thruk.fcgi -socket /tmp/thruk.socket
+    FastCGIExternalServer /tmp/thruk.fcgi -socket /tmp/thruk.socket -idle-timeout 120
 
     # Load rewrite module unless already loaded
     LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
