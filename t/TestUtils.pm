@@ -81,6 +81,7 @@ sub test_page {
     }
     my $content = $request->content;
 
+    # text that should appear
     if(defined $opts{'like'}) {
         if(ref $opts{'like'} eq '') {
             like($content, qr/$opts{'like'}/, "Content should contain: ".$opts{'like'});
@@ -91,9 +92,23 @@ sub test_page {
         }
     }
 
+    # text that shouldn't appear
     if(defined $opts{'unlike'}) {
-        unlike($content, qr/$opts{'unlike'}/mx, "Content should not contain ".$opts{'unlike'});
+        if(ref $opts{'unlike'} eq '') {
+            unlike($content, qr/$opts{'unlike'}/, "Content should not contain: ".$opts{'unlike'});
+        } elsif(ref $opts{'unlike'} eq 'ARRAY') {
+            for my $unlike (@{$opts{'unlike'}}) {
+                unlike($content, qr/$unlike/, "Content should not contain: ".$unlike);
+            }
+        }
     }
+
+    # test the content type
+    my $content_type = $request->header('Content-Type');
+    if(defined $opts{'content_type'}) {
+        is($content_type, $opts{'content_type'}, 'Content-Type should be: '.$opts{'content_type'});
+    }
+
 
     # memory usage
 #    open(my $fh, '>>', '/tmp/memory_stats.txt') or die('cannot write: '.$!);
@@ -114,6 +129,8 @@ sub test_page {
         eval { require HTML::Lint };
 
         skip "HTML::Lint not installed", 2 if $@;
+
+        skip "no HTML::Lint for: ".$content_type, 2 if $content_type !~ 'text\/html';
 
         my $lint = new HTML::Lint;
         isa_ok( $lint, "HTML::Lint" );

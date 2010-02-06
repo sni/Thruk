@@ -32,6 +32,7 @@ requires:
   Catalyst::Plugin::StackTrace: 0
   Catalyst::Plugin::Static::Simple: 0
   Catalyst::Runtime: 5.80016
+  Catalyst::View::GD: 0
   Catalyst::View::TT: 0
   Class::Accessor::Fast: 0
   Class::C3: 0
@@ -43,6 +44,7 @@ requires:
   FCGI: 0
   FCGI::ProcManager: 0
   File::Copy::Recursive: 0
+  GD: 0
   HTTP::Body: 0
   LWP: 0
   Log::Dispatch::File: 0
@@ -66,4 +68,4 @@ resources:
   homepage: http://github.com/sni/Thruk
   license: http://opensource.org/licenses/gpl-3.0.html
   repository: http://github.com/sni/Thruk
-version: 0.23_3
+version: 0.25_1

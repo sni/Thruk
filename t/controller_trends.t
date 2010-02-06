@@ -1,16 +1,43 @@
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 29;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
 BEGIN { use_ok 'Thruk::Controller::trends' }
 
-ok( request('/trends')->is_success, 'Trends Request should succeed' );
-my $request = request('/thruk/cgi-bin/trends.cgi');
-ok( $request->is_success, 'Trends Request should succeed' );
-my $content = $request->content;
-TODO: {
-    local $TODO = "needs to be implemented";
-    like($content, qr/Host and Service State Trends/, "Content contains: Host and Service State Trends");
-};
-unlike($content, qr/internal\ server\ error/mx, "Content contains error");
+my($host,$service) = TestUtils::get_test_service();
+
+my $pages = [
+# Step 1
+    '/trends',
+    '/thruk/cgi-bin/trends.cgi',
+];
+
+my $pictures = [
+    # host last 7 days
+    '/thruk/cgi-bin/trends.cgi?createimage&smallimage&host='.$host.'&t1=1264820912&t2=1265425712&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&backtrack=4',
+
+    # service last 7 days
+    '/thruk/cgi-bin/trends.cgi?createimage&smallimage&host='.$host.'&service='.$service.'&t1=1264820912&t2=1265425712&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedservicestate=0&backtrack=4',
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => 'Host and Service State Trends',
+        'unlike'  => 'internal server error',
+    );
+}
+
+for my $url (@{$pictures}) {
+    TestUtils::test_page(
+        'url'          => $url,
+        'content_type' => 'image/png',
+        'unlike'       => 'internal server error',
+    );
+}

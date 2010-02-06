@@ -51,7 +51,9 @@ sub begin : Private {
     # these features are not implemented yet
     $c->stash->{'use_feature_statusmap'} = 0;
     $c->stash->{'use_feature_statuswrl'} = 0;
-    $c->stash->{'use_feature_trends'}    = 0;
+
+    # enable trends if gd loaded
+    $c->stash->{'use_feature_trends'} = $c->config->{'use_feature_trends'};
 
     $c->stash->{'datetime_format'}      = Thruk->config->{'datetime_format'};
     $c->stash->{'datetime_format_long'} = Thruk->config->{'datetime_format_long'};

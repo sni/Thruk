@@ -432,6 +432,7 @@ $commandForm
 sub add_files {
     my $file = shift;
     push @opt_files, $file;
+    return 1;
 }
 
 #########################################################################

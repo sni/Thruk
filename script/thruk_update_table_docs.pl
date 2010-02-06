@@ -48,15 +48,16 @@ for my $type (@tables) {
     my $keys  = $ml->selectrow_hashref($statement );
 
     my $file = 'docs/development/tables/'.$type.'.txt';
-    open(FH, '>', $file) or die("cannot write to $file: $!");
-    print FH Dumper($keys);
-    close(FH);
+    open(my $fh, '>', $file) or die("cannot write to $file: $!");
+    print $fh Dumper($keys);
+    close($fh);
 }
 
 #########################################################################
 sub add_file {
     my $file = shift;
     push @opt_f, $file;
+    return 1;
 }
 
 =head1 NAME

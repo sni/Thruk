@@ -23,7 +23,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.23_3';
+our $VERSION = '0.25_1';
 
 ###################################################
 # Configure the application.
@@ -38,6 +38,7 @@ our $VERSION = '0.23_3';
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
                     'released'               => 'February 06, 2010',
+                    'default_view'           => 'View::TT',
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',
                         ENCODING           => 'utf8',
@@ -61,6 +62,10 @@ __PACKAGE__->config('name'                   => 'Thruk',
                         STAT_TTL           => 60,
                         STRICT             => 0,
 #                        DEBUG              => 'all',
+                    },
+                    'View::GD'               => {
+                        gd_image_type      => 'png',
+
                     },
                     'Plugin::ConfigLoader'   => { file => 'thruk.conf' },
                     'Plugin::Authentication' => {
@@ -102,6 +107,18 @@ if(defined $log4confarr and ref $log4confarr eq 'ARRAY') {
 }
 elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );
+}
+
+###################################################
+# GD installed?
+eval { require GD; };
+if($@) {
+    __PACKAGE__->log->info("disabled trends, cannot load GD");
+    __PACKAGE__->log->debug($@);
+    __PACKAGE__->config->{'use_feature_trends'} = 0;
+} else {
+    __PACKAGE__->log->info("enabled trends");
+    __PACKAGE__->config->{'use_feature_trends'} = 1;
 }
 
 ###################################################
