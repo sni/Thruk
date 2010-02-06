@@ -105,13 +105,13 @@ sub _draw_timestamps {
 
     for my $log ( @{$logs} ) {
         # inside report period?
-        next unless $log->{'start'} > $start;
-        next unless $log->{'start'} < $end;
+        next unless $log->{'end'} > $start;
+        next unless $log->{'end'} < $end;
 
         # proc start?
         next unless $log->{'type'} eq 'PROGRAM (RE)START';
 
-        my $x1 = int(($log->{'start'} - $start) / $report_duration * $width);
+        my $x1 = int(($log->{'end'} - $start) / $report_duration * $width);
         my $y1 = 0;
 
         my $x2 = $x1;
@@ -152,12 +152,9 @@ sub _draw_states {
     for my $log ( @{$logs} ) {
         next unless defined $log->{'class'};
 
-        # inside report period?
-        next unless $log->{'start'} > $start;
-        next unless $log->{'start'} < $end;
 
         # host/service state?
-        my $color = $colors->{'black'};
+        my $color;
         if(   $log->{'class'} eq 'UP')            { $color = $colors->{'green'};   }
         elsif($log->{'class'} eq 'DOWN')          { $color = $colors->{'red'};     }
         elsif($log->{'class'} eq 'UNREACHABLE')   { $color = $colors->{'darkred'}; }
@@ -170,6 +167,10 @@ sub _draw_states {
 
         next unless defined $color;
         $last_color = $color;
+
+        # inside report period?
+        next if $log->{'end'}   <= $start;
+        next if $log->{'start'} > $end;
 
         my $x1 = int(($log->{'start'} - $start) / $report_duration * $width);
         my $y1 = 0;
