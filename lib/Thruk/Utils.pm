@@ -905,14 +905,14 @@ sub page_data {
     my $data                = shift || [];
     my $default_result_size = shift || $c->stash->{'default_page_size'};
 
+    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
+
     # we dont use paging at all?
-    unless($c->stash->{'use_pager'}) {
+    unless($c->stash->{'use_pager'} and defined $entries and $entries > 0) {
         $c->stash->{'data'}  = $data,
         return 1;
     }
-
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
-    my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
 
     my $pager = new Data::Page;
     $pager->total_entries(scalar @{$data});
