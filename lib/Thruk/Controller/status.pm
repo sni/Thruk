@@ -293,7 +293,7 @@ sub _process_overview_page {
         }
 
         my($hostname,$servicename);
-        if($hostgroup) {
+        if($hostgroup and defined $group->{'members'}) {
             for my $hostname (split /,/mx, $group->{'members'}) {
                 # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
@@ -415,6 +415,10 @@ sub _process_grid_page {
     # sort in hosts / services
     my %joined_groups;
     for my $group (@{$groups}) {
+
+        # only need groups with members
+        next unless $group->{'members'};
+
         my $name = $group->{'name'};
         if(!defined $joined_groups{$name}) {
             $joined_groups{$name}->{'name'}  = $group->{'name'};

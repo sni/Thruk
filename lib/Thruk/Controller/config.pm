@@ -87,6 +87,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $data = $c->{'live'}->selectall_arrayref("GET hostgroups\nColumns: name alias members", { Slice => 1, Deepcopy => 1 });
         my $hostgroups = {};
         for my $hostgroup (@{$data}) {
+            next unless defined $hostgroup->{'members'};
             if(!defined $hostgroups->{$hostgroup->{'name'}}) {
                 $hostgroups->{$hostgroup->{'name'}} = $hostgroup;
                 @{$hostgroups->{$hostgroup->{'name'}}->{'members_array'}} = split /,/mx, $hostgroup->{'members'};

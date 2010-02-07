@@ -171,7 +171,7 @@ sub _draw_timestamps {
         my $x = int(($log->{'end'} - $start) / $report_duration * $drawing_width);
 
         # draw start timestamp if possible
-        if(($x > $last_timestamp + MIN_TIMESTAMP_SPACING) and ($x < $drawing_width - 1 - MIN_TIMESTAMP_SPACING)){
+        if(( $x > $last_timestamp + MIN_TIMESTAMP_SPACING ) and ( $x < $drawing_width - 1 - MIN_TIMESTAMP_SPACING )){
             $self->_draw_timestamp($c, $im, $color, $x, $log->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
             $last_timestamp = $x;
         }
