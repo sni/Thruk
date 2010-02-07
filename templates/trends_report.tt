@@ -1,5 +1,85 @@
+[% USE HTML %]
 [% PROCESS _header.tt %]
+[% UNLESS nomap %]
 
+<script language="JavaScript" type="text/javascript">
+<!--
+
+  function MyHash()
+  {
+      this.length = 0;
+      for (var i = 0; i < arguments.length; i += 2) {
+          if (typeof(arguments[i + 1]) != 'undefined') {
+              this[arguments[i]] = arguments[i + 1];
+              this.length++;
+          }
+      }
+  }
+
+  function html_entity_decode(str) {
+    var ta=document.createElement("textarea");
+    ta.innerHTML=str.replace('<',"&lt;").replace('>',"&gt;");
+    return ta.value;
+  }
+
+
+  var details = new Array(
+  [% FOR a = image_map %]
+  new MyHash('start', "[% a.start_human %]", 'end', "[% a.end_human %]", 'state', "[% a.state %]", 'duration',  "[% a.duration %]", 'plugin_output', "[% HTML.escape(a.plugin_output) | replace("'", "\\'") %]", 'real_plugin_output', "[% HTML.escape(a.real_plugin_output) | replace("'", "\\'") %]")[% UNLESS loop.last %],[% END %]
+
+  [% END %]
+  );
+
+  var tmp;
+  function showDetail(nr) {
+    tmp = details[nr];
+    document.getElementById('popup').style.visibility='visible';
+    document.getElementById('detail_state').innerHTML         = details[nr].state;
+    document.getElementById('detail_start').innerHTML         = details[nr].start;
+    document.getElementById('detail_end').innerHTML           = details[nr].end;
+    document.getElementById('detail_duration').innerHTML      = details[nr].duration;
+    if(details[nr].plugin_output != details[nr].real_plugin_output) {
+      document.getElementById('detail_plugin_output').innerHTML = html_entity_decode(details[nr].plugin_output) + "<br><i>original output was:<\/i><br>" + html_entity_decode(details[nr].real_plugin_output);
+    } else {
+      document.getElementById('detail_plugin_output').innerHTML = html_entity_decode(details[nr].plugin_output);
+    }
+  }
+
+  function hideDetail() {
+    document.getElementById('popup').style.visibility='hidden';
+  }
+//-->
+</script>
+<div id="popup" class="image_hover">
+  <table class="popupBorder" border=1>
+    <tr>
+      <td>
+        <table class="popupText">
+          <tr>
+            <th colspan=2 id="detail_state"></th>
+          </tr>
+          <tr>
+            <td>Start:</td>
+            <td id="detail_start"></td>
+          </tr>
+          <tr>
+            <td>End:</td>
+            <td id="detail_end"></td>
+          </tr>
+          <tr>
+            <td>Duration:</td>
+            <td id="detail_duration"></td>
+          </tr>
+          <tr>
+            <td>State Info:</td>
+            <td id="detail_plugin_output"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</div>
+[% END %]
 <table border="0" width="100%" cellspacing="0" cellpadding="0">
   <tr>
     <td align="left" valign="top" width="33%">
@@ -8,7 +88,7 @@
         <tr>
           <td class='linkBox'>
             [% IF service %]
-            <a href="trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]">View Trends For This Host</a><br>
+            <a href="trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %][% IF nomap %]&amp;nomap=[% nomap %][% END %]">View Trends For This Host</a><br>
             <a href="avail.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]&amp;show_log_entries">View Availability Report For This Service</a><br>
             <a href="histogram.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]">View Alert Histogram For This Service</a><br>
             <a href="history.cgi?host=[% host %]&amp;service=n0_test_ok_02">View Alert History For This Service</a><br>
@@ -44,17 +124,34 @@
         <input type='hidden' name='t1' value='[% start %]'>
         <input type='hidden' name='t2' value='[% end %]'>
         <input type='hidden' name='host' value='[% host %]'>
+        [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
         <input type='hidden' name='assumeinitialstates' value='[% assumeinitialstates %]'>
         <input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
         <input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
         <input type='hidden' name='includesoftstates' value='[% includesoftstates %]'>
+        [% IF nomap %]<input type='hidden' name='nomap' value='[% nomap %]'>[% END %]
         <table border="0" class='optBox'>
           <tr>
-            <td class='optBoxItem' valign="top" align="left">First assumed host state:</td>
+            [% IF service %]
+              <td class='optBoxItem' valign="top" align="left">First assumed service state:</td>
+            [% ELSE %]
+              <td class='optBoxItem' valign="top" align="left">First assumed host state:</td>
+            [% END %]
             <td class='optBoxItem' valign="top" align="left">Backtracked archives:</td>
           </tr>
           <tr>
             <td class='optBoxItem' valign="top" align="left">
+              [% IF service %]
+              <input type='hidden' name='initialassumedhoststate' value='[% initialassumedhoststate %]'>
+              <select name='initialassumedservicestate'>
+                <option value="0"[% IF  initialassumedservicestate ==  0 %] selected[% END %]>Unspecified</option>
+                <option value="-1"[% IF initialassumedservicestate == -1 %] selected[% END %]>Current State</option>
+                <option value="6"[% IF  initialassumedservicestate ==  6 %] selected[% END %]>Service Ok</option>
+                <option value="8"[% IF  initialassumedservicestate ==  8 %] selected[% END %]>Service Warning</option>
+                <option value="7"[% IF  initialassumedservicestate ==  7 %] selected[% END %]>Service Unknown</option>
+                <option value="9"[% IF  initialassumedservicestate ==  9 %] selected[% END %]>Service Critical</option>
+              </select>
+              [% ELSE %]
               <input type='hidden' name='initialassumedservicestate' value='[% initialassumedservicestate %]'>
               <select name='initialassumedhoststate'>
                 <option value="0"[% IF  initialassumedhoststate ==  0 %] selected[% END %]>Unspecified</option>
@@ -63,6 +160,7 @@
                 <option value="4"[% IF  initialassumedhoststate ==  4 %] selected[% END %]>Host Down</option>
                 <option value="5"[% IF  initialassumedhoststate ==  5 %] selected[% END %]>Host Unreachable</option>
               </select>
+              [% END %]
             </td>
             <td class='optBoxItem' valign="top" align="left">
               <input type='text' name='backtrack' size='2' maxlength='2' value='[% backtrack %]'>
@@ -116,9 +214,17 @@
     </td>
   </tr>
 </table>
+[% UNLESS nomap %]
 <map name='trendsmap' id="trendsmap">
-<!--  <area shape='rect' coords='116,65,613,125' href='trends.cgi?t1=1265131932&amp;t2=1265283132&amp;host=[% host %]&amp;assumeinitialstates=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;assumestateretention=yes&amp;assumestatesduringnotrunning=yes&amp;includesoftstates=no&amp;backtrack=4&amp;zoom=4' onmouseover='showPopup("&lt;B&gt;&lt;U&gt;UP&lt;/U&gt;&lt;/B&gt;&lt;BR&gt;&lt;B&gt;Time Range&lt;/B&gt;: &lt;I&gt;Sun Jan 31 03:32:12 2010&lt;/I&gt; to &lt;I&gt;Sun Feb 7 03:32:12 2010&lt;/I&gt;&lt;BR&gt;&lt;B&gt;Duration&lt;/B&gt;: &lt;I&gt;7d 0h 0m 0s&lt;/I&gt;&lt;BR&gt;&lt;B&gt;State Info&lt;/B&gt;: &lt;I&gt;N/A&lt;/I&gt;",event)' onmouseout='hidePopup()'>-->
+
+  [% SET x = 0 %]
+  [% FOR a = image_map %]
+  <area shape='rect' coords='[% a.x1 %],[% a.y1 %],[% a.x2 %],[% a.y2 %]' href='trends.cgi?t1=[% a.start %]&amp;t2=[% a.end %]&amp;host=[% host %][% IF service %]&amp;service=[% service %][% END %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]' onmouseover='showDetail([% x %])' onmouseout='hideDetail()'>
+
+  [% SET x = x+1 %]
+  [% END %]
 </map>
+[% END %]
 <br><br>
 <div align="center">
   <img src='trends.cgi?createimage&amp;host=[% host %][% IF service %]&amp;service=[% service %][% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]' border="0" name='trendsimage' usemap='#trendsmap' width="[% image_width %]" height="[% image_height %]" alt="#########" id="trendsimage">

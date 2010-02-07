@@ -25,6 +25,9 @@ Catalyst Controller.
 
 use constant {
     MIN_TIMESTAMP_SPACING => 10,
+
+    IMAGE_MAP_MODE        => 1,
+    IMAGE_MODE            => 2,
 };
 
 
@@ -39,7 +42,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{'no_auto_reload'} = 1;
 
     if(exists $c->{'request'}->{'parameters'}->{'createimage'}) {
-        $c->stash->{gd_image} = $self->_create_image($c);
+        $c->stash->{gd_image} = $self->_create_image($c, IMAGE_MODE);
         $c->forward('Thruk::View::GD');
     }
     elsif($self->_show_step_2($c)) {
@@ -136,7 +139,12 @@ sub _show_report {
 
     $c->stats->profile(begin => "_create_report()");
 
-    Thruk::Utils::calculate_availability($c);
+    # create the image map
+    my $image_map = $self->_create_image($c, IMAGE_MAP_MODE);
+    unless(exists $c->{'request'}->{'parameters'}->{'nomap'}) {
+        $c->stash->{image_map} = $image_map;
+        $c->stash->{nomap}     = $c->{'request'}->{'parameters'}->{'nomap'};
+    }
 
     # finished
     $c->stash->{time_token} = time() - $start_time;
@@ -156,7 +164,7 @@ sub _show_report {
 
 ##########################################################
 sub _create_image {
-    my ( $self, $c ) = @_;
+    my ( $self, $c, $mode ) = @_;
 
     my $smallimage = 0;
     $smallimage = 1 if exists $c->{'request'}->{'parameters'}->{'smallimage'};
@@ -187,9 +195,11 @@ sub _create_image {
     $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
     Thruk::Utils::calculate_availability($c);
 
-    my($im, $width, $height,$drawing_width,$drawing_height,$drawing_x_offset,$drawing_y_offset);
+    my($im, $width, $height, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
     if($smallimage) {
-        $im = GD::Image->new(500, 20);
+        unless($mode == IMAGE_MAP_MODE) {
+            $im = GD::Image->new(500, 20);
+        }
         if($service) {
             $drawing_width      = $small_svc_drawing_width;
             $drawing_height     = $small_svc_drawing_height;
@@ -204,14 +214,18 @@ sub _create_image {
         }
     } else {
         if($service) {
-            $im = GD::Image->newFromPng($c->config->{'image_path'}."/trendssvc.png");
+            unless($mode == IMAGE_MAP_MODE) {
+                $im = GD::Image->newFromPng($c->config->{'image_path'}."/trendssvc.png");
+            }
             $drawing_width      = $svc_drawing_width;
             $drawing_height     = $svc_drawing_height;
             $drawing_x_offset   = $svc_drawing_x_offset;
             $drawing_y_offset   = $svc_drawing_y_offset;
         }
         else {
-            $im = GD::Image->newFromPng($c->config->{'image_path'}."/trendshost.png");
+            unless($mode == IMAGE_MAP_MODE) {
+                $im = GD::Image->newFromPng($c->config->{'image_path'}."/trendshost.png");
+            }
             $drawing_width      = $host_drawing_width;
             $drawing_height     = $host_drawing_height;
             $drawing_x_offset   = $host_drawing_x_offset;
@@ -220,44 +234,51 @@ sub _create_image {
     }
 
     # allocate colors used for drawing
-    $self->{'colors'} = {
-        'white'     => $im->colorAllocate(255,255,255),
-        'black'     => $im->colorAllocate(0,0,0),
-        'red'       => $im->colorAllocate(255,0,0),
-        'darkred'   => $im->colorAllocate(128,0,0),
-        'green'     => $im->colorAllocate(0,210,0),
-        'darkgreen' => $im->colorAllocate(0,128,0),
-        'yellow'    => $im->colorAllocate(176,178,20),
-        'orange'    => $im->colorAllocate(255,100,25),
-    };
+    unless($mode == IMAGE_MAP_MODE) {
+        $self->{'colors'} = {
+            'white'     => $im->colorAllocate(255,255,255),
+            'black'     => $im->colorAllocate(0,0,0),
+            'red'       => $im->colorAllocate(255,0,0),
+            'darkred'   => $im->colorAllocate(128,0,0),
+            'green'     => $im->colorAllocate(0,210,0),
+            'darkgreen' => $im->colorAllocate(0,128,0),
+            'yellow'    => $im->colorAllocate(176,178,20),
+            'orange'    => $im->colorAllocate(255,100,25),
+        };
 
-    # set transparency index
-    $im->transparent($self->{'colors'}->{'white'});
+        # set transparency index
+        $im->transparent($self->{'colors'}->{'white'});
 
-    # make sure the graphic is interlaced
-    $im->interlaced('true');
-
-    # draw service / host states
-    $self->_draw_states($c, $im, $self->{'colors'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
-
-    # draw timestamps and dashed vertical lines
-    $self->_draw_timestamps($c, $im, $self->{'colors'}->{'black'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
-
-    unless($smallimage) {
-        # draw horizontal grid lines
-        $self->_draw_horizontal_grid_lines($c, $im, $self->{'colors'}->{'black'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
-
-        # draw total times / percentages
-        $self->_draw_time_breakdowns($c, $im, $self->{'colors'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
-
-        # draw text
-        $self->_draw_text($c, $im, $self->{'colors'}->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
+        # make sure the graphic is interlaced
+        $im->interlaced('true');
     }
 
-    # draw a border
-    $im->rectangle(0,0,$im->width-1,$im->height-1,$self->{'colors'}->{'black'});
+    # draw service / host states
+    my $image_map = $self->_draw_states($c, $im, $mode, $self->{'colors'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
 
-    return $im;
+    if($mode == IMAGE_MAP_MODE) {
+        return $image_map;
+    }
+    else {
+        # draw timestamps and dashed vertical lines
+        $self->_draw_timestamps($c, $im, $self->{'colors'}->{'black'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+
+        unless($smallimage) {
+            # draw horizontal grid lines
+            $self->_draw_horizontal_grid_lines($c, $im, $self->{'colors'}->{'black'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
+
+            # draw total times / percentages
+            $self->_draw_time_breakdowns($c, $im, $self->{'colors'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
+
+            # draw text
+            $self->_draw_text($c, $im, $self->{'colors'}->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
+        }
+
+        # draw a border
+        $im->rectangle(0,0,$im->width-1,$im->height-1,$self->{'colors'}->{'black'});
+
+        return $im;
+    }
 }
 
 ##########################################################
@@ -328,28 +349,32 @@ sub _draw_dashed_line {
 
 ##########################################################
 sub _draw_states {
-    my ( $self, $c, $im, $colors, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset) = @_;
+    my ( $self, $c, $im, $mode, $colors, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset) = @_;
 
     my $report_duration = $end - $start;
 
-    my($last_color,$last_hight);
+    my($last_color, $last_hight, $last_state, $last_plugin_output, $image_map);
     for my $log ( @{$logs} ) {
         next unless defined $log->{'class'};
 
         # host/service state?
-        my($color,$height);
-        if(   $log->{'class'} eq 'UP')            { $color = $colors->{'green'};    $height = 60;          }
-        elsif($log->{'class'} eq 'DOWN')          { $color = $colors->{'red'};      $height = 40;          }
-        elsif($log->{'class'} eq 'UNREACHABLE')   { $color = $colors->{'darkred'};  $height = 20;          }
-        elsif($log->{'class'} eq 'OK')            { $color = $colors->{'green'};    $height = 80;          }
-        elsif($log->{'class'} eq 'WARNING')       { $color = $colors->{'yellow'};   $height = 60;          }
-        elsif($log->{'class'} eq 'UNKNOWN')       { $color = $colors->{'orange'};   $height = 40;          }
-        elsif($log->{'class'} eq 'CRITICAL')      { $color = $colors->{'red'};      $height = 20;          }
-        elsif($log->{'class'} eq 'INDETERMINATE') { $color = $last_color;           $height = $last_hight; }
+        my($color,$height, $state, $plugin_output);
+        $state         = ucfirst $log->{'class'};
+        $plugin_output = $log->{'plugin_output'};
+        if(   $log->{'class'} eq 'UP')            { $color = $colors->{'green'};    $height = 60; }
+        elsif($log->{'class'} eq 'DOWN')          { $color = $colors->{'red'};      $height = 40; }
+        elsif($log->{'class'} eq 'UNREACHABLE')   { $color = $colors->{'darkred'};  $height = 20; }
+        elsif($log->{'class'} eq 'OK')            { $color = $colors->{'green'};    $height = 80; }
+        elsif($log->{'class'} eq 'WARNING')       { $color = $colors->{'yellow'};   $height = 60; }
+        elsif($log->{'class'} eq 'UNKNOWN')       { $color = $colors->{'orange'};   $height = 40; }
+        elsif($log->{'class'} eq 'CRITICAL')      { $color = $colors->{'red'};      $height = 20; }
+        elsif($log->{'class'} eq 'INDETERMINATE') { $color = $last_color;           $height = $last_hight; $state = $last_state; $plugin_output = $last_plugin_output; }
 
-        next unless defined $color;
-        $last_color = $color;
-        $last_hight = $height;
+        next unless defined $height;
+        $last_color         = $color;
+        $last_hight         = $height;
+        $last_state         = $state;
+        $last_plugin_output = $plugin_output;
 
         # inside report period?
         next if $log->{'end'}   <= $start;
@@ -364,9 +389,35 @@ sub _draw_states {
         my $x2 = $drawing_x_offset + int(($log->{'end'} - $start) / $report_duration * $drawing_width);
         my $y2 = $drawing_y_offset + $drawing_height;
 
-        $im->filledRectangle($x1,$y1,$x2,$y2,$color);
+        if($mode == IMAGE_MAP_MODE) {
+            push @{$image_map}, {
+                "x1"                 => $x1,
+                "y1"                 => $drawing_y_offset,
+
+                "x2"                 => $x2,
+                "y2"                 => $y2,
+
+                "state"              => $state,
+
+                "start_human"        => strftime($c->config->{'datetime_format_trends'}, localtime($log->{'start'})),
+                "end_human"          => strftime($c->config->{'datetime_format_trends'}, localtime($log->{'end'})),
+                "start"              => $log->{'start'},
+                "end"                => $log->{'end'},
+                "plugin_output"      => $log->{'plugin_output'},
+
+                "real_plugin_output" => $plugin_output,
+
+                "duration"           => Thruk::Utils::filter_duration($log->{'end'} - $log->{'start'}),
+            };
+        }
+        else {
+            $im->filledRectangle($x1,$y1,$x2,$y2,$color);
+        }
     }
 
+    if($mode == IMAGE_MAP_MODE) {
+        return $image_map;
+    }
     return 1;
 }
 
@@ -484,7 +535,10 @@ sub _get_time_breakdown_string {
     my($self,$total_time,$time, $type) = @_;
 
     my $duration     = Thruk::Utils::filter_duration($time);
-    my $percent_time = ($time/$total_time)*100;
+    my $percent_time = 0;
+    if($total_time > 0) {
+        $percent_time = ($time/$total_time)*100;
+    }
     return sprintf("%-13s: (%.3f%%) %s",$type,$percent_time,$duration);
 }
 

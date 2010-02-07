@@ -157,10 +157,12 @@
         <td class='reportSelectSubTitle' align="right">Suppress image map:</td>
         <td class='reportSelectItem'><input type='checkbox' name='nomap'></td>
       </tr>
+      <!--
       <tr>
         <td class='reportSelectSubTitle' align="right">Suppress popups:</td>
         <td class='reportSelectItem'><input type='checkbox' name='nopopups'></td>
       </tr>
+      -->
       <tr>
         <td></td>
         <td class='reportSelectItem'>

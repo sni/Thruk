@@ -20,7 +20,6 @@ avail:
     - check availability calculation on multibackend (restarts)
 
 trends:
-    - image map missing
     - zoom missing
 
 summary:
@@ -70,6 +69,8 @@ reports:
     - flexible report output
         HTML, Text, CVS, XML, PDF
         CSV output for single hosts/services,hostgroups/servicegroups
+    - cache results from Thruk::Utils::calculate_availability, no need
+      to parse logfiles twice
 
 statusmap: http://search.cpan.org/~lbrocard/GraphViz/lib/GraphViz.pm
 

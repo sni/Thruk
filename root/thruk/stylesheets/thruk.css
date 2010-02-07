@@ -23,6 +23,50 @@ div.navbarsearch form fieldset {
   vertical-align:text-bottom;
 }
 
+/* details hover for trends image map */
+div.image_hover {
+  visibility:hidden;
+  z-index:100;
+  position:absolute;
+  top:3px;
+  left:175px;
+}
+table.popupBorder {
+  margin-top: 5px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #ffffcc;
+  border-collapse: separate;
+  background-color: #ffffcc;
+}
+body.trends table.popupBorder > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #ffffcc;
+  background-color: #ffffcc;
+}
+body.trends table.popupText {
+  background-color: #ffffcc;
+  border: none;
+}
+body.trends table.popupText td {
+  background-color: #ffffcc;
+  border: none;
+  vertical-align: top;
+}
+body.trends table.popupText th {
+  background-color: #ffffcc;
+  border: none;
+  text-align: left;
+  text-decoration: underline;
+  min-width: 300px;
+  vertical-align: top;
+}
+
 /* fix for link box and infobox border */
 table.infoBox {
   margin-top: 5px;
