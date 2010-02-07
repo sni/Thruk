@@ -38,6 +38,7 @@ our $VERSION = '0.25_1';
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
                     'released'               => 'February 06, 2010',
+                    'image_path'             => 'root/thruk/images',
                     'default_view'           => 'TT',
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',
