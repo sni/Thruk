@@ -27,6 +27,7 @@ use constant {
     MIN_TIMESTAMP_SPACING => 10,
 };
 
+
 ##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
@@ -40,12 +41,118 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if(exists $c->{'request'}->{'parameters'}->{'createimage'}) {
         $c->stash->{gd_image} = $self->_create_image($c);
         $c->forward('Thruk::View::GD');
-    } else {
+    }
+    elsif($self->_show_step_2($c)) {
+        # show step 2
+    }
+    elsif($self->_show_step_3($c)) {
+        # show step 3
+    }
+    elsif($self->_show_report($c)) {
+        # show report
+    }
+    else {
         $c->stash->{'template'} = 'trends_step_1.tt';
     }
 
     return 1;
 }
+
+
+##########################################################
+sub _show_step_2 {
+    my ( $self, $c ) = @_;
+
+    my $input = $c->{'request'}->{'parameters'}->{'input'};
+
+    return unless defined $input;
+
+    my $data;
+    if($input eq 'gethost') {
+        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hosts'), 'name');
+    }
+    elsif($input eq 'getservice') {
+        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        for my $service (@{$services}) {
+            $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
+        }
+    }
+    else {
+        return;
+    }
+
+    my @sorted = sort keys %{$data};
+    $c->stash->{input}       = $input;
+    $c->stash->{data}        = \@sorted;
+    $c->stash->{template}    = 'trends_step_2.tt';
+
+    return 1;
+}
+
+
+##########################################################
+sub _show_step_3 {
+    my ( $self, $c ) = @_;
+
+    my $input = $c->{'request'}->{'parameters'}->{'input'};
+
+    return unless defined $input;
+    return unless $input eq 'getoptions';
+
+    my $host    = $c->{'request'}->{'parameters'}->{'host'};
+    my $service = $c->{'request'}->{'parameters'}->{'service'};
+
+    if(!defined $host and !defined $service) {
+        return;
+    }
+
+    if(defined $service and CORE::index($service, ';') > 0) {
+        ($host,$service) = split/;/mx, $service;
+    }
+
+    $c->stash->{host}    = $host;
+    $c->stash->{service} = $service;
+
+    $c->stash->{template}    = 'trends_step_3.tt';
+
+    return 1;
+}
+
+
+##########################################################
+sub _show_report {
+    my ( $self, $c ) = @_;
+    my $start_time   = time();
+
+    my $host    = $c->{'request'}->{'parameters'}->{'host'};
+    my $service = $c->{'request'}->{'parameters'}->{'service'};
+
+    if(!defined $host and !defined $service) {
+        return;
+    }
+
+    $c->stash->{host}    = $host;
+    $c->stash->{service} = $service;
+
+    $c->stats->profile(begin => "_create_report()");
+
+    Thruk::Utils::calculate_availability($c);
+
+    # finished
+    $c->stash->{time_token} = time() - $start_time;
+    $c->stats->profile(end => "_create_report()");
+
+    $c->stash->{image_width}  = '900';
+    $c->stash->{image_height} = '300';
+    if(defined $service) {
+        $c->stash->{image_height} = '320';
+    }
+
+    $c->stash->{template}    = 'trends_report.tt';
+
+    return 1;
+}
+
 
 ##########################################################
 sub _create_image {

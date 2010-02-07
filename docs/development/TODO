@@ -17,11 +17,11 @@ config:
     - add missing values
 
 avail:
-    - trends graph
     - check availability calculation on multibackend (restarts)
 
 trends:
-    - missing completly
+    - image map missing
+    - zoom missing
 
 summary:
     - add reports

@@ -53,6 +53,7 @@
           <tr>
             <td valign="top" class='reportSelectSubTitle'>Start Date (Inclusive):</td>
             <td align="left" valign="top" class='reportSelectItem'>
+              [% SET yesterday = date.now - 86400 %]
               <select name='smon'>
                 <option value='1'[%  IF date.format(yesterday, '%m') == "01" %] selected[% END %]>January</option>
                 <option value='2'[%  IF date.format(yesterday, '%m') == "02" %] selected[% END %]>February</option>
@@ -67,7 +68,6 @@
                 <option value='11'[% IF date.format(yesterday, '%m') == "11" %] selected[% END %]>November</option>
                 <option value='12'[% IF date.format(yesterday, '%m') == "12" %] selected[% END %]>December</option>
               </select>
-              [% SET yesterday = date.now - 86400 %]
               <input type='text' size='2' maxlength='2' name='sday' value='[% date.format(yesterday, '%d') %]'>
               <input type='text' size='4' maxlength='4' name='syear' value='[% date.format(yesterday, '%Y') %]'>
               <input type='hidden' name='shour' value='0'>

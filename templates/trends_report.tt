@@ -1,0 +1,127 @@
+[% PROCESS _header.tt %]
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+      <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
+        <tr>
+          <td class='linkBox'>
+            [% IF service %]
+            <a href="trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]">View Trends For This Host</a><br>
+            <a href="avail.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]&amp;show_log_entries">View Availability Report For This Service</a><br>
+            <a href="histogram.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]">View Alert Histogram For This Service</a><br>
+            <a href="history.cgi?host=[% host %]&amp;service=n0_test_ok_02">View Alert History For This Service</a><br>
+            <a href="notifications.cgi?host=[% host %]&amp;service=n0_test_ok_02">View Notifications For This Service</a><br>
+            [% ELSE %]
+            <a href='avail.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
+            <a href='status.cgi?host=[% host %]'>View Status Detail For This Host</a><br>
+            <a href='history.cgi?host=[% host %]'>View Alert History For This Host</a><br>
+            <a href='notifications.cgi?host=[% host %]'>View Notifications For This Host</a><br>
+            [% END %]
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td align="center" valign="top" width="33%">
+      <div align="center" class='dataTitle'>
+        [% IF service %]
+        Service '[% service %]' On Host '[% host %]'
+        [% ELSE %]
+        Host '[% host %]'
+        [% END %]
+      </div><br>
+      <img src='/thruk/images/trends.gif' width="20" height="20" border="0" alt='[% IF server %]Service[% ELSE %]Host[% END %] State Trends' title='[% IF server %]Service[% ELSE %]Host[% END %] State Trends'><br clear="all">
+      <div align="center" class='reportRange'>
+        [% date.format(start, datetime_format) %] to [% date.format(end, datetime_format) %]
+      </div>
+      <div align="center" class='reportDuration'>
+        Duration: [% SET dur = end - start %][% duration(dur) %]
+      </div>
+    </td>
+    <td align="right" valign="bottom" width="33%">
+      <form method="get" action="trends.cgi">
+        <input type='hidden' name='t1' value='[% start %]'>
+        <input type='hidden' name='t2' value='[% end %]'>
+        <input type='hidden' name='host' value='[% host %]'>
+        <input type='hidden' name='assumeinitialstates' value='[% assumeinitialstates %]'>
+        <input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
+        <input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
+        <input type='hidden' name='includesoftstates' value='[% includesoftstates %]'>
+        <table border="0" class='optBox'>
+          <tr>
+            <td class='optBoxItem' valign="top" align="left">First assumed host state:</td>
+            <td class='optBoxItem' valign="top" align="left">Backtracked archives:</td>
+          </tr>
+          <tr>
+            <td class='optBoxItem' valign="top" align="left">
+              <input type='hidden' name='initialassumedservicestate' value='[% initialassumedservicestate %]'>
+              <select name='initialassumedhoststate'>
+                <option value="0"[% IF  initialassumedhoststate ==  0 %] selected[% END %]>Unspecified</option>
+                <option value="-1"[% IF initialassumedhoststate == -1 %] selected[% END %]>Current State</option>
+                <option value="3"[% IF  initialassumedhoststate ==  3 %] selected[% END %]>Host Up</option>
+                <option value="4"[% IF  initialassumedhoststate ==  4 %] selected[% END %]>Host Down</option>
+                <option value="5"[% IF  initialassumedhoststate ==  5 %] selected[% END %]>Host Unreachable</option>
+              </select>
+            </td>
+            <td class='optBoxItem' valign="top" align="left">
+              <input type='text' name='backtrack' size='2' maxlength='2' value='[% backtrack %]'>
+            </td>
+          </tr>
+          <tr>
+            <td class='optBoxItem' valign="top" align="left">Report period:</td>
+            <td class='optBoxItem' valign="top" align="left">Zoom factor:</td>
+          </tr>
+          <tr>
+            <td class='optBoxItem' valign="top" align="left">
+              <select name='timeperiod'>
+                <option value="current"[% IF     timeperiod == 'current'     %] selected[% END %]>[ Current time range ]</option>
+                <option value="today"[% IF       timeperiod == 'today'       %] selected[% END %]>Today</option>
+                <option value="last24hours"[% IF timeperiod == 'last24hours' %] selected[% END %]>Last 24 Hours</option>
+                <option value="yesterday"[% IF   timeperiod == 'yesterday'   %] selected[% END %]>Yesterday</option>
+                <option value="thisweek"[% IF    timeperiod == 'thisweek'    %] selected[% END %]>This Week</option>
+                <option value="last7days"[% IF   timeperiod == 'last7days'   %] selected[% END %]>Last 7 Days</option>
+                <option value="lastweek"[% IF    timeperiod == 'lastweek'    %] selected[% END %]>Last Week</option>
+                <option value="thismonth"[% IF   timeperiod == 'thismonth'   %] selected[% END %]>This Month</option>
+                <option value="last31days"[% IF  timeperiod == 'last31days'  %] selected[% END %]>Last 31 Days</option>
+                <option value="lastmonth"[% IF   timeperiod == 'lastmonth'   %] selected[% END %]>Last Month</option>
+                <option value="thisyear"[% IF    timeperiod == 'thisyear'    %] selected[% END %]>This Year</option>
+                <option value="lastyear"[% IF    timeperiod == 'lastyear'    %] selected[% END %]>Last Year</option>
+              </select>
+            </td>
+            <td class='optBoxItem' valign="top" align="left">
+              <select name='zoom'>
+                <option value="4" selected>4</option>
+                <option value="+2">+2</option>
+                <option value="+3">+3</option>
+                <option value="+4">+4</option>
+                <option value="-2">-2</option>
+                <option value="-3">-3</option>
+                <option value="-4">-4</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='optBoxItem' valign="top" align="left"></td>
+            <td class='optBoxItem' valign="top" align="left">
+              <input type='submit' value='Update'>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td align="right" valign="bottom"></td>
+          </tr>
+        </table>
+      </form>
+    </td>
+  </tr>
+</table>
+<map name='trendsmap' id="trendsmap">
+<!--  <area shape='rect' coords='116,65,613,125' href='trends.cgi?t1=1265131932&amp;t2=1265283132&amp;host=[% host %]&amp;assumeinitialstates=yes&amp;initialassumedhoststate=0&amp;initialassumedservicestate=0&amp;assumestateretention=yes&amp;assumestatesduringnotrunning=yes&amp;includesoftstates=no&amp;backtrack=4&amp;zoom=4' onmouseover='showPopup("&lt;B&gt;&lt;U&gt;UP&lt;/U&gt;&lt;/B&gt;&lt;BR&gt;&lt;B&gt;Time Range&lt;/B&gt;: &lt;I&gt;Sun Jan 31 03:32:12 2010&lt;/I&gt; to &lt;I&gt;Sun Feb 7 03:32:12 2010&lt;/I&gt;&lt;BR&gt;&lt;B&gt;Duration&lt;/B&gt;: &lt;I&gt;7d 0h 0m 0s&lt;/I&gt;&lt;BR&gt;&lt;B&gt;State Info&lt;/B&gt;: &lt;I&gt;N/A&lt;/I&gt;",event)' onmouseout='hidePopup()'>-->
+</map>
+<br><br>
+<div align="center">
+  <img src='trends.cgi?createimage&amp;host=[% host %][% IF service %]&amp;service=[% service %][% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]' border="0" name='trendsimage' usemap='#trendsmap' width="[% image_width %]" height="[% image_height %]" alt="#########" id="trendsimage">
+</div>
+
+[% PROCESS _footer.tt %]
