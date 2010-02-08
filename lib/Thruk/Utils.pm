@@ -909,7 +909,7 @@ sub page_data {
     my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
 
     # we dont use paging at all?
-    unless($c->stash->{'use_pager'} and defined $entries and $entries > 0) {
+    unless($c->stash->{'use_pager'} and defined $entries and $entries ne 'all' and $entries > 0) {
         $c->stash->{'data'}  = $data,
         return 1;
     }
