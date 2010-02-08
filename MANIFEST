@@ -65,6 +65,7 @@ lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Utils.pm
+lib/Thruk/View/GD.pm
 lib/Thruk/View/TT.pm
 Makefile.PL
 MANIFEST			This list of files
@@ -73,6 +74,15 @@ README
 root/INSTALL.html
 root/thruk/images/ack.gif
 root/thruk/images/action.gif
+root/thruk/images/cal/cal.gif
+root/thruk/images/cal/cal_close.gif
+root/thruk/images/cal/cal_fastforward.gif
+root/thruk/images/cal/cal_fastreverse.gif
+root/thruk/images/cal/cal_forward.gif
+root/thruk/images/cal/cal_minus.gif
+root/thruk/images/cal/cal_plus.gif
+root/thruk/images/cal/cal_reverse.gif
+root/thruk/images/cal/calendar.png
 root/thruk/images/catalyst_170pix.png
 root/thruk/images/command.png
 root/thruk/images/comment.gif
@@ -111,6 +121,10 @@ root/thruk/images/recovery.png
 root/thruk/images/redudancy.png
 root/thruk/images/redundancy.png
 root/thruk/images/restart.gif
+root/thruk/images/resultset_first.png
+root/thruk/images/resultset_last.png
+root/thruk/images/resultset_next.png
+root/thruk/images/resultset_previous.png
 root/thruk/images/right.gif
 root/thruk/images/serviceevent.gif
 root/thruk/images/start.gif
@@ -136,6 +150,7 @@ root/thruk/images/waiting.gif
 root/thruk/images/warning.png
 root/thruk/images/zoom1.gif
 root/thruk/images/zoom2.gif
+root/thruk/javascript/datetimepicker.js
 root/thruk/stylesheets/avail.css
 root/thruk/stylesheets/checksanity.css
 root/thruk/stylesheets/cmd.css
@@ -193,6 +208,7 @@ templates/_get_content.tt
 templates/_header.tt
 templates/_host_status_details_box.tt
 templates/_infobox.tt
+templates/_pager.tt
 templates/_service_status_details_box.tt
 templates/_status_filter.tt
 templates/avail_report_form_box.tt
@@ -328,7 +344,6 @@ templates/extinfo_type_5.tt
 templates/extinfo_type_6.tt
 templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
-templates/histogram.tt
 templates/histogram_step_1.tt
 templates/history.tt
 templates/index.tt
@@ -342,8 +357,10 @@ templates/status_grid.tt
 templates/status_hostdetail.tt
 templates/status_overview.tt
 templates/status_summary.tt
-templates/summary.tt
 templates/summary_step_1.tt
 templates/tac.tt
-templates/trends.tt
+templates/trends_report.tt
+templates/trends_step_1.tt
+templates/trends_step_2.tt
+templates/trends_step_3.tt
 thruk.conf

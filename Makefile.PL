@@ -7,7 +7,7 @@ all_from 'lib/Thruk.pm';
 
 license 'gpl3';
 resources(
-    'homepage',   => 'http://github.com/sni/Thruk',
+    'homepage',   => 'http://www.thruk.org',
     'bugtracker'  => 'http://github.com/sni/Thruk/issues',
     'repository', => 'http://github.com/sni/Thruk',
 );

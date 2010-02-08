@@ -14,8 +14,10 @@
       <body>
         <h2>Thruk</h2>
         <p align="center">
-          <a href="http://github.com/sni/Thruk">http://github.com/sni/Thruk</a><br />
-          Copyright (c) 1999-2009 Ethan Galstad<br />
+          <a href="http://www.thruk.org">http://www.thruk.org</a><br />
+          Copyright &copy; 2010 Thruk Developer Team.<br>
+          Copyright &copy; 2009 Nagios Core Development Team and Community Contributors.<br>
+          Copyright &copy; 1999-2009 Ethan Galstad.<br>
         </p>
         <p>
           <i>Note: These pages require a browser which supports frames</i>

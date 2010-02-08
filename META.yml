@@ -65,7 +65,7 @@ requires:
   threads: 1.75
 resources:
   bugtracker: http://github.com/sni/Thruk/issues
-  homepage: http://github.com/sni/Thruk
+  homepage: http://www.thruk.org
   license: http://opensource.org/licenses/gpl-3.0.html
   repository: http://github.com/sni/Thruk
 version: 0.25_1

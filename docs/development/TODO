@@ -9,6 +9,7 @@ general
     - add backend name to logs
     - showlog performance is still too slow (only firefox)
     - show downtimes on extinfo 1/2 ( at least the downtime comment )
+    - implement escape_html_tags from cgi.cfg
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -29,7 +30,6 @@ histogram:
     - add reports
 
 livestatus:
-    - StatsSum: ( needed by tac and extinfo 4 )
     - Contacts: Service Notification Options, Host Notification Options,
                 Retention Options, Service Notification Commands,
                 Host Notification Commands
@@ -63,6 +63,7 @@ general:
     - add multiple notes url or action urls, maybe add an "_html" cust var
     - add ability to display contacts for machine
     - uc,lc option for auth user -> monitoring
+    - selectable themes
 
 reports:
     - generate long running reports in an extra process
