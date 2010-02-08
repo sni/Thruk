@@ -7,12 +7,14 @@
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>Thruk</title>
     <link href="/thruk/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    <link href="/thruk/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
     <link rel="shortcut icon" href="/thruk/images/favicon.ico" type="image/ico" />
   </head>
   <body class='navbar'>
 [% ELSE %]
   [% SET target = "_self" %]
 [% END %]
+    <a href="http://www.thruk.org" target="_blank"><img src="/thruk/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="139" height="43" class="nav_small_logo"></a>
     <div class="navsection">
       <div class="navsectiontitle">General</div>
       <div class="navsectionlinks">
@@ -104,6 +106,7 @@
         </ul>
       </div>
     </div>
+    <img src="images/greendot.gif" class="hidepics" alt=""><img src="images/orangedot.gif" class="hidepics" alt="">
 [% IF use_frames %]
   </body>
 </html>

@@ -3,10 +3,33 @@
 .servicePENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
 .itemTotalsTitle { font-family: arial,serif;  font-size: 8pt;  text-align: center; }
 
+.nav_small_logo { margin: 0px; padding: 0px; }
+
+body.navbar {
+  font-family:arial,verdana,serif;
+  margin: 5px;
+  margin-top: 2px;
+}
+
+/* class to preload images */
+.hidepics {
+  width:0px;
+  height:0px;
+  visibility:hidden;
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 100;
+}
+
 div.navbarsearch form fieldset {
   border: 0px;
   padding-top: 0px;
   padding-bottom: 0px;
+}
+
+div.navsection {
+  margin:2px 0 8px;
 }
 
 .pager_direct_link {
