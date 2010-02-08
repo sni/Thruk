@@ -73,11 +73,15 @@ reports:
     - cache results from Thruk::Utils::calculate_availability, no need
       to parse logfiles twice
 
-statusmap: http://search.cpan.org/~lbrocard/GraphViz/lib/GraphViz.pm
+statusmap: maybe something with http://search.cpan.org/~lbrocard/GraphViz/lib/GraphViz.pm
+           or a link to nagvis
 
 status:
-    - proper search (maybe ajax)
-    - add new search page, with selector for all parameters 
+    - proper search (maybe ajax autocomplete for input form)
+    - add new search page, with selector for all parameters
+    - add flexible selector, ex.: select multiple hostgroups
+    - host table map with worst service state as color
+    - hide host/service summary in status.cgi (maybe with http://jqueryui.com/demos/toggle/ )
 
 showlog:
     - proper logfile page
