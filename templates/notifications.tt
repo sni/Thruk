@@ -170,7 +170,7 @@
           <td class='[% class %]'>[% date.format(n.time, datetime_format) %]</td>
           <td class='[% class %]'><a href='config.cgi?type=contacts#[% n.contact_name %]'>[% n.contact_name %]</a></td>
           <td class='[% class %]'><a href='config.cgi?type=commands#[% n.command_name %]'>[% n.command_name %]</a></td>
-          <td class='[% class %]'>[% n.plugin_output %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(n.plugin_output) %][% ELSE %][% n.plugin_output %][% END %]</td>
         </tr>
         [% END %]
 

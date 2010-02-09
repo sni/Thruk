@@ -53,7 +53,9 @@ sub begin : Private {
     $c->stash->{'use_feature_statuswrl'} = 0;
 
     # enable trends if gd loaded
-    $c->stash->{'use_feature_trends'} = $c->config->{'use_feature_trends'};
+    if($c->config->{'has_gd'}) {
+        $c->stash->{'use_feature_trends'} = 1;
+    }
 
     $c->stash->{'datetime_format'}      = Thruk->config->{'datetime_format'};
     $c->stash->{'datetime_format_long'} = Thruk->config->{'datetime_format_long'};

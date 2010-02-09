@@ -161,6 +161,8 @@ Configuration
 ~~~~~~~~~~~~~
 edit "thruk.conf" and adjust the livestatus settings to your needs.
 
+edit "cgi.conf" and adjust settings to your needs.
+
 
 
 Test

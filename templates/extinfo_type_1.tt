@@ -118,9 +118,9 @@
                             <td class='dataVar' valign='top'>Status Information:</td>
                             <td class='dataVal'>
                               [% IF host.has_been_checked == 0 %]host has not been checked yet[% END %]
-                              [% host.plugin_output %]
+                              [% IF escape_html_tags %][% html_escape(host.plugin_output) %][% ELSE %][% host.plugin_output %][% END %]
                               [% IF host.long_plugin_output %]
-                              <br>[% host.long_plugin_output %]
+                              <br>[% IF escape_html_tags %][% html_escape(host.long_plugin_output) %][% ELSE %][% host.long_plugin_output %][% END %]
                               [% END %]
                             </td>
                           </tr>

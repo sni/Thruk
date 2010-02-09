@@ -56,6 +56,7 @@ requires 'Log::Dispatch::File';
 requires 'Data::Page';
 requires 'GD';
 requires 'Catalyst::View::GD';
+requires 'HTML::Entities';
 
 # test requirements make it into the META.yml and will break
 # normal package installation

@@ -115,7 +115,7 @@
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]' nowrap>[% date.format(h.last_check, datetime_format) %]</td>
           <td class='[% class %]' nowrap>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
-          <td class='[% class %]' valign='middle'>[% IF h.has_been_checked == 0 %]Host check scheduled for [% date.format(h.next_check, datetime_format_long) %][% ELSE %][% h.plugin_output %][% END %]&nbsp;</td>
+          <td class='[% class %]' valign='middle'>[% IF h.has_been_checked == 0 %]Host check scheduled for [% date.format(h.next_check, datetime_format_long) %][% ELSE %][% IF escape_html_tags %][% html_escape(h.plugin_output) %][% ELSE %][% h.plugin_output %][% END %][% END %]&nbsp;</td>
         </tr>
         [% END %]
 

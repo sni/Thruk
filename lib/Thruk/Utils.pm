@@ -199,10 +199,10 @@ sub get_cgi_cfg {
 
     return(\%config) if $cgi_config_already_read;
 
-    my $file = Thruk->config->{'cgi_cfg'};
+    my $file = $c->config->{'cgi_cfg'};
 
     if(!defined $file or $file eq '') {
-        Thruk->config->{'cgi_cfg'} = 'undef';
+        $c->config->{'cgi_cfg'} = 'undef';
         $c->log->error("cgi.cfg not set");
         $c->error("cgi.cfg not set");
         $c->detach('/error/index/4');
@@ -1448,6 +1448,7 @@ sub _initialassumedhoststate_to_state {
     croak('unknown state: '.$initialassumedhoststate);
 }
 
+
 ########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
@@ -1459,6 +1460,14 @@ sub _initialassumedservicestate_to_state {
     return 'unknown'     if $initialassumedservicestate ==  7; # Service Unknown
     return 'critical'    if $initialassumedservicestate ==  9; # Service Critical
     croak('unknown state: '.$initialassumedservicestate);
+}
+
+
+########################################
+sub _html_escape {
+    my $text = shift;
+
+    return HTML::Entities::encode($text);
 }
 
 1;
