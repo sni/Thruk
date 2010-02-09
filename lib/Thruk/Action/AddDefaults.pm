@@ -89,6 +89,9 @@ before 'execute' => sub {
     $c->stash->{'backends'}           = \@possible_backends;
     $c->stash->{'backend_detail'}     = \%backend_detail;
 
+    ###############################
+    $c->stash->{'escape_html_tags'}   = $c->{'cgi_cfg'}->{'escape_html_tags'};
+
     $c->stats->profile(end => "AddDefaults::before");
 };
 

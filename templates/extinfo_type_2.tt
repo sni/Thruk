@@ -107,9 +107,9 @@
                             <td class='dataVar' valign='top'> Status Information: </td>
                             <td class='dataVal'>
                               [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
-                              [% service.plugin_output %]
+                              [% IF escape_html_tags %][% html_escape(service.plugin_output) %][% ELSE %][% service.plugin_output %][% END %]
                               [% IF service.long_plugin_output %]
-                              <br>[% service.long_plugin_output %]
+                              <br>[% IF escape_html_tags %][% html_escape(service.long_plugin_output) %][% ELSE %][% service.long_plugin_output %][% END %]
                               [% END %]
                             </td>
                           </tr>

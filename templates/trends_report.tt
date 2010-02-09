@@ -39,9 +39,17 @@
     document.getElementById('detail_end').innerHTML           = details[nr].end;
     document.getElementById('detail_duration').innerHTML      = details[nr].duration;
     if(details[nr].plugin_output != details[nr].real_plugin_output) {
-      document.getElementById('detail_plugin_output').innerHTML = html_entity_decode(details[nr].plugin_output) + "<br><i>original output was:<\/i><br>" + html_entity_decode(details[nr].real_plugin_output);
+      [% IF escape_html_tags %]
+        document.getElementById('detail_plugin_output').innerHTML = details[nr].plugin_output + "<br><i>original output was:<\/i><br>" + details[nr].real_plugin_output;
+      [% ELSE %]
+        document.getElementById('detail_plugin_output').innerHTML = html_entity_decode(details[nr].plugin_output) + "<br><i>original output was:<\/i><br>" + html_entity_decode(details[nr].real_plugin_output);
+      [% END %]
     } else {
-      document.getElementById('detail_plugin_output').innerHTML = html_entity_decode(details[nr].plugin_output);
+      [% IF escape_html_tags %]
+        document.getElementById('detail_plugin_output').innerHTML = details[nr].plugin_output;
+      [% ELSE %]
+        document.getElementById('detail_plugin_output').innerHTML = html_entity_decode(details[nr].plugin_output);
+      [% END %]
     }
   }
 

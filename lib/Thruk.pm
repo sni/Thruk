@@ -48,11 +48,12 @@ __PACKAGE__->config('name'                   => 'Thruk',
                                                 'duration'  => \&Thruk::Utils::filter_duration,
                                             },
                         PRE_DEFINE         => {
-                                                'sprintf'   => sub { my $format = shift; sprintf $format, @_ },
-                                                'duration'  => \&Thruk::Utils::filter_duration,
-                                                'name2id'   => \&Thruk::Utils::name2id,
-                                                'uri'       => \&Thruk::Utils::uri,
-                                                'uri_with'  => \&Thruk::Utils::uri_with,
+                                                'sprintf'      => sub { my $format = shift; sprintf $format, @_ },
+                                                'duration'     => \&Thruk::Utils::filter_duration,
+                                                'name2id'      => \&Thruk::Utils::name2id,
+                                                'uri'          => \&Thruk::Utils::uri,
+                                                'uri_with'     => \&Thruk::Utils::uri_with,
+                                                'html_escape'  => \&Thruk::Utils::_html_escape,
                                             },
                         PRE_CHOMP          => 1,
                         POST_CHOMP         => 1,
@@ -116,13 +117,11 @@ eval { require GD; };
 if($@) {
     __PACKAGE__->log->info("disabled trends, cannot load GD");
     __PACKAGE__->log->debug($@);
-    __PACKAGE__->config->{'use_feature_trends'} = 0;
+    __PACKAGE__->config->{'has_gd'} = 0;
 } else {
-    __PACKAGE__->log->info("enabled trends");
-    __PACKAGE__->config->{'use_feature_trends'} = 1;
+    __PACKAGE__->log->info("enabled gd");
+    __PACKAGE__->config->{'has_gd'} = 1;
 }
-
-###################################################
 
 
 =head1 NAME

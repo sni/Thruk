@@ -5,11 +5,10 @@ for version 1.0
 general
     - fix authorization ( check services by host_contacts, comments/downtimes )
     - fix host/servicegroups pages with authorization
-    - write tests
+    - write tests ( with admin user, limited user, unknown user )
     - add backend name to logs
     - showlog performance is still too slow (only firefox)
     - show downtimes on extinfo 1/2 ( at least the downtime comment )
-    - implement escape_html_tags from cgi.cfg
 
 extinfo:
     - finish performance data on extinfo type 4

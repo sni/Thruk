@@ -106,7 +106,7 @@
         </ul>
       </div>
     </div>
-    <img src="images/greendot.gif" class="hidepics" alt=""><img src="images/orangedot.gif" class="hidepics" alt="">
+    <img src="images/greendot.gif" class="hidepics" alt="" width="0" height="0"><img src="images/orangedot.gif" class="hidepics" alt="" width="0" height="0">
 [% IF use_frames %]
   </body>
 </html>

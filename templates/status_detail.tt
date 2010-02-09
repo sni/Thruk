@@ -181,7 +181,7 @@
         <td class='[% serviceclass %]' nowrap>[% date.format(s.last_check, datetime_format) %]</td>
         <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
         <td class='[% serviceclass %]'>[% s.current_attempt %]/[% s.max_check_attempts %]</td>
-        <td class='[% serviceclass %]'>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% s.plugin_output %][% END %]&nbsp;</td>
+        <td class='[% serviceclass %]'>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% IF escape_html_tags %][% html_escape(s.plugin_output) %][% ELSE %][% s.plugin_output %][% END %][% END %]&nbsp;</td>
       </tr>
       [% SET lasthost = s.host_name %]
       [% END %]
