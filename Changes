@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 0.25_1  Sat Feb  6 17:29:12 CET 2010
           - added trends
           - implemented escape_html_tags
+          - added show_context_help
 
 0.23_3  Sat Feb  6 00:06:39 CET 2010
           - added paging for hosts / services

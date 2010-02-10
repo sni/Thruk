@@ -7,7 +7,11 @@
         <td align="right" valign="bottom" width="50%">
           <table border="0" cellspacing="0">
             <tr>
-              <td valign="bottom" align="right"></td>
+              <td valign="bottom" align="right">
+              [% IF show_context_help %]
+              <br><a href='/thruk/docs/tac' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/images/contexthelp2.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+              [% END %]
+              </td>
               <td>
                 <table border="0" cellspacing="4">
                   <tr>

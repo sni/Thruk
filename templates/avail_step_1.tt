@@ -7,12 +7,9 @@
         </td>
         <td align="center" valign="top" width="33%"></td>
         <td align="right" valign="bottom" width="33%">
-          <table border="0" class='optBox'>
-            <tr>
-              <td></td>
-              <td align="right" valign="bottom"></td>
-            </tr>
-          </table>
+          [% IF show_context_help %]
+          <br><a href='/thruk/docs/avail' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          [% END %]
         </td>
       </tr>
     </table>

@@ -65,7 +65,9 @@
           <font size="-1"><i>Extra Notes</i></font><br clear="all">
           <br clear="all">
           [% END %]
-          <table border='0'></table>
+          [% IF show_context_help %]
+          <br><a href='/thruk/docs/extinfo_2' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          [% END %]
         </td>
 
       </tr>

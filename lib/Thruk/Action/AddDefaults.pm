@@ -91,6 +91,7 @@ before 'execute' => sub {
 
     ###############################
     $c->stash->{'escape_html_tags'}   = $c->{'cgi_cfg'}->{'escape_html_tags'};
+    $c->stash->{'show_context_help'}  = $c->{'cgi_cfg'}->{'show_context_help'};
 
     $c->stats->profile(end => "AddDefaults::before");
 };
