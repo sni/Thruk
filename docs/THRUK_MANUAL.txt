@@ -1,0 +1,444 @@
+Thruk Users Guide
+=================
+
+CAUTION: this is not a stable release, do not use on productive systems
+
+== Introduction
+
+Thruk is an independent multibackend monitoring webinterface which currently
+supports Nagios and Icinga as backend using the MKLivestatus addon.  It was
+designed to be a "dropin" replacement. The target is to cover 100% of the
+original features plus additional enhancements for large installations.
+
+Main Features / Advantages
+
+  * multiple backends
+  * faster, no need to parse status.dat for every request
+  * live, no delay between core and gui
+  * independant from monitoring core, can be installed on remote host
+  * clusterable, can be clustered over hosts
+  * better logging, uses log4perl
+  * valid HTML code
+  * no frames ( can be reenabled for better addon integration)
+  * easy to extend (MVC Design)
+  * 100% perl (using catalyst)
+  * paging ( can be disabled or customized )
+
+
+
+== Installation
+
+The clean and proper way to install Thruk is to create a new local
+user and install the missing perl modules with local::lib.
+
+=== Quick Installation Guide for Debian
+
+----
+1.  install debian netinst
+      - minimal inst, create user thruk
+2.  add "contrib non-free" to /etc/apt/sources.list
+3.  #> apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl make gcc git git-core libcatalyst-modules-perl
+4.  #> su - thruk
+5.  %> cd /tmp
+6.  %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
+7.  %> tar zxvf local-lib-1.004009.tar.gz
+8.  %> cd local-lib-1.004009
+9.  %> perl Makefile.PL --bootstrap
+10. %> make install
+11. %> echo 'eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)' >>~/.bashrc
+12. %> . ~/.bashrc
+13. %> cd && git clone http://github.com/sni/Thruk.git
+14. %> cd Thruk
+15. %> perl Makefile.PL && make
+16. %> cp thuk.conf thruk_local.conf && vi thruk_local.conf
+17. %> vi cgi.cfg
+18. %> ./script/thruk_server.pl
+----
+
+
+
+=== Install from Source
+==== Requirements
+
+In order to install the Thruk Monitoring Webinterface from source for Nagios/Icinga you
+will need the following:
+
+- Perl
+- Git Client
+- compiler tools: automake, make, g++, gcc
+- Apache Webserver (optional for fastcgi only)
+
+==== Create New User
+refer to your systems manual on howto add new user.
+This guide uses the following:
+
+-------
+  user:  thruk
+  group: thruk
+-------
+
+
+IMPORTANT: all following steps should be done by the thruk user.
+
+==== Install Local::Lib
+
+
+Follow the steps on http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique
+
+quick guide:
+
+-------
+  %> su - thruk
+  %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
+  %> tar zxf local-lib-1.004009.tar.gz
+  %> cd local-lib-1.004009
+  %> perl Makefile.PL --bootstrap && make install
+-------
+
+[TIP]
+.proxy configuration
+=======
+if you need a proxy configuration, you should answer <no> at this question:
+
+ Would you like me to configure as much as possible automatically? [yes]
+
+Setting a proper http_proxy/ftp_proxy environment should work for the automatic
+configuration.
+=======
+
+
+Add the following line to the thruk users .profile or .bashrc
+
+ eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
+
+logout and login again and verify that your perl env looks like this:
+
+-------
+ %> env | grep perl
+ PERL5LIB=/home/thruk/perl5/lib/perl5:/home/thruk/perl5/lib/perl5/x86_64-linux-gnu-thread-multi
+ MODULEBUILDRC=/home/thruk/perl5/.modulebuildrc
+ PATH=/home/thruk/perl5/bin:/usr/local/bin:/usr/bin:/bin:/usr/games
+ PERL_MM_OPT=INSTALL_BASE=/home/thruk/perl5
+-------
+
+
+==== Install Module::Install
+-------
+  perl -MCPAN -e "install Module::Install::Catalyst"
+-------
+
+
+==== Git Clone Thruk
+
+-------
+    git clone http://github.com/sni/Thruk.git
+    cd Thruk
+    perl Makefile.PL
+-------
+
+press <enter> here:
+-------
+  ==> Auto-install the 35 mandatory module(s) from CPAN? [y]
+-------
+
+then run make
+-------
+    make
+-------
+
+This may take a while, as there are probably several modules missing.
+
+Press <y> at this questions:
+-------
+  Do you want to build the XS Stash module? [y]
+  Do you want to use the XS Stash by default? [y]
+-------
+
+run perl Makefile.PL again to see if all dependecies are now installed properly.
+
+-------
+    perl Makefile.PL
+-------
+
+
+==== Install Livestatus
+
+Refer to http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus
+on how to install livestatus onto your monitoring box.
+
+Basically you have to build the NDO addon and add it to your nagios/icinga.cfg.
+
+-------
+ broker_module=/opt/local/livestatus/livestatus.o /tmp/live.sock
+-------
+
+
+==== Configuration
+
+Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.
+
+Edit "cgi.conf" and adjust settings to your needs.
+
+See the <<Configuration>> section for detailed explaination of configuration options.
+
+
+
+==== Start Server
+After running these steps successfully, you should be able to test your
+installation:
+
+-------
+    ./script/thruk_server.pl
+-------
+
+Open your browser and open http://<your_host>:3000 
+
+
+=== Configure FastCGI Server
+
+start your fcgi server:
+
+-------
+    %>./script/thruk_fastcgi.pl -n 5 \
+                -l /tmp/thruk.socket \
+                -p /tmp/thruk.pid
+-------
+
+
+==== Apache Configuration
+
+use this apache example configuration:
+
+- replace /home/thruk/Thruk with your installation path
+- replace your-web-host.local with your hostname
+- create a /home/thruk/Thruk/htpasswd.users with htpasswd2
+- make sure the /home/thruk/Thruk/logs/ directory exists
+
+-------
+<VirtualHost *:80>
+    ServerName   your-host.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    <Directory />
+        order deny,allow
+        deny from all
+    </Directory>
+
+    <Directory /home/thruk/Thruk/root/>
+        order allow,deny
+        allow from all
+    </Directory>
+
+    # authorization
+    <Location "/">
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Order Allow,Deny
+        Allow from all
+        require valid-user
+    </Location>
+
+    # Load fastcgi module unless already loaded
+    LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
+
+    # fastcgi configuration
+    FastCGIExternalServer /tmp/thruk.fcgi -socket /tmp/thruk.socket -idle-timeout 120
+
+    # Load rewrite module unless already loaded
+    LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
+
+    # rewrite configuration
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/(.*)$ /tmp/thruk.fcgi/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
+</VirtualHost>
+-------
+
+
+
+== Configuration
+
+Configuration is managed mainly in two configuration files.
+
+  * thruk_local.conf
+  * cgi.cfg
+
+=== thruk_local.conf
+
+The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
+The idea is, that the thruk.conf is provided with the packaged defaults and the
+thruk_local.conf is to override these settings where needed.
+
+
+==== documentation_link
+
+This link is used in the side navigation menu as link to the documentation.
+Replace it with whatever your documentation is located. Set it to a blank value
+if you don't want a documentation link in the menu at all.
+
+ex.:
+
+  documentation_link = /thruk/docs/
+
+
+==== cgi_cfg
+
+The path to your cgi.cfg. See <<cgi.cfg>> for details.
+
+ex.:
+
+  cgi_cfg = cgi.cfg
+
+
+==== use_frames
+
+Set wether you want to use a framed navigation or not. With using frames it's
+sometimes easier to include addons.
+
+ex.:
+
+  use_frames = 0
+
+
+==== use_pager
+Using the pager will make huge pages much faster as most people don't want a
+services page with 100.000 services displayed. Can be disabled if you don't
+need it.
+
+ex.:
+
+  use_pager = 1
+
+
+==== default_page_size
+Set the default value for paging. Only used when paging is enabled. Should be a
+value of the paging_steps.
+
+ex.:
+
+  default_page_size = 100
+
+
+==== paging_steps
+Define the single selectable values for paging sizes.
+
+ex.:
+
+  paging_steps        = 100
+  paging_steps        = 500
+  paging_steps        = 1000
+  paging_steps        = 5000
+  paging_steps        = all
+
+
+==== can_submit_commands
+Set here if a contact should be allowed to send commands unless defined for the
+contact itself. This is the default value for all contacts unless the user has
+a can_submit_commands setting in your monitoring configuration.
+
+ex.:
+
+  can_submit_commands = 1
+
+
+==== command_disabled
+Use this to disabled specific commands. Can be use multiple times to disabled
+multiple commands. Use the number from the cmd_typ cgi parameter.
+
+ex.:
+
+  command_disabled = 14
+  command_disabled = 35
+
+
+==== datetime_format
+Default timeformat. Use POSIX format.
+
+ex.:
+
+  datetime_format = %Y-%m-%d  %H:%M:%S
+
+
+==== datetime_format_long
+Default long timeformat.
+
+ex.:
+
+  datetime_format_long = %a %b %e %H:%M:%S %Z %Y
+
+
+==== datetime_format_log
+Default log timeformat.
+
+ex.:
+
+  datetime_format_log = %B %d, %Y  %H
+
+
+==== datetime_format_trends
+Default trends timeformat.
+
+ex.:
+
+  datetime_format_trends = %a %b %e %H:%M:%S %Y
+
+
+==== Component Monitoring::Livestatus
+Enter your livestatus connection settings here. The port is the port from the
+xinetd.conf. You can enter local unix sockets too.
+
+  * keepalive    keeps the connection to livestatus open.
+  * use_threads  access multiple backends with threads. Usually it's faster
+                 without threads except the backends have a very poor connection
+  * peer         enter the peer configuration. You can enter a name for each 
+                 connection.
+
+ex.:
+
+  <Component Monitoring::Livestatus>
+    keepalive   = 1
+    use_threads = 0
+    <peer>
+      name = Local Nagios
+      peer = /tmp/livestatus.socket
+    </peer>
+    <peer>
+      name = External Nagios
+      peer = 172.16.0.1:9999
+    </peer>
+    <peer>
+      name = External Icinga
+      peer = 172.16.0.2:9999
+    </peer>
+  </Component>
+
+
+==== Component Catalyst::Log::Log4perl
+Basically a normal log4perl configuration. You can configure whatever is
+possible in log4perl. Refer to the log4perl manual for detailed information.
+
+ex.:
+
+  <Component Catalyst::Log::Log4perl>
+    conf = log4perl.logger=ALL, ErrorLog, DebugLog
+
+    conf = log4perl.appender.ErrorLog=Log::Dispatch::File
+    conf = log4perl.appender.ErrorLog.filename=logs/error.log
+    conf = log4perl.appender.ErrorLog.mode=append
+    conf = log4perl.appender.ErrorLog.Threshold=ERROR
+    conf = log4perl.appender.ErrorLog.layout=Log::Log4perl::Layout::PatternLayout
+    conf = log4perl.appender.ErrorLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n
+  </Component>
+
+
+
+
+=== cgi.cfg
+
+The cgi.cfg is mainly the same as in nagios itself stripped down some unneeded
+values.
+

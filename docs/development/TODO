@@ -9,6 +9,7 @@ general
     - add backend name to logs
     - showlog performance is still too slow (only firefox)
     - show downtimes on extinfo 1/2 ( at least the downtime comment )
+    - cgi ssi: http://nagios.sourceforge.net/docs/3_0/cgiincludes.html
 
 extinfo:
     - finish performance data on extinfo type 4
