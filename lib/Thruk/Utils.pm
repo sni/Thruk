@@ -308,11 +308,13 @@ sub sort {
     $c->log->debug("ordering by: ".$sortstring) if defined $c;
 
     ## no critic
+    no warnings; # sorting by undef values generates lots of errors
     if(uc $order eq 'ASC') {
         eval '@sorted = sort { '.$sortstring.' } @{$data};';
     } else {
         eval '@sorted = reverse sort { '.$sortstring.' } @{$data};';
     }
+    use warnings;
     ## use critic
 
     $c->stats->profile(end => "Utils::sort()") if defined $c;
