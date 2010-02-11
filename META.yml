@@ -50,7 +50,7 @@ requires:
   LWP: 0
   Log::Dispatch::File: 0
   Monitoring::Availability: 0.10
-  Monitoring::Livestatus: 0.38
+  Monitoring::Livestatus: 0.40
   Moose: 0
   MooseX::MethodAttributes::Inheritable: 0
   MooseX::Role::WithOverloading: 0

@@ -11,6 +11,7 @@ general
     - show downtimes on extinfo 1/2 ( at least the downtime comment )
     - cgi ssi: http://nagios.sourceforge.net/docs/3_0/cgiincludes.html
     - add context sensitive help
+    - add fastcgi init.d script
 
 extinfo:
     - finish performance data on extinfo type 4
