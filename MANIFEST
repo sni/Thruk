@@ -80,6 +80,7 @@ script/thruk_cgi.pl
 script/thruk_create.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
+script/thruk_fastcgi_server.sh
 script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
