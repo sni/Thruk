@@ -63,8 +63,10 @@
       </tr>
     </table>
 
+<div align="center">[% PROCESS _pager.tt %]</div>
+
 [% SET last_hour = '' %]
-[% FOREACH l = logs %]
+[% FOREACH l = data %]
 [% this_hour = date.format(l.time, '%Y-%m-%d  %H') _ ':00' %]
 [% IF this_hour != last_hour %]
   [% SET last_hour = this_hour %]
@@ -128,8 +130,11 @@
 <img align='left' src='/thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width="20" height="20">[[% date.format(l.time, datetime_format) %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 
 [% END %]
-[% IF logs.size and logs.size > 0 %]</div>[% END %]
+
+<div align="center">[% PROCESS _pager.tt %]</div>
+
+[% IF data.size and data.size > 0 %]</div>[% END %]
 <hr>
-<div class="itemTotalsTitle">[% IF logs.size %][% logs.size %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>
+<div class="itemTotalsTitle">[% IF data.size %][% data.size %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>
 
 [% PROCESS _footer.tt %]

@@ -59,7 +59,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     my $sortedlogs = Thruk::Utils::sort($c, $logs, 'time', $order);
 
-    $c->stash->{logs}             = $sortedlogs;
+    Thruk::Utils::page_data($c, $sortedlogs);
+
     $c->stash->{archive}          = $archive;
     $c->stash->{start}            = $start;
     $c->stash->{end}              = $end;
