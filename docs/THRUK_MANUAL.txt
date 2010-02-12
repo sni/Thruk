@@ -23,6 +23,7 @@ Main Features / Advantages
   * easy to extend (MVC Design)
   * 100% perl (using catalyst)
   * paging ( can be disabled or customized )
+  * per user themes
 
 
 
@@ -305,6 +306,16 @@ ex.:
   use_frames = 0
 
 
+==== default_theme
+
+Default theme to use for all users. Must be a valid subdirectory in
+the themes folder.
+
+ex.:
+
+  default_theme = Classic
+
+
 ==== use_pager
 Using the pager will make huge pages much faster as most people don't want a
 services page with 100.000 services displayed. Can be disabled if you don't
@@ -392,11 +403,13 @@ ex.:
 Enter your livestatus connection settings here. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.
 
-  * keepalive    keeps the connection to livestatus open.
-  * use_threads  access multiple backends with threads. Usually it's faster
-                 without threads except the backends have a very poor connection
-  * peer         enter the peer configuration. You can enter a name for each 
-                 connection.
+  * keepalive        keeps the connection to livestatus open.
+  * use_threads      access multiple backends with threads. Usually it's faster
+                     without threads except the backends have a very poor connection
+  * peer             enter the peer configuration. You can enter a name for each 
+                     connection.
+  * connect_timeout  timeout for new connections
+  * query_timeout    timeout for queries
 
 ex.:
 

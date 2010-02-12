@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.27_1  Fri Feb 12 03:59:09 CET 2010
+          - per user themes
+
 0.25_1  Sat Feb  6 17:29:12 CET 2010
           - added trends
           - implemented escape_html_tags

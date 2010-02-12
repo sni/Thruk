@@ -1,0 +1,33 @@
+.summary { background-color: white; color: black; }
+
+.reportRange { text-align: center; font-weight: bold; font-size: 10pt; }
+.reportDuration { text-align: center; font-size: 8pt; }
+.reportTime { text-align: center; font-size: 8pt; }
+
+.reportDataOdd { font-size: 8pt; background-color: #e7e7e7; }
+.reportDataEven { font-size: 8pt; background-color: #f4f2f2; }
+
+.hostUP { 
+  font-size: 9pt; background-color: #88d066; border: 1px solid #777777; }
+.hostDOWN { 
+  font-size: 9pt; background-color: #f88888; border: 1px solid #777777; }
+.hostUNREACHABLE { 
+  font-size: 9pt; background-color: #f88888; border: 1px solid #777777; }
+
+.serviceOK { 
+  font-size: 9pt; background-color: #88d066; border: 1px solid #777777; }
+.serviceWARNING { 
+  font-size: 9pt; background-color: #ffff00; border: 1px solid #777777; }
+.serviceUNKNOWN { 
+  font-size: 9pt; background-color: #ffbb55; border: 1px solid #777777; }
+.serviceCRITICAL { 
+  font-size: 9pt; background-color: #f88888; border: 1px solid #777777; }
+
+.dateSelectTitle { text-align: center; font-weight: bold; font-size: 12pt; }
+.dateSelectSubTitle { font-weight: bold; font-size: 10pt; }
+.dateSelectItem { font-size: 8pt; }
+
+.reportSelectTitle { text-align: center; font-weight: bold; font-size: 12pt; }
+.reportSelectSubTitle { text-align: right; font-size: 10pt; }
+.reportSelectItem { font-size: 8pt; }
+.reportSelectTip { font-size: 8pt; font-style: italic; }

@@ -2,27 +2,60 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <link rel="shortcut icon" href="/thruk/images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <title>[% title %]</title>
-    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/common.css' />
+    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/common.css' />
     [% SET page = 'status' IF page == '' %]
-    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/[% page %].css' />
-    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk.css' />
-    [% UNLESS use_frames %]
-    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes.css' />
-    <!--[if IE 5]>
-    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes_ie_fix.css' />
-    <![endif]-->
-    <!--[if IE 6]>
-    <link rel='stylesheet' type='text/css' href='/thruk/stylesheets/thruk_noframes_ie_fix.css' />
-    <![endif]-->
+    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% page %].css' />
+    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk.css' />
 
-    [% IF css %]<link href="[% css %]" rel="stylesheet" type="text/css">[% END %]
+    [% UNLESS use_frames %]
+      <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk_noframes.css' />
+      <!--[if IE 5]>
+      <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+      <![endif]-->
+      <!--[if IE 6]>
+      <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+      <![endif]-->
+    [% END %]
+
+    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
+    <script type="text/javascript" src="/thruk/javascript/thruk.js"></script>
     [% IF js %]<script type="text/javascript" src="[% js %]"></script>[% END %]
 
-    [% END %]
+    [% PROCESS extra_headers.tt %]
+
   </head>
   <body class='[% page %]' id='[% page %]'>
+  <a href="javascript:togglePreferencePane('[% theme %]')"><img src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
+  <div class="pref_pane" id="pref_pane">
+    <form action="[% c.uri %]" method="GET">
+    <table class="pref_pane" border=1 width="300">
+      <tr>
+        <td>
+          <table>
+            <tr>
+              <td>Theme:</td>
+              <td>
+                <select name="theme" id="pref_theme">
+                  [% FOR t = themes %]
+                  <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
+                  [% END %]
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>
+                <input type="button" name="submit" value="ok" onClick="prefSubmit('[% c.uri %]')">
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    </form>
+  </div>
   [% UNLESS use_frames %]
   <div class="navbar">
     [% PROCESS side.tt %]

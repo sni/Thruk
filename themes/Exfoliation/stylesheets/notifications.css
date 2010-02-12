@@ -1,0 +1,37 @@
+.notifications { background-color: white; color: black; }
+
+TABLE.notifications { 
+  padding: 0;
+  margin: 0;
+}
+TH.notifications { 
+  font-size: 9pt;
+  text-align: left;
+  padding: 0 3px 0 3px;
+  border-bottom: 1px solid #777777;
+  color: #333333;
+}
+.notificationsOdd {
+  font-size: 8pt;
+  background-color: #e7e7e7;
+}
+.notificationsEven {
+  font-size: 8pt;
+  background-color: #f4f2f2;
+}
+
+/* these are dark colors */
+.notificationsOK { background-color: #88d066; border: 1px solid #777777; }
+.notificationsUNKNOWN { background-color: #ffbb55; border: 1px solid #777777; }
+.notificationsWARNING { background-color: #ffff00; border: 1px solid #777777; }
+.notificationsCRITICAL { background-color: #f88888; border: 1px solid #777777; }
+.notificationsACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; }
+.notificationsCUSTOM { background-color: #778899; border: 1px solid #777777; }
+
+/* these are dark colors */
+.notificationsHOSTUP { background-color: #88d066; border: 1px solid #777777; }
+.notificationsHOSTDOWN { background-color: #f88888; border: 1px solid #777777; }
+.notificationsHOSTUNREACHABLE { background-color: #f88888; border: 1px solid #777777; }
+.notificationsHOSTACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; }
+.notificationsHOSTCUSTOM { background-color: #778899; border: 1px solid #777777; }
+

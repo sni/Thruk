@@ -47,7 +47,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem'>
                 Previous Day<br>
-                <a href='history.cgi?archive=[% archive + 1 %][% link %]'><img src='/thruk/images/left.gif' border="0" alt='Previous Day' title='Previous Day' width="36" height="32"></a>
+                <a href='history.cgi?archive=[% archive + 1 %][% link %]'><img src='/thruk/themes/[% theme %]/images/left.gif' border="0" alt='Previous Day' title='Previous Day' width="36" height="32"></a>
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
@@ -64,10 +64,10 @@
               [% IF archive >= 1 %]
               <td align="center" valign="middle" class='navBoxItem'>
                 Next Day<br>
-                <a href='history.cgi?archive=[% archive - 1 %][% link %]'><img src='/thruk/images/right.gif' border="0" alt='Next Day' title='Next Day' width="36" height="32"></a>
+                <a href='history.cgi?archive=[% archive - 1 %][% link %]'><img src='/thruk/themes/[% theme %]/images/right.gif' border="0" alt='Next Day' title='Next Day' width="36" height="32"></a>
               </td>
               [% ELSE %]
-              <td><img src='/thruk/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
+              <td><img src='/thruk/themes/[% theme %]/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
               [% END %]
             </tr>
           </table><br>
@@ -131,7 +131,7 @@
             </table>
           </form>
           [% IF show_context_help %]
-          <br><a href='/thruk/docs/history' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          <br><a href='/thruk/docs/history' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>
@@ -205,7 +205,7 @@
 [% ELSIF l.type.search('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
 [% ELSE                                              %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% END %]
-<img align='left' src='/thruk/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width="20" height="20">[[% date.format(l.time, datetime_format) %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
+<img align='left' src='/thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width="20" height="20">[[% date.format(l.time, datetime_format) %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 [% END %]
 [% IF logs.size and logs.size > 0 %]</div>[% END %]
 

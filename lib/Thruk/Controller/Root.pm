@@ -61,6 +61,16 @@ sub begin : Private {
     $c->stash->{'datetime_format_long'} = Thruk->config->{'datetime_format_long'};
     $c->stash->{'datetime_format_log'}  = Thruk->config->{'datetime_format_log'};
 
+    # which theme?
+    my $theme = Thruk->config->{'default_theme'};
+    if(defined $c->request->cookie('thruk_theme')) {
+        my $theme_cookie = $c->request->cookie('thruk_theme');
+        $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme, $c->config->{'themes'};
+        $c->log->debug("Set theme: '".$theme."' by cookie");
+    }
+    $c->stash->{additional_template_paths} = [ $c->config->{root}.'/../themes/'.$theme.'/templates' ];
+    $c->stash->{'theme'}                   = $theme;
+
     return 1;
 }
 

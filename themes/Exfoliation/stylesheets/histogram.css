@@ -1,0 +1,13 @@
+.histogram { background-color: white; color: black; }
+
+.helpfulHints { text-align: center; font-size: 10pt; }
+
+.reportRange { text-align: center; font-weight: bold; font-size: 10pt; }
+.reportDuration { text-align: center; font-size: 8pt; }
+.reportTime { text-align: center; font-size: 8pt; }
+
+.reportSelectTitle { text-align: center; font-weight: bold; font-size: 12pt; }
+.reportSelectSubTitle { text-align: right; font-size: 10pt; }
+.reportSelectItem { font-size: 8pt; }
+
+

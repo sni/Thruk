@@ -66,7 +66,6 @@ general:
     - add multiple notes url or action urls, maybe add an "_html" cust var
     - add ability to display contacts for machine
     - uc,lc option for auth user -> monitoring
-    - selectable themes
 
 reports:
     - generate long running reports in an extra process

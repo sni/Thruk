@@ -31,7 +31,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem'>
                 Previous Day<br>
-                <a href='notifications.cgi?[% link %]&amp;archive=[% archive + 1 %]'><img src='/thruk/images/left.gif' border="0" alt='Previous Day' title='Previous Day' width="36" height="32"></a>
+                <a href='notifications.cgi?[% link %]&amp;archive=[% archive + 1 %]'><img src='/thruk/themes/[% theme %]/images/left.gif' border="0" alt='Previous Day' title='Previous Day' width="36" height="32"></a>
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
@@ -48,10 +48,10 @@
               [% IF archive >= 1 %]
               <td align="center" valign="middle" class='navBoxItem'>
                 Next Day<br>
-                <a href='notifications.cgi?[% link %]&amp;archive=[% archive - 1 %]'><img src='/thruk/images/right.gif' border="0" alt='Next Day' title='Next Day' width="36" height="32"></a>
+                <a href='notifications.cgi?[% link %]&amp;archive=[% archive - 1 %]'><img src='/thruk/themes/[% theme %]/images/right.gif' border="0" alt='Next Day' title='Next Day' width="36" height="32"></a>
               </td>
               [% ELSE %]
-              <td><img src='/thruk/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
+              <td><img src='/thruk/themes/[% theme %]/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
               [% END %]
             </tr>
           </table>
@@ -109,7 +109,7 @@
             </tr>
           </table>
           [% IF show_context_help %]
-          <br><a href='/thruk/docs/notifications' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          <br><a href='/thruk/docs/notifications' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>

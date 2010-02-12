@@ -1,0 +1,31 @@
+.cmd { background-color: white;  color: black; }
+
+.cmdType {
+  font-size: 10pt;
+  font-weight: bold;
+  text-align: center;
+  color: #aa0000;
+}
+
+.commandDescription {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #f4f2f2;
+  border: 1px solid #d0d0d0;
+  margin: 4 0 0 0;
+  padding: 4 4 4 4;
+}
+
+.descriptionTitle {
+  font-size: 10pt;
+  text-align: center;
+  font-weight: bold;
+}
+
+.infoMessage {
+  font-size: 9pt;
+  margin: 60 20% 0 20%;
+  padding: 5 5 5 5;
+  background-color: #ddddaa;
+  border: 1px solid #888888;
+}

@@ -1,0 +1,32 @@
+
+.outages { font-family: arial,serif; background-color: #fff; color: #000; font-size: 10pt; }
+
+a { color: #6e7475;  text-decoration: none; }
+a:hover { color: #000; }
+table { width: 100% }
+th { text-align: left; padding: 0 5px;  border: 0; }
+td { font-size: 8pt; border: 0; }
+
+.errorMessage { text-align: center; color: #ff3300; font-weight: bold; font-size: 10pt; }
+.errorDescription { text-align: center; font-weight: bold; font-size: 10pt; }
+.warningMessage { text-align: center; color: #ff3300; font-weight: bold; font-size: 10pt; }
+.infoMessage { text-align: center; color: #ff3300; font-weight: bold; }
+
+.infoBox { color: #000; padding: 2; border: 0; }
+.infoBoxTitle { font-size: 10pt; font-weight: bold; color: #000; }
+.infoBoxBadProcStatus { color: #ff3300; }
+a.homepageURL:Hover { color: #ff3300; }
+
+.itemTotalsTitle { font-size: 8pt; text-align: center; }
+
+.dataTitle { text-align: center; font-weight: bold; font-size: 10pt; margin-bottom: 15px; }
+
+table.data { background-color: #fff; padding: 2; }
+th.data { text-align: left; font-size: 10pt; background-color: #707677; color: #fff; }
+.dataOdd { background-color: #ededed; }
+.dataEven { background-color: #e9e9e9; }
+
+.hostUP { background-color: #00cc33; font-weight: bold; }
+.hostDOWN { background-color: #ff3300; font-weight: bold; }
+.hostUNREACHABLE { background-color: #bf44b2; font-weight: bold; }
+

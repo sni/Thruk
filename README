@@ -14,17 +14,18 @@ all documentation is under docs/
 see docs/INSTALL on howto install thruk
 
 
+Main Features / Advantages
+--------------------------
 
-Main Advantages
----------------
- - multiple backends
- - faster, no need to parse status.dat for every request
- - live, no delay between core and gui
- - independant from monitoring core, can be installed on remote host
- - clusterable, can be clustered over hosts
- - better logging, uses log4perl
- - valid HTML code
- - no frames ( can be reenabled for better addon integration)
- - easy to extend (MVC Design)
- - paging ( can be disabled or customized )
-
+  * multiple backends
+  * faster, no need to parse status.dat for every request
+  * live, no delay between core and gui
+  * independant from monitoring core, can be installed on remote host
+  * clusterable, can be clustered over hosts
+  * better logging, uses log4perl
+  * valid HTML code
+  * no frames ( can be reenabled for better addon integration)
+  * easy to extend (MVC Design)
+  * 100% perl (using catalyst)
+  * paging ( can be disabled or customized )
+  * per user themes

@@ -9,7 +9,7 @@
         <td align="center" valign="middle" width="33%"></td>
         <td align="right" valign="bottom" width="33%">
           [% IF show_context_help %]
-          <br><a href='/thruk/docs/extinfo_6' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          <br><a href='/thruk/docs/extinfo_6' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>
@@ -19,7 +19,7 @@
 
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Host Downtime</div>
-    <div class='comment'><img src='/thruk/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
+    <div class='comment'><img src='/thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
@@ -49,7 +49,7 @@
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+          <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
         </tr>
         [% END %]
       </table>
@@ -58,7 +58,7 @@
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtime</div>
-    <div class='comment'><img src='/thruk/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
+    <div class='comment'><img src='/thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
@@ -90,7 +90,7 @@
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+          <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
         </tr>
         [% END %]
       </table>

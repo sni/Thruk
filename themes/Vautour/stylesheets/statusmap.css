@@ -1,0 +1,30 @@
+
+.statusmap { font-family: arial,serif; font-size: 8pt; background-color: #fff; color: #000; }
+
+a { color: #6e7475; text-decoration: none; }
+a:hover { color: #000; }
+th { text-align: left; padding: 0 5px; border: 0; }
+td { font-size: 8pt; border: 0; }
+
+.errorMessage { text-align: center; color: #ff3300; font-weight: bold; font-size: 10pt; }
+.errorDescription { text-align: center; font-weight: bold; font-size: 10pt; }
+.warningMessage { text-align: center; color: #ff3300; font-weight: bold; font-size: 10pt; }
+
+.infoBox { color: #000; padding: 2; border: 0;  }
+.infoBoxTitle { font-size: 10pt; font-weight: bold; color: #000; }
+.infoBoxBadProcStatus { color: #ff3300; }
+a.homepageURL:Hover { font-family: arial,serif; color: #ff3300; }
+
+.linkBox { border: 0; }
+table.linkBox { margin-top: 20px; }
+td.linkBox a { margin-left: 5px; padding-left: 10px; background: url(../../images/interface/menu_li1.gif) 0 0.35em no-repeat; }
+td.linkBox a:hover { background: url(../../images/interface/menu_li2.gif) 0 0.35em no-repeat; }
+
+.optBox { font-size: 10pt; font-weight: bold; }
+
+.imageInfo { font-weight: bold; text-align: center; }
+
+.zoomTitle { font-size: 10pt; font-weight: bold; }
+
+.popupText { font-weight: bold; }
+

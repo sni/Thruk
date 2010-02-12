@@ -1,0 +1,409 @@
+/* Nagios Neat: A pure CSS solution for a drab Nagios */
+/* Release 001 - jacob.laack@alegent.org */
+/* status.css */
+
+BODY.status {
+ font-family: "Arial", "Helvetica", sans-serif;
+}
+BODY.status P {
+ margin: 0;
+ padding: 0;
+}
+BODY.status TABLE {
+ border-spacing: 0;
+}
+
+/* host and service total tables shown in upper right corner */
+DIV.hostTotals, DIV.serviceTotals {
+ background-image: url("images/tableheader.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ font-weight: bold;
+ font-size: 1em;
+ margin-bottom: 0.3em;
+ border-right: 1px solid #ddd;
+}
+TABLE.hostTotals, TABLE.serviceTotals {
+ width: 100%;
+ margin-bottom: 0.3em;
+}
+TABLE.hostTotals TH, TABLE.serviceTotals TH {
+ font-size: 0.8em;
+ text-align: center;
+ border-right: 1px solid #ddd;
+ padding: 0.1em 0.5em 0.1em 0.5em;
+}
+TABLE.hostTotals TD, TABLE.serviceTotals TD {
+ font-size: 0.7em;
+ text-align: center;
+ padding: 0.1em 0.5em 0.1em 0.5em;
+}
+TH.hostTotals, TH.serviceTotals {
+ background-image: url("images/tablesubheader.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ text-align: center;
+ font-size: 0.8em;
+ padding: 0.1em 0.2em 0.1em 0.2em;
+}
+
+TD.hostTotals, TD.serviceTotals {
+ background-color: #F8F8F8;
+}
+TD.hostTotalsUP, TD.serviceTotalsOK {
+ color: #669866;
+ background-color: #a7ffa7;
+ background-image: url("images/gradShortVertGreen.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+}
+TD.hostTotalsDOWN, TD.hostTotalsUNREACHABLE, TD.serviceTotalsCRITICAL {
+ color: #fff;
+ background-color: #ff0000;
+ background-image: url("images/gradShortVertRed.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ font-weight: bold;
+}
+TD.hostTotalsPENDING, TD.serviceTotalsPENDING {
+ color: #fff;
+ background-color: #fafafa;
+ background-image: url("images/gradShortVertGray.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+}
+TD.serviceTotalsWARNING {
+ color: #fff;
+ background-color: #fcff01;
+ background-image: url("images/gradShortVertYellow.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ font-weight: bold;
+}
+TD.hostTotalsPROBLEMS, TD.serviceTotalsPROBLEMS, TD.serviceTotalsUNKNOWN {
+ color: #fff;
+ background-color: #ffae01;
+ background-image: url("images/gradShortVertOrange.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ font-weight: bold;
+}
+
+A.hostTotals, A.hostTotals:visited, A.serviceTotals, A.serviceTotals:visited {
+ color: #fff;
+}
+
+/* page title in the middle of the page */
+DIV.statusTitle {
+ text-align: center;
+ font-weight: bold;
+ font-size: 1em;
+ margin-top: 1em;
+}
+
+/* small subtitle showing what fields the page are sorted on */
+DIV.statusSort {
+ font-size: 0.7em;
+}
+
+/* status styles */
+TABLE.status TD {
+ padding: 0 0.2em 0 0.2em;
+ font-size: 0.7em;
+}
+TABLE.status TD TD {
+ padding: 0;
+}
+TABLE.status TH.status {
+ background-image: url("images/tableheader.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-right: solid 1px #ddd;
+ font-size: 0.8em;
+ padding: 0.2em;
+ white-space: nowrap;
+}
+TABLE.status TH.status IMG {
+ vertical-align: middle;
+}
+
+TD.statusOdd {
+ background-color: #EEE;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusEven {
+ background-color: #FFF;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusEven TD, TD.statusOdd TD {
+ background: none;
+ border: none;
+}
+
+/* service status styles */
+TD.statusPENDING TD, TD.statusOK TD, TD.statusRECOVERY TD, TD.statusUNKNOWN TD, TD.statusWARNING TD, TD.statusCRITICAL TD {
+/* not sure if this exists */
+ border: double 3px red;
+}
+
+TD.statusOK, A.statusOK, TD.statusRECOVERY, A.statusRECOVERY {
+ color: #669866;
+ background-color: #a7ffa7;
+ background-image: url("images/gradShortVertGreen.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusOK A, TD.statusRECOVERY A { color: #479048; }
+
+TD.statusPENDING, A.statusPENDING {
+ color: #fff;
+ background-color: #fafafa;
+ background-image: url("images/gradShortVertGray.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+
+TD.statusUNKNOWN, A.statusUNKNOWN {
+ color: #fff;
+ background-color: #ffae01;
+ background-image: url("images/gradShortVertOrange.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+
+TD.statusWARNING, A.statusWARNING {
+ color: #fff;
+ background-color: #fcff01;
+ background-image: url("images/gradShortVertYellow.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+
+TD.statusCRITICAL, A.statusCRITICAL {
+ color: #fff;
+ background-color: #ff0000;
+ background-image: url("images/gradShortVertRed.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusPENDING A, TD.statusUNKNOWN A, TD.statusWARNING A, TD.statusCRITICAL A { color: #fff; }
+
+/* host status styles */
+TD.statusHOSTPENDING TD, TD.statusHOSTUP TD, TD.statusHOSTDOWN TD, TD.statusHOSTDOWNACK TD, TD.statusHOSTDOWNSCHED TD, TD.statusHOSTUNREACHALBE TD, TD.statusHOSTUNREACHABLEACK TD, TD.statusHOSTUNREACHABLESCHED TD {
+ border: none;
+ background: none;
+}
+
+TD.statusHOSTPENDING {
+ color: #005b0b;
+ background-color: #01ff1f;
+ background-image: url("images/gradShortVertGray.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusHOSTPENDING A { color: #666; }
+
+TD.statusHOSTUP {
+ color: #669866;
+ background-color: #fafafa;
+ background-image: url("images/gradShortVertGreen.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusHOSTUP A { color: #0f4d00; }
+
+TD.statusHOSTDOWN, TD.statusHOSTDOWNACK, TD.statusHOSTDOWNSCHED, TD.statusHOSTUNREACHABLE, TD.statusHOSTUNREACHABLEACK, TD.statusHOSTUNREACHABLESCHED {
+ color: #fff;
+ background-color: #ff0000;
+ background-image: url("images/gradShortVertRed.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusHOSTDOWN A, TD.statusHOSTDOWNACK A, TD.statusHOSTDOWNSCHED A, TD.statusHOSTUNREACHABLE A, TD.statusHOSTUNREACHABLEACK A, TD.statusHOSTUNREACHABLESCHED A { color: #fff; }
+
+/* status backgrounds */
+TD.statusBGUNKNOWN TD, TD.statusBGUNKNOWNACK TD, TD.statusBGUNKNOWNSCHED TD, TD.statusBGWARNING TD, TD.statusBGWARNINGACK TD, TD.statusBGWARNINGSCHED TD, TD.statusBGCRITICAL TD, TD.statusBGCRITICALACK TD, TD.statusBGCRITICALSCHED TD, TD.statusBGDOWN TD, TD.statusBGDOWNACK TD, TD.statusBGDOWNSCHED TD, TD.statusBGUNREACHABLE TD, TD.statusBGUNREACHABLEACK TD, TD.statusBGUNREACHABLESCHED TD {
+ border: none;
+ padding: 0;
+ margin: 0;
+}
+
+TD.statusBGUNKNOWN, TD.statusBGUNKNOWNACK, TD.statusBGUNKNOWNSCHED {
+ padding: 0;
+ margin: 0;
+ font-size: 1em;
+ background-color: #FFDA9F;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusBGWARNING, TD.statusBGWARNINGACK, TD.statusBGWARNINGSCHED {
+ padding: 0;
+ margin: 0;
+ font-size: 1em;
+ background-color: #FEFFD6;
+ border-bottom: solid 1px #ddd;
+}
+TD.statusBGCRITICAL, TD.statusBGCRITICALACK, TD.statusBGCRITICALSCHED, TD.statusBGDOWN, TD.statusBGDOWNACK, TD.statusBGDOWNSCHED, TD.statusBGUNREACHABLE, TD.statusBGUNREACHABLEACK, TD.statusBGUNREACHABLESCHED {
+ padding: 0;
+ margin: 0;
+ font-size: 1em;
+ background-color: #FFD6D6;
+ border-bottom: solid 1px #ddd;
+}
+
+/* service statuses displayed in overviews, summaries and grids */
+TD.miniStatusPENDING A {
+ color: #005b0b;
+ background-color: #01ff1f;
+ background-image: url("images/gradShortVertGray.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ text-align: center;
+ display: block;
+ width: 8em;
+ float: left;
+ clear: right;
+}
+TD.miniStatusOK A {
+ color: #479048;
+ background-color: #fafafa;
+ background-image: url("images/gradShortVertGreen.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ text-align: center;
+ display: block;
+ width: 8em;
+ float: left;
+ clear: right;
+}
+TD.miniStatusUNKNOWN A {
+ color: #fff
+ background-color: #ffae01;
+ background-image: url("images/gradShortVertOrange.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ text-align: center;
+ display: block;
+ width: 8em;
+ float: left;
+ clear: right;
+}
+TD.miniStatusWARNING A {
+ color: #fff;
+ background-color: #fcff01;
+ background-image: url("images/gradShortVertYellow.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ border-bottom: solid 1px #ddd;
+ text-align: center;
+ display: block;
+ width: 8em;
+ float: left;
+ clear: right;
+}
+TD.miniStatusCRITICAL A {
+ color: #fff;
+ background-color: #ff0000;
+ background-image: url("images/gradShortVertRed.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ text-align: center;
+ display: block;
+ width: 8em;
+ float: left;
+ clear: right;
+}
+
+/* host statuses displayed in overviews, summaries and grids */
+TD.miniStatusUP A {
+ color: #479048;
+ background-color: #fafafa;
+ background-image: url("images/gradShortVertGreen.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ text-align: center;
+ display: block;
+ width: 8em;
+}
+TD.miniStatusDOWN A, TD.miniStatusUNREACHABLE A {
+ color: #fff;
+ background-color: #ff0000;
+ background-image: url("images/gradShortVertRed.png");
+ background-position: bottom left;
+ background-repeat: repeat-x;
+ text-align: center;
+ display: block;
+ width: 8em;
+}
+
+/* unhandled host statuses displayed in overviews, summaries and grids */
+.hostImportantProblem {
+ text-align: left;
+ background-color: #ff0000;
+ color: black;
+ text-decoration: blink;
+}
+.hostUnimportantProblem {
+ text-align: left;
+ background-color: #ffcccc;
+ color: black;
+}
+
+/* unhandled service statuses displayed in overviews, summaries and grids */
+.serviceImportantProblem {
+ text-align: left;
+ background-color: #ff0000;
+ color: black;
+ text-decoration: blink;
+}
+.serviceUnimportantProblem {
+ text-align: left;
+ background-color: #ffcccc;
+ color: black;
+}
+
+/* small section at the bottom of the page that shows the number of items displayed */
+DIV.itemTotalsTitle {
+ font-size: 0.7em; 
+ text-align: center;
+}
+
+
+/* these styles change how Nagios looks, hopefully for the better, when it's printed */
+@media print {
+  TABLE.status TH.status {
+   border: none;
+   border-bottom: solid 0.5pt black;
+   background: none;
+  }
+  TABLE.status TH.status IMG {
+   display: none;
+  }
+  DIV.hostTotals, DIV.serviceTotals, TABLE.hostTotals TH.hostTotals, TABLE.serviceTotals TH.serviceTotals {
+   border: none;
+   border-bottom: solid 0.5pt black;
+   color: #000;
+  }
+  TABLE.hostTotals, TABLE.serviceTotals {
+   margin-left: 5pt;
+  }
+  DIV.hostTotals, DIV.serviceTotals {
+   font-size: 0.9em;
+   margin-left: 5pt;
+  }
+  TH.hostTotals A, TH.serviceTotals A {
+   font-size: 0.8em;
+  }
+  TABLE.hostTotals TH, TABLE.serviceTotals TH, TABLE.hostTotals TD, TABLE.serviceTotals TD, TH.hostTotals, TH.serviceTotals, TD.hostTotals, TD.serviceTotals, TD.hostTotalsUP, TD.serviceTotalsOK, TD.hostTotalsDOWN, TD.hostTotalsUNREACHABLE, TD.serviceTotalsCRITICAL, TD.hostTotalsPENDING, TD.serviceTotalsPENDING, TD.serviceTotalsWARNING, TD.hostTotalsPROBLEMS, TD.serviceTotalsPROBLEMS, TD.serviceTotalsUNKNOWN, A.hostTotals, A.hostTotals:visited, A.serviceTotals, A.serviceTotals:visited, TABLE.status TD, TABLE.status TD TD, TABLE.status TH.status, TABLE.status TH.status IMG, TD.statusOdd, TD.statusEven, TD.statusEven TD, TD.statusOdd TD, TD.statusPENDING TD, TD.statusOK TD, TD.statusRECOVERY TD, TD.statusUNKNOWN TD, TD.statusWARNING TD, TD.statusCRITICAL TD, TD.statusOK, A.statusOK, TD.statusRECOVERY, A.statusRECOVERY, TD.statusOK A, TD.statusRECOVERY A, TD.statusPENDING, A.statusPENDING, TD.statusUNKNOWN, A.statusUNKNOWN, TD.statusWARNING, A.statusWARNING, TD.statusCRITICAL, A.statusCRITICAL, TD.statusPENDING A, TD.statusUNKNOWN A, TD.statusWARNING A, TD.statusCRITICAL A, TD.statusHOSTPENDING TD, TD.statusHOSTUP TD, TD.statusHOSTDOWN TD, TD.statusHOSTDOWNACK TD, TD.statusHOSTDOWNSCHED TD, TD.statusHOSTUNREACHALBE TD, TD.statusHOSTUNREACHABLEACK TD, TD.statusHOSTUNREACHABLESCHED TD, TD.statusHOSTPENDING, TD.statusHOSTPENDING A, TD.statusHOSTUP, TD.statusHOSTUP A, TD.statusHOSTDOWN, TD.statusHOSTDOWNACK, TD.statusHOSTDOWNSCHED, TD.statusHOSTUNREACHABLE, TD.statusHOSTUNREACHABLEACK, TD.statusHOSTUNREACHABLESCHED, TD.statusHOSTDOWN A, TD.statusHOSTDOWNACK A, TD.statusHOSTDOWNSCHED A, TD.statusHOSTUNREACHABLE A, TD.statusHOSTUNREACHABLEACK A, TD.statusHOSTUNREACHABLESCHED A, TD.statusBGUNKNOWN TD, TD.statusBGUNKNOWNACK TD, TD.statusBGUNKNOWNSCHED TD, TD.statusBGWARNING TD, TD.statusBGWARNINGACK TD, TD.statusBGWARNINGSCHED TD, TD.statusBGCRITICAL TD, TD.statusBGCRITICALACK TD, TD.statusBGCRITICALSCHED TD, TD.statusBGDOWN TD, TD.statusBGDOWNACK TD, TD.statusBGDOWNSCHED TD, TD.statusBGUNREACHABLE TD, TD.statusBGUNREACHABLEACK TD, TD.statusBGUNREACHABLESCHED TD, TD.statusBGUNKNOWN, TD.statusBGUNKNOWNACK, TD.statusBGUNKNOWNSCHED, TD.statusBGWARNING, TD.statusBGWARNINGACK, TD.statusBGWARNINGSCHED, TD.statusBGCRITICAL, TD.statusBGCRITICALACK, TD.statusBGCRITICALSCHED, TD.statusBGDOWN, TD.statusBGDOWNACK, TD.statusBGDOWNSCHED, TD.statusBGUNREACHABLE, TD.statusBGUNREACHABLEACK, TD.statusBGUNREACHABLESCHED, TD.miniStatusPENDING A, TD.miniStatusOK A, TD.miniStatusUNKNOWN A, TD.miniStatusWARNING A, TD.miniStatusCRITICAL A, TD.miniStatusUP A, TD.miniStatusDOWN A, TD.miniStatusUNREACHABLE A {
+   color: #000;
+   background-image: none;
+   background-color: #FFF;
+  }
+}

@@ -1,0 +1,34 @@
+.avail { background-color: white; color: black; }
+
+.data { font-size: 10pt; }
+
+.hostUP { background-color: #cce8cc; }
+.hostDOWN { background-color: #ffdddd; }
+.hostUNREACHABLE { background-color: #ffdddd; }
+
+.serviceOK { background-color: #cce8cc; }
+.serviceWARNING { background-color: #feffc1; }
+.serviceUNKNOWN { background-color: #ffddaa; }
+.serviceCRITICAL { background-color: #ffdddd; }
+
+table.logEntries { font-size: 9pt; padding: 5 0 0 0; }
+th.logEntries {
+  font-size: 9pt;
+  text-align: left;
+  padding: 0 3px 0 3px;
+  border-bottom: 1px solid #777777;
+  color: #333333;
+}
+.logEntriesOdd { padding: 0 4 0 4; background-color: #e7e7e7; }
+.logEntriesEven { padding: 0 4 0 4; background-color: #f4f2f2; }
+
+.logEntriesOK { background-color: #cce8cc; }
+.logEntriesUNKNOWN { background-color: #ffddaa; }
+.logEntriesWARNING { background-color: #feffc1; }
+.logEntriesCRITICAL { background-color: #ffdddd; }
+.logEntriesUP { background-color: #cce8cc; }
+.logEntriesDOWN { background-color: #ffdddd; }
+.logEntriesUNREACHABLE { background-color: #ffdddd; }
+.logEntriesINDETERMINATE { background-color: #acacac; }
+
+.infoMessage { font-size: 9pt; }

@@ -23,7 +23,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.25_1';
+our $VERSION = '0.27_1';
 
 ###################################################
 # Configure the application.
@@ -37,7 +37,7 @@ our $VERSION = '0.25_1';
 
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'February 06, 2010',
+                    'released'               => 'February 12, 2010',
                     'image_path'             => 'root/thruk/images',
                     'default_view'           => 'TT',
                     'View::TT'               => {
@@ -86,6 +86,19 @@ __PACKAGE__->config('name'                   => 'Thruk',
                         'ignore_extensions' => [ qw/tpl tt tt2/ ],
                     },
 );
+
+###################################################
+# set installed themes
+my $themes_dir = "themes/";
+my @themes;
+opendir(my $dh, $themes_dir) or die "can't opendir '$themes_dir': $!";
+for my $entry (readdir($dh)) {
+    next unless -d $themes_dir."/".$entry;
+    next if $entry eq '.' or $entry eq '..';
+    push @themes, $entry;
+}
+closedir $dh;
+__PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
 ###################################################
 # Start the application

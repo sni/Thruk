@@ -1,0 +1,195 @@
+.status { background-color: white; color: black; }
+
+.itemTotalsTitle { font-size: 8pt; text-align: center; }
+
+TABLE.status {
+  font-size: 8pt;
+  padding: 0 0 10 0;
+}
+TH.status {
+  font-size: 9pt;
+  text-align: left;
+  padding: 0 3px 0 3px;
+  border-bottom: 1px solid #777777;
+  color: #333333;
+}
+DIV.status {
+  font-size: 10pt;
+  text-align: center;
+}
+.statusOdd { font-size: 8pt; background-color: #e7e7e7; line-height: 150%; }
+.statusEven { font-size: 8pt; background-color: #f4f2f2; line-height: 150%; }
+
+.statusPENDING {
+  font-size: 8pt; background-color: #acacac; padding: 0 5 0 5; border: 1px solid #777777; }
+.statusOK {
+  font-size: 8pt; background-color: #88d066; padding: 0 5 0 5; border: 1px solid #777777; }
+.statusRECOVERY {
+  font-size: 8pt; background-color: #88d066; padding: 0 5 0 5; border: 1px solid #777777; }
+.statusUNKNOWN {
+  font-size: 8pt; background-color: #ffbb55; padding: 0 5 0 5; border: 1px solid #777777; }
+.statusWARNING {
+  font-size: 8pt; background-color: #ffff00; padding: 0 5 0 5; border: 1px solid #777777; }
+.statusCRITICAL {
+  font-size: 8pt; background-color: #f88888; padding: 0 5 0 5; border: 1px solid #777777; }
+
+.statusHOSTPENDING { font-size: 8pt; background-color: #acacac; }
+.statusHOSTUP { font-size: 8pt; background-color: #cce8cc; }
+.statusHOSTDOWN { font-size: 8pt; background-color: #ffdddd; }
+.statusHOSTDOWNACK { font-size: 8pt; background-color: #ffdddd; }
+.statusHOSTDOWNSCHED { font-size: 8pt; background-color: #ffdddd; }
+.statusHOSTUNREACHABLE { font-size: 8pt; background-color: #ffdddd; }
+.statusHOSTUNREACHABLEACK { font-size: 8pt; background-color: #ffdddd; }
+.statusHOSTUNREACHABLESCHED { font-size: 8pt; background-color: #ffdddd; }
+
+.statusBGUNKNOWN { font-size: 8pt; background-color: #ffddaa; }
+.statusBGUNKNOWNACK { font-size: 8pt; background-color: #ffddaa; }
+.statusBGUNKNOWNSCHED { font-size: 8pt; background-color: #ffddaa; }
+.statusBGWARNING { font-size: 8pt; background-color: #feffc1; }
+.statusBGWARNINGACK { font-size: 8pt; background-color: #feffc1; }
+.statusBGWARNINGSCHED { font-size: 8pt; background-color: #feffc1; }
+.statusBGCRITICAL { font-size: 8pt; background-color: #ffdddd; }
+.statusBGCRITICALACK { font-size: 8pt; background-color: #ffdddd; }
+.statusBGCRITICALSCHED { font-size: 8pt; background-color: #ffdddd; }
+.statusBGDOWN { font-size: 8pt; background-color: #ffdddd; }
+.statusBGDOWNACK { font-size: 8pt; background-color: #ffdddd; }
+.statusBGDOWNSCHED { font-size: 8pt; background-color: #ffdddd; }
+.statusBGUNREACHABLE { font-size: 8pt; background-color: #ffdddd; }
+.statusBGUNREACHABLEACK { font-size: 8pt; background-color: #ffdddd; }
+.statusBGUNREACHABLESCHED { font-size: 8pt; background-color: #ffdddd; }
+
+DIV.serviceTotals {
+  text-align: center;
+  font-weight: bold;
+  font-size: 10pt;
+}
+TABLE.serviceTotals {
+  font-size: 10pt;
+  font-weight: bold;
+}
+TH.serviceTotals,A.serviceTotals {
+  font-size: 9pt;
+}
+TD.serviceTotals {
+  font-size: 8pt;
+  text-align: center; 
+  background-color: #e0e0e0;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.serviceTotalsOK {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #88d066;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.serviceTotalsWARNING {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #ffff00;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.serviceTotalsUNKNOWN {
+  font-size: 8pt; 
+  text-align: center; 
+  background-color: #ffbb55;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.serviceTotalsCRITICAL {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #f88888;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.serviceTotalsPENDING {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #acacac;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.serviceTotalsPROBLEMS {
+  font-size: 8pt; 
+  text-align: center; 
+  background-color: orange; 
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+
+
+DIV.hostTotals {
+  text-align: center;
+  font-weight: bold;
+  font-size: 10pt; 
+}
+TABLE.hostTotals {
+  font-size: 10pt;
+  font-weight: bold;
+}
+TH.hostTotals,A.hostTotals {
+  font-size: 9pt;
+}
+TD.hostTotals {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #e0e0e0;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.hostTotalsUP {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #88d066;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.hostTotalsDOWN {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #f88888;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.hostTotalsUNREACHABLE {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #f88888;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.hostTotalsPENDING {
+  font-size: 8pt;
+  text-align: center;
+  background-color: #acacac;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+.hostTotalsPROBLEMS {
+  font-size: 8pt;
+  text-align: center;
+  background-color: orange;
+  border: 1px solid #777777;
+  padding: 2 4 2 4;
+}
+
+.miniStatusPENDING {
+  font-size: 8pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusOK {
+  font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusUNKNOWN {
+  font-size: 8pt; text-align: center; background-color: #ffbb55; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusWARNING {
+  font-size: 8pt; text-align: center; background-color: #ffff00; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusCRITICAL {
+  font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5 0 5; }
+
+.miniStatusUP {
+  font-size: 8pt; text-align: center; background-color: #88d066; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusDOWN {
+  font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5 0 5; }
+.miniStatusUNREACHABLE {
+  font-size: 8pt; text-align: center; background-color: #f88888; border: 1px solid #777777; padding: 0 5 0 5; }

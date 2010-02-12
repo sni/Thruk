@@ -1,0 +1,134 @@
+.peerDOWN { width:100px; font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; }
+.hostPENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
+.servicePENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
+.itemTotalsTitle { font-family: arial,serif;  font-size: 8pt;  text-align: center; }
+
+.nav_small_logo { margin: 0px; padding: 0px; }
+
+body.navbar {
+  font-family:arial,verdana,serif;
+  margin: 5px;
+  margin-top: 2px;
+}
+
+/* preferences pane */
+div.pref_pane {
+  width:300px;
+  height:100px;
+  visibility:hidden;
+  position:absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 99;
+  color: black;
+}
+table.pref_pane {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #C4C2C2;
+  border-collapse: separate;
+  background-color: #C4C2C2;
+}
+table.pref_pane > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #C4C2C2;
+  background-color: #C4C2C2;
+}
+
+/* preferences pane */
+img.pref_pane_button {
+  position:absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 100;
+}
+
+/* class to preload images */
+.hidepics {
+  width:0px;
+  height:0px;
+  visibility:hidden;
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 100;
+}
+
+div.navbarsearch form fieldset {
+  border: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+div.navsection {
+  margin:2px 0 8px;
+}
+
+.pager_direct_link {
+  vertical-align:top;
+  font-weight: normal;
+  color: #000000;
+}
+.pager_direct_link_current {
+  vertical-align:top;
+  font-weight: bold;
+  color: #FF6600;
+}
+.pager_input_img {
+  vertical-align:text-bottom;
+}
+
+/* details hover for trends image map */
+div.image_hover {
+  visibility:hidden;
+  z-index:100;
+  position:absolute;
+  top:3px;
+  left:175px;
+}
+table.popupBorder {
+  margin-top: 5px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #ffffcc;
+  border-collapse: separate;
+  background-color: #ffffcc;
+}
+body.trends table.popupBorder > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #ffffcc;
+  background-color: #ffffcc;
+}
+body.trends table.popupText {
+  background-color: #ffffcc;
+  border: none;
+}
+body.trends table.popupText td {
+  background-color: #ffffcc;
+  border: none;
+  vertical-align: top;
+}
+body.trends table.popupText th {
+  background-color: #ffffcc;
+  border: none;
+  text-align: left;
+  text-decoration: underline;
+  min-width: 300px;
+  vertical-align: top;
+}
+
+/* fix for calendar image in commands */
+body.cmd img {
+  vertical-align:text-bottom;
+}

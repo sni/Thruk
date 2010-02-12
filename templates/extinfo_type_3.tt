@@ -9,7 +9,7 @@
         <td align="center" valign="middle" width="33%"></td>
         <td align="right" valign="bottom" width="33%">
           [% IF show_context_help %]
-          <br><a href='/thruk/docs/extinfo_3' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          <br><a href='/thruk/docs/extinfo_3' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>
@@ -22,7 +22,7 @@
     <a name="HOSTCOMMENTS" id="HOSTCOMMENTS"></a>
     <div class='commentTitle'>Host Comments</div>
     <div class='comment'>
-      <img src='/thruk/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a>
+      <img src='/thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a>
     </div><br>
     <div align="center">
       <table border="0" class='comment'>
@@ -52,7 +52,7 @@
           <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% c.id %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% c.id %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF hostcommentscount == 0 %]
@@ -67,7 +67,7 @@
     <br>
     <a name="SERVICECOMMENTS" id="SERVICECOMMENTS"></a>
     <div class='commentTitle'>Service Comments</div>
-    <div class='comment'><img src='/thruk/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div><br>
+    <div class='comment'><img src='/thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div><br>
     <div align="center">
       <table border="0" class='comment'>
         <tr class='comment'>
@@ -97,7 +97,7 @@
           <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% c.id %]'><img src='/thruk/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% c.id %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF servicecommentscount == 0 %]
