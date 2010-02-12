@@ -1,17 +1,16 @@
 Thruk - Monitoring Webinterface
 =============================
 
-Thruk is an independent multibackend monitoring webinterface which
-currently supports Nagios and Icinga as backend using the MKLivestatus
-addon.
-
+Thruk is a multibackend monitoring webinterface which currently
+supports Nagios and Icinga as backend using the MKLivestatus addon.
+It was designed to be a "dropin" replacement. The target is to cover
+100% of the original features plus additional enhancements for large
+installations.
 
 
 DOCS
 ----
 all documentation is under docs/
-
-see docs/INSTALL on howto install thruk
 
 
 Main Features / Advantages
