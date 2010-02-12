@@ -403,7 +403,7 @@ ex.:
 Enter your livestatus connection settings here. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.
 
-  * keepalive        keeps the connection to livestatus open.
+  * keepalive        keeps open the connection to livestatus.
   * use_threads      access multiple backends with threads. Usually it's faster
                      without threads except the backends have a very poor connection
   * peer             enter the peer configuration. You can enter a name for each 

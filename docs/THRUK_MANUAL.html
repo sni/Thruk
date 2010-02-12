@@ -543,6 +543,11 @@ easy to extend (MVC Design)
 paging ( can be disabled or customized )
 </p>
 </li>
+<li>
+<p>
+per user themes
+</p>
+</li>
 </ul></div>
 </div>
 <h2 id="_installation">Installation</h2>
@@ -924,6 +929,14 @@ sometimes easier to include addons.</p></div>
 <div class="content">
 <pre><tt>use_frames = 0</tt></pre>
 </div></div>
+<h4 id="_default_theme">default_theme</h4>
+<div class="para"><p>Default theme to use for all users. Must be a valid subdirectory in
+the themes folder.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>default_theme = Classic</tt></pre>
+</div></div>
 <h4 id="_use_pager">use_pager</h4>
 <div class="para"><p>Using the pager will make huge pages much faster as most people don't want a
 services page with 100.000 services displayed. Can be disabled if you don't
@@ -1004,19 +1017,29 @@ xinetd.conf. You can enter local unix sockets too.</p></div>
 <div class="ilist"><ul>
 <li>
 <p>
-keepalive    keeps the connection to livestatus open.
+keepalive        keeps open the connection to livestatus.
 </p>
 </li>
 <li>
 <p>
-use_threads  access multiple backends with threads. Usually it's faster
-                 without threads except the backends have a very poor connection
+use_threads      access multiple backends with threads. Usually it's faster
+                     without threads except the backends have a very poor connection
 </p>
 </li>
 <li>
 <p>
-peer         enter the peer configuration. You can enter a name for each
-                 connection.
+peer             enter the peer configuration. You can enter a name for each
+                     connection.
+</p>
+</li>
+<li>
+<p>
+connect_timeout  timeout for new connections
+</p>
+</li>
+<li>
+<p>
+query_timeout    timeout for queries
 </p>
 </li>
 </ul></div>
@@ -1194,7 +1217,7 @@ commands.</p></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-02-10 11:28:54 CEST
+Last updated 2010-02-12 04:06:36 CEST
 </div>
 </div>
 </body>
