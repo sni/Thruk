@@ -97,6 +97,7 @@ for my $entry (readdir($dh)) {
     next if $entry eq '.' or $entry eq '..';
     push @themes, $entry;
 }
+@themes = sort @themes;
 closedir $dh;
 __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
