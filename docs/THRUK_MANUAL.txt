@@ -193,7 +193,7 @@ installation:
     ./script/thruk_server.pl
 -------
 
-Open your browser and open http://<your_host>:3000 
+Open your browser and open http://<your_host>:3000
 
 
 === Configure FastCGI Server
@@ -206,18 +206,18 @@ start your fcgi server:
                 -p /tmp/thruk_fastcgi.pid
 -------
 
-you may want to create a custom init.d script (additional modules
-required) with:
--------
-    %> ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid
--------
-
-or copy and adjust paths from:
+you may want to copy the init.d script to /etc/init.d and adjust its paths:
 -------
     %> sudo cp ./script/thruk_fastcgi_server.sh /etc/init.d/thruk_fastcgi_server
     %> vi /etc/init.d/thruk_fastcgi_server
     %> sudo chown root: /etc/init.d/thruk_fastcgi_server
 -------
+
+Or create a custom init.d script (additional modules required) with:
+-------
+    %> ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid
+-------
+
 
 
 ==== Apache Configuration
@@ -420,7 +420,7 @@ xinetd.conf. You can enter local unix sockets too.
   * keepalive        keeps open the connection to livestatus.
   * use_threads      access multiple backends with threads. Usually it's faster
                      without threads except the backends have a very poor connection
-  * peer             enter the peer configuration. You can enter a name for each 
+  * peer             enter the peer configuration. You can enter a name for each
                      connection.
   * connect_timeout  timeout for new connections
   * query_timeout    timeout for queries
@@ -614,4 +614,3 @@ commands.
 ex.:
 
   lock_author_names = 1
-

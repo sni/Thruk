@@ -817,18 +817,17 @@ installation:</p></div>
                 -l /tmp/thruk_fastcgi.socket \
                 -p /tmp/thruk_fastcgi.pid</tt></pre>
 </div></div>
-<div class="para"><p>you may want to create a custom init.d script (additional modules
-required) with:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>    %&gt; ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid</tt></pre>
-</div></div>
-<div class="para"><p>or copy and adjust paths from:</p></div>
+<div class="para"><p>you may want to copy the init.d script to /etc/init.d and adjust its paths:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    %&gt; sudo cp ./script/thruk_fastcgi_server.sh /etc/init.d/thruk_fastcgi_server
     %&gt; vi /etc/init.d/thruk_fastcgi_server
     %&gt; sudo chown root: /etc/init.d/thruk_fastcgi_server</tt></pre>
+</div></div>
+<div class="para"><p>Or create a custom init.d script (additional modules required) with:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>    %&gt; ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid</tt></pre>
 </div></div>
 <h4 id="_apache_configuration">Apache Configuration</h4>
 <div class="para"><p>use this apache example configuration:</p></div>
@@ -1231,7 +1230,7 @@ commands.</p></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-02-14 20:44:15 CEST
+Last updated 2010-02-14 22:34:40 CEST
 </div>
 </div>
 </body>
