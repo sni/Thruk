@@ -1,33 +1,41 @@
-/* exfoliation: a nagios makeover by mwall      */
-/* version: 0.4                                 */
-/*   thanks to jacob.laack for nagiosneat       */
-/*   thanks to nagios authors for a solid base  */
+/* exfoliation: a nagios makeover                                          */
+/* version: 0.5                                                            */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
+
+/*   thanks to jacob.laack for nagiosneat           */
+/*   thanks to nagios authors for a solid base      */
 
 /* these are reference colors for the color scheme:
 
-             color    dark    light   border
-   OK:       green    88d066  cce8cc  777777
-   WARNING:  yellow   ffff00  feffc1  777777
-   CRITICAL: red      f88888  ffdddd  777777
-   PENDING:  grey     acacac  fefefe  777777
-   UNKNOWN:  orange   ffbb55  ffddaa  777777
-   PROBLEMS: orange
+                color    dark    light   border
+           OK:  green    88d066  cce8cc  777777
+      WARNING:  yellow   ffff00  feffc1  777777
+     CRITICAL:  red      f88888  ffdddd  777777
+      PENDING:  grey     acacac  fefefe  777777
+      UNKNOWN:  orange   ffbb55  ffddaa  777777
+  UNREACHABLE:  orange   ffbb55  ffddaa  777777
+INDETERMINATE:  purple           ddccff  777777
+     PROBLEMS:  blue             aaccff  777777
 
-   ACK:               aaaaaa
-   CUSTOM:            778899
+          ACK:  aaaaaa
+       CUSTOM:  778899
 
-   important: lighter grey
-   not important: darker grey
+      important: lighter grey
+  not important: darker grey
 
    table header: d0d0d0
-   odd rows: e7e7e7
-   even rows: f4f2f2
+       odd rows: e7e7e7
+      even rows: f4f2f2
 
+   titles: 12pt
    body: 10pt
-   headings: 9pt
-   hosts, services: 9pt
-   events, notifications: 8pt
-   cmds: 9pt
+   table headings: 9pt
+   controls: 9pt
+   data in tables: 8pt or 9pt
 */
 
 body {
@@ -84,9 +92,9 @@ div.navsection {
 div.navsectiontitle {
   font-size: 9pt;
   font-weight: bold;
-  border:1px solid #dee7c6;
   padding: 2px;
-  background-color: #eeeeee;
+  background-color: #efefef;
+  border:1px solid #dddddd;
 }
 div.navsectionlinks {
   margin: 3px 0 0 0;
@@ -219,141 +227,46 @@ ul.navsectionlinks li ul li ul {
 
 
 
-table.infoBox {
-  width: 100%;
-}
-td.infoBox {
-  font-size: 8pt;
-  padding: 0 0 1em 0; 
-  white-space: nowrap;
-}
-div.infoBoxTitle {
-  font-size: 10pt; font-weight: bold;
-}
-div.infoBoxBadProcStatus {
-  font-size: 8pt;
-  font-weight: bold;
-  color: red;
-}
+table.infoBox { width: 100%; }
+td.infoBox { font-size: 8pt; padding: 0 0 1em 0; white-space: nowrap; }
+div.infoBoxTitle { font-size: 10pt; font-weight: bold; }
+div.infoBoxBadProcStatus { font-size: 8pt; font-weight: bold; color: red; }
 
+.linkBox { font-size: 8pt; padding: 1; }
+table.linkBox td { white-space: nowrap; }
 
-.linkBox {
-  font-size: 8pt;
-  padding: 1;
-}
-table.linkBox td {
-  white-space: nowrap;
-}
+.filter      { font-size: 8pt; padding: 1; }
+.filterTitle { font-size: 9pt; font-weight: bold; }
+.filterName  { font-size: 8pt; text-align: right; font-weight: bold; }
+.filterValue { font-size: 8pt; }
 
+.errorDescription { font-size: 10pt; text-align: center; font-weight: bold; }
+.errorMessage     { font-size: 10pt; text-align: center; font-weight: bold; color: red; }
+.warningMessage   { font-size: 10pt; text-align: center; font-weight: bold; color: red; }
 
-.filter {
-  font-size: 8pt;
-  padding: 1;
-}
-.filterTitle {
-  font-size: 9pt;
-  font-weight: bold;
-}
-.filterName {
-  font-size: 8pt;
-}
-.filterValue {
-  font-size: 8pt;
-}
+.statusTitle { text-align: center; font-weight: bold; font-size: 12pt; white-space: nowrap; }
+.statusSort  { font-size: 8pt; }
 
-.errorMessage { text-align: center;  color: red;  font-weight: bold;  font-size: 12pt; }
-.errorDescription { text-align: center;  font-weight: bold;  font-size: 12pt; }
-.warningMessage { text-align: center;  color: red;  font-weight: bold;  font-size: 10pt; }
+table.data    { padding: 0; }
+th.data       { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
+.dataOdd      { font-size: 8pt; background-color: #e7e7e7; padding: 0 4 0 4; }
+.dataEven     { font-size: 8pt; background-color: #f4f2f2; padding: 0 4 0 4; }
+.dataTitle    { font-size: 12pt; text-align: center; font-weight: bold; }
+.dataSubTitle { font-size: 10pt; text-align: center; font-weight: bold; }
 
-.statusTitle { 
-  text-align: center;
-  font-weight: bold;
-  font-size: 12pt;
-  white-space: nowrap;
-}
-.statusSort {
-  font-size: 8pt;
-}
+.optBox             { font-size:  9pt; white-space: nowrap; padding: 2 0 0 0; }
+.optBoxTitle        { font-size: 10pt; font-weight: bold; text-align: center; }
+.optBoxRequiredItem { font-size:  9pt; text-align: right; padding: 0 5 0 5; color: red; }
+.optBoxItem         { font-size:  9pt; text-align: right; padding: 0 5 0 5; }
+.optBoxValue        { font-size:  9pt; }
 
-TABLE.data {
-  padding: 0;
-}
-TH.data {
-  font-size: 9pt;
-  text-align: left;
-  padding: 0 3px 0 3px;
-  border-bottom: 1px solid #777777;
-  color: #333333;
-}
-.dataOdd {
-  font-size: 9pt;
-  background-color: #e7e7e7;
-  padding: 0 4 0 4;
-}
-.dataEven {
-  font-size: 9pt; 
-  background-color: #f4f2f2;
-  padding: 0 4 0 4;
-}
-.dataTitle {
-  text-align: center;
-  font-weight: bold;
-  font-size: 12pt;
-}
-.dataSubTitle {
-  text-align: center;
-  font-weight: bold;
-  font-size: 10pt;
-}
+.optionBoxTitle { font-size: 10pt; text-align: center; font-weight: bold; }
+.optionBox      { font-size: 10pt; padding: 2; }
 
-.optBox {
-  padding: 2 0 0 0;
-  font-size: 10pt;
-  font-weight: bold;
-  white-space: nowrap;
-}
-.optBoxTitle {
-  font-size: 10pt;
-  text-align: center;
-  font-weight: bold;
-}
-.optBoxRequiredItem {
-  font-size: 10pt;
-  text-align: right; 
-  padding-left: 10; 
-  padding-right: 5; 
-  color: red;
-}
-.optBoxItem {
-  font-size: 10pt;
-  text-align: right;
-  padding-left: 10; 
-  padding-right: 5; 
-}
-.optBoxValue {
-  font-size: 10pt;
-  font-style: italic;
-}
-
-.optionBoxTitle { text-align: center; font-weight: bold; font-size: 10pt; }
-.optionBox { font-size: 10pt; padding: 2; }
-
-.navBoxTitle {
-  font-size: 10pt;
-  font-weight: bold;
-  white-space: nowrap;
-}
-.navBoxItem {
-  font-size: 8pt;
-}
-.navBoxDate {
-  font-size: 9pt;
-  white-space: nowrap;
-}
-.navBoxFile {
-  font-size: 8pt;
-  text-align: center;
-}
+.navBoxTitle { font-size: 10pt; font-weight: bold; white-space: nowrap; }
+.navBoxItem  { font-size: 8pt; }
+.navBoxDate  { font-size: 8pt; white-space: nowrap; }
+.navBoxFile  { font-size: 8pt; text-align: center; }
 
 .helpfulHint { font-size: 8pt; font-style: italic; text-align: center; }
 
@@ -361,32 +274,26 @@ TH.data {
 
 .dateTimeBreak { font-size: 9pt; font-weight: bold; }
 
-.reportRange { text-align: center; font-size: 10pt; }
-.reportDuration { text-align: center; font-size: 8pt; }
-.reportTime { text-align: center; font-size: 8pt; }
+.reportRange    { font-size: 10pt; white-space: nowrap; }
+.reportDuration { font-size:  8pt; white-space: nowrap; }
+.reportTime     { font-size:  8pt; white-space: nowrap; text-align: right; font-style: italic; }
 
-.reportSelectTip { font-size: 8pt; font-style: italic; }
-.reportSelectTitle { text-align: center; font-size: 12pt; font-weight: bold; }
-.reportSelectSubTitle { text-align: right; font-size: 10pt; font-weight: bold; }
-.reportSelectItem { font-size: 8pt; }
+.reportSelectTitle    { font-size: 12pt; text-align: center; font-weight: bold; }
+.reportSelectSubTitle { font-size:  9pt; text-align: right; }
+.reportSelectItem     { font-size:  9pt; }
+.reportSelectTip      { font-size:  8pt; font-style: italic; }
 
-.dateSelectTitle { text-align: center; font-size: 12pt; font-weight: bold; }
-.dateSelectSubTitle { font-size: 10pt; font-weight: bold; }
-.dateSelectItem { font-size: 8pt; }
+.dateSelectTitle    { font-size: 12pt; text-align: center; font-weight: bold; }
+.dateSelectSubTitle { font-size:  9pt; text-align: right; }
+.dateSelectItem     { font-size:  9pt; }
 
-.popupText { font-size: 8pt; font-weight: bold; }
+.popupText { font-size: 8pt; background-color: #eeeeaa; border: 1px solid #777777; padding: 10 10 10 10; }
 
-.hostImportantProblem {
-  font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.hostUnimportantProblem {
-  font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.hostImportantProblem      { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
+.hostUnimportantProblem    { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
 
-.serviceImportantProblem {
-  font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.serviceUnimportantProblem {
-  font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.serviceImportantProblem   { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
+.serviceUnimportantProblem { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
 
-.outageImportantProblem {
-  font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
-.outageUnimportantProblem {
-  font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
+.outageImportantProblem    { font-size: 8pt; background-color: #dddddd; border: 1px solid #aaaaaa; padding: 0 5 0 5; }
+.outageUnimportantProblem  { font-size: 8pt; background-color: #aaaaaa; border: 1px solid #888888; padding: 0 5 0 5; }
