@@ -447,6 +447,7 @@ themes/Exfoliation/images/warning.png
 themes/Exfoliation/images/weblogo1.png
 themes/Exfoliation/images/zoom1.gif
 themes/Exfoliation/images/zoom2.gif
+themes/Exfoliation/readme.txt
 themes/Exfoliation/stylesheets/avail.css
 themes/Exfoliation/stylesheets/checksanity.css
 themes/Exfoliation/stylesheets/cmd.css
@@ -513,7 +514,6 @@ themes/Neat/stylesheets/thruk.css
 themes/Neat/stylesheets/thruk_noframes.css
 themes/Neat/stylesheets/thruk_noframes_ie_fix.css
 themes/Neat/stylesheets/trends.css
-themes/Vautour/images/.DS_Store
 themes/Vautour/images/ack.gif
 themes/Vautour/images/action.gif
 themes/Vautour/images/catalyst_170pix.png
