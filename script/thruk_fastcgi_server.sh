@@ -31,11 +31,11 @@ fi
 RETVAL=0
 prog="thruk"
 
-EXECDIR=/Users/sven/projects/git/Thruk
-PID=/private/tmp/thruk_fastcgi.pid
+EXECDIR=/home/thruk/Thruk
+PID=/tmp/thruk_fastcgi.pid
 LOGFILE=/dev/null
 PROCS=5
-SOCKET=/private/tmp/thruk_fastcgi.socket
+SOCKET=/tmp/thruk_fastcgi.socket
 
 
 # your application environment variables
