@@ -9,3 +9,4 @@ logs/error.log
 logs/access.log
 thruk_local.conf
 inc
+docs/images

@@ -482,10 +482,11 @@ NiWv4favdMLRXVPrCWZwjs7/2eX3F70B/wN27TGv/ABMBwAAAABJRU5ErkJggg==" />
 </div>
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="para"><p>Thruk is an independent multibackend monitoring webinterface which currently
-supports Nagios and Icinga as backend using the MKLivestatus addon.  It was
-designed to be a "dropin" replacement. The target is to cover 100% of the
-original features plus additional enhancements for large installations.</p></div>
+<div class="para"><p>Thruk is a multibackend monitoring webinterface which currently
+supports Nagios and Icinga as backend using the MKLivestatus addon.
+It was designed to be a "dropin" replacement. The target is to cover
+100% of the original features plus additional enhancements for large
+installations.</p></div>
 <div class="para"><p>Main Features / Advantages</p></div>
 <div class="ilist"><ul>
 <li>
@@ -813,8 +814,21 @@ installation:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    %&gt;./script/thruk_fastcgi.pl -n 5 \
-                -l /tmp/thruk.socket \
-                -p /tmp/thruk.pid</tt></pre>
+                -l /tmp/thruk_fastcgi.socket \
+                -p /tmp/thruk_fastcgi.pid</tt></pre>
+</div></div>
+<div class="para"><p>you may want to create a custom init.d script (additional modules
+required) with:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>    %&gt; ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid</tt></pre>
+</div></div>
+<div class="para"><p>or copy and adjust paths from:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>    %&gt; sudo cp ./script/thruk_fastcgi_server.sh /etc/init.d/thruk_fastcgi_server
+    %&gt; vi /etc/init.d/thruk_fastcgi_server
+    %&gt; sudo chown root: /etc/init.d/thruk_fastcgi_server</tt></pre>
 </div></div>
 <h4 id="_apache_configuration">Apache Configuration</h4>
 <div class="para"><p>use this apache example configuration:</p></div>
@@ -874,7 +888,7 @@ make sure the /home/thruk/Thruk/logs/ directory exists
     LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
 
     # fastcgi configuration
-    FastCGIExternalServer /tmp/thruk.fcgi -socket /tmp/thruk.socket -idle-timeout 120
+    FastCGIExternalServer /tmp/thruk_fastcgi.fcgi -socket /tmp/thruk_fastcgi.socket -idle-timeout 120
 
     # Load rewrite module unless already loaded
     LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
@@ -882,7 +896,7 @@ make sure the /home/thruk/Thruk/logs/ directory exists
     # rewrite configuration
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^/(.*)$ /tmp/thruk.fcgi/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
+    RewriteRule ^/(.*)$ /tmp/thruk_fastcgi.fcgi/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
 &lt;/VirtualHost&gt;</tt></pre>
 </div></div>
 </div>
@@ -1217,7 +1231,7 @@ commands.</p></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-02-12 04:06:36 CEST
+Last updated 2010-02-14 20:44:15 CEST
 </div>
 </div>
 </body>

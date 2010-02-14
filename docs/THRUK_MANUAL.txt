@@ -206,9 +206,17 @@ start your fcgi server:
                 -p /tmp/thruk_fastcgi.pid
 -------
 
-you may want to create a custom init.d script with
+you may want to create a custom init.d script (additional modules
+required) with:
 -------
     %> ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid
+-------
+
+or copy and adjust paths from:
+-------
+    %> sudo cp ./script/thruk_fastcgi_server.sh /etc/init.d/thruk_fastcgi_server
+    %> vi /etc/init.d/thruk_fastcgi_server
+    %> sudo chown root: /etc/init.d/thruk_fastcgi_server
 -------
 
 

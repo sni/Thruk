@@ -7,9 +7,20 @@
 # chkconfig: 2345 84 16
 # description: thruk fastcgi daemon start/stop script
 # processname: fcgi
-# pidfile: /private/tmp/thruk_fastcgi.pid
+# pidfile: /tmp/thruk_fastcgi.pid
 #
 # 2010-02-12 by Sven Nierlein
+
+################################
+# settings
+prog="thruk"
+EXECDIR=/home/thruk/Thruk
+PID=/tmp/thruk_fastcgi.pid
+LOGFILE=/dev/null
+PROCS=5
+SOCKET=/tmp/thruk_fastcgi.socket
+EXECUSER=thruk
+################################
 
 # Load in the best success and failure functions we can find
 if [ -f /etc/rc.d/init.d/functions ]; then
@@ -29,14 +40,16 @@ else
 fi
 
 RETVAL=0
-prog="thruk"
 
-EXECDIR=/home/thruk/Thruk
-PID=/tmp/thruk_fastcgi.pid
-LOGFILE=/dev/null
-PROCS=5
-SOCKET=/tmp/thruk_fastcgi.socket
-
+# execute script as $USER if the user is root
+if [ "$USER" = "root" ];then
+  su $USER -c "$0 $*"
+  exit $?
+elif [ "$USER" != "$EXECUSER" ];then
+    echo "wrong user, please use either user $EXECUSER or root"
+    failure $"$prog start"
+    exit 1
+fi
 
 # your application environment variables
 
@@ -53,12 +66,7 @@ start() {
     echo -n $"Starting Thruk: "
     touch ${LOGFILE}
     echo -n "["`date +"%Y-%m-%d %H:%M:%S"`"] " >> ${LOGFILE}
-    if [ "$USER"x != "$EXECUSER"x ]; then
-      cd ${EXECDIR};script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -d >> ${LOGFILE} 2>&1
-    else
-      cd ${EXECDIR}
-      script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -d >> ${LOGFILE} 2>&1
-    fi
+    cd ${EXECDIR} && script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -d >> ${LOGFILE} 2>&1
     RETVAL=$?
     [ $RETVAL -eq 0 ] && success || failure $"$prog start"
     echo

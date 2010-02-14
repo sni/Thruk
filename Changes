@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.27_2  Sun Feb 14 19:20:58 CET 2010
+          - updated Exfoliation to 0.5
+          - added init.d script
+
 0.27_1  Fri Feb 12 03:59:09 CET 2010
           - per user themes
 
