@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.27_3  Tue Feb 16 16:11:00 CET 2010
+          - fixed sorting with filters
+
 0.27_2  Sun Feb 14 19:20:58 CET 2010
           - updated Exfoliation to 0.5
           - added init.d script
