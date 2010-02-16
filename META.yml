@@ -18,50 +18,50 @@ no_index:
     - inc
     - t
 requires:
-  Algorithm::C3: 0
-  Carp: 0
-  Catalyst::Action::RenderView: 0
+  Algorithm::C3: 0.08
+  Carp: 1.08
+  Catalyst::Action::RenderView: 0.14
   Catalyst::Engine::FastCGI: 0
-  Catalyst::Log::Log4perl: 0
-  Catalyst::Plugin::Authentication: 0
-  Catalyst::Plugin::Authorization::Roles: 0
+  Catalyst::Log::Log4perl: 1.04
+  Catalyst::Plugin::Authentication: 0.10015
+  Catalyst::Plugin::Authorization::Roles: 0.08
   Catalyst::Plugin::Compress::Gzip: 0
-  Catalyst::Plugin::ConfigLoader: 0
-  Catalyst::Plugin::CustomErrorMessage: 0
-  Catalyst::Plugin::Redirect: 0
-  Catalyst::Plugin::StackTrace: 0
-  Catalyst::Plugin::Static::Simple: 0
+  Catalyst::Plugin::ConfigLoader: 0.27
+  Catalyst::Plugin::CustomErrorMessage: 0.04
+  Catalyst::Plugin::Redirect: 0.02
+  Catalyst::Plugin::StackTrace: 0.11
+  Catalyst::Plugin::Static::Simple: 0.26
   Catalyst::Runtime: 5.80016
-  Catalyst::View::GD: 0
-  Catalyst::View::TT: 0
-  Class::Accessor::Fast: 0
-  Class::C3: 0
+  Catalyst::View::GD: 0.01
+  Catalyst::View::TT: 0.31
+  Class::Accessor::Fast: 0.34
+  Class::C3: 0.21
   Compress::Raw::Zlib: 2.023
-  Config::Any: 0
-  Config::General: 0
-  Data::Page: 0
-  Date::Calc: 0
-  FCGI: 0
-  FCGI::ProcManager: 0
-  File::Copy::Recursive: 0
-  GD: 0
-  HTML::Entities: 0
-  HTTP::Body: 0
-  LWP: 0
-  Log::Dispatch::File: 0
-  Monitoring::Availability: 0.10
-  Monitoring::Livestatus: 0.40
-  Moose: 0
-  MooseX::MethodAttributes::Inheritable: 0
-  MooseX::Role::WithOverloading: 0
-  Path::Class: 0
-  Sub::Uplevel: 0
+  Config::Any: 0.18
+  Config::General: 2.44
+  Data::Page: 2.02
+  Date::Calc: 6.3
+  FCGI: 0.68
+  FCGI::ProcManager: 0.19
+  File::Copy::Recursive: 0.38
+  GD: 2.44
+  HTML::Entities: 3.64
+  HTTP::Body: 1.05
+  LWP: 5.833
+  Log::Dispatch::File: 2.26
+  Monitoring::Availability: 0.1
+  Monitoring::Livestatus: 0.4
+  Moose: 0.93
+  MooseX::MethodAttributes::Inheritable: 0.18
+  MooseX::Role::WithOverloading: 0.03
+  Path::Class: 0.17
+  Sub::Uplevel: 0.2002
   Template: 2.22
   Thread::Queue: 2.11
-  Time::HiRes: 0
-  Variable::Magic: 0
-  YAML::Tiny: 0
-  parent: 0
+  Time::HiRes: 1.9719
+  Variable::Magic: 0.39
+  YAML::Tiny: 1.41
+  parent: 0.223
   perl: 5.8.0
   threads: 1.75
 resources:
