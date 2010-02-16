@@ -21,6 +21,7 @@ requires:
   Algorithm::C3: 0.08
   Carp: 1.08
   Catalyst::Action::RenderView: 0.14
+  Catalyst::Devel: 1.26
   Catalyst::Engine::FastCGI: 0
   Catalyst::Log::Log4perl: 1.04
   Catalyst::Plugin::Authentication: 0.10015

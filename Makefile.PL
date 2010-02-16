@@ -57,18 +57,27 @@ requires 'Data::Page'                             => 2.02;
 requires 'GD'                                     => 2.44;
 requires 'Catalyst::View::GD'                     => 0.01;
 requires 'HTML::Entities'                         => 3.64;
+requires 'Catalyst::Devel'                        => 1.26;
 
 # test requirements make it into the META.yml and will break
 # normal package installation
 # install them by hand if you plan author tests
-#test_requires 'Catalyst::Devel';
 #test_requires 'HTML::Lint';
 #test_requires 'Test::Pod'                         => 1.40;
 #test_requires 'Test::Perl::Critic';
 #test_requires 'Test::Pod::Coverage';
 #test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
 
-catalyst;
+##################################
+# should come with Catalyst::Devel
+eval {
+    require Module::Install::Catalyst;
+};
+unless($@) {
+    catalyst;
+}
+##################################
+
 install_script glob('script/*.pl');
 auto_install;
 WriteAll;
