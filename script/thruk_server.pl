@@ -4,6 +4,11 @@ use strict;
 use warnings;
 
 BEGIN {
+    use FindBin;
+    if(-e "$FindBin::Bin/../local-lib") {
+        use lib "$FindBin::Bin/../local-lib/lib/perl5";
+        require local::lib; local::lib->import("$FindBin::Bin/local-lib");
+    }
     $ENV{CATALYST_SCRIPT_GEN} = 40;
 }
 

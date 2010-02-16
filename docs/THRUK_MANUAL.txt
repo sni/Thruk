@@ -33,6 +33,18 @@ Main Features / Advantages
 The clean and proper way to install Thruk is to create a new local
 user and install the missing perl modules with local::lib.
 
+=== Use Package
+Installation from a package should be easy and seemless:
+
+-------
+  %> wget http://
+  %> tar zxf Thruk-0.30-i386.tar.gz
+  %> cd Thruk-0.30
+  %> ./script/thruk_server.pl
+-------
+
+For a FastCGI installation follow the steps from the <<_configure_fastcgi_server,source installation>>.
+
 === Quick Installation Guide for Debian
 
 ----

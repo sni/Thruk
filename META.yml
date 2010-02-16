@@ -24,43 +24,43 @@ requires:
   Catalyst::Devel: 1.26
   Catalyst::Engine::FastCGI: 0
   Catalyst::Log::Log4perl: 1.04
-  Catalyst::Plugin::Authentication: 0.10015
+  Catalyst::Plugin::Authentication: 0.10016
   Catalyst::Plugin::Authorization::Roles: 0.08
   Catalyst::Plugin::Compress::Gzip: 0
   Catalyst::Plugin::ConfigLoader: 0.27
   Catalyst::Plugin::CustomErrorMessage: 0.04
   Catalyst::Plugin::Redirect: 0.02
   Catalyst::Plugin::StackTrace: 0.11
-  Catalyst::Plugin::Static::Simple: 0.26
-  Catalyst::Runtime: 5.80016
+  Catalyst::Plugin::Static::Simple: 0.29
+  Catalyst::Runtime: 5.8002
   Catalyst::View::GD: 0.01
-  Catalyst::View::TT: 0.31
+  Catalyst::View::TT: 0.32
   Class::Accessor::Fast: 0.34
-  Class::C3: 0.21
-  Compress::Raw::Zlib: 2.023
-  Config::Any: 0.18
+  Class::C3: 0.22
+  Compress::Raw::Zlib: 2.024
+  Config::Any: 0.19
   Config::General: 2.44
   Data::Page: 2.02
   Date::Calc: 6.3
-  FCGI: 0.68
+  FCGI: 0.69
   FCGI::ProcManager: 0.19
   File::Copy::Recursive: 0.38
   GD: 2.44
   HTML::Entities: 3.64
-  HTTP::Body: 1.05
+  HTTP::Body: 1.07
   LWP: 5.833
   Log::Dispatch::File: 2.26
   Monitoring::Availability: 0.1
   Monitoring::Livestatus: 0.4
-  Moose: 0.93
-  MooseX::MethodAttributes::Inheritable: 0.18
-  MooseX::Role::WithOverloading: 0.03
-  Path::Class: 0.17
-  Sub::Uplevel: 0.2002
+  Moose: 0.98
+  MooseX::MethodAttributes::Inheritable: 0.2
+  MooseX::Role::WithOverloading: 0.05
+  Path::Class: 0.18
+  Sub::Uplevel: 0.22
   Template: 2.22
   Thread::Queue: 2.11
-  Time::HiRes: 1.9719
-  Variable::Magic: 0.39
+  Time::HiRes: 1.972
+  Variable::Magic: 0.4
   YAML::Tiny: 1.41
   parent: 0.223
   perl: 5.8.0
@@ -70,4 +70,4 @@ resources:
   homepage: http://www.thruk.org
   license: http://opensource.org/licenses/gpl-3.0.html
   repository: http://github.com/sni/Thruk
-version: 0.27_3
+version: 0.30

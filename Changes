@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.30    Tue Feb 16 23:40:09 CET 2010
+          - updated meta data, documentation
+          - added local lib
+
 0.27_3  Tue Feb 16 16:11:00 CET 2010
           - fixed sorting with filters
 
