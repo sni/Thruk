@@ -1,5 +1,3 @@
-use strict;
-use warnings;
 use inc::Module::Install;
 
 name 'Thruk';
@@ -69,15 +67,10 @@ requires 'Catalyst::Devel'                        => 1.26;
 #test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
 
 ##################################
-# should come with Catalyst::Devel
-eval {
-    require Module::Install::Catalyst;
-};
-unless($@) {
-    catalyst;
-}
-##################################
 
+eval {
+    catalyst;
+};
 install_script glob('script/*.pl');
 auto_install;
 WriteAll;
