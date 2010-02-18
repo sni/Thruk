@@ -166,6 +166,7 @@ sub thruk_index_html : Path('/thruk/index.html') {
     unless($c->stash->{'use_frames'}) {
         $c->detach("thruk_main_html");
     }
+    $c->response->header('Cache-Control' => 'max-age=7200, public');
     $c->stash->{'template'} = 'index.tt';
 
     return 1;
