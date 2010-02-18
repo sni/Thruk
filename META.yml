@@ -61,6 +61,7 @@ requires:
   Thread::Queue: 2.11
   Time::HiRes: 1.972
   Variable::Magic: 0.4
+  YAML: 0.7
   YAML::Tiny: 1.41
   parent: 0.223
   perl: 5.8.0

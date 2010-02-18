@@ -3,7 +3,7 @@ use inc::Module::Install;
 use FindBin;
 if(-e "$FindBin::Bin/local-lib") {
     use lib "$FindBin::Bin/local-lib/lib/perl5";
-    require local::lib; local::lib->import("$FindBin::Bin/local-lib");
+    require local::lib; local::lib->import("$FindBin::Bin/local-lib/perl5/");
 }
 
 name 'Thruk';
@@ -17,6 +17,7 @@ resources(
 );
 
 requires 'Carp'                                   => 1.08;
+requires 'YAML'                                   => 0.70;
 requires 'YAML::Tiny'                             => 1.41;
 requires 'Compress::Raw::Zlib'                    => 2.024;
 requires 'Sub::Uplevel'                           => 0.22;
