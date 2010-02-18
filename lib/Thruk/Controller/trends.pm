@@ -389,6 +389,9 @@ sub _draw_states {
         my $x2 = $drawing_x_offset + int(($log->{'end'} - $start) / $report_duration * $drawing_width);
         my $y2 = $drawing_y_offset + $drawing_height;
 
+        if($x1 < $drawing_x_offset) { $x1 = $drawing_x_offset; }
+        if($x2 < $drawing_x_offset) { $x2 = $drawing_x_offset; }
+
         if($mode == IMAGE_MAP_MODE) {
             push @{$image_map}, {
                 "x1"                 => $x1,
