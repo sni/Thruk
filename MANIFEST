@@ -78,6 +78,7 @@ root/thruk/javascript/datetimepicker.js
 root/thruk/javascript/thruk.js
 script/thruk_cgi.pl
 script/thruk_create.pl
+script/thruk_create_package.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
@@ -310,6 +311,7 @@ themes/Classic/images/left.gif
 themes/Classic/images/logo_thruk.png
 themes/Classic/images/logo_thruk_mid.png
 themes/Classic/images/logo_thruk_small.png
+themes/Classic/images/logos/tux.png
 themes/Classic/images/logrotate.png
 themes/Classic/images/ndisabled.gif
 themes/Classic/images/noack.gif
@@ -404,6 +406,7 @@ themes/Exfoliation/images/left.gif
 themes/Exfoliation/images/logo_thruk.png
 themes/Exfoliation/images/logo_thruk_mid.png
 themes/Exfoliation/images/logo_thruk_small.png
+themes/Exfoliation/images/logos
 themes/Exfoliation/images/logrotate.png
 themes/Exfoliation/images/ndisabled.gif
 themes/Exfoliation/images/noack.gif
@@ -551,6 +554,7 @@ themes/Vautour/images/left.gif
 themes/Vautour/images/logo_thruk.png
 themes/Vautour/images/logo_thruk_mid.png
 themes/Vautour/images/logo_thruk_small.png
+themes/Vautour/images/logos
 themes/Vautour/images/logrotate.png
 themes/Vautour/images/ndisabled.gif
 themes/Vautour/images/noack.gif

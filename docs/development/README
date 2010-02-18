@@ -1,7 +1,7 @@
-Test Nagios Installation
-========================
+Thruk Development Guide
+=======================
 
-There are many way of setting up a test nagios instance:
+Unsorted things you may want to do during development:
 
 
 Install a Clean Nagios From Source
@@ -34,3 +34,22 @@ Text Color: 414141
 BG: FFFFFF
 Font: Futuristic Fonts -> Oscilloscope 4
 Size: 90
+
+
+Setup Package Build Environment
+-------------------------------
+  * create clean new user
+  * modify .bashrc:
+
+----
+# use the local lib perl modules
+eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)
+export PERL5LIB="$HOME/perl5/lib/perl5'
+export PERL_MM_OPT='INSTALL_BASE=$HOME/perl5
+INSTALLARCHLIB=$HOME/perl5/lib/perl5
+INSTALLSITEARCH=$HOME/perl5/lib/perl5
+INSTALLVENDORARCH=$HOME/perl5/lib/perl5"
+----
+
+  * git clone repository
+  * run ./script/thruk_create_package.pl
