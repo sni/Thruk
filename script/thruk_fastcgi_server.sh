@@ -22,6 +22,18 @@ SOCKET=/tmp/thruk_fastcgi.socket
 EXECUSER=thruk
 ################################
 
+# execute script as $EXECUSER if the user is root
+if [ "$USER" = "root" ];then
+  SCRIPT=`readlink -f $0`
+  su - $EXECUSER -c "$SCRIPT $*"
+  exit $?
+elif [ "$USER" != "$EXECUSER" ];then
+    echo "wrong user, please use either user $EXECUSER or root"
+    failure $"$prog start"
+    exit 1
+fi
+
+################################
 # Load in the best success and failure functions we can find
 if [ -f /etc/rc.d/init.d/functions ]; then
     . /etc/rc.d/init.d/functions
@@ -40,39 +52,43 @@ else
 fi
 
 RETVAL=0
-
-# execute script as $USER if the user is root
-if [ "$USER" = "root" ];then
-  su $USER -c "$0 $*"
-  exit $?
-elif [ "$USER" != "$EXECUSER" ];then
-    echo "wrong user, please use either user $EXECUSER or root"
-    failure $"$prog start"
-    exit 1
-fi
-
-# your application environment variables
-
 if [ -f "/etc/sysconfig/"$prog ]; then
   . "/etc/sysconfig/"$prog
 fi
 
+################################
+# check pid file
+if [ -f $PID ]; then
+  ps -p `cat $PID` >/dev/null 2>&1;
+  if [ $? != 0 ]; then
+    echo "removed stale pid file";
+    rm $PID;
+  fi
+fi
+
+################################
 start() {
   if [ -f $PID ]; then
     echo "already running..."
       return 1
     fi
     # Start daemons.
-    echo -n $"Starting Thruk: "
+    echo -n $"Starting"
     touch ${LOGFILE}
     echo -n "["`date +"%Y-%m-%d %H:%M:%S"`"] " >> ${LOGFILE}
-    cd ${EXECDIR} && script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -d >> ${LOGFILE} 2>&1
+    cd ${EXECDIR} && script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -d >> ${LOGFILE} 2>&1 &
+    for i in 1 2 3 4 5 6 7 8 9 0; do
+      if [ -f $PID ]; then break; fi
+      echo -n '.' && sleep 1;
+    done
+    echo -n " "
+    status
     RETVAL=$?
     [ $RETVAL -eq 0 ] && success || failure $"$prog start"
-    echo
-    return $RETVAL
+    return $?
 }
 
+################################
 stop() {
   # Stop daemons.
   echo -n $"Shutting down Thruk: "
@@ -80,25 +96,27 @@ stop() {
   /bin/kill `cat $PID 2>/dev/null ` >/dev/null 2>&1 && (success; echo "Stoped" >> ${LOGFILE} ) || (failure $"$prog stop";echo "Stop failed" >> ${LOGFILE} )
   /bin/rm $PID >/dev/null 2>&1
   RETVAL=$?
-  echo
   return $RETVAL
 }
 
+################################
 status() {
   # show status
   if [ -f $PID ]; then
-    echo "${prog} (pid `/bin/cat $PID`) is running..."
+    echo -n "${prog} (pid `/bin/cat $PID`) is running..."
   else
-    echo "${prog} is stopped"
+    echo -n "${prog} is stopped"
   fi
   return $?
 }
 
+################################
 restart() {
   stop
   start
 }
 
+################################
 # See how we were called.
 case "$1" in
   start)
@@ -113,6 +131,7 @@ case "$1" in
     ;;
   status)
     status
+    echo " "
     ;;
   *)
     echo $"Usage: $0 {start|stop|restart|status}"

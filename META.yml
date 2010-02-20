@@ -7,7 +7,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.91'
+generated_by: 'Module::Install version 0.93'
 license: gpl3
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -18,50 +18,52 @@ no_index:
     - inc
     - t
 requires:
-  Algorithm::C3: 0
-  Carp: 0
-  Catalyst::Action::RenderView: 0
+  Algorithm::C3: 0.08
+  Carp: 1.08
+  Catalyst::Action::RenderView: 0.14
+  Catalyst::Devel: 1.26
   Catalyst::Engine::FastCGI: 0
-  Catalyst::Log::Log4perl: 0
-  Catalyst::Plugin::Authentication: 0
-  Catalyst::Plugin::Authorization::Roles: 0
+  Catalyst::Log::Log4perl: 1.04
+  Catalyst::Plugin::Authentication: 0.10016
+  Catalyst::Plugin::Authorization::Roles: 0.08
   Catalyst::Plugin::Compress::Gzip: 0
-  Catalyst::Plugin::ConfigLoader: 0
-  Catalyst::Plugin::CustomErrorMessage: 0
-  Catalyst::Plugin::Redirect: 0
-  Catalyst::Plugin::StackTrace: 0
-  Catalyst::Plugin::Static::Simple: 0
-  Catalyst::Runtime: 5.80016
-  Catalyst::View::GD: 0
-  Catalyst::View::TT: 0
-  Class::Accessor::Fast: 0
-  Class::C3: 0
-  Compress::Raw::Zlib: 2.023
-  Config::Any: 0
-  Config::General: 0
-  Data::Page: 0
-  Date::Calc: 0
-  FCGI: 0
-  FCGI::ProcManager: 0
-  File::Copy::Recursive: 0
-  GD: 0
-  HTML::Entities: 0
-  HTTP::Body: 0
-  LWP: 0
-  Log::Dispatch::File: 0
-  Monitoring::Availability: 0.10
-  Monitoring::Livestatus: 0.40
-  Moose: 0
-  MooseX::MethodAttributes::Inheritable: 0
-  MooseX::Role::WithOverloading: 0
-  Path::Class: 0
-  Sub::Uplevel: 0
+  Catalyst::Plugin::ConfigLoader: 0.27
+  Catalyst::Plugin::CustomErrorMessage: 0.04
+  Catalyst::Plugin::Redirect: 0.02
+  Catalyst::Plugin::StackTrace: 0.11
+  Catalyst::Plugin::Static::Simple: 0.29
+  Catalyst::Runtime: 5.8002
+  Catalyst::View::GD: 0.01
+  Catalyst::View::TT: 0.32
+  Class::Accessor::Fast: 0.34
+  Class::C3: 0.22
+  Compress::Raw::Zlib: 2.024
+  Config::Any: 0.19
+  Config::General: 2.44
+  Data::Page: 2.02
+  Date::Calc: 6.3
+  FCGI: 0.69
+  FCGI::ProcManager: 0.19
+  File::Copy::Recursive: 0.38
+  GD: 2.44
+  HTML::Entities: 3.64
+  HTTP::Body: 1.07
+  LWP: 5.833
+  Log::Dispatch::File: 2.26
+  Monitoring::Availability: 0.1
+  Monitoring::Livestatus: 0.4
+  Moose: 0.98
+  MooseX::MethodAttributes::Inheritable: 0.2
+  MooseX::Role::WithOverloading: 0.05
+  Path::Class: 0.18
+  Sub::Uplevel: 0.22
   Template: 2.22
   Thread::Queue: 2.11
-  Time::HiRes: 0
-  Variable::Magic: 0
-  YAML::Tiny: 0
-  parent: 0
+  Time::HiRes: 1.972
+  Variable::Magic: 0.4
+  YAML: 0.7
+  YAML::Tiny: 1.41
+  parent: 0.223
   perl: 5.8.0
   threads: 1.75
 resources:
@@ -69,4 +71,4 @@ resources:
   homepage: http://www.thruk.org
   license: http://opensource.org/licenses/gpl-3.0.html
   repository: http://github.com/sni/Thruk
-version: 0.27_2
+version: 0.30

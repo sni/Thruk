@@ -24,7 +24,7 @@ Main Features / Advantages
   * easy to extend (MVC Design)
   * 100% perl (using catalyst)
   * paging ( can be disabled or customized )
-  * per user themes
+  * support for themes (on a per user basis )
 
 
 
@@ -33,13 +33,26 @@ Main Features / Advantages
 The clean and proper way to install Thruk is to create a new local
 user and install the missing perl modules with local::lib.
 
+=== Use Package
+Installation from a package should be easy and seemless:
+
+-------
+  %> wget http://
+  %> tar zxf Thruk-0.30-i386.tar.gz
+  %> cd Thruk-0.30
+  %> ./script/thruk_server.pl
+-------
+
+For a FastCGI installation follow the steps from the <<_configure_fastcgi_server,source installation>>.
+
 === Quick Installation Guide for Debian
 
 ----
 1.  install debian netinst
       - minimal inst, create user thruk
 2.  add "contrib non-free" to /etc/apt/sources.list
-3.  #> apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl make gcc git git-core libcatalyst-modules-perl
+3.  #> apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl \
+          make gcc git git-core libgd2-xpm-dev
 4.  #> su - thruk
 5.  %> cd /tmp
 6.  %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
@@ -193,7 +206,7 @@ installation:
     ./script/thruk_server.pl
 -------
 
-Open your browser and open http://<your_host>:3000 
+Open your browser and open http://<your_host>:3000
 
 
 === Configure FastCGI Server
@@ -206,18 +219,18 @@ start your fcgi server:
                 -p /tmp/thruk_fastcgi.pid
 -------
 
-you may want to create a custom init.d script (additional modules
-required) with:
--------
-    %> ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid
--------
-
-or copy and adjust paths from:
+you may want to copy the init.d script to /etc/init.d and adjust its paths:
 -------
     %> sudo cp ./script/thruk_fastcgi_server.sh /etc/init.d/thruk_fastcgi_server
     %> vi /etc/init.d/thruk_fastcgi_server
     %> sudo chown root: /etc/init.d/thruk_fastcgi_server
 -------
+
+Or create a custom init.d script (additional modules required) with:
+-------
+    %> ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid
+-------
+
 
 
 ==== Apache Configuration
@@ -420,7 +433,7 @@ xinetd.conf. You can enter local unix sockets too.
   * keepalive        keeps open the connection to livestatus.
   * use_threads      access multiple backends with threads. Usually it's faster
                      without threads except the backends have a very poor connection
-  * peer             enter the peer configuration. You can enter a name for each 
+  * peer             enter the peer configuration. You can enter a name for each
                      connection.
   * connect_timeout  timeout for new connections
   * query_timeout    timeout for queries
@@ -614,4 +627,3 @@ commands.
 ex.:
 
   lock_author_names = 1
-

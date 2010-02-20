@@ -27,4 +27,4 @@ Main Features / Advantages
   * easy to extend (MVC Design)
   * 100% perl (using catalyst)
   * paging ( can be disabled or customized )
-  * per user themes
+  * support for themes (on a per user basis )
