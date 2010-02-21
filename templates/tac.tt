@@ -482,7 +482,7 @@
                     [% IF service_stats.active_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledActiveServiceChecks'>All Services Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledActiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=16'>[% service_stats.active_checks_disabled %] Services Disabled</a></td
+                    <td width="100%" class='featureItemDisabledActiveServiceChecks'><a href='status.cgi?host=all&amp;type=detail&amp;serviceprops=16'>[% service_stats.active_checks_disabled %] Services Disabled</a></td>
                     [% END %]
                   </tr>
                   <tr>

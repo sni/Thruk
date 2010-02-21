@@ -264,6 +264,9 @@ templates/status_grid.tt
 templates/status_hostdetail.tt
 templates/status_overview.tt
 templates/status_summary.tt
+templates/summary_report.tt
+templates/summary_report_alert_producer.tt
+templates/summary_report_recent_alerts.tt
 templates/summary_step_1.tt
 templates/tac.tt
 templates/trends_report.tt

@@ -1,0 +1,57 @@
+[% PROCESS _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% PROCESS _infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%">
+          <div align="center" class='dataTitle'>[% report_title %]</div><br>
+          <div align="center" class='reportRange'>[% date.format(start, datetime_format) %] to [% date.format(end, datetime_format) %]</div>
+          <div align="center" class='reportDuration'>Duration: [% SET dur = end - start %][% duration(dur) %]</div>
+        </td>
+        <td align="right" valign="bottom" width="33%">
+          <table border="0">
+            <tr>
+              <td valign="top" align="left" class='optBoxTitle' colspan="2">Report Options Summary:</td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>Alert Types:</td>
+              <td valign="top" align="left" class='optBoxValue'>Host &amp; Service Alerts</td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>State Types:</td>
+              <td valign="top" align="left" class='optBoxValue'>Soft &amp; Hard States</td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>Host States:</td>
+              <td valign="top" align="left" class='optBoxValue'>Up, Down, Unreachable</td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" class='optBoxItem'>Service States:</td>
+              <td valign="top" align="left" class='optBoxValue'>Ok, Warning, Unknown, Critical</td>
+            </tr>
+            <tr>
+              <td valign="top" align="left" colspan="2" class='optBoxItem'>
+                <form action='summary.cgi' method='get'>
+                  <input type='submit' name='btnSubmit' value='Generate New Report'>
+                </form>
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td align="right" valign="bottom">
+                [% IF show_context_help %]
+                <br><a href='/thruk/docs/summary' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+                [% END %]
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+[% PROCESS $report_template %]
+
+[% PROCESS _footer.tt %]

@@ -21,6 +21,7 @@ avail:
 
 summary:
     - add reports
+    - preset selections when generating new report
 
 histogram:
     - add reports

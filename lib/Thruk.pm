@@ -129,11 +129,11 @@ elsif(!__PACKAGE__->debug) {
 # GD installed?
 eval { require GD; };
 if($@) {
-    __PACKAGE__->log->info("disabled trends, cannot load GD");
+    __PACKAGE__->log->debug("disabled trends, cannot load GD");
     __PACKAGE__->log->debug($@);
     __PACKAGE__->config->{'has_gd'} = 0;
 } else {
-    __PACKAGE__->log->info("enabled gd");
+    __PACKAGE__->log->debug("enabled gd");
     __PACKAGE__->config->{'has_gd'} = 1;
 }
 

@@ -1,0 +1,34 @@
+<div align="center" class='dataSubTitle'>
+  Displaying all 11 matching alerts
+  <div align="center">
+    <table border="0" class='data'>
+      <tr>
+        <th class='data'>Time</th>
+        <th class='data'>Alert Type</th>
+        <th class='data'>Host</th>
+        <th class='data'>Service</th>
+        <th class='data'>State</th>
+        <th class='data'>State Type</th>
+        <th class='data'>Information</th>
+      </tr>
+      <tr class='dataEven'>
+        <td class='dataEven'>2010-02-21 20:02:11</td>
+        <td class='dataEven'>Host Alert</td>
+        <td class='dataEven'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_1'>n6_test_host_1</a></td>
+        <td class='dataEven'>N/A</td>
+        <td class='hostUP'>UP</td>
+        <td class='dataEven'>SOFT</td>
+        <td class='dataEven'>n6_test_host_1 (checked by mo) FLAP: flap hostcheck up</td>
+      </tr>
+      <tr class='dataOdd'>
+        <td class='dataOdd'>2010-02-21 19:59:41</td>
+        <td class='dataOdd'>Host Alert</td>
+        <td class='dataOdd'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_1'>n6_test_host_1</a></td>
+        <td class='dataOdd'>N/A</td>
+        <td class='hostDOWN'>DOWN</td>
+        <td class='dataOdd'>SOFT</td>
+        <td class='dataOdd'>n6_test_host_1 (checked by mo) FLAP: flap hostcheck down</td>
+      </tr>
+    </table>
+  </div>
+</div>

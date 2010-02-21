@@ -765,7 +765,8 @@ sub calculate_overall_processinfo {
 
 =head2 get_start_end_for_timeperiod
 
-  my($start, $end) = get_start_end_for_timeperiod($timeperiod,
+  my($start, $end) = get_start_end_for_timeperiod($c,
+                                                  $timeperiod,
                                                   $smon,
                                                   $sday,
                                                   $syear,
@@ -785,7 +786,7 @@ returns a start and end timestamp for a report date definition
 
 =cut
 sub get_start_end_for_timeperiod {
-    my($timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2) = @_;
+    my($c,$timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2) = @_;
 
     my $start;
     my $end;
@@ -862,7 +863,47 @@ sub get_start_end_for_timeperiod {
         return(undef, undef);
     }
 
+    $c->log->debug("start: ".$start." - ".(scalar localtime($start)));
+    $c->log->debug("end  : ".$end." - ".(scalar localtime($end)));
+
     return($start, $end);
+}
+
+
+########################################
+
+=head2 get_start_end_for_timeperiod_from_param
+
+  my($start, $end) = get_start_end_for_timeperiod_from_param($c)
+
+returns a start and end timestamp for a report date definition
+will use cgi params for input
+
+=cut
+sub get_start_end_for_timeperiod_from_param {
+    my $c = shift;
+
+    confess("no c") unless defined($c);
+
+    # get timeperiod
+    my $timeperiod   = $c->{'request'}->{'parameters'}->{'timeperiod'};
+    my $smon         = $c->{'request'}->{'parameters'}->{'smon'};
+    my $sday         = $c->{'request'}->{'parameters'}->{'sday'};
+    my $syear        = $c->{'request'}->{'parameters'}->{'syear'};
+    my $shour        = $c->{'request'}->{'parameters'}->{'shour'};
+    my $smin         = $c->{'request'}->{'parameters'}->{'smin'};
+    my $ssec         = $c->{'request'}->{'parameters'}->{'ssec'};
+    my $emon         = $c->{'request'}->{'parameters'}->{'emon'};
+    my $eday         = $c->{'request'}->{'parameters'}->{'eday'};
+    my $eyear        = $c->{'request'}->{'parameters'}->{'eyear'};
+    my $ehour        = $c->{'request'}->{'parameters'}->{'ehour'};
+    my $emin         = $c->{'request'}->{'parameters'}->{'emin'};
+    my $esec         = $c->{'request'}->{'parameters'}->{'esec'};
+    my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
+    my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
+
+    $timeperiod = 'last24hours' if(!defined $timeperiod and !defined $t1 and !defined $t2);
+    return Thruk::Utils::get_start_end_for_timeperiod($c, $timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
 }
 
 
@@ -1062,33 +1103,13 @@ sub calculate_availability {
         delete $c->{'request'}->{'parameters'}->{'full_log_entries'};
     }
 
-    # get timeperiod
-    my $timeperiod   = $c->{'request'}->{'parameters'}->{'timeperiod'};
-    my $smon         = $c->{'request'}->{'parameters'}->{'smon'};
-    my $sday         = $c->{'request'}->{'parameters'}->{'sday'};
-    my $syear        = $c->{'request'}->{'parameters'}->{'syear'};
-    my $shour        = $c->{'request'}->{'parameters'}->{'shour'};
-    my $smin         = $c->{'request'}->{'parameters'}->{'smin'};
-    my $ssec         = $c->{'request'}->{'parameters'}->{'ssec'};
-    my $emon         = $c->{'request'}->{'parameters'}->{'emon'};
-    my $eday         = $c->{'request'}->{'parameters'}->{'eday'};
-    my $eyear        = $c->{'request'}->{'parameters'}->{'eyear'};
-    my $ehour        = $c->{'request'}->{'parameters'}->{'ehour'};
-    my $emin         = $c->{'request'}->{'parameters'}->{'emin'};
-    my $esec         = $c->{'request'}->{'parameters'}->{'esec'};
-    my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
-    my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
-
-    $timeperiod = 'last24hours' if(!defined $timeperiod and !defined $t1 and !defined $t2);
-    my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod($timeperiod,$smon,$sday,$syear,$shour,$smin,$ssec,$emon,$eday,$eyear,$ehour,$emin,$esec,$t1,$t2);
-
-    $c->log->debug("start: ".$start." - ".(scalar localtime($start)));
-    $c->log->debug("end  : ".$end." - ".(scalar localtime($end)));
+    # get start/end from timeperiod in params
+    my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
     return 0 if (!defined $start or !defined $end);
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
-    $c->stash->{timeperiod} = $timeperiod;
+    $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'};
 
     my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'};
     my $assumeinitialstates          = $c->{'request'}->{'parameters'}->{'assumeinitialstates'};
@@ -1107,7 +1128,7 @@ sub calculate_availability {
     $zoom =~ s/^\+//gmx;
 
     # default zoom is 4
-    if($zoom !~ m/^(\-|)\d+$/) {
+    if($zoom !~ m/^(\-|)\d+$/mx) {
         $zoom = 4;
     }
     $zoom = 1 if $zoom == 0;
@@ -1270,12 +1291,14 @@ sub calculate_availability {
                 $joined_groups{$name}->{'hosts'} = {};
             }
 
-            for my $hostname (split /,/mx, $group->{'members'}) {
-                # show only hosts with proper authorization
-                next unless defined $host_data->{$hostname};
+            if(defined $group->{'members'}) {
+                for my $hostname (split /,/mx, $group->{'members'}) {
+                    # show only hosts with proper authorization
+                    next unless defined $host_data->{$hostname};
 
-                if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname} = 1;
+                    if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
+                        $joined_groups{$name}->{'hosts'}->{$hostname} = 1;
+                    }
                 }
             }
             # remove empty groups

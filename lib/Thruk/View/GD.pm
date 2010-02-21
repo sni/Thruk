@@ -3,6 +3,7 @@ package Thruk::View::GD;
 use strict;
 use base 'Catalyst::View::GD';
 
+
 =head1 NAME
 
 Thruk::View::GD - GD View for Thruk
@@ -17,7 +18,7 @@ GD View for Thruk.
 
 L<Thruk>
 
-sven,,,
+Sven Nierlein, 2009, <nierlein@cpan.org>
 
 =head1 LICENSE
 

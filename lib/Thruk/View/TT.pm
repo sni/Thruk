@@ -17,7 +17,7 @@ TT View for Thruk.
 
 L<Thruk>
 
-sven,,,
+Sven Nierlein, 2009, <nierlein@cpan.org>
 
 =head1 LICENSE
 

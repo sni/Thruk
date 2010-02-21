@@ -48,7 +48,7 @@ my @gzips = glob("*.gz");
 if(scalar @gzips != 1) { die("found != 1 .gz files: ".Dumper(\@gzips)); }
 my $archive = $gzips[0];
 
-$archive =~ m/Thruk\-(.*?)\.tar\.gz/;
+$archive =~ m/Thruk\-(.*?)\.tar\.gz/mx;
 my $version = $1;
 unless(defined $version) {
     die("archive name does not match");
@@ -85,6 +85,7 @@ sub cmd {
         print $line;
     }
     close($ph) or die("cmd failed (rc:$?): $!");
+    return 1;
 }
 
 #########################################################################

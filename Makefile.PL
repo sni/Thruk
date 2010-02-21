@@ -72,6 +72,8 @@ requires 'Catalyst::Devel'                        => 1.26;
 #test_requires 'Test::Perl::Critic';
 #test_requires 'Test::Pod::Coverage';
 #test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
+#test_requires 'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs';
+#test_requires 'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData';
 
 ##################################
 # should come with Catalyst::Devel

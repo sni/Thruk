@@ -132,3 +132,17 @@ body.trends table.popupText th {
 body.cmd img {
   vertical-align:text-bottom;
 }
+
+/* fix for complete bold reports in summary */
+body.summary td.dataOdd         { font-weight: normal; }
+body.summary td.dataEven        { font-weight: normal; }
+body.summary td.hostDOWN        { font-weight: normal; }
+body.summary td.hostUP          { font-weight: normal; }
+body.summary td.hostUNREACHABLE { font-weight: normal; }
+body.summary td.serviceOK       { font-weight: normal; }
+body.summary td.serviceWARNING  { font-weight: normal; }
+body.summary td.serviceUNKNOWN  { font-weight: normal; }
+body.summary td.serviceCRITICAL { font-weight: normal; }
+body.summary table.data {
+  background-color: white;
+}
