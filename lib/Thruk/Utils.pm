@@ -1100,6 +1100,17 @@ sub calculate_availability {
     my $backtrack                    = $c->{'request'}->{'parameters'}->{'backtrack'};
     my $show_log_entries             = $c->{'request'}->{'parameters'}->{'show_log_entries'};
     my $full_log_entries             = $c->{'request'}->{'parameters'}->{'full_log_entries'};
+    my $zoom                         = $c->{'request'}->{'parameters'}->{'zoom'};
+
+    # calculate zoom
+    $zoom = 4 unless defined $zoom;
+    $zoom =~ s/^\+//gmx;
+
+    # default zoom is 4
+    if($zoom !~ m/^(\-|)\d+$/) {
+        $zoom = 4;
+    }
+    $zoom = 1 if $zoom == 0;
 
     # show_log_entries is true if it exists
     $show_log_entries = 1 if exists $c->{'request'}->{'parameters'}->{'show_log_entries'};
@@ -1148,6 +1159,7 @@ sub calculate_availability {
     $c->stash->{backtrack}                    = $backtrack;
     $c->stash->{show_log_entries}             = $show_log_entries;
     $c->stash->{full_log_entries}             = $full_log_entries;
+    $c->stash->{zoom}                         = $zoom;
 
     # get groups / hosts /services
     my $groupfilter      = "";

@@ -197,7 +197,7 @@
             </td>
             <td class='optBoxItem' valign="top" align="left">
               <select name='zoom'>
-                <option value="4" selected>4</option>
+                <option value="[% zoom %]" selected>[% zoom %]</option>
                 <option value="+2">+2</option>
                 <option value="+3">+3</option>
                 <option value="+4">+4</option>
@@ -230,7 +230,7 @@
 
   [% SET x = 0 %]
   [% FOR a = image_map %]
-  <area shape='rect' coords='[% a.x1 %],[% a.y1 %],[% a.x2 %],[% a.y2 %]' href='trends.cgi?t1=[% a.start %]&amp;t2=[% a.end %]&amp;host=[% host %][% IF service %]&amp;service=[% service %][% END %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]' onmouseover='showDetail([% x %])' onmouseout='hideDetail()'>
+  <area shape='rect' coords='[% a.x1 %],[% a.y1 %],[% a.x2 %],[% a.y2 %]' href='trends.cgi?t1=[% a.t1 %]&amp;t2=[% a.t2 %]&amp;host=[% host %][% IF service %]&amp;service=[% service %][% END %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]' onmouseover='showDetail([% x %])' onmouseout='hideDetail()'>
 
   [% SET x = x+1 %]
   [% END %]

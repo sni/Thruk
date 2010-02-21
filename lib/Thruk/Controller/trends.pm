@@ -254,7 +254,7 @@ sub _create_image {
     }
 
     # draw service / host states
-    my $image_map = $self->_draw_states($c, $im, $mode, $self->{'colors'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+    my $image_map = $self->_draw_states($c, $im, $mode, $self->{'colors'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->stash->{'zoom'});
 
     if($mode == IMAGE_MAP_MODE) {
         return $image_map;
@@ -349,7 +349,7 @@ sub _draw_dashed_line {
 
 ##########################################################
 sub _draw_states {
-    my ( $self, $c, $im, $mode, $colors, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset) = @_;
+    my ( $self, $c, $im, $mode, $colors, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset,$zoom) = @_;
 
     my $report_duration = $end - $start;
 
@@ -393,6 +393,28 @@ sub _draw_states {
         if($x2 < $drawing_x_offset) { $x2 = $drawing_x_offset; }
 
         if($mode == IMAGE_MAP_MODE) {
+
+            my $t1   = $log->{'start'};
+            my $t2   = $log->{'end'};
+            my $next_start = $t1;
+            my $next_end   = $t2;
+            if(defined $zoom) {
+                # get the center of this time range
+                my $center_time = $start + (( $end - $start) / 2);
+
+                # determine next start and end time range with zoom factor
+                if($zoom > 0){
+                    $next_start = int($center_time - ((( $t2 - $t1) / 2) / $zoom ));
+                    $next_end   = int($center_time + ((( $t2 - $t1) / 2) / $zoom ));
+                }
+                else {
+                    $next_start = $center_time + ((( $t2 - $t1) / 2) * $zoom );
+                    $next_end   = $center_time - ((( $t2 - $t1) / 2) * $zoom );
+                }
+                $t1 = $next_start;
+                $t2 = $next_end;
+            }
+
             push @{$image_map}, {
                 "x1"                 => $x1,
                 "y1"                 => $drawing_y_offset,
@@ -407,6 +429,9 @@ sub _draw_states {
                 "start"              => $log->{'start'},
                 "end"                => $log->{'end'},
                 "plugin_output"      => $log->{'plugin_output'},
+
+                "t1"                 => $t1,
+                "t2"                 => $t2,
 
                 "real_plugin_output" => $plugin_output,
 

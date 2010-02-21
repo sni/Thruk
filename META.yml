@@ -50,7 +50,7 @@ requires:
   HTTP::Body: 1.07
   LWP: 5.833
   Log::Dispatch::File: 2.26
-  Monitoring::Availability: 0.1
+  Monitoring::Availability: 0.12
   Monitoring::Livestatus: 0.4
   Moose: 0.98
   MooseX::MethodAttributes::Inheritable: 0.2
@@ -71,4 +71,4 @@ resources:
   homepage: http://www.thruk.org
   license: http://opensource.org/licenses/gpl-3.0.html
   repository: http://github.com/sni/Thruk
-version: 0.30
+version: 0.31_1
