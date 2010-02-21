@@ -73,6 +73,7 @@ reports:
 
 statusmap: maybe something with http://search.cpan.org/~lbrocard/GraphViz/lib/GraphViz.pm
            or a link to nagvis
+           or with http://thejit.org/Jit/Examples/RGraph/example1.html
 
 status:
     - proper search (maybe ajax autocomplete for input form)

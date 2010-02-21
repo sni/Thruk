@@ -98,7 +98,7 @@
             [% IF service %]
             <a href="trends.cgi?host=[% host %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %][% IF nomap %]&amp;nomap=[% nomap %][% END %]">View Trends For This Host</a><br>
             <a href="avail.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]&amp;show_log_entries">View Availability Report For This Service</a><br>
-            <a href="histogram.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]">View Alert Histogram For This Service</a><br>
+            [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% host %]&amp;service=[% service %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]">View Alert Histogram For This Service</a><br>[% END %]
             <a href="history.cgi?host=[% host %]&amp;service=n0_test_ok_02">View Alert History For This Service</a><br>
             <a href="notifications.cgi?host=[% host %]&amp;service=n0_test_ok_02">View Notifications For This Service</a><br>
             [% ELSE %]

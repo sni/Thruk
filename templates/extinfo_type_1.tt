@@ -14,7 +14,7 @@
                 <a href='status.cgi?host=[% host.name %]'>View Status Detail For This Host</a><br>
                 <a href='history.cgi?host=[% host.name %]'>View Alert History For This Host</a><br>
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name %]'>View Trends For This Host</a><br>[% END %]
-                <a href='histogram.cgi?host=[% host.name %]'>View Alert Histogram For This Host</a><br>
+                [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name %]'>View Alert Histogram For This Host</a><br>[% END %]
 
                 <a href='avail.cgi?host=[% host.name %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
                 <a href='notifications.cgi?host=[% host.name %]'>View Notifications For This Host</a>

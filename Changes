@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.31    Sun Feb 21 18:03:55 CET 2010
           - fixed zoom for trends
+          - made histogram links optional
 
 0.30    Tue Feb 16 23:40:09 CET 2010
           - updated meta data, documentation

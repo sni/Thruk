@@ -47,7 +47,7 @@
 			<li class="menuli_style1"><a href="/thruk/cgi-bin/trends.cgi" target="[% target %]">Trends</a></li>
 	        [% END %]
 			<li class="menuli_style2"><a href="/thruk/cgi-bin/avail.cgi" target="[% target %]">Availability</a></li>
-			<li class="menuli_style1"><a href="/thruk/cgi-bin/histogram.cgi" target="[% target %]">Alert Histogram</a></li>
+			[% IF use_feature_histogram %]<li class="menuli_style1"><a href="/thruk/cgi-bin/histogram.cgi" target="[% target %]">Alert Histogram</a></li>[% END %]
 			<li class="menuli_style2"><a href="/thruk/cgi-bin/history.cgi?host=all" target="[% target %]">Alert History</a></li>
 			<li class="menuli_style1"><a href="/thruk/cgi-bin/summary.cgi" target="[% target %]">Alert Summary</a></li>
 			<li class="menuli_style2"><a href="/thruk/cgi-bin/notifications.cgi?contact=all" target="[% target %]">Notifications</a></li>

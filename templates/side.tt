@@ -84,7 +84,7 @@
             <ul>
               <li><a href="/thruk/cgi-bin/history.cgi?host=all" target="[% target %]">History</a></li>
               <li><a href="/thruk/cgi-bin/summary.cgi" target="[% target %]">Summary</a></li>
-              <li><a href="/thruk/cgi-bin/histogram.cgi" target="[% target %]">Histogram</a></li>
+              [% IF use_feature_histogram %]<li><a href="/thruk/cgi-bin/histogram.cgi" target="[% target %]">Histogram</a></li>[% END %]
             </ul>
           </li>
           <li><a href="/thruk/cgi-bin/notifications.cgi?contact=all" target="[% target %]">Notifications</a></li>

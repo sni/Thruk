@@ -51,6 +51,7 @@ sub begin : Private {
     # these features are not implemented yet
     $c->stash->{'use_feature_statusmap'} = 0;
     $c->stash->{'use_feature_statuswrl'} = 0;
+    $c->stash->{'use_feature_histogram'} = 0;
 
     # enable trends if gd loaded
     if($c->config->{'has_gd'}) {
