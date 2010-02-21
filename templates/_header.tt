@@ -25,29 +25,35 @@
 
     [% PROCESS extra_headers.tt %]
 
+
   </head>
-  <body class='[% page %]' id='[% page %]'>
+  <body class='[% page %]' id='[% page %]'[% UNLESS no_auto_reload %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
   <a href="javascript:togglePreferencePane('[% theme %]')"><img src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
   <div class="pref_pane" id="pref_pane">
     <form action="[% c.uri %]" method="GET">
-    <table class="pref_pane" border=1 width="300">
+    <table class="pref_pane" border=1 width="350">
       <tr>
         <td>
           <table>
             <tr>
-              <td>Theme:</td>
+              <th>Theme:</th>
               <td>
                 <select name="theme" id="pref_theme">
                   [% FOR t = themes %]
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
                   [% END %]
                 </select>
+                <input type="button" name="submit" value="change" onClick="prefSubmit('[% c.uri %]', '[% theme %]')">
               </td>
             </tr>
             <tr>
-              <td>&nbsp;</td>
-              <td>
-                <input type="button" name="submit" value="ok" onClick="prefSubmit('[% c.uri %]')">
+              <th>Page Refresh:</th>
+              <td nowrap>
+              [% IF no_auto_reload %]
+              This page will not refresh automatically
+              [% ELSE %]
+              <span id="refresh_rate">Update in [% refresh_rate %] seconds <input type="button" value="stop" onClick="stopRefresh()"></span>
+              [% END %]
               </td>
             </tr>
           </table>

@@ -104,7 +104,8 @@ after 'execute' => sub {
 
     if(defined $c->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
         $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
-        $c->response->headers->header('refresh' => $c->{'cgi_cfg'}->{'refresh_rate'})
+        # refresh is done by js now
+        #$c->response->headers->header('refresh' => $c->{'cgi_cfg'}->{'refresh_rate'})
     }
 
     $c->stats->profile(end => "AddDefaults::after");

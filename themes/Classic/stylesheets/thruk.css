@@ -13,7 +13,7 @@ body.navbar {
 
 /* preferences pane */
 div.pref_pane {
-  width:300px;
+  width:350px;
   height:100px;
   visibility:hidden;
   position:absolute;

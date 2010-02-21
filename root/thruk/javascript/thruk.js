@@ -1,5 +1,6 @@
 
 var prefPaneState = 0;
+var refreshPage   = 1;
 
 /* toggle the visibility of the preferences pane */
 function togglePreferencePane(theme, state) {
@@ -10,21 +11,45 @@ function togglePreferencePane(theme, state) {
   if(prefPaneState == 0) {
     pane.style.visibility = "visible";
     prefPaneState = 1;
-	img.src = "/thruk/themes/"+theme+"/images/icon_minimize.gif";
+    img.src = "/thruk/themes/"+theme+"/images/icon_minimize.gif";
   }
   else {
     pane.style.visibility = "hidden";
     prefPaneState = 0;
-	img.src = "/thruk/themes/"+theme+"/images/icon_maximize.gif";
+    img.src = "/thruk/themes/"+theme+"/images/icon_maximize.gif";
   }
 }
 
 /* save settings in a cookie */
-function prefSubmit(url) {
-    var sel 		= document.getElementById('pref_theme')
-	var now 		= new Date();
-	var expires 	= new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
-	document.cookie = "thruk_theme="+sel.value + "; path=/; expires=" + expires.toGMTString() + ";";
-	window.status 	= "thruk preferences saved";
-	window.location = url;
+function prefSubmit(url, current_theme) {
+  var sel         = document.getElementById('pref_theme')
+  var now         = new Date();
+  var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
+  if(current_theme != sel.value) {
+    document.cookie = "thruk_theme="+sel.value + "; path=/; expires=" + expires.toGMTString() + ";";
+    window.status   = "thruk preferences saved";
+    window.location = url;
+  }
+}
+
+/* page refresh rate */
+function setRefreshRate(rate) {
+  var obj = document.getElementById('refresh_rate');
+  if(refreshPage == 0) {
+    obj.innerHTML = "This page will not refresh automatically";
+  }
+  else {
+    obj.innerHTML = "<span id='refresh_rate'>Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'></span>";
+    if(rate == 0) {
+      window.location.reload(true);
+    }
+    if(rate > 0) {
+      newRate = rate - 1;
+      setTimeout("setRefreshRate(newRate)", 1000);
+    }
+  }
+}
+function stopRefresh() {
+  refreshPage = 0;
+  setRefreshRate(0);
 }
