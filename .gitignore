@@ -10,3 +10,4 @@ logs/access.log
 thruk_local.conf
 inc
 docs/images
+htpasswd.users

@@ -35,7 +35,7 @@ function prefSubmit(url, current_theme) {
 /* page refresh rate */
 function setRefreshRate(rate) {
   var obj = document.getElementById('refresh_rate');
-  if(refreshPage == 0) {
+  if(!rate || refreshPage == 0) {
     obj.innerHTML = "This page will not refresh automatically";
   }
   else {
