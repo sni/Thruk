@@ -14,13 +14,6 @@ Thruk::Controller::trends - Catalyst Controller
 
 Catalyst Controller.
 
-=head1 METHODS
-
-=cut
-
-
-=head2 index
-
 =cut
 
 use constant {
@@ -30,6 +23,11 @@ use constant {
     IMAGE_MODE            => 2,
 };
 
+=head1 METHODS
+
+=head2 index
+
+=cut
 
 ##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {

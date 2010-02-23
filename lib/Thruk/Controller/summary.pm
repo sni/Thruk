@@ -12,13 +12,6 @@ Thruk::Controller::summary - Catalyst Controller
 
 Catalyst Controller.
 
-=head1 METHODS
-
-=cut
-
-
-=head2 index
-
 =cut
 
 use constant {
@@ -52,6 +45,12 @@ use constant {
     AE_SERVICE_OK                       => 64,
 };
 
+=head1 METHODS
+
+=head2 index
+
+=cut
+
 ##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
@@ -73,7 +72,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     return 1;
 }
-
 
 ##########################################################
 sub _show_step_1 {
