@@ -242,10 +242,50 @@ use this apache example configuration:
 - create a /home/thruk/Thruk/htpasswd.users with htpasswd2
 - make sure the /home/thruk/Thruk/logs/ directory exists
 
-.Apache configuration
+
+.Apache configuration within existing vhost
 -------
 <VirtualHost *:80>
-    ServerName   your-host.local
+    # ... existing configuration
+
+    # thruk configuration
+    <Directory /home/thruk/Thruk/root/>
+        order allow,deny
+        allow from all
+    </Directory>
+
+    Alias /thruk/ /home/thruk/Thruk/root/thruk/
+    <Location "/thruk">
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Order Allow,Deny
+        Allow from all
+        require valid-user
+    </Location>
+
+    # Load fastcgi module unless already loaded
+    LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
+
+    # fastcgi configuration
+    FastCGIExternalServer /tmp/thruk_fastcgi.fcgi -socket /tmp/thruk_fastcgi.socket -idle-timeout 120
+
+    # Load rewrite module unless already loaded
+    LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
+
+    # rewrite configuration
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/thruk/(.*)$ /tmp/thruk_fastcgi.fcgi/thruk/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
+
+</VirtualHost>
+-------
+
+
+.Apache configuration with own vhost
+-------
+<VirtualHost *:80>
+    ServerName   thruk.your-host.local
 
     DocumentRoot /home/thruk/Thruk/root/
     CustomLog    /home/thruk/Thruk/logs/access.log combined
