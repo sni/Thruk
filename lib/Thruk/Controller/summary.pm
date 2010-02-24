@@ -96,7 +96,7 @@ sub _create_report {
     my ( $self, $c ) = @_;
     $c->stats->profile(begin => "_create_report()");
 
-    my($timeperiod, $statetypes, $limit, $display_type, $alert_types, $host_states, $service_states);
+    my($timeperiod, $statetypes, $limit, $displaytype, $alert_types, $host_states, $service_states);
     my $standardreport = $c->{'request'}->{'parameters'}->{'standardreport'};
     if(defined $standardreport) {
         # set options from standard report options
@@ -105,28 +105,28 @@ sub _create_report {
         $limit      = 25;
 
         if($standardreport == SREPORT_RECENT_ALERTS) {
-            $display_type   = REPORT_RECENT_ALERTS;
+            $displaytype    = REPORT_RECENT_ALERTS;
             $alert_types    = AE_HOST_ALERT + AE_SERVICE_ALERT;
             $host_states    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
             $service_states = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
         }
         elsif($standardreport == SREPORT_RECENT_HOST_ALERTS) {
-            $display_type   = REPORT_RECENT_ALERTS;
+            $displaytype    = REPORT_RECENT_ALERTS;
             $alert_types    = AE_HOST_ALERT;
             $host_states    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
         }
         elsif($standardreport == SREPORT_RECENT_SERVICE_ALERTS) {
-            $display_type   = REPORT_RECENT_ALERTS;
+            $displaytype    = REPORT_RECENT_ALERTS;
             $alert_types    = AE_SERVICE_ALERT;
             $service_states = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
         }
         elsif($standardreport == SREPORT_TOP_HOST_ALERTS) {
-            $display_type   = REPORT_TOP_ALERTS;
+            $displaytype    = REPORT_TOP_ALERTS;
             $alert_types    = AE_HOST_ALERT;
             $host_states    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
         }
         elsif($standardreport == SREPORT_TOP_SERVICE_ALERTS) {
-            $display_type   = REPORT_TOP_ALERTS;
+            $displaytype    = REPORT_TOP_ALERTS;
             $alert_types    = AE_SERVICE_ALERT;
             $service_states = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
         }
@@ -137,7 +137,7 @@ sub _create_report {
         # set options from parameters
         $statetypes     = $c->{'request'}->{'parameters'}->{'statetypes'};
         $limit          = $c->{'request'}->{'parameters'}->{'limit'};
-        $display_type   = $c->{'request'}->{'parameters'}->{'display_type'};
+        $displaytype    = $c->{'request'}->{'parameters'}->{'displaytype'};
         $alert_types    = $c->{'request'}->{'parameters'}->{'alert_types'};
         $host_states    = $c->{'request'}->{'parameters'}->{'host_states'};
         $service_states = $c->{'request'}->{'parameters'}->{'service_states'};
@@ -150,31 +150,31 @@ sub _create_report {
     $c->stash->{end}        = $end;
     $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'};
 
-    if($display_type == REPORT_RECENT_ALERTS) {
+    if($displaytype == REPORT_RECENT_ALERTS) {
         $c->stash->{report_title}    = 'Most Recent Alerts';
         $c->stash->{report_template} = 'summary_report_recent_alerts.tt';
     }
-    elsif($display_type == REPORT_TOP_ALERTS) {
+    elsif($displaytype == REPORT_TOP_ALERTS) {
         $c->stash->{report_title}    = 'Top Alert Producers';
         $c->stash->{report_template} = 'summary_report_top_alerts.tt';
     }
-    elsif($display_type == REPORT_ALERT_TOTALS) {
+    elsif($displaytype == REPORT_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
     }
-    elsif($display_type == REPORT_HOSTGROUP_ALERT_TOTALS) {
+    elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
     }
-    elsif($display_type == REPORT_HOST_ALERT_TOTALS) {
+    elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
     }
-    elsif($display_type == REPORT_SERVICE_ALERT_TOTALS) {
+    elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
     }
-    elsif($display_type == REPORT_SERVICEGROUP_ALERT_TOTALS) {
+    elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
     }
