@@ -5,6 +5,10 @@
 
 .nav_small_logo { margin: 0px; padding: 0px; }
 
+body {
+  margin-top: 0px;
+}
+
 body.navbar {
   font-family:arial,verdana,serif;
   margin: 5px;
@@ -21,6 +25,7 @@ div.pref_pane {
   right: 0px;
   z-index: 99;
   color: black;
+  font-size: 10pt;
 }
 table.pref_pane {
   margin-top: 0px;
@@ -41,12 +46,29 @@ table.pref_pane > tbody > tr > td {
   background-color: #C4C2C2;
 }
 
-/* preferences pane */
 img.pref_pane_button {
   position:absolute;
-  top: 0px;
-  right: 0px;
+  top: 4px;
+  right: 4px;
   z-index: 100;
+}
+table.top_nav {
+  border: 0px none;
+  font-size: 10pt;
+}
+.top_nav td {
+  border: 0px none;
+}
+
+input.top_nav_pref_button
+{
+   font-size:9px;
+   font-weight:bold;
+   color:#444444;
+   background-color:#EEEEEE;
+   border-style:double;
+   border-color:#999999;
+   border-width:3px;
 }
 
 /* class to preload images */
