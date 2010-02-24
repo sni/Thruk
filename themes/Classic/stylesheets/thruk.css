@@ -25,7 +25,7 @@ div.pref_pane {
   right: 0px;
   z-index: 99;
   color: black;
-  font-size: 10pt;
+  font-size: 9pt;
 }
 table.pref_pane {
   margin-top: 0px;
@@ -55,20 +55,51 @@ img.pref_pane_button {
 table.top_nav {
   border: 0px none;
   font-size: 10pt;
+  margin: 0px;
+  padding: 0px;
+  font-size:8px;
 }
 .top_nav td {
   border: 0px none;
+  padding: 0px;
+  margin: 0px;
 }
 
-input.top_nav_pref_button
-{
-   font-size:9px;
-   font-weight:bold;
-   color:#444444;
-   background-color:#EEEEEE;
-   border-style:double;
-   border-color:#999999;
-   border-width:3px;
+input.top_nav_pref_button {
+  color:#444444;
+  background-color:#EEEEEE;
+  border-style:double;
+  border-color:#999999;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+}
+input.button_peerUP {
+  color:#444444;
+  background-color:#33FF00;
+  border-style:double;
+  border-color:#999999;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+}
+input.button_peerDOWN {
+  color:#444444;
+  background-color:#F83838;
+  border-style:double;
+  border-color:#999999;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+}
+input.button_peerDIS {
+  color:#444444;
+  background-color:#EEEEEE;
+  border-style:double;
+  border-color:#ACACAC;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
 }
 
 /* class to preload images */
