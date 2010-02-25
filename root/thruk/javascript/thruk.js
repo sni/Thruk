@@ -10,13 +10,13 @@ function togglePreferencePane(theme, state) {
   if(state == 1) { prefPaneState = 0; }
   if(prefPaneState == 0) {
     pane.style.visibility = "visible";
+    img.style.visibility  = "visible";
     prefPaneState = 1;
-    img.src = "/thruk/themes/"+theme+"/images/icon_minimize.gif";
   }
   else {
     pane.style.visibility = "hidden";
+    img.style.visibility  = "hidden";
     prefPaneState = 0;
-    img.src = "/thruk/themes/"+theme+"/images/icon_maximize.gif";
   }
 }
 
@@ -52,4 +52,15 @@ function setRefreshRate(rate) {
 function stopRefresh() {
   refreshPage = 0;
   setRefreshRate(0);
+}
+
+
+function button_over(button)
+{
+   button.style.borderColor = "#555555";
+}
+
+function button_out(button)
+{
+   button.style.borderColor = "#999999";
 }

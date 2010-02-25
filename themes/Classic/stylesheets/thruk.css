@@ -5,6 +5,10 @@
 
 .nav_small_logo { margin: 0px; padding: 0px; }
 
+body {
+  margin-top: 0px;
+}
+
 body.navbar {
   font-family:arial,verdana,serif;
   margin: 5px;
@@ -21,6 +25,7 @@ div.pref_pane {
   right: 0px;
   z-index: 99;
   color: black;
+  font-size: 9pt;
 }
 table.pref_pane {
   margin-top: 0px;
@@ -41,12 +46,60 @@ table.pref_pane > tbody > tr > td {
   background-color: #C4C2C2;
 }
 
-/* preferences pane */
 img.pref_pane_button {
   position:absolute;
-  top: 0px;
-  right: 0px;
+  top: 4px;
+  right: 4px;
   z-index: 100;
+}
+table.top_nav {
+  border: 0px none;
+  font-size: 10pt;
+  margin: 0px;
+  padding: 0px;
+  font-size:8px;
+}
+.top_nav td {
+  border: 0px none;
+  padding: 0px;
+  margin: 0px;
+}
+
+input.top_nav_pref_button {
+  color:#444444;
+  background-color:#EEEEEE;
+  border-style:double;
+  border-color:#999999;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+}
+input.button_peerUP {
+  color:#444444;
+  background-color:#33FF00;
+  border-style:double;
+  border-color:#999999;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+}
+input.button_peerDOWN {
+  color:#444444;
+  background-color:#F83838;
+  border-style:double;
+  border-color:#999999;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+}
+input.button_peerDIS {
+  color:#444444;
+  background-color:#EEEEEE;
+  border-style:double;
+  border-color:#ACACAC;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
 }
 
 /* class to preload images */
