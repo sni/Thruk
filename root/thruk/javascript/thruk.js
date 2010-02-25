@@ -36,7 +36,7 @@ function prefSubmit(url, current_theme) {
 function setRefreshRate(rate) {
   var obj = document.getElementById('refresh_rate');
   if(!rate || refreshPage == 0) {
-    obj.innerHTML = "This page will not refresh automatically";
+    obj.innerHTML = "<span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>";
   }
   else {
     obj.innerHTML = "<span id='refresh_rate'>Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'></span>";

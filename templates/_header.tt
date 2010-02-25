@@ -32,7 +32,7 @@
   <div class="pref_pane" id="pref_pane">
     <a href="javascript:togglePreferencePane('[% theme %]')"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
     <form action="[% c.uri %]" method="GET">
-    <table class="pref_pane" border=1 width="350">
+    <table class="pref_pane" border=1 width="450">
       <tr>
         <td>
           <table>
@@ -51,7 +51,7 @@
               <th>Page Refresh:</th>
               <td nowrap>
               [% IF no_auto_reload %]
-              This page will not refresh automatically
+              <span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>
               [% ELSE %]
               <span id="refresh_rate">Update in [% refresh_rate %] seconds <input type="button" value="stop" onClick="stopRefresh()"></span>
               [% END %]
