@@ -77,7 +77,9 @@ statusmap: maybe something with http://search.cpan.org/~lbrocard/GraphViz/lib/Gr
            or with http://thejit.org/Jit/Examples/RGraph/example1.html
 
 status:
-    - proper search (maybe ajax autocomplete for input form)
+    - proper search
+        maybe ajax autocomplete for input form
+        save searches
     - add new search page, with selector for all parameters
     - add flexible selector, ex.: select multiple hostgroups
     - host table map with worst service state as color
