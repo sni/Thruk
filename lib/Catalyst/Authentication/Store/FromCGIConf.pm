@@ -65,6 +65,17 @@ sub find_user {
         $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;
     }
 
+    # override can_submit_commands from cgi.cfg
+    if(grep 'authorized_for_all_host_commands', @{$user->{'roles'}}) {
+        $can_submit_commands = 1;
+    }
+    elsif(grep 'authorized_for_all_service_commands', @{$user->{'roles'}}) {
+        $can_submit_commands = 1;
+    }
+    elsif(grep 'authorized_for_system_commands', @{$user->{'roles'}}) {
+        $can_submit_commands = 1;
+    }
+
     $c->log->debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
         push @{$user->{'roles'}}, 'is_authorized_for_read_only';
