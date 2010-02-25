@@ -17,19 +17,19 @@
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>Alert Types:</td>
-              <td valign="top" align="left" class='optBoxValue'>Host &amp; Service Alerts</td>
+              <td valign="top" align="left" class='optBoxValue'>[% alerttypefilter %] Alerts</td>
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>State Types:</td>
-              <td valign="top" align="left" class='optBoxValue'>Soft &amp; Hard States</td>
+              <td valign="top" align="left" class='optBoxValue'>[% statetypefilter %] States</td>
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>Host States:</td>
-              <td valign="top" align="left" class='optBoxValue'>Up, Down, Unreachable</td>
+              <td valign="top" align="left" class='optBoxValue'>[% hoststatusfilter %]</td>
             </tr>
             <tr>
               <td valign="top" align="left" class='optBoxItem'>Service States:</td>
-              <td valign="top" align="left" class='optBoxValue'>Ok, Warning, Unknown, Critical</td>
+              <td valign="top" align="left" class='optBoxValue'>[% servicestatusfilter %]</td>
             </tr>
             <tr>
               <td valign="top" align="left" colspan="2" class='optBoxItem'>

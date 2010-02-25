@@ -1,5 +1,5 @@
 <div align="center" class='dataSubTitle'>
-  Displaying all 12 matching alert producers
+  Displaying all [% data.size %] matching alert producers
   <div align="center">
     <table border="0" class='data'>
       <tr>
@@ -9,33 +9,22 @@
         <th class='data'>Service</th>
         <th class='data'>Total Alerts</th>
       </tr>
+      [%  FOREACH d = data %]
+      [% SET class = 'dataOdd'  IF loop.even %]
+      [% SET class = 'dataEven' IF loop.odd %]
       <tr class='dataEven'>
-        <td class='dataEven'>#1</td>
-        <td class='dataEven'>Service</td>
-        <td class='dataEven'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_2'>n6_test_host_2</a></td>
-        <td class='dataEven'><a href='extinfo.cgi?type=2&amp;host=n6_test_host_2&amp;service=n6_test_random_09'>n6_test_random_09</a></td>
-        <td class='dataEven'>8</td>
-      </tr>
-      <tr class='dataOdd'>
-        <td class='dataOdd'>#2</td>
-        <td class='dataOdd'>Service</td>
-        <td class='dataOdd'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_2'>n6_test_host_2</a></td>
-        <td class='dataOdd'><a href='extinfo.cgi?type=2&amp;host=n6_test_host_2&amp;service=n6_test_random_07'>n6_test_random_07</a></td>
-        <td class='dataOdd'>8</td>
-      </tr>
-      <tr class='dataEven'>
-        <td class='dataEven'>#3</td>
-        <td class='dataEven'>Service</td>
-        <td class='dataEven'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_0'>n6_test_host_0</a></td>
-        <td class='dataEven'><a href='extinfo.cgi?type=2&amp;host=n6_test_host_0&amp;service=n6_test_random_04'>n6_test_random_04</a></td>
-        <td class='dataEven'>6</td>
-      </tr>
-      <tr class='dataOdd'>
-        <td class='dataOdd'>#4</td>
-        <td class='dataOdd'>Service</td>
-        <td class='dataOdd'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_1'>n6_test_host_1</a></td>
-        <td class='dataOdd'><a href='extinfo.cgi?type=2&amp;host=n6_test_host_1&amp;service=n6_test_random_09'>n6_test_random_09</a></td>
-        <td class='dataOdd'>5</td>
+        <td class='[% class %]'>#[% loop.index() + 1 %]</td>
+        [% IF d.service_description %]
+        <td class='[% class %]'>Service</td>
+        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
+        <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name %]&amp;service=[% d.service_description %]'>[% d.service_description %]</a></td>
+        [% ELSE %]
+        <td class='[% class %]'>Host</td>
+        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
+        <td class='[% class %]'>N/A</td>
+        [% END %]
+        <td class='[% class %]'>8</td>
+      [% END %]
       </tr>
     </table>
   </div>

@@ -2,9 +2,10 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <title>[% title %]</title>
+    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/common.css' />
+
     [% SET page = 'status' IF page == '' %]
     <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% page %].css' />
     <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk.css' />
@@ -71,9 +72,27 @@
 
 <table border="0" cellpadding=0 cellspacing=0 class="top_nav">
   <tr>
-    <td width="100%">&nbsp;</td>
+    <td width="100%">
+      <table border=0 cellpadding=0 cellspacing=0>
+        <tr>
+          [% FOREACH pd IN backends %]
+          <td>
+            [% SET name  = 'unknown' %]
+            [% SET class = 'button_peerDOWN' %]
+            [% IF pi_detail.$pd.program_start %]
+              [% name = pi_detail.$pd.peer_name %]
+              [% SET class = 'button_peerUP' %]
+            [% ELSIF backend_detail.$pd.name %]
+              [% name = backend_detail.$pd.name %]
+            [% END %]
+            <input type="button" class="[% class %]" value="[% name %]" title="[% name %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)">
+          </td>
+          [% END %]
+        </tr>
+      </table>
+    </td>
     <td class="top_nav_pref">
-      <input type="button" name="pref_button" class="top_nav_pref_button" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="togglePreferencePane('[% theme %]', 1)">
+      <input type="button" class="top_nav_pref_button" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="togglePreferencePane('[% theme %]', 1)">
     </td>
   </tr>
 </table>

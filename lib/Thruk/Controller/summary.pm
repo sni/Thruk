@@ -31,6 +31,10 @@ use constant {
     REPORT_SERVICE_ALERT_TOTALS         => 6,
     REPORT_SERVICEGROUP_ALERT_TOTALS    => 7,
 
+    # state types
+    AE_SOFT                             => 1,
+    AE_HARD                             => 2,
+
     # alert types
     AE_HOST_ALERT                       => 1,
     AE_SERVICE_ALERT                    => 2,
@@ -150,42 +154,238 @@ sub _create_report {
     $c->stash->{end}        = $end;
     $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'};
 
+    # get filter from parameters
+    my($hostfilter, $servicefilter) = $self->_get_filter($c);
+
+    $hostfilter    .= "Filter: time >= $start\nFilter: time <= $end";
+    $servicefilter .= "Filter: time >= $start\nFilter: time <= $end";
+
+    my $alertlogs = $self->_get_alerts_from_log($c, $hostfilter, $servicefilter);
+
     if($displaytype == REPORT_RECENT_ALERTS) {
         $c->stash->{report_title}    = 'Most Recent Alerts';
         $c->stash->{report_template} = 'summary_report_recent_alerts.tt';
+        $self->_display_recent_alerts($c, $alertlogs);
     }
     elsif($displaytype == REPORT_TOP_ALERTS) {
         $c->stash->{report_title}    = 'Top Alert Producers';
         $c->stash->{report_template} = 'summary_report_top_alerts.tt';
+        $self->_display_top_alerts($c, $alertlogs);
     }
     elsif($displaytype == REPORT_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
+        $self->_display_alert_totals($c, $alertlogs);
     }
     elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
+        $self->_display_alert_totals($c, $alertlogs);
     }
     elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
+        $self->_display_alert_totals($c, $alertlogs);
     }
     elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
+        $self->_display_alert_totals($c, $alertlogs);
     }
     elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
+        $self->_display_alert_totals($c, $alertlogs);
     }
     else {
         return;
     }
 
-    $c->stash->{template}        = 'summary_report.tt';
+    $c->stash->{template} = 'summary_report.tt';
 
-    $c->stats->profile(begin => "_create_report()");
+    $c->stats->profile(end => "_create_report()");
     return 1;
+}
+
+##########################################################
+sub _display_top_alerts {
+    my ( $self, $c, $alerts ) = @_;
+    $c->stats->profile(begin => "_display_top_alerts()");
+
+
+    $c->stats->profile(end => "_display_top_alerts()");
+    return 1;
+}
+
+##########################################################
+sub _get_alerts_from_log {
+    my ( $self, $c, $hostfilter, $servicefilter ) = @_;
+
+    my($hostlogs, $servicelogs);
+
+    if($c->stash->{alerttypefilter} ne "Service") {
+        my $host_log_query = "GET log\n".$hostfilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state host_name service_description current_host_groups current_service_groups";
+        $c->log->debug($host_log_query);
+        $c->stats->profile(begin => "summary.pm fetch host logs");
+        $hostlogs = $c->{'live'}->selectall_arrayref($host_log_query, { Slice => 1} );
+        $c->stats->profile(end   => "summary.pm fetch host logs");
+    }
+
+    if($c->stash->{alerttypefilter} ne "Host") {
+        my $service_log_query = "GET log\n".$servicefilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state host_name service_description current_host_groups current_service_groups";
+        $c->log->debug($service_log_query);
+        $c->stats->profile(begin => "summary.pm fetch service logs");
+        $servicelogs = $c->{'live'}->selectall_arrayref($service_log_query, { Slice => 1} );
+        $c->stats->profile(end   => "summary.pm fetch service logs");
+    }
+
+    my @alertlogs = [ @{$hostlogs}, @{$servicelogs} ];
+
+    return(\@alertlogs);
+}
+
+##########################################################
+sub _get_filter {
+    my( $self, $c ) = @_;
+
+    my($hostfilter, $servicefilter) = ("", "");
+
+    # host state filter
+    my($hoststatusfiltername,$hoststatusfilter)
+        = $self->_get_host_statustype_filter($c->{'request'}->{'parameters'}->{'hoststates'});
+    $c->stash->{hoststatusfilter} = $hoststatusfiltername;
+    $hostfilter .= $hoststatusfilter;
+
+    # service state filter
+    my($servicestatusfiltername,$servicestatusfilter)
+        = $self->_get_service_statustype_filter($c->{'request'}->{'parameters'}->{'servicestates'});
+    $c->stash->{servicestatusfilter} = $servicestatusfiltername;
+    $servicefilter .= $servicestatusfilter;
+
+    # hard or soft?
+    my $statetypes = $c->{'request'}->{'parameters'}->{'statetypes'};
+    if($statetypes == AE_SOFT) {
+        $c->stash->{statetypefilter} = "Soft";
+        $servicefilter .= "Filter: options ~ ;SOFT;\n";
+        $hostfilter    .= "Filter: options ~ ;SOFT;\n";
+    }
+    elsif($statetypes == AE_HARD) {
+        $c->stash->{statetypefilter} = "Hard";
+        $servicefilter .= "Filter: options ~ ;HARD;\n";
+        $hostfilter    .= "Filter: options ~ ;HARD;\n";
+    }
+    else {
+        $c->stash->{statetypefilter} = "Hard &amp; Soft";
+    }
+
+    # only hosts or services?
+    $hostfilter    .= "Filter: type = HOST ALERT\n";
+    $servicefilter .= "Filter: type = SERVICE ALERT\n";
+    my $alerttypes = $c->{'request'}->{'parameters'}->{'alerttypes'};
+    if($alerttypes == AE_HOST_ALERT) {
+        $c->stash->{alerttypefilter} = "Host";
+    }
+    elsif($alerttypes == AE_SERVICE_ALERT) {
+        $c->stash->{alerttypefilter} = "Service";
+    }
+    else {
+        $c->stash->{alerttypefilter} = "Host &amp; Service";
+    }
+
+    # hostgroups?
+    my $hostgroup    = $c->{'request'}->{'parameters'}->{'hostgroup'};
+    my $host         = $c->{'request'}->{'parameters'}->{'host'};
+    my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'};
+    if(defined $hostgroup and $hostgroup ne 'all') {
+        $hostfilter    .= "Filter: current_host_groups >= $hostgroup\n";
+        $servicefilter .= "Filter: current_host_groups >= $hostgroup\n";
+    }
+    elsif(defined $host and $host ne 'all') {
+        $hostfilter    .= "Filter: host_name = $host\n";
+        $servicefilter .= "Filter: host_name = $host\n";
+    }
+    elsif(defined $servicegroup and $servicegroup ne 'all') {
+        $hostfilter    .= "Filter: current_service_groups >= $servicegroup\n";
+        $servicefilter .= "Filter: current_service_groups >= $servicegroup\n";
+    }
+
+    return($hostfilter, $servicefilter);
+}
+
+##########################################################
+sub _get_host_statustype_filter {
+    my ( $self, $number ) = @_;
+
+    $number = 7 if !defined $number or $number <= 0 or $number > 7;
+    my $hoststatusfiltername = 'All';
+    my $hostfilter           = '';
+    if($number and $number != 7) {
+        my @hoststatusfilter;
+        my @hoststatusfiltername;
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("n", int($number))));
+
+        if($bits[0]) {  # 1 - host down
+            push @hoststatusfilter,    "Filter: state = 1";
+            push @hoststatusfiltername, 'Down';
+        }
+        if($bits[1]) {  # 2 - host unreachable
+            push @hoststatusfilter,    "Filter: state = 2";
+            push @hoststatusfiltername, 'Unreachable';
+        }
+        if($bits[2]) {  # 4 - host up
+            push @hoststatusfilter,    "Filter: state = 0";
+            push @hoststatusfiltername, 'Up';
+        }
+        $hoststatusfiltername = join(', ', @hoststatusfiltername);
+
+        if(scalar @hoststatusfilter > 1) {
+            $hostfilter    .= join("\n", @hoststatusfilter)."\nOr: ".(scalar @hoststatusfilter)."\n";
+        }
+        elsif(scalar @hoststatusfilter == 1) {
+            $hostfilter    .= $hoststatusfilter[0]."\n";
+        }
+    }
+    return($hoststatusfiltername,$hostfilter);
+}
+
+##########################################################
+sub _get_service_statustype_filter {
+    my ( $self, $number ) = @_;
+
+    $number = 120 if !defined $number or $number <= 0 or $number > 120;
+    my $servicestatusfiltername = 'All';
+    my $servicefilter           = '';
+    if($number and $number != 120) {
+        my @servicestatusfilter;
+        my @servicestatusfiltername;
+        my @bits = reverse split(/\ */mx, unpack("B*", pack("n", int($number))));
+
+        if($bits[3]) {  # 8 - service warning
+            push @servicestatusfilter,    "Filter: state = 1";
+            push @servicestatusfiltername, 'Warning';
+        }
+        if($bits[4]) {  # 16 - service unknown
+            push @servicestatusfilter,    "Filter: state = 3";
+            push @servicestatusfiltername, 'Unknown';
+        }
+        if($bits[5]) {  # 32 - service critical
+            push @servicestatusfilter,    "Filter: state = 2";
+            push @servicestatusfiltername, 'Critical';
+        }
+        if($bits[6]) {  # 64 - service ok
+            push @servicestatusfilter,    "Filter: state = 0";
+            push @servicestatusfiltername, 'Ok';
+        }
+        $servicestatusfiltername = join(', ', @servicestatusfiltername);
+
+        if(scalar @servicestatusfilter > 1) {
+            $servicefilter    .= join("\n", @servicestatusfilter)."\nOr: ".(scalar @servicestatusfilter)."\n";
+        }
+        elsif(scalar @servicestatusfilter == 1) {
+            $servicefilter    .= $servicestatusfilter[0]."\n";
+        }
+    }
+    return($servicestatusfiltername,$servicefilter);
 }
 
 ##########################################################
