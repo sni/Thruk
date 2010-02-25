@@ -169,7 +169,7 @@ sub _create_report {
     }
     elsif($displaytype == REPORT_TOP_ALERTS) {
         $c->stash->{report_title}    = 'Top Alert Producers';
-        $c->stash->{report_template} = 'summary_report_top_alerts.tt';
+        $c->stash->{report_template} = 'summary_report_alert_producer.tt';
         $self->_display_top_alerts($c, $alertlogs);
     }
     elsif($displaytype == REPORT_ALERT_TOTALS) {

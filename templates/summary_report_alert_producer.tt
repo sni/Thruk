@@ -1,5 +1,3 @@
-[% PROCESS _header.tt %]
-
 <div align="center" class='dataSubTitle'>
   Displaying all [% data.size %] matching alert producers
   <div align="center">
@@ -14,23 +12,20 @@
       [%  FOREACH d = data %]
       [% SET class = 'dataOdd'  IF loop.even %]
       [% SET class = 'dataEven' IF loop.odd %]
-      <tr class='[% class %]'>
+      <tr class='dataEven'>
         <td class='[% class %]'>#[% loop.index() + 1 %]</td>
         [% IF d.service_description %]
-        <td class='[% class %]'>Host</td>
-        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
-        <td class='[% class %]'>N/A</td>
-        [% ELSE %]
         <td class='[% class %]'>Service</td>
         <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
         <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name %]&amp;service=[% d.service_description %]'>[% d.service_description %]</a></td>
+        [% ELSE %]
+        <td class='[% class %]'>Host</td>
+        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
+        <td class='[% class %]'>N/A</td>
         [% END %]
-        <td class='[% class %]'>4</td>
-        [% END %]
+        <td class='[% class %]'>8</td>
       </tr>
       [% END %]
     </table>
   </div>
 </div>
-
-[% PROCESS _footer.tt %]
