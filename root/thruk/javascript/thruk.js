@@ -64,3 +64,33 @@ function button_out(button)
 {
    button.style.borderColor = "#999999";
 }
+
+/* toggle querys for this backend */
+function toggleBackend(backend) {
+  var button        = document.getElementById('button_' + backend);
+
+  initial_state = initial_backend_states.get(backend);
+  if(button.className == "button_peerDIS") {
+    if(initial_state == 1) {
+      button.className = 'button_peerDOWN';
+    }
+    else if(initial_state == 3) {
+      button.className = 'button_peerHID';
+    }
+    else {
+        button.className = 'button_peerUP';
+    }
+    current_backend_states.set(backend, 0);
+  } else {
+    button.className = "button_peerDIS";
+    current_backend_states.set(backend, 2);
+  }
+
+  /* save current selected backends in cookie */
+  var now         = new Date();
+  var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
+  document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/; expires=" + expires.toGMTString() + ";";
+  if(initial_state != 3) {
+    document.location.reload();
+  }
+}

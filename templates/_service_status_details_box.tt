@@ -20,11 +20,11 @@
           <th class='serviceTotals'><a class='serviceTotals' href='status.cgi?[% filter %][% sfilter %]&amp;servicestatustypes=1[% hfilter %]'>Pending</a></th>
         </tr>
         <tr>
-          <td class='[% IF service_stats.ok > 0 %]serviceTotalsOK[% ELSE %]serviceTotals[% END %]'>[% service_stats.ok %]</td>
-          <td class='[% IF service_stats.warning > 0 %]serviceTotalsWARNING[% ELSE %]serviceTotals[% END %]'>[% service_stats.warning %]</td>
-          <td class='[% IF service_stats.unknown > 0 %]serviceTotalsUNKNOWN[% ELSE %]serviceTotals[% END %]'>[% service_stats.unknown %]</td>
-          <td class='[% IF service_stats.critical > 0 %]serviceTotalsCRITICAL[% ELSE %]serviceTotals[% END %]'>[% service_stats.critical %]</td>
-          <td class='[% IF service_stats.pending > 0 %]serviceTotalsPENDING[% ELSE %]serviceTotals[% END %]'>[% service_stats.pending %]</td>
+          <td class='[% IF service_stats.ok > 0 %]serviceTotalsOK[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.ok %][% service_stats.ok %][% ELSE %]0[% END %]</td>
+          <td class='[% IF service_stats.warning > 0 %]serviceTotalsWARNING[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.warning %][% service_stats.warning %][% ELSE %]0[% END %]</td>
+          <td class='[% IF service_stats.unknown > 0 %]serviceTotalsUNKNOWN[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.unknown %][% service_stats.unknown %][% ELSE %]0[% END %]</td>
+          <td class='[% IF service_stats.critical > 0 %]serviceTotalsCRITICAL[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.critical %][% service_stats.critical %][% ELSE %]0[% END %]</td>
+          <td class='[% IF service_stats.pending > 0 %]serviceTotalsPENDING[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.pending %][% service_stats.pending %][% ELSE %]0[% END %]</td>
         </tr>
       </table>
     </td>

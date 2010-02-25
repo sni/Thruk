@@ -40,7 +40,18 @@ before 'execute' => sub {
 
     ###############################
     # get livesocket object
-    $c->{'live'} = Thruk::Utils::get_livestatus($c);
+    my %disabled_backends;
+    my $nr_disabled = 0;
+    if(defined $c->request->cookie('thruk_backends')) {
+        for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
+            my($key, $value) = split/=/mx, $val;
+            $disabled_backends{$key} = $value;
+            $nr_disabled++ if $value == 2;
+        }
+    }
+    $c->{'live'} = Thruk::Utils::get_livestatus($c, \%disabled_backends);
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
+    $c->stash->{'param_backend'}  = $backend;
 
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
@@ -61,6 +72,23 @@ before 'execute' => sub {
     }
 
     ###############################
+    my @possible_backends = $c->{'live'}->peer_key();
+    my %backend_detail;
+    for my $back (@possible_backends) {
+        $backend_detail{$back} = {
+            "name"     => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
+            "addr"     => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
+            "disabled" => $disabled_backends{$back} || 0,
+        };
+    }
+    $c->stash->{'backends'}           = \@possible_backends;
+    $c->stash->{'backend_detail'}     = \%backend_detail;
+
+    ###############################
+    $c->stash->{'escape_html_tags'}   = $c->{'cgi_cfg'}->{'escape_html_tags'};
+    $c->stash->{'show_context_help'}  = $c->{'cgi_cfg'}->{'show_context_help'};
+
+    ###############################
     # add program status
     eval {
         my $processinfo = $c->{'live'}->selectall_hashref("GET status\n".Thruk::Utils::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
@@ -72,26 +100,11 @@ before 'execute' => sub {
         $c->log->error("livestatus error: $@");
         $c->detach('/error/index/9');
     }
-    if(!defined $c->stash->{'pi_detail'}) {
-        $c->log->error("got no result from every backend, please check backend connection");
+    if(!defined $c->stash->{'pi_detail'} and $nr_disabled < scalar @possible_backends) {
+        $c->log->error("got no result from any enabled backend, please check backend connection and logfiles");
         $c->detach('/error/index/9');
     }
-
     ###############################
-    my @possible_backends = $c->{'live'}->peer_key();
-    my %backend_detail;
-    for my $back (@possible_backends) {
-        $backend_detail{$back} = {
-            "name" => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
-            "addr" => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
-        };
-    }
-    $c->stash->{'backends'}           = \@possible_backends;
-    $c->stash->{'backend_detail'}     = \%backend_detail;
-
-    ###############################
-    $c->stash->{'escape_html_tags'}   = $c->{'cgi_cfg'}->{'escape_html_tags'};
-    $c->stash->{'show_context_help'}  = $c->{'cgi_cfg'}->{'show_context_help'};
 
     $c->stats->profile(end => "AddDefaults::before");
 };

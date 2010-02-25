@@ -48,6 +48,8 @@
                         <td class='dataVal' nowrap>
                           [% IF pi_detail.$pd.program_start %]
                             [% date.format(pi_detail.$pd.program_start, datetime_format) %]
+                          [% ELSIF backend_detail.$pd.disabled == 2 %]
+                          <div class='peerDIS'>&nbsp;&nbsp;DISABLED</div>
                           [% ELSE %]
                           <div class='peerDOWN'>&nbsp;&nbsp;DOWN</div>
                           [% END %]

@@ -26,14 +26,14 @@
           <div class='data'>Host</div>
           <div class='dataTitle'>[% host.alias %]</div>
           <div class='dataTitle'>([% host.name %])</div><br>
-          [% IF backends.size > 1 %]
+          [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">
               <input type="hidden" name="type" value="1">
               <input type="hidden" name="host" value="[% host.name %]">
               This host is ambiguous:
               <select name="backend">
-                [% FOREACH b IN backends %]
+                [% FOREACH b IN matching_backends %]
                 [% SET name = pi_detail.$b.peer_name %]
                 <option value="[% b %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
                 [% END %]

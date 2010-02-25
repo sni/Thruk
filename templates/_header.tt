@@ -21,9 +21,24 @@
     [% END %]
 
     <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
+    <script type="text/javascript" src="/thruk/javascript/prototype-1.6.0.3.js"></script>
     <script type="text/javascript" src="/thruk/javascript/thruk.js"></script>
     [% IF js %]<script type="text/javascript" src="[% js %]"></script>[% END %]
 
+    <script type="text/javascript">
+    <!--
+    var initial_backend_states = new Hash({
+        [% FOREACH pd IN backends %]
+          [% SET val = '1' %]
+          [% SET val = '0' IF pi_detail.$pd.program_start %]
+          [% SET val = '2' IF backend_detail.$pd.disabled == 2 %]
+          [% SET val = '3' IF param_backend && pd != param_backend %]
+          '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
+        [% END %]
+    });
+    var current_backend_states = initial_backend_states.clone();
+    -->
+    </script>
     [% PROCESS extra_headers.tt %]
 
   </head>
@@ -68,8 +83,8 @@
     [% PROCESS side.tt %]
   </div>
   [% END %]
-  <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
 
+<!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
 <table border="0" cellpadding=0 cellspacing=0 class="top_nav">
   <tr>
     <td width="100%">
@@ -78,14 +93,13 @@
           [% FOREACH pd IN backends %]
           <td>
             [% SET name  = 'unknown' %]
+            [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
+            [% SET name = pi_detail.$pd.peer_name IF pi_detail.$pd.program_start %]
             [% SET class = 'button_peerDOWN' %]
-            [% IF pi_detail.$pd.program_start %]
-              [% name = pi_detail.$pd.peer_name %]
-              [% SET class = 'button_peerUP' %]
-            [% ELSIF backend_detail.$pd.name %]
-              [% name = backend_detail.$pd.name %]
-            [% END %]
-            <input type="button" class="[% class %]" value="[% name %]" title="[% name %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)">
+            [% SET class = 'button_peerUP'  IF pi_detail.$pd.program_start %]
+            [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %]
+            [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
+            <input type="button" id='button_[% pd %]' class="[% class %]" value="[% name %]" title="[% name %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleBackend('[% pd %]')">
           </td>
           [% END %]
         </tr>

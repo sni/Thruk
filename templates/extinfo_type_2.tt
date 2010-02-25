@@ -27,7 +27,7 @@
           <div class='data'>On Host</div>
           <div class='dataTitle'>[% service.host_alias %]</div>
           <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name %]'>[% service.host_name %]</a>)</div><br>
-          [% IF backends.size > 1 %]
+          [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">
               <input type="hidden" name="type" value="1">
@@ -35,7 +35,7 @@
               <input type="hidden" name="description" value="[% service.description %]">
               This service is ambiguous:
               <select name="backend">
-                [% FOREACH b IN backends %]
+                [% FOREACH b IN matching_backends %]
                 [% SET name = pi_detail.$b.peer_name %]
                 <option value="[% b %]"[% IF b == backend %] selected[% END %]>[% name %]</option>
                 [% END %]

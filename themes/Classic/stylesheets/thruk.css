@@ -1,4 +1,5 @@
 .peerDOWN { width:100px; font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; }
+.peerDIS { width:100px; font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; }
 .hostPENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
 .servicePENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
 .itemTotalsTitle { font-family: arial,serif;  font-size: 8pt;  text-align: center; }
@@ -100,6 +101,18 @@ input.button_peerDIS {
   border-width:3px;
   font-size:9px;
   font-weight:normal;
+}
+input.button_peerHID {
+  color:#444444;
+  background-color:#EEEEEE;
+  border-style:double;
+  border-color:#ACACAC;
+  border-width:3px;
+  font-size:9px;
+  font-weight:normal;
+  filter:alpha(opacity=40); /* IE */
+  -moz-opacity: 0.40; /* Mozilla */
+  opacity: 0.40; /* Opera */
 }
 
 /* class to preload images */

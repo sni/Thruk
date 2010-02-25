@@ -52,34 +52,34 @@ sub find_user {
         }
     }
 
-    # is the contact allowed to send commands?
-    my $can_submit_commands;
-    eval {
-        $can_submit_commands = $c->{'live'}->selectscalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
-    };
-    if($@) {
-        $c->log->error("livestatus error: $@");
-        $c->detach('/error/index/9');
-    }
-    if(!defined $can_submit_commands) {
-        $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;
-    }
-
-    # override can_submit_commands from cgi.cfg
-    if(grep 'authorized_for_all_host_commands', @{$user->{'roles'}}) {
-        $can_submit_commands = 1;
-    }
-    elsif(grep 'authorized_for_all_service_commands', @{$user->{'roles'}}) {
-        $can_submit_commands = 1;
-    }
-    elsif(grep 'authorized_for_system_commands', @{$user->{'roles'}}) {
-        $can_submit_commands = 1;
-    }
-
-    $c->log->debug("can_submit_commands: $can_submit_commands");
-    if($can_submit_commands != 1) {
-        push @{$user->{'roles'}}, 'is_authorized_for_read_only';
-    }
+    ## is the contact allowed to send commands?
+    #my $can_submit_commands;
+    #eval {
+    #    $can_submit_commands = $c->{'live'}->selectscalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
+    #};
+    #if($@) {
+    #    $c->log->error("livestatus error: $@");
+    #    $c->detach('/error/index/9');
+    #}
+    #if(!defined $can_submit_commands) {
+    #    $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;
+    #}
+    #
+    ## override can_submit_commands from cgi.cfg
+    #if(grep 'authorized_for_all_host_commands', @{$user->{'roles'}}) {
+    #    $can_submit_commands = 1;
+    #}
+    #elsif(grep 'authorized_for_all_service_commands', @{$user->{'roles'}}) {
+    #    $can_submit_commands = 1;
+    #}
+    #elsif(grep 'authorized_for_system_commands', @{$user->{'roles'}}) {
+    #    $can_submit_commands = 1;
+    #}
+    #
+    #$c->log->debug("can_submit_commands: $can_submit_commands");
+    #if($can_submit_commands != 1) {
+    #    push @{$user->{'roles'}}, 'is_authorized_for_read_only';
+    #}
 
     return bless $user, "Catalyst::Authentication::User::Hash";
 }

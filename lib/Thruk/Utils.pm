@@ -233,7 +233,8 @@ return the livestatus object
 
 =cut
 sub get_livestatus {
-    my $c = shift;
+    my $c                 = shift;
+    my $disabled_backends = shift;
 
     $c->stats->profile(begin => "Utils::get_livestatus()");
 
@@ -241,6 +242,15 @@ sub get_livestatus {
 
     if(defined $livestatus) {
         $c->log->debug("got livestatus from cache");
+        $livestatus->enable();
+        if(defined $disabled_backends) {
+            for my $key (keys %{$disabled_backends}) {
+                if($disabled_backends->{$key} == 2) {
+                    $c->log->debug("disabled livestatus backend: $key");
+                    $livestatus->disable($key);
+                }
+            }
+        }
         return($livestatus);
     }
     $c->log->debug("creating new livestatus");
@@ -254,6 +264,15 @@ sub get_livestatus {
         $livestatus_config->{'logger'} = $c->log
     }
     $livestatus = Monitoring::Livestatus::MULTI->new(%{$livestatus_config});
+
+    if(defined $disabled_backends) {
+        for my $key (keys %{$disabled_backends}) {
+            if($disabled_backends->{$key} == 2) {
+                $c->log->debug("disabled livestatus backend: $key");
+                $livestatus->disable($key);
+            }
+        }
+    }
 
     $c->stats->profile(end => "Utils::get_livestatus()");
 
@@ -652,9 +671,8 @@ sub get_service_execution_stats {
             if(!defined $check_stats->{$type}->{'latency_max'} or $check_stats->{$type}->{'execution_time_max'} < $backend_result->{'execution_time_max'}) { $check_stats->{$type}->{'execution_time_max'} = $backend_result->{'execution_time_max'}; }
             if(!defined $check_stats->{$type}->{'latency_max'} or $check_stats->{$type}->{'latency_max'} < $backend_result->{'latency_max'}) { $check_stats->{$type}->{'latency_max'} = $backend_result->{'latency_max'}; }
         }
-        #$c->log->error(Dumper($data));
 
-        if($check_stats->{$type}->{'has_been_checked'} > 0) {
+        if(defined $check_stats->{$type}->{'has_been_checked'} and $check_stats->{$type}->{'has_been_checked'} > 0) {
             $check_stats->{$type}->{'execution_time_avg'} = $check_stats->{$type}->{'execution_time_sum'} / $check_stats->{$type}->{'has_been_checked'};
             $check_stats->{$type}->{'latency_avg'}        = $check_stats->{$type}->{'latency_sum'}        / $check_stats->{$type}->{'has_been_checked'};
         }

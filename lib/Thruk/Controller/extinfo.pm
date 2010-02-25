@@ -279,8 +279,8 @@ sub _set_backend_selector {
         push @backends, $back;
     }
 
-    $c->stash->{'backends'} = \@backends;
-    $c->stash->{'backend'}  = $selected;
+    $c->stash->{'matching_backends'} = \@backends;
+    $c->stash->{'backend'}           = $selected;
     return 1;
 }
 
