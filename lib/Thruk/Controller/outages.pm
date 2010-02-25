@@ -33,7 +33,7 @@ Filter: childs !=
 And: 2
 ", { Slice => 1 });
 
-    if(scalar @{$outages} > 0) {
+    if(defined $outages and scalar @{$outages} > 0) {
         my $hostcomments = Thruk::Utils::get_hostcomments($c);
         my $all_hosts = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."
 Columns: name childs num_services

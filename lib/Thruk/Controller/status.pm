@@ -266,9 +266,12 @@ sub _process_overview_page {
         $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
 
         # we have to sort in all services and states
-        for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name", { Slice => {} })}) {
-            next if $service->{'description'} eq '';
-            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+        my $tmp_services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name", { Slice => {} });
+        if(defined $tmp_services) {
+            for my $service (@{$tmp_services}) {
+                next if $service->{'description'} eq '';
+                $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+            }
         }
     }
 
@@ -399,8 +402,11 @@ sub _process_grid_page {
 
     # create a hash of all services
     my $services_data;
-    for my $service (@{$c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} })}) {
-        $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+    my $tmp_services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state description host_name\n$servicefilter", { Slice => {} });
+    if(defined $tmp_services) {
+        for my $service (@{$tmp_services}) {
+            $services_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+        }
     }
 
     # get all host/service groups

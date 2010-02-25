@@ -82,9 +82,14 @@ sub _show_step_1 {
     my ( $self, $c ) = @_;
     $c->stats->profile(begin => "_show_step_1()");
 
-    my @hosts         = sort keys %{$c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hosts'), 'name')};
-    my @hostgroups    = sort keys %{$c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hostgroups'), 'name')};
-    my @servicegroups = sort keys %{$c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'servicegroups'), 'name')};
+    my $tmp_hosts         = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hosts'), 'name');
+    my $tmp_hostgroups    = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hostgroups'), 'name');
+    my $tmp_servicegroups = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'servicegroups'), 'name');
+
+    my(@hosts, @hostgroups, @servicegroups);
+    @hosts         = sort keys %{$tmp_hosts}         if defined $tmp_hosts;
+    @hostgroups    = sort keys %{$tmp_hostgroups}    if defined $tmp_hostgroups;
+    @servicegroups = sort keys %{$tmp_servicegroups} if defined $tmp_servicegroups;
 
     $c->stash->{hosts}         = \@hosts;
     $c->stash->{hostgroups}    = \@hostgroups;

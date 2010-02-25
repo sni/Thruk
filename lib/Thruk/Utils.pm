@@ -501,70 +501,73 @@ sub get_service_execution_stats_old {
             'passive_state_change_sum'  => 0,
         };
 
-        for my $data (@{$c->{'live'}->selectall_arrayref("GET $type\n".Thruk::Utils::get_auth_filter($c, $type)."\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 })}) {
-            my $minall = $c->stash->{'pi_detail'}->{$data->{'peer_key'}}->{'program_start'};
+        my $tmp_data = $c->{'live'}->selectall_arrayref("GET $type\n".Thruk::Utils::get_auth_filter($c, $type)."\nColumns: execution_time has_been_checked last_check latency percent_state_change check_type", { Slice => 1, AddPeer => 1 });
+        if($tmp_data) {
+            for my $data (@{$tmp_data}) {
+                my $minall = $c->stash->{'pi_detail'}->{$data->{'peer_key'}}->{'program_start'};
 
-            if($data->{'check_type'} == 0) {
-                $check_stats->{$type}->{'active_sum'}++;
-            } else {
-                $check_stats->{$type}->{'passive_sum'}++;
-            }
-
-            if($data->{'has_been_checked'}) {
-
-                # active checks
                 if($data->{'check_type'} == 0) {
-                    if($data->{'last_check'} >= $min1)   { $check_stats->{$type}->{'active_1_min'}++;   }
-                    if($data->{'last_check'} >= $min5)   { $check_stats->{$type}->{'active_5_min'}++;   }
-                    if($data->{'last_check'} >= $min15)  { $check_stats->{$type}->{'active_15_min'}++;  }
-                    if($data->{'last_check'} >= $min60)  { $check_stats->{$type}->{'active_60_min'}++;  }
-                    if($data->{'last_check'} >= $minall) { $check_stats->{$type}->{'active_all_min'}++; }
-
-                    # sum up all values to calculate averages later
-                    $check_stats->{$type}->{'execution_time_sum'}       += $data->{'execution_time'};
-                    $check_stats->{$type}->{'latency_sum'}              += $data->{'latency'};
-                    $check_stats->{$type}->{'active_state_change_sum'}  += $data->{'percent_state_change'};
-
-                    # check min/max values
-                    if(!defined $check_stats->{$type}->{'execution_time_min'} or $check_stats->{$type}->{'execution_time_min'} > $data->{'execution_time'}) {
-                        $check_stats->{$type}->{'execution_time_min'} = $data->{'execution_time'};
-                    }
-                    if(!defined $check_stats->{$type}->{'execution_time_max'} or $check_stats->{$type}->{'execution_time_max'} < $data->{'execution_time'}) {
-                        $check_stats->{$type}->{'execution_time_max'} = $data->{'execution_time'};
-                    }
-
-                    if(!defined $check_stats->{$type}->{'latency_min'} or $check_stats->{$type}->{'latency_min'} > $data->{'latency'}) {
-                        $check_stats->{$type}->{'latency_min'} = $data->{'latency'};
-                    }
-                    if(!defined $check_stats->{$type}->{'latency_max'} or $check_stats->{$type}->{'latency_max'} < $data->{'latency'}) {
-                        $check_stats->{$type}->{'latency_max'} = $data->{'latency'};
-                    }
-
-                    if(!defined $check_stats->{$type}->{'active_state_change_min'} or $check_stats->{$type}->{'active_state_change_min'} > $data->{'percent_state_change'}) {
-                        $check_stats->{$type}->{'active_state_change_min'} = $data->{'percent_state_change'};
-                    }
-                    if(!defined $check_stats->{$type}->{'active_state_change_max'} or $check_stats->{$type}->{'active_state_change_max'} < $data->{'percent_state_change'}) {
-                        $check_stats->{$type}->{'active_state_change_max'} = $data->{'percent_state_change'};
-                    }
-                }
-                # passive checks
-                else {
+                    $check_stats->{$type}->{'active_sum'}++;
+                } else {
                     $check_stats->{$type}->{'passive_sum'}++;
-                    if($data->{'last_check'} >= $min1)   { $check_stats->{$type}->{'passive_1_min'}++;   }
-                    if($data->{'last_check'} >= $min5)   { $check_stats->{$type}->{'passive_5_min'}++;   }
-                    if($data->{'last_check'} >= $min15)  { $check_stats->{$type}->{'passive_15_min'}++;  }
-                    if($data->{'last_check'} >= $min60)  { $check_stats->{$type}->{'passive_60_min'}++;  }
-                    if($data->{'last_check'} >= $minall) { $check_stats->{$type}->{'passive_all_min'}++; }
+                }
 
-                    # sum up all values to calculate averages later
-                    $check_stats->{$type}->{'passive_state_change_sum'} += $data->{'percent_state_change'};
+                if($data->{'has_been_checked'}) {
 
-                    # check min/max values
-                    if(!defined $check_stats->{$type}->{'passive_state_change_min'} or $check_stats->{$type}->{'passive_state_change_min'} > $data->{'percent_state_change'}) {
-                        $check_stats->{$type}->{'active_state_change_min'} = $data->{'percent_state_change'};
+                    # active checks
+                    if($data->{'check_type'} == 0) {
+                        if($data->{'last_check'} >= $min1)   { $check_stats->{$type}->{'active_1_min'}++;   }
+                        if($data->{'last_check'} >= $min5)   { $check_stats->{$type}->{'active_5_min'}++;   }
+                        if($data->{'last_check'} >= $min15)  { $check_stats->{$type}->{'active_15_min'}++;  }
+                        if($data->{'last_check'} >= $min60)  { $check_stats->{$type}->{'active_60_min'}++;  }
+                        if($data->{'last_check'} >= $minall) { $check_stats->{$type}->{'active_all_min'}++; }
+
+                        # sum up all values to calculate averages later
+                        $check_stats->{$type}->{'execution_time_sum'}       += $data->{'execution_time'};
+                        $check_stats->{$type}->{'latency_sum'}              += $data->{'latency'};
+                        $check_stats->{$type}->{'active_state_change_sum'}  += $data->{'percent_state_change'};
+
+                        # check min/max values
+                        if(!defined $check_stats->{$type}->{'execution_time_min'} or $check_stats->{$type}->{'execution_time_min'} > $data->{'execution_time'}) {
+                            $check_stats->{$type}->{'execution_time_min'} = $data->{'execution_time'};
+                        }
+                        if(!defined $check_stats->{$type}->{'execution_time_max'} or $check_stats->{$type}->{'execution_time_max'} < $data->{'execution_time'}) {
+                            $check_stats->{$type}->{'execution_time_max'} = $data->{'execution_time'};
+                        }
+
+                        if(!defined $check_stats->{$type}->{'latency_min'} or $check_stats->{$type}->{'latency_min'} > $data->{'latency'}) {
+                            $check_stats->{$type}->{'latency_min'} = $data->{'latency'};
+                        }
+                        if(!defined $check_stats->{$type}->{'latency_max'} or $check_stats->{$type}->{'latency_max'} < $data->{'latency'}) {
+                            $check_stats->{$type}->{'latency_max'} = $data->{'latency'};
+                        }
+
+                        if(!defined $check_stats->{$type}->{'active_state_change_min'} or $check_stats->{$type}->{'active_state_change_min'} > $data->{'percent_state_change'}) {
+                            $check_stats->{$type}->{'active_state_change_min'} = $data->{'percent_state_change'};
+                        }
+                        if(!defined $check_stats->{$type}->{'active_state_change_max'} or $check_stats->{$type}->{'active_state_change_max'} < $data->{'percent_state_change'}) {
+                            $check_stats->{$type}->{'active_state_change_max'} = $data->{'percent_state_change'};
+                        }
                     }
-                    if(!defined $check_stats->{$type}->{'passive_state_change_max'} or $check_stats->{$type}->{'passive_state_change_max'} < $data->{'percent_state_change'}) {
-                        $check_stats->{$type}->{'passive_state_change_max'} = $data->{'percent_state_change'};
+                    # passive checks
+                    else {
+                        $check_stats->{$type}->{'passive_sum'}++;
+                        if($data->{'last_check'} >= $min1)   { $check_stats->{$type}->{'passive_1_min'}++;   }
+                        if($data->{'last_check'} >= $min5)   { $check_stats->{$type}->{'passive_5_min'}++;   }
+                        if($data->{'last_check'} >= $min15)  { $check_stats->{$type}->{'passive_15_min'}++;  }
+                        if($data->{'last_check'} >= $min60)  { $check_stats->{$type}->{'passive_60_min'}++;  }
+                        if($data->{'last_check'} >= $minall) { $check_stats->{$type}->{'passive_all_min'}++; }
+
+                        # sum up all values to calculate averages later
+                        $check_stats->{$type}->{'passive_state_change_sum'} += $data->{'percent_state_change'};
+
+                        # check min/max values
+                        if(!defined $check_stats->{$type}->{'passive_state_change_min'} or $check_stats->{$type}->{'passive_state_change_min'} > $data->{'percent_state_change'}) {
+                            $check_stats->{$type}->{'active_state_change_min'} = $data->{'percent_state_change'};
+                        }
+                        if(!defined $check_stats->{$type}->{'passive_state_change_max'} or $check_stats->{$type}->{'passive_state_change_max'} < $data->{'percent_state_change'}) {
+                            $check_stats->{$type}->{'passive_state_change_max'} = $data->{'percent_state_change'};
+                        }
                     }
                 }
             }
@@ -1053,6 +1056,51 @@ sub uri_with {
     $uri =~ s/&/&amp;/gmx;
 
     return $uri;
+}
+
+########################################
+
+=head2 set_can_submit_commands
+
+  set_can_submit_commands($c)
+
+sets the is_authorized_for_read_only role
+
+=cut
+sub set_can_submit_commands {
+    my $c = shift;
+
+    my $username = $c->request->{'user'}->{'username'};
+
+    # is the contact allowed to send commands?
+    my $can_submit_commands;
+    eval {
+        $can_submit_commands = $c->{'live'}->selectscalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
+    };
+    if($@) {
+        $c->log->error("livestatus error: $@");
+        $c->detach('/error/index/9');
+    }
+    if(!defined $can_submit_commands) {
+        $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;
+    }
+
+    # override can_submit_commands from cgi.cfg
+    if(grep 'authorized_for_all_host_commands', @{$c->request->{'user'}->{'roles'}}) {
+        $can_submit_commands = 1;
+    }
+    elsif(grep 'authorized_for_all_service_commands', @{$c->request->{'user'}->{'roles'}}) {
+        $can_submit_commands = 1;
+    }
+    elsif(grep 'authorized_for_system_commands', @{$c->request->{'user'}->{'roles'}}) {
+        $can_submit_commands = 1;
+    }
+
+    $c->log->debug("can_submit_commands: $can_submit_commands");
+    if($can_submit_commands != 1) {
+        push @{$c->request->{'user'}->{'roles'}}, 'is_authorized_for_read_only';
+    }
+    return 1;
 }
 
 

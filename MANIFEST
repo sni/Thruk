@@ -28,6 +28,7 @@ docs/development/tables/services.txt
 docs/development/tables/status.txt
 docs/development/tables/timeperiods.txt
 docs/development/TODO
+docs/images
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
 inc/Module/AutoInstall.pm
@@ -71,10 +72,13 @@ Makefile.PL
 MANIFEST			This list of files
 META.yml
 README
+root/favicon.ico
+root/robots.txt
 root/thruk/documentation.html
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
 root/thruk/javascript/datetimepicker.js
+root/thruk/javascript/prototype-1.6.0.3.js
 root/thruk/javascript/thruk.js
 script/thruk_cgi.pl
 script/thruk_create.pl
@@ -266,6 +270,7 @@ templates/status_overview.tt
 templates/status_summary.tt
 templates/summary_report.tt
 templates/summary_report_alert_producer.tt
+templates/summary_report_alert_totals.tt
 templates/summary_report_recent_alerts.tt
 templates/summary_step_1.tt
 templates/tac.tt
@@ -538,6 +543,7 @@ themes/Vautour/images/downtime.gif
 themes/Vautour/images/empty.gif
 themes/Vautour/images/enabled.gif
 themes/Vautour/images/extinfo.gif
+themes/Vautour/images/favicon.ico
 themes/Vautour/images/flapping.gif
 themes/Vautour/images/github.png
 themes/Vautour/images/greendot.gif

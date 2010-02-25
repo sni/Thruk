@@ -105,6 +105,10 @@ before 'execute' => sub {
         $c->detach('/error/index/9');
     }
     ###############################
+    # set some more roles
+    Thruk::Utils::set_can_submit_commands($c);
+
+    ###############################
 
     $c->stats->profile(end => "AddDefaults::before");
 };
