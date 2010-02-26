@@ -23,7 +23,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.31_2';
+our $VERSION = '0.32';
 
 ###################################################
 # Configure the application.
@@ -37,7 +37,7 @@ our $VERSION = '0.31_2';
 
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'February 21, 2010',
+                    'released'               => 'February 26, 2010',
                     'image_path'             => 'root/thruk/images',
                     'default_view'           => 'TT',
                     'View::TT'               => {
