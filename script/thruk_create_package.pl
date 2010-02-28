@@ -76,7 +76,7 @@ elsif(-d "$ENV{'HOME'}/perl5") {
 
 if(defined $local_lib and $local_lib ne '') {
   print "creating Thruk-".$version."-".$arch.".tar";
-  cmd("tar zxvf $archive");
+  cmd("tar zxf $archive");
   cmd("rsync -a $local_lib Thruk-".$version."/");
   cmd("tar cvf Thruk-".$version."-".$arch.".tar Thruk-".$version);
   cmd("gzip -9 Thruk-".$version."-".$arch.".tar");

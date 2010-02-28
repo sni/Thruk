@@ -20,7 +20,6 @@ avail:
     - check availability calculation on multibackend (restarts)
 
 summary:
-    - add reports
     - preset selections when generating new report
 
 histogram:

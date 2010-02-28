@@ -1,6 +1,11 @@
 [% USE Math %]
 
 [% IF use_pager AND pager %]
+
+  [% pages = Math.int(pager.total_entries / pager.entries_per_page) %]
+  [% IF pager.total_entries > pager.entries_per_page * pages %][% SET pages = pages + 1 %][% END %]
+
+  [% IF pages > 1 %]
   <br>
   <form action="/[% c.request.path %]" method="GET">
   [% FOREACH par = c.request.query_params.keys %]
@@ -18,8 +23,6 @@
   [% IF pager.previous_page %]
     <input type="image" src="/thruk/themes/[% theme %]/images/resultset_first.png" name="first" alt="first" value="1" class="pager_input_img"><input type="image" src="/thruk/themes/[% theme %]/images/resultset_previous.png" name="previous" alt="previous" value="1" class="pager_input_img">&nbsp;
   [% END %]
-
-  [% pages = Math.int(pager.total_entries / pager.entries_per_page) %]
 
   [% IF pages <= 13 %]
     [% page  = 1 %]
@@ -68,4 +71,5 @@
     </select>
   [% END %]
   </form>
+  [% END %]
 [% END %]

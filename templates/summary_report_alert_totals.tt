@@ -1,109 +1,22 @@
 <div align="center">
-  <div align="center" class='dataSubTitle'>Totals By Servicegroup</div><br>
-  <table border="1" cellspacing="0" cellpadding="0" class='reportDataEven'>
-    <tr>
-      <td>
-        <table border="0">
-          <tr>
-            <td colspan="2" align="center" class='dataSubTitle'>Servicegroup 'critical' (All Critical Services)</td>
-          </tr>
-          <tr>
-            <td align="center" valign="top">
-              <div align="center" class='dataSubTitle'>Host Alerts</div>
-              <div align="center">
-                <table border="0" class='data'>
-                  <tr>
-                    <th class='data'>State</th>
-                    <th class='data'>Soft Alerts</th>
-                    <th class='data'>Hard Alerts</th>
-                    <th class='data'>Total Alerts</th>
-                  </tr>
-                  <tr class='dataOdd'>
-                    <td class='hostUP'>UP</td>
-                    <td class='dataOdd'>195</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>195</td>
-                  </tr>
-                  <tr class='dataEven'>
-                    <td class='hostDOWN'>DOWN</td>
-                    <td class='dataEven'>197</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'>197</td>
-                  </tr>
-                  <tr class='dataOdd'>
-                    <td class='hostUNREACHABLE'>UNREACHABLE</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                  </tr>
-                  <tr class='dataEven'>
-                    <td class='dataEven'>All States</td>
-                    <td class='dataEven'>392</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'><b>392</b></td>
-                  </tr>
-                </table>
-              </div>
-            </td>
-            <td align="center" valign="top">
-              <div align="center" class='dataSubTitle'>Service Alerts</div>
-              <div align="center">
-                <table border="0" class='data'>
-                  <tr>
-                    <th class='data'>State</th>
-                    <th class='data'>Soft Alerts</th>
-                    <th class='data'>Hard Alerts</th>
-                    <th class='data'>Total Alerts</th>
-                  </tr>
-                  <tr class='dataOdd'>
-                    <td class='serviceOK'>OK</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                  </tr>
-                  <tr class='dataEven'>
-                    <td class='serviceWARNING'>WARNING</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'>0</td>
-                  </tr>
-                  <tr class='dataOdd'>
-                    <td class='serviceUNKNOWN'>UNKNOWN</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                  </tr>
-                  <tr class='dataEven'>
-                    <td class='serviceCRITICAL'>CRITICAL</td>
-                    <td class='dataEven'>10</td>
-                    <td class='dataEven'>2</td>
-                    <td class='dataEven'>12</td>
-                  </tr>
-                  <tr class='dataOdd'>
-                    <td class='dataOdd'>All States</td>
-                    <td class='dataOdd'>10</td>
-                    <td class='dataOdd'>2</td>
-                    <td class='dataOdd'><b>12</b></td>
-                  </tr>
-                </table>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-  <br>
+  <div align="center" class='dataSubTitle'>[% box_title %]</div><br>
 
-  <table border="1" cellspacing="0" cellpadding="0" class='reportDataEven'>
+  [%  FOREACH report_key = data.keys.sort %]
+  [% SET d = data.$report_key %]
+  [% SET class = 'reportDataOdd'  IF loop.even %]
+  [% SET class = 'reportDataEven' IF loop.odd  %]
+  <table border="1" cellspacing="0" cellpadding="0" class='[% class %]'>
     <tr>
       <td>
         <table border="0">
+          [% IF d.sub_title %]
           <tr>
-            <td colspan="2" align="center" class='dataSubTitle'>Servicegroup 'flap' (All Flapping Services)</td>
+            <td colspan="2" align="center" class='dataSubTitle'>[% d.sub_title %]</td>
           </tr>
+          [% END %]
           <tr>
             <td align="center" valign="top">
+              [% UNLESS d.no_hosts %]
               <div align="center" class='dataSubTitle'>Host Alerts</div>
               <div align="center">
                 <table border="0" class='data'>
@@ -115,30 +28,31 @@
                   </tr>
                   <tr class='dataOdd'>
                     <td class='hostUP'>UP</td>
-                    <td class='dataOdd'>2</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>2</td>
+                    <td class='dataOdd'>[% d.host.SOFT.UP %]</td>
+                    <td class='dataOdd'>[% d.host.HARD.UP %]</td>
+                    <td class='dataOdd'>[% d.host.SOFT.UP + d.host.HARD.UP %]</td>
                   </tr>
                   <tr class='dataEven'>
                     <td class='hostDOWN'>DOWN</td>
-                    <td class='dataEven'>3</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'>3</td>
+                    <td class='dataEven'>[% d.host.SOFT.DOWN %]</td>
+                    <td class='dataEven'>[% d.host.HARD.DOWN %]</td>
+                    <td class='dataEven'>[% d.host.SOFT.DOWN + d.host.HARD.DOWN %]</td>
                   </tr>
                   <tr class='dataOdd'>
                     <td class='hostUNREACHABLE'>UNREACHABLE</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
+                    <td class='dataOdd'>[% d.host.SOFT.UNREACHABLE %]</td>
+                    <td class='dataOdd'>[% d.host.HARD.UNREACHABLE %]</td>
+                    <td class='dataOdd'>[% d.host.SOFT.UNREACHABLE + d.host.HARD.UNREACHABLE %]</td>
                   </tr>
                   <tr class='dataEven'>
                     <td class='dataEven'>All States</td>
-                    <td class='dataEven'>5</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'><b>5</b></td>
+                    <td class='dataEven'>[% d.host.SOFT.UP + d.host.SOFT.DOWN + d.host.SOFT.UNREACHABLE %]</td>
+                    <td class='dataEven'>[% d.host.HARD.UP + d.host.HARD.DOWN + d.host.HARD.UNREACHABLE %]</td>
+                    <td class='dataEven'><b>[% d.host.SOFT.UP + d.host.SOFT.DOWN + d.host.SOFT.UNREACHABLE + d.host.HARD.UP + d.host.HARD.DOWN + d.host.HARD.UNREACHABLE %]</b></td>
                   </tr>
                 </table>
               </div>
+              [% END %]
             </td>
             <td align="center" valign="top">
               <div align="center" class='dataSubTitle'>Service Alerts</div>
@@ -152,33 +66,33 @@
                   </tr>
                   <tr class='dataOdd'>
                     <td class='serviceOK'>OK</td>
-                    <td class='dataOdd'>177</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>177</td>
+                    <td class='dataOdd'>[% d.service.SOFT.OK %]</td>
+                    <td class='dataOdd'>[% d.service.HARD.OK %]</td>
+                    <td class='dataOdd'>[% d.service.SOFT.OK + d.service.HARD.OK %]</td>
                   </tr>
                   <tr class='dataEven'>
                     <td class='serviceWARNING'>WARNING</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'>0</td>
+                    <td class='dataEven'>[% d.service.SOFT.WARNING %]</td>
+                    <td class='dataEven'>[% d.service.HARD.WARNING %]</td>
+                    <td class='dataEven'>[% d.service.SOFT.WARNING + d.service.HARD.WARNING %]</td>
                   </tr>
                   <tr class='dataOdd'>
                     <td class='serviceUNKNOWN'>UNKNOWN</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'>0</td>
+                    <td class='dataOdd'>[% d.service.SOFT.UNKNOWN %]</td>
+                    <td class='dataOdd'>[% d.service.HARD.UNKNOWN %]</td>
+                    <td class='dataOdd'>[% d.service.SOFT.UNKNOWN + d.service.HARD.UNKNOWN %]</td>
                   </tr>
                   <tr class='dataEven'>
                     <td class='serviceCRITICAL'>CRITICAL</td>
-                    <td class='dataEven'>177</td>
-                    <td class='dataEven'>0</td>
-                    <td class='dataEven'>177</td>
+                    <td class='dataEven'>[% d.service.SOFT.CRITICAL %]</td>
+                    <td class='dataEven'>[% d.service.HARD.CRITICAL %]</td>
+                    <td class='dataEven'>[% d.service.SOFT.CRITICAL + d.service.HARD.CRITICAL %]</td>
                   </tr>
                   <tr class='dataOdd'>
                     <td class='dataOdd'>All States</td>
-                    <td class='dataOdd'>354</td>
-                    <td class='dataOdd'>0</td>
-                    <td class='dataOdd'><b>354</b></td>
+                    <td class='dataOdd'>[% d.service.SOFT.OK + d.service.SOFT.WARNING + d.service.SOFT.UNKNOWN + d.service.SOFT.CRITICAL %]</td>
+                    <td class='dataOdd'>[% d.service.HARD.OK + d.service.HARD.WARNING + d.service.HARD.UNKNOWN + d.service.HARD.CRITICAL %]</td>
+                    <td class='dataOdd'><b>[% d.service.SOFT.OK + d.service.SOFT.WARNING + d.service.SOFT.UNKNOWN + d.service.SOFT.CRITICAL + d.service.HARD.OK + d.service.HARD.WARNING + d.service.HARD.UNKNOWN + d.service.HARD.CRITICAL %]</b></td>
                   </tr>
                 </table>
               </div>
@@ -189,5 +103,6 @@
     </tr>
   </table>
   <br>
+  [% END %]
 
 </div>

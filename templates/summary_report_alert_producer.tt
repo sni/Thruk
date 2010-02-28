@@ -1,5 +1,5 @@
 <div align="center" class='dataSubTitle'>
-  Displaying all [% data.size %] matching alert producers
+  Displaying [% IF pager.total_entries > limit %] first [% limit %] of [% pager.total_entries %] [% ELSE %] all [% data.size %] [% END %] matching alert producers
   <div align="center">
     <table border="0" class='data'>
       <tr>
@@ -23,7 +23,7 @@
         <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
         <td class='[% class %]'>N/A</td>
         [% END %]
-        <td class='[% class %]'>8</td>
+        <td class='[% class %]'>[% d.alerts %]</td>
       </tr>
       [% END %]
     </table>

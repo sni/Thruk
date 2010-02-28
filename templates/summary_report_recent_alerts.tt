@@ -1,5 +1,6 @@
+[% USE date %]
 <div align="center" class='dataSubTitle'>
-  Displaying all 11 matching alerts
+  Displaying [% IF pager.total_entries > limit %] most recent [% limit %] of [% pager.total_entries %] [% ELSE %] all [% data.size %] [% END %]  matching alerts
   <div align="center">
     <table border="0" class='data'>
       <tr>
@@ -11,24 +12,33 @@
         <th class='data'>State Type</th>
         <th class='data'>Information</th>
       </tr>
-      <tr class='dataEven'>
-        <td class='dataEven'>2010-02-21 20:02:11</td>
-        <td class='dataEven'>Host Alert</td>
-        <td class='dataEven'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_1'>n6_test_host_1</a></td>
-        <td class='dataEven'>N/A</td>
-        <td class='hostUP'>UP</td>
-        <td class='dataEven'>SOFT</td>
-        <td class='dataEven'>n6_test_host_1 (checked by mo) FLAP: flap hostcheck up</td>
+      [%  FOREACH d = data %]
+      [% SET class = 'dataOdd'  IF loop.even %]
+      [% SET class = 'dataEven' IF loop.odd  %]
+      <tr class='[% class %]'>
+        <td class='[% class %]'>[% date.format(d.time, datetime_format) %]</td>
+        [% IF d.service_description %]
+        [% SET status = 'OK'       IF d.state == 0 %]
+        [% SET status = 'WARNING'  IF d.state == 1 %]
+        [% SET status = 'UNKNOWN'  IF d.state == 3 %]
+        [% SET status = 'CRITICAL' IF d.state == 2 %]
+        <td class='[% class %]'>Service Alert</td>
+        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
+        <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name %]&amp;service=[% d.service_description %]'>[% d.service_description %]</a></td>
+        <td class='service[% status %]'>[% status %]</td>
+        [% ELSE %]
+        [% SET status = 'UP'          IF d.state == 0 %]
+        [% SET status = 'DOWN'        IF d.state == 1 %]
+        [% SET status = 'UNREACHABLE' IF d.state == 2 %]
+        <td class='[% class %]'>Host Alert</td>
+        <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
+        <td class='[% class %]'>N/A</td>
+        <td class='host[% status %]'>[% status %]</td>
+        [% END %]
+        <td class='[% class %]'>[% d.state_type %]</td>
+        <td class='[% class %]'>[% d.plugin_output %]</td>
       </tr>
-      <tr class='dataOdd'>
-        <td class='dataOdd'>2010-02-21 19:59:41</td>
-        <td class='dataOdd'>Host Alert</td>
-        <td class='dataOdd'><a href='extinfo.cgi?type=1&amp;host=n6_test_host_1'>n6_test_host_1</a></td>
-        <td class='dataOdd'>N/A</td>
-        <td class='hostDOWN'>DOWN</td>
-        <td class='dataOdd'>SOFT</td>
-        <td class='dataOdd'>n6_test_host_1 (checked by mo) FLAP: flap hostcheck down</td>
-      </tr>
+      [% END %]
     </table>
   </div>
 </div>

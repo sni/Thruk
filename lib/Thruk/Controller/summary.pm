@@ -175,68 +175,197 @@ sub _create_report {
         $c->stash->{report_template} = 'summary_report_alert_producer.tt';
         $self->_display_top_alerts($c, $alertlogs);
     }
-    elsif($displaytype == REPORT_ALERT_TOTALS) {
+    elsif(   $displaytype == REPORT_ALERT_TOTALS
+          or $displaytype == REPORT_HOSTGROUP_ALERT_TOTALS
+          or $displaytype == REPORT_HOST_ALERT_TOTALS
+          or $displaytype == REPORT_SERVICE_ALERT_TOTALS
+          or $displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS
+         ) {
         $c->stash->{report_title}    = 'Alert Totals';
         $c->stash->{report_template} = 'summary_report_alert_totals.tt';
-        $self->_display_alert_totals($c, $alertlogs);
-    }
-    elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
-        $c->stash->{report_title}    = 'Alert Totals';
-        $c->stash->{report_template} = 'summary_report_alert_totals.tt';
-        $self->_display_alert_totals($c, $alertlogs);
-    }
-    elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
-        $c->stash->{report_title}    = 'Alert Totals';
-        $c->stash->{report_template} = 'summary_report_alert_totals.tt';
-        $self->_display_alert_totals($c, $alertlogs);
-    }
-    elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
-        $c->stash->{report_title}    = 'Alert Totals';
-        $c->stash->{report_template} = 'summary_report_alert_totals.tt';
-        $self->_display_alert_totals($c, $alertlogs);
-    }
-    elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
-        $c->stash->{report_title}    = 'Alert Totals';
-        $c->stash->{report_template} = 'summary_report_alert_totals.tt';
-        $self->_display_alert_totals($c, $alertlogs);
+        $self->_display_alert_totals($c, $alertlogs, $displaytype);
     }
     else {
         return;
     }
 
     $c->stash->{template} = 'summary_report.tt';
+    $c->stash->{limit}    = $c->{'request'}->{'parameters'}->{'limit'};
 
     $c->stats->profile(end => "_create_report()");
     return 1;
 }
 
 ##########################################################
+# Most Recent Alerts
 sub _display_recent_alerts {
     my ( $self, $c, $alerts ) = @_;
-    $c->stats->profile(begin => "_display_top_alerts()");
+    $c->stats->profile(begin => "_display_recent_alerts()");
 
+    my $sortedtotals = Thruk::Utils::sort($c, $alerts, 'time', 'DESC');
+    Thruk::Utils::page_data($c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
 
-    $c->stats->profile(end => "_display_top_alerts()");
+    $c->stats->profile(end => "_display_recent_alerts()");
     return 1;
 }
 
 ##########################################################
+# Top Alert Producers
 sub _display_top_alerts {
     my ( $self, $c, $alerts ) = @_;
     $c->stats->profile(begin => "_display_top_alerts()");
 
+    my $totals = {};
+    for my $alert (@{$alerts}) {
+        my $ident = $alert->{'host_name'}.";".$alert->{'service_description'};
+        if(!defined $totals->{$ident}) {
+            $totals->{$ident} = {
+                        'host_name'           => $alert->{'host_name'},
+                        'service_description' => $alert->{'service_description'},
+                        'alerts'              => 1,
+            };
+        }
+        else {
+            $totals->{$ident}->{'alerts'}++;
+        }
+    }
+
+    my @totals = values %{$totals};
+    my $sortedtotals = Thruk::Utils::sort($c, \@totals, 'alerts', 'DESC');
+    Thruk::Utils::page_data($c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
 
     $c->stats->profile(end => "_display_top_alerts()");
     return 1;
 }
 
 ##########################################################
+# Alert Totals
 sub _display_alert_totals {
-    my ( $self, $c, $alerts ) = @_;
-    $c->stats->profile(begin => "_display_top_alerts()");
+    my ( $self, $c, $alerts, $displaytype ) = @_;
+    $c->stats->profile(begin => "_display_alert_totals()");
 
+    # set overall title
+    my $box_title_data;
+    if($displaytype == REPORT_ALERT_TOTALS) {
+        $c->stash->{'box_title'} = 'Overall Totals';
+    }
+    elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
+        $c->stash->{'box_title'} = 'Totals By Hostgroup';
+        my $tmp = $c->{'live'}->selectcol_arrayref("GET hostgroups\nColumns: name alias", { Columns => [1,2] });
+        %{$box_title_data} = @{$tmp} if defined $tmp;
+    }
+    elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
+        $c->stash->{'box_title'} = 'Totals By Host';
+        my $tmp = $c->{'live'}->selectcol_arrayref("GET hosts\nColumns: name alias", { Columns => [1,2] });
+        %{$box_title_data} = @{$tmp} if defined $tmp;
+    }
+    elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
+        $c->stash->{'box_title'} = 'Totals By Service';
+    }
+    elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
+        $c->stash->{'box_title'} = 'Totals By Servicegroup';
+        my $tmp = $c->{'live'}->selectcol_arrayref("GET servicegroups\nColumns: name alias", { Columns => [1,2] });
+        %{$box_title_data} = @{$tmp} if defined $tmp;
+    }
 
-    $c->stats->profile(end => "_display_top_alerts()");
+    my $totals = {};
+    for my $alert (@{$alerts}) {
+
+        # define by which type we group
+        my @idents;
+        if($displaytype == REPORT_ALERT_TOTALS) {
+            $idents[0] = 'overall';
+        }
+        elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
+            next unless defined $alert->{'current_host_groups'};
+            @idents = split/,/mx, $alert->{'current_host_groups'};
+        }
+        elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
+            $idents[0] = $alert->{'host_name'};
+        }
+        elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
+            next unless defined $alert->{'service_description'};
+            $idents[0] = $alert->{'host_name'}.";".$alert->{'service_description'};
+        }
+        elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
+            next unless defined $alert->{'current_service_groups'};
+            @idents = split/,/mx, $alert->{'current_service_groups'};
+        }
+
+        for my $ident (@idents) {
+            # set a empty default set of counters
+            if(!defined $totals->{$ident}) {
+                my $sub_title = '';
+                if($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
+                    $sub_title = "Hostgroup '".$ident."' (".$box_title_data->{$ident}.")";
+                }
+                elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
+                    $sub_title = "Host '".$ident."' (".$box_title_data->{$ident}.")";
+                }
+                elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
+                    my($host,$service) = split/;/mx, $ident;
+                    $sub_title = "Service '".$service."' on Host '".$host."'";
+                }
+                elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
+                    $sub_title = "Servicegroup '".$ident."' (".$box_title_data->{$ident}.")";
+                }
+                $totals->{$ident} = {
+                    'sub_title' => $sub_title,
+                    'host'      => {
+                                    'HARD' => {
+                                                'UP'          => 0,
+                                                'DOWN'        => 0,
+                                                'UNREACHABLE' => 0,
+                                               },
+                                    'SOFT' => {
+                                                'UP'          => 0,
+                                                'DOWN'        => 0,
+                                                'UNREACHABLE' => 0,
+                                               },
+                                },
+                    'service'   => {
+                                    'HARD' => {
+                                                'OK'       => 0,
+                                                'WARNING'  => 0,
+                                                'UNKNOWN'  => 0,
+                                                'CRITICAL' => 0,
+                                               },
+                                    'SOFT' => {
+                                                'OK'       => 0,
+                                                'WARNING'  => 0,
+                                                'UNKNOWN'  => 0,
+                                                'CRITICAL' => 0,
+                                               },
+                                },
+                };
+                if($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
+                    $totals->{$ident}->{'no_hosts'} = 1;
+                }
+            }
+
+            # define path to counter
+            my($host_or_service,$state);
+            if(defined $alert->{'service_description'} and $alert->{'service_description'} ne '') {
+                $host_or_service = 'service';
+                if   ($alert->{'state'} == 0) { $state = 'OK';       }
+                elsif($alert->{'state'} == 1) { $state = 'WARNING';  }
+                elsif($alert->{'state'} == 2) { $state = 'CRITICAL'; }
+                elsif($alert->{'state'} == 3) { $state = 'UNKNOWN';  }
+            } else {
+                $host_or_service = 'host';
+                if   ($alert->{'state'} == 0) { $state = 'UP';          }
+                elsif($alert->{'state'} == 1) { $state = 'DOWN';        }
+                elsif($alert->{'state'} == 2) { $state = 'UNREACHABLE'; }
+            }
+
+            # increase counter
+            $totals->{$ident}->{$host_or_service}->{$alert->{'state_type'}}->{$state}++;
+        }
+    }
+
+    $c->stash->{'data'} = $totals;
+
+    $c->stats->profile(end => "_display_alert_totals()");
     return 1;
 }
 
@@ -247,7 +376,7 @@ sub _get_alerts_from_log {
     my($hostlogs, $servicelogs);
 
     if($c->stash->{alerttypefilter} ne "Service") {
-        my $host_log_query = "GET log\n".$hostfilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state host_name service_description current_host_groups current_service_groups";
+        my $host_log_query = "GET log\n".$hostfilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output";
         $c->log->debug($host_log_query);
         $c->stats->profile(begin => "summary.pm fetch host logs");
         $hostlogs = $c->{'live'}->selectall_arrayref($host_log_query, { Slice => 1} );
@@ -255,7 +384,7 @@ sub _get_alerts_from_log {
     }
 
     if($c->stash->{alerttypefilter} ne "Host") {
-        my $service_log_query = "GET log\n".$servicefilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state host_name service_description current_host_groups current_service_groups";
+        my $service_log_query = "GET log\n".$servicefilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state state_type  host_name service_description current_host_groups current_service_groups plugin_output";
         $c->log->debug($service_log_query);
         $c->stats->profile(begin => "summary.pm fetch service logs");
         $servicelogs = $c->{'live'}->selectall_arrayref($service_log_query, { Slice => 1} );
@@ -264,9 +393,9 @@ sub _get_alerts_from_log {
 
     $hostlogs    = [] unless defined $hostlogs;
     $servicelogs = [] unless defined $servicelogs;
-    my @alertlogs = [ @{$hostlogs}, @{$servicelogs} ];
+    my $alertlogs = [ @{$hostlogs}, @{$servicelogs} ];
 
-    return(\@alertlogs);
+    return($alertlogs);
 }
 
 ##########################################################

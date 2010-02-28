@@ -7,7 +7,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.93'
+generated_by: 'Module::Install version 0.94'
 license: gpl3
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -50,7 +50,7 @@ requires:
   LWP: 5.833
   Log::Dispatch::File: 2.26
   Monitoring::Availability: 0.12
-  Monitoring::Livestatus: 0.42
+  Monitoring::Livestatus: 0.44
   Moose: 0.98
   MooseX::MethodAttributes::Inheritable: 0.2
   MooseX::Role::WithOverloading: 0.05
