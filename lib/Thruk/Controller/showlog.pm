@@ -46,7 +46,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $filter .= "Filter: time >= $start\n";
     $filter .= "Filter: time <= $end\n";
 
-    my $query = "GET log\nColumns: time type options state\n".$filter;
+    my $query = "GET log\nColumns: time type message state\n".$filter;
     $query   .= Thruk::Utils::get_auth_filter($c, 'log');
 
     $c->stats->profile(begin => "showlog::fetch");
