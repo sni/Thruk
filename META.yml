@@ -19,7 +19,6 @@ no_index:
     - t
 requires:
   Algorithm::C3: 0.08
-  Carp: 1.08
   Catalyst::Action::RenderView: 0.14
   Catalyst::Devel: 1.26
   Catalyst::Engine::FastCGI: 0

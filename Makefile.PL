@@ -16,7 +16,6 @@ resources(
     'repository', => 'http://github.com/sni/Thruk',
 );
 
-requires 'Carp'                                   => 1.08;
 requires 'YAML'                                   => 0.70;
 requires 'YAML::Tiny'                             => 1.41;
 requires 'Compress::Raw::Zlib'                    => 2.024;

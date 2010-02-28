@@ -11,11 +11,11 @@ $Data::Dumper::Sortkeys = 1;
 
 #########################################################################
 # parse and check cmd line arguments
-my ($opt_h, $opt_v);
+my ($opt_h, $opt_v, $opt_p);
 Getopt::Long::Configure('no_ignore_case');
 if(!GetOptions (
    "h"              => \$opt_h,
-   "<>"             => \&add_file,
+   "p=s"            => \$opt_p,
 )) {
     pod2usage( { -verbose => 1, -message => 'error in options' } );
     exit 3;
@@ -27,6 +27,10 @@ if(defined $opt_h) {
 };
 
 #########################################################################
+# set perl version
+my $perl = $opt_p || "perl";
+
+#########################################################################
 unless(-d './script/') {
     print "please run only from the project root\n";
 }
@@ -34,13 +38,13 @@ unless(-d './script/') {
 #########################################################################
 # create source package
 unlink(glob("*.gz"));
-cmd("rm -rf local-lib > /dev/null");
-cmd("perl Makefile.PL");
+
+cmd("$perl Makefile.PL");
+cmd("make");
 cmd("make distclean");
-cmd("perl Makefile.PL");
+cmd("$perl Makefile.PL");
 cmd("make");
 cmd("make dist");
-cmd('rsync -av $HOME/perl5 local-lib');
 
 #########################################################################
 # fix name of source tarball
@@ -61,14 +65,24 @@ $archive = $newarchive;
 
 #########################################################################
 # add local lib dir
-chomp(my $arch = `uname -m`);
-cmd("tar zxvf $archive");
-cmd("rsync -a local-lib Thruk-".$version."/");
-cmd("tar cvf Thruk-".$version."-".$arch.".tar Thruk-".$version);
-cmd("gzip -9 Thruk-".$version."-".$arch.".tar");
-cmd("rm -rf Thruk-".$version);
-cmd("rm -rf local-lib");
-print "created Thruk-".$version."-".$arch.".tar.gz\n";
+chomp(my $arch = "$perl -e 'use Config; print \$Config{archname}'");
+my $local_lib;
+if(-d "local-lib") {
+  $local_lib = "local-lib";
+}
+elsif(-d "$ENV{'HOME'}/perl5") {
+  $local_lib = "$ENV{'HOME'}/perl5";
+}
+
+if(defined $local_lib and $local_lib ne '') {
+  print "creating Thruk-".$version."-".$arch.".tar";
+  cmd("tar zxvf $archive");
+  cmd("rsync -a $local_lib Thruk-".$version."/");
+  cmd("tar cvf Thruk-".$version."-".$arch.".tar Thruk-".$version);
+  cmd("gzip -9 Thruk-".$version."-".$arch.".tar");
+  cmd("rm -rf Thruk-".$version);
+  print "created Thruk-".$version."-".$arch.".tar.gz\n";
+}
 
 #########################################################################
 # finished

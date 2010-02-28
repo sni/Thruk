@@ -105,51 +105,49 @@ sub _create_report {
     my ( $self, $c ) = @_;
     $c->stats->profile(begin => "_create_report()");
 
-    my($timeperiod, $statetypes, $limit, $displaytype, $alert_types, $host_states, $service_states);
+    my($timeperiod, $displaytype, $alerttypes, $hoststates, $servicestates);
     my $standardreport = $c->{'request'}->{'parameters'}->{'standardreport'};
     if(defined $standardreport) {
         # set options from standard report options
         $c->{'request'}->{'parameters'}->{'timeperiod'} = "last7days";
-        $statetypes = 2; # hard only
-        $limit      = 25;
+        $c->{'request'}->{'parameters'}->{'statetypes'} = 2;
+        $c->{'request'}->{'parameters'}->{'limit'}      = 25;
 
         if($standardreport == SREPORT_RECENT_ALERTS) {
-            $displaytype    = REPORT_RECENT_ALERTS;
-            $alert_types    = AE_HOST_ALERT + AE_SERVICE_ALERT;
-            $host_states    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
-            $service_states = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
+            $displaytype   = REPORT_RECENT_ALERTS;
+            $alerttypes    = AE_HOST_ALERT + AE_SERVICE_ALERT;
+            $hoststates    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
+            $servicestates = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
         }
         elsif($standardreport == SREPORT_RECENT_HOST_ALERTS) {
-            $displaytype    = REPORT_RECENT_ALERTS;
-            $alert_types    = AE_HOST_ALERT;
-            $host_states    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
+            $displaytype   = REPORT_RECENT_ALERTS;
+            $alerttypes    = AE_HOST_ALERT;
+            $hoststates    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
         }
         elsif($standardreport == SREPORT_RECENT_SERVICE_ALERTS) {
-            $displaytype    = REPORT_RECENT_ALERTS;
-            $alert_types    = AE_SERVICE_ALERT;
-            $service_states = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
+            $displaytype   = REPORT_RECENT_ALERTS;
+            $alerttypes    = AE_SERVICE_ALERT;
+            $servicestates = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
         }
         elsif($standardreport == SREPORT_TOP_HOST_ALERTS) {
-            $displaytype    = REPORT_TOP_ALERTS;
-            $alert_types    = AE_HOST_ALERT;
-            $host_states    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
+            $displaytype   = REPORT_TOP_ALERTS;
+            $alerttypes    = AE_HOST_ALERT;
+            $hoststates    = AE_HOST_UP + AE_HOST_DOWN + AE_HOST_UNREACHABLE;
         }
         elsif($standardreport == SREPORT_TOP_SERVICE_ALERTS) {
-            $displaytype    = REPORT_TOP_ALERTS;
-            $alert_types    = AE_SERVICE_ALERT;
-            $service_states = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
+            $displaytype   = REPORT_TOP_ALERTS;
+            $alerttypes    = AE_SERVICE_ALERT;
+            $servicestates = AE_SERVICE_OK + AE_SERVICE_WARNING + AE_SERVICE_UNKNOWN + AE_SERVICE_CRITICAL;
         }
         else {
             return;
         }
+        $c->{'request'}->{'parameters'}->{'alerttypes'}    = $alerttypes;
+        $c->{'request'}->{'parameters'}->{'servicestates'} = $servicestates;
+        $c->{'request'}->{'parameters'}->{'hoststates'}    = $hoststates;
     } else {
         # set options from parameters
-        $statetypes     = $c->{'request'}->{'parameters'}->{'statetypes'};
-        $limit          = $c->{'request'}->{'parameters'}->{'limit'};
         $displaytype    = $c->{'request'}->{'parameters'}->{'displaytype'};
-        $alert_types    = $c->{'request'}->{'parameters'}->{'alert_types'};
-        $host_states    = $c->{'request'}->{'parameters'}->{'host_states'};
-        $service_states = $c->{'request'}->{'parameters'}->{'service_states'};
     }
 
     # get start/end from timeperiod in params
@@ -213,7 +211,27 @@ sub _create_report {
 }
 
 ##########################################################
+sub _display_recent_alerts {
+    my ( $self, $c, $alerts ) = @_;
+    $c->stats->profile(begin => "_display_top_alerts()");
+
+
+    $c->stats->profile(end => "_display_top_alerts()");
+    return 1;
+}
+
+##########################################################
 sub _display_top_alerts {
+    my ( $self, $c, $alerts ) = @_;
+    $c->stats->profile(begin => "_display_top_alerts()");
+
+
+    $c->stats->profile(end => "_display_top_alerts()");
+    return 1;
+}
+
+##########################################################
+sub _display_alert_totals {
     my ( $self, $c, $alerts ) = @_;
     $c->stats->profile(begin => "_display_top_alerts()");
 
@@ -244,6 +262,8 @@ sub _get_alerts_from_log {
         $c->stats->profile(end   => "summary.pm fetch service logs");
     }
 
+    $hostlogs    = [] unless defined $hostlogs;
+    $servicelogs = [] unless defined $servicelogs;
     my @alertlogs = [ @{$hostlogs}, @{$servicelogs} ];
 
     return(\@alertlogs);
@@ -268,7 +288,7 @@ sub _get_filter {
     $servicefilter .= $servicestatusfilter;
 
     # hard or soft?
-    my $statetypes = $c->{'request'}->{'parameters'}->{'statetypes'};
+    my $statetypes = $c->{'request'}->{'parameters'}->{'statetypes'} || 3;
     if($statetypes == AE_SOFT) {
         $c->stash->{statetypefilter} = "Soft";
         $servicefilter .= "Filter: options ~ ;SOFT;\n";
@@ -286,7 +306,7 @@ sub _get_filter {
     # only hosts or services?
     $hostfilter    .= "Filter: type = HOST ALERT\n";
     $servicefilter .= "Filter: type = SERVICE ALERT\n";
-    my $alerttypes = $c->{'request'}->{'parameters'}->{'alerttypes'};
+    my $alerttypes = $c->{'request'}->{'parameters'}->{'alerttypes'} || 3;
     if($alerttypes == AE_HOST_ALERT) {
         $c->stash->{alerttypefilter} = "Host";
     }
