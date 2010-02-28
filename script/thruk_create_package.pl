@@ -65,7 +65,7 @@ $archive = $newarchive;
 
 #########################################################################
 # add local lib dir
-chomp(my $arch = "$perl -e 'use Config; print \$Config{archname}'");
+chomp(my $arch = `$perl -e 'use Config; print \$Config{archname}'`);
 my $local_lib;
 if(-d "local-lib") {
   $local_lib = "local-lib";
@@ -98,7 +98,7 @@ sub cmd {
     while(my $line = <$ph>) {
         print $line;
     }
-    close($ph) or die("cmd failed (rc:$?): $!");
+    close($ph) or die("cmd '$cmd' failed (rc:$?): $!");
     return 1;
 }
 
