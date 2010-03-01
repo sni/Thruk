@@ -212,3 +212,11 @@ body.summary td.serviceCRITICAL { font-weight: normal; }
 body.summary table.data {
   background-color: white;
 }
+
+/* mouse over classes for inline command selection in status page */
+.tableRowHover{
+  background-color:#78ABE8;
+}
+.tableRowSelected{
+  background-color:#407FD2;
+}

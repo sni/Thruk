@@ -67,7 +67,8 @@
         <td valign="top" align="right" width="33%"></td>
       </tr>
     </table>
-    <table border="0" width="100%" class='status'>
+
+    <table border="0" width="100%" class='status' id="statusTable">
       <tr>
         <th class='status' nowrap>Host&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)' width="11" height="14"></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)' width="11" height="14"></a></th>
         <th class='status' nowrap>Service&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 2) %]'><img src='/thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)' width="11" height="14"></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 2) %]'><img src='/thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)' width="11" height="14"></a></th>
@@ -114,7 +115,7 @@
       <tr><td colspan="6"></td></tr>
       [% END %]
 
-      <tr>
+      <tr id="r[% loop.index %]">
         [% IF lasthost == s.host_name %]
         <td></td>
         [% ELSE %]
@@ -122,13 +123,7 @@
         <td class='[% hostclass %]'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
-              <td align="left">
-                <table border="0" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name %]' title='[% s.host_address %]'>[% s.host_name %]</a></td>
-                  </tr>
-                </table>
-              </td>
+              <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name %]' title='[% s.host_address %]'>[% s.host_name %]</a></td>
               <td align="right">
                 <table border="0" cellpadding="0" cellspacing="0">
                   <tr>
@@ -153,13 +148,7 @@
         <td class='[% serviceclass %]'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
             <tr>
-              <td align="left">
-                <table border="0" cellspacing="0" cellpadding="0">
-                  <tr>
-                    <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]&amp;backend=[% s.peer_key %]'>[% s.description %]</a></td>
-                  </tr>
-                </table>
-              </td>
+              <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]&amp;backend=[% s.peer_key %]'>[% s.description %]</a></td>
               <td align="right" class='[% serviceclass %]'>
                 <table border="0" cellspacing="0" cellpadding="0">
                   <tr>
@@ -191,6 +180,9 @@
       [% END %]
 
     </table>
+    <script type="text/javascript">
+      addRowSelector('statusTable');
+    </script>
     <div align="center">
     [% PROCESS _pager.tt %]
     </div>
