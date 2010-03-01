@@ -43,7 +43,7 @@
 
   </head>
 
-  <body class='[% page %]' id='[% page %]'[% UNLESS no_auto_reload %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
+  <body class='[% page %]' id='[% page %]'[% IF refresh_rate %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
   <div class="pref_pane" id="pref_pane">
     <a href="javascript:togglePreferencePane('[% theme %]')"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
     <form action="[% c.uri %]" method="GET">
@@ -65,10 +65,10 @@
             <tr>
               <th>Page Refresh:</th>
               <td nowrap>
-              [% IF no_auto_reload %]
-              <span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>
-              [% ELSE %]
+              [% IF refresh_rate %]
               <span id="refresh_rate">Update in [% refresh_rate %] seconds <input type="button" value="stop" onClick="stopRefresh()"></span>
+              [% ELSE %]
+              <span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>
               [% END %]
               </td>
             </tr>
