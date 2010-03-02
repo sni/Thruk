@@ -215,8 +215,58 @@ body.summary table.data {
 
 /* mouse over classes for inline command selection in status page */
 .tableRowHover{
-  background-color:#78ABE8;
+  background-color:#88BBD8;
 }
 .tableRowSelected{
-  background-color:#407FD2;
+  background-color:#609FD2;
+}
+
+/* command pane */
+div.cmd_pane {
+  width:400px;
+  height:100px;
+  visibility:hidden;
+  position:fixed;
+  top: 20px;
+  right: 0px;
+  z-index: 99;
+  color: black;
+  font-size: 9pt;
+}
+table.cmd_pane {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #C4C2C2;
+  border-collapse: separate;
+  background-color: #C4C2C2;
+}
+table.cmd_pane > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #C4C2C2;
+}
+
+img.cmd_pane_button {
+  position:absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 100;
+}
+th.cmd_pane a, th.cmd_pane {
+  text-align:center;
+  color:#DCE5C1;
+  font-size:10pt;
+}
+th.status a:hover {
+  color:#DCE5C1;
+  font-size:10pt;
+  text-decoration: none;
+}
+td.submit {
+  text-align: center;
 }

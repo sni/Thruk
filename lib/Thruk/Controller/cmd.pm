@@ -38,33 +38,40 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->detach('/error/index/3');
     }
 
-    my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
-    $c->detach('/error/index/6') unless defined $cmd_typ;
-
-    # command disabled by config?
-    my $not_allowed = Thruk->config->{'command_disabled'};
-    if(defined $not_allowed) {
-        my %command_disabled;
-        if(ref $not_allowed eq 'ARRAY') {
-            for my $num (@{$not_allowed}) {
-                $command_disabled{$num} = 1;
-            }
-        } else {
-            $command_disabled{$not_allowed} = 1;
-        }
-        if(defined $command_disabled{$cmd_typ}) {
-            $c->detach('/error/index/12');
-        }
-    }
-
     # read only user?
     $c->detach('/error/index/11') if $c->check_user_roles('is_authorized_for_read_only');
 
+
+    my $quick_command = $c->{'request'}->{'parameters'}->{'quick_command'};
+    if(defined $quick_command and $quick_command) {
+        #for my $host () {
+        #    $self->_check_for_commands($c);
+        #}
+        #for my $service () {
+        #    $self->_check_for_commands($c);
+        #}
+        $self->_redirect_or_success($c, -1);
+    }
+    else {
+        $self->_check_for_commands($c);
+    }
+}
+
+######################################
+# command disabled by config?
+sub _check_for_commands {
+    my ( $self, $c, $redirect ) = @_;
+
+    $redirect = 1 unless defined $redirect;
+
+    my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
+    $c->detach('/error/index/6') unless defined $cmd_typ;
+    $self->_cmd_is_disabled($c, $cmd_typ);
 
     # command commited?
     if(defined $cmd_mod and $self->_do_send_command($c)) {
-        # success page is already displayed
+        $self->_redirect_or_success($c, -2) if $redirect;
     } else {
         # no command submited, view commands page
         if($cmd_typ == 55 or $cmd_typ == 56) {
@@ -87,6 +94,43 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     return 1;
 }
 
+######################################
+# command disabled by config?
+sub _cmd_is_disabled {
+    my ( $self, $c, $cmd_typ ) = @_;
+
+    my $not_allowed = Thruk->config->{'command_disabled'};
+    if(defined $not_allowed) {
+        my %command_disabled;
+        if(ref $not_allowed eq 'ARRAY') {
+            for my $num (@{$not_allowed}) {
+                $command_disabled{$num} = 1;
+            }
+        } else {
+            $command_disabled{$not_allowed} = 1;
+        }
+        if(defined $command_disabled{$cmd_typ}) {
+            $c->detach('/error/index/12');
+        }
+    }
+}
+
+######################################
+# view our success page or redirect to referer
+sub _redirect_or_success {
+    my ( $self, $c, $how_far_back ) = @_;
+
+    $c->stash->{how_far_back} = $how_far_back;
+
+    my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';
+    if($referer ne '') {
+        # wait 0.3 seconds, so the command is probably already processed
+        usleep(300000);
+        $c->redirect($referer);
+    } else {
+        $c->stash->{template} = 'cmd_success.tt';
+    }
+}
 
 ######################################
 # sending commands
@@ -155,16 +199,6 @@ sub _do_send_command {
         $c->{'live'}->do($cmd);
     }
     $c->log->info("[".$c->user->username."] cmd: $cmd");
-
-    # view our success page or redirect to referer
-    my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';
-    if($referer ne '') {
-        # wait 0.3 seconds, so the command is probably already processed
-        usleep(300000);
-        $c->redirect($referer);
-    } else {
-        $c->stash->{template} = 'cmd_success.tt';
-    }
 
     return(1);
 }

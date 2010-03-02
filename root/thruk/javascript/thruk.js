@@ -1,6 +1,9 @@
 
-var prefPaneState = 0;
-var refreshPage   = 1;
+var prefPaneState  = 0;
+var refreshPage    = 1;
+var cmdPaneState   = 0;
+var origRefreshVal = 0;
+var curRefreshVal  = 0;
 
 /* toggle the visibility of the preferences pane */
 function togglePreferencePane(theme, state) {
@@ -34,6 +37,7 @@ function prefSubmit(url, current_theme) {
 
 /* page refresh rate */
 function setRefreshRate(rate) {
+  curRefreshVal = rate;
   var obj = document.getElementById('refresh_rate');
   if(refreshPage == 0) {
     obj.innerHTML = "<span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>";
@@ -202,7 +206,6 @@ function highlightServiceRow(event)
     // find id of current row
     var row_id = getFirstParentId(event.target.parentNode);
     setRowStyle(row_id, 'tableRowHover', 'service');
-    document.title = row_id;
 }
 
 /* this is the mouseover function for hosts */
@@ -211,21 +214,42 @@ function highlightHostRow(event)
     // find id of current row
     var row_id = getFirstParentId(event.target.parentNode);
     setRowStyle(row_id, 'tableRowHover', 'host');
-    document.title = row_id;
 }
 
 /* select this service */
-function selectService(event)
+function selectService(event, state)
 {
+    var row_id;
+    if(!event) {
+        return;
+    }
     // find id of current row
-    var row_id = getFirstParentId(event.target.parentNode);
-    if(selectedServices.get(row_id)) {
-        setRowStyle(row_id, 'original', 'service', true);
-        selectedServices.unset(row_id);
+    if(event.target) {
+        row_id = getFirstParentId(event.target);
     } else {
+        row_id = getFirstParentId(event);
+    }
+    if(!row_id) {
+        return;
+    }
+    var targetState;
+    if(!Object.isUndefined(state)) {
+        targetState = state;
+    }
+    else if(selectedServices.get(row_id)) {
+        targetState = false;
+    }
+    else {
+        targetState = true;
+    }
+    if(targetState) {
         setRowStyle(row_id, 'tableRowSelected', 'service', true);
         selectedServices.set(row_id, 1);
+    } else {
+        setRowStyle(row_id, 'original', 'service', true);
+        selectedServices.unset(row_id);
     }
+    checkCmdPaneVisibility();
 }
 
 /* select this host */
@@ -240,13 +264,25 @@ function selectHost(event)
         setRowStyle(row_id, 'tableRowSelected', 'host', true);
         selectedHosts.set(row_id, 1);
     }
+    checkCmdPaneVisibility();
 }
 
 /* reset row style unless it has been clicked */
 function resetServiceRow(event)
 {
+    var row_id;
+    if(!event) {
+        return;
+    }
     // find id of current row
-    var row_id = getFirstParentId(event.target.parentNode);
+    if(event.target) {
+        row_id = getFirstParentId(event.target);
+    } else {
+        row_id = getFirstParentId(event);
+    }
+    if(!row_id) {
+        return;
+    }
     setRowStyle(row_id, 'original', 'service');
 }
 
@@ -256,4 +292,107 @@ function resetHostRow(event)
     // find id of current row
     var row_id = getFirstParentId(event.target.parentNode);
     setRowStyle(row_id, 'original', 'host');
+}
+/* select or deselect all services */
+function selectAllServices(state) {
+    if(state) {
+        var classes = new Array('.statusOK', '.statusWARNING', '.statusUNKNOWN', '.statusCRITICAL', '.statusPENDING');
+    }
+    else {
+        var classes = new Array('.tableRowSelected');
+    }
+    classes.each(function(classname) {
+        $$(classname).each(function(obj) {
+            selectService(obj, state);
+        })
+    });
+}
+function selectServicesByClass(classes) {
+    classes.each(function(classname) {
+        $$(classname).each(function(obj) {
+            selectService(obj, true);
+        })
+    });
+}
+
+/* toggle the visibility of the command pane */
+function toggleCmdPane(state) {
+  var pane = document.getElementById('cmd_pane');
+  if(state == 0) { cmdPaneState = 1; }
+  if(state == 1) { cmdPaneState = 0; }
+  if(cmdPaneState == 0) {
+    pane.style.visibility = "visible";
+    cmdPaneState          = 1;
+  }
+  else {
+    pane.style.visibility = "hidden";
+    cmdPaneState          = 0;
+  }
+}
+
+/* show command panel if there are services or hosts selected otherwise hide the panel */
+function checkCmdPaneVisibility() {
+    var size = selectedServices.size() + selectedHosts.size();
+    if(size == 0) {
+        /* hide command panel and reenable refresh */
+        toggleCmdPane(0);
+        refreshPage = 1;
+        setRefreshRate(origRefreshVal);
+    } else {
+        /* show command panel and disable page refresh */
+        if(refreshPage == 1) {
+            origRefreshVal = curRefreshVal;
+            toggleCmdPane(1);
+        }
+        stopRefresh();
+
+        /* set submit button text */
+        var btn = document.getElementById('multi_cmd_submit_button');
+        var ssize = selectedServices.size();
+        var hsize = selectedHosts.size();
+        var serviceName = "services";
+        if(ssize == 1) { serviceName = "service";  }
+        var hostName = "hosts";
+        if(hsize == 1) { hostName = "host";  }
+        var text;
+        if( hsize > 0 && ssize > 0 ) {
+            text = ssize + " " + serviceName + " and " + hsize + " " + hostName;
+        }
+        else if( hsize > 0 ) {
+            text = hsize + " " + hostName;
+        }
+        else if( ssize > 0 ) {
+            text = ssize + " " + serviceName;
+        }
+        btn.value = "submit command for " + text;
+    }
+}
+
+/* collect selected hosts and services and pack them into nice form data */
+function collectFormData() {
+    var services = new Array();
+    selectedServices.keys().each(function(row_id) {
+        services.push(getServiceNameForRowId(row_id));
+    });
+    service_form = document.getElementById('selected_services');
+    service_form.value = services.join(',');
+
+    var hosts = new Array();
+    selectedHosts.keys().each(function(row_id) {
+        hosts.push(getHostNameForRowId(row_id));
+    });
+    host_form = document.getElementById('selected_hosts');
+    host_form.value = hosts.join(',');
+}
+
+/* return the host;service for a row */
+function getServiceNameForRowId(row_id) {
+    return servicesHash.get(row_id);
+}
+
+/* return the host for a row */
+function getHostNameForRowId(row_id) {
+    var data = servicesHash.get(row_id);
+    var pos  = data.indexOf(';');
+    return data.substr(0,pos);
 }

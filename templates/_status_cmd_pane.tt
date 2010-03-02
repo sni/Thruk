@@ -1,0 +1,46 @@
+[% USE date %]
+<div class="cmd_pane" id="cmd_pane">
+<form action="cmd.cgi" method="POST">
+  <input type="hidden" name="referer" value="[% c.request.uri %]">
+  <input type="hidden" name="selected_services" id="selected_services" value="">
+  <input type="hidden" name="selected_hosts"    id="selected_hosts"    value="">
+  <table class="cmd_pane" border=1 width="400">
+    <tr>
+      <th colspan=2 class="status cmd_pane">
+          <a href="javascript:selectAllServices(true);">check all</a>
+        - <a href="javascript:selectAllServices(false);">uncheck all</a>
+        - <a href="javascript:selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+        - <a href="javascript:selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+      </th>
+    </tr>
+    <tr>
+      <td class="statusEven">Command:</td>
+      <td class="statusEven">
+        <select name="quick_command">
+          <option value="1">force service check now
+          <option value="2">add downtime
+          <option value="3">add comment
+          <option value="4">acknowlege
+          <option value="5">remove downtimes
+          <option value="6">remove comments
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td class="statusOdd">Comment:</td>
+      <td class="statusOdd"><input type="text" value="" name="comment" size="30" disabled></td>
+    </tr>
+    <tr>
+      <td class="statusEven">Start:</td>
+      <td class="statusEven"><a href="javascript:NewCssCal('start_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/cal/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" size="20" disabled></td>
+    </tr>
+    <tr>
+      <td class="statusOdd">End:</td>
+      <td class="statusOdd"><a href="javascript:NewCssCal('end_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/cal/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]" id="end_time" size="20" disabled></td>
+    </tr>
+    <tr>
+      <td class="statusEven submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="collectFormData()"></td>
+    </tr>
+  </table>
+</form>
+</div>

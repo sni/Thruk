@@ -1,6 +1,9 @@
 [% USE date %]
-[% PROCESS _header.tt %]
-
+[% PROCESS _header.tt
+  js = "/thruk/javascript/datetimepicker.js"
+%]
+var
+[% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -81,7 +84,7 @@
 
       [% SET lasthost = '' %]
 
-      [%  FOREACH s = data %]
+      [% FOREACH s = data %]
       [% SET serviceclass = 'statusOdd'  IF loop.even %]
       [% SET serviceclass = 'statusEven' IF loop.odd %]
       [% SET hostclass = 'statusOdd'  IF loop.even %]
@@ -158,7 +161,7 @@
                     [% IF s.active_checks_enabled == 0 && s.accept_passive_checks == 0 %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this service have been disabled" title="Checks of this service have been disabled" border="0" height="20" width="20"></a></td>
                     [% ELSIF s.active_checks_enabled == 0   %]<td align="center" valign="middle"><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]'><img src='/thruk/themes/[% theme %]/images/passiveonly.gif' border="0" width="20" height="20" alt='Active checks of the service have been disabled - only passive checks are being accepted' title='Active checks of the service have been disabled - only passive checks are being accepted'></a></td>[% END %]
                     [% IF s.is_flapping                  %]<td align="center"><a href='extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]'><img src='/thruk/themes/[% theme %]/images/flapping.gif' border="0" width="20" height="20" alt='This service is flapping between states' title='This service is flapping between states'></a></td>[% END %]
-                    [% IF s.scheduled_downtime_depth > 0 %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/thruk/themes/[% theme %]/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" title="This service is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>[% END %]
+                    [% IF s.scheduled_downtime_depth > 0 %]<td class="has_downtime" align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/thruk/themes/[% theme %]/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" title="This service is currently in a period of scheduled downtime" border="0" height="20" width="20"></a></td>[% END %]
                     [% IF s.is_executing > 0             %]<td align="center"><a href="extinfo.cgi?type=2&amp;host=[% s.host_name %]&amp;service=[% s.description %]"><img src="/thruk/themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20"></a></td>[% END %]
                     [% IF s.notes_url_expanded           %]<td align="center" valign="middle"><a href='[% s.notes_url_expanded %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/thruk/themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Service Notes' title='View Extra Service Notes'></a></td>[% END %]
                     [% IF s.action_url_expanded          %]<td align="center" valign="middle"><a href='[% s.action_url_expanded %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/thruk/themes/[% theme %]/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Service Actions' title='Perform Extra Service Actions'></a></td>[% END %]
@@ -181,6 +184,7 @@
 
     </table>
     <script type="text/javascript">
+      var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %]"[% UNLESS loop.last %],[% END %][% END %]});
       addRowSelector('statusTable');
     </script>
     <div align="center">
