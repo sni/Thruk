@@ -11,7 +11,7 @@ general
     - cgi ssi: http://nagios.sourceforge.net/docs/3_0/cgiincludes.html
     - default hidden setting for backends in thruk_local.conf
     - add go back button on error page
-    - overlib for long status on status detail
+    - overlib for long plugin_output on status detail page
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -82,8 +82,7 @@ status:
     - hide host/service summary in status.cgi (maybe with http://jqueryui.com/demos/toggle/ )
 
 showlog:
-    - proper logfile page
-    - time period selector (day,week,month,custom)
+    - time fram selector (day,week,month,custom)
 
 history:
     - time period selector (day,week,month,custom)

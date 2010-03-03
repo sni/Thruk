@@ -198,6 +198,15 @@ body.trends table.popupText th {
 body.cmd img {
   vertical-align:text-bottom;
 }
+.cal_icon {
+  vertical-align:text-bottom;
+}
+.date_input {
+  border: none;
+  font-weight: bold;
+  font-size: 8pt;
+  text-align: center;
+}
 
 /* fix for complete bold reports in summary */
 body.summary td.dataOdd         { font-weight: normal; }
