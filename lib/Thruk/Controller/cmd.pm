@@ -45,9 +45,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         1 => 96, # reschedule host check
         2 => 55, # schedule downtime
         3 => 1,  # add comment
-        4 => 34, # acknowledge
+        4 => 34, # add acknowledgement
         5 => 78, # remove all downtimes
         6 => 20, # remove all comments
+        7 => 51, # remove acknowledgement
     };
     my $service_quick_commands = {
         1 => 7, # reschedule host check
@@ -56,6 +57,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         4 => 34, # acknowledge
         5 => 79, # remove all downtimes
         6 => 21, # remove all comments
+        7 => 52, # remove acknowledgement
     };
 
     # did we receive a quick command from the status page?

@@ -451,13 +451,15 @@ function check_selected_command() {
     if(value == 3) { /* add comment */
         enableFormElement('row_comment');
     }
-    if(value == 4) { /* acknowledge */
+    if(value == 4) { /* add acknowledgement */
         enableFormElement('row_comment');
         enableFormElement('row_ack_options');
     }
     if(value == 5) { /* remove downtimes */
     }
     if(value == 6) { /* remove comments */
+    }
+    if(value == 7) { /* remove acknowledgement */
     }
 }
 

@@ -19,11 +19,14 @@
       <td class="statusOdd">
         <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)">
           <option value="1">reschedule next check</option>
+          <option value="" disabled>-----------------</option>
           <option value="2">add downtime</option>
           <option value="3">add comment</option>
-          <option value="4">acknowlege</option>
+          <option value="4">add acknowledgement</option>
+          <option value="" disabled>-----------------</option>
           <option value="5">remove downtimes</option>
           <option value="6">remove comments</option>
+          <option value="7">remove acknowledgement</option>
         </select>
       </td>
     </tr>
