@@ -2,7 +2,6 @@
 [% PROCESS _header.tt
   js = "/thruk/javascript/datetimepicker.js"
 %]
-var
 [% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
@@ -184,7 +183,7 @@ var
 
     </table>
     <script type="text/javascript">
-      var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %]"[% UNLESS loop.last %],[% END %][% END %]});
+      var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
       addRowSelector('statusTable');
     </script>
     <div align="center">

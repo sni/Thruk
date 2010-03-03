@@ -181,7 +181,7 @@ function styleElements(elems, style, force) {
     for(var x = 0; x < elems.length; x++) {
         if(style == 'original') {
             // reset style to original
-            if(elems[x].className == "tableRowHover" || force) {
+            if(elems[x].hasAttribute('origClass') && (elems[x].className == "tableRowHover" || force)) {
                 elems[x].className = elems[x].origClass;
             }
         }
@@ -253,16 +253,37 @@ function selectService(event, state)
 }
 
 /* select this host */
-function selectHost(event)
+function selectHost(event, state)
 {
+    var row_id;
+    if(!event) {
+        return;
+    }
     // find id of current row
-    var row_id = getFirstParentId(event.target.parentNode);
-    if(selectedHosts.get(row_id)) {
-        setRowStyle(row_id, 'original', 'host', true);
-        selectedHosts.unset(row_id);
+    if(event.target) {
+        row_id = getFirstParentId(event.target);
     } else {
+        row_id = getFirstParentId(event);
+    }
+    if(!row_id) {
+        return;
+    }
+    var targetState;
+    if(!Object.isUndefined(state)) {
+        targetState = state;
+    }
+    else if(selectedHosts.get(row_id)) {
+        targetState = false;
+    }
+    else {
+        targetState = true;
+    }
+    if(targetState) {
         setRowStyle(row_id, 'tableRowSelected', 'host', true);
         selectedHosts.set(row_id, 1);
+    } else {
+        setRowStyle(row_id, 'original', 'host', true);
+        selectedHosts.unset(row_id);
     }
     checkCmdPaneVisibility();
 }
@@ -315,6 +336,21 @@ function selectServicesByClass(classes) {
     });
 }
 
+/* select or deselect all hosts */
+function selectAllHosts(state) {
+    if(state) {
+        var classes = new Array('.statusHOSTUP', '.statusHOSTDOWN', '.statusHOSTUNREACHABLE');
+    }
+    else {
+        var classes = new Array('.tableRowSelected');
+    }
+    classes.each(function(classname) {
+        $$(classname).each(function(obj) {
+            selectHost(obj, state);
+        })
+    });
+}
+
 /* toggle the visibility of the command pane */
 function toggleCmdPane(state) {
   var pane = document.getElementById('cmd_pane');
@@ -339,13 +375,6 @@ function checkCmdPaneVisibility() {
         refreshPage = 1;
         setRefreshRate(origRefreshVal);
     } else {
-        /* show command panel and disable page refresh */
-        if(refreshPage == 1) {
-            origRefreshVal = curRefreshVal;
-            toggleCmdPane(1);
-        }
-        stopRefresh();
-
         /* set submit button text */
         var btn = document.getElementById('multi_cmd_submit_button');
         var ssize = selectedServices.size();
@@ -365,6 +394,14 @@ function checkCmdPaneVisibility() {
             text = ssize + " " + serviceName;
         }
         btn.value = "submit command for " + text;
+        check_selected_command();
+
+        /* show command panel and disable page refresh */
+        if(refreshPage == 1) {
+            origRefreshVal = curRefreshVal;
+            toggleCmdPane(1);
+        }
+        stopRefresh();
     }
 }
 
@@ -372,27 +409,58 @@ function checkCmdPaneVisibility() {
 function collectFormData() {
     var services = new Array();
     selectedServices.keys().each(function(row_id) {
-        services.push(getServiceNameForRowId(row_id));
+        services.push(servicesHash.get(row_id));
     });
     service_form = document.getElementById('selected_services');
     service_form.value = services.join(',');
 
     var hosts = new Array();
     selectedHosts.keys().each(function(row_id) {
-        hosts.push(getHostNameForRowId(row_id));
+        hosts.push(servicesHash.get(row_id));
     });
     host_form = document.getElementById('selected_hosts');
     host_form.value = hosts.join(',');
 }
 
-/* return the host;service for a row */
-function getServiceNameForRowId(row_id) {
-    return servicesHash.get(row_id);
+/* show/hide options for commands based on the selected command*/
+function check_selected_command() {
+    var sel = document.getElementById('quick_command');
+    var value = sel.value;
+
+    disableAllFormElement();
+    if(value == 1) { /* reschedule next check */
+        enableFormElement('row_start');
+        enableFormElement('row_reschedule_options');
+    }
+    if(value == 2) { /* add downtime */
+        enableFormElement('row_start');
+        enableFormElement('row_end');
+        enableFormElement('row_comment');
+    }
+    if(value == 3) { /* add comment */
+        enableFormElement('row_comment');
+    }
+    if(value == 4) { /* acknowledge */
+        enableFormElement('row_comment');
+        enableFormElement('row_ack_options');
+    }
+    if(value == 5) { /* remove downtimes */
+    }
+    if(value == 6) { /* remove comments */
+    }
 }
 
-/* return the host for a row */
-function getHostNameForRowId(row_id) {
-    var data = servicesHash.get(row_id);
-    var pos  = data.indexOf(';');
-    return data.substr(0,pos);
+/* hide all form element rows */
+function disableAllFormElement() {
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options');
+    elems.each(function(id) {
+        obj = document.getElementById(id);
+        obj.style.display = "none";
+    });
+}
+
+/* show this form row */
+function enableFormElement(id) {
+    obj = document.getElementById(id);
+    obj.style.display = "";
 }

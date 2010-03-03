@@ -41,28 +41,116 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # read only user?
     $c->detach('/error/index/11') if $c->check_user_roles('is_authorized_for_read_only');
 
+    my $host_quick_commands = {
+        1 => 96, # reschedule host check
+        2 => 55, # schedule downtime
+        3 => 1,  # add comment
+        4 => 34, # acknowledge
+        5 => 78, # remove all downtimes
+        6 => 20, # remove all comments
+    };
+    my $service_quick_commands = {
+        1 => 7, # reschedule host check
+        2 => 56, # schedule downtime
+        3 => 3,  # add comment
+        4 => 34, # acknowledge
+        5 => 79, # remove all downtimes
+        6 => 21, # remove all comments
+    };
 
+    # did we receive a quick command from the status page?
     my $quick_command = $c->{'request'}->{'parameters'}->{'quick_command'};
     if(defined $quick_command and $quick_command) {
-        #for my $host () {
-        #    $self->_check_for_commands($c);
-        #}
-        #for my $service () {
-        #    $self->_check_for_commands($c);
-        #}
+        my $cmd_typ;
+        $c->{'request'}->{'parameters'}->{'cmd_mod'} = 1;
+        for my $hostdata (split/,/mx, $c->{'request'}->{'parameters'}->{'selected_hosts'}) {
+            if(defined $host_quick_commands->{$quick_command}) {
+                $cmd_typ = $host_quick_commands->{$quick_command};
+            }
+            else {
+                $c->detach('/error/index/7');
+            }
+            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
+            my($host,$service,$backend) = split/;/mx, $hostdata;
+            $c->{'request'}->{'parameters'}->{'host'}    = $host;
+            $c->{'request'}->{'parameters'}->{'backend'} = $backend;
+            if($quick_command == 5) {
+                $self->_remove_all_downtimes($c, $host);
+            }
+            else {
+                if($self->_do_send_command($c)) {
+                    $c->log->debug("command for host $host succeeded");
+                } else {
+                    $c->log->error("command for host $host failed");
+                    $c->log->error(Dumper($c->stash->{'form_errors'}));
+                }
+            }
+        }
+        for my $servicedata (split/,/mx, $c->{'request'}->{'parameters'}->{'selected_services'}) {
+            if(defined $service_quick_commands->{$quick_command}) {
+                $cmd_typ = $service_quick_commands->{$quick_command};
+            }
+            else {
+                $c->detach('/error/index/7');
+            }
+            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
+            my($host,$service,$backend) = split/;/mx, $servicedata;
+            $c->{'request'}->{'parameters'}->{'host'}    = $host;
+            $c->{'request'}->{'parameters'}->{'service'} = $service;
+            $c->{'request'}->{'parameters'}->{'backend'} = $backend;
+            if($quick_command == 5) {
+                $self->_remove_all_downtimes($c, $host, $service);
+            }
+            else {
+                if($self->_do_send_command($c)) {
+                    $c->log->debug("command for $service on host $host succeeded");
+                } else {
+                    $c->log->error("command for $service on host $host failed");
+                    $c->log->error(Dumper($c->stash->{'form_errors'}));
+                }
+            }
+        }
         $self->_redirect_or_success($c, -1);
     }
+
+    # normal page call
     else {
         $self->_check_for_commands($c);
     }
+
+    return 1;
+}
+
+######################################
+# remove downtimes
+sub _remove_all_downtimes {
+    my ( $self, $c, $host, $service ) = @_;
+
+    # get list of all downtimes
+    my $ids;
+    if(defined $service) {
+        $ids = $c->{'live'}->selectcol_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = $service\nFilter: host_name = $host\nColumns: id");
+    }
+    else {
+        $ids = $c->{'live'}->selectcol_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nFilter: host_name = $host\nColumns: id");
+    }
+    for my $id (@{$ids}) {
+        $c->{'request'}->{'parameters'}->{'down_id'} = $id;
+        if($self->_do_send_command($c)) {
+            $c->log->debug("removing downtime $id succeeded");
+        } else {
+            $c->log->error("removeing downtime $id failed");
+            $c->log->error(Dumper($c->stash->{'form_errors'}));
+        }
+    }
+
+    return 1;
 }
 
 ######################################
 # command disabled by config?
 sub _check_for_commands {
-    my ( $self, $c, $redirect ) = @_;
-
-    $redirect = 1 unless defined $redirect;
+    my ( $self, $c ) = @_;
 
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
@@ -71,7 +159,7 @@ sub _check_for_commands {
 
     # command commited?
     if(defined $cmd_mod and $self->_do_send_command($c)) {
-        $self->_redirect_or_success($c, -2) if $redirect;
+        $self->_redirect_or_success($c, -2);
     } else {
         # no command submited, view commands page
         if($cmd_typ == 55 or $cmd_typ == 56) {
@@ -113,6 +201,8 @@ sub _cmd_is_disabled {
             $c->detach('/error/index/12');
         }
     }
+
+    return 1;
 }
 
 ######################################
@@ -130,6 +220,8 @@ sub _redirect_or_success {
     } else {
         $c->stash->{template} = 'cmd_success.tt';
     }
+
+    return 1;
 }
 
 ######################################
@@ -141,7 +233,7 @@ sub _do_send_command {
     $c->detach('/error/index/6') unless defined $cmd_typ;
 
     # locked author names?
-    if($c->{'cgi_cfg'}->{'lock_author_names'}) {
+    if($c->{'cgi_cfg'}->{'lock_author_names'} or !defined $c->{'request'}->{'parameters'}->{'com_author'}) {
         my $author = $c->user->username;
         $author    = $c->user->alias if defined $c->user->alias;
         $c->{'request'}->{'parameters'}->{'com_author'} = $author;

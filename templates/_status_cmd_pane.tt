@@ -2,44 +2,59 @@
 <div class="cmd_pane" id="cmd_pane">
 <form action="cmd.cgi" method="POST">
   <input type="hidden" name="referer" value="[% c.request.uri %]">
+  <input type="hidden" name="fixed" value="1">
   <input type="hidden" name="selected_services" id="selected_services" value="">
   <input type="hidden" name="selected_hosts"    id="selected_hosts"    value="">
   <table class="cmd_pane" border=1 width="400">
     <tr>
       <th colspan=2 class="status cmd_pane">
           <a href="javascript:selectAllServices(true);">check all</a>
-        - <a href="javascript:selectAllServices(false);">uncheck all</a>
+        - <a href="javascript:selectAllServices(false);selectAllHosts(false);">uncheck all</a>
         - <a href="javascript:selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
         - <a href="javascript:selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
       </th>
     </tr>
     <tr>
-      <td class="statusEven">Command:</td>
-      <td class="statusEven">
-        <select name="quick_command">
-          <option value="1">force service check now
-          <option value="2">add downtime
-          <option value="3">add comment
-          <option value="4">acknowlege
-          <option value="5">remove downtimes
-          <option value="6">remove comments
+      <td class="statusOdd">Command:</td>
+      <td class="statusOdd">
+        <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)">
+          <option value="1">reschedule next check</option>
+          <option value="2">add downtime</option>
+          <option value="3">add comment</option>
+          <option value="4">acknowlege</option>
+          <option value="5">remove downtimes</option>
+          <option value="6">remove comments</option>
         </select>
       </td>
     </tr>
-    <tr>
+    <tr id="row_comment">
       <td class="statusOdd">Comment:</td>
-      <td class="statusOdd"><input type="text" value="" name="comment" size="30" disabled></td>
+      <td class="statusOdd"><input type="text" value="" name="com_data" size="30"></td>
     </tr>
-    <tr>
-      <td class="statusEven">Start:</td>
-      <td class="statusEven"><a href="javascript:NewCssCal('start_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/cal/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" size="20" disabled></td>
+    <tr id="row_start">
+      <td class="statusOdd">Start:</td>
+      <td class="statusOdd"><a href="javascript:NewCssCal('start_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/cal/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20"></td>
     </tr>
-    <tr>
+    <tr id="row_end">
       <td class="statusOdd">End:</td>
-      <td class="statusOdd"><a href="javascript:NewCssCal('end_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/cal/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]" id="end_time" size="20" disabled></td>
+      <td class="statusOdd"><a href="javascript:NewCssCal('end_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/cal/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20"></td>
+    </tr>
+    <tr id="row_reschedule_options">
+      <td class="statusOdd">Options:</td>
+      <td class="statusOdd"><input type='checkbox' name='force_check' checked></td>
+    </tr>
+    <tr id="row_ack_options">
+      <td class="statusOdd" valign="top">Options:</td>
+      <td class="statusOdd">
+        <table border=0 cellpadding=0 cellspacing=0>
+          <tr><td>Sticky Acknowledgement:</td><td><input type='checkbox' name='sticky_ack' checked></td></tr>
+          <tr><td>Send Notification:</td><td><input type='checkbox' name='send_notification'></td></tr>
+          <tr><td>Persistent Comment:</td><td><input type='checkbox' name='persistent'></td></tr>
+        </table>
+      </td>
     </tr>
     <tr>
-      <td class="statusEven submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="collectFormData()"></td>
+      <td class="statusOdd submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="collectFormData()"></td>
     </tr>
   </table>
 </form>
