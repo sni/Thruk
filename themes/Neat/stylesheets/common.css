@@ -196,22 +196,22 @@ TABLE.filter {
  margin: 1em 0 1em 0;
 }
 TABLE.filter TD.filter {
- font-size: 0.6em;
+ font-size: 0.9em;
  padding: 0 0 0.5em 0.5em;
 }
 TABLE.filter TD.filterTitle {
- font-size: 0.7em;
+ font-size: 0.9em;
  font-weight: bold;
  border-bottom: 1px solid #eee;
 }
 TABLE.filter TD.filterName {
- font-size: 0.6em;
+ font-size: 0.8em;
  font-style: italic;
  line-height: 90%;
  padding: 0 1em 0 0;
 }
 TABLE.filter TD.filterValue {
- font-size: 0.6em;
+ font-size: 0.8em;
  font-style: italic;
  line-height: 90%;
 }

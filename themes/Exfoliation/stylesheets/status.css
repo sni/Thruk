@@ -9,7 +9,7 @@
 
 .itemTotalsTitle { font-size: 8pt; font-style: italic; }
 
-table.status { font-size: 9pt; padding: 0 0 10 0; }
+table.status { font-size: 8pt; padding: 0 0 10 0; }
 th.status    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
 div.status   { font-size: 10pt; text-align: center; }
 .statusOdd   { font-size: 8pt; background-color: #e7e7e7; line-height: 150%; padding: 0 4 0 4; }

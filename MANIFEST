@@ -289,6 +289,7 @@ templates/trends_step_1.tt
 templates/trends_step_2.tt
 templates/trends_step_3.tt
 THANKS
+themes/Classic/images/accept.png
 themes/Classic/images/ack.gif
 themes/Classic/images/action.gif
 themes/Classic/images/calendar.png
@@ -383,10 +384,12 @@ themes/Classic/stylesheets/thruk.css
 themes/Classic/stylesheets/thruk_noframes.css
 themes/Classic/stylesheets/thruk_noframes_ie_fix.css
 themes/Classic/stylesheets/trends.css
+themes/Exfoliation/images/accept.png
 themes/Exfoliation/images/ack.gif
 themes/Exfoliation/images/action-graph.gif
 themes/Exfoliation/images/action-orig.gif
 themes/Exfoliation/images/action.gif
+themes/Exfoliation/images/calendar.png
 themes/Exfoliation/images/catalyst_170pix.png
 themes/Exfoliation/images/command.png
 themes/Exfoliation/images/comment.gif
@@ -528,8 +531,10 @@ themes/Neat/stylesheets/thruk.css
 themes/Neat/stylesheets/thruk_noframes.css
 themes/Neat/stylesheets/thruk_noframes_ie_fix.css
 themes/Neat/stylesheets/trends.css
+themes/Vautour/images/accept.png
 themes/Vautour/images/ack.gif
 themes/Vautour/images/action.gif
+themes/Vautour/images/calendar.png
 themes/Vautour/images/catalyst_170pix.png
 themes/Vautour/images/command.png
 themes/Vautour/images/comment.gif

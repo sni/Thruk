@@ -109,7 +109,7 @@ DIV.statusSort {
 /* status styles */
 TABLE.status TD {
  padding: 0 0.2em 0 0.2em;
- font-size: 0.7em;
+ font-size: 9pt;
 }
 TABLE.status TD TD {
  padding: 0;
@@ -371,7 +371,7 @@ TD.miniStatusDOWN A, TD.miniStatusUNREACHABLE A {
 
 /* small section at the bottom of the page that shows the number of items displayed */
 DIV.itemTotalsTitle {
- font-size: 0.7em; 
+ font-size: 0.7em;
  text-align: center;
 }
 
