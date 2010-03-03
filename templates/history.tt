@@ -1,5 +1,7 @@
 [% USE date %]
-[% PROCESS _header.tt %]
+[% PROCESS _header.tt
+  js = "/thruk/javascript/datetimepicker.js"
+%]
 
 [% link = '' %]
 [% IF service    != '' %][% link = link _ '&amp;' _ 'service='    _ service    %][% END %]
@@ -10,6 +12,7 @@
 [% IF type       != '' %][% link = link _ '&amp;' _ 'type='       _ type       %][% END %]
 [% IF statetype  != '' %][% link = link _ '&amp;' _ 'statetype='  _ statetype  %][% END %]
 
+    <form method="get" action="history.cgi">
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -45,39 +48,32 @@
           </div><br>
           <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
             <tr>
-              <td align="center" valign="middle" class='navBoxItem'>
+              <td align="center" valign="middle" class='navBoxItem' width="75">
                 Previous Day<br>
-                <a href='history.cgi?archive=[% archive + 1 %][% link %]'><img src='/thruk/themes/[% theme %]/images/left.gif' border="0" alt='Previous Day' title='Previous Day' width="36" height="32"></a>
+                <input type="image" name="archive" value='-1' src='/thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day'>
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
                 <div class='navBoxTitle'>Log File Navigation</div>
-                [% date.format(start, datetime_format_long) %]<br>
-                to<br>
-                [% IF endname %]
-                  [% endname %]
-                [% ELSE %]
-                  [% date.format(end, datetime_format_long) %]<br>
-                [% END %]
+                <input type="text" value="[% date.format(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:NewCssCal('start','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <br>to<br>
+                <input type="text" value="[% date.format(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:NewCssCal('end','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <br>
               </td>
-              <td width="15"></td>
-              [% IF archive >= 1 %]
-              <td align="center" valign="middle" class='navBoxItem'>
+              <td valign="middle">
+                &nbsp;&nbsp;<input type='submit' value='Update'>
+              </td>
+              <td align="center" valign="middle" class='navBoxItem' width="75">
                 Next Day<br>
-                <a href='history.cgi?archive=[% archive - 1 %][% link %]'><img src='/thruk/themes/[% theme %]/images/right.gif' border="0" alt='Next Day' title='Next Day' width="36" height="32"></a>
+                <input type="image" name="archive" value='+1' src='/thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day'>
               </td>
-              [% ELSE %]
-              <td><img src='/thruk/themes/[% theme %]/images/empty.gif' border="0" width="75" height="1" alt="#########"></td>
-              [% END %]
             </tr>
-          </table><br>
+          </table>
         </td>
 
         <td align="right" valign="top" width="33%">
-          <form method="get" action="history.cgi">
               [% IF host    %]<input type='hidden' name='host'    value='[% host    %]'>[% END %]
               [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]
-              [% IF archive %]<input type='hidden' name='archive' value='[% archive %]'>[% END %]
             <table border="0" class='optBox'>
               <tr>
                 <td align="left" class='optBoxItem'>State type options:</td>
@@ -129,13 +125,13 @@
                 <td align="right"></td>
               </tr>
             </table>
-          </form>
           [% IF show_context_help %]
           <br><a href='/thruk/docs/history' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>
     </table>
+    </form>
 
 [% SET last_hour = '' %]
 [% FOREACH l = logs %]

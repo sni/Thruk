@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.34    Wed Mar  3 09:40:49 CET 2010
           - send multiple commands from status detail
+          - date picker for logfile pages (history, showlog and notifications)
 
 0.32    Fri Feb 26 09:16:20 CET 2010
           - added summary report

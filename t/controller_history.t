@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 62;
+use Test::More tests => 74;
 
 BEGIN {
     use lib('t');
@@ -20,6 +20,8 @@ my $pages = [
     '/thruk/cgi-bin/history.cgi?archive=1&host=all&noflapping=0&nodowntime=1&nosystem=0&type=0&statetype=0',
     '/thruk/cgi-bin/history.cgi?archive=1&host=all&noflapping=0&nodowntime=0&nosystem=1&type=0&statetype=0',
     '/thruk/cgi-bin/history.cgi?archive=1&host=all&noflapping=0&nodowntime=0&nosystem=0&type=0&statetype=1',
+    '/thruk/cgi-bin/history.cgi?start=2010-03-02+00%3A00%3A00&end=2010-03-03+00%3A00%3A00',
+    '/thruk/cgi-bin/history.cgi?start=2010-03-02+00%3A00%3A00&end=2010-03-03+00%3A00%3A00&oldestfirst=on',
 ];
 
 for my $url (@{$pages}) {

@@ -26,7 +26,9 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+    my($start,$end);
     my $filter  = "";
+    my $timeframe = 86400;
 
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
     my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
@@ -46,17 +48,43 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{infoBoxTitle} = 'Alert History';
     }
 
-    # start with today 00:00
-    my $timeperiod = 86400;
-    my($endname);
-    if($archive == 0) {
-        $endname = 'Present..';
+    my $param_start = $c->{'request'}->{'parameters'}->{'start'};
+    my $param_end   = $c->{'request'}->{'parameters'}->{'end'};
+
+    # start / end date from formular values?
+    if(defined $param_start and defined $param_end) {
+        # convert to timestamps
+        # Format: 2010-03-02 00:00:00
+        if($param_start =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+            $start = Mktime($1,$2,$3, $4,$5,$6);
+        }
+        if($param_end =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+            $end = Mktime($1,$2,$3, $4,$5,$6);
+        }
     }
-    my ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
-    $hour = 0; $min = 0; $sec = 0;
-    my $today = Mktime($year,$month,$day, $hour,$min,$sec);
-    my $end   = $today - ($timeperiod * ($archive-1));
-    my $start = $end - $timeperiod;
+    if(!defined $start or $start == 0 or !defined $end or $end == 0) {
+        # start with today 00:00
+        my ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
+        $hour = 0; $min = 0; $sec = 0;
+        my $today = Mktime($year,$month,$day, $hour,$min,$sec);
+        $start = $today;
+        $end   = $start + $timeframe;
+    }
+    if($archive eq '+1') {
+        $start = $start + $timeframe;
+        $end   = $end   + $timeframe;
+    }
+    elsif($archive eq '-1') {
+        $start = $start - $timeframe;
+        $end   = $end   - $timeframe;
+    }
+
+    # swap date if they are mixed up
+    if($start > $end) {
+        my $tmp = $start;
+        $start = $end;
+        $end   = $tmp;
+    }
 
     $filter .= "Filter: time >= $start\n";
     $filter .= "Filter: time <= $end\n";
@@ -141,7 +169,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{oldestfirst}      = $oldestfirst;
     $c->stash->{start}            = $start;
     $c->stash->{end}              = $end;
-    $c->stash->{endname}          = $endname;
     $c->stash->{host}             = $host;
     $c->stash->{service}          = $service;
     $c->stash->{title}            = 'History';

@@ -47,6 +47,7 @@ inc/Module/Install/WriteAll.pm
 lib/Catalyst/Authentication/Credential/Thruk.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
+lib/Catalyst/View/GD.pm
 lib/Thruk.pm
 lib/Thruk/Action/AddDefaults.pm
 lib/Thruk/Controller/avail.pm
@@ -75,6 +76,14 @@ README
 root/favicon.ico
 root/robots.txt
 root/thruk/documentation.html
+root/thruk/images/cal/cal.gif
+root/thruk/images/cal/cal_close.gif
+root/thruk/images/cal/cal_fastforward.gif
+root/thruk/images/cal/cal_fastreverse.gif
+root/thruk/images/cal/cal_forward.gif
+root/thruk/images/cal/cal_minus.gif
+root/thruk/images/cal/cal_plus.gif
+root/thruk/images/cal/cal_reverse.gif
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
 root/thruk/javascript/datetimepicker.js
@@ -120,6 +129,7 @@ templates/_host_status_details_box.tt
 templates/_infobox.tt
 templates/_pager.tt
 templates/_service_status_details_box.tt
+templates/_status_cmd_pane.tt
 templates/_status_filter.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
@@ -281,15 +291,7 @@ templates/trends_step_3.tt
 THANKS
 themes/Classic/images/ack.gif
 themes/Classic/images/action.gif
-themes/Classic/images/cal/cal.gif
-themes/Classic/images/cal/cal_close.gif
-themes/Classic/images/cal/cal_fastforward.gif
-themes/Classic/images/cal/cal_fastreverse.gif
-themes/Classic/images/cal/cal_forward.gif
-themes/Classic/images/cal/cal_minus.gif
-themes/Classic/images/cal/cal_plus.gif
-themes/Classic/images/cal/cal_reverse.gif
-themes/Classic/images/cal/calendar.png
+themes/Classic/images/calendar.png
 themes/Classic/images/catalyst_170pix.png
 themes/Classic/images/command.png
 themes/Classic/images/comment.gif
@@ -312,6 +314,7 @@ themes/Classic/images/greendot.gif
 themes/Classic/images/histogram.png
 themes/Classic/images/history.gif
 themes/Classic/images/hostevent.gif
+themes/Classic/images/icon_close.gif
 themes/Classic/images/icon_maximize.gif
 themes/Classic/images/icon_minimize.gif
 themes/Classic/images/info.png
@@ -414,7 +417,6 @@ themes/Exfoliation/images/left.gif
 themes/Exfoliation/images/logo_thruk.png
 themes/Exfoliation/images/logo_thruk_mid.png
 themes/Exfoliation/images/logo_thruk_small.png
-themes/Exfoliation/images/logos
 themes/Exfoliation/images/logrotate.png
 themes/Exfoliation/images/ndisabled.gif
 themes/Exfoliation/images/noack.gif
@@ -564,7 +566,6 @@ themes/Vautour/images/left.gif
 themes/Vautour/images/logo_thruk.png
 themes/Vautour/images/logo_thruk_mid.png
 themes/Vautour/images/logo_thruk_small.png
-themes/Vautour/images/logos
 themes/Vautour/images/logrotate.png
 themes/Vautour/images/ndisabled.gif
 themes/Vautour/images/noack.gif

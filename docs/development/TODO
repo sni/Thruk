@@ -75,23 +75,14 @@ statusmap: maybe something with http://search.cpan.org/~lbrocard/GraphViz/lib/Gr
 status:
     - proper search
         maybe ajax autocomplete for input form
-        save searches
+        save searches (like bookmarks would do it)
     - add new search page, with selector for all parameters
     - add flexible selector, ex.: select multiple hostgroups
     - host table map with worst service state as color
     - hide host/service summary in status.cgi (maybe with http://jqueryui.com/demos/toggle/ )
 
-showlog:
-    - time fram selector (day,week,month,custom)
-
-history:
-    - time period selector (day,week,month,custom)
-
-notifications:
-    - time period selector (day,week,month,custom)
-
 histogram:
-    - add reports
+    - missing completly
 
 summary:
     - preset selections when generating new report
