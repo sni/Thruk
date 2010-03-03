@@ -1,0 +1,5 @@
+/* show log filter */
+body.showlog .filter { border: 0; background-color: white; }
+body.showlog .filterTitle { font-size: 10pt; font-weight: bold; background-color: white; }
+body.showlog .filterValue { color: #707677; background-color: white; }
+body.showlog .filterName { background-color: white; }

@@ -73,12 +73,30 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $filter .= "Filter: time >= $start\n";
     $filter .= "Filter: time <= $end\n";
 
+
+    # additional filters set?
+    my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
+    my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
+    if(defined $pattern and $pattern !~ m/^\s*$/mx) {
+        $filter .= "Filter: message ~~ $pattern\n";
+    }
+
     my $query = "GET log\nColumns: time type message state\n".$filter;
     $query   .= Thruk::Utils::get_auth_filter($c, 'log');
 
     $c->stats->profile(begin => "showlog::fetch");
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
     $c->stats->profile(end   => "showlog::fetch");
+
+    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+        my $newlogs = [];
+        my $tmp_pattern = $exclude_pattern;
+        $tmp_pattern =~ s/\ /\\ /gmx;
+        for my $log (@{$logs}) {
+            push @{$newlogs}, $log if $log->{'message'} !~ m/$tmp_pattern/mx;
+        }
+        $logs = $newlogs;
+    }
 
     my $order = "DESC";
     if($oldestfirst) {
@@ -91,6 +109,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{archive}          = $archive;
     $c->stash->{start}            = $start;
     $c->stash->{end}              = $end;
+    $c->stash->{pattern}          = $pattern;
+    $c->stash->{exclude_pattern}  = $exclude_pattern;
     $c->stash->{oldestfirst}      = $oldestfirst;
     $c->stash->{title}            = 'Log File';
     $c->stash->{infoBoxTitle}     = 'Event Log';

@@ -12,6 +12,7 @@ general
     - default hidden setting for backends in thruk_local.conf
     - add go back button on error page
     - overlib for long plugin_output on status detail page
+    - check styles
 
 extinfo:
     - finish performance data on extinfo type 4

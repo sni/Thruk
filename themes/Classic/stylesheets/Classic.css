@@ -245,3 +245,7 @@ body.avail table.logEntries td {
   border-style: inset;
   border-color: #DBDBDB;
 }
+
+div.logEntries {
+  font-family:"Courier New",courier,monospace;
+}

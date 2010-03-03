@@ -7,7 +7,27 @@
   <table border="0" width="100%" cellpadding="0" cellspacing="0">
     <tr>
       <td align="left" valign="top" width="33%">
-      [% PROCESS _infobox.tt %]
+        [% PROCESS _infobox.tt %]
+        <table border="1" class='filter' cellspacing="0" cellpadding="0">
+          <tr>
+            <td class='filter'>
+              <table border="0" cellspacing="2" cellpadding="0">
+                <tr>
+                  <td align="left" class='filterTitle'>Display Filters:</td>
+                  <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update"></td>
+                </tr>
+                <tr>
+                  <td align="left" class='filterName'>Search Pattern:</td>
+                  <td align="left" class='filterValue'><input type="text" name="pattern" value="[% pattern%]"></td>
+                </tr>
+                <tr>
+                  <td align="left" class='filterName'>Exclude Pattern:</td>
+                  <td align="left" class='filterValue'><input type="text" name="exclude_pattern" value="[% exclude_pattern%]"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
       </td>
       <td align="center" valign="top" width="33%">
         <table border="0" cellspacing="0" cellpadding="0" class='navBox'>
@@ -124,7 +144,7 @@
 [% ELSIF l.type.search('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
 [% ELSE                                           %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% END %]
-<img align='left' src='/thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width="20" height="20">[[% date.format(l.time, datetime_format) %]] [% message %]<br clear='all'>
+<img align='middle' src='/thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, datetime_format) %]] [% message %]<br clear='all'>
 
 [% END %]
 

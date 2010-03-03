@@ -6,7 +6,7 @@ window.addEvent('domready', function(){
 	var collapsibles = new Array();
 	heads.each( function(head, i) {
 		var headimg = new Element('img');
-		headimg.setProperty('src', 'images/interface/menu_less.gif');
+		headimg.setProperty('src', '/thruk/themes/Vautour/images/interface/menu_less.gif');
 		headimg.injectInside(heads[i]);
 		heads[i].setStyles('cursor: pointer;');
 		var collapsible = new Fx.Slide(accordions[i], {
@@ -17,7 +17,7 @@ window.addEvent('domready', function(){
 		head.onclick = function() {
 			var img = $E('img', head);
 			if (img) {
-				var newHTML = img.getProperty('src') == 'images/interface/menu_more.gif' ? 'images/interface/menu_less.gif' : 'images/interface/menu_more.gif';
+				var newHTML = img.getProperty('src') == '/thruk/themes/Vautour/images/interface/menu_more.gif' ? '/thruk/themes/Vautour/images/interface/menu_less.gif' : '/thruk/themes/Vautour/images/interface/menu_more.gif';
 				img.setProperty('src', newHTML);
 			}
 			collapsible.toggle();

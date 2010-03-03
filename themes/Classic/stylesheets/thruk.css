@@ -223,10 +223,10 @@ body.summary table.data {
 }
 
 /* mouse over classes for inline command selection in status page */
-.tableRowHover{
+.tableRowHover {
   background-color:#88BBD8;
 }
-.tableRowSelected{
+.tableRowSelected {
   background-color:#609FD2;
 }
 
@@ -293,3 +293,9 @@ div.thruk_message {
 .fail_message {
   color: #FF0000;
 }
+
+/* show log filter */
+body.showlog .filter { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
+body.showlog .filterTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold;  background-color: #DBDBDB; }
+body.showlog .filterName { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
+body.showlog .filterValue { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
