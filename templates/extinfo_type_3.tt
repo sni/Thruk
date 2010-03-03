@@ -52,7 +52,7 @@
           <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% c.id %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% c.id %]&amp;backend=[% c.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF hostcommentscount == 0 %]
@@ -97,7 +97,7 @@
           <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% c.id %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% c.id %]&amp;backend=[% c.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF servicecommentscount == 0 %]

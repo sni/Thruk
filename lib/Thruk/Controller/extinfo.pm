@@ -83,8 +83,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 # create the downtimes page
 sub _process_comments_page {
     my ( $self, $c ) = @_;
-    $c->stash->{'hostcomments'}    = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name id source type author comment entry_time entry_type expire_time expires\nFilter: service_description = ", { Slice => {} });
-    $c->stash->{'servicecomments'} = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name service_description id source type author comment entry_time entry_type expire_time expires\nFilter: service_description != ", { Slice => {} });
+    $c->stash->{'hostcomments'}    = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name id source type author comment entry_time entry_type expire_time expires\nFilter: service_description = ", { Slice => {}, AddPeer => 1 });
+    $c->stash->{'servicecomments'} = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name service_description id source type author comment entry_time entry_type expire_time expires\nFilter: service_description != ", { Slice => {}, AddPeer => 1 });
     return 1;
 }
 
@@ -92,8 +92,8 @@ sub _process_comments_page {
 # create the downtimes page
 sub _process_downtimes_page {
     my ( $self, $c ) = @_;
-    $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: author comment end_time entry_time fixed host_name id start_time triggered_by", { Slice => {} });
-    $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description != \nColumns: author comment end_time entry_time fixed host_name id service_description start_time triggered_by", { Slice => {} });
+    $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: author comment end_time entry_time fixed host_name id start_time triggered_by", { Slice => {}, AddPeer => 1 });
+    $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description != \nColumns: author comment end_time entry_time fixed host_name id service_description start_time triggered_by", { Slice => {}, AddPeer => 1 });
     return 1;
 }
 
