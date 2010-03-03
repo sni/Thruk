@@ -11,6 +11,7 @@ general
     - cgi ssi: http://nagios.sourceforge.net/docs/3_0/cgiincludes.html
     - default hidden setting for backends in thruk_local.conf
     - add go back button on error page
+    - overlib for long status on status detail
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -20,12 +21,6 @@ config:
 
 avail:
     - check availability calculation on multibackend (restarts)
-
-summary:
-    - preset selections when generating new report
-
-histogram:
-    - add reports
 
 livestatus:
     - Contacts: Service Notification Options, Host Notification Options,
@@ -95,3 +90,9 @@ history:
 
 notifications:
     - time period selector (day,week,month,custom)
+
+histogram:
+    - add reports
+
+summary:
+    - preset selections when generating new report

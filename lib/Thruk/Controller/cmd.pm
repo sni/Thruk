@@ -110,6 +110,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 }
             }
         }
+        Thruk::Utils::set_message($c, 'success_message', 'Commands successfully submitted');
         $self->_redirect_or_success($c, -1);
     }
 

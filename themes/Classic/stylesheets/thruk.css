@@ -270,3 +270,17 @@ th.status a:hover {
 td.submit {
   text-align: center;
 }
+
+div.thruk_message {
+  text-align: center;
+  font-weight: bold;
+}
+.close_button {
+  vertical-align: sub;
+}
+.success_message {
+  color: #008000;
+}
+.fail_message {
+  color: #FF0000;
+}

@@ -1538,6 +1538,53 @@ sub calculate_availability {
     return 1;
 }
 
+########################################
+
+=head2 set_message
+
+  set_message($c, $style, $text)
+
+set a message in an cookie for later display
+
+=cut
+sub set_message {
+    my $c       = shift;
+    my $style   = shift;
+    my $message = shift;
+
+    $c->res->cookies->{'thruk_message'} = {
+        value => $style.'~~'.$message,
+    };
+
+    return 1;
+}
+
+########################################
+
+=head2 get_message
+
+  get_message($c)
+
+get a message from an cookie, display and delete it
+
+=cut
+sub get_message {
+    my $c       = shift;
+
+    if(defined $c->request->cookie('thruk_message')) {
+        my $cookie = $c->request->cookie('thruk_message');
+        my($style,$message) = split/~~/mx, $cookie->value;
+        $c->stash->{'thruk_message'}       = $message;
+        $c->stash->{'thruk_message_class'} = $style;
+
+        $c->res->cookies->{'thruk_message'} = {
+            value   => '',
+            expires => '-1M',
+        };
+    }
+
+    return 1;
+}
 
 ########################################
 sub _initialassumedhoststate_to_state {

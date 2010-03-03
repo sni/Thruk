@@ -407,6 +407,17 @@ function checkCmdPaneVisibility() {
 
 /* collect selected hosts and services and pack them into nice form data */
 function collectFormData() {
+
+    // check form values
+    var sel = document.getElementById('quick_command');
+    var value = sel.value;
+    if(value == 2 || value == 3 || value == 4) { /* add downtime / comment / acknowledge */
+        if(document.getElementById('com_data').value == '') {
+            alert('please enter a comment');
+            return(false);
+        }
+    }
+
     var services = new Array();
     selectedServices.keys().each(function(row_id) {
         services.push(servicesHash.get(row_id));
@@ -463,4 +474,10 @@ function disableAllFormElement() {
 function enableFormElement(id) {
     obj = document.getElementById(id);
     obj.style.display = "";
+}
+
+/* hide message */
+function close_message() {
+    obj = document.getElementById('thruk_message');
+    obj.style.display = "none";
 }

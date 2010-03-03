@@ -29,7 +29,7 @@
     </tr>
     <tr id="row_comment">
       <td class="statusOdd">Comment:</td>
-      <td class="statusOdd"><input type="text" value="" name="com_data" size="30"></td>
+      <td class="statusOdd"><input type="text" value="" name="com_data" id="com_data" size="30"></td>
     </tr>
     <tr id="row_start">
       <td class="statusOdd">Start:</td>
@@ -54,7 +54,7 @@
       </td>
     </tr>
     <tr>
-      <td class="statusOdd submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="collectFormData()"></td>
+      <td class="statusOdd submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="return collectFormData()"></td>
     </tr>
   </table>
 </form>
