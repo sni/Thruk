@@ -44,16 +44,7 @@
         </td>
       </tr>
     </table>
-
-    [% IF thruk_message %]
-    <div id="thruk_message" class="thruk_message">
-        <span class="[% thruk_message_class %]">[% thruk_message %]
-        <a href="javascript:close_message()"><img src='/thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a>
-        </span>
-    </div>
-    [% END %]
-
-    <table border="0" width="100%">
+    <table border="0" width="100%" cellpadding=0 cellspacing=0>
       <tr>
         <td valign="top" align="left" width="33%">
           [% PROCESS _status_filter.tt %]
@@ -70,6 +61,13 @@
           Host '[% host %]'
           [% END %]
           </div>
+          [% IF thruk_message %]
+          <div id="thruk_message" class="thruk_message">
+              <span class="[% thruk_message_class %]">[% thruk_message %]
+              <a href="javascript:close_message()"><img src='/thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a>
+              </span>
+          </div>
+          [% END %]
           [% IF c.request.parameters.sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
@@ -78,6 +76,8 @@
         <td valign="top" align="right" width="33%"></td>
       </tr>
     </table>
+    <br>
+
     [% PROCESS _pager.tt %]
 
     <table border="0" width="100%" class='status' id="statusTable">

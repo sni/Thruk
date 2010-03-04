@@ -1,5 +1,4 @@
 [% IF show_filter_table %]
-<br>
 <table border="1" class='filter' cellspacing="0" cellpadding="0">
   <tr>
     <td class='filter'>

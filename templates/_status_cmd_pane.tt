@@ -1,7 +1,7 @@
 [% USE date %]
 <div class="cmd_pane" id="cmd_pane">
 <form action="cmd.cgi" method="POST">
-  <input type="hidden" name="referer" value="[% c.request.uri %]">
+  <input type="hidden" name="referer" value="[% c.request.uri | replace('&', '&amp;') %]">
   <input type="hidden" name="fixed" value="1">
   <input type="hidden" name="selected_services" id="selected_services" value="">
   <input type="hidden" name="selected_hosts"    id="selected_hosts"    value="">

@@ -288,7 +288,7 @@ div.thruk_message {
   font-weight: bold;
 }
 .close_button {
-  vertical-align: sub;
+  vertical-align: middle;
 }
 .success_message {
   color: #008000;
@@ -317,7 +317,6 @@ table.overDivTable {
   border-collapse: separate;
 }
 table.overDivTable > tbody > tr > td {
-  padding: 2px;
   margin: 0px;
   border-width: 1px;
   border-style: inset;
