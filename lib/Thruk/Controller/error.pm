@@ -151,6 +151,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     }
 
     $c->stash->{'template'} = Thruk->config->{'custom-error-message'}->{'error-template'};
+    
+    if(defined $c->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
+        $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
+    }
 
     return 1;
 }
