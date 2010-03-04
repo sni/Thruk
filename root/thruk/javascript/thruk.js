@@ -134,7 +134,9 @@ function addEventHandler(elem, type) {
     if(type == 'service') {
         elem.onmouseover = highlightServiceRow;
         elem.onmouseout  = resetServiceRow;
-        elem.onclick     = selectService;
+        if(!elem.onclick) {
+            elem.onclick     = selectService;
+        }
     }
 }
 
@@ -225,6 +227,10 @@ function selectService(event, state)
     }
     // find id of current row
     if(event.target) {
+        // dont select row when clicked on a link
+        if(event.target.tagName == 'A' || event.target.tagName == 'IMG') {
+            return;
+        }
         row_id = getFirstParentId(event.target);
     } else {
         row_id = getFirstParentId(event);

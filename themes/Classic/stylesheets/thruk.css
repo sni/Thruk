@@ -229,6 +229,9 @@ body.summary table.data {
 .tableRowSelected {
   background-color:#609FD2;
 }
+.has_long_plugin_output {
+  color: #0000FF;
+}
 
 /* command pane */
 div.cmd_pane {
@@ -299,3 +302,37 @@ body.showlog .filter { font-family: arial,serif;  font-size: 8pt;  background-co
 body.showlog .filterTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold;  background-color: #DBDBDB; }
 body.showlog .filterName { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
 body.showlog .filterValue { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
+
+/* overlay for status page */
+.overDivTable {
+  font-family: arial,serif;
+  font-size: 8pt;
+}
+table.overDivTable {
+  background-color: #DBDBDB;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: #000000;
+  border-collapse: separate;
+}
+table.overDivTable > tbody > tr > td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 1px;
+  border-style: inset;
+  border-color: #C4C2C2;
+  background-color: #C4C2C2;
+}
+
+.overDivHead {
+  background-color:#999797;
+  color:#DCE5C1;
+  font-size:10pt;
+  text-align:left;
+  border: 0x none;
+}
+.overDivContent {
+  background-color: #DBDBDB;
+  border: 0x none;
+}

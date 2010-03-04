@@ -1,7 +1,8 @@
 [% USE date %]
 [% PROCESS _header.tt
-  js = "/thruk/javascript/datetimepicker.js"
+  js = "/thruk/javascript/overlib.js"
 %]
+<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
 [% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
@@ -185,7 +186,23 @@
         <td class='[% serviceclass %]' nowrap>[% date.format(s.last_check, datetime_format) %]</td>
         <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
         <td class='[% serviceclass %]'>[% s.current_attempt %]/[% s.max_check_attempts %]</td>
-        <td class='[% serviceclass %]'>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% IF escape_html_tags %][% html_escape(s.plugin_output) %][% ELSE %][% s.plugin_output %][% END %][% END %]&nbsp;</td>
+          [% IF s.has_been_checked == 0 %]
+            <td class='[% serviceclass %]'>Service check scheduled for [% date.format(s.next_check, datetime_format_long) %]</td>
+          [% ELSE %]
+            [% IF s.long_plugin_output %]
+              [% IF escape_html_tags %]
+                <td class='[% serviceclass %]' onclick="return overlib('[% html_escape(html_escape(s.plugin_output)) %]<br>[% html_escape(html_escape(s.long_plugin_output)) %]',STICKY,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,800);"><span class="has_long_plugin_output">[% html_escape(s.plugin_output) %]</span></td>
+              [% ELSE %]
+                <td class='[% serviceclass %]' onclick="return overlib('[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) %]',STICKY,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,800);"><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
+              [% END %]
+            [% ELSE %]
+              [% IF escape_html_tags %]
+                <td class='[% serviceclass %]'>[% html_escape(s.plugin_output) %]</td>
+              [% ELSE %]
+                <td class='[% serviceclass %]'>[% s.plugin_output %]</td>
+              [% END %]
+            [% END %]
+          [% END %]
       </tr>
       [% SET lasthost = s.host_name %]
       [% END %]
