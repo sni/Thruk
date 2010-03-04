@@ -8,7 +8,7 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to disable active checks of all services in a particular servicegroup'
-   description = 'This command is used to disable active checks of all services in the specified servicegroup. This <i>does not</i> disable checks of the hosts in the servicegroup unless you check the 'Disable for hosts too' option.'
+   description = 'This command is used to disable active checks of all services in the specified servicegroup. This <i>does not</i> disable checks of the hosts in the servicegroup unless you check the "Disable for hosts too" option.'
 %]
 
 [%# definition of the command send to your backend #%]

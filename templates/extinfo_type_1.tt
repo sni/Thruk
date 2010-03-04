@@ -349,7 +349,7 @@
                           </tr>
 
 
-                          [% IF host.state >= 1 %]
+                          [% IF host.acknowledged || host.state >= 1 %]
                           <tr class='command'>
                             [% IF host.acknowledged %]
                               <td><img src='/thruk/themes/[% theme %]/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement' width="20" height="20"></td>

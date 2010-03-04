@@ -1,5 +1,7 @@
-[% IF show_filter_table %]
-<table border="1" class='filter' cellspacing="0" cellpadding="0">
+[% UNLESS show_filter_table %]
+<a href="javascript:toggleFilterPane('[% theme %]')"><img src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="filter_button" id="filter_button" border="0" alt="filter" width="13" height="12"></a>
+[% END %]
+<table border="1" class='filter' style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" cellspacing="0" cellpadding="0" id="filter_pane">
   <tr>
     <td class='filter'>
       <table border="0" cellspacing="2" cellpadding="0">
@@ -26,4 +28,3 @@
     </td>
   </tr>
 </table>
-[% END %]

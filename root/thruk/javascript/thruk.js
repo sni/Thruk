@@ -227,11 +227,13 @@ function selectService(event, state)
     }
     // find id of current row
     if(event.target) {
+        row_id = getFirstParentId(event.target);
+
         // dont select row when clicked on a link
         if(event.target.tagName == 'A' || event.target.tagName == 'IMG') {
+            resetServiceRow(event);
             return;
         }
-        row_id = getFirstParentId(event.target);
     } else {
         row_id = getFirstParentId(event);
     }
@@ -268,6 +270,12 @@ function selectHost(event, state)
     // find id of current row
     if(event.target) {
         row_id = getFirstParentId(event.target);
+
+        // dont select row when clicked on a link
+        if(event.target.tagName == 'A' || event.target.tagName == 'IMG') {
+            resetHostRow(event);
+            return;
+        }
     } else {
         row_id = getFirstParentId(event);
     }
@@ -488,4 +496,22 @@ function enableFormElement(id) {
 function close_message() {
     obj = document.getElementById('thruk_message');
     obj.style.display = "none";
+}
+
+/* toggle the visibility of the filter pane */
+function toggleFilterPane(theme) {
+  var pane = document.getElementById('filter_pane');
+  var img  = document.getElementById('filter_button');
+  if(pane.style.display == 'none') {
+    pane.style.display    = '';
+    pane.style.visibility = 'visible';
+    img.style.display     = 'none';
+    img.style.visibility  = 'hidden';
+  }
+  else {
+    pane.style.display    = 'none';
+    pane.style.visibility = 'hidden';
+    img.style.display     = '';
+    img.style.visibility  = 'visible';
+  }
 }

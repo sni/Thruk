@@ -332,7 +332,7 @@
                             [% END %]
                           </tr>
 
-                          [% IF service.state >= 2 %]
+                          [% IF service.acknowledged || service.state >= 1 %]
                           <tr class='command'>
                             [% IF service.acknowledged %]
                             <td><img src='/thruk/themes/[% theme %]/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement' width="20" height="20"></td>
