@@ -1,0 +1,127 @@
+body.navbar {
+  background-color: #C3C7D3;
+  border-color: #C3C7D3;
+}
+div.navbar {
+  background-color: #C3C7D3;
+  border-color: #C3C7D3;
+}
+body {
+  background-color: #C3C7D3;
+  border-color: #C3C7D3;
+  font-family: arial, verdana, serif;
+  font-weight: normal;
+  font-size: 10pt;
+}
+
+/* main page */
+#splashpage{
+    background-color: #C3C7D3;
+	text-align: center;
+	}
+
+#mainbrandsplash{
+	font-size: 12pt;
+	font-weight: bold;
+	margin: 0 0 35px 0;
+	}
+
+#maincopy{
+	margin: 0 0 15px 0;
+	}
+
+#currentversioninfo{
+	font-size: 12pt;
+	}
+#currentversioninfo .product{
+	font-size: 14pt;
+	font-weight: bold;
+	}
+#currentversioninfo .version{
+	font-size: 14pt;
+	font-weight: bold;
+	}
+#currentversioninfo .releasedate{
+	font-size: 11pt;
+	margin: 5px 0 0 0;
+	}
+#currentversioninfo .checkforupdates{
+	font-size: 11pt;
+	font-weight: bold;
+	}
+#currentversioninfo .whatsnew{
+	font-size: 11pt;
+	font-weight: bold;
+	margin: 50px 0 0 0;
+	}
+
+#updateversioninfo{
+	margin: 15px auto 50px auto;
+	width: 400px;
+	}
+.updatechecksdisabled{
+	background-color: #FF9F9F;
+	border: 1px solid red;
+	padding: 10px;
+	}
+.updatechecksdisabled div.warningmessage{
+	font-weight: bold;
+	}
+#updateversioninfo div.submessage{
+	clear: left;
+	}
+.updateavailable{
+	background-color: #9FD4FF;
+	border: 1px solid blue;
+	padding: 10px;
+	}
+.updateavailable div.updatemessage{
+	font-size: 12pt;
+	font-weight: bold;
+	}
+
+#splashpage #mainfooter{
+	margin: 100px 0 0 0;
+	font-size: 8pt;
+	}
+#splashpage #mainfooter .disclaimer{
+	width: 80%;
+	margin: auto;
+	}
+#splashpage #mainfooter .logos{
+	margin: 15px 0 0 0;
+	}
+
+a img {
+	border: none;
+	}
+
+/* command pane header */
+th.cmd_pane a, th.cmd_pane {
+  color:#3F3D3D;
+  font-family:Tahoma,Arial,Sans-Serif;
+  font-size:8pt;
+}
+/* command pane header */
+th.status a:hover {
+  color:#3F3D3D;
+  font-family:Tahoma,Arial,Sans-Serif;
+  font-size:8pt;
+  text-decoration: underline;
+}
+
+.tableRowHover {
+  background-color:#88BBD8;
+  height:22px;
+  padding:1px;
+}
+.tableRowSelected {
+  background-color:#609FD2;
+  height:22px;
+  padding:1px;
+}
+
+/* fix for navigation table header */
+div.tree td {
+  line-height: 3px;
+}

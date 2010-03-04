@@ -1,5 +1,5 @@
 [% UNLESS show_filter_table %]
-<input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="filter_button" id="filter_button" border="0" alt="filter" width="13" height="12" onClick="toggleFilterPane('[% theme %]'); return false;">
+<input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane('[% theme %]'); return false;">
 [% END %]
 <table border="1" class='filter' style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" cellspacing="0" cellpadding="0" id="filter_pane">
   <tr>

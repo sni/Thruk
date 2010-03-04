@@ -1,0 +1,26 @@
+<script type="text/javascript" language="JavaScript1.2" src="/thruk/themes/Nuvola/config.js"></script>
+<link rel="StyleSheet" href="/thruk/themes/Nuvola/side/dtree.css" type="text/css" />
+<script type="text/javascript" language="JavaScript1.2" src="/thruk/themes/Nuvola/side/dtree.js"></script>
+<script language="JavaScript" type="text/javascript">
+<!--
+function newImage(arg)
+{
+	if (document.images)
+	{
+		rslt = new Image();
+		rslt.src = arg;
+		return rslt;
+	}
+}
+function preloadImages()
+{
+	if (document.images)
+	{
+		exanded = newImage("/thruk/themes/Nuvola/side/expand.gif");
+		collapsed = newImage("/thruk/themes/Nuvola/side/collapse.gif");
+		plus = newImage("/thruk/themes/Nuvola/side/plus.gif");
+		minus = newImage("/thruk/themes/Nuvola/side/minus.gif");
+	}
+}
+-->
+</script>

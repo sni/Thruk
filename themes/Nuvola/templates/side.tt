@@ -1,0 +1,123 @@
+[% IF use_frames %]
+  [% SET target = "main" %]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <title>Thruk</title>
+    <link href="/thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    <link href="/thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
+    <link href="/thruk/themes/[% theme %]/stylesheets/[% theme %].css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+	[% PROCESS extra_headers.tt %]
+  </head>
+  <body class='navbar' onload="preloadImages();">
+[% ELSE %]
+  [% SET target = "_self" %]
+[% END %]
+<div class="tree">
+<form style="padding: 0px; margin:0px;" method="get" action="/thruk/cgi-bin/status.cgi" target="[% target %]">
+<script type="text/javascript" language="JavaScript1.2">
+<!--
+//******************************************************************************
+// ------ DTree Tree-menu Data --------------------------------------------
+//******************************************************************************
+
+if ( ( typeof( window[ 'homeMenuTitle' ] ) != "undefined" ) )
+{
+general = new dTree('general');
+
+general.header('&nbsp;&nbsp;<a thref="#">' + homeMenuTitle + '<\/a>','/thruk/themes/Nuvola/side/home.gif',32,'/thruk/themes/Nuvola/side/title.gif','#AFB1C3',homeMenuOpen)
+
+general.add(0,-1);
+general.add(1,0,'Home','/thruk/main.html','','[% target %]','/thruk/themes/Nuvola/side/icons/info.gif');
+[% IF documentation_link %]
+general.add(2,0,'Documentation','[% documentation_link %]','','[% target %]','/thruk/themes/Nuvola/side/icons/info.gif');
+[% END %]
+
+document.write(general);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+if ( ( typeof( window[ 'monitMenuTitle' ] ) != "undefined" ) )
+{
+monitoring = new dTree('monitoring');
+
+monitoring.header('&nbsp;&nbsp;<a thref="#">' + monitMenuTitle + '<\/a>','/thruk/themes/Nuvola/side/monitoring.gif',32,'/thruk/themes/Nuvola/side/title.gif','#AFB1C3',monitMenuOpen)
+
+monitoring.add(0,-1);
+monitoring.add(1,0,'Tactical Overview',cgipath + 'tac.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+monitoring.add(2,0,'Service Detail',cgipath + 'status.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+monitoring.add(3,0,'Host Detail',cgipath + 'status.cgi?hostgroup=all&style=hostdetail','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+monitoring.add(100,0,"<nobr><input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' value='hostname' size=10 style='font-size:10'><\/nobr>",'','','','/thruk/themes/Nuvola/side/icons/search.gif');
+monitoring.add(4,0,'Host Group',cgipath + 'status.cgi?hostgroup=all&style=overview','','[% target %]','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
+	monitoring.add(5,4,'Summary',cgipath + 'status.cgi?hostgroup=all&style=summary','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+	monitoring.add(6,4,'Grid',cgipath + 'status.cgi?hostgroup=all&style=grid','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+monitoring.add(7,0,'Service Group',cgipath + 'status.cgi?servicegroup=all&style=overview','','[% target %]','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
+	monitoring.add(8,7,'Summary',cgipath + 'status.cgi?servicegroup=all&style=summary','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+	monitoring.add(9,7,'Grid',cgipath + 'status.cgi?servicegroup=all&style=grid','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+[% IF use_feature_statusmap %]
+monitoring.add(10,0,'Status Map',cgipath + 'statusmap.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/map.gif');
+[% END %]
+monitoring.add(11,0,'Problems','','','','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
+	monitoring.add(12,11,'Service',cgipath + 'status.cgi?host=all&servicestatustypes=28','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
+	monitoring.add(13,11,'Host',cgipath + 'status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
+	monitoring.add(14,11,'Network Outages',cgipath + 'outages.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
+monitoring.add(15,0,'Comments',cgipath + 'extinfo.cgi?&type=3','','[% target %]','/thruk/themes/Nuvola/side/icons/notes.gif');
+monitoring.add(16,0,'Downtime',cgipath + 'extinfo.cgi?&type=6','','[% target %]','/thruk/themes/Nuvola/side/icons/downtime.gif');
+
+document.write(monitoring);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+if ( ( typeof( window[ 'reportMenuTitle' ] ) != "undefined" ) )
+{
+reporting = new dTree('reporting');
+
+reporting.header('&nbsp;&nbsp;<a thref="#">' + reportMenuTitle + '<\/a>','/thruk/themes/Nuvola/side/reporting.gif',32,'/thruk/themes/Nuvola/side/title.gif','#AFB1C3',reportMenuOpen)
+
+reporting.add(0,-1);
+[% IF use_feature_trends %]
+reporting.add(1,0,'Trends',cgipath + 'trends.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+[% END %]
+reporting.add(2,0,'Availability',cgipath + 'avail.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+reporting.add(3,0,'Alerts','','','','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
+	[% IF use_feature_histogram %]
+	reporting.add(4,3,'Histogram',cgipath + 'histogram.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+	[% END %]
+	reporting.add(5,3,'History',cgipath + 'history.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+	reporting.add(6,3,'Summary',cgipath + 'summary.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+reporting.add(7,0,'Notifications',cgipath + 'notifications.cgi?contact=all','','[% target %]','/thruk/themes/Nuvola/side/icons/notifications.gif');
+reporting.add(8,0,'Event Log',cgipath + 'showlog.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/notes.gif');
+
+document.write(reporting);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+if ( ( typeof( window[ 'configMenuTitle' ] ) != "undefined" ) )
+{
+configuration = new dTree('configuration');
+
+configuration.header('&nbsp;&nbsp;<a thref="#">' + configMenuTitle + '<\/a>','/thruk/themes/Nuvola/side/configuration.gif',32,'/thruk/themes/Nuvola/side/title.gif','#AFB1C3',configMenuOpen)
+
+configuration.add(0,-1);
+configuration.add(1,0,'Process',cgipath + 'extinfo.cgi?&type=0','','[% target %]','/thruk/themes/Nuvola/side/icons/processes.gif');
+configuration.add(2,0,'Performance',cgipath + 'extinfo.cgi?&type=4','','[% target %]','/thruk/themes/Nuvola/side/icons/performance.gif');
+configuration.add(3,0,'Scheduling Queue',cgipath + 'extinfo.cgi?&type=7','','[% target %]','/thruk/themes/Nuvola/side/icons/queue.gif');
+configuration.add(4,0,'View Config',cgipath + 'config.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/configuration.gif');
+
+document.write(configuration);
+}
+
+-->
+</script>
+</form>
+</div>
+[% IF use_frames %]
+  </body>
+</html>
+[% END %]

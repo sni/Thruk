@@ -3,6 +3,8 @@ THANKS
 
 Thanks to all contributing people:
 
+STYLES:
+=======
 Nagios Neat Style:
 http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Nagios-Neat/details
 
@@ -12,5 +14,21 @@ http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-In
 Exfoliation Style:
 http://lancet.mit.edu/mwall/projects/nagios/
 
+Nuvola Style:
+http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Nuvola-Style/details
+
+
+ICONS:
+======
+
 Silk Icon Set:
 http://www.famfamfam.com/lab/icons/silk/
+
+
+JAVASCRIPT:
+===========
+Overlib Library:
+http://www.bosrup.com/web/overlib/
+
+Prototype Library:
+http://www.prototypejs.org/
