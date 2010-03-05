@@ -46,6 +46,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                         INCLUDE_PATH       =>  'templates',
                         FILTERS            => {
                                                 'duration'  => \&Thruk::Utils::filter_duration,
+                                                'nl2br'     => \&Thruk::Utils::filter_nl2br,
                                             },
                         PRE_DEFINE         => {
                                                 'sprintf'      => sub { my $format = shift; sprintf $format, @_ },

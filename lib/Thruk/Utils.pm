@@ -180,6 +180,22 @@ sub filter_duration {
 }
 
 
+##############################################
+
+=head2 filter_nl2br
+
+  my $string = filter_nl2br($string);
+
+replace newlines with linebreaks
+
+=cut
+sub filter_nl2br {
+    my $string = shift;
+    $string =~ s/\\n/<br\ \/>/gmx;
+    return $string;
+}
+
+
 ######################################
 
 =head2 get_cgi_cfg

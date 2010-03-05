@@ -111,7 +111,7 @@
                               [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
                               [% IF escape_html_tags %][% html_escape(service.plugin_output) %][% ELSE %][% service.plugin_output %][% END %]
                               [% IF service.long_plugin_output %]
-                              <br>[% IF escape_html_tags %][% html_escape(service.long_plugin_output) %][% ELSE %][% service.long_plugin_output %][% END %]
+                              <br>[% IF escape_html_tags %][% html_escape(service.long_plugin_output) | nl2br %][% ELSE %][% service.long_plugin_output | nl2br %][% END %]
                               [% END %]
                             </td>
                           </tr>

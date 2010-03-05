@@ -335,3 +335,9 @@ table.overDivTable > tbody > tr > td {
   background-color: #DBDBDB;
   border: 0x none;
 }
+
+table.overDivTable a {
+  font-size:8pt;
+  font-weight: bold;
+  color:#000000;
+}
