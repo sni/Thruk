@@ -114,10 +114,10 @@ function addRowSelector(id)
 
         // for each cell in a row
         for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
-            if(cell_nr == 0 && cells[0].innerHTML != '') {
+            if(pagetype == "hostdetail" || (cell_nr == 0 && cells[0].innerHTML != '')) {
                 addEventHandler(cells[cell_nr], 'host');
             }
-            if(cell_nr >= 1) {
+            else if(cell_nr >= 1) {
                 addEventHandler(cells[cell_nr], 'service');
             }
         }
@@ -129,7 +129,9 @@ function addEventHandler(elem, type) {
     if(type == 'host') {
         elem.onmouseover = highlightHostRow;
         elem.onmouseout  = resetHostRow;
-        elem.onclick     = selectHost;
+        if(!elem.onclick) {
+            elem.onclick     = selectHost;
+        }
     }
     if(type == 'service') {
         elem.onmouseover = highlightServiceRow;
@@ -160,7 +162,7 @@ function setRowStyle(row_id, style, type, force) {
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         // only the first cell for hosts
         // all except the first cell for services
-        if((type == 'host' && cell_nr == 0) || (type == 'service' && cell_nr >= 1)) {
+        if((type == 'host' && pagetype == 'hostdetail') || (type == 'host' && cell_nr == 0) || (type == 'service' && cell_nr >= 1)) {
             // set style for cell itself
             styleElements(cells[cell_nr], style, force)
 

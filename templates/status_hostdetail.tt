@@ -3,6 +3,7 @@
   js = "/thruk/javascript/overlib.js"
 %]
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
+[% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -59,7 +60,7 @@
       </tr>
     </table>
     <div align='center'>
-      <table border="0" class='status' width="100%">
+      <table border="0" class='status' width="100%" id="statusTable">
         <tr>
           <th class='status'>Host&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
           <th class='status'>Status&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 8) %]'><img src='/thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host status (ascending)' title='Sort by host status (ascending)'></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 8) %]'><img src='/thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host status (descending)' title='Sort by host status (descending)'></a></th>
@@ -93,7 +94,7 @@
           [% class = 'statusBGDOWN' %]
         [% END %]
 
-        <tr>
+        <tr id="r[% loop.index %]">
           <td class='[% statusClass %]'>
             <table border="0" width='100%' cellpadding="0" cellspacing="0">
               <tr>
@@ -132,9 +133,9 @@
           [% ELSE %]
             [% IF h.long_plugin_output %]
               [% IF escape_html_tags %]
-                <td  valign='middle' class='[% class %]' onclick="return overlib('[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]',STICKY,CAPTION,'[% h.name %]',WIDTH,800);"><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
+                <td  valign='middle' class='[% class %]' onclick="return overlib('[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]',STICKY,CAPTION,'[% h.name %]',WIDTH,800,CLOSECLICK);"><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
               [% ELSE %]
-                <td  valign='middle' class='[% class %]' onclick="return overlib('[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]',STICKY,CAPTION,'[% h.name %]',WIDTH,800);"><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
+                <td  valign='middle' class='[% class %]' onclick="return overlib('[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]',STICKY,CAPTION,'[% h.name %]',WIDTH,800,CLOSECLICK);"><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
               [% END %]
             [% ELSE %]
               [% IF escape_html_tags %]
@@ -148,6 +149,11 @@
         [% END %]
 
       </table>
+      <script type="text/javascript">
+        var pagetype = 'hostdetail';
+        var servicesHash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+        addRowSelector('statusTable');
+      </script>
       [% PROCESS _pager.tt %]
     </div>
 
