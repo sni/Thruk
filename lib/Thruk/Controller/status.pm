@@ -290,6 +290,8 @@ sub _process_overview_page {
     my %joined_groups;
     for my $group (@{$groups}) {
 
+        next unless defined $group->{'members'};
+
         my $name = $group->{'name'};
         if(!defined $joined_groups{$name}) {
             $joined_groups{$name}->{'name'}  = $group->{'name'};

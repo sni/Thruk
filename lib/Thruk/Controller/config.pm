@@ -104,6 +104,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $data = $c->{'live'}->selectall_arrayref("GET servicegroups\nColumns: name alias members", { Slice => 1, Deepcopy => 1 });
         my $servicegroups = {};
         for my $servicegroup (@{$data}) {
+            next unless defined $servicegroup->{'members'};
             if(!defined $servicegroups->{$servicegroup->{'name'}}) {
                 $servicegroups->{$servicegroup->{'name'}} = $servicegroup;
                 @{$servicegroups->{$servicegroup->{'name'}}->{'members_array'}} = split /,/mx, $servicegroup->{'members'};
