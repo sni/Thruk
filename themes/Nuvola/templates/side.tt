@@ -1,5 +1,12 @@
+[% UNLESS target %]
+  [% IF use_frames %]
+    [% SET target = "main" %]
+  [% ELSE %]
+    [% SET target = "_self" %]
+  [% END %]
+[% END %]
+
 [% IF use_frames %]
-  [% SET target = "main" %]
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -10,11 +17,9 @@
     <link href="/thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
     <link href="/thruk/themes/[% theme %]/stylesheets/[% theme %].css" type="text/css" rel="stylesheet" />
     <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
-	[% PROCESS extra_headers.tt %]
+    [% PROCESS extra_headers.tt %]
   </head>
   <body class='navbar' onload="preloadImages();">
-[% ELSE %]
-  [% SET target = "_self" %]
 [% END %]
 <div class="tree">
 <form style="padding: 0px; margin:0px;" method="get" action="/thruk/cgi-bin/status.cgi" target="[% target %]">
@@ -33,7 +38,7 @@ general.header('&nbsp;&nbsp;<a thref="#">' + homeMenuTitle + '<\/a>','/thruk/the
 general.add(0,-1);
 general.add(1,0,'Home','/thruk/main.html','','[% target %]','/thruk/themes/Nuvola/side/icons/info.gif');
 [% IF documentation_link %]
-general.add(2,0,'Documentation','[% documentation_link %]','','[% target %]','/thruk/themes/Nuvola/side/icons/info.gif');
+general.add(2,0,'Documentation','/thruk/frame.html?link=[% html_escape(documentation_link) %]','','_parent','/thruk/themes/Nuvola/side/icons/info.gif');
 [% END %]
 
 document.write(general);
@@ -53,18 +58,18 @@ monitoring.add(2,0,'Service Detail',cgipath + 'status.cgi?host=all','','[% targe
 monitoring.add(3,0,'Host Detail',cgipath + 'status.cgi?hostgroup=all&style=hostdetail','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
 monitoring.add(100,0,"<nobr><input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' value='hostname' size=10 style='font-size:10'><\/nobr>",'','','','/thruk/themes/Nuvola/side/icons/search.gif');
 monitoring.add(4,0,'Host Group',cgipath + 'status.cgi?hostgroup=all&style=overview','','[% target %]','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
-	monitoring.add(5,4,'Summary',cgipath + 'status.cgi?hostgroup=all&style=summary','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
-	monitoring.add(6,4,'Grid',cgipath + 'status.cgi?hostgroup=all&style=grid','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+    monitoring.add(5,4,'Summary',cgipath + 'status.cgi?hostgroup=all&style=summary','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+    monitoring.add(6,4,'Grid',cgipath + 'status.cgi?hostgroup=all&style=grid','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
 monitoring.add(7,0,'Service Group',cgipath + 'status.cgi?servicegroup=all&style=overview','','[% target %]','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
-	monitoring.add(8,7,'Summary',cgipath + 'status.cgi?servicegroup=all&style=summary','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
-	monitoring.add(9,7,'Grid',cgipath + 'status.cgi?servicegroup=all&style=grid','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+    monitoring.add(8,7,'Summary',cgipath + 'status.cgi?servicegroup=all&style=summary','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
+    monitoring.add(9,7,'Grid',cgipath + 'status.cgi?servicegroup=all&style=grid','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
 [% IF use_feature_statusmap %]
 monitoring.add(10,0,'Status Map',cgipath + 'statusmap.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/map.gif');
 [% END %]
 monitoring.add(11,0,'Problems','','','','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
-	monitoring.add(12,11,'Service',cgipath + 'status.cgi?host=all&servicestatustypes=28','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
-	monitoring.add(13,11,'Host',cgipath + 'status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
-	monitoring.add(14,11,'Network Outages',cgipath + 'outages.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
+    monitoring.add(12,11,'Service',cgipath + 'status.cgi?host=all&servicestatustypes=28','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
+    monitoring.add(13,11,'Host',cgipath + 'status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
+    monitoring.add(14,11,'Network Outages',cgipath + 'outages.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
 monitoring.add(15,0,'Comments',cgipath + 'extinfo.cgi?&type=3','','[% target %]','/thruk/themes/Nuvola/side/icons/notes.gif');
 monitoring.add(16,0,'Downtime',cgipath + 'extinfo.cgi?&type=6','','[% target %]','/thruk/themes/Nuvola/side/icons/downtime.gif');
 
@@ -85,11 +90,11 @@ reporting.add(1,0,'Trends',cgipath + 'trends.cgi','','[% target %]','/thruk/them
 [% END %]
 reporting.add(2,0,'Availability',cgipath + 'avail.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
 reporting.add(3,0,'Alerts','','','','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
-	[% IF use_feature_histogram %]
-	reporting.add(4,3,'Histogram',cgipath + 'histogram.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
-	[% END %]
-	reporting.add(5,3,'History',cgipath + 'history.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
-	reporting.add(6,3,'Summary',cgipath + 'summary.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+    [% IF use_feature_histogram %]
+    reporting.add(4,3,'Histogram',cgipath + 'histogram.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+    [% END %]
+    reporting.add(5,3,'History',cgipath + 'history.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
+    reporting.add(6,3,'Summary',cgipath + 'summary.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/reporting.gif');
 reporting.add(7,0,'Notifications',cgipath + 'notifications.cgi?contact=all','','[% target %]','/thruk/themes/Nuvola/side/icons/notifications.gif');
 reporting.add(8,0,'Event Log',cgipath + 'showlog.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/notes.gif');
 

@@ -354,6 +354,20 @@ ex.:
   documentation_link = /thruk/docs/
 
 
+==== allowed_frame_links
+
+List of allowed patterns, where links inside frames can be set to.
+You can link to /thruk/frame.html?link=http://wiki.my-company.com/page/blah
+Your wiki will then be displayed with the Thruk navigation frame.
+Useful for other addons, so they don't have to display a own
+navigation.
+
+ex.:
+
+  allowed_frame_links = http://intranet.my-company.com
+  allowed_frame_links = https://wiki.my-company.com
+
+
 ==== cgi_cfg
 
 The path to your cgi.cfg. See <<cgi.cfg>> for details.

@@ -1,14 +1,17 @@
-[% PROCESS _header.tt %]
-
-Thruk Documentation
-<br><br>
-Thruks documentation itself is located in your project root under the /docs/ folder.<br>
-<br>
-To replace this link with a valid documentation of your monitoring tool<br>
-change the <i>documentation_link</i> setting in your thruk_local.conf<br>
-<br>
-If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
-<br>
-For installation information look at the <a href="/thruk/documentation.html">Documentation</a>
-
-[% PROCESS _footer.tt %]
+<html>
+  <head>
+    <title>Thruk Documentation</title>
+  </head>
+  <body>
+  Thruk Documentation
+  <br><br>
+  Thruks documentation itself is located in your project root under the /docs/ folder.<br>
+  <br>
+  To replace this link with a valid documentation of your monitoring tool<br>
+  change the <i>documentation_link</i> setting in your thruk_local.conf<br>
+  <br>
+  If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
+  <br>
+  For installation information look at the <a href="/thruk/documentation.html">Documentation</a>
+</body>
+</html>

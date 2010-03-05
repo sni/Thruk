@@ -1,5 +1,12 @@
+[% UNLESS target %]
+  [% IF use_frames %]
+    [% SET target = "main" %]
+  [% ELSE %]
+    [% SET target = "_self" %]
+  [% END %]
+[% END %]
+
 [% IF use_frames %]
-  [% SET target = "main" %]
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -11,8 +18,6 @@
     <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
   </head>
   <body class='navbar'>
-[% ELSE %]
-  [% SET target = "_self" %]
 [% END %]
     <a href="http://www.thruk.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="139" height="43" class="nav_small_logo" /></a>
     <div class="navsection">
@@ -21,7 +26,7 @@
         <ul class="navsectionlinks">
           <li><a href="/thruk/main.html" target="[% target %]">Home</a></li>
           [% IF documentation_link %]
-          <li><a href="[% documentation_link %]" target="[% target %]">Documentation</a></li>
+          <li><a href="/thruk/frame.html?link=[% html_escape(documentation_link) %]" target="_parent">Documentation</a></li>
           [% END %]
         </ul>
       </div>

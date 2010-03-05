@@ -184,11 +184,61 @@ page: /thruk/side.html
 sub thruk_side_html : Path('/thruk/side.html') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{'template'} = 'side.tt';
+    my $target = $c->{'request'}->{'parameters'}->{'target'};
+    if(!$c->stash->{'use_frames'} and defined $target and $target eq '_parent') {
+        $c->stash->{'target'} = '_parent';
+    }
+
+    $c->stash->{'use_frames'} = 1;
+    $c->stash->{'template'}   = 'side.tt';
 
     return 1;
 }
 
+######################################
+
+=head2 thruk_frame_html
+
+page: /thruk/frame.html
+# creates frame for external pages
+
+=cut
+sub thruk_frame_html : Path('/thruk/frame.html') {
+    my ( $self, $c ) = @_;
+
+    # allowed links to be framed
+    my $valid_links = [
+        $c->stash->{'documentation_link'},
+    ];
+    my $additional_links = Thruk->config->{'allowed_frame_links'};
+    if(defined $additional_links) {
+        if(ref $additional_links eq 'ARRAY') {
+            $valid_links = [ @{$valid_links}, @{$additional_links} ];
+        }
+        else {
+            $valid_links = [ @{$valid_links}, $additional_links ];
+        }
+    }
+
+    # check if any of the allowed links match
+    my $link = $c->{'request'}->{'parameters'}->{'link'};
+    if(defined $link) {
+        for my $pattern (@{$valid_links}) {
+            if($link =~ m/$pattern/mx) {
+                $c->stash->{'target'}   = '_parent';
+                $c->stash->{'main'}     = $link;
+                $c->stash->{'template'} = 'index.tt';
+
+                return 1;
+            }
+        }
+    }
+
+    # no link or none matched, display the usual index.html
+    $c->detach("thruk_index_html");
+
+    return 1;
+}
 
 ######################################
 
