@@ -1,6 +1,8 @@
 [% USE date %]
-[% PROCESS _header.tt %]
-
+[% PROCESS _header.tt
+  js = "/thruk/javascript/overlib.js"
+%]
+<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -40,6 +42,13 @@
         </td>
         <td valign="top" align="center" width="33%">
           <div align="center" class='statusTitle'>Host Status Details For [% IF hostgroup == 'all' %]All Host Groups[% ELSE %]Host Group '[% hostgroup %]'[% END %]</div>
+          [% IF thruk_message %]
+          <div id="thruk_message" class="thruk_message">
+              <span class="[% thruk_message_class %]">[% thruk_message %]
+              <a href="javascript:close_message()"><img src='/thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a>
+              </span>
+          </div>
+          [% END %]
           [% IF c.request.parameters.sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
@@ -118,7 +127,23 @@
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]' nowrap>[% date.format(h.last_check, datetime_format) %]</td>
           <td class='[% class %]' nowrap>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
-          <td class='[% class %]' valign='middle'>[% IF h.has_been_checked == 0 %]Host check scheduled for [% date.format(h.next_check, datetime_format_long) %][% ELSE %][% IF escape_html_tags %][% html_escape(h.plugin_output) %][% ELSE %][% h.plugin_output %][% END %][% END %]&nbsp;</td>
+          [% IF h.has_been_checked == 0 %]
+            <td class='[% class %]' valign='middle'>Host check scheduled for [% date.format(h.next_check, datetime_format_long) %]</td>
+          [% ELSE %]
+            [% IF h.long_plugin_output %]
+              [% IF escape_html_tags %]
+                <td  valign='middle' class='[% class %]' onclick="return overlib('[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]',STICKY,CAPTION,'[% h.name %]',WIDTH,800);"><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
+              [% ELSE %]
+                <td  valign='middle' class='[% class %]' onclick="return overlib('[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]',STICKY,CAPTION,'[% h.name %]',WIDTH,800);"><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
+              [% END %]
+            [% ELSE %]
+              [% IF escape_html_tags %]
+                <td  valign='middle' class='[% class %]'>[% html_escape(h.plugin_output) %]</td>
+              [% ELSE %]
+                <td  valign='middle' class='[% class %]'>[% h.plugin_output %]</td>
+              [% END %]
+            [% END %]
+          [% END %]
         </tr>
         [% END %]
 
