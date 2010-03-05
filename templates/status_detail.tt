@@ -78,7 +78,7 @@
     </table>
     <br>
 
-    [% PROCESS _pager.tt %]
+    <div align="center">[% PROCESS _pager.tt %]</div>
 
     <table border="0" width="100%" class='status' id="statusTable">
       <tr>
@@ -212,9 +212,7 @@
       var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
       addRowSelector('statusTable');
     </script>
-    <div align="center">
-    [% PROCESS _pager.tt %]
-    </div>
+    <div align="center">[% PROCESS _pager.tt %]</div>
 
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
