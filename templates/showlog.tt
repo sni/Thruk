@@ -152,6 +152,6 @@
 
 [% IF data.size and data.size > 0 %]</div>[% END %]
 <hr>
-<div class="itemTotalsTitle">[% IF data.size %][% data.size %][% ELSE %]0[% END %] of [% pager.total_entries %] Matching Log Entries Displayed</div>
+<div class="itemTotalsTitle">[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>
 
 [% PROCESS _footer.tt %]

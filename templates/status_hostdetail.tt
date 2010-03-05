@@ -158,6 +158,6 @@
     </div>
 
     <br>
-    <div class='itemTotalsTitle'>[% IF data.size %][% data.size %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
+    <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
 
 [% PROCESS _footer.tt %]
