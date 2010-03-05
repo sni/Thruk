@@ -35,7 +35,7 @@
         [% SET class = 'dataEven' IF loop.even %]
         <tr class='[% class %]'>
           <td class='[% class %]'>[% host.severity %]</td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name %]'>[% host.name %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
           <td class='hostDOWN'>DOWN</td>
           <td class='[% class %]'>
             [% IF host.comment_count > 0 %]

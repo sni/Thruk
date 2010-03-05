@@ -31,7 +31,7 @@ Columns: name last_state_change childs
 Filter: state = 1
 Filter: childs !=
 And: 2
-", { Slice => 1 });
+", { Slice => 1, AddPeer => 1 });
 
     if(defined $outages and scalar @{$outages} > 0) {
         my $hostcomments = Thruk::Utils::get_hostcomments($c);
