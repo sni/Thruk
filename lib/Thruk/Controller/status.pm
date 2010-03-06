@@ -754,6 +754,8 @@ sub _extend_filter {
 
     $c->stash->{'servicestatustypes'} = $c->{'request'}->{'parameters'}->{'servicestatustypes'};
     $c->stash->{'hoststatustypes'}    = $c->{'request'}->{'parameters'}->{'hoststatustypes'};
+    $c->stash->{'serviceprops'}       = $c->{'request'}->{'parameters'}->{'serviceprops'};
+    $c->stash->{'hostprops'}          = $c->{'request'}->{'parameters'}->{'hostprops'};
 
     return($hostfilter,$servicefilter);
 }
@@ -762,7 +764,7 @@ sub _extend_filter {
 sub _get_host_statustype_filter {
     my ( $self, $number ) = @_;
 
-    $number = 15 if !defined $number or $number <= 0 or $number > 15;
+    $number = 15 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 15;
     my $hoststatusfiltername = 'All';
     my $hostfilter           = '';
     my $servicefilter        = '';
@@ -811,7 +813,7 @@ sub _get_host_statustype_filter {
 sub _get_host_prop_filter {
     my ( $self, $number ) = @_;
 
-    $number = 0 if !defined $number or $number <= 0 or $number > 1048575;
+    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 1048575;
     my $host_prop_filtername = 'Any';
     my $hostfilter           = '';
     my $servicefilter        = '';
@@ -940,7 +942,7 @@ sub _get_host_prop_filter {
 sub _get_service_statustype_filter {
     my ( $self, $number ) = @_;
 
-    $number = 31 if !defined $number or $number <= 0 or $number > 31;
+    $number = 31 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 31;
     my $servicestatusfiltername = 'All';
     my $servicefilter           = '';
     if($number and $number != 31) {
@@ -985,7 +987,7 @@ sub _get_service_statustype_filter {
 sub _get_service_prop_filter {
     my ( $self, $number ) = @_;
 
-    $number = 0 if !defined $number or $number <= 0 or $number > 1048575;
+    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 1048575;
     my $service_prop_filtername = 'Any';
     my $servicefilter           = '';
     if($number > 0) {

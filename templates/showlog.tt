@@ -37,7 +37,7 @@
               <input type="image" name="archive" value='-1' src='/thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day'>
             </td>
             <td width="15"></td>
-            <td align="center" class='navBoxDate'>
+            <td align="center" class='navBoxDate' nowrap>
               <div class='navBoxTitle'>Log File Navigation</div>
               <input type="text" value="[% date.format(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:NewCssCal('start','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
               <br>to<br>

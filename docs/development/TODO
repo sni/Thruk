@@ -11,6 +11,10 @@ general
     - cgi ssi: http://nagios.sourceforge.net/docs/3_0/cgiincludes.html
     - default hidden setting for backends in thruk_local.conf
     - add go back button on error page
+    - set default for command checkboxes
+    - strict authorization option:
+      contacts authorized for hosts, should not see all services for
+      this host: http://www.monitoring-portal.org/wbb/index.php?page=Thread&postID=117591#post117591
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -51,8 +55,6 @@ general:
     - _HTML field for hosts / services besides action_url/notes_url
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
     - show host/service dependencies
-    - contacts authorized for hosts, should not see all services for
-      this host: http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=117591#post117591
     - add multiple notes url or action urls, maybe add an "_html" cust var
     - add ability to display contacts for machine
     - uc,lc option for auth user -> monitoring
@@ -75,7 +77,6 @@ status:
     - proper search
         maybe ajax autocomplete for input form
         save searches (like bookmarks would do it)
-    - add new search page, with selector for all parameters
     - add flexible selector, ex.: select multiple hostgroups
     - host table map with worst service state as color
     - hide host/service summary in status.cgi (maybe with http://jqueryui.com/demos/toggle/ )

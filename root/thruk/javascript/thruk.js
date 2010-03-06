@@ -1,26 +1,77 @@
+/*******************************************************************************
+88888888ba  88888888ba  88888888888 88888888888
+88      "8b 88      "8b 88          88
+88      ,8P 88      ,8P 88          88
+88aaaaaa8P' 88aaaaaa8P' 88aaaaa     88aaaaa
+88""""""'   88""""88'   88"""""     88"""""
+88          88    `8b   88          88
+88          88     `8b  88          88
+88          88      `8b 88888888888 88
+*******************************************************************************/
 
-var prefPaneState  = 0;
 var refreshPage    = 1;
 var cmdPaneState   = 0;
 var origRefreshVal = 0;
 var curRefreshVal  = 0;
 
-/* toggle the visibility of the preferences pane */
-function togglePreferencePane(theme, state) {
-  var pane = document.getElementById('pref_pane');
-  var img  = document.getElementById('pref_pane_button');
-  if(state == 0) { prefPaneState = 1; }
-  if(state == 1) { prefPaneState = 0; }
-  if(prefPaneState == 0) {
-    pane.style.visibility = "visible";
-    img.style.visibility  = "visible";
-    prefPaneState = 1;
+// needed to keep the order
+var hoststatustypes    = new Array( 1, 2, 4, 8 );
+var servicestatustypes = new Array( 1, 2, 4, 8, 16 );
+var hostprops          = new Array( 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288 );
+var serviceprops       = new Array( 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288 );
+
+/*******************************************************************************
+  ,ad8888ba,  88888888888 888b      88 88888888888 88888888ba  88   ,ad8888ba,
+ d8"'    `"8b 88          8888b     88 88          88      "8b 88  d8"'    `"8b
+d8'           88          88 `8b    88 88          88      ,8P 88 d8'
+88            88aaaaa     88  `8b   88 88aaaaa     88aaaaaa8P' 88 88
+88      88888 88"""""     88   `8b  88 88"""""     88""""88'   88 88
+Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
+ Y8a.    .a88 88          88     `8888 88          88     `8b  88  Y8a.    .a8P
+  `"Y88888P"  88888888888 88      `888 88888888888 88      `8b 88   `"Y8888Y"'
+*******************************************************************************/
+
+/* hide a element by id */
+function hideElement(id) {
+  var pane = document.getElementById(id);
+  pane.style.display    = 'none';
+  pane.style.visibility = 'hidden';
+}
+
+/* show a element by id */
+function showElement(id) {
+  var pane = document.getElementById(id);
+  pane.style.display    = '';
+  pane.style.visibility = 'visible';
+}
+
+/* toggle a element by id */
+function toggleElement(id) {
+  var pane = document.getElementById(id);
+  if(!pane) {
+    alert("got no panel for id in toggleElement(): " + id);
+    return;
+  }
+  if(pane.style.visibility == "" || pane.style.visibility == "hidden") {
+    showElement(id);
+    return true;
   }
   else {
-    pane.style.visibility = "hidden";
-    img.style.visibility  = "hidden";
-    prefPaneState = 0;
+    hideElement(id);
+    return false;
   }
+}
+
+/* hide message */
+function close_message() {
+    obj = document.getElementById('thruk_message');
+    obj.style.display = "none";
+}
+
+/* toggle the visibility of the preferences pane */
+function togglePreferencePane(theme, state) {
+    toggleElement('pref_pane');
+    toggleElement('pref_pane_button');
 }
 
 /* save settings in a cookie */
@@ -96,11 +147,21 @@ function toggleBackend(backend) {
   }
 }
 
-/***************************************
- * Mouse Over for Status Table
- * to select hosts / services
- * for sending quick commands
- **************************************/
+
+/*******************************************************************************
+  ,ad8888ba,  88b           d88 88888888ba,
+ d8"'    `"8b 888b         d888 88      `"8b
+d8'           88`8b       d8'88 88        `8b
+88            88 `8b     d8' 88 88         88
+88            88  `8b   d8'  88 88         88
+Y8,           88   `8b d8'   88 88         8P
+ Y8a.    .a8P 88    `888'    88 88      .a8P
+  `"Y8888Y"'  88     `8'     88 88888888Y"'
+
+ Mouse Over for Status Table
+ to select hosts / services
+ for sending quick commands
+*******************************************************************************/
 var selectedServices = new Hash;
 var selectedHosts    = new Hash;
 function addRowSelector(id)
@@ -369,16 +430,13 @@ function selectAllHosts(state) {
 
 /* toggle the visibility of the command pane */
 function toggleCmdPane(state) {
-  var pane = document.getElementById('cmd_pane');
-  if(state == 0) { cmdPaneState = 1; }
-  if(state == 1) { cmdPaneState = 0; }
-  if(cmdPaneState == 0) {
-    pane.style.visibility = "visible";
-    cmdPaneState          = 1;
+  if(state == 1) {
+    showElement('cmd_pane');
+    cmdPaneState = 1;
   }
   else {
-    pane.style.visibility = "hidden";
-    cmdPaneState          = 0;
+    hideElement('cmd_pane');
+    cmdPaneState = 0;
   }
 }
 
@@ -494,11 +552,20 @@ function enableFormElement(id) {
     obj.style.display = "";
 }
 
-/* hide message */
-function close_message() {
-    obj = document.getElementById('thruk_message');
-    obj.style.display = "none";
-}
+
+/*******************************************************************************
+88888888888  88   88     888888888888 88888888888 88888888ba
+88           88   88          88      88          88      "8b
+88           88   88          88      88          88      ,8P
+88aaaaa      88   88          88      88aaaaa     88aaaaaa8P'
+88"""""      88   88          88      88"""""     88""""88'
+88           88   88          88      88          88    `8b
+88           88   88          88      88          88     `8b
+88           88   88888888888 88      88888888888 88      `8b
+
+everything needed for displaying and changing filter
+on status / host details page
+*******************************************************************************/
 
 /* toggle the visibility of the filter pane */
 function toggleFilterPane(theme) {
@@ -516,4 +583,158 @@ function toggleFilterPane(theme) {
     img.style.display     = '';
     img.style.visibility  = 'visible';
   }
+}
+
+/* toggle filter pane */
+function toggleFilterPaneSelector(id) {
+  var panel;
+  var checkbox_name;
+  var input_name;
+  var checkbox_prefix;
+
+  if(id == "hoststatustypes") {
+    panel           = 'hoststatustypes_pane';
+    checkbox_name   = 'hoststatustype';
+    input_name      = 'hoststatustypes';
+    checkbox_prefix = 'ht';
+  }
+  if(id == "hostprops") {
+    panel           = 'hostprops_pane';
+    checkbox_name   = 'hostprop';
+    input_name      = 'hostprops';
+    checkbox_prefix = 'hp';
+  }
+  if(id == "servicestatustypes") {
+    panel           = 'servicestatustypes_pane';
+    checkbox_name   = 'servicestatustype';
+    input_name      = 'servicestatustypes';
+    checkbox_prefix = 'st';
+  }
+  if(id == "serviceprops") {
+    panel           = 'serviceprops_pane';
+    checkbox_name   = 'serviceprop';
+    input_name      = 'serviceprops';
+    checkbox_prefix = 'sp';
+  }
+
+  if(!panel) {
+    alert("unknown id in toggleFilterPaneSelector(): " + id);
+    return;
+  }
+  if(!toggleElement(panel)) {
+    accept_filter_types(checkbox_name, input_name, checkbox_prefix);
+  } {
+    set_filter_types(input_name, checkbox_prefix);
+  }
+}
+
+/* calculate the sum for a filter */
+function accept_filter_types(checkbox_names, result_name, checkbox_prefix) {
+    var inp  = document.getElementsByName(result_name);
+    var orig = inp[0].value;
+    var sum = 0;
+    var elems = Array.from(document.getElementsByName(checkbox_names));
+    elems.each(function(elem) {
+        if(elem.checked) {
+            sum += parseInt(elem.value);
+        }
+    });
+    inp[0].value = sum;
+
+    set_filter_name(checkbox_names, checkbox_prefix, parseInt(sum));
+
+    /* submit the form if something changed */
+    if(sum != orig) {
+      form = document.getElementById('filterForm');
+      form.submit();
+    }
+}
+
+/* set the initial state of filter checkboxes */
+function set_filter_types(initial_id, checkbox_prefix) {
+    var inp = document.getElementsByName(initial_id);
+    var initial_value = parseInt(inp[0].value);
+    var bin  = initial_value.toString(2);
+    var bits = new Array(); bits = bin.split('').reverse();
+    for (var index = 0, len = bits.length; index < len; ++index) {
+        var bit = bits[index];
+        var nr  = Math.pow(2, index);
+        var checkbox = document.getElementById(checkbox_prefix + nr);
+        if(!checkbox) { alert("got no checkbox for id in set_filter_types(): " + checkbox_prefix + nr); return; }
+        if(bit == '1') {
+            checkbox.checked = true;
+        } else {
+            checkbox.checked = false;
+        }
+    }
+}
+
+/* set the filtername */
+function set_filter_name(checkbox_names, checkbox_prefix, filtervalue) {
+  var order;
+  if(checkbox_prefix == 'ht') {
+    order = hoststatustypes;
+  }
+  else if(checkbox_prefix == 'hp') {
+    order = hostprops;
+  }
+  else if(checkbox_prefix == 'st') {
+    order = servicestatustypes;
+  }
+  else if(checkbox_prefix == 'sp') {
+    order = serviceprops;
+  }
+  else {
+    alert('unknown prefix in set_filter_name(): ' + checkbox_prefix);
+  }
+
+  var checked_ones = new Array();
+  order.each(function(bit) {
+    checkbox = document.getElementById(checkbox_prefix + bit);
+    if(!checkbox) {
+      alert('got no checkbox in set_filter_name(): ' + checkbox_prefix + bit);
+    }
+    if(checkbox.checked) {
+      nameElem = document.getElementById(checkbox_prefix + bit + 'n');
+      checked_ones.push(nameElem.innerHTML);
+    }
+  });
+
+  /* some override names */
+  if(checkbox_prefix == 'ht') {
+    filtername = checked_ones.join(' | ');
+    if(filtervalue == 0 || filtervalue == 15) {
+      filtername = 'All';
+    }
+    if(filtervalue == 12) {
+      filtername = 'All problems';
+    }
+  }
+
+  if(checkbox_prefix == 'st') {
+    filtername = checked_ones.join(' | ');
+    if(filtervalue == 0 || filtervalue == 31) {
+      filtername = 'All';
+    }
+    if(filtervalue == 28) {
+      filtername = 'All problems';
+    }
+  }
+
+  if(checkbox_prefix == 'hp') {
+    filtername = checked_ones.join(' & ');
+    if(filtervalue == 0) {
+      filtername = 'Any';
+    }
+  }
+
+  if(checkbox_prefix == 'sp') {
+    filtername = checked_ones.join(' & ');
+    if(filtervalue == 0) {
+      filtername = 'Any';
+    }
+  }
+
+  target = document.getElementById(checkbox_prefix + 'n');
+  target.innerHTML = filtername;
 }

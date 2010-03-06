@@ -1,30 +1,276 @@
 [% UNLESS show_filter_table %]
 <input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane('[% theme %]'); return false;">
 [% END %]
+<div>
+<form action="[% c.uri %]" method="GET" id="filterForm">
+<input type="hidden" name="filter_search" value="1">
+<input type="hidden" name="style" value="[% style %]">
+<input type="hidden" name="hoststatustypes" value="[% hoststatustypes %]">
+<input type="hidden" name="servicestatustypes" value="[% servicestatustypes %]">
+<input type="hidden" name="hostprops" value="[% hostprops %]">
+<input type="hidden" name="serviceprops" value="[% serviceprops %]">
 <table border="1" class='filter' style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" cellspacing="0" cellpadding="0" id="filter_pane">
   <tr>
     <td class='filter'>
-      <table border="0" cellspacing="2" cellpadding="0">
+      <table border="0" cellspacing="2" cellpadding="0" id="filterTable">
         <tr>
-          <td colspan="2" valign="top" align="left" class='filterTitle'>Display Filters:</td>
+          <td valign="top" align="left" class='filterTitle'>Display Filters:</td>
+          <td colspan=2 align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update"></td>
         </tr>
+<!-- HOST STATUS TYPES -->
         <tr>
           <td valign="top" align="left" class='filterName'>Host Status Types:</td>
-          <td valign="top" align="left" class='filterValue'>[% host_statustype_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector('hoststatustypes')" id="htn">[% host_statustype_filtername %]</td>
+          <td>
+            <div class="filter_pane" style="visibility:hidden;" id="hoststatustypes_pane">
+            <table border="1" class='filter' cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='filter'>
+                  <table border="0" cellspacing="2" cellpadding="0">
+                    <tr>
+                      <td valign="top" align="left" class='filterTitle'>Host Status Types:</td>
+                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" onclick="toggleFilterPaneSelector('hoststatustypes'); return false;"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="ht2n">Up</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="ht2" name="hoststatustype"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="ht4n">Down</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="ht4" name="hoststatustype"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="ht8n">Unreachable</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="ht8" name="hoststatustype"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="ht1n">Pending</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="ht1" name="hoststatustype"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            </div>
+          </td>
         </tr>
+<!-- HOST PROPERTIES -->
         <tr>
           <td valign="top" align="left" class='filterName'>Host Properties:</td>
-          <td valign="top" align="left" class='filterValue'>[% host_prop_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector('hostprops')" id="hpn">[% host_prop_filtername %]</td>
+          <td>
+            <div class="filter_pane" style="visibility:hidden;" id="hostprops_pane">
+            <table border="1" class='filter' cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='filter'>
+                  <table border="0" cellspacing="2" cellpadding="0">
+                    <tr>
+                      <td valign="top" align="left" class='filterTitle'>Host Properties:</td>
+                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" onclick="toggleFilterPaneSelector('hostprops'); return false;"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp1n">In Scheduled Downtime</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="hp1" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="hp2" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp2n">Not In Scheduled Downtime</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp4n">Has Been Acknowledged</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="hp4" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="hp8" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp8n">Has Not Been Acknowledged</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp16n">Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="hp16" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32" id="hp32" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp32n">Checks Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp64n">Event Handler Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="64" id="hp64" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="128" id="hp128" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp128n">Event Handler Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp256n">Flap Detection Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="256" id="hp256" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="512" id="hp512" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp512n">Flap Detection Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp1024n">Is Flapping</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1024" id="hp1024" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2048" id="hp2048" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp2048n">Is Not Flapping</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp4096n">Notifications Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4096" id="hp4096" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8192" id="hp8192" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp8192n">Notifications Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp16384n">Passive Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16384" id="hp16384" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32768" id="hp32768" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp32768n">Passive Checks Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp65536n">Passive Checks</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="65536" id="hp65536" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="131072" id="hp131072" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp131072n">Active Checks</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="hp262144n">In Hard State</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="262144" id="hp262144" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="524288" id="hp524288" name="hostprop"></td>
+                      <td valign="top" align="left" class='filterName' id="hp524288n">In Soft State</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            </div>
+          </td>
         </tr>
+<!-- SERVICE STATUS TYPES -->
         <tr>
           <td valign="top" align="left" class='filterName'>Service Status Types:</td>
-          <td valign="top" align="left" class='filterValue'>[% service_statustype_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector('servicestatustypes')" id="stn">[% service_statustype_filtername %]</td>
+          <td>
+            <div class="filter_pane" style="visibility:hidden;" id="servicestatustypes_pane">
+            <table border="1" class='filter' cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='filter'>
+                  <table border="0" cellspacing="2" cellpadding="0">
+                    <tr>
+                      <td valign="top" align="left" class='filterTitle'>Service Status Types:</td>
+                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" onclick="toggleFilterPaneSelector('servicestatustypes'); return false;"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="st2n">Ok</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="st2" name="servicestatustype"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="st4n">Warning</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="st4" name="servicestatustype"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="st8n">Unknown</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="st8" name="servicestatustype"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="st16n">Critical</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="st16" name="servicestatustype"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="st1n">Pending</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="st1" name="servicestatustype"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            </div>
+          </td>
         </tr>
+<!-- SERVICE PROPERTIES -->
         <tr>
           <td valign="top" align="left" class='filterName'>Service Properties:</td>
-          <td valign="top" align="left" class='filterValue'>[% service_prop_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector('serviceprops')" id="spn">[% service_prop_filtername %]</td>
+        </tr>
+        [% FOREACH type IN [ 'host' 'hostgroup' 'servicegroup' ] %]
+        [% IF $type %]
+        <tr>
+          <td align="left" class='filterName'>[% type | ucfirst %]:</td>
+          <td align="left" class='filterValueInput'><input type="text" name="[% type %]" value="[% $type %]"></td>
+          <td>
+            <div class="filter_pane" style="visibility:hidden;" id="serviceprops_pane">
+            <table border="1" class='filter' cellspacing="0" cellpadding="0">
+              <tr>
+                <td class='filter'>
+                  <table border="0" cellspacing="2" cellpadding="0">
+                    <tr>
+                      <td valign="top" align="left" class='filterTitle'>Service Properties:</td>
+                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" onclick="toggleFilterPaneSelector('serviceprops'); return false;"></td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp1n">In Scheduled Downtime</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="sp1" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="sp2" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp2n">Not In Scheduled Downtime</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp4n">Has Been Acknowledged</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="sp4" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="sp8" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp8n">Has Not Been Acknowledged</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp16n">Active Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="sp16" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32" id="sp32" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp32n">Active Checks Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp64n">Event Handler Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="64" id="sp64" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="128" id="sp128" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp128n">Event Handler Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp512n">Flap Detection Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="512" id="sp512" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="256" id="sp256" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp256n">Flap Detection Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp1024n">Is Flapping</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1024" id="sp1024" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2048" id="sp2048" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp2048n">Is Not Flapping</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp4096n">Notifications Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4096" id="sp4096" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8192" id="sp8192" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp8192n">Notifications Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp16384n">Passive Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16384" id="sp16384" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32768" id="sp32768" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp32768n">Passive Checks Enabled</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp65536n">Passive Checks</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="65536" id="sp65536" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="131072" id="sp131072" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp131072n">Active Checks</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName' id="sp262144n">In Hard State</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="262144" id="sp262144" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="524288" id="sp524288" name="serviceprop"></td>
+                      <td valign="top" align="left" class='filterName' id="sp524288n">In Soft State</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            </div>
+          </td>
+        </tr>
+        [% END %]
+        [% END %]
+        <tr>
+          <td colspan=2 class='newfilter' align="center" onClick="addNewFilter('filterTable')">+</td>
         </tr>
       </table>
     </td>
   </tr>
 </table>
+</form>
+</div>

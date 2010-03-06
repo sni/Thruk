@@ -341,3 +341,29 @@ table.overDivTable a {
   font-weight: bold;
   color:#000000;
 }
+
+td.filterValueInput input {
+  width: 100px;
+  border: 0px;
+}
+td.filterValue:hover {
+  background-color:#88BBD8;
+  cursor: pointer;
+}
+td.filterName {
+  vertical-align: middle;
+}
+
+td.newfilter {
+  line-height: 8px;
+}
+td.newfilter:hover {
+  line-height: 8px;
+  background-color:#88BBD8;
+  cursor: pointer;
+}
+
+div.filter_pane {
+  z-index:100;
+  position:absolute;
+}
