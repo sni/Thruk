@@ -125,3 +125,9 @@ th.status a:hover {
 div.tree td {
   line-height: 3px;
 }
+
+.filter_button_mini {
+  position:relative;
+  top: -1px;
+  left: -13px;
+}

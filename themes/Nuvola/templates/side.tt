@@ -56,7 +56,7 @@ monitoring.add(0,-1);
 monitoring.add(1,0,'Tactical Overview',cgipath + 'tac.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
 monitoring.add(2,0,'Service Detail',cgipath + 'status.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
 monitoring.add(3,0,'Host Detail',cgipath + 'status.cgi?hostgroup=all&style=hostdetail','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
-monitoring.add(100,0,"<nobr><input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' value='hostname' size=10 style='font-size:10'><\/nobr>",'','','','/thruk/themes/Nuvola/side/icons/search.gif');
+monitoring.add(100,0,"<nobr>[% IF use_new_search%]<input type='hidden' name='hidesearch' value='2' /><input type='hidden' name='s0_op' value='~' /><input type='hidden' name='s0_type' value='search' /><input type='text' name='s0_value' value='hostname' onclick='this.value=\"\";' size=10 style='font-size:10'>[% ELSE %]<input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' onclick='this.value=\"\";' value='hostname' size=10 style='font-size:10'>[% END %]<\/nobr>",'','','','/thruk/themes/Nuvola/side/icons/search.gif');
 monitoring.add(4,0,'Host Group',cgipath + 'status.cgi?hostgroup=all&style=overview','','[% target %]','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
     monitoring.add(5,4,'Summary',cgipath + 'status.cgi?hostgroup=all&style=summary','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');
     monitoring.add(6,4,'Grid',cgipath + 'status.cgi?hostgroup=all&style=grid','','[% target %]','/thruk/themes/Nuvola/side/icons/monitoring.gif');

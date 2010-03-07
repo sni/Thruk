@@ -79,12 +79,14 @@ sub _process_search_request {
 
     # search pattern is in host param
     my $host = $c->{'request'}->{'parameters'}->{'host'};
+    $c->{'request'}->{'parameters'}->{'hidesearch'} = 2;
 
     return('detail') unless defined $host;
 
     # is there a servicegroup with this name?
     my $servicegroups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\nColumns: name\nFilter: name = $host");
     if(scalar @{$servicegroups} > 0) {
+        delete $c->{'request'}->{'parameters'}->{'host'};
         $c->{'request'}->{'parameters'}->{'servicegroup'} = $host;
         return('overview');
     }
@@ -92,6 +94,7 @@ sub _process_search_request {
     # is there a hostgroup with this name?
     my $hostgroups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\nColumns: name\nFilter: name = $host");
     if(scalar @{$hostgroups} > 0) {
+        delete $c->{'request'}->{'parameters'}->{'host'};
         $c->{'request'}->{'parameters'}->{'hostgroup'} = $host;
         return('overview');
     }

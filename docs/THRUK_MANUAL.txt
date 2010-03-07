@@ -381,10 +381,22 @@ ex.:
 
 Set whether you want to use a framed navigation or not. With using frames it's
 sometimes easier to include addons.
+See allowed_frame_links option for how to integrate addons.
 
 ex.:
 
   use_frames = 0
+
+
+==== use_new_search
+
+Use the old or the classic search from the navigation. The new search
+supports regular expressions and searches in many attributes. For
+example: plugin_output, groups, names, descriptions
+
+ex.:
+
+  use_new_search = 1
 
 
 ==== default_theme

@@ -42,9 +42,16 @@
         </ul>
         <div id="search_box">
             <form action="/thruk/cgi-bin/status.cgi" method="get" target="[% target %]">
-                <input id="search" name="host" type="text" />
-                <input type="hidden" name="navbarsearch" value="1" />
-                <input src="/thruk/themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
+            [% IF use_new_search%]
+            <input type='hidden' name='hidesearch' value='2' />
+            <input type='hidden' name='s0_op' value='~' />
+            <input type='hidden' name='s0_type' value='search' />
+            <input type='text' name='s0_value' id='search' />
+            [% ELSE %]
+            <input id="search" name="host" type="text" />
+            <input type="hidden" name="navbarsearch" value="1" />
+            [% END %]
+            <input src="/thruk/themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
             </form>
         </div>
         <h2>Reporting</h2>

@@ -16,3 +16,12 @@ body.showlog .filter { background-color: white; }
 body.showlog .filterTitle { background-color: white; }
 body.showlog .filterValue { background-color: white; }
 body.showlog .filterName { background-color: white; }
+
+
+td.filter { background-color: white; }
+
+.filter_button_mini {
+  position:relative;
+  top: -1px;
+  left: -8px;
+}

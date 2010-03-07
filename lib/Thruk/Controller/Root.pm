@@ -72,6 +72,11 @@ sub begin : Private {
     $c->stash->{additional_template_paths} = [ $c->config->{root}.'/../themes/'.$theme.'/templates' ];
     $c->stash->{'theme'}                   = $theme;
 
+    # new or classic search?
+    my $use_new_search = Thruk->config->{'use_new_search'};
+    $use_new_search = 1 unless defined $use_new_search;
+    $c->stash->{'use_new_search'} = $use_new_search;
+
     return 1;
 }
 
