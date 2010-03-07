@@ -107,11 +107,6 @@ sub _process_details_page {
     # which host to display?
     my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
 
-#use Data::Dumper;
-#$c->log->error("hostfilter: ".Dumper($hostfilter));
-#$c->log->error("servicefilter: ".Dumper($servicefilter));
-#$c->log->error("groupfilter: ".Dumper($groupfilter));
-
     # get all services
     my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output", { Slice => {}, AddPeer => 1 });
 
@@ -193,18 +188,15 @@ sub _process_overview_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
-    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
-
-    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
-    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+    my($hostfilter,$servicefilter, $hostgroupfilter, $servicegroupfilter) = $self->_do_filter($c);
 
     # we need the hostname, address etc...
     my $host_data;
     my $services_data;
-    if($hostgroup) {
+    if($hostgroupfilter ne '') {
         $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt num_services_ok as ok num_services_unknown as unknown num_services_warn as warning num_services_crit as critical num_services_pending as pending\n$hostfilter", 'name' );
     }
-    elsif($servicegroup) {
+    elsif($servicegroupfilter ne '') {
         $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
 
         # we have to sort in all services and states
@@ -219,11 +211,11 @@ sub _process_overview_page {
 
     # get all host/service groups
     my $groups;
-    if($hostgroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+    if($hostgroupfilter ne '') {
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$hostgroupfilter\nColumns: name alias members", { Slice => {} });
     }
-    elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+    elsif($servicegroupfilter ne '') {
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$servicegroupfilter\nColumns: name alias members", { Slice => {} });
     }
 
     # join our groups together
@@ -240,7 +232,7 @@ sub _process_overview_page {
         }
 
         my($hostname,$servicename);
-        if($hostgroup and defined $group->{'members'}) {
+        if($hostgroupfilter ne '' and defined $group->{'members'}) {
             for my $hostname (split /,/mx, $group->{'members'}) {
                 # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
@@ -263,7 +255,7 @@ sub _process_overview_page {
                 $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} += $host_data->{$hostname}->{'critical'};
             }
         }
-        elsif($servicegroup) {
+        elsif($servicegroupfilter ne '') {
             for my $member (split /,/mx, $group->{'members'}) {
                 my($hostname,$servicename) = split/\|/mx, $member, 2;
                 # show only hosts with proper authorization
@@ -316,10 +308,7 @@ sub _process_grid_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
-    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
-
-    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
-    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+    my($hostfilter,$servicefilter, $hostgroupfilter, $servicegroupfilter) = $self->_do_filter($c);
 
     # we need the hostname, address etc...
     my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
@@ -335,11 +324,11 @@ sub _process_grid_page {
 
     # get all host/service groups
     my $groups;
-    if($hostgroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+    if($hostgroupfilter ne '') {
+        $groups = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$hostgroupfilter\nColumns: name alias members", { Slice => {} });
     }
-    elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", { Slice => {} });
+    elsif($servicegroupfilter ne '') {
+        $groups = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$servicegroupfilter\nColumns: name alias members", { Slice => {} });
     }
 
     # sort in hosts / services
@@ -358,10 +347,10 @@ sub _process_grid_page {
 
         for my $member (split /,/mx, $group->{'members'}) {
             my($hostname,$servicename);
-            if($hostgroup) {
+            if($hostgroupfilter ne '') {
                 $hostname = $member;
             }
-            if($servicegroup) {
+            if($servicegroupfilter ne '') {
                 ($hostname,$servicename) = split/\|/mx, $member, 2;
             }
 
@@ -375,12 +364,12 @@ sub _process_grid_page {
             }
 
             # add all services
-            if($hostgroup) {
+            if($hostgroupfilter ne '') {
                 for my $service (sort keys %{$services_data->{$hostname}}) {
                      $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$services_data->{$hostname}->{$service}->{'description'}} = $services_data->{$hostname}->{$service};
                 }
             }
-            elsif($servicegroup) {
+            elsif($servicegroupfilter ne '') {
                 $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$services_data->{$hostname}->{$servicename}->{'description'}} = $services_data->{$hostname}->{$servicename};
             }
         }
@@ -404,18 +393,15 @@ sub _process_summary_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
-    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
-
-    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
-    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+    my($hostfilter,$servicefilter, $hostgroupfilter, $servicegroupfilter) = $self->_do_filter($c);
 
     # get all host/service groups
     my $groups;
-    if($hostgroup) {
-        $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name alias members", 'name');
+    if($hostgroupfilter ne '') {
+        $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\n$hostgroupfilter\nColumns: name alias members", 'name');
     }
-    elsif($servicegroup) {
-        $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name alias members", 'name');
+    elsif($servicegroupfilter ne '') {
+        $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\n$servicegroupfilter\nColumns: name alias members", 'name');
     }
 
     # set defaults for all groups
@@ -457,7 +443,7 @@ sub _process_summary_page {
 
     my $services_data;
     my $groupsname = "host_groups";
-    if($hostgroup) {
+    if($hostgroupfilter ne '') {
         # we need the hosts data
         my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name groups state checks_enabled acknowledged scheduled_downtime_depth has_been_checked\n$hostfilter", { Slice => 1 } );
 
@@ -472,7 +458,7 @@ sub _process_summary_page {
         }
     }
 
-    if($servicegroup) {
+    if($servicegroupfilter ne '') {
         # create a hash of all services
         $services_data = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: has_been_checked state host_name host_state groups host_groups checks_enabled acknowledged scheduled_downtime_depth host_name host_state host_checks_enabled host_acknowledged host_scheduled_downtime_depth host_has_been_checked\n$servicefilter", { Slice => {} });
 
@@ -484,7 +470,7 @@ sub _process_summary_page {
         for my $group (split/,/mx, $service->{$groupsname}) {
             next if !defined $groups->{$group};
 
-            if($servicegroup) {
+            if($servicegroupfilter ne '') {
                 if(!defined $host_already_added{$group}->{$service->{'host_name'}}) {
                     $self->_summary_add_host_stats("host_", $groups->{$group}, $service);
                     $host_already_added{$group}->{$service->{'host_name'}} = 1;
@@ -1003,15 +989,22 @@ sub _get_service_prop_filter {
 sub _do_filter {
     my ( $self, $c ) = @_;
 
-    my $hostfilter    = "";
-    my $servicefilter = "";
-    my $groupfilter   = "";
-    my $searches      = [];
+    my $hostfilter         = "";
+    my $servicefilter      = "";
+    my $hostgroupfilter;
+    my $servicegroupfilter;
+    my $searches           = [];
 
     unless($c->{'request'}->{'parameters'}->{'s0_type'}) {
         # classic search
         my $search;
-        ($search, $hostfilter,$servicefilter, $groupfilter) = $self->_classic_filter($c);
+        ($search,
+         $hostfilter,
+         $servicefilter,
+         $hostgroupfilter,
+         $servicegroupfilter)
+            = $self->_classic_filter($c);
+
         # convert that into a new search
         $searches->[0] = $search;
     } else {
@@ -1020,13 +1013,14 @@ sub _do_filter {
         ($searches,
          $hostfilter,
          $servicefilter,
-         $groupfilter)
+         $hostgroupfilter,
+         $servicegroupfilter)
             = $self->_do_search($c, $searches);
     }
 
     $c->stash->{'searches'} = $searches;
 
-    return($hostfilter,$servicefilter,$groupfilter);
+    return($hostfilter,$servicefilter,$hostgroupfilter,$servicegroupfilter);
 }
 
 
@@ -1034,9 +1028,10 @@ sub _do_filter {
 sub _classic_filter {
     my ( $self, $c ) = @_;
 
-    my $hostfilter    = "";
-    my $servicefilter = "";
-    my $groupfilter   = "";
+    my $hostfilter         = '';
+    my $servicefilter      = '';
+    my $hostgroupfilter    = '';
+    my $servicegroupfilter = '';
 
     # classic search
     my $host          = $c->{'request'}->{'parameters'}->{'host'}         || '';
@@ -1062,13 +1057,19 @@ sub _classic_filter {
         }
     }
     elsif($hostgroup ne 'all' and $hostgroup ne '') {
-        $hostfilter    = "Filter: groups >= $hostgroup\n";
-        $servicefilter = "Filter: host_groups >= $hostgroup\n";
-        $groupfilter   = "Filter: name = $hostgroup\n";
+        $hostfilter      = "Filter: groups >= $hostgroup\n";
+        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
+        $hostgroupfilter = "Filter: name = $hostgroup\n";
+    }
+    elsif($hostgroup eq 'all') {
+        $hostgroupfilter = "Filter: name !=\n";
     }
     elsif($servicegroup ne 'all' and $servicegroup ne '') {
-        $servicefilter = "Filter: groups >= $servicegroup\n";
-        $groupfilter   = "Filter: name = $servicegroup\n";
+        $servicefilter      = "Filter: groups >= $servicegroup\n";
+        $servicegroupfilter = "Filter: name = $servicegroup\n";
+    }
+    elsif($servicegroup eq 'all') {
+        $servicegroupfilter = "Filter: name !=\n";
     }
 
     # fill the host/service totals box
@@ -1079,7 +1080,6 @@ sub _classic_filter {
     my $hostprops          = $c->{'request'}->{'parameters'}->{'hostprops'};
     my $servicestatustypes = $c->{'request'}->{'parameters'}->{'servicestatustypes'};
     my $serviceprops       = $c->{'request'}->{'parameters'}->{'serviceprops'};
-
 
     my($host_statustype_filtername,$host_prop_filtername,$service_statustype_filtername,$service_prop_filtername);
     my($host_statustype_filtervalue,$host_prop_filtervalue,$service_statustype_filtervalue,$service_prop_filtervalue);
@@ -1111,27 +1111,32 @@ sub _classic_filter {
         'host_prop_filtername'          => $host_prop_filtername,
         'service_statustype_filtername' => $service_statustype_filtername,
         'service_prop_filtername'       => $service_prop_filtername,
-        'text_filter'        => [
-                                    {
-                                        'op' => '=',
-                                    }
-        ],
+        'text_filter'                   => [],
     };
 
     if($host ne '') {
-        $search->{'text_filter'}->[0]->{'type'}  = 'host';
-        $search->{'text_filter'}->[0]->{'value'} = $host;
+        push @{$search->{'text_filter'}}, {
+            'type'  => 'host',
+            'value' => $host,
+            'op'    => '=',
+        };
     }
     elsif($hostgroup ne '') {
-        $search->{'text_filter'}->[0]->{'type'} = 'hostgroup';
-        $search->{'text_filter'}->[0]->{'value'} = $hostgroup;
+        push @{$search->{'text_filter'}}, {
+            'type'  => 'hostgroup',
+            'value' => $hostgroup,
+            'op'    => '=',
+        };
     }
     elsif($servicegroup ne '') {
-        $search->{'text_filter'}->[0]->{'type'} = 'servicegroup';
-        $search->{'text_filter'}->[0]->{'value'} = $servicegroup;
+        push @{$search->{'text_filter'}}, {
+            'type'  => 'servicegroup',
+            'value' => $servicegroup,
+            'op'    => '=',
+        };
     }
 
-    return($search,$hostfilter,$servicefilter,$groupfilter);
+    return($search,$hostfilter,$servicefilter,$hostgroupfilter,$servicegroupfilter);
 }
 
 ##########################################################
@@ -1173,25 +1178,22 @@ sub _get_search_from_param {
 sub _do_search {
     my ( $self, $c, $searches ) = @_;
 
-    my(@hostfilter,@servicefilter,@groupfilter);
+    my(@hostfilter,@servicefilter,@hostgroupfilter,@servicegroupfilter);
 
     for my $search (@{$searches}) {
-        my($tmp_hostfilter, $tmp_servicefilter,$tmp_groupfilter)
+        my($tmp_hostfilter, $tmp_servicefilter,$tmp_hostgroupfilter,$tmp_servicegroupfilter)
             = $self->_single_search($c, $search);
-        push @hostfilter,    $tmp_hostfilter    if $tmp_hostfilter    ne '';
-        push @servicefilter, $tmp_servicefilter if $tmp_servicefilter ne '';
-        push @groupfilter,   $tmp_groupfilter   if $tmp_groupfilter   ne '';
+        push @hostfilter,         $tmp_hostfilter         if $tmp_hostfilter         ne '';
+        push @servicefilter,      $tmp_servicefilter      if $tmp_servicefilter      ne '';
+        push @hostgroupfilter,    $tmp_hostgroupfilter    if $tmp_hostgroupfilter    ne '';
+        push @servicegroupfilter, $tmp_servicegroupfilter if $tmp_servicegroupfilter ne '';
     }
 
-#use Data::Dumper;
-#$c->log->error("hostfilter: ".Dumper(\@hostfilter));
-#$c->log->error("servicefilter: ".Dumper(\@servicefilter));
-#$c->log->error("groupfilter: ".Dumper(\@groupfilter));
-
     # combine the array of filters by OR
-    my $hostfilter    = Thruk::Utils::combine_filter(\@hostfilter,    'Or');
-    my $servicefilter = Thruk::Utils::combine_filter(\@servicefilter, 'Or');
-    my $groupfilter   = Thruk::Utils::combine_filter(\@groupfilter,   'Or');
+    my $hostfilter         = Thruk::Utils::combine_filter(\@hostfilter,         'Or');
+    my $servicefilter      = Thruk::Utils::combine_filter(\@servicefilter,      'Or');
+    my $hostgroupfilter    = Thruk::Utils::combine_filter(\@hostgroupfilter,    'Or');
+    my $servicegroupfilter = Thruk::Utils::combine_filter(\@servicegroupfilter, 'Or');
 
     # fill the host/service totals box
     $self->_fill_totals_box($c, $hostfilter, $servicefilter);
@@ -1215,14 +1217,14 @@ sub _do_search {
         }
     }
 
-    return($searches, $hostfilter, $servicefilter, $groupfilter);
+    return($searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter);
 }
 
 ##########################################################
 sub _single_search {
     my ( $self, $c, $search ) = @_;
 
-    my(@hostfilter,@servicefilter,@groupfilter);
+    my(@hostfilter,@servicefilter,@hostgroupfilter,@servicegroupfilter);
 
     my($tmp_hostfilter,
        $tmp_servicefilter,
@@ -1261,7 +1263,17 @@ sub _single_search {
         my $op    = '=';
         if($filter->{'op'} eq '~') { $op = '~~'; }
 
-        next if $op eq '=' and $value eq 'all';
+        if($op eq '=' and $value eq 'all') {
+            if($filter->{'type'} eq 'hostgroup') {
+                push @hostgroupfilter, "Filter: name !=";
+            }
+            elsif($filter->{'type'} ne 'servicegroup') {
+                push @servicegroupfilter, "Filter: name !=";
+            }
+            else {
+                next;
+            }
+        }
 
         if($filter->{'type'} eq 'search') {
             my $host_search_filter = [
@@ -1300,25 +1312,23 @@ sub _single_search {
             }
         }
         elsif($filter->{'type'} eq 'hostgroup') {
-            push @hostfilter,    "Filter: groups >= $value";
-            push @servicefilter, "Filter: host_groups >= $value";
-            push @groupfilter,   "Filter: name = $value";
+            push @hostfilter,      "Filter: groups >= $value";
+            push @servicefilter,   "Filter: host_groups >= $value";
+            push @hostgroupfilter, "Filter: name = $value";
         }
         elsif($filter->{'type'} eq 'servicegroup') {
-            push @servicefilter, "Filter: groups >= $value";
-            push @groupfilter,   "Filter: name = $value";
+            push @servicefilter,      "Filter: groups >= $value";
+            push @servicegroupfilter, "Filter: name = $value";
         }
     }
 
     # combine the array of filters by AND
-    my $hostfilter    = Thruk::Utils::combine_filter(\@hostfilter,    'And');
-    my $servicefilter = Thruk::Utils::combine_filter(\@servicefilter, 'And');
-    my $groupfilter   = Thruk::Utils::combine_filter(\@groupfilter,   'And');
+    my $hostfilter         = Thruk::Utils::combine_filter(\@hostfilter,      'And');
+    my $servicefilter      = Thruk::Utils::combine_filter(\@servicefilter,   'And');
+    my $hostgroupfilter    = Thruk::Utils::combine_filter(\@hostgroupfilter, 'And');
+    my $servicegroupfilter = Thruk::Utils::combine_filter(\@servicegroupfilter, 'And');
 
-#use Data::Dumper;
-#$c->log->error("searching: ".Dumper($search));
-
-    return($hostfilter, $servicefilter, $groupfilter);
+    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter);
 }
 
 ##########################################################

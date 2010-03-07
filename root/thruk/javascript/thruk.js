@@ -9,10 +9,11 @@
 88          88      `8b 88888888888 88
 *******************************************************************************/
 
-var refreshPage    = 1;
-var cmdPaneState   = 0;
-var origRefreshVal = 0;
-var curRefreshVal  = 0;
+var refreshPage      = 1;
+var cmdPaneState     = 0;
+var origRefreshVal   = 0;
+var curRefreshVal    = 0;
+var additionalParams = new Hash({});
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -94,7 +95,7 @@ function prefSubmit(url, current_theme) {
   if(current_theme != sel.value) {
     document.cookie = "thruk_theme="+sel.value + "; path=/; expires=" + expires.toGMTString() + ";";
     window.status   = "thruk preferences saved";
-    window.location = url;
+    reloadPage();
   }
 }
 
@@ -103,12 +104,12 @@ function setRefreshRate(rate) {
   curRefreshVal = rate;
   var obj = document.getElementById('refresh_rate');
   if(refreshPage == 0) {
-    obj.innerHTML = "<span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='window.location.reload(true)'></span>";
+    obj.innerHTML = "<span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='reloadPage()'></span>";
   }
   else {
     obj.innerHTML = "<span id='refresh_rate'>Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'></span>";
     if(rate == 0) {
-      window.location.reload(true);
+      reloadPage();
     }
     if(rate > 0) {
       newRate = rate - 1;
@@ -116,9 +117,42 @@ function setRefreshRate(rate) {
     }
   }
 }
+
+/* stops the reload interval */
 function stopRefresh() {
   refreshPage = 0;
   setRefreshRate(0);
+}
+
+/* reloads the current page and adds some parameter from a hash */
+function reloadPage() {
+  var obj = document.getElementById('refresh_rate');
+  obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
+
+  var origUrl = new String(window.location);
+  var newUrl  = origUrl;
+  var index   = newUrl.indexOf('?');
+  var urlArgs = new Hash();
+  if(index != -1) {
+    newUrl  = newUrl.substring(0, index);
+    urlArgs = new Hash(origUrl.parseQuery());
+  }
+
+  additionalParams.each(function(pair) {
+    urlArgs.set(pair.key, pair.value);
+  });
+  var newParams = Object.toQueryString(urlArgs);
+
+  if(newParams != '') {
+    newUrl = newUrl + '?' + newParams;
+  }
+
+  if(newUrl == origUrl) {
+    window.location.reload(true);
+  }
+  else {
+    window.location = newUrl;
+  }
 }
 
 /* set border color as mouse over for top row buttons*/
@@ -155,7 +189,7 @@ function toggleBackend(backend) {
   /* save current selected backends in session cookie */
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
   if(initial_state != 3) {
-    document.location.reload();
+    reloadPage();
   }
 }
 
@@ -588,12 +622,14 @@ function toggleFilterPane() {
     pane.style.visibility = 'visible';
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
+    additionalParams.set('hidesearch', 2);
   }
   else {
     pane.style.display    = 'none';
     pane.style.visibility = 'hidden';
     img.style.display     = '';
     img.style.visibility  = 'visible';
+    additionalParams.set('hidesearch', 1);
   }
 }
 

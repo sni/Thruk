@@ -1,10 +1,9 @@
-[% SET show_filter_table = 0 IF c.request.parameters.hidesearch == 1 %]
-[% UNLESS show_filter_table %]
-<input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
-[% END %]
+[% SET show_filter_table = 0 IF c.request.parameters.hidesearch == "1" %]
+[% SET show_filter_table = 1 IF c.request.parameters.hidesearch == "2" %]
+<input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif"  style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
 <form action="[% c.uri %]" method="GET" id="filterForm">
-[% IF style %]<input type="hidden" name="style" value="[% style %]">[% END %]
-[% IF hidesearch %]<input type="hidden" name="hidesearch" value="[% hidesearch %]">[% END %]
+<input type="hidden" name="style" value="[% style %]">
+<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
 <table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr><td valign="top" class="filter_table">
 [% FOR search = searches %]
 <table border="1" class='filter' cellspacing="0" cellpadding="0" id="s0_filter_pane">
@@ -13,14 +12,14 @@
       <table border="0" cellspacing="2" cellpadding="0" id="s0_filterTable">
         <tr>
           <td valign="top" align="left" class='filterTitle'>
-            <input type="image" src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="filter_button_mini" alt="filter" onClick="toggleFilterPane(); return false;">
+            <a href="#"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="filter_button_mini" alt="filter" onClick="toggleFilterPane(); return false;"></a>
             Display Filters:
             <input type="hidden" name="s0_hoststatustypes" value="[% search.hoststatustypes %]">
             <input type="hidden" name="s0_servicestatustypes" value="[% search.servicestatustypes %]">
             <input type="hidden" name="s0_hostprops" value="[% search.hostprops %]">
             <input type="hidden" name="s0_serviceprops" value="[% search.serviceprops %]">
           </td>
-          <td colspan=2 align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update"></td>
+          <td colspan=2 align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" onClick="document.getElementById('hidesearch').value = '2'"></td>
           <!--<td rowspan=99 align="right" class='newfilter' onClick="new_filter('filter_pane', 'all_filter_table')" id="s0_new_filter">&gt;</td>-->
         </tr>
 <!-- HOST STATUS TYPES -->
