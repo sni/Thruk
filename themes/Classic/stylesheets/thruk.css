@@ -354,7 +354,7 @@ td.filterValue:hover {
   cursor: pointer;
 }
 td.filterName {
-  vertical-align: middle;
+  vertical-align: top;
   white-space: nowrap;
 }
 td.filterValueNoHighlight {

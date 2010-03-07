@@ -41,6 +41,7 @@ function hideElement(id) {
   else {
     pane = document.getElementById(id);
   }
+  if(!pane) { alert("ERROR: got no element for id in hideElement(): " + id); return; }
   pane.style.display    = 'none';
   pane.style.visibility = 'hidden';
 }
@@ -54,6 +55,7 @@ function showElement(id) {
   else {
     pane = document.getElementById(id);
   }
+  if(!pane) { alert("ERROR: got no element for id in hideElement(): " + id); return; }
   pane.style.display    = '';
   pane.style.visibility = 'visible';
 }
@@ -62,7 +64,7 @@ function showElement(id) {
 function toggleElement(id) {
   var pane = document.getElementById(id);
   if(!pane) {
-    alert("got no panel for id in toggleElement(): " + id);
+    alert("ERROR: got no panel for id in toggleElement(): " + id);
     return;
   }
   if(pane.style.visibility == "" || pane.style.visibility == "hidden") {
@@ -668,7 +670,7 @@ function toggleFilterPaneSelector(search_prefix, id) {
   }
 
   if(!panel) {
-    alert("unknown id in toggleFilterPaneSelector(): " + search_prefix + id);
+    alert("ERROR: unknown id in toggleFilterPaneSelector(): " + search_prefix + id);
     return;
   }
   if(!toggleElement(search_prefix+panel)) {
@@ -681,7 +683,7 @@ function toggleFilterPaneSelector(search_prefix, id) {
 /* calculate the sum for a filter */
 function accept_filter_types(search_prefix, checkbox_names, result_name, checkbox_prefix) {
     var inp  = document.getElementsByName(search_prefix + result_name);
-    if(!inp || inp.length == 0) { alert("no element in accept_filter_types() for: " + search_prefix + result_name); return; }
+    if(!inp || inp.length == 0) { alert("ERROR: no element in accept_filter_types() for: " + search_prefix + result_name); return; }
     var orig = inp[0].value;
     var sum = 0;
     var elems = Array.from(document.getElementsByName(search_prefix + checkbox_names));
@@ -704,7 +706,7 @@ function accept_filter_types(search_prefix, checkbox_names, result_name, checkbo
 /* set the initial state of filter checkboxes */
 function set_filter_types(search_prefix, initial_id, checkbox_prefix) {
     var inp = document.getElementsByName(search_prefix + initial_id);
-    if(!inp || inp.length == 0) { alert("no element in set_filter_types() for: " + search_prefix + initial_id); return; }
+    if(!inp || inp.length == 0) { alert("ERROR: no element in set_filter_types() for: " + search_prefix + initial_id); return; }
     var initial_value = parseInt(inp[0].value);
     var bin  = initial_value.toString(2);
     var bits = new Array(); bits = bin.split('').reverse();
@@ -712,7 +714,7 @@ function set_filter_types(search_prefix, initial_id, checkbox_prefix) {
         var bit = bits[index];
         var nr  = Math.pow(2, index);
         var checkbox = document.getElementById(search_prefix + checkbox_prefix + nr);
-        if(!checkbox) { alert("got no checkbox for id in set_filter_types(): " + search_prefix + checkbox_prefix + nr); return; }
+        if(!checkbox) { alert("ERROR: got no checkbox for id in set_filter_types(): " + search_prefix + checkbox_prefix + nr); return; }
         if(bit == '1') {
             checkbox.checked = true;
         } else {
@@ -737,16 +739,16 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
     order = serviceprops;
   }
   else {
-    alert('unknown prefix in set_filter_name(): ' + checkbox_prefix);
+    alert('ERROR: unknown prefix in set_filter_name(): ' + checkbox_prefix);
   }
 
   var checked_ones = new Array();
   order.each(function(bit) {
     checkbox = document.getElementById(search_prefix + checkbox_prefix + bit);
-    if(!checkbox) { alert('got no checkbox in set_filter_name(): ' + search_prefix + checkbox_prefix + bit); }
+    if(!checkbox) { alert('ERROR: got no checkbox in set_filter_name(): ' + search_prefix + checkbox_prefix + bit); }
     if(checkbox.checked) {
       nameElem = document.getElementById(search_prefix + checkbox_prefix + bit + 'n');
-      if(!nameElem) { alert('got no element in set_filter_name(): ' + search_prefix + checkbox_prefix + bit + 'n'); }
+      if(!nameElem) { alert('ERROR: got no element in set_filter_name(): ' + search_prefix + checkbox_prefix + bit + 'n'); }
       checked_ones.push(nameElem.innerHTML);
     }
   });
@@ -794,24 +796,23 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
 function add_new_filter(search_prefix, table) {
   search_prefix = search_prefix.substring(0,3);
   var table = document.getElementById(search_prefix+table);
-  if(!table) { alert("got no table for id in add_new_filter(): " + search_prefix+table); return; }
+  if(!table) { alert("ERROR: got no table for id in add_new_filter(): " + search_prefix+table); return; }
 
   // add new row
   var tblBody        = table.tBodies[0];
   var currentLastRow = tblBody.rows.length - 1;
   var newRow         = tblBody.insertRow(currentLastRow);
-  var search_nr      = 0;
 
   // add first cell
   var typeselect        = document.createElement('select');
   var options           = new Array('Search', 'Host', 'Hostgroup', 'Servicegroup');
-  typeselect.setAttribute('name', 's' + search_nr + '_type');
+  typeselect.setAttribute('name', search_prefix + 'type');
   add_options(typeselect, options);
 
   var opselect          = document.createElement('select');
   //var options           = new Array('~', '!~', '=');
   var options           = new Array('~', '=');
-  opselect.setAttribute('name', 's' + search_nr + '_op');
+  opselect.setAttribute('name', search_prefix + 'op');
   add_options(opselect, options);
 
   var newCell0 = newRow.insertCell(0);
@@ -824,7 +825,7 @@ function add_new_filter(search_prefix, table) {
   var newInput       = document.createElement('input');
   newInput.type      = 'text';
   newInput.value     = '';
-  newInput.setAttribute('name', 's' + search_nr + '_value');
+  newInput.setAttribute('name', search_prefix + 'value');
   var newCell1       = newRow.insertCell(1);
   newCell1.className = "filterValueInput";
   newCell1.appendChild(newInput);
@@ -863,15 +864,63 @@ function add_options(select, options) {
 }
 
 /* create a complete new filter pane */
-function new_filter(cloneObj, parentObj) {
-  var origObj  = document.getElementById(cloneObj);
+function new_filter(cloneObj, parentObj, btnId) {
+  var search_prefix = btnId.substring(0, 3);
+  var origObj  = document.getElementById(search_prefix+cloneObj);
+  if(!origObj) { alert("ERROR: no elem to clone in new_filter() for: " + search_prefix + cloneObj); }
   var newObj   = origObj.cloneNode(true);
+
+  var new_prefix = 's' + (parseInt(search_prefix.substring(1)) + 1) + '_';
+
+  // replace ids and names
+  var tags = new Array('A', 'INPUT', 'TABLE', 'TR', 'TD', 'SELECT', 'INPUT', 'DIV', 'IMG');
+  tags.each(function(tag) {
+      var elems = newObj.getElementsByTagName(tag);
+      replaceIdAndNames(elems, new_prefix);
+  });
+  // replace id of panel itself
+  replaceIdAndNames(newObj, new_prefix);
 
   var tblObj   = document.getElementById(parentObj);
   var tblBody  = tblObj.tBodies[0];
   var nextCell = tblBody.rows[0].cells.length;
-  var newCell  = tblBody.rows[0].insertCell(newCell);
+  var newCell  = tblBody.rows[0].insertCell(nextCell);
   newCell.setAttribute('valign', 'top');
   newCell.appendChild(newObj);
-  hideElement(document.getElementById('new_filter'));
+
+  // hide the original button
+  hideElement(btnId);
+  hideBtn = document.getElementById(new_prefix + 'filter_button_mini');
+  if(hideBtn) {
+      hideElement(hideBtn);
+  }
+}
+
+/* replace ids and names for elements */
+function replaceIdAndNames(elems, new_prefix) {
+  if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
+    elems = new Array(elems);
+  }
+  for(var x = 0; x < elems.length; x++) {
+    var elem = elems[x];
+    if(elem.id) {
+        var new_id = elem.id.replace(/^s\d+_/, new_prefix);
+        elem.setAttribute('id', new_id);
+    }
+    if(elem.name) {
+        var new_name = elem.name.replace(/^s\d+_/, new_prefix);
+        elem.setAttribute('name', new_name);
+    }
+  };
+}
+
+/* remove a search panel */
+function deleteSearchPane(id) {
+  var search_prefix = id.substring(0, 3);
+
+  pane = document.getElementById(search_prefix + 'filter_pane');
+  while(child = pane.firstChild) {
+      pane.removeChild(child);
+  }
+  return false;
 }

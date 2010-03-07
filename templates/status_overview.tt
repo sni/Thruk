@@ -27,6 +27,11 @@
                   <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=summary'>View Status Summary For This Service Group</a><br>
                   <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=grid'>View Service Status Grid For This Service Group</a><br>
                   <a href='status.cgi?servicegroup=all&amp;style=overview'>View Status Overview For All Service Groups</a><br>
+                [% ELSE %]
+                  <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
+                  <a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a><br>
+                  <a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a><br>
+                  <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
                 [% END %]
               </td>
             </tr>

@@ -45,7 +45,7 @@ livestatus:
                 Service Escalations
 
 =========================================================
-after 1.0
+ideas for after 1.0
 
 general:
     - reload cgi.cfg if changed
@@ -60,6 +60,7 @@ general:
     - uc,lc option for auth user -> monitoring
     - multi language support
     - add context sensitive help
+    - completly hide backends by contactgroups
 
 reports:
     - generate long running reports in an extra process

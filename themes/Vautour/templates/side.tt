@@ -31,6 +31,7 @@
             [% IF use_feature_statusmap %]
             <li class="menuli_style2"><a href="/thruk/cgi-bin/statusmap.cgi?host=all" target="[% target %]">Status Map</a></li>
             [% END %]
+            <li class="menuli_style2"><a href="[% all_problems_link %]" target="[% target %]">All Problems</a></li>
             <li class="menuli_style2"><a href="/thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28" target="[% target %]">Service Problems</a></li>
             <li class="menuli_style1"><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=12" target="[% target %]">Host Problems</a></li>
             <li class="menuli_style2"><a href="/thruk/cgi-bin/outages.cgi" target="[% target %]">Network Outages</a></li>

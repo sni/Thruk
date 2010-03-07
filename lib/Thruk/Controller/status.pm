@@ -69,6 +69,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}           = 'status';
     $c->stash->{template}       = 'status_'.$style.'.tt';
 
+    my $custom_title = $c->{'request'}->{'parameters'}->{'title'};
+    $c->stash->{custom_title}   = $custom_title;
+
     return 1;
 }
 
@@ -998,7 +1001,7 @@ sub _do_filter {
     my $servicegroupfilter;
     my $searches           = [];
 
-    unless($c->{'request'}->{'parameters'}->{'s0_type'}) {
+    unless(exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}) {
         # classic search
         my $search;
         ($search,
@@ -1009,10 +1012,14 @@ sub _do_filter {
             = $self->_classic_filter($c);
 
         # convert that into a new search
-        $searches->[0] = $search;
+        push @{$searches}, $search;
     } else {
         # complex filter search?
-        $searches->[0] = $self->_get_search_from_param($c, 's0');
+        push @{$searches}, $self->_get_search_from_param($c, 's0', 1);
+        for(my $x = 1; $x <= 99; $x++) {
+            my $search = $self->_get_search_from_param($c, 's'.$x);
+            push @{$searches}, $search if defined $search;
+        }
         ($searches,
          $hostfilter,
          $servicefilter,
@@ -1144,7 +1151,11 @@ sub _classic_filter {
 
 ##########################################################
 sub _get_search_from_param {
-    my ( $self, $c, $prefix ) = @_;
+    my ( $self, $c, $prefix, $force ) = @_;
+
+    unless($force || exists $c->{'request'}->{'parameters'}->{$prefix.'_hoststatustypes'}) {
+        return;
+    }
 
     my $search = {
         'hoststatustypes'    => $c->{'request'}->{'parameters'}->{$prefix.'_hoststatustypes'},
@@ -1186,10 +1197,10 @@ sub _do_search {
     for my $search (@{$searches}) {
         my($tmp_hostfilter, $tmp_servicefilter,$tmp_hostgroupfilter,$tmp_servicegroupfilter)
             = $self->_single_search($c, $search);
-        push @hostfilter,         $tmp_hostfilter         if $tmp_hostfilter         ne '';
-        push @servicefilter,      $tmp_servicefilter      if $tmp_servicefilter      ne '';
-        push @hostgroupfilter,    $tmp_hostgroupfilter    if $tmp_hostgroupfilter    ne '';
-        push @servicegroupfilter, $tmp_servicegroupfilter if $tmp_servicegroupfilter ne '';
+        push @hostfilter,         $tmp_hostfilter;
+        push @servicefilter,      $tmp_servicefilter;
+        push @hostgroupfilter,    $tmp_hostgroupfilter;
+        push @servicegroupfilter, $tmp_servicegroupfilter;
     }
 
     # combine the array of filters by OR
@@ -1267,7 +1278,10 @@ sub _single_search {
         if($filter->{'op'} eq '~') { $op = '~~'; }
 
         if($op eq '=' and $value eq 'all') {
-            if($filter->{'type'} eq 'hostgroup') {
+            if($filter->{'type'} eq 'host') {
+                push @hostfilter, "Filter: name !=";
+            }
+            elsif($filter->{'type'} eq 'hostgroup') {
                 push @hostgroupfilter, "Filter: name !=";
             }
             elsif($filter->{'type'} ne 'servicegroup') {
@@ -1277,8 +1291,7 @@ sub _single_search {
                 next;
             }
         }
-
-        if($filter->{'type'} eq 'search') {
+        elsif($filter->{'type'} eq 'search') {
             my $host_search_filter = [
                 "Filter: name $op $value",
                 "Filter: alias $op $value",
@@ -1326,10 +1339,19 @@ sub _single_search {
     }
 
     # combine the array of filters by AND
-    my $hostfilter         = Thruk::Utils::combine_filter(\@hostfilter,      'And');
-    my $servicefilter      = Thruk::Utils::combine_filter(\@servicefilter,   'And');
-    my $hostgroupfilter    = Thruk::Utils::combine_filter(\@hostgroupfilter, 'And');
+    my $hostfilter         = Thruk::Utils::combine_filter(\@hostfilter,         'And');
+    my $servicefilter      = Thruk::Utils::combine_filter(\@servicefilter,      'And');
+    my $hostgroupfilter    = Thruk::Utils::combine_filter(\@hostgroupfilter,    'And');
     my $servicegroupfilter = Thruk::Utils::combine_filter(\@servicegroupfilter, 'And');
+
+    # filter does not work when it is empty,
+    # so add useless filter which matches everything
+    ## no critic
+    if($hostfilter         =~ m/^\s*$/) { $hostfilter         = "Filter: name !=";        }
+    if($servicefilter      =~ m/^\s*$/) { $servicefilter      = "Filter: description !="; }
+    if($hostgroupfilter    =~ m/^\s*$/) { $hostgroupfilter    = "Filter: name !=";        }
+    if($servicegroupfilter =~ m/^\s*$/) { $servicegroupfilter = "Filter: name !=";        }
+    ## use critic
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter);
 }

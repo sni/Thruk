@@ -1,11 +1,15 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+
+0.40    Sun Mar  7 21:12:37 CET 2010
+          - change status.cgi filter inline
+          - combine several filter
+
 0.34    Wed Mar  3 09:40:49 CET 2010
           - send multiple commands from status detail
           - date picker for logfile pages (history, showlog and notifications)
           - overlib for long plugin out in status details
           - added new theme Nuvola
-          - change status.cgi filter inline
 
 0.32    Fri Feb 26 09:16:20 CET 2010
           - added summary report

@@ -26,10 +26,15 @@
                 <a href='history.cgi?host=all'>View History For all hosts</a><br>
                 <a href='notifications.cgi?host=all'>View Notifications For All Hosts</a><br>
                 <a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Hosts</a>
-                [% ELSE %]
+                [% ELSIF host != '' %]
                 <a href='history.cgi?host=[% host %]'>View History For This Host</a><br>
                 <a href='notifications.cgi?host=[% host %]'>View Notifications For This Host</a><br>
                 <a href='status.cgi?host=all'>View Service Status Detail For All Hosts</a>
+                [% ELSE %]
+                <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
+                <a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a><br>
+                <a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a><br>
+                <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
                 [% END %]
               </td>
             </tr>
@@ -51,7 +56,8 @@
         </td>
         <td valign="top" align="center" width="33%" nowrap><br>
           <div align="center" class='statusTitle'>
-            [% IF hostgroup != '' %]Service Status Details For Host Group '[% hostgroup %]'
+            [% IF custom_title != '' %][% custom_title %]
+            [% ELSIF hostgroup != '' %]Service Status Details For Host Group '[% hostgroup %]'
             [% ELSIF servicegroup %] Service Status Details For Service Group '[% servicegroup %]'
             [% ELSIF host == 'all' %]Service Status Details For All Host
             [% ELSIF host != '' %]Service Status Details For Host '[% host %]'

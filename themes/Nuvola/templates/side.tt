@@ -67,6 +67,7 @@ monitoring.add(7,0,'Service Group',cgipath + 'status.cgi?servicegroup=all&style=
 monitoring.add(10,0,'Status Map',cgipath + 'statusmap.cgi?host=all','','[% target %]','/thruk/themes/Nuvola/side/icons/map.gif');
 [% END %]
 monitoring.add(11,0,'Problems','','','','/thruk/themes/Nuvola/side/icons/folder.gif','/thruk/themes/Nuvola/side/icons/folder_open.gif');
+    monitoring.add(12,11,'All Problems','[% all_problems_link %]','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
     monitoring.add(12,11,'Service',cgipath + 'status.cgi?host=all&servicestatustypes=28','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
     monitoring.add(13,11,'Host',cgipath + 'status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');
     monitoring.add(14,11,'Network Outages',cgipath + 'outages.cgi','','[% target %]','/thruk/themes/Nuvola/side/icons/error.gif');

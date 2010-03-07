@@ -57,7 +57,7 @@
             </ul>
           </li>
           <li>
-            <a href="/thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28" target="[% target %]">Problems</a>
+            <a href="[% all_problems_link %]" target="[% target %]">Problems</a>
             <ul>
               <li><a href="/thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28" target="[% target %]">Services</a> (<a href="/thruk/cgi-bin/status.cgi?host=all&amp;type=detail&amp;hoststatustypes=3&amp;serviceprops=42&amp;servicestatustypes=28" target="[% target %]">Unhandled</a>)</li>
               <li><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=12" target="[% target %]">Hosts</a> (<a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=12&amp;hostprops=42" target="[% target %]">Unhandled</a>)</li>
