@@ -57,6 +57,8 @@
           <div align="center" class='statusTitle'>Service Overview For All Service Groups</div><br>
           [% ELSIF servicegroup != '' %]
           <div align="center" class='statusTitle'>Service Overview For Service Group '[% servicegroup %]'</div><br>
+          [% ELSE %]
+          <div align="center" class='statusTitle'>Service Overview</div><br>
           [% END %]
         </td>
         <td valign="top" align="right" width="33%"></td>

@@ -38,6 +38,7 @@
         [% END %]
     });
     var current_backend_states = initial_backend_states.clone();
+    var theme = '[% theme %]';
     -->
     </script>
     [% PROCESS extra_headers.tt %]
@@ -46,7 +47,7 @@
 
   <body class='[% page %]' id='[% page %]'[% IF refresh_rate %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
   <div class="pref_pane" id="pref_pane">
-    <a href="javascript:togglePreferencePane('[% theme %]')"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
+    <a href="javascript:togglePreferencePane()"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
     <form action="[% c.uri %]" method="GET">
     <table class="pref_pane" border=1 width="450">
       <tr>
@@ -60,7 +61,7 @@
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
                   [% END %]
                 </select>
-                <input type="button" name="submit" value="change" onClick="prefSubmit('[% c.uri %]', '[% theme %]')">
+                <input type="button" name="submit" value="change" onClick="prefSubmit('[% html_escape(c.request.uri) %]', '[% theme %]')">
               </td>
             </tr>
             <tr>
@@ -108,7 +109,7 @@
       </table>
     </td>
     <td class="top_nav_pref">
-      <input type="button" class="top_nav_pref_button" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="togglePreferencePane('[% theme %]', 1)">
+      <input type="button" class="top_nav_pref_button" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="togglePreferencePane(1)">
     </td>
   </tr>
 </table>

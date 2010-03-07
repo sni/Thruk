@@ -105,39 +105,7 @@ sub _process_details_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
-    my $host          = $c->{'request'}->{'parameters'}->{'host'}         || '';
-    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
-    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
-    my $hostfilter    = "";
-    my $servicefilter = "";
-
-    if($host ne 'all' and $host ne '') {
-        $hostfilter    = "Filter: name = $host\n";
-        $servicefilter = "Filter: host_name = $host\n";
-
-        # check for wildcards
-        if(CORE::index($host, '*') >= 0) {
-            # convert wildcards into real regexp
-            my $searchhost = $host;
-            $searchhost =~ s/\.\*/*/gmx;
-            $searchhost =~ s/\*/.*/gmx;
-            $hostfilter    = "Filter: name ~~ $searchhost\n";
-            $servicefilter = "Filter: host_name ~~ $searchhost\n";
-        }
-    }
-    elsif($hostgroup ne 'all' and $hostgroup ne '') {
-        $hostfilter    = "Filter: groups >= $hostgroup\n";
-        $servicefilter = "Filter: host_groups >= $hostgroup\n";
-    }
-    elsif($servicegroup ne 'all' and $servicegroup ne '') {
-        $servicefilter = "Filter: groups >= $servicegroup\n";
-    }
-
-    # fill the host/service totals box
-    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
-
-    # then add some more filter based on get parameter
-    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
+    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
 
     # get all services
     my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output", { Slice => {}, AddPeer => 1 });
@@ -169,9 +137,6 @@ sub _process_details_page {
 
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;
-    $c->stash->{'host'}          = $host;
-    $c->stash->{'hostgroup'}     = $hostgroup;
-    $c->stash->{'servicegroup'}  = $servicegroup;
     $c->stash->{'style'}         = 'detail';
 
     return 1;
@@ -182,20 +147,8 @@ sub _process_details_page {
 sub _process_hostdetails_page {
     my ( $self, $c ) = @_;
 
-    # which hostgroup to display?
-    my $hostgroup = $c->{'request'}->{'parameters'}->{'hostgroup'} || 'all';
-    my $hostfilter    = "";
-    my $servicefilter = "";
-    if($hostgroup ne 'all') {
-        $hostfilter    = "Filter: groups >= $hostgroup\n";
-        $servicefilter = "Filter: host_groups >= $hostgroup\n";
-    }
-
-    # fill the host/service totals box
-    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
-
-    # then add some more filter based on get parameter
-    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
+    # which host to display?
+    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
 
     # add comments into hosts.comments and hosts.comment_count
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\n$hostfilter\nColumns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check long_plugin_output", { Slice => {}, AddPeer => 1 });
@@ -224,7 +177,6 @@ sub _process_hostdetails_page {
 
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;
-    $c->stash->{'hostgroup'}     = $hostgroup;
     $c->stash->{'style'}         = 'hostdetail';
 
     return 1;
@@ -236,27 +188,10 @@ sub _process_overview_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
+    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
+
     my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
-
-    my $hostfilter      = "";
-    my $servicefilter   = "";
-    my $groupfilter     = "";
-    if($hostgroup ne '' and $hostgroup ne 'all') {
-        $hostfilter      = "Filter: groups >= $hostgroup\n";
-        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
-        $groupfilter     = "Filter: name = $hostgroup\n";
-    }
-    elsif($servicegroup ne '' and $servicegroup ne 'all') {
-        $servicefilter   = "Filter: groups >= $servicegroup\n";
-        $groupfilter     = "Filter: name = $servicegroup\n";
-    }
-
-    # fill the host/service totals box
-    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
-
-    # then add some more filter based on get parameter
-    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # we need the hostname, address etc...
     my $host_data;
@@ -362,10 +297,7 @@ sub _process_overview_page {
             delete $joined_groups{$name};
         }
     }
-#use Data::Dumper;
-#print Dumper(\%joined_groups);
-    $c->stash->{'hostgroup'}    = $hostgroup;
-    $c->stash->{'servicegroup'} = $servicegroup;
+
     $c->stash->{'groups'}       = \%joined_groups;
     $c->stash->{'style'}        = 'overview';
 
@@ -379,27 +311,10 @@ sub _process_grid_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
+    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
+
     my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
-
-    my $hostfilter      = "";
-    my $servicefilter   = "";
-    my $groupfilter     = "";
-    if($hostgroup ne '' and $hostgroup ne 'all') {
-        $hostfilter      = "Filter: groups >= $hostgroup\n";
-        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
-        $groupfilter     = "Filter: name = $hostgroup\n";
-    }
-    elsif($servicegroup ne '' and $servicegroup ne 'all') {
-        $servicefilter   = "Filter: groups >= $servicegroup\n";
-        $groupfilter     = "Filter: name = $servicegroup\n";
-    }
-
-    # fill the host/service totals box
-    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
-
-    # then add some more filter based on get parameter
-    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # we need the hostname, address etc...
     my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
@@ -471,8 +386,6 @@ sub _process_grid_page {
         }
     }
 
-    $c->stash->{'hostgroup'}    = $hostgroup;
-    $c->stash->{'servicegroup'} = $servicegroup;
     $c->stash->{'groups'}       = \%joined_groups;
     $c->stash->{'style'}        = 'grid';
 
@@ -486,27 +399,10 @@ sub _process_summary_page {
     my ( $self, $c ) = @_;
 
     # which host to display?
+    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
+
     my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
-
-    my $hostfilter      = "";
-    my $servicefilter   = "";
-    my $groupfilter     = "";
-    if($hostgroup ne '' and $hostgroup ne 'all') {
-        $hostfilter      = "Filter: groups >= $hostgroup\n";
-        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
-        $groupfilter     = "Filter: name = $hostgroup\n";
-    }
-    elsif($servicegroup ne '' and $servicegroup ne 'all') {
-        $servicefilter   = "Filter: groups >= $servicegroup\n";
-        $groupfilter     = "Filter: name = $servicegroup\n";
-    }
-
-    # fill the host/service totals box
-    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
-
-    # then add some more filter based on get parameter
-    ($hostfilter,$servicefilter) = $self->_extend_filter($c,$hostfilter,$servicefilter);
 
     # get all host/service groups
     my $groups;
@@ -627,8 +523,6 @@ sub _process_summary_page {
         }
     }
 
-    $c->stash->{'hostgroup'}    = $hostgroup;
-    $c->stash->{'servicegroup'} = $servicegroup;
     $c->stash->{'groups'}       = $groups;
     $c->stash->{'style'}        = 'summary';
 
@@ -714,50 +608,55 @@ Stats: has_been_checked = 0 as pending
 
 ##########################################################
 sub _extend_filter {
-    my ( $self, $c, $hostfilter, $servicefilter ) = @_;
+    my ( $self, $c, $hostfilter, $servicefilter, $hoststatustypes, $hostprops, $servicestatustypes, $serviceprops ) = @_;
 
     $hostfilter    = '' unless defined $hostfilter;
     $servicefilter = '' unless defined $servicefilter;
 
     # host statustype filter (up,down,...)
-    my($host_statustype_filtername,$host_statustype_filter,$host_statustype_filter_service)
-            = $self->_get_host_statustype_filter($c->{'request'}->{'parameters'}->{'hoststatustypes'});
+    my($host_statustype_filtername,$host_statustype_filter,$host_statustype_filter_service);
+    ($hoststatustypes,$host_statustype_filtername,$host_statustype_filter,$host_statustype_filter_service)
+            = $self->_get_host_statustype_filter($hoststatustypes);
     $hostfilter    .= $host_statustype_filter;
     $servicefilter .= $host_statustype_filter_service;
 
     $c->stash->{'show_filter_table'}          = 1 if $host_statustype_filter ne '';
-    $c->stash->{'host_statustype_filtername'} = $host_statustype_filtername;
 
     # host props filter (downtime, acknowledged...)
-    my($host_prop_filtername,$host_prop_filter,$host_prop_filter_service) = $self->_get_host_prop_filter($c->{'request'}->{'parameters'}->{'hostprops'});
+    my($host_prop_filtername,$host_prop_filter,$host_prop_filter_service);
+    ($hostprops,$host_prop_filtername,$host_prop_filter,$host_prop_filter_service) = $self->_get_host_prop_filter($hostprops);
     $hostfilter    .= $host_prop_filter;
     $servicefilter .= $host_prop_filter_service;
 
     $c->stash->{'show_filter_table'}    = 1 if $host_prop_filter ne '';
-    $c->stash->{'host_prop_filtername'} = $host_prop_filtername;
 
 
     # service statustype filter (ok,warning,...)
-    my($service_statustype_filtername,$service_statustype_filter_service)
-            = $self->_get_service_statustype_filter($c->{'request'}->{'parameters'}->{'servicestatustypes'});
+    my($service_statustype_filtername,$service_statustype_filter_service);
+    ($servicestatustypes,$service_statustype_filtername,$service_statustype_filter_service)
+            = $self->_get_service_statustype_filter($servicestatustypes);
     $servicefilter .= $service_statustype_filter_service;
 
     $c->stash->{'show_filter_table'}             = 1 if $service_statustype_filter_service ne '';
-    $c->stash->{'service_statustype_filtername'} = $service_statustype_filtername;
 
     # service props filter (downtime, acknowledged...)
-    my($service_prop_filtername,$service_prop_filter_service) = $self->_get_service_prop_filter($c->{'request'}->{'parameters'}->{'serviceprops'});
+    my($service_prop_filtername,$service_prop_filter_service);
+    ($serviceprops,$service_prop_filtername,$service_prop_filter_service) = $self->_get_service_prop_filter($serviceprops);
     $servicefilter .= $service_prop_filter_service;
 
     $c->stash->{'show_filter_table'}       = 1 if $service_prop_filter_service ne '';
-    $c->stash->{'service_prop_filtername'} = $service_prop_filtername;
 
-    $c->stash->{'servicestatustypes'} = $c->{'request'}->{'parameters'}->{'servicestatustypes'};
-    $c->stash->{'hoststatustypes'}    = $c->{'request'}->{'parameters'}->{'hoststatustypes'};
-    $c->stash->{'serviceprops'}       = $c->{'request'}->{'parameters'}->{'serviceprops'};
-    $c->stash->{'hostprops'}          = $c->{'request'}->{'parameters'}->{'hostprops'};
-
-    return($hostfilter,$servicefilter);
+    return($hostfilter,
+           $servicefilter,
+           $host_statustype_filtername,
+           $host_prop_filtername,
+           $service_statustype_filtername,
+           $service_prop_filtername,
+           $hoststatustypes,
+           $hostprops,
+           $servicestatustypes,
+           $serviceprops
+          );
 }
 
 ##########################################################
@@ -806,7 +705,7 @@ sub _get_host_statustype_filter {
             $servicefilter .= $servicestatusfilter[0]."\n";
         }
     }
-    return($hoststatusfiltername,$hostfilter,$servicefilter);
+    return($number,$hoststatusfiltername,$hostfilter,$servicefilter);
 }
 
 ##########################################################
@@ -935,7 +834,7 @@ sub _get_host_prop_filter {
             $servicefilter .= $host_prop_filter_service[0]."\n";
         }
     }
-    return($host_prop_filtername,$hostfilter,$servicefilter);
+    return($number,$host_prop_filtername,$hostfilter,$servicefilter);
 }
 
 ##########################################################
@@ -980,7 +879,7 @@ sub _get_service_statustype_filter {
             $servicefilter .= $servicestatusfilter[0]."\n";
         }
     }
-    return($servicestatusfiltername,$servicefilter);
+    return($number,$servicestatusfiltername,$servicefilter);
 }
 
 ##########################################################
@@ -1085,8 +984,285 @@ sub _get_service_prop_filter {
             $servicefilter .= $service_prop_filter[0]."\n";
         }
     }
-    return($service_prop_filtername,$servicefilter);
+    return($number,$service_prop_filtername,$servicefilter);
 }
+
+
+##########################################################
+sub _do_filter {
+    my ( $self, $c ) = @_;
+
+    my $hostfilter    = "";
+    my $servicefilter = "";
+    my $groupfilter   = "";
+    my $searches      = [];
+
+    unless($c->{'request'}->{'parameters'}->{'s0_type'}) {
+        # classic search
+        my $search;
+        ($search, $hostfilter,$servicefilter, $groupfilter) = $self->_classic_filter($c);
+        # convert that into a new search
+        $searches->[0] = $search;
+    } else {
+        # complex filter search?
+        $searches->[0] = $self->_get_search_from_param($c, 's0');
+        ($searches,
+         $hostfilter,
+         $servicefilter,
+         $groupfilter)
+            = $self->_do_search($c, $searches);
+    }
+
+    $c->stash->{'searches'} = $searches;
+
+    return($hostfilter,$servicefilter,$groupfilter);
+}
+
+
+##########################################################
+sub _classic_filter {
+    my ( $self, $c ) = @_;
+
+    my $hostfilter    = "";
+    my $servicefilter = "";
+    my $groupfilter   = "";
+
+    # classic search
+    my $host          = $c->{'request'}->{'parameters'}->{'host'}         || '';
+    my $hostgroup     = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
+    my $servicegroup  = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
+
+    $c->stash->{'host'}          = $host;
+    $c->stash->{'hostgroup'}     = $hostgroup;
+    $c->stash->{'servicegroup'}  = $servicegroup;
+
+    if($host ne 'all' and $host ne '') {
+        $hostfilter    = "Filter: name = $host\n";
+        $servicefilter = "Filter: host_name = $host\n";
+
+        # check for wildcards
+        if(CORE::index($host, '*') >= 0) {
+            # convert wildcards into real regexp
+            my $searchhost = $host;
+            $searchhost =~ s/\.\*/*/gmx;
+            $searchhost =~ s/\*/.*/gmx;
+            $hostfilter    = "Filter: name ~~ $searchhost\n";
+            $servicefilter = "Filter: host_name ~~ $searchhost\n";
+        }
+    }
+    elsif($hostgroup ne 'all' and $hostgroup ne '') {
+        $hostfilter    = "Filter: groups >= $hostgroup\n";
+        $servicefilter = "Filter: host_groups >= $hostgroup\n";
+        $groupfilter   = "Filter: name = $hostgroup\n";
+    }
+    elsif($servicegroup ne 'all' and $servicegroup ne '') {
+        $servicefilter = "Filter: groups >= $servicegroup\n";
+        $groupfilter   = "Filter: name = $servicegroup\n";
+    }
+
+    # fill the host/service totals box
+    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
+
+    # then add some more filter based on get parameter
+    my $hoststatustypes    = $c->{'request'}->{'parameters'}->{'hoststatustypes'};
+    my $hostprops          = $c->{'request'}->{'parameters'}->{'hostprops'};
+    my $servicestatustypes = $c->{'request'}->{'parameters'}->{'servicestatustypes'};
+    my $serviceprops       = $c->{'request'}->{'parameters'}->{'serviceprops'};
+
+
+    my($host_statustype_filtername,$host_prop_filtername,$service_statustype_filtername,$service_prop_filtername);
+    my($host_statustype_filtervalue,$host_prop_filtervalue,$service_statustype_filtervalue,$service_prop_filtervalue);
+    ($hostfilter,
+     $servicefilter,
+     $host_statustype_filtername,
+     $host_prop_filtername,
+     $service_statustype_filtername,
+     $service_prop_filtername,
+     $host_statustype_filtervalue,
+     $host_prop_filtervalue,
+     $service_statustype_filtervalue,
+     $service_prop_filtervalue
+    )= $self->_extend_filter($c,
+                                $hostfilter,
+                                $servicefilter,
+                                $hoststatustypes,
+                                $hostprops,
+                                $servicestatustypes,
+                                $serviceprops);
+
+    # create a new style search hash
+    my $search = {
+        'hoststatustypes'               => $host_statustype_filtervalue,
+        'hostprops'                     => $host_prop_filtervalue,
+        'servicestatustypes'            => $service_statustype_filtervalue,
+        'serviceprops'                  => $service_prop_filtervalue,
+        'host_statustype_filtername'    => $host_statustype_filtername,
+        'host_prop_filtername'          => $host_prop_filtername,
+        'service_statustype_filtername' => $service_statustype_filtername,
+        'service_prop_filtername'       => $service_prop_filtername,
+        'text_filter'        => [
+                                    {
+                                        'op' => '=',
+                                    }
+        ],
+    };
+
+    if($host ne '') {
+        $search->{'text_filter'}->[0]->{'type'}  = 'host';
+        $search->{'text_filter'}->[0]->{'value'} = $host;
+    }
+    elsif($hostgroup ne '') {
+        $search->{'text_filter'}->[0]->{'type'} = 'hostgroup';
+        $search->{'text_filter'}->[0]->{'value'} = $hostgroup;
+    }
+    elsif($servicegroup ne '') {
+        $search->{'text_filter'}->[0]->{'type'} = 'servicegroup';
+        $search->{'text_filter'}->[0]->{'value'} = $servicegroup;
+    }
+
+    return($search,$hostfilter,$servicefilter,$groupfilter);
+}
+
+##########################################################
+sub _get_search_from_param {
+    my ( $self, $c, $prefix ) = @_;
+
+    my $search = {
+        'hoststatustypes'    => $c->{'request'}->{'parameters'}->{$prefix.'_hoststatustypes'},
+        'hostprops'          => $c->{'request'}->{'parameters'}->{$prefix.'_hostprops'},
+        'servicestatustypes' => $c->{'request'}->{'parameters'}->{$prefix.'_servicestatustypes'},
+        'serviceprops'       => $c->{'request'}->{'parameters'}->{$prefix.'_serviceprops'},
+    };
+
+    return $search unless defined $c->{'request'}->{'parameters'}->{$prefix.'_type'};
+
+    if(ref $c->{'request'}->{'parameters'}->{$prefix.'_type'} eq 'ARRAY') {
+        for(my $x = 0; $x < scalar @{$c->{'request'}->{'parameters'}->{$prefix.'_type'}}; $x++) {
+            my $text_filter = {
+                type  => $c->{'request'}->{'parameters'}->{$prefix.'_type'}->[$x],
+                value => $c->{'request'}->{'parameters'}->{$prefix.'_value'}->[$x],
+                op    => $c->{'request'}->{'parameters'}->{$prefix.'_op'}->[$x],
+            };
+            push @{$search->{'text_filter'}}, $text_filter;
+        }
+    }
+    else {
+        my $text_filter = {
+            type  => $c->{'request'}->{'parameters'}->{$prefix.'_type'},
+            value => $c->{'request'}->{'parameters'}->{$prefix.'_value'},
+            op    => $c->{'request'}->{'parameters'}->{$prefix.'_op'},
+        };
+        push @{$search->{'text_filter'}}, $text_filter;
+    }
+
+    return $search;
+}
+
+##########################################################
+sub _do_search {
+    my ( $self, $c, $searches ) = @_;
+
+    my(@hostfilter,@servicefilter,@groupfilter);
+
+    for my $search (@{$searches}) {
+        my($tmp_hostfilter, $tmp_servicefilter,$tmp_groupfilter)
+            = $self->_single_search($c, $search);
+        push @hostfilter,    $tmp_hostfilter    if $tmp_hostfilter    ne '';
+        push @servicefilter, $tmp_servicefilter if $tmp_servicefilter ne '';
+        push @groupfilter,   $tmp_groupfilter   if $tmp_groupfilter   ne '';
+    }
+
+use Data::Dumper;
+$c->log->error("hostfilter: ".Dumper(\@hostfilter));
+$c->log->error("servicefilter: ".Dumper(\@servicefilter));
+$c->log->error("groupfilter: ".Dumper(\@groupfilter));
+
+    # combine the array of filters by OR
+    my($hostfilter,$servicefilter,$groupfilter) = ('','','');
+    if(scalar @hostfilter > 1) {
+        $hostfilter    = join("\n", @hostfilter)."\nOr: ".(scalar @hostfilter)."\n";
+    }
+    elsif(scalar @hostfilter == 1) {
+        $hostfilter    = $hostfilter[0]."\n";
+    }
+    if(scalar @servicefilter > 1) {
+        $servicefilter = join("\n", @servicefilter)."\nOr: ".(scalar @servicefilter)."\n";
+    }
+    elsif(scalar @servicefilter == 1) {
+        $servicefilter = $servicefilter[0]."\n";
+    }
+    if(scalar @groupfilter > 1) {
+        $groupfilter   = join("\n", @groupfilter)."\nOr: ".(scalar @groupfilter)."\n";
+    }
+    elsif(scalar @groupfilter == 1) {
+        $groupfilter   = $groupfilter[0]."\n";
+    }
+
+    # fill the host/service totals box
+    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
+
+    # if there is only one search with a single text filter
+    # set stash to reflect a classic search
+    if(    scalar @{$searches} == 1
+       and scalar @{$searches->[0]->{'text_filter'}} == 1
+       and $searches->[0]->{'text_filter'}->[0]->{'op'} eq '='
+      ) {
+        my $type  = $searches->[0]->{'text_filter'}->[0]->{'type'};
+        my $value = $searches->[0]->{'text_filter'}->[0]->{'value'};
+        if($type eq 'host') {
+            $c->stash->{'host'}         = $value;
+        }
+        elsif($type eq 'hostgroup') {
+            $c->stash->{'hostgroup'}    = $value;
+        }
+        elsif($type eq 'servicegroup') {
+            $c->stash->{'servicegroup'} = $value;
+        }
+    }
+
+    return($searches, $hostfilter, $servicefilter, $groupfilter);
+}
+
+##########################################################
+sub _single_search {
+    my ( $self, $c, $search ) = @_;
+
+    my $groupfilter = "";
+    my($hostfilter,
+       $servicefilter,
+       $host_statustype_filtername,
+       $host_prop_filtername,
+       $service_statustype_filtername,
+       $service_prop_filtername,
+       $host_statustype_filtervalue,
+       $host_prop_filtervalue,
+       $service_statustype_filtervalue,
+       $service_prop_filtervalue
+      ) = $self->_extend_filter($c,
+                                '',
+                                '',
+                                $search->{'hoststatustypes'},
+                                $search->{'hostprops'},
+                                $search->{'servicestatustypes'},
+                                $search->{'serviceprops'});
+
+    $search->{'host_statustype_filtername'}    = $host_statustype_filtername;
+    $search->{'host_prop_filtername'}          = $host_prop_filtername;
+    $search->{'service_statustype_filtername'} = $service_statustype_filtername;
+    $search->{'service_prop_filtername'}       = $service_prop_filtername;
+
+    $search->{'hoststatustypes'}               = $host_statustype_filtervalue;
+    $search->{'hostprops'}                     = $host_prop_filtervalue;
+    $search->{'servicestatustypes'}            = $service_statustype_filtervalue;
+    $search->{'serviceprops'}                  = $service_prop_filtervalue;
+
+use Data::Dumper;
+$c->log->error("searching: ".Dumper($search));
+
+    return($hostfilter, $servicefilter, $groupfilter);
+}
+
+##########################################################
 
 =head1 AUTHOR
 

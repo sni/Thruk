@@ -50,16 +50,13 @@
           [% PROCESS _status_filter.tt %]
         </td>
         <td valign="top" align="center" width="33%" nowrap><br>
-          <div align="center" class='statusTitle'>Service Status Details For
-          [% IF hostgroup %]
-          Host Group '[% hostgroup %]'
-          [% ELSIF servicegroup %]
-          Service Group '[% servicegroup %]'
-          [% ELSIF host == 'all' %]
-          All Host
-          [% ELSE %]
-          Host '[% host %]'
-          [% END %]
+          <div align="center" class='statusTitle'>
+            [% IF hostgroup != '' %]Service Status Details For Host Group '[% hostgroup %]'
+            [% ELSIF servicegroup %] Service Status Details For Service Group '[% servicegroup %]'
+            [% ELSIF host == 'all' %]Service Status Details For All Host
+            [% ELSIF host != '' %]Service Status Details For Host '[% host %]'
+            [% ELSE %]Service Status Details
+            [% END %]
           </div>
           [% IF thruk_message %]
           <div id="thruk_message" class="thruk_message">

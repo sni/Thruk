@@ -38,11 +38,16 @@
     </table>
     <table border="0" width="100%" cellpadding=0 cellspacing=0>
       <tr>
-        <td valign="top" align="left" width="33%">
+        <td valign="top" align="left" width="33%" nowrap>
           [% PROCESS _status_filter.tt %]
         </td>
         <td valign="top" align="center" width="33%">
-          <div align="center" class='statusTitle'>Host Status Details For [% IF hostgroup == 'all' %]All Host Groups[% ELSE %]Host Group '[% hostgroup %]'[% END %]</div>
+          <div align="center" class='statusTitle'>
+            [% IF hostgroup == 'all' %]Host Status Details For All Host Groups
+            [% ELSIF hostgroup != '' %]Host Status Details For Host Group '[% hostgroup %]'
+            [% ELSE %]Host Status Details
+            [% END %]
+          </div>
           [% IF thruk_message %]
           <div id="thruk_message" class="thruk_message">
               <span class="[% thruk_message_class %]">[% thruk_message %]

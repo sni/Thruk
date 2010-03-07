@@ -342,6 +342,9 @@ table.overDivTable a {
   color:#000000;
 }
 
+td.filter select {
+  border: 0px;
+}
 td.filterValueInput input {
   width: 100px;
   border: 0px;
@@ -353,6 +356,8 @@ td.filterValue:hover {
 td.filterName {
   vertical-align: middle;
 }
+td.filterValueNoHighlight {
+}
 
 td.newfilter {
   line-height: 8px;
@@ -361,6 +366,9 @@ td.newfilter:hover {
   line-height: 8px;
   background-color:#88BBD8;
   cursor: pointer;
+}
+td.filter_table {
+  white-space: normal;
 }
 
 div.filter_pane {

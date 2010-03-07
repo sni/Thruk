@@ -33,14 +33,26 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 
 /* hide a element by id */
 function hideElement(id) {
-  var pane = document.getElementById(id);
+  var pane;
+  if(typeof(id) == 'object') {
+    pane = id;
+  }
+  else {
+    pane = document.getElementById(id);
+  }
   pane.style.display    = 'none';
   pane.style.visibility = 'hidden';
 }
 
 /* show a element by id */
 function showElement(id) {
-  var pane = document.getElementById(id);
+  var pane;
+  if(typeof(id) == 'object') {
+    pane = id;
+  }
+  else {
+    pane = document.getElementById(id);
+  }
   pane.style.display    = '';
   pane.style.visibility = 'visible';
 }
@@ -69,7 +81,7 @@ function close_message() {
 }
 
 /* toggle the visibility of the preferences pane */
-function togglePreferencePane(theme, state) {
+function togglePreferencePane(state) {
     toggleElement('pref_pane');
     toggleElement('pref_pane_button');
 }
@@ -568,7 +580,7 @@ on status / host details page
 *******************************************************************************/
 
 /* toggle the visibility of the filter pane */
-function toggleFilterPane(theme) {
+function toggleFilterPane() {
   var pane = document.getElementById('filter_pane');
   var img  = document.getElementById('filter_button');
   if(pane.style.display == 'none') {
@@ -586,11 +598,13 @@ function toggleFilterPane(theme) {
 }
 
 /* toggle filter pane */
-function toggleFilterPaneSelector(id) {
+function toggleFilterPaneSelector(search_prefix, id) {
   var panel;
   var checkbox_name;
   var input_name;
   var checkbox_prefix;
+
+  var search_prefix = search_prefix.substring(0, 3);
 
   if(id == "hoststatustypes") {
     panel           = 'hoststatustypes_pane';
@@ -618,22 +632,23 @@ function toggleFilterPaneSelector(id) {
   }
 
   if(!panel) {
-    alert("unknown id in toggleFilterPaneSelector(): " + id);
+    alert("unknown id in toggleFilterPaneSelector(): " + search_prefix + id);
     return;
   }
-  if(!toggleElement(panel)) {
-    accept_filter_types(checkbox_name, input_name, checkbox_prefix);
+  if(!toggleElement(search_prefix+panel)) {
+    accept_filter_types(search_prefix, checkbox_name, input_name, checkbox_prefix);
   } {
-    set_filter_types(input_name, checkbox_prefix);
+    set_filter_types(search_prefix, input_name, checkbox_prefix);
   }
 }
 
 /* calculate the sum for a filter */
-function accept_filter_types(checkbox_names, result_name, checkbox_prefix) {
-    var inp  = document.getElementsByName(result_name);
+function accept_filter_types(search_prefix, checkbox_names, result_name, checkbox_prefix) {
+    var inp  = document.getElementsByName(search_prefix + result_name);
+    if(!inp || inp.length == 0) { alert("no element in accept_filter_types() for: " + search_prefix + result_name); return; }
     var orig = inp[0].value;
     var sum = 0;
-    var elems = Array.from(document.getElementsByName(checkbox_names));
+    var elems = Array.from(document.getElementsByName(search_prefix + checkbox_names));
     elems.each(function(elem) {
         if(elem.checked) {
             sum += parseInt(elem.value);
@@ -641,7 +656,7 @@ function accept_filter_types(checkbox_names, result_name, checkbox_prefix) {
     });
     inp[0].value = sum;
 
-    set_filter_name(checkbox_names, checkbox_prefix, parseInt(sum));
+    set_filter_name(search_prefix, checkbox_names, checkbox_prefix, parseInt(sum));
 
     /* submit the form if something changed */
     if(sum != orig) {
@@ -651,16 +666,17 @@ function accept_filter_types(checkbox_names, result_name, checkbox_prefix) {
 }
 
 /* set the initial state of filter checkboxes */
-function set_filter_types(initial_id, checkbox_prefix) {
-    var inp = document.getElementsByName(initial_id);
+function set_filter_types(search_prefix, initial_id, checkbox_prefix) {
+    var inp = document.getElementsByName(search_prefix + initial_id);
+    if(!inp || inp.length == 0) { alert("no element in set_filter_types() for: " + search_prefix + initial_id); return; }
     var initial_value = parseInt(inp[0].value);
     var bin  = initial_value.toString(2);
     var bits = new Array(); bits = bin.split('').reverse();
     for (var index = 0, len = bits.length; index < len; ++index) {
         var bit = bits[index];
         var nr  = Math.pow(2, index);
-        var checkbox = document.getElementById(checkbox_prefix + nr);
-        if(!checkbox) { alert("got no checkbox for id in set_filter_types(): " + checkbox_prefix + nr); return; }
+        var checkbox = document.getElementById(search_prefix + checkbox_prefix + nr);
+        if(!checkbox) { alert("got no checkbox for id in set_filter_types(): " + search_prefix + checkbox_prefix + nr); return; }
         if(bit == '1') {
             checkbox.checked = true;
         } else {
@@ -670,7 +686,7 @@ function set_filter_types(initial_id, checkbox_prefix) {
 }
 
 /* set the filtername */
-function set_filter_name(checkbox_names, checkbox_prefix, filtervalue) {
+function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filtervalue) {
   var order;
   if(checkbox_prefix == 'ht') {
     order = hoststatustypes;
@@ -690,12 +706,11 @@ function set_filter_name(checkbox_names, checkbox_prefix, filtervalue) {
 
   var checked_ones = new Array();
   order.each(function(bit) {
-    checkbox = document.getElementById(checkbox_prefix + bit);
-    if(!checkbox) {
-      alert('got no checkbox in set_filter_name(): ' + checkbox_prefix + bit);
-    }
+    checkbox = document.getElementById(search_prefix + checkbox_prefix + bit);
+    if(!checkbox) { alert('got no checkbox in set_filter_name(): ' + search_prefix + checkbox_prefix + bit); }
     if(checkbox.checked) {
-      nameElem = document.getElementById(checkbox_prefix + bit + 'n');
+      nameElem = document.getElementById(search_prefix + checkbox_prefix + bit + 'n');
+      if(!nameElem) { alert('got no element in set_filter_name(): ' + search_prefix + checkbox_prefix + bit + 'n'); }
       checked_ones.push(nameElem.innerHTML);
     }
   });
@@ -735,6 +750,91 @@ function set_filter_name(checkbox_names, checkbox_prefix, filtervalue) {
     }
   }
 
-  target = document.getElementById(checkbox_prefix + 'n');
+  target = document.getElementById(search_prefix + checkbox_prefix + 'n');
   target.innerHTML = filtername;
+}
+
+/* add a new filter selector to this table */
+function add_new_filter(search_prefix, table) {
+  search_prefix = search_prefix.substring(0,3);
+  var table = document.getElementById(search_prefix+table);
+  if(!table) { alert("got no table for id in add_new_filter(): " + search_prefix+table); return; }
+
+  // add new row
+  var tblBody        = table.tBodies[0];
+  var currentLastRow = tblBody.rows.length - 1;
+  var newRow         = tblBody.insertRow(currentLastRow);
+  var search_nr      = 0;
+
+  // add first cell
+  var typeselect        = document.createElement('select');
+  var options           = new Array('Search', 'Host', 'Hostgroup', 'Servicegroup');
+  typeselect.setAttribute('name', 's' + search_nr + '_type');
+  add_options(typeselect, options);
+
+  var opselect          = document.createElement('select');
+  var options           = new Array('~', '!~', '=');
+  opselect.setAttribute('name', 's' + search_nr + '_op');
+  add_options(opselect, options);
+
+  var newCell0 = newRow.insertCell(0);
+  newCell0.nowrap    = "true";
+  newCell0.className = "filterName";
+  newCell0.appendChild(typeselect);
+  newCell0.appendChild(opselect);
+
+  // add second cell
+  var newInput       = document.createElement('input');
+  newInput.type      = 'text';
+  newInput.value     = '';
+  newInput.setAttribute('name', 's' + search_nr + '_value');
+  var newCell1       = newRow.insertCell(1);
+  newCell1.className = "filterValueInput";
+  newCell1.appendChild(newInput);
+
+  // add thirds cell
+  var img            = document.createElement('input');
+  img.type           = 'image';
+  img.src            = "/thruk/themes/"+theme+"/images/delete.png";
+  img.className      = 'filter_button';
+  img.onclick        = delete_filter_row;
+  var newCell2       = newRow.insertCell(2);
+  newCell2.className = "filterValueNoHighlight";
+  newCell2.appendChild(img);
+}
+
+/* remove a row */
+function delete_filter_row(event) {
+  var row;
+  if(event.target) {
+    row = event.target.parentNode.parentNode;
+  } else {
+    row = event.parentNode.parentNode;
+  }
+  row.parentNode.deleteRow(row.rowIndex);
+  return false;
+}
+
+/* add options to a select */
+function add_options(select, options) {
+  options.each(function(text) {
+    var opt = document.createElement('option');
+    opt.text     = text;
+    opt.value    = text.toLowerCase();
+    select.options[select.options.length] = opt;
+  });
+}
+
+/* create a complete new filter pane */
+function new_filter(cloneObj, parentObj) {
+  var origObj  = document.getElementById(cloneObj);
+  var newObj   = origObj.cloneNode(true);
+
+  var tblObj   = document.getElementById(parentObj);
+  var tblBody  = tblObj.tBodies[0];
+  var nextCell = tblBody.rows[0].cells.length;
+  var newCell  = tblBody.rows[0].insertCell(newCell);
+  newCell.setAttribute('valign', 'top');
+  newCell.appendChild(newObj);
+  hideElement(document.getElementById('new_filter'));
 }
