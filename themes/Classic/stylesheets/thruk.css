@@ -375,3 +375,14 @@ div.filter_pane {
   z-index:100;
   position:absolute;
 }
+
+/* prevent showlog from wrapping long log lines */
+div.logEntries {
+  white-space: nowrap;
+}
+
+.filter_button_mini {
+  position:relative;
+  top: -6px;
+  left: -4px;
+}

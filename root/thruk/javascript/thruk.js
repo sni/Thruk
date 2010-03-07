@@ -581,7 +581,7 @@ on status / host details page
 
 /* toggle the visibility of the filter pane */
 function toggleFilterPane() {
-  var pane = document.getElementById('filter_pane');
+  var pane = document.getElementById('all_filter_table');
   var img  = document.getElementById('filter_button');
   if(pane.style.display == 'none') {
     pane.style.display    = '';
@@ -773,7 +773,8 @@ function add_new_filter(search_prefix, table) {
   add_options(typeselect, options);
 
   var opselect          = document.createElement('select');
-  var options           = new Array('~', '!~', '=');
+  //var options           = new Array('~', '!~', '=');
+  var options           = new Array('~', '=');
   opselect.setAttribute('name', 's' + search_nr + '_op');
   add_options(opselect, options);
 

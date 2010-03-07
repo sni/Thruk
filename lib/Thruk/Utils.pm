@@ -1076,6 +1076,31 @@ sub uri_with {
 
 ########################################
 
+=head2 combine_filter
+
+  combine_filter($filter_array_ref, $operator)
+
+combines the filter by given operator
+
+=cut
+sub combine_filter {
+    my $filter = shift;
+    my $op     = shift;
+
+    return "" if scalar @{$filter} == 0;
+
+    confess("unknown operator: ".$op) if ($op ne 'And' and $op ne 'Or');
+
+    if(scalar @{$filter} > 1) {
+        return join("\n", @{$filter})."\n$op: ".(scalar @{$filter})."\n";
+    }
+
+    return $filter->[0]."\n";
+}
+
+
+########################################
+
 =head2 set_can_submit_commands
 
   set_can_submit_commands($c)

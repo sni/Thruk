@@ -107,6 +107,11 @@ sub _process_details_page {
     # which host to display?
     my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
 
+#use Data::Dumper;
+#$c->log->error("hostfilter: ".Dumper($hostfilter));
+#$c->log->error("servicefilter: ".Dumper($servicefilter));
+#$c->log->error("groupfilter: ".Dumper($groupfilter));
+
     # get all services
     my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output", { Slice => {}, AddPeer => 1 });
 
@@ -610,23 +615,26 @@ Stats: has_been_checked = 0 as pending
 sub _extend_filter {
     my ( $self, $c, $hostfilter, $servicefilter, $hoststatustypes, $hostprops, $servicestatustypes, $serviceprops ) = @_;
 
-    $hostfilter    = '' unless defined $hostfilter;
-    $servicefilter = '' unless defined $servicefilter;
+    my @hostfilter;
+    my @servicefilter;
+
+    push @hostfilter,    $hostfilter    if defined $hostfilter and $hostfilter ne '';
+    push @servicefilter, $servicefilter if defined $servicefilter and $servicefilter ne '';
 
     # host statustype filter (up,down,...)
     my($host_statustype_filtername,$host_statustype_filter,$host_statustype_filter_service);
     ($hoststatustypes,$host_statustype_filtername,$host_statustype_filter,$host_statustype_filter_service)
             = $self->_get_host_statustype_filter($hoststatustypes);
-    $hostfilter    .= $host_statustype_filter;
-    $servicefilter .= $host_statustype_filter_service;
+    push @hostfilter,    $host_statustype_filter         if defined $host_statustype_filter and $host_statustype_filter ne '';
+    push @servicefilter, $host_statustype_filter_service if defined $host_statustype_filter_service and $host_statustype_filter_service ne '';
 
     $c->stash->{'show_filter_table'}          = 1 if $host_statustype_filter ne '';
 
     # host props filter (downtime, acknowledged...)
     my($host_prop_filtername,$host_prop_filter,$host_prop_filter_service);
     ($hostprops,$host_prop_filtername,$host_prop_filter,$host_prop_filter_service) = $self->_get_host_prop_filter($hostprops);
-    $hostfilter    .= $host_prop_filter;
-    $servicefilter .= $host_prop_filter_service;
+    push @hostfilter,    $host_prop_filter         if defined $host_prop_filter and $host_prop_filter ne '';
+    push @servicefilter, $host_prop_filter_service if defined $host_prop_filter_service and $host_prop_filter_service ne '';
 
     $c->stash->{'show_filter_table'}    = 1 if $host_prop_filter ne '';
 
@@ -635,16 +643,19 @@ sub _extend_filter {
     my($service_statustype_filtername,$service_statustype_filter_service);
     ($servicestatustypes,$service_statustype_filtername,$service_statustype_filter_service)
             = $self->_get_service_statustype_filter($servicestatustypes);
-    $servicefilter .= $service_statustype_filter_service;
+    push @servicefilter, $service_statustype_filter_service if defined $service_statustype_filter_service and $service_statustype_filter_service ne '';
 
     $c->stash->{'show_filter_table'}             = 1 if $service_statustype_filter_service ne '';
 
     # service props filter (downtime, acknowledged...)
     my($service_prop_filtername,$service_prop_filter_service);
     ($serviceprops,$service_prop_filtername,$service_prop_filter_service) = $self->_get_service_prop_filter($serviceprops);
-    $servicefilter .= $service_prop_filter_service;
+    push @servicefilter, $service_prop_filter_service if defined $service_prop_filter_service and $service_prop_filter_service ne '';
 
     $c->stash->{'show_filter_table'}       = 1 if $service_prop_filter_service ne '';
+
+    $hostfilter    = Thruk::Utils::combine_filter(\@hostfilter,    'And');
+    $servicefilter = Thruk::Utils::combine_filter(\@servicefilter, 'And');
 
     return($hostfilter,
            $servicefilter,
@@ -1172,31 +1183,15 @@ sub _do_search {
         push @groupfilter,   $tmp_groupfilter   if $tmp_groupfilter   ne '';
     }
 
-use Data::Dumper;
-$c->log->error("hostfilter: ".Dumper(\@hostfilter));
-$c->log->error("servicefilter: ".Dumper(\@servicefilter));
-$c->log->error("groupfilter: ".Dumper(\@groupfilter));
+#use Data::Dumper;
+#$c->log->error("hostfilter: ".Dumper(\@hostfilter));
+#$c->log->error("servicefilter: ".Dumper(\@servicefilter));
+#$c->log->error("groupfilter: ".Dumper(\@groupfilter));
 
     # combine the array of filters by OR
-    my($hostfilter,$servicefilter,$groupfilter) = ('','','');
-    if(scalar @hostfilter > 1) {
-        $hostfilter    = join("\n", @hostfilter)."\nOr: ".(scalar @hostfilter)."\n";
-    }
-    elsif(scalar @hostfilter == 1) {
-        $hostfilter    = $hostfilter[0]."\n";
-    }
-    if(scalar @servicefilter > 1) {
-        $servicefilter = join("\n", @servicefilter)."\nOr: ".(scalar @servicefilter)."\n";
-    }
-    elsif(scalar @servicefilter == 1) {
-        $servicefilter = $servicefilter[0]."\n";
-    }
-    if(scalar @groupfilter > 1) {
-        $groupfilter   = join("\n", @groupfilter)."\nOr: ".(scalar @groupfilter)."\n";
-    }
-    elsif(scalar @groupfilter == 1) {
-        $groupfilter   = $groupfilter[0]."\n";
-    }
+    my $hostfilter    = Thruk::Utils::combine_filter(\@hostfilter,    'Or');
+    my $servicefilter = Thruk::Utils::combine_filter(\@servicefilter, 'Or');
+    my $groupfilter   = Thruk::Utils::combine_filter(\@groupfilter,   'Or');
 
     # fill the host/service totals box
     $self->_fill_totals_box($c, $hostfilter, $servicefilter);
@@ -1227,9 +1222,10 @@ $c->log->error("groupfilter: ".Dumper(\@groupfilter));
 sub _single_search {
     my ( $self, $c, $search ) = @_;
 
-    my $groupfilter = "";
-    my($hostfilter,
-       $servicefilter,
+    my(@hostfilter,@servicefilter,@groupfilter);
+
+    my($tmp_hostfilter,
+       $tmp_servicefilter,
        $host_statustype_filtername,
        $host_prop_filtername,
        $service_statustype_filtername,
@@ -1239,8 +1235,8 @@ sub _single_search {
        $service_statustype_filtervalue,
        $service_prop_filtervalue
       ) = $self->_extend_filter($c,
-                                '',
-                                '',
+                                undef,
+                                undef,
                                 $search->{'hoststatustypes'},
                                 $search->{'hostprops'},
                                 $search->{'servicestatustypes'},
@@ -1256,8 +1252,71 @@ sub _single_search {
     $search->{'servicestatustypes'}            = $service_statustype_filtervalue;
     $search->{'serviceprops'}                  = $service_prop_filtervalue;
 
-use Data::Dumper;
-$c->log->error("searching: ".Dumper($search));
+    push @hostfilter,    $tmp_hostfilter    if $tmp_hostfilter    ne '';
+    push @servicefilter, $tmp_servicefilter if $tmp_servicefilter ne '';
+
+    # do the text filter
+    foreach my $filter (@{$search->{'text_filter'}}) {
+        my $value = $filter->{'value'};
+        my $op    = '=';
+        if($filter->{'op'} eq '~') { $op = '~~'; }
+
+        next if $op eq '=' and $value eq 'all';
+
+        if($filter->{'type'} eq 'search') {
+            my $host_search_filter = [
+                "Filter: name $op $value",
+                "Filter: alias $op $value",
+                "Filter: groups >= $value",
+                "Filter: plugin_output $op $value",
+                "Filter: long_plugin_output $op $value"
+            ];
+            push @hostfilter, Thruk::Utils::combine_filter($host_search_filter, 'Or');
+
+            # and some for services
+            my $service_search_filter = [
+                "Filter: description $op $value",
+                "Filter: groups >= $value",
+                "Filter: plugin_output $op $value",
+                "Filter: long_plugin_output $op $value",
+                "Filter: host_name $op $value",
+                "Filter: host_alias $op $value",
+                "Filter: host_groups >= $value",
+            ];
+            push @servicefilter, Thruk::Utils::combine_filter($service_search_filter, 'Or');
+        }
+        elsif($filter->{'type'} eq 'host') {
+            # check for wildcards
+            if(CORE::index($value, '*') >= 0 and $op eq '=') {
+                # convert wildcards into real regexp
+                my $searchhost = $value;
+                $searchhost =~ s/\.\*/*/gmx;
+                $searchhost =~ s/\*/.*/gmx;
+                push @hostfilter,    "Filter: name ~~ $searchhost";
+                push @servicefilter, "Filter: host_name ~~ $searchhost";
+            } else {
+                push @hostfilter,    "Filter: name $op $value";
+                push @servicefilter, "Filter: host_name $op $value";
+            }
+        }
+        elsif($filter->{'type'} eq 'hostgroup') {
+            push @hostfilter,    "Filter: groups >= $value";
+            push @servicefilter, "Filter: host_groups >= $value";
+            push @groupfilter,   "Filter: name = $value";
+        }
+        elsif($filter->{'type'} eq 'servicegroup') {
+            push @servicefilter, "Filter: groups >= $value";
+            push @groupfilter,   "Filter: name = $value";
+        }
+    }
+
+    # combine the array of filters by AND
+    my $hostfilter    = Thruk::Utils::combine_filter(\@hostfilter,    'And');
+    my $servicefilter = Thruk::Utils::combine_filter(\@servicefilter, 'And');
+    my $groupfilter   = Thruk::Utils::combine_filter(\@groupfilter,   'And');
+
+#use Data::Dumper;
+#$c->log->error("searching: ".Dumper($search));
 
     return($hostfilter, $servicefilter, $groupfilter);
 }

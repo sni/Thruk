@@ -1,17 +1,19 @@
-[% SET show_filter_table = 1 %]
+[% SET show_filter_table = 0 IF c.request.parameters.hidesearch == 1 %]
 [% UNLESS show_filter_table %]
 <input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
 [% END %]
 <form action="[% c.uri %]" method="GET" id="filterForm">
-<input type="hidden" name="style" value="[% style %]">
-<table id="all_filter_table" border=0 cellspacing=0 cellpadding=0><tr><td valign="top" class="filter_table">
+[% IF style %]<input type="hidden" name="style" value="[% style %]">[% END %]
+[% IF hidesearch %]<input type="hidden" name="hidesearch" value="[% hidesearch %]">[% END %]
+<table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr><td valign="top" class="filter_table">
 [% FOR search = searches %]
-<table border="1" class='filter' style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" cellspacing="0" cellpadding="0" id="s0_filter_pane">
+<table border="1" class='filter' cellspacing="0" cellpadding="0" id="s0_filter_pane">
   <tr>
     <td class='filter'>
       <table border="0" cellspacing="2" cellpadding="0" id="s0_filterTable">
         <tr>
           <td valign="top" align="left" class='filterTitle'>
+            <input type="image" src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="filter_button_mini" alt="filter" onClick="toggleFilterPane(); return false;">
             Display Filters:
             <input type="hidden" name="s0_hoststatustypes" value="[% search.hoststatustypes %]">
             <input type="hidden" name="s0_servicestatustypes" value="[% search.servicestatustypes %]">
@@ -267,18 +269,18 @@
         [% FOR s = search.text_filter %]
         <tr>
           <td class='filterName' nowrap>
-            <select name="s[% loop.index %]_type">
+            <select name="s0_type">
               <option value="search">Search</option>
               <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
               <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
               <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
-            </select><select name="s[% loop.index %]_op">
+            </select><select name="s0_op">
               <option value="~"[% IF s.op == '~' %] selected[% END %]>~</option>
-              <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
+              <!--<option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>-->
               <option value="="[% IF s.op == '=' %] selected[% END %]>=</option>
             </select>
           </td>
-          <td align="left" class='filterValueInput'><input type="text" name="s[% loop.index %]_value" value="[% s.value %]"></td>
+          <td align="left" class='filterValueInput'><input type="text" name="s0_value" value="[% s.value %]"></td>
           <td align="right" class='filterValueNoHighlight'><input type="image" src="/thruk/themes/[% theme %]/images/delete.png" name="delete Filter" onclick="delete_filter_row(this)"></td>
         </tr>
         [% END %]
