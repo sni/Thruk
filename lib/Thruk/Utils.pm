@@ -191,6 +191,9 @@ replace newlines with linebreaks
 =cut
 sub filter_nl2br {
     my $string = shift;
+    $string =~ s/\n/<br\ \/>/gmx;
+    $string =~ s/\r//gmx;
+    $string =~ s/\c//gmx;
     $string =~ s/\\n/<br\ \/>/gmx;
     return $string;
 }
