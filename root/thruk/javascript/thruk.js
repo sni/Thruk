@@ -55,7 +55,7 @@ function showElement(id) {
   else {
     pane = document.getElementById(id);
   }
-  if(!pane) { alert("ERROR: got no element for id in hideElement(): " + id); return; }
+  if(!pane) { alert("ERROR: got no element for id in showElement(): " + id); return; }
   pane.style.display    = '';
   pane.style.visibility = 'visible';
 }
@@ -833,7 +833,7 @@ function add_new_filter(search_prefix, table) {
   // add thirds cell
   var img            = document.createElement('input');
   img.type           = 'image';
-  img.src            = "/thruk/themes/"+theme+"/images/delete.png";
+  img.src            = "/thruk/themes/"+theme+"/images/icon_remove.png";
   img.className      = 'filter_button';
   img.onclick        = delete_filter_row;
   var newCell2       = newRow.insertCell(2);
@@ -891,9 +891,12 @@ function new_filter(cloneObj, parentObj, btnId) {
   // hide the original button
   hideElement(btnId);
   hideBtn = document.getElementById(new_prefix + 'filter_button_mini');
-  if(hideBtn) {
-      hideElement(hideBtn);
-  }
+  if(hideBtn) { hideElement(hideBtn); }
+  hideElement(new_prefix + 'btn_accept_search');
+  showElement(new_prefix + 'btn_del_search');
+
+  hideBtn = document.getElementById(new_prefix + 'filter_title');
+  if(hideBtn) { hideElement(hideBtn); }
 }
 
 /* replace ids and names for elements */
@@ -918,9 +921,29 @@ function replaceIdAndNames(elems, new_prefix) {
 function deleteSearchPane(id) {
   var search_prefix = id.substring(0, 3);
 
-  pane = document.getElementById(search_prefix + 'filter_pane');
-  while(child = pane.firstChild) {
-      pane.removeChild(child);
+  var pane = document.getElementById(search_prefix + 'filter_pane');
+  var cell = pane.parentNode;
+  while(child = cell.firstChild) {
+      cell.removeChild(child);
   }
+
+  // show last "new search" button
+  var last_nr = 0;
+  for(var x = 0; x<= 99; x++) {
+      tst = document.getElementById('s'+x+'_' + 'new_filter');
+      if(tst && 's'+x+'_' != search_prefix) { last_nr = x; }
+  }
+  showElement('s'+last_nr+'_' + 'new_filter');
+
   return false;
+}
+
+function toggleFilterCheckBox(id) {
+  var id  = id.substring(0, id.length -1);
+  var box = document.getElementById(id);
+  if(box.checked) {
+    box.checked = false;
+  } else {
+    box.checked = true;
+  }
 }

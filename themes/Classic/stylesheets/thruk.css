@@ -387,3 +387,11 @@ div.logEntries {
   top: -6px;
   left: -5px;
 }
+
+td.clickable {
+  vertical-align: middle;
+}
+td.clickable:hover {
+  cursor: pointer;
+  vertical-align: middle;
+}
