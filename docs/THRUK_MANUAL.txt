@@ -18,6 +18,8 @@ Main Features / Advantages
   * live, no delay between core and gui
   * independant from monitoring core, can be installed on remote host
   * clusterable, can be clustered over hosts
+  * change status.cgi filter inline
+  * extended logfile search
   * better logging, uses log4perl
   * valid HTML code
   * no frames ( can be reenabled for better addon integration)
@@ -352,6 +354,16 @@ if you don't want a documentation link in the menu at all.
 ex.:
 
   documentation_link = /thruk/docs/
+
+
+==== all_problems_link
+
+Customizable link for the "problems" link in side menu. Can be useful
+to reflect your companys process of error handling.
+
+ex.:
+
+  all_problems_link = /thruk/cgi-bin/status.cgi?...
 
 
 ==== allowed_frame_links

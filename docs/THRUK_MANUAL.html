@@ -516,6 +516,16 @@ clusterable, can be clustered over hosts
 </li>
 <li>
 <p>
+change status.cgi filter inline
+</p>
+</li>
+<li>
+<p>
+extended logfile search
+</p>
+</li>
+<li>
+<p>
 better logging, uses log4perl
 </p>
 </li>
@@ -976,6 +986,26 @@ if you don't want a documentation link in the menu at all.</p></div>
 <div class="content">
 <pre><tt>documentation_link = /thruk/docs/</tt></pre>
 </div></div>
+<h4 id="_all_problems_link">all_problems_link</h4>
+<div class="para"><p>Customizable link for the "problems" link in side menu. Can be useful
+to reflect your companys process of error handling.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>all_problems_link = /thruk/cgi-bin/status.cgi?...</tt></pre>
+</div></div>
+<h4 id="_allowed_frame_links">allowed_frame_links</h4>
+<div class="para"><p>List of allowed patterns, where links inside frames can be set to.
+You can link to /thruk/frame.html?link=http://wiki.my-company.com/page/blah
+Your wiki will then be displayed with the Thruk navigation frame.
+Useful for other addons, so they don't have to display a own
+navigation.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>allowed_frame_links = http://intranet.my-company.com
+allowed_frame_links = https://wiki.my-company.com</tt></pre>
+</div></div>
 <h4 id="_cgi_cfg">cgi_cfg</h4>
 <div class="para"><p>The path to your cgi.cfg. See <a href="#cgi.cfg">[cgi.cfg]</a> for details.</p></div>
 <div class="para"><p>ex.:</p></div>
@@ -985,11 +1015,21 @@ if you don't want a documentation link in the menu at all.</p></div>
 </div></div>
 <h4 id="_use_frames">use_frames</h4>
 <div class="para"><p>Set whether you want to use a framed navigation or not. With using frames it's
-sometimes easier to include addons.</p></div>
+sometimes easier to include addons.
+See allowed_frame_links option for how to integrate addons.</p></div>
 <div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_frames = 0</tt></pre>
+</div></div>
+<h4 id="_use_new_search">use_new_search</h4>
+<div class="para"><p>Use the old or the classic search from the navigation. The new search
+supports regular expressions and searches in many attributes. For
+example: plugin_output, groups, names, descriptions</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_new_search = 1</tt></pre>
 </div></div>
 <h4 id="_default_theme">default_theme</h4>
 <div class="para"><p>Default theme to use for all users. Must be a valid subdirectory in
@@ -1279,7 +1319,7 @@ commands.</p></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-02-23 13:43:34 CEST
+Last updated 2010-03-08 15:28:53 CEST
 </div>
 </div>
 </body>

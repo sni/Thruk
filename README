@@ -21,6 +21,8 @@ Main Features / Advantages
   * live, no delay between core and gui
   * independant from monitoring core, can be installed on remote host
   * clusterable, can be clustered over hosts
+  * change status.cgi filter inline
+  * extended logfile search
   * better logging, uses log4perl
   * valid HTML code
   * no frames ( can be reenabled for better addon integration)
@@ -28,3 +30,4 @@ Main Features / Advantages
   * 100% perl (using catalyst)
   * paging ( can be disabled or customized )
   * support for themes (on a per user basis )
+
