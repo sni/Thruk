@@ -316,18 +316,18 @@ function styleElements(elems, style, force) {
 }
 
 /* this is the mouseover function for services */
-function highlightServiceRow(event)
+function highlightServiceRow()
 {
     // find id of current row
-    var row_id = getFirstParentId(event.target.parentNode);
+    var row_id = getFirstParentId(this);
     setRowStyle(row_id, 'tableRowHover', 'service');
 }
 
 /* this is the mouseover function for hosts */
-function highlightHostRow(event)
+function highlightHostRow()
 {
     // find id of current row
-    var row_id = getFirstParentId(event.target.parentNode);
+    var row_id = getFirstParentId(this);
     setRowStyle(row_id, 'tableRowHover', 'host');
 }
 
@@ -335,11 +335,8 @@ function highlightHostRow(event)
 function selectService(event, state)
 {
     var row_id;
-    if(!event) {
-        return;
-    }
     // find id of current row
-    if(event.target) {
+    if(event && event.target) {
         row_id = getFirstParentId(event.target);
 
         // dont select row when clicked on a link
@@ -348,7 +345,7 @@ function selectService(event, state)
             return;
         }
     } else {
-        row_id = getFirstParentId(event);
+        row_id = getFirstParentId(this);
     }
     if(!row_id) {
         return;
@@ -377,11 +374,8 @@ function selectService(event, state)
 function selectHost(event, state)
 {
     var row_id;
-    if(!event) {
-        return;
-    }
     // find id of current row
-    if(event.target) {
+    if(event && event.target) {
         row_id = getFirstParentId(event.target);
 
         // dont select row when clicked on a link
@@ -390,7 +384,7 @@ function selectHost(event, state)
             return;
         }
     } else {
-        row_id = getFirstParentId(event);
+        row_id = getFirstParentId(this);
     }
     if(!row_id) {
         return;
@@ -420,7 +414,7 @@ function resetServiceRow(event)
 {
     var row_id;
     if(!event) {
-        return;
+        event = this;
     }
     // find id of current row
     if(event.target) {
@@ -438,9 +432,10 @@ function resetServiceRow(event)
 function resetHostRow(event)
 {
     // find id of current row
-    var row_id = getFirstParentId(event.target.parentNode);
+    var row_id = getFirstParentId(this);
     setRowStyle(row_id, 'original', 'host');
 }
+
 /* select or deselect all services */
 function selectAllServices(state) {
     if(state) {
@@ -856,10 +851,12 @@ function add_new_filter(search_prefix, table) {
 /* remove a row */
 function delete_filter_row(event) {
   var row;
-  if(event.target) {
+  if(event && event.target) {
     row = event.target.parentNode.parentNode;
-  } else {
+  } else if(event) {
     row = event.parentNode.parentNode;
+  } else {
+    row = this.parentNode.parentNode;
   }
   row.parentNode.deleteRow(row.rowIndex);
   return false;
@@ -962,12 +959,14 @@ function toggleFilterCheckBox(id) {
 }
 
 /* verify operator for search type selects */
-function verify_op(e) {
+function verify_op(event) {
   var selElem;
-  if(e.target) {
-    selElem = e.target;
+  if(event && event.target) {
+    selElem = event.target;
+  } else if(event) {
+    selElem = document.getElementById(event);
   } else {
-    selElem = document.getElementById(e);
+    selElem = document.getElementById(this.id);
   }
 
   // get operator select
