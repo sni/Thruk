@@ -277,15 +277,16 @@
         [% FOR s = search.text_filter %]
         <tr>
           <td class='filterName' nowrap>
-            <select name="[% prefix %]_type">
+            <select name="[% prefix %]_type" id="[% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
               <option value="search">Search</option>
               <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
               <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
               <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
-            </select><select name="[% prefix %]_op">
-              <option value="~"[% IF s.op == '~' %] selected[% END %]>~</option>
-              <!--<option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>-->
+            </select><select name="[% prefix %]_op" id="[% prefix %]_[% loop.index %]_to">
+              <option value="~"[% IF s.op == '~' %] selected[% END %][% IF s.type == 'hostgroup' or s.type == 'servicegroup' %] disabled[% END %]>~</option>
+              <!--<option value="!~"[% IF s.op == '!~' %] selected[% END %][% IF s.type == 'hostgroup' or s.type == 'servicegroup' %] disabled[% END %]>!~</option>-->
               <option value="="[% IF s.op == '=' %] selected[% END %]>=</option>
+              <option value="!="[% IF s.op == '!=' %] selected[% END %]>!=</option>
             </select>
           </td>
           <td align="left" class='filterValueInput'><input type="text" name="[% prefix %]_value" value="[% s.value %]"></td>

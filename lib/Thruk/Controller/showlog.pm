@@ -80,8 +80,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
         $filter .= "Filter: message ~~ $pattern\n";
     }
+# TODO: does not work yet
+#    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+#        $filter .= "Filter: message !~~ $exclude_pattern\nAnd: 2\n";
+#    }
 
     my $query = "GET log\nColumns: time type message state\n".$filter;
+
     $query   .= Thruk::Utils::get_auth_filter($c, 'log');
 
     $c->stats->profile(begin => "showlog::fetch");
@@ -97,6 +102,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         $logs = $newlogs;
     }
+
 
     my $order = "DESC";
     if($oldestfirst) {

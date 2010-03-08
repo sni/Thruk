@@ -1274,12 +1274,16 @@ sub _single_search {
     # do the text filter
     foreach my $filter (@{$search->{'text_filter'}}) {
         my $value = $filter->{'value'};
-        my $op    = '=';
-        if($filter->{'op'} eq '~') { $op = '~~'; }
+        my $op     = '=';
+        my $listop = '>=';
+        if($filter->{'op'} eq '!~') { $op = '!~~'; }
+        if($filter->{'op'} eq '~')  { $op = '~~';  }
+        if($filter->{'op'} eq '!=') { $op = '!=';  $listop = '!>='; }
 
         if($op eq '=' and $value eq 'all') {
+            # add a useless filter
             if($filter->{'type'} eq 'host') {
-                push @hostfilter, "Filter: name !=";
+                push @hostfilter, "Filter: name !=\n";
             }
             elsif($filter->{'type'} eq 'hostgroup') {
                 push @hostgroupfilter, "Filter: name !=";
@@ -1295,7 +1299,7 @@ sub _single_search {
             my $host_search_filter = [
                 "Filter: name $op $value",
                 "Filter: alias $op $value",
-                "Filter: groups >= $value",
+                "Filter: groups $listop $value",
                 "Filter: plugin_output $op $value",
                 "Filter: long_plugin_output $op $value"
             ];
@@ -1304,12 +1308,12 @@ sub _single_search {
             # and some for services
             my $service_search_filter = [
                 "Filter: description $op $value",
-                "Filter: groups >= $value",
+                "Filter: groups $listop $value",
                 "Filter: plugin_output $op $value",
                 "Filter: long_plugin_output $op $value",
                 "Filter: host_name $op $value",
                 "Filter: host_alias $op $value",
-                "Filter: host_groups >= $value",
+                "Filter: host_groups $listop $value",
             ];
             push @servicefilter, Thruk::Utils::combine_filter($service_search_filter, 'Or');
         }
@@ -1320,21 +1324,21 @@ sub _single_search {
                 my $searchhost = $value;
                 $searchhost =~ s/\.\*/*/gmx;
                 $searchhost =~ s/\*/.*/gmx;
-                push @hostfilter,    "Filter: name ~~ $searchhost";
-                push @servicefilter, "Filter: host_name ~~ $searchhost";
+                push @hostfilter,    "Filter: name ~~ $searchhost\nFilter: alias ~~ $searchhost\nOr: 2";
+                push @servicefilter, "Filter: host_name ~~ $searchhost\nFilter: host_alias ~~ $searchhost\nOr: 2";
             } else {
-                push @hostfilter,    "Filter: name $op $value";
-                push @servicefilter, "Filter: host_name $op $value";
+                push @hostfilter,    "Filter: name $op $value\nFilter: alias $op $value\nOr: 2";
+                push @servicefilter, "Filter: host_name $op $value\nFilter: host_alias $op $value\nOr: 2";
             }
         }
         elsif($filter->{'type'} eq 'hostgroup') {
-            push @hostfilter,      "Filter: groups >= $value";
-            push @servicefilter,   "Filter: host_groups >= $value";
-            push @hostgroupfilter, "Filter: name = $value";
+            push @hostfilter,      "Filter: groups $listop $value";
+            push @servicefilter,   "Filter: host_groups $listop $value";
+            push @hostgroupfilter, "Filter: name $op $value";
         }
         elsif($filter->{'type'} eq 'servicegroup') {
-            push @servicefilter,      "Filter: groups >= $value";
-            push @servicegroupfilter, "Filter: name = $value";
+            push @servicefilter,      "Filter: groups $listop $value";
+            push @servicegroupfilter, "Filter: name $op $value";
         }
     }
 

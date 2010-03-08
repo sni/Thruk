@@ -141,7 +141,9 @@ function reloadPage() {
   }
 
   additionalParams.each(function(pair) {
-    urlArgs.set(pair.key, pair.value);
+    if(pair.key == 'hidesearch') { // check for valid options to set here
+      urlArgs.set(pair.key, pair.value);
+    }
   });
   var newParams = Object.toQueryString(urlArgs);
 
@@ -803,16 +805,26 @@ function add_new_filter(search_prefix, table) {
   var currentLastRow = tblBody.rows.length - 1;
   var newRow         = tblBody.insertRow(currentLastRow);
 
+  // get first free number of typeselects
+  var nr = 0;
+  for(var x = 0; x<= 99; x++) {
+    tst = document.getElementById(search_prefix + 'typeselect_' + x);
+    if(tst) { nr = x+1; }
+  }
+
   // add first cell
   var typeselect        = document.createElement('select');
   var options           = new Array('Search', 'Host', 'Hostgroup', 'Servicegroup');
+  typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', search_prefix + 'type');
+  typeselect.setAttribute('id', search_prefix + '_' + nr + '_ts');
   add_options(typeselect, options);
 
   var opselect          = document.createElement('select');
-  //var options           = new Array('~', '!~', '=');
-  var options           = new Array('~', '=');
+  //var options           = new Array('~', '!~', '=', '!=');
+  var options           = new Array('~', '=', '!=');
   opselect.setAttribute('name', search_prefix + 'op');
+  opselect.setAttribute('id', search_prefix + '_' + nr + '_to');
   add_options(opselect, options);
 
   var newCell0 = newRow.insertCell(0);
@@ -938,6 +950,7 @@ function deleteSearchPane(id) {
   return false;
 }
 
+/* toogle checkbox for attribute filter */
 function toggleFilterCheckBox(id) {
   var id  = id.substring(0, id.length -1);
   var box = document.getElementById(id);
@@ -945,5 +958,46 @@ function toggleFilterCheckBox(id) {
     box.checked = false;
   } else {
     box.checked = true;
+  }
+}
+
+/* verify operator for search type selects */
+function verify_op(e) {
+  var selElem;
+  if(e.target) {
+    selElem = e.target;
+  } else {
+    selElem = document.getElementById(e);
+  }
+
+  // get operator select
+  var opElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 1) + 'o');
+
+  var selValue = selElem.options[selElem.selectedIndex].value;
+
+  for(var x = 0; x< opElem.options.length; x++) {
+    var curOp = opElem.options[x].value;
+    if(curOp == '~' || curOp == '!~') {
+      if(selValue == 'hostgroup' || selValue == 'servicegroup') {
+        // is this currently selected?
+        if(x == opElem.selectedIndex) {
+          selectByValue(opElem, '=');
+        }
+        opElem.options[x].disabled = true;
+      } else {
+        opElem.options[x].disabled = false;
+      }
+    }
+  }
+}
+
+/* select option from a select by value*/
+function selectByValue(select, val) {
+  for(var x = 0; x< select.options.length; x++) {
+    if(select.options[x].value == val) {
+      select.selectedIndex = x;
+    } else {
+      select.options[x].selected = false;
+    }
   }
 }
