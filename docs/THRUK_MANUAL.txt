@@ -345,6 +345,18 @@ The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.
 
 
+==== use_strict_host_authorization
+
+When set to a true value, every contact will only see the hosts where
+he is contact for plus the services where he is contact for. When
+disabled, a host contact will see all services for this host
+regardless of wheter he is a service contact or not.
+
+ex.:
+
+  use_strict_host_authorization = 1
+
+
 ==== documentation_link
 
 This link is used in the side navigation menu as link to the documentation.

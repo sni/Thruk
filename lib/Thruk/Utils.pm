@@ -69,7 +69,11 @@ sub get_auth_filter {
         if($c->check_user_roles('authorized_for_all_services')) {
             return("");
         }
-        return("Filter: contacts >= ".$c->user->get('username')."\nFilter: host_contacts >= ".$c->user->get('username')."\nOr: 2");
+        if(Thruk->config->{'use_strict_host_authorization'}) {
+            return("Filter: contacts >= ".$c->user->get('username')."\n");
+        } else {
+            return("Filter: contacts >= ".$c->user->get('username')."\nFilter: host_contacts >= ".$c->user->get('username')."\nOr: 2");
+        }
     }
 
     # servicegroups authorization
@@ -104,10 +108,16 @@ sub get_auth_filter {
     elsif($type eq 'log') {
         my @filter;
         if(!$c->check_user_roles('authorized_for_all_services')) {
-            push @filter, "Filter: current_service_contacts >= ".$c->user->get('username')."\n";
+            push @filter, "Filter: current_service_contacts >= ".$c->user->get('username')."\nFilter: current_service_description != \nAnd: 2";
         }
         if(!$c->check_user_roles('authorized_for_all_hosts')) {
-            push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\n";
+            if(Thruk->config->{'use_strict_host_authorization'}) {
+                # only allowed for the host itself, not the services
+                push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\nFilter: current_service_description = \nAnd: 2\n";
+            } else {
+                # allowed for all hosts and its services
+                push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\n";
+            }
         }
         if(scalar @filter == 0) {
             return("");

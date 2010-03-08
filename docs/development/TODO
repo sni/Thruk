@@ -12,9 +12,6 @@ general
     - default hidden setting for backends in thruk_local.conf
     - add go back button on error page
     - set default for command checkboxes
-    - strict authorization option:
-      contacts authorized for hosts, should not see all services for
-      this host: http://www.monitoring-portal.org/wbb/index.php?page=Thread&postID=117591#post117591
 
 extinfo:
     - finish performance data on extinfo type 4
