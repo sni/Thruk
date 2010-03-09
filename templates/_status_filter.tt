@@ -4,6 +4,7 @@
 <form action="[% c.uri %]" method="GET" id="filterForm" onsubmit="document.getElementById('hidesearch').value = '2'">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
 <table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr>
 [% FOR search = searches %]
 [% SET prefix = 's' _ loop.index %]

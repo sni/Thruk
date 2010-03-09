@@ -4,7 +4,7 @@
 %]
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
 [% PROCESS _status_cmd_pane.tt %]
-    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
       <tr>
         <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]

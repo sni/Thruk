@@ -72,6 +72,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $custom_title = $c->{'request'}->{'parameters'}->{'title'};
     $c->stash->{custom_title}   = $custom_title;
 
+    my $hidetop = $c->{'request'}->{'parameters'}->{'hidetop'};
+    $c->stash->{hidetop}   = $hidetop;
+
     return 1;
 }
 
@@ -82,7 +85,7 @@ sub _process_search_request {
 
     # search pattern is in host param
     my $host = $c->{'request'}->{'parameters'}->{'host'};
-    $c->{'request'}->{'parameters'}->{'hidesearch'} = 2;
+    $c->{'request'}->{'parameters'}->{'hidesearch'} = 2; # force show search
 
     return('detail') unless defined $host;
 

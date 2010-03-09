@@ -113,3 +113,6 @@
     </td>
   </tr>
 </table>
+[% IF page == 'status' %]
+<a href="#" onClick="toggleTopPane(); return false;"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
+[% END %]

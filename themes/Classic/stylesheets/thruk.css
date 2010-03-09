@@ -404,3 +404,10 @@ table.filter > tbody > tr > td {
   border-bottom: 0px !important;
   border-right: 0px !important;
 }
+
+
+.btn_toggle_top_pane {
+  position: absolute;
+  top: 20px;
+  right: 0px;
+}

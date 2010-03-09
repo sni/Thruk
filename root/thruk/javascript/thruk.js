@@ -67,7 +67,7 @@ function toggleElement(id) {
     alert("ERROR: got no panel for id in toggleElement(): " + id);
     return;
   }
-  if(pane.style.visibility == "" || pane.style.visibility == "hidden") {
+  if(pane.style.visibility == "hidden" || pane.style.visibility == "" || pane.style.display == 'none') {
     showElement(id);
     return true;
   }
@@ -141,7 +141,7 @@ function reloadPage() {
   }
 
   additionalParams.each(function(pair) {
-    if(pair.key == 'hidesearch') { // check for valid options to set here
+    if(pair.key == 'hidesearch' || pair.key == 'hidetop' ) { // check for valid options to set here
       urlArgs.set(pair.key, pair.value);
     }
   });
@@ -1035,5 +1035,17 @@ function selectByValue(select, val) {
     } else {
       select.options[x].selected = false;
     }
+  }
+}
+
+/* toggle visibility of top status informations */
+function toggleTopPane() {
+  var formInput = document. getElementById('hidetop');
+  if(toggleElement('top_pane')) {
+    additionalParams.set('hidetop', 0);
+    formInput.value = 0;
+  } else {
+    additionalParams.set('hidetop', 1);
+    formInput.value = 1;
   }
 }
