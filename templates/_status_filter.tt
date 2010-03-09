@@ -1,7 +1,7 @@
 [% SET show_filter_table = 0 IF c.request.parameters.hidesearch == "1" %]
 [% SET show_filter_table = 1 IF c.request.parameters.hidesearch == "2" %]
 <input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
-<form action="[% c.uri %]" method="GET" id="filterForm">
+<form action="[% c.uri %]" method="GET" id="filterForm" onsubmit="document.getElementById('hidesearch').value = '2'">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
 <table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr>
@@ -26,7 +26,7 @@
             <input type="hidden" name="[% prefix %]_serviceprops" value="[% search.serviceprops %]">
           </td>
           <td colspan=2 align="right">
-            <input type="image" src="/thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% prefix %]_btn_accept_search" onClick="document.getElementById('hidesearch').value = '2'">
+            <input type="image" src="/thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% prefix %]_btn_accept_search">
             <input type="image" src="/thruk/themes/[% theme %]/images/icon_close.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
           </td>
           <td rowspan=99 align="right" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('filter_pane', 'all_filter_table', this.id)" id="[% prefix %]_new_filter">&gt;</td>

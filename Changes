@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 0.40    Sun Mar  7 21:12:37 CET 2010
           - change status.cgi filter inline
           - combine several filter
+          - strict authorization option
 
 0.34    Wed Mar  3 09:40:49 CET 2010
           - send multiple commands from status detail
