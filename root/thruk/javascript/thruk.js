@@ -293,6 +293,43 @@ function styleElements(elems, style, force) {
     if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
         elems = new Array(elems);
     }
+
+    if(navigator.appName == "Microsoft Internet Explorer") {
+        return styleElementsIE(elems, style, force);
+    }
+    else {
+        return styleElementsFF(elems, style, force);
+    }
+}
+
+/* save current style and change it (IE only) */
+function styleElementsIE(elems, style, force) {
+    for(var x = 0; x < elems.length; x++) {
+        if(style == 'original') {
+            // reset style to original
+            if(elems[x].className != "tableRowSelected" || force) {
+                elems[x].className = elems[x].origclass;
+            }
+        }
+        else {
+            if(elems[x].className != "tableRowSelected" || force) {
+                // save style in custom attribute
+                if(elems[x].className != "undefined" && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
+                    //var oldClass = '';
+                    //if(elems[x].className) { oldClass = elems[x].className; }
+                    //elems[x].setAttribute('origclass', oldClass);
+                    elems[x].setAttribute('origclass', elems[x].className);
+                }
+
+                // set new style
+                elems[x].className = style;
+            }
+        }
+    }
+}
+
+/* save current style and change it (non IE version) */
+function styleElementsFF(elems, style, force) {
     for(var x = 0; x < elems.length; x++) {
         if(style == 'original') {
             // reset style to original
