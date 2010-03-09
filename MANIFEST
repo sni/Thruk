@@ -28,7 +28,6 @@ docs/development/tables/services.txt
 docs/development/tables/status.txt
 docs/development/tables/timeperiods.txt
 docs/development/TODO
-docs/images
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
 inc/Module/AutoInstall.pm
