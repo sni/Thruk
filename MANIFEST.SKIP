@@ -4,7 +4,7 @@ blib
 Makefile.old
 MANIFEST.bak
 MANIFEST.SKIP
-blib
+htpasswd.users
 pm_to_blib
 local-lib
 logs/debug.log

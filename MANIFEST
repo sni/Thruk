@@ -320,6 +320,7 @@ themes/Classic/images/hostevent.gif
 themes/Classic/images/icon_close.gif
 themes/Classic/images/icon_maximize.gif
 themes/Classic/images/icon_minimize.gif
+themes/Classic/images/icon_remove.png
 themes/Classic/images/info.png
 themes/Classic/images/left.gif
 themes/Classic/images/logo_thruk.png
@@ -419,6 +420,7 @@ themes/Exfoliation/images/hostevent.gif
 themes/Exfoliation/images/icon_close.gif
 themes/Exfoliation/images/icon_maximize.gif
 themes/Exfoliation/images/icon_minimize.gif
+themes/Exfoliation/images/icon_remove.png
 themes/Exfoliation/images/info.png
 themes/Exfoliation/images/left.gif
 themes/Exfoliation/images/logo_thruk.png
@@ -570,6 +572,7 @@ themes/Nuvola/images/hostevent.gif
 themes/Nuvola/images/icon_close.gif
 themes/Nuvola/images/icon_maximize.gif
 themes/Nuvola/images/icon_minimize.gif
+themes/Nuvola/images/icon_remove.png
 themes/Nuvola/images/info.png
 themes/Nuvola/images/left.gif
 themes/Nuvola/images/logo_thruk.png
@@ -705,6 +708,7 @@ themes/Vautour/images/hostevent.gif
 themes/Vautour/images/icon_close.gif
 themes/Vautour/images/icon_maximize.gif
 themes/Vautour/images/icon_minimize.gif
+themes/Vautour/images/icon_remove.png
 themes/Vautour/images/info.png
 themes/Vautour/images/interface/bar.gif
 themes/Vautour/images/interface/logo.gif
