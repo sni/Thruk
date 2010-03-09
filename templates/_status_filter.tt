@@ -16,7 +16,7 @@
           <td valign="top" align="left" class='filterTitle' nowrap>
            [% IF loop.first %]
            <div id="[% prefix %]_filter_title">
-            <a href="#"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% prefix %]_filter_button_mini" alt="filter" onClick="toggleFilterPane(); return false;"></a>
+            <a href="#" onClick="toggleFilterPane(); return false;"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% prefix %]_filter_button_mini" alt="filter"></a>
             Display Filters:
            </div>
            [% END %]
