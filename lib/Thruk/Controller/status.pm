@@ -1001,7 +1001,9 @@ sub _do_filter {
     my $servicegroupfilter;
     my $searches           = [];
 
-    unless(exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}) {
+    unless(   exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}
+           or exists $c->{'request'}->{'parameters'}->{'s0_type'}
+           ) {
         # classic search
         my $search;
         ($search,
