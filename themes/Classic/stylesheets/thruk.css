@@ -8,6 +8,9 @@
 
 body {
   margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 2px;
+  margin-right: 0px;
 }
 
 body.navbar {
@@ -20,7 +23,6 @@ body.navbar {
 div.pref_pane {
   width:450px;
   height:100px;
-  visibility:hidden;
   position:absolute;
   top: 0px;
   right: 0px;
@@ -393,7 +395,7 @@ div.logEntries {
 td.clickable {
   vertical-align: middle;
 }
-td.clickable:hover {
+.clickable:hover {
   cursor: pointer;
   vertical-align: middle;
 }
@@ -405,9 +407,38 @@ table.filter > tbody > tr > td {
   border-right: 0px !important;
 }
 
-
 .btn_toggle_top_pane {
   position: absolute;
   top: 20px;
   right: 0px;
+}
+
+.hidenav {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 10px;
+  height: 100%;
+  z-index: 250;
+}
+
+.hidenav:hover {
+  background-image: url(../images/left.png);
+  background-repeat: repeat-y;
+  background-color:#88BBD8;
+}
+
+.shownav {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 10px;
+  height: 100%;
+  z-index: 250;
+}
+
+.shownav:hover {
+  background-image: url(../images/right.png);
+  background-repeat: repeat-y;
+  background-color:#88BBD8;
 }

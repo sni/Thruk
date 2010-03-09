@@ -20,6 +20,9 @@
   </head>
   <body class='navbar'>
 [% END %]
+[% UNLESS use_frames %]
+<div class="hidenav clickable" onclick="window.location='[% uri_with(c, 'nav' => 0) %]'"></div>
+[% END %]
     <div id="menu">
         <h2>Monitoring</h2>
         <ul>

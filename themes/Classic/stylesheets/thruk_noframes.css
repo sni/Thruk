@@ -9,7 +9,7 @@ div.navbar {
   border-top: 0px solid black;
   border-bottom: 0px solid black;
   border-right: 5px solid black;
-  border-left: 5px solid black;
+  border-left: 2px solid black;
   overflow:auto;
   top: 0px;
   left: 0px;
@@ -18,5 +18,5 @@ div.navbar {
 
 body {
   margin: 0px;
-  margin-left: 185px;
+  margin-left: 180px;
 }

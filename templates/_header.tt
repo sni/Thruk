@@ -46,7 +46,10 @@
   </head>
 
   <body class='[% page %]' id='[% page %]'[% IF refresh_rate %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
-  <div class="pref_pane" id="pref_pane">
+  [% IF use_frames %]
+  <div class="shownav clickable" onclick="window.location='[% uri_with(c, 'nav' => 1) %]'"></div>
+  [% END %]
+  <div class="pref_pane" id="pref_pane" style="display:none; visibility:hidden;">
     <a href="javascript:togglePreferencePane()"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
     <form action="[% c.uri %]" method="GET">
     <table class="pref_pane" border=1 width="450">
@@ -81,7 +84,7 @@
     </form>
   </div>
   [% UNLESS use_frames %]
-  <div class="navbar">
+  <div id="navbar" class="navbar">
     [% PROCESS side.tt %]
   </div>
   [% END %]

@@ -67,7 +67,7 @@ function toggleElement(id) {
     alert("ERROR: got no panel for id in toggleElement(): " + id);
     return;
   }
-  if(pane.style.visibility == "hidden" || pane.style.visibility == "" || pane.style.display == 'none') {
+  if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
     showElement(id);
     return true;
   }
@@ -86,7 +86,6 @@ function close_message() {
 /* toggle the visibility of the preferences pane */
 function togglePreferencePane(state) {
     toggleElement('pref_pane');
-    toggleElement('pref_pane_button');
 }
 
 /* save settings in a cookie */
