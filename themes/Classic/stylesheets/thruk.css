@@ -362,6 +362,8 @@ td.filterValueNoHighlight {
 
 td.newfilter {
   line-height: 8px;
+  height: 12px;
+  width: 14px;
 }
 td.newfilter:hover {
   line-height: 8px;
@@ -394,4 +396,11 @@ td.clickable {
 td.clickable:hover {
   cursor: pointer;
   vertical-align: middle;
+}
+
+table.filter > tbody > tr > td {
+  padding-bottom: 0px !important;
+  padding-right: 0px !important;
+  border-bottom: 0px !important;
+  border-right: 0px !important;
 }
