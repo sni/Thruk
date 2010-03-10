@@ -196,7 +196,7 @@
               [% IF escape_html_tags %]
                 <td class='[% serviceclass %]' onclick="return overlib('[% html_escape(html_escape(s.plugin_output)) %]<br>[% html_escape(html_escape(s.long_plugin_output)) | nl2br %]',STICKY,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,800,CLOSECLICK);"><span class="has_long_plugin_output">[% html_escape(s.plugin_output) %]</span></td>
               [% ELSE %]
-                <td class='[% serviceclass %]' onclick="return overlib('[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) | nl2br %]',STICKY,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,800,CLOSECLICK);"><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
+                <td class='[% serviceclass %]' onclick="return overlib(this.title,STICKY,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,800,CLOSECLICK);" title='[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
               [% END %]
             [% ELSE %]
               [% IF escape_html_tags %]
