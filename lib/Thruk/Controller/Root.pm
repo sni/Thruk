@@ -36,7 +36,12 @@ sub begin : Private {
     my ( $self, $c ) = @_;
     my $use_frames = Thruk->config->{'use_frames'};
     $use_frames = 1 unless defined $use_frames;
-    $use_frames = !$c->{'request'}->{'parameters'}->{'nav'} if defined $c->{'request'}->{'parameters'}->{'nav'};
+    if(exists $c->{'request'}->{'parameters'}->{'nav'} and $c->{'request'}->{'parameters'}->{'nav'} ne '') {
+        $use_frames = 1;
+        if($c->{'request'}->{'parameters'}->{'nav'} == 1) {
+            $use_frames = 0;
+        }
+    }
     $c->stash->{'use_frames'} = $use_frames;
 
     # use pager?

@@ -1336,6 +1336,9 @@ sub _single_search {
                 push @servicefilter, "Filter: host_name $op $value\nFilter: host_alias $op $value\nOr: 2";
             }
         }
+        elsif($filter->{'type'} eq 'service') {
+            push @servicefilter,   "Filter: description $op $value";
+        }
         elsif($filter->{'type'} eq 'hostgroup') {
             push @hostfilter,      "Filter: groups $listop $value";
             push @servicefilter,   "Filter: host_groups $listop $value";

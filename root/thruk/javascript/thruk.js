@@ -853,7 +853,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Hostgroup', 'Servicegroup');
+  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup');
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', search_prefix + 'type');
   typeselect.setAttribute('id', search_prefix + '_' + nr + '_ts');
