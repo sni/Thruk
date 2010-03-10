@@ -884,7 +884,7 @@ function add_new_filter(search_prefix, table) {
   // add thirds cell
   var img            = document.createElement('input');
   img.type           = 'image';
-  img.src            = "/thruk/themes/"+theme+"/images/icon_remove.png";
+  img.src            = "/thruk/themes/"+theme+"/images/minus.gif";
   img.className      = 'filter_button';
   img.onclick        = delete_filter_row;
   var newCell2       = newRow.insertCell(2);
