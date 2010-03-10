@@ -12,3 +12,4 @@ thruk_local.conf
 inc
 docs/images
 htpasswd.users
+.DS_Store

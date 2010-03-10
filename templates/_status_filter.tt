@@ -294,7 +294,7 @@
             </select>
           </td>
           <td align="left" class='filterValueInput'><input type="text" name="[% prefix %]_value" value="[% s.value %]"></td>
-          <td align="right" class='filterValueNoHighlight'><input type="image" src="/thruk/themes/[% theme %]/images/icon_remove.png" name="delete Filter" onclick="delete_filter_row(this)"></td>
+          <td align="right" class='filterValueNoHighlight'><input type="image" src="/thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)"></td>
         </tr>
         [% END %]
 <!-- NEW FILTER -->
