@@ -255,7 +255,7 @@ function addEventHandler(elem, type) {
 /* returns the first element which has an id */
 function getFirstParentId(elem) {
     nr = 0;
-    while(nr < 100 && (!elem.id || elem.id == '')) {
+    while(nr < 10 && !elem.id) {
         nr++;
         elem = elem.parentNode;
     }
@@ -380,7 +380,11 @@ function selectService(event, state)
             resetServiceRow(event);
             return;
         }
-    } else {
+    }
+    else if (event && (event.id || event.parentNode)) {
+        row_id = getFirstParentId(event);
+    }
+    else {
         row_id = getFirstParentId(this);
     }
     if(!row_id) {
@@ -419,7 +423,11 @@ function selectHost(event, state)
             resetHostRow(event);
             return;
         }
-    } else {
+    }
+    else if (event && (event.id || event.parentNode)) {
+        row_id = getFirstParentId(event);
+    }
+    else {
         row_id = getFirstParentId(this);
     }
     if(!row_id) {
