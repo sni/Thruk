@@ -69,8 +69,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}           = 'status';
     $c->stash->{template}       = 'status_'.$style.'.tt';
 
-    my $custom_title = $c->{'request'}->{'parameters'}->{'title'};
-    $c->stash->{custom_title}   = $custom_title;
+    if(exists $c->{'request'}->{'parameters'}->{'title'}) {
+        my $custom_title = $c->{'request'}->{'parameters'}->{'title'};
+        $custom_title =~ s/\+/\ /gmx;
+        $c->stash->{custom_title}   = $custom_title;
+    }
 
     my $hidetop = $c->{'request'}->{'parameters'}->{'hidetop'};
     $c->stash->{hidetop}   = $hidetop;
@@ -140,7 +143,7 @@ sub _process_details_page {
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     my $sortedservices = Thruk::Utils::sort($c, $services, $sortoptions->{$sortoption}->[0], $order);
-    if($sortoption == 6) { @{$sortedservices} = reverse @{$sortedservices}; }
+    if($sortoption == 6 and defined $sortedservices) { @{$sortedservices} = reverse @{$sortedservices}; }
 
     Thruk::Utils::page_data($c, $sortedservices);
 

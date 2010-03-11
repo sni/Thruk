@@ -1,6 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+0.42    Thu Mar 11 08:36:04 CET 2010
+          - fixed problem with sorting empty results
+
 0.40    Sun Mar  7 21:12:37 CET 2010
           - change status.cgi filter inline
           - combine several filter
