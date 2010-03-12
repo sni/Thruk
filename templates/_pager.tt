@@ -2,9 +2,6 @@
 
 [% IF use_pager AND pager %]
 
-  [% pages = Math.int(pager.total_entries / pager.entries_per_page) %]
-  [% IF pager.total_entries > pager.entries_per_page * pages %][% SET pages = pages + 1 %][% END %]
-
   [% IF pages > 1 %]
   <br>
   <form action="/[% c.request.path %]" method="GET">
@@ -16,6 +13,12 @@
     [% NEXT IF par == 'previous' %]
     [% NEXT IF par == 'previous.x' %]
     [% NEXT IF par == 'previous.y' %]
+    [% NEXT IF par == 'first' %]
+    [% NEXT IF par == 'first.x' %]
+    [% NEXT IF par == 'first.y' %]
+    [% NEXT IF par == 'last' %]
+    [% NEXT IF par == 'last.x' %]
+    [% NEXT IF par == 'last.y' %]
     [% NEXT IF par == 'page' %]
     <input type="hidden" name="[% par %]" value="[% c.request.query_params.$par %]">
   [% END %]

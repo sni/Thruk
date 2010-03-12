@@ -1024,7 +1024,7 @@ sub page_data {
 
     my $pager = new Data::Page;
     $pager->total_entries(scalar @{$data});
-    my $pages = int($pager->total_entries / $entries);
+    my $pages = POSIX::ceil($pager->total_entries / $entries);
 
     if(exists $c->{'request'}->{'parameters'}->{'next'}) {
         $page++;
@@ -1056,6 +1056,7 @@ sub page_data {
     }
 
     $c->stash->{'pager'} = $pager;
+    $c->stash->{'pages'} = $pages;
 
     return 1;
 }
