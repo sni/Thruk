@@ -1,5 +1,3 @@
-[% USE Math %]
-
 [% IF use_pager AND pager %]
 
   [% IF pages > 1 %]
