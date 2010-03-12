@@ -33,6 +33,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}             = 'avail';
     $c->stash->{'no_auto_reload'} = 1;
 
+    Thruk::Utils::ssi_include($c);
+
     # lookup parameters
     my $report_type    = $c->{'request'}->{'parameters'}->{'report_type'}  || '';
     my $timeperiod     = $c->{'request'}->{'parameters'}->{'timeperiod'};

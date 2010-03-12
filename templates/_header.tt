@@ -43,10 +43,11 @@
     -->
     </script>
     [% PROCESS extra_headers.tt %]
-
   </head>
 
   <body class='[% page %]' id='[% page %]'[% IF refresh_rate %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
+  [% ssi_header %]
+
   [% IF use_frames %]
   <div class="shownav clickable" onclick="window.location='[% uri_with(c, 'nav' => 1) %]'"></div>
   [% END %]

@@ -39,6 +39,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}             = 'trends';
     $c->stash->{'no_auto_reload'} = 1;
 
+    Thruk::Utils::ssi_include($c);
+
     if(exists $c->{'request'}->{'parameters'}->{'createimage'}) {
         $c->stash->{gd_image} = $self->_create_image($c, IMAGE_MODE);
         $c->forward('Thruk::View::GD');

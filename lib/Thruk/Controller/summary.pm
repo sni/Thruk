@@ -65,6 +65,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}             = 'summary';
     $c->stash->{'no_auto_reload'} = 1;
 
+    Thruk::Utils::ssi_include($c);
+
     if(exists $c->{'request'}->{'parameters'}->{'report'}
        and $self->_create_report($c)) {
         # report created

@@ -75,6 +75,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}           = 'status';
     $c->stash->{template}       = 'status_'.$style.'.tt';
 
+    Thruk::Utils::ssi_include($c);
+
     if(exists $c->{'request'}->{'parameters'}->{'title'}) {
         my $custom_title = $c->{'request'}->{'parameters'}->{'title'};
         $custom_title =~ s/\+/\ /gmx;

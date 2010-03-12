@@ -43,7 +43,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',
                         ENCODING           => 'utf8',
-                        INCLUDE_PATH       =>  'templates',
+                        INCLUDE_PATH       => 'templates',
                         FILTERS            => {
                                                 'duration'  => \&Thruk::Utils::filter_duration,
                                                 'nl2br'     => \&Thruk::Utils::filter_nl2br,
@@ -102,6 +102,18 @@ for my $entry (readdir($dh)) {
 @themes = sort @themes;
 closedir $dh;
 __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
+
+###################################################
+# set installed themes
+my $ssi_dir = "ssi/";
+my %ssi;
+opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
+for my $entry (readdir($dh)) {
+    next if $entry eq '.' or $entry eq '..';
+    $ssi{$entry} = { name => $entry } if($entry =~ /\.ssi$/);
+}
+closedir $dh;
+__PACKAGE__->config->{'ssi_includes'} = \%ssi;
 
 ###################################################
 # Start the application

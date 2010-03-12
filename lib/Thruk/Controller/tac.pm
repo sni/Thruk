@@ -276,6 +276,8 @@ Stats: accept_passive_checks = 0 as passive_checks_disabled
     $c->stash->{page}           = 'tac';
     $c->stash->{template}       = 'tac.tt';
 
+    Thruk::Utils::ssi_include($c);
+
     return 1;
 }
 

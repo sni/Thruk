@@ -1657,6 +1657,50 @@ sub get_message {
 }
 
 ########################################
+#
+# SSI Functions
+#
+sub ssi_include {
+    my $c = shift;
+    my $global_header_file = "global-header.ssi";
+    my $header_file = $c->stash->{'page'}."-header.ssi";
+    my $global_footer_file = "global-footer.ssi";
+    my $footer_file = $c->stash->{'page'}."-footer.ssi";
+
+    #print Dumper $c->config->{ssi_includes};
+
+    if ( defined $c->config->{ssi_includes}->{$global_header_file} ){
+    	$c->stash->{ssi_header} = Thruk::Utils::read_ssi{$global_header_file}; 
+    }
+    if ( defined $c->config->{ssi_includes}->{$header_file} ){
+    	$c->stash->{ssi_header} .= Thruk::Utils::read_ssi{$header_file}; 
+    }
+    # Footer
+    if ( defined $c->config->{ssi_includes}->{$global_footer_file} ){
+    	$c->stash->{ssi_footer} = Thruk::Utils::read_ssi{$global_footer_file}; 
+    }
+    if ( defined $c->config->{ssi_includes}->{$footer_file} ){
+    	$c->stash->{ssi_footer} .= Thruk::Utils::read_ssi{$footer_file}; 
+    }
+    return 1;
+}
+	
+
+sub read_ssi {
+   my $file = shift;
+   # retun if file is execitabel
+   if( -x "ssi/$file" ){
+	return "<p>ssi/$file is executable!</p>";
+   }
+   open (my $fh, "< ssi/$file") or die("cannot open ssi: $!");
+   local $/;
+   my $data = <$fh>;
+   close($fh);
+   return $data;
+}
+
+
+########################################
 sub _initialassumedhoststate_to_state {
     my $initialassumedhoststate = shift;
 

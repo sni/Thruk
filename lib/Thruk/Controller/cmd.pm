@@ -33,6 +33,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{no_auto_reload} = 1;
     $c->stash->{page}           = 'cmd';
 
+    Thruk::Utils::ssi_include($c);
+
     # check if authorization is enabled
     if($c->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
         $c->detach('/error/index/3');
@@ -180,6 +182,7 @@ sub _check_for_commands {
         $c->stash->{referer}        = $c->{'request'}->{'parameters'}->{'referer'} || $c->{'request'}->{'headers'}->{'referer'} || '';
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
+
     }
 
     return 1;

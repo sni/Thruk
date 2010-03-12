@@ -31,6 +31,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}             = 'histogram';
     $c->stash->{'no_auto_reload'} = 1;
 
+    Thruk::Utils::ssi_include($c);
+
     # Step 1 - select report type
     $self->_show_step_1($c);
 

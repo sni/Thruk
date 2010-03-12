@@ -65,6 +65,8 @@ Columns: name childs num_services
     $c->stash->{page}           = 'outages';
     $c->stash->{template}       = 'outages.tt';
 
+    Thruk::Utils::ssi_include($c);
+
     return 1;
 }
 

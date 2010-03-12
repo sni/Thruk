@@ -71,6 +71,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{page}           = 'extinfo';
     $c->stash->{template}       = 'extinfo_type_'.$type.'.tt';
 
+    Thruk::Utils::ssi_include($c);
+
     return 1;
 }
 
