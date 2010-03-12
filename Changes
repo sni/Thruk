@@ -1,6 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+0.44    Fri Mar 12 17:31:10 CET 2010
+          - added server side includes
+
 0.42    Fri Mar 12 17:31:10 CET 2010
           - changed datepicker
           - fixed problem with sorting empty results

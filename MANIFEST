@@ -625,6 +625,7 @@ script/thruk_fastcgi_server.sh
 script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
+ssi/README
 t/01app.t
 t/10-Thruk-Utils.t
 t/97-Pod.t

@@ -23,7 +23,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.42';
+our $VERSION = '0.44';
 
 ###################################################
 # Configure the application.
@@ -110,7 +110,8 @@ my %ssi;
 opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
 for my $entry (readdir($dh)) {
     next if $entry eq '.' or $entry eq '..';
-    $ssi{$entry} = { name => $entry } if($entry =~ /\.ssi$/);
+    next if $entry !~ /\.ssi$/mx;
+    $ssi{$entry} = { name => $entry } 
 }
 closedir $dh;
 __PACKAGE__->config->{'ssi_includes'} = \%ssi;

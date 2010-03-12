@@ -19,6 +19,7 @@ use Digest::MD5  qw(md5_hex);
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
 use Data::Page;
 use Monitoring::Livestatus::MULTI;
+use File::Slurp;
 
 
 ##############################################
@@ -1656,47 +1657,61 @@ sub get_message {
     return 1;
 }
 
+
 ########################################
-#
-# SSI Functions
-#
+
+=head2 ssi_include
+
+  ssi_include($c)
+
+puts the ssi templates into the stash
+
+=cut
 sub ssi_include {
     my $c = shift;
     my $global_header_file = "global-header.ssi";
-    my $header_file = $c->stash->{'page'}."-header.ssi";
+    my $header_file        = $c->stash->{'page'}."-header.ssi";
     my $global_footer_file = "global-footer.ssi";
-    my $footer_file = $c->stash->{'page'}."-footer.ssi";
-
-    #print Dumper $c->config->{ssi_includes};
+    my $footer_file        = $c->stash->{'page'}."-footer.ssi";
 
     if ( defined $c->config->{ssi_includes}->{$global_header_file} ){
-    	$c->stash->{ssi_header} = Thruk::Utils::read_ssi{$global_header_file}; 
+        $c->stash->{ssi_header} = Thruk::Utils::read_ssi{$global_header_file}; 
     }
     if ( defined $c->config->{ssi_includes}->{$header_file} ){
-    	$c->stash->{ssi_header} .= Thruk::Utils::read_ssi{$header_file}; 
+        $c->stash->{ssi_header} .= Thruk::Utils::read_ssi{$header_file}; 
     }
     # Footer
     if ( defined $c->config->{ssi_includes}->{$global_footer_file} ){
-    	$c->stash->{ssi_footer} = Thruk::Utils::read_ssi{$global_footer_file}; 
+        $c->stash->{ssi_footer} = Thruk::Utils::read_ssi{$global_footer_file}; 
     }
     if ( defined $c->config->{ssi_includes}->{$footer_file} ){
-    	$c->stash->{ssi_footer} .= Thruk::Utils::read_ssi{$footer_file}; 
+        $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi{$footer_file}; 
     }
+
     return 1;
 }
-	
 
+
+########################################
+
+=head2 read_ssi
+
+  read_ssi($file)
+
+reads a ssi file or executes it if its executable
+
+=cut
 sub read_ssi {
    my $file = shift;
    # retun if file is execitabel
    if( -x "ssi/$file" ){
-	return "<p>ssi/$file is executable!</p>";
+       open(my $ph, '-|', "ssi/$file 2>&1") or carp("cannot execute ssi: $!");
+       my $output = <$ph>;
+       close($ph);
+       return $output;
    }
-   open (my $fh, "< ssi/$file") or die("cannot open ssi: $!");
-   local $/;
-   my $data = <$fh>;
-   close($fh);
-   return $data;
+   return read_file("ssi/$file") or carp("cannot open ssi: $!");
+
 }
 
 

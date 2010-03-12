@@ -1,0 +1,13 @@
+# Server Side Includes
+
+# global includes for every page:
+ssi/global-footer.ssi
+ssi/global-header.ssi
+
+# page specific includes
+ssi/status-footer.ssi
+ssi/status-header.ssi
+
+
+Executables will be executed and the output will be used.
+Normal files will just be placed at the start or end of the body.
