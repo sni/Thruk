@@ -38,11 +38,13 @@ user and install the missing perl modules with local::lib.
 === Use Package
 Installation from a package is easy and should be painless:
 
+IMPORTANT: you may need to install libgd and libxpm.
+
 -------
   %> arch=$(perl -e 'use Config; print $Config{archname}')
-  %> wget http://www.thruk.org/files/Thruk-0.42-$arch.tar.gz
-  %> tar zxf Thruk-0.42-$arch.tar.gz
-  %> cd Thruk-0.42
+  %> wget http://www.thruk.org/files/Thruk-0.44-$arch.tar.gz
+  %> tar zxf Thruk-0.44-$arch.tar.gz
+  %> cd Thruk-0.44
   %> ./script/thruk_server.pl
 -------
 
@@ -718,3 +720,25 @@ commands.
 ex.:
 
   lock_author_names = 1
+
+
+
+=== Server Side Includes
+
+You can place static include files or executables in the ssi folder.
+The static files will be place right after the body or just before the
+end of the body.
+
+There are two global includes, which will be included in every cgi
+page:
+ - ssi/global-footer.ssi
+ - ssi/global-header.ssi
+
+and there are page specific includes, which will only be placed in the
+specific page:
+ssi/status-footer.ssi
+ssi/status-header.ssi
+
+Files will be statically placed inside the output of the normal cgi
+output. Executables will be executed and the output will then be used
+as content.
