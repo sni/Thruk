@@ -90,7 +90,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
 
 ###################################################
 # set installed themes
-my $themes_dir = "themes/";
+my $themes_dir = "root/thruk/themes/";
 my @themes;
 opendir(my $dh, $themes_dir) or die "can't opendir '$themes_dir': $!";
 for my $entry (readdir($dh)) {
