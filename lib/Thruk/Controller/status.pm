@@ -38,6 +38,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
     }
 
+    # put some filter into the stash
+    $c->stash->{'hoststatustypes'}    = $c->{'request'}->{'parameters'}->{'hoststatustypes'};
+    $c->stash->{'hostprops'}          = $c->{'request'}->{'parameters'}->{'hostprops'};
+    $c->stash->{'servicestatustypes'} = $c->{'request'}->{'parameters'}->{'servicestatustypes'};
+    $c->stash->{'serviceprops'}       = $c->{'request'}->{'parameters'}->{'serviceprops'};
+
     $style = 'detail' unless defined $allowed_subpages->{$style};
 
     # did we get a search request?
@@ -1165,11 +1171,13 @@ sub _get_search_from_param {
         return;
     }
 
+    # use the type or prop without prefix as global overide
+    # ex.: hoststatustypes set from the totals link should override all filter
     my $search = {
-        'hoststatustypes'    => $c->{'request'}->{'parameters'}->{$prefix.'_hoststatustypes'},
-        'hostprops'          => $c->{'request'}->{'parameters'}->{$prefix.'_hostprops'},
-        'servicestatustypes' => $c->{'request'}->{'parameters'}->{$prefix.'_servicestatustypes'},
-        'serviceprops'       => $c->{'request'}->{'parameters'}->{$prefix.'_serviceprops'},
+        'hoststatustypes'    => $c->stash->{'hoststatustypes'}    || $c->{'request'}->{'parameters'}->{$prefix.'_hoststatustypes'},
+        'hostprops'          => $c->stash->{'hostprops'}          || $c->{'request'}->{'parameters'}->{$prefix.'_hostprops'},
+        'servicestatustypes' => $c->stash->{'servicestatustypes'} || $c->{'request'}->{'parameters'}->{$prefix.'_servicestatustypes'},
+        'serviceprops'       => $c->stash->{'serviceprops'}       || $c->{'request'}->{'parameters'}->{$prefix.'_serviceprops'},
     };
 
     return $search unless defined $c->{'request'}->{'parameters'}->{$prefix.'_type'};
@@ -1200,25 +1208,29 @@ sub _get_search_from_param {
 sub _do_search {
     my ( $self, $c, $searches ) = @_;
 
-    my(@hostfilter,@servicefilter,@hostgroupfilter,@servicegroupfilter);
+    my(@hostfilter,@servicefilter,@hostgroupfilter,@servicegroupfilter,@hosttotalsfilter,@servicetotalsfilter);
 
     for my $search (@{$searches}) {
-        my($tmp_hostfilter, $tmp_servicefilter,$tmp_hostgroupfilter,$tmp_servicegroupfilter)
+        my($tmp_hostfilter, $tmp_servicefilter,$tmp_hostgroupfilter,$tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter)
             = $self->_single_search($c, $search);
-        push @hostfilter,         $tmp_hostfilter;
-        push @servicefilter,      $tmp_servicefilter;
-        push @hostgroupfilter,    $tmp_hostgroupfilter;
-        push @servicegroupfilter, $tmp_servicegroupfilter;
+        push @hostfilter,          $tmp_hostfilter;
+        push @servicefilter,       $tmp_servicefilter;
+        push @hostgroupfilter,     $tmp_hostgroupfilter;
+        push @servicegroupfilter,  $tmp_servicegroupfilter;
+        push @servicetotalsfilter, $tmp_servicetotalsfilter;
+        push @hosttotalsfilter,    $tmp_hosttotalsfilter;
     }
 
     # combine the array of filters by OR
-    my $hostfilter         = Thruk::Utils::combine_filter(\@hostfilter,         'Or');
-    my $servicefilter      = Thruk::Utils::combine_filter(\@servicefilter,      'Or');
-    my $hostgroupfilter    = Thruk::Utils::combine_filter(\@hostgroupfilter,    'Or');
-    my $servicegroupfilter = Thruk::Utils::combine_filter(\@servicegroupfilter, 'Or');
+    my $hostfilter          = Thruk::Utils::combine_filter(\@hostfilter,          'Or');
+    my $servicefilter       = Thruk::Utils::combine_filter(\@servicefilter,       'Or');
+    my $hostgroupfilter     = Thruk::Utils::combine_filter(\@hostgroupfilter,     'Or');
+    my $servicegroupfilter  = Thruk::Utils::combine_filter(\@servicegroupfilter,  'Or');
+    my $hosttotalsfilter    = Thruk::Utils::combine_filter(\@hosttotalsfilter,    'Or');
+    my $servicetotalsfilter = Thruk::Utils::combine_filter(\@servicetotalsfilter, 'Or');
 
     # fill the host/service totals box
-    $self->_fill_totals_box($c, $hostfilter, $servicefilter);
+    $self->_fill_totals_box($c, $hosttotalsfilter, $servicetotalsfilter);
 
     # if there is only one search with a single text filter
     # set stash to reflect a classic search
@@ -1246,7 +1258,7 @@ sub _do_search {
 sub _single_search {
     my ( $self, $c, $search ) = @_;
 
-    my(@hostfilter,@servicefilter,@hostgroupfilter,@servicegroupfilter);
+    my(@hostfilter,@servicefilter,@hostgroupfilter,@servicegroupfilter,@hosttotalsfilter,@servicetotalsfilter);
 
     my($tmp_hostfilter,
        $tmp_servicefilter,
@@ -1312,7 +1324,8 @@ sub _single_search {
                 "Filter: plugin_output $op $value",
                 "Filter: long_plugin_output $op $value"
             ];
-            push @hostfilter, Thruk::Utils::combine_filter($host_search_filter, $joinop);
+            push @hostfilter,       Thruk::Utils::combine_filter($host_search_filter, $joinop);
+            push @hosttotalsfilter, Thruk::Utils::combine_filter($host_search_filter, $joinop);
 
             # and some for services
             my $service_search_filter = [
@@ -1324,7 +1337,8 @@ sub _single_search {
                 "Filter: host_alias $op $value",
                 "Filter: host_groups $listop $value",
             ];
-            push @servicefilter, Thruk::Utils::combine_filter($service_search_filter, $joinop);
+            push @servicefilter,       Thruk::Utils::combine_filter($service_search_filter, $joinop);
+            push @servicetotalsfilter, Thruk::Utils::combine_filter($service_search_filter, $joinop);
         }
         elsif($filter->{'type'} eq 'host') {
             # check for wildcards
@@ -1333,32 +1347,42 @@ sub _single_search {
                 my $searchhost = $value;
                 $searchhost =~ s/\.\*/*/gmx;
                 $searchhost =~ s/\*/.*/gmx;
-                push @hostfilter,    "Filter: name ~~ $searchhost\nFilter: alias ~~ $searchhost\nOr: 2";
-                push @servicefilter, "Filter: host_name ~~ $searchhost\nFilter: host_alias ~~ $searchhost\nOr: 2";
+                push @hostfilter,          "Filter: name ~~ $searchhost\nFilter: alias ~~ $searchhost\nOr: 2";
+                push @hosttotalsfilter,    "Filter: name ~~ $searchhost\nFilter: alias ~~ $searchhost\nOr: 2";
+                push @servicefilter,       "Filter: host_name ~~ $searchhost\nFilter: host_alias ~~ $searchhost\nOr: 2";
+                push @servicetotalsfilter, "Filter: host_name ~~ $searchhost\nFilter: host_alias ~~ $searchhost\nOr: 2";
             } else {
-                push @hostfilter,    "Filter: name $op $value\nFilter: alias $op $value\n$joinop: 2";
-                push @servicefilter, "Filter: host_name $op $value\nFilter: host_alias $op $value\n$joinop: 2";
+                push @hostfilter,          "Filter: name $op $value\nFilter: alias $op $value\n$joinop: 2";
+                push @hosttotalsfilter,    "Filter: name $op $value\nFilter: alias $op $value\n$joinop: 2";
+                push @servicefilter,       "Filter: host_name $op $value\nFilter: host_alias $op $value\n$joinop: 2";
+                push @servicetotalsfilter, "Filter: host_name $op $value\nFilter: host_alias $op $value\n$joinop: 2";
             }
         }
         elsif($filter->{'type'} eq 'service') {
-            push @servicefilter,   "Filter: description $op $value";
+            push @servicefilter,       "Filter: description $op $value";
+            push @servicetotalsfilter, "Filter: description $op $value";
         }
         elsif($filter->{'type'} eq 'hostgroup') {
-            push @hostfilter,      "Filter: groups $listop $value";
-            push @servicefilter,   "Filter: host_groups $listop $value";
-            push @hostgroupfilter, "Filter: name $op $value";
+            push @hostfilter,          "Filter: groups $listop $value";
+            push @hosttotalsfilter,    "Filter: groups $listop $value";
+            push @servicefilter,       "Filter: host_groups $listop $value";
+            push @servicetotalsfilter, "Filter: host_groups $listop $value";
+            push @hostgroupfilter,     "Filter: name $op $value";
         }
         elsif($filter->{'type'} eq 'servicegroup') {
-            push @servicefilter,      "Filter: groups $listop $value";
-            push @servicegroupfilter, "Filter: name $op $value";
+            push @servicefilter,       "Filter: groups $listop $value";
+            push @servicetotalsfilter, "Filter: groups $listop $value";
+            push @servicegroupfilter,  "Filter: name $op $value";
         }
     }
 
     # combine the array of filters by AND
-    my $hostfilter         = Thruk::Utils::combine_filter(\@hostfilter,         'And');
-    my $servicefilter      = Thruk::Utils::combine_filter(\@servicefilter,      'And');
-    my $hostgroupfilter    = Thruk::Utils::combine_filter(\@hostgroupfilter,    'And');
-    my $servicegroupfilter = Thruk::Utils::combine_filter(\@servicegroupfilter, 'And');
+    my $hostfilter          = Thruk::Utils::combine_filter(\@hostfilter,          'And');
+    my $servicefilter       = Thruk::Utils::combine_filter(\@servicefilter,       'And');
+    my $hostgroupfilter     = Thruk::Utils::combine_filter(\@hostgroupfilter,     'And');
+    my $servicegroupfilter  = Thruk::Utils::combine_filter(\@servicegroupfilter,  'And');
+    my $hosttotalsfilter    = Thruk::Utils::combine_filter(\@hosttotalsfilter,    'And');
+    my $servicetotalsfilter = Thruk::Utils::combine_filter(\@servicetotalsfilter, 'And');
 
     # filter does not work when it is empty,
     # so add useless filter which matches everything
@@ -1369,7 +1393,7 @@ sub _single_search {
     if($servicegroupfilter =~ m/^\s*$/) { $servicegroupfilter = "Filter: name !=";        }
     ## use critic
 
-    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter);
+    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $hosttotalsfilter, $servicetotalsfilter);
 }
 
 ##########################################################

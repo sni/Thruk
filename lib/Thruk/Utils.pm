@@ -220,7 +220,7 @@ wrapper around the internal sprintf
 sub filter_sprintf {
     my $format = shift;
     local $SIG{__WARN__} = sub { Carp::cluck(@_); };
-    sprintf $format, @_;
+    return sprintf $format, @_;
 }
 
 
