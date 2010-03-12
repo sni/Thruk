@@ -95,7 +95,8 @@ my @themes;
 opendir(my $dh, $themes_dir) or die "can't opendir '$themes_dir': $!";
 for my $entry (readdir($dh)) {
     next unless -d $themes_dir."/".$entry;
-    next if $entry eq '.' or $entry eq '..';
+    next if $entry =~ m/^\./mx; # hide hidden dirs
+    next if $entry eq 'images';
     push @themes, $entry;
 }
 @themes = sort @themes;

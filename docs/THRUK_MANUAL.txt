@@ -36,12 +36,13 @@ The clean and proper way to install Thruk is to create a new local
 user and install the missing perl modules with local::lib.
 
 === Use Package
-Installation from a package should be easy and seemless:
+Installation from a package is easy and should be painless:
 
 -------
-  %> wget http://
-  %> tar zxf Thruk-0.30-i386.tar.gz
-  %> cd Thruk-0.30
+  %> arch=$(perl -e 'use Config; print $Config{archname}')
+  %> wget http://www.thruk.org/files/Thruk-0.42-$arch.tar.gz
+  %> tar zxf Thruk-0.42-$arch.tar.gz
+  %> cd Thruk-0.42
   %> ./script/thruk_server.pl
 -------
 

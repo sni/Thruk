@@ -566,12 +566,13 @@ support for themes (on a per user basis )
 <div class="para"><p>The clean and proper way to install Thruk is to create a new local
 user and install the missing perl modules with local::lib.</p></div>
 <h3 id="_use_package">Use Package</h3><div style="clear:left"></div>
-<div class="para"><p>Installation from a package should be easy and seemless:</p></div>
+<div class="para"><p>Installation from a package is easy and should be painless:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>  %&gt; wget http://
-  %&gt; tar zxf Thruk-0.30-i386.tar.gz
-  %&gt; cd Thruk-0.30
+<pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
+  %&gt; wget http://www.thruk.org/files/Thruk-0.42-$arch.tar.gz
+  %&gt; tar zxf Thruk-0.42-$arch.tar.gz
+  %&gt; cd Thruk-0.42
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
 <div class="para"><p>For a FastCGI installation follow the steps from the <a href="#_configure_fastcgi_server">source installation</a>.</p></div>
@@ -977,6 +978,16 @@ cgi.cfg
 <div class="para"><p>The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
 The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.</p></div>
+<h4 id="_use_strict_host_authorization">use_strict_host_authorization</h4>
+<div class="para"><p>When set to a true value, every contact will only see the hosts where
+he is contact for plus the services where he is contact for. When
+disabled, a host contact will see all services for this host
+regardless of wheter he is a service contact or not.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_strict_host_authorization = 1</tt></pre>
+</div></div>
 <h4 id="_documentation_link">documentation_link</h4>
 <div class="para"><p>This link is used in the side navigation menu as link to the documentation.
 Replace it with whatever your documentation is located. Set it to a blank value
@@ -1319,7 +1330,7 @@ commands.</p></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-03-08 15:28:53 CEST
+Last updated 2010-03-12 15:49:39 CEST
 </div>
 </div>
 </body>
