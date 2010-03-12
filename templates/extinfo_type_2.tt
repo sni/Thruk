@@ -439,7 +439,7 @@
                   <tr class='[% class %]'>
                     <td class='[% class %]' nowrap>[% date.format(comment.entry_time, datetime_format) %]</td>
                     <td class='[% class %]'>[% comment.author %]</td>
-                    <td class='[% class %]'>[% comment.comment %]</td>
+                    <td class='[% class %]'>[% comment.comment | html %]</td>
                     <td class='[% class %]'>[% comment.id %]</td>
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
@@ -452,6 +452,58 @@
                     <td class='commentOdd' colspan='9'>This Service has no comments associated with it</td>
                   </tr>
                 [% END %]
+
+              </table>
+            </div>
+          [% END %]
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center" valign="top" class='commentPanel'>
+          [% IF c.check_user_roles('is_authorized_for_read_only') %]
+          [% ELSE %]
+            <a name="downtimes" id="comments"></a>
+            <div class='commentTitle'>Service Downtimes</div>
+            <table border="0">
+              <tr>
+                <td valign="middle"><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all downtimes</a></td> <!-- FIXME -->
+              </tr>
+            </table>
+            <div align="center">
+              <table border="0" class='comment'>
+                <tr class='comment'>
+                  <th class='comment' nowrap>Entry Time</th>
+                  <th class='comment' nowrap>Start Time</th>
+                  <th class='comment' nowrap>End Time</th>
+                  <th class='comment'>Author</th>
+                  <th class='comment'>Comment</th>
+                  <th class='comment' nowrap>Comment ID</th>
+                  <th class='comment'>Type</th>
+                  <th class='comment'>Actions</th>
+                </tr>
+
+                [% IF downtimes %]
+                  [% FOREACH downtime IN downtimes %]
+                  [% SET class = 'commentEven' IF loop.even %]
+                  [% SET class = 'commentOdd'  IF loop.odd %]
+                  <tr class='[% class %]'>
+                    <td class='[% class %]' nowrap>[% date.format(downtime.entry_time, datetime_format) %]</td>
+                    <td class='[% class %]' nowrap>[% date.format(downtime.start_time, datetime_format) %]</td>
+                    <td class='[% class %]' nowrap>[% date.format(downtime.end_time, datetime_format) %]</td>
+                    <td class='[% class %]'>[% downtime.author %]</td>
+                    <td class='[% class %]'>[% downtime.comment | html %]</td>
+                    <td class='[% class %]'>[% downtime.id %]</td>
+                    <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
+                    <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% downtime.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+                  </tr>
+                  [% END %]
+                [% ELSE %]
+                  <tr class='commentOdd'>
+                    <td class='commentOdd' colspan='9'>This Service has no downtimes associated with it</td>
+                  </tr>
+                [% END %]
+
               </table>
             </div>
           [% END %]
@@ -459,5 +511,4 @@
         </tr>
       </table>
     </div>
-
 [% PROCESS _footer.tt %]
