@@ -208,6 +208,22 @@ sub filter_nl2br {
 }
 
 
+##############################################
+
+=head2 filter_sprintf
+
+  my $string = sprintf($format, $list)
+
+wrapper around the internal sprintf
+
+=cut
+sub filter_sprintf {
+    my $format = shift;
+    local $SIG{__WARN__} = sub { Carp::cluck(@_); };
+    sprintf $format, @_;
+}
+
+
 ######################################
 
 =head2 get_cgi_cfg

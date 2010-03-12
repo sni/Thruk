@@ -49,7 +49,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                                                 'nl2br'     => \&Thruk::Utils::filter_nl2br,
                                             },
                         PRE_DEFINE         => {
-                                                'sprintf'      => sub { my $format = shift; sprintf $format, @_ },
+                                                'sprintf'      => \&Thruk::Utils::filter_sprintf,
                                                 'duration'     => \&Thruk::Utils::filter_duration,
                                                 'name2id'      => \&Thruk::Utils::name2id,
                                                 'uri'          => \&Thruk::Utils::uri,
