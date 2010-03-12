@@ -75,9 +75,9 @@ elsif(-d "$ENV{'HOME'}/perl5") {
 }
 
 if(defined $local_lib and $local_lib ne '') {
-  print "creating Thruk-".$version."-".$arch.".tar";
+  print "creating Thruk-".$version."-".$arch.".tar\n";
   cmd("tar zxf $archive");
-  cmd("rsync -a $local_lib/ Thruk-".$version."/local-lib");
+  cmd("rsync --modify-window=120 -a $local_lib/ Thruk-".$version."/local-lib");
   cmd("tar cvf Thruk-".$version."-".$arch.".tar Thruk-".$version);
   cmd("gzip -9 Thruk-".$version."-".$arch.".tar");
   cmd("rm -rf Thruk-".$version);
@@ -94,6 +94,7 @@ exit;
 #########################################################################
 sub cmd {
     my $cmd = shift;
+    print "cmd: $cmd\n";
     open(my $ph, '|-', $cmd." 2>&1") or die("cannot execute cmd: $cmd");
     while(my $line = <$ph>) {
         print $line;
