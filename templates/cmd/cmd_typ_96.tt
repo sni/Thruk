@@ -22,7 +22,7 @@
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Check Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]'> <a href="javascript: NewCssCal('start_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Check Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]'> <a href="javascript:show_cal('start_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
 <tr><td class='optBoxItem'>Force Check:</td><td><b><input type='checkbox' name='force_check'></b></td></tr>
 
 [% END %]

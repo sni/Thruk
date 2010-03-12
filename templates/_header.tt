@@ -23,7 +23,8 @@
     <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
     <script type="text/javascript" src="/thruk/javascript/prototype-1.6.0.3.js"></script>
     <script type="text/javascript" src="/thruk/javascript/thruk.js"></script>
-    <script type="text/javascript" src="/thruk/javascript/datetimepicker.js"></script>
+    <script type="text/javascript" src="/thruk/javascript/cal/jscal2.js"></script>
+    <link rel='stylesheet' type='text/css' href='/thruk/javascript/cal/jscal2.css' />
     [% IF js %]<script type="text/javascript" src="[% js %]"></script>[% END %]
 
     <script type="text/javascript">

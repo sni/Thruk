@@ -1056,3 +1056,40 @@ function toggleTopPane() {
     formInput.value = 1;
   }
 }
+
+/*******************************************************************************
+  ,ad8888ba,        db        88
+ d8"'    `"8b      d88b       88
+d8'               d8'`8b      88
+88               d8'  `8b     88
+88              d8YaaaaY8b    88
+Y8,            d8""""""""8b   88
+ Y8a.    .a8P d8'        `8b  88
+  `"Y8888Y"' d8'          `8b 88888888888
+*******************************************************************************/
+
+function show_cal(id) {
+  var date_val  = document.getElementById(id).value;
+  var date_time = date_val.split(" ");
+  var dates     = date_time[0].split('-');
+  var times     = date_time[1].split(':');
+  var dateObj   = new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]);
+  var cal = Calendar.setup({
+      time: Calendar.printDate(dateObj, '%H%M'),
+      date: Calendar.dateToInt(dateObj),
+      showTime: true,
+      fdow: 1,
+      weekNumbers: true,
+      onSelect: function() {
+        var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
+        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+        this.hide();
+      },
+      onBlur: function() {
+        var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
+        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+      }
+  });
+  cal.selection.set(Calendar.dateToInt(dateObj));
+  cal.popup(id);
+}

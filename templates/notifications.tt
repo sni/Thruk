@@ -1,7 +1,5 @@
 [% USE date %]
-[% PROCESS _header.tt
-  js = "/thruk/javascript/datetimepicker.js"
-%]
+[% PROCESS _header.tt %]
 
     <form method='get' action='notifications.cgi'>
     <table border="0" width="100%">
@@ -38,9 +36,9 @@
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
                 <div class='navBoxTitle'>Log File Navigation</div>
-                <input type="text" value="[% date.format(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:NewCssCal('start','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% date.format(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:show_cal('start')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>to<br>
-                <input type="text" value="[% date.format(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:NewCssCal('end','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% date.format(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:show_cal('end')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>
               </td>
               <td valign="middle">
