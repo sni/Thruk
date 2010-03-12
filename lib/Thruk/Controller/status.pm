@@ -1284,9 +1284,10 @@ sub _single_search {
         my $value = $filter->{'value'};
         my $op     = '=';
         my $listop = '>=';
-        if($filter->{'op'} eq '!~') { $op = '!~~'; }
+        my $joinop = "Or";
+        if($filter->{'op'} eq '!~') { $op = '!~~'; $joinop = "And"; }
         if($filter->{'op'} eq '~')  { $op = '~~';  }
-        if($filter->{'op'} eq '!=') { $op = '!=';  $listop = '!>='; }
+        if($filter->{'op'} eq '!=') { $op = '!=';  $joinop = "And"; $listop = '!>='; }
 
         if($op eq '=' and $value eq 'all') {
             # add a useless filter
@@ -1311,7 +1312,7 @@ sub _single_search {
                 "Filter: plugin_output $op $value",
                 "Filter: long_plugin_output $op $value"
             ];
-            push @hostfilter, Thruk::Utils::combine_filter($host_search_filter, 'Or');
+            push @hostfilter, Thruk::Utils::combine_filter($host_search_filter, $joinop);
 
             # and some for services
             my $service_search_filter = [
@@ -1323,7 +1324,7 @@ sub _single_search {
                 "Filter: host_alias $op $value",
                 "Filter: host_groups $listop $value",
             ];
-            push @servicefilter, Thruk::Utils::combine_filter($service_search_filter, 'Or');
+            push @servicefilter, Thruk::Utils::combine_filter($service_search_filter, $joinop);
         }
         elsif($filter->{'type'} eq 'host') {
             # check for wildcards
@@ -1335,8 +1336,8 @@ sub _single_search {
                 push @hostfilter,    "Filter: name ~~ $searchhost\nFilter: alias ~~ $searchhost\nOr: 2";
                 push @servicefilter, "Filter: host_name ~~ $searchhost\nFilter: host_alias ~~ $searchhost\nOr: 2";
             } else {
-                push @hostfilter,    "Filter: name $op $value\nFilter: alias $op $value\nOr: 2";
-                push @servicefilter, "Filter: host_name $op $value\nFilter: host_alias $op $value\nOr: 2";
+                push @hostfilter,    "Filter: name $op $value\nFilter: alias $op $value\n$joinop: 2";
+                push @servicefilter, "Filter: host_name $op $value\nFilter: host_alias $op $value\n$joinop: 2";
             }
         }
         elsif($filter->{'type'} eq 'service') {
