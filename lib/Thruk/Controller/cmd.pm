@@ -67,6 +67,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if(defined $quick_command and $quick_command) {
         my $cmd_typ;
         $c->{'request'}->{'parameters'}->{'cmd_mod'} = 1;
+        $c->{'request'}->{'parameters'}->{'trigger'} = 0;
         for my $hostdata (split/,/mx, $c->{'request'}->{'parameters'}->{'selected_hosts'}) {
             if(defined $host_quick_commands->{$quick_command}) {
                 $cmd_typ = $host_quick_commands->{$quick_command};

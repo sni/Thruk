@@ -52,6 +52,11 @@
           <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
         </tr>
         [% END %]
+        [% IF !hostdowntimes || hostdowntimes.size == 0 %]
+        <tr class='downtimeOdd'>
+          <td class='downtimeOdd' colspan="11">There are no host downtimes</td>
+        </tr>
+        [% END %]
       </table>
     </div><br>
     <br>
@@ -91,6 +96,11 @@
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
           <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+        </tr>
+        [% END %]
+        [% IF !servicedowntimes || servicedowntimes.size == 0 %]
+        <tr class='downtimeOdd'>
+          <td class='downtimeOdd' colspan="12">There are no service downtimes</td>
         </tr>
         [% END %]
       </table>

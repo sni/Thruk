@@ -1678,17 +1678,17 @@ sub ssi_include {
     my $footer_file        = $c->stash->{'page'}."-footer.ssi";
 
     if ( defined $c->config->{ssi_includes}->{$global_header_file} ){
-        $c->stash->{ssi_header} = Thruk::Utils::read_ssi{$global_header_file}; 
+        $c->stash->{ssi_header} = Thruk::Utils::read_ssi{$global_header_file};
     }
     if ( defined $c->config->{ssi_includes}->{$header_file} ){
-        $c->stash->{ssi_header} .= Thruk::Utils::read_ssi{$header_file}; 
+        $c->stash->{ssi_header} .= Thruk::Utils::read_ssi{$header_file};
     }
     # Footer
     if ( defined $c->config->{ssi_includes}->{$global_footer_file} ){
-        $c->stash->{ssi_footer} = Thruk::Utils::read_ssi{$global_footer_file}; 
+        $c->stash->{ssi_footer} = Thruk::Utils::read_ssi{$global_footer_file};
     }
     if ( defined $c->config->{ssi_includes}->{$footer_file} ){
-        $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi{$footer_file}; 
+        $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi{$footer_file};
     }
 
     return 1;
