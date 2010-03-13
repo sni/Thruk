@@ -44,6 +44,12 @@ sub begin : Private {
     }
     $c->stash->{'use_frames'} = $use_frames;
 
+    # Index Page
+    my $index_page = Thruk->config->{'index_page'};
+    if(defined $index_page){
+        $c->stash->{'main'} = $index_page;
+    }
+
     # use pager?
     $c->stash->{'use_pager'} = Thruk->config->{'use_pager'}                 || 1;
     $c->stash->{'default_page_size'} = Thruk->config->{'default_page_size'} || 100;
@@ -164,6 +170,10 @@ sub thruk_index : Path('/thruk/') {
     }
     if($c->stash->{'use_frames'}) {
         return $c->detach("thruk_index_html");
+    }
+    # redirect to Thruk->config{'index_page'}
+    if(defined $c->stash->{'main'}){
+        return $c->redirect( $c->stash->{'main'} );
     }
     else {
         return $c->detach("thruk_main_html");
