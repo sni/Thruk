@@ -252,6 +252,9 @@ sub get_cgi_cfg {
         $c->error("cgi.cfg not set");
         $c->detach('/error/index/4');
     }
+    if(! -r $file and -r $c->config->{'project_root'}.'/'.$file) {
+        $file = $c->config->{'project_root'}.'/'.$file;
+    }
     if(! -r $file) {
         $c->log->error("cgi.cfg not readable: ".$!);
         $c->error("cgi.cfg not readable: ".$!);
