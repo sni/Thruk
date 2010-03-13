@@ -415,8 +415,10 @@
               <tr>
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=3&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new comment</a></td>
+                [% IF comments %]
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all comments</a></td>
+                [% END %]
               </tr>
             </table>
             <div align="center">
@@ -466,8 +468,12 @@
             <div class='commentTitle'>Service Downtimes</div>
             <table border="0">
               <tr>
+                <td valign="middle"><img src='/thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a></td>
+                [% IF downtimes %]
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all downtimes</a></td> <!-- FIXME -->
+                <td class='comment'><a href='cmd.cgi?cmd_typ=FIXME&amp;host=[% service.host_name %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all downtimes</a></td>
+                [% END %]
               </tr>
             </table>
             <div align="center">
@@ -478,7 +484,7 @@
                   <th class='comment' nowrap>End Time</th>
                   <th class='comment'>Author</th>
                   <th class='comment'>Comment</th>
-                  <th class='comment' nowrap>Comment ID</th>
+                  <th class='comment' nowrap>Downtime ID</th>
                   <th class='comment'>Type</th>
                   <th class='comment'>Actions</th>
                 </tr>
@@ -495,12 +501,12 @@
                     <td class='[% class %]'>[% downtime.comment | html %]</td>
                     <td class='[% class %]'>[% downtime.id %]</td>
                     <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% downtime.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+                    <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% downtime.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]
                   <tr class='commentOdd'>
-                    <td class='commentOdd' colspan='9'>This Service has no downtimes associated with it</td>
+                    <td class='commentOdd' colspan='8'>This Service has no downtimes associated with it</td>
                   </tr>
                 [% END %]
 

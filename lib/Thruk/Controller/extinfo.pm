@@ -138,8 +138,18 @@ sub _process_host_page {
 
     $c->stash->{'host'}     = $host;
     my $comments            = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nFilter: host_name = $hostname\nFilter: service_description =\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
+    my $downtimes           = $c->{'live'}->selectall_arrayref(
+            "GET downtimes\n"
+        .   Thruk::Utils::get_auth_filter($c, 'downtimes') . "\n"
+        .   "Filter: host_name = $hostname\n"
+        .   "Filter: service_description =\n"
+        .   "Columns:  author comment end_time entry_time fixed host_name id "
+        .      "service_description start_time triggered_by"
+    , {Slice => 1});
+    my $sorteddowntimes = Thruk::Utils::sort($c, $downtimes, 'id', 'DESC');
     my $sortedcomments      = Thruk::Utils::sort($c, $comments, 'id', 'DESC');
     $c->stash->{'comments'} = $sortedcomments;
+    $c->stash->{'downtimes'} = $sorteddowntimes;
 
     return 1;
 }
