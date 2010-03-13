@@ -6,6 +6,7 @@ use warnings;
 
 use Thruk::Utils;
 use Catalyst::Runtime '5.70';
+use FindBin qw($Bin);
 
 ###################################################
 # Set flags and add plugins for the application
@@ -23,7 +24,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.44';
+our $VERSION = '0.46';
 
 ###################################################
 # Configure the application.
@@ -34,16 +35,17 @@ our $VERSION = '0.44';
 # details given here can function as a default configuration,
 # with a external configuration file acting as an override for
 # local deployment.
-
+our $project_root = "$Bin/..";
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
                     'released'               => 'March 12, 2010',
-                    'image_path'             => 'root/thruk/images',
+                    'image_path'             => $project_root.'/root/thruk/images',
+                    'project_root'           => $project_root,
                     'default_view'           => 'TT',
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',
                         ENCODING           => 'utf8',
-                        INCLUDE_PATH       => 'templates',
+                        INCLUDE_PATH       => $project_root.'/templates',
                         FILTERS            => {
                                                 'duration'  => \&Thruk::Utils::filter_duration,
                                                 'nl2br'     => \&Thruk::Utils::filter_nl2br,
@@ -70,7 +72,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                         gd_image_type      => 'png',
 
                     },
-                    'Plugin::ConfigLoader'   => { file => 'thruk.conf' },
+                    'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
                     'Plugin::Authentication' => {
                         default_realm => 'Thruk',
                         realms => {
@@ -90,7 +92,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
 
 ###################################################
 # set installed themes
-my $themes_dir = "root/thruk/themes/";
+my $themes_dir = $project_root."/root/thruk/themes/";
 my @themes;
 opendir(my $dh, $themes_dir) or die "can't opendir '$themes_dir': $!";
 for my $entry (readdir($dh)) {
@@ -105,7 +107,7 @@ __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
 ###################################################
 # set installed themes
-my $ssi_dir = "ssi/";
+my $ssi_dir = $project_root."/ssi/";
 my %ssi;
 opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
 for my $entry (readdir($dh)) {
@@ -125,7 +127,7 @@ __PACKAGE__->setup();
 # Logging
 #
 # check if logdir exists
-if(!-d 'logs') { mkdir('logs') or die("failed to create logs directory: $!"); }
+if(!-d $project_root.'/logs') { mkdir($project_root.'/logs') or die("failed to create logs directory: $!"); }
 
 # initialize Log4Perl
 use Catalyst::Log::Log4perl;
