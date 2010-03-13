@@ -86,7 +86,17 @@
           [% END %]
         </td>
       </tr>
-    </table><br>
+    </table>
+    <br>
+
+    [% IF thruk_message %]
+    <div id="thruk_message" class="thruk_message">
+        <span class="[% thruk_message_class %]">[% thruk_message %]
+        <a href="javascript:close_message()"><img src='/thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a>
+        </span>
+    </div>
+    [% END %]
+
     <div align="center">
       <table border="0" cellpadding="0" width="100%">
         <tr>
@@ -473,7 +483,7 @@
                   <tr class='[% class %]'>
                     <td class='[% class %]' nowrap>[% date.format(comment.entry_time, datetime_format) %]</td>
                     <td class='[% class %]'>[% comment.author %]</td>
-                    <td class='[% class %]'>[% comment.comment %]</td>
+                    <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(comment.comment) %][% ELSE %][% comment.comment %][% END %]</td>
                     <td class='[% class %]'>[% comment.id %]</td>
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
@@ -495,7 +505,8 @@
           <td colspan="2" align="center" valign="top" class='commentPanel'>
           [% IF c.check_user_roles('is_authorized_for_read_only') %]
           [% ELSE %]
-            <a name="downtimes" id="comments"></a>
+            <br>
+            <a name="downtimes" id="downtimes"></a>
             <div class='commentTitle'>Host Downtimes</div>
             <table border="0">
               <tr>
@@ -503,7 +514,7 @@
                 <td class='comment'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a></td>
                 [% IF downtimes %]
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=x&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]' class='comment'>Delete all downtimes</a></td><!-- FIXME -->
+                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;selected_hosts=[% host.name %]%3B%3B[% host.peer_key %]&amp;referer=[% c.request.uri | uri %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]
               </tr>
             </table>
@@ -528,7 +539,7 @@
                     <td class='[% class %]' nowrap>[% date.format(downtime.start_time, datetime_format) %]</td>
                     <td class='[% class %]' nowrap>[% date.format(downtime.end_time, datetime_format) %]</td>
                     <td class='[% class %]'>[% downtime.author %]</td>
-                    <td class='[% class %]'>[% downtime.comment %]</td>
+                    <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
                     <td class='[% class %]'>[% downtime.id %]</td>
                     <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
                     <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% downtime.id %]&amp;backend=[% host.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>

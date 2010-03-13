@@ -47,7 +47,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% c.host_name %]'>[% c.host_name %]</a></td>
           <td class='[% class %]'>[% date.format(c.entry_time, datetime_format) %]</td>
           <td class='[% class %]'>[% c.author %]</td>
-          <td class='[% class %]'>[% c.comment %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(c.comment) %][% ELSE %][% c.comment %][% END %]</td>
           <td class='[% class %]'>[% c.id %]</td>
           <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
@@ -92,7 +92,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% c.host_name %]&amp;service=[% c.service_description %]'>[% c.service_description %]</a></td>
           <td class='[% class %]'>[% date.format(c.entry_time, datetime_format) %]</td>
           <td class='[% class %]'>[% c.author %]</td>
-          <td class='[% class %]'>[% c.comment %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(c.comment) %][% ELSE %][% c.comment %][% END %]</td>
           <td class='[% class %]'>[% c.id %]</td>
           <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
