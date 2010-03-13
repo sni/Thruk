@@ -50,7 +50,6 @@ requires 'Catalyst::Plugin::Compress::Gzip'       => 0;
 requires 'Class::C3'                              => 0.22;
 requires 'Algorithm::C3'                          => 0.08;
 requires 'Time::HiRes'                            => 1.972;
-requires 'threads'                                => 1.75;
 requires 'Thread::Queue'                          => 2.11;
 requires 'Date::Calc'                             => 6.3;
 requires 'FCGI'                                   => 0.69;
