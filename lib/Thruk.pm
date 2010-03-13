@@ -6,6 +6,7 @@ use warnings;
 
 use Thruk::Utils;
 use Catalyst::Runtime '5.70';
+use FindBin qw($Bin);
 
 ###################################################
 # Set flags and add plugins for the application
@@ -23,7 +24,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.44';
+our $VERSION = '0.46';
 
 ###################################################
 # Configure the application.
@@ -90,7 +91,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
 
 ###################################################
 # set installed themes
-my $themes_dir = "root/thruk/themes/";
+my $themes_dir = $Bin."/../root/thruk/themes/";
 my @themes;
 opendir(my $dh, $themes_dir) or die "can't opendir '$themes_dir': $!";
 for my $entry (readdir($dh)) {
@@ -105,7 +106,7 @@ __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
 ###################################################
 # set installed themes
-my $ssi_dir = "ssi/";
+my $ssi_dir = $Bin."/../ssi/";
 my %ssi;
 opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
 for my $entry (readdir($dh)) {
