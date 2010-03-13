@@ -40,15 +40,15 @@ Installation from a package is easy and should be painless:
 
 IMPORTANT: you may need to install libgd and libxpm.
 
--------
+----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
-  %> wget http://www.thruk.org/files/Thruk-0.44-$arch.tar.gz
-  %> tar zxf Thruk-0.44-$arch.tar.gz
-  %> cd Thruk-0.44
+  %> wget http://www.thruk.org/files/Thruk-0.46-$arch.tar.gz
+  %> tar zxf Thruk-0.46-$arch.tar.gz
+  %> cd Thruk-0.46
   %> ./script/thruk_server.pl
--------
+----
 
-For a FastCGI installation follow the steps from the <<_configure_fastcgi_server,source installation>>.
+For the FastCGI installation follow the steps at <<_configure_fastcgi,fastcgi installation>>.
 
 === Quick Installation Guide for Debian
 
@@ -214,7 +214,12 @@ installation:
 Open your browser and open http://<your_host>:3000
 
 
-=== Configure FastCGI Server
+== Configure FastCGI
+
+There are two fast cgi modules for apache at the moment. Choose the
+one which fits best into your environment.
+
+=== mod_fastcgi
 
 start your fcgi server:
 
@@ -332,6 +337,26 @@ use this apache example configuration:
 </VirtualHost>
 -------
 
+=== mod_fcgid
+
+IMPORTANT: Thruk runs with the webserver user in this scenario, make
+sure the webserver user has access to all files and perl modules.
+
+.Apache configuration with mod_fcgid
+-------
+LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
+Alias /thruk /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/
+<Location /thruk>
+    Options ExecCGI
+    Order allow,deny
+    Allow from all
+    AddHandler fcgid-script .pl
+    AuthName "Monitoring Access"
+    AuthType Basic
+    AuthUserFile /home/thruk/Thruk/htpasswd.users
+    Require valid-user
+</Location>
+-------
 
 
 == Configuration
