@@ -196,6 +196,15 @@ function toggleBackend(backend) {
   }
 }
 
+/* toogle checkbox by id */
+function toggleCheckBox(id) {
+  var box = document.getElementById(id);
+  if(box.checked) {
+    box.checked = false;
+  } else {
+    box.checked = true;
+  }
+}
 
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
@@ -1111,3 +1120,4 @@ function show_cal(id) {
   cal.selection.set(Calendar.dateToInt(dateObj));
   cal.popup(id);
 }
+

@@ -44,15 +44,19 @@
     </tr>
     <tr id="row_reschedule_options">
       <td class="statusOdd">Options:</td>
-      <td class="statusOdd"><input type='checkbox' name='force_check' checked></td>
+      <td class="statusOdd">
+        <table border=0 cellpadding=0 cellspacing=0>
+          <tr><td onclick="javascript:toggleCheckBox('opt1')">Force Check:</td><td><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
+        </table>
+      </td>
     </tr>
     <tr id="row_ack_options">
       <td class="statusOdd" valign="top">Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
-          <tr><td>Sticky Acknowledgement:</td><td><input type='checkbox' name='sticky_ack' checked></td></tr>
-          <tr><td>Send Notification:</td><td><input type='checkbox' name='send_notification'></td></tr>
-          <tr><td>Persistent Comment:</td><td><input type='checkbox' name='persistent'></td></tr>
+          <tr><td onclick="javascript:toggleCheckBox('opt2')">Sticky Acknowledgement:</td><td><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack %] checked>[% END %]</td></tr>
+          <tr><td onclick="javascript:toggleCheckBox('opt3')">Send Notification:</td><td><input type='checkbox' id="opt3" name='send_notification'[% IF c.config.cmd_defaults.send_notification %] checked[% END %]></td></tr>
+          <tr><td onclick="javascript:toggleCheckBox('opt4')">Persistent Comment:</td><td><input type='checkbox' id="opt4" name='persistent'[% IF c.config.cmd_defaults.persistent %] checked[% END %]></td></tr>
         </table>
       </td>
     </tr>

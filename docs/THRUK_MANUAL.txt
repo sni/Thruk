@@ -512,6 +512,24 @@ ex.:
   command_disabled = 35
 
 
+==== cmd_defaults
+Set the default checked state for command options.
+
+ex.:
+
+  <cmd_defaults>
+    ahas                   = 0  # For Hosts Too
+    broadcast_notification = 0  # Broadcast
+    force_check            = 0  # Forced Check
+    force_notification     = 0  # Forced Notification
+    send_notification      = 1  # Send Notification
+    sticky_ack             = 1  # Sticky Acknowledgement
+    persistent_comments    = 1  # Persistent Comments
+    persistent_ack         = 0  # Persistent Acknowledgement Comments
+    ptc                    = 0  # For Child Hosts Too
+  </cmd_defaults>
+
+
 ==== datetime_format
 Default timeformat. Use POSIX format.
 

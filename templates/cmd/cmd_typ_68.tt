@@ -8,7 +8,7 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to disable active checks of all services in a particular hostgroup'
-   description = 'This command is used to disable active checks of all services in the specified hostgroup. This <i>does not</i> disable checks of the hosts in the hostgroup unless you check the 'Disable for hosts too' option.'
+   description = 'This command is used to disable active checks of all services in the specified hostgroup. This <i>does not</i> disable checks of the hosts in the hostgroup unless you check the "Disable for hosts too" option.'
 %]
 
 [%# definition of the command send to your backend #%]
@@ -20,7 +20,7 @@
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Hostgroup Name:</td><td><b><input type='text' name='hostgroup' value='[% c.request.parameters.hostgroup %]'></b></td></tr>
-<tr><td class='optBoxItem'>Disable For Hosts Too:</td><td><b><input type='checkbox' name='ahas'></b></td></tr>
+<tr><td class='optBoxItem'>Disable For Hosts Too:</td><td><b><input type='checkbox' name='ahas'[% IF c.config.cmd_defaults.ahas %] checked[% END %]></b></td></tr>
 
 [% END %]
 [% END %]

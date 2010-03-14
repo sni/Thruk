@@ -1229,6 +1229,23 @@ multiple commands. Use the number from the cmd_typ cgi parameter.</p></div>
 <pre><tt>command_disabled = 14
 command_disabled = 35</tt></pre>
 </div></div>
+<h4 id="_cmd_defaults">cmd_defaults</h4>
+<div class="para"><p>Set the default checked state for command options.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;cmd_defaults&gt;
+  ahas                   = 0  # For Hosts Too
+  broadcast_notification = 0  # Broadcast
+  force_check            = 0  # Forced Check
+  force_notification     = 0  # Forced Notification
+  send_notification      = 1  # Send Notification
+  sticky_ack             = 1  # Sticky Acknowledgement
+  persistent_comments    = 1  # Persistent Comments
+  persistent_ack         = 0  # Persistent Acknowledgement Comments
+  ptc                    = 0  # For Child Hosts Too
+&lt;/cmd_defaults&gt;</tt></pre>
+</div></div>
 <h4 id="_datetime_format">datetime_format</h4>
 <div class="para"><p>Default timeformat. Use POSIX format.</p></div>
 <div class="para"><p>ex.:</p></div>
@@ -1478,7 +1495,7 @@ as content.</p></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-03-14 00:49:59 CEST
+Last updated 2010-03-14 12:28:04 CEST
 </div>
 </div>
 </body>
