@@ -4,6 +4,7 @@ use 5.008000;
 use strict;
 use warnings;
 
+use Catalyst::Log::Log4perl;
 use Thruk::Utils;
 use Catalyst::Runtime '5.70';
 
@@ -117,9 +118,17 @@ for my $entry (readdir($dh)) {
 closedir $dh;
 __PACKAGE__->config->{'ssi_includes'} = \%ssi;
 
+
 ###################################################
 # Start the application
 __PACKAGE__->setup();
+
+
+###################################################
+# load and parse cgi.cfg into $c->config
+unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log)) {
+    die("\n\n*****\nfailed to load cgi config\n*****\n\n");
+}
 
 
 ###################################################
@@ -127,9 +136,6 @@ __PACKAGE__->setup();
 #
 # check if logdir exists
 if(!-d $project_root.'/logs') { mkdir($project_root.'/logs') or die("failed to create logs directory: $!"); }
-
-# initialize Log4Perl
-use Catalyst::Log::Log4perl;
 
 my $log4perlconfig;
 my $log4confarr = __PACKAGE__->config->{'Catalyst::Log::Log4perl'}->{'conf'};
@@ -141,9 +147,12 @@ elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );
 }
 
+
 ###################################################
 # GD installed?
+# set to true unless there is a way to load trends.pm safely without GD
 __PACKAGE__->config->{'has_gd'} = 1;
+
 
 =head1 NAME
 

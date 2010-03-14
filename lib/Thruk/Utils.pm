@@ -43,7 +43,7 @@ sub get_auth_filter {
     return("") if $type eq 'status';
 
     # if authentication is completly disabled
-    if($c->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
+    if($c->config->{'cgi.cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi.cfg'}->{'use_ssl_authentication'} == 0) {
         return("");
     }
 
@@ -227,47 +227,67 @@ sub filter_sprintf {
 
 ######################################
 
-=head2 get_cgi_cfg
+=head2 read_cgi_cfg
 
-  my $conf = get_cgi_cfg($c);
+  read_cgi_cfg($c);
 
-parse and return the cgi.cg as hash ref
+parse the cgi.cfg and put it into $c->config
 
 =cut
-sub get_cgi_cfg {
-    my $c = shift;
+sub read_cgi_cfg {
+    my $c      = shift;
+    my $config = shift;
+    if(defined $c) {
+        $config = $c->config;
+    }
 
-    $c->stats->profile(begin => "Utils::get_cgi_cfg()");
+    $c->stats->profile(begin => "Utils::read_cgi_cfg()") if defined $c;
 
-    # read only once per request
-    our(%config, $cgi_config_already_read);
-
-    return(\%config) if $cgi_config_already_read;
-
-    my $file = $c->config->{'cgi_cfg'};
-
+    # read only if its changed
+    my $file = $config->{'cgi_cfg'};
     if(!defined $file or $file eq '') {
-        $c->config->{'cgi_cfg'} = 'undef';
-        $c->log->error("cgi.cfg not set");
-        $c->error("cgi.cfg not set");
-        $c->detach('/error/index/4');
+        $config->{'cgi_cfg'} = 'undef';
+        if(defined $c) {
+            $c->log->error("cgi.cfg not set");
+            $c->error("cgi.cfg not set");
+            $c->detach('/error/index/4');
+        }
+        print STDERR "cgi_cfg option must be set in thruk.conf or thruk_local.conf\n\n";
+        return;
     }
-    if(! -r $file and -r $c->config->{'project_root'}.'/'.$file) {
-        $file = $c->config->{'project_root'}.'/'.$file;
+    elsif( -r $file ) {
+        # perfect, file exists and is readable
     }
-    if(! -r $file) {
-        $c->log->error("cgi.cfg not readable: ".$!);
-        $c->error("cgi.cfg not readable: ".$!);
-        $c->detach('/error/index/4');
+    elsif(-r $config->{'project_root'}.'/'.$file) {
+        $file = $config->{'project_root'}.'/'.$file;
+    }
+    else {
+        if(defined $c) {
+            $c->log->error("cgi.cfg not readable: ".$!);
+            $c->error("cgi.cfg not readable: ".$!);
+            $c->detach('/error/index/4');
+        }
+        print STDERR "$file not readable: ".$!."\n\n";
+        return;
     }
 
-    $cgi_config_already_read = 1;
-    my $conf = new Config::General($file);
-    %config  = $conf->getall;
+    # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
+    my @cgi_cfg_stat = stat($file);
 
-    $c->stats->profile(end => "Utils::get_cgi_cfg()");
+    my $last_stat = $config->{'cgi_cfg_stat'};
+    if(!defined $last_stat
+       or $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
+       or $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
+      ) {
+        $c->log->debug("reading $file") if defined $c;
+        $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
+        my $conf = new Config::General($file);
+        %{$config->{'cgi.cfg'}} = $conf->getall;
+    }
 
-    return(\%config);
+    $c->stats->profile(end => "Utils::read_cgi_cfg()") if defined $c;
+
+    return 1;
 }
 
 

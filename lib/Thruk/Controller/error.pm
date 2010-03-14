@@ -29,9 +29,6 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         confess("undefined c in error/index");
     }
 
-    # if there is no cgi config, always return the cgi error
-    if(!defined $c->{'cgi_cfg'}) { $arg1 = 4; }
-
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
 
@@ -154,12 +151,9 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
 
     ###############################
     # try to set the refresh
-    eval {
-        $c->{'cgi_cfg'} = Thruk::Utils::get_cgi_cfg($c);
-        if(defined $c->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
-            $c->stash->{'refresh_rate'} = $c->{'cgi_cfg'}->{'refresh_rate'};
-        }
-    };
+    if(defined $c->config->{'cgi.cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
+        $c->stash->{'refresh_rate'} = $c->config->{'cgi.cfg'}->{'refresh_rate'};
+    }
 
     return 1;
 }

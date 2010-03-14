@@ -42,7 +42,6 @@ livestatus:
 ideas for after 1.0
 
 general:
-    - reload cgi.cfg if changed
     - create models for hosts / services / contacts
     - webservice api, passthrough querys to livestatus and return json
       result
