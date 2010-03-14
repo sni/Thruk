@@ -127,6 +127,36 @@ sub _process_details_page {
     # which host to display?
     my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
 
+    # add comments and downtimes
+    my $comments  = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name service_description source type author comment entry_time entry_type expire_time", { Slice => {} });
+    my $downtimes = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nColumns: service_description author comment end_time entry_time fixed host_name id start_time", { Slice => {} });
+    my $downtimes_by_host;
+    my $downtimes_by_host_service;
+    if($downtimes) {
+        for my $downtime (@{$downtimes}) {
+            if(defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '') {
+                push @{$downtimes_by_host_service->{$downtime->{'host_name'}}->{$downtime->{'service_description'}}}, $downtime;
+            } else {
+                push @{$downtimes_by_host->{$downtime->{'host_name'}}}, $downtime;
+            }
+        }
+    }
+    $c->stash->{'downtimes_by_host'}         = $downtimes_by_host;
+    $c->stash->{'downtimes_by_host_service'} = $downtimes_by_host_service;
+    my $comments_by_host;
+    my $comments_by_host_service;
+    if($comments) {
+        for my $comment (@{$comments}) {
+            if(defined $comment->{'service_description'} and $comment->{'service_description'} ne '') {
+                push @{$comments_by_host_service->{$comment->{'host_name'}}->{$comment->{'service_description'}}}, $comment;
+            } else {
+                push @{$comments_by_host->{$comment->{'host_name'}}}, $comment;
+            }
+        }
+    }
+    $c->stash->{'comments_by_host'}         = $comments_by_host;
+    $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
+
     # get all services
     my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\n$servicefilter\nColumns: host_name host_state host_address host_acknowledged host_notifications_enabled host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded host_icon_image_alt host_comments has_been_checked state description acknowledged comments notifications_enabled active_checks_enabled accept_passive_checks is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change current_attempt max_check_attempts next_check plugin_output long_plugin_output", { Slice => {}, AddPeer => 1 });
 
@@ -169,6 +199,24 @@ sub _process_hostdetails_page {
 
     # which host to display?
     my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
+
+    # add comments and downtimes
+    my $comments  = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name source type author comment entry_time entry_type expire_time\nFilter: service_description = ", { Slice => {} });
+    my $downtimes = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: author comment end_time entry_time fixed host_name id start_time", { Slice => {} });
+    my $downtimes_by_host;
+    if($downtimes) {
+        for my $downtime (@{$downtimes}) {
+            push @{$downtimes_by_host->{$downtime->{'host_name'}}}, $downtime;
+        }
+    }
+    $c->stash->{'downtimes_by_host'} = $downtimes_by_host;
+    my $comments_by_host;
+    if($comments) {
+        for my $comment (@{$comments}) {
+            push @{$comments_by_host->{$comment->{'host_name'}}}, $comment;
+        }
+    }
+    $c->stash->{'comments_by_host'} = $comments_by_host;
 
     # add comments into hosts.comments and hosts.comment_count
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\n$hostfilter\nColumns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check long_plugin_output", { Slice => {}, AddPeer => 1 });

@@ -6,7 +6,6 @@ use warnings;
 
 use Thruk::Utils;
 use Catalyst::Runtime '5.70';
-use FindBin qw($Bin);
 
 ###################################################
 # Set flags and add plugins for the application
@@ -35,10 +34,10 @@ our $VERSION = '0.46';
 # details given here can function as a default configuration,
 # with a external configuration file acting as an override for
 # local deployment.
-our $project_root = "$Bin/..";
+my $project_root = __PACKAGE__->config->{home};
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'March 12, 2010',
+                    'released'               => 'March 14, 2010',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
                     'default_view'           => 'TT',
@@ -113,7 +112,7 @@ opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
 for my $entry (readdir($dh)) {
     next if $entry eq '.' or $entry eq '..';
     next if $entry !~ /\.ssi$/mx;
-    $ssi{$entry} = { name => $entry } 
+    $ssi{$entry} = { name => $entry }
 }
 closedir $dh;
 __PACKAGE__->config->{'ssi_includes'} = \%ssi;

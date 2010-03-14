@@ -196,6 +196,15 @@ function toggleBackend(backend) {
   }
 }
 
+/* toogle checkbox by id */
+function toggleCheckBox(id) {
+  var box = document.getElementById(id);
+  if(box.checked) {
+    box.checked = false;
+  } else {
+    box.checked = true;
+  }
+}
 
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
@@ -254,9 +263,17 @@ function addEventHandler(elem, type) {
 
 /* returns the first element which has an id */
 function getFirstParentId(elem) {
+    if(!elem) {
+        alert("ERROR: got no element in getFirstParentId()");
+        return;
+    }
     nr = 0;
     while(nr < 10 && !elem.id) {
         nr++;
+        if(!elem.parentNode) {
+            //alert("ERROR: element has no parentNode in getFirstParentId(): " + elem);
+            return;
+        }
         elem = elem.parentNode;
     }
     return elem.id;
@@ -266,6 +283,10 @@ function getFirstParentId(elem) {
 function setRowStyle(row_id, style, type, force) {
 
     var row = document.getElementById(row_id);
+    if(!row) {
+        //alert("ERROR: got no row in setRowStyle(): " + row_id);
+        return;
+    }
 
     // for each cells in this row
     var cells = row.cells;
@@ -356,6 +377,9 @@ function highlightServiceRow()
 {
     // find id of current row
     var row_id = getFirstParentId(this);
+    if(!row_id) {
+      return;
+    }
     setRowStyle(row_id, 'tableRowHover', 'service');
 }
 
@@ -364,6 +388,9 @@ function highlightHostRow()
 {
     // find id of current row
     var row_id = getFirstParentId(this);
+    if(!row_id) {
+      return;
+    }
     setRowStyle(row_id, 'tableRowHover', 'host');
 }
 
@@ -1093,3 +1120,4 @@ function show_cal(id) {
   cal.selection.set(Calendar.dateToInt(dateObj));
   cal.popup(id);
 }
+

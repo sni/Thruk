@@ -625,12 +625,12 @@ RkWOKkVXIjB5X2ac8f8HA74K8I0SaJkAAAAASUVORK5CYII=" />
 <div class="listingblock">
 <div class="content">
 <pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
-  %&gt; wget http://www.thruk.org/files/Thruk-0.44-$arch.tar.gz
-  %&gt; tar zxf Thruk-0.44-$arch.tar.gz
-  %&gt; cd Thruk-0.44
+  %&gt; wget http://www.thruk.org/files/Thruk-0.46-$arch.tar.gz
+  %&gt; tar zxf Thruk-0.46-$arch.tar.gz
+  %&gt; cd Thruk-0.46
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
-<div class="para"><p>For a FastCGI installation follow the steps from the <a href="#_configure_fastcgi_server">source installation</a>.</p></div>
+<div class="para"><p>For the FastCGI installation follow the steps at <a href="#_configure_fastcgi">fastcgi installation</a>.</p></div>
 <h3 id="_quick_installation_guide_for_debian">Quick Installation Guide for Debian</h3><div style="clear:left"></div>
 <div class="listingblock">
 <div class="content">
@@ -886,7 +886,12 @@ installation:</p></div>
 <pre><tt>    ./script/thruk_server.pl</tt></pre>
 </div></div>
 <div class="para"><p>Open your browser and open <a href="http://&lt;your_host&gt;:3000">http://&lt;your_host&gt;:3000</a></p></div>
-<h3 id="_configure_fastcgi_server">Configure FastCGI Server</h3><div style="clear:left"></div>
+</div>
+<h2 id="_configure_fastcgi">Configure FastCGI</h2>
+<div class="sectionbody">
+<div class="para"><p>There are two fast cgi modules for apache at the moment. Choose the
+one which fits best into your environment.</p></div>
+<h3 id="_mod_fastcgi">mod_fastcgi</h3><div style="clear:left"></div>
 <div class="para"><p>start your fcgi server:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -1012,6 +1017,79 @@ make sure the /home/thruk/Thruk/logs/ directory exists
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^/(.*)$ /tmp/thruk_fastcgi.fcgi/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
 &lt;/VirtualHost&gt;</tt></pre>
+</div></div>
+<h3 id="_mod_fcgid">mod_fcgid</h3><div style="clear:left"></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Important" src="data:image/png;base64,
+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" />
+</td>
+<td class="content">Thruk runs with the webserver user in this scenario, make
+sure the webserver user has access to all files and perl modules.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="title">Example: Apache configuration with mod_fcgid</div>
+<div class="content">
+<pre><tt>LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
+Alias /thruk /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/
+&lt;Location /thruk&gt;
+    Options ExecCGI
+    Order allow,deny
+    Allow from all
+    AddHandler fcgid-script .pl
+    AuthName "Monitoring Access"
+    AuthType Basic
+    AuthUserFile /home/thruk/Thruk/htpasswd.users
+    Require valid-user
+&lt;/Location&gt;</tt></pre>
 </div></div>
 </div>
 <h2 id="_configuration_2">Configuration</h2>
@@ -1150,6 +1228,23 @@ multiple commands. Use the number from the cmd_typ cgi parameter.</p></div>
 <div class="content">
 <pre><tt>command_disabled = 14
 command_disabled = 35</tt></pre>
+</div></div>
+<h4 id="_cmd_defaults">cmd_defaults</h4>
+<div class="para"><p>Set the default checked state for command options.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;cmd_defaults&gt;
+  ahas                   = 0  # For Hosts Too
+  broadcast_notification = 0  # Broadcast
+  force_check            = 0  # Forced Check
+  force_notification     = 0  # Forced Notification
+  send_notification      = 1  # Send Notification
+  sticky_ack             = 1  # Sticky Acknowledgement
+  persistent_comments    = 1  # Persistent Comments
+  persistent_ack         = 0  # Persistent Acknowledgement Comments
+  ptc                    = 0  # For Child Hosts Too
+&lt;/cmd_defaults&gt;</tt></pre>
 </div></div>
 <h4 id="_datetime_format">datetime_format</h4>
 <div class="para"><p>Default timeformat. Use POSIX format.</p></div>
@@ -1400,7 +1495,7 @@ as content.</p></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-03-12 23:03:12 CEST
+Last updated 2010-03-14 12:28:04 CEST
 </div>
 </div>
 </body>

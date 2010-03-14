@@ -42,7 +42,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name %]'>[% d.host_name %]</a></td>
           <td class='[% class %]'>[% date.format(d.entry_time, datetime_format) %]</td>
           <td class='[% class %]'>[% d.author %]</td>
-          <td class='[% class %]'>[% d.comment %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
           <td class='[% class %]'>[% date.format(d.start_time, datetime_format) %]</td>
           <td class='[% class %]'>[% date.format(d.end_time, datetime_format) %]</td>
           <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
@@ -50,6 +50,11 @@
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
           <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+        </tr>
+        [% END %]
+        [% IF !hostdowntimes || hostdowntimes.size == 0 %]
+        <tr class='downtimeOdd'>
+          <td class='downtimeOdd' colspan="11">There are no host downtimes</td>
         </tr>
         [% END %]
       </table>
@@ -83,7 +88,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name %]&amp;service=[% d.service_description %]'>[% d.service_description %]</a></td>
           <td class='[% class %]'>[% date.format(d.entry_time, datetime_format) %]</td>
           <td class='[% class %]'>[% d.author %]</td>
-          <td class='[% class %]'>[% d.comment %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
           <td class='[% class %]'>[% date.format(d.start_time, datetime_format) %]</td>
           <td class='[% class %]'>[% date.format(d.end_time, datetime_format) %]</td>
           <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
@@ -91,6 +96,11 @@
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
           <td><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+        </tr>
+        [% END %]
+        [% IF !servicedowntimes || servicedowntimes.size == 0 %]
+        <tr class='downtimeOdd'>
+          <td class='downtimeOdd' colspan="12">There are no service downtimes</td>
         </tr>
         [% END %]
       </table>

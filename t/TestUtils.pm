@@ -141,6 +141,33 @@ sub test_page {
         is( scalar @errors, 0, "No errors found in HTML" );
         $lint->clear_errors();
     }
+
+    # check for missing images / css or js
+    if($content_type =~ 'text\/html') {
+        my @matches = $content =~ m/(src|href)=['|"](.+?)['|"]/g;
+        my $links_to_check;
+        my $x=0;
+        for my $match (@matches) {
+            $x++;
+            next if $x%2==1;
+            next if $match =~ m/^http/;
+            next if $match =~ m/^mailto:/;
+            next if $match =~ m/^#/;
+            next if $match =~ m/^\/thruk\/cgi\-bin/;
+            next if $match =~ m/^\w+\.cgi/;
+            next if $match =~ m/^javascript:/;
+            $links_to_check->{$match} = 1;
+        }
+        my $errors = 0;
+        for my $test_url (keys %{$links_to_check}) {
+            my $request = request($test_url);
+            unless($request->is_success) {
+                $errors++;
+                diag("'$test_url' is missing");
+            }
+        }
+        is( $errors, 0, 'All stylesheets, images and javascript exist' );
+    }
 }
 
 #########################

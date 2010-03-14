@@ -20,7 +20,7 @@
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
-<tr><td class='optBoxItem'>Enable Notifications For Child Hosts Too:</td><td><b><input type='checkbox' name='ptc'></b></td></tr>
+<tr><td class='optBoxItem'>Enable Notifications For Child Hosts Too:</td><td><b><input type='checkbox' name='ptc'[% IF c.config.cmd_defaults.ptc %] checked[% END %]></b></td></tr>
 
 [% END %]
 [% END %]

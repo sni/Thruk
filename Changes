@@ -1,6 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+0.46    Sun Mar 14 12:29:51 CET 2010
+          - default state of command checkboxes can be configured
+          - fixed problem with paths
+          - fixed 'check all' link for hostdetails
+
 0.44    Fri Mar 12 17:31:10 CET 2010
           - added server side includes
 

@@ -8,7 +8,7 @@
 [%# description used by the commands page #%]
 [% WRAPPER $cmd_tt
    request     = 'You are requesting to add a host comment'
-   description = 'This command is used to add a comment for the specified host. If you work with other administrators, you may find it useful to share information about a host that is having problems if more than one of you may be working on it. If you do not check the 'persistent' option, the comment will be automatically be deleted the next time your Monitoring is restarted.'
+   description = 'This command is used to add a comment for the specified host. If you work with other administrators, you may find it useful to share information about a host that is having problems if more than one of you may be working on it. If you do not check the "persistent" option, the comment will be automatically be deleted the next time your Monitoring is restarted.'
 %]
 
 [%# definition of the command send to your backend #%]
@@ -23,7 +23,7 @@
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
-<tr><td class='optBoxItem'>Persistent:</td><td><b><input type='checkbox' name='persistent' checked></b></td></tr>
+<tr><td class='optBoxItem'>Persistent:</td><td><b><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_comments %] checked[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
 

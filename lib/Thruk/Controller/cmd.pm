@@ -67,6 +67,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if(defined $quick_command and $quick_command) {
         my $cmd_typ;
         $c->{'request'}->{'parameters'}->{'cmd_mod'} = 1;
+        $c->{'request'}->{'parameters'}->{'trigger'} = 0;
+        $c->{'request'}->{'parameters'}->{'selected_hosts'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_hosts'};
         for my $hostdata (split/,/mx, $c->{'request'}->{'parameters'}->{'selected_hosts'}) {
             if(defined $host_quick_commands->{$quick_command}) {
                 $cmd_typ = $host_quick_commands->{$quick_command};
@@ -90,6 +92,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 }
             }
         }
+        $c->{'request'}->{'parameters'}->{'selected_services'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_services'};
         for my $servicedata (split/,/mx, $c->{'request'}->{'parameters'}->{'selected_services'}) {
             if(defined $service_quick_commands->{$quick_command}) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
