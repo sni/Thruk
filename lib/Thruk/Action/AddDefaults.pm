@@ -49,6 +49,15 @@ before 'execute' => sub {
             $nr_disabled++ if $value == 2;
         }
     }
+    else {
+        my $livestatus_config = Thruk::Utils::get_livestatus_conf($c);
+        for my $peer (@{$livestatus_config->{'peer'}}) {
+            if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
+                $disabled_backends{$peer->{'peer'}} = 2;
+                $nr_disabled++;
+            }
+        }
+    }
     $c->{'live'} = Thruk::Utils::get_livestatus($c, \%disabled_backends);
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     $c->stash->{'param_backend'}  = $backend;
