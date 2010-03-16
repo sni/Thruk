@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - cgi.cfg will be reloaded if changed ( without restarting )
           - fixed problem with paths
           - fixed 'check all' link for hostdetails
+          - fixed problem with umlauts in comments
 
 0.44    Fri Mar 12 17:31:10 CET 2010
           - added server side includes

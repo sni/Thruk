@@ -15,6 +15,7 @@ use Catalyst::Runtime '5.70';
 
 use parent qw/Catalyst/;
 use Catalyst qw/
+                Unicode
                 Authentication
                 Authorization::ThrukRoles
                 CustomErrorMessage
