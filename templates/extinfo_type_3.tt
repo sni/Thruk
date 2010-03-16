@@ -39,20 +39,20 @@
         </tr>
 
         [% SET hostcommentscount = 0 %]
-        [%  FOREACH c = hostcomments %]
+        [%  FOREACH com = hostcomments %]
         [% SET class = 'commentOdd'  IF loop.even %]
         [% SET class = 'commentEven' IF loop.odd %]
         [% SET hostcommentscount = hostcommentscount + 1 %]
         <tr class='[% class %]'>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% c.host_name %]'>[% c.host_name %]</a></td>
-          <td class='[% class %]'>[% date.format(c.entry_time, datetime_format) %]</td>
-          <td class='[% class %]'>[% c.author %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(c.comment) %][% ELSE %][% c.comment %][% END %]</td>
-          <td class='[% class %]'>[% c.id %]</td>
-          <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
-          <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
-          <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% c.id %]&amp;backend=[% c.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% com.host_name %]'>[% com.host_name %]</a></td>
+          <td class='[% class %]'>[% date.format(com.entry_time, datetime_format) %]</td>
+          <td class='[% class %]'>[% com.author %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
+          <td class='[% class %]'>[% com.id %]</td>
+          <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
+          <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
+          <td class='[% class %]'>[% IF com.expires %][% date.format(com.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
+          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF hostcommentscount == 0 %]
@@ -83,21 +83,21 @@
           <th class='comment'>Actions</th>
         </tr>
         [% SET servicecommentscount = 0 %]
-        [%  FOREACH c = servicecomments %]
+        [%  FOREACH com = servicecomments %]
         [% SET class = 'commentOdd'  IF loop.even %]
         [% SET class = 'commentEven' IF loop.odd %]
         [% SET servicecommentscount = servicecommentscount + 1 %]
         <tr class='[% class %]'>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% c.host_name %]'>[% c.host_name %]</a></td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% c.host_name %]&amp;service=[% c.service_description %]'>[% c.service_description %]</a></td>
-          <td class='[% class %]'>[% date.format(c.entry_time, datetime_format) %]</td>
-          <td class='[% class %]'>[% c.author %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(c.comment) %][% ELSE %][% c.comment %][% END %]</td>
-          <td class='[% class %]'>[% c.id %]</td>
-          <td class='[% class %]'>[% IF c.persistent %]Yes[% ELSE %]No[% END %]</td>
-          <td class='[% class %]'>[% IF c.entry_type == 1 %]User[% ELSIF c.entry_type == 2 %]Scheduled Downtime[% ELSIF c.entry_type == 3 %]Flap Detection[% ELSIF c.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
-          <td class='[% class %]'>[% IF c.expires %][% date.format(c.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% c.id %]&amp;backend=[% c.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% com.host_name %]'>[% com.host_name %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% com.host_name %]&amp;service=[% com.service_description %]'>[% com.service_description %]</a></td>
+          <td class='[% class %]'>[% date.format(com.entry_time, datetime_format) %]</td>
+          <td class='[% class %]'>[% com.author %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
+          <td class='[% class %]'>[% com.id %]</td>
+          <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
+          <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
+          <td class='[% class %]'>[% IF com.expires %][% date.format(com.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
+          <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF servicecommentscount == 0 %]

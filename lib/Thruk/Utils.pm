@@ -311,14 +311,7 @@ sub get_livestatus {
     if(defined $livestatus) {
         $c->log->debug("got livestatus from cache");
         $livestatus->enable();
-        if(defined $disabled_backends) {
-            for my $key (keys %{$disabled_backends}) {
-                if($disabled_backends->{$key} == 2) {
-                    $c->log->debug("disabled livestatus backend: $key");
-                    $livestatus->disable($key);
-                }
-            }
-        }
+        Thruk::Utils::_disable_backends($c, $livestatus, $disabled_backends);
         return($livestatus);
     }
     $c->log->debug("creating new livestatus");
@@ -333,14 +326,7 @@ sub get_livestatus {
     }
     $livestatus = Monitoring::Livestatus::MULTI->new(%{$livestatus_config});
 
-    if(defined $disabled_backends) {
-        for my $key (keys %{$disabled_backends}) {
-            if($disabled_backends->{$key} == 2) {
-                $c->log->debug("disabled livestatus backend: $key");
-                $livestatus->disable($key);
-            }
-        }
-    }
+    Thruk::Utils::_disable_backends($c, $livestatus, $disabled_backends);
 
     $c->stats->profile(end => "Utils::get_livestatus()");
 
@@ -1772,6 +1758,33 @@ sub _html_escape {
     return HTML::Entities::encode($text);
 }
 
+########################################
+# disable (hide) livestatus backends by key or address
+sub _disable_backends {
+    my $c                 = shift;
+    my $livestatus        = shift;
+    my $disabled_backends = shift;
+
+    if(defined $disabled_backends) {
+        for my $key (keys %{$disabled_backends}) {
+            if($disabled_backends->{$key} == 2) {
+                if($livestatus->_get_peer_by_key($key)) {
+                    $c->log->debug("disabled livestatus backend by key: $key");
+                    $livestatus->disable($key);
+                }
+                else {
+                    my $peer = $livestatus->_get_peer_by_addr($key);
+                    if(defined $peer) {
+                        $c->log->debug("disabled livestatus backend by addr: ".$key);
+                        $livestatus->disable($peer->{'key'});
+                        $disabled_backends->{$peer->{'key'}} = 2;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
 1;
 
 =head1 AUTHOR

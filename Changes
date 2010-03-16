@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 0.46    Sun Mar 14 12:29:51 CET 2010
           - default state of command checkboxes can be configured
           - cgi.cfg will be reloaded if changed ( without restarting )
+          - backends can be setup with initial hidden state
           - fixed problem with paths
           - fixed 'check all' link for hostdetails
           - fixed problem with umlauts in comments
