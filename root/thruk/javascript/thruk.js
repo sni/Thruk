@@ -378,6 +378,12 @@ function styleElementsFF(elems, style, force) {
 /* this is the mouseover function for services */
 function highlightServiceRow()
 {
+    // reset all current highlighted rows
+    $$('td.tableRowHover').each(function(e) {
+        resetHostRow(e);
+        resetServiceRow(e);
+    });
+
     // find id of current row
     var row_id = getFirstParentId(this);
     if(!row_id) {
@@ -389,6 +395,12 @@ function highlightServiceRow()
 /* this is the mouseover function for hosts */
 function highlightHostRow()
 {
+    // reset all current highlighted rows
+    $$('td.tableRowHover').each(function(e) {
+        resetHostRow(e);
+        resetServiceRow(e);
+    });
+
     // find id of current row
     var row_id = getFirstParentId(this);
     if(!row_id) {
@@ -490,6 +502,7 @@ function resetServiceRow(event)
     if(!event) {
         event = this;
     }
+
     // find id of current row
     if(event.target) {
         row_id = getFirstParentId(event.target);
