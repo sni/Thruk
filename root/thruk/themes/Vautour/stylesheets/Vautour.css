@@ -1,3 +1,9 @@
+.servicePENDING  { background-color: #acacac; }
+.serviceOK       { background-color: #00CC33; }
+.serviceUNKNOWN  { background-color: #bf44b2; }
+.serviceWARNING  { background-color: #ffa500; }
+.serviceCRITICAL { background-color: #ff3300; }
+
 /* show log filter */
 body.showlog .filter { border: 0; background-color: white; }
 body.showlog .filterTitle { font-size: 10pt; font-weight: bold; background-color: white; }

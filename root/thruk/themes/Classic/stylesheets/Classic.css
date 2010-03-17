@@ -1,3 +1,9 @@
+.servicePENDING  { background-color: #ACACAC; }
+.serviceOK       { background-color: #33FF00; }
+.serviceUNKNOWN  { background-color: #FF9900; }
+.serviceWARNING  { background-color: #FFFF00; }
+.serviceCRITICAL { background-color: #F83838; }
+
 /* fix for link box and infobox border */
 table.infoBox {
   margin-top: 5px;
