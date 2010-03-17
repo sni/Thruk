@@ -14,6 +14,7 @@ var cmdPaneState     = 0;
 var origRefreshVal   = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Hash({});
+var backendSelTimer;
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -192,7 +193,8 @@ function toggleBackend(backend) {
   /* save current selected backends in session cookie */
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
   if(initial_state != 3) {
-    reloadPage();
+    window.clearTimeout(backendSelTimer);
+    backendSelTimer  = window.setTimeout('reloadPage()', 1000);
   }
 }
 
@@ -222,6 +224,7 @@ Y8,           88   `8b d8'   88 88         8P
 *******************************************************************************/
 var selectedServices = new Hash;
 var selectedHosts    = new Hash;
+
 function addRowSelector(id)
 {
     var table = document.getElementById(id);
@@ -502,8 +505,19 @@ function resetServiceRow(event)
 /* reset row style unless it has been clicked */
 function resetHostRow(event)
 {
+    var row_id;
+    if(!event) {
+        event = this;
+    }
     // find id of current row
-    var row_id = getFirstParentId(this);
+    if(event.target) {
+        row_id = getFirstParentId(event.target);
+    } else {
+        row_id = getFirstParentId(event);
+    }
+    if(!row_id) {
+        return;
+    }
     setRowStyle(row_id, 'original', 'host');
 }
 
@@ -1120,4 +1134,3 @@ function show_cal(id) {
   cal.selection.set(Calendar.dateToInt(dateObj));
   cal.popup(id);
 }
-
