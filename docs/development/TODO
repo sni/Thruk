@@ -11,7 +11,7 @@ general
     - authorization docs
     - bookmarks
     - enable backends on extinfo1/2
-    - more search options: contacts/contactgroups/last check/next check
+    - more search options: last check/next check
 
 extinfo:
     - finish performance data on extinfo type 4

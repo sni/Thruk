@@ -2,6 +2,7 @@ package Thruk::Controller::status;
 
 use strict;
 use warnings;
+use Carp;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -1428,6 +1429,13 @@ sub _single_search {
             push @servicefilter,       "Filter: groups $listop $value";
             push @servicetotalsfilter, "Filter: groups $listop $value";
             push @servicegroupfilter,  "Filter: name $op $value";
+        }
+        elsif($filter->{'type'} eq 'contact') {
+            push @servicefilter,       "Filter: contacts $listop $value";
+            push @servicetotalsfilter, "Filter: contacts $listop $value";
+        }
+        else {
+            confess("unknown filter: ".$filter->{'type'});
         }
     }
 

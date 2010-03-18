@@ -907,7 +907,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup');
+  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact');
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', search_prefix + 'type');
   typeselect.setAttribute('id', search_prefix + '_' + nr + '_ts');
@@ -1074,10 +1074,16 @@ function verify_op(event) {
   for(var x = 0; x< opElem.options.length; x++) {
     var curOp = opElem.options[x].value;
     if(curOp == '~' || curOp == '!~') {
-      if(selValue == 'hostgroup' || selValue == 'servicegroup') {
+      if(selValue == 'hostgroup' || selValue == 'servicegroup' || selValue == 'contact' ) {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
-          selectByValue(opElem, '=');
+          // only = and != are allowed for list searches
+          // so set the corresponding one
+          if(curOp == '~') {
+              selectByValue(opElem, '=');
+          } else {
+              selectByValue(opElem, '!=');
+          }
         }
         opElem.options[x].disabled = true;
       } else {
