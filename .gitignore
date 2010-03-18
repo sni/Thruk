@@ -13,3 +13,4 @@ inc
 docs/images
 htpasswd.users
 .DS_Store
+ssi/*.ssi

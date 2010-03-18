@@ -1,0 +1,7 @@
+<script src="/pnp4nagios/media/js/jquery-min.js" type="text/javascript"></script>
+<script src="/pnp4nagios/media/js/jquery.cluetip.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('a.tips').cluetip({ajaxCache: false, dropShadow: false, showTitle: false });
+});
+</script>
