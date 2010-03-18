@@ -21,9 +21,6 @@
   </head>
   <body class='navbar' onload="preloadImages();">
 [% END %]
-[% UNLESS use_frames %]
-<div class="hidenav clickable" onclick="window.location='[% uri_with(c, 'nav' => 0) %]'"></div>
-[% END %]
 <div class="tree">
 <form style="padding: 0px; margin:0px;" method="get" action="/thruk/cgi-bin/status.cgi" target="[% target %]">
 <script type="text/javascript" language="JavaScript1.2">

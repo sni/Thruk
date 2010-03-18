@@ -74,7 +74,7 @@ sub begin : Private {
         $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme, $c->config->{'themes'};
         $c->log->debug("Set theme: '".$theme."' by cookie");
     }
-    $c->stash->{additional_template_paths} = [ $c->config->{root}.'/../themes/'.$theme.'/templates' ];
+    $c->stash->{additional_template_paths} = [ $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
     $c->stash->{'theme'}                   = $theme;
 
     # new or classic search?

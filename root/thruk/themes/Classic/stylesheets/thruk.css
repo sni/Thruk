@@ -9,7 +9,7 @@
 body {
   margin-top: 0px;
   margin-bottom: 0px;
-  margin-left: 2px;
+  margin-left: 8px;
   margin-right: 0px;
 }
 
@@ -416,29 +416,33 @@ table.filter > tbody > tr > td {
 .hidenav {
   position: absolute;
   top: 0px;
-  left: 0px;
-  width: 10px;
+  left: 175px;
+  width: 7px;
   height: 100%;
-  z-index: 250;
+  background-image: url(../images/drag.png);
+  background-repeat: no-repeat;
+  background-color:#e0dfde;
+  background-position: center;
 }
 
 .hidenav:hover {
-  background-image: url(../images/left.png);
-  background-repeat: repeat-y;
-  background-color:#88BBD8;
+  background-image: url(../images/drag_hover.png);
+  background-color:#9e9c9a;
 }
 
 .shownav {
   position: absolute;
   top: 0px;
   left: 0px;
-  width: 10px;
+  width: 7px;
   height: 100%;
-  z-index: 250;
+  background-image: url(../images/drag.png);
+  background-repeat: no-repeat;
+  background-color:#e0dfde;
+  background-position: center;
 }
 
 .shownav:hover {
-  background-image: url(../images/right.png);
-  background-repeat: repeat-y;
-  background-color:#88BBD8;
+  background-image: url(../images/drag_hover.png);
+  background-color:#9e9c9a;
 }

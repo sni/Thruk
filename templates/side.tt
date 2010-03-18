@@ -20,9 +20,6 @@
   <body class='navbar'>
 [% END %]
     <a href="http://www.thruk.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="139" height="43" class="nav_small_logo" /></a>
-    [% UNLESS use_frames %]
-    <div class="hidenav clickable" onclick="window.location='[% uri_with(c, 'nav' => 0) %]'"></div>
-    [% END %]
     <div class="navsection">
       <div class="navsectiontitle">General</div>
       <div class="navsectionlinks">

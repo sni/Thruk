@@ -89,6 +89,7 @@
   <div id="navbar" class="navbar">
     [% PROCESS side.tt %]
   </div>
+  <div class="hidenav clickable" onclick="window.location='[% uri_with(c, 'nav' => 0) %]'" title="hide navigation"></div>
   [% END %]
 
 <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->

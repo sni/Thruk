@@ -1,6 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+0.47    Thu Mar 18 16:38:44 CET 2010
+          - changed navbar show/hide
+          - fixed themes
+
 0.46    Wed Mar 17 21:47:57 CET 2010
           - default state of command checkboxes can be configured
           - cgi.cfg will be reloaded if changed ( without restarting )
