@@ -107,11 +107,19 @@
         [% SET avgClass = 'dataOdd'  IF class == 'dataEven' %]
         <tr class='[% avgClass %]'>
           <td class='[% avgClass %]'[% UNLESS host %] colspan=2[% END %]>Average</td>
+          [% IF servicecount %]
           <td class='serviceOK'>[% sprintf('%2.3f', perc_ok_total / servicecount) %]% ([% sprintf('%2.3f', perc_ok_known_total / servicecount) %]%)</td>
           <td class='serviceWARNING'>[% sprintf('%2.3f', perc_warning_total / servicecount) %]% ([% sprintf('%2.3f', perc_warning_known_total / servicecount) %]%)</td>
           <td class='serviceUNKNOWN'>[% sprintf('%2.3f', perc_unknown_total / servicecount) %]% ([% sprintf('%2.3f', perc_unknown_known_total / servicecount) %]%)</td>
           <td class='serviceCRITICAL'>[% sprintf('%2.3f', perc_critical_total / servicecount) %]% ([% sprintf('%2.3f', perc_critical_known_total / servicecount) %]%)</td>
           <td class='[% avgClass %]'>[% sprintf('%2.3f', perc_undetermined_services_total / servicecount) %]%</td>
+          [% ELSE %]
+          <td class='serviceOK'>[% sprintf('%2.3f', 0) %]% ([% sprintf('%2.3f', 0 ) %]%)</td>
+          <td class='serviceWARNING'>[% sprintf('%2.3f', 0 ) %]% ([% sprintf('%2.3f', 0 ) %]%)</td>
+          <td class='serviceUNKNOWN'>[% sprintf('%2.3f', 0 ) %]% ([% sprintf('%2.3f', 0 ) %]%)</td>
+          <td class='serviceCRITICAL'>[% sprintf('%2.3f', 0 ) %]% ([% sprintf('%2.3f', 0 ) %]%)</td>
+          <td class='[% avgClass %]'>[% sprintf('%2.3f', 0 ) %]%</td>
+          [% END %]
         </tr>
       </table>
     </div>
