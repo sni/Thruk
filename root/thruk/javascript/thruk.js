@@ -914,8 +914,7 @@ function add_new_filter(search_prefix, table) {
   add_options(typeselect, options);
 
   var opselect          = document.createElement('select');
-  //var options           = new Array('~', '!~', '=', '!=');
-  var options           = new Array('~', '=', '!=');
+  var options           = new Array('~', '!~', '=', '!=');
   opselect.setAttribute('name', search_prefix + 'op');
   opselect.setAttribute('id', search_prefix + '_' + nr + '_to');
   add_options(opselect, options);

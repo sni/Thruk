@@ -1,8 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
-0.47    Thu Mar 18 16:38:44 CET 2010
+0.48    Thu Mar 18 20:32:39 CET 2010
           - changed navbar show/hide
+          - added !~ filter
           - fixed themes
 
 0.46    Wed Mar 17 21:47:57 CET 2010

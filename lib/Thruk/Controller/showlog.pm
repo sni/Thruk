@@ -77,13 +77,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # additional filters set?
     my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
     my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
+    my @filter;
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
-        $filter .= "Filter: message ~~ $pattern\n";
+        push @filter, "Filter: message ~~ $pattern\n";
     }
-# TODO: does not work yet
-#    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
-#        $filter .= "Filter: message !~~ $exclude_pattern\nAnd: 2\n";
-#    }
+    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+        push @filter, "Filter: message !~~ $exclude_pattern\n";
+    }
+    $filter .= Thruk::Utils::combine_filter(\@filter, 'And');
 
     my $query = "GET log\nColumns: time type message state\n".$filter;
 
@@ -92,17 +93,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stats->profile(begin => "showlog::fetch");
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
     $c->stats->profile(end   => "showlog::fetch");
-
-    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
-        my $newlogs = [];
-        my $tmp_pattern = $exclude_pattern;
-        $tmp_pattern =~ s/\ /\\ /gmx;
-        for my $log (@{$logs}) {
-            push @{$newlogs}, $log if $log->{'message'} !~ m/$tmp_pattern/mx;
-        }
-        $logs = $newlogs;
-    }
-
 
     my $order = "DESC";
     if($oldestfirst) {

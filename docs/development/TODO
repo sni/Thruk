@@ -7,11 +7,11 @@ general
     - fix host/servicegroups pages with authorization
     - write tests ( with admin user, limited user, unknown user )
     - add backend name to logs
-    - default hidden setting for backends in thruk_local.conf
     - add go back button on error page
     - authorization docs
     - bookmarks
     - enable backends on extinfo1/2
+    - more search options: contacts/contactgroups/last check/next check
 
 extinfo:
     - finish performance data on extinfo type 4

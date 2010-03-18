@@ -1094,6 +1094,11 @@ sub _do_filter {
 
     $c->stash->{'searches'} = $searches;
 
+    #$c->log->debug("hostfilter: $hostfilter");
+    #$c->log->debug("servicefilter: $servicefilter");
+    #$c->log->debug("hostgroupfilter: $hostgroupfilter");
+    #$c->log->debug("servicegroupfilter: $servicegroupfilter");
+
     return($hostfilter,$servicefilter,$hostgroupfilter,$servicegroupfilter);
 }
 
@@ -1347,7 +1352,7 @@ sub _single_search {
         my $op     = '=';
         my $listop = '>=';
         my $joinop = "Or";
-        if($filter->{'op'} eq '!~') { $op = '!~~'; $joinop = "And"; }
+        if($filter->{'op'} eq '!~') { $op = '!~~'; $joinop = "And"; $listop = '!>='; }
         if($filter->{'op'} eq '~')  { $op = '~~';  }
         if($filter->{'op'} eq '!=') { $op = '!=';  $joinop = "And"; $listop = '!>='; }
 
