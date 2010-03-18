@@ -25,7 +25,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.46';
+our $VERSION = '0.47_1';
 
 ###################################################
 # Configure the application.
