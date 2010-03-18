@@ -91,10 +91,14 @@ sub get_auth_filter {
     elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;
         if(!$c->check_user_roles('authorized_for_all_services')) {
-            push @filter, "Filter: service_contacts >= ".$c->user->get('username')."\n";
+            push @filter, "Filter: service_contacts >= ".$c->user->get('username')."\nFilter: service_description !=\nAnd: 2\n";
         }
         if(!$c->check_user_roles('authorized_for_all_hosts')) {
-            push @filter, "Filter: host_contacts >= ".$c->user->get('username')."\n";
+            if(Thruk->config->{'use_strict_host_authorization'}) {
+                push @filter, "Filter: host_contacts >= ".$c->user->get('username')."\nFilter: service_description =\nAnd: 2\n";
+            } else {
+                push @filter, "Filter: host_contacts >= ".$c->user->get('username')."\n";
+            }
         }
         if(scalar @filter == 0) {
             return("");
@@ -279,6 +283,7 @@ sub read_cgi_cfg {
        or $last_stat->[1] != $cgi_cfg_stat[1] # inode changed
        or $last_stat->[9] != $cgi_cfg_stat[9] # modify time changed
       ) {
+        $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
         my $conf = new Config::General($file);
