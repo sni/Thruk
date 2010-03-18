@@ -1493,9 +1493,50 @@ ssi/status-header.ssi</p></div>
 output. Executables will be executed and the output will then be used
 as content.</p></div>
 </div>
+<h2 id="_examples">Examples</h2>
+<div class="sectionbody">
+<div class="para"><p>Here is a list of common tasks and configurations.</p></div>
+<h3 id="_remote_livestatus_with_ssl">Remote Livestatus with SSL</h3><div style="clear:left"></div>
+<div class="para"><p>Generate ssl key for the remote machine:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  %&gt; FILENAME=remote-livestatus
+  %&gt; openssl genrsa -out $FILENAME.key 1024
+  %&gt; openssl req -new -key $FILENAME.key -x509 -days 3653 -out %$FILENAME.crt
+  %&gt; cat $FILENAME.key $FILENAME.crt &gt;$FILENAME.pem
+  %&gt; chmod 600 $FILENAME.key $FILENAME.pem</tt></pre>
+</div></div>
+<div class="para"><p>Generate ssl key for thruk. Use the same command with a differen FILENAME.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  %&gt; FILENAME=thruk-host</tt></pre>
+</div></div>
+<div class="para"><p>Now start socat on both machines:</p></div>
+<div class="listingblock">
+<div class="title">Example: Remote Machine</div>
+<div class="content">
+<pre><tt>  %&gt; /usr/bin/socat \
+       -L/tmp/liveststatus-socat.lock \
+       openssl-listen:9999,reuseaddr,fork,cert=/path_to_your/certs/remote-livestatus.pem,cafile=/path_to_your/certs/thruk-host.crt,keepalive,nodelay \
+       UNIX-CLIENT:/usr/local/nagios/var/live.sock,keepalive</tt></pre>
+</div></div>
+<div class="para"><p>Socat will then listen on port 9999 and connect to the local unix socket from livestatus.
+Change the paths to your needs.</p></div>
+<div class="para"><p>Start another socat on the thruk host:
+.Thruk Machine</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  %&gt; /usr/bin/socat \
+       -L/tmp/liveststatus-socat.lock \
+       UNIX-LISTEN:/home/thruk/var/remote.sock,fork,keepalive,mode=0660,group=thruk \
+       openssl-connect:remote-host:9999,cert=/path_to_your/certs/thruk-host.pem,cafile=/path_to_your/certs/remote-livestatus.crt</tt></pre>
+</div></div>
+<div class="para"><p>Socat will then connect to the remote host on port 9999 and listen on the local unix socket. The tcp connection is encrypted.
+You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-03-14 12:28:04 CEST
+Last updated 2010-03-18 13:03:15 CEST
 </div>
 </div>
 </body>
