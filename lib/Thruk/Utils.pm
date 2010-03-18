@@ -1106,11 +1106,15 @@ sub uri_with {
         $data->{$key} = undef if $data->{$key} eq 'undef';
     }
 
-    my $uri = $c->request->uri_with($data);
-
-    $uri =~ s/&/&amp;/gmx;
-
-    return $uri;
+    eval {
+        my $uri = $c->request->uri_with($data);
+        $uri =~ s/&/&amp;/gmx;
+        return $uri;
+    };
+    if($@) {
+        confess("ERROR in uri_with(): ".$@);
+    }
+    return undef;
 }
 
 ########################################

@@ -9,6 +9,10 @@ general
     - add backend name to logs
     - default hidden setting for backends in thruk_local.conf
     - add go back button on error page
+    - authorization docs
+    - bookmarks
+    - enable backends on extinfo1/2
+    - make nav frame close link nicer
 
 extinfo:
     - finish performance data on extinfo type 4
