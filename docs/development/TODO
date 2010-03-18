@@ -12,7 +12,6 @@ general
     - authorization docs
     - bookmarks
     - enable backends on extinfo1/2
-    - make nav frame close link nicer
 
 extinfo:
     - finish performance data on extinfo type 4
