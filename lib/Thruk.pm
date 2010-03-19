@@ -4,6 +4,7 @@ use 5.008000;
 use strict;
 use warnings;
 
+use Carp;
 use Catalyst::Log::Log4perl;
 use Thruk::Utils;
 use Catalyst::Runtime '5.70';
@@ -152,7 +153,15 @@ elsif(!__PACKAGE__->debug) {
 ###################################################
 # GD installed?
 # set to true unless there is a way to load trends.pm safely without GD
-__PACKAGE__->config->{'has_gd'} = 1;
+__PACKAGE__->config->{'has_gd'} = 0;
+eval {
+    require GD;
+    __PACKAGE__->config->{'has_gd'} = 1;
+};
+if($@) {
+    __PACKAGE__->log->error("cannot load GD.pm: did you forget to install libgd, libxpm or GD.pm?\n".$@);
+    croak('cannot start');
+}
 
 
 =head1 NAME

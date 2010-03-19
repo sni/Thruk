@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Class::C3::Adopt::NEXT -no_warn;
-use GD;
 use Scalar::Util 'blessed';
 
 use Catalyst::Exception;
@@ -23,6 +22,14 @@ __PACKAGE__->mk_accessors(qw[
 sub new {
     my($class, $c, $args) = @_;
     my $self = $class->NEXT::new($c, $args);
+
+    eval {
+        require GD;
+        GD->import;
+    };
+    if($@) {
+        $c->log->error("error loading gd, did you forget to install libgd, libxml or GD.pm?\n".$@);
+    }
 
     my $config = $c->config->{'View::GD'};
 
