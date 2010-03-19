@@ -651,7 +651,7 @@ RkWOKkVXIjB5X2ac8f8HA74K8I0SaJkAAAAASUVORK5CYII=" />
 13. %&gt; cd &amp;&amp; git clone http://github.com/sni/Thruk.git
 14. %&gt; cd Thruk
 15. %&gt; perl Makefile.PL &amp;&amp; make
-16. %&gt; cp thuk.conf thruk_local.conf &amp;&amp; vi thruk_local.conf
+16. %&gt; cp thruk.conf thruk_local.conf &amp;&amp; vi thruk_local.conf
 17. %&gt; vi cgi.cfg
 18. %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
@@ -876,6 +876,13 @@ on how to install livestatus onto your monitoring box.</p></div>
 </div></div>
 <h4 id="_configuration">Configuration</h4>
 <div class="para"><p>Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  %&gt; cp thruk.conf thruk_local.conf</tt></pre>
+</div></div>
+<div class="para"><p>The thruk.conf will be overwritten with new defaults on updates. The
+thruk_local.conf contains the local overrides and will never be
+overwritten.</p></div>
 <div class="para"><p>Edit "cgi.conf" and adjust settings to your needs.</p></div>
 <div class="para"><p>See the <a href="#Configuration">[Configuration]</a> section for detailed explaination of configuration options.</p></div>
 <h4 id="_start_server">Start Server</h4>
@@ -1544,7 +1551,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-03-19 17:30:25 CEST
+Last updated 2010-03-19 18:37:53 CEST
 </div>
 </div>
 </body>

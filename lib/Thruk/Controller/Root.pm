@@ -166,7 +166,7 @@ sub thruk_index : Path('/thruk/') {
     }
 
     # custom start page?
-    if($c->stash->{'start_page'} !~ /^\/thruk\//) {
+    if($c->stash->{'start_page'} !~ /^\/thruk\//mx) {
         # external link, put in frames
         return $c->redirect("/thruk/frame.html?link=".$c->stash->{'start_page'});
     }

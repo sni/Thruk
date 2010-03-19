@@ -2,6 +2,7 @@ package Thruk::Controller::status;
 
 use strict;
 use warnings;
+use Carp;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -1094,6 +1095,11 @@ sub _do_filter {
 
     $c->stash->{'searches'} = $searches;
 
+    #$c->log->debug("hostfilter: $hostfilter");
+    #$c->log->debug("servicefilter: $servicefilter");
+    #$c->log->debug("hostgroupfilter: $hostgroupfilter");
+    #$c->log->debug("servicegroupfilter: $servicegroupfilter");
+
     return($hostfilter,$servicefilter,$hostgroupfilter,$servicegroupfilter);
 }
 
@@ -1347,7 +1353,7 @@ sub _single_search {
         my $op     = '=';
         my $listop = '>=';
         my $joinop = "Or";
-        if($filter->{'op'} eq '!~') { $op = '!~~'; $joinop = "And"; }
+        if($filter->{'op'} eq '!~') { $op = '!~~'; $joinop = "And"; $listop = '!>='; }
         if($filter->{'op'} eq '~')  { $op = '~~';  }
         if($filter->{'op'} eq '!=') { $op = '!=';  $joinop = "And"; $listop = '!>='; }
 
@@ -1423,6 +1429,13 @@ sub _single_search {
             push @servicefilter,       "Filter: groups $listop $value";
             push @servicetotalsfilter, "Filter: groups $listop $value";
             push @servicegroupfilter,  "Filter: name $op $value";
+        }
+        elsif($filter->{'type'} eq 'contact') {
+            push @servicefilter,       "Filter: contacts $listop $value";
+            push @servicetotalsfilter, "Filter: contacts $listop $value";
+        }
+        else {
+            confess("unknown filter: ".$filter->{'type'});
         }
     }
 

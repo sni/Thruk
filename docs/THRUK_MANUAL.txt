@@ -70,7 +70,7 @@ For the FastCGI installation follow the steps at <<_configure_fastcgi,fastcgi in
 13. %> cd && git clone http://github.com/sni/Thruk.git
 14. %> cd Thruk
 15. %> perl Makefile.PL && make
-16. %> cp thuk.conf thruk_local.conf && vi thruk_local.conf
+16. %> cp thruk.conf thruk_local.conf && vi thruk_local.conf
 17. %> vi cgi.cfg
 18. %> ./script/thruk_server.pl
 ----
@@ -196,6 +196,13 @@ Basically you have to build the NDO addon and add it to your nagios/icinga.cfg.
 ==== Configuration
 
 Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.
+-------
+  %> cp thruk.conf thruk_local.conf
+-------
+The thruk.conf will be overwritten with new defaults on updates. The
+thruk_local.conf contains the local overrides and will never be
+overwritten.
+
 
 Edit "cgi.conf" and adjust settings to your needs.
 
