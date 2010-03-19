@@ -625,9 +625,9 @@ RkWOKkVXIjB5X2ac8f8HA74K8I0SaJkAAAAASUVORK5CYII=" />
 <div class="listingblock">
 <div class="content">
 <pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
-  %&gt; wget http://www.thruk.org/files/Thruk-0.46-$arch.tar.gz
-  %&gt; tar zxf Thruk-0.46-$arch.tar.gz
-  %&gt; cd Thruk-0.46
+  %&gt; wget http://www.thruk.org/files/Thruk-0.50-$arch.tar.gz
+  %&gt; tar zxf Thruk-0.50-$arch.tar.gz
+  %&gt; cd Thruk-0.50
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
 <div class="para"><p>For the FastCGI installation follow the steps at <a href="#_configure_fastcgi">fastcgi installation</a>.</p></div>
@@ -651,7 +651,7 @@ RkWOKkVXIjB5X2ac8f8HA74K8I0SaJkAAAAASUVORK5CYII=" />
 13. %&gt; cd &amp;&amp; git clone http://github.com/sni/Thruk.git
 14. %&gt; cd Thruk
 15. %&gt; perl Makefile.PL &amp;&amp; make
-16. %&gt; cp thuk.conf thruk_local.conf &amp;&amp; vi thruk_local.conf
+16. %&gt; cp thruk.conf thruk_local.conf &amp;&amp; vi thruk_local.conf
 17. %&gt; vi cgi.cfg
 18. %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
@@ -876,6 +876,13 @@ on how to install livestatus onto your monitoring box.</p></div>
 </div></div>
 <h4 id="_configuration">Configuration</h4>
 <div class="para"><p>Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  %&gt; cp thruk.conf thruk_local.conf</tt></pre>
+</div></div>
+<div class="para"><p>The thruk.conf will be overwritten with new defaults on updates. The
+thruk_local.conf contains the local overrides and will never be
+overwritten.</p></div>
 <div class="para"><p>Edit "cgi.conf" and adjust settings to your needs.</p></div>
 <div class="para"><p>See the <a href="#Configuration">[Configuration]</a> section for detailed explaination of configuration options.</p></div>
 <h4 id="_start_server">Start Server</h4>
@@ -1120,6 +1127,14 @@ regardless of wheter he is a service contact or not.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_strict_host_authorization = 1</tt></pre>
+</div></div>
+<h4 id="_start_page">start_page</h4>
+<div class="para"><p>This link is used as startpage and points usually to the main.html
+with displays version information and general links.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>start_page = /thruk/main.html</tt></pre>
 </div></div>
 <h4 id="_documentation_link">documentation_link</h4>
 <div class="para"><p>This link is used in the side navigation menu as link to the documentation.
@@ -1536,7 +1551,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-03-18 13:03:15 CEST
+Last updated 2010-03-19 20:13:52 CEST
 </div>
 </div>
 </body>

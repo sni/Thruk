@@ -10,8 +10,8 @@ general
     - add go back button on error page
     - authorization docs
     - bookmarks
-    - enable backends on extinfo1/2
     - more search options: last check/next check
+    - show only backends where user has at least permission for one host/service
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -48,6 +48,7 @@ general:
     - create models for hosts / services / contacts
     - webservice api, passthrough querys to livestatus and return json
       result
+      - query builder, click to add filter or stats
     - _HTML field for hosts / services besides action_url/notes_url
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
     - show host/service dependencies
@@ -57,6 +58,7 @@ general:
     - multi language support
     - add context sensitive help
     - completly hide backends by contactgroups
+    - addons: own template, images/themes and lib directory
 
 reports:
     - generate long running reports in an extra process

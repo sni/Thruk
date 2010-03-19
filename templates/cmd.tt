@@ -46,10 +46,7 @@
                           <form action="extinfo.cgi" method="GET">
                             <select name="backend" size="5" multiple>
                               [% FOREACH b IN backends %]
-                              [% SET name = pi_detail.$b.peer_name %]
-                                [% IF name %]
-                                  <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% name %]</option>
-                                [% END %]
+                                <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% backend_detail.$b.name %]</option>
                               [% END %]
                             </select>
                           </form>

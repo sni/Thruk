@@ -11,9 +11,9 @@
 
 var refreshPage      = 1;
 var cmdPaneState     = 0;
-var origRefreshVal   = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Hash({});
+var refreshTimer;
 var backendSelTimer;
 
 // needed to keep the order
@@ -115,7 +115,8 @@ function setRefreshRate(rate) {
     }
     if(rate > 0) {
       newRate = rate - 1;
-      setTimeout("setRefreshRate(newRate)", 1000);
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout("setRefreshRate(newRate)", 1000);
     }
   }
 }
@@ -141,7 +142,7 @@ function reloadPage() {
   }
 
   additionalParams.each(function(pair) {
-    if(pair.key == 'hidesearch' || pair.key == 'hidetop' ) { // check for valid options to set here
+    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' ) { // check for valid options to set here
       urlArgs.set(pair.key, pair.value);
     }
   });
@@ -185,6 +186,10 @@ function toggleBackend(backend) {
         button.className = 'button_peerUP';
     }
     current_backend_states.set(backend, 0);
+  } else if(button.className == "button_peerHID") {
+    button.className = 'button_peerUP';
+    current_backend_states.set(backend, 0);
+    additionalParams.set('backend', undefined);
   } else {
     button.className = "button_peerDIS";
     current_backend_states.set(backend, 2);
@@ -192,10 +197,10 @@ function toggleBackend(backend) {
 
   /* save current selected backends in session cookie */
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
-  if(initial_state != 3) {
+  //if(initial_state != 3) {
     window.clearTimeout(backendSelTimer);
     backendSelTimer  = window.setTimeout('reloadPage()', 1000);
-  }
+  //}
 }
 
 /* toogle checkbox by id */
@@ -587,11 +592,11 @@ function toggleCmdPane(state) {
 function checkCmdPaneVisibility() {
     var size = selectedServices.size() + selectedHosts.size();
     if(size == 0) {
-        /* hide command panel and reenable refresh */
+        /* hide command panel */
         toggleCmdPane(0);
-        refreshPage = 1;
-        setRefreshRate(origRefreshVal);
     } else {
+        setRefreshRate(refresh_rate);
+
         /* set submit button text */
         var btn = document.getElementById('multi_cmd_submit_button');
         var ssize = selectedServices.size();
@@ -613,12 +618,8 @@ function checkCmdPaneVisibility() {
         btn.value = "submit command for " + text;
         check_selected_command();
 
-        /* show command panel and disable page refresh */
-        if(refreshPage == 1) {
-            origRefreshVal = curRefreshVal;
-            toggleCmdPane(1);
-        }
-        stopRefresh();
+        /* show command panel */
+        toggleCmdPane(1);
     }
 }
 
