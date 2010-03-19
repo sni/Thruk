@@ -385,6 +385,16 @@ ex.:
   use_strict_host_authorization = 1
 
 
+==== start_page
+
+This link is used as startpage and points usually to the main.html
+with displays version information and general links.
+
+ex.:
+
+  start_page = /thruk/main.html
+
+
 ==== documentation_link
 
 This link is used in the side navigation menu as link to the documentation.

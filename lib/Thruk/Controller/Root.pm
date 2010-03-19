@@ -44,20 +44,13 @@ sub begin : Private {
     }
     $c->stash->{'use_frames'} = $use_frames;
 
-    # Index Page
-    my $index_page = Thruk->config->{'index_page'};
-    if(defined $index_page){
-        $c->stash->{'main'} = $index_page;
-    }
-
     # use pager?
     $c->stash->{'use_pager'} = Thruk->config->{'use_pager'}                 || 1;
     $c->stash->{'default_page_size'} = Thruk->config->{'default_page_size'} || 100;
     $c->stash->{'paging_steps'} = Thruk->config->{'paging_steps'}           || ['100', '500', '1000', '5000', 'all' ];
 
-    my $doc_link = Thruk->config->{'documentation_link'};
-    $doc_link    = '/thruk/docs/index.html' unless defined $doc_link;
-    $c->stash->{'documentation_link'} = $doc_link;
+    $c->stash->{'start_page'}         = Thruk->config->{'start_page'}         || '/thruk/main.html';
+    $c->stash->{'documentation_link'} = Thruk->config->{'documentation_link'} || '/thruk/docs/index.html';
 
     # these features are not implemented yet
     $c->stash->{'use_feature_statusmap'} = 0;
@@ -171,13 +164,18 @@ sub thruk_index : Path('/thruk/') {
     if($c->stash->{'use_frames'}) {
         return $c->detach("thruk_index_html");
     }
-    # redirect to Thruk->config{'index_page'}
-    if(defined $c->stash->{'main'}){
-        return $c->redirect( $c->stash->{'main'} );
+
+    # custom start page?
+    if($c->stash->{'start_page'} !~ /^\/thruk\//) {
+        # external link, put in frames
+        return $c->redirect("/thruk/frame.html?link=".$c->stash->{'start_page'});
     }
-    else {
-        return $c->detach("thruk_main_html");
+    elsif($c->stash->{'start_page'} ne '/thruk/main.html') {
+        # internal link, no need to put in frames
+        return $c->redirect($c->stash->{'start_page'});
     }
+
+    return $c->detach("thruk_main_html");
 }
 
 
@@ -235,7 +233,8 @@ sub thruk_frame_html : Path('/thruk/frame.html') {
 
     # allowed links to be framed
     my $valid_links = [
-        $c->stash->{'documentation_link'},
+        quotemeta($c->stash->{'documentation_link'}),
+        quotemeta($c->stash->{'start_page'}),
     ];
     my $additional_links = Thruk->config->{'allowed_frame_links'};
     if(defined $additional_links) {

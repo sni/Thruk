@@ -8,7 +8,7 @@
   </head>
   <frameset cols="180,*">
     <frame src="side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" />
-    <frame src="[% IF main %][% main %][% ELSE %]main.html[% END %]" name="main" frameborder="0" id="main" />
+    <frame src="[% IF main %][% main %][% ELSE %][% start_page %][% END %]" name="main" frameborder="0" id="main" />
     <noframes>
       <!-- This page requires a web browser which supports frames. -->
       <body>
