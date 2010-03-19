@@ -10,9 +10,8 @@ general
     - add go back button on error page
     - authorization docs
     - bookmarks
-    - change cursor on row highlight
-    - reset reload counter when selecting row
     - more search options: last check/next check
+    - show only backends where user has at least permission for one host/service
 
 extinfo:
     - finish performance data on extinfo type 4

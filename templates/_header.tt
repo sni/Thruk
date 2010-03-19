@@ -47,6 +47,9 @@
     });
     var current_backend_states = initial_backend_states.clone();
     var theme = '[% theme %]';
+
+    [% IF refresh_rate %]    var refresh_rate = [% refresh_rate %];[% END %]
+
     -->
     </script>
     [% PROCESS extra_headers.tt %]

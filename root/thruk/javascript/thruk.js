@@ -11,9 +11,9 @@
 
 var refreshPage      = 1;
 var cmdPaneState     = 0;
-var origRefreshVal   = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Hash({});
+var refreshTimer;
 var backendSelTimer;
 
 // needed to keep the order
@@ -115,7 +115,8 @@ function setRefreshRate(rate) {
     }
     if(rate > 0) {
       newRate = rate - 1;
-      setTimeout("setRefreshRate(newRate)", 1000);
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout("setRefreshRate(newRate)", 1000);
     }
   }
 }
@@ -591,11 +592,11 @@ function toggleCmdPane(state) {
 function checkCmdPaneVisibility() {
     var size = selectedServices.size() + selectedHosts.size();
     if(size == 0) {
-        /* hide command panel and reenable refresh */
+        /* hide command panel */
         toggleCmdPane(0);
-        refreshPage = 1;
-        setRefreshRate(origRefreshVal);
     } else {
+        setRefreshRate(refresh_rate);
+
         /* set submit button text */
         var btn = document.getElementById('multi_cmd_submit_button');
         var ssize = selectedServices.size();
@@ -617,12 +618,8 @@ function checkCmdPaneVisibility() {
         btn.value = "submit command for " + text;
         check_selected_command();
 
-        /* show command panel and disable page refresh */
-        if(refreshPage == 1) {
-            origRefreshVal = curRefreshVal;
-            toggleCmdPane(1);
-        }
-        stopRefresh();
+        /* show command panel */
+        toggleCmdPane(1);
     }
 }
 
