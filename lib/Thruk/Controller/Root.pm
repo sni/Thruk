@@ -35,14 +35,22 @@ begin, running at the begin of every req
 sub begin : Private {
     my ( $self, $c ) = @_;
     my $use_frames = Thruk->config->{'use_frames'};
-    $use_frames = 1 unless defined $use_frames;
+    $use_frames    = 1 unless defined $use_frames;
+    my $show_nav_button = 1;
     if(exists $c->{'request'}->{'parameters'}->{'nav'} and $c->{'request'}->{'parameters'}->{'nav'} ne '') {
+        if($c->{'request'}->{'parameters'}->{'nav'} ne '1') {
+            $show_nav_button = 1;
+        }
         $use_frames = 1;
         if($c->{'request'}->{'parameters'}->{'nav'} == 1) {
             $use_frames = 0;
         }
     }
-    $c->stash->{'use_frames'} = $use_frames;
+    if(Thruk->config->{'use_frames'} == 1) {
+        $show_nav_button = 0;
+    }
+    $c->stash->{'use_frames'}      = $use_frames;
+    $c->stash->{'show_nav_button'} = $show_nav_button;
 
     # use pager?
     $c->stash->{'use_pager'} = Thruk->config->{'use_pager'}                 || 1;

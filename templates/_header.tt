@@ -19,6 +19,13 @@
       <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
       <![endif]-->
     [% END %]
+    [% IF show_nav_button && use_frames %]
+    <style type='text/css'>
+      body {
+        margin-left: 8px;
+      }
+    </style>
+    [% END %]
 
     <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
     <script type="text/javascript" src="/thruk/javascript/prototype-1.6.0.3.js"></script>
@@ -48,9 +55,6 @@
   <body class='[% page %]' id='[% page %]'[% IF refresh_rate %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
   [% ssi_header %]
 
-  [% IF use_frames %]
-  <div class="shownav clickable" onclick="window.location='[% uri_with(c, 'nav' => 1) %]'"></div>
-  [% END %]
   <div class="pref_pane" id="pref_pane" style="display:none; visibility:hidden;">
     <a href="javascript:togglePreferencePane()"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
     <form action="[% c.uri %]" method="GET">
@@ -89,7 +93,13 @@
   <div id="navbar" class="navbar">
     [% PROCESS side.tt %]
   </div>
-  <div class="hidenav clickable" onclick="window.location='[% uri_with(c, 'nav' => 0) %]'" title="hide navigation"></div>
+  [% END %]
+  [% IF show_nav_button %]
+    [% UNLESS use_frames %]
+    <div class="hidenav clickable" onclick="window.location='[% uri_with(c, 'nav' => 0) %]'" title="hide navigation"></div>
+    [% ELSE %]
+    <div class="shownav clickable" onclick="window.location='[% uri_with(c, 'nav' => 1) %]'"></div>
+    [% END %]
   [% END %]
 
 <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
