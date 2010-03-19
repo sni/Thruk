@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
 0.50    Fri Mar 19 20:11:48 CET 2010
+          - add backends can be enabled in extinfo 1/2
           - added start_page config option
           - added sample pnp ssi
           - fixed navbar

@@ -141,7 +141,7 @@ function reloadPage() {
   }
 
   additionalParams.each(function(pair) {
-    if(pair.key == 'hidesearch' || pair.key == 'hidetop' ) { // check for valid options to set here
+    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' ) { // check for valid options to set here
       urlArgs.set(pair.key, pair.value);
     }
   });
@@ -185,6 +185,10 @@ function toggleBackend(backend) {
         button.className = 'button_peerUP';
     }
     current_backend_states.set(backend, 0);
+  } else if(button.className == "button_peerHID") {
+    button.className = 'button_peerUP';
+    current_backend_states.set(backend, 0);
+    additionalParams.set('backend', undefined);
   } else {
     button.className = "button_peerDIS";
     current_backend_states.set(backend, 2);
@@ -192,10 +196,10 @@ function toggleBackend(backend) {
 
   /* save current selected backends in session cookie */
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
-  if(initial_state != 3) {
+  //if(initial_state != 3) {
     window.clearTimeout(backendSelTimer);
     backendSelTimer  = window.setTimeout('reloadPage()', 1000);
-  }
+  //}
 }
 
 /* toogle checkbox by id */

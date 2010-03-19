@@ -10,7 +10,6 @@ general
     - add go back button on error page
     - authorization docs
     - bookmarks
-    - enable backends on extinfo1/2
     - change cursor on row highlight
     - reset reload counter when selecting row
     - more search options: last check/next check
