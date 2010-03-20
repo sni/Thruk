@@ -1,8 +1,6 @@
 Thruk Users Guide
 =================
 
-CAUTION: this is not a stable release, do not use on productive systems
-
 == Introduction
 
 Thruk is a multibackend monitoring webinterface which currently
@@ -42,13 +40,13 @@ IMPORTANT: you may need to install libgd and libxpm.
 
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
-  %> wget http://www.thruk.org/files/Thruk-0.50-$arch.tar.gz
-  %> tar zxf Thruk-0.50-$arch.tar.gz
-  %> cd Thruk-0.50
+  %> wget http://www.thruk.org/files/Thruk-0.52-$arch.tar.gz
+  %> tar zxf Thruk-0.52-$arch.tar.gz
+  %> cd Thruk-0.52
   %> ./script/thruk_server.pl
 ----
 
-For the FastCGI installation follow the steps at <<_configure_fastcgi,fastcgi installation>>.
+For the FastCGI installation follow the steps at <<_fastcgi,fastcgi installation>>.
 
 === Quick Installation Guide for Debian
 
@@ -221,7 +219,7 @@ installation:
 Open your browser and open http://<your_host>:3000
 
 
-== Configure FastCGI
+== FastCGI
 
 There are two fast cgi modules for apache at the moment. Choose the
 one which fits best into your environment.
