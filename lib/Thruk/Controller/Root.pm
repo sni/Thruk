@@ -70,9 +70,10 @@ sub begin : Private {
         $c->stash->{'use_feature_trends'} = 1;
     }
 
-    $c->stash->{'datetime_format'}      = Thruk->config->{'datetime_format'};
-    $c->stash->{'datetime_format_long'} = Thruk->config->{'datetime_format_long'};
-    $c->stash->{'datetime_format_log'}  = Thruk->config->{'datetime_format_log'};
+    $c->stash->{'datetime_format'}       = Thruk->config->{'datetime_format'};
+    $c->stash->{'datetime_format_today'} = Thruk->config->{'datetime_format_today'};
+    $c->stash->{'datetime_format_long'}  = Thruk->config->{'datetime_format_long'};
+    $c->stash->{'datetime_format_log'}   = Thruk->config->{'datetime_format_log'};
 
     # which theme?
     my $theme = Thruk->config->{'default_theme'};

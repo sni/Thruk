@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - backends can be enabled in extinfo 1/2
           - added start_page config option
           - reload counter resets when host/service is selected
+          - different date format for today (only HH:MM:SS for example)
           - added sample pnp ssi
           - fixed navbar
 

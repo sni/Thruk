@@ -3,21 +3,17 @@ Todo List:
 
 for version 1.0
 general
-    - fix authorization ( check services by host_contacts, comments/downtimes )
-    - fix host/servicegroups pages with authorization
     - write tests ( with admin user, limited user, unknown user )
     - add backend name to logs
     - add go back button on error page
     - authorization docs
-    - bookmarks
-    - show only backends where user has at least permission for one host/service
-    - different date format for today (only HH:MM:SS for example)
 
 extinfo:
     - finish performance data on extinfo type 4
 
 config:
     - add missing values
+    - add paging
 
 avail:
     - check availability calculation on multibackend (restarts)
@@ -59,6 +55,8 @@ general:
     - add context sensitive help
     - completly hide backends by contactgroups
     - addons: own template, images/themes and lib directory
+    - bookmarks
+    - show only backends where user has at least permission for one host/service
 
 reports:
     - generate long running reports in an extra process
