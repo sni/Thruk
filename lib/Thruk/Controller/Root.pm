@@ -82,7 +82,11 @@ sub begin : Private {
         $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme, $c->config->{'themes'};
         $c->log->debug("Set theme: '".$theme."' by cookie");
     }
-    $c->stash->{additional_template_paths} = [ $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
+    if(defined $c->config->{templates_paths}) {
+        $c->stash->{additional_template_paths} = [ @{$c->config->{templates_paths}}, $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
+    } else {
+        $c->stash->{additional_template_paths} = [ $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
+    }
     $c->stash->{'theme'}                   = $theme;
 
     # new or classic search?
@@ -342,19 +346,6 @@ page: /thruk/cgi-bin/tac.cgi
 sub tac_cgi : Path('/thruk/cgi-bin/tac.cgi') {
     my ( $self, $c ) = @_;
     return $c->detach('/tac/index');
-}
-
-
-######################################
-
-=head2 statusmap_cgi
-
-page: /thruk/cgi-bin/statusmap.cgi
-
-=cut
-sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
-    my ( $self, $c ) = @_;
-    return $c->detach('/statusmap/index');
 }
 
 

@@ -93,6 +93,16 @@ __PACKAGE__->config('name'                   => 'Thruk',
 );
 
 ###################################################
+# get installed plugins
+BEGIN {
+    my $project_root = __PACKAGE__->config->{home};
+    for my $addon (glob($project_root.'/plugins/*/')) {
+        unshift(@INC, $addon.'/lib') if -d $addon.'lib';
+        unshift @{__PACKAGE__->config->{templates_paths}}, $addon.'templates' if -d $addon.'templates';
+    }
+}
+
+###################################################
 # set installed themes
 my $themes_dir = $project_root."/root/thruk/themes/";
 my @themes;
@@ -119,7 +129,6 @@ for my $entry (readdir($dh)) {
 }
 closedir $dh;
 __PACKAGE__->config->{'ssi_includes'} = \%ssi;
-
 
 ###################################################
 # Start the application

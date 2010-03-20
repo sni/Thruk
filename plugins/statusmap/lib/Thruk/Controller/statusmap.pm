@@ -17,11 +17,23 @@ Catalyst Controller.
 =cut
 
 
+######################################
+
+=head2 statusmap_cgi
+
+page: /thruk/cgi-bin/statusmap.cgi
+
+=cut
+sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
+    my ( $self, $c ) = @_;
+    return $c->detach('/statusmap/index');
+}
+
+##########################################################
+
 =head2 index
 
 =cut
-
-##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
@@ -33,7 +45,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 =head1 AUTHOR
 
-Sven Nierlein, 2009, <nierlein@cpan.org>
+Sven Nierlein, 2010, <nierlein@cpan.org>
 
 =head1 LICENSE
 
