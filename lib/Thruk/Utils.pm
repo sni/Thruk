@@ -17,6 +17,7 @@ use Carp;
 use Data::Dumper;
 use Digest::MD5  qw(md5_hex);
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
+use Date::Manip;
 use Data::Page;
 use Monitoring::Livestatus::MULTI;
 use File::Slurp;
@@ -244,6 +245,9 @@ sub parse_date {
     my $timestamp;
     if($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+    }
+    else {
+        $timestamp = UnixDate($string, '%s');
     }
     return $timestamp;
 }

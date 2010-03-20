@@ -2,7 +2,6 @@ package Thruk::Controller::notifications;
 
 use strict;
 use warnings;
-use Date::Calc qw/Localtime Mktime/;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -44,20 +43,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # start / end date from formular values?
     if(defined $param_start and defined $param_end) {
         # convert to timestamps
-        # Format: 2010-03-02 00:00:00
-        if($param_start =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
-            $start = Mktime($1,$2,$3, $4,$5,$6);
-        }
-        if($param_end =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
-            $end = Mktime($1,$2,$3, $4,$5,$6);
-        }
+        $start = Thruk::Utils::parse_date($param_start);
+        $end   = Thruk::Utils::parse_date($param_end);
     }
     if(!defined $start or $start == 0 or !defined $end or $end == 0) {
         # start with today 00:00
-        my ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
-        $hour = 0; $min = 0; $sec = 0;
-        my $today = Mktime($year,$month,$day, $hour,$min,$sec);
-        $start = $today;
+        $start = Thruk::Utils::parse_date("today 00:00");
         $end   = $start + $timeframe;
     }
     if($archive eq '+1') {
