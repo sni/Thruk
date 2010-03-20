@@ -128,6 +128,8 @@ function stopRefresh() {
 }
 
 /* reloads the current page and adds some parameter from a hash */
+var a;
+var b;
 function reloadPage() {
   var obj = document.getElementById('refresh_rate');
   obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
@@ -138,6 +140,7 @@ function reloadPage() {
   var urlArgs = new Hash();
   if(index != -1) {
     newUrl  = newUrl.substring(0, index);
+    origUrl  = origUrl.replace(/\+/g, " ");
     urlArgs = new Hash(origUrl.parseQuery());
   }
 
@@ -902,22 +905,22 @@ function add_new_filter(search_prefix, table) {
   // get first free number of typeselects
   var nr = 0;
   for(var x = 0; x<= 99; x++) {
-    tst = document.getElementById(search_prefix + 'typeselect_' + x);
+    tst = document.getElementById(search_prefix + x + '_ts');
     if(tst) { nr = x+1; }
   }
 
   // add first cell
   var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact');
+  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact', 'Last Check', 'Next Check');
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', search_prefix + 'type');
-  typeselect.setAttribute('id', search_prefix + '_' + nr + '_ts');
+  typeselect.setAttribute('id', search_prefix + nr + '_ts');
   add_options(typeselect, options);
 
   var opselect          = document.createElement('select');
-  var options           = new Array('~', '!~', '=', '!=');
+  var options           = new Array('~', '!~', '=', '!=', '<=', '>=');
   opselect.setAttribute('name', search_prefix + 'op');
-  opselect.setAttribute('id', search_prefix + '_' + nr + '_to');
+  opselect.setAttribute('id', search_prefix + nr + '_to');
   add_options(opselect, options);
 
   var newCell0 = newRow.insertCell(0);
@@ -931,11 +934,24 @@ function add_new_filter(search_prefix, table) {
   newInput.type      = 'text';
   newInput.value     = '';
   newInput.setAttribute('name', search_prefix + 'value');
+  newInput.setAttribute('id',   search_prefix + nr + '_value');
   var newCell1       = newRow.insertCell(1);
   newCell1.className = "filterValueInput";
   newCell1.appendChild(newInput);
 
-  // add thirds cell
+  var calImg = document.createElement('img');
+  calImg.src = "/thruk/themes/"+theme+"/images/calendar.png";
+  calImg.className = "cal_icon";
+  calImg.alt = "choose date";
+  var link   = document.createElement('a');
+  link.href  = "javascript:show_cal('" + search_prefix + nr + "_value')";
+  link.setAttribute('id',   search_prefix + nr + '_cal');
+  link.style.display    = "none";
+  link.style.visibility = "hidden";
+  link.appendChild(calImg);
+  newCell1.appendChild(link);
+
+  // add third cell
   var img            = document.createElement('input');
   img.type           = 'image';
   img.src            = "/thruk/themes/"+theme+"/images/minus.gif";
@@ -1072,23 +1088,45 @@ function verify_op(event) {
 
   var selValue = selElem.options[selElem.selectedIndex].value;
 
+  // do we have to display the datepicker?
+  var calElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'cal');
+  if(selValue == 'next check' || selValue == 'last check' ) {
+    showElement(calElem);
+  } else {
+    hideElement(calElem);
+  }
+
+  // check if the right operator are active
   for(var x = 0; x< opElem.options.length; x++) {
     var curOp = opElem.options[x].value;
     if(curOp == '~' || curOp == '!~') {
-      if(selValue == 'hostgroup' || selValue == 'servicegroup' || selValue == 'contact' ) {
+      if(selValue != 'search' && selValue != 'host' && selValue != 'service' ) {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only = and != are allowed for list searches
           // so set the corresponding one
-          if(curOp == '~') {
-              selectByValue(opElem, '=');
-          } else {
+          if(curOp == '!~') {
               selectByValue(opElem, '!=');
+          } else {
+              selectByValue(opElem, '=');
           }
         }
-        opElem.options[x].disabled = true;
+        opElem.options[x].style.display = "none";
       } else {
-        opElem.options[x].disabled = false;
+        opElem.options[x].style.display = "";
+      }
+    }
+
+    if(curOp == '<=' || curOp == '>=') {
+      if(selValue != 'next check' && selValue != 'last check' ) {
+        // is this currently selected?
+        if(x == opElem.selectedIndex) {
+          // only <= and >= are allowed for list searches
+          selectByValue(opElem, '=');
+        }
+        opElem.options[x].style.display = "none";
+      } else {
+        opElem.options[x].style.display = "";
       }
     }
   }
@@ -1129,11 +1167,18 @@ Y8,            d8""""""""8b   88
 *******************************************************************************/
 
 function show_cal(id) {
+  var dateObj   = new Date();
   var date_val  = document.getElementById(id).value;
   var date_time = date_val.split(" ");
-  var dates     = date_time[0].split('-');
-  var times     = date_time[1].split(':');
-  var dateObj   = new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]);
+  if(date_time.length == 2) {
+    var dates     = date_time[0].split('-');
+    var times     = date_time[1].split(':');
+    dateObj   = new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]);
+  }
+  else {
+    times = new Array(0,0,0);
+  }
+
   var cal = Calendar.setup({
       time: Calendar.printDate(dateObj, '%H%M'),
       date: Calendar.dateToInt(dateObj),

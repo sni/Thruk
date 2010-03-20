@@ -1352,10 +1352,13 @@ sub _single_search {
         my $value = $filter->{'value'};
         my $op     = '=';
         my $listop = '>=';
+        my $dateop = '=';
         my $joinop = "Or";
         if($filter->{'op'} eq '!~') { $op = '!~~'; $joinop = "And"; $listop = '!>='; }
         if($filter->{'op'} eq '~')  { $op = '~~';  }
-        if($filter->{'op'} eq '!=') { $op = '!=';  $joinop = "And"; $listop = '!>='; }
+        if($filter->{'op'} eq '!=') { $op = '!=';  $joinop = "And"; $listop = '!>='; $dateop = '!='; }
+        if($filter->{'op'} eq '>=') { $dateop = '>='; }
+        if($filter->{'op'} eq '<=') { $dateop = '<='; }
 
         if($op eq '=' and $value eq 'all') {
             # add a useless filter
@@ -1432,7 +1435,22 @@ sub _single_search {
         }
         elsif($filter->{'type'} eq 'contact') {
             push @servicefilter,       "Filter: contacts $listop $value";
+            push @hostfilter,          "Filter: contacts $listop $value";
             push @servicetotalsfilter, "Filter: contacts $listop $value";
+        }
+        elsif($filter->{'type'} eq 'next check') {
+            my $date = Thruk::Utils::parse_date($value);
+            if($date) {
+                push @hostfilter,      "Filter: next_check $dateop $date";
+                push @servicefilter,   "Filter: next_check $dateop $date";
+            }
+        }
+        elsif($filter->{'type'} eq 'last check') {
+            my $date = Thruk::Utils::parse_date($value);
+            if($date) {
+                push @hostfilter,      "Filter: last_check $dateop $date";
+                push @servicefilter,   "Filter: last_check $dateop $date";
+            }
         }
         else {
             confess("unknown filter: ".$filter->{'type'});

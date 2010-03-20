@@ -345,8 +345,11 @@ td.filter select {
   border: 0px;
 }
 td.filterValueInput input {
-  width: 100px;
+  width: 135px;
   border: 0px;
+}
+td.filterValueInput {
+  white-space: nowrap;
 }
 td.filterValue:hover {
   background-color:#88BBD8;

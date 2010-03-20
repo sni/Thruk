@@ -10,8 +10,8 @@ general
     - add go back button on error page
     - authorization docs
     - bookmarks
-    - more search options: last check/next check
     - show only backends where user has at least permission for one host/service
+    - different date format for today (only HH:MM:SS for example)
 
 extinfo:
     - finish performance data on extinfo type 4

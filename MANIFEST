@@ -66,6 +66,7 @@ lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Utils.pm
+lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/GD.pm
 lib/Thruk/View/TT.pm
 Makefile.PL
@@ -111,6 +112,8 @@ root/thruk/themes/Classic/images/detail.gif
 root/thruk/themes/Classic/images/disabled.gif
 root/thruk/themes/Classic/images/down.gif
 root/thruk/themes/Classic/images/downtime.gif
+root/thruk/themes/Classic/images/drag.png
+root/thruk/themes/Classic/images/drag_hover.png
 root/thruk/themes/Classic/images/empty.gif
 root/thruk/themes/Classic/images/enabled.gif
 root/thruk/themes/Classic/images/extinfo.gif
@@ -216,6 +219,8 @@ root/thruk/themes/Exfoliation/images/detail.gif
 root/thruk/themes/Exfoliation/images/disabled.gif
 root/thruk/themes/Exfoliation/images/down.gif
 root/thruk/themes/Exfoliation/images/downtime.gif
+root/thruk/themes/Exfoliation/images/drag.png
+root/thruk/themes/Exfoliation/images/drag_hover.png
 root/thruk/themes/Exfoliation/images/empty.gif
 root/thruk/themes/Exfoliation/images/enabled.gif
 root/thruk/themes/Exfoliation/images/extinfo.gif
@@ -375,6 +380,8 @@ root/thruk/themes/Nuvola/images/detail.gif
 root/thruk/themes/Nuvola/images/disabled.gif
 root/thruk/themes/Nuvola/images/down.gif
 root/thruk/themes/Nuvola/images/downtime.gif
+root/thruk/themes/Nuvola/images/drag.png
+root/thruk/themes/Nuvola/images/drag_hover.png
 root/thruk/themes/Nuvola/images/empty.gif
 root/thruk/themes/Nuvola/images/enabled.gif
 root/thruk/themes/Nuvola/images/extinfo.gif
@@ -518,6 +525,8 @@ root/thruk/themes/Vautour/images/detail.gif
 root/thruk/themes/Vautour/images/disabled.gif
 root/thruk/themes/Vautour/images/down.gif
 root/thruk/themes/Vautour/images/downtime.gif
+root/thruk/themes/Vautour/images/drag.png
+root/thruk/themes/Vautour/images/drag_hover.png
 root/thruk/themes/Vautour/images/empty.gif
 root/thruk/themes/Vautour/images/enabled.gif
 root/thruk/themes/Vautour/images/extinfo.gif
@@ -626,6 +635,7 @@ script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
 ssi/README
+ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
 t/97-Pod.t
