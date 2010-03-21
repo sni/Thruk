@@ -16,6 +16,7 @@ Catalyst Controller.
 
 =cut
 
+Thruk->config->{'use_feature_statusmap'} = 1;
 
 ######################################
 
@@ -28,6 +29,7 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
     my ( $self, $c ) = @_;
     return $c->detach('/statusmap/index');
 }
+
 
 ##########################################################
 

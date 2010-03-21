@@ -98,6 +98,7 @@ BEGIN {
     my $project_root = __PACKAGE__->config->{home};
     for my $addon (glob($project_root.'/plugins/plugins-enabled/*/')) {
         my $addon_name = $addon;
+        $addon_name =~ s/\/$//gmx;
         $addon_name =~ s/^.*\///gmx;
         # lib directory included?
         if(-d $addon.'lib') {

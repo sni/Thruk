@@ -61,9 +61,9 @@ sub begin : Private {
     $c->stash->{'documentation_link'} = Thruk->config->{'documentation_link'} || '/thruk/docs/index.html';
 
     # these features are not implemented yet
-    $c->stash->{'use_feature_statusmap'} = 0;
-    $c->stash->{'use_feature_statuswrl'} = 0;
-    $c->stash->{'use_feature_histogram'} = 0;
+    $c->stash->{'use_feature_statusmap'} = Thruk->config->{'use_feature_statusmap'} || 0;
+    $c->stash->{'use_feature_statuswrl'} = Thruk->config->{'use_feature_statuswrl'} || 0;
+    $c->stash->{'use_feature_histogram'} = Thruk->config->{'use_feature_histogram'} || 0;
 
     # enable trends if gd loaded
     if($c->config->{'has_gd'}) {
