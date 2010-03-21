@@ -24,7 +24,7 @@ sub new {
     my $self = $class->NEXT::new($c, $args);
 
     eval {
-        require GD;
+        require("GD.pm");
         GD->import;
     };
     if($@) {

@@ -61,7 +61,6 @@ lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/Root.pm
 lib/Thruk/Controller/showlog.pm
 lib/Thruk/Controller/status.pm
-lib/Thruk/Controller/statusmap.pm
 lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
@@ -72,6 +71,10 @@ lib/Thruk/View/TT.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
+plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
+plugins/plugins-available/statusmap/root/jit-yc.js
+plugins/plugins-available/statusmap/root/Treemap.css
+plugins/plugins-available/statusmap/templates/statusmap.tt
 README
 root/favicon.ico
 root/robots.txt

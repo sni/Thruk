@@ -177,7 +177,7 @@ elsif(!__PACKAGE__->debug) {
 # set to true unless there is a way to load trends.pm safely without GD
 __PACKAGE__->config->{'has_gd'} = 0;
 eval {
-    require GD;
+    require("GD.pm");
     __PACKAGE__->config->{'has_gd'} = 1;
 };
 if($@) {
