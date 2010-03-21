@@ -1,4 +1,3 @@
-[% USE date %]
 [% statusmap_header = BLOCK %]
   <link type="text/css" href="/thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
   <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script>
@@ -15,7 +14,49 @@
       <div align="center" class='dataTitle'>Statusmap For All Hosts</div><br>
     </td>
     <td align="right" valign="top" width="33%">
-      <input type='hidden' name='hidetop' id='hidetop' value='[% hidetop %]'>
+      <table border="0" cellspacing=2 cellpadding=2 class='optBox'>
+        <tr>
+          <td align="left" class='optBoxItem'>Map Layout:</td>
+          <td align="left" class='optBoxItem'>Group By:</td>
+        </tr>
+        <tr>
+          <td align="left" class='optBoxItem'>
+            <select name='type'>
+              <option value="1"[% IF type == 1 %] selected[% END %]>Table Layout</option>
+              <option value="2"[% IF type == 2 %] selected[% END %]>Circular Layout</option>
+            </select>
+          </td>
+          <td align="left" class='optBoxItem'>
+            <select name='groupby'>
+              <option value="1"[% IF groupby == 1 %] selected[% END %]>Parent</option>
+              <option value="2"[% IF groupby == 2 %] selected[% END %]>IP Address</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" colspan="2" class='optBoxItem'>Detail Level:</td>
+        </tr>
+        <tr>
+          <td align="left" colspan="2" class='optBoxItem'>
+            <select name='level'>
+              <option value="1"[% IF level == 1 %] selected[% END %]>1</option>
+              <option value="2"[% IF level == 2 %] selected[% END %]>2</option>
+              <option value="3"[% IF level == 3 %] selected[% END %]>3</option>
+              <option value="4"[% IF level == 4 %] selected[% END %]>4</option>
+              <option value="5"[% IF level == 5 %] selected[% END %]>5</option>
+              <option value="6"[% IF level == 6 %] selected[% END %]>6</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" valign="bottom" class='optBoxItem'>
+          </td>
+          <td align="right" class='optBoxItem'>
+            <input type='hidden' name='hidetop' id='hidetop' value='[% hidetop %]'>
+            <input type='submit' value='Update'>
+          </td>
+        </tr>
+      </table>
       [% IF show_context_help %]
       <br><a href='/thruk/docs/statusmap' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
       [% END %]
@@ -26,56 +67,91 @@
 <br>
 
 <div id="infovis"></div>
-
+<div id="tooltip" class="tip" style="position: absolute; z-index: 13000; display: none;"></div>
 
 <script type="text/javascript">
 <!--
 
-function addClass(obj, new_class) {
-  if(obj) {
-    obj.className = (obj.className + " " + new_class);
-  }
+function addEvent(obj, type, fn) {
+  if (obj.addEventListener)
+    obj.addEventListener(type, fn, false);
+  else
+    obj.attachEvent('on' + type, fn);
 };
+
+function makeHTMLFromData(data){
+  var html = '<pre>';
+  if(data.status != undefined) {
+    html += 'Alias:   ' + data.alias + '<br />';
+    html += 'Address: ' + data.address + '<br />';
+    html += 'Status:  <span class="' + data.class + '">&nbsp;' + data.status + '&nbsp;<\/span> ' + data.duration + '<br />';
+    html += 'Output:  ' + data.plugin_output + '<br />';
+  }
+  html += '<\/pre>';
+  return html;
+};
+
+function showTip(e, node) {
+
+  tipOffsetX = 20;
+  tipOffsetY = 20;
+
+  tip = document.getElementById('tooltip');
+
+  //Add mousemove event handler
+  addEvent(e.target, 'mousemove', function(e, win){
+      //get mouse position
+      win = win  || window;
+      e = e || win.event;
+      var doc = win.document;
+      doc = doc.html || doc.body;
+      var page = {
+          x: e.pageX || e.clientX + doc.scrollLeft,
+          y: e.pageY || e.clientY + doc.scrollTop
+      };
+      tip.style.display = '';
+      //get window dimensions
+      win = {
+          'height': document.body.clientHeight,
+          'width': document.body.clientWidth
+      };
+      //get tooltip dimensions
+      var obj = {
+        'width': tip.offsetWidth,
+        'height': tip.offsetHeight
+      };
+      //set tooltip position
+      var style = tip.style, x = tipOffsetX, y = tipOffsetY;
+      style.top = ((page.y + y + obj.height > win.height)?
+          (page.y - obj.height - y) : page.y + y) + 'px';
+      style.left = ((page.x + obj.width + x > win.width)?
+          (page.x - obj.width - x) : page.x + x) + 'px';
+  });
+
+  addEvent(e.target, 'mouseout', function(e, win){
+    tip.style.display = 'none';
+  });
+
+
+  tip.innerHTML = "<div class=\"tip-title\">Host: " + node.name + "<\/div>" + "<div class=\"tip-text\">" + makeHTMLFromData(node.data) + "<\/div>";
+}
 
 function init(){
     //init data
-    var json = {
-        'id': 'rootnode',
-        'name': 'network map',
-        'data': {
-            '$area': 100
-        },
-        'children': [
-          [% FOREACH h = hosts %]
-          [% SET peer_key      = h.peer_key %]
-          [% SET program_start = pi_detail.$peer_key.program_start %]
-          {
-            'id': 'host_node_[% loop.index %]',
-            'name': '[% h.name %]',
-            'data': {
-                '$area':  100,
-                'class':    '[% IF h.has_been_checked %][% IF h.state == 0 %]hostUP[% ELSIF h.state == 1 %]hostDOWN[% ELSIF h.state == 2 %]hostUNREACHABLE[% END %][% ELSE %]hostPENDING[% END %]',
-                'status':   '[% IF h.has_been_checked %][% IF h.state == 0 %]UP[% ELSIF h.state == 1 %]DOWN[% ELSIF h.state == 2 %]UNREACHABLE[% END %][% ELSE %]PENDING[% END %]',
-                'duration': '(for [% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])'
-            },
-            'children': []
-          }[% UNLESS loop.last %],[% END %]
-          [% END %]
-        ]
-    };
-    //end
-
+    var json    = [% json %];
     var infovis = document.getElementById('infovis');
-    var w = infovis.offsetWidth , h = infovis.offsetHeight;
-    infovis.style.width = (w - 20) + 'px';
-    infovis.style.height = (h - infovis.offsetTop -20 ) + 'px';
+    var w = infovis.offsetWidth - 20, h = infovis.offsetHeight - infovis.offsetTop - 20;
+    infovis.style.width = w + 'px';
+    infovis.style.height = h + 'px';
 
+[%# Table Layout #%]
+[% IF type == '1' %]
     //init tm
     var tm = new TM.Squarified({
         //The id of the treemap container
         rootId: 'infovis',
         //Set the max. depth to be shown for a subtree
-        levelsToShow: 1,
+        levelsToShow: [% level %],
 
         //Add click handlers for
         //zooming the Treemap in and out
@@ -87,61 +163,115 @@ function init(){
         //is done by adding the 'in-path' CSS class to each node.
         // selectPathOnHover: true,
 
-        // add host class for the host nods
+        // add host class for the host nodes
         onCreateElement:  function(content, node, isLeaf, head, body) {
-          if(isLeaf && node.data.class != undefined) {
-            addClass(head, node.data.class);
+          if(isLeaf && node.data.class != undefined && head) {
+            head.className = (head.className + " " + node.data.class);
+            //head.onmouseover = "showTip(node)";
+            head.onmouseover = function (e){showTip((e||window.event), node)};
           }
-        },
-
-        //Allow tips
-        Tips: {
-          allow: true,
-          //add positioning offsets
-          offsetX: 20,
-          offsetY: 20,
-          //implement the onShow method to
-          //add content to the tooltip when a node
-          //is hovered
-          onShow: function(tip, node, isLeaf, domElement) {
-              tip.innerHTML = "<div class=\"tip-title\">" + node.name + "<\/div>" +
-                "<div class=\"tip-text\">" + this.makeHTMLFromData(node.data) + "<\/div>";
-          },
-
-          //Aux method: Build the tooltip inner html by using the data property
-          makeHTMLFromData: function(data){
-              var html = '';
-              html += data.status + ' ' + data.duration + '<br />';
-              return html;
-          }
-        },
-
-        //Implement this method for retrieving a requested
-        //subtree that has as root a node with id = nodeId,
-        //and level as depth. This method could also make a server-side
-        //call for the requested subtree. When completed, the onComplete
-        //callback method should be called.
-        request: function(nodeId, level, onComplete){
-            var tree = json;
-            var subtree = TreeUtil.getSubtree(tree, nodeId);
-            TreeUtil.prune(subtree, 1);
-            onComplete.onComplete(nodeId, subtree);
-        },
-
-        //Remove all events for the element before destroying it.
-        onDestroyElement: function(content, tree, isLeaf, leaf){
-            if(leaf.clearAttributes) leaf.clearAttributes();
         }
     });
 
-    var pjson = json;
-    TreeUtil.prune(pjson, 1);
-    tm.loadJSON(pjson);
-    //end
+    tm.loadJSON(json);
+[% END %]
+
+
+[%# Circular Layout #%]
+[% IF type == '2' %]
+
+  // distance between circles
+  var levelDistance = 100;
+
+  //Create a new canvas instance.
+  var canvas = new Canvas('mycanvas', {
+      //Where to append the canvas widget
+      'injectInto': 'infovis',
+      'width': w,
+      'height': h,
+
+      //Optional: create a background canvas and plot
+      //concentric circles in it.
+      'backgroundCanvas': {
+          'styles': {
+              'strokeStyle': '#CCCCCC'
+          },
+
+          'impl': {
+              'init': function(){},
+              'plot': function(canvas, ctx){
+                  var times = 6, d = levelDistance;
+                  var pi2 = Math.PI * 2;
+                  for (var i = 1; i <= times; i++) {
+                      ctx.beginPath();
+                      ctx.arc(0, 0, i * d, 0, pi2, true);
+                      ctx.stroke();
+                      ctx.closePath();
+                  }
+              }
+          }
+      }
+  });
+
+  var rgraph = new RGraph(canvas, {
+      levelDistance: levelDistance,
+      duration: 700,
+      fps: 40,
+
+      Node: { //Set Node and Edge colors.
+          overridable: true,
+      },
+      Edge: {
+          color: '#333333'
+      },
+
+      //Add the name of the node in the correponding label
+      //and a click handler to move the graph.
+      //This method is called once, on label creation.
+      onCreateLabel: function(domElement, node){
+          domElement.innerHTML = node.name;
+          domElement.onclick = function(){
+              rgraph.onClick(node.id);
+          };
+      },
+      //Change some label dom properties.
+      //This method is called each time a label is plotted.
+      onPlaceLabel: function(domElement, node){
+          var style = domElement.style;
+          style.display = '';
+          style.cursor = 'pointer';
+
+          if (node._depth <= 1) {
+              style.fontSize = "0.9em";
+              style.color = "#000000";
+
+          } else if(node._depth == 2){
+              style.fontSize = "0.8em";
+              style.color = "#494949";
+
+          } else {
+              style.display = 'none';
+          }
+
+          //domElement.onmouseover = "showTip(node)";
+          domElement.onmouseover = function (e){showTip((e||window.event), node)};
+
+          var left = parseInt(style.left);
+          var w = domElement.offsetWidth;
+          style.left = (left - w / 2) + 'px';
+      }
+  });
+
+  //load JSON data
+  rgraph.loadJSON(json);
+  //compute positions and make the first plot
+  rgraph.refresh();
+
+[% END %]
+
 }
 
-
-
+// show graph
 init();
 -->
 </script>

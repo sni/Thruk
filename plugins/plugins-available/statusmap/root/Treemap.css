@@ -12,8 +12,11 @@ html, body {
 
 #infovis div {
     position:absolute;
-    overflow:hidden;
     font-size:11px;
+}
+
+div#mycanvas div {
+    overflow:hidden;
 }
 
 #infovis .content {
@@ -67,4 +70,3 @@ html, body {
     padding:7px;
     white-space: nowrap;
 }
-
