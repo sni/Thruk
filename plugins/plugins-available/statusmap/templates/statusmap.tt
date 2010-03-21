@@ -71,7 +71,7 @@
 
 <script type="text/javascript">
 <!--
-
+var a;
 function addEvent(obj, type, fn) {
   if (obj.addEventListener)
     obj.addEventListener(type, fn, false);
@@ -79,15 +79,23 @@ function addEvent(obj, type, fn) {
     obj.attachEvent('on' + type, fn);
 };
 
-function makeHTMLFromData(data){
-  var html = '<pre>';
+function makeHTMLFromData(name, data){
+  var html = '';
+
+  if(data.status != undefined) {
+    html += '<div class="tip-title">Host: ' + name + '<\/div>'
+  } else {
+    html += '<div class="tip-title">Network: ' + name + '<\/div>'
+  }
+
+  html += '<div class="tip-text"><pre>';
   if(data.status != undefined) {
     html += 'Alias:   ' + data.alias + '<br />';
     html += 'Address: ' + data.address + '<br />';
     html += 'Status:  <span class="' + data.class + '">&nbsp;' + data.status + '&nbsp;<\/span> ' + data.duration + '<br />';
     html += 'Output:  ' + data.plugin_output + '<br />';
   }
-  html += '<\/pre>';
+  html += '<\/div><\/pre>';
   return html;
 };
 
@@ -133,7 +141,7 @@ function showTip(e, node) {
   });
 
 
-  tip.innerHTML = "<div class=\"tip-title\">Host: " + node.name + "<\/div>" + "<div class=\"tip-text\">" + makeHTMLFromData(node.data) + "<\/div>";
+  tip.innerHTML = makeHTMLFromData(node.name, node.data);
 }
 
 function init(){
@@ -181,7 +189,7 @@ function init(){
 [% IF type == '2' %]
 
   // distance between circles
-  var levelDistance = 100;
+  var levelDistance = 70;
 
   //Create a new canvas instance.
   var canvas = new Canvas('mycanvas', {
@@ -241,24 +249,26 @@ function init(){
           style.display = '';
           style.cursor = 'pointer';
 
-          if (node._depth <= 1) {
+          if(node._depth <= 1) {
               style.fontSize = "0.9em";
               style.color = "#000000";
-
-          } else if(node._depth == 2){
+          }
+          else if(node._depth <= 3){
               style.fontSize = "0.8em";
               style.color = "#494949";
-
-          } else {
+          }else {
               style.display = 'none';
           }
 
-          //domElement.onmouseover = "showTip(node)";
           domElement.onmouseover = function (e){showTip((e||window.event), node)};
 
           var left = parseInt(style.left);
           var w = domElement.offsetWidth;
           style.left = (left - w / 2) + 'px';
+      },
+      onAfterPlotNode: function(node) {
+          a = node;
+          node.onmouseover = function (e){showTip((e||window.event), node)};
       }
   });
 

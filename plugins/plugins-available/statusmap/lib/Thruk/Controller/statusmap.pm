@@ -2,7 +2,9 @@ package Thruk::Controller::statusmap;
 
 use strict;
 use warnings;
+use Carp;
 use JSON::XS;
+use Data::Dumper;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -48,21 +50,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # order by address
     if($c->stash->{groupby} == 2) {
-        $hosts = Thruk::Utils::sort($c, $hosts, ['address'], 'ASC');
+        #$hosts = Thruk::Utils::sort($c, $hosts, ['address'], 'ASC');
     }
 
-    my $json = {
-        'id'   => 'rootnode',
-        'name' => 'network map',
-        'data' => {
-            '$area' => 100,
-        },
-        'children' => [],
-    };
-
-
     my $x = 0;
+    my $host_tree = {};
     for my $host (@{$hosts}) {
+        my $id = 'host_node_'.$x;
         my $program_start = $c->stash->{'pi_detail'}->{$host->{'peer_key'}}->{'program_start'};
         my($class, $status, $duration,$color);
         if($host->{'has_been_checked'}) {
@@ -91,10 +85,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $duration = '( for '.Thruk::Utils::filter_duration(time() - $program_start).'+ )';
         }
         my $json_host = {
-            'id'   => 'host_node_'.$x,
+            'id'   => $id,
             'name' => $host->{'name'},
             'data' => {
-                '$area'         =>  100,
+                '$area'         => 100,
                 '$color'        => $color,
                 'class'         => $class,
                 'status'        => $status,
@@ -105,13 +99,54 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             },
             'children' => [],
         };
-        push @{$json->{'children'}}, $json_host;
+
+        # where should we put the host onto?
+        if($c->stash->{groupby} == 2) {
+            if($host->{'address'} =~ m/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/) {
+                # table layout
+                if($c->stash->{'type'} == 1) {
+                    if($c->stash->{level} == 4) {
+                        $host_tree->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+                    }
+                    if($c->stash->{level} == 3) {
+                        $host_tree->{$1.'.'.$2}->{$id} = $json_host;
+                    }
+                    if($c->stash->{level} == 2) {
+                        $host_tree->{$1}->{$id} = $json_host;
+                    }
+                    if($c->stash->{level} == 1) {
+                        $host_tree->{$id} = $json_host;
+                    }
+                }
+                elsif($c->stash->{'type'} == 2) {
+                    if($c->stash->{level} == 1) {
+                        $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+                    }
+                    if($c->stash->{level} == 2) {
+                        $host_tree->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+                    }
+                } else {
+                    confess("unknown type");
+                }
+            }
+        } else {
+            $host_tree->{$id} = $json_host;
+        }
         $x++;
     }
 
-#use Data::Dumper;
 #print "HTTP/1.0 200 OK\n\n<pre>";
+#print Dumper($host_tree);
+
+    my $json = {
+        'id'       => 'rootnode',
+        'name'     => 'network map',
+        'data'     => { '$area' => 100 },
+        'children' => $self->_get_json_for_hosts($host_tree, 0),
+    };
+
 #print Dumper($json);
+
 
     #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger)
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
@@ -124,6 +159,46 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     return 1;
 }
+
+
+##########################################################
+
+=head2 _get_json_for_hosts
+
+=cut
+
+sub _get_json_for_hosts {
+    my $self  = shift;
+    my $data  = shift;
+    my $level = shift;
+
+#print Dumper($data);
+
+    my $children = [];
+
+    if(ref $data ne 'HASH') {
+        my @caller = caller;
+        confess('not a hash ref: '.Dumper($data)."\n".Dumper(\@caller));
+    }
+
+    for my $key (sort keys %{$data}) {
+        my $dat = $data->{$key};
+        if($key =~ m/^host_node_/mx) {
+            push @{$children}, $dat;
+        }
+        else {
+            push @{$children}, {
+                'id'       => 'sub_node_'.$level.'_'.$key,
+                'name'     => $key,
+                'data'     => { '$area' => 100 },
+                'children' => $self->_get_json_for_hosts($dat, ($level+1)),
+            };
+        }
+    }
+
+    return $children;
+}
+
 
 
 =head1 AUTHOR
