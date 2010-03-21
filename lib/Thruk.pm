@@ -96,9 +96,22 @@ __PACKAGE__->config('name'                   => 'Thruk',
 # get installed plugins
 BEGIN {
     my $project_root = __PACKAGE__->config->{home};
-    for my $addon (glob($project_root.'/plugins/*/')) {
-        unshift(@INC, $addon.'/lib') if -d $addon.'lib';
-        unshift @{__PACKAGE__->config->{templates_paths}}, $addon.'templates' if -d $addon.'templates';
+    for my $addon (glob($project_root.'/plugins/plugins-enabled/*/')) {
+        my $addon_name = $addon;
+        $addon_name =~ s/^.*\///gmx;
+        # lib directory included?
+        if(-d $addon.'lib') {
+            unshift(@INC, $addon.'lib')
+        }
+        # template directory included?
+        if(-d $addon.'templates') {
+            unshift @{__PACKAGE__->config->{templates_paths}}, $addon.'templates'
+        }
+        # static content included?
+        if(-d $addon.'root') {
+            unlink($project_root.'/root/plugins/'.$addon_name);
+            symlink($addon.'root', $project_root.'/root/plugins/'.$addon_name);
+        }
     }
 }
 

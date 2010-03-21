@@ -1,0 +1,150 @@
+[% statusmap_header = BLOCK %]
+  <link type="text/css" href="/thruk/plugins/statusmap/base.css" rel="stylesheet" />
+  <link type="text/css" href="/thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
+  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script>
+[% END %]
+[% PROCESS _header.tt extra_header => statusmap_header %]
+
+<form method="get" action="statusmap.cgi">
+<table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="top" width="33%">
+      <div align="center" class='dataTitle'>Statusmap For All Hosts</div><br>
+    </td>
+    <td align="right" valign="top" width="33%">
+      <input type='hidden' name='hidetop' id='hidetop' value='[% hidetop %]'>
+      [% IF show_context_help %]
+      <br><a href='/thruk/docs/statusmap' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+      [% END %]
+    </td>
+  </tr>
+</table>
+</form>
+<br>
+
+<div id="infovis"></div>
+
+
+<script type="text/javascript">
+<!--
+
+function addClass(obj, new_class) {
+  if(obj) {
+    obj.className = (obj.className + " " + new_class);
+  }
+};
+var a;
+function init(){
+    //init data
+    var json = {
+        'id': 'rootnode',
+        'name': 'network map',
+        'data': {
+            '$area': 100
+        },
+        'children': [
+          [% FOREACH h = hosts %]
+          {
+            'id': 'host_node_[% loop.index %]',
+            'name': '[% h.name %]',
+            'data': {
+                '$area':  100,
+                'class':  '[% IF h.has_been_checked %][% IF h.state == 0 %]hostUP[% ELSIF h.state == 1 %]hostDOWN[% ELSIF h.state == 2 %]hostUNREACHABLE[% END %][% ELSE %]hostPENDING[% END %]',
+                'status': '[% IF h.has_been_checked %][% IF h.state == 0 %]UP[% ELSIF h.state == 1 %]DOWN[% ELSIF h.state == 2 %]UNREACHABLE[% END %][% ELSE %]PENDING[% END %]',
+            },
+            'children': []
+          }[% UNLESS loop.last %],[% END %]
+          [% END %]
+        ]
+    };
+    //end
+
+    var infovis = document.getElementById('infovis');
+    var w = infovis.offsetWidth , h = infovis.offsetHeight;
+    infovis.style.width = (w - 20) + 'px';
+    infovis.style.height = (h - infovis.offsetTop -20 ) + 'px';
+
+    //init tm
+    var tm = new TM.Squarified({
+        //The id of the treemap container
+        rootId: 'infovis',
+        //Set the max. depth to be shown for a subtree
+        levelsToShow: 1,
+
+        //Add click handlers for
+        //zooming the Treemap in and out
+        addLeftClickHandler: true,
+        addRightClickHandler: true,
+
+        //When hovering a node highlight the nodes
+        //between the root node and the hovered node. This
+        //is done by adding the 'in-path' CSS class to each node.
+        selectPathOnHover: true,
+
+        onCreateElement:  function(content, node, isLeaf, head, body) {
+          if(isLeaf && node.data.class != undefined) {
+            addClass(head, node.data.class);
+          }
+        },
+
+        //Allow tips
+        Tips: {
+          allow: true,
+          //add positioning offsets
+          offsetX: 20,
+          offsetY: 20,
+          //implement the onShow method to
+          //add content to the tooltip when a node
+          //is hovered
+          onShow: function(tip, node, isLeaf, domElement) {
+              tip.innerHTML = "<div class=\"tip-title\">" + node.name + "<\/div>" +
+                "<div class=\"tip-text\">" + this.makeHTMLFromData(node.data) + "<\/div>";
+          },
+
+          //Aux method: Build the tooltip inner html by using the data property
+          makeHTMLFromData: function(data){
+              var html = '';
+              html += 'status: ' + data.status + '<br />';
+              /*if ("$color" in data)
+                  html += "rank" + ': ' + data.$color + '<br />';
+              if ("image" in data)
+                  html += "<img class=\"album\" src=\"" + data.image + "\" />";
+              */
+              return html;
+          }
+        },
+
+        //Implement this method for retrieving a requested
+        //subtree that has as root a node with id = nodeId,
+        //and level as depth. This method could also make a server-side
+        //call for the requested subtree. When completed, the onComplete
+        //callback method should be called.
+        request: function(nodeId, level, onComplete){
+            var tree = json;
+            var subtree = TreeUtil.getSubtree(tree, nodeId);
+            TreeUtil.prune(subtree, 1);
+            onComplete.onComplete(nodeId, subtree);
+        },
+
+        //Remove all events for the element before destroying it.
+        onDestroyElement: function(content, tree, isLeaf, leaf){
+            if(leaf.clearAttributes) leaf.clearAttributes();
+        }
+    });
+
+    var pjson = json;
+    TreeUtil.prune(pjson, 1);
+    tm.loadJSON(pjson);
+    //end
+}
+
+
+
+init();
+-->
+</script>
+
+[% PROCESS _footer.tt %]

@@ -20,6 +20,8 @@ table.linkBox { margin-top: 20px; }
 td.linkBox a { margin-left: 5px; padding-left: 10px; background: url(../../images/interface/menu_li1.gif) 0 0.35em no-repeat; }
 td.linkBox a:hover { background: url(../../images/interface/menu_li2.gif) 0 0.35em no-repeat; }
 
+.dataTitle { text-align: center; font-weight: bold; font-size: 10pt; }
+
 .optBox { font-size: 10pt; font-weight: bold; }
 
 .imageInfo { font-weight: bold; text-align: center; }

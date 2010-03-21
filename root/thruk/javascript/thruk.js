@@ -1145,7 +1145,7 @@ function selectByValue(select, val) {
 
 /* toggle visibility of top status informations */
 function toggleTopPane() {
-  var formInput = document. getElementById('hidetop');
+  var formInput = document.getElementById('hidetop');
   if(toggleElement('top_pane')) {
     additionalParams.set('hidetop', 0);
     formInput.value = 0;

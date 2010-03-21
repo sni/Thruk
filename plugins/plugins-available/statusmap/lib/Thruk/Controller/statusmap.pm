@@ -37,7 +37,14 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->response->body('Matched Thruk::Controller::statusmap in statusmap.');
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name address has_been_checked", { Slice => {}, AddPeer => 1 });
+    # order by address
+    $c->stash->{hosts}        = Thruk::Utils::sort($c, $hosts, ['address'], 'ASC');
+
+    $c->stash->{title}        = 'Network Map';
+    $c->stash->{page}         = 'statusmap';
+    $c->stash->{template}     = 'statusmap.tt';
+    $c->stash->{infoBoxTitle} = 'Network Map For All Hosts';
 
     return 1;
 }

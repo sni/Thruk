@@ -4,6 +4,11 @@
 .serviceWARNING  { background-color: #FFFF00; }
 .serviceCRITICAL { background-color: #f88888; }
 
+.hostUP          { background-color: #88d066; }
+.hostDOWN        { background-color: #f88888; }
+.hostUNREACHABLE { background-color: #f88888; }
+.hostPENDING     { background-color: #acacac; }
+
 /* mouse over classes for inline command selection in status page */
 .tableRowHover {
   background-color:#88BBD8;

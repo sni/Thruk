@@ -7,6 +7,8 @@ general
     - add backend name to logs
     - add go back button on error page
     - authorization docs
+    - navigation hider does not work on start page
+    - navigation scrollbar too much left
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -65,10 +67,6 @@ reports:
         CSV output for single hosts/services,hostgroups/servicegroups
     - cache results from Thruk::Utils::calculate_availability, no need
       to parse logfiles twice
-
-statusmap: maybe something with http://search.cpan.org/~lbrocard/GraphViz/lib/GraphViz.pm
-           or a link to nagvis
-           or with http://thejit.org/Jit/Examples/RGraph/example1.html
 
 status:
     - proper search

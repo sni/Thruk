@@ -101,6 +101,9 @@ sub begin : Private {
     }
     $c->stash->{'all_problems_link'} = $all_problems_link;
 
+    my $hidetop = $c->{'request'}->{'parameters'}->{'hidetop'};
+    $c->stash->{hidetop}   = $hidetop;
+
     return 1;
 }
 

@@ -4,6 +4,11 @@
 .serviceWARNING  { background-color: #FFFF00; }
 .serviceCRITICAL { background-color: #F83838; }
 
+.hostUP          { background-color: #33FF00; }
+.hostDOWN        { background-color: #F83838; }
+.hostUNREACHABLE { background-color: #F83838; }
+.hostPENDING     { background-color: #ACACAC; }
+
 /* fix for link box and infobox border */
 table.infoBox {
   margin-top: 5px;
