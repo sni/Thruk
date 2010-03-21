@@ -1,10 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
     <title>Thruk Documentation</title>
   </head>
   <body>
-  Thruk Documentation
-  <br><br>
+  <h2>Thruk Documentation</h2>
+  <br>
   Thruks documentation itself is located in your project root under the /docs/ folder.<br>
   <br>
   To replace this link with a valid documentation of your monitoring tool<br>

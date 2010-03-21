@@ -2,16 +2,6 @@ html, body {
     height:100%; /* important for layout of statusmap */
 }
 
-.text {
-    margin: 7px;
-}
-
-#inner-details {
-    font-size:0.8em;
-    list-style:none;
-    margin:7px;
-}
-
 #infovis {
     position:relative;
     margin:auto;
@@ -46,8 +36,6 @@ html, body {
 }
 
 #infovis .leaf {
-/*    color:white;
-    background-color:#111; */
     display:table-cell;
     vertical-align:middle;
     border:1px solid #000;
@@ -71,21 +59,12 @@ html, body {
 /*TOOLTIPS*/
 .tip {
     color: #fff;
-    width: 139px;
+    min-width: 139px;
     background-color: black;
     opacity:0.9;
     filter:alpha(opacity=90);
     font-size:10px;
     padding:7px;
+    white-space: nowrap;
 }
 
-.album {
-    width:100px;
-    margin:3px;
-}
-/*
-input {
-    font-size:10px;
-    font-family:Verdana, Geneva, Arial, Helvetica, sans-serif;
-}
-*/

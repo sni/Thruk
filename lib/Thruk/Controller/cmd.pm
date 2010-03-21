@@ -248,6 +248,14 @@ sub _do_send_command {
         $c->{'request'}->{'parameters'}->{'com_author'} = $author;
     }
 
+    # replace parsed dates
+    if(defined $c->request->parameters->{'start_time'}) {
+        $c->request->parameters->{'start_time'} = Thruk::Utils::parse_date($c->request->parameters->{'start_time'});
+    }
+    if(defined $c->request->parameters->{'end_time'}) {
+        $c->request->parameters->{'end_time'} = Thruk::Utils::parse_date($c->request->parameters->{'end_time'});
+    }
+
     my $tt  = Template->new($c->{'View::TT'});
     my $cmd = '';
     $tt->process( 'cmd/cmd_typ_'.$cmd_typ.'.tt', { c => $c, cmd_tt => 'cmd_line.tt' }, \$cmd ) || die $tt->error();

@@ -1,3 +1,4 @@
+[% USE date %]
 [% statusmap_header = BLOCK %]
   <link type="text/css" href="/thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
   <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script>
@@ -35,7 +36,7 @@ function addClass(obj, new_class) {
     obj.className = (obj.className + " " + new_class);
   }
 };
-var a;
+
 function init(){
     //init data
     var json = {
@@ -46,13 +47,16 @@ function init(){
         },
         'children': [
           [% FOREACH h = hosts %]
+          [% SET peer_key      = h.peer_key %]
+          [% SET program_start = pi_detail.$peer_key.program_start %]
           {
             'id': 'host_node_[% loop.index %]',
             'name': '[% h.name %]',
             'data': {
                 '$area':  100,
-                'class':  '[% IF h.has_been_checked %][% IF h.state == 0 %]hostUP[% ELSIF h.state == 1 %]hostDOWN[% ELSIF h.state == 2 %]hostUNREACHABLE[% END %][% ELSE %]hostPENDING[% END %]',
-                'status': '[% IF h.has_been_checked %][% IF h.state == 0 %]UP[% ELSIF h.state == 1 %]DOWN[% ELSIF h.state == 2 %]UNREACHABLE[% END %][% ELSE %]PENDING[% END %]',
+                'class':    '[% IF h.has_been_checked %][% IF h.state == 0 %]hostUP[% ELSIF h.state == 1 %]hostDOWN[% ELSIF h.state == 2 %]hostUNREACHABLE[% END %][% ELSE %]hostPENDING[% END %]',
+                'status':   '[% IF h.has_been_checked %][% IF h.state == 0 %]UP[% ELSIF h.state == 1 %]DOWN[% ELSIF h.state == 2 %]UNREACHABLE[% END %][% ELSE %]PENDING[% END %]',
+                'duration': '(for [% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])'
             },
             'children': []
           }[% UNLESS loop.last %],[% END %]
@@ -81,8 +85,9 @@ function init(){
         //When hovering a node highlight the nodes
         //between the root node and the hovered node. This
         //is done by adding the 'in-path' CSS class to each node.
-        selectPathOnHover: true,
+        // selectPathOnHover: true,
 
+        // add host class for the host nods
         onCreateElement:  function(content, node, isLeaf, head, body) {
           if(isLeaf && node.data.class != undefined) {
             addClass(head, node.data.class);
@@ -106,12 +111,7 @@ function init(){
           //Aux method: Build the tooltip inner html by using the data property
           makeHTMLFromData: function(data){
               var html = '';
-              html += 'status: ' + data.status + '<br />';
-              /*if ("$color" in data)
-                  html += "rank" + ': ' + data.$color + '<br />';
-              if ("image" in data)
-                  html += "<img class=\"album\" src=\"" + data.image + "\" />";
-              */
+              html += data.status + ' ' + data.duration + '<br />';
               return html;
           }
         },
