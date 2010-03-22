@@ -86,6 +86,9 @@ function makeHTMLFromData(name, data){
     html += '<div class="tip-title">Host: ' + name + '<\/div>'
   } else {
     html += '<div class="tip-title">Network: ' + name + '<\/div>'
+    //html += '<div class="tip-text"><pre>';
+    //html += 'Area:  ' + data.$area + '<br />';
+    //html += '<\/div><\/pre>';
   }
 
   html += '<div class="tip-text"><pre>';
@@ -159,7 +162,11 @@ function init(){
         //The id of the treemap container
         rootId: 'infovis',
         //Set the max. depth to be shown for a subtree
-        levelsToShow: [% level %],
+        //levelsToShow: [% level %],
+        levelsToShow: 1,
+
+        // space between divs
+        offset: 4,
 
         //Add click handlers for
         //zooming the Treemap in and out
@@ -175,12 +182,20 @@ function init(){
         onCreateElement:  function(content, node, isLeaf, head, body) {
           if(isLeaf && node.data.class != undefined && head) {
             head.className = (head.className + " " + node.data.class);
-            //head.onmouseover = "showTip(node)";
-            head.onmouseover = function (e){showTip((e||window.event), node)};
           }
-        }
+          head.onmouseover = function (e){showTip((e||window.event), node)};
+        },
+        request: function(nodeId, level, onComplete){
+            var tree = json;
+            var subtree = TreeUtil.getSubtree(tree, nodeId);
+            TreeUtil.prune(subtree, 1);
+            onComplete.onComplete(nodeId, subtree);
+        },
+        //Remove all events for the element before destroying it.
+        //onDestroyElement: function(content, tree, isLeaf, leaf){
+        //    if(leaf.clearAttributes) leaf.clearAttributes();
+        //}
     });
-
     tm.loadJSON(json);
 [% END %]
 
@@ -189,7 +204,7 @@ function init(){
 [% IF type == '2' %]
 
   // distance between circles
-  var levelDistance = 70;
+  var levelDistance = 100;
 
   //Create a new canvas instance.
   var canvas = new Canvas('mycanvas', {
@@ -246,18 +261,23 @@ function init(){
       //This method is called each time a label is plotted.
       onPlaceLabel: function(domElement, node){
           var style = domElement.style;
-          style.display = '';
+          //style.visibility = 'visible';
           style.cursor = 'pointer';
+          style.height = '';
+          style.width  = '';
 
           if(node._depth <= 1) {
-              style.fontSize = "0.9em";
-              style.color = "#000000";
+              style.fontSize = '0.9em';
+              style.color    = '#000000';
           }
           else if(node._depth <= 3){
-              style.fontSize = "0.8em";
-              style.color = "#494949";
+              style.fontSize = '0.8em';
+              style.color    = '#494949';
           }else {
-              style.display = 'none';
+              style.fontSize = '0px';
+              style.height   = '10px';
+              style.width    = '10px';
+              //style.visibility = 'hidden';
           }
 
           domElement.onmouseover = function (e){showTip((e||window.event), node)};
@@ -266,10 +286,6 @@ function init(){
           var w = domElement.offsetWidth;
           style.left = (left - w / 2) + 'px';
       },
-      onAfterPlotNode: function(node) {
-          a = node;
-          node.onmouseover = function (e){showTip((e||window.event), node)};
-      }
   });
 
   //load JSON data

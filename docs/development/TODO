@@ -7,8 +7,7 @@ general
     - add backend name to logs
     - add go back button on error page
     - authorization docs
-    - navigation hider does not work on start page
-    - navigation scrollbar too much left
+    - Filter: latency, execution_time
 
 extinfo:
     - finish performance data on extinfo type 4

@@ -46,104 +46,22 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{type}         = $c->request->parameters->{'type'}    || 1;
     $c->stash->{groupby}      = $c->request->parameters->{'groupby'} || 1;
 
-    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output", { Slice => {}, AddPeer => 1 });
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output childs parents", { Slice => {}, AddPeer => 1 });
 
+    my $json;
+    if($c->stash->{groupby} == 1) {
+        $json = $self->_get_hosts_by_parents($c, $hosts);
+    }
     # order by address
-    if($c->stash->{groupby} == 2) {
-        #$hosts = Thruk::Utils::sort($c, $hosts, ['address'], 'ASC');
+    elsif($c->stash->{groupby} == 2) {
+        $json = $self->_get_hosts_by_address($c, $hosts);
     }
 
-    my $x = 0;
-    my $host_tree = {};
-    for my $host (@{$hosts}) {
-        my $id = 'host_node_'.$x;
-        my $program_start = $c->stash->{'pi_detail'}->{$host->{'peer_key'}}->{'program_start'};
-        my($class, $status, $duration,$color);
-        if($host->{'has_been_checked'}) {
-            if($host->{'state'} == 0) {
-                $class    = 'hostUP';
-                $status   = 'UP';
-                $color    = '#00FF00';
-            }
-            if($host->{'state'} == 1) {
-                $class    = 'hostDOWN';
-                $status   = 'DOWN';
-                $color    = '#FF0000';
-            }
-            if($host->{'state'} == 2) {
-                $class    = 'hostUNREACHABLE';
-                $status   = 'UNREACHABLE';
-                $color    = '#FF0000';
-            }
-        } else {
-            $class    = 'hostPENDING';
-            $status   = 'PENDING';
-        }
-        if($host->{'last_state_change'}) {
-            $duration = '( for '.Thruk::Utils::filter_duration(time() - $host->{'last_state_change'}).' )';
-        } else {
-            $duration = '( for '.Thruk::Utils::filter_duration(time() - $program_start).'+ )';
-        }
-        my $json_host = {
-            'id'   => $id,
-            'name' => $host->{'name'},
-            'data' => {
-                '$area'         => 100,
-                '$color'        => $color,
-                'class'         => $class,
-                'status'        => $status,
-                'duration'      => $duration,
-                'plugin_output' => $host->{'plugin_output'},
-                'alias'         => $host->{'alias'},
-                'address'       => $host->{'address'},
-            },
-            'children' => [],
-        };
 
-        # where should we put the host onto?
-        if($c->stash->{groupby} == 2) {
-            if($host->{'address'} =~ m/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/) {
-                # table layout
-                if($c->stash->{'type'} == 1) {
-                    if($c->stash->{level} == 4) {
-                        $host_tree->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
-                    }
-                    if($c->stash->{level} == 3) {
-                        $host_tree->{$1.'.'.$2}->{$id} = $json_host;
-                    }
-                    if($c->stash->{level} == 2) {
-                        $host_tree->{$1}->{$id} = $json_host;
-                    }
-                    if($c->stash->{level} == 1) {
-                        $host_tree->{$id} = $json_host;
-                    }
-                }
-                elsif($c->stash->{'type'} == 2) {
-                    if($c->stash->{level} == 1) {
-                        $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
-                    }
-                    if($c->stash->{level} == 2) {
-                        $host_tree->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
-                    }
-                } else {
-                    confess("unknown type");
-                }
-            }
-        } else {
-            $host_tree->{$id} = $json_host;
-        }
-        $x++;
-    }
 
 #print "HTTP/1.0 200 OK\n\n<pre>";
 #print Dumper($host_tree);
 
-    my $json = {
-        'id'       => 'rootnode',
-        'name'     => 'network map',
-        'data'     => { '$area' => 100 },
-        'children' => $self->_get_json_for_hosts($host_tree, 0),
-    };
 
 #print Dumper($json);
 
@@ -151,6 +69,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger)
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
     $c->stash->{json}         = $coder->encode($json);
+    #$c->stash->{json}         = $coder->encode(\@hosts);
 
     $c->stash->{title}        = 'Network Map';
     $c->stash->{page}         = 'statusmap';
@@ -166,13 +85,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 =head2 _get_json_for_hosts
 
 =cut
-
 sub _get_json_for_hosts {
     my $self  = shift;
     my $data  = shift;
     my $level = shift;
-
-#print Dumper($data);
 
     my $children = [];
 
@@ -181,25 +97,185 @@ sub _get_json_for_hosts {
         confess('not a hash ref: '.Dumper($data)."\n".Dumper(\@caller));
     }
 
+    my $sum = 0;
     for my $key (sort keys %{$data}) {
         my $dat = $data->{$key};
-        if($key =~ m/^host_node_/mx) {
+        if(exists $dat->{'id'}) {
             push @{$children}, $dat;
+            $sum += $dat->{'data'}->{'$area'};
         }
         else {
+            my($childs, $csum) = $self->_get_json_for_hosts($dat, ($level+1));
+            $sum = $sum + $csum;
             push @{$children}, {
                 'id'       => 'sub_node_'.$level.'_'.$key,
                 'name'     => $key,
-                'data'     => { '$area' => 100 },
-                'children' => $self->_get_json_for_hosts($dat, ($level+1)),
+                'data'     => { '$area' => $csum },
+                'children' => $childs,
             };
         }
     }
 
-    return $children;
+    return($children,$sum);
 }
 
 
+##########################################################
+
+=head2 _get_hosts_by_address
+
+=cut
+sub _get_hosts_by_address {
+    my $self  = shift;
+    my $c     = shift;
+    my $hosts = shift;
+
+    my $host_tree;
+    for my $host (@{$hosts}) {
+
+        my $json_host = $self->_get_json_host($c, $host);
+        $json_host->{'children'} = [];
+        my $id = $json_host->{'id'};
+
+        # where should we put the host onto?
+        if($c->stash->{groupby} == 2) { # order by address
+            if($host->{'address'} =~ m/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/) {
+                # table layout
+                if($c->stash->{'type'} == 1) {
+                    $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+                    #if($c->stash->{level} == 4) {
+                    #    $host_tree->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+                    #}
+                    #if($c->stash->{level} == 3) {
+                    #    $host_tree->{$1.'.'.$2}->{$id} = $json_host;
+                    #}
+                    #if($c->stash->{level} == 2) {
+                    #    $host_tree->{$1}->{$id} = $json_host;
+                    #}
+                    #if($c->stash->{level} == 1) {
+                    #    $host_tree->{$id} = $json_host;
+                    #}
+                }
+                # circle layout
+                elsif($c->stash->{'type'} == 2) {
+                    if($c->stash->{level} == 1) {
+                        $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+                    }
+                    if($c->stash->{level} == 2) {
+                        $host_tree->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+                    }
+                } else {
+                    confess("unknown type: ".$c->stash->{'type'});
+                }
+            }
+        } else {
+            $host_tree->{$id} = $json_host;
+        }
+    }
+
+    my($children, $sum) = $self->_get_json_for_hosts($host_tree, 0);
+    my $rootnode = {
+        'id'       => 'rootid',
+        'name'     => 'monitoring host',
+        'data'     => { '$area' => $sum },
+        'children' => $children,
+    };
+
+    return $rootnode;
+}
+
+
+##########################################################
+
+=head2 _get_hosts_by_parents
+
+=cut
+sub _get_hosts_by_parents {
+    my $self  = shift;
+    my $c     = shift;
+    my $hosts = shift;
+
+    my @hosts;
+    my @rootchilds;
+    for my $host (@{$hosts}) {
+        my $json_host = $self->_get_json_host($c, $host);
+        my @adjacencies;
+        push @adjacencies, split(/,/mx, $host->{'childs'})  if defined $host->{'childs'};
+        #push @adjacencies, split(/,/mx, $host->{'parents'}) if defined $host->{'parents'};
+        #if(scalar @adjacencies == 0) {
+        unless(defined $host->{'parents'}) {
+            push @rootchilds, $host->{'name'};
+        #    push @adjacencies, 'monitoring host';
+        }
+        $json_host->{'adjacencies'} = \@adjacencies;
+        push @hosts, $json_host;
+    }
+
+    my $rootnode = {
+        'id'          => 'rootid',
+        'name'        => 'monitoring host',
+        'data'        => { '$area' => 100 },
+        'adjacencies'    => \@rootchilds,
+    };
+    unshift @hosts, $rootnode;
+    return \@hosts;
+}
+
+
+##########################################################
+
+=head2 _get_json_host
+
+=cut
+sub _get_json_host {
+    my $self = shift;
+    my $c    = shift;
+    my $host = shift;
+
+    my $program_start = $c->stash->{'pi_detail'}->{$host->{'peer_key'}}->{'program_start'};
+    my($class, $status, $duration,$color);
+    if($host->{'has_been_checked'}) {
+        if($host->{'state'} == 0) {
+            $class    = 'hostUP';
+            $status   = 'UP';
+            $color    = '#00FF00';
+        }
+        if($host->{'state'} == 1) {
+            $class    = 'hostDOWN';
+            $status   = 'DOWN';
+            $color    = '#FF0000';
+        }
+        if($host->{'state'} == 2) {
+            $class    = 'hostUNREACHABLE';
+            $status   = 'UNREACHABLE';
+            $color    = '#FF0000';
+        }
+    } else {
+        $class    = 'hostPENDING';
+        $status   = 'PENDING';
+    }
+    if($host->{'last_state_change'}) {
+        $duration = '( for '.Thruk::Utils::filter_duration(time() - $host->{'last_state_change'}).' )';
+    } else {
+        $duration = '( for '.Thruk::Utils::filter_duration(time() - $program_start).'+ )';
+    }
+    my $json_host = {
+        'id'   => $host->{'name'},
+        'name' => $host->{'name'},
+        'data' => {
+            '$area'         => 1,
+            '$color'        => $color,
+            'class'         => $class,
+            'status'        => $status,
+            'duration'      => $duration,
+            'plugin_output' => $host->{'plugin_output'},
+            'alias'         => $host->{'alias'},
+            'address'       => $host->{'address'},
+        },
+    };
+
+    return $json_host;
+}
 
 =head1 AUTHOR
 
