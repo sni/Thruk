@@ -177,7 +177,7 @@ sub thruk_index : Path('/thruk/') {
     if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
         return $c->detach("default");
     }
-    if($c->stash->{'use_frames'}) {
+    if($c->stash->{'use_frames'} and !$c->stash->{'show_nav_button'}) {
         return $c->detach("thruk_index_html");
     }
 
