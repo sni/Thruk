@@ -7,6 +7,7 @@ general
     - add backend name to logs
     - add go back button on error page
     - authorization docs
+    - Filter: latency, execution_time
 
 extinfo:
     - finish performance data on extinfo type 4
