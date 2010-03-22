@@ -8,8 +8,9 @@ div.navbar {
   z-index:100;
   border-top: 0px solid black;
   border-bottom: 0px solid black;
-  border-right: 5px solid black;
+  border-right: 0px solid black;
   border-left: 2px solid black;
+  padding-right: 3px;
   overflow:auto;
   top: 0px;
   left: 0px;

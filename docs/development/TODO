@@ -58,6 +58,7 @@ general:
     - addons: own template, images/themes and lib directory
     - bookmarks
     - show only backends where user has at least permission for one host/service
+    - use livestatus wait feature where possible
 
 reports:
     - generate long running reports in an extra process
