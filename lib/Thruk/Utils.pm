@@ -234,22 +234,41 @@ sub filter_sprintf {
 
 =head2 parse_date
 
-  my $timestamp = parse_date($string)
+  my $timestamp = parse_date($c, $string)
 
 Format: 2010-03-02 00:00:00
 parse given date and return timestamp
 
 =cut
 sub parse_date {
+    my $c      = shift;
     my $string = shift;
     my $timestamp;
     if($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+        $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
     }
     else {
         $timestamp = UnixDate($string, '%s');
+        $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
     }
     return $timestamp;
+}
+
+
+##############################################
+
+=head2 format_date
+
+  my $date_string = format_date($string, $format)
+
+return date from timestamp in given format
+
+=cut
+sub format_date {
+    my $timestamp = shift;
+    my $format    = shift;
+    return UnixDate("epoch $timestamp", $format);
 }
 
 
@@ -1158,16 +1177,25 @@ combines the filter by given operator
 sub combine_filter {
     my $filter = shift;
     my $op     = shift;
-
-    return "" if scalar @{$filter} == 0;
+    my $erg    = "";
 
     confess("unknown operator: ".$op) if ($op ne 'And' and $op ne 'Or');
 
-    if(scalar @{$filter} > 1) {
-        return join("\n", @{$filter})."\n$op: ".(scalar @{$filter})."\n";
+    # filter empty strings
+    @{$filter} = grep {!/^\s*$/} @{$filter};
+
+    if(scalar @{$filter} == 0) {
+        $erg = ""
+    }
+    elsif(scalar @{$filter} > 1) {
+        $erg = join("\n", @{$filter})."\n$op: ".(scalar @{$filter})."\n";
+    }
+    else {
+        $erg = $filter->[0]."\n";
+
     }
 
-    return $filter->[0]."\n";
+    return $erg;
 }
 
 

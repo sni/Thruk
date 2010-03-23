@@ -53,12 +53,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # start / end date from formular values?
     if(defined $param_start and defined $param_end) {
         # convert to timestamps
-        $start = Thruk::Utils::parse_date($param_start);
-        $end   = Thruk::Utils::parse_date($param_end);
+        $start = Thruk::Utils::parse_date($c, $param_start);
+        $end   = Thruk::Utils::parse_date($c, $param_end);
     }
     if(!defined $start or $start == 0 or !defined $end or $end == 0) {
         # start with today 00:00
-        $start = Thruk::Utils::parse_date("today 00:00");
+        $start = Thruk::Utils::parse_date($c, "today 00:00");
         $end   = $start + $timeframe;
     }
     if($archive eq '+1') {
