@@ -1,7 +1,7 @@
 [% USE date %]
 [% PROCESS _header.tt %]
 
-    <form method='get' action='notifications.cgi'>
+    <form method='get' action='notifications.cgi' id="date_form">
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -31,7 +31,7 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 Previous Day<br>
-                <input type="image" name="archive" value='-1' src='/thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day'>
+                <img style="cursor: pointer;" src='/thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate'>
@@ -43,10 +43,11 @@
               </td>
               <td valign="middle">
                 &nbsp;&nbsp;<input type='submit' value='Update'>
+                <input type="hidden" name="archive" value="" id="archive">
               </td>
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 Next Day<br>
-                <input type="image" name="archive" value='+1' src='/thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day'>
+                <img style="cursor: pointer;" src='/thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
               </td>
             </tr>
           </table>
