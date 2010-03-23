@@ -814,7 +814,7 @@ Generate ssl key for the remote machine:
 ---------------------
   %> FILENAME=remote-livestatus
   %> openssl genrsa -out $FILENAME.key 1024
-  %> openssl req -new -key $FILENAME.key -x509 -days 3653 -out %$FILENAME.crt
+  %> openssl req -new -key $FILENAME.key -x509 -days 3653 -out $FILENAME.crt
   %> cat $FILENAME.key $FILENAME.crt >$FILENAME.pem
   %> chmod 600 $FILENAME.key $FILENAME.pem
 ---------------------
