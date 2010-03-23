@@ -146,7 +146,7 @@ function showTip(e, node) {
 
   tip.innerHTML = makeHTMLFromData(node.name, node.data);
 }
-
+var a;
 function init(){
     //init data
     var json    = [% json %];
@@ -158,12 +158,53 @@ function init(){
 [%# Table Layout #%]
 [% IF type == '1' %]
     //init tm
+//    alert(TreeUtil.loadSubtrees);
+//    TreeUtil.loadSubtrees = function(tree, controller) {
+//        var maxLevel = controller.request && controller.levelsToShow;
+//alert(maxLevel);
+//        var leaves = this.getLeaves(tree, maxLevel),
+//        len = leaves.length,
+//        selectedNode = {};
+//        if(len == 0) controller.onComplete();
+//        for(var i=0, counter=0; i<len; i++) {
+//            var leaf = leaves[i], id = leaf.node.id;
+//            selectedNode[id] = leaf.node;
+//            controller.request(id, leaf.level, {
+//                onComplete: function(nodeId, tree) {
+//                    var ch = tree.children;
+//                    selectedNode[nodeId].children = ch;
+//                    if(++counter == len) {
+//                        controller.onComplete();
+//                    }
+//                }
+//            });
+//        }
+//    };
+
+
+//     onRightClick: function() {
+//        a = this;
+//        this.out();
+//        alert(this.shownTree.id);
+//
+//        var tree = json;
+//        var subtree = TreeUtil.getSubtree(tree, this.shownTree.id);
+//        TreeUtil.prune(subtree, 1);
+//        //onComplete.onComplete(nodeId, subtree);
+//        tm.loadJSON(subtree);
+//
+//        //var tree = json;
+//        //var subtree = TreeUtil.getSubtree(tree, nodeId);
+//        //TreeUtil.prune(subtree, 1);
+//        //onComplete.onComplete(nodeId, subtree);
+//     }
+//    });
     var tm = new TM.Squarified({
         //The id of the treemap container
         rootId: 'infovis',
         //Set the max. depth to be shown for a subtree
         //levelsToShow: [% level %],
-        levelsToShow: 1,
+        levelsToShow: 2,
 
         // space between divs
         offset: 4,
@@ -176,7 +217,7 @@ function init(){
         //When hovering a node highlight the nodes
         //between the root node and the hovered node. This
         //is done by adding the 'in-path' CSS class to each node.
-        // selectPathOnHover: true,
+        selectPathOnHover: true,
 
         // add host class for the host nodes
         onCreateElement:  function(content, node, isLeaf, head, body) {
@@ -190,13 +231,15 @@ function init(){
             var subtree = TreeUtil.getSubtree(tree, nodeId);
             TreeUtil.prune(subtree, 1);
             onComplete.onComplete(nodeId, subtree);
-        },
+            //tm.loadTree('rootid');
+        }
         //Remove all events for the element before destroying it.
         //onDestroyElement: function(content, tree, isLeaf, leaf){
         //    if(leaf.clearAttributes) leaf.clearAttributes();
         //}
     });
     tm.loadJSON(json);
+    tm.loadTree('rootid');
 [% END %]
 
 
