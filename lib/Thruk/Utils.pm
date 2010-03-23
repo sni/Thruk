@@ -1177,16 +1177,25 @@ combines the filter by given operator
 sub combine_filter {
     my $filter = shift;
     my $op     = shift;
-
-    return "" if scalar @{$filter} == 0;
+    my $erg    = "";
 
     confess("unknown operator: ".$op) if ($op ne 'And' and $op ne 'Or');
 
-    if(scalar @{$filter} > 1) {
-        return join("\n", @{$filter})."\n$op: ".(scalar @{$filter})."\n";
+    # filter empty strings
+    @{$filter} = grep {!/^\s*$/} @{$filter};
+
+    if(scalar @{$filter} == 0) {
+        $erg = ""
+    }
+    elsif(scalar @{$filter} > 1) {
+        $erg = join("\n", @{$filter})."\n$op: ".(scalar @{$filter})."\n";
+    }
+    else {
+        $erg = $filter->[0]."\n";
+
     }
 
-    return $filter->[0]."\n";
+    return $erg;
 }
 
 
