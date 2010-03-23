@@ -53,7 +53,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         7 => 51, # remove acknowledgement
     };
     my $service_quick_commands = {
-        1 => 7, # reschedule host check
+        1 => 7,  # reschedule service check
         2 => 56, # schedule downtime
         3 => 3,  # add comment
         4 => 34, # acknowledge
@@ -250,10 +250,18 @@ sub _do_send_command {
 
     # replace parsed dates
     if(defined $c->request->parameters->{'start_time'}) {
-        $c->request->parameters->{'start_time'} = Thruk::Utils::parse_date($c->request->parameters->{'start_time'});
+        if($c->request->parameters->{'start_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+            my $new_date = Thruk::Utils::format_date(Thruk::Utils::parse_date($c, $c->request->parameters->{'start_time'}), '%Y-%m-%d %H:%M:%S');
+            $c->log->debug("setting start date to: ".$new_date);
+            $c->request->parameters->{'start_time'} = $new_date;
+        }
     }
     if(defined $c->request->parameters->{'end_time'}) {
-        $c->request->parameters->{'end_time'} = Thruk::Utils::parse_date($c->request->parameters->{'end_time'});
+        if($c->request->parameters->{'end_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+            my $new_date = Thruk::Utils::format_date(Thruk::Utils::parse_date($c, $c->request->parameters->{'end_time'}), '%Y-%m-%d %H:%M:%S');
+            $c->log->debug("setting end date to: ".$new_date);
+            $c->request->parameters->{'end_time'} = $new_date;
+        }
     }
 
     my $tt  = Template->new($c->{'View::TT'});

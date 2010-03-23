@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added text dates like 'tomorrow' or '-3 weeks' for all date input fields
           - fixed menu scrollbar
           - fixed nav hider on main.html
+          - fixed parsing dates
 
 0.50    Fri Mar 19 20:11:48 CET 2010
           - added next/last check filter
