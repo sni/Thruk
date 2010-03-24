@@ -151,8 +151,6 @@ sub _process_host_page {
     $c->stash->{'comments'} = $sortedcomments;
     $c->stash->{'downtimes'} = $sorteddowntimes;
 
-    Thruk::Utils::get_message($c);
-
     return 1;
 }
 
@@ -221,8 +219,6 @@ sub _process_service_page {
     my $sorteddowntimes = Thruk::Utils::sort($c, $downtimes, 'id', 'DESC');
     $c->stash->{'comments'} = $sortedcomments;
     $c->stash->{'downtimes'} = $sorteddowntimes;
-
-    Thruk::Utils::get_message($c);
 
     return 1;
 }

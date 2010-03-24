@@ -124,6 +124,7 @@ sub _process_details_page {
 
     # which host to display?
     my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
+    return if defined $c->stash->{'has_error'};
 
     # add comments and downtimes
     my $comments  = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name service_description source type author comment entry_time entry_type expire_time", { Slice => {} });
@@ -197,6 +198,7 @@ sub _process_hostdetails_page {
 
     # which host to display?
     my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
+    return if defined $c->stash->{'has_error'};
 
     # add comments and downtimes
     my $comments  = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name source type author comment entry_time entry_type expire_time\nFilter: service_description = ", { Slice => {} });
@@ -255,6 +257,7 @@ sub _process_overview_page {
 
     # which host to display?
     my($hostfilter,$servicefilter, $hostgroupfilter, $servicegroupfilter) = $self->_do_filter($c);
+    return if defined $c->stash->{'has_error'};
 
     # we need the hostname, address etc...
     my $host_data;
@@ -375,6 +378,7 @@ sub _process_grid_page {
 
     # which host to display?
     my($hostfilter,$servicefilter, $hostgroupfilter, $servicegroupfilter) = $self->_do_filter($c);
+    return if defined $c->stash->{'has_error'};
 
     # we need the hostname, address etc...
     my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name address state has_been_checked notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt\n$hostfilter", 'name' );
@@ -460,6 +464,7 @@ sub _process_summary_page {
 
     # which host to display?
     my($hostfilter,$servicefilter, $hostgroupfilter, $servicegroupfilter) = $self->_do_filter($c);
+    return if defined $c->stash->{'has_error'};
 
     # get all host/service groups
     my $groups;
@@ -1109,6 +1114,7 @@ sub _classic_filter {
     my $servicefilter      = '';
     my $hostgroupfilter    = '';
     my $servicegroupfilter = '';
+    my $errors             = 0;
 
     # classic search
     my $host          = $c->{'request'}->{'parameters'}->{'host'}         || '';
@@ -1129,6 +1135,7 @@ sub _classic_filter {
             my $searchhost = $host;
             $searchhost =~ s/\.\*/*/gmx;
             $searchhost =~ s/\*/.*/gmx;
+            $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $searchhost);
             $hostfilter    = "Filter: name ~~ $searchhost\n";
             $servicefilter = "Filter: host_name ~~ $searchhost\n";
         }
@@ -1211,6 +1218,10 @@ sub _classic_filter {
             'value' => $servicegroup,
             'op'    => '=',
         };
+    }
+
+    if($errors) {
+        $c->stash->{'has_error'} = 1;
     }
 
     return($search,$hostfilter,$servicefilter,$hostgroupfilter,$servicegroupfilter);
@@ -1311,6 +1322,7 @@ sub _do_search {
 sub _single_search {
     my ( $self, $c, $search ) = @_;
 
+    my $errors = 0;
     my(@hostfilter,@servicefilter,@hostgroupfilter,@servicegroupfilter,@hosttotalsfilter,@servicetotalsfilter);
 
     my($tmp_hostfilter,
@@ -1356,6 +1368,10 @@ sub _single_search {
         if($filter->{'op'} eq '!=') { $op = '!=';  $joinop = "And"; $listop = '!>='; $dateop = '!='; }
         if($filter->{'op'} eq '>=') { $dateop = '>='; }
         if($filter->{'op'} eq '<=') { $dateop = '<='; }
+
+        if($op eq '!~~' or $op eq '~~') {
+            $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $value);
+        }
 
         if($op eq '=' and $value eq 'all') {
             # add a useless filter
@@ -1470,6 +1486,10 @@ sub _single_search {
     if($hostgroupfilter    =~ m/^\s*$/) { $hostgroupfilter    = "Filter: name !=";        }
     if($servicegroupfilter =~ m/^\s*$/) { $servicegroupfilter = "Filter: name !=";        }
     ## use critic
+
+    if($errors) {
+        $c->stash->{'has_error'} = 1;
+    }
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $hosttotalsfilter, $servicetotalsfilter);
 }

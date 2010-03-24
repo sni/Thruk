@@ -27,6 +27,7 @@ Catalyst Controller.
 ##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
+    my $errors = 0;
 
     $c->stash->{title}          = "External Command Interface";
     $c->stash->{infoBoxTitle}   = "External Command Interface";
@@ -87,8 +88,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 if($self->_do_send_command($c)) {
                     $c->log->debug("command for host $host succeeded");
                 } else {
-                    $c->log->error("command for host $host failed");
-                    $c->log->error(Dumper($c->stash->{'form_errors'}));
+                    $errors++;
+                    Thruk::Utils::set_message($c, 'fail_message', "command for host $host failed");
+                    $c->log->debug("command for host $host failed");
+                    $c->log->debug(Dumper($c->stash->{'form_errors'}));
                 }
             }
         }
@@ -112,12 +115,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 if($self->_do_send_command($c)) {
                     $c->log->debug("command for $service on host $host succeeded");
                 } else {
-                    $c->log->error("command for $service on host $host failed");
-                    $c->log->error(Dumper($c->stash->{'form_errors'}));
+                    $errors++;
+                    Thruk::Utils::set_message($c, 'fail_message', "command for $service on host $host failed");
+                    $c->log->debug("command for $service on host $host failed");
+                    $c->log->debug(Dumper($c->stash->{'form_errors'}));
                 }
             }
         }
-        Thruk::Utils::set_message($c, 'success_message', 'Commands successfully submitted');
+        Thruk::Utils::set_message($c, 'success_message', 'Commands successfully submitted') unless $errors;
         $self->_redirect_or_success($c, -1);
     }
 
@@ -146,9 +151,11 @@ sub _remove_all_downtimes {
         $c->{'request'}->{'parameters'}->{'down_id'} = $id;
         if($self->_do_send_command($c)) {
             $c->log->debug("removing downtime $id succeeded");
+            Thruk::Utils::set_message($c, 'success_message', "removing downtime $id succeeded");
         } else {
-            $c->log->error("removeing downtime $id failed");
-            $c->log->error(Dumper($c->stash->{'form_errors'}));
+            $c->log->debug("removing downtime $id failed");
+            Thruk::Utils::set_message($c, 'fail_message', "removing downtime $id failed");
+            $c->log->debug(Dumper($c->stash->{'form_errors'}));
         }
     }
 

@@ -282,7 +282,9 @@ td.submit {
   text-align: center;
 }
 
-div.thruk_message {
+div.thruk_message table {
+  margin-left:auto;
+  margin-right:auto;
   text-align: center;
   font-weight: bold;
 }

@@ -69,29 +69,29 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
     my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
     my @filter;
+    my $errors = 0;
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
+        $errors++ unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
         push @filter, "Filter: message ~~ $pattern\n";
     }
     if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+        $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $exclude_pattern);
         push @filter, "Filter: message !~~ $exclude_pattern\n";
     }
-    $filter .= Thruk::Utils::combine_filter(\@filter, 'And');
-
-    my $query = "GET log\nColumns: time type message state\n".$filter;
-
-    $query   .= Thruk::Utils::get_auth_filter($c, 'log');
-
-    $c->stats->profile(begin => "showlog::fetch");
-    my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
-    $c->stats->profile(end   => "showlog::fetch");
-
-    my $order = "DESC";
-    if($oldestfirst) {
-        $order = "ASC";
+    if($errors == 0) {
+        $filter .= Thruk::Utils::combine_filter(\@filter, 'And');
+        my $query = "GET log\nColumns: time type message state\n".$filter;
+        $query   .= Thruk::Utils::get_auth_filter($c, 'log');
+        $c->stats->profile(begin => "showlog::fetch");
+        my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
+        $c->stats->profile(end   => "showlog::fetch");
+        my $order = "DESC";
+        if($oldestfirst) {
+            $order = "ASC";
+        }
+        my $sortedlogs = Thruk::Utils::sort($c, $logs, 'time', $order);
+        Thruk::Utils::page_data($c, $sortedlogs);
     }
-    my $sortedlogs = Thruk::Utils::sort($c, $logs, 'time', $order);
-
-    Thruk::Utils::page_data($c, $sortedlogs);
 
     $c->stash->{archive}          = $archive;
     $c->stash->{start}            = $start;
