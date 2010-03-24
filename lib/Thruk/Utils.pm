@@ -1208,7 +1208,7 @@ sub combine_filter {
     confess("unknown operator: ".$op) if ($op ne 'And' and $op ne 'Or');
 
     # filter empty strings
-    @{$filter} = grep {!/^\s*$/mx} @{$filter};
+    @{$filter} = grep {!/\Z\s*\A/mx} @{$filter};
 
     if(scalar @{$filter} == 0) {
         $erg = ""
