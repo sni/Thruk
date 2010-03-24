@@ -19,6 +19,7 @@ Catalyst Controller.
 
 =cut
 
+# enable statusmap if this plugin is loaded
 Thruk->config->{'use_feature_statusmap'} = 1;
 
 ######################################
@@ -97,26 +98,46 @@ sub _get_json_for_hosts {
         confess('not a hash ref: '.Dumper($data)."\n".Dumper(\@caller));
     }
 
-    my $sum = 0;
+    my($sum_hosts,$state_up,$state_down,$state_unreachable,$state_pending) = (0,0,0,0,0);
     for my $key (sort keys %{$data}) {
         my $dat = $data->{$key};
         if(exists $dat->{'id'}) {
             push @{$children}, $dat;
-            $sum += $dat->{'data'}->{'$area'};
+            $sum_hosts         += $dat->{'data'}->{'$area'};
+            $state_up          += $dat->{'data'}->{'state_up'};
+            $state_down        += $dat->{'data'}->{'state_down'};
+            $state_unreachable += $dat->{'data'}->{'state_unreachable'};
+            $state_pending     += $dat->{'data'}->{'state_pending'};
         }
         else {
-            my($childs, $csum) = $self->_get_json_for_hosts($dat, ($level+1));
-            $sum = $sum + $csum;
+            my($childs,
+               $child_sum_hosts,
+               $child_sum_up,
+               $child_sum_down,
+               $child_sum_unreachable,
+               $child_sum_pending
+            ) = $self->_get_json_for_hosts($dat, ($level+1));
+            $sum_hosts          += $child_sum_hosts;
+            $state_up           += $child_sum_up;
+            $state_down         += $child_sum_down;
+            $state_unreachable  += $child_sum_unreachable;
+            $state_pending      += $child_sum_pending;
             push @{$children}, {
                 'id'       => 'sub_node_'.$level.'_'.$key,
                 'name'     => $key,
-                'data'     => { '$area' => $csum },
+                'data'     => {
+                                '$area'            => $child_sum_hosts,
+                                'state_up'         => $child_sum_up,
+                                'state_down'       => $child_sum_down,
+                                'state_unreachable'=> $child_sum_unreachable,
+                                'state_pending'    => $child_sum_pending,
+                              },
                 'children' => $childs,
             };
         }
     }
 
-    return($children,$sum);
+    return($children,$sum_hosts,$state_up,$state_down,$state_unreachable,$state_pending);
 }
 
 
@@ -173,12 +194,24 @@ sub _get_hosts_by_address {
         }
     }
 
-    my($children, $sum) = $self->_get_json_for_hosts($host_tree, 0);
+    my($childs,
+       $child_sum_hosts,
+       $child_sum_up,
+       $child_sum_down,
+       $child_sum_unreachable,
+       $child_sum_pending
+    ) = $self->_get_json_for_hosts($host_tree, 0);
     my $rootnode = {
         'id'       => 'rootid',
         'name'     => 'monitoring host',
-        'data'     => { '$area' => $sum },
-        'children' => $children,
+        'data'     => {
+                       '$area' => $child_sum_hosts,
+                        'state_up'         => $child_sum_up,
+                        'state_down'       => $child_sum_down,
+                        'state_unreachable'=> $child_sum_unreachable,
+                        'state_pending'    => $child_sum_pending,
+                       },
+        'children' => $childs,
     };
 
     return $rootnode;
@@ -234,25 +267,30 @@ sub _get_json_host {
 
     my $program_start = $c->stash->{'pi_detail'}->{$host->{'peer_key'}}->{'program_start'};
     my($class, $status, $duration,$color);
+    my($state_up,$state_down,$state_unreachable,$state_pending) = (0,0,0,0);
     if($host->{'has_been_checked'}) {
         if($host->{'state'} == 0) {
             $class    = 'hostUP';
             $status   = 'UP';
             $color    = '#00FF00';
+            $state_up++;
         }
         if($host->{'state'} == 1) {
             $class    = 'hostDOWN';
             $status   = 'DOWN';
             $color    = '#FF0000';
+            $state_down++;
         }
         if($host->{'state'} == 2) {
             $class    = 'hostUNREACHABLE';
             $status   = 'UNREACHABLE';
             $color    = '#FF0000';
+            $state_unreachable++;
         }
     } else {
         $class    = 'hostPENDING';
         $status   = 'PENDING';
+        $state_pending++;
     }
     if($host->{'last_state_change'}) {
         $duration = '( for '.Thruk::Utils::filter_duration(time() - $host->{'last_state_change'}).' )';
@@ -263,14 +301,18 @@ sub _get_json_host {
         'id'   => $host->{'name'},
         'name' => $host->{'name'},
         'data' => {
-            '$area'         => 1,
-            '$color'        => $color,
-            'class'         => $class,
-            'status'        => $status,
-            'duration'      => $duration,
-            'plugin_output' => $host->{'plugin_output'},
-            'alias'         => $host->{'alias'},
-            'address'       => $host->{'address'},
+            '$area'             => 1,
+            '$color'            => $color,
+            'class'             => $class,
+            'status'            => $status,
+            'duration'          => $duration,
+            'plugin_output'     => $host->{'plugin_output'} || '',
+            'alias'             => $host->{'alias'},
+            'address'           => $host->{'address'},
+            'state_up'          => $state_up,
+            'state_down'        => $state_down,
+            'state_unreachable' => $state_unreachable,
+            'state_pending'     => $state_pending,
         },
     };
 

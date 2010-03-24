@@ -86,9 +86,12 @@ function makeHTMLFromData(name, data){
     html += '<div class="tip-title">Host: ' + name + '<\/div>'
   } else {
     html += '<div class="tip-title">Network: ' + name + '<\/div>'
-    //html += '<div class="tip-text"><pre>';
-    //html += 'Area:  ' + data.$area + '<br />';
-    //html += '<\/div><\/pre>';
+    html += '<div class="tip-text"><pre>';
+    html += '<span class="' + ((data.state_up > 0) ? "hostUP" : "") +                   '"> Up: <\/span>          ' + data.state_up + '<br />';
+    html += '<span class="' + ((data.state_down > 0) ? "hostDOWN" : "") +               '"> Down: <\/span>        ' + data.state_down + '<br />';
+    html += '<span class="' + ((data.state_unreachable > 0) ? "hostUNREACHABLE" : "") + '"> Unreachable: <\/span> ' + data.state_unreachable + '<br />';
+    html += '<span class="' + ((data.state_pending > 0) ? "hostPENDING" : "") +         '"> Pending: <\/span>     ' + data.state_pending + '<br />';
+    html += '<\/div><\/pre>';
   }
 
   html += '<div class="tip-text"><pre>';
