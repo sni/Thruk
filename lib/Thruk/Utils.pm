@@ -341,6 +341,32 @@ sub read_cgi_cfg {
 
 ######################################
 
+=head2 is_valid_regular_expression
+
+  my $result = is_valid_regular_expression($expression)
+
+return true if this is a valid regular expression
+
+=cut
+sub is_valid_regular_expression {
+    my $c          = shift;
+    my $expression = shift;
+    local $SIG{__DIE__} = undef;
+    eval { "test" =~ m/$expression/mx; };
+    if($@) {
+        my $error_message = "invalid regular expression: ".$@;
+        $error_message =~ s/\s+at\s+.*$//gmx;
+        $error_message =~ s/in\s+regex\;/in regex<br \/>/gmx;
+        $error_message =~ s/HERE\s+in\s+m\//HERE in <br \/>/gmx;
+        $error_message =~ s/\/$//gmx;
+        set_message($c, 'fail_message', $error_message);
+        return;
+    }
+    return 1;
+}
+
+######################################
+
 =head2 get_livestatus
 
   my $conf = get_livestatus($c)
@@ -1182,7 +1208,7 @@ sub combine_filter {
     confess("unknown operator: ".$op) if ($op ne 'And' and $op ne 'Or');
 
     # filter empty strings
-    @{$filter} = grep {!/^\s*$/} @{$filter};
+    @{$filter} = grep {!/^\s*$/mx} @{$filter};
 
     if(scalar @{$filter} == 0) {
         $erg = ""
@@ -1696,6 +1722,7 @@ sub set_message {
     $c->res->cookies->{'thruk_message'} = {
         value => $style.'~~'.$message,
     };
+    $c->stash->{'thruk_message'} = $style.'~~'.$message;
 
     return 1;
 }
@@ -1712,19 +1739,26 @@ get a message from an cookie, display and delete it
 sub get_message {
     my $c       = shift;
 
+    # message from cookie?
     if(defined $c->request->cookie('thruk_message')) {
         my $cookie = $c->request->cookie('thruk_message');
         my($style,$message) = split/~~/mx, $cookie->value;
-        $c->stash->{'thruk_message'}       = $message;
-        $c->stash->{'thruk_message_class'} = $style;
 
         $c->res->cookies->{'thruk_message'} = {
             value   => '',
             expires => '-1M',
         };
+
+        return($style, $message);
+    }
+    # message from stash
+    elsif(defined $c->stash->{'thruk_message'}) {
+        my($style,$message) = split/~~/mx, $c->stash->{'thruk_message'};
+        delete $c->res->cookies->{'thruk_message'};
+        return($style, $message);
     }
 
-    return 1;
+    return;
 }
 
 

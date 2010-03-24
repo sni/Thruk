@@ -1,0 +1,11 @@
+[% SET message = get_message(c) %]
+[% IF message %]
+<div id="thruk_message" class="thruk_message">
+  <table border=0 cellspacing=2 cellpadding=2>
+    <tr>
+      <td><span class="[% message.0 %]">[% message.1 %]</span></td>
+      <td valign="top"><a href="javascript:close_message()"><img src='/thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a></td>
+    </tr>
+  </table>
+</div>
+[% END %]
