@@ -1,6 +1,7 @@
 [% statusmap_header = BLOCK %]
   <link type="text/css" href="/thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
   <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script>
+  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/statusmap.js"></script>
 [% END %]
 [% PROCESS _header.tt extra_header => statusmap_header %]
 
@@ -72,87 +73,42 @@
 <script type="text/javascript">
 <!--
 var a;
-function addEvent(obj, type, fn) {
-  if (obj.addEventListener)
-    obj.addEventListener(type, fn, false);
-  else
-    obj.attachEvent('on' + type, fn);
-};
 
-function makeHTMLFromData(name, data){
-  var html = '';
-
-  if(data.status != undefined) {
-    html += '<div class="tip-title">Host: ' + name + '<\/div>'
-  } else {
-    html += '<div class="tip-title">Network: ' + name + '<\/div>'
-    html += '<div class="tip-text"><pre>';
-    html += '<span class="' + ((data.state_up > 0) ? "hostUP" : "") +                   '"> Up: <\/span>          ' + data.state_up + '<br />';
-    html += '<span class="' + ((data.state_down > 0) ? "hostDOWN" : "") +               '"> Down: <\/span>        ' + data.state_down + '<br />';
-    html += '<span class="' + ((data.state_unreachable > 0) ? "hostUNREACHABLE" : "") + '"> Unreachable: <\/span> ' + data.state_unreachable + '<br />';
-    html += '<span class="' + ((data.state_pending > 0) ? "hostPENDING" : "") +         '"> Pending: <\/span>     ' + data.state_pending + '<br />';
-    html += '<\/div><\/pre>';
-  }
-
-  html += '<div class="tip-text"><pre>';
-  if(data.status != undefined) {
-    html += 'Alias:   ' + data.alias + '<br />';
-    html += 'Address: ' + data.address + '<br />';
-    html += 'Status:  <span class="' + data.class + '">&nbsp;' + data.status + '&nbsp;<\/span> ' + data.duration + '<br />';
-    html += 'Output:  ' + data.plugin_output + '<br />';
-  }
-  html += '<\/div><\/pre>';
-  return html;
-};
-
-function showTip(e, node) {
-
-  tipOffsetX = 20;
-  tipOffsetY = 20;
-
-  tip = document.getElementById('tooltip');
-
-  //Add mousemove event handler
-  addEvent(e.target, 'mousemove', function(e, win){
-      //get mouse position
-      win = win  || window;
-      e = e || win.event;
-      var doc = win.document;
-      doc = doc.html || doc.body;
-      var page = {
-          x: e.pageX || e.clientX + doc.scrollLeft,
-          y: e.pageY || e.clientY + doc.scrollTop
-      };
-      tip.style.display = '';
-      //get window dimensions
-      win = {
-          'height': document.body.clientHeight,
-          'width': document.body.clientWidth
-      };
-      //get tooltip dimensions
-      var obj = {
-        'width': tip.offsetWidth,
-        'height': tip.offsetHeight
-      };
-      //set tooltip position
-      var style = tip.style, x = tipOffsetX, y = tipOffsetY;
-      style.top = ((page.y + y + obj.height > win.height)?
-          (page.y - obj.height - y) : page.y + y) + 'px';
-      style.left = ((page.x + obj.width + x > win.width)?
-          (page.x - obj.width - x) : page.x + x) + 'px';
-  });
-
-  addEvent(e.target, 'mouseout', function(e, win){
-    tip.style.display = 'none';
-  });
+//TreeUtil.loadSubtrees = function(tree, controller) {
+//    var maxLevel = controller.request && controller.levelsToShow;
+//    var leaves = this.getLeaves(tree, maxLevel),
+//    len = leaves.length,
+//    selectedNode = {};
+//    if(len == 0) controller.onComplete();
+//    for(var i=0, counter=0; i<len; i++) {
+//        var leaf = leaves[i], id = leaf.node.id;
+//        selectedNode[id] = leaf.node;
+//        controller.request(id, leaf.level, {
+//            onComplete: function(nodeId, tree) {
+//                var ch = tree.children;
+//                selectedNode[nodeId].children = ch;
+//                if(++counter == len) {
+//                    controller.onComplete();
+//                }
+//            }
+//        });
+//    }
+//};
 
 
-  tip.innerHTML = makeHTMLFromData(node.name, node.data);
-}
-var a;
+TreeUtil.prune = function(tree, maxLevel) {
+        this.each(tree, function(elem, i) {
+            if(i == maxLevel && elem.children) {
+                delete elem.children;
+                elem.children = [];
+            }
+        });
+    };
+
+
 function init(){
     //init data
-    var json    = [% json %];
+    var json    = '[% json %]';
     var infovis = document.getElementById('infovis');
     var w = infovis.offsetWidth - 20, h = infovis.offsetHeight - infovis.offsetTop - 20;
     infovis.style.width = w + 'px';
@@ -161,47 +117,17 @@ function init(){
 [%# Table Layout #%]
 [% IF type == '1' %]
     //init tm
-//    alert(TreeUtil.loadSubtrees);
-//    TreeUtil.loadSubtrees = function(tree, controller) {
-//        var maxLevel = controller.request && controller.levelsToShow;
-//alert(maxLevel);
-//        var leaves = this.getLeaves(tree, maxLevel),
-//        len = leaves.length,
-//        selectedNode = {};
-//        if(len == 0) controller.onComplete();
-//        for(var i=0, counter=0; i<len; i++) {
-//            var leaf = leaves[i], id = leaf.node.id;
-//            selectedNode[id] = leaf.node;
-//            controller.request(id, leaf.level, {
-//                onComplete: function(nodeId, tree) {
-//                    var ch = tree.children;
-//                    selectedNode[nodeId].children = ch;
-//                    if(++counter == len) {
-//                        controller.onComplete();
-//                    }
-//                }
-//            });
-//        }
-//    };
 
-
-//     onRightClick: function() {
-//        a = this;
-//        this.out();
-//        alert(this.shownTree.id);
-//
-//        var tree = json;
-//        var subtree = TreeUtil.getSubtree(tree, this.shownTree.id);
-//        TreeUtil.prune(subtree, 1);
-//        //onComplete.onComplete(nodeId, subtree);
-//        tm.loadJSON(subtree);
-//
-//        //var tree = json;
-//        //var subtree = TreeUtil.getSubtree(tree, nodeId);
-//        //TreeUtil.prune(subtree, 1);
-//        //onComplete.onComplete(nodeId, subtree);
-//     }
-//    });
+    TM.Squarified.implement({
+//        'leafBox': function( json, coord ) {
+//alert('leafBox');
+//            //this.leafBox();
+//        },
+        'onRightClick': function() {
+//alert('out');
+            this.out();
+        }
+    });
     var tm = new TM.Squarified({
         //The id of the treemap container
         rootId: 'infovis',
@@ -230,19 +156,20 @@ function init(){
           head.onmouseover = function (e){showTip((e||window.event), node)};
         },
         request: function(nodeId, level, onComplete){
-            var tree = json;
+            var tree    = eval('(' + json + ')');
             var subtree = TreeUtil.getSubtree(tree, nodeId);
-            TreeUtil.prune(subtree, 1);
+            TreeUtil.prune(subtree, tm.config.levelsToShow);
             onComplete.onComplete(nodeId, subtree);
-            //tm.loadTree('rootid');
+            //tm.loadJSON(json);
         }
-        //Remove all events for the element before destroying it.
-        //onDestroyElement: function(content, tree, isLeaf, leaf){
-        //    if(leaf.clearAttributes) leaf.clearAttributes();
-        //}
     });
-    tm.loadJSON(json);
-    tm.loadTree('rootid');
+    var tree    = eval('(' + json + ')');
+    var subtree = TreeUtil.getSubtree(tree, 'rootid');
+//alert(tm.levelsToShow);
+    TreeUtil.prune(subtree, tm.config.levelsToShow);
+    //a = pjson;
+//    tm.loadJSON(json);
+    tm.loadJSON(subtree);
 [% END %]
 
 
