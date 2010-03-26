@@ -1,9 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
-0.52    Fri Mar 19 20:11:48 CET 2010
+0.52    Fri Mar 26 09:03:28 CET 2010
           - added text dates like 'tomorrow' or '-3 weeks' for all date input fields
           - select multiple hosts/services with shift + mouseclick
+          - changed to Unicode::Encode for UTF-8 support
           - fixed menu scrollbar
           - fixed nav hider on main.html
           - fixed parsing dates
