@@ -15,6 +15,7 @@ var curRefreshVal    = 0;
 var additionalParams = new Hash({});
 var refreshTimer;
 var backendSelTimer;
+var lastRowSelected;
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -216,6 +217,19 @@ function toggleCheckBox(id) {
   }
 }
 
+// unselect current text seletion
+function unselectCurrentSelection(obj)
+{
+    if (document.selection)
+    {
+        document.selection.empty();
+    }
+    else
+    {
+        window.getSelection().removeAllRanges();
+    }
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -260,14 +274,14 @@ function addEventHandler(elem, type) {
         elem.onmouseover = highlightHostRow;
         elem.onmouseout  = resetHostRow;
         if(!elem.onclick) {
-            elem.onclick     = selectHost;
+            elem.onclick = selectHost;
         }
     }
     if(type == 'service') {
         elem.onmouseover = highlightServiceRow;
         elem.onmouseout  = resetServiceRow;
         if(!elem.onclick) {
-            elem.onclick     = selectService;
+            elem.onclick = selectService;
         }
     }
 }
@@ -440,6 +454,41 @@ function selectService(event, state)
     if(!row_id) {
         return;
     }
+
+    selectServiceById(row_id, state, event);
+    unselectCurrentSelection();
+}
+
+
+/* select this service */
+function selectServiceById(row_id, state, event)
+{
+    if(event && event.shiftKey && lastRowSelected != undefined) {
+      var id1 = parseInt(row_id.substring(1));
+      var id2 = parseInt(lastRowSelected.substring(1));
+
+      // all selected should get the same state
+      state = false;
+      if(selectedServices.get(lastRowSelected)) {
+        state = true;
+      }
+
+      // selected top down?
+      if(id1 > id2) {
+        var tmp = id2;
+        id2 = id1;
+        id1 = tmp;
+      }
+
+      for(var x = id1; x < id2; x++) {
+        selectServiceById('r'+x, state);
+      }
+      lastRowSelected = undefined;
+    }
+    else {
+      lastRowSelected = row_id;
+    }
+
     var targetState;
     if(!Object.isUndefined(state)) {
         targetState = state;
@@ -483,6 +532,40 @@ function selectHost(event, state)
     if(!row_id) {
         return;
     }
+
+    selectHostById(row_id, state, event);
+    unselectCurrentSelection();
+}
+
+
+/* select this service */
+function selectHostById(row_id, state, event) {
+
+    if(event && event.shiftKey && lastRowSelected != undefined) {
+      var id1 = parseInt(row_id.substring(1));
+      var id2 = parseInt(lastRowSelected.substring(1));
+
+      // all selected should get the same state
+      state = false;
+      if(selectedHosts.get(lastRowSelected)) {
+        state = true;
+      }
+
+      // selected top down?
+      if(id1 > id2) {
+        var tmp = id2;
+        id2 = id1;
+        id1 = tmp;
+      }
+
+      for(var x = id1; x < id2; x++) {
+        selectHostById('r'+x, state);
+      }
+      lastRowSelected = undefined;
+    } else {
+      lastRowSelected = row_id;
+    }
+
     var targetState;
     if(!Object.isUndefined(state)) {
         targetState = state;
@@ -493,6 +576,13 @@ function selectHost(event, state)
     else {
         targetState = true;
     }
+
+    // dont select the empty cells in services view
+    row = document.getElementById(row_id);
+    if(row.cells[0].innerHTML == "") {
+      return;
+    }
+
     if(targetState) {
         setRowStyle(row_id, 'tableRowSelected', 'host', true);
         selectedHosts.set(row_id, 1);

@@ -8,6 +8,7 @@ general
     - add go back button on error page
     - authorization docs
     - Filter: latency, execution_time
+    - configure url path in config (ex.: /thruk/ )
 
 extinfo:
     - finish performance data on extinfo type 4
