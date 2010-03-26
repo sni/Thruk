@@ -1,6 +1,7 @@
 [% statusmap_header = BLOCK %]
   <link type="text/css" href="/thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
-  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script>
+<!--  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script> -->
+  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit.js"></script>
   <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/statusmap.js"></script>
 [% END %]
 [% PROCESS _header.tt extra_header => statusmap_header %]
@@ -74,43 +75,20 @@
 
 <script type="text/javascript">
 <!--
-var a;
-
-//TreeUtil.loadSubtrees = function(tree, controller) {
-//    var maxLevel = controller.request && controller.levelsToShow;
-//    var leaves = this.getLeaves(tree, maxLevel),
-//    len = leaves.length,
-//    selectedNode = {};
-//    if(len == 0) controller.onComplete();
-//    for(var i=0, counter=0; i<len; i++) {
-//        var leaf = leaves[i], id = leaf.node.id;
-//        selectedNode[id] = leaf.node;
-//        controller.request(id, leaf.level, {
-//            onComplete: function(nodeId, tree) {
-//                var ch = tree.children;
-//                selectedNode[nodeId].children = ch;
-//                if(++counter == len) {
-//                    controller.onComplete();
-//                }
-//            }
-//        });
-//    }
-//};
-
 
 TreeUtil.prune = function(tree, maxLevel) {
-        this.each(tree, function(elem, i) {
-            if(i == maxLevel && elem.children) {
-                delete elem.children;
-                elem.children = [];
-            }
-        });
-    };
+    this.each(tree, function(elem, i) {
+        if(i == maxLevel && elem.children) {
+            delete elem.children;
+            elem.children = [];
+        }
+    });
+};
 
+var json = '[% json %]';
 
 function init(){
     //init data
-    var json    = '[% json %]';
     var infovis = document.getElementById('infovis');
     var w = infovis.offsetWidth - 20, h = infovis.offsetHeight - infovis.offsetTop - 20;
     infovis.style.width = w + 'px';
@@ -118,60 +96,9 @@ function init(){
 
 [%# Table Layout #%]
 [% IF type == '1' %]
-    //init tm
-
-    TM.Squarified.implement({
-//        'leafBox': function( json, coord ) {
-//alert('leafBox');
-//            //this.leafBox();
-//        },
-        'onRightClick': function() {
-//alert('out');
-            this.out();
-        }
-    });
-    var tm = new TM.Squarified({
-        //The id of the treemap container
-        rootId: 'infovis',
-        //Set the max. depth to be shown for a subtree
-        //levelsToShow: [% level %],
-        levelsToShow: 2,
-
-        // space between divs
-        offset: 4,
-
-        //Add click handlers for
-        //zooming the Treemap in and out
-        addLeftClickHandler: true,
-        addRightClickHandler: true,
-
-        //When hovering a node highlight the nodes
-        //between the root node and the hovered node. This
-        //is done by adding the 'in-path' CSS class to each node.
-        selectPathOnHover: true,
-
-        // add host class for the host nodes
-        onCreateElement:  function(content, node, isLeaf, head, body) {
-          if(isLeaf && node.data.class != undefined && head) {
-            head.className = (head.className + " " + node.data.class);
-          }
-          head.onmouseover = function (e){showTip((e||window.event), node)};
-        },
-        request: function(nodeId, level, onComplete){
-            var tree    = eval('(' + json + ')');
-            var subtree = TreeUtil.getSubtree(tree, nodeId);
-            TreeUtil.prune(subtree, tm.config.levelsToShow);
-            onComplete.onComplete(nodeId, subtree);
-            //tm.loadJSON(json);
-        }
-    });
-    var tree    = eval('(' + json + ')');
-    var subtree = TreeUtil.getSubtree(tree, 'rootid');
-//alert(tm.levelsToShow);
-    TreeUtil.prune(subtree, tm.config.levelsToShow);
-    //a = pjson;
-//    tm.loadJSON(json);
-    tm.loadJSON(subtree);
+    //init treemap
+    var id_to_show = '[% host %]';
+    show_tree_map(id_to_show);
 [% END %]
 
 

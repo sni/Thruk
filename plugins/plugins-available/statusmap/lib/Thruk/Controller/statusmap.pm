@@ -46,6 +46,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{level}        = $c->request->parameters->{'level'}   || 1;
     $c->stash->{type}         = $c->request->parameters->{'type'}    || 1;
     $c->stash->{groupby}      = $c->request->parameters->{'groupby'} || 1;
+    $c->stash->{host}         = $c->request->parameters->{'host'}    || 'rootid';
 
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output childs parents", { Slice => {}, AddPeer => 1 });
 

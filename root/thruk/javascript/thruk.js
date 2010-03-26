@@ -146,7 +146,8 @@ function reloadPage() {
   }
 
   additionalParams.each(function(pair) {
-    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' ) { // check for valid options to set here
+    // check for valid options to set here
+    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' || pair.key == 'host' ) {
       urlArgs.set(pair.key, pair.value);
     }
   });
