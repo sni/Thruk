@@ -60,12 +60,15 @@
           [% IF c.request.parameters.sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
-          <br>
-          [% PROCESS _pager.tt %]
         </td>
         <td valign="top" align="right" width="33%"></td>
       </tr>
     </table>
+
+    <div align="center">[% PROCESS _pager.tt %]</div>
+
+    <div class="hint">select host / services with leftclick to send multiple commands</div>
+
     <div align='center'>
       <table border="0" class='status' width="100%" id="statusTable">
         <tr>

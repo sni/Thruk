@@ -80,6 +80,8 @@
 
     <div align="center">[% PROCESS _pager.tt %]</div>
 
+    <div class="hint">select host / services with leftclick to send multiple commands</div>
+
     <table border="0" width="100%" class='status' id="statusTable">
       <tr>
         <th class='status' nowrap>Host&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>

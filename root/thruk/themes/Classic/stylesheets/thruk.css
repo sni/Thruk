@@ -224,9 +224,11 @@ body.summary table.data {
 /* mouse over classes for inline command selection in status page */
 .tableRowHover {
   background-color:#88BBD8;
+  cursor: pointer;
 }
 .tableRowSelected {
   background-color:#609FD2;
+  cursor: pointer;
 }
 .has_long_plugin_output {
   color: #0000FF;
@@ -447,4 +449,9 @@ table.filter > tbody > tr > td {
 .shownav:hover {
   background-image: url(../images/drag_hover.png);
   background-color:#9e9c9a;
+}
+
+.hint {
+  font-size: smaller;
+  text-align: center;
 }
