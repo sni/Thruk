@@ -80,7 +80,7 @@
 
     <div align="center">[% PROCESS _pager.tt %]</div>
 
-    <div class="hint">select host / services with leftclick to send multiple commands</div>
+    <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
 
     <table border="0" width="100%" class='status' id="statusTable">
       <tr>
