@@ -64,7 +64,7 @@ requires 'HTML::Entities'                         => 3.64;
 requires 'Catalyst::Devel'                        => 1.26;
 requires 'File::Slurp'                            => 0.00;
 requires 'FindBin'                                => 0.00;
-requires 'Catalyst::Plugin::Unicode'              => 0.00;
+requires 'Catalyst::Plugin::Unicode::Encoding'    => 0.00;
 requires 'Date::Manip'                            => 0.00;
 
 # test requirements make it into the META.yml and will break
