@@ -66,7 +66,9 @@
 </table>
 </form>
 <br>
-
+[% IF type == '1' %]
+<div class="hint">left mouseclick = zoom in, right mouse click = zoom out</div>
+[% END %]
 <div id="infovis"></div>
 <div id="tooltip" class="tip" style="position: absolute; z-index: 13000; display: none;"></div>
 
