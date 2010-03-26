@@ -24,17 +24,18 @@
         <tr>
           <td align="left" class='optBoxItem'>
             <select name='type'>
-              <option value="1"[% IF type == 1 %] selected[% END %]>Table Layout</option>
-              <option value="2"[% IF type == 2 %] selected[% END %]>Circular Layout</option>
+              <option value="table"[% IF type == 'table' %] selected[% END %]>Table Layout</option>
+              <option value="circle"[% IF type == 'circle' %] selected[% END %]>Circular Layout</option>
             </select>
           </td>
           <td align="left" class='optBoxItem'>
             <select name='groupby'>
-              <option value="1"[% IF groupby == 1 %] selected[% END %]>Parent</option>
-              <option value="2"[% IF groupby == 2 %] selected[% END %]>IP Address</option>
+              <option value="parent"[% IF groupby == 'parent' %] selected[% END %]>Parent</option>
+              <option value="address"[% IF groupby == 'address' %] selected[% END %]>IP Address</option>
             </select>
           </td>
         </tr>
+        <!--
         <tr>
           <td align="left" colspan="2" class='optBoxItem'>Detail Level:</td>
         </tr>
@@ -50,6 +51,7 @@
             </select>
           </td>
         </tr>
+        -->
         <tr>
           <td align="left" valign="bottom" class='optBoxItem'>
           </td>
@@ -67,7 +69,7 @@
 </table>
 </form>
 <br>
-[% IF type == '1' %]
+[% IF type == 'table' %]
 <div class="hint">left mouseclick = zoom in, right mouse click = zoom out</div>
 [% END %]
 <div id="infovis"></div>
@@ -85,108 +87,17 @@ function init(){
     infovis.style.width = w + 'px';
     infovis.style.height = h + 'px';
 
-[%# Table Layout #%]
-[% IF type == '1' %]
-    //init treemap
     var id_to_show = '[% host %]';
+
+[% IF type == 'table' %]
+
+    //init treemap
     show_tree_map(id_to_show);
-[% END %]
 
+[% ELSIF type == 'circle' %]
 
-[%# Circular Layout #%]
-[% IF type == '2' %]
-
-  // distance between circles
-  var levelDistance = 100;
-
-  //Create a new canvas instance.
-  var canvas = new Canvas('mycanvas', {
-      //Where to append the canvas widget
-      'injectInto': 'infovis',
-      'width': w,
-      'height': h,
-
-      //Optional: create a background canvas and plot
-      //concentric circles in it.
-      'backgroundCanvas': {
-          'styles': {
-              'strokeStyle': '#CCCCCC'
-          },
-
-          'impl': {
-              'init': function(){},
-              'plot': function(canvas, ctx){
-                  var times = 6, d = levelDistance;
-                  var pi2 = Math.PI * 2;
-                  for (var i = 1; i <= times; i++) {
-                      ctx.beginPath();
-                      ctx.arc(0, 0, i * d, 0, pi2, true);
-                      ctx.stroke();
-                      ctx.closePath();
-                  }
-              }
-          }
-      }
-  });
-
-  var rgraph = new RGraph(canvas, {
-      levelDistance: levelDistance,
-      duration: 700,
-      fps: 40,
-
-      Node: { //Set Node and Edge colors.
-          overridable: true,
-      },
-      Edge: {
-          color: '#333333'
-      },
-
-      //Add the name of the node in the correponding label
-      //and a click handler to move the graph.
-      //This method is called once, on label creation.
-      onCreateLabel: function(domElement, node){
-          domElement.innerHTML = node.name;
-          domElement.onclick = function(){
-              rgraph.onClick(node.id);
-          };
-      },
-      //Change some label dom properties.
-      //This method is called each time a label is plotted.
-      onPlaceLabel: function(domElement, node){
-          var style = domElement.style;
-          //style.visibility = 'visible';
-          style.cursor = 'pointer';
-          style.height = '';
-          style.width  = '';
-
-          if(node._depth <= 1) {
-              style.fontSize = '0.9em';
-              style.color    = '#000000';
-          }
-          else if(node._depth <= 3){
-              style.fontSize = '0.8em';
-              style.color    = '#494949';
-          }else {
-              style.fontSize = '0px';
-              style.height   = '10px';
-              style.width    = '10px';
-              //style.visibility = 'hidden';
-          }
-
-          domElement.onmouseover = function (e){showTip((e||window.event), node)};
-
-          var left = parseInt(style.left);
-          var w = domElement.offsetWidth;
-          style.left = (left - w / 2) + 'px';
-      },
-  });
-
-  //load JSON data
-  var tree = eval('(' + json + ')');
-  rgraph.loadJSON(tree);
-
-  //compute positions and make the first plot
-  rgraph.refresh();
+    // init circle map
+    show_circle_map(id_to_show, w, h);
 
 [% END %]
 

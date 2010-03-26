@@ -43,21 +43,27 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{level}        = $c->request->parameters->{'level'}   || 1;
-    $c->stash->{type}         = $c->request->parameters->{'type'}    || 1;
-    $c->stash->{groupby}      = $c->request->parameters->{'groupby'} || 1;
+    #$c->stash->{level}        = $c->request->parameters->{'level'}   || 1;
+    $c->stash->{type}         = $c->request->parameters->{'type'}    || 'circle';
+    $c->stash->{groupby}      = $c->request->parameters->{'groupby'} || 'parent';
     $c->stash->{host}         = $c->request->parameters->{'host'}    || 'rootid';
+    if($c->stash->{host} eq 'all') {
+        $c->stash->{host} = 'rootid';
+    }
 
-    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output childs parents", { Slice => {}, AddPeer => 1 });
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output parents", { Slice => {}, AddPeer => 1 });
 
     my $json;
     # oder by parents
-    if($c->stash->{groupby} == 1) {
+    if($c->stash->{groupby} eq 'parent') {
         $json = $self->_get_hosts_by_parents($c, $hosts);
     }
     # order by address
-    elsif($c->stash->{groupby} == 2) {
+    elsif($c->stash->{groupby} eq 'address') {
         $json = $self->_get_hosts_by_address($c, $hosts);
+    }
+    else {
+        confess("unknown groupby option: ".$c->stash->{groupby});
     }
 
 #print "HTTP/1.0 200 OK\n\n<pre>";
@@ -101,6 +107,10 @@ sub _get_json_for_hosts {
     my($sum_hosts,$state_up,$state_down,$state_unreachable,$state_pending) = (0,0,0,0,0);
     for my $key (sort keys %{$data}) {
         my $dat = $data->{$key};
+        if(ref $dat ne 'HASH') {
+            my @caller = caller;
+            confess('not a hash ref: '.Dumper($dat)."\n".Dumper(\@caller));
+        }
         if(exists $dat->{'id'}) {
             push @{$children}, $dat;
             $sum_hosts         += $dat->{'data'}->{'$area'};
@@ -159,37 +169,10 @@ sub _get_hosts_by_address {
         my $id = $json_host->{'id'};
 
         # where should we put the host onto?
-        if($c->stash->{groupby} == 2) { # order by address
-            if($host->{'address'} =~ m/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/) {
-                # table layout
-                if($c->stash->{'type'} == 1) {
-                    $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
-                    #if($c->stash->{level} == 4) {
-                    #    $host_tree->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
-                    #}
-                    #if($c->stash->{level} == 3) {
-                    #    $host_tree->{$1.'.'.$2}->{$id} = $json_host;
-                    #}
-                    #if($c->stash->{level} == 2) {
-                    #    $host_tree->{$1}->{$id} = $json_host;
-                    #}
-                    #if($c->stash->{level} == 1) {
-                    #    $host_tree->{$id} = $json_host;
-                    #}
-                }
-                # circle layout
-                elsif($c->stash->{'type'} == 2) {
-                    if($c->stash->{level} == 1) {
-                        $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
-                    }
-                    if($c->stash->{level} == 2) {
-                        $host_tree->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
-                    }
-                } else {
-                    confess("unknown type: ".$c->stash->{'type'});
-                }
-            }
-        } else {
+        if($host->{'address'} =~ m/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/) {
+            $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+        }
+        else {
             $host_tree->{$id} = $json_host;
         }
     }
@@ -228,41 +211,84 @@ sub _get_hosts_by_parents {
     my $c     = shift;
     my $hosts = shift;
 
-    my $host_tree;
-#    for my $host (@{$hosts}) {
-#        my $json_host = $self->_get_json_host($c, $host);
-#        my @adjacencies;
-#        push @adjacencies, split(/,/mx, $host->{'childs'})  if defined $host->{'childs'};
-#        #push @adjacencies, split(/,/mx, $host->{'parents'}) if defined $host->{'parents'};
-#        #if(scalar @adjacencies == 0) {
-#        unless(defined $host->{'parents'}) {
-#            push @rootchilds, $host->{'name'};
-#        #    push @adjacencies, 'monitoring host';
-#        }
-#        $json_host->{'adjacencies'} = \@adjacencies;
-#        push @hosts, $json_host;
-#    }
+    my $all_hosts;
+    for my $host (@{$hosts}) {
+        $all_hosts->{$host->{name}} = $host;
+    }
 
-    my($rootchilds,
-       $child_sum_hosts,
-       $child_sum_up,
-       $child_sum_down,
-       $child_sum_unreachable,
-       $child_sum_pending
-    ) = $self->_get_json_for_hosts($host_tree, 0);
-    my $rootnode = {
-        'id'       => 'rootid',
-        'name'     => 'monitoring host',
-        'data'     => {
-                       '$area'             => $child_sum_hosts,
-                        'state_up'         => $child_sum_up,
-                        'state_down'       => $child_sum_down,
-                        'state_unreachable'=> $child_sum_unreachable,
-                        'state_pending'    => $child_sum_pending,
-                       },
-        'children' => $rootchilds,
+    my($subtree, $remaining, $state_up, $state_down, $state_unreachable, $state_pending)
+        = $self->_fill_subtree($c, 'rootid', $hosts, $all_hosts);
+    my $host_tree->{'rootid'} = {
+        'id'   => 'rootid',
+        'name' => 'monitoring host',
+        'data' => {
+            '$area'             => $state_up + $state_down + $state_unreachable + $state_pending,
+            'state_up'          => $state_up,
+            'state_down'        => $state_down,
+            'state_unreachable' => $state_unreachable,
+            'state_pending'     => $state_pending,
+        },
+        'children' => $subtree,
     };
-    return $rootnode;
+
+    my $array = $self->_hash_tree_to_array($host_tree);
+    return($array->[0]);
+}
+
+##########################################################
+
+=head2 _fill_subtree
+
+=cut
+sub _fill_subtree {
+    my $self      = shift;
+    my $c         = shift;
+    my $parent    = shift;
+    my $hosts     = shift;
+    my $all_hosts = shift;
+
+    my $tree;
+    my $remaining_hosts;
+
+    # find direct childs
+    for my $host (@{$hosts}) {
+        if(!defined $host->{'parents'}) {
+            $host->{'parents'} = 'rootid';
+        }
+        my $found_parent = 0;
+        if(grep {/$parent/} split(/,/mx, $host->{'parents'})) {
+            $tree->{$host->{'name'}} = {};
+        }
+        else {
+            push @{$remaining_hosts}, $host;
+        }
+    }
+
+    my($sum_state_up, $sum_state_down, $sum_state_unreachable, $sum_state_pending) = (0,0,0,0);
+
+    # insert the child childs
+    for my $parent (keys %{$tree}) {
+        my($subtree, $state_up, $state_down, $state_unreachable, $state_pending);
+        ($subtree, $remaining_hosts, $state_up, $state_down, $state_unreachable, $state_pending)
+            = $self->_fill_subtree($c, $parent, $remaining_hosts, $all_hosts);
+        my $json_host = $self->_get_json_host($c, $all_hosts->{$parent});
+        $json_host->{'data'}->{'state_up'}          += $state_up;
+        $json_host->{'data'}->{'state_down'}        += $state_down;
+        $json_host->{'data'}->{'state_unreachable'} += $state_unreachable;
+        $json_host->{'data'}->{'state_pending'}     += $state_pending;
+        $json_host->{'data'}->{'$area'}             =    $json_host->{'data'}->{'state_up'}
+                                                       + $json_host->{'data'}->{'state_down'}
+                                                       + $json_host->{'data'}->{'state_unreachable'}
+                                                       + $json_host->{'data'}->{'state_pending'};
+        $json_host->{'children'}                     = $subtree;
+        $tree->{$parent}                             = $json_host;
+        $sum_state_up                               += $json_host->{'data'}->{'state_up'};
+        $sum_state_down                             += $json_host->{'data'}->{'state_down'};
+        $sum_state_unreachable                      += $json_host->{'data'}->{'state_unreachable'};
+        $sum_state_pending                          += $json_host->{'data'}->{'state_pending'};
+    }
+
+    return($tree, $remaining_hosts, $sum_state_up, $sum_state_down, $sum_state_unreachable, $sum_state_pending)
 }
 
 
@@ -328,6 +354,28 @@ sub _get_json_host {
     };
 
     return $json_host;
+}
+
+##########################################################
+
+=head2 _hash_tree_to_array
+
+=cut
+sub _hash_tree_to_array {
+    my $self = shift;
+    my $hash = shift;
+
+    my $array = [];
+    for my $key (sort keys %{$hash}) {
+        my $val = $hash->{$key};
+        if(defined $val->{'children'}) {
+            my $childs = $self->_hash_tree_to_array($val->{'children'});
+            $val->{'children'} = $childs;
+            push @{$array}, $val;
+        }
+    }
+
+    return $array;
 }
 
 =head1 AUTHOR
