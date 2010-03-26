@@ -16,7 +16,7 @@ use Catalyst::Runtime '5.70';
 
 use parent qw/Catalyst/;
 use Catalyst qw/
-                Unicode
+                Unicode::Encoding
                 Authentication
                 Authorization::ThrukRoles
                 CustomErrorMessage
@@ -41,6 +41,7 @@ my $project_root = __PACKAGE__->config->{home};
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
                     'released'               => 'March 22, 2010',
+                    'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
                     'default_view'           => 'TT',

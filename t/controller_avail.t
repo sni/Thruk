@@ -26,7 +26,7 @@ my $pages = [
 # Step 3
     '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=hostgroups&hostgroup=down',
     '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=hosts&host='.$host,
-    '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=services&service='.$host.';'.$service,
+    '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=services&service='.$host.'%3B'.$service,
     '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=servicegroups&servicegroup=critical',
 
 # Report
