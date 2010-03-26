@@ -125,7 +125,7 @@ function show_tree_map(id_to_show) {
           else if(isLeaf && head && node.data) {
             var total  = node.data.state_up + node.data.state_down + node.data.state_unreachable;
             var failed = node.data.state_down + node.data.state_unreachable;
-            var totalClass = 'hostUP';
+            var totalClass = '';
             if(total > 0) {
                 var perc   = Math.ceil(failed / total) * 100;
                 if(failed == 0) {

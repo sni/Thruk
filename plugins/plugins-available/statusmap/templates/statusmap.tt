@@ -76,15 +76,6 @@
 <script type="text/javascript">
 <!--
 
-TreeUtil.prune = function(tree, maxLevel) {
-    this.each(tree, function(elem, i) {
-        if(i == maxLevel && elem.children) {
-            delete elem.children;
-            elem.children = [];
-        }
-    });
-};
-
 var json = '[% json %]';
 
 function init(){
@@ -191,7 +182,9 @@ function init(){
   });
 
   //load JSON data
-  rgraph.loadJSON(json);
+  var tree = eval('(' + json + ')');
+  rgraph.loadJSON(tree);
+
   //compute positions and make the first plot
   rgraph.refresh();
 

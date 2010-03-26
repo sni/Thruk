@@ -51,6 +51,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output childs parents", { Slice => {}, AddPeer => 1 });
 
     my $json;
+    # oder by parents
     if($c->stash->{groupby} == 1) {
         $json = $self->_get_hosts_by_parents($c, $hosts);
     }
@@ -59,19 +60,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $json = $self->_get_hosts_by_address($c, $hosts);
     }
 
-
-
 #print "HTTP/1.0 200 OK\n\n<pre>";
 #print Dumper($host_tree);
-
-
 #print Dumper($json);
-
 
     #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger)
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
     $c->stash->{json}         = $coder->encode($json);
-    #$c->stash->{json}         = $coder->encode(\@hosts);
 
     $c->stash->{title}        = 'Network Map';
     $c->stash->{page}         = 'statusmap';
@@ -93,6 +88,10 @@ sub _get_json_for_hosts {
     my $level = shift;
 
     my $children = [];
+
+    unless(defined $data) {
+        return($children,0,0,0,0,0);
+    }
 
     if(ref $data ne 'HASH') {
         my @caller = caller;
@@ -195,7 +194,7 @@ sub _get_hosts_by_address {
         }
     }
 
-    my($childs,
+    my($rootchilds,
        $child_sum_hosts,
        $child_sum_up,
        $child_sum_down,
@@ -206,13 +205,13 @@ sub _get_hosts_by_address {
         'id'       => 'rootid',
         'name'     => 'monitoring host',
         'data'     => {
-                       '$area' => $child_sum_hosts,
+                       '$area'             => $child_sum_hosts,
                         'state_up'         => $child_sum_up,
                         'state_down'       => $child_sum_down,
                         'state_unreachable'=> $child_sum_unreachable,
                         'state_pending'    => $child_sum_pending,
                        },
-        'children' => $childs,
+        'children' => $rootchilds,
     };
 
     return $rootnode;
@@ -229,30 +228,41 @@ sub _get_hosts_by_parents {
     my $c     = shift;
     my $hosts = shift;
 
-    my @hosts;
-    my @rootchilds;
-    for my $host (@{$hosts}) {
-        my $json_host = $self->_get_json_host($c, $host);
-        my @adjacencies;
-        push @adjacencies, split(/,/mx, $host->{'childs'})  if defined $host->{'childs'};
-        #push @adjacencies, split(/,/mx, $host->{'parents'}) if defined $host->{'parents'};
-        #if(scalar @adjacencies == 0) {
-        unless(defined $host->{'parents'}) {
-            push @rootchilds, $host->{'name'};
-        #    push @adjacencies, 'monitoring host';
-        }
-        $json_host->{'adjacencies'} = \@adjacencies;
-        push @hosts, $json_host;
-    }
+    my $host_tree;
+#    for my $host (@{$hosts}) {
+#        my $json_host = $self->_get_json_host($c, $host);
+#        my @adjacencies;
+#        push @adjacencies, split(/,/mx, $host->{'childs'})  if defined $host->{'childs'};
+#        #push @adjacencies, split(/,/mx, $host->{'parents'}) if defined $host->{'parents'};
+#        #if(scalar @adjacencies == 0) {
+#        unless(defined $host->{'parents'}) {
+#            push @rootchilds, $host->{'name'};
+#        #    push @adjacencies, 'monitoring host';
+#        }
+#        $json_host->{'adjacencies'} = \@adjacencies;
+#        push @hosts, $json_host;
+#    }
 
+    my($rootchilds,
+       $child_sum_hosts,
+       $child_sum_up,
+       $child_sum_down,
+       $child_sum_unreachable,
+       $child_sum_pending
+    ) = $self->_get_json_for_hosts($host_tree, 0);
     my $rootnode = {
-        'id'          => 'rootid',
-        'name'        => 'monitoring host',
-        'data'        => { '$area' => 100 },
-        'adjacencies'    => \@rootchilds,
+        'id'       => 'rootid',
+        'name'     => 'monitoring host',
+        'data'     => {
+                       '$area'             => $child_sum_hosts,
+                        'state_up'         => $child_sum_up,
+                        'state_down'       => $child_sum_down,
+                        'state_unreachable'=> $child_sum_unreachable,
+                        'state_pending'    => $child_sum_pending,
+                       },
+        'children' => $rootchilds,
     };
-    unshift @hosts, $rootnode;
-    return \@hosts;
+    return $rootnode;
 }
 
 
