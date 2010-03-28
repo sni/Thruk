@@ -119,6 +119,9 @@ before 'execute' => sub {
 
     ###############################
 
+    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
+
+    ###############################
     $c->stats->profile(end => "AddDefaults::before");
 };
 
