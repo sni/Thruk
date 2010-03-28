@@ -185,7 +185,7 @@
           </table>
         </td>
         <td class='status[% state %]'>[% state %]</td>
-        <td class='[% serviceclass %]' nowrap align="right">[% IF s.has_been_checked == 0 %]never[% ELSE %][% IF date.format(s.last_check, '%Y-%m-%d') == today %][% date.format(s.last_check, datetime_format_today) %][% ELSE %][% date.format(s.last_check, datetime_format) %][% END %][% END %]</td>
+        <td class='[% serviceclass %]' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% IF date.format(s.last_check, '%Y-%m-%d') == today %][% date.format(s.last_check, datetime_format_today) %][% ELSE %][% date.format(s.last_check, datetime_format) %][% END %][% END %]</td>
         <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
         <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %]</td>
           [% IF s.has_been_checked == 0 %]

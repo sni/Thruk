@@ -136,7 +136,7 @@
             </table>
           </td>
           <td class='[% statusClass %]'>[% status %]</td>
-          <td class='[% class %]' nowrap align="right">[% IF date.format(h.last_check, '%Y-%m-%d') == today %][% date.format(h.last_check, datetime_format_today) %][% ELSE %][% date.format(h.last_check, datetime_format) %][% END %]</td>
+          <td class='[% class %]' nowrap align="center">[% IF date.format(h.last_check, '%Y-%m-%d') == today %][% date.format(h.last_check, datetime_format_today) %][% ELSE %][% date.format(h.last_check, datetime_format) %][% END %]</td>
           <td class='[% class %]' nowrap>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
           [% IF h.has_been_checked == 0 %]
             <td class='[% class %]' valign='middle'>Host check scheduled for [% date.format(h.next_check, datetime_format_long) %]</td>
