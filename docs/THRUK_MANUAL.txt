@@ -3,10 +3,10 @@ Thruk Users Guide
 
 == Introduction
 
-Thruk is a multibackend monitoring webinterface which currently
-supports Nagios and Icinga as backend using the MKLivestatus addon.
-It was designed to be a "dropin" replacement. The target is to cover
-100% of the original features plus additional enhancements for large
+Thruk is an multibackend monitoring web interface which currently
+supports Nagios and Icinga using the Livestatus NEB module. It is
+designed to be a “drop-in” replacement and targets covering 100% of
+the original features plus additional enhancements for large
 installations.
 
 Main Features / Advantages
@@ -27,6 +27,18 @@ Main Features / Advantages
   * paging ( can be disabled and customized )
   * multiple themes included
 
+
+
+== How it works
+
+Thruk is written in Perl using the http://www.catalystframework.org[Catalyst Framework]. Backend
+monitoring systems will be connected with the http://search.cpan.org/dist/Monitoring-Livestatus[Monitoring::Livestatus]
+Perl Module. Thruk itself is running as a fastcgi process.
+Authentication is provided by the Apache webserver (For example with
+mod_auth).
+
+.Thruk Architecture
+image:source/arch_preview.png[Thruk Architecture]
 
 
 == Installation
