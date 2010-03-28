@@ -32,6 +32,7 @@
             <select name='groupby'>
               <option value="parent"[% IF groupby == 'parent' %] selected[% END %]>Parent</option>
               <option value="address"[% IF groupby == 'address' %] selected[% END %]>IP Address</option>
+              <option value="hostgroup"[% IF groupby == 'hostgroup' %] selected[% END %]>Hostgroup</option>
             </select>
           </td>
         </tr>
@@ -77,6 +78,15 @@
 
 <script type="text/javascript">
 <!--
+
+[% IF groupby == 'address' %]
+var nodename = 'Network';
+[% ELSIF groupby == 'parent' %]
+var nodename = 'Node';
+[% ELSIF groupby == 'hostgroup' %]
+var nodename = 'Hostgroup';
+[% END %]
+
 
 var json = '[% json %]';
 

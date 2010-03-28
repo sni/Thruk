@@ -43,15 +43,14 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    #$c->stash->{level}        = $c->request->parameters->{'level'}   || 1;
-    $c->stash->{type}         = $c->request->parameters->{'type'}    || 'circle';
-    $c->stash->{groupby}      = $c->request->parameters->{'groupby'} || 'parent';
-    $c->stash->{host}         = $c->request->parameters->{'host'}    || 'rootid';
+    $c->stash->{type}    = $c->request->parameters->{'type'}    || 'circle';
+    $c->stash->{groupby} = $c->request->parameters->{'groupby'} || 'parent';
+    $c->stash->{host}    = $c->request->parameters->{'host'}    || 'rootid';
     if($c->stash->{host} eq 'all') {
         $c->stash->{host} = 'rootid';
     }
 
-    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output parents", { Slice => {}, AddPeer => 1 });
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output groups parents", { Slice => {}, AddPeer => 1 });
 
     my $json;
     # oder by parents
@@ -61,6 +60,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # order by address
     elsif($c->stash->{groupby} eq 'address') {
         $json = $self->_get_hosts_by_address($c, $hosts);
+    }
+    elsif($c->stash->{groupby} eq 'hostgroup') {
+        $json = $self->_get_hosts_by_attribute($c, $hosts, 'groups');
     }
     else {
         confess("unknown groupby option: ".$c->stash->{groupby});
@@ -174,6 +176,54 @@ sub _get_hosts_by_address {
         }
         else {
             $host_tree->{$id} = $json_host;
+        }
+    }
+
+    my($rootchilds,
+       $child_sum_hosts,
+       $child_sum_up,
+       $child_sum_down,
+       $child_sum_unreachable,
+       $child_sum_pending
+    ) = $self->_get_json_for_hosts($host_tree, 0);
+    my $rootnode = {
+        'id'       => 'rootid',
+        'name'     => 'monitoring host',
+        'data'     => {
+                       '$area'             => $child_sum_hosts,
+                        'state_up'         => $child_sum_up,
+                        'state_down'       => $child_sum_down,
+                        'state_unreachable'=> $child_sum_unreachable,
+                        'state_pending'    => $child_sum_pending,
+                       },
+        'children' => $rootchilds,
+    };
+
+    return $rootnode;
+}
+
+
+##########################################################
+
+=head2 _get_hosts_by_attribute
+
+=cut
+sub _get_hosts_by_attribute {
+    my $self  = shift;
+    my $c     = shift;
+    my $hosts = shift;
+    my $attr  = shift;
+
+    my $host_tree;
+    for my $host (@{$hosts}) {
+
+        my $json_host = $self->_get_json_host($c, $host);
+        $json_host->{'children'} = [];
+        my $id = $json_host->{'id'};
+
+        # where should we put the host onto?
+        for my $val (split/,/, $host->{$attr}) {
+            $host_tree->{$val}->{$id} = $json_host;
         }
     }
 

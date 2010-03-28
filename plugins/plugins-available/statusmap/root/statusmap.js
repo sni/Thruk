@@ -14,7 +14,7 @@ function makeHTMLFromData(name, data){
     html += '<div class="tip-title">Host: ' + name + '<\/div>'
   } else {
     // network leaf
-    html += '<div class="tip-title">Network: ' + name + '<\/div>'
+    html += '<div class="tip-title">' + nodename + ': ' + name + '<\/div>'
   }
   html += '<div class="tip-text"><pre>';
 
