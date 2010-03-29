@@ -29,7 +29,7 @@
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value='[% c.request.parameters.servicegroup %]'></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.config.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]'> <a href="javascript:show_cal('start_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
 <tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]'> <a href="javascript: NewCssCal('end_time','yyyymmdd','arrow',true,24,false)"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>

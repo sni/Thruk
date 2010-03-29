@@ -43,8 +43,8 @@ sub find_user {
                       'authorized_for_system_information'
                     ];
     for my $role (@{$possible_roles}) {
-        if(defined $c->config->{'cgi.cfg'}->{$role}) {
-            my %contacts = map { $_ => 1 } split/,/mx, $c->config->{'cgi.cfg'}->{$role};
+        if(defined $c->config->{'cgi_cfg'}->{$role}) {
+            my %contacts = map { $_ => 1 } split/,/mx, $c->config->{'cgi_cfg'}->{$role};
             push @{$user->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'});
         }
     }

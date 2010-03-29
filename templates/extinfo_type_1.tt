@@ -65,7 +65,7 @@
           [% IF host.action_url_expanded %]
             <tr>
               <td align='right'>
-                <a href='[% host.action_url_expanded %]' target='[% c.cgi_cfg.action_url_target %]'><img src='/thruk/themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host' width="40" height="40"></a><br clear="all">
+                <a href='[% host.action_url_expanded %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='/thruk/themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Host' title='Perform Additional Actions On This Host' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Extra Actions</i></font><br clear="all">
                 <br clear="all">
               </td>
@@ -74,7 +74,7 @@
           [% IF host.notes_url_expanded %]
             <tr>
               <td align='right'>
-                <a href='[% host.notes_url_expanded %]' target='[% c.cgi_cfg.notes_url_target %]'><img src='/thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40"></a><br clear="all">
+                <a href='[% host.notes_url_expanded %]' target='[% c.config.cgi_cfg.notes_url_target %]'><img src='/thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Host' title='View Additional Notes For This Host' width="40" height="40"></a><br clear="all">
                 <font size="-1"><i>Extra Notes</i></font><br clear="all">
                 <br clear="all">
               </td>

@@ -44,7 +44,7 @@ sub get_auth_filter {
     return("") if $type eq 'status';
 
     # if authentication is completly disabled
-    if($c->config->{'cgi.cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi.cfg'}->{'use_ssl_authentication'} == 0) {
+    if($c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
         return("");
     }
 
@@ -291,7 +291,7 @@ sub read_cgi_cfg {
     $c->stats->profile(begin => "Utils::read_cgi_cfg()") if defined $c;
 
     # read only if its changed
-    my $file = $config->{'cgi_cfg'};
+    my $file = $config->{'cgi.cfg'};
     if(!defined $file or $file eq '') {
         $config->{'cgi_cfg'} = 'undef';
         if(defined $c) {
@@ -330,7 +330,7 @@ sub read_cgi_cfg {
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
         my $conf = new Config::General($file);
-        %{$config->{'cgi.cfg'}} = $conf->getall;
+        %{$config->{'cgi_cfg'}} = $conf->getall;
     }
 
     $c->stats->profile(end => "Utils::read_cgi_cfg()") if defined $c;

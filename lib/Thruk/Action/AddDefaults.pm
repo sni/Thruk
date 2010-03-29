@@ -94,8 +94,8 @@ before 'execute' => sub {
     $c->stash->{'backend_detail'}     = \%backend_detail;
 
     ###############################
-    $c->stash->{'escape_html_tags'}   = $c->config->{'cgi.cfg'}->{'escape_html_tags'};
-    $c->stash->{'show_context_help'}  = $c->config->{'cgi.cfg'}->{'show_context_help'};
+    $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
+    $c->stash->{'show_context_help'}  = $c->config->{'cgi_cfg'}->{'show_context_help'};
 
     ###############################
     # add program status
@@ -131,8 +131,8 @@ after 'execute' => sub {
 
     $c->stats->profile(begin => "AddDefaults::after");
 
-    if(defined $c->config->{'cgi.cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
-        $c->stash->{'refresh_rate'} = $c->config->{'cgi.cfg'}->{'refresh_rate'};
+    if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
+        $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
 
     $c->stats->profile(end => "AddDefaults::after");

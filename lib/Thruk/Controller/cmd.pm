@@ -37,7 +37,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     Thruk::Utils::ssi_include($c);
 
     # check if authorization is enabled
-    if($c->config->{'cgi.cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi.cfg'}->{'use_ssl_authentication'} == 0) {
+    if($c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
         $c->detach('/error/index/3');
     }
 
@@ -249,7 +249,7 @@ sub _do_send_command {
     $c->detach('/error/index/6') unless defined $cmd_typ;
 
     # locked author names?
-    if($c->config->{'cgi.cfg'}->{'lock_author_names'} or !defined $c->{'request'}->{'parameters'}->{'com_author'}) {
+    if($c->config->{'cgi_cfg'}->{'lock_author_names'} or !defined $c->{'request'}->{'parameters'}->{'com_author'}) {
         my $author = $c->user->username;
         $author    = $c->user->alias if defined $c->user->alias;
         $c->{'request'}->{'parameters'}->{'com_author'} = $author;
@@ -315,7 +315,6 @@ sub _do_send_command {
     # send the command
     $cmd = "COMMAND [".time()."] $cmd";
     $c->log->debug("sending $cmd");
-        my $comment_author          = $c->user->username;
     if(defined $backends) {
         $c->log->debug("sending to backends: ".Dumper($backends));
         $c->{'live'}->do($cmd, { Backend => $backends });

@@ -156,8 +156,8 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
 
     ###############################
     # try to set the refresh
-    if(defined $c->config->{'cgi.cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
-        $c->stash->{'refresh_rate'} = $c->config->{'cgi.cfg'}->{'refresh_rate'};
+    if(defined $c->config->{'cgi_cfg'}->{'refresh_rate'} and (!defined $c->stash->{'no_auto_reload'} or $c->stash->{'no_auto_reload'} == 0)) {
+        $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
 
     return 1;
