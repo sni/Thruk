@@ -97,6 +97,10 @@ function show_tree_map(id_to_show) {
             var parent = TreeUtil.getParent(tree, this.shownTree.id);
             if(parent) {
                 show_tree_map(parent.id);
+
+                // reset page refresh
+                setRefreshRate(refresh_rate);
+                additionalParams.set('host', parent.id);
             }
             return false;
         }

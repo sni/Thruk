@@ -56,21 +56,30 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # oder by parents
     if($c->stash->{groupby} eq 'parent') {
         $json = $self->_get_hosts_by_parents($c, $hosts);
+        $c->stash->{nodename} = 'Host';
     }
     # order by address
     elsif($c->stash->{groupby} eq 'address') {
-        $json = $self->_get_hosts_by_address($c, $hosts);
+        $json = $self->_get_hosts_by_split_attribute($c, $hosts, 'address', '.', 0);
+        $c->stash->{nodename} = 'Network';
     }
+    # order by domain
+    elsif($c->stash->{groupby} eq 'domain') {
+        $json = $self->_get_hosts_by_split_attribute($c, $hosts, 'name', '.', 1);
+        $c->stash->{nodename} = 'Domain';
+    }
+    # order by hostgroups
     elsif($c->stash->{groupby} eq 'hostgroup') {
         $json = $self->_get_hosts_by_attribute($c, $hosts, 'groups');
+        $c->stash->{nodename} = 'Hostgroup';
     }
     else {
         confess("unknown groupby option: ".$c->stash->{groupby});
     }
 
 #print "HTTP/1.0 200 OK\n\n<pre>";
-#print Dumper($host_tree);
 #print Dumper($json);
+#exit;
 
     #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger)
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
@@ -155,27 +164,49 @@ sub _get_json_for_hosts {
 
 ##########################################################
 
-=head2 _get_hosts_by_address
+=head2 _get_hosts_by_split_attribute
 
 =cut
-sub _get_hosts_by_address {
-    my $self  = shift;
-    my $c     = shift;
-    my $hosts = shift;
+sub _get_hosts_by_split_attribute {
+    my $self     = shift;
+    my $c        = shift;
+    my $hosts    = shift;
+    my $attr     = shift;
+    my $char     = shift;
+    my $reverse  = shift;
+    my $metachar = quotemeta($char);
 
-    my $host_tree;
+    my $host_tree = {};
     for my $host (@{$hosts}) {
 
         my $json_host = $self->_get_json_host($c, $host);
         $json_host->{'children'} = [];
         my $id = $json_host->{'id'};
 
-        # where should we put the host onto?
-        if($host->{'address'} =~ m/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/) {
-            $host_tree->{$1}->{$1.'.'.$2}->{$1.'.'.$2.'.'.$3}->{$id} = $json_host;
+        my @chunks;
+        if($reverse) {
+            @chunks  = reverse split/$metachar/mx, $host->{$attr};
+        } else {
+            @chunks  = split/$metachar/mx, $host->{$attr};
         }
-        else {
-            $host_tree->{$id} = $json_host;
+        my $num     = scalar @chunks;
+        my $key     = "";
+        my $subtree = $host_tree;
+        for(my $x = 0; $x < $num; $x++) {
+            if($reverse) {
+                $key  = $char.$key unless $key eq '';
+                $key  = $chunks[$x].$key;
+            } else {
+                $key .= $char unless $key eq '';
+                $key .= $chunks[$x];
+            }
+            if($x == $num-1) {
+                $subtree->{$key} = $json_host;
+            }
+            else {
+                if(!exists $subtree->{$key}) { $subtree->{$key} = {}; }
+                $subtree = \%{$subtree->{$key}};
+            }
         }
     }
 
@@ -220,6 +251,8 @@ sub _get_hosts_by_attribute {
         my $json_host = $self->_get_json_host($c, $host);
         $json_host->{'children'} = [];
         my $id = $json_host->{'id'};
+
+        $host->{$attr} = 'unknown' unless defined $host->{$attr};
 
         # where should we put the host onto?
         for my $val (split/,/, $host->{$attr}) {
