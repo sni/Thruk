@@ -231,6 +231,30 @@ function unselectCurrentSelection(obj)
     }
 }
 
+/* returns true if the shift key is pressed for that event */
+var no_more_events = 0;
+function is_shift_pressed(e) {
+
+  if(no_more_events) {
+    return false;
+  }
+
+  if(e && e.shiftKey) {
+    return true;
+  }
+
+  try {
+    if(event && event.shiftKey) {
+      return true;
+    }
+  }
+  catch(err) {
+    // errors wont matter here
+  }
+
+  return false;
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -435,6 +459,7 @@ function highlightHostRow()
 /* select this service */
 function selectService(event, state)
 {
+    unselectCurrentSelection();
     var row_id;
     // find id of current row
     if(event && event.target) {
@@ -451,6 +476,7 @@ function selectService(event, state)
     }
     else {
         row_id = getFirstParentId(this);
+        event  = this;
     }
     if(!row_id) {
         return;
@@ -460,11 +486,11 @@ function selectService(event, state)
     unselectCurrentSelection();
 }
 
-
 /* select this service */
 function selectServiceById(row_id, state, event)
 {
-    if(event && event.shiftKey && lastRowSelected != undefined) {
+    if(is_shift_pressed(event) && lastRowSelected != undefined) {
+      no_more_events = 1;
       var id1 = parseInt(row_id.substring(1));
       var id2 = parseInt(lastRowSelected.substring(1));
 
@@ -485,6 +511,7 @@ function selectServiceById(row_id, state, event)
         selectServiceById('r'+x, state);
       }
       lastRowSelected = undefined;
+      no_more_events  = 0;
     }
     else {
       lastRowSelected = row_id;
@@ -513,6 +540,8 @@ function selectServiceById(row_id, state, event)
 /* select this host */
 function selectHost(event, state)
 {
+    unselectCurrentSelection();
+
     var row_id;
     // find id of current row
     if(event && event.target) {
@@ -529,6 +558,7 @@ function selectHost(event, state)
     }
     else {
         row_id = getFirstParentId(this);
+        event  = this;
     }
     if(!row_id) {
         return;
@@ -542,7 +572,8 @@ function selectHost(event, state)
 /* select this service */
 function selectHostById(row_id, state, event) {
 
-    if(event && event.shiftKey && lastRowSelected != undefined) {
+    if(is_shift_pressed(event) && lastRowSelected != undefined) {
+      no_more_events = 1;
       var id1 = parseInt(row_id.substring(1));
       var id2 = parseInt(lastRowSelected.substring(1));
 
@@ -563,6 +594,7 @@ function selectHostById(row_id, state, event) {
         selectHostById('r'+x, state);
       }
       lastRowSelected = undefined;
+      no_more_events  = 0;
     } else {
       lastRowSelected = row_id;
     }

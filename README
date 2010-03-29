@@ -18,16 +18,16 @@ Main Features / Advantages
 
   * multiple backends
   * faster, no need to parse status.dat for every request
-  * live, no delay between core and gui
+  * less cpu usage
+  * display live data, no delay between core and gui
   * independant from monitoring core, can be installed on remote host
   * clusterable, can be clustered over hosts
   * change status.cgi filter inline
   * extended logfile search
-  * better logging, uses log4perl
+  * better logging, uses log4perl (who submitted which command?)
   * valid HTML code
   * no frames ( can be reenabled for better addon integration)
-  * easy to extend (MVC Design)
-  * 100% perl (using catalyst)
-  * paging ( can be disabled or customized )
-  * support for themes (on a per user basis )
-
+  * easy to extend with plugins
+  * 100% Perl (using Catalyst Framework)
+  * paging ( can be disabled and customized )
+  * multiple themes included

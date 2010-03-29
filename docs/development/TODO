@@ -9,6 +9,7 @@ general
     - authorization docs
     - Filter: latency, execution_time
     - configure url path in config (ex.: /thruk/ )
+    - add extra grapher url
 
 extinfo:
     - finish performance data on extinfo type 4

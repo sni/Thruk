@@ -44,7 +44,7 @@ sub get_auth_filter {
     return("") if $type eq 'status';
 
     # if authentication is completly disabled
-    if($c->config->{'cgi.cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi.cfg'}->{'use_ssl_authentication'} == 0) {
+    if($c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
         return("");
     }
 
@@ -291,7 +291,7 @@ sub read_cgi_cfg {
     $c->stats->profile(begin => "Utils::read_cgi_cfg()") if defined $c;
 
     # read only if its changed
-    my $file = $config->{'cgi_cfg'};
+    my $file = $config->{'cgi.cfg'};
     if(!defined $file or $file eq '') {
         $config->{'cgi_cfg'} = 'undef';
         if(defined $c) {
@@ -330,7 +330,7 @@ sub read_cgi_cfg {
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
         my $conf = new Config::General($file);
-        %{$config->{'cgi.cfg'}} = $conf->getall;
+        %{$config->{'cgi_cfg'}} = $conf->getall;
     }
 
     $c->stats->profile(end => "Utils::read_cgi_cfg()") if defined $c;
@@ -1240,13 +1240,17 @@ sub set_can_submit_commands {
     my $username = $c->request->{'user'}->{'username'};
 
     # is the contact allowed to send commands?
-    my $can_submit_commands;
+    my($can_submit_commands,$alias);
     eval {
-        $can_submit_commands = $c->{'live'}->selectscalar_value("GET contacts\nColumns: can_submit_commands\nFilter: name = $username", { Slice => {}, Sum => 1 });
+        my $data = $c->{'live'}->selectrow_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Sum => 1 });
+        ($can_submit_commands,$alias) = @{$data} if defined $data;
     };
     if($@) {
         $c->log->error("livestatus error: $@");
         $c->detach('/error/index/9');
+    }
+    if(defined $alias) {
+        $c->request->{'user'}->{'alias'} = $alias;
     }
     if(!defined $can_submit_commands) {
         $can_submit_commands = Thruk->config->{'can_submit_commands'} || 0;

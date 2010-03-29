@@ -96,7 +96,7 @@ sub authenticate {
     my $authenticated = 0;
 
     # authenticated by ssl
-    if(defined $c->config->{'cgi.cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi.cfg'}->{'use_ssl_authentication'} >= 1) {
+    if(defined $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} >= 1) {
         if(defined $c->engine->env->{'SSL_CLIENT_S_DN_CN'}) {
             $username = $c->engine->env->{'SSL_CLIENT_S_DN_CN'};
         }
@@ -110,8 +110,8 @@ sub authenticate {
     }
 
     # default_user_name?
-    if(!defined $username and defined $c->config->{'cgi.cfg'}->{'default_user_name'}) {
-        $username = $c->config->{'cgi.cfg'}->{'default_user_name'};
+    if(!defined $username and defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
+        $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
     }
 
     if(!defined $username or $username eq '') {

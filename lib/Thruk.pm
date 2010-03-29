@@ -26,7 +26,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.52';
+our $VERSION = '0.54';
 
 ###################################################
 # Configure the application.
@@ -40,7 +40,7 @@ our $VERSION = '0.52';
 my $project_root = __PACKAGE__->config->{home};
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'March 26, 2010',
+                    'released'               => 'March 28, 2010',
                     'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
@@ -153,6 +153,11 @@ __PACKAGE__->setup();
 
 ###################################################
 # load and parse cgi.cfg into $c->config
+if(exists __PACKAGE__->config->{'cgi_cfg'}) {
+    warn("cgi_cfg option is deprecated and has been renamed to cgi.cfg!");
+    __PACKAGE__->config->{'cgi.cfg'} = __PACKAGE__->config->{'cgi_cfg'};
+    delete __PACKAGE__->config->{'cgi_cfg'};
+}
 unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log)) {
     die("\n\n*****\nfailed to load cgi config\n*****\n\n");
 }
