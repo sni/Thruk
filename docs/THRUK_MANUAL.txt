@@ -832,7 +832,7 @@ Generate ssl key for the remote machine:
   %> chmod 600 $FILENAME.key $FILENAME.pem
 ---------------------
 
-Generate ssl key for thruk. Use the same command with a differen FILENAME.
+Generate ssl key for thruk. Use the same command with a different FILENAME.
 ---------------------
   %> FILENAME=thruk-host
 ---------------------
