@@ -50,6 +50,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{host} = 'rootid';
     }
 
+    $self->{'all_nodes'} = {};
+
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output groups parents", { Slice => {}, AddPeer => 1 });
 
     my $json;
@@ -75,6 +77,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     else {
         confess("unknown groupby option: ".$c->stash->{groupby});
+    }
+
+    # does our root id exist?
+    if(!defined $self->{'all_nodes'}->{$c->stash->{host}}) {
+        $c->stash->{host} = 'rootid';
     }
 
 #print "HTTP/1.0 200 OK\n\n<pre>";
@@ -123,6 +130,7 @@ sub _get_json_for_hosts {
             confess('not a hash ref: '.Dumper($dat)."\n".Dumper(\@caller));
         }
         if(exists $dat->{'id'}) {
+            $self->{'all_nodes'}->{$dat->{'id'}} = 1;
             push @{$children}, $dat;
             $sum_hosts         += $dat->{'data'}->{'$area'};
             $state_up          += $dat->{'data'}->{'state_up'};
@@ -155,6 +163,7 @@ sub _get_json_for_hosts {
                               },
                 'children' => $childs,
             };
+            $self->{'all_nodes'}->{'sub_node_'.$level.'_'.$key} = 1;
         }
     }
 
@@ -435,6 +444,7 @@ sub _get_json_host {
             'state_pending'     => $state_pending,
         },
     };
+    $self->{'all_nodes'}->{$host->{'name'}} = 1;
 
     return $json_host;
 }

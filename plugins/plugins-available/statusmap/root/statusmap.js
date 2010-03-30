@@ -12,7 +12,7 @@ function makeHTMLFromData(name, data){
   if(data.status != undefined) {
     // real host leaf
     html += '<div class="tip-title">Host: ' + name + '<\/div>'
-  } else {
+  } else if(name) {
     // network leaf
     html += '<div class="tip-title">' + nodename + ': ' + name + '<\/div>'
   }
@@ -174,9 +174,54 @@ function show_tree_map(id_to_show) {
 
 
 /* create and show a circle map */
+var a;
 function show_circle_map(id_to_show, w, h) {
     // distance between circles
     var levelDistance = 100;
+
+    //RGraph.Plot.NodeTypes.implement({
+    //  //This node type is used for plotting the pie charts
+    //  'nodepie': function(node, canvas) {
+    //    //Create new canvas instances.
+    //    w = node.data.$dim*2;
+    //    h = node.data.$dim*2;
+    //    w = 100;
+    //    h = 100;
+    //    //var newCanvas            = document.createElement('canvas');
+    //    //newCanvas.id             = "canvas_" + node.id;
+    //    //newCanvas.style.width    = w + 'px';
+    //    //newCanvas.style.height   = h + 'px';
+    //    //newCanvas.style.left     = w*2 + 'px';
+    //    //newCanvas.style.top      = h*2 + 'px';
+    //    //newCanvas.style.position = 'relative';
+    //    //newCanvas.style.zIndex   = 5000000;
+    //    //document.getElementById('infovis').appendChild(newCanvas);
+    //    //var canvas = new Canvas('piecanvas'+newCanvas.id, {
+    //    //    //'injectInto': newCanvas.id,
+    //    //    'injectInto': 'infovis',
+    //    //    'width':  w,
+    //    //    'height': h
+    //    //});
+    //
+    //    var span = node.angleSpan, begin = span.begin, end = span.end;
+    //    var polarNode = node.pos.getp(true);
+    //    var polar = new Polar(polarNode.rho, begin);
+    //    var p1coord = polar.getc(true);
+    //    polar.theta = end;
+    //    var p2coord = polar.getc(true);
+    //
+    //    var ctx = canvas.getCtx();
+    //    ctx.beginPath();
+    //    ctx.moveTo(0, 0);
+    //    ctx.lineTo(p1coord.x, p1coord.y);
+    //    ctx.moveTo(0, 0);
+    //    ctx.lineTo(p2coord.x, p2coord.y);
+    //    ctx.moveTo(0, 0);
+    //    ctx.arc(0, 0, polarNode.rho, begin, end, false);
+    //    ctx.fill();
+    //  }
+    //});
+
 
     //Create a new canvas instance.
     var canvas = new Canvas('mycanvas', {
@@ -214,7 +259,7 @@ function show_circle_map(id_to_show, w, h) {
         fps: 40,
 
         Node: { //Set Node and Edge colors.
-            overridable: true,
+            overridable: true
         },
         Edge: {
             color: '#333333'
@@ -231,9 +276,16 @@ function show_circle_map(id_to_show, w, h) {
         //This method is called once, on label creation.
         onCreateLabel: function(domElement, node){
             domElement.innerHTML = node.name;
-            domElement.onclick = function(){
-                rgraph.onClick(node.id);
-            };
+            if(node.data.clickid) {
+                domElement.onclick = function(){
+                    rgraph.onClick(node.data.clickid);
+                };
+            }
+            else {
+                domElement.onclick = function(){
+                    rgraph.onClick(node.id);
+                };
+            }
         },
         //Change some label dom properties.
         //This method is called each time a label is plotted.
@@ -255,20 +307,73 @@ function show_circle_map(id_to_show, w, h) {
                 style.fontSize = '0px';
                 style.height   = '10px';
                 style.width    = '10px';
-                //style.visibility = 'hidden';
             }
-
             domElement.onmouseover = function (e){showTip((e||window.event), node)};
 
-            var left = parseInt(style.left);
-            var w = domElement.offsetWidth;
-            style.left = (left - w / 2) + 'px';
-        },
+            if(node.name == '') {
+                style.fontSize = '0px';
+                style.height   = 2*node.data.$dim + 'px';
+                style.width    = 2*node.data.$dim + 'px';
+
+                var left = parseInt(style.left);
+                var w = domElement.offsetWidth;
+                style.left = (left - w / 2) + 'px';
+
+                var top = parseInt(style.top);
+                var h = domElement.offsetHeight;
+                style.top = (top - h / 2) + 'px';
+            } else {
+                var left = parseInt(style.left);
+                var w = domElement.offsetWidth;
+                style.left = (left - w / 2) + 'px';
+            }
+
+
+        }
     });
 
     //load JSON data
     var tree = eval('(' + json + ')');
     rgraph.loadJSON(tree);
+    rgraph.root = id_to_show;
+    rgraph.compute();
+
+    var nodes = new Hash(rgraph.graph.nodes);
+    nodes.values().each(function(node) {
+        if(node._depth >= 1) {
+            h = new Hash(node.adjacencies);
+            if(h.size() >= 5) {
+                var removed = new Array();
+                h.values().each(function(adj) {
+                    if(adj.nodeTo._depth > node._depth) {
+                        removed.push(adj.nodeTo);
+                        rgraph.graph.removeNode(adj.nodeTo.id);
+                    }
+                    if(adj.nodeFrom._depth > node._depth) {
+                        removed.push(adj.nodeFrom);
+                        rgraph.graph.removeNode(adj.nodeFrom.id);
+                    }
+                });
+                if(removed.size() > 0) {
+                    var newNode = Object({
+                        'id':     node.id + "_sum",
+                        'name':   "",
+                        'data': {
+//                            '$type':            'nodepie',
+                            '$dim':              removed.size()*2,
+                            'clickid':           node.id,
+                            'state_up':          node.data.state_up,
+                            'state_down':        node.data.state_down,
+                            'state_unreachable': node.data.state_unreachable,
+                            'state_pending':     node.data.state_pending
+                        }
+//                        'adjacencies': removed
+                    });
+                    rgraph.graph.addAdjacence(node, newNode, {});
+                }
+            }
+        }
+    });
+
     rgraph.refresh();
-    rgraph.onClick(id_to_show);
 }
