@@ -44,6 +44,25 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # read only user?
     $c->detach('/error/index/11') if $c->check_user_roles('is_authorized_for_read_only');
 
+    # set authorization information
+    if(defined $c->{'request'}->{'parameters'}->{'backend'}) {
+        my $backend = $c->{'request'}->{'parameters'}->{'backend'};
+        my($data);
+        # for comment ids
+        if(defined $c->{'request'}->{'parameters'}->{'com_id'}) {
+            $data = $c->{'live'}->selectall_arrayref("GET comments\nColumns: host_name service_description\nFilter: id = ".$c->{'request'}->{'parameters'}->{'com_id'}, { Slice => 1, Backend => [ $backend ]});
+        }
+        # for downtime ids
+        if(defined $c->{'request'}->{'parameters'}->{'down_id'}) {
+            $data = $c->{'live'}->selectall_arrayref("GET downtimes\nColumns: host_name service_description\nFilter: id = ".$c->{'request'}->{'parameters'}->{'down_id'}, { Slice => 1, Backend => [ $backend ] });
+        }
+        if(defined $data->[0]) {
+            $c->{'request'}->{'parameters'}->{'host'}    = $data->[0]->{'host_name'};
+            $c->{'request'}->{'parameters'}->{'service'} = $data->[0]->{'service_description'};
+        }
+    }
+
+
     my $host_quick_commands = {
         1 => 96, # reschedule host check
         2 => 55, # schedule downtime
