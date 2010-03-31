@@ -26,6 +26,7 @@
             <select name='type'>
               <option value="table"[% IF type == 'table' %] selected[% END %]>Table Layout</option>
               <option value="circle"[% IF type == 'circle' %] selected[% END %]>Circular Layout</option>
+              <option value="hyper"[% IF type == 'hyper' %] selected[% END %]>Hyper Layout</option>
             </select>
           </td>
           <td align="left" class='optBoxItem'>
@@ -101,6 +102,11 @@ function init(){
 
     // init circle map
     show_circle_map(id_to_show, w, h);
+
+[% ELSIF type == 'hyper' %]
+
+    // init hyper tree
+    show_hypertree_map(id_to_show, w, h);
 
 [% END %]
 

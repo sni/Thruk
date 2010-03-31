@@ -153,10 +153,10 @@ function show_tree_map(id_to_show) {
           head.onmouseover = function (e){showTip((e||window.event), node)};
         },
         request: function(nodeId, level, onComplete){
-            var tree    = eval('(' + json + ')');
-            var subtree = TreeUtil.getSubtree(tree, nodeId);
-            TreeUtil.prune(subtree, tm.config.levelsToShow);
-            onComplete.onComplete(nodeId, subtree);
+            //var tree    = eval('(' + json + ')');
+            //var subtree = TreeUtil.getSubtree(tree, nodeId);
+            //TreeUtil.prune(subtree, tm.config.levelsToShow);
+            //onComplete.onComplete(nodeId, subtree);
 
             // reset page refresh
             setRefreshRate(refresh_rate);
@@ -174,54 +174,9 @@ function show_tree_map(id_to_show) {
 
 
 /* create and show a circle map */
-var a;
 function show_circle_map(id_to_show, w, h) {
     // distance between circles
     var levelDistance = 100;
-
-    //RGraph.Plot.NodeTypes.implement({
-    //  //This node type is used for plotting the pie charts
-    //  'nodepie': function(node, canvas) {
-    //    //Create new canvas instances.
-    //    w = node.data.$dim*2;
-    //    h = node.data.$dim*2;
-    //    w = 100;
-    //    h = 100;
-    //    //var newCanvas            = document.createElement('canvas');
-    //    //newCanvas.id             = "canvas_" + node.id;
-    //    //newCanvas.style.width    = w + 'px';
-    //    //newCanvas.style.height   = h + 'px';
-    //    //newCanvas.style.left     = w*2 + 'px';
-    //    //newCanvas.style.top      = h*2 + 'px';
-    //    //newCanvas.style.position = 'relative';
-    //    //newCanvas.style.zIndex   = 5000000;
-    //    //document.getElementById('infovis').appendChild(newCanvas);
-    //    //var canvas = new Canvas('piecanvas'+newCanvas.id, {
-    //    //    //'injectInto': newCanvas.id,
-    //    //    'injectInto': 'infovis',
-    //    //    'width':  w,
-    //    //    'height': h
-    //    //});
-    //
-    //    var span = node.angleSpan, begin = span.begin, end = span.end;
-    //    var polarNode = node.pos.getp(true);
-    //    var polar = new Polar(polarNode.rho, begin);
-    //    var p1coord = polar.getc(true);
-    //    polar.theta = end;
-    //    var p2coord = polar.getc(true);
-    //
-    //    var ctx = canvas.getCtx();
-    //    ctx.beginPath();
-    //    ctx.moveTo(0, 0);
-    //    ctx.lineTo(p1coord.x, p1coord.y);
-    //    ctx.moveTo(0, 0);
-    //    ctx.lineTo(p2coord.x, p2coord.y);
-    //    ctx.moveTo(0, 0);
-    //    ctx.arc(0, 0, polarNode.rho, begin, end, false);
-    //    ctx.fill();
-    //  }
-    //});
-
 
     //Create a new canvas instance.
     var canvas = new Canvas('mycanvas', {
@@ -322,6 +277,36 @@ function show_circle_map(id_to_show, w, h) {
                 var top = parseInt(style.top);
                 var h = domElement.offsetHeight;
                 style.top = (top - h / 2) + 'px';
+
+
+                //Create new canvas instances.
+                var newCanvas            = document.createElement('div');
+                newCanvas.id             = "canvas_" + node.id;
+                newCanvas.style.position = 'absolute';
+                newCanvas.style.left     = style.left;
+                newCanvas.style.top      = style.top;
+                newCanvas.style.width    = style.width;
+                newCanvas.style.height   = style.height;
+                document.getElementById('infovis').appendChild(newCanvas);
+                var child_canvas = new Canvas('piecanvas'+newCanvas.id, {
+                    'injectInto': newCanvas.id,
+                    'width':  2*node.data.$dim,
+                    'height': 2*node.data.$dim
+                });
+                var child_json = node.data.children.sortBy(function(c) {
+                  return c.data.status;
+                });
+
+                var newRootNode = Object({
+                  'id': node.id + "_sum_root",
+                  'name':   "",
+                  'data': {},
+                  'adjacencies': []
+                });
+                child_json.each(function(n) { n.adjacencies = new Array(node.id + "_sum_root"); });
+                child_json.unshift(newRootNode);
+                insert_pie_graph_into_canvas(child_json, child_canvas);
+
             } else {
                 var left = parseInt(style.left);
                 var w = domElement.offsetWidth;
@@ -355,19 +340,19 @@ function show_circle_map(id_to_show, w, h) {
                     }
                 });
                 if(removed.size() > 0) {
+                  var dim = Math.sqrt(removed.size() * Math.pow(rgraph.config.Node.dim, 2));
                     var newNode = Object({
                         'id':     node.id + "_sum",
                         'name':   "",
                         'data': {
-//                            '$type':            'nodepie',
-                            '$dim':              removed.size()*2,
+                            '$dim':              dim,
                             'clickid':           node.id,
                             'state_up':          node.data.state_up,
                             'state_down':        node.data.state_down,
                             'state_unreachable': node.data.state_unreachable,
-                            'state_pending':     node.data.state_pending
+                            'state_pending':     node.data.state_pending,
+                            'children':          removed,
                         }
-//                        'adjacencies': removed
                     });
                     rgraph.graph.addAdjacence(node, newNode, {});
                 }
@@ -376,4 +361,123 @@ function show_circle_map(id_to_show, w, h) {
     });
 
     rgraph.refresh();
+}
+
+
+
+
+/* create and show a pie graph map */
+function insert_pie_graph_into_canvas(json, canvas) {
+    // distance between circles
+    var size = canvas.getSize();
+    var levelDistance = size.width/2;
+    RGraph.Plot.NodeTypes.implement({
+      //This node type is used for plotting the pie charts
+      'nodepie': function(node, canvas) {
+        var span = node.angleSpan, begin = span.begin, end = span.end;
+        var polarNode = node.pos.getp(true);
+        var polar = new Polar(polarNode.rho, begin);
+        var p1coord = polar.getc(true);
+        polar.theta = end;
+        var p2coord = polar.getc(true);
+
+        var ctx = canvas.getCtx();
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(p1coord.x, p1coord.y);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(p2coord.x, p2coord.y);
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, polarNode.rho, begin, end, false);
+        ctx.fill();
+      }
+    });
+
+    var rgraph = new RGraph(canvas, {
+        levelDistance: levelDistance,
+        duration: 700,
+        fps: 40,
+
+        Node: { //Set Node and Edge colors.
+            overridable: true,
+            type: 'nodepie'
+        },
+        Edge: {
+            color: '#333333',
+            type: 'none'
+        }
+    });
+
+    //load JSON data
+    rgraph.loadJSON(json);
+    rgraph.refresh();
+}
+
+
+
+
+/* create and show a hypertree map */
+function show_hypertree_map(id_to_show, w, h) {
+  levelDistance = 100;
+
+    //Create a new canvas instance.
+    var canvas = new Canvas('mycanvas', {
+        //Where to append the canvas widget
+        'injectInto': 'infovis',
+        'width':  w,
+        'height': h,
+
+        //Optional: create a background canvas and plot
+        //concentric circles in it.
+        'backgroundCanvas': {
+            'styles': {
+                'strokeStyle': '#CCCCCC'
+            },
+
+            'impl': {
+                'init': function(){},
+                'plot': function(canvas, ctx){
+                    var times = 6, d = levelDistance;
+                    var pi2 = Math.PI * 2;
+                    for (var i = 1; i <= times; i++) {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, i * d, 0, pi2, true);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+    });
+
+
+  var ht = new Hypertree(canvas, {
+    Node: {
+      overridable: false,
+      type: 'circle',
+      color: '#ccb',
+      lineWidth: 1,
+      height: 5,
+      width: 5,
+      dim: 7,
+      transform: true
+    },
+    Edge: {
+      overridable: false,
+      type: 'hyperline',
+      color: '#ccb',
+      lineWidth: 1
+    },
+    duration: 1500,
+    fps: 40,
+    transition: Trans.Quart.easeInOut,
+    clearCanvas: true,
+    withLabels: true,
+  });
+
+    var tree = eval('(' + json + ')');
+    ht.loadJSON(tree);
+    ht.root = id_to_show;
+    ht.compute();
+    ht.refresh();
 }
