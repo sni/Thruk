@@ -14,11 +14,11 @@ BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
 #########################
 sub get_test_servicegroup {
-    my $request = request('/thruk/cgi-bin/config.cgi?type=servicegroups');
+    my $request = request('/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview');
     ok( $request->is_success, 'get_test_servicegroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
-    if($page =~ m/<td class='dataEven'><a id="(.*?)"><\/a>[^<]+<\/td>/) {
+    if($page =~ m/extinfo\.cgi\?type=8&amp;servicegroup=(.*?)'>(.*?)<\/a>/) {
         $group = $1;
     }
     isnt($group, undef, "got a servicegroup from config.cgi") or BAIL_OUT('got no test servicegroup, cannot test');
@@ -27,12 +27,14 @@ sub get_test_servicegroup {
 
 #########################
 sub get_test_hostgroup {
-    my $request = request('/thruk/cgi-bin/config.cgi?type=hostgroups');
+    my $request = request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=overview');
     ok( $request->is_success, 'get_test_hostgroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
-    if($page =~ m/<td class='dataEven'><a id="(.*?)"><\/a>([^<]+)<\/td>/) {
+    if($page =~ m/'extinfo\.cgi\?type=5&amp;hostgroup=(.*?)'>(.*?)<\/a>/) {
         $group = $1;
+    } else {
+        print Dumper($page);
     }
     isnt($group, undef, "got a hostgroup from config.cgi") or BAIL_OUT('got no test hostgroup, cannot test');
     return($group);
@@ -40,7 +42,7 @@ sub get_test_hostgroup {
 
 #########################
 sub get_test_user {
-    my $request = request('/thruk/cgi-bin/config.cgi');
+    my $request = request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
     ok( $request->is_success, 'get_test_user() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $user;
