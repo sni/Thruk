@@ -232,6 +232,21 @@ sub filter_sprintf {
 
 ##############################################
 
+=head2 throw
+
+  throw($string)
+
+can be used to die in templates
+
+=cut
+sub throw {
+    my $string = shift;
+    die($string);
+}
+
+
+##############################################
+
 =head2 parse_date
 
   my $timestamp = parse_date($c, $string)
@@ -1242,8 +1257,13 @@ sub set_can_submit_commands {
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias);
     eval {
-        my $data = $c->{'live'}->selectrow_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Sum => 1 });
-        ($can_submit_commands,$alias) = @{$data} if defined $data;
+        my $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Slice => 1 });
+        if(defined $data) {
+            for my $dat (@{$data}) {
+                $alias               = $dat->{'alias'}               if defined $dat->{'alias'};
+                $can_submit_commands = $dat->{'can_submit_commands'} if defined $dat->{'can_submit_commands'};
+            }
+        }
     };
     if($@) {
         $c->log->error("livestatus error: $@");

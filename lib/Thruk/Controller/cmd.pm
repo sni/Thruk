@@ -273,15 +273,17 @@ sub _do_send_command {
 
     my $tt  = Template->new($c->{'View::TT'});
     my $cmd = '';
-    $tt->process( 'cmd/cmd_typ_'.$cmd_typ.'.tt', { c => $c, cmd_tt => 'cmd_line.tt' }, \$cmd ) || die $tt->error();
-    $cmd =~ s/^\s+//gmx;
-    $cmd =~ s/\s+$//gmx;
+    eval {
+        $tt->process( 'cmd/cmd_typ_'.$cmd_typ.'.tt', { c => $c, cmd_tt => 'cmd_line.tt', die_on_errors => 1 }, \$cmd ) || die $tt->error();
+        $cmd =~ s/^\s+//gmx;
+        $cmd =~ s/\s+$//gmx;
+    };
 
     # unknown command given?
     $c->detach('/error/index/7') unless defined $cmd;
 
     # unauthorized?
-    $c->detach('/error/index/8') unless $cmd ne '';
+    $c->detach('/error/index/10') unless $cmd ne '';
 
     # check for required fields
     my($form,@errors);
