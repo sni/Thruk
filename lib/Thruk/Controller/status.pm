@@ -145,6 +145,8 @@ sub _process_raw_request {
     if(defined $limit and scalar @{$hosts} > $limit) { @{$hosts} = @{$hosts}[0..$limit]; }
     $c->stash->{'json'} = $hosts;
     $c->forward('Thruk::View::JSON');
+
+    return 1;
 }
 
 

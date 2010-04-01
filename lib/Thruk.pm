@@ -7,6 +7,7 @@ use warnings;
 use Carp;
 use Catalyst::Log::Log4perl;
 use Thruk::Utils;
+use Thruk::Utils::Livestatus;
 use Catalyst::Runtime '5.70';
 
 ###################################################
@@ -173,6 +174,7 @@ if($@) {
     croak('cannot start');
 }
 
+###################################################
 
 =head1 NAME
 
