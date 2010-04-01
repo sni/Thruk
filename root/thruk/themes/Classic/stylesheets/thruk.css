@@ -456,6 +456,10 @@ table.filter > tbody > tr > td {
   text-align: center;
 }
 
+.dataVal {
+  white-space: nowrap;
+}
+
 /* Search result suggestions */
 #search-results {
   position: absolute;
