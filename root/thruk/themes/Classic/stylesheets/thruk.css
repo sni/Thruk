@@ -455,3 +455,35 @@ table.filter > tbody > tr > td {
   font-size: smaller;
   text-align: center;
 }
+
+/* Search result suggestions */
+#search-results {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 150px;
+  border: 1px solid #484256;
+  background-color:white;
+  font-size:8pt;
+  font-family: arial,serif;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#search-results ul{
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+#search-results a{
+  display: block;
+  padding: 0px;
+  text-decoration: none;
+  color:black;
+}
+
+#search-results a.ajax_search_selected, #search-results a:hover {
+  background-color:#88BBD8;
+  cursor: pointer;
+}

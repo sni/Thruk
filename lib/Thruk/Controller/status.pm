@@ -52,8 +52,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $style = $self->_process_search_request($c);
     }
 
+    # raw data request?
+    $c->stash->{'output_format'} = $c->{'request'}->{'parameters'}->{'format'} || 'html';
+    if($c->stash->{'output_format'} ne 'html') {
+        $self->_process_raw_request($c);
+        return 1;
+    }
     # normal pages
-    if($style eq 'detail') {
+    elsif($style eq 'detail') {
         $self->_process_details_page($c);
     }
     elsif($style eq 'hostdetail') {
@@ -89,6 +95,58 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     return 1;
 }
+
+
+##########################################################
+# check for search results
+sub _process_raw_request {
+    my ( $self, $c ) = @_;
+
+    # which host to display?
+    my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
+    return if defined $c->stash->{'has_error'};
+
+    my($limit,$limitstr) = (undef,'');
+    if(defined $c->{'request'}->{'parameters'}->{'limit'}) {
+        $limitstr = "Limit: ".$c->{'request'}->{'parameters'}->{'limit'}."\n";
+        $limit    = $c->{'request'}->{'parameters'}->{'limit'};
+    }
+
+    my @columns = qw/comments
+                     has_been_checked
+                     state
+                     name
+                     address
+                     acknowledged
+                     notifications_enabled
+                     active_checks_enabled
+                     is_flapping
+                     scheduled_downtime_depth
+                     is_executing
+                     notes_url_expanded
+                     action_url_expanded
+                     icon_image_expanded
+                     icon_image_alt
+                     last_check
+                     last_state_change
+                     plugin_output
+                     next_check
+                     long_plugin_output/;
+    if(defined $c->{'request'}->{'parameters'}->{'column'}) {
+        if(ref $c->{'request'}->{'parameters'}->{'column'} eq 'ARRAY') {
+            @columns = @{$c->{'request'}->{'parameters'}->{'column'}};
+        }
+        else {
+            @columns = ( $c->{'request'}->{'parameters'}->{'column'} );
+        }
+    }
+
+    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".$limitstr.Thruk::Utils::get_auth_filter($c, 'hosts')."\n$hostfilter\nColumns: ".join(' ', @columns), { Slice => {} });
+    if(defined $limit and scalar @{$hosts} > $limit) { @{$hosts} = @{$hosts}[0..$limit]; }
+    $c->stash->{'json'} = $hosts;
+    $c->forward('Thruk::View::JSON');
+}
+
 
 ##########################################################
 # check for search results
@@ -246,9 +304,9 @@ sub _process_hostdetails_page {
 
     Thruk::Utils::page_data($c, $sortedhosts);
 
-    $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
-    $c->stash->{'orderdir'}      = $order;
-    $c->stash->{'style'}         = 'hostdetail';
+    $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'orderdir'} = $order;
+    $c->stash->{'style'}    = 'hostdetail';
 
     return 1;
 }

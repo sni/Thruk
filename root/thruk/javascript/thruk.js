@@ -67,7 +67,7 @@ function toggleElement(id) {
   var pane = document.getElementById(id);
   if(!pane) {
     alert("ERROR: got no panel for id in toggleElement(): " + id);
-    return;
+    return false;
   }
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
     showElement(id);
@@ -254,6 +254,21 @@ function is_shift_pressed(e) {
   return false;
 }
 
+/* return coordinates for given element */
+function get_coordinates(element) {
+    var offsetLeft = 0;
+    var offsetTop = 0;
+    while(element.offsetParent){
+        offsetLeft += element.offsetLeft;
+        offsetTop += element.offsetTop;
+        if(element.scrollTop > 0){
+            offsetTop -= element.scrollTop;
+        }
+        element = element.offsetParent;
+    }
+    return [offsetLeft, offsetTop];
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -314,14 +329,14 @@ function addEventHandler(elem, type) {
 function getFirstParentId(elem) {
     if(!elem) {
         alert("ERROR: got no element in getFirstParentId()");
-        return;
+        return false;
     }
     nr = 0;
     while(nr < 10 && !elem.id) {
         nr++;
         if(!elem.parentNode) {
             //alert("ERROR: element has no parentNode in getFirstParentId(): " + elem);
-            return;
+            return false;
         }
         elem = elem.parentNode;
     }
@@ -376,14 +391,14 @@ function styleElementsIE(elems, style, force) {
     for(var x = 0; x < elems.length; x++) {
         if(style == 'original') {
             // reset style to original
-            if(elems[x].className != "tableRowSelected" || force) {
+            if(elems[x].className != "tableRowSelected" || force) {
                 elems[x].className = elems[x].origclass;
             }
         }
         else {
-            if(elems[x].className != "tableRowSelected" || force) {
+            if(elems[x].className != "tableRowSelected" || force) {
                 // save style in custom attribute
-                if(elems[x].className != "undefined" && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
+                if(elems[x].className != "undefined" && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
                     //var oldClass = '';
                     //if(elems[x].className) { oldClass = elems[x].className; }
                     //elems[x].setAttribute('origclass', oldClass);
@@ -402,12 +417,12 @@ function styleElementsFF(elems, style, force) {
     for(var x = 0; x < elems.length; x++) {
         if(style == 'original') {
             // reset style to original
-            if(elems[x].hasAttribute('origClass') && (elems[x].className == "tableRowHover" || force)) {
+            if(elems[x].hasAttribute('origClass') && (elems[x].className == "tableRowHover" || force)) {
                 elems[x].className = elems[x].origClass;
             }
         }
         else {
-            if(elems[x].className != "tableRowSelected" || force) {
+            if(elems[x].className != "tableRowSelected" || force) {
                 // save style in custom attribute
                 if(!elems[x].hasAttribute('origClass')) {
                     elems[x].setAttribute('origClass', elems[x].className);
@@ -774,6 +789,8 @@ function collectFormData() {
     });
     host_form = document.getElementById('selected_hosts');
     host_form.value = hosts.join(',');
+
+    return(true);
 }
 
 /* show/hide options for commands based on the selected command*/
@@ -863,7 +880,7 @@ function toggleFilterPaneSelector(search_prefix, id) {
   var input_name;
   var checkbox_prefix;
 
-  var search_prefix = search_prefix.substring(0, 3);
+  search_prefix = search_prefix.substring(0, 3);
 
   if(id == "hoststatustypes") {
     panel           = 'hoststatustypes_pane';
@@ -1016,7 +1033,7 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
 /* add a new filter selector to this table */
 function add_new_filter(search_prefix, table) {
   search_prefix = search_prefix.substring(0,3);
-  var table = document.getElementById(search_prefix+table);
+  table = document.getElementById(search_prefix+table);
   if(!table) { alert("ERROR: got no table for id in add_new_filter(): " + search_prefix+table); return; }
 
   // add new row
@@ -1168,7 +1185,8 @@ function deleteSearchPane(id) {
 
   var pane = document.getElementById(search_prefix + 'filter_pane');
   var cell = pane.parentNode;
-  while(child = cell.firstChild) {
+  while(cell.firstChild) {
+      child = cell.firstChild;
       cell.removeChild(child);
   }
 
@@ -1185,7 +1203,7 @@ function deleteSearchPane(id) {
 
 /* toogle checkbox for attribute filter */
 function toggleFilterCheckBox(id) {
-  var id  = id.substring(0, id.length -1);
+  id  = id.substring(0, id.length -1);
   var box = document.getElementById(id);
   if(box.checked) {
     box.checked = false;
@@ -1319,4 +1337,209 @@ function show_cal(id) {
   });
   cal.selection.set(Calendar.dateToInt(dateObj));
   cal.popup(id);
+}
+
+/*******************************************************************************
+ ad88888ba  88888888888        db        88888888ba    ,ad8888ba,  88        88
+d8"     "8b 88                d88b       88      "8b  d8"'    `"8b 88        88
+Y8,         88               d8'`8b      88      ,8P d8'           88        88
+`Y8aaaaa,   88aaaaa         d8'  `8b     88aaaaaa8P' 88            88aaaaaaaa88
+  `"""""8b, 88"""""        d8YaaaaY8b    88""""88'   88            88""""""""88
+        `8b 88            d8""""""""8b   88    `8b   Y8,           88        88
+Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
+ "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
+*******************************************************************************/
+var ajax_search_url         = '/thruk/cgi-bin/status.cgi?format=json;column=name;column=alias;hostgroup=all';
+var ajax_search_max_results = 9;
+var ajax_search_input_field = 'NavBarSearchItem';
+var ajax_search_result_pan  = 'search-results';
+
+var ajax_search_hosts       = new Array();
+var ajax_search_initialized = false;
+var ajax_search_cur_select  = -1;
+var ajax_search_cur_results;
+var ajax_search_cur_pattern;
+
+/* initialize search */
+function ajax_search_init() {
+    var date = new Date;
+    var now = parseInt(date.getTime() / 1000);
+
+    // update every hour (frames searches wont update otherwise)
+    if(ajax_search_initialized && now < ajax_search_initialized - 3600) {
+        ajax_search_suggest();
+        return false;
+    }
+    new Ajax.Request(ajax_search_url, {
+        onSuccess: function(transport) {
+            ajax_search_initialized = now;
+            ajax_search_hosts = transport.responseJSON.sortBy(function(s) {
+                return s.name;
+            });
+            ajax_search_suggest();
+        }
+    });
+
+    document.onkeypress = ajax_search_arrow_keys;
+    document.onclick    = ajax_search_hide_results;
+
+    return false;
+}
+
+/* hide the search results */
+function ajax_search_hide_results(event) {
+    if(event && event.target) {
+    }
+    else {
+        event  = this;
+    }
+    try {
+        // dont hide search result if clicked on the input field
+        if(event.target.tagName == 'INPUT') { return; }
+    }
+    catch(e) {
+        // doesnt matter
+    }
+
+    var panel = document.getElementById(ajax_search_result_pan);
+    if(!panel) { return; }
+    hideElement(panel);
+}
+
+/* search some hosts to suggest */
+function ajax_search_suggest() {
+    var input;
+    var input = document.getElementById(ajax_search_input_field);
+    if(!input) { return; }
+    if(ajax_search_hosts.size() == 0) { return; }
+
+    pattern = input.value;
+    if(pattern.length >= 1) {
+        var results = new Array();
+        ajax_search_hosts.each(function(host) {
+            if(host.name.indexOf(pattern) != -1) {
+                host.relevance = 1;
+                if(host.name.indexOf(pattern) == 0) { // perfect match, starts with pattern
+                    host.relevance = 100;
+                }
+                host.display = host.name;
+                results.push(host);
+            }
+            else if(host.alias.indexOf(pattern) != -1) {
+                host.relevance = 1;
+                if(host.alias.indexOf(pattern) == 0) { // perfect match, starts with pattern
+                    host.relevance = 100;
+                }
+                host.display = host.alias;
+                results.push(host);
+            }
+        });
+        ajax_search_cur_results = results;
+        ajax_search_cur_pattern = pattern;
+        ajax_search_show_results(results, pattern, ajax_search_cur_select);
+    }
+    else {
+        ajax_search_hide_results();
+    }
+}
+
+/* present the results */
+function ajax_search_show_results(results, pattern, selected) {
+    var panel = document.getElementById(ajax_search_result_pan);
+    var input = document.getElementById(ajax_search_input_field);
+    if(!panel) { return; }
+
+    var hosts = results.sortBy(function(s) {
+        return -1 * s.relevance;
+    });
+
+    size = hosts.size();
+
+    if(size == 1 && hosts[0].name == input.value) {
+        return;
+    }
+
+    if(size >= ajax_search_max_results) {
+        hosts = hosts.splice(0,ajax_search_max_results);
+        hosts.push(Object({'display': (size-ajax_search_max_results) + ' more...'}));
+    }
+
+    var resultHTML = '<ul>';
+    var x = 0;
+    hosts.each(function(host) {
+        var name = host.display.replace(pattern, "<b>" + pattern + "<\/b>");
+        var classname = "item";
+        if(selected != -1 && selected == x) {
+            classname = "item ajax_search_selected";
+        }
+        resultHTML += '<li><a href="" class="' + classname + '" onclick="return ajax_search_set(\'' + host.display +'\')">' + name +'</a></li>';
+        x++;
+    });
+    resultHTML += '<\/ul>';
+    if(results.size() == 0) {
+        resultHTML += '<a href="#">no hosts found</a>';
+    }
+
+    panel.innerHTML = resultHTML;
+
+    var style = panel.style;
+    var coords    = get_coordinates(input);
+    style.left    = coords[0] + "px";
+    style.top     = coords[1] + input.offsetHeight + "px";
+    style.display = "block";
+
+    showElement(panel);
+}
+
+/* set the value into the input field */
+function ajax_search_set(value) {
+    var input = document.getElementById(ajax_search_input_field);
+    input.value = value;
+    ajax_search_cur_select = -1;
+    ajax_search_hide_results();
+    input.focus();
+    return false;
+}
+
+/* eventhandler for arrow keys */
+function ajax_search_arrow_keys(evt) {
+    evt              = (evt) ? evt : ((window.event) ? event : null);
+    if(!evt) { return false; }
+    var panel        = document.getElementById(ajax_search_result_pan);
+    var focus        = false;
+    var keyCode      = evt.keyCode;
+    var navigateUp   = keyCode == 38;
+    var navigateDown = keyCode == 40;
+    if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)){
+        if(ajax_search_cur_select == -1) { ajax_search_cur_select = 0; }
+        else if(navigateDown) {
+            ajax_search_cur_select++;
+            if(ajax_search_cur_select >= ajax_search_cur_results.size() -1) {
+                ajax_search_cur_select = ajax_search_cur_results.size() - 1;
+            }
+            if(ajax_search_cur_select >= ajax_search_max_results) {
+                ajax_search_cur_select = ajax_search_max_results;
+            }
+            focus = true;
+        }
+        else if(navigateUp) {
+            ajax_search_cur_select--;
+            if(ajax_search_cur_select < 0) {
+                ajax_search_cur_select = -1;
+                var input = document.getElementById(ajax_search_input_field);
+                input.focus();
+            }
+            else {
+                focus = true;
+            }
+        }
+        ajax_search_show_results(ajax_search_cur_results, ajax_search_cur_pattern, ajax_search_cur_select);
+        if(focus) {
+            var el = document.getElementsByClassName('ajax_search_selected');
+            if(el[0]) {
+                el[0].focus();
+            }
+        }
+    }
+    return true;
 }

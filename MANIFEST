@@ -59,6 +59,7 @@ lib/Thruk/Controller/trends.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/GD.pm
+lib/Thruk/View/JSON.pm
 lib/Thruk/View/TT.pm
 Makefile.PL
 MANIFEST			This list of files
@@ -69,6 +70,8 @@ root/robots.txt
 root/thruk/documentation.html
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
+root/thruk/javascript/.ajaxSuggestions.js.swp
+root/thruk/javascript/ajaxSuggestions.js
 root/thruk/javascript/cal/img/cool-bg-hard-inv.png
 root/thruk/javascript/cal/img/cool-bg-hard.png
 root/thruk/javascript/cal/img/cool-bg-inv.png

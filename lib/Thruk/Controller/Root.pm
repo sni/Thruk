@@ -96,6 +96,8 @@ sub begin : Private {
         $all_problems_link = "/thruk/cgi-bin/status.cgi?style=detail&amp;hidesearch=1&amp;s0_hoststatustypes=12&amp;s0_servicestatustypes=31&amp;s0_hostprops=10&amp;s0_serviceprops=0&amp;s1_hoststatustypes=15&amp;s1_servicestatustypes=28&amp;s1_hostprops=10&amp;s1_serviceprops=10&amp;s1_hostprop=2&amp;s1_hostprop=8&amp;title=All%20Unhandled%20Problems";
     }
     $c->stash->{'all_problems_link'} = $all_problems_link;
+    
+    $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
 
     return 1;
 }

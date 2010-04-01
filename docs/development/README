@@ -49,3 +49,10 @@ Setup Package Build Environment
 5.  install with local::lib like described in the users guide
 6.  %> ./script/thruk_create_package.pl
 ----
+
+Create Tags For Javascript File
+-------------------------------
+just use figlet for that:
+----
+  %> figlet -w 900 -f univers SEARCH
+----

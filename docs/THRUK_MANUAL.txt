@@ -5,7 +5,7 @@ Thruk Users Guide
 
 Thruk is an multibackend monitoring web interface which currently
 supports Nagios and Icinga using the Livestatus NEB module. It is
-designed to be a “drop-in” replacement and targets covering 100% of
+designed to be a "drop-in" replacement and targets covering 100% of
 the original features plus additional enhancements for large
 installations.
 
@@ -477,6 +477,15 @@ example: plugin_output, groups, names, descriptions
 ex.:
 
   use_new_search = 1
+
+
+==== use_ajax_search
+
+Enables the ajax search field. Suggests hostnames after typing.
+
+ex.:
+
+  use_ajax_search = 1
 
 
 ==== default_theme

@@ -75,7 +75,9 @@ __PACKAGE__->config('name'                   => 'Thruk',
                     },
                     'View::GD'               => {
                         gd_image_type      => 'png',
-
+                    },
+                    'View::JSON'               => {
+                        expose_stash       => 'json',
                     },
                     'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
                     'Plugin::Authentication' => {
