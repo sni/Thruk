@@ -41,7 +41,7 @@ our $VERSION = '0.54';
 my $project_root = __PACKAGE__->config->{home};
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'April 1, 2010',
+                    'released'               => 'April 2, 2010',
                     'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
@@ -79,6 +79,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                     },
                     'View::JSON'               => {
                         expose_stash       => 'json',
+                        json_driver        => 'XS',
                     },
                     'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
                     'Plugin::Authentication' => {
