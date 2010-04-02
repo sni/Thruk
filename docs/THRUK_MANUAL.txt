@@ -481,11 +481,50 @@ ex.:
 
 ==== use_ajax_search
 
-Enables the ajax search field. Suggests hostnames after typing.
+Enables the ajax search field. There will be suggestions while typing
+into the search field.
 
 ex.:
 
   use_ajax_search = 1
+
+
+==== ajax_search_hosts
+
+Enables the suggestion of hosts in the ajax search field.
+Depending on the number of hosts, this can make the search slow.
+
+ex.:
+
+  ajax_search_hosts = 1
+
+
+==== ajax_search_hostgroups
+
+Enables the suggestion of hostgroups in the ajax search field.
+
+ex.:
+
+  ajax_search_hostgroups = 1
+
+
+==== ajax_search_services
+
+Enables the suggestion of services in the ajax search field.
+Depending on the number of services, this can make the search slow.
+
+ex.:
+
+  ajax_search_services = 1
+
+
+==== ajax_search_servicegroups
+
+Enables the suggestion of servicegroups in the ajax search field.
+
+ex.:
+
+  ajax_search_servicegroups = 1
 
 
 ==== default_theme

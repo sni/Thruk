@@ -1361,6 +1361,7 @@ var ajax_search_cur_select      = -1;
 var ajax_search_result_size     = false;
 var ajax_search_cur_results;
 var ajax_search_cur_pattern;
+var ajax_search_timer;
 
 /* initialize search */
 function ajax_search_init() {
@@ -1409,8 +1410,14 @@ function ajax_search_hide_results(event) {
     hideElement(panel);
 }
 
-/* search some hosts to suggest */
+/* wrapper around ajax_search_suggest to avoid multiple running searches */
 function ajax_search_suggest() {
+    window.clearTimeout(ajax_search_timer);
+    ajax_search_timer = window.setTimeout(ajax_search_suggest_do, 100);
+}
+
+/* search some hosts to suggest */
+function ajax_search_suggest_do() {
     var input;
     var input = document.getElementById(ajax_search_input_field);
     if(!input) { return; }
@@ -1418,20 +1425,40 @@ function ajax_search_suggest() {
 
     pattern = input.value;
     if(pattern.length >= 1) {
+
+        // remove empty strings from pattern array
+        pattern = pattern.split(" ");
+        var trimmed_pattern = new Array();
+        pattern.each(function(sub_pattern) {
+            if(sub_pattern != '') {
+                trimmed_pattern.push(sub_pattern);
+            }
+        });
+        pattern = trimmed_pattern;
+
         var results = new Array();
         ajax_search_base.each(function(search_type) {
             var sub_results = new Array();
             var top_hits = 0;
             search_type.data.each(function(data) {
-                result_obj = new Object({ 'name': data });
-                if(data.indexOf(pattern) != -1) {
-                    result_obj.relevance = 1;
-                    if(data.indexOf(pattern) == 0) { // perfect match, starts with pattern
-                        result_obj.relevance = 100;
-                        top_hits++;
+                result_obj = new Object({ 'name': data, 'relevance': 0 });
+                var found = 0;
+                pattern.each(function(sub_pattern) {
+                    var index = data.indexOf(sub_pattern);
+                    if(index != -1) {
+                        found++;
+                        if(index == 0) { // perfect match, starts with pattern
+                            result_obj.relevance += 100;
+                        } else {
+                            result_obj.relevance += 1;
+                        }
                     }
+                });
+                // only if all pattern were found
+                if(found == pattern.size()) {
                     result_obj.display = data;
                     sub_results.push(result_obj);
+                    if(result_obj.relevance >= 100) { top_hits++; }
                 }
             });
             if(sub_results.size() > 0) {
@@ -1452,6 +1479,10 @@ function ajax_search_suggest() {
 
 /* present the results */
 function ajax_search_show_results(results, pattern, selected) {
+    ajax_search_res = results;
+    ajax_search_pat = pattern;
+    ajax_search_sel = selected;
+
     var panel = document.getElementById(ajax_search_result_pan);
     var input = document.getElementById(ajax_search_input_field);
     if(!panel) { return; }
@@ -1473,7 +1504,10 @@ function ajax_search_show_results(results, pattern, selected) {
         resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
         type.results.each(function(data) {
             if(cur_count <= results_per_type) {
-                var name = data.display.replace(pattern, "<b>" + pattern + "<\/b>");
+                var name = data.display;
+                pattern.each(function(sub_pattern) {
+                    name = name.replace(sub_pattern, "<b>" + sub_pattern + "<\/b>");
+                });
                 var classname = "item";
                 if(selected != -1 && selected == x) {
                     classname = "item ajax_search_selected";
@@ -1515,24 +1549,34 @@ function ajax_search_set(value) {
 function ajax_search_arrow_keys(evt) {
     evt              = (evt) ? evt : ((window.event) ? event : null);
     if(!evt) { return false; }
+    var input        = document.getElementById(ajax_search_input_field);
     var panel        = document.getElementById(ajax_search_result_pan);
     var focus        = false;
     var keyCode      = evt.keyCode;
     var navigateUp   = keyCode == 38;
     var navigateDown = keyCode == 40;
-    if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)){
-        if(ajax_search_cur_select == -1) { ajax_search_cur_select = 0; }
+    if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)) {
+        if(navigateDown && ajax_search_cur_select == -1) {
+            ajax_search_cur_select = 0;
+            focus = true;
+        }
+        else if(navigateUp && ajax_search_cur_select == -1) {
+            ajax_search_cur_select = ajax_search_result_size - 1;
+            focus = true;
+        }
         else if(navigateDown) {
             if(ajax_search_result_size > ajax_search_cur_select + 1) {
                 ajax_search_cur_select++;
+                focus = true;
+            } else {
+                ajax_search_cur_select = -1;
+                input.focus();
             }
-            focus = true;
         }
         else if(navigateUp) {
             ajax_search_cur_select--;
             if(ajax_search_cur_select < 0) {
                 ajax_search_cur_select = -1;
-                var input = document.getElementById(ajax_search_input_field);
                 input.focus();
             }
             else {

@@ -75,10 +75,10 @@
             <input type='hidden' name='hidesearch' value='2' />
             <input type='hidden' name='s0_op' value='~' />
             <input type='hidden' name='s0_type' value='search' />
-            <input type='text' name='s0_value' size='15' class="NavBarSearchItem" id="NavBarSearchItem"[% IF ajax_search %] onFocus="ajax_search_init()" onKeyUp="ajax_search_suggest()"[% END %] />
+            <input type='text' name='s0_value' size='15' class="NavBarSearchItem" id="NavBarSearchItem" />
             [% ELSE %]
             <input type='hidden' name='navbarsearch' value='1' />
-            <input type='text' name='host' size='15' class="NavBarSearchItem" id="NavBarSearchItem"[% IF ajax_search %] onFocus="ajax_search_init()" onKeyUp="ajax_search_suggest()"[% END %] />
+            <input type='text' name='host' size='15' class="NavBarSearchItem" id="NavBarSearchItem" />
             [% END %]
           </fieldset>
         </form>
@@ -121,16 +121,7 @@
     <img src="/thruk/themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
     <img src="/thruk/themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
 
-[% IF ajax_search %]
-<div style="display:none;" id="search-results"></div>
-<script type="text/javascript">
-<!--
-  var input = document.getElementById('NavBarSearchItem');
-  input.setAttribute("autocomplete", "off");
-  input.parentNode.parentNode.setAttribute("autocomplete", "off");
--->
-</script>
-[% END %]
+[% PROCESS _ajax_search.tt %]
 
 [% IF use_frames %]
   </body>

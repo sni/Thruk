@@ -103,10 +103,19 @@ sub _process_raw_request {
     my ( $self, $c ) = @_;
 
     if($c->stash->{'output_format'} eq 'search') {
-        my @hostgroups    = keys %{$c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\nColumns: name", 'name' )};
-        my @servicegroups = keys %{$c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\nColumns: name", 'name' )};
-        my @hosts         = keys %{$c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' )};
-        my @services      = keys %{$c->{'live'}->selectall_hashref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description' )};
+        my(@hostgroups,@servicegroups,@hosts,@services);
+        if($c->config->{ajax_search_hostgroups}) {
+            @hostgroups    = keys %{$c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\nColumns: name", 'name' )};
+        }
+        if($c->config->{ajax_search_servicegroups}) {
+            @servicegroups = keys %{$c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\nColumns: name", 'name' )};
+        }
+        if($c->config->{ajax_search_hosts}) {
+            @hosts         = keys %{$c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' )};
+        }
+        if($c->config->{ajax_search_services}) {
+            @services      = keys %{$c->{'live'}->selectall_hashref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description' )};
+        }
         my $json = [
               { 'name' => 'hostgroups',    'data' => \@hostgroups    },
               { 'name' => 'servicegroups', 'data' => \@servicegroups },

@@ -137,3 +137,13 @@ div.tree td {
   top: -1px;
   left: -13px;
 }
+
+
+/* Search result suggestions */
+#search-results {
+  width: 120px;
+}
+
+#search-results a{
+  width: 120px;
+}
