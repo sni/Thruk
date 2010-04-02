@@ -232,6 +232,21 @@ sub filter_sprintf {
 
 ##############################################
 
+=head2 throw
+
+  throw($string)
+
+can be used to die in templates
+
+=cut
+sub throw {
+    my $string = shift;
+    die($string);
+}
+
+
+##############################################
+
 =head2 parse_date
 
   my $timestamp = parse_date($c, $string)
@@ -365,49 +380,6 @@ sub is_valid_regular_expression {
     return 1;
 }
 
-######################################
-
-=head2 get_livestatus
-
-  my $conf = get_livestatus($c)
-
-return the livestatus object
-
-=cut
-sub get_livestatus {
-    my $c                 = shift;
-    my $disabled_backends = shift;
-
-    $c->stats->profile(begin => "Utils::get_livestatus()");
-
-    our $livestatus;
-
-    if(defined $livestatus) {
-        $c->log->debug("got livestatus from cache");
-        $livestatus->enable();
-        Thruk::Utils::_disable_backends($c, $livestatus, $disabled_backends);
-        return($livestatus);
-    }
-    $c->log->debug("creating new livestatus");
-
-    my $livestatus_config = Thruk::Utils::get_livestatus_conf($c);
-    if(!defined $livestatus_config or !defined $livestatus_config->{'peer'} ) {
-        $c->detach("/error/index/14");
-    }
-
-    if(defined $livestatus_config->{'verbose'} and $livestatus_config->{'verbose'}) {
-        $livestatus_config->{'logger'} = $c->log
-    }
-    $livestatus = Monitoring::Livestatus::MULTI->new(%{$livestatus_config});
-
-    Thruk::Utils::_disable_backends($c, $livestatus, $disabled_backends);
-
-    $c->stats->profile(end => "Utils::get_livestatus()");
-
-    return($livestatus);
-}
-
-
 ########################################
 
 =head2 sort
@@ -526,35 +498,6 @@ sub remove_duplicates {
 
     $c->stats->profile(end => "Utils::remove_duplicates()");
     return($return);
-}
-
-
-########################################
-
-=head2 get_livestatus_conf
-
-  get_livestatus_conf($c)
-
-returns config for livestatus backends
-
-=cut
-sub get_livestatus_conf {
-    my $c = shift;
-
-    my $livestatus_config = Thruk->config->{'Monitoring::Livestatus'};
-
-    if(defined $livestatus_config) {
-        # with only on peer, we have to convert to an array
-        if(defined $livestatus_config->{'peer'} and ref $livestatus_config->{'peer'} eq 'HASH') {
-            my $peer = $livestatus_config->{'peer'};
-            delete $livestatus_config->{'peer'};
-            push @{$livestatus_config->{'peer'}}, $peer;
-        }
-    }
-
-    $c->log->debug("livestatus config: ".Dumper($livestatus_config));
-
-    return($livestatus_config);
 }
 
 
@@ -1237,13 +1180,19 @@ sets the is_authorized_for_read_only role
 sub set_can_submit_commands {
     my $c = shift;
 
+    $c->stats->profile(begin => "Thruk::Utils::set_can_submit_commands");
     my $username = $c->request->{'user'}->{'username'};
 
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias);
     eval {
-        my $data = $c->{'live'}->selectrow_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Sum => 1 });
-        ($can_submit_commands,$alias) = @{$data} if defined $data;
+        my $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Slice => 1 });
+        if(defined $data) {
+            for my $dat (@{$data}) {
+                $alias               = $dat->{'alias'}               if defined $dat->{'alias'};
+                $can_submit_commands = $dat->{'can_submit_commands'} if defined $dat->{'can_submit_commands'};
+            }
+        }
     };
     if($@) {
         $c->log->error("livestatus error: $@");
@@ -1271,6 +1220,8 @@ sub set_can_submit_commands {
     if($can_submit_commands != 1) {
         push @{$c->request->{'user'}->{'roles'}}, 'is_authorized_for_read_only';
     }
+
+    $c->stats->profile(end => "Thruk::Utils::set_can_submit_commands");
     return 1;
 }
 
@@ -1857,33 +1808,7 @@ sub _html_escape {
     return HTML::Entities::encode($text);
 }
 
-########################################
-# disable (hide) livestatus backends by key or address
-sub _disable_backends {
-    my $c                 = shift;
-    my $livestatus        = shift;
-    my $disabled_backends = shift;
 
-    if(defined $disabled_backends) {
-        for my $key (keys %{$disabled_backends}) {
-            if($disabled_backends->{$key} == 2) {
-                if($livestatus->_get_peer_by_key($key)) {
-                    $c->log->debug("disabled livestatus backend by key: $key");
-                    $livestatus->disable($key);
-                }
-                else {
-                    my $peer = $livestatus->_get_peer_by_addr($key);
-                    if(defined $peer) {
-                        $c->log->debug("disabled livestatus backend by addr: ".$key);
-                        $livestatus->disable($peer->{'key'});
-                        $disabled_backends->{$peer->{'key'}} = 2;
-                    }
-                }
-            }
-        }
-    }
-    return 1;
-}
 1;
 
 =head1 AUTHOR

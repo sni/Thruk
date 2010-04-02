@@ -76,7 +76,6 @@ statusmap: maybe something with http://search.cpan.org/~lbrocard/GraphViz/lib/Gr
 
 status:
     - proper search
-        maybe ajax autocomplete for input form
         save searches (like bookmarks would do it)
     - add flexible selector, ex.: select multiple hostgroups
     - host table map with worst service state as color

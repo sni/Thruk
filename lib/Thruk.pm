@@ -7,6 +7,7 @@ use warnings;
 use Carp;
 use Catalyst::Log::Log4perl;
 use Thruk::Utils;
+use Thruk::Utils::Livestatus;
 use Catalyst::Runtime '5.70';
 
 ###################################################
@@ -40,7 +41,7 @@ our $VERSION = '0.54';
 my $project_root = __PACKAGE__->config->{home};
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'March 28, 2010',
+                    'released'               => 'April 1, 2010',
                     'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
@@ -61,6 +62,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                                                 'uri_with'     => \&Thruk::Utils::uri_with,
                                                 'html_escape'  => \&Thruk::Utils::_html_escape,
                                                 'get_message'  => \&Thruk::Utils::get_message,
+                                                'throw'        => \&Thruk::Utils::throw,
                                             },
                         PRE_CHOMP          => 1,
                         POST_CHOMP         => 1,
@@ -74,7 +76,9 @@ __PACKAGE__->config('name'                   => 'Thruk',
                     },
                     'View::GD'               => {
                         gd_image_type      => 'png',
-
+                    },
+                    'View::JSON'               => {
+                        expose_stash       => 'json',
                     },
                     'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
                     'Plugin::Authentication' => {
@@ -170,6 +174,7 @@ if($@) {
     croak('cannot start');
 }
 
+###################################################
 
 =head1 NAME
 

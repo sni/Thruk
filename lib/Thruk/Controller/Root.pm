@@ -34,6 +34,12 @@ begin, running at the begin of every req
 =cut
 sub begin : Private {
     my ( $self, $c ) = @_;
+
+    unless(defined $c->{'live'}) {
+        $c->{'live'} = Thruk::Utils::Livestatus->new($c);
+    }
+
+    # frame options
     my $use_frames = Thruk->config->{'use_frames'};
     $use_frames    = 1 unless defined $use_frames;
     my $show_nav_button = 1;
@@ -53,9 +59,9 @@ sub begin : Private {
     $c->stash->{'show_nav_button'} = $show_nav_button;
 
     # use pager?
-    $c->stash->{'use_pager'} = Thruk->config->{'use_pager'}                 || 1;
-    $c->stash->{'default_page_size'} = Thruk->config->{'default_page_size'} || 100;
-    $c->stash->{'paging_steps'} = Thruk->config->{'paging_steps'}           || ['100', '500', '1000', '5000', 'all' ];
+    $c->stash->{'use_pager'}          = Thruk->config->{'use_pager'}          || 1;
+    $c->stash->{'default_page_size'}  = Thruk->config->{'default_page_size'}  || 100;
+    $c->stash->{'paging_steps'}       = Thruk->config->{'paging_steps'}       || ['100', '500', '1000', '5000', 'all' ];
 
     $c->stash->{'start_page'}         = Thruk->config->{'start_page'}         || '/thruk/main.html';
     $c->stash->{'documentation_link'} = Thruk->config->{'documentation_link'} || '/thruk/docs/index.html';
@@ -96,6 +102,8 @@ sub begin : Private {
         $all_problems_link = "/thruk/cgi-bin/status.cgi?style=detail&amp;hidesearch=1&amp;s0_hoststatustypes=12&amp;s0_servicestatustypes=31&amp;s0_hostprops=10&amp;s0_serviceprops=0&amp;s1_hoststatustypes=15&amp;s1_servicestatustypes=28&amp;s1_hostprops=10&amp;s1_serviceprops=10&amp;s1_hostprop=2&amp;s1_hostprop=8&amp;title=All%20Unhandled%20Problems";
     }
     $c->stash->{'all_problems_link'} = $all_problems_link;
+
+    $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
 
     return 1;
 }
