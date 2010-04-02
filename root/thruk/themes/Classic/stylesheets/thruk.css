@@ -478,13 +478,15 @@ table.filter > tbody > tr > td {
   list-style: none;
   margin: 0px;
   padding: 0px;
+  color:black;
+  display: block;
 }
 
 #search-results a{
-  display: block;
-  padding: 0px;
   text-decoration: none;
   color:black;
+  width: 150px;
+  display: block;
 }
 
 #search-results a.ajax_search_selected, #search-results a:hover {

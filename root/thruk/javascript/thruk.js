@@ -1349,33 +1349,36 @@ Y8,         88               d8'`8b      88      ,8P d8'           88        88
 Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
-var ajax_search_url         = '/thruk/cgi-bin/status.cgi?format=json;column=name;column=alias;hostgroup=all';
-var ajax_search_max_results = 9;
-var ajax_search_input_field = 'NavBarSearchItem';
-var ajax_search_result_pan  = 'search-results';
+var ajax_search_url             = '/thruk/cgi-bin/status.cgi?format=search';
+var ajax_search_max_results     = 12;
+var ajax_search_input_field     = 'NavBarSearchItem';
+var ajax_search_result_pan      = 'search-results';
+var ajax_search_update_interval = 3600; // update at least every hour
 
-var ajax_search_hosts       = new Array();
-var ajax_search_initialized = false;
-var ajax_search_cur_select  = -1;
+var ajax_search_base            = new Array();
+var ajax_search_initialized     = false;
+var ajax_search_cur_select      = -1;
+var ajax_search_result_size     = false;
 var ajax_search_cur_results;
 var ajax_search_cur_pattern;
 
 /* initialize search */
 function ajax_search_init() {
     var date = new Date;
-    var now = parseInt(date.getTime() / 1000);
+    var now  = parseInt(date.getTime() / 1000);
+
+    var input = document.getElementById(ajax_search_input_field);
+    input.a
 
     // update every hour (frames searches wont update otherwise)
-    if(ajax_search_initialized && now < ajax_search_initialized - 3600) {
+    if(ajax_search_initialized && now > ajax_search_initialized - ajax_search_update_interval) {
         ajax_search_suggest();
         return false;
     }
+    ajax_search_initialized = now;
     new Ajax.Request(ajax_search_url, {
         onSuccess: function(transport) {
-            ajax_search_initialized = now;
-            ajax_search_hosts = transport.responseJSON.sortBy(function(s) {
-                return s.name;
-            });
+            ajax_search_base = transport.responseJSON;
             ajax_search_suggest();
         }
     });
@@ -1411,27 +1414,31 @@ function ajax_search_suggest() {
     var input;
     var input = document.getElementById(ajax_search_input_field);
     if(!input) { return; }
-    if(ajax_search_hosts.size() == 0) { return; }
+    if(ajax_search_base.size() == 0) { return; }
 
     pattern = input.value;
     if(pattern.length >= 1) {
         var results = new Array();
-        ajax_search_hosts.each(function(host) {
-            if(host.name.indexOf(pattern) != -1) {
-                host.relevance = 1;
-                if(host.name.indexOf(pattern) == 0) { // perfect match, starts with pattern
-                    host.relevance = 100;
+        ajax_search_base.each(function(search_type) {
+            var sub_results = new Array();
+            var top_hits = 0;
+            search_type.data.each(function(data) {
+                result_obj = new Object({ 'name': data });
+                if(data.indexOf(pattern) != -1) {
+                    result_obj.relevance = 1;
+                    if(data.indexOf(pattern) == 0) { // perfect match, starts with pattern
+                        result_obj.relevance = 100;
+                        top_hits++;
+                    }
+                    result_obj.display = data;
+                    sub_results.push(result_obj);
                 }
-                host.display = host.name;
-                results.push(host);
-            }
-            else if(host.alias.indexOf(pattern) != -1) {
-                host.relevance = 1;
-                if(host.alias.indexOf(pattern) == 0) { // perfect match, starts with pattern
-                    host.relevance = 100;
-                }
-                host.display = host.alias;
-                results.push(host);
+            });
+            if(sub_results.size() > 0) {
+                sub_results = sub_results.sortBy(function(s) {
+                    return((-1 * s.relevance) + s.name);
+                });
+                results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
             }
         });
         ajax_search_cur_results = results;
@@ -1449,35 +1456,38 @@ function ajax_search_show_results(results, pattern, selected) {
     var input = document.getElementById(ajax_search_input_field);
     if(!panel) { return; }
 
-    var hosts = results.sortBy(function(s) {
-        return -1 * s.relevance;
-    });
-
-    size = hosts.size();
-
-    if(size == 1 && hosts[0].name == input.value) {
+    size = results.size();
+    if(size == 1 && results[0].results[0].display == input.value) {
         return;
     }
 
-    if(size >= ajax_search_max_results) {
-        hosts = hosts.splice(0,ajax_search_max_results);
-        hosts.push(Object({'display': (size-ajax_search_max_results) + ' more...'}));
-    }
+    results = results.sortBy(function(s) {
+        return(-1 * s.top_hits);
+    });
 
     var resultHTML = '<ul>';
     var x = 0;
-    hosts.each(function(host) {
-        var name = host.display.replace(pattern, "<b>" + pattern + "<\/b>");
-        var classname = "item";
-        if(selected != -1 && selected == x) {
-            classname = "item ajax_search_selected";
-        }
-        resultHTML += '<li><a href="" class="' + classname + '" onclick="return ajax_search_set(\'' + host.display +'\')">' + name +'</a></li>';
-        x++;
+    var results_per_type = Math.ceil(ajax_search_max_results / results.size());
+    results.each(function(type) {
+        var cur_count = 0;
+        resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
+        type.results.each(function(data) {
+            if(cur_count <= results_per_type) {
+                var name = data.display.replace(pattern, "<b>" + pattern + "<\/b>");
+                var classname = "item";
+                if(selected != -1 && selected == x) {
+                    classname = "item ajax_search_selected";
+                }
+                resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search_set(\'' + data.display +'\')"> ' + name +'<\/a><\/li>';
+                x++;
+                cur_count++;
+            }
+        });
     });
+    ajax_search_result_size = x;
     resultHTML += '<\/ul>';
     if(results.size() == 0) {
-        resultHTML += '<a href="#">no hosts found</a>';
+        resultHTML += '<a href="#">no results found</a>';
     }
 
     panel.innerHTML = resultHTML;
@@ -1513,12 +1523,8 @@ function ajax_search_arrow_keys(evt) {
     if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)){
         if(ajax_search_cur_select == -1) { ajax_search_cur_select = 0; }
         else if(navigateDown) {
-            ajax_search_cur_select++;
-            if(ajax_search_cur_select >= ajax_search_cur_results.size() -1) {
-                ajax_search_cur_select = ajax_search_cur_results.size() - 1;
-            }
-            if(ajax_search_cur_select >= ajax_search_max_results) {
-                ajax_search_cur_select = ajax_search_max_results;
+            if(ajax_search_result_size > ajax_search_cur_select + 1) {
+                ajax_search_cur_select++;
             }
             focus = true;
         }

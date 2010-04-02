@@ -102,6 +102,22 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 sub _process_raw_request {
     my ( $self, $c ) = @_;
 
+    if($c->stash->{'output_format'} eq 'search') {
+        my @hostgroups    = keys %{$c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\nColumns: name", 'name' )};
+        my @servicegroups = keys %{$c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\nColumns: name", 'name' )};
+        my @hosts         = keys %{$c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' )};
+        my @services      = keys %{$c->{'live'}->selectall_hashref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description' )};
+        my $json = [
+              { 'name' => 'hostgroups',    'data' => \@hostgroups    },
+              { 'name' => 'servicegroups', 'data' => \@servicegroups },
+              { 'name' => 'hosts',         'data' => \@hosts         },
+              { 'name' => 'services',      'data' => \@services      },
+        ];
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
     # which host to display?
     my($hostfilter,$servicefilter, $groupfilter) = $self->_do_filter($c);
     return if defined $c->stash->{'has_error'};
