@@ -5,7 +5,7 @@ Thruk Users Guide
 
 Thruk is an multibackend monitoring web interface which currently
 supports Nagios and Icinga using the Livestatus NEB module. It is
-designed to be a “drop-in” replacement and targets covering 100% of
+designed to be a "drop-in" replacement and targets covering 100% of
 the original features plus additional enhancements for large
 installations.
 
@@ -53,9 +53,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
-  %> wget http://www.thruk.org/files/Thruk-0.52-$arch.tar.gz
-  %> tar zxf Thruk-0.52-$arch.tar.gz
-  %> cd Thruk-0.52
+  %> wget http://www.thruk.org/files/Thruk-0.54-$arch.tar.gz
+  %> tar zxf Thruk-0.54-$arch.tar.gz
+  %> cd Thruk-0.54
   %> ./script/thruk_server.pl
 ----
 
@@ -479,6 +479,54 @@ ex.:
   use_new_search = 1
 
 
+==== use_ajax_search
+
+Enables the ajax search field. There will be suggestions while typing
+into the search field.
+
+ex.:
+
+  use_ajax_search = 1
+
+
+==== ajax_search_hosts
+
+Enables the suggestion of hosts in the ajax search field.
+Depending on the number of hosts, this can make the search slow.
+
+ex.:
+
+  ajax_search_hosts = 1
+
+
+==== ajax_search_hostgroups
+
+Enables the suggestion of hostgroups in the ajax search field.
+
+ex.:
+
+  ajax_search_hostgroups = 1
+
+
+==== ajax_search_services
+
+Enables the suggestion of services in the ajax search field.
+Depending on the number of services, this can make the search slow.
+
+ex.:
+
+  ajax_search_services = 1
+
+
+==== ajax_search_servicegroups
+
+Enables the suggestion of servicegroups in the ajax search field.
+
+ex.:
+
+  ajax_search_servicegroups = 1
+
+
 ==== default_theme
 
 Default theme to use for all users. Must be a valid subdirectory in
@@ -832,7 +880,7 @@ Generate ssl key for the remote machine:
   %> chmod 600 $FILENAME.key $FILENAME.pem
 ---------------------
 
-Generate ssl key for thruk. Use the same command with a differen FILENAME.
+Generate ssl key for thruk. Use the same command with a different FILENAME.
 ---------------------
   %> FILENAME=thruk-host
 ---------------------

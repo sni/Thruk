@@ -1,0 +1,12 @@
+[% IF ajax_search %]
+<div style="display:none;" id="search-results"></div>
+<script type="text/javascript">
+<!--
+  var input = document.getElementById('NavBarSearchItem');
+  input.setAttribute("autocomplete", "off");
+  input.parentNode.parentNode.setAttribute("autocomplete", "off");
+  input.onfocus = ajax_search_init;
+  input.onkeyup = ajax_search_suggest;
+-->
+</script>
+[% END %]

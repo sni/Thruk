@@ -1,3 +1,4 @@
+[% IF die_on_errors %][% throw(errorMessage) %][% END %]
 [% PROCESS _header.tt %]
 
   <table border="0" width="100%">

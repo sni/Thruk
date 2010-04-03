@@ -1,18 +1,5 @@
 cgi.cfg
 Changes
-contrib/livestatus/patches/build.sh
-contrib/livestatus/patches/create_patched_livestatus_source_dir.sh
-contrib/livestatus/patches/INSTALL
-contrib/livestatus/patches/obsolete/0001-fixed-state-id-for-notifications.obsolete
-contrib/livestatus/patches/obsolete/0002-added-complete-logline-and-options-to-log-table.obsolete
-contrib/livestatus/patches/obsolete/0003-added-recovery-state-fixed-hidden-external-commands.obsolete
-contrib/livestatus/patches/obsolete/0004-log-every-request-input.patch.obsolete
-contrib/livestatus/patches/obsolete/0005-added-timeperiods-table.obsolete
-contrib/livestatus/patches/obsolete/0006-added-new-table-contactgroups.obsolete
-contrib/livestatus/patches/obsolete/0007-added-interval_length-to-status-table.obsolete
-contrib/livestatus/patches/obsolete/0008-fixed-logentries-for-external-commands.obsolete
-contrib/livestatus/patches/obsolete/0009-added-missing-icon_image_expanded-to-TableHosts.obsolete
-contrib/livestatus/patches/obsolete/0010-added-icon_image_expanded-for-services.obsolete
 docs/development/README
 docs/development/tables/columns.txt
 docs/development/tables/commands.txt
@@ -28,6 +15,9 @@ docs/development/tables/services.txt
 docs/development/tables/status.txt
 docs/development/tables/timeperiods.txt
 docs/development/TODO
+docs/source/arch.graffle
+docs/source/arch.png
+docs/source/arch_preview.png
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
 inc/Module/AutoInstall.pm
@@ -66,8 +56,10 @@ lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Utils.pm
+lib/Thruk/Utils/Livestatus.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/GD.pm
+lib/Thruk/View/JSON.pm
 lib/Thruk/View/TT.pm
 Makefile.PL
 MANIFEST			This list of files
@@ -664,6 +656,7 @@ t/controller_trends.t
 t/perlcriticrc
 t/TestUtils.pm
 t/view_TT.t
+templates/_ajax_search.tt
 templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt

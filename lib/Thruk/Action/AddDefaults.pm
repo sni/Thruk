@@ -22,6 +22,7 @@ use strict;
 use warnings;
 use Moose;
 use Carp;
+use Data::Dumper;
 
 extends 'Catalyst::Action';
 
@@ -50,7 +51,8 @@ before 'execute' => sub {
         }
     }
     else {
-        my $livestatus_config = Thruk::Utils::get_livestatus_conf($c);
+        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+        $c->log->debug("livestatus config: ".Dumper($livestatus_config));
         for my $peer (@{$livestatus_config->{'peer'}}) {
             if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
                 $disabled_backends{$peer->{'peer'}} = 2;
@@ -58,7 +60,7 @@ before 'execute' => sub {
             }
         }
     }
-    $c->{'live'} = Thruk::Utils::get_livestatus($c, \%disabled_backends);
+    $c->{'live'}->_disable_backends(\%disabled_backends);
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     $c->stash->{'param_backend'}  = $backend;
 
@@ -99,6 +101,7 @@ before 'execute' => sub {
 
     ###############################
     # add program status
+    $c->stats->profile(begin => "AddDefaults::get_proc_info");
     eval {
         my $processinfo = $c->{'live'}->selectall_hashref("GET status\n".Thruk::Utils::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
         my $overall_processinfo = Thruk::Utils::calculate_overall_processinfo($processinfo);
@@ -113,6 +116,8 @@ before 'execute' => sub {
         $c->log->error("got no result from any enabled backend, please check backend connection and logfiles");
         $c->detach('/error/index/9');
     }
+    $c->stats->profile(end => "AddDefaults::get_proc_info");
+
     ###############################
     # set some more roles
     Thruk::Utils::set_can_submit_commands($c);

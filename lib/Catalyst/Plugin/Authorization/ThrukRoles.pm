@@ -52,7 +52,7 @@ sub check_permissions {
     }
     elsif($type eq 'hostgroup') {
         my $count1 = $c->{'live'}->selectscalar_value("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nStats: groups >= $value", { Sum => 1 });
-        my $count2 = $c->{'live'}->selectscalar_value("GET hosts\nStats: group >= $value", { Sum => 1 });
+        my $count2 = $c->{'live'}->selectscalar_value("GET hosts\nStats: groups >= $value", { Sum => 1 });
         $count = 0;
         if(defined $count1 and defined $count2 and $count1 == $count2 and $count2 != 0) {
             $count = 1;
@@ -60,7 +60,7 @@ sub check_permissions {
     }
     elsif($type eq 'servicegroup') {
         my $count1 = $c->{'live'}->selectscalar_value("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nStats: groups >= $value", { Sum => 1 });
-        my $count2 = $c->{'live'}->selectscalar_value("GET services\nStats: group >= $value", { Sum => 1 });
+        my $count2 = $c->{'live'}->selectscalar_value("GET services\nStats: groups >= $value", { Sum => 1 });
         $count = 0;
         if(defined $count1 and defined $count2 and $count1 == $count2 and $count2 != 0) {
             $count = 1;

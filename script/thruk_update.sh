@@ -16,19 +16,6 @@ if [ $? != 0 ]; then
   exit 1;
 fi
 
-# tests for Test::WWW::Mechanize fail at the moment
-# install with notest
-perl -e 'use Catalyst::Plugin::Unicode' > /dev/null 2>&1
-if [ $? != 0 ]; then
-  perl -MCPAN -e 'notest install Catalyst::Plugin::Unicode'
-  if [ $? != 0 ]; then
-    echo "*** ERROR: perl Makefile.PL failed ***";
-    echo "";
-    echo "please fix errors first";
-    exit 1;
-  fi
-fi
-
 perl Makefile.PL
 if [ $? != 0 ]; then
   echo "*** ERROR: perl Makefile.PL failed ***";
@@ -44,6 +31,3 @@ if [ $? != 0 ]; then
   echo "please fix errors first";
   exit 1;
 fi
-
-#./contrib/livestatus/patches/create_patched_livestatus_source_dir.sh || ( echo "livcestatus update failed"; exit 1 )
-#cd /tmp/livestatus && ./build.sh && ./configure && make && cd -      || ( echo "livcestatus update failed"; exit 1 )

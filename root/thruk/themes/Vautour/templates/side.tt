@@ -47,10 +47,10 @@
             <input type='hidden' name='hidesearch' value='2' />
             <input type='hidden' name='s0_op' value='~' />
             <input type='hidden' name='s0_type' value='search' />
-            <input type='text' name='s0_value' id='search' />
+            <input type='text' name='s0_value' id="NavBarSearchItem" />
             [% ELSE %]
             <input id="search" name="host" type="text" />
-            <input type="hidden" name="navbarsearch" value="1" />
+            <input type="hidden" name="navbarsearch" id="NavBarSearchItem" value="1" />
             [% END %]
             <input src="/thruk/themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
             </form>
@@ -75,6 +75,7 @@
             [% END %]
         </ul>
     </div>
+[% PROCESS _ajax_search.tt %]
 [% IF use_frames %]
   </body>
 </html>

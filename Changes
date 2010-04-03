@@ -2,8 +2,11 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
 0.54    Sun Mar 28 17:01:02 CEST 2010
+          - added ajax search to side navigation
           - made eventype for status.cgi popups configurable
           - renamed cgi_cfg option to cgi.cfg
+          - fixed removing downtimes
+          - fixed removing comments
           - fixed parsing cgi.cfg
 
 0.52    Fri Mar 26 09:03:28 CET 2010
