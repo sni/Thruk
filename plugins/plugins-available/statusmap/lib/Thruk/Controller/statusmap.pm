@@ -264,7 +264,7 @@ sub _get_hosts_by_attribute {
         $host->{$attr} = 'unknown' unless defined $host->{$attr};
 
         # where should we put the host onto?
-        for my $val (split/,/, $host->{$attr}) {
+        for my $val (split/,/mx, $host->{$attr}) {
             $host_tree->{$val}->{$id} = $json_host;
         }
     }
@@ -348,7 +348,7 @@ sub _fill_subtree {
             $host->{'parents'} = 'rootid';
         }
         my $found_parent = 0;
-        if(grep {/$parent/} split(/,/mx, $host->{'parents'})) {
+        if(grep {/$parent/mx} split(/,/mx, $host->{'parents'})) {
             $tree->{$host->{'name'}} = {};
         }
         else {

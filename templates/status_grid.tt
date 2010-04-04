@@ -146,7 +146,7 @@
             [% END %]
             <a href='status.cgi?host=[% h.name %]'><img src='/thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
-            <a href='statusmap.cgi?host=[% h.name %]'><img src='/thruk/themes/[% theme %]/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map' width="20" height="20"></a>
+            <a href='statusmap.cgi?host=[% h.name %]'><img src='/thruk/themes/[% theme %]/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map' width="20" height="20"></a>
             [% END %]
           </td>
         </tr>

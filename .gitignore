@@ -15,3 +15,4 @@ htpasswd.users
 .DS_Store
 ssi/*.ssi
 root/thruk/plugins/*/
+t/xt

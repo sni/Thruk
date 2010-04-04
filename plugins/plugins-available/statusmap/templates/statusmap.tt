@@ -1,7 +1,6 @@
 [% statusmap_header = BLOCK %]
   <link type="text/css" href="/thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
-<!--  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script> -->
-  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit.js"></script>
+  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script>
   <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/statusmap.js"></script>
 [% END %]
 [% PROCESS _header.tt extra_header => statusmap_header %]

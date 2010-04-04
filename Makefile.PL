@@ -85,6 +85,18 @@ requires 'FCGI::ProcManager'                      => 0.19;
 eval {
     catalyst;
 };
+
+##################################
+# create symlinks for tests
+mkdir('t/xt') unless -d 't/xt';
+unlink(glob('t/xt/*.t'));
+for my $test (glob('plugins/plugins-available/*/t/*.t')) {
+    my $testfile = $test;
+    $testfile    =~ s/.*\///gmx;
+    symlink('../../'.$test, 't/xt/'.$testfile) or die("cannot create symlink: $!");
+}
+
+tests_recursive;
 install_script glob('script/*.pl');
 auto_install;
 WriteAll;

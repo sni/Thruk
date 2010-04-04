@@ -66,7 +66,9 @@ MANIFEST			This list of files
 META.yml
 plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
 plugins/plugins-available/statusmap/root/jit-yc.js
+plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
+plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
 README
 root/favicon.ico
@@ -649,7 +651,6 @@ t/controller_outages.t
 t/controller_Root.t
 t/controller_showlog.t
 t/controller_status.t
-t/controller_statusmap.t
 t/controller_summary.t
 t/controller_tac.t
 t/controller_trends.t
