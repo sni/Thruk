@@ -473,6 +473,7 @@ table.filter > tbody > tr > td {
   white-space: nowrap;
   overflow: hidden;
   z-index: 1000;
+  text-align: left;
 }
 
 #search-results ul{
