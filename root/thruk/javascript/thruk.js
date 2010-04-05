@@ -1361,7 +1361,7 @@ var ajax_search = {
 
     /* initialize search */
     init: function(elem) {
-        if(elem.id) {
+        if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
         } else {

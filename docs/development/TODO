@@ -62,6 +62,7 @@ general:
     - show only backends where user has at least permission for one host/service
     - use livestatus wait feature where possible
 
+
 reports:
     - generate long running reports in an extra process
     - flexible report output
@@ -77,9 +78,10 @@ statusmap: maybe something with http://search.cpan.org/~lbrocard/GraphViz/lib/Gr
 status:
     - proper search
         save searches (like bookmarks would do it)
-    - add flexible selector, ex.: select multiple hostgroups
+    - add flexible selector, ex.: select multiple hostgroups by comma
     - host table map with worst service state as color
-    - hide host/service summary in status.cgi (maybe with http://jqueryui.com/demos/toggle/ )
+    - search "rou 17" -> split by space and search with and
+      host ~ rou && host ~ 17
 
 histogram:
     - missing completly
