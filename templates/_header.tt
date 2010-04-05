@@ -46,7 +46,8 @@
         [% END %]
     });
     var current_backend_states = initial_backend_states.clone();
-    var theme = '[% theme %]';
+    var theme                  = '[% theme %]';
+    var ajax_search_enabled    = '[% ajax_search %]';
 
     [% IF refresh_rate %]    var refresh_rate = [% refresh_rate %];[% END %]
 
@@ -57,6 +58,7 @@
 
   <body class='[% page %]' id='[% page %]'[% IF refresh_rate %] onLoad="setRefreshRate([% refresh_rate %])"[% END %]>
   [% ssi_header %]
+  <div style="display:none;" id="search-results"></div>
 
   <div class="pref_pane" id="pref_pane" style="display:none; visibility:hidden;">
     <a href="javascript:togglePreferencePane()"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>

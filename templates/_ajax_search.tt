@@ -1,19 +1,11 @@
 [% IF ajax_search %]
-<div style="display:none;" id="search-results"></div>
+[% IF use_frames %]
+  <div style="display:none;" id="search-results"></div>
+[% END %]
 <script type="text/javascript">
 <!--
   var input = document.getElementById('NavBarSearchItem');
-  input.setAttribute("autocomplete", "off");
-
-  // disable autocomplete for parent form
-  elem = input;
-  while(elem.tagName != 'FORM')  {
-      elem = elem.parentNode;
-  }
-  elem.setAttribute("autocomplete", "off");
-
-  input.onfocus = ajax_search.init;
-  input.onkeyup = ajax_search.suggest;
+  input.onclick = ajax_search.init;
 -->
 </script>
 [% END %]

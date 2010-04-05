@@ -472,6 +472,7 @@ table.filter > tbody > tr > td {
   font-family: arial,serif;
   white-space: nowrap;
   overflow: hidden;
+  z-index: 1000;
 }
 
 #search-results ul{
