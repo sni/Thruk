@@ -4,9 +4,16 @@
 <!--
   var input = document.getElementById('NavBarSearchItem');
   input.setAttribute("autocomplete", "off");
-  input.parentNode.parentNode.setAttribute("autocomplete", "off");
-  input.onfocus = ajax_search_init;
-  input.onkeyup = ajax_search_suggest;
+
+  // disable autocomplete for parent form
+  elem = input;
+  while(elem.tagName != 'FORM')  {
+      elem = elem.parentNode;
+  }
+  elem.setAttribute("autocomplete", "off");
+
+  input.onfocus = ajax_search.init;
+  input.onkeyup = ajax_search.suggest;
 -->
 </script>
 [% END %]

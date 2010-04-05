@@ -254,21 +254,6 @@ function is_shift_pressed(e) {
   return false;
 }
 
-/* return coordinates for given element */
-function get_coordinates(element) {
-    var offsetLeft = 0;
-    var offsetTop = 0;
-    while(element.offsetParent){
-        offsetLeft += element.offsetLeft;
-        offsetTop += element.offsetTop;
-        if(element.scrollTop > 0){
-            offsetTop -= element.scrollTop;
-        }
-        element = element.offsetParent;
-    }
-    return [offsetLeft, offsetTop];
-}
-
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -1349,247 +1334,265 @@ Y8,         88               d8'`8b      88      ,8P d8'           88        88
 Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
-var ajax_search_url             = '/thruk/cgi-bin/status.cgi?format=search';
-var ajax_search_max_results     = 12;
-var ajax_search_input_field     = 'NavBarSearchItem';
-var ajax_search_result_pan      = 'search-results';
-var ajax_search_update_interval = 3600; // update at least every hour
+var ajax_search = {
+    url             : '/thruk/cgi-bin/status.cgi?format=search',
+    max_results     : 12,
+    input_field     : 'NavBarSearchItem',
+    result_pan      : 'search-results',
+    update_interval : 3600, // update at least every hour
 
-var ajax_search_base            = new Array();
-var ajax_search_initialized     = false;
-var ajax_search_cur_select      = -1;
-var ajax_search_result_size     = false;
-var ajax_search_cur_results;
-var ajax_search_cur_pattern;
-var ajax_search_timer;
+    base            : new Array(),
+    initialized     : false,
+    cur_select      : -1,
+    result_size     : false,
+    cur_results     : false,
+    cur_pattern     : false,
+    timer           : false,
 
-/* initialize search */
-function ajax_search_init() {
-    var date = new Date;
-    var now  = parseInt(date.getTime() / 1000);
+    /* initialize search */
+    init: function() {
+        var date = new Date;
+        var now  = parseInt(date.getTime() / 1000);
 
-    var input = document.getElementById(ajax_search_input_field);
-    input.a
+        var input = document.getElementById(ajax_search.input_field);
 
-    // update every hour (frames searches wont update otherwise)
-    if(ajax_search_initialized && now > ajax_search_initialized - ajax_search_update_interval) {
-        ajax_search_suggest();
-        return false;
-    }
-    ajax_search_initialized = now;
-    new Ajax.Request(ajax_search_url, {
-        onSuccess: function(transport) {
-            ajax_search_base = transport.responseJSON;
-            ajax_search_suggest();
+        // update every hour (frames searches wont update otherwise)
+        if(ajax_search.initialized && now > ajax_search.initialized - ajax_search.update_interval) {
+            ajax_search.suggest();
+            return false;
         }
-    });
-
-    document.onkeypress = ajax_search_arrow_keys;
-    document.onclick    = ajax_search_hide_results;
-
-    return false;
-}
-
-/* hide the search results */
-function ajax_search_hide_results(event) {
-    if(event && event.target) {
-    }
-    else {
-        event  = this;
-    }
-    try {
-        // dont hide search result if clicked on the input field
-        if(event.target.tagName == 'INPUT') { return; }
-    }
-    catch(e) {
-        // doesnt matter
-    }
-
-    var panel = document.getElementById(ajax_search_result_pan);
-    if(!panel) { return; }
-    hideElement(panel);
-}
-
-/* wrapper around ajax_search_suggest to avoid multiple running searches */
-function ajax_search_suggest() {
-    window.clearTimeout(ajax_search_timer);
-    ajax_search_timer = window.setTimeout(ajax_search_suggest_do, 100);
-}
-
-/* search some hosts to suggest */
-function ajax_search_suggest_do() {
-    var input;
-    var input = document.getElementById(ajax_search_input_field);
-    if(!input) { return; }
-    if(ajax_search_base.size() == 0) { return; }
-
-    pattern = input.value;
-    if(pattern.length >= 1) {
-
-        // remove empty strings from pattern array
-        pattern = pattern.split(" ");
-        var trimmed_pattern = new Array();
-        pattern.each(function(sub_pattern) {
-            if(sub_pattern != '') {
-                trimmed_pattern.push(sub_pattern);
+        ajax_search.initialized = now;
+        new Ajax.Request(ajax_search.url, {
+            onSuccess: function(transport) {
+                ajax_search.base = transport.responseJSON;
+                ajax_search.suggest();
+            },
+            onFailure: function(transport) {
             }
         });
-        pattern = trimmed_pattern;
 
-        var results = new Array();
-        ajax_search_base.each(function(search_type) {
-            var sub_results = new Array();
-            var top_hits = 0;
-            search_type.data.each(function(data) {
-                result_obj = new Object({ 'name': data, 'relevance': 0 });
-                var found = 0;
-                pattern.each(function(sub_pattern) {
-                    var index = data.indexOf(sub_pattern);
-                    if(index != -1) {
-                        found++;
-                        if(index == 0) { // perfect match, starts with pattern
-                            result_obj.relevance += 100;
-                        } else {
-                            result_obj.relevance += 1;
-                        }
-                    }
-                });
-                // only if all pattern were found
-                if(found == pattern.size()) {
-                    result_obj.display = data;
-                    sub_results.push(result_obj);
-                    if(result_obj.relevance >= 100) { top_hits++; }
+        document.onkeypress = ajax_search.arrow_keys;
+        document.onclick    = ajax_search.hide_results;
+
+        return false;
+    },
+
+    /* hide the search results */
+    hide_results: function(event) {
+        if(event && event.target) {
+        }
+        else {
+            event  = this;
+        }
+        try {
+            // dont hide search result if clicked on the input field
+            if(event.target.tagName == 'INPUT') { return; }
+        }
+        catch(e) {
+            // doesnt matter
+        }
+
+        var panel = document.getElementById(ajax_search.result_pan);
+        if(!panel) { return; }
+        hideElement(panel);
+    },
+
+    /* wrapper around suggest() to avoid multiple running searches */
+    suggest: function() {
+        window.clearTimeout(ajax_search.timer);
+        ajax_search.timer = window.setTimeout("ajax_search.suggest_do()", 100);
+    },
+
+    /* search some hosts to suggest */
+    suggest_do: function() {
+        var input;
+        var input = document.getElementById(ajax_search.input_field);
+        if(!input) { return; }
+        if(ajax_search.base.size() == 0) { return; }
+
+        pattern = input.value;
+        if(pattern.length >= 1) {
+
+            // remove empty strings from pattern array
+            pattern = pattern.split(" ");
+            var trimmed_pattern = new Array();
+            pattern.each(function(sub_pattern) {
+                if(sub_pattern != '') {
+                    trimmed_pattern.push(sub_pattern);
                 }
             });
-            if(sub_results.size() > 0) {
-                sub_results = sub_results.sortBy(function(s) {
-                    return((-1 * s.relevance) + s.name);
+            pattern = trimmed_pattern;
+
+            var results = new Array();
+            ajax_search.base.each(function(search_type) {
+                var sub_results = new Array();
+                var top_hits = 0;
+                search_type.data.each(function(data) {
+                    result_obj = new Object({ 'name': data, 'relevance': 0 });
+                    var found = 0;
+                    pattern.each(function(sub_pattern) {
+                        var index = data.indexOf(sub_pattern);
+                        if(index != -1) {
+                            found++;
+                            if(index == 0) { // perfect match, starts with pattern
+                                result_obj.relevance += 100;
+                            } else {
+                                result_obj.relevance += 1;
+                            }
+                        }
+                    });
+                    // only if all pattern were found
+                    if(found == pattern.size()) {
+                        result_obj.display = data;
+                        sub_results.push(result_obj);
+                        if(result_obj.relevance >= 100) { top_hits++; }
+                    }
                 });
-                results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
-            }
-        });
-        ajax_search_cur_results = results;
-        ajax_search_cur_pattern = pattern;
-        ajax_search_show_results(results, pattern, ajax_search_cur_select);
-    }
-    else {
-        ajax_search_hide_results();
-    }
-}
-
-/* present the results */
-function ajax_search_show_results(results, pattern, selected) {
-    ajax_search_res = results;
-    ajax_search_pat = pattern;
-    ajax_search_sel = selected;
-
-    var panel = document.getElementById(ajax_search_result_pan);
-    var input = document.getElementById(ajax_search_input_field);
-    if(!panel) { return; }
-
-    size = results.size();
-    if(size == 1 && results[0].results[0].display == input.value) {
-        return;
-    }
-
-    results = results.sortBy(function(s) {
-        return(-1 * s.top_hits);
-    });
-
-    var resultHTML = '<ul>';
-    var x = 0;
-    var results_per_type = Math.ceil(ajax_search_max_results / results.size());
-    results.each(function(type) {
-        var cur_count = 0;
-        resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
-        type.results.each(function(data) {
-            if(cur_count <= results_per_type) {
-                var name = data.display;
-                pattern.each(function(sub_pattern) {
-                    name = name.replace(sub_pattern, "<b>" + sub_pattern + "<\/b>");
-                });
-                var classname = "item";
-                if(selected != -1 && selected == x) {
-                    classname = "item ajax_search_selected";
+                if(sub_results.size() > 0) {
+                    sub_results = sub_results.sortBy(function(s) {
+                        return((-1 * s.relevance) + s.name);
+                    });
+                    results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
                 }
-                resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search_set(\'' + data.display +'\')"> ' + name +'<\/a><\/li>';
-                x++;
-                cur_count++;
-            }
+            });
+            ajax_search.cur_results = results;
+            ajax_search.cur_pattern = pattern;
+            ajax_search.show_results(results, pattern, ajax_search.cur_select);
+        }
+        else {
+            ajax_search.hide_results();
+        }
+    },
+
+    /* present the results */
+    show_results: function(results, pattern, selected) {
+        ajax_search_res = results;
+        ajax_search_pat = pattern;
+        ajax_search_sel = selected;
+
+        var panel = document.getElementById(ajax_search.result_pan);
+        var input = document.getElementById(ajax_search.input_field);
+        if(!panel) { return; }
+
+        size = results.size();
+        if(size == 1 && results[0].results[0].display == input.value) {
+            return;
+        }
+
+        results = results.sortBy(function(s) {
+            return(-1 * s.top_hits);
         });
-    });
-    ajax_search_result_size = x;
-    resultHTML += '<\/ul>';
-    if(results.size() == 0) {
-        resultHTML += '<a href="#">no results found</a>';
-    }
 
-    panel.innerHTML = resultHTML;
-
-    var style = panel.style;
-    var coords    = get_coordinates(input);
-    style.left    = coords[0] + "px";
-    style.top     = coords[1] + input.offsetHeight + "px";
-    style.display = "block";
-
-    showElement(panel);
-}
-
-/* set the value into the input field */
-function ajax_search_set(value) {
-    var input = document.getElementById(ajax_search_input_field);
-    input.value = value;
-    ajax_search_cur_select = -1;
-    ajax_search_hide_results();
-    input.focus();
-    return false;
-}
-
-/* eventhandler for arrow keys */
-function ajax_search_arrow_keys(evt) {
-    evt              = (evt) ? evt : ((window.event) ? event : null);
-    if(!evt) { return false; }
-    var input        = document.getElementById(ajax_search_input_field);
-    var panel        = document.getElementById(ajax_search_result_pan);
-    var focus        = false;
-    var keyCode      = evt.keyCode;
-    var navigateUp   = keyCode == 38;
-    var navigateDown = keyCode == 40;
-    if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)) {
-        if(navigateDown && ajax_search_cur_select == -1) {
-            ajax_search_cur_select = 0;
-            focus = true;
+        var resultHTML = '<ul>';
+        var x = 0;
+        var results_per_type = Math.ceil(ajax_search.max_results / results.size());
+        results.each(function(type) {
+            var cur_count = 0;
+            resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
+            type.results.each(function(data) {
+                if(cur_count <= results_per_type) {
+                    var name = data.display;
+                    pattern.each(function(sub_pattern) {
+                        name = name.replace(sub_pattern, "<b>" + sub_pattern + "<\/b>");
+                    });
+                    var classname = "item";
+                    if(selected != -1 && selected == x) {
+                        classname = "item ajax_search_selected";
+                    }
+                    resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search.set_result(\'' + data.display +'\')"> ' + name +'<\/a><\/li>';
+                    x++;
+                    cur_count++;
+                }
+            });
+        });
+        ajax_search.result_size = x;
+        resultHTML += '<\/ul>';
+        if(results.size() == 0) {
+            resultHTML += '<a href="#">no results found</a>';
         }
-        else if(navigateUp && ajax_search_cur_select == -1) {
-            ajax_search_cur_select = ajax_search_result_size - 1;
-            focus = true;
-        }
-        else if(navigateDown) {
-            if(ajax_search_result_size > ajax_search_cur_select + 1) {
-                ajax_search_cur_select++;
+
+        panel.innerHTML = resultHTML;
+
+        var style = panel.style;
+        var coords    = ajax_search.get_coordinates(input);
+        style.left    = coords[0] + "px";
+        style.top     = coords[1] + input.offsetHeight + "px";
+        style.display = "block";
+
+        showElement(panel);
+    },
+
+    /* set the value into the input field */
+    set_result: function(value) {
+        var input = document.getElementById(ajax_search.input_field);
+        input.value = value;
+        ajax_search.cur_select = -1;
+        ajax_search.hide_results();
+        input.focus();
+        return false;
+    },
+
+    /* eventhandler for arrow keys */
+    arrow_keys: function(evt) {
+        evt              = (evt) ? evt : ((window.event) ? event : null);
+        if(!evt) { return false; }
+        var input        = document.getElementById(ajax_search.input_field);
+        var panel        = document.getElementById(ajax_search.result_pan);
+        var focus        = false;
+        var keyCode      = evt.keyCode;
+        var navigateUp   = keyCode == 38;
+        var navigateDown = keyCode == 40;
+        if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)) {
+            if(navigateDown && ajax_search.cur_select == -1) {
+                ajax_search.cur_select = 0;
                 focus = true;
-            } else {
-                ajax_search_cur_select = -1;
-                input.focus();
             }
-        }
-        else if(navigateUp) {
-            ajax_search_cur_select--;
-            if(ajax_search_cur_select < 0) {
-                ajax_search_cur_select = -1;
-                input.focus();
-            }
-            else {
+            else if(navigateUp && ajax_search.cur_select == -1) {
+                ajax_search.cur_select = ajax_search.result_size - 1;
                 focus = true;
             }
-        }
-        ajax_search_show_results(ajax_search_cur_results, ajax_search_cur_pattern, ajax_search_cur_select);
-        if(focus) {
-            var el = document.getElementsByClassName('ajax_search_selected');
-            if(el[0]) {
-                el[0].focus();
+            else if(navigateDown) {
+                if(ajax_search.result_size > ajax_search.cur_select + 1) {
+                    ajax_search.cur_select++;
+                    focus = true;
+                } else {
+                    ajax_search.cur_select = -1;
+                    input.focus();
+                }
+            }
+            else if(navigateUp) {
+                ajax_search.cur_select--;
+                if(ajax_search.cur_select < 0) {
+                    ajax_search.cur_select = -1;
+                    input.focus();
+                }
+                else {
+                    focus = true;
+                }
+            }
+            ajax_search.show_results(ajax_search.cur_results, ajax_search.cur_pattern, ajax_search.cur_select);
+            if(focus) {
+                var el = document.getElementsByClassName('ajax_search_selected');
+                if(el[0]) {
+                    el[0].focus();
+                }
             }
         }
+        return true;
+    },
+
+    /* return coordinates for given element */
+    get_coordinates: function(element) {
+        var offsetLeft = 0;
+        var offsetTop = 0;
+        while(element.offsetParent){
+            offsetLeft += element.offsetLeft;
+            offsetTop += element.offsetTop;
+            if(element.scrollTop > 0){
+                offsetTop -= element.scrollTop;
+            }
+            element = element.offsetParent;
+        }
+        return [offsetLeft, offsetTop];
     }
-    return true;
 }
