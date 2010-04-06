@@ -67,7 +67,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         1 => 96, # reschedule host check
         2 => 55, # schedule downtime
         3 => 1,  # add comment
-        4 => 34, # add acknowledgement
+        4 => 33, # add acknowledgement
         5 => 78, # remove all downtimes
         6 => 20, # remove all comments
         7 => 51, # remove acknowledgement
