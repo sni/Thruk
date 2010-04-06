@@ -10,6 +10,7 @@ general
     - Filter: latency, execution_time
     - configure url path in config (ex.: /thruk/ )
     - add extra grapher url
+    - use title for quick downtimes popups
 
 extinfo:
     - finish performance data on extinfo type 4

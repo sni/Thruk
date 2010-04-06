@@ -1,6 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+0.56    Tue Apr  6 10:17:56 CEST 2010
+          - fixed host acknowledgements
+          - fixed problem with date filter in status.cgi
+
 0.54    Mon Apr  5 16:37:42 CEST 2010
           - added ajax search to side navigation and status page
           - made eventype for status.cgi popups configurable

@@ -1540,14 +1540,14 @@ sub _single_search {
             push @servicetotalsfilter, "Filter: contacts $listop $value";
         }
         elsif($filter->{'type'} eq 'next check') {
-            my $date = Thruk::Utils::parse_date($value);
+            my $date = Thruk::Utils::parse_date($c, $value);
             if($date) {
                 push @hostfilter,      "Filter: next_check $dateop $date";
                 push @servicefilter,   "Filter: next_check $dateop $date";
             }
         }
         elsif($filter->{'type'} eq 'last check') {
-            my $date = Thruk::Utils::parse_date($value);
+            my $date = Thruk::Utils::parse_date($c, $value);
             if($date) {
                 push @hostfilter,      "Filter: last_check $dateop $date";
                 push @servicefilter,   "Filter: last_check $dateop $date";
