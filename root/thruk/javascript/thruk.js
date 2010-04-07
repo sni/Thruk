@@ -1376,6 +1376,14 @@ var ajax_search = {
         input.blur();   // blur & focus the element, otherwise the first
         input.focus();  // click would result in the browser autocomplete
 
+        var tmpElem = input;
+        while(tmpElem && tmpElem.parentNode) {
+            tmpElem = tmpElem.parentNode;
+            if(tmpElem.tagName == 'FORM') {
+                tmpElem.onsubmit = ajax_search.hide_results;
+            }
+        }
+
         // set type from select
         var type_selector_id = elem.id.replace('_value', '_ts');
         var selector = document.getElementById(type_selector_id);
@@ -1429,8 +1437,18 @@ var ajax_search = {
     },
 
     /* wrapper around suggest() to avoid multiple running searches */
-    suggest: function() {
+    suggest: function(evt) {
         window.clearTimeout(ajax_search.timer);
+
+        // dont suggest on enter
+        evt = (evt) ? evt : ((window.event) ? event : null);
+        if(evt) {
+            var keyCode = evt.keyCode;
+            if(keyCode == 13 || keyCode == 108) {
+                return false;
+            }
+        }
+
         ajax_search.timer = window.setTimeout("ajax_search.suggest_do()", 100);
     },
 
