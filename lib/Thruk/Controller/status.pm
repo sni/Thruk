@@ -969,13 +969,13 @@ sub _get_host_prop_filter {
             push @host_prop_filtername,     'Active Checks';
         }
         if($bits[18]) {  # 262144 - In Hard State
-            push @host_prop_filter,         "Filter: hard_state = 0";
-            push @host_prop_filter_service, "Filter: host_hard_state = 0";
+            push @host_prop_filter,         "Filter: state_type = 1";
+            push @host_prop_filter_service, "Filter: host_state_type = 1";
             push @host_prop_filtername,     'In Hard State';
         }
         if($bits[19]) {  # 524288 - In Soft State
-            push @host_prop_filter,         "Filter: hard_state = 1";
-            push @host_prop_filter_service, "Filter: host_hard_state = 1";
+            push @host_prop_filter,         "Filter: state_type = 0";
+            push @host_prop_filter_service, "Filter: host_state_type = 0";
             push @host_prop_filtername,     'In Soft State';
         }
 
