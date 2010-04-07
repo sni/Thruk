@@ -295,18 +295,34 @@ function addRowSelector(id)
 /* add the event handler */
 function addEventHandler(elem, type) {
     if(type == 'host') {
-        elem.onmouseover = highlightHostRow;
-        elem.onmouseout  = resetHostRow;
+        addEvent(elem, 'mouseover', highlightHostRow);
+        addEvent(elem, 'mouseout',  resetHostRow);
         if(!elem.onclick) {
             elem.onclick = selectHost;
         }
     }
     if(type == 'service') {
-        elem.onmouseover = highlightServiceRow;
-        elem.onmouseout  = resetServiceRow;
+        addEvent(elem, 'mouseover', highlightServiceRow);
+        addEvent(elem, 'mouseout',  resetServiceRow);
         if(!elem.onclick) {
             elem.onclick = selectService;
         }
+    }
+}
+
+/* add additional eventhandler to object */
+function addEvent(obj, evType, fn)
+{
+    if(obj.addEventListener) {
+        obj.addEventListener(evType, fn, false);
+        return true;
+    }
+    else if (obj.attachEvent) {
+        var r = obj.attachEvent("on" + evType, fn);
+        return r;
+    }
+    else {
+        return false;
     }
 }
 
