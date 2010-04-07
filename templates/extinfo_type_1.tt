@@ -137,7 +137,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Current Attempt:</td>
-                            <td class='dataVal'>[% host.current_attempt %]/[% host.max_check_attempts %]&nbsp;&nbsp;([% IF host.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td>
+                            <td class='dataVal'>[% host.current_attempt %]/[% host.max_check_attempts %]&nbsp;&nbsp;([% IF host.hard_state == 1 %]SOFT[% ELSE %]HARD[% END%] state)</td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Check Time:</td>
