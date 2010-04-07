@@ -453,7 +453,7 @@ function show_hypertree_map(id_to_show, w, h) {
 
   var ht = new Hypertree(canvas, {
     Node: {
-      overridable: false,
+      overridable: true,
       type: 'circle',
       color: '#ccb',
       lineWidth: 1,
@@ -463,7 +463,7 @@ function show_hypertree_map(id_to_show, w, h) {
       transform: true
     },
     Edge: {
-      overridable: false,
+      overridable: true,
       type: 'hyperline',
       color: '#ccb',
       lineWidth: 1
@@ -473,6 +473,45 @@ function show_hypertree_map(id_to_show, w, h) {
     transition: Trans.Quart.easeInOut,
     clearCanvas: true,
     withLabels: true,
+
+
+    onCreateLabel: function(domElement, node){
+        domElement.innerHTML = node.name;
+        if(node.data.clickid) {
+            domElement.onclick = function(){
+                ht.onClick(node.data.clickid);
+            };
+        }
+        else {
+            domElement.onclick = function(){
+                ht.onClick(node.id);
+            };
+        }
+    },
+    //Change some label dom properties.
+    //This method is called each time a label is plotted.
+    onPlaceLabel: function(domElement, node){
+        var style = domElement.style;
+        //style.visibility = 'visible';
+        style.cursor = 'pointer';
+        style.height = '';
+        style.width  = '';
+
+        if(node._depth <= 1) {
+            style.fontSize = '0.9em';
+            style.color    = '#000000';
+        }
+        else if(node._depth < 2){
+            style.fontSize = '0.8em';
+            style.color    = '#494949';
+        }else {
+            style.fontSize = '0px';
+            style.height   = '10px';
+            style.width    = '10px';
+        }
+        domElement.onmouseover = function (e){showTip((e||window.event), node)};
+    },
+
   });
 
     var tree = eval('(' + json + ')');
