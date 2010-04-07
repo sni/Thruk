@@ -62,6 +62,7 @@ general:
     - bookmarks
     - show only backends where user has at least permission for one host/service
     - use livestatus wait feature where possible
+    - page by attribute a,b,c,d,e...z
 
 
 reports:
