@@ -11,6 +11,7 @@ general
     - configure url path in config (ex.: /thruk/ )
     - add extra grapher url
     - use title for quick downtimes popups
+    - reload nav frame when changing themes
 
 extinfo:
     - finish performance data on extinfo type 4

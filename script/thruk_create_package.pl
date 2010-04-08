@@ -40,10 +40,8 @@ unless(-d './script/') {
 unlink(glob("*.gz"));
 
 cmd("$perl Makefile.PL");
-cmd("make");
 cmd("make distclean");
 cmd("$perl Makefile.PL");
-cmd("make");
 cmd("make dist");
 
 #########################################################################
@@ -77,8 +75,8 @@ elsif(-d "$ENV{'HOME'}/perl5") {
 if(defined $local_lib and $local_lib ne '') {
   print "creating Thruk-".$version."-".$arch.".tar\n";
   cmd("tar zxf $archive");
-  cmd("rsync --modify-window=120 -a $local_lib/ Thruk-".$version."/local-lib");
-  cmd("tar cvf Thruk-".$version."-".$arch.".tar Thruk-".$version);
+  cmd("rsync --modify-window=300 -a $local_lib/ Thruk-".$version."/local-lib");
+  cmd("tar cf Thruk-".$version."-".$arch.".tar Thruk-".$version);
   cmd("gzip -9 Thruk-".$version."-".$arch.".tar");
   cmd("rm -rf Thruk-".$version);
   print "created Thruk-".$version."-".$arch.".tar.gz\n";
