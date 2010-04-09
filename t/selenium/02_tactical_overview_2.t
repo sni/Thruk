@@ -7,14 +7,15 @@ use Test::Exception;
 
 my $url     = $ENV{SELENIUM_TEST_URL}     || "http://localhost:3000/";
 my $browser = $ENV{SELENIUM_TEST_BROWSER} || "*firefox";
-my $sel = Test::WWW::Selenium->new( host => "localhost", 
-                                    port => 4444, 
-                                    browser => $browser,
+my $host    = $ENV{SELENIUM_TEST_HOST}    || "localhost";
+my $port    = $ENV{SELENIUM_TEST_PORT}    || "4444";
+my $sel = Test::WWW::Selenium->new( host        => $host,
+                                    port        => $port, 
+                                    browser     => $browser,
                                     browser_url => $url
                                   );
 
-$sel->open_ok("/thruk/cgi-bin/status.cgi?hidesearch=2&s0_op=~&s0_type=search&s0_value=n1_test_host_000");
-$sel->title_is("Current Network Status");
+$sel->open_ok("/");
 $sel->click_ok("link=Hosts");
 $sel->wait_for_page_to_load_ok("30000");
 $sel->title_is("Current Network Status");

@@ -7,13 +7,15 @@ use Test::Exception;
 
 my $url     = $ENV{SELENIUM_TEST_URL}     || "http://localhost:3000/";
 my $browser = $ENV{SELENIUM_TEST_BROWSER} || "*firefox";
-my $sel = Test::WWW::Selenium->new( host => "localhost", 
-                                    port => 4444, 
-                                    browser => $browser,
+my $host    = $ENV{SELENIUM_TEST_HOST}    || "localhost";
+my $port    = $ENV{SELENIUM_TEST_PORT}    || "4444";
+my $sel = Test::WWW::Selenium->new( host        => $host,
+                                    port        => $port, 
+                                    browser     => $browser,
                                     browser_url => $url
                                   );
 
-$sel->open_ok("/thruk/");
+$sel->open_ok("/");
 $sel->click_ok("link=Services");
 $sel->wait_for_page_to_load_ok("30000");
 $sel->title_is("Current Network Status");
@@ -86,7 +88,7 @@ WAIT: {
     }
     fail("timeout");
 }
-$sel->text_is("//div[\@id='search-results']/ul/li[1]/b/i", "1 Servicegroups");
+$sel->text_is("//div[\@id='search-results']/ul/li[1]/b/i", "* Servicegroups");
 $sel->click_ok("link=critical");
 $sel->click_ok("s0_btn_accept_search");
 $sel->wait_for_page_to_load_ok("30000");
