@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="" />
+<title>Service Filter</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">Service Filter</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/thruk/</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Services</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Current Network Status</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//tr[@id='r0']/td[4]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//tr[@id='r1']/td[4]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//tr[@id='r2']/td[4]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//tr[@id='r3']/td[4]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//tr[@id='r4']/td[4]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyValue</td>
+	<td>multi_cmd_submit_button</td>
+	<td>submit command for 5 services</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//tr[@id='r0']/td[1]/table/tbody/tr/td[1]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyValue</td>
+	<td>multi_cmd_submit_button</td>
+	<td>submit command for 5 services and 1 host</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>opt1</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>multi_cmd_submit_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Current Network Status</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//div[@id='thruk_message']/table/tbody/tr/td[1]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Commands successfully submitted</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>filter_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_filter_title</td>
+	<td>Display Filters:</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht4</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht8</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht1</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_htn</td>
+	<td>Up</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht4</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_htn</td>
+	<td>Up | Down</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht8</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_htn</td>
+	<td>Up | Down | Unreachable</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht2</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_htn</td>
+	<td>All problems</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht1</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Pending | Down | Unreachable</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>s0_btn_accept_search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Current Network Status</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Display Filters:</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>//td[@id='s0_add_new_filter_button']/img</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//td[@id='s0_add_new_filter_button']/img</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>s0_1_ts</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>s0_1_value</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>s0_1_ts</td>
+	<td>label=Servicegroup</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//select[@id='s0_1_ts']/option[5]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_1_value</td>
+	<td></td>
+</tr>
+<tr>
+	<td>typeKeys</td>
+	<td>s0_1_value</td>
+	<td>cri</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//div[@id='search-results']/ul/li[1]/b/i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>//div[@id='search-results']/ul/li[1]/b/i</td>
+	<td>1 Servicegroups</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=critical</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>s0_btn_accept_search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Current Network Status</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_filter_button_mini</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>filter_button</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Display Filters:</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//table[@id='s0_filterTable']/tbody/tr[7]/td[3]/input</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@name='delete Filter']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht2</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//img[@alt='add new filter']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_ht2</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_ht4</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_ht1</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_htn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht2</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht4</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_ht8</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_ht</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>s0_btn_accept_search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Current Network Status</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_htn</td>
+	<td>Pending</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s1_htn</td>
+	<td>Unreachable</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hpn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp1</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp4</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp16</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp64</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp256</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp1024</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp4096</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp16384</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp65536</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp262144</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_hp</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_hpn</td>
+	<td>In Scheduled Downtime &amp; Has Been Acknowledged &amp; Checks Disabled &amp; Event Handler Disabled &amp; Flap Detection Disabled &amp; Is Flapping &amp; Notifications Disabled &amp; Passive Checks Disabled &amp; Passive Checks &amp; In Hard State</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hpn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp2</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp8</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp32</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp128</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp512</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp2048</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp8192</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp32768</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp131072</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hp524288</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_accept_hp</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s1_hpn</td>
+	<td>Not In Scheduled Downtime &amp; Has Not Been Acknowledged &amp; Checks Enabled &amp; Event Handler Enabled &amp; Flap Detection Enabled &amp; Is Not Flapping &amp; Notifications Enabled &amp; Passive Checks Enabled &amp; Active Checks &amp; In Soft State</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>s0_btn_accept_search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Current Network Status</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s0_hpn</td>
+	<td>In Scheduled Downtime &amp; Has Been Acknowledged &amp; Checks Disabled &amp; Event Handler Disabled &amp; Flap Detection Disabled &amp; Is Flapping &amp; Notifications Disabled &amp; Passive Checks Disabled &amp; Passive Checks &amp; In Hard State</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>s1_hpn</td>
+	<td>Not In Scheduled Downtime &amp; Has Not Been Acknowledged &amp; Checks Enabled &amp; Event Handler Enabled &amp; Flap Detection Enabled &amp; Is Not Flapping &amp; Notifications Enabled &amp; Passive Checks Enabled &amp; Active Checks &amp; In Soft State</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hpn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp1</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp4</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp16</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp64</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp256</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp1024</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp4096</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp16384</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp65536</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_hp262144</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s0_accept_hp</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_hpn</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_accept_hp</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>s1_btn_del_search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>s0_btn_accept_search</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Current Network Status</td>
+	<td></td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
