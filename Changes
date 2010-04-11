@@ -1,6 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
+0.58    Sun Apr 11 16:13:21 CEST 2010
+          - fixed javascript issues with safari and opera
+
 0.56    Fri Apr  9 08:58:43 CEST 2010
           - fixed host acknowledgements
           - fixed problem with date filter in status.cgi

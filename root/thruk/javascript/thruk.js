@@ -311,20 +311,24 @@ function addEventHandler(elem, type) {
 }
 
 /* add additional eventhandler to object */
-function addEvent(obj, evType, fn)
-{
-    if(obj.addEventListener) {
-        obj.addEventListener(evType, fn, false);
-        return true;
-    }
-    else if (obj.attachEvent) {
-        var r = obj.attachEvent("on" + evType, fn);
-        return r;
-    }
-    else {
-        return false;
-    }
+function addEvent( obj, type, fn ) {
+  if ( obj.attachEvent ) {
+    obj['e'+type+fn] = fn;
+    obj[type+fn] = function(){obj['e'+type+fn]( window.event );}
+    obj.attachEvent( 'on'+type, obj[type+fn] );
+  } else
+    obj.addEventListener( type, fn, false );
 }
+
+/* remove an eventhandler from object */
+function removeEvent( obj, type, fn ) {
+  if ( obj.detachEvent ) {
+    obj.detachEvent( 'on'+type, obj[type+fn] );
+    obj[type+fn] = null;
+  } else
+    obj.removeEventListener( type, fn, false );
+}
+
 
 /* returns the first element which has an id */
 function getFirstParentId(elem) {
@@ -861,6 +865,7 @@ function toggleFilterPane() {
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
     additionalParams.set('hidesearch', 2);
+    document.getElementById('hidesearch').value = 2;
   }
   else {
     pane.style.display    = 'none';
@@ -868,6 +873,7 @@ function toggleFilterPane() {
     img.style.display     = '';
     img.style.visibility  = 'visible';
     additionalParams.set('hidesearch', 1);
+    document.getElementById('hidesearch').value = 1;
   }
 }
 
@@ -1642,6 +1648,7 @@ var ajax_search = {
                     el[0].focus();
                 }
             }
+            return false;
         }
         return true;
     },

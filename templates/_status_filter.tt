@@ -1,11 +1,11 @@
 [% SET show_filter_table = 0 IF c.request.parameters.hidesearch == "1" %]
 [% SET show_filter_table = 1 IF c.request.parameters.hidesearch == "2" %]
 <input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
-<form action="[% c.uri %]" method="GET" id="filterForm" onsubmit="document.getElementById('hidesearch').value = '2'">
+<form action="[% c.uri %]" method="GET" id="filterForm">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% c.request.parameters.nav %]">
-<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
-<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
+<input type="hidden" name="hidesearch" id="hidesearch" value="[% c.request.parameters.hidesearch %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% c.request.parameters.hidetop %]">
 <table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr>
 [% FOR search = searches %]
 [% SET prefix = 's' _ loop.index %]
