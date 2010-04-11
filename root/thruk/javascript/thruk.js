@@ -375,7 +375,7 @@ function setRowStyle(row_id, style, type, force) {
 
 /* save current style and change it*/
 function styleElements(elems, style, force) {
-    if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
+    if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
         elems = new Array(elems);
     }
 
@@ -400,9 +400,6 @@ function styleElementsIE(elems, style, force) {
             if(elems[x].className != "tableRowSelected" || force) {
                 // save style in custom attribute
                 if(elems[x].className != "undefined" && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
-                    //var oldClass = '';
-                    //if(elems[x].className) { oldClass = elems[x].className; }
-                    //elems[x].setAttribute('origclass', oldClass);
                     elems[x].setAttribute('origclass', elems[x].className);
                 }
 
@@ -1169,7 +1166,7 @@ function new_filter(cloneObj, parentObj, btnId) {
 
 /* replace ids and names for elements */
 function replaceIdAndNames(elems, new_prefix) {
-  if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
+  if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
     elems = new Array(elems);
   }
   for(var x = 0; x < elems.length; x++) {
@@ -1381,7 +1378,7 @@ var ajax_search = {
         } else if(this.id) {
           elem = this;
         } else {
-          return;
+          return false;
         }
 
         ajax_search.input_field = elem.id;
@@ -1426,7 +1423,7 @@ var ajax_search = {
             }
         });
 
-        document.onkeypress = ajax_search.arrow_keys;
+        document.onkeydown  = ajax_search.arrow_keys;
         document.onclick    = ajax_search.hide_results;
 
         return false;
@@ -1466,6 +1463,7 @@ var ajax_search = {
         }
 
         ajax_search.timer = window.setTimeout("ajax_search.suggest_do()", 100);
+        return true;
     },
 
     /* search some hosts to suggest */
