@@ -220,7 +220,7 @@ function toggleCheckBox(id) {
 // unselect current text seletion
 function unselectCurrentSelection(obj)
 {
-    if (document.selection)
+    if (document.selection && document.selection.empty)
     {
         document.selection.empty();
     }
@@ -228,6 +228,7 @@ function unselectCurrentSelection(obj)
     {
         window.getSelection().removeAllRanges();
     }
+    return true;
 }
 
 /* returns true if the shift key is pressed for that event */
@@ -1362,6 +1363,7 @@ Y8,         88               d8'`8b      88      ,8P d8'           88        88
 Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
+var a;
 var ajax_search = {
     url             : '/thruk/cgi-bin/status.cgi?format=search',
     max_results     : 12,
@@ -1424,7 +1426,11 @@ var ajax_search = {
         ajax_search.initialized = now;
         new Ajax.Request(ajax_search.url, {
             onSuccess: function(transport) {
-                ajax_search.base = transport.responseJSON;
+                if(transport.responseJSON != null) {
+                    ajax_search.base = transport.responseJSON;
+                } else {
+                    ajax_search.base = eval(transport.responseText);
+                }
                 ajax_search.suggest();
             }
         });
