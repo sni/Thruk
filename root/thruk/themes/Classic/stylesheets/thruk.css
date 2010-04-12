@@ -236,7 +236,7 @@ body.summary table.data {
 
 /* command pane */
 div.cmd_pane {
-  width:400px;
+  min-width:400px;
   height:100px;
   visibility:hidden;
   position:fixed;
@@ -245,6 +245,7 @@ div.cmd_pane {
   z-index: 99;
   color: black;
   font-size: 9pt;
+  white-space: nowrap;
 }
 table.cmd_pane {
   margin-top: 0px;

@@ -220,7 +220,7 @@ function toggleCheckBox(id) {
 // unselect current text seletion
 function unselectCurrentSelection(obj)
 {
-    if (document.selection)
+    if (document.selection && document.selection.empty)
     {
         document.selection.empty();
     }
@@ -228,6 +228,7 @@ function unselectCurrentSelection(obj)
     {
         window.getSelection().removeAllRanges();
     }
+    return true;
 }
 
 /* returns true if the shift key is pressed for that event */
@@ -311,20 +312,24 @@ function addEventHandler(elem, type) {
 }
 
 /* add additional eventhandler to object */
-function addEvent(obj, evType, fn)
-{
-    if(obj.addEventListener) {
-        obj.addEventListener(evType, fn, false);
-        return true;
-    }
-    else if (obj.attachEvent) {
-        var r = obj.attachEvent("on" + evType, fn);
-        return r;
-    }
-    else {
-        return false;
-    }
+function addEvent( obj, type, fn ) {
+  if ( obj.attachEvent ) {
+    obj['e'+type+fn] = fn;
+    obj[type+fn] = function(){obj['e'+type+fn]( window.event );}
+    obj.attachEvent( 'on'+type, obj[type+fn] );
+  } else
+    obj.addEventListener( type, fn, false );
 }
+
+/* remove an eventhandler from object */
+function removeEvent( obj, type, fn ) {
+  if ( obj.detachEvent ) {
+    obj.detachEvent( 'on'+type, obj[type+fn] );
+    obj[type+fn] = null;
+  } else
+    obj.removeEventListener( type, fn, false );
+}
+
 
 /* returns the first element which has an id */
 function getFirstParentId(elem) {
@@ -375,7 +380,7 @@ function setRowStyle(row_id, style, type, force) {
 
 /* save current style and change it*/
 function styleElements(elems, style, force) {
-    if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
+    if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
         elems = new Array(elems);
     }
 
@@ -400,9 +405,6 @@ function styleElementsIE(elems, style, force) {
             if(elems[x].className != "tableRowSelected" || force) {
                 // save style in custom attribute
                 if(elems[x].className != "undefined" && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
-                    //var oldClass = '';
-                    //if(elems[x].className) { oldClass = elems[x].className; }
-                    //elems[x].setAttribute('origclass', oldClass);
                     elems[x].setAttribute('origclass', elems[x].className);
                 }
 
@@ -865,6 +867,7 @@ function toggleFilterPane() {
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
     additionalParams.set('hidesearch', 2);
+    document.getElementById('hidesearch').value = 2;
   }
   else {
     pane.style.display    = 'none';
@@ -872,6 +875,7 @@ function toggleFilterPane() {
     img.style.display     = '';
     img.style.visibility  = 'visible';
     additionalParams.set('hidesearch', 1);
+    document.getElementById('hidesearch').value = 1;
   }
 }
 
@@ -1170,7 +1174,7 @@ function new_filter(cloneObj, parentObj, btnId) {
 
 /* replace ids and names for elements */
 function replaceIdAndNames(elems, new_prefix) {
-  if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
+  if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
     elems = new Array(elems);
   }
   for(var x = 0; x < elems.length; x++) {
@@ -1360,6 +1364,7 @@ Y8,         88               d8'`8b      88      ,8P d8'           88        88
 Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
+var a;
 var ajax_search = {
     url             : '/thruk/cgi-bin/status.cgi?format=search',
     max_results     : 12,
@@ -1382,7 +1387,7 @@ var ajax_search = {
         } else if(this.id) {
           elem = this;
         } else {
-          return;
+          return false;
         }
 
         ajax_search.input_field = elem.id;
@@ -1422,12 +1427,16 @@ var ajax_search = {
         ajax_search.initialized = now;
         new Ajax.Request(ajax_search.url, {
             onSuccess: function(transport) {
-                ajax_search.base = transport.responseJSON;
+                if(transport.responseJSON != null) {
+                    ajax_search.base = transport.responseJSON;
+                } else {
+                    ajax_search.base = eval(transport.responseText);
+                }
                 ajax_search.suggest();
             }
         });
 
-        document.onkeypress = ajax_search.arrow_keys;
+        document.onkeydown  = ajax_search.arrow_keys;
         document.onclick    = ajax_search.hide_results;
 
         return false;
@@ -1467,6 +1476,7 @@ var ajax_search = {
         }
 
         ajax_search.timer = window.setTimeout("ajax_search.suggest_do()", 100);
+        return true;
     },
 
     /* search some hosts to suggest */
@@ -1645,6 +1655,7 @@ var ajax_search = {
                     el[0].focus();
                 }
             }
+            return false;
         }
         return true;
     },

@@ -631,6 +631,7 @@ ssi/README
 ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
+t/96_selenium.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
 t/99-Perl-Critic.t
@@ -651,6 +652,17 @@ t/controller_summary.t
 t/controller_tac.t
 t/controller_trends.t
 t/perlcriticrc
+t/selenium/01_tactical_overview.t
+t/selenium/02_tactical_overview_2.t
+t/selenium/10_ajax_search.t
+t/selenium/11_host_commands.t
+t/selenium/12_service_filter.t
+t/selenium/source/00_thruk_selenium_test_suite.html
+t/selenium/source/01_tactical_overview.html
+t/selenium/source/02_tactical_overview_2.html
+t/selenium/source/10_ajax_search.html
+t/selenium/source/11_host_commands.html
+t/selenium/source/12_service_filter.html
 t/TestUtils.pm
 t/view_TT.t
 templates/_ajax_search.tt

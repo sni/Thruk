@@ -91,7 +91,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     my $hidetop = $c->{'request'}->{'parameters'}->{'hidetop'};
-    $c->stash->{hidetop}   = $hidetop;
+    $c->stash->{hidetop}    = $hidetop;
+
+    my $hidesearch = $c->{'request'}->{'parameters'}->{'hidesearch'};
+    $c->stash->{hidesearch} = $hidesearch;
+
 
     return 1;
 }
