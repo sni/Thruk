@@ -109,16 +109,20 @@ sub _process_raw_request {
     if($c->stash->{'output_format'} eq 'search') {
         my(@hostgroups,@servicegroups,@hosts,@services);
         if($c->config->{ajax_search_hostgroups}) {
-            @hostgroups    = keys %{$c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\nColumns: name", 'name' )};
+            my $hostgroups    = $c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::get_auth_filter($c, 'hostgroups')."\nColumns: name", 'name');
+            @hostgroups       = keys %{$hostgroups} if defined $hostgroups;
         }
         if($c->config->{ajax_search_servicegroups}) {
-            @servicegroups = keys %{$c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\nColumns: name", 'name' )};
+            my $servicegroups = $c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::get_auth_filter($c, 'servicegroups')."\nColumns: name", 'name');
+            @servicegroups    = keys %{$servicegroups} if defined $servicegroups;
         }
         if($c->config->{ajax_search_hosts}) {
-            @hosts         = keys %{$c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name", 'name' )};
+            my $hosts         = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: name", 'name');
+            @hosts            = keys %{$hosts} if defined $hosts;
         }
         if($c->config->{ajax_search_services}) {
-            @services      = keys %{$c->{'live'}->selectall_hashref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description' )};
+            my $services      = $c->{'live'}->selectall_hashref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: description", 'description');
+            @services         = keys %{$services} if defined $services;
         }
         my $json = [
               { 'name' => 'hostgroups',    'data' => \@hostgroups    },
