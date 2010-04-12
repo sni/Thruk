@@ -90,6 +90,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{custom_title}   = $custom_title;
     }
 
+    my $hidetop = $c->{'request'}->{'parameters'}->{'hidetop'};
+    $c->stash->{hidetop}    = $hidetop;
+
+    my $hidesearch = $c->{'request'}->{'parameters'}->{'hidesearch'};
+    $c->stash->{hidesearch} = $hidesearch;
+
+
     return 1;
 }
 
