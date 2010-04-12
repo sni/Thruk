@@ -811,6 +811,7 @@ function check_selected_command() {
     }
     if(value == 3) { /* add comment */
         enableFormElement('row_comment');
+        enableFormElement('row_comment_options');
     }
     if(value == 4) { /* add acknowledgement */
         enableFormElement('row_comment');
@@ -826,7 +827,7 @@ function check_selected_command() {
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options');
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options');
     elems.each(function(id) {
         obj = document.getElementById(id);
         obj.style.display = "none";

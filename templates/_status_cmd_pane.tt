@@ -60,6 +60,14 @@
         </table>
       </td>
     </tr>
+    <tr id="row_comment_options">
+      <td class="statusOdd" valign="top">Options:</td>
+      <td class="statusOdd">
+        <table border=0 cellpadding=0 cellspacing=0>
+          <tr><td onclick="javascript:toggleCheckBox('opt5')">Persistent :</td><td><input type='checkbox' id="opt5" name='persistent'[% IF c.config.cmd_defaults.persistent %] checked[% END %]></td></tr>
+        </table>
+      </td>
+    </tr>
     <tr>
       <td class="statusOdd submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="return collectFormData()"></td>
     </tr>
