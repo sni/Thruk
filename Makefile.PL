@@ -69,6 +69,7 @@ requires 'Catalyst::Engine::FastCGI'              => 0;
 requires 'Catalyst::Devel'                        => 1.26;
 requires 'FCGI'                                   => 0.69;
 requires 'FCGI::ProcManager'                      => 0.19;
+requires 'FCGI::ProcManager::MaxRequests'         => 0;
 
 # test requirements make it into the META.yml and will break
 # normal package installation

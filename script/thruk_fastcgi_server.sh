@@ -2,8 +2,6 @@
 #
 # thruk_fastcgi_server.sh : thruk fastcgi daemon start/stop script
 #
-# version : 0.05
-#
 # chkconfig: 2345 84 16
 # description: thruk fastcgi daemon start/stop script
 # processname: fcgi
@@ -76,7 +74,7 @@ start() {
     echo -n $"Starting"
     touch ${LOGFILE}
     echo -n "["`date +"%Y-%m-%d %H:%M:%S"`"] " >> ${LOGFILE}
-    cd ${EXECDIR} && script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -d >> ${LOGFILE} 2>&1 &
+    cd ${EXECDIR} && PM_MAX_REQUESTS=100 ./script/thruk_fastcgi.pl -n ${PROCS} -l ${SOCKET} -p ${PID} -M FCGI::ProcManager::MaxRequests -d >> ${LOGFILE} 2>&1 &
     for i in 1 2 3 4 5 6 7 8 9 0; do
       if [ -f $PID ]; then break; fi
       echo -n '.' && sleep 1;
