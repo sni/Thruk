@@ -82,7 +82,7 @@ start() {
     echo -n " "
     status
     RETVAL=$?
-    [ $RETVAL -eq 0 ] && success || failure $"$prog start"
+    [ $RETVAL -eq 0 ] && success || failure "$prog start"
     return $?
 }
 
@@ -100,12 +100,14 @@ stop() {
 ################################
 status() {
   # show status
-  if [ -f $PID ]; then
+  test -f $PID;
+  rc=$?
+  if [ $rc -eq 0 ]; then
     echo -n "${prog} (pid `/bin/cat $PID`) is running..."
   else
     echo -n "${prog} is stopped"
   fi
-  return $?
+  return $rc
 }
 
 ################################
