@@ -12,6 +12,8 @@ general
     - add extra grapher url
     - use title for quick downtimes popups
     - reload nav frame when changing themes
+    - enable/disable checks/notifications on status.cgi
+    - make quick commands configurable
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -41,6 +43,9 @@ livestatus:
                 Host Escalations
                 Service Dependencies
                 Service Escalations
+
+user docs:
+    - how to add new theme
 
 =========================================================
 ideas for after 1.0

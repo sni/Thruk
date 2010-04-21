@@ -53,9 +53,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
-  %> wget http://www.thruk.org/files/Thruk-0.56-$arch.tar.gz
-  %> tar zxf Thruk-0.56-$arch.tar.gz
-  %> cd Thruk-0.56
+  %> wget http://www.thruk.org/files/Thruk-0.58-$arch.tar.gz
+  %> tar zxf Thruk-0.58-$arch.tar.gz
+  %> cd Thruk-0.58
   %> ./script/thruk_server.pl
 ----
 
@@ -184,6 +184,8 @@ Press <y> at this questions:
   Do you want to build the XS Stash module? [y]
   Do you want to use the XS Stash by default? [y]
 -------
+
+Tell me if someone knows a way to answer this questions automatically.
 
 run perl Makefile.PL again to see if all dependecies are now installed properly.
 
