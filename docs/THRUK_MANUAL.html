@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.4.4" />
+<meta name="generator" content="AsciiDoc 8.5.3" />
 <title>Thruk Users Guide</title>
 <style type="text/css">
 /* Debug borders */
@@ -91,7 +91,7 @@ span#author {
 }
 span#email {
 }
-span#revision {
+span#revnumber, span#revdate, span#revremark {
   font-family: sans-serif;
 }
 
@@ -118,12 +118,14 @@ div#preamble {
 div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
 div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
 div.admonitionblock {
-  margin-top: 1.5em;
+  margin-top: 1.0em;
   margin-bottom: 1.5em;
 }
 div.admonitionblock {
-  margin-top: 2.5em;
-  margin-bottom: 2.5em;
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
 }
 
 div.content { /* Block element content. */
@@ -165,21 +167,21 @@ div.listingblock > div.content {
   padding: 0.5em;
 }
 
-div.quoteblock {
-  padding-left: 2.0em;
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
   margin-right: 10%;
+  border-left: 5px solid #dddddd;
+  color: #777777;
 }
+
 div.quoteblock > div.attribution {
   padding-top: 0.5em;
   text-align: right;
 }
 
-div.verseblock {
-  padding-left: 2.0em;
-  margin-right: 10%;
-}
-div.verseblock > div.content {
-  white-space: pre;
+div.verseblock > pre.content {
+  font-family: inherit;
 }
 div.verseblock > div.attribution {
   padding-top: 0.75em;
@@ -200,17 +202,17 @@ div.admonitionblock .icon {
 }
 div.admonitionblock td.content {
   padding-left: 0.5em;
-  border-left: 2px solid silver;
+  border-left: 3px solid #dddddd;
 }
 
 div.exampleblock > div.content {
-  border-left: 2px solid silver;
-  padding: 0.5em;
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
 }
 
 div.imageblock div.content { padding-left: 0; }
-div.imageblock img { border: 1px solid silver; }
 span.image img { border-style: none; }
+a.image:visited { color: white; }
 
 dl {
   margin-top: 0.8em;
@@ -255,7 +257,7 @@ div.compact div, div.compact div {
 div.tableblock > table {
   border: 3px solid #527bbd;
 }
-thead {
+thead, p.table.header {
   font-family: sans-serif;
   font-weight: bold;
 }
@@ -310,8 +312,40 @@ div.hdlist.compact tr {
   background: yellow;
 }
 
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+
 @media print {
   div#footer-badges { display: none; }
+}
+
+div#toc {
+  margin-bottom: 2.5em;
 }
 
 div#toctitle {
@@ -365,8 +399,8 @@ div.quoteblock-attribution {
   text-align: right;
 }
 
-div.verseblock-content {
-  white-space: pre;
+pre.verseblock-content {
+  font-family: inherit;
 }
 div.verseblock-attribution {
   padding-top: 0.75em;
@@ -374,7 +408,7 @@ div.verseblock-attribution {
 }
 
 div.exampleblock-content {
-  border-left: 2px solid silver;
+  border-left: 3px solid #dddddd;
   padding-left: 0.5em;
 }
 
@@ -383,7 +417,13 @@ div#toc a:visited { color: blue; }
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
-window.onload = function(){generateToc(2)}
+window.onload = function(){asciidoc.footnotes(); asciidoc.toc(2);}
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
 /* Author: Mihai Bazon, September 2002
  * http://students.infoiasi.ro/~mishoo
  *
@@ -395,53 +435,55 @@ window.onload = function(){generateToc(2)}
  */
 
  /* modified by Troy D. Hanson, September 2006. License: GPL */
- /* modified by Stuart Rackham, October 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
 
-function getText(el) {
-  var text = "";
-  for (var i = el.firstChild; i != null; i = i.nextSibling) {
-    if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
-      text += i.data;
-    else if (i.firstChild != null)
-      text += getText(i);
-  }
-  return text;
-}
+// toclevels = 1..4.
+toc: function (toclevels) {
 
-function TocEntry(el, text, toclevel) {
-  this.element = el;
-  this.text = text;
-  this.toclevel = toclevel;
-}
-
-function tocEntries(el, toclevels) {
-  var result = new Array;
-  var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
-  // Function that scans the DOM tree for header elements (the DOM2
-  // nodeIterator API would be a better technique but not supported by all
-  // browsers).
-  var iterate = function (el) {
+  function getText(el) {
+    var text = "";
     for (var i = el.firstChild; i != null; i = i.nextSibling) {
-      if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
-        var mo = re.exec(i.tagName)
-        if (mo)
-          result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
-        iterate(i);
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
       }
     }
+    iterate(el);
+    return result;
   }
-  iterate(el);
-  return result;
-}
 
-// This function does the work. toclevels = 1..4.
-function generateToc(toclevels) {
   var toc = document.getElementById("toc");
-  var entries = tocEntries(document.getElementsByTagName("body")[0], toclevels);
+  var entries = tocEntries(document.getElementById("content"), toclevels);
   for (var i = 0; i < entries.length; ++i) {
     var entry = entries[i];
     if (entry.element.id == "")
-      entry.element.id = "toc" + i;
+      entry.element.id = "_toc_" + i;
     var a = document.createElement("a");
     a.href = "#" + entry.element.id;
     a.appendChild(document.createTextNode(entry.text));
@@ -451,12 +493,63 @@ function generateToc(toclevels) {
     toc.appendChild(div);
   }
   if (entries.length == 0)
-    document.getElementById("header").removeChild(toc);
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  var cont = document.getElementById("content");
+  var noteholder = document.getElementById("footnotes");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      // Use [\s\S] in place of . so multi-line matches work.
+      // Because JavaScript has no s (dotall) regex flag.
+      note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      spans[i].innerHTML =
+        "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+        "' title='View footnote' class='footnote'>" + n + "</a>]";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+}
+
 }
 /*]]>*/
 </script>
 </head>
-<body>
+<body style="max-width:800">
 <div id="header">
 <h1>Thruk Users Guide</h1>
 <div id="toc">
@@ -464,6 +557,7 @@ function generateToc(toclevels) {
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
 </div>
 </div>
+<div id="content">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Thruk is an multibackend monitoring web interface which currently
@@ -558,7 +652,7 @@ Perl Module. Thruk itself is running as a fastcgi process.
 Authentication is provided by the Apache webserver (For example with
 mod_auth).</p></div>
 <div class="paragraph"><div class="title">Thruk Architecture</div><p><span class="image">
-<img alt="Thruk Architecture" title="Thruk Architecture" src="data:image/png;base64,
+<img alt="Thruk Architecture" src="data:image/png;base64,
 iVBORw0KGgoAAAANSUhEUgAAASwAAAF4CAIAAABhAFPDAAAKQ2lDQ1BJQ0MgcHJvZmlsZQAAeNqd
 U3dYk/cWPt/3ZQ9WQtjwsZdsgQAiI6wIyBBZohCSAGGEEBJAxYWIClYUFRGcSFXEgtUKSJ2I4qAo
 uGdBiohai1VcOO4f3Ke1fXrv7e371/u855zn/M55zw+AERImkeaiagA5UoU8Otgfj09IxMm9gAIV
@@ -1009,7 +1103,7 @@ NEiTjfP2vWn8cf+N9IjPf/eTgw78b1Ut++t+tw3d+drB208Yf+Jziipfdu5DO466esfREx/77zxZ
 lQQRMYmlGseNvfb2f86JRsOrfvy+37ZXfjA/oytM0ZR4IqJrkhCCC1AUpXu38DVH3HD5vxdWR1Rd
 U7ggRZMVRWldtnT0thO+bSZFYtFYKF4dkpil35NjEHfsCq5BzbEHONbH4nMg+Okdd0KIgglNiLqu
 y5KMDD/88MMJEyb4V7n2dtLp9DXXXPPJx59omhYKhRRFIdv7ge6f9VBwx3bvGvHJcyEUdXI9X7Ld
-IIlggxujP9zhriVycLjJ8xNqmqZp2ozp06upUKrVJGWbc5G2P6MV5uRGA4MBNYmB+9MnC72Hh
+IIlggxujP9zhriVycLjJ8xNqmqZp2ozp06+++upUKrVJGWbc5G2P6MV5uRGA4MBNYmB+9MnC72Hh
 jc8OORCS701dKCv09rT5mx2y8059wlq3LsDN6R/PzXTZ5qBt2EWnP9T/05t26QY5AWDkv5i57MOv
 Xzn/9J2v+9vzC35qXdFohkPqF9O+fuylb/c7Yrexw3oIIWa89/m3q43JM+v2GG+uXrhi1pLsyGF9
 5syYb0TjW4dpXkNbhkM0BHff/foPLXDOmft0VQxTFEAYYSF/GrSDglGIfOlJVoJb7NbACAUBCWCI
@@ -1031,7 +1125,7 @@ WFGXbk2JlTwLAjkBcpFpy1T13/7qk1oPGDfglSvAMETtlj3n/nP6Rx/2e/791t0v6x5uql72/Myn
 n615fy7sIyHKvPWnZXc9+N/pM1cN2g0FgQGgVMdjBiQGDXzkqlGTXpjRt1rKG1x4UNk+RjUX/cii
 GrSkGmFBlVkQv45DVDjrgbBbMDmFFHxxUe8PmwZKDEKSGVIFgOyHDLJUlBkzZqyNdVTTNKuiC21C
 oZBMBD8txO++TzI0jjmKkHFBnCw6Irfn/r75eo7r+ZJtfnLbSeUl3dqgdL9uf7ggImqa8l7uny/I
-QoCmy7JE4RD6rCxExDn/8ssv12igds+XZTmfz2eYb3TBTmiTUtr74Ep7JAex0ER+JyDDZ8M1r
+QoCmy7JE4RD6rCxExDn/8ssv12igds+XZTmfz2+++eYb3TBTmiTUtr74Ep7JAex0ER+JyDDZ8M1r
 uuqieuDwWy764ZmpkVyWRu/Q98MZc79L5/tsN/CkI4dtt+NWH3357b0z8dT/O/qsv2xb35ADSTKZ
 MmzY5jyP59y8b+vKVduO7BLF/CGXnvzugkeOOfrRfn8Y/39/2l5O9Zk89f5bH5+5+VZdt4zjdnuP
 3/uBHx5/4qdho7bou3WNCfKOvRKyVv3Be+ecevG/Dzx0ejg+6Mg/Mp4zuQUGAH6rHfnA261r9JX6
@@ -1068,13 +1162,13 @@ RsQsDYeEpRMSkbASCHAjXHJZDQEXQARo45+77HztklFsKn5Cn0JYbIkgAm4SkpVI7SdI942BBzri
 s62io0uLIgXEesg9EtygGOPP0i4e2iBX7Hrvj2UdBQfAD9b7SkjEiJidLGDrhCQprS0ZAiC+ES65
 rIZAcEAAiUjyo2G1BzSyyfgJOyAAMznFwyyVzkU1SVBBrrkNjFDahuiLhYAg4XzAqAal5r6f9bkA
 uaS0lrI++5MzeEjm5IPeKaE5/bKVED3wDgIAo62tx17jPvv0ux2GD8xz89e/5DIaAgEESEIgWUEz
-ztNro61twiuhG52AhcnQbRm+W3/1o4f3BI5NtmWJsED/jeiELIJVIpw5kkAVcRqVItUqSC3Zc
+ztNro61twiuhG52AhcnQbRm+W3/1o4+++f3BI5NtmWJsED/jeiELIJVIpw5kkAVcRqVItUqSC3Zc
 8Zf1h4hW1KUT2RWyHM6LUobRX7wSIhAjwYRwk+x4NlszcNCcT/81bNQ2XBgle77hLrmshkCS2LJl
 dV236ityOcmfWUwExH85b3kZr4Qu1o9D0U5OilMqx/ccHD/3tffH/24n0xSMMY/YMpiYSb43JziJ
 US5rPATwufywk170lP/komYd7AMfpSV5Zu710x8iiFeH73rgrV17GsAklzdpfToIAYCACWIgwE18
 FdB/hyGTnzcPa0lKisq5+NUuuayGgHNeFQs/cM9/uo0/zmxtRRBoQ0lZrysGm8TG2n00yIVccxHI
 AYFkhoJJZ+7EzzzrPi0cCYVDiMxJtCdnB32MPC7VDnG7yCYY8QGkO6BGopBrac3NUkGzQGtZscP+
-CAJJUavjVcFlu5pQ9tq3NGUQbBPoXEYhZ2OboIj0Rz2RGn3v2kUdel01lwmEdkbn930CXXG5D
+CAJJUavjVc+++Flu5pQ9tq3NGUQbBPoXEYhZ2OboIj0Rz2RGn3v2kUdel01lwmEdkbn930CXXG5D
 IMksEY+9POn9t75Pb7v7SBAcgRhad0kgEG76Lgq/ru1kglmYT3kDBvaJ/R3bLjvjht0OGLPH7tvF
 axOesaog5oEgQLYcCKMPqvGIAQN5BxWhFFF2ezCZP78/iJjL5uZ89cPkyTM2a/12wpGbt2aE+9Yv
 zVv7C3RCAEAiRgX9pNoeXQ978smL7rh7z0GJcfuO6l4bDdhJ/NCgnn8A/TE4AMAcAyZ4ISkiEIFR
@@ -2523,9 +2617,11 @@ Change the paths to your needs.</p></div>
 <div class="paragraph"><p>Socat will then connect to the remote host on port 9999 and listen on the local unix socket. The tcp connection is encrypted.
 You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></div>
 </div>
+</div>
+<div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-04-21 14:36:53 CEST
+Last updated 2010-04-22 09:18:31 CEST
 </div>
 </div>
 </body>
