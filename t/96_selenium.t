@@ -13,6 +13,7 @@ my $core_conf = 't/selenium/server.conf';
 eval "use Test::WWW::Selenium";
 plan skip_all => 'Test::WWW::Selenium required' if $@;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+plan skip_all => 'Author test. Set $ENV{TEST_SELENIUM} to a true value to run.' unless $ENV{TEST_SELENIUM};
 
 my $conf   = new Config::General(
                           -ConfigFile => $core_conf,
