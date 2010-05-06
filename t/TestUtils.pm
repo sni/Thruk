@@ -12,6 +12,12 @@ use Test::More;
 
 BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
+my $use_html_lint = 0;
+eval { 
+    require HTML::Lint;
+    $use_html_lint = 1;
+};
+
 #########################
 sub get_test_servicegroup {
     my $request = request('/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview');
@@ -128,11 +134,13 @@ sub test_page {
 
     # html valitidy
     SKIP: {
-        eval { require HTML::Lint };
 
-        skip "HTML::Lint not installed", 2 if $@;
-
-        skip "no HTML::Lint for: ".$content_type, 2 if $content_type !~ 'text\/html';
+        if($use_html_lint == 0) {
+            skip "no HTML::Lint installed", 2;
+        }
+        if($content_type !~ 'text\/html') {
+            skip "no HTML::Lint for: ".$content_type, 2;
+        }
 
         my $lint = new HTML::Lint;
         isa_ok( $lint, "HTML::Lint" );
