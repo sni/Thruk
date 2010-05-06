@@ -208,10 +208,14 @@ sub _check_for_commands {
         my $comment_author          = $c->user->username;
         $comment_author             = $c->user->alias if defined $c->user->alias;
         $c->stash->{comment_author} = $comment_author;
-        $c->stash->{referer}        = $c->{'request'}->{'parameters'}->{'referer'} || $c->{'request'}->{'headers'}->{'referer'} || '';
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
 
+        # set a valid referer
+        my $referer                 = $c->{'request'}->{'parameters'}->{'referer'} || $c->{'request'}->{'headers'}->{'referer'} || '';
+        $referer                    =~ s/&amp;/&/gmx;
+        $referer                    =~ s/&/&amp;/gmx;
+        $c->stash->{referer}        = $referer;
     }
 
     return 1;

@@ -43,13 +43,11 @@
                       <tr>
                         <td>Send command to backend:</td>
                         <td>
-                          <form action="extinfo.cgi" method="GET">
-                            <select name="backend" size="5" multiple>
-                              [% FOREACH b IN backends %]
-                                <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% backend_detail.$b.name %]</option>
-                              [% END %]
-                            </select>
-                          </form>
+                          <select name="backend" size="5" multiple>
+                            [% FOREACH b IN backends %]
+                              <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% backend_detail.$b.name %]</option>
+                            [% END %]
+                          </select>
                         </td>
                       </tr>
                       <tr>
