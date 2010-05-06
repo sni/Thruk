@@ -365,17 +365,35 @@ sure the webserver user has access to all files and perl modules.
 .Apache configuration with mod_fcgid
 -------
 LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
-Alias /thruk /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/
-<Location /thruk>
-    Options ExecCGI
-    Order allow,deny
-    Allow from all
-    AddHandler fcgid-script .pl
-    AuthName "Monitoring Access"
-    AuthType Basic
-    AuthUserFile /home/thruk/Thruk/htpasswd.users
-    Require valid-user
-</Location>
+<VirtualHost *:80>
+    ServerName   thruk.company.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    <Directory /home/thruk/Thruk/root/>
+        order allow,deny
+        allow from all
+    </Directory>
+
+    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
+    <Location /thruk>
+        Options ExecCGI
+        Order allow,deny
+        Allow from all
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Require valid-user
+    </Location>
+
+    <IfModule mod_fcgid.c>
+      AddHandler fcgid-script .pl
+      MaxRequestsPerProcess 100
+    </IfModule>
+
+</VirtualHost>
 -------
 
 

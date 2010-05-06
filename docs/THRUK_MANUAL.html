@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.3" />
+<meta name="generator" content="AsciiDoc 8.5.2" />
 <title>Thruk Users Guide</title>
 <style type="text/css">
 /* Debug borders */
@@ -180,8 +180,8 @@ div.quoteblock > div.attribution {
   text-align: right;
 }
 
-div.verseblock > pre.content {
-  font-family: inherit;
+div.verseblock > div.content {
+  white-space: pre;
 }
 div.verseblock > div.attribution {
   padding-top: 0.75em;
@@ -399,8 +399,8 @@ div.quoteblock-attribution {
   text-align: right;
 }
 
-pre.verseblock-content {
-  font-family: inherit;
+div.verseblock-content {
+  white-space: pre;
 }
 div.verseblock-attribution {
   padding-top: 0.75em;
@@ -2116,17 +2116,35 @@ sure the webserver user has access to all files and perl modules.</td>
 <div class="title">Apache configuration with mod_fcgid</div>
 <div class="content">
 <pre><tt>LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
-Alias /thruk /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/
-&lt;Location /thruk&gt;
-    Options ExecCGI
-    Order allow,deny
-    Allow from all
-    AddHandler fcgid-script .pl
-    AuthName "Monitoring Access"
-    AuthType Basic
-    AuthUserFile /home/thruk/Thruk/htpasswd.users
-    Require valid-user
-&lt;/Location&gt;</tt></pre>
+&lt;VirtualHost *:80&gt;
+    ServerName   thruk.company.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    &lt;Directory /home/thruk/Thruk/root/&gt;
+        order allow,deny
+        allow from all
+    &lt;/Directory&gt;
+
+    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
+    &lt;Location /thruk&gt;
+        Options ExecCGI
+        Order allow,deny
+        Allow from all
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Require valid-user
+    &lt;/Location&gt;
+
+    &lt;IfModule mod_fcgid.c&gt;
+      AddHandler fcgid-script .pl
+      MaxRequestsPerProcess 100
+    &lt;/IfModule&gt;
+
+&lt;/VirtualHost&gt;</tt></pre>
 </div></div>
 </div>
 <h2 id="_configuration_2">Configuration</h2>
@@ -2621,7 +2639,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-04-22 09:18:31 CEST
+Last updated 2010-05-06 19:02:56 CEST
 </div>
 </div>
 </body>
