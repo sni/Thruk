@@ -1,6 +1,5 @@
 [% IF use_pager AND pager %]
 
-  <br>
   <form action="/[% c.request.path %]" method="GET">
   [% FOREACH par = c.request.query_params.keys %]
     [% NEXT IF par == 'entries' %]
@@ -26,6 +25,7 @@
   [% END %]
 
   [% IF pages > 1 %]
+  <br>
   <input type="hidden" name="page" value="[% current_page %]">
   [% IF pager.previous_page %]
     <input type="image" src="/thruk/themes/[% theme %]/images/resultset_first.png" name="first" alt="first" value="1" class="pager_input_img"><input type="image" src="/thruk/themes/[% theme %]/images/resultset_previous.png" name="previous" alt="previous" value="1" class="pager_input_img">&nbsp;
