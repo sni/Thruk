@@ -1044,13 +1044,16 @@ sub page_data {
     my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
 
     # we dont use paging at all?
-    unless($c->stash->{'use_pager'} and defined $entries and $entries ne 'all' and $entries > 0) {
+    if(!$c->stash->{'use_pager'} or !defined $entries) {
         $c->stash->{'data'}  = $data,
         return 1;
     }
 
+    $c->stash->{'entries_per_page'} = $entries;
+
     my $pager = new Data::Page;
     $pager->total_entries(scalar @{$data});
+    if($entries eq 'all') { $entries = $pager->total_entries; }
     my $pages = POSIX::ceil($pager->total_entries / $entries);
 
     if(exists $c->{'request'}->{'parameters'}->{'next'}) {
@@ -1069,7 +1072,6 @@ sub page_data {
     if($page < 0)      { $page = 1;      }
     if($page > $pages) { $page = $pages; }
 
-    $c->stash->{'entries_per_page'} = $entries;
     $c->stash->{'current_page'}     = $page;
 
     if($entries eq 'all') {
