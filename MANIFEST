@@ -9,12 +9,18 @@ docs/development/tables/contacts.txt
 docs/development/tables/downtimes.txt
 docs/development/tables/hostgroups.txt
 docs/development/tables/hosts.txt
+docs/development/tables/hostsbygroup.txt
 docs/development/tables/log.txt
 docs/development/tables/servicegroups.txt
 docs/development/tables/services.txt
+docs/development/tables/servicesbygroup.txt
+docs/development/tables/servicesbyhostgroup.txt
 docs/development/tables/status.txt
+docs/development/tables/thruk_update_table_docs.pl
 docs/development/tables/timeperiods.txt
 docs/development/TODO
+docs/FAQ.html
+docs/FAQ.txt
 docs/source/arch.graffle
 docs/source/arch.png
 docs/source/arch_preview.png
@@ -68,6 +74,7 @@ MANIFEST			This list of files
 META.yml
 README
 root/favicon.ico
+root/index.html
 root/robots.txt
 root/thruk/documentation.html
 root/thruk/images/trendshost.png
