@@ -17,8 +17,13 @@
     [% NEXT IF par == 'last' %]
     [% NEXT IF par == 'last.x' %]
     [% NEXT IF par == 'last.y' %]
+    [% NEXT IF par == 'update' %]
+    [% NEXT IF par == 'update.x' %]
+    [% NEXT IF par == 'update.y' %]
     [% NEXT IF par == 'page' %]
-    <input type="hidden" name="[% par %]" value="[% c.request.query_params.$par %]">
+    [% FOR value IN c.request.query_params.$par.list %]
+      <input type="hidden" name="[% par %]" value="[% value %]">
+    [% END %]
   [% END %]
   <input type="hidden" name="page" value="[% current_page %]">
   [% IF pager.previous_page %]
@@ -59,7 +64,7 @@
     &nbsp;<input type="image" src="/thruk/themes/[% theme %]/images/resultset_next.png" name="next" alt="next" value="1" class="pager_input_img"><input type="image" src="/thruk/themes/[% theme %]/images/resultset_last.png" name="last" alt="last" value="1" class="pager_input_img">
   [% END %]
 
-  [% IF pager.total_entries > 100 %]
+  [% IF paging_steps.0 && pager.total_entries > paging_steps.0 %]
     &nbsp;&nbsp;
     <select name="entries" onChange="this.form.submit()">
       [% FOR step = paging_steps %]
