@@ -27,6 +27,7 @@ requires 'Path::Class'                            => 0.18;
 requires 'Config::General'                        => 2.44;
 requires 'File::Copy::Recursive'                  => 0.38;
 requires 'Scalar::Util'                           => 1.21;
+requires 'URI::Escape'                            => 0;
 requires 'parent'                                 => 0.223;
 requires 'Moose'                                  => 0.98;
 requires 'MooseX::MethodAttributes::Inheritable'  => 0.20;

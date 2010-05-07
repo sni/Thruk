@@ -138,18 +138,16 @@ sub test_page {
         if($use_html_lint == 0) {
             skip "no HTML::Lint installed", 2;
         }
-        if($content_type !~ 'text\/html') {
-            skip "no HTML::Lint for: ".$content_type, 2;
+        if($content_type =~ 'text\/html') {
+            my $lint = new HTML::Lint;
+            isa_ok( $lint, "HTML::Lint" );
+
+            $lint->parse( $content );
+            my @errors = $lint->errors;
+            @errors = diag_lint_errors_and_remove_some_exceptions($lint);
+            is( scalar @errors, 0, "No errors found in HTML" );
+            $lint->clear_errors();
         }
-
-        my $lint = new HTML::Lint;
-        isa_ok( $lint, "HTML::Lint" );
-
-        $lint->parse( $content );
-        my @errors = $lint->errors;
-        @errors = diag_lint_errors_and_remove_some_exceptions($lint);
-        is( scalar @errors, 0, "No errors found in HTML" );
-        $lint->clear_errors();
     }
 
     # check for missing images / css or js
