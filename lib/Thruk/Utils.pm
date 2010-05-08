@@ -1208,13 +1208,13 @@ sub set_can_submit_commands {
     }
 
     # override can_submit_commands from cgi.cfg
-    if(grep 'authorized_for_all_host_commands', @{$c->request->{'user'}->{'roles'}}) {
+    if(grep /authorized_for_all_host_commands/, @{$c->request->{'user'}->{'roles'}}) {
         $can_submit_commands = 1;
     }
-    elsif(grep 'authorized_for_all_service_commands', @{$c->request->{'user'}->{'roles'}}) {
+    elsif(grep /authorized_for_all_service_commands/, @{$c->request->{'user'}->{'roles'}}) {
         $can_submit_commands = 1;
     }
-    elsif(grep 'authorized_for_system_commands', @{$c->request->{'user'}->{'roles'}}) {
+    elsif(grep /authorized_for_system_commands/, @{$c->request->{'user'}->{'roles'}}) {
         $can_submit_commands = 1;
     }
 
