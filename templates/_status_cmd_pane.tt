@@ -47,6 +47,15 @@
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td onclick="javascript:toggleCheckBox('opt1')">Force Check:</td><td><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
+          <tr><td>Spread Checks:</td><td>
+            <select name="spread">
+              <option value="0">no</option>
+              <option value="10">10 Seconds</option>
+              <option value="30">30 Seconds</option>
+              <option value="60"> 1 Minute</option>
+              <option value="300"> 5 Minutes</option>
+            </select>
+          </td></tr>
         </table>
       </td>
     </tr>
