@@ -14,7 +14,6 @@ general
     - reload nav frame when changing themes
     - enable/disable checks/notifications on status.cgi
     - make quick commands configurable
-    - spread checks over time when scheduling huge amount of checks
 
 extinfo:
     - finish performance data on extinfo type 4
