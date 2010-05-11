@@ -1811,6 +1811,18 @@ sub _html_escape {
 }
 
 
+########################################
+# used to escape html tags so it can be used as javascript string
+sub _escape_quotes {
+    my $text = shift;
+    $text = HTML::Entities::encode($text);
+    $text =~ s/&amp;quot;/&quot;/gmx;
+    $text =~ s/&amp;gt;/>/gmx;
+    $text =~ s/&amp;lt;/</gmx;
+    return $text;
+}
+
+
 1;
 
 =head1 AUTHOR
