@@ -3,6 +3,9 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.60    Thu May  6 19:32:14 CEST 2010
           - moved logging configuration into separate file
+          - added spread checks option when rescheduling many services/hosts
+          - fixed problem with display of quotes in popups when escape_html_tags disabled
+          - fixed problem with display of very long performance data
           - fixed problem with start_page and absolute uris
           - fixed problem with sending command in IE
           - fixed problem with reseting pager on filter change
