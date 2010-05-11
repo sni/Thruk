@@ -460,6 +460,9 @@ table.filter > tbody > tr > td {
 .dataVal {
   white-space: nowrap;
 }
+td.stateInfoTable1 .dataVal {
+  white-space: normal;
+}
 
 /* Search result suggestions */
 #search-results {
