@@ -31,9 +31,13 @@ Main Features / Advantages
 
 == How it works
 
-Thruk is written in Perl using the http://www.catalystframework.org[Catalyst Framework]. Backend
-monitoring systems will be connected with the http://search.cpan.org/dist/Monitoring-Livestatus[Monitoring::Livestatus]
+Thruk is written in Perl using the
+http://www.catalystframework.org[Catalyst Framework]. Backend
+monitoring systems will be connected with the
+http://search.cpan.org/dist/Monitoring-Livestatus[Monitoring::Livestatus]
 Perl Module. Thruk itself is running as a fastcgi process.
+Availability will be calculated with
+http://search.cpan.org/dist/Monitoring-Availability[Monitoring::Availability].
 Authentication is provided by the Apache webserver (For example with
 mod_auth).
 
@@ -399,10 +403,11 @@ LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
 
 == Configuration
 
-Configuration is managed mainly in two configuration files.
+Configuration is managed mainly in three configuration files.
 
   * thruk_local.conf
   * cgi.cfg
+  * log4perl.conf
 
 === thruk_local.conf
 
@@ -690,23 +695,6 @@ ex.:
   </Component>
 
 
-==== Component Catalyst::Log::Log4perl
-Basically a normal log4perl configuration. You can configure whatever is
-possible in log4perl. Refer to the log4perl manual for detailed information.
-
-ex.:
-
-  <Component Catalyst::Log::Log4perl>
-    conf = log4perl.logger=ALL, ErrorLog, DebugLog
-
-    conf = log4perl.appender.ErrorLog=Log::Dispatch::File
-    conf = log4perl.appender.ErrorLog.filename=logs/error.log
-    conf = log4perl.appender.ErrorLog.mode=append
-    conf = log4perl.appender.ErrorLog.Threshold=ERROR
-    conf = log4perl.appender.ErrorLog.layout=Log::Log4perl::Layout::PatternLayout
-    conf = log4perl.appender.ErrorLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n
-  </Component>
-
 
 
 
@@ -859,6 +847,37 @@ commands.
 ex.:
 
   lock_author_names = 1
+
+
+
+=== log4perl.conf
+
+This file contains the log4perl configuration. You can configure whatever is
+possible in log4perl. Refer to the log4perl manual for detailed
+information:
+http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html
+There is a log4perl.conf.example file shiped with the package.
+
+ex.:
+
+ log4perl.logger=ALL, ErrorLog, DebugLog
+ log4perl.appender.ErrorLog=Log::Dispatch::File
+ log4perl.appender.ErrorLog.filename=/home/thruk/Thruk/logs/error.log
+ log4perl.appender.ErrorLog.mode=append
+ log4perl.appender.ErrorLog.Threshold=ERROR
+ log4perl.appender.ErrorLog.layout=Log::Log4perl::Layout::PatternLayout
+ log4perl.appender.ErrorLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n
+
+
+[TIP]
+.command logging
+=======
+if you want to log all sent commands, just set the loglevel to INFO.
+
+ex.: log4perl.appender.ErrorLog.Threshold=INFO
+=======
+
+
 
 
 
