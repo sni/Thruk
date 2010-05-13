@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.3" />
+<meta name="generator" content="AsciiDoc 8.5.2" />
 <title>Frequently Asked Questions</title>
 <style type="text/css">
 /* Debug borders */
@@ -180,8 +180,8 @@ div.quoteblock > div.attribution {
   text-align: right;
 }
 
-div.verseblock > pre.content {
-  font-family: inherit;
+div.verseblock > div.content {
+  white-space: pre;
 }
 div.verseblock > div.attribution {
   padding-top: 0.75em;
@@ -399,8 +399,8 @@ div.quoteblock-attribution {
   text-align: right;
 }
 
-pre.verseblock-content {
-  font-family: inherit;
+div.verseblock-content {
+  white-space: pre;
 }
 div.verseblock-attribution {
   padding-top: 0.75em;
@@ -569,9 +569,6 @@ releases.</p></div>
 <div class="paragraph"><p>Authentication is done by the webserver, so authentication is only available
 with the fastcgi version.</p></div>
 </div>
-<h2 id="_installation">Installation</h2>
-<div class="sectionbody">
-</div>
 <h2 id="_usage">Usage</h2>
 <div class="sectionbody">
 <h3 id="_how_do_i_select_hosts_services_on_the_status_page">How do i select hosts/services on the status page?</h3><div style="clear:left"></div>
@@ -588,11 +585,43 @@ like.</p></div>
 physically from <em>root/thruk/themes/</em>. Make sure you replace symlinks from other
 themes with proper files if you remove the Classic theme.</p></div>
 </div>
+<h2 id="_installation">Installation</h2>
+<div class="sectionbody">
+<h3 id="_how_can_i_enable_debug_mode">How can i enable debug mode?</h3><div style="clear:left"></div>
+<h4 id="_thruk_server">Thruk Server</h4>
+<div class="paragraph"><p>For a quick test without authorization, you can start the thruk server
+with <em>./script/thruk_server.pl -d</em>. Make sure your log4perl.conf has
+DEBUG theshold configured. You can also move your log4perl.conf away,
+so all debug output will be sent to the terminal.</p></div>
+<h4 id="_fastcgi_server">FastCGI Server</h4>
+<div class="paragraph"><p>This is a bit more complicate.
+First you have to enable debuging for your thruk application.
+Add <em>-Debug</em> to the use Catalyst in your lib/Thruk.pm. The part
+should look like this:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  use Catalyst qw/
+                -Debug
+                Unicode::Encoding
+                Authentication
+                Authorization::ThrukRoles
+                CustomErrorMessage
+                ConfigLoader
+                StackTrace
+                Static::Simple
+                Redirect
+                Compress::Gzip
+                /;
+  our $VERSION = '0.60';</tt></pre>
+</div></div>
+<div class="paragraph"><p>Then make sure you have a log4perl.conf with DEBUG threshold configured.
+Finally restart your fastcgi server.</p></div>
+</div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-05-10 15:37:30 CEST
+Last updated 2010-05-13 17:55:21 CEST
 </div>
 </div>
 </body>

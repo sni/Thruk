@@ -14,6 +14,9 @@ general
     - reload nav frame when changing themes
     - enable/disable checks/notifications on status.cgi
     - make quick commands configurable
+    - delay page delivery for a few seconds after core reload (all
+      servics are pending otherwise) Could be done after backend
+      status select
 
 extinfo:
     - finish performance data on extinfo type 4
