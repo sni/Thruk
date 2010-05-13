@@ -663,6 +663,26 @@ ex.:
   datetime_format_trends = %a %b %e %H:%M:%S %Y
 
 
+==== datetime_format_today
+Default timeformat for todays date. Can be useful if you want a
+shorter date format for today.
+
+ex.:
+
+  datetime_format_today = %H:%M:%S
+
+
+==== info_popup_event_type
+On which event should the comments / downtime or longpluginout popup
+show up. Valid values are onclick or onmouseover.
+
+ex.:
+
+  info_popup_event_type = onmouseover
+
+
+
+
 ==== Component Monitoring::Livestatus
 Enter your livestatus connection settings here. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.

@@ -12,9 +12,12 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $conf = get_thruk_conf();
 my $docs = get_docs();
 for my $key (keys %{$conf}) {
+    next if $key eq 'Component';
     is($docs->{$key}, 1, $key);
 }
-#print Dumper($docs);
+for my $key (keys %{$conf->{'Component'}}) {
+    is($docs->{"Component $key"}, 1, $key);
+}
 
 done_testing();
 
