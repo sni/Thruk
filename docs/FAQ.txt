@@ -22,11 +22,6 @@ with the fastcgi version.
 
 
 
-== Installation
-
-
-
-
 == Usage
 
 === How do i select hosts/services on the status page?
@@ -50,3 +45,39 @@ like.
 This is not possible at the moment. However, you could remove the theme
 physically from 'root/thruk/themes/'. Make sure you replace symlinks from other
 themes with proper files if you remove the Classic theme.
+
+
+
+
+== Installation
+
+=== How can i enable debug mode?
+==== Thruk Server
+For a quick test without authorization, you can start the thruk server
+with './script/thruk_server.pl -d'. Make sure your log4perl.conf has
+DEBUG theshold configured. You can also move your log4perl.conf away,
+so all debug output will be sent to the terminal.
+
+==== FastCGI Server
+This is a bit more complicate.
+First you have to enable debuging for your thruk application.
+Add '-Debug' to the use Catalyst in your lib/Thruk.pm. The part
+should look like this:
+------------------
+  use Catalyst qw/
+                -Debug
+                Unicode::Encoding
+                Authentication
+                Authorization::ThrukRoles
+                CustomErrorMessage
+                ConfigLoader
+                StackTrace
+                Static::Simple
+                Redirect
+                Compress::Gzip
+                /;
+  our $VERSION = '0.60';
+------------------
+
+Then make sure you have a log4perl.conf with DEBUG threshold configured. 
+Finally restart your fastcgi server.
