@@ -1,11 +1,12 @@
-[% SET show_filter_table = 0 IF c.request.parameters.hidesearch == "1" %]
-[% SET show_filter_table = 1 IF c.request.parameters.hidesearch == "2" %]
+[% SET show_filter_table = 0 IF hidesearch == "1" %]
+[% SET show_filter_table = 1 IF hidesearch == "2" %]
 <input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
-<form action="[% c.uri %]" method="GET" id="filterForm" onsubmit="document.getElementById('hidesearch').value = '2'">
+<form action="[% c.uri %]" method="GET" id="filterForm">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% c.request.parameters.nav %]">
+[% IF c.request.parameters.entries %]<input type="hidden" name="entries" value="[% c.request.parameters.entries %]">[% END %]
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
-<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% c.request.parameters.hidetop %]">
 <table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr>
 [% FOR search = searches %]
 [% SET prefix = 's' _ loop.index %]
@@ -299,7 +300,7 @@
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>
           </td>
-          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% prefix %]_value" id="[% prefix %]_[% loop.index %]_value" value="[% s.value %]"><a id="[% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% prefix %]_value" id="[% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
           <td align="right" class='filterValueNoHighlight'><input type="image" src="/thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
             <script type="text/javascript">
             <!--

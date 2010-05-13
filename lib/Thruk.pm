@@ -27,7 +27,7 @@ use Catalyst qw/
                 Redirect
                 Compress::Gzip
                 /;
-our $VERSION = '0.54';
+our $VERSION = '0.60';
 
 ###################################################
 # Configure the application.
@@ -41,7 +41,7 @@ our $VERSION = '0.54';
 my $project_root = __PACKAGE__->config->{home};
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'April 2, 2010',
+                    'released'               => 'May 06, 2010',
                     'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
@@ -61,6 +61,7 @@ __PACKAGE__->config('name'                   => 'Thruk',
                                                 'uri'          => \&Thruk::Utils::uri,
                                                 'uri_with'     => \&Thruk::Utils::uri_with,
                                                 'html_escape'  => \&Thruk::Utils::_html_escape,
+                                                'escape_quotes'=> \&Thruk::Utils::_escape_quotes,
                                                 'get_message'  => \&Thruk::Utils::get_message,
                                                 'throw'        => \&Thruk::Utils::throw,
                                             },
@@ -174,11 +175,8 @@ unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log))
 # check if logdir exists
 if(!-d $project_root.'/logs') { mkdir($project_root.'/logs') or die("failed to create logs directory: $!"); }
 
-my $log4perlconfig;
-my $log4confarr = __PACKAGE__->config->{'Catalyst::Log::Log4perl'}->{'conf'};
-if(defined $log4confarr and ref $log4confarr eq 'ARRAY') {
-    $log4perlconfig .= join("\n", @{$log4confarr})."\n";
-    __PACKAGE__->log(Catalyst::Log::Log4perl->new(\$log4perlconfig));
+if(-s "log4perl.conf") {
+    __PACKAGE__->log(Catalyst::Log::Log4perl->new("log4perl.conf"));
 }
 elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );

@@ -1044,13 +1044,16 @@ sub page_data {
     my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
 
     # we dont use paging at all?
-    unless($c->stash->{'use_pager'} and defined $entries and $entries ne 'all' and $entries > 0) {
+    if(!$c->stash->{'use_pager'} or !defined $entries) {
         $c->stash->{'data'}  = $data,
         return 1;
     }
 
+    $c->stash->{'entries_per_page'} = $entries;
+
     my $pager = new Data::Page;
     $pager->total_entries(scalar @{$data});
+    if($entries eq 'all') { $entries = $pager->total_entries; }
     my $pages = POSIX::ceil($pager->total_entries / $entries);
 
     if(exists $c->{'request'}->{'parameters'}->{'next'}) {
@@ -1069,7 +1072,6 @@ sub page_data {
     if($page < 0)      { $page = 1;      }
     if($page > $pages) { $page = $pages; }
 
-    $c->stash->{'entries_per_page'} = $entries;
     $c->stash->{'current_page'}     = $page;
 
     if($entries eq 'all') {
@@ -1206,13 +1208,13 @@ sub set_can_submit_commands {
     }
 
     # override can_submit_commands from cgi.cfg
-    if(grep 'authorized_for_all_host_commands', @{$c->request->{'user'}->{'roles'}}) {
+    if(grep /authorized_for_all_host_commands/mx, @{$c->request->{'user'}->{'roles'}}) {
         $can_submit_commands = 1;
     }
-    elsif(grep 'authorized_for_all_service_commands', @{$c->request->{'user'}->{'roles'}}) {
+    elsif(grep /authorized_for_all_service_commands/mx, @{$c->request->{'user'}->{'roles'}}) {
         $can_submit_commands = 1;
     }
-    elsif(grep 'authorized_for_system_commands', @{$c->request->{'user'}->{'roles'}}) {
+    elsif(grep /authorized_for_system_commands/mx, @{$c->request->{'user'}->{'roles'}}) {
         $can_submit_commands = 1;
     }
 
@@ -1806,6 +1808,18 @@ sub _html_escape {
     my $text = shift;
 
     return HTML::Entities::encode($text);
+}
+
+
+########################################
+# used to escape html tags so it can be used as javascript string
+sub _escape_quotes {
+    my $text = shift;
+    $text = HTML::Entities::encode($text);
+    $text =~ s/&amp;quot;/&quot;/gmx;
+    $text =~ s/&amp;gt;/>/gmx;
+    $text =~ s/&amp;lt;/</gmx;
+    return $text;
 }
 
 

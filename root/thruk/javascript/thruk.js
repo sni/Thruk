@@ -221,7 +221,7 @@ function toggleCheckBox(id) {
 // unselect current text seletion
 function unselectCurrentSelection(obj)
 {
-    if (document.selection)
+    if (document.selection && document.selection.empty)
     {
         document.selection.empty();
     }
@@ -229,6 +229,7 @@ function unselectCurrentSelection(obj)
     {
         window.getSelection().removeAllRanges();
     }
+    return true;
 }
 
 /* returns true if the shift key is pressed for that event */
@@ -253,21 +254,6 @@ function is_shift_pressed(e) {
   }
 
   return false;
-}
-
-/* return coordinates for given element */
-function get_coordinates(element) {
-    var offsetLeft = 0;
-    var offsetTop = 0;
-    while(element.offsetParent){
-        offsetLeft += element.offsetLeft;
-        offsetTop += element.offsetTop;
-        if(element.scrollTop > 0){
-            offsetTop -= element.scrollTop;
-        }
-        element = element.offsetParent;
-    }
-    return [offsetLeft, offsetTop];
 }
 
 /*******************************************************************************
@@ -311,20 +297,40 @@ function addRowSelector(id)
 /* add the event handler */
 function addEventHandler(elem, type) {
     if(type == 'host') {
-        elem.onmouseover = highlightHostRow;
-        elem.onmouseout  = resetHostRow;
+        addEvent(elem, 'mouseover', highlightHostRow);
+        addEvent(elem, 'mouseout',  resetHostRow);
         if(!elem.onclick) {
             elem.onclick = selectHost;
         }
     }
     if(type == 'service') {
-        elem.onmouseover = highlightServiceRow;
-        elem.onmouseout  = resetServiceRow;
+        addEvent(elem, 'mouseover', highlightServiceRow);
+        addEvent(elem, 'mouseout',  resetServiceRow);
         if(!elem.onclick) {
             elem.onclick = selectService;
         }
     }
 }
+
+/* add additional eventhandler to object */
+function addEvent( obj, type, fn ) {
+  if ( obj.attachEvent ) {
+    obj['e'+type+fn] = fn;
+    obj[type+fn] = function(){obj['e'+type+fn]( window.event );}
+    obj.attachEvent( 'on'+type, obj[type+fn] );
+  } else
+    obj.addEventListener( type, fn, false );
+}
+
+/* remove an eventhandler from object */
+function removeEvent( obj, type, fn ) {
+  if ( obj.detachEvent ) {
+    obj.detachEvent( 'on'+type, obj[type+fn] );
+    obj[type+fn] = null;
+  } else
+    obj.removeEventListener( type, fn, false );
+}
+
 
 /* returns the first element which has an id */
 function getFirstParentId(elem) {
@@ -375,7 +381,7 @@ function setRowStyle(row_id, style, type, force) {
 
 /* save current style and change it*/
 function styleElements(elems, style, force) {
-    if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
+    if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
         elems = new Array(elems);
     }
 
@@ -400,9 +406,6 @@ function styleElementsIE(elems, style, force) {
             if(elems[x].className != "tableRowSelected" || force) {
                 // save style in custom attribute
                 if(elems[x].className != "undefined" && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
-                    //var oldClass = '';
-                    //if(elems[x].className) { oldClass = elems[x].className; }
-                    //elems[x].setAttribute('origclass', oldClass);
                     elems[x].setAttribute('origclass', elems[x].className);
                 }
 
@@ -811,6 +814,7 @@ function check_selected_command() {
     }
     if(value == 3) { /* add comment */
         enableFormElement('row_comment');
+        enableFormElement('row_comment_options');
     }
     if(value == 4) { /* add acknowledgement */
         enableFormElement('row_comment');
@@ -826,7 +830,7 @@ function check_selected_command() {
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options');
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options');
     elems.each(function(id) {
         obj = document.getElementById(id);
         obj.style.display = "none";
@@ -864,6 +868,7 @@ function toggleFilterPane() {
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
     additionalParams.set('hidesearch', 2);
+    document.getElementById('hidesearch').value = 2;
   }
   else {
     pane.style.display    = 'none';
@@ -871,6 +876,7 @@ function toggleFilterPane() {
     img.style.display     = '';
     img.style.visibility  = 'visible';
     additionalParams.set('hidesearch', 1);
+    document.getElementById('hidesearch').value = 1;
   }
 }
 
@@ -935,11 +941,12 @@ function accept_filter_types(search_prefix, checkbox_names, result_name, checkbo
 
     set_filter_name(search_prefix, checkbox_names, checkbox_prefix, parseInt(sum));
 
+    /* removed submit, its inconsistend to submit the form sometimes and sometimes not */
     /* submit the form if something changed */
-    if(sum != orig) {
-      form = document.getElementById('filterForm');
-      form.submit();
-    }
+    //if(sum != orig) {
+    //  form = document.getElementById('filterForm');
+    //  form.submit();
+    //}
 }
 
 /* set the initial state of filter checkboxes */
@@ -1075,6 +1082,9 @@ function add_new_filter(search_prefix, table) {
   newInput.value     = '';
   newInput.setAttribute('name', search_prefix + 'value');
   newInput.setAttribute('id',   search_prefix + nr + '_value');
+  if(ajax_search_enabled) {
+    newInput.onclick = ajax_search.init;
+  }
   var newCell1       = newRow.insertCell(1);
   newCell1.className = "filterValueInput";
   newCell1.appendChild(newInput);
@@ -1141,6 +1151,7 @@ function new_filter(cloneObj, parentObj, btnId) {
       var elems = newObj.getElementsByTagName(tag);
       replaceIdAndNames(elems, new_prefix);
   });
+
   // replace id of panel itself
   replaceIdAndNames(newObj, new_prefix);
 
@@ -1164,7 +1175,7 @@ function new_filter(cloneObj, parentObj, btnId) {
 
 /* replace ids and names for elements */
 function replaceIdAndNames(elems, new_prefix) {
-  if (elems==null || typeof(elems)!="object" || typeof(elems.length)!="number") {
+  if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
     elems = new Array(elems);
   }
   for(var x = 0; x < elems.length; x++) {
@@ -1176,6 +1187,10 @@ function replaceIdAndNames(elems, new_prefix) {
     if(elem.name) {
         var new_name = elem.name.replace(/^s\d+_/, new_prefix);
         elem.setAttribute('name', new_name);
+    }
+
+    if(ajax_search_enabled && elem.tagName == 'INPUT' && elem.type == 'text') {
+      elem.onclick = ajax_search.init;
     }
   };
 }
@@ -1350,247 +1365,314 @@ Y8,         88               d8'`8b      88      ,8P d8'           88        88
 Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
-var ajax_search_url             = '/thruk/cgi-bin/status.cgi?format=search';
-var ajax_search_max_results     = 12;
-var ajax_search_input_field     = 'NavBarSearchItem';
-var ajax_search_result_pan      = 'search-results';
-var ajax_search_update_interval = 3600; // update at least every hour
+var a;
+var ajax_search = {
+    url             : '/thruk/cgi-bin/status.cgi?format=search',
+    max_results     : 12,
+    input_field     : 'NavBarSearchItem',
+    result_pan      : 'search-results',
+    update_interval : 3600, // update at least every hour
+    search_type     : 'all',
 
-var ajax_search_base            = new Array();
-var ajax_search_initialized     = false;
-var ajax_search_cur_select      = -1;
-var ajax_search_result_size     = false;
-var ajax_search_cur_results;
-var ajax_search_cur_pattern;
-var ajax_search_timer;
+    base            : new Array(),
+    initialized     : false,
+    cur_select      : -1,
+    result_size     : false,
+    cur_results     : false,
+    cur_pattern     : false,
+    timer           : false,
 
-/* initialize search */
-function ajax_search_init() {
-    var date = new Date;
-    var now  = parseInt(date.getTime() / 1000);
-
-    var input = document.getElementById(ajax_search_input_field);
-    input.a
-
-    // update every hour (frames searches wont update otherwise)
-    if(ajax_search_initialized && now > ajax_search_initialized - ajax_search_update_interval) {
-        ajax_search_suggest();
-        return false;
-    }
-    ajax_search_initialized = now;
-    new Ajax.Request(ajax_search_url, {
-        onSuccess: function(transport) {
-            ajax_search_base = transport.responseJSON;
-            ajax_search_suggest();
+    /* initialize search */
+    init: function(elem) {
+        if(elem && elem.id) {
+        } else if(this.id) {
+          elem = this;
+        } else {
+          return false;
         }
-    });
 
-    document.onkeypress = ajax_search_arrow_keys;
-    document.onclick    = ajax_search_hide_results;
+        ajax_search.input_field = elem.id;
 
-    return false;
-}
+        var input = document.getElementById(ajax_search.input_field);
+        input.onkeyup = ajax_search.suggest;
+        input.setAttribute("autocomplete", "off");
+        input.blur();   // blur & focus the element, otherwise the first
+        input.focus();  // click would result in the browser autocomplete
 
-/* hide the search results */
-function ajax_search_hide_results(event) {
-    if(event && event.target) {
-    }
-    else {
-        event  = this;
-    }
-    try {
-        // dont hide search result if clicked on the input field
-        if(event.target.tagName == 'INPUT') { return; }
-    }
-    catch(e) {
-        // doesnt matter
-    }
+        var tmpElem = input;
+        while(tmpElem && tmpElem.parentNode) {
+            tmpElem = tmpElem.parentNode;
+            if(tmpElem.tagName == 'FORM') {
+                tmpElem.onsubmit = ajax_search.hide_results;
+            }
+        }
 
-    var panel = document.getElementById(ajax_search_result_pan);
-    if(!panel) { return; }
-    hideElement(panel);
-}
+        // set type from select
+        var type_selector_id = elem.id.replace('_value', '_ts');
+        var selector = document.getElementById(type_selector_id);
+        ajax_search.search_type = 'all';
+        if(selector && selector.tagName == 'SELECT') {
+            var search_type = selector.options[selector.selectedIndex].value;
+            if(search_type == 'host' || search_type == 'hostgroup' || search_type == 'service' || search_type == 'servicegroup') {
+                ajax_search.search_type = search_type;
+            }
+        }
 
-/* wrapper around ajax_search_suggest to avoid multiple running searches */
-function ajax_search_suggest() {
-    window.clearTimeout(ajax_search_timer);
-    ajax_search_timer = window.setTimeout(ajax_search_suggest_do, 100);
-}
-
-/* search some hosts to suggest */
-function ajax_search_suggest_do() {
-    var input;
-    var input = document.getElementById(ajax_search_input_field);
-    if(!input) { return; }
-    if(ajax_search_base.size() == 0) { return; }
-
-    pattern = input.value;
-    if(pattern.length >= 1) {
-
-        // remove empty strings from pattern array
-        pattern = pattern.split(" ");
-        var trimmed_pattern = new Array();
-        pattern.each(function(sub_pattern) {
-            if(sub_pattern != '') {
-                trimmed_pattern.push(sub_pattern);
+        var date = new Date;
+        var now  = parseInt(date.getTime() / 1000);
+        // update every hour (frames searches wont update otherwise)
+        if(ajax_search.initialized && now > ajax_search.initialized - ajax_search.update_interval) {
+            ajax_search.suggest();
+            return false;
+        }
+        ajax_search.initialized = now;
+        new Ajax.Request(ajax_search.url, {
+            onSuccess: function(transport) {
+                if(transport.responseJSON != null) {
+                    ajax_search.base = transport.responseJSON;
+                } else {
+                    ajax_search.base = eval(transport.responseText);
+                }
+                ajax_search.suggest();
             }
         });
-        pattern = trimmed_pattern;
 
-        var results = new Array();
-        ajax_search_base.each(function(search_type) {
-            var sub_results = new Array();
-            var top_hits = 0;
-            search_type.data.each(function(data) {
-                result_obj = new Object({ 'name': data, 'relevance': 0 });
-                var found = 0;
-                pattern.each(function(sub_pattern) {
-                    var index = data.indexOf(sub_pattern);
-                    if(index != -1) {
-                        found++;
-                        if(index == 0) { // perfect match, starts with pattern
-                            result_obj.relevance += 100;
-                        } else {
-                            result_obj.relevance += 1;
-                        }
-                    }
-                });
-                // only if all pattern were found
-                if(found == pattern.size()) {
-                    result_obj.display = data;
-                    sub_results.push(result_obj);
-                    if(result_obj.relevance >= 100) { top_hits++; }
+        document.onkeydown  = ajax_search.arrow_keys;
+        document.onclick    = ajax_search.hide_results;
+
+        return false;
+    },
+
+    /* hide the search results */
+    hide_results: function(event) {
+        if(event && event.target) {
+        }
+        else {
+            event  = this;
+        }
+        try {
+            // dont hide search result if clicked on the input field
+            if(event.target.tagName == 'INPUT') { return; }
+        }
+        catch(e) {
+            // doesnt matter
+        }
+
+        var panel = document.getElementById(ajax_search.result_pan);
+        if(!panel) { return; }
+        hideElement(panel);
+    },
+
+    /* wrapper around suggest() to avoid multiple running searches */
+    suggest: function(evt) {
+        window.clearTimeout(ajax_search.timer);
+
+        // dont suggest on enter
+        evt = (evt) ? evt : ((window.event) ? event : null);
+        if(evt) {
+            var keyCode = evt.keyCode;
+            if(keyCode == 13 || keyCode == 108) {
+                return false;
+            }
+        }
+
+        ajax_search.timer = window.setTimeout("ajax_search.suggest_do()", 100);
+        return true;
+    },
+
+    /* search some hosts to suggest */
+    suggest_do: function() {
+        var input;
+        var input = document.getElementById(ajax_search.input_field);
+        if(!input) { return; }
+        if(ajax_search.base.size() == 0) { return; }
+
+        pattern = input.value;
+        if(pattern.length >= 1 || ajax_search.search_type != 'all') {
+
+            // remove empty strings from pattern array
+            pattern = pattern.split(" ");
+            var trimmed_pattern = new Array();
+            pattern.each(function(sub_pattern) {
+                if(sub_pattern != '') {
+                    trimmed_pattern.push(sub_pattern);
                 }
             });
-            if(sub_results.size() > 0) {
-                sub_results = sub_results.sortBy(function(s) {
-                    return((-1 * s.relevance) + s.name);
-                });
-                results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
-            }
-        });
-        ajax_search_cur_results = results;
-        ajax_search_cur_pattern = pattern;
-        ajax_search_show_results(results, pattern, ajax_search_cur_select);
-    }
-    else {
-        ajax_search_hide_results();
-    }
-}
+            pattern = trimmed_pattern;
 
-/* present the results */
-function ajax_search_show_results(results, pattern, selected) {
-    ajax_search_res = results;
-    ajax_search_pat = pattern;
-    ajax_search_sel = selected;
-
-    var panel = document.getElementById(ajax_search_result_pan);
-    var input = document.getElementById(ajax_search_input_field);
-    if(!panel) { return; }
-
-    size = results.size();
-    if(size == 1 && results[0].results[0].display == input.value) {
-        return;
-    }
-
-    results = results.sortBy(function(s) {
-        return(-1 * s.top_hits);
-    });
-
-    var resultHTML = '<ul>';
-    var x = 0;
-    var results_per_type = Math.ceil(ajax_search_max_results / results.size());
-    results.each(function(type) {
-        var cur_count = 0;
-        resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
-        type.results.each(function(data) {
-            if(cur_count <= results_per_type) {
-                var name = data.display;
-                pattern.each(function(sub_pattern) {
-                    name = name.replace(sub_pattern, "<b>" + sub_pattern + "<\/b>");
-                });
-                var classname = "item";
-                if(selected != -1 && selected == x) {
-                    classname = "item ajax_search_selected";
+            var results = new Array();
+            ajax_search.base.each(function(search_type) {
+                var sub_results = new Array();
+                var top_hits = 0;
+                if(ajax_search.search_type == 'all' || ajax_search.search_type + 's' == search_type.name) {
+                  search_type.data.each(function(data) {
+                      result_obj = new Object({ 'name': data, 'relevance': 0 });
+                      var found = 0;
+                      pattern.each(function(sub_pattern) {
+                          var index = data.indexOf(sub_pattern);
+                          if(index != -1) {
+                              found++;
+                              if(index == 0) { // perfect match, starts with pattern
+                                  result_obj.relevance += 100;
+                              } else {
+                                  result_obj.relevance += 1;
+                              }
+                          }
+                      });
+                      // only if all pattern were found
+                      if(found == pattern.size()) {
+                          result_obj.display = data;
+                          sub_results.push(result_obj);
+                          if(result_obj.relevance >= 100) { top_hits++; }
+                      }
+                  });
                 }
-                resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search_set(\'' + data.display +'\')"> ' + name +'<\/a><\/li>';
-                x++;
-                cur_count++;
-            }
+                if(sub_results.size() > 0) {
+                    sub_results = sub_results.sortBy(function(s) {
+                        return((-1 * s.relevance) + s.name);
+                    });
+                    results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
+                }
+            });
+            ajax_search.cur_results = results;
+            ajax_search.cur_pattern = pattern;
+            ajax_search.show_results(results, pattern, ajax_search.cur_select);
+        }
+        else {
+            ajax_search.hide_results();
+        }
+    },
+
+    /* present the results */
+    show_results: function(results, pattern, selected) {
+        ajax_search_res = results;
+        ajax_search_pat = pattern;
+        ajax_search_sel = selected;
+
+        var panel = document.getElementById(ajax_search.result_pan);
+        var input = document.getElementById(ajax_search.input_field);
+        if(!panel) { return; }
+
+        size = results.size();
+        if(size == 1 && results[0].results[0].display == input.value) {
+            return;
+        }
+
+        results = results.sortBy(function(s) {
+            return(-1 * s.top_hits);
         });
-    });
-    ajax_search_result_size = x;
-    resultHTML += '<\/ul>';
-    if(results.size() == 0) {
-        resultHTML += '<a href="#">no results found</a>';
-    }
 
-    panel.innerHTML = resultHTML;
-
-    var style = panel.style;
-    var coords    = get_coordinates(input);
-    style.left    = coords[0] + "px";
-    style.top     = coords[1] + input.offsetHeight + "px";
-    style.display = "block";
-
-    showElement(panel);
-}
-
-/* set the value into the input field */
-function ajax_search_set(value) {
-    var input = document.getElementById(ajax_search_input_field);
-    input.value = value;
-    ajax_search_cur_select = -1;
-    ajax_search_hide_results();
-    input.focus();
-    return false;
-}
-
-/* eventhandler for arrow keys */
-function ajax_search_arrow_keys(evt) {
-    evt              = (evt) ? evt : ((window.event) ? event : null);
-    if(!evt) { return false; }
-    var input        = document.getElementById(ajax_search_input_field);
-    var panel        = document.getElementById(ajax_search_result_pan);
-    var focus        = false;
-    var keyCode      = evt.keyCode;
-    var navigateUp   = keyCode == 38;
-    var navigateDown = keyCode == 40;
-    if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)) {
-        if(navigateDown && ajax_search_cur_select == -1) {
-            ajax_search_cur_select = 0;
-            focus = true;
+        var resultHTML = '<ul>';
+        var x = 0;
+        var results_per_type = Math.ceil(ajax_search.max_results / results.size());
+        results.each(function(type) {
+            var cur_count = 0;
+            resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
+            type.results.each(function(data) {
+                if(cur_count <= results_per_type) {
+                    var name = data.display;
+                    pattern.each(function(sub_pattern) {
+                        name = name.replace(sub_pattern, "<b>" + sub_pattern + "<\/b>");
+                    });
+                    var classname = "item";
+                    if(selected != -1 && selected == x) {
+                        classname = "item ajax_search_selected";
+                    }
+                    resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search.set_result(\'' + data.display +'\')"> ' + name +'<\/a><\/li>';
+                    x++;
+                    cur_count++;
+                }
+            });
+        });
+        ajax_search.result_size = x;
+        resultHTML += '<\/ul>';
+        if(results.size() == 0) {
+            resultHTML += '<a href="#">no results found</a>';
         }
-        else if(navigateUp && ajax_search_cur_select == -1) {
-            ajax_search_cur_select = ajax_search_result_size - 1;
-            focus = true;
-        }
-        else if(navigateDown) {
-            if(ajax_search_result_size > ajax_search_cur_select + 1) {
-                ajax_search_cur_select++;
+
+        panel.innerHTML = resultHTML;
+
+        var style = panel.style;
+        var coords    = ajax_search.get_coordinates(input);
+        style.left    = coords[0] + "px";
+        style.top     = (coords[1] + input.offsetHeight + 2) + "px";
+        style.display = "block";
+
+        showElement(panel);
+    },
+
+    /* set the value into the input field */
+    set_result: function(value) {
+        var input = document.getElementById(ajax_search.input_field);
+        input.value = value;
+        ajax_search.cur_select = -1;
+        ajax_search.hide_results();
+        input.focus();
+        return false;
+    },
+
+    /* eventhandler for arrow keys */
+    arrow_keys: function(evt) {
+        evt              = (evt) ? evt : ((window.event) ? event : null);
+        if(!evt) { return false; }
+        var input        = document.getElementById(ajax_search.input_field);
+        var panel        = document.getElementById(ajax_search.result_pan);
+        var focus        = false;
+        var keyCode      = evt.keyCode;
+        var navigateUp   = keyCode == 38;
+        var navigateDown = keyCode == 40;
+        if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)) {
+            if(navigateDown && ajax_search.cur_select == -1) {
+                ajax_search.cur_select = 0;
                 focus = true;
-            } else {
-                ajax_search_cur_select = -1;
-                input.focus();
             }
-        }
-        else if(navigateUp) {
-            ajax_search_cur_select--;
-            if(ajax_search_cur_select < 0) {
-                ajax_search_cur_select = -1;
-                input.focus();
-            }
-            else {
+            else if(navigateUp && ajax_search.cur_select == -1) {
+                ajax_search.cur_select = ajax_search.result_size - 1;
                 focus = true;
             }
-        }
-        ajax_search_show_results(ajax_search_cur_results, ajax_search_cur_pattern, ajax_search_cur_select);
-        if(focus) {
-            var el = document.getElementsByClassName('ajax_search_selected');
-            if(el[0]) {
-                el[0].focus();
+            else if(navigateDown) {
+                if(ajax_search.result_size > ajax_search.cur_select + 1) {
+                    ajax_search.cur_select++;
+                    focus = true;
+                } else {
+                    ajax_search.cur_select = -1;
+                    input.focus();
+                }
             }
+            else if(navigateUp) {
+                ajax_search.cur_select--;
+                if(ajax_search.cur_select < 0) {
+                    ajax_search.cur_select = -1;
+                    input.focus();
+                }
+                else {
+                    focus = true;
+                }
+            }
+            ajax_search.show_results(ajax_search.cur_results, ajax_search.cur_pattern, ajax_search.cur_select);
+            if(focus) {
+                var el = document.getElementsByClassName('ajax_search_selected');
+                if(el[0]) {
+                    el[0].focus();
+                }
+            }
+            return false;
         }
+        return true;
+    },
+
+    /* return coordinates for given element */
+    get_coordinates: function(element) {
+        var offsetLeft = 0;
+        var offsetTop = 0;
+        while(element.offsetParent){
+            offsetLeft += element.offsetLeft;
+            offsetTop += element.offsetTop;
+            if(element.scrollTop > 0){
+                offsetTop -= element.scrollTop;
+            }
+            element = element.offsetParent;
+        }
+        return [offsetLeft, offsetTop];
     }
-    return true;
 }

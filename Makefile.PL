@@ -18,6 +18,7 @@ resources(
 
 requires 'YAML'                                   => 0.70;
 requires 'YAML::Tiny'                             => 1.41;
+requires 'JSON'                                   => 0.00;
 requires 'JSON::XS'                               => 0.00;
 requires 'Compress::Raw::Zlib'                    => 2.024;
 requires 'Sub::Uplevel'                           => 0.22;
@@ -26,6 +27,7 @@ requires 'Path::Class'                            => 0.18;
 requires 'Config::General'                        => 2.44;
 requires 'File::Copy::Recursive'                  => 0.38;
 requires 'Scalar::Util'                           => 1.21;
+requires 'URI::Escape'                            => 0;
 requires 'parent'                                 => 0.223;
 requires 'Moose'                                  => 0.98;
 requires 'MooseX::MethodAttributes::Inheritable'  => 0.20;
@@ -68,6 +70,7 @@ requires 'Catalyst::Engine::FastCGI'              => 0;
 requires 'Catalyst::Devel'                        => 1.26;
 requires 'FCGI'                                   => 0.69;
 requires 'FCGI::ProcManager'                      => 0.19;
+requires 'FCGI::ProcManager::MaxRequests'         => 0;
 
 # test requirements make it into the META.yml and will break
 # normal package installation

@@ -31,9 +31,13 @@ Main Features / Advantages
 
 == How it works
 
-Thruk is written in Perl using the http://www.catalystframework.org[Catalyst Framework]. Backend
-monitoring systems will be connected with the http://search.cpan.org/dist/Monitoring-Livestatus[Monitoring::Livestatus]
+Thruk is written in Perl using the
+http://www.catalystframework.org[Catalyst Framework]. Backend
+monitoring systems will be connected with the
+http://search.cpan.org/dist/Monitoring-Livestatus[Monitoring::Livestatus]
 Perl Module. Thruk itself is running as a fastcgi process.
+Availability will be calculated with
+http://search.cpan.org/dist/Monitoring-Availability[Monitoring::Availability].
 Authentication is provided by the Apache webserver (For example with
 mod_auth).
 
@@ -53,9 +57,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
-  %> wget http://www.thruk.org/files/Thruk-0.54-$arch.tar.gz
-  %> tar zxf Thruk-0.54-$arch.tar.gz
-  %> cd Thruk-0.54
+  %> wget http://www.thruk.org/files/Thruk-0.58-$arch.tar.gz
+  %> tar zxf Thruk-0.58-$arch.tar.gz
+  %> cd Thruk-0.58
   %> ./script/thruk_server.pl
 ----
 
@@ -184,6 +188,8 @@ Press <y> at this questions:
   Do you want to build the XS Stash module? [y]
   Do you want to use the XS Stash by default? [y]
 -------
+
+Tell me if someone knows a way to answer this questions automatically.
 
 run perl Makefile.PL again to see if all dependecies are now installed properly.
 
@@ -363,26 +369,45 @@ sure the webserver user has access to all files and perl modules.
 .Apache configuration with mod_fcgid
 -------
 LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
-Alias /thruk /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/
-<Location /thruk>
-    Options ExecCGI
-    Order allow,deny
-    Allow from all
-    AddHandler fcgid-script .pl
-    AuthName "Monitoring Access"
-    AuthType Basic
-    AuthUserFile /home/thruk/Thruk/htpasswd.users
-    Require valid-user
-</Location>
+<VirtualHost *:80>
+    ServerName   thruk.company.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    <Directory /home/thruk/Thruk/root/>
+        order allow,deny
+        allow from all
+    </Directory>
+
+    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
+    <Location /thruk>
+        Options ExecCGI
+        Order allow,deny
+        Allow from all
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Require valid-user
+    </Location>
+
+    <IfModule mod_fcgid.c>
+      AddHandler fcgid-script .pl
+      MaxRequestsPerProcess 100
+    </IfModule>
+
+</VirtualHost>
 -------
 
 
 == Configuration
 
-Configuration is managed mainly in two configuration files.
+Configuration is managed mainly in three configuration files.
 
   * thruk_local.conf
   * cgi.cfg
+  * log4perl.conf
 
 === thruk_local.conf
 
@@ -638,6 +663,26 @@ ex.:
   datetime_format_trends = %a %b %e %H:%M:%S %Y
 
 
+==== datetime_format_today
+Default timeformat for todays date. Can be useful if you want a
+shorter date format for today.
+
+ex.:
+
+  datetime_format_today = %H:%M:%S
+
+
+==== info_popup_event_type
+On which event should the comments / downtime or longpluginout popup
+show up. Valid values are onclick or onmouseover.
+
+ex.:
+
+  info_popup_event_type = onmouseover
+
+
+
+
 ==== Component Monitoring::Livestatus
 Enter your livestatus connection settings here. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.
@@ -669,23 +714,6 @@ ex.:
     </peer>
   </Component>
 
-
-==== Component Catalyst::Log::Log4perl
-Basically a normal log4perl configuration. You can configure whatever is
-possible in log4perl. Refer to the log4perl manual for detailed information.
-
-ex.:
-
-  <Component Catalyst::Log::Log4perl>
-    conf = log4perl.logger=ALL, ErrorLog, DebugLog
-
-    conf = log4perl.appender.ErrorLog=Log::Dispatch::File
-    conf = log4perl.appender.ErrorLog.filename=logs/error.log
-    conf = log4perl.appender.ErrorLog.mode=append
-    conf = log4perl.appender.ErrorLog.Threshold=ERROR
-    conf = log4perl.appender.ErrorLog.layout=Log::Log4perl::Layout::PatternLayout
-    conf = log4perl.appender.ErrorLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n
-  </Component>
 
 
 
@@ -839,6 +867,37 @@ commands.
 ex.:
 
   lock_author_names = 1
+
+
+
+=== log4perl.conf
+
+This file contains the log4perl configuration. You can configure whatever is
+possible in log4perl. Refer to the log4perl manual for detailed
+information:
+http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html
+There is a log4perl.conf.example file shiped with the package.
+
+ex.:
+
+ log4perl.logger=ALL, ErrorLog, DebugLog
+ log4perl.appender.ErrorLog=Log::Dispatch::File
+ log4perl.appender.ErrorLog.filename=/home/thruk/Thruk/logs/error.log
+ log4perl.appender.ErrorLog.mode=append
+ log4perl.appender.ErrorLog.Threshold=ERROR
+ log4perl.appender.ErrorLog.layout=Log::Log4perl::Layout::PatternLayout
+ log4perl.appender.ErrorLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n
+
+
+[TIP]
+.command logging
+=======
+if you want to log all sent commands, just set the loglevel to INFO.
+
+ex.: log4perl.appender.ErrorLog.Threshold=INFO
+=======
+
+
 
 
 

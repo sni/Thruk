@@ -67,7 +67,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         1 => 96, # reschedule host check
         2 => 55, # schedule downtime
         3 => 1,  # add comment
-        4 => 34, # add acknowledgement
+        4 => 33, # add acknowledgement
         5 => 78, # remove all downtimes
         6 => 20, # remove all comments
         7 => 51, # remove acknowledgement
@@ -88,8 +88,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $cmd_typ;
         $c->{'request'}->{'parameters'}->{'cmd_mod'} = 1;
         $c->{'request'}->{'parameters'}->{'trigger'} = 0;
-        $c->{'request'}->{'parameters'}->{'selected_hosts'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_hosts'};
-        for my $hostdata (split/,/mx, $c->{'request'}->{'parameters'}->{'selected_hosts'}) {
+        $c->{'request'}->{'parameters'}->{'selected_hosts'}    = '' unless defined $c->{'request'}->{'parameters'}->{'selected_hosts'};
+        $c->{'request'}->{'parameters'}->{'selected_services'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_services'};
+        my @hostdata    = split/,/mx, $c->{'request'}->{'parameters'}->{'selected_hosts'};
+        my @servicedata = split/,/mx, $c->{'request'}->{'parameters'}->{'selected_services'};
+        $self->{'spread_startdates'} = $self->_generate_spread_startdates($c, scalar @hostdata + scalar @servicedata, $c->request->parameters->{'start_time'}, $c->request->parameters->{'spread'});
+        for my $hostdata (@hostdata) {
             if(defined $host_quick_commands->{$quick_command}) {
                 $cmd_typ = $host_quick_commands->{$quick_command};
             }
@@ -114,7 +118,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 }
             }
         }
-        $c->{'request'}->{'parameters'}->{'selected_services'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_services'};
+
         for my $servicedata (split/,/mx, $c->{'request'}->{'parameters'}->{'selected_services'}) {
             if(defined $service_quick_commands->{$quick_command}) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
@@ -208,10 +212,14 @@ sub _check_for_commands {
         my $comment_author          = $c->user->username;
         $comment_author             = $c->user->alias if defined $c->user->alias;
         $c->stash->{comment_author} = $comment_author;
-        $c->stash->{referer}        = $c->{'request'}->{'parameters'}->{'referer'} || $c->{'request'}->{'headers'}->{'referer'} || '';
         $c->stash->{cmd_tt}         = 'cmd.tt';
         $c->stash->{template}       = 'cmd/cmd_typ_'.$cmd_typ.'.tt';
 
+        # set a valid referer
+        my $referer                 = $c->{'request'}->{'parameters'}->{'referer'} || $c->{'request'}->{'headers'}->{'referer'} || '';
+        $referer                    =~ s/&amp;/&/gmx;
+        $referer                    =~ s/&/&amp;/gmx;
+        $c->stash->{referer}        = $referer;
     }
 
     return 1;
@@ -275,7 +283,13 @@ sub _do_send_command {
     }
 
     # replace parsed dates
-    if(defined $c->request->parameters->{'start_time'}) {
+    if(defined $self->{'spread_startdates'} and scalar @{$self->{'spread_startdates'}} > 0) {
+        my $new_start_time = shift @{$self->{'spread_startdates'}};
+        my $new_date = Thruk::Utils::format_date($new_start_time, '%Y-%m-%d %H:%M:%S');
+        $c->log->debug("setting spreaded start date to: ".$new_date);
+        $c->request->parameters->{'start_time'} = $new_date;
+    }
+    elsif(defined $c->request->parameters->{'start_time'}) {
         if($c->request->parameters->{'start_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
             my $new_date = Thruk::Utils::format_date(Thruk::Utils::parse_date($c, $c->request->parameters->{'start_time'}), '%Y-%m-%d %H:%M:%S');
             $c->log->debug("setting start date to: ".$new_date);
@@ -345,6 +359,41 @@ sub _do_send_command {
     $c->log->info("[".$c->user->username."] cmd: $cmd");
 
     return(1);
+}
+
+######################################
+# generate spreaded start dates
+sub _generate_spread_startdates {
+    my $self      = shift;
+    my $c         = shift;
+    my $number    = shift;
+    my $starttime = shift;
+    my $spread    = shift;
+    my $spread_dates = [];
+
+    my $starttimestamp = Thruk::Utils::parse_date($c, $starttime);
+
+    # spreading wont help if the start is in the past
+    $starttimestamp    = time() if $starttimestamp < time();
+
+    # check for a valid number
+    if($spread !~ m/^\d+$/mx or $spread <= 1) {
+        return;
+    }
+    # check for a valid number
+    if($number !~ m/^\d+$/mx or $number <= 1) {
+        return;
+    }
+
+    # calculate time between checks
+    my $delta = $spread / $number;
+    $c->log->debug("calculating spread with delta: ".$delta." seconds");
+
+    for my $x (0..$number) {
+        push @{$spread_dates}, int($starttimestamp + ($x * $delta));
+    }
+
+    return $spread_dates;
 }
 
 =head1 AUTHOR

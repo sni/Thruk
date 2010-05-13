@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
+use URI::Escape;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -192,10 +193,14 @@ sub thruk_index : Path('/thruk/') {
     # custom start page?
     if($c->stash->{'start_page'} !~ /^\/thruk\//mx) {
         # external link, put in frames
-        return $c->redirect("/thruk/frame.html?link=".$c->stash->{'start_page'});
+        my $start_page = uri_escape($c->stash->{'start_page'});
+        $c->log->debug("redirecting to framed start page: '/thruk/frame.html?link=".$start_page."'");
+        $c->log->debug($c->redirect("/thruk/frame.html?link=".$start_page));
+        return $c->redirect("/thruk/frame.html?link=".$start_page);
     }
     elsif($c->stash->{'start_page'} ne '/thruk/main.html') {
         # internal link, no need to put in frames
+        $c->log->debug("redirecting to default start page: '".$c->stash->{'start_page'}."'");
         return $c->redirect($c->stash->{'start_page'});
     }
 

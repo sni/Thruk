@@ -1,0 +1,52 @@
+Frequently Asked Questions
+==========================
+
+== General
+
+=== Is Thruk an Abbreviation? What does Thruk mean?
+
+Thruk is just a random word and has no meaning. Pronounce it like 'Truck'.
+
+
+=== Where is the statusmap?
+
+The statusmap is currently under development and will be included in future
+releases.
+
+
+=== Authorization/Authentication is not working
+
+Authentication is done by the webserver, so authentication is only available
+with the fastcgi version.
+
+
+
+
+== Installation
+
+
+
+
+== Usage
+
+=== How do i select hosts/services on the status page?
+
+Just click on the empty table row when the row is highlighted. This only works
+if you do not click on a link.
+
+
+
+
+== Customization
+
+=== How can i add more themes?
+
+Themes are located under 'root/thruk/themes/'. Just copy and modify the one you
+like.
+
+
+=== How can i disable themes?
+
+This is not possible at the moment. However, you could remove the theme
+physically from 'root/thruk/themes/'. Make sure you replace symlinks from other
+themes with proper files if you remove the Classic theme.

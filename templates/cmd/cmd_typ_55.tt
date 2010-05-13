@@ -28,6 +28,9 @@
     SCHEDULE_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time,end_time,fixed,triggered_by,duration,comment_author,comment_data) %]
 [% END %]
 
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = date.format(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.end_time;   SET end_time   = c.request.parameters.end_time;   ELSE; SET end_time   = date.format(date.now+7200, '%Y-%m-%d %H:%M:%S'); END %]
+
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.config.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
@@ -35,8 +38,8 @@
 <tr><td class='optBoxItem'><br></td></tr>
 <tr><td class='optBoxItem'>Triggered By:</td><td><select name='trigger'><option value='0'> N/A </option>[% FOREACH d = hostdowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Host '[% d.host_name %]' starting @ [% date.format(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %][% FOREACH d = servicedowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Service '[% d.service_description %]' on host '[% d.host_name %]' starting @ [% date.format(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %]</select></td></tr>
 <tr><td class='optBoxItem'><br></td></tr>
-<tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]'> <a href="javascript:show_cal('start_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
-<tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]'> <a href="javascript:show_cal('end_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% start_time %]'> <a href="javascript:show_cal('start_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
+<tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]'> <a href="javascript:show_cal('end_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
 <tr><td class='optBoxItem'>Type:</td><td><b><select name='fixed'><option value="1"> Fixed </option><option value="0"> Flexible </option></select></b></td></tr>
 <tr><td class='optBoxItem'>If Flexible, Duration:</td><td><table border="0"><tr><td align="right"><input type='text' name='hours' value='2' size= "2" maxlength="2"></td><td align="left">Hours</td><td align="right"><input type='text' name='minutes' value='0' size= "2" maxlength="2"></td><td align="left">Minutes</td></tr>
 </table></td></tr>

@@ -10,6 +10,10 @@ general
     - Filter: latency, execution_time
     - configure url path in config (ex.: /thruk/ )
     - add extra grapher url
+    - use title for quick downtimes popups
+    - reload nav frame when changing themes
+    - enable/disable checks/notifications on status.cgi
+    - make quick commands configurable
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -40,6 +44,9 @@ livestatus:
                 Service Dependencies
                 Service Escalations
 
+user docs:
+    - how to add new theme
+
 =========================================================
 ideas for after 1.0
 
@@ -61,6 +68,8 @@ general:
     - bookmarks
     - show only backends where user has at least permission for one host/service
     - use livestatus wait feature where possible
+    - page by attribute a,b,c,d,e...z
+
 
 reports:
     - generate long running reports in an extra process
@@ -73,9 +82,10 @@ reports:
 status:
     - proper search
         save searches (like bookmarks would do it)
-    - add flexible selector, ex.: select multiple hostgroups
+    - add flexible selector, ex.: select multiple hostgroups by comma
     - host table map with worst service state as color
-    - hide host/service summary in status.cgi (maybe with http://jqueryui.com/demos/toggle/ )
+    - search "rou 17" -> split by space and search with and
+      host ~ rou && host ~ 17
 
 histogram:
     - missing completly
