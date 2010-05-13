@@ -18,18 +18,6 @@ LOGFILE=/dev/null
 PROCS=5
 SOCKET=/tmp/thruk_fastcgi.socket
 EXECUSER=thruk
-################################
-
-# execute script as $EXECUSER if the user is root
-if [ "$USER" = "root" ];then
-  SCRIPT=`readlink -f $0`
-  su - $EXECUSER -c "$SCRIPT $*"
-  exit $?
-elif [ "$USER" != "$EXECUSER" ];then
-    echo "wrong user, please use either user $EXECUSER or root"
-    failure $"$prog start"
-    exit 1
-fi
 
 ################################
 # Load in the best success and failure functions we can find
@@ -52,6 +40,18 @@ fi
 RETVAL=0
 if [ -f "/etc/sysconfig/"$prog ]; then
   . "/etc/sysconfig/"$prog
+fi
+
+################################
+# execute script as $EXECUSER if the user is root
+if [ "$USER" = "root" ];then
+  SCRIPT=`readlink -f $0`
+  su - $EXECUSER -c "$SCRIPT $*"
+  exit $?
+elif [ "$USER" != "$EXECUSER" ];then
+    echo "wrong user, please use either user $EXECUSER or root"
+    failure "$prog start"
+    exit 1
 fi
 
 ################################
@@ -91,7 +91,7 @@ stop() {
   # Stop daemons.
   echo -n $"Shutting down Thruk: "
   echo -n "["`date +"%Y-%m-%d %H:%M:%S"`"] " >> ${LOGFILE}
-  /bin/kill `cat $PID 2>/dev/null ` >/dev/null 2>&1 && (success; echo "Stoped" >> ${LOGFILE} ) || (failure $"$prog stop";echo "Stop failed" >> ${LOGFILE} )
+  /bin/kill `cat $PID 2>/dev/null ` >/dev/null 2>&1 && (success; echo "Stoped" >> ${LOGFILE} ) || (failure "$prog stop";echo "Stop failed" >> ${LOGFILE} )
   /bin/rm $PID >/dev/null 2>&1
   RETVAL=$?
   return $RETVAL
