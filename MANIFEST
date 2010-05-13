@@ -69,7 +69,7 @@ lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/GD.pm
 lib/Thruk/View/JSON.pm
 lib/Thruk/View/TT.pm
-log4perl.conf
+log4perl.conf.example
 Makefile.PL
 MANIFEST			This list of files
 META.yml
@@ -640,6 +640,7 @@ ssi/README
 ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
+t/95_doc_coverage.t
 t/96_selenium.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
