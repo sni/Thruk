@@ -46,6 +46,7 @@ before 'execute' => sub {
     if(defined $c->request->cookie('thruk_backends')) {
         for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
+            next unless defined $value;
             $disabled_backends{$key} = $value;
             $nr_disabled++ if $value == 2;
         }
