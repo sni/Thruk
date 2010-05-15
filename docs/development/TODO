@@ -12,8 +12,6 @@ general
     - add extra grapher url
     - use title for quick downtimes popups
     - reload nav frame when changing themes
-    - enable/disable checks/notifications on status.cgi
-    - make quick commands configurable
     - delay page delivery for a few seconds after core reload (all
       servics are pending otherwise) Could be done after backend
       status select
@@ -91,8 +89,6 @@ status:
         save searches (like bookmarks would do it)
     - add flexible selector, ex.: select multiple hostgroups by comma
     - host table map with worst service state as color
-    - search "rou 17" -> split by space and search with and
-      host ~ rou && host ~ 17
 
 histogram:
     - missing completly

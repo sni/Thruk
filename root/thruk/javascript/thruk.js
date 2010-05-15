@@ -779,6 +779,13 @@ function collectFormData() {
         }
     }
 
+    if(value == 12) { /* submit passive result */
+        if(document.getElementById('plugin_output').value == '') {
+            alert('please enter a check result');
+            return(false);
+        }
+    }
+
     var services = new Array();
     selectedServices.keys().each(function(row_id) {
         services.push(servicesHash.get(row_id));
@@ -825,11 +832,22 @@ function check_selected_command() {
     }
     if(value == 7) { /* remove acknowledgement */
     }
+    if(value == 8) { /* enable active checks */
+    }
+    if(value == 9) { /* disable active checks */
+    }
+    if(value == 10) { /* enable notifications */
+    }
+    if(value == 11) { /* disable notifications */
+    }
+    if(value == 12) { /* submit passive check result */
+        enableFormElement('row_submit_options');
+    }
 }
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options');
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options');
     elems.each(function(id) {
         obj = document.getElementById(id);
         obj.style.display = "none";

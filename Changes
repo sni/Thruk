@@ -1,7 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
-0.60    Thu May  6 19:32:14 CEST 2010
+0.60    Sat May 15 15:18:13 CEST 2010
+          - added more quick commands (enable/disable notifications/active checks, sub. passive result)
+          - quick commands can be disabled separately
           - moved logging configuration into separate file
           - added spread checks option when rescheduling many services/hosts
           - keep filled in start/end time when submitting commands, even after missing values verfication

@@ -16,7 +16,7 @@ for my $key (keys %{$conf}) {
     is($docs->{$key}, 1, $key);
 }
 for my $key (keys %{$conf->{'Component'}}) {
-    is($docs->{"Component $key"}, 1, $key);
+    is($docs->{"Component $key"}, 1, "documentation entry for: $key");
 }
 
 done_testing();
