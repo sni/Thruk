@@ -2153,8 +2153,13 @@ sure the webserver user has access to all files and perl modules.</td>
 </div>
 <h2 id="_configuration_2">Configuration</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Configuration is managed mainly in three configuration files.</p></div>
+<div class="paragraph"><p>Configuration is managed mainly in these configuration files.</p></div>
 <div class="ulist"><ul>
+<li>
+<p>
+thruk.conf
+</p>
+</li>
 <li>
 <p>
 thruk_local.conf
@@ -2171,6 +2176,10 @@ log4perl.conf
 </p>
 </li>
 </ul></div>
+<h3 id="_thruk_conf">thruk.conf</h3><div style="clear:left"></div>
+<div class="paragraph"><p>The thruk.conf contains the shipped defaults. You should not edit this
+file directly. Overwrite your settings in your thruk_local.conf
+instead.</p></div>
 <h3 id="_thruk_local_conf">thruk_local.conf</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
 The idea is, that the thruk.conf is provided with the packaged defaults and the
@@ -2228,6 +2237,19 @@ allowed_frame_links = https://wiki.my-company.com</tt></pre>
 <div class="literalblock">
 <div class="content">
 <pre><tt>cgi_cfg = cgi.cfg</tt></pre>
+</div></div>
+<h4 id="_delay_pages_after_backend_reload">delay_pages_after_backend_reload</h4>
+<div class="paragraph"><p>Delay the page delivery until the backends uptime is at least this
+amount of seconds. Displaying pages soon after backend restarts
+may display wrong results and all services are pending. Enable this if
+you experience problems with pending services after reloading your
+backend
+ex.: setting this to 10 would start serving pages 10 seconds
+after the backend reload</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>delay_pages_after_backend_reload = 10</tt></pre>
 </div></div>
 <h4 id="_use_frames">use_frames</h4>
 <div class="paragraph"><p>Set whether you want to use a framed navigation or not. With using frames it&#8217;s
@@ -2322,7 +2344,7 @@ paging_steps        = 5000
 paging_steps        = all</tt></pre>
 </div></div>
 <h4 id="_can_submit_commands">can_submit_commands</h4>
-<div class="paragraph"><p>Set here if a contact should be allowed to send commands unless defined for the
+<div class="paragraph"><p>Set this if a contact should be allowed to send commands unless defined for the
 contact itself. This is the default value for all contacts unless the user has
 a can_submit_commands setting in your monitoring configuration.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -2355,6 +2377,21 @@ command_disabled = 35</tt></pre>
   persistent_ack         = 0  # Persistent Acknowledgement Comments
   ptc                    = 0  # For Child Hosts Too
 &lt;/cmd_defaults&gt;</tt></pre>
+</div></div>
+<h4 id="_cmd_quick_status">cmd_quick_status</h4>
+<div class="paragraph"><p>Configure which commands should be available as quick status commands.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;cmd_quick_status&gt;
+  reschedule             = 0  # Reschedule next check
+  downtime               = 0  # Add/remove downtimes
+  comment                = 0  # Add/remove comments
+  acknowledgement        = 0  # Add/remove acknowledgements
+  active_checks          = 0  # Enable/disable active checks
+  notifications          = 0  # Enable/disable notifications
+  submit_result          = 0  # Submit passive check result
+&lt;/cmd_quick_status&gt;</tt></pre>
 </div></div>
 <h4 id="_datetime_format">datetime_format</h4>
 <div class="paragraph"><p>Default timeformat. Use POSIX format.</p></div>
@@ -2722,7 +2759,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-05-13 16:38:34 CEST
+Last updated 2010-05-15 23:15:19 CEST
 </div>
 </div>
 </body>

@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
 0.60    Sat May 15 15:18:13 CEST 2010
+          - page delivery is delayed for a few seconds after backend restarts (services would be displayed pending otherwise)
           - added more quick commands (enable/disable notifications/active checks, sub. passive result)
           - quick commands can be disabled separately
           - moved logging configuration into separate file

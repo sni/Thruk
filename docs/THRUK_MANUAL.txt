@@ -491,6 +491,21 @@ ex.:
   cgi_cfg = cgi.cfg
 
 
+==== delay_pages_after_backend_reload
+
+Delay the page delivery until the backends uptime is at least this
+amount of seconds. Displaying pages soon after backend restarts
+may display wrong results and all services are pending. Enable this if
+you experience problems with pending services after reloading your
+backend
+ex.: setting this to 10 would start serving pages 10 seconds
+after the backend reload
+
+ex.:
+
+  delay_pages_after_backend_reload = 10
+
+
 ==== use_frames
 
 Set whether you want to use a framed navigation or not. With using frames it's

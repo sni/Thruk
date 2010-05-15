@@ -12,9 +12,6 @@ general
     - add extra grapher url
     - use title for quick downtimes popups
     - reload nav frame when changing themes
-    - delay page delivery for a few seconds after core reload (all
-      servics are pending otherwise) Could be done after backend
-      status select
 
 extinfo:
     - finish performance data on extinfo type 4
