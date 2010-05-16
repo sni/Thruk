@@ -86,6 +86,15 @@ function showTip(e, node) {
 /* create and show a treemap */
 function show_tree_map(id_to_show) {
 
+    var levelsToShow = 1;
+    if(id_to_show == 'rootid' && groupby == 'address') {
+      levelsToShow = 2;
+    }
+
+    // reset page refresh
+    setRefreshRate(refresh_rate);
+    additionalParams.set('host', id_to_show);
+
     TM.Squarified.implement({
         'onRightClick': function() {
             // hide tip
@@ -97,11 +106,15 @@ function show_tree_map(id_to_show) {
             var parent = TreeUtil.getParent(tree, this.shownTree.id);
             if(parent) {
                 show_tree_map(parent.id);
-
-                // reset page refresh
-                setRefreshRate(refresh_rate);
-                additionalParams.set('host', parent.id);
             }
+            return false;
+        },
+        'onLeftClick': function(elem) {
+            // hide tip
+            tip = document.getElementById('tooltip');
+            tip.style.display = 'none';
+
+            show_tree_map(elem.parentNode.id);
             return false;
         }
     });
@@ -109,7 +122,7 @@ function show_tree_map(id_to_show) {
         //The id of the treemap container
         rootId: 'infovis',
         //Set the max. depth to be shown for a subtree
-        levelsToShow: 2,
+        levelsToShow: levelsToShow,
 
         // space between divs
         offset: 4,
@@ -151,17 +164,28 @@ function show_tree_map(id_to_show) {
             head.className = (head.className + " " + totalClass);
           }
           head.onmouseover = function (e){showTip((e||window.event), node)};
-        },
-        request: function(nodeId, level, onComplete){
+        }
+//        request: function(nodeId, level, onComplete){
+//alert('req: ' + nodeId + ' level' + level);
+//return false;
+//            var tree = eval('(' + json + ')');
+//            var parent = TreeUtil.getParent(tree, nodeId);
+//            if(parent) {
+//                show_tree_map(parent.id);
+//            }
+//            return false;
+
+//alert('req: ' + nodeId);
+//            show_tree_map(nodeId);
             //var tree    = eval('(' + json + ')');
             //var subtree = TreeUtil.getSubtree(tree, nodeId);
             //TreeUtil.prune(subtree, tm.config.levelsToShow);
             //onComplete.onComplete(nodeId, subtree);
 
             // reset page refresh
-            setRefreshRate(refresh_rate);
-            additionalParams.set('host', nodeId);
-        }
+            //setRefreshRate(refresh_rate);
+            //additionalParams.set('host', nodeId);
+//        }
     });
 
     var tree    = eval('(' + json + ')');

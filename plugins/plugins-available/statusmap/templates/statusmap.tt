@@ -34,6 +34,7 @@
               <option value="address"[% IF groupby == 'address' %] selected[% END %]>IP Address</option>
               <option value="domain"[% IF groupby == 'domain' %] selected[% END %]>Domain</option>
               <option value="hostgroup"[% IF groupby == 'hostgroup' %] selected[% END %]>Hostgroup</option>
+              <option value="servicegroup"[% IF groupby == 'servicegroup' %] selected[% END %]>Servicegroup</option>
             </select>
           </td>
         </tr>
@@ -82,6 +83,7 @@
 
 var nodename = '[% nodename %]';
 var json     = '[% json %]';
+var groupby  = '[% groupby %]';
 
 function init(){
     //init data

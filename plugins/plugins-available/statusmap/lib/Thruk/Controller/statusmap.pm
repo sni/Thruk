@@ -43,8 +43,8 @@ sub statusmap_cgi : Path('/thruk/cgi-bin/statusmap.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{type}    = $c->request->parameters->{'type'}    || 'circle';
-    $c->stash->{groupby} = $c->request->parameters->{'groupby'} || 'parent';
+    $c->stash->{type}    = $c->request->parameters->{'type'}    || 'table';
+    $c->stash->{groupby} = $c->request->parameters->{'groupby'} || 'address';
     $c->stash->{host}    = $c->request->parameters->{'host'}    || 'rootid';
     if($c->stash->{host} eq 'all') {
         $c->stash->{host} = 'rootid';
@@ -53,6 +53,25 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $self->{'all_nodes'} = {};
 
     my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output groups parents", { Slice => {}, AddPeer => 1 });
+
+    # do we need servicegroups?
+    if($c->stash->{groupby} eq 'servicegroup') {
+        my $new_hosts;
+        my $servicegroups = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name groups", { Slice => {} });
+        my $servicegroupsbyhost = {};
+        if(defined $servicegroups) {
+            for my $data (@{$servicegroups}) {
+                for my $group ( split/,/mx,$data->{'groups'}) {
+                    $servicegroupsbyhost->{$data->{'host_name'}}->{$group} = 1;
+                }
+            }
+            for my $data (@{$hosts}) {
+                $data->{'servicegroups'} = join(',', keys %{$servicegroupsbyhost->{$data->{'name'}}});
+                push @{$new_hosts}, $data;
+            }
+        }
+        $hosts = $new_hosts;
+    }
 
     my $json;
     # oder by parents
@@ -74,6 +93,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     elsif($c->stash->{groupby} eq 'hostgroup') {
         $json = $self->_get_hosts_by_attribute($c, $hosts, 'groups');
         $c->stash->{nodename} = 'Hostgroup';
+    }
+    # order by servicegroups
+    elsif($c->stash->{groupby} eq 'servicegroup') {
+        $json = $self->_get_hosts_by_attribute($c, $hosts, 'servicegroups');
+        $c->stash->{nodename} = 'Servicegroup';
     }
     else {
         confess("unknown groupby option: ".$c->stash->{groupby});
