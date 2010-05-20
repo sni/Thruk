@@ -21,4 +21,15 @@ if ( $EVAL_ERROR ) {
 }
 
 eval "use Test::Pod::Coverage 1.00";
-all_pod_coverage_ok({ also_private => [ qr/^[A-Z_]+$/ ]});
+
+my @modules = all_modules();
+for my $module (@modules) {
+
+    next if $module =~ m/::plugins\-available::/;
+    next if $module =~ m/::plugins\-enabled::/;
+
+    # check module and skip UPPERCASE constants which are reported as fail
+    pod_coverage_ok( $module, { also_private => [ qr/^[A-Z_]+$/ ]} );
+}
+
+done_testing;
