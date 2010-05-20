@@ -403,11 +403,20 @@ LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
 
 == Configuration
 
-Configuration is managed mainly in three configuration files.
+Configuration is managed mainly in these configuration files.
 
+  * thruk.conf
   * thruk_local.conf
   * cgi.cfg
   * log4perl.conf
+
+
+=== thruk.conf
+
+The thruk.conf contains the shipped defaults. You should not edit this
+file directly. Overwrite your settings in your thruk_local.conf
+instead.
+
 
 === thruk_local.conf
 
@@ -480,6 +489,21 @@ The path to your cgi.cfg. See <<cgi.cfg>> for details.
 ex.:
 
   cgi_cfg = cgi.cfg
+
+
+==== delay_pages_after_backend_reload
+
+Delay the page delivery until the backends uptime is at least this
+amount of seconds. Displaying pages soon after backend restarts
+may display wrong results and all services are pending. Enable this if
+you experience problems with pending services after reloading your
+backend
+ex.: setting this to 10 would start serving pages 10 seconds
+after the backend reload
+
+ex.:
+
+  delay_pages_after_backend_reload = 10
 
 
 ==== use_frames
@@ -594,7 +618,7 @@ ex.:
 
 
 ==== can_submit_commands
-Set here if a contact should be allowed to send commands unless defined for the
+Set this if a contact should be allowed to send commands unless defined for the
 contact itself. This is the default value for all contacts unless the user has
 a can_submit_commands setting in your monitoring configuration.
 
@@ -629,6 +653,22 @@ ex.:
     persistent_ack         = 0  # Persistent Acknowledgement Comments
     ptc                    = 0  # For Child Hosts Too
   </cmd_defaults>
+
+
+==== cmd_quick_status
+Configure which commands should be available as quick status commands.
+
+ex.:
+ 
+  <cmd_quick_status>
+    reschedule             = 0  # Reschedule next check
+    downtime               = 0  # Add/remove downtimes
+    comment                = 0  # Add/remove comments
+    acknowledgement        = 0  # Add/remove acknowledgements
+    active_checks          = 0  # Enable/disable active checks
+    notifications          = 0  # Enable/disable notifications
+    submit_result          = 0  # Submit passive check result
+  </cmd_quick_status>
 
 
 ==== datetime_format

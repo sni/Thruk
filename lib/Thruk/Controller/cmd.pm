@@ -64,22 +64,32 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 
     my $host_quick_commands = {
-        1 => 96, # reschedule host check
-        2 => 55, # schedule downtime
-        3 => 1,  # add comment
-        4 => 33, # add acknowledgement
-        5 => 78, # remove all downtimes
-        6 => 20, # remove all comments
-        7 => 51, # remove acknowledgement
+        1  => 96, # reschedule host check
+        2  => 55, # schedule downtime
+        3  => 1,  # add comment
+        4  => 33, # add acknowledgement
+        5  => 78, # remove all downtimes
+        6  => 20, # remove all comments
+        7  => 51, # remove acknowledgement
+        8  => 47, # enable active checks
+        9  => 48, # disable active checks
+        10 => 24, # enable notifications
+        11 => 25, # disable notifications
+        12 => 87, # submit passive check result
     };
     my $service_quick_commands = {
-        1 => 7,  # reschedule service check
-        2 => 56, # schedule downtime
-        3 => 3,  # add comment
-        4 => 34, # acknowledge
-        5 => 79, # remove all downtimes
-        6 => 21, # remove all comments
-        7 => 52, # remove acknowledgement
+        1  => 7,  # reschedule service check
+        2  => 56, # schedule downtime
+        3  => 3,  # add comment
+        4  => 34, # acknowledge
+        5  => 79, # remove all downtimes
+        6  => 21, # remove all comments
+        7  => 52, # remove acknowledgement
+        8  => 5,  # enable active checks
+        9  => 6,  # disable active checks
+        10 => 22, # enable notifications
+        11 => 23, # disable notifications
+        12 => 30, # submit passive check result
     };
 
     # did we receive a quick command from the status page?

@@ -119,7 +119,7 @@ sub _disable_backends {
 
     if(defined $disabled_backends) {
         for my $key (keys %{$disabled_backends}) {
-            if($disabled_backends->{$key} == 2) {
+            if(defined $disabled_backends->{$key} and $disabled_backends->{$key} == 2) {
                 if($self->{'livestatus'}->_get_peer_by_key($key)) {
                     $self->{'c'}->log->debug("disabled livestatus backend by key: $key");
                     $self->{'livestatus'}->disable($key);

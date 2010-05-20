@@ -41,7 +41,7 @@ our $VERSION = '0.60';
 my $project_root = __PACKAGE__->config->{home};
 __PACKAGE__->config('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'May 06, 2010',
+                    'released'               => 'May 16, 2010',
                     'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
@@ -175,8 +175,8 @@ unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log))
 # check if logdir exists
 if(!-d $project_root.'/logs') { mkdir($project_root.'/logs') or die("failed to create logs directory: $!"); }
 
-if(-s "log4perl.conf") {
-    __PACKAGE__->log(Catalyst::Log::Log4perl->new("log4perl.conf"));
+if(-s $project_root.'log4perl.conf') {
+    __PACKAGE__->log(Catalyst::Log::Log4perl->new($project_root.'log4perl.conf'));
 }
 elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );

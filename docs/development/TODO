@@ -12,11 +12,6 @@ general
     - add extra grapher url
     - use title for quick downtimes popups
     - reload nav frame when changing themes
-    - enable/disable checks/notifications on status.cgi
-    - make quick commands configurable
-    - delay page delivery for a few seconds after core reload (all
-      servics are pending otherwise) Could be done after backend
-      status select
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -47,9 +42,6 @@ livestatus:
                 Service Dependencies
                 Service Escalations
 
-user docs:
-    - how to add new theme
-
 =========================================================
 ideas for after 1.0
 
@@ -57,7 +49,7 @@ general:
     - create models for hosts / services / contacts
     - webservice api, passthrough querys to livestatus and return json
       result
-      - query builder, click to add filter or stats
+    - query builder, click to add filter or stats
     - _HTML field for hosts / services besides action_url/notes_url
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
     - show host/service dependencies
@@ -87,8 +79,6 @@ status:
         save searches (like bookmarks would do it)
     - add flexible selector, ex.: select multiple hostgroups by comma
     - host table map with worst service state as color
-    - search "rou 17" -> split by space and search with and
-      host ~ rou && host ~ 17
 
 histogram:
     - missing completly

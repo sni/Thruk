@@ -134,11 +134,10 @@ sub test_page {
 
     # html valitidy
     SKIP: {
-
-        if($use_html_lint == 0) {
-            skip "no HTML::Lint installed", 2;
-        }
         if($content_type =~ 'text\/html') {
+            if($use_html_lint == 0) {
+                skip "no HTML::Lint installed", 2;
+            }
             my $lint = new HTML::Lint;
             isa_ok( $lint, "HTML::Lint" );
 
