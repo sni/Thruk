@@ -366,6 +366,7 @@ return true if this is a valid regular expression
 sub is_valid_regular_expression {
     my $c          = shift;
     my $expression = shift;
+    return 1 unless defined $expression;
     local $SIG{__DIE__} = undef;
     eval { "test" =~ m/$expression/mx; };
     if($@) {
