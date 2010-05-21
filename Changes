@@ -1,7 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
-0.60    Sat May 15 15:18:13 CEST 2010
+0.60    Fri May 21 14:33:26 CEST 2010
+          - added parent search filter
           - display more useful error message when accessing nonexistand hosts/services as admin
           - page delivery is delayed for a few seconds after backend restarts (services would be displayed pending otherwise)
           - added more quick commands (enable/disable notifications/active checks, sub. passive result)

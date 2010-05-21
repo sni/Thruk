@@ -1561,6 +1561,12 @@ sub _single_search {
                 push @servicefilter,   "Filter: last_check $dateop $date";
             }
         }
+        elsif($filter->{'type'} eq 'parent') {
+            push @hostfilter,          "Filter: parents $listop $value";
+            push @hosttotalsfilter,    "Filter: parents $listop $value";
+            push @servicefilter,       "Filter: host_parents $listop $value";
+            push @servicetotalsfilter, "Filter: host_parents $listop $value";
+        }
         else {
             confess("unknown filter: ".$filter->{'type'});
         }
