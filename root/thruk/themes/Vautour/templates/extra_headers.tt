@@ -1,9 +1,2 @@
 <link rel="stylesheet" type="text/css" href="/thruk/themes/[% theme %]/stylesheets/interface/menu.css" media="screen, projection" />
 <link rel="stylesheet" type="text/css" href="/thruk/themes/[% theme %]/stylesheets/interface/common.css" media="screen, projection" />
-<!--
-<script type="text/javascript" src="/thruk/themes/[% theme %]/js/mootools.js"></script>
-<script type="text/javascript" src="/thruk/themes/[% theme %]/js/menu.js"></script>
-<script type="text/javascript" src="/thruk/themes/[% theme %]/js/search.js"></script>
--->
-<!-- must be loaded again, otherwise some Objects will be overriden by mootools -->
-<!--<script type="text/javascript" src="/thruk/javascript/prototype-1.6.0.3.js"></script>-->
