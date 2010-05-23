@@ -8,10 +8,17 @@
   <table class="cmd_pane" border=1 width="400">
     <tr>
       <th colspan=2 class="status cmd_pane">
-          <a href="javascript:[% IF style == 'hostdetail' %]selectAllHosts(true);[% ELSE %]selectAllServices(true);[% END %]">check all</a>
-        - <a href="javascript:selectAllServices(false);selectAllHosts(false);">uncheck all</a>
-        - <a href="javascript:selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-        - <a href="javascript:selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+        [% IF style == 'hostdetail' %]
+          <a href="javascript:selectAllHosts(true);">check all</a>
+        - <a href="javascript:selectAllHosts(false);">uncheck all</a>
+        - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+        - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+        [% ELSE %]
+          <a href="javascript:selectAllHosts(false);selectAllServices(true);">check all</a>
+        - <a href="javascript:selectAllHosts(false);selectAllServices(false);">uncheck all</a>
+        - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+        - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+        [% END %]
       </th>
     </tr>
     <tr>
