@@ -93,3 +93,27 @@ eval {
 install_script glob('script/*.pl');
 auto_install;
 WriteAll;
+
+##################################
+# patch our makefile
+my $new_makefile = '';
+open(my $fh, '<', 'Makefile') or die("cannot open Makefile");
+while(<$fh>) {
+    my $line = $_;
+    if($line =~ m/^install\s*:/mx) {
+        $line = <<EOT;
+do_not_install :
+	\$(NOECHO) \$(ECHO) make install is not supported.
+	\$(NOECHO) \$(ECHO) please have a look at the documentation on howto install Thruk.
+	exit 1
+
+install :: do_not_install pure_install doc_install
+EOT
+    }
+    $new_makefile .= $line;
+}
+close($fh);
+open(my $fh, '>', 'Makefile') or die("cannot open Makefile for writing");
+print $fh $new_makefile;
+close($fh);
+print "patched Makefile\n";
