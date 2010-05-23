@@ -69,6 +69,13 @@
 
     <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
 
+    <div class="hint">
+        <a href="javascript:selectAllHosts(true);">check all</a>
+      - <a href="javascript:selectAllHosts(false);">uncheck all</a>
+      - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+      - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+    </div>
+
     <div align='center'>
       <table border="0" class='status' width="100%" id="statusTable">
         <tr>
@@ -164,6 +171,14 @@
         var servicesHash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
         addRowSelector('statusTable');
       </script>
+
+      <div class="hint">
+          <a href="javascript:selectAllHosts(true);">check all</a>
+        - <a href="javascript:selectAllHosts(false);">uncheck all</a>
+        - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+        - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+      </div>
+
       [% PROCESS _pager.tt %]
     </div>
 

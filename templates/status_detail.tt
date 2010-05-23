@@ -82,6 +82,13 @@
 
     <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
 
+    <div class="hint">
+        <a href="javascript:selectAllHosts(false);selectAllServices(true);">check all</a>
+      - <a href="javascript:selectAllHosts(false);selectAllServices(false);">uncheck all</a>
+      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+    </div>
+
     <table border="0" width="100%" class='status' id="statusTable">
       <tr>
         <th class='status' nowrap>Host&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 1) %]'><img src='/thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
@@ -215,6 +222,14 @@
       var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
       addRowSelector('statusTable');
     </script>
+
+    <div class="hint">
+        <a href="javascript:selectAllHosts(false);selectAllServices(true);">check all</a>
+      - <a href="javascript:selectAllHosts(false);selectAllServices(false);">uncheck all</a>
+      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+    </div>
+   
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <br>
