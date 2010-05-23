@@ -721,6 +721,16 @@ ex.:
   info_popup_event_type = onmouseover
 
 
+==== info_popup_options
+Options for the popup window used for long pluginoutput, downtimes and
+comments.
+See http://www.bosrup.com/web/overlib/?Command_Reference for
+what options are available
+
+ex.:
+
+  info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF
+
 
 
 ==== Component Monitoring::Livestatus

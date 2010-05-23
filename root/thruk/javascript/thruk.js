@@ -1075,7 +1075,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact', 'Last Check', 'Next Check');
+  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Last Check', 'Next Check');
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', search_prefix + 'type');
   typeselect.setAttribute('id', search_prefix + nr + '_ts');
@@ -1432,6 +1432,9 @@ var ajax_search = {
             var search_type = selector.options[selector.selectedIndex].value;
             if(search_type == 'host' || search_type == 'hostgroup' || search_type == 'service' || search_type == 'servicegroup') {
                 ajax_search.search_type = search_type;
+            }
+            if(search_type == 'parent') {
+                ajax_search.search_type = 'host';
             }
         }
 
