@@ -18,14 +18,25 @@
       <table border="0" cellspacing=2 cellpadding=2 class='optBox'>
         <tr>
           <td align="left" class='optBoxItem'>Map Layout:</td>
+          <td align="left" class='optBoxItem'>Detail Level:</td>
           <td align="left" class='optBoxItem'>Group By:</td>
         </tr>
         <tr>
           <td align="left" class='optBoxItem'>
             <select name='type'>
               <option value="table"[% IF type == 'table' %] selected[% END %]>Table Layout</option>
+              <!--
               <option value="circle"[% IF type == 'circle' %] selected[% END %]>Circular Layout</option>
               <option value="hyper"[% IF type == 'hyper' %] selected[% END %]>Hyper Layout</option>
+              -->
+            </select>
+          </td>
+          <td align="left" class='optBoxItem'>
+            <select name='detail'>
+              <option value="0"[% IF detail == '0' %] selected[% END %]>0</option>
+              <option value="1"[% IF detail == '1' %] selected[% END %]>+1</option>
+              <option value="2"[% IF detail == '2' %] selected[% END %]>+2</option>
+              <option value="3"[% IF detail == '3' %] selected[% END %]>+3</option>
             </select>
           </td>
           <td align="left" class='optBoxItem'>
@@ -38,25 +49,8 @@
             </select>
           </td>
         </tr>
-        <!--
         <tr>
-          <td align="left" colspan="2" class='optBoxItem'>Detail Level:</td>
-        </tr>
-        <tr>
-          <td align="left" colspan="2" class='optBoxItem'>
-            <select name='level'>
-              <option value="1"[% IF level == 1 %] selected[% END %]>1</option>
-              <option value="2"[% IF level == 2 %] selected[% END %]>2</option>
-              <option value="3"[% IF level == 3 %] selected[% END %]>3</option>
-              <option value="4"[% IF level == 4 %] selected[% END %]>4</option>
-              <option value="5"[% IF level == 5 %] selected[% END %]>5</option>
-              <option value="6"[% IF level == 6 %] selected[% END %]>6</option>
-            </select>
-          </td>
-        </tr>
-        -->
-        <tr>
-          <td align="left" valign="bottom" class='optBoxItem'>
+          <td colspan=2 align="left" valign="bottom" class='optBoxItem'>
           </td>
           <td align="right" class='optBoxItem'>
             <input type='hidden' name='hidetop' id='hidetop' value='[% hidetop %]'>
@@ -84,6 +78,7 @@
 var nodename = '[% nodename %]';
 var json     = '[% json %]';
 var groupby  = '[% groupby %]';
+var detail   = [% detail %];
 
 function init(){
     //init data

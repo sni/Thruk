@@ -90,6 +90,7 @@ function show_tree_map(id_to_show) {
     if(id_to_show == 'rootid' && groupby == 'address') {
       levelsToShow = 2;
     }
+    levelsToShow = levelsToShow + detail;
 
     // reset page refresh
     setRefreshRate(refresh_rate);

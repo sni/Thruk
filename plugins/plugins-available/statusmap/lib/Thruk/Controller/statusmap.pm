@@ -46,6 +46,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{type}    = $c->request->parameters->{'type'}    || 'table';
     $c->stash->{groupby} = $c->request->parameters->{'groupby'} || 'address';
     $c->stash->{host}    = $c->request->parameters->{'host'}    || 'rootid';
+    $c->stash->{detail}  = $c->request->parameters->{'detail'}  || '0';
     if($c->stash->{host} eq 'all') {
         $c->stash->{host} = 'rootid';
     }
