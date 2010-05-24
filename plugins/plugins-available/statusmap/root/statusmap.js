@@ -1,11 +1,3 @@
-/* add event to object */
-function addEvent(obj, type, fn) {
-  if (obj.addEventListener)
-    obj.addEventListener(type, fn, false);
-  else
-    obj.attachEvent('on' + type, fn);
-};
-
 /* create tool tip content */
 function makeHTMLFromData(name, data){
   var html = '';
@@ -21,7 +13,7 @@ function makeHTMLFromData(name, data){
   if(data.status != undefined) {
     html += 'Alias:   ' + data.alias + '<br \/>';
     html += 'Address: ' + data.address + '<br \/>';
-    html += 'Status:  <span class="' + data.class + '">&nbsp;' + data.status + '&nbsp;<\/span> ' + data.duration + '<br \/>';
+    html += 'Status:  <span class="' + data.cssClass + '">&nbsp;' + data.status + '&nbsp;<\/span> ' + data.duration + '<br \/>';
     html += 'Output:  ' + data.plugin_output + '<br \/>';
   }
 
@@ -44,13 +36,15 @@ function showTip(e, node) {
   tipOffsetX = 20;
   tipOffsetY = 20;
 
+  var target = e.target ? e.target : e.srcElement;
+
   tip = document.getElementById('tooltip');
 
   //Add mousemove event handler
-  addEvent(e.target, 'mousemove', function(e, win){
+  addEvent(target, 'mousemove', function(e, win){
       //get mouse position
       win = win  || window;
-      e = e || win.event;
+      e   = e    || win.event;
       var doc = win.document;
       doc = doc.html || doc.body;
       var page = {
@@ -76,7 +70,7 @@ function showTip(e, node) {
           (page.x - obj.width - x) : page.x + x) + 'px';
   });
 
-  addEvent(e.target, 'mouseout', function(e, win){
+  addEvent(target, 'mouseout', function(e, win){
     tip.style.display = 'none';
   });
 
@@ -143,8 +137,8 @@ function show_tree_map(id_to_show) {
           if(!node) {
             return;
           }
-          if(isLeaf && node.data.class != undefined && head) {
-            head.className = (head.className + " " + node.data.class);
+          if(isLeaf && node.data.cssClass != undefined && head) {
+            head.className = (head.className + " " + node.data.cssClass);
           }
           else if(isLeaf && head && node.data) {
             var total  = node.data.state_up + node.data.state_down + node.data.state_unreachable;

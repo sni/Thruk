@@ -458,6 +458,7 @@ sub _get_json_host {
             '$area'             => 1,
             '$color'            => $color,
             'class'             => $class,
+            'cssClass'          => $class,
             'status'            => $status,
             'duration'          => $duration,
             'plugin_output'     => $host->{'plugin_output'} || '',
