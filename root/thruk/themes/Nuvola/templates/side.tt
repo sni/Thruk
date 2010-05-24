@@ -17,7 +17,7 @@
     <link href="/thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
     <link href="/thruk/themes/[% theme %]/stylesheets/[% theme %].css" type="text/css" rel="stylesheet" />
     <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <script type="text/javascript" src="/thruk/javascript/prototype-1.6.0.3.js"></script>
+    <script type="text/javascript" src="/thruk/javascript/prototype-1.6.1.js"></script>
     <script type="text/javascript" src="/thruk/javascript/thruk.js"></script>
     [% PROCESS extra_headers.tt %]
   </head>

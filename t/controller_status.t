@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 234;
+use Test::More tests => 242;
 
 BEGIN {
     use lib('t');
@@ -46,6 +46,10 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=hostgroup_01',
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=servicegroup_01',
+
+# Bugs
+    # Paging all when nothing found -> div by zero
+    '/thruk/cgi-bin/status.cgi?style=detail&nav=0&entries=all&hidesearch=2&hidetop=1&s0_hoststatustypes=15&s0_servicestatustypes=29&s0_hostprops=0&s0_serviceprops=8&update.x=4&update.y=9&s0_serviceprop=8&s0_type=service&s0_op=%3D&s0_value=nonexstiant_service_check',
 ];
 
 for my $url (@{$pages}) {

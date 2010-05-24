@@ -1,19 +1,24 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 
-0.60    Sat May 15 15:18:13 CEST 2010
+0.60    Sun May 23 13:12:00 CEST 2010
+          - added parent search filter
+          - added config options for downtime,comment,longplugin output popups
+          - display more useful error message when accessing nonexistand hosts/services as admin
           - page delivery is delayed for a few seconds after backend restarts (services would be displayed pending otherwise)
           - added more quick commands (enable/disable notifications/active checks, sub. passive result)
           - quick commands can be disabled separately
           - moved logging configuration into separate file
           - added spread checks option when rescheduling many services/hosts
           - keep filled in start/end time when submitting commands, even after missing values verfication
+          - patched Makefile to disable make install
           - fixed problem with display of quotes in popups when escape_html_tags disabled
           - fixed problem with display of very long performance data
           - fixed problem with start_page and absolute uris
           - fixed problem with sending command in IE
           - fixed problem with reseting pager on filter change
           - fixed problem with multiple filters and paging
+          - fixed problem with paging nothing but selected all
 
 0.58    Mon Apr 12 16:30:40 CEST 2010
           - changed to FCGI::ProcManager::MaxRequests

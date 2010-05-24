@@ -179,10 +179,10 @@ sub _process_service_page {
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
 
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
-    return $c->detach('/error/index/5') unless defined $hostname;
+    return $c->detach('/error/index/15') unless defined $hostname;
 
     my $servicename = $c->{'request'}->{'parameters'}->{'service'};
-    return $c->detach('/error/index/5') unless defined $servicename;
+    return $c->detach('/error/index/15') unless defined $servicename;
 
     my $services = $c->{'live'}->selectall_hashref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nFilter: host_name = $hostname\nFilter: description = $servicename\nColumns: has_been_checked accept_passive_checks acknowledged action_url_expanded checks_enabled check_type current_attempt current_notification_number description event_handler_enabled execution_time flap_detection_enabled groups host_address host_alias host_name icon_image_expanded icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts next_check notes_expanded notes_url_expanded notifications_enabled obsess_over_service percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
 
@@ -200,7 +200,7 @@ sub _process_service_page {
         }
     }
 
-    return $c->detach('/error/index/5') unless defined $service;
+    return $c->detach('/error/index/15') unless defined $service;
 
     my @backends = keys %{$services};
     $self->_set_backend_selector($c, \@backends, $service->{'peer_key'});

@@ -57,9 +57,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
-  %> wget http://www.thruk.org/files/Thruk-0.58-$arch.tar.gz
-  %> tar zxf Thruk-0.58-$arch.tar.gz
-  %> cd Thruk-0.58
+  %> wget http://www.thruk.org/files/Thruk-0.60-$arch.tar.gz
+  %> tar zxf Thruk-0.60-$arch.tar.gz
+  %> cd Thruk-0.60
   %> ./script/thruk_server.pl
 ----
 
@@ -720,6 +720,16 @@ ex.:
 
   info_popup_event_type = onmouseover
 
+
+==== info_popup_options
+Options for the popup window used for long pluginoutput, downtimes and
+comments.
+See http://www.bosrup.com/web/overlib/?Command_Reference for
+what options are available
+
+ex.:
+
+  info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF
 
 
 

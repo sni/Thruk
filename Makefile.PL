@@ -32,7 +32,7 @@ requires 'parent'                                 => 0.223;
 requires 'Moose'                                  => 0.98;
 requires 'MooseX::MethodAttributes::Inheritable'  => 0.20;
 requires 'MooseX::Role::WithOverloading'          => 0.05;
-requires 'Monitoring::Livestatus'                 => 0.46;
+requires 'Monitoring::Livestatus'                 => 0.52;
 requires 'Monitoring::Availability'               => 0.12;
 requires 'MIME::Types'                            => 0.00;
 requires 'HTTP::Body'                             => 1.07;
@@ -105,3 +105,27 @@ tests_recursive;
 install_script glob('script/*.pl');
 auto_install;
 WriteAll;
+
+##################################
+# patch our makefile
+my $new_makefile = '';
+open(my $fh, '<', 'Makefile') or die("cannot open Makefile");
+while(<$fh>) {
+    my $line = $_;
+    if($line =~ m/^install\s*:/mx) {
+        $line = <<EOT;
+do_not_install :
+	\$(NOECHO) \$(ECHO) make install is not supported.
+	\$(NOECHO) \$(ECHO) please have a look at the documentation on howto install Thruk.
+	exit 1
+
+install :: do_not_install pure_install doc_install
+EOT
+    }
+    $new_makefile .= $line;
+}
+close($fh);
+open(my $fh, '>', 'Makefile') or die("cannot open Makefile for writing");
+print $fh $new_makefile;
+close($fh);
+print "patched Makefile\n";

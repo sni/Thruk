@@ -3,6 +3,12 @@
   js = "/thruk/javascript/overlib.js"
 %]
 [% today = date.format(date.now, '%Y-%m-%d') %]
+
+<script type="text/javascript">
+  var pagetype = 'hostdetail';
+  var servicesHash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+</script>
+
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
 [% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
@@ -69,6 +75,13 @@
 
     <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
 
+    <div class="hint">
+        <a href="javascript:selectAllHosts(true);">select all</a>
+      - <a href="javascript:selectAllHosts(false);">unselect all</a>
+      - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+      - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+    </div>
+
     <div align='center'>
       <table border="0" class='status' width="100%" id="statusTable">
         <tr>
@@ -104,7 +117,7 @@
           [% class = 'statusBGDOWN' %]
         [% END %]
 
-        <tr id="r[% loop.index %]">
+        <tr id="r[% loop.index %]" onmouseover="addRowSelector(this.id)">
           <td class='[% statusClass %]'>
             <table border="0" width='100%' cellpadding="0" cellspacing="0">
               <tr>
@@ -119,11 +132,11 @@
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
                       [% IF h.acknowledged                 %]<td align="center" valign="middle"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]&amp;backend=[% h.peer_key %]#comments"><img src="/thruk/themes/[% theme %]/images/ack.gif" alt="This host problem has been acknowledged" title="This host problem has been acknowledged" border="0" height="20" width="20"></a></td>[% END %]
-                      [% IF comment_count > 0              %]<td align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = h.name %][% FOR com = comments_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% IF date.format(com.entry_time, '%Y-%m-%d') == today %][% date.format(com.entry_time, datetime_format_today) %][% ELSE %][% date.format(com.entry_time, datetime_format) %][% END %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',STICKY, CAPTION,'[% h.name %] Comments',WIDTH,600,CLOSECLICK,HAUTO);"></td>[% END %]
+                      [% IF comment_count > 0              %]<td align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = h.name %][% FOR com = comments_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% IF date.format(com.entry_time, '%Y-%m-%d') == today %][% date.format(com.entry_time, datetime_format_today) %][% ELSE %][% date.format(com.entry_time, datetime_format) %][% END %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',CAPTION,'[% h.name %] Comments',WIDTH,600,[% c.config.info_popup_options %]);"></td>[% END %]
                       [% IF h.notifications_enabled == 0   %]<td align="center" valign="middle"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]&amp;backend=[% h.peer_key %]"><img src="/thruk/themes/[% theme %]/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
                       [% IF h.active_checks_enabled == 0   %]<td align="center" valign="middle"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]&amp;backend=[% h.peer_key %]"><img src="/thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
                       [% IF h.is_flapping                  %]<td align="center" valign="middle"><a href='extinfo.cgi?type=1&amp;host=[% h.name %]&amp;backend=[% h.peer_key %]'><img src='/thruk/themes/[% theme %]/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>[% END %]
-                      [% IF h.scheduled_downtime_depth > 0 %]<td align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = h.name %][% FOR d = downtimes_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% IF date.format(d.start_time, '%Y-%m-%d') == today %][% date.format(d.start_time, datetime_format_today) %][% ELSE %][% date.format(d.start_time, datetime_format) %][% END %] until </td><td nowrap valign=\'top\' align=\'right\'>[% IF date.format(d.end_time, '%Y-%m-%d') == today %][% date.format(d.end_time, datetime_format_today) %][% ELSE %][% date.format(d.end_time, datetime_format) %][% END %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',STICKY, CAPTION,'[% h.name %] Downtimes',CLOSECLICK,HAUTO);"></td>[% END %]
+                      [% IF h.scheduled_downtime_depth > 0 %]<td class="has_downtime" align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = h.name %][% FOR d = downtimes_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% IF date.format(d.start_time, '%Y-%m-%d') == today %][% date.format(d.start_time, datetime_format_today) %][% ELSE %][% date.format(d.start_time, datetime_format) %][% END %] until </td><td nowrap valign=\'top\' align=\'right\'>[% IF date.format(d.end_time, '%Y-%m-%d') == today %][% date.format(d.end_time, datetime_format_today) %][% ELSE %][% date.format(d.end_time, datetime_format) %][% END %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',CAPTION,'[% h.name %] Downtimes',[% c.config.info_popup_options %]);"></td>[% END %]
                       [% IF h.is_executing > 0             %]<td align="center" valign="middle"><a href="extinfo.cgi?type=1&amp;host=[% h.name %]&amp;backend=[% h.peer_key %]"><img src="/thruk/themes/[% theme %]/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20"></a></td>[% END %]
                       [% IF h.notes_url_expanded           %]<td align="center" valign="middle"><a href='[% h.notes_url_expanded %]'[% IF c.config.cgi_cfg.notes_url_target %] target='[% c.config.cgi_cfg.notes_url_target %]'[% END %]><img src='/thruk/themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a></td>[% END %]
                       [% IF h.action_url                   %]<td align="center" valign="middle"><a href='[% h.action_url %]'[% IF c.config.cgi_cfg.action_url_target %] target='[% c.config.cgi_cfg.action_url_target %]'[% END %]><img src='/thruk/themes/[% theme %]/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a></td>[% END %]
@@ -143,9 +156,9 @@
           [% ELSE %]
             [% IF h.long_plugin_output %]
               [% IF escape_html_tags %]
-                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib('[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]',STICKY,CAPTION,'[% h.name %]',WIDTH,800,CLOSECLICK,HAUTO);"><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
+                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib('[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]',CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);"><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
               [% ELSE %]
-                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.title ,STICKY,CAPTION,'[% h.name %]',WIDTH,800,CLOSECLICK,HAUTO);" title='[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
+                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.title,CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);" title='[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
               [% END %]
             [% ELSE %]
               [% IF escape_html_tags %]
@@ -159,11 +172,14 @@
         [% END %]
 
       </table>
-      <script type="text/javascript">
-        var pagetype = 'hostdetail';
-        var servicesHash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
-        addRowSelector('statusTable');
-      </script>
+
+      <div class="hint">
+          <a href="javascript:selectAllHosts(true);">select all</a>
+        - <a href="javascript:selectAllHosts(false);">unselect all</a>
+        - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+        - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+      </div>
+
       [% PROCESS _pager.tt %]
     </div>
 

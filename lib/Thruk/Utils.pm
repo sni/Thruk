@@ -366,6 +366,7 @@ return true if this is a valid regular expression
 sub is_valid_regular_expression {
     my $c          = shift;
     my $expression = shift;
+    return 1 unless defined $expression;
     local $SIG{__DIE__} = undef;
     eval { "test" =~ m/$expression/mx; };
     if($@) {
@@ -1054,7 +1055,14 @@ sub page_data {
     my $pager = new Data::Page;
     $pager->total_entries(scalar @{$data});
     if($entries eq 'all') { $entries = $pager->total_entries; }
-    my $pages = POSIX::ceil($pager->total_entries / $entries);
+    my $pages = 0;
+    if($entries > 0) {
+        $pages = POSIX::ceil($pager->total_entries / $entries);
+    }
+    else {
+        $c->stash->{'data'}  = $data,
+        return 1;
+    }
 
     if(exists $c->{'request'}->{'parameters'}->{'next'}) {
         $page++;

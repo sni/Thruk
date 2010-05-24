@@ -381,11 +381,6 @@ sub _generate_spread_startdates {
     my $spread    = shift;
     my $spread_dates = [];
 
-    my $starttimestamp = Thruk::Utils::parse_date($c, $starttime);
-
-    # spreading wont help if the start is in the past
-    $starttimestamp    = time() if $starttimestamp < time();
-
     # check for a valid number
     if($spread !~ m/^\d+$/mx or $spread <= 1) {
         return;
@@ -394,6 +389,11 @@ sub _generate_spread_startdates {
     if($number !~ m/^\d+$/mx or $number <= 1) {
         return;
     }
+
+    my $starttimestamp = Thruk::Utils::parse_date($c, $starttime);
+
+    # spreading wont help if the start is in the past
+    $starttimestamp    = time() if $starttimestamp < time();
 
     # calculate time between checks
     my $delta = $spread / $number;
