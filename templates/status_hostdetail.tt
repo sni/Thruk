@@ -76,8 +76,8 @@
     <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
 
     <div class="hint">
-        <a href="javascript:selectAllHosts(true);">check all</a>
-      - <a href="javascript:selectAllHosts(false);">uncheck all</a>
+        <a href="javascript:selectAllHosts(true);">select all</a>
+      - <a href="javascript:selectAllHosts(false);">unselect all</a>
       - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
       - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
     </div>
@@ -174,8 +174,8 @@
       </table>
 
       <div class="hint">
-          <a href="javascript:selectAllHosts(true);">check all</a>
-        - <a href="javascript:selectAllHosts(false);">uncheck all</a>
+          <a href="javascript:selectAllHosts(true);">select all</a>
+        - <a href="javascript:selectAllHosts(false);">unselect all</a>
         - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
         - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
       </div>
