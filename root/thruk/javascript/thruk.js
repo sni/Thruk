@@ -271,24 +271,39 @@ Y8,           88   `8b d8'   88 88         8P
 *******************************************************************************/
 var selectedServices = new Hash;
 var selectedHosts    = new Hash;
+var noEventsForId    = new Hash;
 
+/* add mouseover eventhandler for all cells and execute it once */
 function addRowSelector(id)
 {
-    var table = document.getElementById(id);
-    var rows  = table.tBodies[0].rows;
+    var row   = document.getElementById(id);
+    var cells = row.cells;
 
-    // for each table row, beginning with the second ( dont need table header )
-    for(var row_nr = 1; row_nr < rows.length; row_nr++) {
-        var cells = rows[row_nr].cells;
+    // remove this eventhandler, it has to fire only once
+    if(noEventsForId.get(id)) {
+        return false;
+    }
+    if( row.detachEvent ) {
+        noEventsForId.set(id, 1);
+    } else {
+        row.onmouseover = undefined;
+    }
 
-        // for each cell in a row
-        for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
-            if(pagetype == "hostdetail" || (cell_nr == 0 && cells[0].innerHTML != '')) {
-                addEventHandler(cells[cell_nr], 'host');
-            }
-            else if(cell_nr >= 1) {
-                addEventHandler(cells[cell_nr], 'service');
-            }
+    // reset all current highlighted rows
+    $$('td.tableRowHover').each(function(e) {
+        resetHostRow(e);
+        resetServiceRow(e);
+    });
+
+    // for each cell in a row
+    for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
+        if(pagetype == "hostdetail" || (cell_nr == 0 && cells[0].innerHTML != '')) {
+            setRowStyle(id, 'tableRowHover', 'host');
+            addEventHandler(cells[cell_nr], 'host');
+        }
+        else if(cell_nr >= 1) {
+            setRowStyle(id, 'tableRowHover', 'service');
+            addEventHandler(cells[cell_nr], 'service');
         }
     }
 }

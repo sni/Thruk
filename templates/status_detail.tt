@@ -3,6 +3,12 @@
   js = "/thruk/javascript/overlib.js"
 %]
 [% today = date.format(date.now, '%Y-%m-%d') %]
+
+<script type="text/javascript">
+  var pagetype = 'servicedetail';
+  var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+</script>
+
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
 [% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
@@ -136,7 +142,7 @@
       <tr><td colspan="6"></td></tr>
       [% END %]
 
-      <tr id="r[% loop.index %]">
+      <tr id="r[% loop.index %]" onmouseover="addRowSelector(this.id)">
         [% IF lasthost == s.host_name %]
         <td></td>
         [% ELSE %]
@@ -217,11 +223,6 @@
       [% END %]
 
     </table>
-    <script type="text/javascript">
-      var pagetype = 'servicedetail';
-      var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
-      addRowSelector('statusTable');
-    </script>
 
     <div class="hint">
         <a href="javascript:selectAllHosts(false);selectAllServices(true);">check all</a>
@@ -229,7 +230,7 @@
       - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
       - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
     </div>
-   
+
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <br>
