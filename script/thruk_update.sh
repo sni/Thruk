@@ -3,7 +3,7 @@
 #export PERL_AUTOINSTALL_PREFER_CPAN=1
 export PERL_MM_USE_DEFAULT=1
 
-if [ ! -d "script" ]; then
+if [ ! -d "script" -o ! -d "root" -o ! -d "lib" -o ! -d "ssi" ]; then
   echo "please execute from your app root dir"
   exit 1
 fi
@@ -31,3 +31,5 @@ if [ $? != 0 ]; then
   echo "please fix errors first";
   exit 1;
 fi
+
+find . -exec touch {} \;
