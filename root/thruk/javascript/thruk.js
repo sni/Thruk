@@ -415,13 +415,15 @@ function styleElementsIE(elems, style, force) {
         if(style == 'original') {
             // reset style to original
             if(elems[x].className != "tableRowSelected" || force) {
-                elems[x].className = elems[x].origclass;
+                if(elems[x].origclass != undefined) {
+                    elems[x].className = elems[x].origclass;
+                }
             }
         }
         else {
             if(elems[x].className != "tableRowSelected" || force) {
                 // save style in custom attribute
-                if(elems[x].className != "undefined" && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
+                if(elems[x].className != undefined && elems[x].className != "tableRowSelected" && elems[x].className != "tableRowHover") {
                     elems[x].setAttribute('origclass', elems[x].className);
                 }
 
