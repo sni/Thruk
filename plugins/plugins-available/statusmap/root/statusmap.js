@@ -158,15 +158,15 @@ function show_tree_map(id_to_show) {
                 totalClass = 'hostPENDING';
             }
             else if(total > 0) {
-                var perc   = Math.ceil(failed / total - node.data.state_pending) * 100;
+                var perc = (failed /(total-node.data.state_pending))*100;
                 if(failed == 0) {
                     totalClass = 'hostUP';
                 }
                 else if(perc > 75) {
-                    totalClass = 'serviceWARNING';
+                    totalClass = 'hostDOWN';
                 }
                 else {
-                    totalClass = 'hostDOWN';
+                    totalClass = 'serviceWARNING';
                 }
             }
 
@@ -174,27 +174,6 @@ function show_tree_map(id_to_show) {
           }
           head.onmouseover = function (e){showTip((e||window.event), node)};
         }
-//        request: function(nodeId, level, onComplete){
-//alert('req: ' + nodeId + ' level' + level);
-//return false;
-//            var tree = eval('(' + json + ')');
-//            var parent = TreeUtil.getParent(tree, nodeId);
-//            if(parent) {
-//                show_tree_map(parent.id);
-//            }
-//            return false;
-
-//alert('req: ' + nodeId);
-//            show_tree_map(nodeId);
-            //var tree    = eval('(' + json + ')');
-            //var subtree = TreeUtil.getSubtree(tree, nodeId);
-            //TreeUtil.prune(subtree, tm.config.levelsToShow);
-            //onComplete.onComplete(nodeId, subtree);
-
-            // reset page refresh
-            //setRefreshRate(refresh_rate);
-            //additionalParams.set('host', nodeId);
-//        }
     });
 
     var tree    = eval('(' + json + ')');
@@ -384,7 +363,7 @@ function show_circle_map(id_to_show, w, h) {
                             'state_down':        node.data.state_down,
                             'state_unreachable': node.data.state_unreachable,
                             'state_pending':     node.data.state_pending,
-                            'children':          removed,
+                            'children':          removed
                         }
                     });
                     rgraph.graph.addAdjacence(node, newNode, {});
@@ -543,8 +522,7 @@ function show_hypertree_map(id_to_show, w, h) {
             style.width    = '10px';
         }
         domElement.onmouseover = function (e){showTip((e||window.event), node)};
-    },
-
+    }
   });
 
     var tree = eval('(' + json + ')');
