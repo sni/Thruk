@@ -335,7 +335,8 @@ sub _get_hosts_by_parents {
 
     my($subtree, $remaining, $state_up, $state_down, $state_unreachable, $state_pending)
         = $self->_fill_subtree($c, 'rootid', $hosts, $all_hosts);
-    my $host_tree->{'rootid'} = {
+    my $host_tree = {};
+    $host_tree->{'rootid'} = {
         'id'   => 'rootid',
         'name' => 'monitoring host',
         'data' => {
