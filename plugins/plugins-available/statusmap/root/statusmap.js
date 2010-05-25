@@ -141,11 +141,24 @@ function show_tree_map(id_to_show) {
             head.className = (head.className + " " + node.data.cssClass);
           }
           else if(isLeaf && head && node.data) {
-            var total  = node.data.state_up + node.data.state_down + node.data.state_unreachable;
+            var total  = node.data.state_up + node.data.state_down + node.data.state_unreachable + node.data.state_pending;
             var failed = node.data.state_down + node.data.state_unreachable;
             var totalClass = '';
-            if(total > 0) {
-                var perc   = Math.ceil(failed / total) * 100;
+            // calculate colour of node
+            if(total == node.data.state_up) {
+                totalClass = 'hostUP';
+            }
+            else if(total == node.data.state_down) {
+                totalClass = 'hostDOWN';
+            }
+            else if(total == node.data.state_unreachable) {
+                totalClass = 'hostUNREACHABLE';
+            }
+            else if(total == node.data.state_pending) {
+                totalClass = 'hostPENDING';
+            }
+            else if(total > 0) {
+                var perc   = Math.ceil(failed / total - node.data.state_pending) * 100;
                 if(failed == 0) {
                     totalClass = 'hostUP';
                 }
@@ -156,6 +169,7 @@ function show_tree_map(id_to_show) {
                     totalClass = 'hostDOWN';
                 }
             }
+
             head.className = (head.className + " " + totalClass);
           }
           head.onmouseover = function (e){showTip((e||window.event), node)};

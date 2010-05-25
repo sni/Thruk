@@ -430,17 +430,20 @@ sub _get_json_host {
             $color    = '#00FF00';
             $state_up++;
         }
-        if($host->{'state'} == 1) {
+        elsif($host->{'state'} == 1) {
             $class    = 'hostDOWN';
             $status   = 'DOWN';
             $color    = '#FF0000';
             $state_down++;
         }
-        if($host->{'state'} == 2) {
+        elsif($host->{'state'} == 2) {
             $class    = 'hostUNREACHABLE';
             $status   = 'UNREACHABLE';
             $color    = '#FF0000';
             $state_unreachable++;
+        }
+        else {
+            carp("unknown state: ".Dumper($host));
         }
     } else {
         $class    = 'hostPENDING';
