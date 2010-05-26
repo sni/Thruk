@@ -33,11 +33,13 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     my $code = 500; # internal server error
 
     # override some errors for admins
-    if(defined $arg1 and $arg1 == 15 and $c->check_user_roles('authorized_for_all_services')) {
-        $arg1 = 18;
-    }
-    if(defined $arg1 and $arg1 == 5  and $c->check_user_roles('authorized_for_all_hosts')) {
-        $arg1 = 17;
+    if(defined $arg1 and $arg1 =~ m/^\d+$/) {
+        if($arg1 == 15 and $c->check_user_roles('authorized_for_all_services')) {
+            $arg1 = 18;
+        }
+        if($arg1 == 5  and $c->check_user_roles('authorized_for_all_hosts')) {
+            $arg1 = 17;
+        }
     }
 
     my $errors = {
