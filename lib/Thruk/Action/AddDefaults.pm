@@ -51,7 +51,7 @@ before 'execute' => sub {
             $nr_disabled++ if $value == 2;
         }
     }
-    else {
+    elsif(defined $c->{'live'}) {
         my $livestatus_config = $c->{'live'}->get_livestatus_conf();
         $c->log->debug("livestatus config: ".Dumper($livestatus_config));
         for my $peer (@{$livestatus_config->{'peer'}}) {
@@ -61,7 +61,9 @@ before 'execute' => sub {
             }
         }
     }
-    $c->{'live'}->_disable_backends(\%disabled_backends);
+    if(defined $c->{'live'}) {
+        $c->{'live'}->_disable_backends(\%disabled_backends);
+    }
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     $c->stash->{'param_backend'}  = $backend;
 

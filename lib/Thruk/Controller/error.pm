@@ -119,7 +119,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '14'  => {
             'mess' => 'missing backend configuration',
-            'dscr' => 'please specify at least one livestatus backend in your thruk_local.conf',
+            'dscr' => 'please specify at least one livestatus backend in your thruk_local.conf<br>Please refer the <a href="/thruk/documentation.html#_configuration_2">documentation</a> on how to setup Thruk.',
             'code' => 500, # internal server error
         },
         '15'  => {

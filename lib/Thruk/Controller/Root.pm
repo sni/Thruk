@@ -83,18 +83,19 @@ sub begin : Private {
     $c->stash->{'datetime_format_log'}   = Thruk->config->{'datetime_format_log'};
 
     # which theme?
-    my $theme = Thruk->config->{'default_theme'};
+    my $theme;
     if(defined $c->request->cookie('thruk_theme')) {
         my $theme_cookie = $c->request->cookie('thruk_theme');
         $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme, $c->config->{'themes'};
-        $c->log->debug("Set theme: '".$theme."' by cookie");
+        $c->log->debug("Set theme: '".$theme."' by cookie") if defined $theme;
     }
+    $theme = $theme || Thruk->config->{'default_theme'} || 'Classic';
     if(defined $c->config->{templates_paths}) {
         $c->stash->{additional_template_paths} = [ @{$c->config->{templates_paths}}, $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
     } else {
         $c->stash->{additional_template_paths} = [ $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
     }
-    $c->stash->{'theme'}                   = $theme;
+    $c->stash->{'theme'} = $theme;
 
     # new or classic search?
     my $use_new_search = Thruk->config->{'use_new_search'};
@@ -112,6 +113,11 @@ sub begin : Private {
     $c->stash->{hidetop}   = $hidetop;
 
     $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
+
+    # redirect to error page unless we have a connection
+    if(!defined $c->{'live'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs') {
+        $c->detach("/error/index/14");
+    }
 
     return 1;
 }
@@ -191,6 +197,7 @@ sub thruk_index : Path('/thruk/') {
     }
 
     # custom start page?
+    $c->stash->{'start_page'} = '/thruk/main.html' unless defined $c->stash->{'start_page'};
     if($c->stash->{'start_page'} !~ /^\/thruk\//mx) {
         # external link, put in frames
         my $start_page = uri_escape($c->stash->{'start_page'});

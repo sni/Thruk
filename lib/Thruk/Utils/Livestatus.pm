@@ -32,7 +32,7 @@ sub new {
         'c'          => $c,
     };
     bless $self, $class;
-    $self->init_livestatus();
+    return unless $self->init_livestatus();
     return $self;
 }
 
@@ -61,7 +61,7 @@ sub init_livestatus {
 
     my $livestatus_config = $self->get_livestatus_conf();
     if(!defined $livestatus_config or !defined $livestatus_config->{'peer'} ) {
-        $self->{'c'}->detach("/error/index/14");
+        return;
     }
 
     if(defined $livestatus_config->{'verbose'} and $livestatus_config->{'verbose'}) {
@@ -73,7 +73,7 @@ sub init_livestatus {
 
     $self->{'c'}->stats->profile(end => "Thruk::Utils::Livestatus::init_livestatus()");
 
-    return;
+    return($self);
 }
 
 
