@@ -58,7 +58,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # do we need servicegroups?
     if($c->stash->{groupby} eq 'servicegroup') {
         my $new_hosts;
-        my $servicegroups = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name groups", { Slice => {} });
+        my $servicegroups = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name groups\nFilter: groups !=", { Slice => {} });
         my $servicegroupsbyhost = {};
         if(defined $servicegroups) {
             for my $data (@{$servicegroups}) {
