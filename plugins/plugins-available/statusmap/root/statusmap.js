@@ -18,7 +18,7 @@ function makeHTMLFromData(name, data){
   }
 
   // with childs
-  if(data.state_up != undefined && data.state_up + data.state_down + data.state_unreachable + data.state_pending > 1) {
+  if(data.status == undefined || (data.state_up + data.state_down + data.state_unreachable + data.state_pending > 1)) {
     html += '<br \/>Child Hosts:<br \/>';
     html += '<span class="' + ((data.state_up > 0) ? "hostUP" : "") +                   '"> Up: <\/span>          ' + data.state_up + '<br \/>';
     html += '<span class="' + ((data.state_down > 0) ? "hostDOWN" : "") +               '"> Down: <\/span>        ' + data.state_down + '<br \/>';
