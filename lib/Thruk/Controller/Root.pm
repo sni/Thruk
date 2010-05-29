@@ -86,7 +86,7 @@ sub begin : Private {
     my $theme;
     if(defined $c->request->cookie('thruk_theme')) {
         my $theme_cookie = $c->request->cookie('thruk_theme');
-        $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme, $c->config->{'themes'};
+        $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
         $c->log->debug("Set theme: '".$theme."' by cookie") if defined $theme;
     }
     $theme = $theme || Thruk->config->{'default_theme'} || 'Classic';
