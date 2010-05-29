@@ -240,7 +240,7 @@ div.cmd_pane {
   height:100px;
   visibility:hidden;
   position:fixed;
-  top: 20px;
+  top: 70px;
   right: 0px;
   z-index: 99;
   color: black;
