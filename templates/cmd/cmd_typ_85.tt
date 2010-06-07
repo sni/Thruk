@@ -24,7 +24,8 @@
     [% comment_author       = c.request.parameters.com_author %]
     [% hostgroup_name       = c.request.parameters.hostgroup %]
 
-    [% IF c.request.parameters.ahas %]SCHEDULE_HOSTGROUP_HOST_DOWNTIME[% ELSE %]SCHEDULE_HOSTGROUP_SVC_DOWNTIME[% END %];[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",hostgroup_name,start_time,end_time,fixed,duration,comment_author,comment_data) %]
+    [% IF c.request.parameters.ahas %]SCHEDULE_HOSTGROUP_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",hostgroup_name,start_time,end_time,fixed,duration,comment_author,comment_data) %] \
+COMMAND [[% date.format(date.now, '%s') %]] SCHEDULE_HOSTGROUP_SVC_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",hostgroup_name,start_time,end_time,fixed,duration,comment_author,comment_data) %][% ELSE %]SCHEDULE_HOSTGROUP_SVC_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",hostgroup_name,start_time,end_time,fixed,duration,comment_author,comment_data) %][% END %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = date.format(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
