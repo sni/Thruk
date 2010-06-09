@@ -85,8 +85,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 # create the downtimes page
 sub _process_comments_page {
     my ( $self, $c ) = @_;
-    $c->stash->{'hostcomments'}    = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name id source type author comment entry_time entry_type expire_time expires\nFilter: service_description = ", { Slice => {}, AddPeer => 1 });
-    $c->stash->{'servicecomments'} = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name service_description id source type author comment entry_time entry_type expire_time expires\nFilter: service_description != ", { Slice => {}, AddPeer => 1 });
+    $c->stash->{'hostcomments'}    = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description = ", { Slice => {}, AddPeer => 1 });
+    $c->stash->{'servicecomments'} = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::get_auth_filter($c, 'comments')."\nColumns: host_name service_description id source type author comment entry_time entry_type persistent expire_time expires\nFilter: service_description != ", { Slice => {}, AddPeer => 1 });
     return 1;
 }
 
