@@ -1,5 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.64    Sun May 30 10:17:24 CEST 2010
+          - fixed problem with removing downtimes
+
+0.62    Sat May 29 17:03:41 CEST 2010
+          - fixed problem with selecting themes
+          - fixed command default checkbox settings
 
 0.60    Sun May 23 13:12:00 CEST 2010
           - added parent search filter

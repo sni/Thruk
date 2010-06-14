@@ -42,6 +42,10 @@ livestatus:
                 Service Dependencies
                 Service Escalations
 
+Known Bugs:
+    Statusmap Link from Hostgroups does not work
+    Alerts - top 25 hard alert producer
+
 =========================================================
 ideas for after 1.0
 
