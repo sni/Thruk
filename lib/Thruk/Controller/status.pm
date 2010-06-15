@@ -282,6 +282,14 @@ sub _process_details_page {
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'style'}         = 'detail';
 
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    if(defined $view_mode and $view_mode eq 'xls') {
+        my $filename = 'status_detail.xls';
+        #$c->res->header('Content-Disposition', qq[attachment; filename="]. $filename .q["]);
+        $c->stash->{'template'} = 'excel/status_detail.tt';
+        $c->detach('View::Excel');
+    }
+
     return 1;
 }
 

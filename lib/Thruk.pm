@@ -39,7 +39,7 @@ our $VERSION = '0.66';
 # with a external configuration file acting as an override for
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
-__PACKAGE__->config('name'                   => 'Thruk',
+my %config = ('name'                   => 'Thruk',
                     'version'                => $VERSION,
                     'released'               => 'June 21, 2010',
                     'encoding'               => 'UTF-8',
@@ -99,6 +99,8 @@ __PACKAGE__->config('name'                   => 'Thruk',
                         'ignore_extensions' => [ qw/tpl tt tt2/ ],
                     },
 );
+$config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
+__PACKAGE__->config(%config);
 
 ###################################################
 # get installed plugins

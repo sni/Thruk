@@ -1,0 +1,51 @@
+[% USE date %]
+<workbook>
+  <worksheet name="Status">
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        <cell width='30'>Hostname</cell>
+        <cell width='10'>IP</cell>
+        <cell width='30'>Service</cell>
+        <cell width='20'>Status</cell>
+        <cell width='20'>Last Check</cell>
+        <cell width='15'>Duration</cell>
+        <cell width='10'>Attempt</cell>
+        <cell width='80'>Status Information</cell>
+      </format>
+    </row>
+    [% FOREACH s = data %]
+      [% IF s.has_been_checked == 0 %]
+        [% state       = 'PENDING' %]
+        [% state_color = 'grey' %]
+      [% ELSIF s.state == 0 %]
+        [% state       = 'OK' %]
+        [% state_color = 'green' %]
+      [% ELSIF s.state == 1 %]
+        [% state       = 'WARNING' %]
+        [% state_color = 'yellow' %]
+      [% ELSIF s.state == 2 %]
+        [% state       = 'CRITICAL' %]
+        [% state_color = 'red' %]
+      [% ELSIF s.state == 3 %]
+        [% state       = 'UNKNOWN' %]
+        [% state_color = 'orange' %]
+      [% END %]
+      <row>
+        <cell>[% s.host_name %]</cell>
+        <cell>[% s.host_address %]</cell>
+        <cell>[% s.description %]</cell>
+        <format bg_color='[% state_color %]'>
+          <cell>[% state %]</cell>
+        </format>
+        <format num_format='yyyy-mm-dd hh:mm:ss'>
+          <cell type='date_time'>[% IF s.has_been_checked == 0 %][% ELSE %][% date.format(s.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
+        </format>
+        <cell>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>
+        <format align='center'>
+          <cell>[% s.current_attempt %]/[% s.max_check_attempts %]</cell>
+        </format>
+        <cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% s.plugin_output %][% END %]</cell>
+      </row>
+    [% END %]
+  </worksheet>
+</workbook>

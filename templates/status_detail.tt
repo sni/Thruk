@@ -236,4 +236,8 @@
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
 
+    <div class='exportOptions'>
+      <a href='[% uri_with(c, 'view_mode' => 'xls') %]'><img src='/thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>
+    </div>
+
 [% PROCESS _footer.tt %]

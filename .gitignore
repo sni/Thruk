@@ -16,3 +16,4 @@ htpasswd.users
 ssi/*.ssi
 root/thruk/plugins/*/
 t/xt
+*.swp

@@ -61,6 +61,7 @@ requires 'Catalyst::Plugin::StackTrace'           => 0.11;
 requires 'Catalyst::View::TT'                     => 0.32;
 requires 'Catalyst::View::GD'                     => 0.01;
 requires 'Catalyst::View::JSON'                   => 0.00;
+requires 'Catalyst::View::Excel::Template::Plus'  => 0.03;
 requires 'Catalyst::Plugin::Authentication'       => 0.10016;
 requires 'Catalyst::Plugin::Authorization::Roles' => 0.08;
 requires 'Catalyst::Plugin::CustomErrorMessage'   => 0.04;
