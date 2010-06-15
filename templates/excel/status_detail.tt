@@ -1,6 +1,6 @@
 [% USE date %]
 <workbook>
-  <worksheet name="Status">
+  <worksheet name='Status' autofilter='A1:H99999'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
         <cell width='30'>Hostname</cell>
