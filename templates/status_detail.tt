@@ -9,6 +9,10 @@
   var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
 </script>
 
+<div class='exportOptions' id="exportOptions"[% IF hidetop == 1 %] style="visibility:hidden; display:none;"[% END %]>
+  <a href='[% uri_with(c, 'view_mode' => 'xls') %]'><img src='/thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>
+</div>
+
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
 [% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
@@ -235,9 +239,5 @@
 
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
-
-    <div class='exportOptions'>
-      <a href='[% uri_with(c, 'view_mode' => 'xls') %]'><img src='/thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>
-    </div>
 
 [% PROCESS _footer.tt %]

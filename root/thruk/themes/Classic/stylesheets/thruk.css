@@ -115,8 +115,9 @@ input.button_peerHID {
 }
 
 .exportOptions {
-  text-align: right;
-  margin-right: 20px;
+  position: absolute;
+  top: 50px;
+  right: 15px;
 }
 
 /* class to preload images */
