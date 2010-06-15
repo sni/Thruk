@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.66    Mon Jun 14 13:04:39 CEST 2010
+          - fixed all commands which send more than one external command
+          - fixed problem with "Schedule Downtime For Hosts Too"
+
 0.64    Sun May 30 10:17:24 CEST 2010
           - fixed problem with removing downtimes
 

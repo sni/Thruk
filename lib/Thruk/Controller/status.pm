@@ -75,8 +75,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $self->_process_summary_page($c);
     }
 
-    Thruk::Utils::get_message($c);
-
     $c->stash->{title}          = 'Current Network Status';
     $c->stash->{infoBoxTitle}   = 'Current Network Status';
     $c->stash->{page}           = 'status';

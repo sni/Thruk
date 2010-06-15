@@ -210,6 +210,7 @@ sub _check_for_commands {
 
     # command commited?
     if(defined $cmd_mod and $self->_do_send_command($c)) {
+        Thruk::Utils::set_message($c, 'success_message', 'Commands successfully submitted');
         $self->_redirect_or_success($c, -2);
     } else {
         # no command submited, view commands page
@@ -361,15 +362,18 @@ sub _do_send_command {
     }
 
     # send the command
-    $cmd = "COMMAND [".time()."] $cmd";
-    $c->log->debug("sending $cmd");
+    my $options = {};
     if(defined $backends) {
         $c->log->debug("sending to backends: ".Dumper($backends));
-        $c->{'live'}->do($cmd, { Backend => $backends });
-    } else {
-        $c->{'live'}->do($cmd);
+        $options = { Backend => $backends };
     }
-    $c->log->info("[".$c->user->username."] cmd: $cmd");
+
+    for my $cmd_line (split/\n/mx, $cmd) {
+        $cmd_line = 'COMMAND ['.time().'] '.$cmd_line;
+        $c->log->debug('sending '.$cmd_line);
+        $c->{'live'}->do($cmd_line, $options);
+        $c->log->info('['.$c->user->username.'] cmd: '.$cmd_line);
+    }
 
     return(1);
 }

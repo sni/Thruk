@@ -12,6 +12,7 @@ general
     - add extra grapher url
     - use title for quick downtimes popups
     - reload nav frame when changing themes
+    - excel export on status.cgi
 
 extinfo:
     - finish performance data on extinfo type 4

@@ -27,6 +27,9 @@
         </td>
       </tr>
     </table><br>
+
+    [% PROCESS _message.tt %]
+
     <div align="center">
       <table border="0" width="100%">
         <tr>
