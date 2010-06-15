@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 242;
+use Test::More tests => 250;
 
 BEGIN {
     use lib('t');
@@ -59,3 +59,19 @@ for my $url (@{$pages}) {
         'unlike'  => 'internal server error',
     );
 }
+
+
+$pages = [
+# Excel Export
+    '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=xls',
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'          => $url,
+        'unlike'       => 'internal server error',
+        'content_type' => 'application/x-msexcel',
+    );
+}
+
