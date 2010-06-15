@@ -276,19 +276,18 @@ sub _process_details_page {
     my $sortedservices = Thruk::Utils::sort($c, $services, $sortoptions->{$sortoption}->[0], $order);
     if($sortoption == 6 and defined $sortedservices) { @{$sortedservices} = reverse @{$sortedservices}; }
 
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    if(defined $view_mode and $view_mode eq 'xls') {
+        $c->stash->{'template'} = 'excel/status_detail.tt';
+        $c->detach('View::Excel');
+        return 1;
+    }
+
     Thruk::Utils::page_data($c, $sortedservices);
 
     $c->stash->{'orderby'}       = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}      = $order;
     $c->stash->{'style'}         = 'detail';
-
-    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
-    if(defined $view_mode and $view_mode eq 'xls') {
-        my $filename = 'status_detail.xls';
-        #$c->res->header('Content-Disposition', qq[attachment; filename="]. $filename .q["]);
-        $c->stash->{'template'} = 'excel/status_detail.tt';
-        $c->detach('View::Excel');
-    }
 
     return 1;
 }
