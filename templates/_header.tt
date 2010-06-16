@@ -114,9 +114,10 @@
     <td width="100%">
       <table border=0 cellpadding=0 cellspacing=0>
         <tr>
+          <td>
           [% IF backends && backends.size > 1 %]
           [% FOREACH pd IN backends %]
-          <td>
+          <div class='backend'>
             [% SET name  = 'unknown' %]
             [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
             [% SET name = pi_detail.$pd.peer_name IF pi_detail.$pd.program_start %]
@@ -125,9 +126,10 @@
             [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %]
             [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
             <input type="button" id='button_[% pd %]' class="[% class %]" value="[% name %]" title="[% name %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleBackend('[% pd %]')">
+          </div>
+          [% END %]
+          [% END %]
           </td>
-          [% END %] [% ELSE %] <td></td> [% END %]
-          <td width="100%"></td>
         </tr>
       </table>
     </td>

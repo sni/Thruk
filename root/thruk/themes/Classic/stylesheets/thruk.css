@@ -65,6 +65,17 @@ table.top_nav {
   margin: 0px;
 }
 
+td.top_nav_pref {
+  vertical-align: top;
+}
+
+.top_nav div.backend {
+  border: 0px none;
+  padding: 0px;
+  margin: 0px;
+  float: left;
+}
+
 input.top_nav_pref_button {
   color:#444444;
   background-color:#EEEEEE;
