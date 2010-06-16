@@ -811,6 +811,7 @@ templates/config_timeperiods.tt
 templates/docs.tt
 templates/error.tt
 templates/excel/status_detail.tt
+templates/excel/status_hostdetail.tt
 templates/extinfo_type_0.tt
 templates/extinfo_type_1.tt
 templates/extinfo_type_2.tt

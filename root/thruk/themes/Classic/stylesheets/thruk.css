@@ -114,12 +114,6 @@ input.button_peerHID {
   opacity: 0.40; /* Opera */
 }
 
-.exportOptions {
-  position: absolute;
-  top: 50px;
-  right: 15px;
-}
-
 /* class to preload images */
 .hidepics {
   width:0px;

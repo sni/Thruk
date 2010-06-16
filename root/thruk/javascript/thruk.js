@@ -1368,11 +1368,9 @@ function toggleTopPane() {
   if(toggleElement('top_pane')) {
     additionalParams.set('hidetop', 0);
     formInput.value = 0;
-    showElement('exportOptions');
   } else {
     additionalParams.set('hidetop', 1);
     formInput.value = 1;
-    hideElement('exportOptions');
   }
 }
 

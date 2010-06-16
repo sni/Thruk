@@ -9,10 +9,6 @@
   var servicesHash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
 </script>
 
-<div class='exportOptions' id="exportOptions"[% IF hidetop == 1 %] style="visibility:hidden; display:none;"[% END %]>
-  <a href='[% uri_with(c, 'view_mode' => 'xls') %]'><img src='/thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>
-</div>
-
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
 [% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
@@ -62,10 +58,10 @@
     </table>
     <table border="0" width="100%" cellpadding=0 cellspacing=0>
       <tr>
-        <td valign="top" align="left" width="33%">
+        <td valign="top" align="left" width="33%" nowrap>
           [% PROCESS _status_filter.tt %]
         </td>
-        <td valign="top" align="center" width="33%" nowrap><br>
+        <td valign="top" align="center" width="33%" nowrap>
           <div align="center" class='statusTitle'>
             [% IF custom_title != '' %][% custom_title %]
             [% ELSIF hostgroup != '' %]Service Status Details For Host Group '[% hostgroup %]'
@@ -83,21 +79,29 @@
           [% END %]
           <br>
           </td>
-        <td valign="top" align="right" width="33%"></td>
+        <td valign="bottom" align="right" width="33%"></td>
       </tr>
     </table>
-    <br>
 
     <div align="center">[% PROCESS _pager.tt %]</div>
 
-    <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
-
-    <div class="hint">
-        <a href="javascript:selectAllHosts(false);selectAllServices(true);">select all</a>
-      - <a href="javascript:selectAllHosts(false);selectAllServices(false);">unselect all</a>
-      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
-    </div>
+    <table border="0" width="100%" cellpadding=0 cellspacing=0>
+      <tr>
+        <td valign="top" align="left" width="10%" nowrap></td>
+        <td valign="top" align="center" width="80%">
+          <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
+          <div class="hint">
+              <a href="javascript:selectAllHosts(false);selectAllServices(true);">select all</a>
+            - <a href="javascript:selectAllHosts(false);selectAllServices(false);">unselect all</a>
+            - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+            - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+          </div>
+        </td>
+        <td valign="bottom" align="right" width="10%">
+          <a href='[% uri_with(c, 'view_mode' => 'xls') %]'><img src='/thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>&nbsp;
+        </td>
+      </tr>
+    </table>
 
     <table border="0" width="100%" class='status' id="statusTable">
       <tr>

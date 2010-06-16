@@ -53,7 +53,7 @@
         <td valign="top" align="left" width="33%" nowrap>
           [% PROCESS _status_filter.tt %]
         </td>
-        <td valign="top" align="center" width="33%">
+        <td valign="top" align="center" width="33%" nowrap>
           <div align="center" class='statusTitle'>
             [% IF hostgroup == 'all' %]Host Status Details For All Host Groups
             [% ELSIF hostgroup != '' %]Host Status Details For Host Group '[% hostgroup %]'
@@ -66,21 +66,31 @@
           [% IF c.request.parameters.sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
+          <br>
         </td>
-        <td valign="top" align="right" width="33%"></td>
+        <td valign="bottom" align="right" width="33%"></td>
       </tr>
     </table>
 
     <div align="center">[% PROCESS _pager.tt %]</div>
 
-    <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
-
-    <div class="hint">
-        <a href="javascript:selectAllHosts(true);">select all</a>
-      - <a href="javascript:selectAllHosts(false);">unselect all</a>
-      - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
-      - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
-    </div>
+    <table border="0" width="100%" cellpadding=0 cellspacing=0>
+      <tr>
+        <td valign="top" align="left" width="10%" nowrap></td>
+        <td valign="top" align="center" width="80%">
+          <div class="hint">select host with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
+          <div class="hint">
+              <a href="javascript:selectAllHosts(true);">select all</a>
+            - <a href="javascript:selectAllHosts(false);">unselect all</a>
+            - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+            - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+          </div>
+        </td>
+        <td valign="bottom" align="right" width="10%">
+          <a href='[% uri_with(c, 'view_mode' => 'xls') %]'><img src='/thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>&nbsp;
+        </td>
+      </tr>
+    </table>
 
     <div align='center'>
       <table border="0" class='status' width="100%" id="statusTable">

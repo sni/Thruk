@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 250;
+use Test::More tests => 254;
 
 BEGIN {
     use lib('t');
@@ -65,6 +65,7 @@ $pages = [
 # Excel Export
     '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&view_mode=xls',
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=xls',
 ];
 
 for my $url (@{$pages}) {

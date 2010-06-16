@@ -44,7 +44,7 @@
         <format align='center'>
           <cell>[% s.current_attempt %]/[% s.max_check_attempts %]</cell>
         </format>
-        <cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% s.plugin_output %][% END %]</cell>
+        <cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% html_escape(s.plugin_output) %][% END %]</cell>
       </row>
     [% END %]
   </worksheet>

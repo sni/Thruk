@@ -1,0 +1,42 @@
+[% USE date %]
+<workbook>
+  <worksheet name='Status' autofilter='A1:H99999'>
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        <cell width='30'>Hostname</cell>
+        <cell width='10'>IP</cell>
+        <cell width='20'>Status</cell>
+        <cell width='20'>Last Check</cell>
+        <cell width='15'>Duration</cell>
+        <cell width='80'>Status Information</cell>
+      </format>
+    </row>
+    [% FOREACH h = data %]
+      [% IF h.has_been_checked == 0 %]
+        [% state       = 'PENDING' %]
+        [% state_color = 'grey' %]
+      [% ELSIF h.state == 0 %]
+        [% state       = 'OK' %]
+        [% state_color = 'green' %]
+      [% ELSIF h.state == 1 %]
+        [% state       = 'DOWN' %]
+        [% state_color = 'red' %]
+      [% ELSIF h.state == 2 %]
+        [% state       = 'UNREACHABLE' %]
+        [% state_color = 'red' %]
+      [% END %]
+      <row>
+        <cell>[% h.name %]</cell>
+        <cell>[% h.address %]</cell>
+        <format bg_color='[% state_color %]'>
+          <cell>[% state %]</cell>
+        </format>
+        <format num_format='yyyy-mm-dd hh:mm:ss'>
+          <cell type='date_time'>[% IF h.has_been_checked == 0 %][% ELSE %][% date.format(h.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
+        </format>
+        <cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>
+        <cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% date.format(h.next_check, datetime_format_long) %][% ELSE %][% html_escape(h.plugin_output) %][% END %]</cell>
+      </row>
+    [% END %]
+  </worksheet>
+</workbook>

@@ -278,6 +278,7 @@ sub _process_details_page {
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if(defined $view_mode and $view_mode eq 'xls') {
+        $c->stash->{'data'}     = $sortedservices;
         $c->stash->{'template'} = 'excel/status_detail.tt';
         $c->detach('View::Excel');
         return 1;
@@ -341,6 +342,14 @@ sub _process_hostdetails_page {
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     my $sortedhosts = Thruk::Utils::sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
     if($sortoption == 6) { @{$sortedhosts} = reverse @{$sortedhosts}; }
+
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    if(defined $view_mode and $view_mode eq 'xls') {
+        $c->stash->{'data'}     = $sortedhosts;
+        $c->stash->{'template'} = 'excel/status_hostdetail.tt';
+        $c->detach('View::Excel');
+        return 1;
+    }
 
     Thruk::Utils::page_data($c, $sortedhosts);
 
