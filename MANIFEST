@@ -44,6 +44,7 @@ lib/Catalyst/Authentication/Store/FromCGIConf.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
 lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/View/GD.pm
+lib/Excel/Template/Container/Worksheet.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Thruk.pm
 lib/Thruk/Action/AddDefaults.pm
@@ -65,6 +66,7 @@ lib/Thruk/Controller/trends.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Livestatus.pm
 lib/Thruk/Utils/Trends.pm
+lib/Thruk/View/Excel.pm
 lib/Thruk/View/GD.pm
 lib/Thruk/View/JSON.pm
 lib/Thruk/View/TT.pm
@@ -151,6 +153,7 @@ root/thruk/themes/Classic/images/noack.gif
 root/thruk/themes/Classic/images/notes.gif
 root/thruk/themes/Classic/images/notify.gif
 root/thruk/themes/Classic/images/orangedot.gif
+root/thruk/themes/Classic/images/page_white_excel.png
 root/thruk/themes/Classic/images/passiveonly.gif
 root/thruk/themes/Classic/images/plus.gif
 root/thruk/themes/Classic/images/recovery.png
@@ -258,6 +261,7 @@ root/thruk/themes/Exfoliation/images/noack.gif
 root/thruk/themes/Exfoliation/images/notes.gif
 root/thruk/themes/Exfoliation/images/notify.gif
 root/thruk/themes/Exfoliation/images/orangedot.gif
+root/thruk/themes/Exfoliation/images/page_white_excel.png
 root/thruk/themes/Exfoliation/images/passiveonly.gif
 root/thruk/themes/Exfoliation/images/plus.gif
 root/thruk/themes/Exfoliation/images/recovery.png
@@ -419,6 +423,7 @@ root/thruk/themes/Nuvola/images/noack.gif
 root/thruk/themes/Nuvola/images/notes.gif
 root/thruk/themes/Nuvola/images/notify.gif
 root/thruk/themes/Nuvola/images/orange.gif
+root/thruk/themes/Nuvola/images/page_white_excel.png
 root/thruk/themes/Nuvola/images/passiveonly.gif
 root/thruk/themes/Nuvola/images/plus.gif
 root/thruk/themes/Nuvola/images/recovery.png
@@ -570,6 +575,7 @@ root/thruk/themes/Vautour/images/noack.gif
 root/thruk/themes/Vautour/images/notes.gif
 root/thruk/themes/Vautour/images/notify.gif
 root/thruk/themes/Vautour/images/orangedot.gif
+root/thruk/themes/Vautour/images/page_white_excel.png
 root/thruk/themes/Vautour/images/passiveonly.gif
 root/thruk/themes/Vautour/images/plus.gif
 root/thruk/themes/Vautour/images/recovery.png
@@ -666,6 +672,8 @@ t/controller_tac.t
 t/controller_trends.t
 t/perlcriticrc
 t/TestUtils.pm
+t/view_Excel.t
+t/view_GD.t
 t/view_TT.t
 templates/_ajax_search.tt
 templates/_footer.tt
@@ -802,6 +810,7 @@ templates/config_services.tt
 templates/config_timeperiods.tt
 templates/docs.tt
 templates/error.tt
+templates/excel/status_detail.tt
 templates/extinfo_type_0.tt
 templates/extinfo_type_1.tt
 templates/extinfo_type_2.tt

@@ -9,8 +9,18 @@ BEGIN {
     use Excel::Template::Container;
 }
 
-sub exit_scope { $_[1]->active_worksheet(undef) }
+=head2 exit_scope
 
+exit current scope
+
+=cut
+sub exit_scope { return $_[1]->active_worksheet(undef); }
+
+=head2 render
+
+render worksheet
+
+=cut
 sub render {
     my $self = shift;
     my ($context) = @_;
@@ -40,10 +50,10 @@ sub render {
 
     my $autofilter = $context->get( $self, "AUTOFILTER");
     if ( defined $autofilter ) {
-        if ($autofilter =~ /^\D/) {
+        if ($autofilter =~ /^\D/mx) {
             $worksheet->autofilter($autofilter);
         }else{
-            $autofilter =~ s/ //g;
+            $autofilter =~ s/\ //gmx;
             my ($row1, $col1, $row2, $col2) = split(',',$autofilter);
             $worksheet->autofilter($row1, $col1, $row2, $col2);
         }

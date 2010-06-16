@@ -70,7 +70,7 @@ my %config = ('name'                   => 'Thruk',
                         TRIM               => 1,
                         CACHE_SIZE         => 0,
                         COMPILE_EXT        => '.ttc',
-                        COMPILE_DIR        => '/tmp/ttc_'.getlogin(),
+                        COMPILE_DIR        => '/tmp/ttc_'.$>, # use uid to make tmp dir uniq
                         STAT_TTL           => 60,
                         STRICT             => 0,
 #                        DEBUG              => 'all',
