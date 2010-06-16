@@ -15,7 +15,10 @@
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 
-    [% IF c.request.parameters.ahas %]DISABLE_HOST_NOTIFICATIONS[% ELSE %]DISABLE_HOST_SVC_NOTIFICATIONS[% END %];[% sprintf("%s",host_name) %]
+    [% IF c.request.parameters.ahas %]
+        DISABLE_HOST_NOTIFICATIONS;[% sprintf("%s",host_name) %]
+    [% END +%]
+    DISABLE_HOST_SVC_NOTIFICATIONS;[% sprintf("%s",host_name) %]
 [% END %]
 
 [%# definition of the html form data #%]

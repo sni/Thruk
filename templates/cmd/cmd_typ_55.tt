@@ -25,7 +25,13 @@
     [% host_name            = c.request.parameters.host %]
     [% comment_author       = c.request.parameters.com_author %]
 
-    SCHEDULE_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time,end_time,fixed,triggered_by,duration,comment_author,comment_data) %]
+    [% IF c.request.parameters.childoptions == 1 %]
+        SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time,end_time,fixed,triggered_by,duration,comment_author,comment_data) %]
+    [% ELSIF c.request.parameters.childoptions == 2 %]
+        SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time,end_time,fixed,triggered_by,duration,comment_author,comment_data) %]
+    [% ELSE %]
+        SCHEDULE_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time,end_time,fixed,triggered_by,duration,comment_author,comment_data) %]
+    [% END %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = date.format(date.now,      '%Y-%m-%d %H:%M:%S'); END %]

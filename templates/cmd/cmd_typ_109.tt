@@ -15,7 +15,10 @@
 [% BLOCK action%]
     [% servicegroup_name    = c.request.parameters.servicegroup %]
 
-    [% IF c.request.parameters.ahas %]ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS[% ELSE %]ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS[% END %];[% sprintf("%s",servicegroup_name) %]
+    [% IF c.request.parameters.ahas %]
+        ENABLE_SERVICEGROUP_HOST_NOTIFICATIONS;[% sprintf("%s",servicegroup_name) %]
+    [% END +%]
+    ENABLE_SERVICEGROUP_SVC_NOTIFICATIONS;[% sprintf("%s",servicegroup_name) %]
 [% END %]
 
 [%# definition of the html form data #%]

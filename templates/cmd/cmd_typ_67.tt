@@ -15,7 +15,10 @@
 [% BLOCK action%]
     [% hostgroup_name       = c.request.parameters.hostgroup %]
 
-    [% IF c.request.parameters.ahas %]ENABLE_HOSTGROUP_HOST_CHECKS[% ELSE %]ENABLE_HOSTGROUP_SVC_CHECKS[% END %];[% sprintf("%s",hostgroup_name) %]
+    [% IF c.request.parameters.ahas %]
+        ENABLE_HOSTGROUP_HOST_CHECKS;[% sprintf("%s",hostgroup_name) %]
+    [% END +%]
+    ENABLE_HOSTGROUP_SVC_CHECKS;[% sprintf("%s",hostgroup_name) %]
 [% END %]
 
 [%# definition of the html form data #%]
