@@ -178,10 +178,10 @@ sub _remove_all_downtimes {
     # get list of all downtimes
     my $ids;
     if(defined $service) {
-        $ids = $c->{'live'}->selectcol_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = $service\nFilter: host_name = $host\nColumns: id");
+        $ids = $c->{'live'}->selectcol_arrayref("GET downtimes\n".Thruk::Utils::Auth::get_auth_filter($c, 'downtimes')."\nFilter: service_description = $service\nFilter: host_name = $host\nColumns: id");
     }
     else {
-        $ids = $c->{'live'}->selectcol_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nFilter: host_name = $host\nColumns: id");
+        $ids = $c->{'live'}->selectcol_arrayref("GET downtimes\n".Thruk::Utils::Auth::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nFilter: host_name = $host\nColumns: id");
     }
     for my $id (@{$ids}) {
         $c->{'request'}->{'parameters'}->{'down_id'} = $id;
@@ -215,8 +215,8 @@ sub _check_for_commands {
     } else {
         # no command submited, view commands page
         if($cmd_typ == 55 or $cmd_typ == 56) {
-            $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: id host_name start_time", { Slice => {} });
-            $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::get_auth_filter($c, 'downtimes')."\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} });
+            $c->stash->{'hostdowntimes'}    = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::Auth::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: id host_name start_time", { Slice => {} });
+            $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::Auth::get_auth_filter($c, 'downtimes')."\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} });
         }
 
         my @possible_backends       = $c->{'live'}->peer_key();

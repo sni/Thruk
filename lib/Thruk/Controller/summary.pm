@@ -84,9 +84,9 @@ sub _show_step_1 {
     my ( $self, $c ) = @_;
     $c->stats->profile(begin => "_show_step_1()");
 
-    my $tmp_hosts         = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hosts'), 'name');
-    my $tmp_hostgroups    = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hostgroups'), 'name');
-    my $tmp_servicegroups = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'servicegroups'), 'name');
+    my $tmp_hosts         = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), 'name');
+    my $tmp_hostgroups    = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), 'name');
+    my $tmp_servicegroups = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), 'name');
 
     my(@hosts, @hostgroups, @servicegroups);
     @hosts         = sort keys %{$tmp_hosts}         if defined $tmp_hosts;
@@ -378,7 +378,7 @@ sub _get_alerts_from_log {
     my($hostlogs, $servicelogs);
 
     if($c->stash->{alerttypefilter} ne "Service") {
-        my $host_log_query = "GET log\n".$hostfilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output";
+        my $host_log_query = "GET log\n".$hostfilter.Thruk::Utils::Auth::get_auth_filter($c, 'log')."\nColumns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output";
         $c->log->debug($host_log_query);
         $c->stats->profile(begin => "summary.pm fetch host logs");
         $hostlogs = $c->{'live'}->selectall_arrayref($host_log_query, { Slice => 1} );
@@ -386,7 +386,7 @@ sub _get_alerts_from_log {
     }
 
     if($c->stash->{alerttypefilter} ne "Host") {
-        my $service_log_query = "GET log\n".$servicefilter.Thruk::Utils::get_auth_filter($c, 'log')."\nColumns: time state state_type  host_name service_description current_host_groups current_service_groups plugin_output";
+        my $service_log_query = "GET log\n".$servicefilter.Thruk::Utils::Auth::get_auth_filter($c, 'log')."\nColumns: time state state_type  host_name service_description current_host_groups current_service_groups plugin_output";
         $c->log->debug($service_log_query);
         $c->stats->profile(begin => "summary.pm fetch service logs");
         $servicelogs = $c->{'live'}->selectall_arrayref($service_log_query, { Slice => 1} );

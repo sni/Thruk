@@ -48,10 +48,10 @@ sub _show_step_2 {
 
     my $data;
     if($input eq 'gethost') {
-        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::get_auth_filter($c, 'hosts'), 'name');
+        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), 'name');
     }
     elsif($input eq 'getservice') {
-        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }

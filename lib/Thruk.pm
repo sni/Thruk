@@ -8,6 +8,7 @@ use Carp;
 use Catalyst::Log::Log4perl;
 use Thruk::Utils;
 use Thruk::Utils::Livestatus;
+use Thruk::Utils::Auth;
 use Catalyst::Runtime '5.70';
 
 ###################################################

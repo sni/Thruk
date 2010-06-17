@@ -108,7 +108,7 @@ before 'execute' => sub {
     # backend availability checks here
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     eval {
-        my $processinfo          = $c->{'live'}->selectall_hashref("GET status\n".Thruk::Utils::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
+        my $processinfo          = $c->{'live'}->selectall_hashref("GET status\n".Thruk::Utils::Auth::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
         my $overall_processinfo  = Thruk::Utils::calculate_overall_processinfo($processinfo);
         $c->stash->{'pi'}        = $overall_processinfo;
         $c->stash->{'pi_detail'} = $processinfo;

@@ -140,7 +140,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     my $query = "GET log\nColumns: time type options state\n".$filter;
     #$c->log->debug($query);
-    $query   .= Thruk::Utils::get_auth_filter($c, 'log');
+    $query   .= Thruk::Utils::Auth::get_auth_filter($c, 'log');
 
     my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
 
