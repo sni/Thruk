@@ -72,7 +72,7 @@ For the FastCGI installation follow the steps at <<_fastcgi,fastcgi installation
       - minimal inst, create user thruk
 2.  add "contrib non-free" to /etc/apt/sources.list
 3.  #> apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl \
-          make gcc git git-core libgd2-xpm-dev
+          make gcc git git-core libgd2-xpm-dev libexpat1-dev
 4.  #> su - thruk
 5.  %> cd /tmp
 6.  %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz

@@ -43,7 +43,6 @@ livestatus:
                 Service Escalations
 
 Known Bugs:
-    Statusmap Link from Hostgroups does not work
     Alerts - top 25 hard alert producer
 
 =========================================================
