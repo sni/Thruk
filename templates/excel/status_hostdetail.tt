@@ -12,6 +12,9 @@
       </format>
     </row>
     [% FOREACH h = data %]
+      [% SET peer_key      = h.peer_key %]
+      [% SET program_start = pi_detail.$peer_key.program_start %]
+
       [% IF h.has_been_checked == 0 %]
         [% state       = 'PENDING' %]
         [% state_color = 'grey' %]
