@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.66    Mon Jun 14 13:04:39 CEST 2010
           - added Excel export to status/host details page
+          - fixed problem with command authorization
           - fixed problem with logfile access authorization
           - fixed problem with template compile directory and different users on one host
           - fixed all commands which send more than one external command

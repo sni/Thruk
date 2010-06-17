@@ -159,7 +159,8 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             $c->log->error($errors->{$arg1}->{'mess'});
             $c->log->error("on page: ".$c->request->uri) if defined $c->request->uri;
         } else {
-            $c->log->info($errors->{$arg1}->{'mess'});
+            $c->log->debug($errors->{$arg1}->{'mess'});
+            $c->log->debug("on page: ".$c->request->uri) if defined $c->request->uri;
         }
     }
 

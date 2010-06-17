@@ -30,8 +30,9 @@ returns a filter which can be used for authorization
 
 =cut
 sub get_auth_filter {
-    my $c    = shift;
-    my $type = shift;
+    my $c      = shift;
+    my $type   = shift;
+    my $strict = shift || 0;
 
     return("") if $type eq 'status';
 
@@ -40,14 +41,13 @@ sub get_auth_filter {
         return("");
     }
 
-    # if the user has access to everthing
-    if($c->check_user_roles('authorized_for_all_hosts') and $c->check_user_roles('authorized_for_all_services')) {
-        return("");
+    if($strict and $type ne 'hosts' and $type ne 'services') {
+        croak("strict authorization not implemented for: ".$type);
     }
 
     # host authorization
     if($type eq 'hosts') {
-        if($c->check_user_roles('authorized_for_all_hosts')) {
+        if(!$strict and $c->check_user_roles('authorized_for_all_hosts')) {
             return("");
         }
         return("Filter: contacts >= ".$c->user->get('username'));
@@ -60,7 +60,7 @@ sub get_auth_filter {
 
     # service authorization
     elsif($type eq 'services') {
-        if($c->check_user_roles('authorized_for_all_services')) {
+        if(!$strict and $c->check_user_roles('authorized_for_all_services')) {
             return("");
         }
         if(Thruk->config->{'use_strict_host_authorization'}) {

@@ -208,6 +208,9 @@
             <table border="1" cellpadding="0" cellspacing="0" class='command'>
               <tr>
                 <td>
+                  [% UNLESS c.check_cmd_permissions('system') %]
+                  <div align=center class='infoMessage'>Your account does not have permissions to execute commands.<br>
+                  [% ELSE %]
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/stop.gif' border="0" alt='Shutdown the Backend Process' title='Shutdown the Backend Process' width="20" height="20"></td>
@@ -347,7 +350,7 @@
                       <td class='command'><a href='cmd.cgi?cmd_typ=82'>Enable performance data</a></td>
                     </tr>
                     [% END %]
-
+                    [% END %]
                   </table>
                 </td>
               </tr>

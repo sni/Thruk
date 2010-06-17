@@ -288,7 +288,7 @@
                   <table border='1' cellspacing="0" cellpadding="0" class="command">
                     <tr>
                       <td>
-                        [% IF c.check_user_roles('is_authorized_for_read_only') %]
+                        [% UNLESS c.check_cmd_permissions('service', service.description, service.host_name) %]
                         <div align=center class='infoMessage'>Your account does not have permissions to execute commands.<br>
                         [% ELSE %]
                         <table border="0" cellspacing="0" cellpadding="0">
@@ -409,8 +409,7 @@
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_user_roles('is_authorized_for_read_only') %]
-          [% ELSE %]
+          [% IF c.check_cmd_permissions('service', service.description, service.host_name) %]
             <a name="comments" id="comments"></a>
             <div class='commentTitle'>Service Comments</div>
             <table border="0">

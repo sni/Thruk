@@ -1,8 +1,6 @@
 [%# which one is authorized? #%]
-[% IF c.check_user_roles('is_authorized_for_read_only')
-   || (!c.check_user_roles('authorized_for_system_commands'))
-%]
-[% WRAPPER error.tt errorMessage = "you are not authorized for this command" errorDescription = "check your configuration if you believe this is an error" %][% END %]
+[% IF !c.check_cmd_permissions('system') %]
+  [% WRAPPER error.tt errorMessage = "you are not authorized for this command" errorDescription = "check your configuration if you believe this is an error" %][% END %]
 [% ELSE %]
 
 [%# description used by the commands page #%]
