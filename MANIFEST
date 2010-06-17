@@ -64,6 +64,7 @@ lib/Thruk/Controller/summary.pm
 lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Utils.pm
+lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Livestatus.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/Excel.pm
@@ -651,6 +652,7 @@ ssi/README
 ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
+t/20-Template_Dates.t
 t/95_doc_coverage.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
