@@ -93,37 +93,44 @@ sub get_auth_filter {
                 push @filter, "Filter: host_contacts >= ".$c->user->get('username')."\n";
             }
         }
-        if(scalar @filter == 0) {
-            return("");
-        }
-        if(scalar @filter == 1) {
-            return($filter[0]);
-        }
-        return(join("\n", @filter)."\nOr: ".scalar @filter);
+        return(Thruk::Utils::combine_filter(\@filter, 'Or'));
     }
 
     # logfile authorization
     elsif($type eq 'log') {
         my @filter;
-        if(!$c->check_user_roles('authorized_for_all_services')) {
-            push @filter, "Filter: current_service_contacts >= ".$c->user->get('username')."\nFilter: current_service_description != \nAnd: 2";
+
+        # service log entries
+        if($c->check_user_roles('authorized_for_all_services')) {
+            # allowed for all services related log entries
+            push @filter, "Filter: current_service_description != \n";
         }
-        if(!$c->check_user_roles('authorized_for_all_hosts')) {
+        else {
+            push @filter, "Filter: current_service_contacts >= ".$c->user->get('username')."\nFilter: service_description != \nAnd: 2\n";
+        }
+
+        # host log entries
+        if($c->check_user_roles('authorized_for_all_hosts')) {
+            # allowed for all host related log entries
+            push @filter, "Filter: service_description = \nFilter: host_name != \nAnd: 2";
+        }
+        else {
             if(Thruk->config->{'use_strict_host_authorization'}) {
                 # only allowed for the host itself, not the services
-                push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\nFilter: current_service_description = \nAnd: 2\n";
+                push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\nFilter: service_description = \nAnd: 2\n";
             } else {
                 # allowed for all hosts and its services
                 push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\n";
             }
         }
-        if(scalar @filter == 0) {
-            return("");
+
+        # other log entries
+        if($c->check_user_roles('authorized_for_system_information')) {
+            # everything not related to a specific host or service
+            push @filter, "Filter: service_description = \nFilter: host_name = \nAnd: 2";
         }
-        if(scalar @filter == 1) {
-            return($filter[0]);
-        }
-        return(join("\n", @filter)."\nOr: ".scalar @filter);
+
+        return(Thruk::Utils::combine_filter(\@filter, 'Or'));
     }
 
     else {
