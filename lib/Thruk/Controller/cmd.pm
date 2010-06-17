@@ -48,7 +48,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $query_options = { Slice => 1 };
     if(defined $c->{'request'}->{'parameters'}->{'backend'}) {
         my $backend = $c->{'request'}->{'parameters'}->{'backend'};
-        my $query_options = { Slice => 1, Backend => [ $backend ]};
+        $query_options = { Slice => 1, Backend => [ $backend ]};
     }
 
     my($data);
@@ -355,10 +355,10 @@ sub _do_send_command {
     my $backends          = $c->{'request'}->{'parameters'}->{'backend'};
     my @possible_backends = $c->{'live'}->peer_key();
     if(scalar @possible_backends > 1 and !defined $backends) {
-            delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
-            push @errors, { message => 'please select a backend' };
-            $c->stash->{'form_errors'} = \@errors;
-            return(0);
+        delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+        push @errors, { message => 'please select a backend' };
+        $c->stash->{'form_errors'} = \@errors;
+        return(0);
     }
 
     # send the command

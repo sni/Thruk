@@ -45,7 +45,7 @@
                         <td>
                           <select name="backend" size="5" multiple>
                             [% FOREACH b IN backends %]
-                              <option value="[% b %]"[% IF b == backend || backend == '' %] selected[% END %]>[% backend_detail.$b.name %]</option>
+                              <option value="[% b %]"[% IF backend_detail.$b.disabled != 2 && (b == backend || backend == '') %] selected[% END %]>[% backend_detail.$b.name %]</option>
                             [% END %]
                           </select>
                         </td>
