@@ -10,6 +10,16 @@ body {
   margin: 0px;
 }
 
+td.dataVal {
+  text-align: left;
+}
+td.dataVar {
+  text-align: left;
+}
+td.command {
+  text-align: left;
+}
+
 body.navbar {
   font-family:arial,verdana,serif;
   margin: 5px;
