@@ -12,10 +12,9 @@
 
 [%# definition of the command send to your backend #%]
 [% BLOCK action%]
-    [% scheduled_time       = date.format( c.request.parameters.start_time, '%s') %]
     [% host_name            = c.request.parameters.host %]
 
-    [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_HOST_SVC_CHECKS[% ELSE %]SCHEDULE_HOST_SVC_CHECKS[% END %];[% sprintf("%s;%lu",host_name,scheduled_time) %]
+    [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_HOST_SVC_CHECKS[% ELSE %]SCHEDULE_HOST_SVC_CHECKS[% END %];[% sprintf("%s;%lu",host_name,start_time_unix) %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = date.format(date.now,      '%Y-%m-%d %H:%M:%S'); END %]

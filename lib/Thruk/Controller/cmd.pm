@@ -297,6 +297,8 @@ sub _do_send_command {
     }
 
     # replace parsed dates
+    my $start_time_unix = 0;
+    my $end_time_unix   = 0;
     if(defined $self->{'spread_startdates'} and scalar @{$self->{'spread_startdates'}} > 0) {
         my $new_start_time = shift @{$self->{'spread_startdates'}};
         my $new_date = Thruk::Utils::format_date($new_start_time, '%Y-%m-%d %H:%M:%S');
@@ -309,6 +311,7 @@ sub _do_send_command {
             $c->log->debug("setting start date to: ".$new_date);
             $c->request->parameters->{'start_time'} = $new_date;
         }
+        $start_time_unix = Thruk::Utils::parse_date($c, $c->request->parameters->{'start_time'});
     }
     if(defined $c->request->parameters->{'end_time'}) {
         if($c->request->parameters->{'end_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
@@ -316,12 +319,23 @@ sub _do_send_command {
             $c->log->debug("setting end date to: ".$new_date);
             $c->request->parameters->{'end_time'} = $new_date;
         }
+        $end_time_unix = Thruk::Utils::parse_date($c, $c->request->parameters->{'end_time'});
     }
 
     my $tt  = Template->new($c->{'View::TT'});
     my $cmd = '';
     eval {
-        $tt->process( 'cmd/cmd_typ_'.$cmd_typ.'.tt', { c => $c, cmd_tt => 'cmd_line.tt', die_on_errors => 1 }, \$cmd ) || die $tt->error();
+        $tt->process(
+                        'cmd/cmd_typ_'.$cmd_typ.'.tt',
+                        {
+                            c               => $c,
+                            cmd_tt          => 'cmd_line.tt',
+                            start_time_unix => $start_time_unix,
+                            end_time_unix   => $end_time_unix,
+                            die_on_errors   => 1,
+                        },
+                        \$cmd
+                    ) || die $tt->error();
         $cmd =~ s/^\s+//gmx;
         $cmd =~ s/\s+$//gmx;
     };
@@ -334,7 +348,16 @@ sub _do_send_command {
 
     # check for required fields
     my($form,@errors);
-    $tt->process( 'cmd/cmd_typ_'.$cmd_typ.'.tt', { c => $c, cmd_tt => '_get_content.tt' }, \$form ) || die $tt->error();
+    $tt->process(
+                    'cmd/cmd_typ_'.$cmd_typ.'.tt',
+                    {
+                        c               => $c,
+                        cmd_tt          => '_get_content.tt',
+                        start_time_unix => $start_time_unix,
+                        end_time_unix   => $end_time_unix,
+                    },
+                    \$form
+                ) || die $tt->error();
     if(my @matches = $form =~ m/class='(optBoxRequiredItem|optBoxItem)'>(.*?):<\/td>.*?input\s+type='.*?'\s+name='(.*?)'/gmx ) {
         while(scalar @matches > 0) {
             my $req  = shift @matches;

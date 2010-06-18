@@ -15,14 +15,12 @@
     [% IF   c.request.parameters.fixed   %][% SET fixed = 1 %][% ELSE %][% SET fixed = 0 %][% END %]
     [% IF ! c.request.parameters.hour    %][% SET c.request.parameters.hour = 0 %][% END %]
     [% IF ! c.request.parameters.minutes %][% SET c.request.parameters.minutes = 0 %][% END %]
-    [% start_time           = date.format( c.request.parameters.start_time, '%s') %]
-    [% end_time             = date.format( c.request.parameters.end_time, '%s') %]
     [% duration             = c.request.parameters.hour * 3600 + c.request.parameters.minutes * 60 %]
     [% comment_data         = c.request.parameters.com_data %]
     [% servicegroup_name    = c.request.parameters.servicegroup %]
     [% comment_author       = c.request.parameters.com_author %]
 
-    SCHEDULE_SERVICEGROUP_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",servicegroup_name,start_time,end_time,fixed,duration,comment_author,comment_data) %]
+    SCHEDULE_SERVICEGROUP_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",servicegroup_name,start_time_unix,end_time_unix,fixed,duration,comment_author,comment_data) %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = date.format(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
