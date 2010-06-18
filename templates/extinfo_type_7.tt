@@ -43,10 +43,10 @@
         [% SET class = 'queueOdd'  IF loop.odd %]
         <tr class='[% class %]'>
 
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% q.host_name %]'>[% q.host_name %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% q.host_name %]'>[% q.host_name | uri %]</a></td>
 
           [% IF q.description %]
-          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% q.host_name %]&amp;service=[% q.description %]'>[% q.description %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]'>[% q.description %]</a></td>
           [% ELSE %]
           <td class='[% class %]'></td>
           [% END %]
@@ -73,18 +73,18 @@
           <td class='[% class %]'>
           [% IF q.description %]
             [% IF q.active_checks_enabled %]
-            <a href='cmd.cgi?cmd_typ=6&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service' width="20" height="20"></a>
+            <a href='cmd.cgi?cmd_typ=6&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]'><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Service' title='Disable Active Checks Of This Service' width="20" height="20"></a>
             [% ELSE %]
-            <a href='cmd.cgi?cmd_typ=5&amp;host=[% q.host_name %]&amp;service=[% q.description %]'><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service' width="20" height="20"></a>
+            <a href='cmd.cgi?cmd_typ=5&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]'><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Service' title='Enable Active Checks Of This Service' width="20" height="20"></a>
             [% END %]
-            <a href='cmd.cgi?cmd_typ=7&amp;host=[% q.host_name %]&amp;service=[% q.description %]&amp;force_check'><img src='/thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check' width="20" height="20"></a>
+            <a href='cmd.cgi?cmd_typ=7&amp;host=[% q.host_name | uri %]&amp;service=[% q.description | uri %]&amp;force_check'><img src='/thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule This Service Check' title='Re-schedule This Service Check' width="20" height="20"></a>
           [% ELSE %]
             [% IF q.active_checks_enabled %]
-            <a href='cmd.cgi?cmd_typ=4&amp;host=[% q.host_name %]'><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host' width="20" height="20"></a>
+            <a href='cmd.cgi?cmd_typ=4&amp;host=[% q.host_name | uri %]'><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host' width="20" height="20"></a>
             [% ELSE %]
-            <a href='cmd.cgi?cmd_typ=47&amp;host=[% q.host_name %]'><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host' width="20" height="20"></a>
+            <a href='cmd.cgi?cmd_typ=47&amp;host=[% q.host_name | uri %]'><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host' width="20" height="20"></a>
             [% END %]
-            <a href='cmd.cgi?cmd_typ=96&amp;host=[% q.host_name %]&amp;force_check'><img src='/thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule This Host Check' title='Re-schedule This Host Check' width="20" height="20"></a>
+            <a href='cmd.cgi?cmd_typ=96&amp;host=[% q.host_name | uri %]&amp;force_check'><img src='/thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule This Host Check' title='Re-schedule This Host Check' width="20" height="20"></a>
           [% END %]
           </td>
         </tr>

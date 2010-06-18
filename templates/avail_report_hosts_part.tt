@@ -71,7 +71,7 @@
     [% SET perc_unreachable_known_total  = perc_unreachable_known_total + perc_unreachable_known %]
     [% SET perc_undetermined_hosts_total = perc_undetermined_hosts_total + perc_undetermined     %]
     <tr class='[% class %]'>
-      <td class='[% class %]'><a href='avail.cgi?host=[% hostname %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% hostname %]</a></td>
+      <td class='[% class %]'><a href='avail.cgi?host=[% hostname | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% hostname %]</a></td>
       <td class='hostUP'>[% sprintf('%2.3f', perc_up) %]% ([% sprintf('%2.3f', perc_up_known ) %]%)</td>
       <td class='hostDOWN'>[% sprintf('%2.3f', perc_down) %]% ([% sprintf('%2.3f', perc_down_known ) %]%)</td>
       <td class='hostUNREACHABLE'>[% sprintf('%2.3f', perc_unreachable) %]% ([% sprintf('%2.3f', perc_unreachable_known ) %]%)</td>

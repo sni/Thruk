@@ -20,7 +20,7 @@
   <tr class='[% class %]'>
     <td class='[% class %]'><a id="[% name2id(d.name, 'hostgroup') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% FOREACH host = d.members_array.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts#[% host %]">[% host %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH host = d.members_array.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts#[% host | uri %]">[% host %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.notes %]</td>
     <td class='[% class %]'>[% d.notes_url %]</td>
     <td class='[% class %]'>[% d.action_url %]</td>

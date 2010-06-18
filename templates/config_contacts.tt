@@ -34,12 +34,12 @@
     [% END %]
     <td class='[% class %]'><a id="[% name2id(d.name, 'contact') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'><a href="mailto:[% d.email %]">[% d.email %]</a></td>
+    <td class='[% class %]'><a href="mailto:[% d.email | uri %]">[% d.email %]</a></td>
     <td class='[% class %]'>[% d.pager %]</td>
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.service_notification_period %]">[% d.service_notification_period %]</a></td>
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.host_notification_period %]">[% d.host_notification_period %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.service_notification_period | uri %]">[% d.service_notification_period %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.host_notification_period | uri %]">[% d.host_notification_period %]</a></td>
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>

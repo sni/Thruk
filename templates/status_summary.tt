@@ -15,18 +15,18 @@
                 <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
                 [% ELSIF hostgroup != '' %]
                 <a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail'>View Service Status Detail For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=overview'>View Status Overview For This Host Group</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail'>View Service Status Detail For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview'>View Status Overview For This Host Group</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
                 [% ELSIF servicegroup == 'all' %]
                 <a href='status.cgi?servicegroup=all&amp;style=detail'>View Service Status Detail For All Service Groups</a><br>
                 <a href='status.cgi?servicegroup=all&amp;style=overview'>View Status Overview For All Service Groups</a><br>
                 <a href='status.cgi?servicegroup=all&amp;style=grid'>View Service Status Grid For All Service Groups</a><br>
                 [% ELSIF servicegroup != '' %]
-                <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=detail'>View Service Status Detail For This Service Group</a><br>
-                <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=overview'>View Status Overview For This Service Group</a><br>
-                <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=grid'>View Service Status Grid For This Service Group</a><br>
+                <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=detail'>View Service Status Detail For This Service Group</a><br>
+                <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=overview'>View Status Overview For This Service Group</a><br>
+                <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=grid'>View Service Status Grid For This Service Group</a><br>
                 <a href='status.cgi?servicegroup=all&amp;style=summary'>View Status Summary For All Service Groups</a><br>
                 [% ELSE %]
                 <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
@@ -79,20 +79,22 @@
         [% FOR groupname IN groups.keys.sort %]
 
         [% IF hostgroup != '' %]
-        [% SET link        = "hostgroup=" _ groupname _ "&amp;style=hostdetail" %]
-        [% SET servicelink = "hostgroup=" _ groupname _ "&amp;style=detail" %]
+        [% SET hostgroup_uri = groupname | uri %]
+        [% SET link        = "hostgroup=" _ hostgroup_uri _ "&amp;style=hostdetail" %]
+        [% SET servicelink = "hostgroup=" _ hostgroup_uri _ "&amp;style=detail" %]
         [% ELSIF servicegroup != '' %]
-        [% SET link        = "servicegroup=" _ groupname _ "&amp;style=detail" %]
-        [% SET servicelink = "servicegroup=" _ groupname _ "&amp;style=detail" %]
+        [% SET servicegroup_uri = groupname | uri %]
+        [% SET link        = "servicegroup=" _ servicegroup_uri _ "&amp;style=detail" %]
+        [% SET servicelink = "servicegroup=" _ servicegroup_uri _ "&amp;style=detail" %]
         [% END %]
         [% SET group = groups.$groupname %]
         [% SET class = 'statusEven' IF loop.odd  %]
         [% SET class = 'statusOdd'  IF loop.even %]
         <tr class='[% class %]'>
           [% IF hostgroup != '' %]
-          <td class='[% class %]'><a href='status.cgi?hostgroup=[% group.name %]&amp;style=overview'>[% group.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% group.name %]'>[% group.name %]</a>)</td>
+          <td class='[% class %]'><a href='status.cgi?hostgroup=[% group.name | uri %]&amp;style=overview'>[% group.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% group.name | uri %]'>[% group.name %]</a>)</td>
           [% ELSIF servicegroup != '' %]
-          <td class='[% class %]'><a href='status.cgi?servicegroup=[% group.name %]&amp;style=overview'>[% group.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% group.name %]'>[% group.name %]</a>)</td>
+          <td class='[% class %]'><a href='status.cgi?servicegroup=[% group.name | uri %]&amp;style=overview'>[% group.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% group.name | uri %]'>[% group.name %]</a>)</td>
           [% END %]
           <td class='[% class %]' align="center" valign="middle">
             <table border='0'>
@@ -143,7 +145,7 @@
           </td>
           <td class='[% class %]' align="center" valign="middle">
             <table border="0">
-              [% IF group.services_ok      > 0 %]<tr><td class='miniStatusOK'><a href='status.cgi?hostgroup=[% group.name %]&amp;style=detail&amp;&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_ok %] OK</a></td></tr>[% END %]
+              [% IF group.services_ok      > 0 %]<tr><td class='miniStatusOK'><a href='status.cgi?hostgroup=[% group.name | uri %]&amp;style=detail&amp;&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_ok %] OK</a></td></tr>[% END %]
               [% IF group.services_warning > 0 %]
               <tr>
                 <td class='miniStatusWARNING'>

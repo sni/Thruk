@@ -14,18 +14,18 @@
                   <a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a><br>
                 [% ELSIF hostgroup != '' %]
                   <a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a><br>
-                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=detail'>View Service Status Detail For This Host Group</a><br>
-                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
-                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
-                  <a href='status.cgi?hostgroup=[% hostgroup %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail'>View Service Status Detail For This Host Group</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail'>View Host Status Detail For This Host Group</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary'>View Status Summary For This Host Group</a><br>
+                  <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid'>View Status Grid For This Host Group</a><br>
                 [% ELSIF servicegroup == 'all' %]
                   <a href='status.cgi?servicegroup=all&amp;style=detail'>View Service Status Detail For All Service Groups</a><br>
                   <a href='status.cgi?servicegroup=all&amp;style=summary'>View Status Summary For All Service Groups</a><br>
                   <a href='status.cgi?servicegroup=all&amp;style=grid'>View Service Status Grid For All Service Groups</a><br>
                 [% ELSIF servicegroup != '' %]
-                  <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=detail'>View Service Status Detail For This Service Group</a><br>
-                  <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=summary'>View Status Summary For This Service Group</a><br>
-                  <a href='status.cgi?servicegroup=[% servicegroup %]&amp;style=grid'>View Service Status Grid For This Service Group</a><br>
+                  <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=detail'>View Service Status Detail For This Service Group</a><br>
+                  <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=summary'>View Status Summary For This Service Group</a><br>
+                  <a href='status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=grid'>View Service Status Grid For This Service Group</a><br>
                   <a href='status.cgi?servicegroup=all&amp;style=overview'>View Status Overview For All Service Groups</a><br>
                 [% ELSE %]
                   <a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a><br>
@@ -77,9 +77,9 @@
           [% SET g = groups.$groupname %]
           <td valign="top" align="center">
             [% IF hostgroup != '' %]
-            <div class='status'><a href='status.cgi?hostgroup=[% g.name %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% g.name %]'>[% g.name %]</a>)</div>
+            <div class='status'><a href='status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]'>[% g.name %]</a>)</div>
             [% ELSIF servicegroup != '' %]
-            <div class='status'><a href='status.cgi?servicegroup=[% g.name %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% g.name %]'>[% g.name %]</a>)</div>
+            <div class='status'><a href='status.cgi?servicegroup=[% g.name | uri %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]'>[% g.name %]</a>)</div>
             [% END %]
             <div class='status'>
               <table border="1" class='status statusgroups'>
@@ -102,11 +102,11 @@
                   <td class='[% hostclass %]'>
                     <table border="0" width="100%" cellpadding="0" cellspacing="0">
                       <tr class='[% hostclass %]'>
-                        <td class='[% hostclass %]'><a href='status.cgi?host=[% h.name %]&amp;style=detail' title='[% h.address %]'>[% h.name %]</a></td>
+                        <td class='[% hostclass %]'><a href='status.cgi?host=[% h.name | uri %]&amp;style=detail' title='[% h.address %]'>[% h.name %]</a></td>
 
                         [% IF h.icon_image_expanded %]
                         <td class='[% hostclass %]' width="5"></td>
-                        <td class='[% hostclass %]' align="right"><a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/thruk/themes/[% theme %]/images/logos/[% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a></td>
+                        <td class='[% hostclass %]' align="right"><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'><img src='/thruk/themes/[% theme %]/images/logos/[% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a></td>
                         [% END %]
 
                       </tr>
@@ -123,27 +123,27 @@
                   [% END %]
                   <td class='[% hostclass %]'>
                     <table border="0" width="100%">
-                      [% IF h.ok       %]<tr><td class='miniStatusOK'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.ok %] OK</a></td></tr>[% END %]
-                      [% IF h.warning  %]<tr><td class='miniStatusWARNING'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.warning %] WARNING</a></td></tr>[% END %]
-                      [% IF h.unknown  %]<tr><td class='miniStatusUNKNOWN'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.unknown %] UNKNOWN</a></td></tr>[% END %]
-                      [% IF h.critical %]<tr><td class='miniStatusCRITICAL'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.critical %] CRITICAL</a></td></tr>[% END %]
-                      [% IF h.pending  %]<tr><td class='miniStatusPENDING'><a href='status.cgi?host=[% h.name %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.pending %] PENDING</a></td></tr>[% END %]
+                      [% IF h.ok       %]<tr><td class='miniStatusOK'><a href='status.cgi?host=[% h.name | uri %]&amp;style=detail&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.ok %] OK</a></td></tr>[% END %]
+                      [% IF h.warning  %]<tr><td class='miniStatusWARNING'><a href='status.cgi?host=[% h.name | uri %]&amp;style=detail&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.warning %] WARNING</a></td></tr>[% END %]
+                      [% IF h.unknown  %]<tr><td class='miniStatusUNKNOWN'><a href='status.cgi?host=[% h.name | uri %]&amp;style=detail&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.unknown %] UNKNOWN</a></td></tr>[% END %]
+                      [% IF h.critical %]<tr><td class='miniStatusCRITICAL'><a href='status.cgi?host=[% h.name | uri %]&amp;style=detail&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.critical %] CRITICAL</a></td></tr>[% END %]
+                      [% IF h.pending  %]<tr><td class='miniStatusPENDING'><a href='status.cgi?host=[% h.name | uri %]&amp;style=detail&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% h.pending %] PENDING</a></td></tr>[% END %]
                     </table>
                     [% IF h.ok + h.warning + h.unknown + h.critical + h.pending == 0 %]
                     No matching services
                     [% END %]
                   </td>
                   <td class='[% hostclass %]'>
-                    <a href='extinfo.cgi?type=1&amp;host=[% h.name %]'><img src='/thruk/themes/[% theme %]/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
+                    <a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'><img src='/thruk/themes/[% theme %]/images/detail.gif' border="0" alt='View Extended Information For This Host' title='View Extended Information For This Host' width="20" height="20"></a>
                     [% IF h.notes_url_expanded %]
                     <a href='[% h.notes_url_expanded %]' target='[% c.config.cgi_cfg.notes_url_target %]'><img src='/thruk/themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
                     [% END %]
                     [% IF h.action_url_expanded %]
                     <a href='[% h.action_url_expanded %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='/thruk/themes/[% theme %]/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a>
                     [% END %]
-                    <a href='status.cgi?host=[% h.name %]'><img src='/thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
+                    <a href='status.cgi?host=[% h.name | uri %]'><img src='/thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
                     [% IF use_feature_statusmap %]
-                    <a href='statusmap.cgi?host=[% h.name %]'><img src='/thruk/themes/[% theme %]/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
+                    <a href='statusmap.cgi?host=[% h.name | uri %]'><img src='/thruk/themes/[% theme %]/images/status3.gif' border="0" width="20" height="20" alt='Locate Host On Map' title='Locate Host On Map'></a>
                     [% END %]
                   </td>
                 </tr>

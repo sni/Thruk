@@ -11,13 +11,13 @@
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
-                <a href='status.cgi?host=[% host.name %]'>View Status Detail For This Host</a><br>
-                <a href='history.cgi?host=[% host.name %]'>View Alert History For This Host</a><br>
-                [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name %]'>View Trends For This Host</a><br>[% END %]
-                [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name %]'>View Alert Histogram For This Host</a><br>[% END %]
+                <a href='status.cgi?host=[% host.name | uri %]'>View Status Detail For This Host</a><br>
+                <a href='history.cgi?host=[% host.name | uri %]'>View Alert History For This Host</a><br>
+                [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'>View Trends For This Host</a><br>[% END %]
+                [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name | uri %]'>View Alert Histogram For This Host</a><br>[% END %]
 
-                <a href='avail.cgi?host=[% host.name %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
-                <a href='notifications.cgi?host=[% host.name %]'>View Notifications For This Host</a>
+                <a href='avail.cgi?host=[% host.name | uri %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
+                <a href='notifications.cgi?host=[% host.name | uri %]'>View Notifications For This Host</a>
               </td>
             </tr>
           </table>
@@ -45,12 +45,12 @@
           [% IF host.parents %]
           <div class='data'>Parents:</div>
           <div class='dataTitle'>
-            [% FOREACH parent IN host.parents.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent %]'>[% parent %]</a>[% END %]
+            [% FOREACH parent IN host.parents.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent | uri %]'>[% parent %]</a>[% END %]
           </div><br>
           [% END %]
           <div class='data'>Member of</div>
           <div class='dataTitle'>
-            [% FOREACH group IN host.groups.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group %]&amp;style=overview'>[% group %]</a>[% END %]
+            [% FOREACH group IN host.groups.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group | uri %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
 
           <div class='data'>[% host.address %]</div>
@@ -310,45 +310,45 @@
                           [% IF use_feature_statusmap %]
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/status3.gif' border="0" alt='Locate Host On Map' title='Locate Host On Map' width="20" height="20"></td>
-                            <td class='command'><a href='statusmap.cgi?host=[% host.name %]'>Locate host on map</a></td>
+                            <td class='command'><a href='statusmap.cgi?host=[% host.name | uri %]'>Locate host on map</a></td>
                           </tr>
                           [% END %]
                           <tr class='command'>
                             [% IF host.checks_enabled %]
                               <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of This Host' title='Disable Active Checks Of This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=48&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable active checks of this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=48&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable active checks of this host</a></td>
                             [% ELSE %]
                               <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of This Host' title='Enable Active Checks Of This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=47&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable active checks of this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=47&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable active checks of this host</a></td>
                             [% END %]
                           </tr>
                           <tr class='data'>
                             <td><img src='/thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name %][% IF host.checks_enabled %]&amp;force_check[% END %]&amp;backend=[% host.peer_key %]'>Re-schedule the next check of this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name | uri %][% IF host.checks_enabled %]&amp;force_check[% END %]&amp;backend=[% host.peer_key %]'>Re-schedule the next check of this host</a></td>
                           </tr>
                           [% IF host.accept_passive_checks %]
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/passiveonly.gif' border="0" alt='Submit Passive Check Result For This Host' title='Submit Passive Check Result For This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=87&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Submit passive check result for this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=87&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Submit passive check result for this host</a></td>
                           </tr>
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Checks For This Host' title='Stop Accepting Passive Checks For This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=93&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Stop accepting passive checks for this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=93&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Stop accepting passive checks for this host</a></td>
                           </tr>
                           [% ELSE %]
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Checks For This Host' title='Start Accepting Passive Checks For This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=92&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Start accepting passive checks for this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=92&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Start accepting passive checks for this host</a></td>
                           </tr>
                           [% END %]
 
                           <tr class='command'>
                             [% IF host.obsess_over_host %]
                               <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over This Host' title='Stop Obsessing Over This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=102&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Stop obsessing over this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=102&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Stop obsessing over this host</a></td>
                             [% ELSE %]
                               <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over This Host' title='Start Obsessing Over This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=101&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Start obsessing over this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=101&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Start obsessing over this host</a></td>
                             [% END %]
                           </tr>
 
@@ -357,10 +357,10 @@
                           <tr class='command'>
                             [% IF host.acknowledged %]
                               <td><img src='/thruk/themes/[% theme %]/images/noack.gif' border="0" alt='Remove Problem Acknowledgement' title='Remove Problem Acknowledgement' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=51&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Remove problem acknowledgement</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=51&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Remove problem acknowledgement</a></td>
                             [% ELSE %]
                               <td><img src='/thruk/themes/[% theme %]/images/ack.gif' border="0" alt='Acknowledge This Host Problem' title='Acknowledge This Host Problem' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=33&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Acknowledge this host problem</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=33&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Acknowledge this host problem</a></td>
                             [% END %]
                           </tr>
                           [% END %]
@@ -369,67 +369,67 @@
                           <tr class='command'>
                             [% IF host.notifications_enabled %]
                               <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For This Host' title='Disable Notifications For This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=25&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable notifications for this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=25&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable notifications for this host</a></td>
                             [% ELSE %]
                               <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications For This Host' title='Enable Notifications For This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=24&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable notifications for this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=24&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable notifications for this host</a></td>
                             [% END %]
                           </tr>
 
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Send Custom Notification' title='Send Custom Notification' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=159&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Send custom host notification</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=159&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Send custom host notification</a></td>
                           </tr>
 
                           [% IF host.state >= 1 %]
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Delay Next Host Notification' title='Delay Next Host Notification' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=10&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Delay next host notification</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=10&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Delay next host notification</a></td>
                           </tr>
                           [% END %]
 
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For This Host' title='Schedule Downtime For This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Schedule downtime for this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule downtime for this host</a></td>
                           </tr>
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For All Services On This Host' title='Disable Notifications For All Services On This Host' width="20" height="20"></td>
-                            <td class='command' nowrap><a href='cmd.cgi?cmd_typ=29&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable notifications for all services on this host</a></td>
+                            <td class='command' nowrap><a href='cmd.cgi?cmd_typ=29&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable notifications for all services on this host</a></td>
                           </tr>
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications For All Services On This Host' title='Enable Notifications For All Services On This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=28&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable notifications for all services on this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=28&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable notifications for all services on this host</a></td>
                           </tr>
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Schedule a check of all services on this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule a check of all services on this host</a></td>
                           </tr>
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Checks Of All Services On This Host' title='Disable Checks Of All Services On This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=16&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable checks of all services on this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=16&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable checks of all services on this host</a></td>
                           </tr>
                           <tr class='command'>
                             <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Checks Of All Services On This Host' title='Enable Checks Of All Services On This Host' width="20" height="20"></td>
-                            <td class='command'><a href='cmd.cgi?cmd_typ=15&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable checks of all services on this host</a></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=15&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable checks of all services on this host</a></td>
                           </tr>
 
                           <tr class='command'>
                             [% IF host.event_handler_enabled %]
                               <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=44&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable event handler for this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=44&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable event handler for this host</a></td>
                             [% ELSE %]
                               <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handler For This Host' title='Enable Event Handler For This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=43&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable event handler for this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=43&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable event handler for this host</a></td>
                             [% END %]
                           </tr>
 
                           <tr class='command'>
                             [% IF host.flap_detection_enabled %]
                               <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection For This Host' title='Disable Flap Detection For This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=58&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Disable flap detection for this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=58&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable flap detection for this host</a></td>
                             [% ELSE %]
                               <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection For This Host' title='Enable Flap Detection For This Host' width="20" height="20"></td>
-                              <td class='command'><a href='cmd.cgi?cmd_typ=57&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]'>Enable flap detection for this host</a></td>
+                              <td class='command'><a href='cmd.cgi?cmd_typ=57&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable flap detection for this host</a></td>
                             [% END %]
                           </tr>
                         </table>
@@ -450,10 +450,10 @@
             <table border="0">
               <tr>
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=1&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new comment</a></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new comment</a></td>
                 [% IF comments %]
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=20&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]' class='comment'>Delete all comments</a></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Delete all comments</a></td>
                 [% END %]
               </tr>
             </table>
@@ -504,10 +504,10 @@
             <table border="0">
               <tr>
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a></td>
+                <td class='comment'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a></td>
                 [% IF downtimes %]
                 <td valign="middle"><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;selected_hosts=[% host.name %]%3B%3B[% host.peer_key %]&amp;referer=[% c.request.uri | uri %]' class='comment'>Delete all downtimes</a></td>
+                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;selected_hosts=[% host.name | uri %]%3B%3B[% host.peer_key %]&amp;referer=[% c.request.uri | uri %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]
               </tr>
             </table>

@@ -156,10 +156,10 @@
         [% END %]
 
         <tr class='[% class %]'>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% n.host_name %]&amp;backend=[% n.peer_key %]'>[% n.host_name %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% n.host_name | uri %]&amp;backend=[% n.peer_key %]'>[% n.host_name %]</a></td>
           <td class='[% class %]'>
             [% IF n.service_description %]
-            <a href='extinfo.cgi?type=2&amp;host=[% n.host_name %]&amp;service=[% n.service_description %]&amp;backend=[% n.peer_key %]'>[% n.service_description %]</a>
+            <a href='extinfo.cgi?type=2&amp;host=[% n.host_name | uri %]&amp;service=[% n.service_description | uri %]&amp;backend=[% n.peer_key %]'>[% n.service_description %]</a>
             [% ELSE %]
             N/A
             [% END %]
