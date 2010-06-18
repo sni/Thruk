@@ -84,6 +84,8 @@ td.top_nav_pref {
   padding: 0px;
   margin: 0px;
   float: left;
+  overflow: hidden;
+  width: 80px;
 }
 
 input.top_nav_pref_button {
@@ -103,6 +105,8 @@ input.button_peerUP {
   border-width:3px;
   font-size:9px;
   font-weight:normal;
+  overflow: hidden;
+  width: 80px;
 }
 input.button_peerDOWN {
   color:#444444;
@@ -112,6 +116,8 @@ input.button_peerDOWN {
   border-width:3px;
   font-size:9px;
   font-weight:normal;
+  overflow: hidden;
+  width: 80px;
 }
 input.button_peerDIS {
   color:#444444;
@@ -121,6 +127,8 @@ input.button_peerDIS {
   border-width:3px;
   font-size:9px;
   font-weight:normal;
+  overflow: hidden;
+  width: 80px;
 }
 input.button_peerHID {
   color:#444444;
@@ -130,6 +138,8 @@ input.button_peerHID {
   border-width:3px;
   font-size:9px;
   font-weight:normal;
+  overflow: hidden;
+  width: 80px;
   filter:alpha(opacity=40); /* IE */
   -moz-opacity: 0.40; /* Mozilla */
   opacity: 0.40; /* Opera */
