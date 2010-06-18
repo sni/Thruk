@@ -278,6 +278,8 @@ sub _process_details_page {
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if(defined $view_mode and $view_mode eq 'xls') {
+        my $filename = 'status.xls';
+        $c->res->header('Content-Disposition', qq[attachment; filename="]. $filename .q["]);
         $c->stash->{'data'}     = $sortedservices;
         $c->stash->{'template'} = 'excel/status_detail.tt';
         $c->detach('View::Excel');
@@ -345,6 +347,8 @@ sub _process_hostdetails_page {
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if(defined $view_mode and $view_mode eq 'xls') {
+        my $filename = 'status.xls';
+        $c->res->header('Content-Disposition', qq[attachment; filename="]. $filename .q["]);
         $c->stash->{'data'}     = $sortedhosts;
         $c->stash->{'template'} = 'excel/status_hostdetail.tt';
         $c->detach('View::Excel');
