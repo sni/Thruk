@@ -95,7 +95,17 @@
     </table>
     </form>
   </div>
-  [% UNLESS use_frames %]
+  [% IF use_frames %]
+      [% IF c.request.parameters.reload_nav %]
+      <script type="text/javascript">
+      <!--
+      if(parent.frames[0] != null) {
+        parent.frames[0].location.reload();
+      }
+      -->
+      </script>
+      [% END %]
+  [% ELSE %]
   <div id="navbar" class="navbar">
     [% PROCESS side.tt %]
   </div>

@@ -11,7 +11,6 @@ general
     - configure url path in config (ex.: /thruk/ )
     - add extra grapher url
     - use title for quick downtimes popups
-    - reload nav frame when changing themes
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -62,7 +61,6 @@ general:
     - multi language support
     - add context sensitive help
     - completly hide backends by contactgroups
-    - addons: own template, images/themes and lib directory
     - bookmarks
     - show only backends where user has at least permission for one host/service
     - use livestatus wait feature where possible
