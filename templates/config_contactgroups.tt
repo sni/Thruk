@@ -1,0 +1,34 @@
+[% WRAPPER config_detail.tt
+   dataTitle = 'Contactgroups'
+%]
+
+<table border="0" class='data'>
+  <tr>
+    [% IF backends.size > 1 %]
+      <th class='data'>Backend</th>
+    [% END %]
+    <th class='data'>Group Name</th>
+    <th class='data'>Description</th>
+    <th class='data'>Contact Member</th>
+  </tr>
+  [% FOREACH d = data %]
+  [% SET class = 'dataOdd'  IF loop.odd %]
+  [% SET class = 'dataEven' IF loop.even %]
+  <tr class='[% class %]'>
+    [% IF backends.size > 1 %]
+      <td class='[% class %]'>
+        [% IF d.backend.peer_name.size < backends.size %]
+          [% d.backend.peer_name.join(', ') %]
+        [% ELSE %]
+        <i>all</i>
+        [% END %]
+      </td>
+    [% END %]
+    <td class='[% class %]'><a id="[% name2id(d.name, 'contactgroup') %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.alias %]</td>
+    <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts#[% contact | uri %]">[% contact %]</a>[% END %]</td>
+  </tr>
+  [% END %]
+</table>
+
+[% END %]

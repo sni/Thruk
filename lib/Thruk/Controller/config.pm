@@ -64,6 +64,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{template} = 'config_contacts.tt';
     }
 
+    # contactgroups
+    elsif($type eq 'contactgroups') {
+        my $data = $c->{'live'}->selectall_arrayref("GET contactgroups\nColumns: name alias members", { Slice => 1, AddPeer => 1, Deepcopy => 1 });
+        $data    = Thruk::Utils::remove_duplicates($c, $data);
+        $data    = Thruk::Utils::sort($c, $data, 'name');
+        $c->stash->{data}     = $data;
+        $c->stash->{template} = 'config_contactgroups.tt';
+    }
+
     # hosts
     elsif($type eq 'hosts') {
         my $data = $c->{'live'}->selectall_arrayref("GET hosts\nColumns: name alias address parents max_check_attempts check_interval retry_interval check_command check_period obsess_over_host active_checks_enabled accept_passive_checks check_freshness contacts notification_interval first_notification_delay notification_period event_handler_enabled flap_detection_enabled low_flap_threshold high_flap_threshold process_performance_data notes notes_url action_url icon_image icon_image_alt", { Slice => 1, AddPeer => 1, Deepcopy => 1 });

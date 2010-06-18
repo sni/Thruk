@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.66    Mon Jun 21 08:45:39 CEST 2010
           - added Excel export to status/host details page
+          - added contactgroups config page
           - navigation frame will be reloaded when changing themes
           - fixed problem with special chars in links
           - fixed problem with command authorization

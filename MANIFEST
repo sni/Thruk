@@ -803,6 +803,7 @@ templates/cmd_line.tt
 templates/cmd_success.tt
 templates/config.tt
 templates/config_commands.tt
+templates/config_contactgroups.tt
 templates/config_contacts.tt
 templates/config_detail.tt
 templates/config_hostgroups.tt
