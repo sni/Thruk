@@ -127,7 +127,6 @@
           <td>
           [% IF backends && backends.size > 1 %]
           [% FOREACH pd IN backends %]
-          [% IF backend_detail.$pd.disabled != 3 %]
           <div class='backend'>
             [% SET name  = 'unknown' %]
             [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
@@ -138,7 +137,6 @@
             [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
             <input type="button" id='button_[% pd %]' class="[% class %]" value="[% name %]" title="[% name %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleBackend('[% pd %]')">
           </div>
-          [% END %]
           [% END %]
           [% END %]
           </td>

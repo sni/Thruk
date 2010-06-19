@@ -117,14 +117,18 @@ before 'execute' => sub {
     ###############################
     my @possible_backends = $c->{'live'}->peer_key();
     my %backend_detail;
+    my @new_possible_backends;
     for my $back (@possible_backends) {
-        $backend_detail{$back} = {
-            "name"     => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
-            "addr"     => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
-            "disabled" => $disabled_backends{$back} || 0,
-        };
+        if($disabled_backends{$back} != 3) {
+            $backend_detail{$back} = {
+                "name"     => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
+                "addr"     => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
+                "disabled" => $disabled_backends{$back} || 0,
+            };
+            push @new_possible_backends, $back;
+        }
     }
-    $c->stash->{'backends'}           = \@possible_backends;
+    $c->stash->{'backends'}           = \@new_possible_backends;
     $c->stash->{'backend_detail'}     = \%backend_detail;
 
     ###############################
