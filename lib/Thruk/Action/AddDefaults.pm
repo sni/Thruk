@@ -40,6 +40,24 @@ before 'execute' => sub {
     Thruk::Utils::read_cgi_cfg($c);
 
     ###############################
+    # Authentication
+    $c->log->debug("checking auth");
+    unless ($c->user_exists) {
+        $c->log->debug("user not authenticated yet");
+        unless ($c->authenticate( {} )) {
+            # return 403 forbidden or kick out the user in other way
+            $c->log->debug("user is not authenticated");
+            $c->detach('/error/index/10');
+        };
+    }
+    $c->log->debug("user authenticated as: ".$c->user->get('username'));
+    if($c->user_exists) {
+        $c->stash->{'remote_user'}  = $c->user->get('username');
+    } else {
+        $c->stash->{'remote_user'}  = '?';
+    }
+
+    ###############################
     # get livesocket object
     my %disabled_backends;
     my $nr_disabled = 0;
@@ -61,29 +79,40 @@ before 'execute' => sub {
             }
         }
     }
+
+    ###############################
+    # disable backends by groups
+    if(defined $c->{'live'}) {
+        my $contactgroups_by_contact = {};
+        my $data = $c->{'live'}->selectall_arrayref("GET contactgroups\nColumns: name members", { Slice => 1 } );
+        for my $group (@{$data}) {
+            next unless defined $group->{'members'};
+            for my $contact (split /,/mx, $group->{'members'}) {
+                $contactgroups_by_contact->{$contact}->{$group->{'name'}} = 1;
+            }
+        }
+        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+        for my $peer (@{$livestatus_config->{'peer'}}) {
+            if(defined $peer->{'groups'}) {
+                $disabled_backends{$peer->{'peer'}} = 3;    # completly hidden
+                $nr_disabled++;
+                for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
+                    if(defined $contactgroups_by_contact->{$c->user->get('username')}->{$group}) {
+                        $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+                        delete $disabled_backends{$peer->{'peer'}};
+                        $nr_disabled--;
+                        last;
+                    }
+                }
+            }
+        }
+    }
+
     if(defined $c->{'live'}) {
         $c->{'live'}->_disable_backends(\%disabled_backends);
     }
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     $c->stash->{'param_backend'}  = $backend;
-
-    $c->log->debug("checking auth");
-    unless ($c->user_exists) {
-        $c->log->debug("user not authenticated yet");
-        unless ($c->authenticate( {} )) {
-            # return 403 forbidden or kick out the user in other way
-            $c->log->debug("user is not authenticated");
-            $c->detach('/error/index/10');
-        };
-    }
-    $c->log->debug("user authenticated as: ".$c->user->get('username'));
-
-    ###############################
-    if($c->user_exists) {
-        $c->stash->{'remote_user'}  = $c->user->get('username');
-    } else {
-        $c->stash->{'remote_user'}  = '?';
-    }
 
     ###############################
     my @possible_backends = $c->{'live'}->peer_key();

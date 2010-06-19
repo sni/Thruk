@@ -40,21 +40,18 @@ sub new {
 
 =head2 init_livestatus
 
-  my $conf = init_livestatus($disabled_backends)
+  my $conf = init_livestatus()
 
 return the livestatus object
 
 =cut
 sub init_livestatus {
     my $self              = shift;
-    my $disabled_backends = shift;
 
     $self->{'c'}->stats->profile(begin => "Thruk::Utils::Livestatus::init_livestatus()");
 
     if(defined $self->{'livestatus'}) {
         $self->{'c'}->log->debug("got livestatus from cache");
-        $self->{'livestatus'}->enable();
-        $self->_disable_backends($disabled_backends);
         return($self);
     }
     $self->{'c'}->log->debug("creating new livestatus");
@@ -68,8 +65,6 @@ sub init_livestatus {
         $livestatus_config->{'logger'} = $self->{'c'}->log;
     }
     $self->{'livestatus'} = Monitoring::Livestatus::MULTI->new(%{$livestatus_config});
-
-    $self->_disable_backends($disabled_backends);
 
     $self->{'c'}->stats->profile(end => "Thruk::Utils::Livestatus::init_livestatus()");
 
@@ -119,7 +114,7 @@ sub _disable_backends {
 
     if(defined $disabled_backends) {
         for my $key (keys %{$disabled_backends}) {
-            if(defined $disabled_backends->{$key} and $disabled_backends->{$key} == 2) {
+            if(defined $disabled_backends->{$key} and ( $disabled_backends->{$key} == 2 or $disabled_backends->{$key} == 3 )) {
                 if($self->{'livestatus'}->_get_peer_by_key($key)) {
                     $self->{'c'}->log->debug("disabled livestatus backend by key: $key");
                     $self->{'livestatus'}->disable($key);
@@ -129,7 +124,7 @@ sub _disable_backends {
                     if(defined $peer) {
                         $self->{'c'}->log->debug("disabled livestatus backend by addr: ".$key);
                         $self->{'livestatus'}->disable($peer->{'key'});
-                        $disabled_backends->{$peer->{'key'}} = 2;
+                        $disabled_backends->{$peer->{'key'}} = $disabled_backends->{$key};
                     }
                 }
             }

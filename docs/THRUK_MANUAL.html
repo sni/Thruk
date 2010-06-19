@@ -2243,7 +2243,8 @@ allowed_frame_links = https://wiki.my-company.com</tt></pre>
 amount of seconds. Displaying pages soon after backend restarts
 may display wrong results and all services are pending. Enable this if
 you experience problems with pending services after reloading your
-backend
+backend.
+Should be obsolete with Livestatus versions greater than 1.1.6
 ex.: setting this to 10 would start serving pages 10 seconds
 after the backend reload</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -2467,6 +2468,28 @@ use_threads      access multiple backends with threads. Usually it&#8217;s faste
 peer             enter the peer configuration. You can enter a name for each
                      connection.
 </p>
+<div class="ulist"><ul>
+<li>
+<p>
+name      name for this connection
+</p>
+</li>
+<li>
+<p>
+peer      address or local socket
+</p>
+</li>
+<li>
+<p>
+hidden    should this peer be hidden ( can be enabled via gui)
+</p>
+</li>
+<li>
+<p>
+groups    if set, only contacts from these groups have access
+</p>
+</li>
+</ul></div>
 </li>
 <li>
 <p>
@@ -2486,8 +2509,10 @@ query_timeout    timeout for queries
   keepalive   = 1
   use_threads = 0
   &lt;peer&gt;
-    name = Local Nagios
-    peer = /tmp/livestatus.socket
+    name   = Local Nagios
+    peer   = /tmp/livestatus.socket
+    hidden = 1
+    groups = admins,local_users
   &lt;/peer&gt;
   &lt;peer&gt;
     name = External Nagios
@@ -2496,6 +2521,10 @@ query_timeout    timeout for queries
   &lt;peer&gt;
     name = External Icinga
     peer = 172.16.0.2:9999
+  &lt;/peer&gt;
+  &lt;peer&gt;
+    name = External Shinken
+    peer = 172.16.0.3:9999
   &lt;/peer&gt;
 &lt;/Component&gt;</tt></pre>
 </div></div>
@@ -2769,7 +2798,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-06-17 12:38:24 CEST
+Last updated 2010-06-18 18:22:01 CEST
 </div>
 </div>
 </body>

@@ -652,7 +652,6 @@ ssi/README
 ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
-t/20-Template_Dates.t
 t/95_doc_coverage.t
 t/97-Pod.t
 t/98-Pod-Coverage.t

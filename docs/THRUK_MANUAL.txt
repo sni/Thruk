@@ -497,7 +497,8 @@ Delay the page delivery until the backends uptime is at least this
 amount of seconds. Displaying pages soon after backend restarts
 may display wrong results and all services are pending. Enable this if
 you experience problems with pending services after reloading your
-backend
+backend.
+Should be obsolete with Livestatus versions greater than 1.1.6
 ex.: setting this to 10 would start serving pages 10 seconds
 after the backend reload
 
@@ -742,6 +743,10 @@ xinetd.conf. You can enter local unix sockets too.
                      without threads except the backends have a very poor connection
   * peer             enter the peer configuration. You can enter a name for each
                      connection.
+         - name      name for this connection
+         - peer      address or local socket
+         - hidden    should this peer be hidden ( can be enabled via gui)
+         - groups    if set, only contacts from these groups have access
   * connect_timeout  timeout for new connections
   * query_timeout    timeout for queries
 
@@ -751,8 +756,10 @@ ex.:
     keepalive   = 1
     use_threads = 0
     <peer>
-      name = Local Nagios
-      peer = /tmp/livestatus.socket
+      name   = Local Nagios
+      peer   = /tmp/livestatus.socket
+      hidden = 1
+      groups = admins,local_users
     </peer>
     <peer>
       name = External Nagios
@@ -761,6 +768,10 @@ ex.:
     <peer>
       name = External Icinga
       peer = 172.16.0.2:9999
+    </peer>
+    <peer>
+      name = External Shinken
+      peer = 172.16.0.3:9999
     </peer>
   </Component>
 
