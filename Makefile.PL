@@ -75,7 +75,6 @@ requires 'Catalyst::Devel'                        => 1.26;
 requires 'FCGI'                                   => 0.69;
 requires 'FCGI::ProcManager'                      => 0.19;
 requires 'FCGI::ProcManager::MaxRequests'         => 0;
-requires 'Cache::Memory'                          => 0.00;
 
 # test requirements make it into the META.yml and will break
 # normal package installation

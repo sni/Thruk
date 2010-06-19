@@ -1075,20 +1075,32 @@ sub set_can_submit_commands {
     my $username = $c->request->{'user'}->{'username'};
 
     # is the contact allowed to send commands?
-    my($can_submit_commands,$alias);
-    eval {
-        my $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Slice => 1 });
-        if(defined $data) {
-            for my $dat (@{$data}) {
-                $alias               = $dat->{'alias'}               if defined $dat->{'alias'};
-                $can_submit_commands = $dat->{'can_submit_commands'} if defined $dat->{'can_submit_commands'};
-            }
+    my($can_submit_commands,$alias,$data);
+    my $cache = $c->cache;
+    my $cached_data = $cache->get($username);
+    if(defined $cached_data->{'can_submit_commands'}) {
+        # got cached data
+        $data = $cached_data->{'can_submit_commands'};
+    }
+    else {
+        eval {
+            $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Slice => 1 });
+            $cached_data->{'can_submit_commands'} = $data;
+            $cache->set($username, $cached_data);
         }
     };
     if($@) {
         $c->log->error("livestatus error: $@");
         $c->detach('/error/index/9');
     }
+
+    if(defined $data) {
+        for my $dat (@{$data}) {
+            $alias               = $dat->{'alias'}               if defined $dat->{'alias'};
+            $can_submit_commands = $dat->{'can_submit_commands'} if defined $dat->{'can_submit_commands'};
+        }
+    }
+
     if(defined $alias) {
         $c->request->{'user'}->{'alias'} = $alias;
     }

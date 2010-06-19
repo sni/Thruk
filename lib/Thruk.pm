@@ -102,7 +102,7 @@ my %config = ('name'                   => 'Thruk',
                     },
                     'Plugin::Cache'        => {
                         'backend'           => {
-                          'class'            => "Cache::Memory",
+                          'class'            => "Catalyst::Plugin::Cache::Backend::Memory",
                         },
                     },
 );

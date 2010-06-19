@@ -144,27 +144,23 @@ returns a list of contactgroups by contact
 
 =cut
 sub _get_contactgroups_by_contact {
-    my $self = shift;
-    my $c    = shift;
+    my($self,$c,$username) = @_;
 
-    my $contactgroups_by_contact = {};
     my $cache = $c->cache;
-    if( $contactgroups_by_contact = $cache->get('contactgroups_by_contact') ) {
-        return $contactgroups_by_contact;
+    my $cached_data = $cache->get($username);
+    if(defined $cached_data->{'contactgroups'}) {
+        return $cached_data->{'contactgroups'};
     }
 
-    return $self->{'contactgroups_by_contact'} if defined $self->{'contactgroups_by_contact'};
-
-    my $data = $self->selectall_arrayref("GET contactgroups\nColumns: name members", { Slice => 1 } );
+    my $contactgroups = {};
+    my $data = $self->selectall_arrayref("GET contactgroups\nColumns: name\nFilter: members >= ".$username, { Slice => 1 } );
     for my $group (@{$data}) {
-        next unless defined $group->{'members'};
-        for my $contact (split /,/mx, $group->{'members'}) {
-            $contactgroups_by_contact->{$contact}->{$group->{'name'}} = 1;
-        }
+        $contactgroups->{$group->{'name'}} = 1;
     }
 
-    $c->cache->set('contactgroups_by_contact', $contactgroups_by_contact);
-    return $contactgroups_by_contact;
+    $cached_data->{'contactgroups'} = $contactgroups;
+    $c->cache->set($username, $cached_data);
+    return $contactgroups;
 }
 
 ########################################
