@@ -68,12 +68,14 @@ requires 'Catalyst::Plugin::CustomErrorMessage'   => 0.04;
 requires 'Catalyst::Plugin::Redirect'             => 0.02;
 requires 'Catalyst::Plugin::Compress::Gzip'       => 0;
 requires 'Catalyst::Plugin::Unicode::Encoding'    => 0.00;
+requires 'Catalyst::Plugin::Cache'                => 0.00;
 requires 'Catalyst::Log::Log4perl'                => 1.04;
 requires 'Catalyst::Engine::FastCGI'              => 0;
 requires 'Catalyst::Devel'                        => 1.26;
 requires 'FCGI'                                   => 0.69;
 requires 'FCGI::ProcManager'                      => 0.19;
 requires 'FCGI::ProcManager::MaxRequests'         => 0;
+requires 'Cache::Memory'                          => 0.00;
 
 # test requirements make it into the META.yml and will break
 # normal package installation

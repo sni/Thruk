@@ -83,25 +83,27 @@ before 'execute' => sub {
     ###############################
     # disable backends by groups
     if(defined $c->{'live'}) {
-        my $contactgroups_by_contact = {};
-        my $data = $c->{'live'}->selectall_arrayref("GET contactgroups\nColumns: name members", { Slice => 1 } );
-        for my $group (@{$data}) {
-            next unless defined $group->{'members'};
-            for my $contact (split /,/mx, $group->{'members'}) {
-                $contactgroups_by_contact->{$contact}->{$group->{'name'}} = 1;
-            }
-        }
-        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+        my $livestatus_config        = $c->{'live'}->get_livestatus_conf();
+        my $has_groups = 0;
         for my $peer (@{$livestatus_config->{'peer'}}) {
             if(defined $peer->{'groups'}) {
-                $disabled_backends{$peer->{'peer'}} = 3;    # completly hidden
-                $nr_disabled++;
-                for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
-                    if(defined $contactgroups_by_contact->{$c->user->get('username')}->{$group}) {
-                        $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
-                        delete $disabled_backends{$peer->{'peer'}};
-                        $nr_disabled--;
-                        last;
+                $has_groups = 1;
+                last;
+            }
+        }
+        if($has_groups) {
+            my $contactgroups_by_contact = $c->{'live'}->_get_contactgroups_by_contact($c);
+            for my $peer (@{$livestatus_config->{'peer'}}) {
+                if(defined $peer->{'groups'}) {
+                    $disabled_backends{$peer->{'peer'}} = 3;    # completly hidden
+                    $nr_disabled++;
+                    for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
+                        if(defined $contactgroups_by_contact->{$c->user->get('username')}->{$group}) {
+                            $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+                            delete $disabled_backends{$peer->{'peer'}};
+                            $nr_disabled--;
+                            last;
+                        }
                     }
                 }
             }

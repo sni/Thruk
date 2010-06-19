@@ -133,6 +133,40 @@ sub _disable_backends {
     return 1;
 }
 
+
+########################################
+
+=head2 _get_contactgroups_by_contact
+
+  _get_contactgroups_by_contact
+
+returns a list of contactgroups by contact
+
+=cut
+sub _get_contactgroups_by_contact {
+    my $self = shift;
+    my $c    = shift;
+
+    my $contactgroups_by_contact = {};
+    my $cache = $c->cache;
+    if( $contactgroups_by_contact = $cache->get('contactgroups_by_contact') ) {
+        return $contactgroups_by_contact;
+    }
+
+    return $self->{'contactgroups_by_contact'} if defined $self->{'contactgroups_by_contact'};
+
+    my $data = $self->selectall_arrayref("GET contactgroups\nColumns: name members", { Slice => 1 } );
+    for my $group (@{$data}) {
+        next unless defined $group->{'members'};
+        for my $contact (split /,/mx, $group->{'members'}) {
+            $contactgroups_by_contact->{$contact}->{$group->{'name'}} = 1;
+        }
+    }
+
+    $c->cache->set('contactgroups_by_contact', $contactgroups_by_contact);
+    return $contactgroups_by_contact;
+}
+
 ########################################
 
 =head2 AUTOLOAD

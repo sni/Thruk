@@ -27,6 +27,7 @@ use Catalyst qw/
                 Static::Simple
                 Redirect
                 Compress::Gzip
+                Cache
                 /;
 our $VERSION = '0.66';
 
@@ -96,8 +97,13 @@ my %config = ('name'                   => 'Thruk',
                         'error-template'    => 'error.tt',
                         'response-status'   => 500,
                     },
-                    'static' => {
+                    'static'               => {
                         'ignore_extensions' => [ qw/tpl tt tt2/ ],
+                    },
+                    'Plugin::Cache'        => {
+                        'backend'           => {
+                          'class'            => "Cache::Memory",
+                        },
                     },
 );
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
