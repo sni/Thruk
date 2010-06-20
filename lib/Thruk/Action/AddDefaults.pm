@@ -66,14 +66,12 @@ before 'execute' => sub {
 
     ###############################
     # get livesocket object
-    my %disabled_backends;
-    my $nr_disabled = 0;
+    my $disabled_backends = {};
     if(defined $c->request->cookie('thruk_backends')) {
         for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
-            $disabled_backends{$key} = $value;
-            $nr_disabled++ if $value == 2;
+            $disabled_backends->{$key} = $value;
         }
     }
     elsif(defined $c->{'live'}) {
@@ -81,13 +79,21 @@ before 'execute' => sub {
         $c->log->debug("livestatus config: ".Dumper($livestatus_config));
         for my $peer (@{$livestatus_config->{'peer'}}) {
             if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
-                $disabled_backends{$peer->{'peer'}} = 2;
-                $nr_disabled++;
+                $disabled_backends->{$peer->{'peer'}} = 2;
             }
         }
     }
+    my $has_groups = 0;
     if(defined $c->{'live'}) {
-        $c->{'live'}->_disable_backends(\%disabled_backends);
+        $c->{'live'}->_disable_backends($disabled_backends);
+
+        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+        for my $peer (@{$livestatus_config->{'peer'}}) {
+            if(defined $peer->{'groups'}) {
+                $has_groups = 1;
+                $disabled_backends->{$peer->{'peer'}} = 3;    # completly hidden
+            }
+        }
     }
 
     ###############################
@@ -131,69 +137,28 @@ before 'execute' => sub {
         }
     };
     if($@) {
+        $self->_set_possible_backends($c, $disabled_backends);
         $c->log->error("livestatus error: $@");
         $c->detach('/error/index/9');
     }
 
     ###############################
     # disable backends by groups
-    if(defined $c->{'live'}) {
-        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
-        my $has_groups = 0;
-        for my $peer (@{$livestatus_config->{'peer'}}) {
-            if(defined $peer->{'groups'}) {
-                $has_groups = 1;
-                last;
-            }
-        }
-        if($has_groups) {
-            $c->{'live'}->enable();
-            my $contactgroups = $c->{'live'}->_get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
-            for my $peer (@{$livestatus_config->{'peer'}}) {
-                if(defined $peer->{'groups'}) {
-                    $disabled_backends{$peer->{'peer'}} = 3;    # completly hidden
-                    $nr_disabled++;
-                    for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
-                        if(defined $contactgroups->{$group}) {
-                            $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
-                            delete $disabled_backends{$peer->{'peer'}};
-                            $nr_disabled--;
-                            last;
-                        }
-                    }
-                }
-            }
-            $c->{'live'}->_disable_backends(\%disabled_backends);
-        }
+    if($has_groups and defined $c->{'live'}) {
+        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends);
     }
+    $self->_set_possible_backends($c, $disabled_backends);
 
     ###############################
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     $c->stash->{'param_backend'}  = $backend;
 
     ###############################
-    my @possible_backends = $c->{'live'}->peer_key();
-    my %backend_detail;
-    my @new_possible_backends;
-    for my $back (@possible_backends) {
-        if(!defined $disabled_backends{$back} or $disabled_backends{$back} != 3) {
-            $backend_detail{$back} = {
-                "name"     => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
-                "addr"     => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
-                "disabled" => $disabled_backends{$back} || 0,
-            };
-            push @new_possible_backends, $back;
-        }
-    }
-    $c->stash->{'backends'}           = \@new_possible_backends;
-    $c->stash->{'backend_detail'}     = \%backend_detail;
-
-    ###############################
     $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
     $c->stash->{'show_context_help'}  = $c->config->{'cgi_cfg'}->{'show_context_help'};
 
-    if(!defined $c->stash->{'pi_detail'} and $nr_disabled < scalar @possible_backends) {
-        $c->log->error("got no result from any enabled backend, please check backend connection and logfiles");
+    if(!defined $c->stash->{'pi_detail'} and $self->_any_backend_enabled($c)) {
+        $c->log->error("got no result from any backend, please check backend connection and logfiles");
         $c->detach('/error/index/9');
     }
     $c->stats->profile(end => "AddDefaults::get_proc_info");
@@ -222,6 +187,63 @@ after 'execute' => sub {
 
     $c->stats->profile(end => "AddDefaults::after");
 };
+
+
+
+########################################
+sub _set_possible_backends {
+    my ($self,$c,$disabled_backends) = @_;
+
+    my @possible_backends = $c->{'live'}->peer_key();
+    my %backend_detail;
+    my @new_possible_backends;
+    for my $back (@possible_backends) {
+        if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 3) {
+            $backend_detail{$back} = {
+                "name"     => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
+                "addr"     => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
+                "disabled" => $disabled_backends->{$back} || 0,
+            };
+            push @new_possible_backends, $back;
+        }
+    }
+    $c->stash->{'backends'}           = \@new_possible_backends;
+    $c->stash->{'backend_detail'}     = \%backend_detail;
+
+    return;
+}
+
+########################################
+sub _disable_backends_by_group {
+    my ($self,$c,$disabled_backends) = @_;
+
+    my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+    $c->{'live'}->enable();
+    my $contactgroups = $c->{'live'}->_get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+    for my $peer (@{$livestatus_config->{'peer'}}) {
+        if(defined $peer->{'groups'}) {
+            for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
+                if(defined $contactgroups->{$group}) {
+                    $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+                    delete $disabled_backends->{$peer->{'peer'}};
+                    last;
+                }
+            }
+        }
+    }
+    $c->{'live'}->_disable_backends($disabled_backends);
+
+    return $disabled_backends;
+}
+
+########################################
+sub _any_backend_enabled {
+    my ($self,$c) = @_;
+    for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
+        return 1 if $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0;
+    }
+    return;
+}
 
 __PACKAGE__->meta->make_immutable;
 
