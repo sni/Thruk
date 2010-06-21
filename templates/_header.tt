@@ -41,6 +41,7 @@
           [% SET val = '1' %]
           [% SET val = '0' IF pi_detail.$pd.program_start %]
           [% SET val = '2' IF backend_detail.$pd.disabled == 2 %]
+          [% SET val = '3' IF backend_detail.$pd.disabled == 3 %]
           [% SET val = '3' IF param_backend && pd != param_backend %]
           '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
         [% END %]
@@ -134,6 +135,7 @@
             [% SET class = 'button_peerDOWN' %]
             [% SET class = 'button_peerUP'  IF pi_detail.$pd.program_start %]
             [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %]
+            [% SET class = 'button_peerHID' IF backend_detail.$pd.disabled == 3 %]
             [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
             <input type="button" id='button_[% pd %]' class="[% class %]" value="[% name %]" title="[% name %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleBackend('[% pd %]')">
           </div>

@@ -85,15 +85,16 @@ before 'execute' => sub {
     }
     my $has_groups = 0;
     if(defined $c->{'live'}) {
-        $c->{'live'}->_disable_backends($disabled_backends);
-
         my $livestatus_config = $c->{'live'}->get_livestatus_conf();
         for my $peer (@{$livestatus_config->{'peer'}}) {
             if(defined $peer->{'groups'}) {
+                my $real_peer = $c->{'live'}->_get_peer_by_addr($peer->{'peer'});
                 $has_groups = 1;
-                $disabled_backends->{$peer->{'peer'}} = 3;    # completly hidden
+                $disabled_backends->{$real_peer->{'key'}} = 4;  # completly hidden
+                $disabled_backends->{$peer->{'peer'}} = 4;      # completly hidden
             }
         }
+        $c->{'live'}->_disable_backends($disabled_backends);
     }
 
     ###############################
@@ -191,14 +192,28 @@ after 'execute' => sub {
 
 
 ########################################
+
+=head2 _set_possible_backends
+
+  _set_possible_backends()
+
+  possible values are:
+    0 = reachable
+    1 = unreachable
+    2 = hidden by user
+    3 = hidden by backend param
+    4 = disabled by missing group auth
+
+=cut
 sub _set_possible_backends {
     my ($self,$c,$disabled_backends) = @_;
 
     my @possible_backends = $c->{'live'}->peer_key();
     my %backend_detail;
     my @new_possible_backends;
+
     for my $back (@possible_backends) {
-        if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 3) {
+        if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 4) {
             $backend_detail{$back} = {
                 "name"     => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
                 "addr"     => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
