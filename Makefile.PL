@@ -131,7 +131,11 @@ EOT
     }
     if($found_make_create_distdir and $line =~ m/^\s*$/mx) {
         $found_make_create_distdir = 0;
-        $line = "\t".'for file in `cat MANIFEST`; do if [ -d $$file -a -L $$file ]; then cp -d $$file $(DISTVNAME)/`dirname $$file`/; fi; done'."\n".$line;
+        my $cp_option;
+        $cp_option = "-d" if $^O eq 'linux';
+        $cp_option = "-R" if $^O eq 'freebsd';
+        $cp_option = "-R" if $^O eq 'darwin';
+        $line = "\t".'for file in `cat MANIFEST`; do if [ -d $$file -a -L $$file ]; then $(CP) '.$cp_option.' $$file $(DISTVNAME)/`dirname $$file`/; fi; done'."\n".$line if defined $cp_option;
     }
     $new_makefile .= $line;
 }
