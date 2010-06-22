@@ -29,7 +29,8 @@ create new livestatus helper
 sub new {
     my( $class, $c ) = @_;
     my $self     = {
-        'c'          => $c,
+        'log'          => $c->log,
+        'stats'        => $c->stats,
     };
     bless $self, $class;
     return unless $self->init_livestatus();
@@ -48,13 +49,13 @@ return the livestatus object
 sub init_livestatus {
     my $self              = shift;
 
-    $self->{'c'}->stats->profile(begin => "Thruk::Utils::Livestatus::init_livestatus()");
+    $self->{'stats'}->profile(begin => "Thruk::Utils::Livestatus::init_livestatus()");
 
     if(defined $self->{'livestatus'}) {
-        $self->{'c'}->log->debug("got livestatus from cache");
+        $self->{'log'}->debug("got livestatus from cache");
         return($self);
     }
-    $self->{'c'}->log->debug("creating new livestatus");
+    $self->{'log'}->debug("creating new livestatus");
 
     my $livestatus_config = $self->get_livestatus_conf();
     if(!defined $livestatus_config or !defined $livestatus_config->{'peer'} ) {
@@ -62,11 +63,11 @@ sub init_livestatus {
     }
 
     if(defined $livestatus_config->{'verbose'} and $livestatus_config->{'verbose'}) {
-        $livestatus_config->{'logger'} = $self->{'c'}->log;
+        $livestatus_config->{'logger'} = $self->{'log'};
     }
     $self->{'livestatus'} = Monitoring::Livestatus::MULTI->new(%{$livestatus_config});
 
-    $self->{'c'}->stats->profile(end => "Thruk::Utils::Livestatus::init_livestatus()");
+    $self->{'stats'}->profile(end => "Thruk::Utils::Livestatus::init_livestatus()");
 
     return($self);
 }
@@ -116,13 +117,13 @@ sub _disable_backends {
         for my $key (keys %{$disabled_backends}) {
             if(defined $disabled_backends->{$key} and ( $disabled_backends->{$key} == 2 or $disabled_backends->{$key} == 3 )) {
                 if($self->{'livestatus'}->_get_peer_by_key($key)) {
-                    $self->{'c'}->log->debug("disabled livestatus backend by key: $key");
+                    $self->{'log'}->debug("disabled livestatus backend by key: $key");
                     $self->{'livestatus'}->disable($key);
                 }
                 else {
                     my $peer = $self->{'livestatus'}->_get_peer_by_addr($key);
                     if(defined $peer) {
-                        $self->{'c'}->log->debug("disabled livestatus backend by addr: ".$key);
+                        $self->{'log'}->debug("disabled livestatus backend by addr: ".$key);
                         $self->{'livestatus'}->disable($peer->{'key'});
                         $disabled_backends->{$peer->{'key'}} = $disabled_backends->{$key};
                     }
@@ -184,9 +185,9 @@ sub AUTOLOAD {
     if($name =~ /^select/mx) {
         $arg = substr($_[0], 0, 50);
         $arg =~ s/\n+/\\n/gmx;
-        $self->{'c'}->log->debug("livestatus->".$name."(".$arg."...)");
+        $self->{'log'}->debug("livestatus->".$name."(".$arg."...)");
         $arg = substr($arg, 0, 20);
-        $self->{'c'}->stats->profile(begin => "l->".$name."(".$arg."...)");
+        $self->{'stats'}->profile(begin => "l->".$name."(".$arg."...)");
     }
 
     my $result;
@@ -197,7 +198,7 @@ sub AUTOLOAD {
     }
 
     if($name =~ /^select/mx) {
-        $self->{'c'}->stats->profile(end => "l->".$name."(".$arg."...)");
+        $self->{'stats'}->profile(end => "l->".$name."(".$arg."...)");
     }
 
     return $result;

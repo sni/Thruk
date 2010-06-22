@@ -1,7 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-0.68    Mon Jun ...
-          - ...
+0.68    Tue Jun 22 20:41:53 CEST 2010
+          - fixed memory leak
 
 0.66    Mon Jun 21 08:45:39 CEST 2010
           - added Excel export to status/host details page
