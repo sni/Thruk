@@ -18,5 +18,5 @@ docs/images
 script/thruk_update_docs.sh
 script/thruk_update_table_docs.pl
 script/thruk_extract_cmd_templates.pl
-root/plugins/.*/
 t/xt
+root/thruk/plugins/*

@@ -112,6 +112,7 @@ WriteAll;
 # patch our makefile
 my $new_makefile = '';
 open(my $fh, '<', 'Makefile') or die("cannot open Makefile");
+my $found_make_create_distdir = 0;
 while(<$fh>) {
     my $line = $_;
     if($line =~ m/^install\s*:/mx) {
@@ -123,6 +124,14 @@ do_not_install :
 
 install :: do_not_install pure_install doc_install
 EOT
+    }
+    # search the create_distdir part
+    if($line =~ m/create_distdir\s*:/mx) {
+        $found_make_create_distdir = 1;
+    }
+    if($found_make_create_distdir and $line =~ m/^\s*$/mx) {
+        $found_make_create_distdir = 0;
+        $line = "\t".'for file in `cat MANIFEST`; do if [ -d $$file -a -L $$file ]; then cp -d $$file $(DISTVNAME)/`dirname $$file`/; fi; done'."\n".$line;
     }
     $new_makefile .= $line;
 }

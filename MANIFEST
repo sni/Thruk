@@ -81,6 +81,7 @@ plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
 plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
+plugins/plugins-enabled/statusmap
 README
 root/favicon.ico
 root/index.html
@@ -255,6 +256,7 @@ root/thruk/themes/Exfoliation/images/left.png
 root/thruk/themes/Exfoliation/images/logo_thruk.png
 root/thruk/themes/Exfoliation/images/logo_thruk_mid.png
 root/thruk/themes/Exfoliation/images/logo_thruk_small.png
+root/thruk/themes/Exfoliation/images/logos
 root/thruk/themes/Exfoliation/images/logrotate.png
 root/thruk/themes/Exfoliation/images/minus.gif
 root/thruk/themes/Exfoliation/images/ndisabled.gif
@@ -325,6 +327,7 @@ root/thruk/themes/Exfoliation/stylesheets/thruk.css
 root/thruk/themes/Exfoliation/stylesheets/thruk_noframes.css
 root/thruk/themes/Exfoliation/stylesheets/thruk_noframes_ie_fix.css
 root/thruk/themes/Exfoliation/stylesheets/trends.css
+root/thruk/themes/Neat/images
 root/thruk/themes/Neat/stylesheets/avail.css
 root/thruk/themes/Neat/stylesheets/checksanity.css
 root/thruk/themes/Neat/stylesheets/cmd.css
@@ -417,6 +420,7 @@ root/thruk/themes/Nuvola/images/logo_thruk.png
 root/thruk/themes/Nuvola/images/logo_thruk_mid.png
 root/thruk/themes/Nuvola/images/logo_thruk_small.png
 root/thruk/themes/Nuvola/images/logofullsize.png
+root/thruk/themes/Nuvola/images/logos
 root/thruk/themes/Nuvola/images/logrotate.png
 root/thruk/themes/Nuvola/images/minus.gif
 root/thruk/themes/Nuvola/images/ndisabled.gif
@@ -569,6 +573,7 @@ root/thruk/themes/Vautour/images/left.png
 root/thruk/themes/Vautour/images/logo_thruk.png
 root/thruk/themes/Vautour/images/logo_thruk_mid.png
 root/thruk/themes/Vautour/images/logo_thruk_small.png
+root/thruk/themes/Vautour/images/logos
 root/thruk/themes/Vautour/images/logrotate.png
 root/thruk/themes/Vautour/images/minus.gif
 root/thruk/themes/Vautour/images/ndisabled.gif
