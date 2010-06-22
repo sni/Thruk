@@ -26,6 +26,7 @@ Main Features / Advantages
   * 100% Perl (using Catalyst Framework)
   * paging ( can be disabled and customized )
   * multiple themes included
+  * Excel export
 
 
 

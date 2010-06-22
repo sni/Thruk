@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.68    Mon Jun ...
+          - ...
+
 0.66    Mon Jun 21 08:45:39 CEST 2010
           - added Excel export to status/host details page
           - added contactgroups config page
@@ -16,6 +19,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fixed problem with removing downtimes
 
 0.62    Sat May 29 17:03:41 CEST 2010
+          - added status map
           - fixed problem with selecting themes
           - fixed command default checkbox settings
 

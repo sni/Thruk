@@ -60,9 +60,7 @@ general:
     - uc,lc option for auth user -> monitoring
     - multi language support
     - add context sensitive help
-    - completly hide backends by contactgroups
     - bookmarks
-    - show only backends where user has at least permission for one host/service
     - use livestatus wait feature where possible
     - page by attribute a,b,c,d,e...z
 

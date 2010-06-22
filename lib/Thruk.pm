@@ -29,7 +29,7 @@ use Catalyst qw/
                 Compress::Gzip
                 Cache
                 /;
-our $VERSION = '0.66';
+our $VERSION = '0.68';
 
 ###################################################
 # Configure the application.
