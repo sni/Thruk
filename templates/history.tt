@@ -200,7 +200,7 @@
 [% ELSIF l.type.search('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
 [% ELSE                                              %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% END %]
-<img align='left' src='/thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width="20" height="20">[[% date.format(l.time, datetime_format) %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
+<img align='middle' src='/thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width="20" height="20">[[% date.format(l.time, datetime_format) %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
 [% END %]
 [% IF logs.size and logs.size > 0 %]</div>[% END %]
 
