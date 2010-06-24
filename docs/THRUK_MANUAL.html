@@ -1988,14 +1988,16 @@ make sure the /home/thruk/Thruk/logs/ directory exists
     &lt;/Directory&gt;
 
     Alias /thruk/ /home/thruk/Thruk/root/thruk/
-    &lt;Location "/thruk"&gt;
+    &lt;Directory "/home/thruk/Thruk/root/thruk/"&gt;
+        Options FollowSymLinks
+        AllowOverride All
         AuthName "Monitoring Access"
         AuthType Basic
         AuthUserFile /home/thruk/Thruk/htpasswd.users
         Order Allow,Deny
         Allow from all
         require valid-user
-    &lt;/Location&gt;
+    &lt;/Directory&gt;
 
     # Load fastcgi module unless already loaded
     LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
@@ -2029,6 +2031,8 @@ make sure the /home/thruk/Thruk/logs/ directory exists
     &lt;/Directory&gt;
 
     &lt;Directory /home/thruk/Thruk/root/&gt;
+        Options FollowSymLinks
+        AllowOverride All
         order allow,deny
         allow from all
     &lt;/Directory&gt;
@@ -2133,6 +2137,8 @@ sure the webserver user has access to all files and perl modules.</td>
     ErrorLog     /home/thruk/Thruk/logs/error.log
 
     &lt;Directory /home/thruk/Thruk/root/&gt;
+        Options FollowSymLinks
+        AllowOverride All
         order allow,deny
         allow from all
     &lt;/Directory&gt;
@@ -2803,7 +2809,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-06-21 23:35:46 CEST
+Last updated 2010-06-24 18:01:42 CEST
 </div>
 </div>
 </body>

@@ -290,14 +290,16 @@ use this apache example configuration:
     </Directory>
 
     Alias /thruk/ /home/thruk/Thruk/root/thruk/
-    <Location "/thruk">
+    <Directory "/home/thruk/Thruk/root/thruk/">
+        Options FollowSymLinks
+        AllowOverride All
         AuthName "Monitoring Access"
         AuthType Basic
         AuthUserFile /home/thruk/Thruk/htpasswd.users
         Order Allow,Deny
         Allow from all
         require valid-user
-    </Location>
+    </Directory>
 
     # Load fastcgi module unless already loaded
     LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
@@ -332,6 +334,8 @@ use this apache example configuration:
     </Directory>
 
     <Directory /home/thruk/Thruk/root/>
+        Options FollowSymLinks
+        AllowOverride All
         order allow,deny
         allow from all
     </Directory>
@@ -378,6 +382,8 @@ LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
     ErrorLog     /home/thruk/Thruk/logs/error.log
 
     <Directory /home/thruk/Thruk/root/>
+        Options FollowSymLinks
+        AllowOverride All
         order allow,deny
         allow from all
     </Directory>
