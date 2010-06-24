@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [% PROCESS _header.tt %]
 
     <form method='get' action='notifications.cgi' id="date_form">

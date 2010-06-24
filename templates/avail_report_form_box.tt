@@ -1,4 +1,4 @@
-<form method="GET" action="avail.cgi">
+﻿<form method="GET" action="avail.cgi">
 [% IF host %]<input type='hidden' name='host' value='[% host %]'>[% END %]
 [% IF hostgroup %]<input type='hidden' name='hostgroup' value='[% hostgroup %]'>[% END %]
 [% IF service %]<input type='hidden' name='service' value='[% service %]'>[% END %]

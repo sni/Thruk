@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [% PROCESS _header.tt %]
 
 <form action="showlog.cgi" method="GET" id="date_form">

@@ -1,4 +1,4 @@
-[% PROCESS _header.tt %]
+﻿[% PROCESS _header.tt %]
     <div id="mainbrandsplash">
       <div id="mainlogo"><a href="http://www.thruk.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     </div>

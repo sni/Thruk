@@ -1,4 +1,4 @@
-[% USE HTML %]
+﻿[% USE HTML %]
 [% PROCESS _header.tt %]
 [% UNLESS nomap %]
 

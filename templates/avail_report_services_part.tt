@@ -1,4 +1,4 @@
-    [% SET perc_ok_total                    = 0 %]
+﻿    [% SET perc_ok_total                    = 0 %]
     [% SET perc_warning_total               = 0 %]
     [% SET perc_unknown_total               = 0 %]
     [% SET perc_critical_total              = 0 %]

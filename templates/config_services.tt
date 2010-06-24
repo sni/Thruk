@@ -1,4 +1,4 @@
-[% WRAPPER config_detail.tt
+﻿[% WRAPPER config_detail.tt
    dataTitle = 'Services'
 %]
 

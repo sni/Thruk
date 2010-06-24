@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 <table class='infoBox' border="1" cellspacing="0" cellpadding="0">
   <tr>
     <td class='infoBox'>

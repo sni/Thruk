@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
   <div align="center" class='dataSubTitle'>[% box_title %]</div><br>
 
   [%  FOREACH report_key = data.keys.sort %]

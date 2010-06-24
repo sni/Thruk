@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [% PROCESS _header.tt
   js = "/thruk/javascript/overlib.js"
 %]

@@ -1,4 +1,4 @@
-[% SET message = get_message(c) %]
+﻿[% SET message = get_message(c) %]
 [% IF message %]
 <div id="thruk_message" class="thruk_message">
   <table border=0 cellspacing=2 cellpadding=2>

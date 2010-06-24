@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 
 [% IF show_log_entries or full_log_entries %]
     <div align="center" class='dataTitle'>[% IF service %]Service[% ELSE %]Host[% END %] Log Entries:</div><br>

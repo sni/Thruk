@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 <workbook>
   <worksheet name='Status' autofilter='A1:H99999'>
     <row>

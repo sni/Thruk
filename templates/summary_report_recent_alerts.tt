@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 <div align="center" class='dataSubTitle'>
   Displaying [% IF pager.total_entries > limit %] most recent [% limit %] of [% pager.total_entries %] [% ELSE %] all [% data.size %] [% END %]  matching alerts
   <div align="center">

@@ -80,6 +80,7 @@ requires 'FCGI::ProcManager::MaxRequests'         => 0;
 # normal package installation
 # install them by hand if you plan author tests
 #test_requires 'HTML::Lint';
+#test_requires 'File::BOM';
 #test_requires 'Test::Pod'                         => 1.40;
 #test_requires 'Test::Perl::Critic';
 #test_requires 'Test::Pod::Coverage';

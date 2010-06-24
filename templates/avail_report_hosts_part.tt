@@ -1,4 +1,4 @@
-[% SET perc_up_total                 = 0 %]
+﻿[% SET perc_up_total                 = 0 %]
 [% SET perc_down_total               = 0 %]
 [% SET perc_unreachable_total        = 0 %]
 [% SET perc_up_known_total           = 0 %]

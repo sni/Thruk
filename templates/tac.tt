@@ -1,4 +1,4 @@
-[% PROCESS _header.tt %]
+﻿[% PROCESS _header.tt %]
 [% SET empty = 0 %]
 [% SET empty = 1 UNLESS host_stats %]
     <table border="0" align="left" width="100%" cellspacing="4" cellpadding="0">

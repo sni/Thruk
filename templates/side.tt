@@ -1,4 +1,4 @@
-[% UNLESS target %]
+﻿[% UNLESS target %]
   [% IF use_frames %]
     [% SET target = "main" %]
   [% ELSE %]

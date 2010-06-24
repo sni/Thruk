@@ -1,4 +1,4 @@
-<div align="center" class='dataSubTitle'>
+﻿<div align="center" class='dataSubTitle'>
   Displaying [% IF pager.total_entries > limit %] first [% limit %] of [% pager.total_entries %] [% ELSE %] all [% data.size %] [% END %] matching alert producers
   <div align="center">
     <table border="0" class='data'>

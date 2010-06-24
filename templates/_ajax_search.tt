@@ -1,4 +1,4 @@
-[% IF ajax_search %]
+﻿[% IF ajax_search %]
 [% IF use_frames %]
   <div style="display:none;" id="search-results"></div>
 [% END %]

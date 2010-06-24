@@ -1,4 +1,4 @@
-[% SET hoststatustypes = 15 IF ! hoststatustypes %]
+﻿[% SET hoststatustypes = 15 IF ! hoststatustypes %]
 
 <div class='serviceTotals'>Service Status Totals</div>
 <table border="0" cellspacing="0" cellpadding="0">

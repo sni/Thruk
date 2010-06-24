@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [%# which one is authorized? #%]
 [% IF !c.check_cmd_permissions('host', c.request.parameters.host) %]
   [% WRAPPER error.tt errorMessage = "you are not authorized for this command" errorDescription = "check your configuration if you believe this is an error" %][% END %]

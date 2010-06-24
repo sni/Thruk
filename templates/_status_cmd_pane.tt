@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 <div class="cmd_pane" id="cmd_pane">
 <form action="cmd.cgi" method="POST">
   <input type="hidden" name="referer" value="[% c.request.uri | replace('&', '&amp;') %]">
