@@ -164,6 +164,7 @@ for my $entry (readdir($dh)) {
 }
 closedir $dh;
 __PACKAGE__->config->{'ssi_includes'} = \%ssi;
+__PACKAGE__->config->{'ssi_path'}     = $ssi_dir;
 
 ###################################################
 # Start the application

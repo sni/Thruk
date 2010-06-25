@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.68    Tue Jun 22 20:41:53 CEST 2010
+          - fixed problem with ssi path
           - fixed utf8 support
           - fixed memory leak
 

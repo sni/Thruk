@@ -1637,17 +1637,17 @@ sub ssi_include {
     my $footer_file        = $c->stash->{'page'}."-footer.ssi";
 
     if ( defined $c->config->{ssi_includes}->{$global_header_file} ){
-        $c->stash->{ssi_header} = Thruk::Utils::read_ssi{$global_header_file};
+        $c->stash->{ssi_header} = Thruk::Utils::read_ssi($c, $global_header_file);
     }
     if ( defined $c->config->{ssi_includes}->{$header_file} ){
-        $c->stash->{ssi_header} .= Thruk::Utils::read_ssi{$header_file};
+        $c->stash->{ssi_header} .= Thruk::Utils::read_ssi($c, $header_file);
     }
     # Footer
     if ( defined $c->config->{ssi_includes}->{$global_footer_file} ){
-        $c->stash->{ssi_footer} = Thruk::Utils::read_ssi{$global_footer_file};
+        $c->stash->{ssi_footer} = Thruk::Utils::read_ssi($c, $global_footer_file);
     }
     if ( defined $c->config->{ssi_includes}->{$footer_file} ){
-        $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi{$footer_file};
+        $c->stash->{ssi_footer} .= Thruk::Utils::read_ssi($c, $footer_file);
     }
 
     return 1;
@@ -1658,21 +1658,22 @@ sub ssi_include {
 
 =head2 read_ssi
 
-  read_ssi($file)
+  read_ssi($c, $file)
 
 reads a ssi file or executes it if its executable
 
 =cut
 sub read_ssi {
+   my $c    = shift;
    my $file = shift;
    # retun if file is execitabel
-   if( -x "ssi/$file" ){
-       open(my $ph, '-|', "ssi/$file 2>&1") or carp("cannot execute ssi: $!");
+   if( -x $c->config->{'ssi_path'}.$file ){
+       open(my $ph, '-|', $c->config->{'ssi_path'}.$file.' 2>&1') or carp("cannot execute ssi: $!");
        my $output = <$ph>;
        close($ph);
        return $output;
    }
-   return read_file("ssi/$file") or carp("cannot open ssi: $!");
+   return read_file($c->config->{'ssi_path'}.$file) or carp("cannot open ssi: $!");
 
 }
 
