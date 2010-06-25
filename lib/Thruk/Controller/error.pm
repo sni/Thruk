@@ -2,6 +2,7 @@ package Thruk::Controller::error;
 
 use strict;
 use warnings;
+use utf8;
 use Data::Dumper;
 use Carp;
 use parent 'Catalyst::Controller';

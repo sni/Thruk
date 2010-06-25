@@ -2,6 +2,7 @@ package Thruk::Controller::summary;
 
 use strict;
 use warnings;
+use utf8;
 use parent 'Catalyst::Controller';
 
 =head1 NAME

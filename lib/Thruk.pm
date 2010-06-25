@@ -4,12 +4,16 @@ use 5.008000;
 use strict;
 use warnings;
 
+use utf8;
 use Carp;
 use Catalyst::Log::Log4perl;
 use Thruk::Utils;
 use Thruk::Utils::Livestatus;
 use Thruk::Utils::Auth;
 use Catalyst::Runtime '5.70';
+
+binmode(STDOUT, ":utf8");
+binmode(STDERR, ":utf8");
 
 ###################################################
 # Set flags and add plugins for the application
@@ -18,7 +22,6 @@ use Catalyst::Runtime '5.70';
 
 use parent qw/Catalyst/;
 use Catalyst qw/
-                Unicode::Encoding
                 Authentication
                 Authorization::ThrukRoles
                 CustomErrorMessage
@@ -26,8 +29,9 @@ use Catalyst qw/
                 StackTrace
                 Static::Simple
                 Redirect
-                Compress::Gzip
                 Cache
+                Unicode::Encoding
+                Compress::Gzip
                 /;
 our $VERSION = '0.68';
 

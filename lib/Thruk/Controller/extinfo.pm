@@ -2,6 +2,7 @@ package Thruk::Controller::extinfo;
 
 use strict;
 use warnings;
+use utf8;
 use parent 'Catalyst::Controller';
 use Data::Page;
 
@@ -73,6 +74,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     Thruk::Utils::ssi_include($c);
 
+    #my $test = "aa ²&é\"'''(§è!çà)- %s ''%s'' aa ~ € bb";
+    #my $test = "aa \x{c2}\x{b2}&\x{c3}\x{a9}\"'''(\x{c2}\x{a7}\x{c3}\x{a8}!\x{c3}\x{a7}\x{c3}\x{a0})- %s ''%s'' aa ~ \x{e2}\x{82}\x{ac} bb";
+    #utf8::decode($test);
+    #$c->stash->{title}          = "aa ²&é\"'''(§è!çà)- %s ''%s'' aa ~ € bb";
+    #$c->stash->{infoBoxTitle}   = $test;
+#use Data::Dumper;
+#print STDERR Dumper($c->stash->{'hostdowntimes'});
+#    $c->stash->{'servicedowntimes'}->[0]->{'comment'} = $test;
+#print STDERR Dumper($c->stash->{'hostdowntimes'});
     return 1;
 }
 
