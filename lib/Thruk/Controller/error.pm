@@ -143,6 +143,11 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'dscr' => 'If you believe this is an error, check your monitoring configuration and make sure all backends are connected.',
             'code' => 404, # not found
         },
+        '19'  => {
+            'mess' => 'not a valid date',
+            'dscr' => 'this is not a valid date',
+            'code' => 500, # internal server error
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

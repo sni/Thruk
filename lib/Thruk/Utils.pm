@@ -140,13 +140,19 @@ sub parse_date {
     my $c      = shift;
     my $string = shift;
     my $timestamp;
-    if($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
-        $timestamp = Mktime($1,$2,$3, $4,$5,$6);
-        $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
-    }
-    else {
-        $timestamp = UnixDate($string, '%s');
-        $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
+    eval {
+        if($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+            $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+            $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
+        }
+        else {
+            $timestamp = UnixDate($string, '%s');
+            $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
+        }
+    };
+    if($@) {
+        $c->detach('/error/index/19');
+        return;
     }
     return $timestamp;
 }
