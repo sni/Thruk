@@ -32,6 +32,7 @@ use Catalyst qw/
                 Cache
                 Unicode::Encoding
                 Compress::Gzip
+                Thruk::RemoveNastyCharsFromHttpParam
                 /;
 our $VERSION = '0.68';
 
