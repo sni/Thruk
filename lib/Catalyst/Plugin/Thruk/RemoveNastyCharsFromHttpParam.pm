@@ -15,19 +15,19 @@ sub prepare_uploads {
 
     my $enc = $c->encoding;
 
-    for my $key (qw/ parameters query_parameters body_parameters /) {
-        for my $value ( values %{ $c->request->{$key} } ) {
-            if ( ref $value && ref $value ne 'ARRAY' ) {
-                next;
-            }
-            for ( ref($value) ? @{$value} : $value ) {
-                $c->log->error('####################');
-                $c->log->error($value);
-                $c->log->error($_);
-                $_ =~ s/[;\|&<>]+//gmx;
-            }
+    for my $key ( keys %{ $c->request->{'parameters'} } ) {
+        next if $key eq 'referer';
+        next if $key eq 'selected_hosts';
+        next if $key eq 'selected_services';
+        my $value = $c->request->{'parameters'}->{$key};
+        if ( ref $value && ref $value ne 'ARRAY' ) {
+            next;
+        }
+        for ( ref($value) ? @{$c->request->{'parameters'}->{$key}} : $c->request->{'parameters'}->{$key} ) {
+            $_ =~ s/[;\|<>]+//gmx if defined $_;
         }
     }
+    return;
 }
 
 1;

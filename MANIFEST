@@ -42,6 +42,7 @@ inc/Module/Install/WriteAll.pm
 lib/Catalyst/Authentication/Credential/Thruk.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
+lib/Catalyst/Plugin/Thruk/RemoveNastyCharsFromHttpParam.pm
 lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/View/GD.pm
 lib/Excel/Template/Container/Worksheet.pm
