@@ -50,7 +50,7 @@ sub begin : Private {
             $show_nav_button = 1;
         }
         $use_frames = 1;
-        if($c->{'request'}->{'parameters'}->{'nav'} == 1) {
+        if($c->{'request'}->{'parameters'}->{'nav'} eq '1') {
             $use_frames = 0;
         }
     }
