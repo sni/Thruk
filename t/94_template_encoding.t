@@ -2,10 +2,9 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use File::BOM qw( :all );
 
-# ensure that all config options are well documented
-
+eval "use File::BOM";
+plan skip_all => 'File::BOM required'.$@ if $@;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my @dirs = glob("templates plugins/plugins-available/statusmap/templates root/thruk/themes/*/templates");
@@ -37,8 +36,9 @@ sub check_file {
     my $file = shift;
     my $type;
     eval {
-        open_bom(FH, $file, 'bytes') or die($!);
-        $type = get_encoding_from_filehandle(FH);
+        File::BOM::open_bom(my $fh, $file, 'bytes') or die($!);
+        $type = File::BOM::get_encoding_from_filehandle($fh);
     };
+    print $@ if $@;
     is( $type, 'UTF-8' , $file.' is utf-8');
 }
