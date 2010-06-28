@@ -48,7 +48,7 @@ our $VERSION = '0.68';
 my $project_root = __PACKAGE__->config->{home};
 my %config = ('name'                   => 'Thruk',
                     'version'                => $VERSION,
-                    'released'               => 'June 21, 2010',
+                    'released'               => 'June 28, 2010',
                     'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
@@ -132,8 +132,8 @@ BEGIN {
         }
         # static content included?
         if(-d $addon.'root') {
-            unlink($project_root.'/root/plugins/'.$addon_name);
-            symlink($addon.'root', $project_root.'/root/plugins/'.$addon_name);
+            unlink($project_root.'/root/thruk/plugins/'.$addon_name);
+            symlink($addon.'root', $project_root.'/root/thruk/plugins/'.$addon_name) or die("cannot create ".$project_root.'/root/thruk/plugins/'.$addon_name);
         }
     }
 }
