@@ -122,14 +122,22 @@ BEGIN {
         my $addon_name = $addon;
         $addon_name =~ s/\/$//gmx;
         $addon_name =~ s/^.*\///gmx;
+
+        # does the plugin directory exist?
+        if(! -d $project_root.'/root/thruk/plugins/') {
+            mkdir($project_root.'/root/thruk/plugins/') or die('cannot create '.$project_root.'/root/thruk/plugins/ : '.$!);
+        }
+
         # lib directory included?
         if(-d $addon.'lib') {
             unshift(@INC, $addon.'lib')
         }
+
         # template directory included?
         if(-d $addon.'templates') {
             unshift @{__PACKAGE__->config->{templates_paths}}, $addon.'templates'
         }
+
         # static content included?
         if(-d $addon.'root') {
             unlink($project_root.'/root/thruk/plugins/'.$addon_name);
