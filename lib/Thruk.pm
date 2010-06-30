@@ -140,8 +140,9 @@ BEGIN {
 
         # static content included?
         if(-d $addon.'root') {
-            unlink($project_root.'/root/thruk/plugins/'.$addon_name);
-            symlink($addon.'root', $project_root.'/root/thruk/plugins/'.$addon_name) or die("cannot create ".$project_root.'/root/thruk/plugins/'.$addon_name." : ".$!);
+            my $target_symlink = $project_root.'/root/thruk/plugins/'.$addon_name;
+            if(-e $target_symlink) { unlink($target_symlink) or die("cannot unlink: ".$target_symlink); }
+            symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
         }
     }
 }
