@@ -109,11 +109,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{host} = 'rootid';
     }
 
-#print "HTTP/1.0 200 OK\n\n<pre>";
-#print Dumper($json);
-#exit;
-
-    #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger)
+    #my $coder = JSON::XS->new->utf8->pretty;  # with indention (bigger and not valid js code)
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
     $c->stash->{json}         = $coder->encode($json);
 
@@ -455,6 +451,17 @@ sub _get_json_host {
     } else {
         $duration = '( for '.Thruk::Utils::filter_duration(time() - $program_start).'+ )';
     }
+
+    # filter quotes as they break the json output
+    my $plugin_output = $host->{'plugin_output'} || '';
+    $plugin_output =~ s/"//gmx;
+
+    my $alias = $host->{'alias'};
+    $alias =~ s/"//gmx;
+
+    my $address = $host->{'address'};
+    $address =~ s/"//gmx;
+
     my $json_host = {
         'id'   => $host->{'name'},
         'name' => $host->{'name'},
@@ -465,9 +472,9 @@ sub _get_json_host {
             'cssClass'          => $class,
             'status'            => $status,
             'duration'          => $duration,
-            'plugin_output'     => $host->{'plugin_output'} || '',
-            'alias'             => $host->{'alias'},
-            'address'           => $host->{'address'},
+            'plugin_output'     => $plugin_output,
+            'alias'             => $alias,
+            'address'           => $address,
             'state_up'          => $state_up,
             'state_down'        => $state_down,
             'state_unreachable' => $state_unreachable,
