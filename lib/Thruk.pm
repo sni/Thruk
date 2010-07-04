@@ -10,6 +10,7 @@ use Catalyst::Log::Log4perl;
 use Thruk::Utils;
 use Thruk::Utils::Livestatus;
 use Thruk::Utils::Auth;
+use Thruk::Utils::Filter;
 use Catalyst::Runtime '5.70';
 
 binmode(STDOUT, ":utf8");
@@ -71,6 +72,7 @@ my %config = ('name'                   => 'Thruk',
                                                 'escape_quotes'=> \&Thruk::Utils::_escape_quotes,
                                                 'get_message'  => \&Thruk::Utils::get_message,
                                                 'throw'        => \&Thruk::Utils::throw,
+                                                'date_format'  => \&Thruk::Utils::Filter::date_format,
                                             },
                         PRE_CHOMP          => 1,
                         POST_CHOMP         => 1,

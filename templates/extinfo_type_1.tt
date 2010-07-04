@@ -141,7 +141,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Check Time:</td>
-                            <td class='dataVal'>[% date.format(host.last_check, datetime_format) %]</td>
+                            <td class='dataVal'>[% date_format(c, host.last_check) %]</td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Check Type:</td>
@@ -162,19 +162,19 @@
                           <tr>
                             <td class='dataVar'>Next Scheduled Active Check:&nbsp;&nbsp;</td>
                             <td class='dataVal'>
-                              [% IF host.next_check %][% date.format(host.next_check, datetime_format) %][% ELSE %]N/A[% END %]
+                              [% IF host.next_check %][% date_format(c, host.next_check) %][% ELSE %]N/A[% END %]
                               [% IF host.is_executing > 0 %]<img src="/thruk/themes/[% theme %]/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20">[% END %]
                             </td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Last State Change:</td>
-                            <td class='dataVal'>[% date.format(host.last_state_change, datetime_format) %]</td>
+                            <td class='dataVal'>[% date_format(c, host.last_state_change) %]</td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Notification:</td>
                             <td class='dataVal'>
                               [% IF host.last_notification != 0 %]
-                              [% date.format(host.last_notification, datetime_format) %]
+                              [% date_format(c, host.last_notification) %]
                               [% ELSE %]
                               N/A
                               [% END %]
@@ -208,7 +208,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Update:</td>
-                            <td class='dataVal'>[% date.format(date.now, datetime_format) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
+                            <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Monitored by:</td>
@@ -474,13 +474,13 @@
                   [% SET class = 'commentEven' IF loop.even %]
                   [% SET class = 'commentOdd'  IF loop.odd %]
                   <tr class='[% class %]'>
-                    <td class='[% class %]' nowrap>[% date.format(comment.entry_time, datetime_format) %]</td>
+                    <td class='[% class %]' nowrap>[% date_format(c, comment.entry_time) %]</td>
                     <td class='[% class %]'>[% comment.author %]</td>
                     <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(comment.comment) %][% ELSE %][% comment.comment %][% END %]</td>
                     <td class='[% class %]'>[% comment.id %]</td>
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
-                    <td class='[% class %]'>[% IF comment.expires %][% date.format(comment.expires_time, datetime_format) %][% ELSE %]N/A[% END %]</td>
+                    <td class='[% class %]'>[% IF comment.expires %][% date_format(c, comment.expires_time) %][% ELSE %]N/A[% END %]</td>
                     <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
                   </tr>
                   [% END %]
@@ -528,9 +528,9 @@
                   [% SET class = 'commentEven' IF loop.even %]
                   [% SET class = 'commentOdd'  IF loop.odd %]
                   <tr class='[% class %]'>
-                    <td class='[% class %]' nowrap>[% date.format(downtime.entry_time, datetime_format) %]</td>
-                    <td class='[% class %]' nowrap>[% date.format(downtime.start_time, datetime_format) %]</td>
-                    <td class='[% class %]' nowrap>[% date.format(downtime.end_time, datetime_format) %]</td>
+                    <td class='[% class %]' nowrap>[% date_format(c, downtime.entry_time) %]</td>
+                    <td class='[% class %]' nowrap>[% date_format(c, downtime.start_time) %]</td>
+                    <td class='[% class %]' nowrap>[% date_format(c, downtime.end_time) %]</td>
                     <td class='[% class %]'>[% downtime.author %]</td>
                     <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
                     <td class='[% class %]'>[% downtime.id %]</td>

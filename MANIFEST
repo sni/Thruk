@@ -66,6 +66,7 @@ lib/Thruk/Controller/tac.pm
 lib/Thruk/Controller/trends.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
+lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/Livestatus.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/Excel.pm
