@@ -153,6 +153,14 @@ before 'execute' => sub {
     ###############################
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     $c->stash->{'param_backend'}  = $backend;
+    if(defined $backend and defined $c->{'live'}) {
+        my @possible_backends = $c->{'live'}->peer_key();
+        for my $back (@possible_backends) {
+            if($back ne $backend) {
+                $c->{'live'}->disable($back);
+            }
+        }
+    }
 
     ###############################
     $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
