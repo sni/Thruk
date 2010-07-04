@@ -51,8 +51,8 @@
           <td class='[% class %]'></td>
           [% END %]
 
-          <td class='[% class %]'>[% date.format(q.last_check, datetime_format) %]</td>
-          <td class='[% class %]'>[% date.format(q.next_check, datetime_format) %]</td>
+          <td class='[% class %]'>[% date_format(c, q.last_check) %]</td>
+          <td class='[% class %]'>[% date_format(c, q.next_check) %]</td>
 
           [% IF q.check_options == 0 %]
           <td class='[% class %]'>Normal</td>
