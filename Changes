@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.68    Mon Jun 28 17:15:36 CEST 2010
           - used date_format_today more often
+          - added more columns to excel export
           - fixed problem with quotes in host definitions on statusmap
           - fixed problem with plugin symlinks
           - fixed problem with ssi path

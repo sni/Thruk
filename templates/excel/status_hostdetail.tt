@@ -1,11 +1,16 @@
 ﻿[% USE date %]
 <workbook>
-  <worksheet name='Status' autofilter='A1:H99999'>
+  <worksheet name='Status' autofilter='A1:H[% data.size + 1 %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
         <cell width='30'>Hostname</cell>
         <cell width='10'>IP</cell>
         <cell width='20'>Status</cell>
+        <cell width='14'>Acknowledged</cell>
+        <cell width='12'>Downtime</cell>
+        <cell width='12'>Notifications</cell>
+        <cell width='14'>Active Checks</cell>
+        <cell width='9'>Flapping</cell>
         <cell width='20'>Last Check</cell>
         <cell width='15'>Duration</cell>
         <cell width='80'>Status Information</cell>
@@ -34,6 +39,11 @@
         <format bg_color='[% state_color %]'>
           <cell>[% state %]</cell>
         </format>
+        <cell>[% IF h.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
+        <cell>[% IF h.scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>
+        <cell>[% IF h.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>
+        <cell>[% IF h.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>
+        <cell>[% IF h.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
         <format num_format='yyyy-mm-dd hh:mm:ss'>
           <cell type='date_time'>[% IF h.has_been_checked == 0 %][% ELSE %][% date.format(h.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
         </format>
