@@ -26,108 +26,6 @@ use File::Slurp;
 ##############################################
 =head1 METHODS
 
-=head2 filter_duration
-
-  my $string = filter_duration($seconds);
-
-formats a duration into the
-format: 0d 0h 29m 43s
-
-=cut
-sub filter_duration {
-    my $duration = shift;
-    my $withdays = shift;
-
-    croak("undef duration in filter_duration(): ".$duration) unless defined $duration;
-    $duration = $duration * -1 if $duration < 0;
-
-    $withdays = 1 unless defined $withdays;
-
-    croak("unknown withdays in filter_duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
-
-    if($duration < 0) { $duration = time() + $duration; }
-
-    my $days    = 0;
-    my $hours   = 0;
-    my $minutes = 0;
-    my $seconds = 0;
-    if($withdays == 1) {
-        if($duration >= 86400) {
-            $days     = int($duration/86400);
-            $duration = $duration%86400;
-        }
-    }
-    if($duration >= 3600) {
-        $hours    = int($duration/3600);
-        $duration = $duration%3600;
-    }
-    if($duration >= 60) {
-        $minutes  = int($duration/60);
-        $duration = $duration%60;
-    }
-    $seconds = $duration;
-
-    if($withdays == 1) {
-        return($days."d ".$hours."h ".$minutes."m ".$seconds."s");
-    }
-    if($withdays == 2) {
-        return($minutes."min ".$seconds."sec");
-    }
-    return($hours."h ".$minutes."m ".$seconds."s");
-}
-
-
-##############################################
-
-=head2 filter_nl2br
-
-  my $string = filter_nl2br($string);
-
-replace newlines with linebreaks
-
-=cut
-sub filter_nl2br {
-    my $string = shift;
-    $string =~ s/\n/<br\ \/>/gmx;
-    $string =~ s/\r//gmx;
-    $string =~ s/\\n/<br\ \/>/gmx;
-    return $string;
-}
-
-
-##############################################
-
-=head2 filter_sprintf
-
-  my $string = sprintf($format, $list)
-
-wrapper around the internal sprintf
-
-=cut
-sub filter_sprintf {
-    my $format = shift;
-    local $SIG{__WARN__} = sub { Carp::cluck(@_); };
-    return sprintf $format, @_;
-}
-
-
-##############################################
-
-=head2 throw
-
-  throw($string)
-
-can be used to die in templates
-
-=cut
-sub throw {
-    my $string = shift;
-    die($string);
-}
-
-
-##############################################
-
 =head2 parse_date
 
   my $timestamp = parse_date($c, $string)
@@ -889,31 +787,6 @@ sub get_start_end_for_timeperiod_from_param {
 
 ########################################
 
-=head2 name2id
-
-  my $striped_string = name2id($name)
-
-returns a string which can be used as id in html elements
-
-An id must begin with a letter ([A-Za-z]) and may be followed
-by any number of letters, digits ([0-9]), hyphens ("-"),
-underscores ("_"), colons (":"), and periods (".").
-
-=cut
-sub name2id {
-    my $name       = shift;
-    my $opt_prefix = shift || '';
-    my $return = $name;
-    $return =~ s/[^a-zA-Z0-9\-_\.]*//gmx;
-    if($return =~ m/^\d+/gmx) {
-        $return = $opt_prefix."_".$return;
-    }
-    return($return);
-}
-
-
-########################################
-
 =head2 page_data
 
   page_data($c, $data)
@@ -985,51 +858,6 @@ sub page_data {
     return 1;
 }
 
-
-########################################
-
-=head2 uri
-
-  uri($c)
-
-returns a correct uri
-
-=cut
-sub uri {
-    my $c = shift;
-    my $uri = $c->request->uri();
-    $uri =~ s/&/&amp;/gmx;
-    return $uri;
-}
-
-
-########################################
-
-=head2 uri_with
-
-  uri_with($c, $data)
-
-returns a correct uri
-
-=cut
-sub uri_with {
-    my $c    = shift;
-    my $data = shift;
-
-    for my $key (keys %{$data}) {
-        $data->{$key} = undef if $data->{$key} eq 'undef';
-    }
-
-    my $uri;
-    eval {
-        $uri = $c->request->uri_with($data);
-        $uri =~ s/&/&amp;/gmx;
-    };
-    if($@) {
-        confess("ERROR in uri_with(): ".$@);
-    }
-    return $uri;
-}
 
 ########################################
 
@@ -1591,40 +1419,6 @@ sub set_message {
     return 1;
 }
 
-########################################
-
-=head2 get_message
-
-  get_message($c)
-
-get a message from an cookie, display and delete it
-
-=cut
-sub get_message {
-    my $c       = shift;
-
-    # message from cookie?
-    if(defined $c->request->cookie('thruk_message')) {
-        my $cookie = $c->request->cookie('thruk_message');
-        my($style,$message) = split/~~/mx, $cookie->value;
-
-        $c->res->cookies->{'thruk_message'} = {
-            value   => '',
-            expires => '-1M',
-        };
-
-        return($style, $message);
-    }
-    # message from stash
-    elsif(defined $c->stash->{'thruk_message'}) {
-        my($style,$message) = split/~~/mx, $c->stash->{'thruk_message'};
-        delete $c->res->cookies->{'thruk_message'};
-        return($style, $message);
-    }
-
-    return;
-}
-
 
 ########################################
 
@@ -1710,25 +1504,6 @@ sub _initialassumedservicestate_to_state {
     croak('unknown state: '.$initialassumedservicestate);
 }
 
-
-########################################
-sub _html_escape {
-    my $text = shift;
-
-    return HTML::Entities::encode($text);
-}
-
-
-########################################
-# used to escape html tags so it can be used as javascript string
-sub _escape_quotes {
-    my $text = shift;
-    $text = HTML::Entities::encode($text);
-    $text =~ s/&amp;quot;/&quot;/gmx;
-    $text =~ s/&amp;gt;/>/gmx;
-    $text =~ s/&amp;lt;/</gmx;
-    return $text;
-}
 
 
 1;

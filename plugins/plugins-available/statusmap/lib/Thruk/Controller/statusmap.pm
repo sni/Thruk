@@ -447,9 +447,9 @@ sub _get_json_host {
         $state_pending++;
     }
     if($host->{'last_state_change'}) {
-        $duration = '( for '.Thruk::Utils::filter_duration(time() - $host->{'last_state_change'}).' )';
+        $duration = '( for '.Thruk::Utils::Filter::duration(time() - $host->{'last_state_change'}).' )';
     } else {
-        $duration = '( for '.Thruk::Utils::filter_duration(time() - $program_start).'+ )';
+        $duration = '( for '.Thruk::Utils::Filter::duration(time() - $program_start).'+ )';
     }
 
     # filter quotes as they break the json output

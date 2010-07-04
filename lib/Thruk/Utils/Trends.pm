@@ -411,7 +411,7 @@ sub _draw_states {
 
                 "real_plugin_output" => $plugin_output,
 
-                "duration"           => Thruk::Utils::filter_duration($log->{'end'} - $log->{'start'}),
+                "duration"           => Thruk::Utils::Filter::duration($log->{'end'} - $log->{'start'}),
             };
         }
         else {
@@ -538,7 +538,7 @@ sub _draw_time_breakdowns {
 sub _get_time_breakdown_string {
     my($self,$total_time,$time, $type) = @_;
 
-    my $duration     = Thruk::Utils::filter_duration($time);
+    my $duration     = Thruk::Utils::Filter::duration($time);
     my $percent_time = 0;
     if($total_time > 0) {
         $percent_time = ($time/$total_time)*100;
