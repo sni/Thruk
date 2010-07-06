@@ -1491,8 +1491,8 @@ sub version_compare {
     my($v1,$v2) = @_;
     confess("version_compare() needs two params") unless defined $v2;
 
-    my @v1 = split/\./,$v1;
-    my @v2 = split/\./,$v2;
+    my @v1 = split/\./mx,$v1;
+    my @v2 = split/\./mx,$v2;
 
     for(my $x = 0; $x < scalar @v1; $x++) {
         next if !defined $v2[$x];

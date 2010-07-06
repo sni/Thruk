@@ -51,6 +51,7 @@ requires 'HTML::Entities'                         => 3.64;
 requires 'File::Slurp'                            => 0.00;
 requires 'FindBin'                                => 0.00;
 requires 'Date::Manip'                            => 0.00;
+requires 'Excel::Template'                        => 0.32;
 requires 'Class::Accessor::Fast'                  => 0.34;
 requires 'Log::Dispatch::File'                    => 2.26;
 requires 'Devel::StackTrace'                      => 0.0;
