@@ -1479,6 +1479,32 @@ sub read_ssi {
 
 
 ########################################
+
+=head2 version_compare
+
+  version_compare($version1, $version2)
+
+compare too version strings
+
+=cut
+sub version_compare {
+    my($v1,$v2) = @_;
+    confess("version_compare() needs two params") unless defined $v2;
+
+    my @v1 = split/\./,$v1;
+    my @v2 = split/\./,$v2;
+
+    for(my $x = 0; $x < scalar @v1; $x++) {
+        next if !defined $v2[$x];
+        my $cmp = 0;
+        if($v2[$x] =~ m/^(\d+)/gmx) { $cmp = $1; }
+        return 0 unless $v1[$x] <= $cmp;
+    }
+    return 1;
+}
+
+
+########################################
 sub _initialassumedhoststate_to_state {
     my $initialassumedhoststate = shift;
 
@@ -1503,7 +1529,6 @@ sub _initialassumedservicestate_to_state {
     return 'critical'    if $initialassumedservicestate ==  9; # Service Critical
     croak('unknown state: '.$initialassumedservicestate);
 }
-
 
 
 1;

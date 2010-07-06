@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - used date_format_today more often
           - added more columns to excel export
           - added backend param to all pages
+          - added check for livestatus minimum version
           - fixed problem with quotes in host definitions on statusmap
           - fixed problem with plugin symlinks
           - fixed problem with ssi path
