@@ -11,7 +11,6 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>Thruk</title>
     <link href="/thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
     <link href="/thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
@@ -22,104 +21,49 @@
   <body class='navbar'>
 [% END %]
     <a href="http://www.thruk.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="139" height="43" class="nav_small_logo" /></a>
-    <div class="navsection">
-      <div class="navsectiontitle">General</div>
-      <div class="navsectionlinks">
-        <ul class="navsectionlinks">
-          <li><a href="/thruk/main.html" target="[% target %]">Home</a></li>
-          [% IF documentation_link %]
-          <li><a href="/thruk/frame.html?link=[% html_escape(documentation_link) %]" target="_parent">Documentation</a></li>
-          [% END %]
-        </ul>
-      </div>
-    </div>
 
+    [% FOREACH section = navigation %]
     <div class="navsection">
-      <div class="navsectiontitle">Current Status</div>
+      <div class="navsectiontitle">[% section.name %]</div>
       <div class="navsectionlinks">
+      [% FOREACH link = section.links %]
         <ul class="navsectionlinks">
-          <li><a href="/thruk/cgi-bin/tac.cgi" target="[% target %]">Tactical Overview</a></li>
-          [% IF use_feature_statusmap %]
-          <li><a href="/thruk/cgi-bin/statusmap.cgi?host=all" target="[% target %]">Map</a></li>
-          [% END %]
-          <li><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail" target="[% target %]">Hosts</a></li>
-          <li><a href="/thruk/cgi-bin/status.cgi?host=all" target="[% target %]">Services</a></li>
-          <li>
-            <a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=overview" target="[% target %]">Host Groups</a>
+          [% IF link.href %]
+          <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>
             <ul>
-              <li><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=summary" target="[% target %]">Summary</a></li>
-              <li><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=grid" target="[% target %]">Grid</a></li>
-            </ul>
-          </li>
-          <li>
-            <a href="/thruk/cgi-bin/status.cgi?servicegroup=all&amp;style=overview" target="[% target %]">Service Groups</a>
-            <ul>
-              <li><a href="/thruk/cgi-bin/status.cgi?servicegroup=all&amp;style=summary" target="[% target %]">Summary</a></li>
-              <li><a href="/thruk/cgi-bin/status.cgi?servicegroup=all&amp;style=grid" target="[% target %]">Grid</a></li>
-            </ul>
-          </li>
-          <li>
-            <a href="[% all_problems_link %]" target="[% target %]">Problems</a>
-            <ul>
-              <li><a href="/thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28" target="[% target %]">Services</a> (<a href="/thruk/cgi-bin/status.cgi?host=all&amp;type=detail&amp;hoststatustypes=3&amp;serviceprops=42&amp;servicestatustypes=28" target="[% target %]">Unhandled</a>)</li>
-              <li><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=12" target="[% target %]">Hosts</a> (<a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=12&amp;hostprops=42" target="[% target %]">Unhandled</a>)</li>
-              <li><a href="/thruk/cgi-bin/outages.cgi" target="[% target %]">Network Outages</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-
-      <div class="navbarsearch">
-        <form method="get" action="/thruk/cgi-bin/status.cgi" target="[% target %]">
-          <fieldset>
-            <legend>Quick Search:</legend>
-            [% IF use_new_search%]
-            <input type='hidden' name='hidesearch' value='2' />
-            <input type='hidden' name='s0_op' value='~' />
-            <input type='hidden' name='s0_type' value='search' />
-            <input type='text' name='s0_value' size='15' class="NavBarSearchItem" id="NavBarSearchItem" />
-            [% ELSE %]
-            <input type='hidden' name='navbarsearch' value='1' />
-            <input type='text' name='host' size='15' class="NavBarSearchItem" id="NavBarSearchItem" />
+            [% FOREACH sublink = link.links %]
+              <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>
+              [% FOREACH addlink = sublink.links %]
+                (<a href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
+              [% END %]
+              </li>
             [% END %]
-          </fieldset>
-        </form>
-      </div>
-    </div>
-
-    <div class="navsection">
-      <div class="navsectiontitle">Reports</div>
-      <div class="navsectionlinks">
-        <ul class="navsectionlinks">
-          <li><a href="/thruk/cgi-bin/avail.cgi" target="[% target %]">Availability</a></li>
-          [% IF use_feature_trends %]<li><a href="/thruk/cgi-bin/trends.cgi" target="[% target %]">Trends</a></li>[% END %]
-          <li>
-            <a href="/thruk/cgi-bin/history.cgi?host=all" target="[% target %]">Alerts</a>
-            <ul>
-              <li><a href="/thruk/cgi-bin/history.cgi?host=all" target="[% target %]">History</a></li>
-              <li><a href="/thruk/cgi-bin/summary.cgi" target="[% target %]">Summary</a></li>
-              [% IF use_feature_histogram %]<li><a href="/thruk/cgi-bin/histogram.cgi" target="[% target %]">Histogram</a></li>[% END %]
             </ul>
           </li>
-          <li><a href="/thruk/cgi-bin/notifications.cgi?contact=all" target="[% target %]">Notifications</a></li>
-          <li><a href="/thruk/cgi-bin/showlog.cgi" target="[% target %]">Event Log</a></li>
+          [% ELSIF link.search %]
+          <div class="navbarsearch">
+            <form method="get" action="/thruk/cgi-bin/status.cgi" target="[% target %]">
+              <fieldset>
+                <legend>[% link.name %]</legend>
+                [% IF use_new_search%]
+                <input type='hidden' name='hidesearch' value='2' />
+                <input type='hidden' name='s0_op' value='~' />
+                <input type='hidden' name='s0_type' value='search' />
+                <input type='text' name='s0_value' size='15' class="NavBarSearchItem" id="NavBarSearchItem" />
+                [% ELSE %]
+                <input type='hidden' name='navbarsearch' value='1' />
+                <input type='text' name='host' size='15' class="NavBarSearchItem" id="NavBarSearchItem" />
+                [% END %]
+              </fieldset>
+            </form>
+          </div>
+          [% END %]
         </ul>
+      [% END %]
       </div>
     </div>
+    [% END %]
 
-    <div class="navsection">
-      <div class="navsectiontitle">System</div>
-      <div class="navsectionlinks">
-        <ul class="navsectionlinks">
-          <li><a href="/thruk/cgi-bin/extinfo.cgi?type=3" target="[% target %]">Comments</a></li>
-          <li><a href="/thruk/cgi-bin/extinfo.cgi?type=6" target="[% target %]">Downtime</a></li>
-          <li><a href="/thruk/cgi-bin/extinfo.cgi?type=0" target="[% target %]">Process Info</a></li>
-          <li><a href="/thruk/cgi-bin/extinfo.cgi?type=4" target="[% target %]">Performance Info</a></li>
-          <li><a href="/thruk/cgi-bin/extinfo.cgi?type=7" target="[% target %]">Scheduling Queue</a></li>
-          <li><a href="/thruk/cgi-bin/config.cgi" target="[% target %]">Configuration</a></li>
-        </ul>
-      </div>
-    </div>
     <img src="/thruk/themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
     <img src="/thruk/themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
 

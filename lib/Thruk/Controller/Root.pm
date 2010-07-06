@@ -71,12 +71,6 @@ sub begin : Private {
     # these features are not implemented yet
     $c->stash->{'use_feature_statusmap'} = Thruk->config->{'use_feature_statusmap'} || 0;
     $c->stash->{'use_feature_statuswrl'} = Thruk->config->{'use_feature_statuswrl'} || 0;
-    $c->stash->{'use_feature_histogram'} = Thruk->config->{'use_feature_histogram'} || 0;
-
-    # enable trends if gd loaded
-    if($c->config->{'has_gd'}) {
-        $c->stash->{'use_feature_trends'} = 1;
-    }
 
     $c->stash->{'datetime_format'}       = Thruk->config->{'datetime_format'};
     $c->stash->{'datetime_format_today'} = Thruk->config->{'datetime_format_today'};
@@ -118,6 +112,10 @@ sub begin : Private {
     # redirect to error page unless we have a connection
     if(!defined $c->{'live'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs') {
         $c->detach("/error/index/14");
+    }
+
+    if(Thruk->config->{'use_frames'} == 0) {
+        Thruk::Utils::read_navigation($c);
     }
 
     return 1;
@@ -250,6 +248,8 @@ sub thruk_side_html : Path('/thruk/side.html') {
     if(!$c->stash->{'use_frames'} and defined $target and $target eq '_parent') {
         $c->stash->{'target'} = '_parent';
     }
+
+    Thruk::Utils::read_navigation($c);
 
     $c->stash->{'use_frames'} = 1;
     $c->stash->{'template'}   = 'side.tt';

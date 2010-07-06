@@ -1505,6 +1505,41 @@ sub version_compare {
 
 
 ########################################
+
+=head2 read_navigation
+
+  read_navigation()
+
+reads the navigation
+
+=cut
+sub read_navigation {
+    my $c = shift;
+
+    my $navigation;
+    my $file = $c->config->{'project_root'}.'/menu.conf';
+    $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
+    ## no critic
+    eval(read_file($file));
+    ## use critic
+    if($@) {
+        $c->log->error("error while loading navigation from ".$file.": ".$@);
+        confess($@);
+    }
+
+    # add default target
+    for my $section (@{$navigation}) {
+        for my $link (@{$section->{'links'}}) {
+            $link->{'target'} = $c->{'stash'}->{'target'} unless defined $link->{'target'};
+        }
+    }
+
+    $c->stash->{'navigation'} = $navigation;
+    return;
+}
+
+
+########################################
 sub _initialassumedhoststate_to_state {
     my $initialassumedhoststate = shift;
 
