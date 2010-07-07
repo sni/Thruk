@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.68    Sun Jul  4 20:32:55 CEST 2010
+          - side menu is completly adjustable by config file
           - used date_format_today more often
           - added more columns to excel export
           - added backend param to all pages

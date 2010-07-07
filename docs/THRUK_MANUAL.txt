@@ -27,6 +27,7 @@ Main Features / Advantages
   * paging ( can be disabled and customized )
   * multiple themes included
   * Excel export
+  * Adjustable side menu
 
 
 
@@ -416,6 +417,8 @@ Configuration is managed mainly in these configuration files.
   * thruk_local.conf
   * cgi.cfg
   * log4perl.conf
+  * menu.conf
+  * menu_local.conf
 
 
 === thruk.conf
@@ -964,6 +967,37 @@ if you want to log all sent commands, just set the loglevel to INFO.
 
 ex.: log4perl.appender.ErrorLog.Threshold=INFO
 =======
+
+
+
+
+=== menu.conf
+
+This file contains the default side menu configuration. Do not change
+it. If you want to change the configuration copy this file to
+menu_local.conf and change that file.
+
+
+
+
+=== menu_local.conf
+
+This file contains the user configuration for the side menu. The file
+is not shipped with the Thruk package. Just copy the menu.conf to
+menu_local.conf to create it.
+
+The file itself is perl syntax, so you can do whatever perl can do.
+Make sure you verify the syntax after changing the file. The changes
+will be used immediately. So maybe you want to test your changes
+on a test instance first.
+
+[TIP]
+.syntax check for menu configuration
+=======
+ %>perl -wc menu_local.conf
+ menu_local.conf syntax OK
+=======
+
 
 
 
