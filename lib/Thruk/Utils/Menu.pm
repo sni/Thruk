@@ -1,0 +1,174 @@
+package Thruk::Utils::Menu;
+
+=head1 NAME
+
+Thruk::Utils::Menu - Menu Utilities Collection for Thruk
+
+=head1 DESCRIPTION
+
+Menu Utilities Collection for Thruk
+
+=cut
+
+use strict;
+use warnings;
+use Carp;
+use Data::Dumper;
+use File::Slurp;
+
+
+##############################################
+=head1 METHODS
+
+=head2 read_navigation
+
+  read_navigation()
+
+reads the navigation
+
+=cut
+sub read_navigation {
+    my $c = shift;
+
+    $Thruk::Utils::Menu::c          = $c;
+    $Thruk::Utils::Menu::navigation = [];
+
+    my $file = $c->config->{'project_root'}.'/menu.conf';
+    $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
+    ## no critic
+    eval(read_file($file));
+    ## use critic
+    if($@) {
+        $c->log->error("error while loading navigation from ".$file.": ".$@);
+        confess($@);
+    }
+
+    $c->stash->{'navigation'} = $Thruk::Utils::Menu::navigation;
+    return;
+}
+
+
+##############################################
+
+=head2 add_section
+
+  add_section()
+
+add a new section
+
+=cut
+sub add_section {
+    my %section = @_;
+    $section{'links'} = [];
+    push(@{$Thruk::Utils::Menu::navigation}, \%section);
+    return;
+}
+
+
+##############################################
+
+=head2 add_link
+
+  add_link()
+
+add a new link to last section
+
+=cut
+sub add_link {
+    my %link = @_;
+    my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
+    $link{'target'} = get_target() unless defined $link{'target'};
+    push(@{$last_section->{'links'}}, \%link);
+    return;
+}
+
+
+##############################################
+
+=head2 add_sub_link
+
+  add_sub_link()
+
+add a new sub link to last link
+
+=cut
+sub add_sub_link {
+    my %link = @_;
+    my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
+    my $last_link    = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
+    $link{'target'} = get_target() unless defined $link{'target'};
+    push(@{$last_link->{'links'}}, \%link);
+    return;
+}
+
+
+##############################################
+
+=head2 add_sub_sub_link
+
+  add_sub_sub_link()
+
+add a new additional link to last sub link
+
+=cut
+sub add_sub_sub_link {
+    my %link = @_;
+    my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
+    my $last_link     = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
+    my $last_sub_link = $last_link->{'links'}->[scalar @{$last_link->{'links'}} - 1];
+    $link{'target'} = get_target() unless defined $link{'target'};
+    push(@{$last_sub_link->{'links'}}, \%link);
+    return;
+}
+
+
+##############################################
+
+=head2 add_search
+
+  add_search()
+
+add a new search to the last section
+
+=cut
+sub add_search {
+    my %search = @_;
+    my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
+    $search{'search'} = 1;
+    $search{'target'} = get_target() unless defined $search{'target'};
+    push(@{$last_section->{'links'}}, \%search);
+    return;
+}
+
+
+##############################################
+
+=head2 get_target
+
+  get_target()
+
+returns the current prefered target
+
+=cut
+sub get_target {
+    my $c = $Thruk::Utils::Menu::c;
+    return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'};
+    if($c->{'stash'}->{'use_frames'}) {
+        return("main");
+    }
+    return("_self");
+}
+
+
+1;
+
+=head1 AUTHOR
+
+Sven Nierlein, 2010, <nierlein@cpan.org>
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

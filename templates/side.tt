@@ -1,12 +1,4 @@
-﻿[% UNLESS target %]
-  [% IF use_frames %]
-    [% SET target = "main" %]
-  [% ELSE %]
-    [% SET target = "_self" %]
-  [% END %]
-[% END %]
-
-[% IF use_frames %]
+﻿[% IF use_frames %]
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -26,10 +18,11 @@
     <div class="navsection">
       <div class="navsectiontitle">[% section.name %]</div>
       <div class="navsectionlinks">
-      [% FOREACH link = section.links %]
+      [%+ FOREACH link = section.links %]
         <ul class="navsectionlinks">
-          [% IF link.href %]
+          [%+ IF link.href %]
           <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>
+            [% IF link.links && link.links.size > 0 %]
             <ul>
             [% FOREACH sublink = link.links %]
               <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>
@@ -37,12 +30,14 @@
                 (<a href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
               [% END %]
               </li>
-            [% END %]
+            [%+ END %]
             </ul>
+            [%+ END %]
           </li>
-          [% ELSIF link.search %]
+          [%+ ELSIF link.search %]
+          <li>
           <div class="navbarsearch">
-            <form method="get" action="/thruk/cgi-bin/status.cgi" target="[% target %]">
+            <form method="get" action="/thruk/cgi-bin/status.cgi" target="[% link.target %]">
               <fieldset>
                 <legend>[% link.name %]</legend>
                 [% IF use_new_search%]
@@ -57,9 +52,10 @@
               </fieldset>
             </form>
           </div>
-          [% END %]
+          </li>
+          [%+ END %]
         </ul>
-      [% END %]
+      [%+ END %]
       </div>
     </div>
     [% END %]

@@ -1,12 +1,4 @@
-﻿[% UNLESS target %]
-  [% IF use_frames %]
-    [% SET target = "main" %]
-  [% ELSE %]
-    [% SET target = "_self" %]
-  [% END %]
-[% END %]
-
-[% IF use_frames %]
+﻿[% IF use_frames %]
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -23,28 +15,25 @@
   <body class='navbar'>
 [% END %]
     <div id="menu">
-        <h2>Monitoring</h2>
-        <ul>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/tac.cgi" target="[% target %]">Tactical Overview</a></li>
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail" target="[% target %]">Host Detail</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/status.cgi?host=all" target="[% target %]">Service Detail</a></li>
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=overview" target="[% target %]">Hostgroup Overview</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/status.cgi?servicegroup=all&amp;style=overview" target="[% target %]">Servicegroup Overview</a></li>
-            [% IF use_feature_statusmap %]
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/statusmap.cgi?host=all" target="[% target %]">Status Map</a></li>
+
+
+    [% FOREACH section = navigation %]
+      <h2>[% section.name %]</h2>
+      <ul>
+      [% FOREACH link = section.links %]
+        [%+ IF link.href %]
+          <li class="menuli_style1"><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a></li>
+          [%+ FOREACH sublink = link.links %]
+            <li class="menuli_style2"><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>
+            [%+ FOREACH addlink = sublink.links %]
+              (<a class="addlink" href="[% addlink.href %]" target="[% addlink.target %]">[% addlink.name %]</a>)
             [% END %]
-            <li class="menuli_style2"><a href="[% all_problems_link %]" target="[% target %]">All Problems</a></li>
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28" target="[% target %]">Service Problems</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=12" target="[% target %]">Host Problems</a></li>
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/outages.cgi" target="[% target %]">Network Outages</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/extinfo.cgi?type=3" target="[% target %]">Comments</a></li>
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/extinfo.cgi?type=6" target="[% target %]">Downtime</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/extinfo.cgi?type=0" target="[% target %]">Process Info</a></li>
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/extinfo.cgi?type=4" target="[% target %]">Performance Info</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/extinfo.cgi?type=7" target="[% target %]">Scheduling Queue</a></li>
-        </ul>
-        <div id="search_box">
-            <form action="/thruk/cgi-bin/status.cgi" method="get" target="[% target %]">
+            </li>
+          [% END %]
+        [%+ ELSIF link.search %]
+          <li>
+          <div id="search_box">
+            <form action="/thruk/cgi-bin/status.cgi" method="get" target="[% link.target %]">
             [% IF use_new_search%]
             <input type='hidden' name='hidesearch' value='2' />
             <input type='hidden' name='s0_op' value='~' />
@@ -56,27 +45,14 @@
             [% END %]
             <input src="/thruk/themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
             </form>
-        </div>
-        <h2>Reporting</h2>
-        <ul>
-            [% IF use_feature_trends %]
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/trends.cgi" target="[% target %]">Trends</a></li>
-            [% END %]
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/avail.cgi" target="[% target %]">Availability</a></li>
-            [% IF use_feature_histogram %]<li class="menuli_style1"><a href="/thruk/cgi-bin/histogram.cgi" target="[% target %]">Alert Histogram</a></li>[% END %]
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/history.cgi?host=all" target="[% target %]">Alert History</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/summary.cgi" target="[% target %]">Alert Summary</a></li>
-            <li class="menuli_style2"><a href="/thruk/cgi-bin/notifications.cgi?contact=all" target="[% target %]">Notifications</a></li>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/showlog.cgi" target="[% target %]">Event Log</a></li>
-        </ul>
-        <h2>Configuration</h2>
-        <ul>
-            <li class="menuli_style1"><a href="/thruk/cgi-bin/config.cgi" target="[% target %]">View Config</a></li>
-            [% IF documentation_link %]
-            <li class="menuli_style1"><a href="/thruk/frame.html?link=[% html_escape(documentation_link) %]" target="_parent">Documentation</a></li>
-            [% END %]
-        </ul>
+          </div>
+          </li>
+        [% END %]
+      [% END %]
+      </ul>
+    [% END %]
     </div>
+
 [% PROCESS _ajax_search.tt %]
 [% IF use_frames %]
   </body>

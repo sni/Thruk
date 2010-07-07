@@ -11,6 +11,7 @@ use Thruk::Utils;
 use Thruk::Utils::Livestatus;
 use Thruk::Utils::Auth;
 use Thruk::Utils::Filter;
+use Thruk::Utils::Menu;
 use Catalyst::Runtime '5.70';
 
 binmode(STDOUT, ":utf8");

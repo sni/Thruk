@@ -67,6 +67,7 @@ lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/Livestatus.pm
+lib/Thruk/Utils/Menu.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/Excel.pm
 lib/Thruk/View/GD.pm
@@ -75,6 +76,7 @@ lib/Thruk/View/TT.pm
 log4perl.conf.example
 Makefile.PL
 MANIFEST			This list of files
+menu.conf
 META.yml
 plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
 plugins/plugins-available/statusmap/root/jit-yc.js
