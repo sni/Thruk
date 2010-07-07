@@ -30,20 +30,42 @@ reads the navigation
 sub read_navigation {
     my $c = shift;
 
-    $Thruk::Utils::Menu::c          = $c;
-    $Thruk::Utils::Menu::navigation = [];
+    $c->stats->profile(begin => "Utils::Menu::read_navigation()");
 
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
-    ## no critic
-    eval(read_file($file));
-    ## use critic
-    if($@) {
-        $c->log->error("error while loading navigation from ".$file.": ".$@);
-        confess($@);
+
+    # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
+    my @menu_conf_stat = stat($file);
+    my $last_stat = $c->cache->get('menu_conf_stat');
+    if(!defined $last_stat
+       or $last_stat->[1] != $menu_conf_stat[1] # inode changed
+       or $last_stat->[9] != $menu_conf_stat[9] # modify time changed
+      ) {
+        $c->log->info("menu.conf has changed, updating...") if defined $last_stat;
+        $c->cache->set('menu_conf_stat', \@menu_conf_stat);
+
+        $Thruk::Utils::Menu::c          = $c;
+        $Thruk::Utils::Menu::navigation = [];
+
+        ## no critic
+        eval(read_file($file));
+        ## use critic
+        if($@) {
+            $c->log->error("error while loading navigation from ".$file.": ".$@);
+            confess($@);
+        }
+
+        $c->stash->{'navigation'}  = $Thruk::Utils::Menu::navigation;
+        $c->cache->set('navigation', $Thruk::Utils::Menu::navigation);
+    } else {
+        # return cached version
+        $c->stash->{'navigation'}  = $c->cache->get('navigation');
+        return;
     }
 
-    $c->stash->{'navigation'} = $Thruk::Utils::Menu::navigation;
+    $c->stats->profile(end => "Utils::Menu::read_navigation()");
+
     return;
 }
 
