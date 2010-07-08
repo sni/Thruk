@@ -1,6 +1,8 @@
 ﻿[% USE date %]
+[% size = 1 %]
+[% IF data %][% size = data.size + 1 %][% END %]
 <workbook>
-  <worksheet name='Status' autofilter='A1:H[% data.size + 1 %]'>
+  <worksheet name='Status' autofilter='A1:H[% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
         <cell width='30'>Hostname</cell>
