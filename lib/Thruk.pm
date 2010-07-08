@@ -54,7 +54,7 @@ my %config = ('name'                   => 'Thruk',
                     'encoding'               => 'UTF-8',
                     'image_path'             => $project_root.'/root/thruk/images',
                     'project_root'           => $project_root,
-                    'min_livestatus_version' => '1.1.6',
+                    'min_livestatus_version' => '1.1.3',
                     'default_view'           => 'TT',
                     'View::TT'               => {
                         TEMPLATE_EXTENSION => '.tt',

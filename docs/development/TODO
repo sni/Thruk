@@ -11,8 +11,6 @@ general
     - configure url path in config (ex.: /thruk/ )
     - add extra grapher url
     - use title for quick downtimes popups
-    - menu configuration 
-        -> http://www.nagios-portal.org/wbb/index.php?page=Thread&threadID=19117
     - specify columns for excel export
         -> http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=129935#post129935
 
