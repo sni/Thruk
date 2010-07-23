@@ -128,10 +128,29 @@ sub begin : Private {
 }
 
 ######################################
-# auto, runs on every request
-#sub auto : Private {
-#    my ( $self, $c ) = @_;
-#}
+=head2 auto
+
+auto, runs on every request
+
+redirects mobile browser to mobile cgis if enabled
+
+=cut
+sub auto : Private {
+    my ( $self, $c ) = @_;
+
+    if(!defined Thruk->config->{'use_feature_mobile'} or Thruk->config->{'use_feature_mobile'} != 1) {
+        return 1;
+    }
+
+    if(defined $c->{'request'}->{'headers'}->{'user-agent'}
+       and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/iPhone/mx
+       and defined $c->{'request'}->{'action'}
+       and $c->{'request'}->{'action'} =~ m/^(\/|thruk|)$/mx
+    ) {
+        return $c->redirect("/thruk/cgi-bin/mobile.cgi");
+    }
+    return 1;
+}
 
 
 ######################################

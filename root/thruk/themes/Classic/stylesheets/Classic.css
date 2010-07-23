@@ -1,13 +1,13 @@
-.servicePENDING  { background-color: #ACACAC; }
-.serviceOK       { background-color: #33FF00; }
-.serviceUNKNOWN  { background-color: #FF9900; }
-.serviceWARNING  { background-color: #FFFF00; }
-.serviceCRITICAL { background-color: #F83838; }
+.servicePENDING  { background-color: #ACACAC !important; }
+.serviceOK       { background-color: #33FF00 !important; }
+.serviceUNKNOWN  { background-color: #FF9900 !important; }
+.serviceWARNING  { background-color: #FFFF00 !important; }
+.serviceCRITICAL { background-color: #F83838 !important; }
 
-.hostUP          { background-color: #33FF00; }
-.hostDOWN        { background-color: #F83838; }
-.hostUNREACHABLE { background-color: #F83838; }
-.hostPENDING     { background-color: #ACACAC; }
+.hostUP          { background-color: #33FF00 !important; }
+.hostDOWN        { background-color: #F83838 !important; }
+.hostUNREACHABLE { background-color: #F83838 !important; }
+.hostPENDING     { background-color: #ACACAC !important; }
 
 /* fix for link box and infobox border */
 table.infoBox {

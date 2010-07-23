@@ -13,6 +13,8 @@ Chris Buben
 Alex Peeters
 Vincent Besancon
 
+
+
 STYLES:
 =======
 Nagios Neat Style:
@@ -28,11 +30,16 @@ Nuvola Style:
 http://exchange.nagios.org/directory/Addons/Frontends-%28GUIs-and-CLIs%29/Web-Interfaces/Themes-and-Skins/Nuvola-Style/details
 
 
+
 ICONS:
 ======
 
 Silk Icon Set:
 http://www.famfamfam.com/lab/icons/silk/
+
+Glyphish Icons
+http://glyphish.com/
+
 
 
 JAVASCRIPT:
@@ -45,3 +52,6 @@ http://www.prototypejs.org/
 
 DHTML Calendar:
 http://www.dynarch.com/projects/calendar/
+
+jQ Touch
+http://code.google.com/p/jqtouch/
