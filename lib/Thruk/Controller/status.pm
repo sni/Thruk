@@ -344,7 +344,7 @@ sub _process_hostdetails_page {
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     my $sortedhosts = Thruk::Utils::sort($c, $hosts, $sortoptions->{$sortoption}->[0], $order);
-    if($sortoption == 6) { @{$sortedhosts} = reverse @{$sortedhosts}; }
+    if($sortoption == 6 and defined $sortedhosts) { @{$sortedhosts} = reverse @{$sortedhosts}; }
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if(defined $view_mode and $view_mode eq 'xls') {

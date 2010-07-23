@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-0.68    Sun Jul  4 20:32:55 CEST 2010
+0.68    Fri Jul 23 21:29:02 CEST 2010
+          - added mobile version for iPhones, iPad and Android mobile phones
           - side menu is completly adjustable by config file
           - used date_format_today more often
           - added more columns to excel export
