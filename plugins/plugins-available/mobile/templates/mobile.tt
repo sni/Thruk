@@ -58,7 +58,7 @@
 <!-- Home -->
     <div id="home" class="current">
       <div class="toolbar">
-        <a href="#reload" onClick="window.location.reload(true);" class="button slideup cancel"><img src="/thruk/plugins/mobile/jqtouch/img/02-redo.png"></a>
+        <a href="#reload" onClick="window.location.reload(true);" class="button slideup cancel"><img src="/thruk/plugins/mobile/jqtouch/img/02-redo.png" alt="reload"></a>
         <h1>Mobile Thruk</h1>
         <a class="button slideup" href="#about">About</a>
       </div>
@@ -86,9 +86,9 @@
 
         <h2>Alerts</h2>
         <ul class="rounded">
-          <li class="arrow"><a href="last_host_alerts">Last Host Alerts</a></li>
-          <li class="arrow"><a href="last_service_alerts">Last Service Alerts</a></li>
-          <li class="arrow"><a href="last_notification">Last Notifications</a></li>
+          <li class="arrow"><a href="#last_host_alerts">Last Host Alerts</a></li>
+          <li class="arrow"><a href="#last_service_alerts">Last Service Alerts</a></li>
+          <li class="arrow"><a href="#last_notification">Last Notifications</a></li>
         </ul>
 
         <h2>Search</h2>
@@ -96,7 +96,7 @@
         <ul class="rounded">
           <li class="" style="position:relative">
             <input type="text" placeholder="search" name="search" id="search" autocapitalize="off" autocorrect="off" autocomplete="off" />
-            <a href="" class="" style="position: absolute; top: 5px; right:8px;"><img src="/thruk/plugins/mobile/jqtouch/img/06-search.png"></a>
+            <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="/thruk/plugins/mobile/jqtouch/img/06-search.png" alt="search"></a>
           </li>
         </ul>
         </form>
