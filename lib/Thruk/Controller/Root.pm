@@ -128,6 +128,7 @@ sub begin : Private {
 }
 
 ######################################
+
 =head2 auto
 
 auto, runs on every request
