@@ -1454,7 +1454,6 @@ Y8,         88               d8'`8b      88      ,8P d8'           88        88
 Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
-var a;
 var ajax_search = {
     url             : '/thruk/cgi-bin/status.cgi?format=search',
     max_results     : 12,
@@ -1577,7 +1576,7 @@ var ajax_search = {
         var input;
         var input = document.getElementById(ajax_search.input_field);
         if(!input) { return; }
-        if(ajax_search.base.size() == 0) { return; }
+        if(ajax_search.base == undefined || ajax_search.base.size() == 0) { return; }
 
         pattern = input.value;
         if(pattern.length >= 1 || ajax_search.search_type != 'all') {
