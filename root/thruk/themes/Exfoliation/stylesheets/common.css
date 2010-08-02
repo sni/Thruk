@@ -111,7 +111,7 @@ ul.navsectionlinks li a {
   font-size: 9pt;
   text-decoration: none;
   padding: 0 0 0 15px;
-  background: transparent url(../images/greendot.gif) no-repeat scroll 0 0
+  background: transparent url(../images/greendot.gif) no-repeat scroll 0 0;
 }
 ul.navsectionlinks li ul {
   margin: 0px;
@@ -120,7 +120,7 @@ ul.navsectionlinks li ul {
 }
 ul.navsectionlinks li ul li { }
 ul.navsectionlinks li a:hover {
-  background: transparent url(../images/orangedot.gif) no-repeat scroll 0 0
+  background: transparent url(../images/orangedot.gif) no-repeat scroll 0 0;
 }
 ul.navsectionlinks li ul li a {
   background: none;
