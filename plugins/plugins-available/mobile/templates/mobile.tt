@@ -18,7 +18,11 @@
                 '/thruk/plugins/mobile/jqtouch/img/whiteButton.png',
                 '/thruk/plugins/mobile/jqtouch/img/toolButton.png',
                 '/thruk/plugins/mobile/jqtouch/img/loading.gif',
-                '/thruk/plugins/mobile/jqtouch/img/02-redo.png'
+                '/thruk/plugins/mobile/jqtouch/img/02-redo.png',
+                '/thruk/plugins/mobile/jqtouch/img/thruk.png',
+                '/thruk/plugins/mobile/jqtouch/img/startup.png',
+                '/thruk/plugins/mobile/jqtouch/img/06-search.png',
+                '/thruk/themes/Classic/images/logo_thruk_small.png'
               ]
       });
 

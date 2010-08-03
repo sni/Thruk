@@ -77,6 +77,7 @@ sub get_test_service {
 #########################
 sub test_page {
     my(%opts) = @_;
+    my $return = {};
 
     my $request = request($opts{'url'});
     if(defined $opts{'fail'}) {
@@ -87,15 +88,15 @@ sub test_page {
     } else {
         ok( $request->is_success, 'Request '.$opts{'url'}.' should succeed' );
     }
-    my $content = $request->content;
+    $return->{'content'} = $request->content;
 
     # text that should appear
     if(defined $opts{'like'}) {
         if(ref $opts{'like'} eq '') {
-            like($content, qr/$opts{'like'}/, "Content should contain: ".$opts{'like'});
+            like($return->{'content'}, qr/$opts{'like'}/, "Content should contain: ".$opts{'like'});
         } elsif(ref $opts{'like'} eq 'ARRAY') {
             for my $like (@{$opts{'like'}}) {
-                like($content, qr/$like/, "Content should contain: ".$like);
+                like($return->{'content'}, qr/$like/, "Content should contain: ".$like);
             }
         }
     }
@@ -103,18 +104,19 @@ sub test_page {
     # text that shouldn't appear
     if(defined $opts{'unlike'}) {
         if(ref $opts{'unlike'} eq '') {
-            unlike($content, qr/$opts{'unlike'}/, "Content should not contain: ".$opts{'unlike'});
+            unlike($return->{'content'}, qr/$opts{'unlike'}/, "Content should not contain: ".$opts{'unlike'});
         } elsif(ref $opts{'unlike'} eq 'ARRAY') {
             for my $unlike (@{$opts{'unlike'}}) {
-                unlike($content, qr/$unlike/, "Content should not contain: ".$unlike);
+                unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike);
             }
         }
     }
 
     # test the content type
+    $return->{'content_type'} = $request->header('Content-Type');
     my $content_type = $request->header('Content-Type');
     if(defined $opts{'content_type'}) {
-        is($content_type, $opts{'content_type'}, 'Content-Type should be: '.$opts{'content_type'});
+        is($return->{'content_type'}, $opts{'content_type'}, 'Content-Type should be: '.$opts{'content_type'});
     }
 
 
@@ -141,7 +143,7 @@ sub test_page {
             my $lint = new HTML::Lint;
             isa_ok( $lint, "HTML::Lint" );
 
-            $lint->parse( $content );
+            $lint->parse($return->{'content'});
             my @errors = $lint->errors;
             @errors = diag_lint_errors_and_remove_some_exceptions($lint);
             is( scalar @errors, 0, "No errors found in HTML" );
@@ -151,7 +153,7 @@ sub test_page {
 
     # check for missing images / css or js
     if($content_type =~ 'text\/html') {
-        my @matches = $content =~ m/(src|href)=['|"](.+?)['|"]/g;
+        my @matches = $return->{'content'} =~ m/(src|href)=['|"](.+?)['|"]/gi;
         my $links_to_check;
         my $x=0;
         for my $match (@matches) {
@@ -175,6 +177,8 @@ sub test_page {
         }
         is( $errors, 0, 'All stylesheets, images and javascript exist' );
     }
+    
+    return $return;
 }
 
 #########################
