@@ -14,6 +14,7 @@ general
     - specify columns for excel export
         -> http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=129935#post129935
     - search with s:service h:host sg and hg
+    - different icon for passive checks
 
 extinfo:
     - finish performance data on extinfo type 4
@@ -24,6 +25,8 @@ config:
 
 avail:
     - check availability calculation on multibackend (restarts)
+    - add switch to exclude downtimes for example hostgroup
+      availability calculations
 
 livestatus:
     - Contacts: Service Notification Options, Host Notification Options,
@@ -50,6 +53,8 @@ Known Bugs:
     - FastCGI: server "/tmp/thruk_fastcgi.fcgi" stderr: Undefined subroutine
       &FCGI::ProcManager::MaxRequestsThruk::self_or_default called at
       /home/thruk/Thruk/script/../lib/FCGI/ProcManager/MaxRequestsThruk.pm
+
+    - Sorting does not work with numbers srv-1, srv-11, srv-2
 
 =========================================================
 ideas for after 1.0
