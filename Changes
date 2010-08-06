@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.70    xxx
+          - added new backend abstraction layer to support new backends
+
 0.68    Fri Jul 23 21:29:02 CEST 2010
           - added mobile version for iPhones, iPad and Android mobile phones
           - side menu is completly adjustable by config file

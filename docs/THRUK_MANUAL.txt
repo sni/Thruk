@@ -670,7 +670,7 @@ ex.:
 Configure which commands should be available as quick status commands.
 
 ex.:
- 
+
   <cmd_quick_status>
     reschedule             = 0  # Reschedule next check
     downtime               = 0  # Add/remove downtimes
@@ -744,47 +744,58 @@ ex.:
 
 
 
-==== Component Monitoring::Livestatus
-Enter your livestatus connection settings here. The port is the port from the
+==== Component Thruk::Backend
+Enter your backend connection settings here. At the moment only
+livestatus is supported. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.
 
-  * keepalive        keeps open the connection to livestatus.
-  * use_threads      access multiple backends with threads. Usually it's faster
-                     without threads except the backends have a very poor connection
-  * peer             enter the peer configuration. You can enter a name for each
-                     connection.
+  * peer             enter the peer configuration. You have to enter a name for
+                     each peer.
          - name      name for this connection
-         - peer      address or local socket
-         - hidden    should this peer be hidden ( can be enabled via gui)
-         - groups    if set, only contacts from these groups have access
-  * connect_timeout  timeout for new connections
-  * query_timeout    timeout for queries
+         - type      type of this connection. Only "livestatus" possible at the
+                     moment
+         - hidden    should this peer be hidden initially ( can be reenabled
+                     via gui switch )
+         - groups    if set, only contacts from these groups have access. You
+                     may add multiple groups seperated by comma.
+         - options
+            - peer              address of this connection.
+            - verbose           let this connection be verbose
+            - connect_timeout   connect timeout setting
+            - query_timeout     query timeout setting
+            - keepalive         enable/disable keepalive for this connection
 
 ex.:
 
-  <Component Monitoring::Livestatus>
-    keepalive   = 1
-    use_threads = 0
+  <Component Thruk::Backend>
     <peer>
-      name   = Local Nagios
-      peer   = /tmp/livestatus.socket
-      hidden = 1
-      groups = admins,local_users
+        name   = Local Nagios
+        type   = livestatus
+        hidden = 1             # make this backend hidden by default
+        groups = admins,locals # make this backend only visible to the admin and the locals group
+        <options>
+            peer            = /tmp/livestatus.socket
+            verbose         = 0
+            connect_timeout = 5
+            query_timeout   = 60
+            keepalive       = 0
+       </options>
     </peer>
     <peer>
-      name = External Nagios
-      peer = 172.16.0.1:9999
+        name   = External Icinga
+        type   = livestatus
+        <options>
+            peer   = 172.16.0.2:9999
+       </options>
     </peer>
     <peer>
-      name = External Icinga
-      peer = 172.16.0.2:9999
-    </peer>
-    <peer>
-      name = External Shinken
-      peer = 172.16.0.3:9999
+        name   = External Shinken
+        type = livestatus
+        <options>
+            peer   = 172.16.0.3:9999
+       </options>
     </peer>
   </Component>
-
 
 
 

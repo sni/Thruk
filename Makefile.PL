@@ -79,17 +79,15 @@ requires 'FCGI'                                   => 0.69;
 requires 'FCGI::ProcManager'                      => 0.19;
 requires 'FCGI::ProcManager::MaxRequests'         => 0;
 
-# test requirements make it into the META.yml and will break
-# normal package installation
-# install them by hand if you plan author tests
-#test_requires 'HTML::Lint';
-#test_requires 'File::BOM';
-#test_requires 'Test::Pod'                         => 1.40;
-#test_requires 'Test::Perl::Critic';
-#test_requires 'Test::Pod::Coverage';
-#test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
-#test_requires 'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs';
-#test_requires 'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData';
+# test requirements
+test_requires 'HTML::Lint';
+test_requires 'File::BOM';
+test_requires 'Test::Pod'                         => 1.40;
+test_requires 'Test::Perl::Critic';
+test_requires 'Test::Pod::Coverage';
+test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
+test_requires 'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs';
+test_requires 'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData';
 
 ##################################
 # should come with Catalyst::Devel
