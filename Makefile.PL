@@ -34,6 +34,7 @@ requires 'Moose'                                  => 0.98;
 requires 'MooseX::MethodAttributes::Inheritable'  => 0.20;
 requires 'MooseX::Role::WithOverloading'          => 0.05;
 requires 'Monitoring::Livestatus'                 => 0.54;
+requires 'Monitoring::Livestatus::Class'          => 0.02;
 requires 'Monitoring::Availability'               => 0.12;
 requires 'MIME::Types'                            => 0.00;
 requires 'HTTP::Body'                             => 1.07;
