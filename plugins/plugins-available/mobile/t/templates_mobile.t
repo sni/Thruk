@@ -16,7 +16,7 @@ my $page = TestUtils::test_page('url' => '/thruk/cgi-bin/mobile.cgi');
 
 my %preloaded;
 if($page->{'content'} =~ m/preloadImages:\s+\[([\s\w\'\/,\-\.]*)/mxi) {
-    for my $preload (split/,\s*\n/, $1) {
+    for my $preload (split/,\s*\n/mx, $1) {
         chomp($preload);
         $preload =~ s/'//gmx;
         $preload =~ s/^\s*//gmx;
@@ -27,7 +27,7 @@ if($page->{'content'} =~ m/preloadImages:\s+\[([\s\w\'\/,\-\.]*)/mxi) {
     BAIL_OUT("did not find any pre loaded images at all");
 }
 
-my @matches = $page->{'content'} =~ m/<img[^>]+(src|href)=['|"](.+?)['|"]/gi;
+my @matches = $page->{'content'} =~ m/<img[^>]+(src|href)=['|"](.+?)['|"]/gmxi;
 my $x=0;
 for my $match (@matches) {
     $x++;

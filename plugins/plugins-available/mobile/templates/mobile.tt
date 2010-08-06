@@ -88,7 +88,7 @@
           } else {
             // empty list
             $('#notification_list').children().remove();
-            $('#notification_list').append('<li><img src="/thruk/plugins/mobile/jqtouch/img/loading.gif"> loading</li>');
+            $('#notification_list').append('<li><img src="/thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>');
           }
         });
       });
@@ -216,7 +216,7 @@
         <h1>Notifications</h1>
       </div>
       <ul class="rounded notifications" id='notification_list'>
-        <li><img src="/thruk/plugins/mobile/jqtouch/img/loading.gif"> loading</li>
+        <li><img src="/thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
       </ul>
     </div>
   </body>
