@@ -37,10 +37,6 @@ begin, running at the begin of every req
 sub begin : Private {
     my ( $self, $c ) = @_;
 
-    unless(defined $c->{'live'}) {
-        $c->{'live'} = Thruk::Utils::Livestatus->new($c);
-    }
-
     # frame options
     my $use_frames = Thruk->config->{'use_frames'};
     $use_frames    = 1 unless defined $use_frames;
@@ -115,8 +111,20 @@ sub begin : Private {
 
     $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
 
+    # initialize our backends
+    unless(defined $c->{'query'}) {
+        my $backend_manager = Thruk::Backend::Manager->new();
+        if(defined $backend_manager) {
+            $c->{'backend'} = Thruk::Backend::Query->new(
+                                    'backends' => $backend_manager,
+                                    'stats'    => $c->stats,
+                                    'log'      => $c->log,
+                                );
+        }
+    }
+
     # redirect to error page unless we have a connection
-    if(!defined $c->{'live'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs') {
+    if(!defined $c->{'backend'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs') {
         $c->detach("/error/index/14");
     }
 

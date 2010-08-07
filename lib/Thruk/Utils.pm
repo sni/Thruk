@@ -918,7 +918,7 @@ sub set_can_submit_commands {
     }
     else {
         eval {
-            $data = $c->{'live'}->selectall_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $username", { Slice => 1 });
+            $data = $c->{'backend'}->get_can_submit_commands();
             $cached_data->{'can_submit_commands'} = $data;
             $cache->set($username, $cached_data);
         }

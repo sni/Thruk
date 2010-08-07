@@ -78,6 +78,7 @@ requires 'Catalyst::Devel'                        => 1.26;
 requires 'FCGI'                                   => 0.69;
 requires 'FCGI::ProcManager'                      => 0.19;
 requires 'FCGI::ProcManager::MaxRequests'         => 0;
+requires 'Module::Find'                           => 0;
 
 # test requirements
 test_requires 'HTML::Lint';

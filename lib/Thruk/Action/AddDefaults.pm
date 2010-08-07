@@ -64,39 +64,39 @@ before 'execute' => sub {
     $c->log->debug("cached data:");
     $c->log->debug(Dumper($cached_data));
 
-    ###############################
-    # get livesocket object
-    my $disabled_backends = {};
-    if(defined $c->request->cookie('thruk_backends')) {
-        for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
-            my($key, $value) = split/=/mx, $val;
-            next unless defined $value;
-            $disabled_backends->{$key} = $value;
-        }
-    }
-    elsif(defined $c->{'live'}) {
-        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
-        $c->log->debug("livestatus config: ".Dumper($livestatus_config));
-        for my $peer (@{$livestatus_config->{'peer'}}) {
-            if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
-                $disabled_backends->{$peer->{'peer'}} = 2;
-            }
-        }
-    }
-    my $has_groups = 0;
-    if(defined $c->{'live'}) {
-        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
-        for my $peer (@{$livestatus_config->{'peer'}}) {
-            if(defined $peer->{'groups'}) {
-                my $real_peer = $c->{'live'}->_get_peer_by_addr($peer->{'peer'});
-                $has_groups = 1;
-                $disabled_backends->{$real_peer->{'key'}} = 4;  # completly hidden
-                $disabled_backends->{$peer->{'peer'}} = 4;      # completly hidden
-            }
-        }
-        $c->{'live'}->_disable_backends($disabled_backends);
-    }
-
+#    ###############################
+#    # get livesocket object
+#    my $disabled_backends = {};
+#    if(defined $c->request->cookie('thruk_backends')) {
+#        for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
+#            my($key, $value) = split/=/mx, $val;
+#            next unless defined $value;
+#            $disabled_backends->{$key} = $value;
+#        }
+#    }
+#    elsif(defined $c->{'live'}) {
+#        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+#        $c->log->debug("livestatus config: ".Dumper($livestatus_config));
+#        for my $peer (@{$livestatus_config->{'peer'}}) {
+#            if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
+#                $disabled_backends->{$peer->{'peer'}} = 2;
+#            }
+#        }
+#    }
+#    my $has_groups = 0;
+#    if(defined $c->{'live'}) {
+#        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+#        for my $peer (@{$livestatus_config->{'peer'}}) {
+#            if(defined $peer->{'groups'}) {
+#                my $real_peer = $c->{'live'}->_get_peer_by_addr($peer->{'peer'});
+#                $has_groups = 1;
+#                $disabled_backends->{$real_peer->{'key'}} = 4;  # completly hidden
+#                $disabled_backends->{$peer->{'peer'}} = 4;      # completly hidden
+#            }
+#        }
+#        $c->{'live'}->_disable_backends($disabled_backends);
+#    }
+#
     ###############################
     # add program status
     # this is also the first query on every page, so do the
@@ -104,7 +104,7 @@ before 'execute' => sub {
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     my $last_program_restart = 0;
     eval {
-        my $processinfo          = $c->{'live'}->selectall_hashref("GET status\n".Thruk::Utils::Auth::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
+        my $processinfo          = $c->{'backend'}->get_processinfo();
         my $overall_processinfo  = Thruk::Utils::calculate_overall_processinfo($processinfo);
         $c->stash->{'pi'}        = $overall_processinfo;
         $c->stash->{'pi_detail'} = $processinfo;
@@ -147,29 +147,29 @@ before 'execute' => sub {
         }
     };
     if($@) {
-        $self->_set_possible_backends($c, $disabled_backends);
+#        $self->_set_possible_backends($c, $disabled_backends);
         $c->log->error("livestatus error: $@");
         $c->detach('/error/index/9');
     }
 
-    ###############################
-    # disable backends by groups
-    if($has_groups and defined $c->{'live'}) {
-        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends);
-    }
-    $self->_set_possible_backends($c, $disabled_backends);
+#    ###############################
+#    # disable backends by groups
+#    if($has_groups and defined $c->{'live'}) {
+#        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends);
+#    }
+#    $self->_set_possible_backends($c, $disabled_backends);
 
-    ###############################
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
-    $c->stash->{'param_backend'}  = $backend;
-    if(defined $backend and defined $c->{'live'}) {
-        my @possible_backends = $c->{'live'}->peer_key();
-        for my $back (@possible_backends) {
-            if($back ne $backend) {
-                $c->{'live'}->disable($back);
-            }
-        }
-    }
+#    ###############################
+#    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
+#    $c->stash->{'param_backend'}  = $backend;
+#    if(defined $backend and defined $c->{'live'}) {
+#        my @possible_backends = $c->{'live'}->peer_key();
+#        for my $back (@possible_backends) {
+#            if($back ne $backend) {
+#                $c->{'live'}->disable($back);
+#            }
+#        }
+#    }
 
     ###############################
     $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
@@ -246,36 +246,36 @@ sub _set_possible_backends {
 }
 
 ########################################
-sub _disable_backends_by_group {
-    my ($self,$c,$disabled_backends) = @_;
-
-    my $livestatus_config = $c->{'live'}->get_livestatus_conf();
-    $c->{'live'}->enable();
-    my $contactgroups = $c->{'live'}->_get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
-    for my $peer (@{$livestatus_config->{'peer'}}) {
-        if(defined $peer->{'groups'}) {
-            for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
-                if(defined $contactgroups->{$group}) {
-                    $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
-                    delete $disabled_backends->{$peer->{'peer'}};
-                    last;
-                }
-            }
-        }
-    }
-    $c->{'live'}->_disable_backends($disabled_backends);
-
-    return $disabled_backends;
-}
+#sub _disable_backends_by_group {
+#    my ($self,$c,$disabled_backends) = @_;
+#
+#    my $livestatus_config = $c->{'live'}->get_livestatus_conf();
+#    $c->{'live'}->enable();
+#    my $contactgroups = $c->{'live'}->_get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+#    for my $peer (@{$livestatus_config->{'peer'}}) {
+#        if(defined $peer->{'groups'}) {
+#            for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
+#                if(defined $contactgroups->{$group}) {
+#                    $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+#                    delete $disabled_backends->{$peer->{'peer'}};
+#                    last;
+#                }
+#            }
+#        }
+#    }
+#    $c->{'live'}->_disable_backends($disabled_backends);
+#
+#    return $disabled_backends;
+#}
 
 ########################################
-sub _any_backend_enabled {
-    my ($self,$c) = @_;
-    for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
-        return 1 if $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0;
-    }
-    return;
-}
+#sub _any_backend_enabled {
+#    my ($self,$c) = @_;
+#    for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
+#        return 1 if $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0;
+#    }
+#    return;
+#}
 
 __PACKAGE__->meta->make_immutable;
 
