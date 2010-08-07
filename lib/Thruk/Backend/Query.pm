@@ -29,9 +29,9 @@ create new manager
 sub new {
     my( $class, %options ) = @_;
     my $self = {
-            'stats'    => undef,
-            'log'      => undef,
-            'backends' => [],
+            'stats'   => undef,
+            'log'     => undef,
+            'manager' => undef,
     };
     bless $self, $class;
 
@@ -49,18 +49,53 @@ sub new {
 
 ##########################################################
 
-=head2 query
+=head2 get_peers
 
-create new manager
+  get_peers()
+
+returns all configured peers
 
 =cut
-sub query {
-    my $self   = shift;
-    my $query  = shift;
+sub get_peers {
+    my $self = shift;
+    my @peers = @{$self->{'manager'}->{'backends'}};
+    return \@peers;
+}
 
-    confess "no query" unless defined $query;
+##########################################################
 
-    return;
+=head2 get_peer_by_key
+
+  get_peer_by_key()
+
+returns all peer by key
+
+=cut
+sub get_peer_by_key {
+    my $self = shift;
+    my $key  = shift;
+    for my $peer (@{$self->get_peers()}) {
+        return $peer if $peer->{'key'} eq $key;
+    }
+    return undef;
+}
+
+##########################################################
+
+=head2 peer_key
+
+  peer_key()
+
+returns all peer keys
+
+=cut
+sub peer_key {
+    my $self = shift;
+    my @keys;
+    for my $peer (@{$self->get_peers()}) {
+        push @keys, $peer->{'key'};
+    }
+    return \@keys;
 }
 
 ##########################################################
@@ -80,26 +115,14 @@ sub AUTOLOAD {
     my $name = $AUTOLOAD;
     $name =~ s/.*://mx;   # strip fully-qualified portion
 
-    #my $arg;
-    #if($name =~ /^select/mx) {
-    #    $arg = substr($_[0], 0, 50);
-    #    $arg =~ s/\n+/\\n/gmx;
-    #    $self->{'log'}->debug("livestatus->".$name."(".$arg."...)");
-    #    $arg = substr($arg, 0, 20);
-    #    $self->{'stats'}->profile(begin => "l->".$name."(".$arg."...)");
-    #}
-
     my $result;
-    #my @arg = @_ || [];
+    my @arg = @_ || qw//;
+    $result = $self->{'manager'}->{'backends'}->[0]->{'class'}->$name(@arg);
     #$result = $self->{'backends'}->[0]->$name(@_);
-    if (@_) {
-        $result = $self->{'backends'}->{'backends'}->[0]->{'class'}->$name(@_);
-    } else {
-        $result = $self->{'backends'}->{'backends'}->[0]->{'class'}->$name();
-    }
-
-    #if($name =~ /^select/mx) {
-    #    $self->{'stats'}->profile(end => "l->".$name."(".$arg."...)");
+    #if (@_) {
+    #    $result = $self->{'backends'}->{'backends'}->[0]->{'class'}->$name(@_);
+    #} else {
+    #    $result = $self->{'backends'}->{'backends'}->[0]->{'class'}->$name();
     #}
 
     return $result;

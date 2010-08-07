@@ -64,39 +64,34 @@ before 'execute' => sub {
     $c->log->debug("cached data:");
     $c->log->debug(Dumper($cached_data));
 
-#    ###############################
-#    # get livesocket object
-#    my $disabled_backends = {};
-#    if(defined $c->request->cookie('thruk_backends')) {
-#        for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
-#            my($key, $value) = split/=/mx, $val;
-#            next unless defined $value;
-#            $disabled_backends->{$key} = $value;
-#        }
-#    }
-#    elsif(defined $c->{'live'}) {
-#        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
-#        $c->log->debug("livestatus config: ".Dumper($livestatus_config));
-#        for my $peer (@{$livestatus_config->{'peer'}}) {
-#            if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
-#                $disabled_backends->{$peer->{'peer'}} = 2;
-#            }
-#        }
-#    }
-#    my $has_groups = 0;
-#    if(defined $c->{'live'}) {
-#        my $livestatus_config = $c->{'live'}->get_livestatus_conf();
-#        for my $peer (@{$livestatus_config->{'peer'}}) {
-#            if(defined $peer->{'groups'}) {
-#                my $real_peer = $c->{'live'}->_get_peer_by_addr($peer->{'peer'});
-#                $has_groups = 1;
-#                $disabled_backends->{$real_peer->{'key'}} = 4;  # completly hidden
-#                $disabled_backends->{$peer->{'peer'}} = 4;      # completly hidden
-#            }
-#        }
-#        $c->{'live'}->_disable_backends($disabled_backends);
-#    }
-#
+    ###############################
+    # get livesocket object
+    my $disabled_backends = {};
+    if(defined $c->request->cookie('thruk_backends')) {
+        for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
+            my($key, $value) = split/=/mx, $val;
+            next unless defined $value;
+            $disabled_backends->{$key} = $value;
+        }
+    }
+    elsif(defined $c->{'backend'}) {
+        for my $peer (@{$c->{'backend'}->get_peers()}) {
+            if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
+                $disabled_backends->{$peer->{'key'}} = 2;
+            }
+        }
+    }
+    my $has_groups = 0;
+    if(defined $c->{'backend'}) {
+        for my $peer (@{$c->{'backend'}->get_peers()}) {
+            if(defined $peer->{'groups'}) {
+                $has_groups = 1;
+                $disabled_backends->{$peer->{'key'}} = 4;  # completly hidden
+            }
+        }
+        #$c->{'live'}->_disable_backends($disabled_backends);
+    }
+
     ###############################
     # add program status
     # this is also the first query on every page, so do the
@@ -147,22 +142,22 @@ before 'execute' => sub {
         }
     };
     if($@) {
-#        $self->_set_possible_backends($c, $disabled_backends);
+        $self->_set_possible_backends($c, $disabled_backends);
         $c->log->error("livestatus error: $@");
         $c->detach('/error/index/9');
     }
 
-#    ###############################
-#    # disable backends by groups
-#    if($has_groups and defined $c->{'live'}) {
-#        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends);
-#    }
-#    $self->_set_possible_backends($c, $disabled_backends);
+    ###############################
+    # disable backends by groups
+    if($has_groups and defined $c->{'backend'}) {
+        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends);
+    }
+    $self->_set_possible_backends($c, $disabled_backends);
 
 #    ###############################
 #    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
 #    $c->stash->{'param_backend'}  = $backend;
-#    if(defined $backend and defined $c->{'live'}) {
+#    if(defined $backend and defined $c->{'backend'}) {
 #        my @possible_backends = $c->{'live'}->peer_key();
 #        for my $back (@possible_backends) {
 #            if($back ne $backend) {
@@ -225,15 +220,16 @@ after 'execute' => sub {
 sub _set_possible_backends {
     my ($self,$c,$disabled_backends) = @_;
 
-    my @possible_backends = $c->{'live'}->peer_key();
+    my @possible_backends = @{$c->{'backend'}->peer_key()};
     my %backend_detail;
     my @new_possible_backends;
 
     for my $back (@possible_backends) {
         if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 4) {
+            my $peer = $c->{'backend'}->get_peer_by_key($back);
             $backend_detail{$back} = {
-                "name"     => $c->{'live'}->_get_peer_by_key($back)->peer_name(),
-                "addr"     => $c->{'live'}->_get_peer_by_key($back)->peer_addr(),
+                "name"     => $peer->{'name'},
+                "addr"     => $peer->{'addr'},
                 "disabled" => $disabled_backends->{$back} || 0,
             };
             push @new_possible_backends, $back;

@@ -60,7 +60,7 @@ sub _initialise_backends {
     if(ref $config eq 'HASH') {
         push @peer_configs, $config;
     }
-    elsif(ref $config->{'peer'} eq 'ARRAY') {
+    elsif(ref $config eq 'ARRAY') {
         @peer_configs = @{$config};
     }
     else {
@@ -94,9 +94,11 @@ sub _initialise_peer {
     require $require.".pm";
     $class->import;
     my $peer = {
-        'name'  => $config->{'name'},
-        'type'  => $config->{'type'},
-        'class' => $class->new($config->{'options'}),
+        'name'   => $config->{'name'},
+        'type'   => $config->{'type'},
+        'hidden' => $config->{'hidden'},
+        'groups' => $config->{'groups'},
+        'class'  => $class->new($config->{'options'}),
     };
     $peer->{'key'}  = $peer->{'class'}->peer_key();
     $peer->{'addr'} = $peer->{'class'}->peer_addr();

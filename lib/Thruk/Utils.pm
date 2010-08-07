@@ -918,7 +918,7 @@ sub set_can_submit_commands {
     }
     else {
         eval {
-            $data = $c->{'backend'}->get_can_submit_commands();
+            $data = $c->{'backend'}->get_can_submit_commands($username);
             $cached_data->{'can_submit_commands'} = $data;
             $cache->set($username, $cached_data);
         }

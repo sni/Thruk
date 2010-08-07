@@ -116,9 +116,9 @@ sub begin : Private {
         my $backend_manager = Thruk::Backend::Manager->new();
         if(defined $backend_manager) {
             $c->{'backend'} = Thruk::Backend::Query->new(
-                                    'backends' => $backend_manager,
-                                    'stats'    => $c->stats,
-                                    'log'      => $c->log,
+                                    'manager' => $backend_manager,
+                                    'stats'   => $c->stats,
+                                    'log'     => $c->log,
                                 );
         }
     }

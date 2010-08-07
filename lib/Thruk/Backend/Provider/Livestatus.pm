@@ -69,9 +69,27 @@ return the process info
 =cut
 sub get_processinfo {
     my $self = shift;
-    #my $processinfo = $self->{'live'}->{'backend_obj'}->selectall_hashref("GET status\n".Thruk::Utils::Auth::get_auth_filter($c, 'status')."\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
-    my $processinfo = $self->{'live'}->{'backend_obj'}->selectall_hashref("GET status\nColumns: livestatus_version program_version accept_passive_host_checks accept_passive_service_checks check_external_commands check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection enable_notifications execute_host_checks execute_service_checks last_command_check last_log_rotation nagios_pid obsess_over_hosts obsess_over_services process_performance_data program_start interval_length", 'peer_key', { AddPeer => 1});
-    return $processinfo;
+    return $self->{'live'}->table('status')->columns(qw/livestatus_version
+                                                            program_version
+                                                            accept_passive_host_checks
+                                                            accept_passive_service_checks
+                                                            check_external_commands
+                                                            check_host_freshness
+                                                            check_service_freshness
+                                                            enable_event_handlers
+                                                            enable_flap_detection
+                                                            enable_notifications
+                                                            execute_host_checks
+                                                            execute_service_checks
+                                                            last_command_check
+                                                            last_log_rotation
+                                                            nagios_pid
+                                                            obsess_over_hosts
+                                                            obsess_over_services
+                                                            process_performance_data
+                                                            program_start
+                                                            interval_length
+                                                          /)->hashref_hash('peer_key');
 }
 
 ##########################################################
@@ -84,17 +102,8 @@ returns if this user is allowed to submit commands
 sub get_can_submit_commands {
     my $self = shift;
     my $user = shift;
-    
-    #my $contacts = $self->{'live'}->table('contacts');
-    #my $data = $contacts->columns(qw/can_submit_commands alias/)->filter({ name => { '='  => $user } })->hashref_array();
-    #my $data = $self->{'live'}->table('contacts')->columns(qw/can_submit_commands alias/)->filter({ name => { '='  => $user } })->hashref_array();
-    #my $data = $self->{'live'}->table('contacts')->columns(qw/can_submit_commands alias/)->filter({ name => { '='  => $user } })->hashref_array();
-    my $hosts = $self->{'live'}->table('contacts');
-    my $data  = $hosts->columns('can_submit_commands')->filter({ name => { '-or' => [$user] } })->hashref_array();
-print STDERR Dumper $data;
-    return;
-
-    #return $self->{'live'}->{'backend_obj'}->selectall_arrayref("GET contacts\nColumns: can_submit_commands alias\nFilter: name = $user", { Slice => 1 });
+    confess("no user") unless defined $user;
+    return $self->{'live'}->table('contacts')->columns(qw/can_submit_commands alias/)->filter({ name => $user })->hashref_array();
 }
 
 =head1 AUTHOR
