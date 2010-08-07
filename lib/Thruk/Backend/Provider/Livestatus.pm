@@ -106,6 +106,27 @@ sub get_can_submit_commands {
     return $self->{'live'}->table('contacts')->columns(qw/can_submit_commands alias/)->filter({ name => $user })->hashref_array();
 }
 
+##########################################################
+
+=head2 get_contactgroups_by_contact
+
+  get_contactgroups_by_contact
+
+returns a list of contactgroups by contact
+
+=cut
+sub get_contactgroups_by_contact {
+    my($self,$username) = @_;
+
+    my $contactgroups = {};
+    my $data = $self->{'live'}->table('contactgroups')->columns(qw/name/)->filter({ members => { '>=' => $username }})->hashref_array();
+    for my $group (@{$data}) {
+        $contactgroups->{$group->{'name'}} = 1;
+    }
+
+    return $contactgroups;
+}
+
 =head1 AUTHOR
 
 Sven Nierlein, 2010, <nierlein@cpan.org>

@@ -8,7 +8,6 @@ use utf8;
 use Carp;
 use Catalyst::Log::Log4perl;
 use Thruk::Backend::Manager;
-use Thruk::Backend::Query;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
 use Thruk::Utils::Filter;

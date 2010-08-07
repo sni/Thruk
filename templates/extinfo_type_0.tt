@@ -28,10 +28,10 @@
                       <td class='dataVar' nowrap>Backend Name:</td>
                       [% FOREACH pd IN backends %]
                       <td class='dataVal'>
-                        [% IF pi_detail.$pd.program_start %]
-                          [% pi_detail.$pd.peer_name %]
-                        [% ELSIF backend_detail.$pd.name %]
+                        [% IF backend_detail.$pd.name %]
                           [% backend_detail.$pd.name %]
+                        [% ELSE %]
+                        unknown
                         [% END %]
                       </td>
                       [% END %]

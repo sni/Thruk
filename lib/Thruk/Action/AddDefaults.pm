@@ -89,7 +89,7 @@ before 'execute' => sub {
                 $disabled_backends->{$peer->{'key'}} = 4;  # completly hidden
             }
         }
-        #$c->{'live'}->_disable_backends($disabled_backends);
+        $c->{'backend'}->disable_backends($disabled_backends);
     }
 
     ###############################
@@ -154,17 +154,16 @@ before 'execute' => sub {
     }
     $self->_set_possible_backends($c, $disabled_backends);
 
-#    ###############################
-#    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
-#    $c->stash->{'param_backend'}  = $backend;
-#    if(defined $backend and defined $c->{'backend'}) {
-#        my @possible_backends = $c->{'live'}->peer_key();
-#        for my $back (@possible_backends) {
-#            if($back ne $backend) {
-#                $c->{'live'}->disable($back);
-#            }
-#        }
-#    }
+    ###############################
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
+    $c->stash->{'param_backend'}  = $backend;
+    if(defined $backend and defined $c->{'backend'}) {
+        for my $back (@{$c->{'backend'}->peer_key()}) {
+            if($back ne $backend) {
+                $c->{'backend'}->disable_backend($back);
+            }
+        }
+    }
 
     ###############################
     $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
@@ -235,6 +234,7 @@ sub _set_possible_backends {
             push @new_possible_backends, $back;
         }
     }
+
     $c->stash->{'backends'}           = \@new_possible_backends;
     $c->stash->{'backend_detail'}     = \%backend_detail;
 
@@ -242,36 +242,35 @@ sub _set_possible_backends {
 }
 
 ########################################
-#sub _disable_backends_by_group {
-#    my ($self,$c,$disabled_backends) = @_;
-#
-#    my $livestatus_config = $c->{'live'}->get_livestatus_conf();
-#    $c->{'live'}->enable();
-#    my $contactgroups = $c->{'live'}->_get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
-#    for my $peer (@{$livestatus_config->{'peer'}}) {
-#        if(defined $peer->{'groups'}) {
-#            for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
-#                if(defined $contactgroups->{$group}) {
-#                    $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
-#                    delete $disabled_backends->{$peer->{'peer'}};
-#                    last;
-#                }
-#            }
-#        }
-#    }
-#    $c->{'live'}->_disable_backends($disabled_backends);
-#
-#    return $disabled_backends;
-#}
+sub _disable_backends_by_group {
+    my ($self,$c,$disabled_backends) = @_;
+
+    $c->{'backend'}->enable_backends();
+    my $contactgroups = $c->{'backend'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+    for my $peer (@{$c->{'backend'}->get_peers()}) {
+        if(defined $peer->{'groups'}) {
+            for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
+                if(defined $contactgroups->{$group}) {
+                    $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+                    delete $disabled_backends->{$peer->{'key'}};
+                    last;
+                }
+            }
+        }
+    }
+    $c->{'backend'}->disable_backends($disabled_backends);
+
+    return $disabled_backends;
+}
 
 ########################################
-#sub _any_backend_enabled {
-#    my ($self,$c) = @_;
-#    for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
-#        return 1 if $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0;
-#    }
-#    return;
-#}
+sub _any_backend_enabled {
+    my ($self,$c) = @_;
+    for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
+        return 1 if $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0;
+    }
+    return;
+}
 
 __PACKAGE__->meta->make_immutable;
 

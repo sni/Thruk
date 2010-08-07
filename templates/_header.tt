@@ -131,7 +131,6 @@
           <div class='backend'>
             [% SET name  = 'unknown' %]
             [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
-            [% SET name = pi_detail.$pd.peer_name IF pi_detail.$pd.program_start %]
             [% SET class = 'button_peerDOWN' %]
             [% SET class = 'button_peerUP'  IF pi_detail.$pd.program_start %]
             [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %]

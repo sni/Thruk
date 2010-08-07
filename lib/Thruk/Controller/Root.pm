@@ -113,14 +113,10 @@ sub begin : Private {
 
     # initialize our backends
     unless(defined $c->{'query'}) {
-        my $backend_manager = Thruk::Backend::Manager->new();
-        if(defined $backend_manager) {
-            $c->{'backend'} = Thruk::Backend::Query->new(
-                                    'manager' => $backend_manager,
+        $c->{'backend'} = Thruk::Backend::Manager->new(
                                     'stats'   => $c->stats,
                                     'log'     => $c->log,
                                 );
-        }
     }
 
     # redirect to error page unless we have a connection
