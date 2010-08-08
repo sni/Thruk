@@ -306,8 +306,12 @@ sub _process_hostdetails_page {
     return if defined $c->stash->{'has_error'};
 
     # add comments and downtimes
-    my $comments  = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::Auth::get_auth_filter($c, 'comments')."\nColumns: host_name source type author comment entry_time entry_type expire_time\nFilter: service_description = ", { Slice => {} });
-    my $downtimes = $c->{'live'}->selectall_arrayref("GET downtimes\n".Thruk::Utils::Auth::get_auth_filter($c, 'downtimes')."\nFilter: service_description = \nColumns: author comment end_time entry_time fixed host_name id start_time", { Slice => {} });
+    my $comments  = $c->{'backend'}->get_comments('columns' => [qw/host_name source type author comment entry_time entry_type expire_time/],
+                                                  'filter'  => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), { 'service_description' => undef } ]
+                                                 );
+    my $downtimes = $c->{'backend'}->get_downtimes('columns' => [qw/author comment end_time entry_time fixed host_name id start_time/],
+                                                  'filter'  => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), { 'service_description' => undef } ]
+                                                 );
     my $downtimes_by_host;
     if($downtimes) {
         for my $downtime (@{$downtimes}) {
@@ -1225,10 +1229,10 @@ sub _do_filter {
 sub _classic_filter {
     my ( $self, $c ) = @_;
 
-    my $hostfilter         = '';
-    my $servicefilter      = '';
-    my $hostgroupfilter    = '';
-    my $servicegroupfilter = '';
+    my $hostfilter         = [];
+    my $servicefilter      = [];
+    my $hostgroupfilter    = [];
+    my $servicegroupfilter = [];
     my $errors             = 0;
 
     # classic search
@@ -1241,8 +1245,8 @@ sub _classic_filter {
     $c->stash->{'servicegroup'}  = $servicegroup;
 
     if($host ne 'all' and $host ne '') {
-        $hostfilter    = "Filter: name = $host\n";
-        $servicefilter = "Filter: host_name = $host\n";
+        $hostfilter    = [{ 'name'      => $host }];
+        $servicefilter = [{ 'host_name' => $host }];
 
         # check for wildcards
         if(CORE::index($host, '*') >= 0) {
@@ -1251,24 +1255,22 @@ sub _classic_filter {
             $searchhost =~ s/\.\*/*/gmx;
             $searchhost =~ s/\*/.*/gmx;
             $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $searchhost);
-            $hostfilter    = "Filter: name ~~ $searchhost\n";
-            $servicefilter = "Filter: host_name ~~ $searchhost\n";
+            $hostfilter    = [{ 'name'      => { '~~' => $searchhost }}];
+            $servicefilter = [{ 'host_name' => { '~~' => $searchhost }}];
         }
     }
     elsif($hostgroup ne 'all' and $hostgroup ne '') {
-        $hostfilter      = "Filter: groups >= $hostgroup\n";
-        $servicefilter   = "Filter: host_groups >= $hostgroup\n";
-        $hostgroupfilter = "Filter: name = $hostgroup\n";
+        $hostfilter      = [{ 'groups'      => { '>=' => $hostgroup }}];
+        $servicefilter   = [{ 'host_groups' => { '>=' => $hostgroup }}];
+        $hostgroupfilter = [{ 'name'        => $hostgroup }];
     }
     elsif($hostgroup eq 'all') {
-        $hostgroupfilter = "Filter: name !=\n";
     }
     elsif($servicegroup ne 'all' and $servicegroup ne '') {
-        $servicefilter      = "Filter: groups >= $servicegroup\n";
-        $servicegroupfilter = "Filter: name = $servicegroup\n";
+        $servicefilter      = [{ 'groups'   => { '>=' => $servicegroup }}];
+        $servicegroupfilter = [{ 'name'     => $servicegroup }];
     }
     elsif($servicegroup eq 'all') {
-        $servicegroupfilter = "Filter: name !=\n";
     }
 
     # fill the host/service totals box

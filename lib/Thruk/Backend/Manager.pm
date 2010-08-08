@@ -235,15 +235,14 @@ returns a result for a sub called on all peers
 
 =cut
 sub do_on_peers {
-    my($self,$sub, @arg) = @_;
-
+    my($self,$sub, $arg) = @_;
 
     my $result;
     eval {
         for my $peer (@{$self->get_peers()}) {
             next unless $peer->{'enabled'} == 1;
             $self->{'stats'}->profile(begin => "do_on_peers() - ".$peer->{'name'});
-            $result->{$peer->{'key'}} = $peer->{'class'}->$sub(@arg);
+            $result->{$peer->{'key'}} = $peer->{'class'}->$sub(@{$arg});
             $self->{'stats'}->profile(end   => "do_on_peers() - ".$peer->{'name'});
         }
     };
@@ -269,8 +268,7 @@ sub AUTOLOAD {
     my $name = $AUTOLOAD;
     $name =~ s/.*://mx;   # strip fully-qualified portion
 
-    my @arg = @_ || qw//;
-    return $self->do_on_peers($name, @arg);
+    return $self->do_on_peers($name, \@_);
 
     #$result = $self->{'backends'}->[0]->$name(@_);
     #if(@_) {

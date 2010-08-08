@@ -74,22 +74,22 @@ before 'execute' => sub {
             $disabled_backends->{$key} = $value;
         }
     }
-    elsif(defined $c->{'backend'}) {
-        for my $peer (@{$c->{'backend'}->get_peers()}) {
+    elsif(defined $c->{'db'}) {
+        for my $peer (@{$c->{'db'}->get_peers()}) {
             if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
                 $disabled_backends->{$peer->{'key'}} = 2;
             }
         }
     }
     my $has_groups = 0;
-    if(defined $c->{'backend'}) {
-        for my $peer (@{$c->{'backend'}->get_peers()}) {
+    if(defined $c->{'db'}) {
+        for my $peer (@{$c->{'db'}->get_peers()}) {
             if(defined $peer->{'groups'}) {
                 $has_groups = 1;
                 $disabled_backends->{$peer->{'key'}} = 4;  # completly hidden
             }
         }
-        $c->{'backend'}->disable_backends($disabled_backends);
+        $c->{'db'}->disable_backends($disabled_backends);
     }
 
     ###############################
@@ -99,7 +99,7 @@ before 'execute' => sub {
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     my $last_program_restart = 0;
     eval {
-        my $processinfo          = $c->{'backend'}->get_processinfo();
+        my $processinfo          = $c->{'db'}->get_processinfo();
         my $overall_processinfo  = Thruk::Utils::calculate_overall_processinfo($processinfo);
         $c->stash->{'pi'}        = $overall_processinfo;
         $c->stash->{'pi_detail'} = $processinfo;
@@ -149,7 +149,7 @@ before 'execute' => sub {
 
     ###############################
     # disable backends by groups
-    if($has_groups and defined $c->{'backend'}) {
+    if($has_groups and defined $c->{'db'}) {
         $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends);
     }
     $self->_set_possible_backends($c, $disabled_backends);
@@ -157,10 +157,10 @@ before 'execute' => sub {
     ###############################
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
     $c->stash->{'param_backend'}  = $backend;
-    if(defined $backend and defined $c->{'backend'}) {
-        for my $back (@{$c->{'backend'}->peer_key()}) {
+    if(defined $backend and defined $c->{'db'}) {
+        for my $back (@{$c->{'db'}->peer_key()}) {
             if($back ne $backend) {
-                $c->{'backend'}->disable_backend($back);
+                $c->{'db'}->disable_backend($back);
             }
         }
     }
@@ -219,13 +219,13 @@ after 'execute' => sub {
 sub _set_possible_backends {
     my ($self,$c,$disabled_backends) = @_;
 
-    my @possible_backends = @{$c->{'backend'}->peer_key()};
+    my @possible_backends = @{$c->{'db'}->peer_key()};
     my %backend_detail;
     my @new_possible_backends;
 
     for my $back (@possible_backends) {
         if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 4) {
-            my $peer = $c->{'backend'}->get_peer_by_key($back);
+            my $peer = $c->{'db'}->get_peer_by_key($back);
             $backend_detail{$back} = {
                 "name"     => $peer->{'name'},
                 "addr"     => $peer->{'addr'},
@@ -245,9 +245,9 @@ sub _set_possible_backends {
 sub _disable_backends_by_group {
     my ($self,$c,$disabled_backends) = @_;
 
-    $c->{'backend'}->enable_backends();
-    my $contactgroups = $c->{'backend'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
-    for my $peer (@{$c->{'backend'}->get_peers()}) {
+    $c->{'db'}->enable_backends();
+    my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+    for my $peer (@{$c->{'db'}->get_peers()}) {
         if(defined $peer->{'groups'}) {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
                 if(defined $contactgroups->{$group}) {
@@ -258,7 +258,7 @@ sub _disable_backends_by_group {
             }
         }
     }
-    $c->{'backend'}->disable_backends($disabled_backends);
+    $c->{'db'}->disable_backends($disabled_backends);
 
     return $disabled_backends;
 }

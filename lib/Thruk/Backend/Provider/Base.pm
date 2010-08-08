@@ -39,6 +39,7 @@ return the peers key
 sub peer_key {
     my $self = shift;
     confess("unimplemented");
+    return;
 }
 
 ##########################################################
@@ -51,6 +52,7 @@ return the peers address
 sub peer_addr {
     my $self = shift;
     confess("unimplemented");
+    return;
 }
 
 ##########################################################
@@ -63,6 +65,7 @@ return the process info
 sub get_processinfo {
     my $self = shift;
     confess("unimplemented");
+    return;
 }
 
 ##########################################################
@@ -75,6 +78,23 @@ returns if this user is allowed to submit commands
 sub get_can_submit_commands {
     my $self = shift;
     confess("unimplemented");
+    return;
+}
+
+
+##########################################################
+
+=head2 get_contactgroups_by_contact
+
+  get_contactgroups_by_contact
+
+returns a list of contactgroups by contact
+
+=cut
+sub get_contactgroups_by_contact {
+    my $self = shift;
+    confess("unimplemented");
+    return;
 }
 
 =head1 AUTHOR

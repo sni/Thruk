@@ -113,14 +113,14 @@ sub begin : Private {
 
     # initialize our backends
     unless(defined $c->{'query'}) {
-        $c->{'backend'} = Thruk::Backend::Manager->new(
+        $c->{'db'} = Thruk::Backend::Manager->new(
                                     'stats'   => $c->stats,
                                     'log'     => $c->log,
                                 );
     }
 
     # redirect to error page unless we have a connection
-    if(!defined $c->{'backend'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs') {
+    if(!defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs') {
         $c->detach("/error/index/14");
     }
 

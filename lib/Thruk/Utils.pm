@@ -869,6 +869,7 @@ combines the filter by given operator
 
 =cut
 sub combine_filter {
+die("obsolete!!");
     my $filter = shift;
     my $op     = shift;
     my $erg    = "";
@@ -918,7 +919,7 @@ sub set_can_submit_commands {
     }
     else {
         eval {
-            $data = $c->{'backend'}->get_can_submit_commands($username);
+            $data = $c->{'db'}->get_can_submit_commands($username);
             $cached_data->{'can_submit_commands'} = $data;
             $cache->set($username, $cached_data);
         }

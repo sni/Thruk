@@ -34,11 +34,11 @@ sub get_auth_filter {
     my $type   = shift;
     my $strict = shift || 0;
 
-    return("") if $type eq 'status';
+    return if $type eq 'status';
 
     # if authentication is completly disabled
     if($c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
-        return("");
+        return;
     }
 
     if($strict and $type ne 'hosts' and $type ne 'services') {
@@ -48,52 +48,55 @@ sub get_auth_filter {
     # host authorization
     if($type eq 'hosts') {
         if(!$strict and $c->check_user_roles('authorized_for_all_hosts')) {
-            return("");
+            return();
         }
-        return("Filter: contacts >= ".$c->user->get('username'));
+        return('contacts' => { '>=' => $c->user->get('username') });
     }
 
     # hostgroups authorization
     elsif($type eq 'hostgroups') {
-        return("");
+        return();
     }
 
     # service authorization
     elsif($type eq 'services') {
         if(!$strict and $c->check_user_roles('authorized_for_all_services')) {
-            return("");
+            return();
         }
         if(Thruk->config->{'use_strict_host_authorization'}) {
-            return("Filter: contacts >= ".$c->user->get('username')."\n");
+            return('contacts' => { '>=' => $c->user->get('username') });
         } else {
-            return("Filter: contacts >= ".$c->user->get('username')."\nFilter: host_contacts >= ".$c->user->get('username')."\nOr: 2");
+            return('-or' => [ 'contacts'      => { '>=' => $c->user->get('username') },
+                              'host_contacts' => { '>=' => $c->user->get('username') }
+                            ]
+                  );
         }
     }
 
     # servicegroups authorization
     elsif($type eq 'servicegroups') {
-        return("");
+        return();
     }
 
     # servicegroups authorization
     elsif($type eq 'timeperiods') {
-        return("");
+        return();
     }
 
     # comments / downtimes authorization
     elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;
         if(!$c->check_user_roles('authorized_for_all_services')) {
-            push @filter, "Filter: service_contacts >= ".$c->user->get('username')."\nFilter: service_description !=\nAnd: 2\n";
+            push @filter, { 'service_contacts' => { '>=' => $c->user->get('username') }, 'service_description' => { '!=' => undef } };
         }
         if(!$c->check_user_roles('authorized_for_all_hosts')) {
             if(Thruk->config->{'use_strict_host_authorization'}) {
-                push @filter, "Filter: host_contacts >= ".$c->user->get('username')."\nFilter: service_description =\nAnd: 2\n";
+                push @filter, { 'host_contacts' => { '>=' => $c->user->get('username') }, 'service_description' => undef };
             } else {
-                push @filter, "Filter: host_contacts >= ".$c->user->get('username')."\n";
+                push @filter, { 'host_contacts' => { '>=' => $c->user->get('username') }};
             }
         }
-        return(Thruk::Utils::combine_filter(\@filter, 'Or'));
+        return \@filter;
     }
 
     # logfile authorization
@@ -103,34 +106,40 @@ sub get_auth_filter {
         # service log entries
         if($c->check_user_roles('authorized_for_all_services')) {
             # allowed for all services related log entries
-            push @filter, "Filter: current_service_description != \n";
+            push @filter, 'current_service_description' => { '!=' => undef };
         }
         else {
-            push @filter, "Filter: current_service_contacts >= ".$c->user->get('username')."\nFilter: service_description != \nAnd: 2\n";
+            push @filter, { '-and' => [
+                              'current_service_contacts' => { '>=' => $c->user->get('username') },
+                              'service_description'      => { '!=' => undef },
+                          ]}
         }
 
         # host log entries
         if($c->check_user_roles('authorized_for_all_hosts')) {
             # allowed for all host related log entries
-            push @filter, "Filter: service_description = \nFilter: host_name != \nAnd: 2";
+            push @filter, { '-and' => [ 'service_description' => undef,
+                                        'host_name'           => { '!=' => undef } ]
+                          };
         }
         else {
             if(Thruk->config->{'use_strict_host_authorization'}) {
                 # only allowed for the host itself, not the services
-                push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\nFilter: service_description = \nAnd: 2\n";
+                push @filter, { -and => [ 'current_host_contacts' => { '>=' => $c->user->get('username') }, { 'service_description' => undef }]};
             } else {
                 # allowed for all hosts and its services
-                push @filter, "Filter: current_host_contacts >= ".$c->user->get('username')."\n";
+                push @filter, 'current_host_contacts' => { '>=' => $c->user->get('username') };
             }
         }
 
         # other log entries
         if($c->check_user_roles('authorized_for_system_information')) {
             # everything not related to a specific host or service
-            push @filter, "Filter: service_description = \nFilter: host_name = \nAnd: 2";
+            push @filter, { '-and' => [ 'service_description' => undef, 'host_name' => undef ]};
         }
 
-        return(Thruk::Utils::combine_filter(\@filter, 'Or'));
+        # combine all filter by OR
+        return('-or' => \@filter);
     }
 
     else {
