@@ -263,13 +263,9 @@ sub _process_scheduling_page {
     };
     $sortoption = 7 if !defined $sortoptions->{$sortoption};
 
-    my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: host_name description next_check last_check check_options active_checks_enabled\nFilter: active_checks_enabled = 1\nFilter: check_options != 0\nOr: 2", { Slice => {} });
-    my $hosts    = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts')."\nColumns: name next_check last_check check_options active_checks_enabled\nFilter: active_checks_enabled = 1\nFilter: check_options != 0\nOr: 2", { Slice => {}, rename => { 'name' => 'host_name' } });
-
-    if(defined $services and defined $hosts) {
-        my $queue    = Thruk::Utils::sort($c, [@{$hosts}, @{$services}], $sortoptions->{$sortoption}->[0], $order);
-        Thruk::Utils::page_data($c, $queue);
-    }
+    my $queue = $c->{'db'}->get_scheduling_queue($c);
+    $queue    = Thruk::Utils::sort($c, $queue, $sortoptions->{$sortoption}->[0], $order);
+    Thruk::Utils::page_data($c, $queue);
 
     $c->stash->{'order'}   = $order;
     $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];

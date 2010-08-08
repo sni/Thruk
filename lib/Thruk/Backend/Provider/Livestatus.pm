@@ -78,6 +78,7 @@ sub get_processinfo {
                 last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
                 process_performance_data program_start program_version interval_length
             /)
+            ->options({AddPeer => 1})
             ->hashref_hash('peer_key');
 }
 
@@ -97,6 +98,7 @@ sub get_can_submit_commands {
             ->columns(qw/can_submit_commands
                          alias/)
             ->filter({ name => $user })
+            ->options({AddPeer => 1})
             ->hashref_array();
 }
 
@@ -117,6 +119,7 @@ sub get_contactgroups_by_contact {
                 ->table('contactgroups')
                 ->columns(qw/name/)
                 ->filter({ members => { '>=' => $username }})
+                ->options({AddPeer => 1})
                 ->hashref_array();
     for my $group (@{$data}) {
         $contactgroups->{$group->{'name'}} = 1;
@@ -146,6 +149,10 @@ sub get_table {
     if(defined $options->{'filter'}) {
         $class = $class->filter(@{$options->{'filter'}});
     }
+
+    $options->{'options'}->{'AddPeer'} = 1;
+    $class = $class->options($options->{'options'});
+
     if(defined $options->{'sort'}) {
         # TODO
     }
@@ -164,24 +171,18 @@ returns a list of hosts
 =cut
 sub get_hosts {
     my($self, %options) = @_;
-    return $self->get_table(
-        'hosts',
-        {
-            'columns' => [qw/
-                accept_passive_checks acknowledged action_url_expanded
-                address alias checks_enabled check_type current_attempt
-                current_notification_number event_handler_enabled execution_time
-                flap_detection_enabled groups has_been_checked icon_image_alt
-                icon_image_expanded is_executing is_flapping last_check
-                last_notification last_state_change latency long_plugin_output
-                max_check_attempts name next_check notes_expanded notes_url_expanded
-                notifications_enabled obsess_over_host parents percent_state_change
-                perf_data plugin_output scheduled_downtime_depth state state_type
-            /],
-            'filter'  => $options{'filter'},
-            'sort'    => $options{'sort'},
-            'limit'   => $options{'limit'},
-        });
+    $options{'columns'} = [qw/
+        active_checks_enabled accept_passive_checks acknowledged action_url_expanded
+        address alias checks_enabled check_options check_type current_attempt
+        current_notification_number event_handler_enabled execution_time
+        flap_detection_enabled groups has_been_checked icon_image_alt
+        icon_image_expanded is_executing is_flapping last_check
+        last_notification last_state_change latency long_plugin_output
+        max_check_attempts name next_check notes_expanded notes_url_expanded
+        notifications_enabled obsess_over_host parents percent_state_change
+        perf_data plugin_output scheduled_downtime_depth state state_type
+        /];
+    return $self->get_table('hosts', \%options);
 }
 
 ##########################################################
@@ -195,24 +196,18 @@ returns a list of services
 =cut
 sub get_services {
     my($self, %options) = @_;
-    return $self->get_table(
-        'services',
-        {
-            'columns' => [qw/
-                accept_passive_checks acknowledged action_url_expanded checks_enabled
-                check_type current_attempt current_notification_number description
-                event_handler_enabled execution_time flap_detection_enabled groups
-                has_been_checked host_address host_alias host_name icon_image_alt
-                icon_image_expanded is_executing is_flapping last_check last_notification
-                last_state_change latency long_plugin_output max_check_attempts next_check
-                notes_expanded notes_url_expanded notifications_enabled obsess_over_service
-                percent_state_change perf_data plugin_output scheduled_downtime_depth
-                state state_type
-            /],
-            'filter'  => $options{'filter'},
-            'sort'    => $options{'sort'},
-            'limit'   => $options{'limit'},
-        });
+    $options{'columns'} = [qw/
+        active_checks_enabled accept_passive_checks acknowledged action_url_expanded checks_enabled
+        check_options check_type current_attempt current_notification_number
+        description event_handler_enabled execution_time flap_detection_enabled
+        groups has_been_checked host_address host_alias host_name icon_image_alt
+        icon_image_expanded is_executing is_flapping last_check last_notification
+        last_state_change latency long_plugin_output max_check_attempts next_check
+        notes_expanded notes_url_expanded notifications_enabled obsess_over_service
+        percent_state_change perf_data plugin_output scheduled_downtime_depth
+        state state_type
+        /];
+    return $self->get_table('services', \%options);
 }
 
 ##########################################################
@@ -226,18 +221,12 @@ returns a list of comments
 =cut
 sub get_comments {
     my($self, %options) = @_;
-    return $self->get_table(
-        'comments',
-        {
-            'columns' => [qw/
-                author comment entry_time entry_type expires
-                expire_time host_name id persistent service_description
-                source type
-            /],
-            'filter'  => $options{'filter'},
-            'sort'    => $options{'sort'},
-            'limit'   => $options{'limit'},
-        });
+    $options{'columns'} = [qw/
+        author comment entry_time entry_type expires
+        expire_time host_name id persistent service_description
+        source type
+        /];
+    return $self->get_table('comments', \%options);
 }
 
 ##########################################################
@@ -251,16 +240,62 @@ returns a list of downtimes
 =cut
 sub get_downtimes {
     my($self, %options) = @_;
-    return $self->get_table('downtimes',
-        {
-            'columns' => [qw/
-                author comment end_time entry_time fixed host_name
-                id start_time service_description triggered_by
-            /],
-            'filter'  => $options{'filter'},
-            'sort'    => $options{'sort'},
-            'limit'   => $options{'limit'},
-        });
+    $options{'columns'} = [qw/
+        author comment end_time entry_time fixed host_name
+        id start_time service_description triggered_by
+        /];
+    return $self->get_table('downtimes', \%options);
+}
+
+##########################################################
+
+=head2 get_contactgroups
+
+  get_contactgroups
+
+returns a list of contactgroups
+
+=cut
+sub get_contactgroups {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/
+        /];
+    return $self->get_table('comments', \%options);
+}
+
+##########################################################
+
+=head2 get_scheduling_queue
+
+  get_scheduling_queue
+
+returns the scheduling queue
+
+=cut
+sub get_scheduling_queue {
+    my($self, $c, %options) = @_;
+    my $services = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
+                                                 { '-or' => [{ 'active_checks_enabled' => '1' },
+                                                            { 'check_options' => { '!=' => '0' }}]
+                                                 }
+                                                 ]
+                                      );
+    my $hosts    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                              { '-or' => [{ 'active_checks_enabled' => '1' },
+                                                         { 'check_options' => { '!=' => '0' }}]
+                                              }
+                                              ],
+                                    options => { rename => { 'name' => 'host_name' } }
+                                    );
+
+    my $queue = [];
+    if(defined $services) {
+        push @{$queue}, @{$services};
+    }
+    if(defined $hosts) {
+        push @{$queue}, @{$hosts};
+    }
+    return $queue;
 }
 
 
