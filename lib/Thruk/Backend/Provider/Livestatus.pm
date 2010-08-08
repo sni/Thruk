@@ -186,6 +186,37 @@ sub get_hosts {
 
 ##########################################################
 
+=head2 get_servives
+
+  get_services
+
+returns a list of services
+
+=cut
+sub get_services {
+    my($self, %options) = @_;
+    return $self->get_table(
+        'services',
+        {
+            'columns' => [qw/
+                accept_passive_checks acknowledged action_url_expanded checks_enabled
+                check_type current_attempt current_notification_number description
+                event_handler_enabled execution_time flap_detection_enabled groups
+                has_been_checked host_address host_alias host_name icon_image_alt
+                icon_image_expanded is_executing is_flapping last_check last_notification
+                last_state_change latency long_plugin_output max_check_attempts next_check
+                notes_expanded notes_url_expanded notifications_enabled obsess_over_service
+                percent_state_change perf_data plugin_output scheduled_downtime_depth
+                state state_type
+            /],
+            'filter'  => $options{'filter'},
+            'sort'    => $options{'sort'},
+            'limit'   => $options{'limit'},
+        });
+}
+
+##########################################################
+
 =head2 get_comments
 
   get_comments
@@ -223,8 +254,8 @@ sub get_downtimes {
     return $self->get_table('downtimes',
         {
             'columns' => [qw/
-                author comment end_time entry_time
-                fixed host_name id start_time triggered_by
+                author comment end_time entry_time fixed host_name
+                id start_time service_description triggered_by
             /],
             'filter'  => $options{'filter'},
             'sort'    => $options{'sort'},

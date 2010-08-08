@@ -74,15 +74,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     Thruk::Utils::ssi_include($c);
 
-    #my $test = "aa ²&é\"'''(§è!çà)- %s ''%s'' aa ~ € bb";
-    #my $test = "aa \x{c2}\x{b2}&\x{c3}\x{a9}\"'''(\x{c2}\x{a7}\x{c3}\x{a8}!\x{c3}\x{a7}\x{c3}\x{a0})- %s ''%s'' aa ~ \x{e2}\x{82}\x{ac} bb";
-    #utf8::decode($test);
-    #$c->stash->{title}          = "aa ²&é\"'''(§è!çà)- %s ''%s'' aa ~ € bb";
-    #$c->stash->{infoBoxTitle}   = $test;
-#use Data::Dumper;
-#print STDERR Dumper($c->stash->{'hostdowntimes'});
-#    $c->stash->{'servicedowntimes'}->[0]->{'comment'} = $test;
-#print STDERR Dumper($c->stash->{'hostdowntimes'});
     return 1;
 }
 
@@ -122,6 +113,8 @@ sub _process_host_page {
                                                  { 'name' => $hostname }]
                                      );
 
+    return $c->detach('/error/index/5') unless defined $hosts;
+
     # we only got one host
     $host = $hosts->[0];
     # we have more and backend param is used
@@ -151,8 +144,7 @@ sub _process_host_page {
                                                          { 'host_name' => $hostname },
                                                          { 'service_description' => undef }],
                                                sort   => {'id' => 'DESC'});
-use Data::Dumper;
-print STDERR Dumper($comments);
+
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
 
@@ -189,41 +181,47 @@ sub _process_service_page {
     my $servicename = $c->{'request'}->{'parameters'}->{'service'};
     return $c->detach('/error/index/15') unless defined $servicename;
 
-    my $services = $c->{'live'}->selectall_hashref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nFilter: host_name = $hostname\nFilter: description = $servicename\nColumns: has_been_checked accept_passive_checks acknowledged action_url_expanded checks_enabled check_type current_attempt current_notification_number description event_handler_enabled execution_time flap_detection_enabled groups host_address host_alias host_name icon_image_expanded icon_image_alt is_executing is_flapping last_check last_notification last_state_change latency long_plugin_output max_check_attempts next_check notes_expanded notes_url_expanded notifications_enabled obsess_over_service percent_state_change perf_data plugin_output scheduled_downtime_depth state state_type", 'peer_key', {AddPeer => 1});
+    my $services = $c->{'db'}->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
+                                                      { 'host_name' => $hostname },
+                                                      { 'description' => $servicename },
+                                                ]
+                                     );
+
+    return $c->detach('/error/index/15') unless defined $services;
 
     # we only got one service
-    if(scalar keys %{$services} == 1) {
-        my @data = values(%{$services});
-        $service = $data[0];
-    }
-    else {
-        if(defined $backend and defined $services->{$backend}) {
-            $service = $services->{$backend};
-        } else {
-            my @data = values(%{$services});
-            $service = $data[0];
+    $service = $services->[0];
+    # we have more and backend param is used
+    if(scalar @{$services} == 1 and defined $services) {
+        for my $s (@{$services}) {
+            if($s->{'peer_key'} eq $backend) {
+                $service = $s;
+                last;
+            }
         }
     }
 
     return $c->detach('/error/index/15') unless defined $service;
 
-    my @backends = keys %{$services};
+    my @backends;
+    for my $s (@{$services}) {
+        push @backends, $s->{'peer_key'};
+    }
     $self->_set_backend_selector($c, \@backends, $service->{'peer_key'});
 
     $c->stash->{'service'}  = $service;
-    my $comments            = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::Auth::get_auth_filter($c, 'comments')."\nFilter: host_name = $hostname\nFilter: service_description = $servicename\nColumns: author id comment entry_time entry_type expire_time expires persistent source", { Slice => 1 });
-    my $sortedcomments      = Thruk::Utils::sort($c, $comments, 'id', 'DESC');
 
-    my $downtimes           = $c->{'live'}->selectall_arrayref(
-            "GET downtimes\n"
-        .   Thruk::Utils::Auth::get_auth_filter($c, 'downtimes') . "\n"
-        .   "Filter: host_name = $hostname\n"
-        .   "Filter: service_description = $servicename\n"
-        .   "Columns:  author comment end_time entry_time fixed host_name id service_description start_time triggered_by"
-    , {Slice => 1});
-    my $sorteddowntimes = Thruk::Utils::sort($c, $downtimes, 'id', 'DESC');
-    $c->stash->{'comments'} = $sortedcomments;
-    $c->stash->{'downtimes'} = $sorteddowntimes;
+
+    my $comments   = $c->{'db'}->get_comments(filter =>  [Thruk::Utils::Auth::get_auth_filter($c, 'comments'),
+                                                         { 'host_name' => $hostname },
+                                                         { 'service_description' => $servicename }],
+                                              sort   =>  {'id' => 'DESC'});
+    my $downtimes  = $c->{'db'}->get_downtimes(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'),
+                                                         { 'host_name' => $hostname },
+                                                         { 'service_description' => $servicename }],
+                                               sort   => {'id' => 'DESC'});
+    $c->stash->{'comments'} = $comments;
+    $c->stash->{'downtimes'} = $downtimes;
 
     return 1;
 }
