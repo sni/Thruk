@@ -173,13 +173,13 @@ sub get_hosts {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
         active_checks_enabled accept_passive_checks acknowledged action_url_expanded
-        address alias checks_enabled check_options check_type current_attempt
+        address alias check_command check_period checks_enabled check_options check_type current_attempt
         current_notification_number event_handler_enabled execution_time
         flap_detection_enabled groups has_been_checked icon_image_alt
         icon_image_expanded is_executing is_flapping last_check
         last_notification last_state_change latency long_plugin_output
         max_check_attempts name next_check notes_expanded notes_url_expanded
-        notifications_enabled obsess_over_host parents percent_state_change
+        notifications_enabled notification_period obsess_over_host parents percent_state_change
         perf_data plugin_output scheduled_downtime_depth state state_type
         /];
     return $self->get_table('hosts', \%options);
@@ -259,8 +259,60 @@ returns a list of contactgroups
 sub get_contactgroups {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
+        name alias members
         /];
-    return $self->get_table('comments', \%options);
+    return $self->get_table('contactgroups', \%options);
+}
+
+##########################################################
+
+=head2 get_timeperiods
+
+  get_timeperiods
+
+returns a list of timeperiods
+
+=cut
+sub get_timeperiods {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/
+        name alias
+        /];
+    return $self->get_table('timeperiods', \%options);
+}
+
+##########################################################
+
+=head2 get_commands
+
+  get_commands
+
+returns a list of commands
+
+=cut
+sub get_commands {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/
+        name line
+        /];
+    return $self->get_table('commands', \%options);
+}
+
+##########################################################
+
+=head2 get_contacts
+
+  get_contacts
+
+returns a list of contacts
+
+=cut
+sub get_contacts {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/
+        name alias email pager service_notification_period host_notification_period
+        /];
+    return $self->get_table('contacts', \%options);
 }
 
 ##########################################################

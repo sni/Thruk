@@ -335,6 +335,10 @@ sub _initialise_peer {
     my @provider = grep {$_ =~ m/::$config->{'type'}$/i} @{$provider};
     confess "unknown type in peer configuration" unless scalar @provider > 0;
     my $class = $provider[0];
+    
+    if(lc $config->{'type'} eq 'livestatus') {
+        $config->{'options'}->{'name'} = $config->{'name'};
+    }
 
     my $require = $class;
     $require    =~ s/::/\//gmx;
