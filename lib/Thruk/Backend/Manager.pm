@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Module::Find;
+use Digest::MD5  qw(md5_hex);
 use Thruk::Utils::Livestatus;
 
 our $AUTOLOAD;
@@ -243,7 +244,7 @@ returns a result for a sub called on all peers
 
 =cut
 sub do_on_peers {
-    my($self,$sub, $arg) = @_;
+    my($self, $sub, $arg) = @_;
 
     my $result;
     eval {
@@ -256,7 +257,89 @@ sub do_on_peers {
     };
     $self->{'log'}->error($@) if $@;
 
-    return $self->_merge_answer($result);
+    # howto merge the answers?
+    my $data;
+    if($sub eq 'get_hostgroups') {
+        $data = $self->_merge_hostgroup_answer($result);
+    }
+    elsif($sub eq 'get_servicegroups') {
+        $data = $self->_merge_servicegroup_answer($result);
+    }
+    else {
+        $data = $self->_merge_answer($result);
+    }
+
+    if(    $sub =~ m/^get_/
+       and ref $arg eq 'ARRAY'
+       and scalar @{$arg}%2 == 0
+      ) {
+        my %arg = @{$arg};
+
+        if($arg{'remove_duplicates'} and scalar keys %{$result} > 1) {
+            $data = $self->_remove_duplicates($data);
+        }
+
+        if($arg{'sort'}) {
+            $data = $self->_sort($data, $arg{'sort'});
+        }
+    }
+
+    return $data;
+}
+
+########################################
+
+=head2 _remove_duplicates
+
+  _remove_duplicates($data)
+
+removes duplicate entries from a array of hashes
+
+=cut
+sub _remove_duplicates {
+    my $self = shift;
+    my $data = shift;
+
+    $self->{'stats'}->profile(begin => "Utils::remove_duplicates()");
+
+    # calculate md5 sums
+    my $uniq = {};
+    for my $dat (@{$data}) {
+        my $peer_key  = $dat->{'peer_key'};  delete $dat->{'peer_key'};
+        my $peer_name = $dat->{'peer_name'}; delete $dat->{'peer_name'};
+        my $peer_addr = $dat->{'peer_addr'}; delete $dat->{'peer_addr'};
+        my $md5 = md5_hex(join(';', values %{$dat}));
+        if(!defined $uniq->{$md5}) {
+            $dat->{'peer_key'}  = $peer_key;
+            $dat->{'peer_name'} = $peer_name;
+            $dat->{'peer_addr'} = $peer_addr;
+
+            $uniq->{$md5} = {
+                              'data'      => $dat,
+                              'peer_key'  => [ $peer_key ],
+                              'peer_name' => [ $peer_name ],
+                              'peer_addr' => [ $peer_addr ],
+                            };
+        } else {
+            push @{$uniq->{$md5}->{'peer_key'}},  $peer_key;
+            push @{$uniq->{$md5}->{'peer_name'}}, $peer_name;
+            push @{$uniq->{$md5}->{'peer_addr'}}, $peer_addr;
+        }
+    }
+
+    my $return = [];
+    for my $data (values %{$uniq}) {
+        $data->{'data'}->{'backend'} = {
+            'peer_key'  => $data->{'peer_key'},
+            'peer_name' => $data->{'peer_name'},
+            'peer_addr' => $data->{'peer_addr'},
+        };
+        push @{$return}, $data->{'data'};
+
+    }
+
+    $self->{'stats'}->profile(end => "Utils::remove_duplicates()");
+    return($return);
 }
 
 ##########################################################
@@ -270,20 +353,11 @@ redirects sub calls to out backends
 =cut
 sub AUTOLOAD {
     my $self = shift;
-    my $type = ref($self)
-        or croak "$self is not an object";
-
     my $name = $AUTOLOAD;
+    my $type = ref($self) or confess "$self is not an object, called as (".$name.")";
+
     $name =~ s/.*://mx;   # strip fully-qualified portion
-
     return $self->do_on_peers($name, \@_);
-
-    #$result = $self->{'backends'}->[0]->$name(@_);
-    #if(@_) {
-    #    $result = $self->{'backends'}->[0]->{'class'}->$name(@_);
-    #} else {
-    #    $result = $self->{'backends'}->[0]->{'class'}->$name();
-    #}
 }
 
 ##########################################################
@@ -396,6 +470,107 @@ sub _merge_answer {
 }
 
 ##########################################################
+# merge hostgroups and merge 'members' of matching groups
+sub _merge_hostgroup_answer {
+    my $self   = shift;
+    my $data   = shift;
+    my $groups = {};
+
+    $self->{'stats'}->profile(begin => "_merge_hostgroup_answer()");
+
+    for my $peer (@{$self->get_peers()}) {
+        my $key = $peer->{'key'};
+        next if !defined $data->{$key};
+
+        confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
+
+        for my $row (@{$data->{$key}}) {
+            if(!defined $groups->{$row->{'name'}}) {
+                $groups->{$row->{'name'}} = $row;
+                if(defined $row->{'members'}) {
+                    @{$groups->{$row->{'name'}}->{'members_array'}} = split /,/mx, $row->{'members'};
+                } else {
+                    $groups->{$row->{'name'}}->{'members_array'} = [];
+                }
+            } else {
+                if(defined $row->{'members'}) {
+                    push @{$groups->{$row->{'name'}}->{'members_array'}}, split /,/mx, $row->{'members'};
+                }
+            }
+
+            if(!defined $groups->{$row->{'name'}}->{'backends_hash'}) { $groups->{$row->{'name'}}->{'backends_hash'} = {} }
+            $groups->{$row->{'name'}}->{'backends_hash'}->{$row->{'peer_name'}} = 1;
+        }
+    }
+    # fix members value
+    for my $group (values %{$groups}) {
+        $group->{'backend'} = [];
+        @{$group->{'backend'}} = sort keys %{$group->{'backends_hash'}};
+        delete $group->{'backends_hash'};
+
+        $group->{'members'} = join(",", sort @{$group->{'members_array'}});
+    }
+    my @return = values %{$groups};
+
+    $self->{'stats'}->profile(end => "_merge_hostgroup_answer()");
+
+    return(\@return);
+}
+
+##########################################################
+# merge servicegroups and merge 'members' of matching groups
+sub _merge_servicegroup_answer {
+    my $self   = shift;
+    my $data   = shift;
+    my $groups = {};
+
+    $self->{'stats'}->profile(begin => "_merge_servicegroup_answer()");
+    for my $peer (@{$self->get_peers()}) {
+        my $key = $peer->{'key'};
+        next if !defined $data->{$key};
+
+        confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
+
+        for my $row (@{$data->{$key}}) {
+            if(!defined $groups->{$row->{'name'}}) {
+                $groups->{$row->{'name'}} = $row;
+                if(defined $row->{'members'}) {
+                    @{$groups->{$row->{'name'}}->{'members_array'}} = split /,/mx, $row->{'members'};
+                } else {
+                    $groups->{$row->{'name'}}->{'members_array'} = [];
+                }
+            } else {
+                if(defined $row->{'members'}) {
+                    push @{$groups->{$row->{'name'}}->{'members_array'}}, split /,/mx, $row->{'members'};
+                }
+            }
+            if(!defined $groups->{$row->{'name'}}->{'backends_hash'}) { $groups->{$row->{'name'}}->{'backends_hash'} = {} }
+            $groups->{$row->{'name'}}->{'backends_hash'}->{$row->{'peer_name'}} = 1;
+        }
+    }
+    # fix members value
+    for my $group (values %{$groups}) {
+        $group->{'backend'} = [];
+        @{$group->{'backend'}} = sort keys %{$group->{'backends_hash'}};
+        delete $group->{'backends_hash'};
+
+        $group->{'members'} = join(",", sort @{$group->{'members_array'}});
+        $group->{'members_split'} = [];
+        for my $service (sort @{$group->{'members_array'}}) {
+            my @split = split(/\|/mx,$service);
+            push @{$group->{'members_split'}}, \@split;
+        }
+        delete $group->{'members_array'};
+    }
+
+    my @return = values %{$groups};
+
+    $self->{'stats'}->profile(end => "_merge_servicegroup_answer()");
+
+    return(\@return);
+}
+
+##########################################################
 sub _sum_answer {
     my $self   = shift;
     my $data   = shift;
@@ -433,6 +608,87 @@ sub _sum_answer {
     $self->{'stats'}->profile(end => "_sum_answer()");
 
     return $return;
+}
+
+########################################
+
+=head2 _sort
+
+  _sort($data, $sortby)
+
+sort a array of hashes by hash keys
+
+  sortby can be a scalar
+
+  $sortby = 'name'
+
+  sortby can be an array
+
+  $sortby = [ 'name', 'description' ]
+
+  sortby can be an hash
+
+  $sortby = { 'DESC' => [ 'name', 'description' ] }
+
+=cut
+sub _sort {
+    my $self   = shift;
+    my $data   = shift;
+    my $sortby = shift;
+    my(@sorted, $key, $order);
+
+    $key = $sortby;
+    if(ref $sortby eq 'HASH') {
+        for $order (qw/ASC DESC/) {
+            if(defined $sortby->{$order}) {
+                $key = $sortby->{$order};
+                last;
+            }
+        }
+    }
+
+    if(!defined $key) { confess('missing options in sort()'); }
+
+    $self->{'stats'}->profile(begin => "_sort()");
+
+    $order = "ASC" if !defined $order;
+
+    return if !defined $data;
+    return if scalar @{$data} == 0;
+
+    my @keys;
+    if(ref($key) eq 'ARRAY') {
+        @keys = @{$key};
+    } else {
+        @keys = ($key);
+    }
+
+    my @compares;
+    for my $key (@keys) {
+        # sort numeric
+        if(defined $data->[0]->{$key} and $data->[0]->{$key} =~ m/^\d+$/xm) {
+            push @compares, '$a->{'.$key.'} <=> $b->{'.$key.'}';
+        }
+        # sort alphanumeric
+        else {
+            push @compares, '$a->{'.$key.'} cmp $b->{'.$key.'}';
+        }
+    }
+    my $sortstring = join(' || ', @compares);
+
+    ## no critic
+    no warnings; # sorting by undef values generates lots of errors
+    if(uc $order eq 'ASC') {
+        eval '@sorted = sort { '.$sortstring.' } @{$data};';
+    } else {
+        eval '@sorted = reverse sort { '.$sortstring.' } @{$data};';
+    }
+    use warnings;
+    ## use critic
+
+    $self->{'stats'}->profile(end => "_sort()");
+
+    return(\@sorted);
 }
 
 =head1 AUTHOR

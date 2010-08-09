@@ -4,6 +4,9 @@
 
 <table border="0" class='data'>
   <tr>
+    [% IF backends.size > 1 %]
+      <th class='data'>Backend</th>
+    [% END %]
     <th class='data'>Group Name</th>
     <th class='data'>Description</th>
     <th class='data'>Host Members</th>
@@ -12,12 +15,20 @@
     <th class='data'>Action URL</th>
   </tr>
 
-  [% FOREACH name = data.keys.sort %]
-  [% SET d = data.$name %]
+  [% FOREACH d = data %]
   [% SET pd = d.peer_key %]
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
   <tr class='[% class %]'>
+    [% IF backends.size > 1 %]
+      <td class='[% class %]'>
+        [% IF d.backend.size < backends.size %]
+          [% d.backend.join(', ') %]
+        [% ELSE %]
+        <i>all</i>
+        [% END %]
+      </td>
+    [% END %]
     <td class='[% class %]'><a id="[% name2id(d.name, 'servicegroup') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>

@@ -155,9 +155,9 @@ before 'execute' => sub {
     $self->_set_possible_backends($c, $disabled_backends);
 
     ###############################
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
     $c->stash->{'param_backend'}  = $backend;
-    if(defined $backend and defined $c->{'db'}) {
+    if($backend ne '' and defined $c->{'db'}) {
         for my $back (@{$c->{'db'}->peer_key()}) {
             if($back ne $backend) {
                 $c->{'db'}->disable_backend($back);
@@ -230,7 +230,9 @@ sub _set_possible_backends {
                 "name"     => $peer->{'name'},
                 "addr"     => $peer->{'addr'},
                 "disabled" => $disabled_backends->{$back} || 0,
+                "running"  => 0,
             };
+            $backend_detail{$back}->{'running'} = 1 if defined $c->stash->{'pi_detail'}->{$back}->{'program_start'};
             push @new_possible_backends, $back;
         }
     }

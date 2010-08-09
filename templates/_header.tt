@@ -38,8 +38,8 @@
     <!--
     var initial_backend_states = new Hash({
         [% FOREACH pd IN backends %]
-          [% SET val = '1' %]
-          [% SET val = '0' IF pi_detail.$pd.program_start %]
+          [% SET val = '1'                                     %]
+          [% SET val = '0' IF backend_detail.$pd.running       %]
           [% SET val = '2' IF backend_detail.$pd.disabled == 2 %]
           [% SET val = '3' IF backend_detail.$pd.disabled == 3 %]
           [% SET val = '3' IF param_backend && pd != param_backend %]
@@ -64,7 +64,7 @@
 
   <div class="pref_pane" id="pref_pane" style="display:none; visibility:hidden;">
     <a href="javascript:togglePreferencePane()"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
-    <form action="[% c.uri %]" method="GET">
+    <form action="[% c.request.uri %]" method="GET">
     <table class="pref_pane" border=1 width="450">
       <tr>
         <td>
@@ -129,10 +129,11 @@
           [% IF backends && backends.size > 1 %]
           [% FOREACH pd IN backends %]
           <div class='backend'>
-            [% SET name  = 'unknown' %]
+            [% SET name  = 'unknown'                                         %]
             [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
-            [% SET class = 'button_peerDOWN' %]
-            [% SET class = 'button_peerUP'  IF pi_detail.$pd.program_start %]
+
+            [% SET class = 'button_peerDOWN'                                    %]
+            [% SET class = 'button_peerUP'  IF backend_detail.$pd.running       %]
             [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %]
             [% SET class = 'button_peerHID' IF backend_detail.$pd.disabled == 3 %]
             [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]

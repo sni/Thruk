@@ -153,10 +153,6 @@ sub get_table {
     $options->{'options'}->{'AddPeer'} = 1;
     $class = $class->options($options->{'options'});
 
-    if(defined $options->{'sort'}) {
-        # TODO
-    }
-
     return $class->hashref_array();
 }
 
@@ -171,6 +167,7 @@ returns a list of hosts
 =cut
 sub get_hosts {
     my($self, %options) = @_;
+
     $options{'columns'} = [qw/
         active_checks_enabled accept_passive_checks acknowledged action_url_expanded
         address alias check_command check_period checks_enabled check_options check_type current_attempt
@@ -183,6 +180,23 @@ sub get_hosts {
         perf_data plugin_output scheduled_downtime_depth state state_type
         /];
     return $self->get_table('hosts', \%options);
+}
+
+##########################################################
+
+=head2 get_hostgroups
+
+  get_hostgroups
+
+returns a list of hostgroups
+
+=cut
+sub get_hostgroups {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/
+        name alias members action_url notes notes_url
+        /];
+    return $self->get_table('hostgroups', \%options);
 }
 
 ##########################################################
@@ -210,6 +224,22 @@ sub get_services {
     return $self->get_table('services', \%options);
 }
 
+##########################################################
+
+=head2 get_servicegroups
+
+  get_servicegroups
+
+returns a list of servicegroups
+
+=cut
+sub get_servicegroups {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/
+        name alias members action_url notes notes_url
+        /];
+    return $self->get_table('servicegroups', \%options);
+}
 ##########################################################
 
 =head2 get_comments

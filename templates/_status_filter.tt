@@ -1,7 +1,7 @@
 ﻿[% SET show_filter_table = 0 IF hidesearch == "1" %]
 [% SET show_filter_table = 1 IF hidesearch == "2" %]
 <input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
-<form action="[% c.uri %]" method="GET" id="filterForm">
+<form action="[% c.request.uri %]" method="GET" id="filterForm">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% c.request.parameters.nav %]">
 [% IF c.request.parameters.entries %]<input type="hidden" name="entries" value="[% c.request.parameters.entries %]">[% END %]

@@ -97,6 +97,171 @@ sub get_contactgroups_by_contact {
     return;
 }
 
+##########################################################
+
+=head2 get_commands
+
+  get_commands
+
+returns a list of commands
+
+=cut
+sub get_commands {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_comments
+
+  get_comments
+
+returns a list of comments
+
+=cut
+sub get_comments {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_contactgroups
+
+  get_contactgroups
+
+returns a list of contactgroups
+
+=cut
+sub get_contactgroups {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_contacts
+
+  get_contacts
+
+returns a list of contacts
+
+=cut
+sub get_contacts {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_downtimes
+
+  get_downtimes
+
+returns a list of downtimes
+
+=cut
+sub get_downtimes {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_hostgroups
+
+  get_hostgroups
+
+returns a list of hostgroups
+
+=cut
+sub get_hostgroups {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_hosts
+
+  get_hosts
+
+returns a list of hosts
+
+=cut
+sub get_hosts {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_scheduling_queue
+
+  get_scheduling_queue
+
+returns a list of queued checks
+
+=cut
+sub get_scheduling_queue {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_servicegroups
+
+  get_servicegroups
+
+returns a list of servicegroups
+
+=cut
+sub get_servicegroups {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_services
+
+  get_services
+
+returns a list of services
+
+=cut
+sub get_services {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_timeperiods
+
+  get_timeperiods
+
+returns a list of timeperiods
+
+=cut
+sub get_timeperiods {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
 =head1 AUTHOR
 
 Sven Nierlein, 2010, <nierlein@cpan.org>

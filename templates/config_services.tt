@@ -4,6 +4,9 @@
 
 <table border="0" class='data'>
   <tr>
+    [% IF backends.size > 1 %]
+      <th>&nbsp;</th>
+    [% END %]
     <th class='data' colspan="2">Service</th>
   </tr>
   <tr>

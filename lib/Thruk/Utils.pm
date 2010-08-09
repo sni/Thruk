@@ -176,6 +176,7 @@ sort a array of hashes by hash keys
 
 =cut
 sub sort {
+confess("deprecated");
     my $c     = shift;
     my $data  = shift;
     my $key   = shift;
@@ -238,6 +239,7 @@ removes duplicate entries from a array of hashes
 
 =cut
 sub remove_duplicates {
+confess("deprecated!");
     my $c    = shift;
     my $data = shift;
 

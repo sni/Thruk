@@ -22,7 +22,7 @@
         <ul class="navsectionlinks">
           [%+ IF link.href %]
           <li><a href="[% link.href %]" target="[% link.target %]">[% link.name %]</a>
-            [% IF link.links && link.links.size > 0 %]
+            [% IF link.links.size > 0 %]
             <ul>
             [% FOREACH sublink = link.links %]
               <li><a href="[% sublink.href %]" target="[% sublink.target %]">[% sublink.name %]</a>

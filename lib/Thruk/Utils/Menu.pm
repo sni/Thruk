@@ -100,6 +100,8 @@ sub add_link {
     my %link = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $link{'target'} = get_target() unless defined $link{'target'};
+    $link{'links'}  = [] unless defined $link{'links'};
+    $link{'href'}   = "" unless defined $link{'href'};
     push(@{$last_section->{'links'}}, \%link);
     return;
 }
@@ -119,6 +121,8 @@ sub add_sub_link {
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link    = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
     $link{'target'} = get_target() unless defined $link{'target'};
+    $link{'links'}  = [] unless defined $link{'links'};
+    $link{'href'}   = "" unless defined $link{'href'};
     push(@{$last_link->{'links'}}, \%link);
     return;
 }
@@ -138,7 +142,8 @@ sub add_sub_sub_link {
     my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link     = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
     my $last_sub_link = $last_link->{'links'}->[scalar @{$last_link->{'links'}} - 1];
-    $link{'target'} = get_target() unless defined $link{'target'};
+    $link{'target'}   = get_target() unless defined $link{'target'};
+    $link{'href'}     = "" unless defined $link{'href'};
     push(@{$last_sub_link->{'links'}}, \%link);
     return;
 }
@@ -158,6 +163,7 @@ sub add_search {
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $search{'search'} = 1;
     $search{'target'} = get_target() unless defined $search{'target'};
+    $search{'href'}   = "" unless defined $search{'href'};
     push(@{$last_section->{'links'}}, \%search);
     return;
 }

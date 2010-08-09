@@ -65,16 +65,25 @@ my %config = ('name'                   => 'Thruk',
                                                 'nl2br'        => \&Thruk::Utils::Filter::nl2br,
                                             },
                         PRE_DEFINE         => {
-                                                'sprintf'      => \&Thruk::Utils::Filter::sprintf,
-                                                'duration'     => \&Thruk::Utils::Filter::duration,
-                                                'name2id'      => \&Thruk::Utils::Filter::name2id,
-                                                'uri'          => \&Thruk::Utils::Filter::uri,
-                                                'uri_with'     => \&Thruk::Utils::Filter::uri_with,
-                                                'html_escape'  => \&Thruk::Utils::Filter::html_escape,
-                                                'escape_quotes'=> \&Thruk::Utils::Filter::escape_quotes,
-                                                'get_message'  => \&Thruk::Utils::Filter::get_message,
-                                                'throw'        => \&Thruk::Utils::Filter::throw,
-                                                'date_format'  => \&Thruk::Utils::Filter::date_format,
+                                                'sprintf'       => \&Thruk::Utils::Filter::sprintf,
+                                                'duration'      => \&Thruk::Utils::Filter::duration,
+                                                'name2id'       => \&Thruk::Utils::Filter::name2id,
+                                                'uri'           => \&Thruk::Utils::Filter::uri,
+                                                'uri_with'      => \&Thruk::Utils::Filter::uri_with,
+                                                'html_escape'   => \&Thruk::Utils::Filter::html_escape,
+                                                'escape_quotes' => \&Thruk::Utils::Filter::escape_quotes,
+                                                'get_message'   => \&Thruk::Utils::Filter::get_message,
+                                                'throw'         => \&Thruk::Utils::Filter::throw,
+                                                'date_format'   => \&Thruk::Utils::Filter::date_format,
+
+                                                'backends'      => [],
+                                                'refresh_rate'  => "",
+                                                'die_on_errors' => 0,  # used in cmd.cgi
+                                                'errorMessage'  => 0,  # used in errors
+                                                'js'            => "", # used in _header.tpl
+                                                'extra_header'  => "", # used in _header.tpl
+                                                'ssi_header'    => "", # used in _header.tpl
+                                                'ssi_footer'    => "", # used in _header.tpl
                                             },
                         PRE_CHOMP          => 1,
                         POST_CHOMP         => 1,
