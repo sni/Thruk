@@ -79,7 +79,7 @@ sub get_processinfo {
                 process_performance_data program_start program_version interval_length
             /)
             ->options({AddPeer => 1})
-            ->hashref_hash('peer_key');
+            ->hashref_pk('peer_key');
 }
 
 ##########################################################
