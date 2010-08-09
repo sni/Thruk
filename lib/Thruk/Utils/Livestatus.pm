@@ -99,6 +99,31 @@ sub get_livestatus_conf {
     return($livestatus_config);
 }
 
+########################################
+
+=head2 get_livestatus_conf
+
+  get_livestatus_conf()
+
+returns config for livestatus backends
+
+=cut
+sub convert_config {
+    my $config = shift;
+
+    my $new_conf = "<Component Thruk::Backend>\n";
+    for my $peer (@{$config->{'peer'}}) {
+        $new_conf .= "  <peer>\n";
+        $new_conf .= "    name   = ".$peer->{'name'}."\n";
+        $new_conf .= "    type   = livestatus\n";
+        $new_conf .= "    <option>\n";
+        $new_conf .= "      name   = ".$peer->{'peer'}."\n";
+        $new_conf .= "    </option>\n";
+        $new_conf .= "  </peer>\n";
+    }
+    $new_conf .= "</Component>\n";
+    return $new_conf;
+}
 
 ########################################
 
