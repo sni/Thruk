@@ -32,7 +32,7 @@
     <td class='[% class %]'><a id="[% name2id(d.name, 'servicegroup') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>
-      [% FOREACH service = d.members_split %]
+      [% FOREACH service = d.members %]
         [% IF !loop.first() %] , [% END %]
         <a href="config.cgi?type=hosts#[% service.0 | uri %]">[% service.0 %]</a> / <a href="config.cgi?type=services#[% service.0 | uri %]_[% service.1 %]">[% service.1 %]</a>
       [% END %]

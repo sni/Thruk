@@ -49,83 +49,88 @@ our $VERSION = '0.70';
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
 my %config = ('name'                   => 'Thruk',
-                    'version'                => $VERSION,
-                    'released'               => 'August 30, 2010',
-                    'encoding'               => 'UTF-8',
-                    'image_path'             => $project_root.'/root/thruk/images',
-                    'project_root'           => $project_root,
-                    'min_livestatus_version' => '1.1.3',
-                    'default_view'           => 'TT',
-                    'View::TT'               => {
-                        TEMPLATE_EXTENSION => '.tt',
-                        ENCODING           => 'utf8',
-                        INCLUDE_PATH       => $project_root.'/templates',
-                        FILTERS            => {
-                                                'duration'     => \&Thruk::Utils::Filter::duration,
-                                                'nl2br'        => \&Thruk::Utils::Filter::nl2br,
-                                            },
-                        PRE_DEFINE         => {
-                                                'sprintf'       => \&Thruk::Utils::Filter::sprintf,
-                                                'duration'      => \&Thruk::Utils::Filter::duration,
-                                                'name2id'       => \&Thruk::Utils::Filter::name2id,
-                                                'uri'           => \&Thruk::Utils::Filter::uri,
-                                                'uri_with'      => \&Thruk::Utils::Filter::uri_with,
-                                                'html_escape'   => \&Thruk::Utils::Filter::html_escape,
-                                                'escape_quotes' => \&Thruk::Utils::Filter::escape_quotes,
-                                                'get_message'   => \&Thruk::Utils::Filter::get_message,
-                                                'throw'         => \&Thruk::Utils::Filter::throw,
-                                                'date_format'   => \&Thruk::Utils::Filter::date_format,
+              'version'                => $VERSION,
+              'released'               => 'August 30, 2010',
+              'encoding'               => 'UTF-8',
+              'image_path'             => $project_root.'/root/thruk/images',
+              'project_root'           => $project_root,
+              'min_livestatus_version' => '1.1.3',
+              'default_view'           => 'TT',
+              'View::TT'               => {
+                  TEMPLATE_EXTENSION => '.tt',
+                  ENCODING           => 'utf8',
+                  INCLUDE_PATH       => $project_root.'/templates',
+                  FILTERS            => {
+                                          'duration'     => \&Thruk::Utils::Filter::duration,
+                                          'nl2br'        => \&Thruk::Utils::Filter::nl2br,
+                                      },
+                  PRE_DEFINE         => {
+                                          'sprintf'        => \&Thruk::Utils::Filter::sprintf,
+                                          'duration'       => \&Thruk::Utils::Filter::duration,
+                                          'name2id'        => \&Thruk::Utils::Filter::name2id,
+                                          'uri'            => \&Thruk::Utils::Filter::uri,
+                                          'uri_with'       => \&Thruk::Utils::Filter::uri_with,
+                                          'html_escape'    => \&Thruk::Utils::Filter::html_escape,
+                                          'escape_quotes'  => \&Thruk::Utils::Filter::escape_quotes,
+                                          'get_message'    => \&Thruk::Utils::Filter::get_message,
+                                          'throw'          => \&Thruk::Utils::Filter::throw,
+                                          'date_format'    => \&Thruk::Utils::Filter::date_format,
 
-                                                'backends'      => [],
-                                                'refresh_rate'  => "",
-                                                'die_on_errors' => 0,  # used in cmd.cgi
-                                                'errorMessage'  => 0,  # used in errors
-                                                'js'            => "", # used in _header.tpl
-                                                'extra_header'  => "", # used in _header.tpl
-                                                'ssi_header'    => "", # used in _header.tpl
-                                                'ssi_footer'    => "", # used in _header.tpl
-                                            },
-                        PRE_CHOMP          => 1,
-                        POST_CHOMP         => 1,
-                        TRIM               => 1,
-                        CACHE_SIZE         => 0,
-                        COMPILE_EXT        => '.ttc',
-                        COMPILE_DIR        => '/tmp/ttc_'.$>, # use uid to make tmp dir uniq
-                        STAT_TTL           => 60,
-                        STRICT             => 0,
-#                        DEBUG              => 'all',
-                        render_die         => 1,
-                    },
-                    'View::GD'               => {
-                        gd_image_type      => 'png',
-                    },
-                    'View::JSON'               => {
-                        expose_stash       => 'json',
-                        json_driver        => 'XS',
-                    },
-                    'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
-                    'Plugin::Authentication' => {
-                        default_realm => 'Thruk',
-                        realms => {
-                            Thruk => { credential => { class => 'Thruk'       },
-                                       store      => { class => 'FromCGIConf' },
-                            }
-                        }
-                    },
-                    'custom-error-message' => {
-                        'error-template'    => 'error.tt',
-                        'response-status'   => 500,
-                    },
-                    'static'               => {
-                        'ignore_extensions' => [ qw/tpl tt tt2/ ],
-                    },
-                    'Plugin::Cache'        => {
-                        'backend'           => {
-                          'class'            => "Catalyst::Plugin::Cache::Backend::Memory",
-                        },
-                    },
+                                          'version'        => $VERSION,
+                                          'backends'       => [],
+                                          'refresh_rate'   => "",
+                                          'remote_user'    => '?',
+                                          'infoBoxTitle'   => "",
+                                          'has_proc_info'  => 0,
+                                          'no_auto_reload' => 0,
+                                          'die_on_errors'  => 0,  # used in cmd.cgi
+                                          'errorMessage'   => 0,  # used in errors
+                                          'js'             => "", # used in _header.tpl
+                                          'extra_header'   => "", # used in _header.tpl
+                                          'ssi_header'     => "", # used in _header.tpl
+                                          'ssi_footer'     => "", # used in _header.tpl
+                                      },
+                  PRE_CHOMP          => 1,
+                  POST_CHOMP         => 1,
+                  TRIM               => 1,
+                  CACHE_SIZE         => 0,
+                  COMPILE_EXT        => '.ttc',
+                  COMPILE_DIR        => '/tmp/ttc_'.$>, # use uid to make tmp dir uniq
+                  STAT_TTL           => 60,
+                  STRICT             => 1,
+                  render_die         => 1,
+              },
+              'View::GD'               => {
+                  gd_image_type      => 'png',
+              },
+              'View::JSON'               => {
+                  expose_stash       => 'json',
+                  json_driver        => 'XS',
+              },
+              'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
+              'Plugin::Authentication' => {
+                  default_realm => 'Thruk',
+                  realms => {
+                      Thruk => { credential => { class => 'Thruk'       },
+                                 store      => { class => 'FromCGIConf' },
+                      }
+                  }
+              },
+              'custom-error-message' => {
+                  'error-template'    => 'error.tt',
+                  'response-status'   => 500,
+              },
+              'static'               => {
+                  'ignore_extensions' => [ qw/tpl tt tt2/ ],
+              },
+              'Plugin::Cache'        => {
+                  'backend'           => {
+                    'class'            => "Catalyst::Plugin::Cache::Backend::Memory",
+                  },
+              },
 );
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
+$config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
 __PACKAGE__->config(%config);
 
 ###################################################

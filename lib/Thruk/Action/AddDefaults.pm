@@ -33,9 +33,6 @@ before 'execute' => sub {
     $c->stats->profile(begin => "AddDefaults::before");
 
     ###############################
-    $c->stash->{'version'} = Thruk->config->{'version'};
-
-    ###############################
     # parse cgi.cfg
     Thruk::Utils::read_cgi_cfg($c);
 
@@ -53,8 +50,6 @@ before 'execute' => sub {
     $c->log->debug("user authenticated as: ".$c->user->get('username'));
     if($c->user_exists) {
         $c->stash->{'remote_user'}  = $c->user->get('username');
-    } else {
-        $c->stash->{'remote_user'}  = '?';
     }
 
     ###############################
@@ -99,10 +94,11 @@ before 'execute' => sub {
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     my $last_program_restart = 0;
     eval {
-        my $processinfo          = $c->{'db'}->get_processinfo();
-        my $overall_processinfo  = Thruk::Utils::calculate_overall_processinfo($processinfo);
-        $c->stash->{'pi'}        = $overall_processinfo;
-        $c->stash->{'pi_detail'} = $processinfo;
+        my $processinfo              = $c->{'db'}->get_processinfo();
+        my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
+        $c->stash->{'pi'}            = $overall_processinfo;
+        $c->stash->{'pi_detail'}     = $processinfo;
+        $c->stash->{'has_proc_info'} = 1;
 
         # set last programm restart
         for my $backend (keys %{$processinfo}) {

@@ -28,7 +28,7 @@
     [% END %]
     <td class='[% class %]'><a id="[% name2id(d.name, 'timeperiod') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>TODO: [% d.exclusion %]</td>
+    <td class='[% class %]'>[% d.exclusion %]</td>
 
     [% has_days = 0 %]
     [% FOREACH day IN [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ] %]

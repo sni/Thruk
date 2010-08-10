@@ -64,7 +64,7 @@
     <td class='[% class %]'><a id="[% name2id(d.name, 'host') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>[% d.address %]</td>
-    <td class='[% class %]'>[% FOREACH parent = d.parents.split(',') %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts#[% parent | uri %]">[% parent %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts#[% parent | uri %]">[% parent %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.max_check_attempts %]</td>
     <td class='[% class %]'>[% duration(d.check_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
     <td class='[% class %]'>[% duration(d.retry_interval * pi_detail.$pd.interval_length, 0 ) %]</td>

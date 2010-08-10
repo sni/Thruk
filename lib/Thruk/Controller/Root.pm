@@ -124,6 +124,7 @@ sub begin : Private {
         $c->detach("/error/index/14");
     }
 
+    $c->stash->{'navigation'}  = "";
     if(Thruk->config->{'use_frames'} == 0) {
         Thruk::Utils::Menu::read_navigation($c);
     }
@@ -344,8 +345,6 @@ sub thruk_main_html : Path('/thruk/main.html') {
     my ( $self, $c ) = @_;
     $c->stash->{'title'}     = 'Thruk Monitoring Webinterface';
     $c->stash->{'page'}      = 'splashpage';
-    $c->stash->{'version'}   = Thruk->config->{'version'};
-    $c->stash->{'released'}  = Thruk->config->{'released'};
     $c->stash->{'template'}  = 'main.tt';
 
     return 1;

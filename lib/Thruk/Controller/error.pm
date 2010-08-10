@@ -188,6 +188,16 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
 
+    $c->stash->{'title'}          = "Error"  unless defined $c->stash->{'title'};
+    $c->stash->{'page'}           = "status" unless defined $c->stash->{'page'};
+    $c->stash->{'infoBoxTitle'}   = "Error"  unless $c->stash->{'infoBoxTitle'} eq '';
+
+    $c->stash->{'navigation'}  = "";
+    if($c->config->{'use_frames'} == 0) {
+        Thruk::Utils::Menu::read_navigation($c);
+    }
+
+
     return 1;
 }
 

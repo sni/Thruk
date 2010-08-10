@@ -487,28 +487,20 @@ sub _merge_hostgroup_answer {
         for my $row (@{$data->{$key}}) {
             if(!defined $groups->{$row->{'name'}}) {
                 $groups->{$row->{'name'}} = $row;
-                if(defined $row->{'members'}) {
-                    @{$groups->{$row->{'name'}}->{'members_array'}} = split /,/mx, $row->{'members'};
-                } else {
-                    $groups->{$row->{'name'}}->{'members_array'} = [];
-                }
+                $groups->{$row->{'name'}}->{'members'} = [ @{$row->{'members'}} ];
             } else {
-                if(defined $row->{'members'}) {
-                    push @{$groups->{$row->{'name'}}->{'members_array'}}, split /,/mx, $row->{'members'};
-                }
+                $groups->{$row->{'name'}}->{'members'} = [ @{$groups->{$row->{'name'}}->{'members'}}, @{$row->{'members'}} ];
             }
 
             if(!defined $groups->{$row->{'name'}}->{'backends_hash'}) { $groups->{$row->{'name'}}->{'backends_hash'} = {} }
             $groups->{$row->{'name'}}->{'backends_hash'}->{$row->{'peer_name'}} = 1;
         }
     }
-    # fix members value
+    # set backends used
     for my $group (values %{$groups}) {
         $group->{'backend'} = [];
         @{$group->{'backend'}} = sort keys %{$group->{'backends_hash'}};
         delete $group->{'backends_hash'};
-
-        $group->{'members'} = join(",", sort @{$group->{'members_array'}});
     }
     my @return = values %{$groups};
 
@@ -534,33 +526,19 @@ sub _merge_servicegroup_answer {
         for my $row (@{$data->{$key}}) {
             if(!defined $groups->{$row->{'name'}}) {
                 $groups->{$row->{'name'}} = $row;
-                if(defined $row->{'members'}) {
-                    @{$groups->{$row->{'name'}}->{'members_array'}} = split /,/mx, $row->{'members'};
-                } else {
-                    $groups->{$row->{'name'}}->{'members_array'} = [];
-                }
+                $groups->{$row->{'name'}}->{'members'} = [ @{$row->{'members'}} ];
             } else {
-                if(defined $row->{'members'}) {
-                    push @{$groups->{$row->{'name'}}->{'members_array'}}, split /,/mx, $row->{'members'};
-                }
+                $groups->{$row->{'name'}}->{'members'} = [ @{$groups->{$row->{'name'}}->{'members'}}, @{$row->{'members'}} ];
             }
             if(!defined $groups->{$row->{'name'}}->{'backends_hash'}) { $groups->{$row->{'name'}}->{'backends_hash'} = {} }
             $groups->{$row->{'name'}}->{'backends_hash'}->{$row->{'peer_name'}} = 1;
         }
     }
-    # fix members value
+    # set backends used
     for my $group (values %{$groups}) {
         $group->{'backend'} = [];
         @{$group->{'backend'}} = sort keys %{$group->{'backends_hash'}};
         delete $group->{'backends_hash'};
-
-        $group->{'members'} = join(",", sort @{$group->{'members_array'}});
-        $group->{'members_split'} = [];
-        for my $service (sort @{$group->{'members_array'}}) {
-            my @split = split(/\|/mx,$service);
-            push @{$group->{'members_split'}}, \@split;
-        }
-        delete $group->{'members_array'};
     }
 
     my @return = values %{$groups};

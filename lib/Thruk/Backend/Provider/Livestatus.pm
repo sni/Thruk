@@ -169,16 +169,20 @@ sub get_hosts {
     my($self, %options) = @_;
 
     $options{'columns'} = [qw/
-        active_checks_enabled accept_passive_checks acknowledged action_url_expanded
-        address alias check_command check_period checks_enabled check_options check_type current_attempt
-        current_notification_number event_handler_enabled execution_time
-        flap_detection_enabled groups has_been_checked icon_image_alt
-        icon_image_expanded is_executing is_flapping last_check
-        last_notification last_state_change latency long_plugin_output
-        max_check_attempts name next_check notes_expanded notes_url_expanded
-        notifications_enabled notification_period obsess_over_host parents percent_state_change
-        perf_data plugin_output scheduled_downtime_depth state state_type
-        /];
+        accept_passive_checks acknowledged action_url action_url_expanded
+        active_checks_enabled address alias check_command check_freshness
+        check_interval check_options check_period check_type checks_enabled
+        current_attempt current_notification_number event_handler_enabled
+        execution_time first_notification_delay flap_detection_enabled groups
+        has_been_checked high_flap_threshold icon_image icon_image_alt
+        icon_image_expanded is_executing is_flapping last_check last_notification
+        last_state_change latency long_plugin_output low_flap_threshold
+        max_check_attempts name next_check notes notes_expanded notes_url
+        notes_url_expanded notification_interval notification_period
+        notifications_enabled obsess_over_host parents percent_state_change
+        perf_data plugin_output process_performance_data retry_interval
+        scheduled_downtime_depth state state_type
+                /];
     return $self->get_table('hosts', \%options);
 }
 
@@ -211,14 +215,18 @@ returns a list of services
 sub get_services {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
-        active_checks_enabled accept_passive_checks acknowledged action_url_expanded checks_enabled
-        check_options check_type current_attempt current_notification_number
-        description event_handler_enabled execution_time flap_detection_enabled
-        groups has_been_checked host_address host_alias host_name icon_image_alt
-        icon_image_expanded is_executing is_flapping last_check last_notification
-        last_state_change latency long_plugin_output max_check_attempts next_check
-        notes_expanded notes_url_expanded notifications_enabled obsess_over_service
-        percent_state_change perf_data plugin_output scheduled_downtime_depth
+        accept_passive_checks acknowledged action_url action_url_expanded
+        active_checks_enabled check_command check_interval check_options
+        check_period check_type checks_enabled current_attempt current_notification_number
+        description event_handler event_handler_enabled execution_time
+        first_notification_delay flap_detection_enabled groups has_been_checked
+        high_flap_threshold host_address host_alias host_name icon_image
+        icon_image_alt icon_image_expanded is_executing is_flapping last_check
+        last_notification last_state_change latency long_plugin_output
+        low_flap_threshold max_check_attempts next_check notes notes_expanded
+        notes_url notes_url_expanded notification_interval notification_period
+        notifications_enabled obsess_over_service percent_state_change perf_data
+        plugin_output process_performance_data retry_interval scheduled_downtime_depth
         state state_type
         /];
     return $self->get_table('services', \%options);
@@ -308,7 +316,19 @@ sub get_timeperiods {
     $options{'columns'} = [qw/
         name alias
         /];
-    return $self->get_table('timeperiods', \%options);
+    my $data = $self->get_table('timeperiods', \%options);
+    # fill in values not provided by livestatus
+    for my $row (@{$data}) {
+        $row->{'exclusion'} = "";
+        $row->{'sunday'}    = "";
+        $row->{'monday'}    = "";
+        $row->{'tuesday'}   = "";
+        $row->{'wednesday'} = "";
+        $row->{'thursday'}  = "";
+        $row->{'friday'}    = "";
+        $row->{'saturday'}  = "";
+    }
+    return $data;
 }
 
 ##########################################################
