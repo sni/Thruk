@@ -27,7 +27,7 @@
   [% IF pages > 1 %]
   <br>
   <input type="hidden" name="page" value="[% current_page %]">
-  [% IF pager.previous_page %]
+  [% IF pager_previous_page %]
     <input type="image" src="/thruk/themes/[% theme %]/images/resultset_first.png" name="first" alt="first" value="1" class="pager_input_img"><input type="image" src="/thruk/themes/[% theme %]/images/resultset_previous.png" name="previous" alt="previous" value="1" class="pager_input_img">&nbsp;
   [% END %]
 
@@ -61,7 +61,7 @@
     [% IF lastpage != pages %]<a class="pager_direct_link" href="[% uri_with(c, page => pages, next => 'undef', previous => 'undef') %]">[% pages %]</a>[% END %]
   [% END %]
 
-  [% IF pager.next_page AND pages > 1 %]
+  [% IF pager_next_page AND pages > 1 %]
     &nbsp;<input type="image" src="/thruk/themes/[% theme %]/images/resultset_next.png" name="next" alt="next" value="1" class="pager_input_img"><input type="image" src="/thruk/themes/[% theme %]/images/resultset_last.png" name="last" alt="last" value="1" class="pager_input_img">
   [% END %]
   [% END %]

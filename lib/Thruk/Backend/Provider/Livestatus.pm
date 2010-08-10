@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use Monitoring::Livestatus::Class;
+use Thruk::Utils;
 use parent 'Thruk::Backend::Provider::Base';
 
 =head1 NAME
@@ -62,24 +63,49 @@ sub peer_addr {
 
 ##########################################################
 
+=head2 peer_name
+
+return the peers name
+
+=cut
+sub peer_name {
+    my $self = shift;
+    return $self->{'live'}->{'backend_obj'}->peer_name();
+}
+
+##########################################################
+
 =head2 get_processinfo
 
 return the process info
 
 =cut
 sub get_processinfo {
-    my $self = shift;
-    return $self->{'live'}
-            ->table('status')
-            ->columns(qw/
-                accept_passive_host_checks accept_passive_service_checks check_external_commands
-                check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection
-                enable_notifications execute_host_checks execute_service_checks last_command_check
-                last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
-                process_performance_data program_start program_version interval_length
-            /)
-            ->options({AddPeer => 1})
-            ->hashref_pk('peer_key');
+    my $self  = shift;
+    my $c     = shift;
+    my $cache = shift;
+    my $data  =  $self->{'live'}
+                  ->table('status')
+                  ->columns(qw/
+                      accept_passive_host_checks accept_passive_service_checks check_external_commands
+                      check_host_freshness check_service_freshness enable_event_handlers enable_flap_detection
+                      enable_notifications execute_host_checks execute_service_checks last_command_check
+                      last_log_rotation livestatus_version nagios_pid obsess_over_hosts obsess_over_services
+                      process_performance_data program_start program_version interval_length
+                  /)
+                  ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
+                  ->hashref_pk('peer_key');
+
+    # do the livestatus version check
+    my $cached_already_warned_about_livestatus_version = $cache->get('already_warned_about_livestatus_version');
+    if(!defined $cached_already_warned_about_livestatus_version and defined $c->config->{'min_livestatus_version'}) {
+        unless(Thruk::Utils::version_compare($c->config->{'min_livestatus_version'}, $data->{$self->peer_key()}->{'data_source_version'})) {
+            $cache->set('already_warned_about_livestatus_version', 1);
+            $c->log->warn("backend '".$self->peer_name()."' uses too old livestatus version: '".$data->{$self->peer_key()}->{'data_source_version'}."', minimum requirement is at least '".$c->config->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
+        }
+    }
+    $data->{$self->peer_key()}->{'data_source_version'} = "Livestatus ".$data->{$self->peer_key()}->{'data_source_version'};
+    return($data, 'HASH');
 }
 
 ##########################################################
@@ -153,7 +179,8 @@ sub get_table {
     $options->{'options'}->{'AddPeer'} = 1;
     $class = $class->options($options->{'options'});
 
-    return $class->hashref_array();
+    my $data = $class->hashref_array() || [];
+    return $data;
 }
 
 ##########################################################
@@ -282,7 +309,9 @@ sub get_downtimes {
         author comment end_time entry_time fixed host_name
         id start_time service_description triggered_by
         /];
-    return $self->get_table('downtimes', \%options);
+    my $data = $self->get_table('downtimes', \%options);
+
+    return $data;
 }
 
 ##########################################################
@@ -316,19 +345,18 @@ sub get_timeperiods {
     $options{'columns'} = [qw/
         name alias
         /];
-    my $data = $self->get_table('timeperiods', \%options);
+
     # fill in values not provided by livestatus
-    for my $row (@{$data}) {
-        $row->{'exclusion'} = "";
-        $row->{'sunday'}    = "";
-        $row->{'monday'}    = "";
-        $row->{'tuesday'}   = "";
-        $row->{'wednesday'} = "";
-        $row->{'thursday'}  = "";
-        $row->{'friday'}    = "";
-        $row->{'saturday'}  = "";
-    }
-    return $data;
+    $options{'options'}->{'callbacks'}->{'exclusion'} = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'sunday'}    = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'monday'}    = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'tuesday'}   = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'wednesday'} = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'thursday'}  = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'friday'}    = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'saturday'}  = sub { return ""; };
+
+    return $self->get_table('timeperiods', \%options);
 }
 
 ##########################################################
@@ -375,19 +403,19 @@ returns the scheduling queue
 
 =cut
 sub get_scheduling_queue {
-    my($self, $c, %options) = @_;
-    my $services = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
+    my($self, %options) = @_;
+    my $services = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'services'),
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}]
                                                  }
                                                  ]
                                       );
-    my $hosts    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+    my $hosts    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'hosts'),
                                               { '-or' => [{ 'active_checks_enabled' => '1' },
                                                          { 'check_options' => { '!=' => '0' }}]
                                               }
                                               ],
-                                    options => { rename => { 'name' => 'host_name' } }
+                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => sub { return ""; } } }
                                     );
 
     my $queue = [];

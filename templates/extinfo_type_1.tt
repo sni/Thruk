@@ -42,15 +42,15 @@
             </form>
           </div>
           [% END %]
-          [% IF host.parents %]
+          [% IF host.parents.size > 0 %]
           <div class='data'>Parents:</div>
           <div class='dataTitle'>
-            [% FOREACH parent IN host.parents.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent | uri %]'>[% parent %]</a>[% END %]
+            [% FOREACH parent IN host.parents.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent | uri %]'>[% parent %]</a>[% END %]
           </div><br>
           [% END %]
           <div class='data'>Member of</div>
           <div class='dataTitle'>
-            [% FOREACH group IN host.groups.split(',').sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group | uri %]&amp;style=overview'>[% group %]</a>[% END %]
+            [% FOREACH group IN host.groups.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group | uri %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
 
           <div class='data'>[% host.address %]</div>
@@ -496,7 +496,7 @@
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_user_roles('is_authorized_for_read_only') %]
+          [% IF c.check_user_roles_wrapper('is_authorized_for_read_only') %]
           [% ELSE %]
             <br>
             <a name="downtimes" id="downtimes"></a>

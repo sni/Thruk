@@ -94,7 +94,7 @@ before 'execute' => sub {
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     my $last_program_restart = 0;
     eval {
-        my $processinfo              = $c->{'db'}->get_processinfo();
+        my $processinfo              = $c->{'db'}->get_processinfo($c, $cache);
         my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
         $c->stash->{'pi'}            = $overall_processinfo;
         $c->stash->{'pi_detail'}     = $processinfo;
@@ -103,15 +103,6 @@ before 'execute' => sub {
         # set last programm restart
         for my $backend (keys %{$processinfo}) {
             $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
-
-            # do the livestatus version check
-            my $cached_already_warning_version = $cache->get('already_warning_version');
-            if(!defined $cached_already_warning_version and defined $c->config->{'min_livestatus_version'}) {
-                unless(Thruk::Utils::version_compare($c->config->{'min_livestatus_version'}, $processinfo->{$backend}->{'livestatus_version'})) {
-                    $cache->set('already_warning_version', 1);
-                    $c->log->warn("backend '".$processinfo->{$backend}->{'peer_name'}."' uses too old livestatus version: '".$processinfo->{$backend}->{'livestatus_version'}."', minimum requirement is at least '".$c->config->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
-                }
-            }
         }
 
         # check if we have to build / clean our per user cache
@@ -139,7 +130,7 @@ before 'execute' => sub {
     };
     if($@) {
         $self->_set_possible_backends($c, $disabled_backends);
-        $c->log->error("livestatus error: $@");
+        $c->log->error("data source error: $@");
         $c->detach('/error/index/9');
     }
 
@@ -225,6 +216,7 @@ sub _set_possible_backends {
             $backend_detail{$back} = {
                 "name"     => $peer->{'name'},
                 "addr"     => $peer->{'addr'},
+                "type"     => $peer->{'type'},
                 "disabled" => $disabled_backends->{$back} || 0,
                 "running"  => 0,
             };

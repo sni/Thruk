@@ -292,7 +292,7 @@ sub get_message {
         return($style, $message);
     }
 
-    return;
+    return '';
 }
 
 

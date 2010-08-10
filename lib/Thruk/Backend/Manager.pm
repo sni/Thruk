@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Module::Find;
 use Digest::MD5  qw(md5_hex);
+use Data::Page;
 use Thruk::Utils::Livestatus;
 
 our $AUTOLOAD;
@@ -227,7 +228,7 @@ sub get_contactgroups_by_contact {
         return $cached_data->{'contactgroups'};
     }
 
-    my $contactgroups = $self->do_on_peers("get_contactgroups_by_contact", $username);
+    my $contactgroups = $self->_do_on_peers("get_contactgroups_by_contact", $username);
 
     $cached_data->{'contactgroups'} = $contactgroups;
     $c->cache->set($username, $cached_data);
@@ -236,23 +237,23 @@ sub get_contactgroups_by_contact {
 
 ########################################
 
-=head2 do_on_peers
+=head2 _do_on_peers
 
-  do_on_peers
+  _do_on_peers
 
 returns a result for a sub called on all peers
 
 =cut
-sub do_on_peers {
+sub _do_on_peers {
     my($self, $sub, $arg) = @_;
 
-    my $result;
+    my($result,$type);
     eval {
         for my $peer (@{$self->get_peers()}) {
             next unless $peer->{'enabled'} == 1;
-            $self->{'stats'}->profile(begin => "do_on_peers() - ".$peer->{'name'});
-            $result->{$peer->{'key'}} = $peer->{'class'}->$sub(@{$arg});
-            $self->{'stats'}->profile(end   => "do_on_peers() - ".$peer->{'name'});
+            $self->{'stats'}->profile(begin => "_do_on_peers() - ".$peer->{'name'});
+            ($result->{$peer->{'key'}}, $type) = $peer->{'class'}->$sub(@{$arg});
+            $self->{'stats'}->profile(end   => "_do_on_peers() - ".$peer->{'name'});
         }
     };
     $self->{'log'}->error($@) if $@;
@@ -266,7 +267,7 @@ sub do_on_peers {
         $data = $self->_merge_servicegroup_answer($result);
     }
     else {
-        $data = $self->_merge_answer($result);
+        $data = $self->_merge_answer($result, $type);
     }
 
     if(    $sub =~ m/^get_/
@@ -281,6 +282,10 @@ sub do_on_peers {
 
         if($arg{'sort'}) {
             $data = $self->_sort($data, $arg{'sort'});
+        }
+
+        if($arg{'pager'}) {
+            $data = $self->_page_data($arg{'pager'}, $data);
         }
     }
 
@@ -342,6 +347,83 @@ sub _remove_duplicates {
     return($return);
 }
 
+########################################
+
+=head2 _page_data
+
+  _page_data($c, $data)
+
+adds paged data set to the template stash.
+Data will be available as 'data'
+The pager itself as 'pager'
+
+=cut
+sub _page_data {
+    my $self                = shift;
+    my $c                   = shift;
+    my $data                = shift || [];
+    my $default_result_size = shift || $c->stash->{'default_page_size'};
+
+    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
+
+    # we dont use paging at all?
+    if(!$c->stash->{'use_pager'} or !defined $entries) {
+        $c->stash->{'data'}  = $data,
+        return 1;
+    }
+
+    $c->stash->{'entries_per_page'} = $entries;
+
+    my $pager = new Data::Page;
+    $pager->total_entries(scalar @{$data});
+    if($entries eq 'all') { $entries = $pager->total_entries; }
+    my $pages = 0;
+    if($entries > 0) {
+        $pages = POSIX::ceil($pager->total_entries / $entries);
+    }
+    else {
+        $c->stash->{'data'}  = $data,
+        return $data;
+    }
+
+    if(exists $c->{'request'}->{'parameters'}->{'next'}) {
+        $page++;
+    }
+    elsif(exists $c->{'request'}->{'parameters'}->{'previous'}) {
+        $page-- if $page > 1;
+    }
+    elsif(exists $c->{'request'}->{'parameters'}->{'first'}) {
+        $page = 1;
+    }
+    elsif(exists $c->{'request'}->{'parameters'}->{'last'}) {
+        $page = $pages;
+    }
+
+    if($page < 0)      { $page = 1;      }
+    if($page > $pages) { $page = $pages; }
+
+    $c->stash->{'current_page'}     = $page;
+
+    if($entries eq 'all') {
+        $c->stash->{'data'}  = $data,
+    }
+    else {
+        $pager->entries_per_page($entries);
+        $pager->current_page($page);
+        my @data = $pager->splice($data);
+        $c->stash->{'data'}  = \@data,
+    }
+
+    $c->stash->{'pager'} = $pager;
+    $c->stash->{'pages'} = $pages;
+
+    # set some variables to avoid undef values in templates
+    $c->stash->{'pager_previous_page'} = $pager->previous_page() || 0;
+    $c->stash->{'pager_next_page'}     = $pager->next_page()     || 0;
+
+    return $data;
+}
 ##########################################################
 
 =head2 AUTOLOAD
@@ -357,7 +439,7 @@ sub AUTOLOAD {
     my $type = ref($self) or confess "$self is not an object, called as (".$name.")";
 
     $name =~ s/.*://mx;   # strip fully-qualified portion
-    return $self->do_on_peers($name, \@_);
+    return $self->_do_on_peers($name, \@_);
 }
 
 ##########################################################
@@ -444,7 +526,11 @@ sub _initialise_peer {
 sub _merge_answer {
     my $self   = shift;
     my $data   = shift;
-    my $return;
+    my $type   = shift;
+    my $return = [];
+    if(defined $type and lc $type eq 'hash') {
+        $return = {};
+    }
 
     $self->{'stats'}->profile(begin => "_merge_answer()");
 
@@ -631,8 +717,8 @@ sub _sort {
 
     $order = "ASC" if !defined $order;
 
-    return if !defined $data;
-    return if scalar @{$data} == 0;
+    return \@sorted if !defined $data;
+    return \@sorted if scalar @{$data} == 0;
 
     my @keys;
     if(ref($key) eq 'ARRAY') {

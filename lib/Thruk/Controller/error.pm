@@ -190,7 +190,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
 
     $c->stash->{'title'}          = "Error"  unless defined $c->stash->{'title'};
     $c->stash->{'page'}           = "status" unless defined $c->stash->{'page'};
-    $c->stash->{'infoBoxTitle'}   = "Error"  unless $c->stash->{'infoBoxTitle'} eq '';
+    $c->stash->{'infoBoxTitle'}   = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
 
     $c->stash->{'navigation'}  = "";
     if($c->config->{'use_frames'} == 0) {

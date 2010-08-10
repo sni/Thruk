@@ -240,6 +240,16 @@ if($@) {
 }
 
 ###################################################
+# wrapper to avoid undef values in TT
+sub check_user_roles_wrapper {
+    my $self = shift;
+    if($self->check_user_roles(@_)) {
+        return 1;
+    }
+    return 0;
+}
+
+###################################################
 
 =head1 NAME
 

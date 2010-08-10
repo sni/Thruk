@@ -263,9 +263,7 @@ sub _process_scheduling_page {
     };
     $sortoption = 7 if !defined $sortoptions->{$sortoption};
 
-    my $queue = $c->{'db'}->get_scheduling_queue($c);
-    $queue    = Thruk::Utils::sort($c, $queue, $sortoptions->{$sortoption}->[0], $order);
-    Thruk::Utils::page_data($c, $queue);
+    my $queue = $c->{'db'}->get_scheduling_queue(sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c, c => $c);
 
     $c->stash->{'order'}   = $order;
     $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];
