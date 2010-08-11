@@ -105,6 +105,9 @@ sub get_processinfo {
         }
     }
     $data->{$self->peer_key()}->{'data_source_version'} = "Livestatus ".$data->{$self->peer_key()}->{'data_source_version'};
+
+    $self->{'last_program_start'} = $data->{$self->peer_key()}->{'program_start'};
+
     return($data, 'HASH');
 }
 
@@ -139,6 +142,7 @@ returns a list of contactgroups by contact
 =cut
 sub get_contactgroups_by_contact {
     my($self,$username) = @_;
+    confess("no user") unless defined $username;
 
     my $contactgroups = {};
     my $data = $self->{'live'}
@@ -156,6 +160,34 @@ sub get_contactgroups_by_contact {
 
 ##########################################################
 
+=head2 get_class
+
+  get_class
+
+generic function to return a table class
+
+=cut
+sub get_class {
+    my $self      = shift;
+    my $table     = shift;
+    my $options   = shift;
+
+    my $class = $self->{'live'}->table($table);
+    if(defined $options->{'columns'}) {
+        $class = $class->columns(@{$options->{'columns'}});
+    }
+    if(defined $options->{'filter'} and scalar @{$options->{'filter'}} > 0) {
+        $class = $class->filter([@{$options->{'filter'}}]);
+    }
+
+    $options->{'options'}->{'AddPeer'} = 1;
+    $class = $class->options($options->{'options'});
+
+    return $class;
+}
+
+##########################################################
+
 =head2 get_table
 
   get_table
@@ -164,22 +196,12 @@ generic function to return a table with options
 
 =cut
 sub get_table {
-    my $self    = shift;
-    my $table   = shift;
-    my $options = shift;
+    my $self      = shift;
+    my $table     = shift;
+    my $options   = shift;
 
-    my $class = $self->{'live'}->table($table);
-    if(defined $options->{'columns'}) {
-        $class = $class->columns(@{$options->{'columns'}});
-    }
-    if(defined $options->{'filter'}) {
-        $class = $class->filter(@{$options->{'filter'}});
-    }
-
-    $options->{'options'}->{'AddPeer'} = 1;
-    $class = $class->options($options->{'options'});
-
-    my $data = $class->hashref_array() || [];
+    my $class = $self->get_class($table, $options);
+    my $data  = $class->hashref_array() || [];
     return $data;
 }
 
@@ -426,6 +448,108 @@ sub get_scheduling_queue {
         push @{$queue}, @{$hosts};
     }
     return $queue;
+}
+
+##########################################################
+
+=head2 get_performance_stats
+
+  get_performance_stats
+
+returns the service /host execution statistics
+
+=cut
+sub get_performance_stats {
+    my($self, %options) = @_;
+
+    my $now    = time();
+    my $min1   = $now - 60;
+    my $min5   = $now - 300;
+    my $min15  = $now - 900;
+    my $min60  = $now - 3600;
+    my $minall = $self->{'last_program_start'};
+
+    my $data = {};
+    for my $type (qw{hosts services}) {
+        my $stats = [
+            $type.'_active_sum'      => { -stats => [ 'check_type' => 0 ]},
+            $type.'_active_1_sum'    => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
+            $type.'_active_5_sum'    => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
+            $type.'_active_15_sum'   => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
+            $type.'_active_60_sum'   => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
+            $type.'_active_all_sum'  => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
+
+            $type.'_passive_sum'     => { -stats => [ 'check_type' => 1 ]},
+            $type.'_passive_1_sum'   => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
+            $type.'_passive_5_sum'   => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
+            $type.'_passive_15_sum'  => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
+            $type.'_passive_60_sum'  => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
+            $type.'_passive_all_sum' => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
+        ];
+        my $class = $self->get_class($type, \%options);
+        my $rows = $class->stats($stats)->hashref_array();
+        $data = { %{$data}, %{$rows->[0]} };
+
+        # add stats for active checks
+        $stats = [
+            $type.'_execution_time_sum'      => { -stats => [ 'sum execution_time' ]},
+            $type.'_latency_sum'             => { -stats => [ 'sum latency' ]},
+            $type.'_active_state_change_sum' => { -stats => [ 'sum percent_state_change' ]},
+            $type.'_execution_time_min'      => { -stats => [ 'min execution_time' ]},
+            $type.'_latency_min'             => { -stats => [ 'min latency' ]},
+            $type.'_active_state_change_min' => { -stats => [ 'min percent_state_change' ]},
+            $type.'_execution_time_max'      => { -stats => [ 'max execution_time' ]},
+            $type.'_latency_max'             => { -stats => [ 'max latency' ]},
+            $type.'_active_state_change_max' => { -stats => [ 'max percent_state_change' ]},
+        ];
+        $class = $self->get_class($type, \%options);
+        $rows = $class
+                    ->filter([ has_been_checked => 1, check_type => 0 ])
+                    ->stats($stats)->hashref_array();
+        $data = { %{$data}, %{$rows->[0]} };
+
+        # add stats for passive checks
+        $stats = [
+            $type.'_passive_state_change_sum' => { -stats => [ 'sum percent_state_change' ]},
+            $type.'_passive_state_change_min' => { -stats => [ 'min percent_state_change' ]},
+            $type.'_passive_state_change_max' => { -stats => [ 'max percent_state_change' ]},
+        ];
+        $class = $self->get_class($type, \%options);
+        $rows = $class
+                    ->filter([ has_been_checked => 1, check_type => 1 ])
+                    ->stats($stats)->hashref_array();
+        $data = { %{$data}, %{$rows->[0]} };
+    }
+
+    return($data, 'STATS');
+}
+
+##########################################################
+
+=head2 get_extra_perf_stats
+
+  get_extra_perf_stats
+
+returns the service /host execution statistics
+
+=cut
+sub get_extra_perf_stats {
+    my($self, %options) = @_;
+
+    my $class = $self->get_class('status', \%options);
+    my $data  =  $class
+                  ->columns(qw/
+                        cached_log_messages connections connections_rate host_checks
+                        host_checks_rate requests requests_rate service_checks
+                        service_checks_rate neb_callbacks neb_callbacks_rate
+                  /)
+                  ->hashref_array();
+
+    if(defined $data) {
+        $data = shift @{$data};
+    }
+
+    return($data, 'SUM');
 }
 
 

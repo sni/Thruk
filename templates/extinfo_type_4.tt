@@ -30,23 +30,23 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 minute:</td>
-                      <td class='dataVal'>[% stats.services.active_1_min %] ([% sprintf('%.1f',stats.services.active_1_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_active_1_sum %] ([% sprintf('%.1f',stats.services_active_1_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 5 minutes:</td>
-                      <td class='dataVal'>[% stats.services.active_5_min %] ([% sprintf('%.1f',stats.services.active_5_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_active_5_sum %] ([% sprintf('%.1f',stats.services_active_5_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 15 minutes:</td>
-                      <td class='dataVal'>[% stats.services.active_15_min %] ([% sprintf('%.1f',stats.services.active_15_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_active_15_sum %] ([% sprintf('%.1f',stats.services_active_15_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 hour:</td>
-                      <td class='dataVal'>[% stats.services.active_60_min %] ([% sprintf('%.1f',stats.services.active_60_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_active_60_sum %] ([% sprintf('%.1f',stats.services_active_60_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% stats.services.active_all_min %] ([% sprintf('%.1f',stats.services.active_all_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_active_all_sum %] ([% sprintf('%.1f',stats.services_active_all_perc) %]%)</td>
                     </tr>
                   </table>
                 </td>
@@ -66,21 +66,21 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>Check Execution Time:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.execution_time_min) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.execution_time_max) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.3f',stats.services.execution_time_avg) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_execution_time_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_execution_time_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.services_execution_time_avg) %] sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Check Latency:</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.latency_min) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.latency_max) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.3f',stats.services.latency_avg) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_latency_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_latency_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.services_latency_avg) %] sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Percent State Change:</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.active_state_change_min) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.active_state_change_max) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.active_state_change_avg) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_active_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_active_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_active_state_change_avg) %]%</td>
                     </tr>
                   </table>
                 </td>
@@ -101,23 +101,23 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 minute:</td>
-                      <td class='dataVal'>[% stats.services.passive_1_min %] ([% sprintf('%.1f',stats.services.passive_1_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_passive_1_sum %] ([% sprintf('%.1f',stats.services_passive_1_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 5 minutes:</td>
-                      <td class='dataVal'>[% stats.services.passive_5_min %] ([% sprintf('%.1f',stats.services.passive_5_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_passive_5_sum %] ([% sprintf('%.1f',stats.services_passive_5_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 15 minutes:</td>
-                      <td class='dataVal'>[% stats.services.passive_15_min %] ([% sprintf('%.1f',stats.services.passive_15_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_passive_15_sum %] ([% sprintf('%.1f',stats.services_passive_15_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 hour:</td>
-                      <td class='dataVal'>[% stats.services.passive_60_min %] ([% sprintf('%.1f',stats.services.passive_60_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_passive_60_sum %] ([% sprintf('%.1f',stats.services_passive_60_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% stats.services.passive_all_min %] ([% sprintf('%.1f',stats.services.passive_all_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.services_passive_all_sum %] ([% sprintf('%.1f',stats.services_passive_all_perc) %]%)</td>
                     </tr>
                   </table>
                 </td>
@@ -137,9 +137,9 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>Percent State Change:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.passive_state_change_min) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.passive_state_change_max) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.services.passive_state_change_avg) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_passive_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_passive_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.services_passive_state_change_avg) %]%</td>
                     </tr>
                   </table>
                 </td>
@@ -160,23 +160,23 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 minute:</td>
-                      <td class='dataVal'>[% stats.hosts.active_1_min %] ([% sprintf('%.1f',stats.hosts.active_1_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_active_1_sum %] ([% sprintf('%.1f',stats.hosts_active_1_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 5 minutes:</td>
-                      <td class='dataVal'>[% stats.hosts.active_5_min %] ([% sprintf('%.1f',stats.hosts.active_5_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_active_5_sum %] ([% sprintf('%.1f',stats.hosts_active_5_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 15 minutes:</td>
-                      <td class='dataVal'>[% stats.hosts.active_15_min %] ([% sprintf('%.1f',stats.hosts.active_15_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_active_15_sum %] ([% sprintf('%.1f',stats.hosts_active_15_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 hour:</td>
-                      <td class='dataVal'>[% stats.hosts.active_60_min %] ([% sprintf('%.1f',stats.hosts.active_60_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_active_60_sum %] ([% sprintf('%.1f',stats.hosts_active_60_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% stats.hosts.active_all_min %] ([% sprintf('%.1f',stats.hosts.active_all_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_active_all_sum %] ([% sprintf('%.1f',stats.hosts_active_all_perc) %]%)</td>
                     </tr>
                   </table>
                 </td>
@@ -196,21 +196,21 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>Check Execution Time:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.execution_time_min) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.execution_time_max) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.3f',stats.hosts.execution_time_avg) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_execution_time_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_execution_time_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.hosts_execution_time_avg) %] sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Check Latency:</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.latency_min) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.latency_max) %] sec</td>
-                      <td class='dataVal'>[% sprintf('%.3f',stats.hosts.latency_avg) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_latency_min) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_latency_max) %] sec</td>
+                      <td class='dataVal'>[% sprintf('%.3f',stats.hosts_latency_avg) %] sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Percent State Change:</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.active_state_change_min) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.active_state_change_max) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.active_state_change_avg) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_active_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_active_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_active_state_change_avg) %]%</td>
                     </tr>
                   </table>
                 </td>
@@ -231,23 +231,23 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 minute:</td>
-                      <td class='dataVal'>[% stats.hosts.passive_1_min %] ([% sprintf('%.1f',stats.hosts.passive_1_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_passive_1_sum %] ([% sprintf('%.1f',stats.hosts_passive_1_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 5 minutes:</td>
-                      <td class='dataVal'>[% stats.hosts.passive_5_min %] ([% sprintf('%.1f',stats.hosts.passive_5_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_passive_5_sum %] ([% sprintf('%.1f',stats.hosts_passive_5_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 15 minutes:</td>
-                      <td class='dataVal'>[% stats.hosts.passive_15_min %] ([% sprintf('%.1f',stats.hosts.passive_15_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_passive_15_sum %] ([% sprintf('%.1f',stats.hosts_passive_15_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>&lt;= 1 hour:</td>
-                      <td class='dataVal'>[% stats.hosts.passive_60_min %] ([% sprintf('%.1f',stats.hosts.passive_60_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_passive_60_sum %] ([% sprintf('%.1f',stats.hosts_passive_60_perc) %]%)</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Since program start:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% stats.hosts.passive_all_min %] ([% sprintf('%.1f',stats.hosts.passive_all_min_perc) %]%)</td>
+                      <td class='dataVal'>[% stats.hosts_passive_all_sum %] ([% sprintf('%.1f',stats.hosts_passive_all_perc) %]%)</td>
                     </tr>
                   </table>
                 </td>
@@ -267,9 +267,9 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>Percent State Change:&nbsp;&nbsp;</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.passive_state_change_min) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.passive_state_change_max) %]%</td>
-                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts.passive_state_change_avg) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_passive_state_change_min) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_passive_state_change_max) %]%</td>
+                      <td class='dataVal'>[% sprintf('%.2f',stats.hosts_passive_state_change_avg) %]%</td>
                     </tr>
                   </table>
                 </td>
@@ -294,32 +294,32 @@
                     </tr>
                     <tr>
                       <td class='dataVar'>Servicechecks:</td>
-                      <td class='dataVal'>[% live_stats.service_checks %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',live_stats.service_checks_rate) %] /sec</td>
+                      <td class='dataVal'>[% perf_stats.service_checks %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.service_checks_rate) %] /sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Hostchecks:</td>
-                      <td class='dataVal'>[% live_stats.host_checks %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',live_stats.host_checks_rate) %] /sec</td>
+                      <td class='dataVal'>[% perf_stats.host_checks %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.host_checks_rate) %] /sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Connections:</td>
-                      <td class='dataVal'>[% live_stats.connections %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',live_stats.connections_rate) %] /sec</td>
+                      <td class='dataVal'>[% perf_stats.connections %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.connections_rate) %] /sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Requests:</td>
-                      <td class='dataVal'>[% live_stats.requests %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',live_stats.requests_rate) %] /sec</td>
+                      <td class='dataVal'>[% perf_stats.requests %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.requests_rate) %] /sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>NEB Callbacks:</td>
-                      <td class='dataVal'>[% live_stats.neb_callbacks %]</td>
-                      <td class='dataVal'>[% sprintf('%.2f',live_stats.neb_callbacks_rate) %] /sec</td>
+                      <td class='dataVal'>[% perf_stats.neb_callbacks %]</td>
+                      <td class='dataVal'>[% sprintf('%.2f',perf_stats.neb_callbacks_rate) %] /sec</td>
                     </tr>
                     <tr>
                       <td class='dataVar'>Cached Log Messages:</td>
-                      <td class='dataVal'>[% live_stats.cached_log_messages %]</td>
+                      <td class='dataVal'>[% perf_stats.cached_log_messages %]</td>
                       <td class='dataVal'></td>
                     </tr>
                   </table>

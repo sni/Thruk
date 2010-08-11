@@ -106,7 +106,7 @@ sub _process_host_page {
     my ( $self, $c ) = @_;
     my $host;
 
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
     my $hosts = $c->{'db'}->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
@@ -173,7 +173,7 @@ sub _process_hostgroup_cmd_page {
 sub _process_service_page {
     my ( $self, $c ) = @_;
     my $service;
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'};
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
 
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     return $c->detach('/error/index/15') unless defined $hostname;
@@ -286,11 +286,9 @@ sub _process_process_info_page {
 sub _process_perf_info_page {
     my ( $self, $c ) = @_;
 
-    my $stats      = Thruk::Utils::get_service_execution_stats_old($c);
-    my $live_stats = $c->{'live'}->selectrow_arrayref("GET status\n".Thruk::Utils::Auth::get_auth_filter($c, 'status')."\nColumns: cached_log_messages connections connections_rate host_checks host_checks_rate requests requests_rate service_checks service_checks_rate neb_callbacks neb_callbacks_rate", { Slice => 1, Sum => 1 });
+    $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'status')]);
+    $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'status')]);
 
-    $c->stash->{'stats'}      = $stats;
-    $c->stash->{'live_stats'} = $live_stats;
     return 1;
 }
 

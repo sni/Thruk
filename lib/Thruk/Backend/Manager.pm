@@ -7,6 +7,7 @@ use Module::Find;
 use Digest::MD5  qw(md5_hex);
 use Data::Page;
 use Thruk::Utils::Livestatus;
+use Scalar::Util qw/ looks_like_number /;
 
 our $AUTOLOAD;
 
@@ -260,7 +261,13 @@ sub _do_on_peers {
 
     # howto merge the answers?
     my $data;
-    if($sub eq 'get_hostgroups') {
+    if(lc $type eq 'stats') {
+        $data = $self->_merge_stats_answer($result);
+    }
+    elsif(lc $type eq 'sum') {
+        $data = $self->_sum_answer($result);
+    }
+    elsif($sub eq 'get_hostgroups') {
         $data = $self->_merge_hostgroup_answer($result);
     }
     elsif($sub eq 'get_servicegroups') {
@@ -437,7 +444,6 @@ sub AUTOLOAD {
     my $self = shift;
     my $name = $AUTOLOAD;
     my $type = ref($self) or confess "$self is not an object, called as (".$name.")";
-
     $name =~ s/.*://mx;   # strip fully-qualified portion
     return $self->_do_on_peers($name, \@_);
 }
@@ -632,6 +638,80 @@ sub _merge_servicegroup_answer {
     $self->{'stats'}->profile(end => "_merge_servicegroup_answer()");
 
     return(\@return);
+}
+
+##########################################################
+sub _merge_stats_answer {
+    my $self   = shift;
+    my $data   = shift;
+    my $return;
+
+    $self->{'stats'}->profile(begin => "_merge_stats_answer()");
+
+    for my $peername (keys %{$data}) {
+        if(ref $data->{$peername} eq 'HASH') {
+            for my $key (keys %{$data->{$peername}}) {
+                if(!defined $return->{$key}) {
+                    $return->{$key} = $data->{$peername}->{$key};
+                } elsif(looks_like_number($data->{$peername}->{$key})) {
+                    if($key =~ m/_sum$/) {
+                        $return->{$key} += $data->{$peername}->{$key};
+                    }
+                    elsif($key =~ m/_min$/) {
+                        $return->{$key} = $data->{$peername}->{$key} if $return->{$key} > $data->{$peername}->{$key};
+                    }
+                    elsif($key =~ m/_max$/) {
+                        $return->{$key} = $data->{$peername}->{$key} if $return->{$key} < $data->{$peername}->{$key};
+                    }
+                }
+            }
+        }
+    }
+
+    # percentages and averages?
+    for my $key (keys %{$return}) {
+        if($key =~ m/^(.*)_(\d+|all)_sum$/) {
+            my $pkey = $1.'_sum';
+            my $nkey = $1.'_'.$2.'_perc';
+            if(exists $return->{$pkey} and $return->{$pkey} > 0) {
+                $return->{$nkey} = $return->{$key} / $return->{$pkey} * 100;
+            } else {
+                $return->{$nkey} = 0;
+            }
+        }
+
+        # active averages
+        for my $akey (qw/execution_time_sum
+                         latency_sum
+                         active_state_change_sum/) {
+            if($key =~ m/(hosts|services)_$akey/mx) {
+                my $type = $1;
+                my $nkey = $type.'_'.$akey;
+                $nkey =~ s/_sum$/_avg/mx;
+                $return->{$nkey} = 0;
+                if($return->{$key} > 0) {
+                    $return->{$nkey} = $return->{$key} / $return->{$type.'_active_sum'};
+                }
+            }
+        }
+
+        # passive averages
+        for my $akey (qw/passive_state_change_sum/) {
+            if($key =~ m/(hosts|services)_$akey/mx) {
+                my $type = $1;
+                my $nkey = $type.'_'.$akey;
+                $nkey =~ s/_sum$/_avg/mx;
+                $return->{$nkey} = 0;
+                if($return->{$key} > 0) {
+                    $return->{$nkey} = $return->{$key} / $return->{$type.'_passive_sum'};
+                }
+            }
+        }
+    }
+
+    $self->{'stats'}->profile(end => "_merge_stats_answer()");
+
+    return $return;
 }
 
 ##########################################################
