@@ -160,53 +160,6 @@ sub get_contactgroups_by_contact {
 
 ##########################################################
 
-=head2 get_class
-
-  get_class
-
-generic function to return a table class
-
-=cut
-sub get_class {
-    my $self      = shift;
-    my $table     = shift;
-    my $options   = shift;
-
-    my $class = $self->{'live'}->table($table);
-    if(defined $options->{'columns'}) {
-        $class = $class->columns(@{$options->{'columns'}});
-    }
-    if(defined $options->{'filter'} and scalar @{$options->{'filter'}} > 0) {
-        $class = $class->filter([@{$options->{'filter'}}]);
-    }
-
-    $options->{'options'}->{'AddPeer'} = 1;
-    $class = $class->options($options->{'options'});
-
-    return $class;
-}
-
-##########################################################
-
-=head2 get_table
-
-  get_table
-
-generic function to return a table with options
-
-=cut
-sub get_table {
-    my $self      = shift;
-    my $table     = shift;
-    my $options   = shift;
-
-    my $class = $self->get_class($table, $options);
-    my $data  = $class->hashref_array() || [];
-    return $data;
-}
-
-##########################################################
-
 =head2 get_hosts
 
   get_hosts
@@ -232,7 +185,7 @@ sub get_hosts {
         perf_data plugin_output process_performance_data retry_interval
         scheduled_downtime_depth state state_type
                 /];
-    return $self->get_table('hosts', \%options);
+    return $self->_get_table('hosts', \%options);
 }
 
 ##########################################################
@@ -249,7 +202,7 @@ sub get_hostgroups {
     $options{'columns'} = [qw/
         name alias members action_url notes notes_url
         /];
-    return $self->get_table('hostgroups', \%options);
+    return $self->_get_table('hostgroups', \%options);
 }
 
 ##########################################################
@@ -278,7 +231,7 @@ sub get_services {
         plugin_output process_performance_data retry_interval scheduled_downtime_depth
         state state_type
         /];
-    return $self->get_table('services', \%options);
+    return $self->_get_table('services', \%options);
 }
 
 ##########################################################
@@ -295,7 +248,7 @@ sub get_servicegroups {
     $options{'columns'} = [qw/
         name alias members action_url notes notes_url
         /];
-    return $self->get_table('servicegroups', \%options);
+    return $self->_get_table('servicegroups', \%options);
 }
 ##########################################################
 
@@ -313,7 +266,7 @@ sub get_comments {
         expire_time host_name id persistent service_description
         source type
         /];
-    return $self->get_table('comments', \%options);
+    return $self->_get_table('comments', \%options);
 }
 
 ##########################################################
@@ -331,7 +284,7 @@ sub get_downtimes {
         author comment end_time entry_time fixed host_name
         id start_time service_description triggered_by
         /];
-    my $data = $self->get_table('downtimes', \%options);
+    my $data = $self->_get_table('downtimes', \%options);
 
     return $data;
 }
@@ -350,7 +303,7 @@ sub get_contactgroups {
     $options{'columns'} = [qw/
         name alias members
         /];
-    return $self->get_table('contactgroups', \%options);
+    return $self->_get_table('contactgroups', \%options);
 }
 
 ##########################################################
@@ -378,7 +331,7 @@ sub get_timeperiods {
     $options{'options'}->{'callbacks'}->{'friday'}    = sub { return ""; };
     $options{'options'}->{'callbacks'}->{'saturday'}  = sub { return ""; };
 
-    return $self->get_table('timeperiods', \%options);
+    return $self->_get_table('timeperiods', \%options);
 }
 
 ##########################################################
@@ -395,7 +348,7 @@ sub get_commands {
     $options{'columns'} = [qw/
         name line
         /];
-    return $self->get_table('commands', \%options);
+    return $self->_get_table('commands', \%options);
 }
 
 ##########################################################
@@ -412,7 +365,7 @@ sub get_contacts {
     $options{'columns'} = [qw/
         name alias email pager service_notification_period host_notification_period
         /];
-    return $self->get_table('contacts', \%options);
+    return $self->_get_table('contacts', \%options);
 }
 
 ##########################################################
@@ -452,6 +405,103 @@ sub get_scheduling_queue {
 
 ##########################################################
 
+=head2 get_host_stats
+
+  get_host_stats
+
+returns the host statistics for the tac page
+
+=cut
+sub get_host_stats {
+    my($self, %options) = @_;
+
+    my $stats = [
+        'total'                     => { -stats => [ 'name' => { '!=' => '' } ]},
+        'total_active'              => { -stats => [ 'check_type' => 0 ]},
+        'total_passive'             => { -stats => [ 'check_type' => 1 ]},
+        'pending'                   => { -stats => [ 'has_been_checked' => 0 ]},
+        'pending_and_disabled'      => { -stats => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]},
+        'pending_and_scheduled'     => { -stats => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'up'                        => { -stats => [ 'has_been_checked' => 1, 'state' => 0 ]},
+        'up_and_disabled'           => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]},
+        'up_and_scheduled'          => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'down'                      => { -stats => [ 'has_been_checked' => 1, 'state' => 1 ]},
+        'down_and_ack'              => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'acknowledged' => 1 ]},
+        'down_and_scheduled'        => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'down_and_disabled'         => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]},
+        'down_and_unhandled'        => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'unreachable'               => { -stats => [ 'has_been_checked' => 1, 'state' => 2 ]},
+        'unreachable_and_ack'       => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'acknowledged' => 1 ]},
+        'unreachable_and_scheduled' => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'unreachable_and_disabled'  => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]},
+        'unreachable_and_unhandled' => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'flapping'                  => { -stats => [ 'is_flapping' => 1 ]},
+        'flapping_disabled'         => { -stats => [ 'flap_detection_enabled' => 0 ]},
+        'notifications_disabled'    => { -stats => [ 'notifications_enabled' => 0 ]},
+        'eventhandler_disabled'     => { -stats => [ 'event_handler_enabled' => 0 ]},
+        'active_checks_disabled'    => { -stats => [ 'active_checks_enabled' => 0 ]},
+        'passive_checks_disabled'   => { -stats => [ 'accept_passive_checks' => 0 ]},
+        'outages'                   => { -stats => [ 'state' => 1, 'childs' => {'!=' => undef } ]},
+    ];
+    my $class = $self->_get_class('hosts', \%options);
+    my $rows = $class->stats($stats)->hashref_array();
+    return(\%{$rows->[0]}, 'SUM');
+}
+
+##########################################################
+
+=head2 get_service_stats
+
+  get_service_stats
+
+returns the services statistics for the tac page
+
+=cut
+sub get_service_stats {
+    my($self, %options) = @_;
+
+    my $stats = [
+        'total'                     => { -stats => [ 'description' => { '!=' => '' } ]},
+        'total_active'              => { -stats => [ 'check_type' => 0 ]},
+        'total_passive'             => { -stats => [ 'check_type' => 1 ]},
+        'pending'                   => { -stats => [ 'has_been_checked' => 0 ]},
+        'pending_and_disabled'      => { -stats => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]},
+        'pending_and_scheduled'     => { -stats => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'ok'                        => { -stats => [ 'has_been_checked' => 1, 'state' => 0 ]},
+        'ok_and_disabled'           => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]},
+        'ok_and_scheduled'          => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'warning'                   => { -stats => [ 'has_been_checked' => 1, 'state' => 1 ]},
+        'warning_and_disabled'      => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]},
+        'warning_and_scheduled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'warning_and_ack'           => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'acknowledged' => 1 ]},
+        'warning_on_down_host'      => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => { '!=' => 0 } ]},
+        'warning_and_unhandled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'critical'                  => { -stats => [ 'has_been_checked' => 1, 'state' => 2 ]},
+        'critical_and_disabled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]},
+        'critical_and_scheduled'    => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'critical_and_ack'          => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'acknowledged' => 1 ]},
+        'critical_on_down_host'     => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => { '!=' => 0 } ]},
+        'critical_and_unhandled'    => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'unknown'                   => { -stats => [ 'has_been_checked' => 1, 'state' => 3 ]},
+        'unknown_and_disabled'      => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'active_checks_enabled' => 0 ]},
+        'unknown_and_scheduled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'unknown_and_ack'           => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'acknowledged' => 1 ]},
+        'unknown_on_down_host'      => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => { '!=' => 0 } ]},
+        'unknown_and_unhandled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'flapping'                  => { -stats => [ 'is_flapping' => 1 ]},
+        'flapping_disabled'         => { -stats => [ 'flap_detection_enabled' => 0 ]},
+        'notifications_disabled'    => { -stats => [ 'notifications_enabled' => 0 ]},
+        'eventhandler_disabled'     => { -stats => [ 'event_handler_enabled' => 0 ]},
+        'active_checks_disabled'    => { -stats => [ 'active_checks_enabled' => 0 ]},
+        'passive_checks_disabled'   => { -stats => [ 'accept_passive_checks' => 0 ]},
+    ];
+    my $class = $self->_get_class('services', \%options);
+    my $rows = $class->stats($stats)->hashref_array();
+    return(\%{$rows->[0]}, 'SUM');
+}
+
+##########################################################
+
 =head2 get_performance_stats
 
   get_performance_stats
@@ -486,7 +536,7 @@ sub get_performance_stats {
             $type.'_passive_60_sum'  => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
             $type.'_passive_all_sum' => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
         ];
-        my $class = $self->get_class($type, \%options);
+        my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
         $data = { %{$data}, %{$rows->[0]} };
 
@@ -502,7 +552,7 @@ sub get_performance_stats {
             $type.'_latency_max'             => { -stats => [ 'max latency' ]},
             $type.'_active_state_change_max' => { -stats => [ 'max percent_state_change' ]},
         ];
-        $class = $self->get_class($type, \%options);
+        $class = $self->_get_class($type, \%options);
         $rows = $class
                     ->filter([ has_been_checked => 1, check_type => 0 ])
                     ->stats($stats)->hashref_array();
@@ -514,7 +564,7 @@ sub get_performance_stats {
             $type.'_passive_state_change_min' => { -stats => [ 'min percent_state_change' ]},
             $type.'_passive_state_change_max' => { -stats => [ 'max percent_state_change' ]},
         ];
-        $class = $self->get_class($type, \%options);
+        $class = $self->_get_class($type, \%options);
         $rows = $class
                     ->filter([ has_been_checked => 1, check_type => 1 ])
                     ->stats($stats)->hashref_array();
@@ -536,7 +586,7 @@ returns the service /host execution statistics
 sub get_extra_perf_stats {
     my($self, %options) = @_;
 
-    my $class = $self->get_class('status', \%options);
+    my $class = $self->_get_class('status', \%options);
     my $data  =  $class
                   ->columns(qw/
                         cached_log_messages connections connections_rate host_checks
@@ -552,6 +602,53 @@ sub get_extra_perf_stats {
     return($data, 'SUM');
 }
 
+
+##########################################################
+
+=head2 _get_class
+
+  _get_class
+
+generic function to return a table class
+
+=cut
+sub _get_class {
+    my $self      = shift;
+    my $table     = shift;
+    my $options   = shift;
+
+    my $class = $self->{'live'}->table($table);
+    if(defined $options->{'columns'}) {
+        $class = $class->columns(@{$options->{'columns'}});
+    }
+    if(defined $options->{'filter'} and scalar @{$options->{'filter'}} > 0) {
+        $class = $class->filter([@{$options->{'filter'}}]);
+    }
+
+    $options->{'options'}->{'AddPeer'} = 1;
+    $class = $class->options($options->{'options'});
+
+    return $class;
+}
+
+##########################################################
+
+=head2 _get_table
+
+  _get_table
+
+generic function to return a table with options
+
+=cut
+sub _get_table {
+    my $self      = shift;
+    my $table     = shift;
+    my $options   = shift;
+
+    my $class = $self->_get_class($table, $options);
+    my $data  = $class->hashref_array() || [];
+    return $data;
+}
 
 =head1 AUTHOR
 

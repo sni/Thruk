@@ -57,6 +57,19 @@ sub peer_addr {
 
 ##########################################################
 
+=head2 peer_name
+
+return the peers name
+
+=cut
+sub peer_name {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_processinfo
 
 return the process info
@@ -257,6 +270,66 @@ returns a list of timeperiods
 
 =cut
 sub get_timeperiods {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_performance_stats
+
+  get_performance_stats
+
+returns a performance statistics
+
+=cut
+sub get_performance_stats {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_extra_perf_stats
+
+  get_extra_perf_stats
+
+returns extra performance statistics
+
+=cut
+sub get_extra_perf_stats {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_host_stats
+
+  get_host_stats
+
+returns hosts statistics used in the tac page
+
+=cut
+sub get_host_stats {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_service_stats
+
+  get_service_stats
+
+returns service statistics used in the tac page
+
+=cut
+sub get_service_stats {
     my $self = shift;
     confess("unimplemented");
     return;

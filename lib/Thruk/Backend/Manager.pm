@@ -248,7 +248,7 @@ returns a result for a sub called on all peers
 sub _do_on_peers {
     my($self, $sub, $arg) = @_;
 
-    my($result,$type);
+    my($result, $type);
     eval {
         for my $peer (@{$self->get_peers()}) {
             next unless $peer->{'enabled'} == 1;
@@ -258,6 +258,7 @@ sub _do_on_peers {
         }
     };
     $self->{'log'}->error($@) if $@;
+    $type = '' unless defined $type;
 
     # howto merge the answers?
     my $data;
@@ -732,20 +733,8 @@ sub _sum_answer {
                 }
             }
         }
-        elsif(ref $data->{$peername} eq 'ARRAY') {
-            my $x = 0;
-            for my $val (@{$data->{$peername}}) {
-                if(!defined $return->[$x]) {
-                    $return->[$x] = $data->{$peername}->[$x];
-                } else {
-                    $return->[$x] += $data->{$peername}->[$x];
-                }
-                $x++;
-            }
-        } elsif(defined $data->{$peername}) {
-            $return = 0 unless defined $return;
-            next unless defined $data->{$peername};
-            $return += $data->{$peername};
+        else {
+            confess("not a hash, got: ".ref($data->{$peername}));
         }
     }
 
