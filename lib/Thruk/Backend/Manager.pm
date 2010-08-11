@@ -252,9 +252,9 @@ sub _do_on_peers {
     eval {
         for my $peer (@{$self->get_peers()}) {
             next unless $peer->{'enabled'} == 1;
-            $self->{'stats'}->profile(begin => "_do_on_peers() - ".$peer->{'name'});
+            $self->{'stats'}->profile(begin => "_do_on_peers() - ".$peer->{'name'}) if defined $self->{'stats'};
             ($result->{$peer->{'key'}}, $type) = $peer->{'class'}->$sub(@{$arg});
-            $self->{'stats'}->profile(end   => "_do_on_peers() - ".$peer->{'name'});
+            $self->{'stats'}->profile(end   => "_do_on_peers() - ".$peer->{'name'}) if defined $self->{'stats'};
         }
     };
     $self->{'log'}->error($@) if $@;
@@ -313,7 +313,7 @@ sub _remove_duplicates {
     my $self = shift;
     my $data = shift;
 
-    $self->{'stats'}->profile(begin => "Utils::remove_duplicates()");
+    $self->{'stats'}->profile(begin => "Utils::remove_duplicates()") if defined $self->{'stats'};
 
     # calculate md5 sums
     my $uniq = {};
@@ -351,7 +351,7 @@ sub _remove_duplicates {
 
     }
 
-    $self->{'stats'}->profile(end => "Utils::remove_duplicates()");
+    $self->{'stats'}->profile(end => "Utils::remove_duplicates()") if defined $self->{'stats'};
     return($return);
 }
 
@@ -539,7 +539,7 @@ sub _merge_answer {
         $return = {};
     }
 
-    $self->{'stats'}->profile(begin => "_merge_answer()");
+    $self->{'stats'}->profile(begin => "_merge_answer()") if defined $self->{'stats'};
 
     # iterate over original peers to retain order
     for my $peer (@{$self->get_peers()}) {
@@ -557,7 +557,7 @@ sub _merge_answer {
         }
     }
 
-    $self->{'stats'}->profile(end => "_merge_answer()");
+    $self->{'stats'}->profile(end => "_merge_answer()") if defined $self->{'stats'};
 
     return($return);
 }
@@ -569,7 +569,7 @@ sub _merge_hostgroup_answer {
     my $data   = shift;
     my $groups = {};
 
-    $self->{'stats'}->profile(begin => "_merge_hostgroup_answer()");
+    $self->{'stats'}->profile(begin => "_merge_hostgroup_answer()") if defined $self->{'stats'};
 
     for my $peer (@{$self->get_peers()}) {
         my $key = $peer->{'key'};
@@ -597,7 +597,7 @@ sub _merge_hostgroup_answer {
     }
     my @return = values %{$groups};
 
-    $self->{'stats'}->profile(end => "_merge_hostgroup_answer()");
+    $self->{'stats'}->profile(end => "_merge_hostgroup_answer()") if defined $self->{'stats'};
 
     return(\@return);
 }
@@ -609,7 +609,7 @@ sub _merge_servicegroup_answer {
     my $data   = shift;
     my $groups = {};
 
-    $self->{'stats'}->profile(begin => "_merge_servicegroup_answer()");
+    $self->{'stats'}->profile(begin => "_merge_servicegroup_answer()") if defined $self->{'stats'};
     for my $peer (@{$self->get_peers()}) {
         my $key = $peer->{'key'};
         next if !defined $data->{$key};
@@ -636,7 +636,7 @@ sub _merge_servicegroup_answer {
 
     my @return = values %{$groups};
 
-    $self->{'stats'}->profile(end => "_merge_servicegroup_answer()");
+    $self->{'stats'}->profile(end => "_merge_servicegroup_answer()") if defined $self->{'stats'};
 
     return(\@return);
 }
@@ -647,7 +647,7 @@ sub _merge_stats_answer {
     my $data   = shift;
     my $return;
 
-    $self->{'stats'}->profile(begin => "_merge_stats_answer()");
+    $self->{'stats'}->profile(begin => "_merge_stats_answer()") if defined $self->{'stats'};
 
     for my $peername (keys %{$data}) {
         if(ref $data->{$peername} eq 'HASH') {
@@ -710,7 +710,7 @@ sub _merge_stats_answer {
         }
     }
 
-    $self->{'stats'}->profile(end => "_merge_stats_answer()");
+    $self->{'stats'}->profile(end => "_merge_stats_answer()") if defined $self->{'stats'};
 
     return $return;
 }
@@ -721,7 +721,7 @@ sub _sum_answer {
     my $data   = shift;
     my $return;
 
-    $self->{'stats'}->profile(begin => "_sum_answer()");
+    $self->{'stats'}->profile(begin => "_sum_answer()") if defined $self->{'stats'};
 
     for my $peername (keys %{$data}) {
         if(ref $data->{$peername} eq 'HASH') {
@@ -738,7 +738,7 @@ sub _sum_answer {
         }
     }
 
-    $self->{'stats'}->profile(end => "_sum_answer()");
+    $self->{'stats'}->profile(end => "_sum_answer()") if defined $self->{'stats'};
 
     return $return;
 }
@@ -772,9 +772,10 @@ sub _sort {
 
     $key = $sortby;
     if(ref $sortby eq 'HASH') {
-        for $order (qw/ASC DESC/) {
-            if(defined $sortby->{$order}) {
-                $key = $sortby->{$order};
+        for my $ord (qw/ASC DESC/) {
+            if(defined $sortby->{$ord}) {
+                $key   = $sortby->{$ord};
+                $order = $ord;
                 last;
             }
         }
@@ -782,7 +783,7 @@ sub _sort {
 
     if(!defined $key) { confess('missing options in sort()'); }
 
-    $self->{'stats'}->profile(begin => "_sort()");
+    $self->{'stats'}->profile(begin => "_sort()") if defined $self->{'stats'};
 
     $order = "ASC" if !defined $order;
 
@@ -819,7 +820,7 @@ sub _sort {
     use warnings;
     ## use critic
 
-    $self->{'stats'}->profile(end => "_sort()");
+    $self->{'stats'}->profile(end => "_sort()") if defined $self->{'stats'};
 
     return(\@sorted);
 }

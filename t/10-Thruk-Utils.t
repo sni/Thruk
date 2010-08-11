@@ -3,10 +3,11 @@
 #########################
 
 use strict;
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Data::Dumper;
 
 use_ok('Thruk::Utils');
+use_ok('Thruk::Backend::Manager');
 
 #########################
 # sort
@@ -48,22 +49,21 @@ my $sorted_by_abc_exp = [
 ];
 #########################
 
-my $sorted_by_a = Thruk::Utils::sort(undef, $befor, 'a', 'ASC');
+my $sorted_by_a = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => 'a' });
 is_deeply($sorted_by_a, $sorted_by_a_exp, 'sort by colum a');
 
-my $sorted_by_b = Thruk::Utils::sort(undef, $befor, 'b', 'ASC');
+my $sorted_by_b = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => 'b'});
 is_deeply($sorted_by_b, $sorted_by_b_exp, 'sort by colum b');
 
-my $sorted_by_c = Thruk::Utils::sort(undef, $befor, 'c', 'ASC');
+my $sorted_by_c = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => 'c'});
 is_deeply($sorted_by_c, $sorted_by_c_exp, 'sort by colum c');
 
-my $sorted_by_ba = Thruk::Utils::sort(undef, $befor, ['b', 'a'], 'ASC');
+my $sorted_by_ba = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => ['b', 'a'] });
 is_deeply($sorted_by_ba, $sorted_by_ba_exp, 'sort by colum b,a');
 
-my $sorted_by_ba_reverse = Thruk::Utils::sort(undef, $befor, ['b', 'a'], 'DESC');
+my $sorted_by_ba_reverse = Thruk::Backend::Manager::_sort(undef, $befor, { 'DESC' => ['b', 'a'] });
 my @sorted_by_ba_exp_reverse = reverse @{$sorted_by_ba_exp};
 is_deeply($sorted_by_ba_reverse, \@sorted_by_ba_exp_reverse, 'sort by colum b,a reverse');
 
-my $sorted_by_abc = Thruk::Utils::sort(undef, $befor, ['a','b','c'], 'ASC');
+my $sorted_by_abc = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => ['a','b','c'] });
 is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
-
