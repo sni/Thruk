@@ -207,7 +207,7 @@ sub get_hostgroups {
 
 ##########################################################
 
-=head2 get_servives
+=head2 get_services
 
   get_services
 

@@ -98,7 +98,7 @@ sub get_peer_by_key {
     for my $peer (@{$self->get_peers()}) {
         return $peer if $peer->{'key'} eq $key;
     }
-    return undef;
+    return;
 }
 
 ##########################################################
@@ -278,7 +278,7 @@ sub _do_on_peers {
         $data = $self->_merge_answer($result, $type);
     }
 
-    if(    $sub =~ m/^get_/
+    if(    $sub =~ m/^get_/mx
        and ref $arg eq 'ARRAY'
        and scalar @{$arg}%2 == 0
       ) {
@@ -471,7 +471,7 @@ sub _initialise_backends {
 
     # get a list of our backend provider modules
     my @provider = findsubmod("Thruk::Backend::Provider");
-    @provider = grep {$_ !~ m/::Base$/} @provider;
+    @provider = grep {$_ !~ m/::Base$/mx} @provider;
 
     # did we get a single peer or a list of peers?
     my @peer_configs;
@@ -503,7 +503,7 @@ sub _initialise_peer {
     confess "missing name in peer configuration" unless defined $config->{'name'};
     confess "missing type in peer configuration" unless defined $config->{'type'};
 
-    my @provider = grep {$_ =~ m/::$config->{'type'}$/i} @{$provider};
+    my @provider = grep {$_ =~ m/::$config->{'type'}$/mxi} @{$provider};
     confess "unknown type in peer configuration" unless scalar @provider > 0;
     my $class = $provider[0];
 
@@ -655,13 +655,13 @@ sub _merge_stats_answer {
                 if(!defined $return->{$key}) {
                     $return->{$key} = $data->{$peername}->{$key};
                 } elsif(looks_like_number($data->{$peername}->{$key})) {
-                    if($key =~ m/_sum$/) {
+                    if($key =~ m/_sum$/mx) {
                         $return->{$key} += $data->{$peername}->{$key};
                     }
-                    elsif($key =~ m/_min$/) {
+                    elsif($key =~ m/_min$/mx) {
                         $return->{$key} = $data->{$peername}->{$key} if $return->{$key} > $data->{$peername}->{$key};
                     }
-                    elsif($key =~ m/_max$/) {
+                    elsif($key =~ m/_max$/mx) {
                         $return->{$key} = $data->{$peername}->{$key} if $return->{$key} < $data->{$peername}->{$key};
                     }
                 }
@@ -671,7 +671,7 @@ sub _merge_stats_answer {
 
     # percentages and averages?
     for my $key (keys %{$return}) {
-        if($key =~ m/^(.*)_(\d+|all)_sum$/) {
+        if($key =~ m/^(.*)_(\d+|all)_sum$/mx) {
             my $pkey = $1.'_sum';
             my $nkey = $1.'_'.$2.'_perc';
             if(exists $return->{$pkey} and $return->{$pkey} > 0) {
