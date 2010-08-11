@@ -101,11 +101,11 @@ sub get_livestatus_conf {
 
 ########################################
 
-=head2 get_livestatus_conf
+=head2 convert_config
 
-  get_livestatus_conf()
+  convert_config()
 
-returns config for livestatus backends
+returns the converted config for livestatus backends
 
 =cut
 sub convert_config {

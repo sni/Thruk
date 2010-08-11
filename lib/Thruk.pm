@@ -239,8 +239,16 @@ if($@) {
     croak('cannot start');
 }
 
+
 ###################################################
-# wrapper to avoid undef values in TT
+
+=head2 check_user_roles_wrapper
+
+  check_user_roles_wrapper()
+
+wrapper to avoid undef values in TT
+
+=cut
 sub check_user_roles_wrapper {
     my $self = shift;
     if($self->check_user_roles(@_)) {
