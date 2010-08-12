@@ -53,6 +53,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{'hostgroup'}          = $c->{'request'}->{'parameters'}->{'hostgroup'}          || '';
     $c->stash->{'servicegroup'}       = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';
     $c->stash->{'host'}               = $c->{'request'}->{'parameters'}->{'host'}               || '';
+    $c->stash->{'data'}               = "";
+    $c->stash->{'style'}              = "";
+    $c->stash->{'has_error'}          = 0;
+    $c->stash->{'pager'}              = "";
 
     $style = 'detail' unless defined $allowed_subpages->{$style};
 
@@ -129,7 +133,7 @@ sub _process_raw_request {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
-    return if defined $c->stash->{'has_error'};
+    return if $c->stash->{'has_error'};
 
     my $limit = $c->{'request'}->{'parameters'}->{'limit'} || 0;
 
@@ -208,7 +212,7 @@ sub _process_details_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
-    return if defined $c->stash->{'has_error'};
+    return if $c->stash->{'has_error'};
 
     # add comments and downtimes
     my $comments = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
@@ -285,7 +289,7 @@ sub _process_hostdetails_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
-    return if defined $c->stash->{'has_error'};
+    return if $c->stash->{'has_error'};
 
     # add comments and downtimes
     my $comments = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ] );
@@ -346,7 +350,7 @@ sub _process_overview_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_filter($c);
-    return if defined $c->stash->{'has_error'};
+    return if $c->stash->{'has_error'};
 
     # we need the hostname, address etc...
     my $host_data;
@@ -476,7 +480,7 @@ sub _process_grid_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_filter($c);
-    return if defined $c->stash->{'has_error'};
+    return if $c->stash->{'has_error'};
 
     # we need the hostname, address etc...
     my $host_data;
@@ -568,7 +572,7 @@ sub _process_summary_page {
 
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_filter($c);
-    return if defined $c->stash->{'has_error'};
+    return if $c->stash->{'has_error'};
 
     # get all host/service groups
     my $groups;
@@ -1184,7 +1188,9 @@ sub _classic_filter {
     }
 
     # fill the host/service totals box
-    $self->_fill_totals_box( $c, $hostfilter, $servicefilter );
+    unless($errors) {
+        $self->_fill_totals_box( $c, $hostfilter, $servicefilter );
+    }
 
     # then add some more filter based on get parameter
     my $hoststatustypes    = $c->{'request'}->{'parameters'}->{'hoststatustypes'};
@@ -1307,7 +1313,9 @@ sub _do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    $self->_fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
+    unless($c->stash->{'has_error'}) {
+        $self->_fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
+    }
 
     # if there is only one search with a single text filter
     # set stash to reflect a classic search

@@ -183,6 +183,7 @@ returns the current prefered target
 =cut
 sub get_target {
     my $c = $Thruk::Utils::Menu::c;
+
     return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'};
     if($c->{'stash'}->{'use_frames'}) {
         return("main");

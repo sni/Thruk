@@ -13,11 +13,11 @@
           <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 1,  hoststatustypes => hoststatustypes) %]'>Pending</a></th>
         </tr>
         <tr>
-          <td class='[% IF service_stats.ok > 0 %]serviceTotalsOK[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.ok %][% service_stats.ok %][% ELSE %]0[% END %]</td>
-          <td class='[% IF service_stats.warning > 0 %]serviceTotalsWARNING[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.warning %][% service_stats.warning %][% ELSE %]0[% END %]</td>
-          <td class='[% IF service_stats.unknown > 0 %]serviceTotalsUNKNOWN[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.unknown %][% service_stats.unknown %][% ELSE %]0[% END %]</td>
-          <td class='[% IF service_stats.critical > 0 %]serviceTotalsCRITICAL[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.critical %][% service_stats.critical %][% ELSE %]0[% END %]</td>
-          <td class='[% IF service_stats.pending > 0 %]serviceTotalsPENDING[% ELSE %]serviceTotals[% END %]'>[% IF service_stats.pending %][% service_stats.pending %][% ELSE %]0[% END %]</td>
+          <td class='[% IF !has_error && service_stats.ok > 0 %]serviceTotalsOK[% ELSE %]serviceTotals[% END %]'>[% IF !has_error && service_stats.ok %][% service_stats.ok %][% ELSE %]0[% END %]</td>
+          <td class='[% IF !has_error && service_stats.warning > 0 %]serviceTotalsWARNING[% ELSE %]serviceTotals[% END %]'>[% IF !has_error && service_stats.warning %][% service_stats.warning %][% ELSE %]0[% END %]</td>
+          <td class='[% IF !has_error && service_stats.unknown > 0 %]serviceTotalsUNKNOWN[% ELSE %]serviceTotals[% END %]'>[% IF !has_error && service_stats.unknown %][% service_stats.unknown %][% ELSE %]0[% END %]</td>
+          <td class='[% IF !has_error && service_stats.critical > 0 %]serviceTotalsCRITICAL[% ELSE %]serviceTotals[% END %]'>[% IF !has_error && service_stats.critical %][% service_stats.critical %][% ELSE %]0[% END %]</td>
+          <td class='[% IF !has_error && service_stats.pending > 0 %]serviceTotalsPENDING[% ELSE %]serviceTotals[% END %]'>[% IF !has_error && service_stats.pending %][% service_stats.pending %][% ELSE %]0[% END %]</td>
         </tr>
       </table>
     </td>
@@ -26,8 +26,12 @@
     <td align="center">
       <table border="1" class='serviceTotals'>
         <tr>
+          [% totalProblems = 0 %]
+          [% total         = 0 %]
+          [% IF !has_error %]
           [% totalProblems = service_stats.warning + service_stats.critical + service_stats.unknown %]
           [% total         = service_stats.ok + totalProblems + service_stats.pending %]
+          [% END %]
           <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 28,    hoststatustypes => hoststatustypes) %]'><i>All Problems</i></a></th>
           <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 'undef', hoststatustypes => hoststatustypes) %]'><i>All Types</i></a></th>
         </tr>

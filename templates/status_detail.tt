@@ -241,6 +241,6 @@
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <br>
-    <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
+    <div class='itemTotalsTitle'>[% IF !has_error && data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Service Entries Displayed</div>
 
 [% PROCESS _footer.tt %]

@@ -126,6 +126,10 @@ sub begin : Private {
         $c->detach("/error/index/14");
     }
 
+    my $target = $c->{'request'}->{'parameters'}->{'target'};
+    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
+        $c->stash->{'target'} = '_parent';
+    }
     $c->stash->{'navigation'} = "";
     if( Thruk->config->{'use_frames'} == 0 ) {
         Thruk::Utils::Menu::read_navigation($c);
@@ -279,11 +283,6 @@ page: /thruk/side.html
 
 sub thruk_side_html : Path('/thruk/side.html') {
     my( $self, $c ) = @_;
-
-    my $target = $c->{'request'}->{'parameters'}->{'target'};
-    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
-        $c->stash->{'target'} = '_parent';
-    }
 
     Thruk::Utils::Menu::read_navigation($c);
 
