@@ -15,6 +15,7 @@ Base class for backend connection provider
 =head1 METHODS
 
 =cut
+
 ##########################################################
 
 =head2 new
@@ -22,6 +23,7 @@ Base class for backend connection provider
 create new manager
 
 =cut
+
 sub new {
     my( $class, $c ) = @_;
     my $self = {};
@@ -36,6 +38,7 @@ sub new {
 return the peers key
 
 =cut
+
 sub peer_key {
     my $self = shift;
     confess("unimplemented");
@@ -49,6 +52,7 @@ sub peer_key {
 return the peers address
 
 =cut
+
 sub peer_addr {
     my $self = shift;
     confess("unimplemented");
@@ -62,6 +66,7 @@ sub peer_addr {
 return the peers name
 
 =cut
+
 sub peer_name {
     my $self = shift;
     confess("unimplemented");
@@ -75,6 +80,7 @@ sub peer_name {
 return the process info
 
 =cut
+
 sub get_processinfo {
     my $self = shift;
     confess("unimplemented");
@@ -88,12 +94,12 @@ sub get_processinfo {
 returns if this user is allowed to submit commands
 
 =cut
+
 sub get_can_submit_commands {
     my $self = shift;
     confess("unimplemented");
     return;
 }
-
 
 ##########################################################
 
@@ -104,6 +110,7 @@ sub get_can_submit_commands {
 returns a list of contactgroups by contact
 
 =cut
+
 sub get_contactgroups_by_contact {
     my $self = shift;
     confess("unimplemented");
@@ -119,6 +126,7 @@ sub get_contactgroups_by_contact {
 returns a list of commands
 
 =cut
+
 sub get_commands {
     my $self = shift;
     confess("unimplemented");
@@ -134,6 +142,7 @@ sub get_commands {
 returns a list of comments
 
 =cut
+
 sub get_comments {
     my $self = shift;
     confess("unimplemented");
@@ -149,6 +158,7 @@ sub get_comments {
 returns a list of contactgroups
 
 =cut
+
 sub get_contactgroups {
     my $self = shift;
     confess("unimplemented");
@@ -164,6 +174,7 @@ sub get_contactgroups {
 returns a list of contacts
 
 =cut
+
 sub get_contacts {
     my $self = shift;
     confess("unimplemented");
@@ -179,6 +190,7 @@ sub get_contacts {
 returns a list of downtimes
 
 =cut
+
 sub get_downtimes {
     my $self = shift;
     confess("unimplemented");
@@ -194,6 +206,7 @@ sub get_downtimes {
 returns a list of hostgroups
 
 =cut
+
 sub get_hostgroups {
     my $self = shift;
     confess("unimplemented");
@@ -209,6 +222,7 @@ sub get_hostgroups {
 returns a list of hostgroup names
 
 =cut
+
 sub get_hostgroup_names {
     my $self = shift;
     confess("unimplemented");
@@ -224,6 +238,7 @@ sub get_hostgroup_names {
 returns a list of hosts
 
 =cut
+
 sub get_hosts {
     my $self = shift;
     confess("unimplemented");
@@ -239,6 +254,7 @@ sub get_hosts {
 returns a list of host names
 
 =cut
+
 sub get_host_names {
     my $self = shift;
     confess("unimplemented");
@@ -254,6 +270,7 @@ sub get_host_names {
 returns a list of queued checks
 
 =cut
+
 sub get_scheduling_queue {
     my $self = shift;
     confess("unimplemented");
@@ -269,6 +286,7 @@ sub get_scheduling_queue {
 returns a list of servicegroups
 
 =cut
+
 sub get_servicegroups {
     my $self = shift;
     confess("unimplemented");
@@ -284,6 +302,7 @@ sub get_servicegroups {
 returns a list of servicegroup names
 
 =cut
+
 sub get_servicegroup_names {
     my $self = shift;
     confess("unimplemented");
@@ -299,6 +318,7 @@ sub get_servicegroup_names {
 returns a list of services
 
 =cut
+
 sub get_services {
     my $self = shift;
     confess("unimplemented");
@@ -314,6 +334,7 @@ sub get_services {
 returns a list of service names
 
 =cut
+
 sub get_service_names {
     my $self = shift;
     confess("unimplemented");
@@ -329,6 +350,7 @@ sub get_service_names {
 returns a list of timeperiods
 
 =cut
+
 sub get_timeperiods {
     my $self = shift;
     confess("unimplemented");
@@ -344,6 +366,7 @@ sub get_timeperiods {
 returns a performance statistics
 
 =cut
+
 sub get_performance_stats {
     my $self = shift;
     confess("unimplemented");
@@ -359,6 +382,7 @@ sub get_performance_stats {
 returns extra performance statistics
 
 =cut
+
 sub get_extra_perf_stats {
     my $self = shift;
     confess("unimplemented");
@@ -374,6 +398,7 @@ sub get_extra_perf_stats {
 returns hosts statistics used in the tac page
 
 =cut
+
 sub get_host_stats {
     my $self = shift;
     confess("unimplemented");
@@ -389,6 +414,7 @@ sub get_host_stats {
 returns service statistics used in the tac page
 
 =cut
+
 sub get_service_stats {
     my $self = shift;
     confess("unimplemented");

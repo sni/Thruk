@@ -25,7 +25,6 @@ Root Controller of the Thruk Monitoring Webinterface
 
 =cut
 
-
 ######################################
 
 =head2 begin
@@ -34,23 +33,24 @@ sets the doc link and decides if frames are used
 begin, running at the begin of every req
 
 =cut
+
 sub begin : Private {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
     # frame options
     my $use_frames = Thruk->config->{'use_frames'};
-    $use_frames    = 1 unless defined $use_frames;
+    $use_frames = 1 unless defined $use_frames;
     my $show_nav_button = 1;
-    if(exists $c->{'request'}->{'parameters'}->{'nav'} and $c->{'request'}->{'parameters'}->{'nav'} ne '') {
-        if($c->{'request'}->{'parameters'}->{'nav'} ne '1') {
+    if( exists $c->{'request'}->{'parameters'}->{'nav'} and $c->{'request'}->{'parameters'}->{'nav'} ne '' ) {
+        if( $c->{'request'}->{'parameters'}->{'nav'} ne '1' ) {
             $show_nav_button = 1;
         }
         $use_frames = 1;
-        if($c->{'request'}->{'parameters'}->{'nav'} eq '1') {
+        if( $c->{'request'}->{'parameters'}->{'nav'} eq '1' ) {
             $use_frames = 0;
         }
     }
-    if(Thruk->config->{'use_frames'} == 1) {
+    if( Thruk->config->{'use_frames'} == 1 ) {
         $show_nav_button = 0;
     }
     $c->stash->{'use_frames'}      = $use_frames;
@@ -58,9 +58,9 @@ sub begin : Private {
     $c->stash->{'reload_nav'}      = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
 
     # use pager?
-    $c->stash->{'use_pager'}          = Thruk->config->{'use_pager'}          || 1;
-    $c->stash->{'default_page_size'}  = Thruk->config->{'default_page_size'}  || 100;
-    $c->stash->{'paging_steps'}       = Thruk->config->{'paging_steps'}       || ['100', '500', '1000', '5000', 'all' ];
+    $c->stash->{'use_pager'}         = Thruk->config->{'use_pager'}         || 1;
+    $c->stash->{'default_page_size'} = Thruk->config->{'default_page_size'} || 100;
+    $c->stash->{'paging_steps'}      = Thruk->config->{'paging_steps'}      || [ '100', '500', '1000', '5000', 'all' ];
 
     $c->stash->{'start_page'}         = Thruk->config->{'start_page'}         || '/thruk/main.html';
     $c->stash->{'documentation_link'} = Thruk->config->{'documentation_link'} || '/thruk/docs/index.html';
@@ -71,7 +71,7 @@ sub begin : Private {
     $c->stash->{'use_feature_histogram'} = Thruk->config->{'use_feature_histogram'} || 0;
 
     # enable trends if gd loaded
-    if($c->config->{'has_gd'}) {
+    if( $c->config->{'has_gd'} ) {
         $c->stash->{'use_feature_trends'} = 1;
     }
 
@@ -82,16 +82,17 @@ sub begin : Private {
 
     # which theme?
     my $theme;
-    if(defined $c->request->cookie('thruk_theme')) {
+    if( defined $c->request->cookie('thruk_theme') ) {
         my $theme_cookie = $c->request->cookie('thruk_theme');
         $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
-        $c->log->debug("Set theme: '".$theme."' by cookie") if defined $theme;
+        $c->log->debug( "Set theme: '" . $theme . "' by cookie" ) if defined $theme;
     }
     $theme = $theme || Thruk->config->{'default_theme'} || 'Classic';
-    if(defined $c->config->{templates_paths}) {
-        $c->stash->{additional_template_paths} = [ @{$c->config->{templates_paths}}, $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
-    } else {
-        $c->stash->{additional_template_paths} = [ $c->config->{root}.'/thruk/themes/'.$theme.'/templates' ];
+    if( defined $c->config->{templates_paths} ) {
+        $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
+    }
+    else {
+        $c->stash->{additional_template_paths} = [ $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
     $c->stash->{'theme'} = $theme;
 
@@ -102,31 +103,31 @@ sub begin : Private {
 
     # all problems link?
     my $all_problems_link = Thruk->config->{'all_problems_link'};
-    if(!defined $all_problems_link) {
+    if( !defined $all_problems_link ) {
         $all_problems_link = "/thruk/cgi-bin/status.cgi?style=detail&amp;hidesearch=1&amp;s0_hoststatustypes=12&amp;s0_servicestatustypes=31&amp;s0_hostprops=10&amp;s0_serviceprops=0&amp;s1_hoststatustypes=15&amp;s1_servicestatustypes=28&amp;s1_hostprops=10&amp;s1_serviceprops=10&amp;s1_hostprop=2&amp;s1_hostprop=8&amp;title=All%20Unhandled%20Problems";
     }
     $c->stash->{'all_problems_link'} = $all_problems_link;
 
     my $hidetop = $c->{'request'}->{'parameters'}->{'hidetop'};
-    $c->stash->{hidetop}   = $hidetop;
+    $c->stash->{hidetop} = $hidetop;
 
     $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
 
     # initialize our backends
-    unless(defined $c->{'query'}) {
+    unless ( defined $c->{'query'} ) {
         $c->{'db'} = Thruk::Backend::Manager->new(
-                                    'stats'   => $c->stats,
-                                    'log'     => $c->log,
-                                );
+            'stats' => $c->stats,
+            'log'   => $c->log,
+        );
     }
 
     # redirect to error page unless we have a connection
-    if(!defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs') {
+    if( !defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
         $c->detach("/error/index/14");
     }
 
-    $c->stash->{'navigation'}  = "";
-    if(Thruk->config->{'use_frames'} == 0) {
+    $c->stash->{'navigation'} = "";
+    if( Thruk->config->{'use_frames'} == 0 ) {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
@@ -142,23 +143,23 @@ auto, runs on every request
 redirects mobile browser to mobile cgis if enabled
 
 =cut
-sub auto : Private {
-    my ( $self, $c ) = @_;
 
-    if(!defined Thruk->config->{'use_feature_mobile'} or Thruk->config->{'use_feature_mobile'} != 1) {
+sub auto : Private {
+    my( $self, $c ) = @_;
+
+    if( !defined Thruk->config->{'use_feature_mobile'} or Thruk->config->{'use_feature_mobile'} != 1 ) {
         return 1;
     }
 
-    if(defined $c->{'request'}->{'headers'}->{'user-agent'}
-       and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/iPhone/mx
-       and defined $c->{'request'}->{'action'}
-       and $c->{'request'}->{'action'} =~ m/^(\/|thruk|)$/mx
-    ) {
+    if(     defined $c->{'request'}->{'headers'}->{'user-agent'}
+        and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/iPhone/mx
+        and defined $c->{'request'}->{'action'}
+        and $c->{'request'}->{'action'} =~ m/^(\/|thruk|)$/mx )
+    {
         return $c->redirect("/thruk/cgi-bin/mobile.cgi");
     }
     return 1;
 }
-
 
 ######################################
 
@@ -167,12 +168,12 @@ sub auto : Private {
 show our 404 error page
 
 =cut
-sub default :Path {
-    my ( $self, $c ) = @_;
-    $c->response->body( 'Page not found' );
+
+sub default : Path {
+    my( $self, $c ) = @_;
+    $c->response->body('Page not found');
     return $c->response->status(404);
 }
-
 
 ######################################
 
@@ -181,14 +182,14 @@ sub default :Path {
 redirect from /
 
 =cut
-sub index :Path('/') {
-    my ( $self, $c ) = @_;
-    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
+
+sub index : Path('/') {
+    my( $self, $c ) = @_;
+    if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         $c->detach("default");
     }
     return $c->redirect("/thruk/");
 }
-
 
 ######################################
 
@@ -199,16 +200,16 @@ redirect from /index.html
 beacuse we dont want index.html in the url
 
 =cut
+
 sub index_html : Path('/index.html') {
-    my ( $self, $c ) = @_;
-    if($c->stash->{'use_frames'}) {
+    my( $self, $c ) = @_;
+    if( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_index_html");
     }
     else {
         return $c->detach("thruk_main_html");
     }
 }
-
 
 ######################################
 
@@ -218,33 +219,35 @@ redirect from /thruk/
 but if used not via fastcgi/apache, there is no way around
 
 =cut
+
 sub thruk_index : Path('/thruk/') {
-    my ( $self, $c ) = @_;
-    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
+    my( $self, $c ) = @_;
+    if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
-    if($c->stash->{'use_frames'} and !$c->stash->{'show_nav_button'}) {
+    if( $c->stash->{'use_frames'} and !$c->stash->{'show_nav_button'} ) {
         return $c->detach("thruk_index_html");
     }
 
     # custom start page?
     $c->stash->{'start_page'} = '/thruk/main.html' unless defined $c->stash->{'start_page'};
-    if($c->stash->{'start_page'} !~ /^\/thruk\//mx) {
+    if( $c->stash->{'start_page'} !~ /^\/thruk\//mx ) {
+
         # external link, put in frames
-        my $start_page = uri_escape($c->stash->{'start_page'});
-        $c->log->debug("redirecting to framed start page: '/thruk/frame.html?link=".$start_page."'");
-        $c->log->debug($c->redirect("/thruk/frame.html?link=".$start_page));
-        return $c->redirect("/thruk/frame.html?link=".$start_page);
+        my $start_page = uri_escape( $c->stash->{'start_page'} );
+        $c->log->debug( "redirecting to framed start page: '/thruk/frame.html?link=" . $start_page . "'" );
+        $c->log->debug( $c->redirect( "/thruk/frame.html?link=" . $start_page ) );
+        return $c->redirect( "/thruk/frame.html?link=" . $start_page );
     }
-    elsif($c->stash->{'start_page'} ne '/thruk/main.html') {
+    elsif ( $c->stash->{'start_page'} ne '/thruk/main.html' ) {
+
         # internal link, no need to put in frames
-        $c->log->debug("redirecting to default start page: '".$c->stash->{'start_page'}."'");
-        return $c->redirect($c->stash->{'start_page'});
+        $c->log->debug( "redirecting to default start page: '" . $c->stash->{'start_page'} . "'" );
+        return $c->redirect( $c->stash->{'start_page'} );
     }
 
     return $c->detach("thruk_main_html");
 }
-
 
 ######################################
 
@@ -254,17 +257,17 @@ page: /thruk/index.html
 # but if used not via fastcgi/apache, there is no way around
 
 =cut
+
 sub thruk_index_html : Path('/thruk/index.html') {
-    my ( $self, $c ) = @_;
-    unless($c->stash->{'use_frames'}) {
+    my( $self, $c ) = @_;
+    unless ( $c->stash->{'use_frames'} ) {
         $c->detach("thruk_main_html");
     }
-    $c->response->header('Cache-Control' => 'max-age=7200, public');
+    $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
     $c->stash->{'template'} = 'index.tt';
 
     return 1;
 }
-
 
 ######################################
 
@@ -273,11 +276,12 @@ sub thruk_index_html : Path('/thruk/index.html') {
 page: /thruk/side.html
 
 =cut
+
 sub thruk_side_html : Path('/thruk/side.html') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
     my $target = $c->{'request'}->{'parameters'}->{'target'};
-    if(!$c->stash->{'use_frames'} and defined $target and $target eq '_parent') {
+    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
         $c->stash->{'target'} = '_parent';
     }
 
@@ -297,17 +301,15 @@ page: /thruk/frame.html
 # creates frame for external pages
 
 =cut
+
 sub thruk_frame_html : Path('/thruk/frame.html') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
     # allowed links to be framed
-    my $valid_links = [
-        quotemeta($c->stash->{'documentation_link'}),
-        quotemeta($c->stash->{'start_page'}),
-    ];
+    my $valid_links = [ quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
     my $additional_links = Thruk->config->{'allowed_frame_links'};
-    if(defined $additional_links) {
-        if(ref $additional_links eq 'ARRAY') {
+    if( defined $additional_links ) {
+        if( ref $additional_links eq 'ARRAY' ) {
             $valid_links = [ @{$valid_links}, @{$additional_links} ];
         }
         else {
@@ -317,9 +319,9 @@ sub thruk_frame_html : Path('/thruk/frame.html') {
 
     # check if any of the allowed links match
     my $link = $c->{'request'}->{'parameters'}->{'link'};
-    if(defined $link) {
-        for my $pattern (@{$valid_links}) {
-            if($link =~ m/$pattern/mx) {
+    if( defined $link ) {
+        for my $pattern ( @{$valid_links} ) {
+            if( $link =~ m/$pattern/mx ) {
                 $c->stash->{'target'}   = '_parent';
                 $c->stash->{'main'}     = $link;
                 $c->stash->{'template'} = 'index.tt';
@@ -342,15 +344,15 @@ sub thruk_frame_html : Path('/thruk/frame.html') {
 page: /thruk/main.html
 
 =cut
+
 sub thruk_main_html : Path('/thruk/main.html') {
-    my ( $self, $c ) = @_;
-    $c->stash->{'title'}     = 'Thruk Monitoring Webinterface';
-    $c->stash->{'page'}      = 'splashpage';
-    $c->stash->{'template'}  = 'main.tt';
+    my( $self, $c ) = @_;
+    $c->stash->{'title'}    = 'Thruk Monitoring Webinterface';
+    $c->stash->{'page'}     = 'splashpage';
+    $c->stash->{'template'} = 'main.tt';
 
     return 1;
 }
-
 
 ######################################
 
@@ -359,8 +361,9 @@ sub thruk_main_html : Path('/thruk/main.html') {
 page: /thruk/changes.html
 
 =cut
-sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+
+sub thruk_changes_html : Path('/thruk/changes.html') : MyAction('AddDefaults') {
+    my( $self, $c ) = @_;
     $c->stash->{infoBoxTitle}     = 'Change Log';
     $c->stash->{'title'}          = 'Change Log';
     $c->stash->{'no_auto_reload'} = 1;
@@ -369,7 +372,6 @@ sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddDefaults') {
     return 1;
 }
 
-
 ######################################
 
 =head2 thruk_docs
@@ -377,9 +379,10 @@ sub thruk_changes_html : Path('/thruk/changes.html') :MyAction('AddDefaults') {
 page: /thruk/docs/
 
 =cut
+
 sub thruk_docs : Path('/thruk/docs/') {
-    my ( $self, $c ) = @_;
-    if(scalar @{$c->request->args} > 0 and $c->request->args->[0] ne 'index.html') {
+    my( $self, $c ) = @_;
+    if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         $c->detach("default");
     }
     $c->stash->{'title'}          = 'Documentation';
@@ -389,7 +392,6 @@ sub thruk_docs : Path('/thruk/docs/') {
     return 1;
 }
 
-
 ######################################
 
 =head2 tac_cgi
@@ -397,11 +399,11 @@ sub thruk_docs : Path('/thruk/docs/') {
 page: /thruk/cgi-bin/tac.cgi
 
 =cut
+
 sub tac_cgi : Path('/thruk/cgi-bin/tac.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/tac/index');
 }
-
 
 ######################################
 
@@ -410,11 +412,11 @@ sub tac_cgi : Path('/thruk/cgi-bin/tac.cgi') {
 page: /thruk/cgi-bin/status.cgi
 
 =cut
+
 sub status_cgi : Path('/thruk/cgi-bin/status.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/status/index');
 }
-
 
 ######################################
 
@@ -423,11 +425,11 @@ sub status_cgi : Path('/thruk/cgi-bin/status.cgi') {
 page: /thruk/cgi-bin/cmd.cgi
 
 =cut
+
 sub cmd_cgi : Path('/thruk/cgi-bin/cmd.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/cmd/index');
 }
-
 
 ######################################
 
@@ -436,11 +438,11 @@ sub cmd_cgi : Path('/thruk/cgi-bin/cmd.cgi') {
 page: /thruk/cgi-bin/outages.cgi
 
 =cut
+
 sub outages_cgi : Path('/thruk/cgi-bin/outages.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/outages/index');
 }
-
 
 ######################################
 
@@ -449,11 +451,11 @@ sub outages_cgi : Path('/thruk/cgi-bin/outages.cgi') {
 page: /thruk/cgi-bin/avail.cgi
 
 =cut
+
 sub avail_cgi : Path('/thruk/cgi-bin/avail.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/avail/index');
 }
-
 
 ######################################
 
@@ -462,11 +464,11 @@ sub avail_cgi : Path('/thruk/cgi-bin/avail.cgi') {
 page: /thruk/cgi-bin/trends.cgi
 
 =cut
+
 sub trends_cgi : Path('/thruk/cgi-bin/trends.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/trends/index');
 }
-
 
 ######################################
 
@@ -475,11 +477,11 @@ sub trends_cgi : Path('/thruk/cgi-bin/trends.cgi') {
 page: /thruk/cgi-bin/history.cgi
 
 =cut
+
 sub history_cgi : Path('/thruk/cgi-bin/history.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/history/index');
 }
-
 
 ######################################
 
@@ -488,11 +490,11 @@ sub history_cgi : Path('/thruk/cgi-bin/history.cgi') {
 page: /thruk/cgi-bin/summary.cgi
 
 =cut
+
 sub summary_cgi : Path('/thruk/cgi-bin/summary.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/summary/index');
 }
-
 
 ######################################
 
@@ -501,11 +503,11 @@ sub summary_cgi : Path('/thruk/cgi-bin/summary.cgi') {
 page: /thruk/cgi-bin/histogram.cgi
 
 =cut
+
 sub histogram_cgi : Path('/thruk/cgi-bin/histogram.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/histogram/index');
 }
-
 
 ######################################
 
@@ -514,11 +516,11 @@ sub histogram_cgi : Path('/thruk/cgi-bin/histogram.cgi') {
 page: /thruk/cgi-bin/notifications.cgi
 
 =cut
+
 sub notifications_cgi : Path('/thruk/cgi-bin/notifications.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/notifications/index');
 }
-
 
 ######################################
 
@@ -527,11 +529,11 @@ sub notifications_cgi : Path('/thruk/cgi-bin/notifications.cgi') {
 page: /thruk/cgi-bin/showlog.cgi
 
 =cut
+
 sub showlog_cgi : Path('/thruk/cgi-bin/showlog.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/showlog/index');
 }
-
 
 ######################################
 
@@ -540,11 +542,11 @@ sub showlog_cgi : Path('/thruk/cgi-bin/showlog.cgi') {
 page: /thruk/cgi-bin/extinfo.cgi
 
 =cut
+
 sub extinfo_cgi : Path('/thruk/cgi-bin/extinfo.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/extinfo/index');
 }
-
 
 ######################################
 
@@ -553,11 +555,11 @@ sub extinfo_cgi : Path('/thruk/cgi-bin/extinfo.cgi') {
 page: /thruk/cgi-bin/config.cgi
 
 =cut
+
 sub config_cgi : Path('/thruk/cgi-bin/config.cgi') {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     return $c->detach('/config/index');
 }
-
 
 ######################################
 
@@ -568,14 +570,14 @@ page: /error/
 internal use only
 
 =cut
+
 sub error : Path('/error/') {
-    my ( $self, $c ) = @_;
-    if(scalar @{$c->request->args} < 1) {
+    my( $self, $c ) = @_;
+    if( scalar @{ $c->request->args } < 1 ) {
         return $c->detach("default");
     }
-    return $c->detach('/error/'.join('/', @{$c->request->args}));
+    return $c->detach( '/error/' . join( '/', @{ $c->request->args } ) );
 }
-
 
 ######################################
 
@@ -584,10 +586,11 @@ sub error : Path('/error/') {
 check and display errors (if any)
 
 =cut
+
 sub end : ActionClass('RenderView') {
-    my ( $self, $c ) = @_;
-    my @errors = @{$c->error};
-    if(scalar @errors > 0) {
+    my( $self, $c ) = @_;
+    my @errors = @{ $c->error };
+    if( scalar @errors > 0 ) {
         for my $error (@errors) {
             $c->log->error($error);
         }

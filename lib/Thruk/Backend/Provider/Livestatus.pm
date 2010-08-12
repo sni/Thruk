@@ -172,19 +172,18 @@ sub get_hosts {
 
     $options{'columns'} = [qw/
         accept_passive_checks acknowledged action_url action_url_expanded
-        active_checks_enabled address alias check_command check_freshness
-        check_interval check_options check_period check_type checks_enabled
-        comments current_attempt current_notification_number event_handler_enabled
-        execution_time first_notification_delay flap_detection_enabled groups
-        has_been_checked high_flap_threshold icon_image icon_image_alt
-        icon_image_expanded is_executing is_flapping last_check last_notification
-        last_state_change latency long_plugin_output low_flap_threshold
-        max_check_attempts name next_check notes notes_expanded notes_url
-        notes_url_expanded notification_interval notification_period
-        notifications_enabled obsess_over_host parents percent_state_change
-        perf_data plugin_output process_performance_data retry_interval
-        scheduled_downtime_depth state state_type
-        num_services_ok num_services_unknown num_services_warn num_services_crit num_services_pending
+        active_checks_enabled address alias check_command check_freshness check_interval
+        check_options check_period check_type checks_enabled comments current_attempt
+        current_notification_number event_handler_enabled execution_time
+        first_notification_delay flap_detection_enabled groups has_been_checked
+        high_flap_threshold icon_image icon_image_alt icon_image_expanded
+        is_executing is_flapping last_check last_notification last_state_change
+        latency long_plugin_output low_flap_threshold max_check_attempts name
+        next_check notes notes_expanded notes_url notes_url_expanded notification_interval
+        notification_period notifications_enabled num_services_crit num_services_ok
+        num_services_pending num_services_unknown num_services_warn obsess_over_host
+        parents percent_state_change perf_data plugin_output process_performance_data
+        retry_interval scheduled_downtime_depth state state_type
                 /];
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     return $self->_get_table('hosts', \%options);
@@ -254,13 +253,17 @@ sub get_services {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
         accept_passive_checks acknowledged action_url action_url_expanded
-        active_checks_enabled check_command check_interval check_options host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded
-        check_period check_type checks_enabled current_attempt current_notification_number host_groups host_checks_enabled
-        comments description event_handler event_handler_enabled execution_time host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth
-        first_notification_delay flap_detection_enabled groups has_been_checked host_notifications_enabled host_has_been_checked
-        high_flap_threshold host_address host_alias host_name host_acknowledged host_state host_comments icon_image
-        icon_image_alt icon_image_expanded is_executing is_flapping last_check
-        last_notification last_state_change latency long_plugin_output
+        active_checks_enabled check_command check_interval check_options
+        check_period check_type checks_enabled comments current_attempt
+        current_notification_number description event_handler event_handler_enabled
+        execution_time first_notification_delay flap_detection_enabled groups
+        has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
+        host_active_checks_enabled host_address host_alias host_checks_enabled
+        host_comments host_groups host_has_been_checked host_icon_image_expanded
+        host_is_executing host_is_flapping host_name host_notes_url_expanded
+        host_notifications_enabled host_scheduled_downtime_depth host_state
+        icon_image icon_image_alt icon_image_expanded is_executing is_flapping
+        last_check last_notification last_state_change latency long_plugin_output
         low_flap_threshold max_check_attempts next_check notes notes_expanded
         notes_url notes_url_expanded notification_interval notification_period
         notifications_enabled obsess_over_service percent_state_change perf_data
