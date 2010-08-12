@@ -1,27 +1,35 @@
 $VAR1 = {
           'action_url' => '',
           'alias' => 'All Down Hosts',
-          'members' => 'n1_test_host_020,n1_test_host_060,n1_test_host_103,n1_test_host_128,n1_test_host_138,n1_test_host_150,n1_test_host_164,n1_test_host_169,n1_test_host_182,n1_test_host_184',
-          'members_with_state' => 'n1_test_host_020|1|1,n1_test_host_060|2|1,n1_test_host_103|1|1,n1_test_host_128|1|1,n1_test_host_138|1|1,n1_test_host_150|1|1,n1_test_host_164|1|1,n1_test_host_169|2|1,n1_test_host_182|1|1,n1_test_host_184|1|1',
+          'members' => [
+                         'n6_test_host_1'
+                       ],
+          'members_with_state' => [
+                                    [
+                                      'n6_test_host_1',
+                                      1,
+                                      1
+                                    ]
+                                  ],
           'name' => 'down',
           'notes' => '',
           'notes_url' => '',
-          'num_hosts' => '10',
-          'num_hosts_down' => '8',
-          'num_hosts_pending' => '0',
-          'num_hosts_unreach' => '2',
-          'num_hosts_up' => '0',
-          'num_services' => '200',
-          'num_services_crit' => '15',
-          'num_services_hard_crit' => '0',
-          'num_services_hard_ok' => '0',
-          'num_services_hard_unknown' => '0',
-          'num_services_hard_warn' => '0',
-          'num_services_ok' => '153',
-          'num_services_pending' => '13',
-          'num_services_unknown' => '7',
-          'num_services_warn' => '12',
-          'worst_host_state' => '1',
-          'worst_service_hard_state' => '0',
-          'worst_service_state' => '2'
+          'num_hosts' => 1,
+          'num_hosts_down' => 1,
+          'num_hosts_pending' => 0,
+          'num_hosts_unreach' => 0,
+          'num_hosts_up' => 0,
+          'num_services' => 10,
+          'num_services_crit' => 0,
+          'num_services_hard_crit' => 0,
+          'num_services_hard_ok' => 0,
+          'num_services_hard_unknown' => 0,
+          'num_services_hard_warn' => 0,
+          'num_services_ok' => 8,
+          'num_services_pending' => 1,
+          'num_services_unknown' => 0,
+          'num_services_warn' => 1,
+          'worst_host_state' => 1,
+          'worst_service_hard_state' => 0,
+          'worst_service_state' => 1
         };
