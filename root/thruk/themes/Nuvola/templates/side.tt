@@ -21,6 +21,9 @@
 // ------ DTree Tree-menu Data --------------------------------------------
 //******************************************************************************
 
+[% sublink.name = "" %]
+[% icon_open    = '' %]
+
 [% BLOCK set_icons %]
   [% icon = '/thruk/themes/Nuvola/side/icons/info.gif' %]
   [% IF section.name == 'Current Status' %]

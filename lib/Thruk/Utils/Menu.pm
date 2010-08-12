@@ -82,6 +82,7 @@ add a new section
 sub add_section {
     my %section = @_;
     $section{'links'} = [];
+    $section{'icon'}  = '' unless defined $section{'icon'};
     push(@{$Thruk::Utils::Menu::navigation}, \%section);
     return;
 }
@@ -123,6 +124,7 @@ sub add_sub_link {
     $link{'target'} = get_target() unless defined $link{'target'};
     $link{'links'}  = [] unless defined $link{'links'};
     $link{'href'}   = "" unless defined $link{'href'};
+    $link{'name'}   = "" unless defined $link{'name'};
     push(@{$last_link->{'links'}}, \%link);
     return;
 }
@@ -144,6 +146,7 @@ sub add_sub_sub_link {
     my $last_sub_link = $last_link->{'links'}->[scalar @{$last_link->{'links'}} - 1];
     $link{'target'}   = get_target() unless defined $link{'target'};
     $link{'href'}     = "" unless defined $link{'href'};
+    $link{'name'}     = "" unless defined $link{'name'};
     push(@{$last_sub_link->{'links'}}, \%link);
     return;
 }
