@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 254;
+use Test::More tests => 270;
 
 BEGIN {
     use lib('t');
@@ -76,3 +76,18 @@ for my $url (@{$pages}) {
     );
 }
 
+$pages = [
+# json export
+    '/thruk/cgi-bin/status.cgi?host=all&format=json',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json',
+    '/thruk/cgi-bin/status.cgi?host=all&format=json&column=host_name&column=description&limit=5',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json&column=name',
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'          => $url,
+        'unlike'       => 'internal server error',
+        'content_type' => 'application/json; charset=utf-8',
+    );
+}
