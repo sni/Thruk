@@ -27,19 +27,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
 
-    my $outages = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts')."
-Columns: name last_state_change childs
-Filter: state = 1
-Filter: childs !=
-And: 2
-", { Slice => 1, AddPeer => 1 });
+    my $outages = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                                    state => 1,
+                                                    childs => { '!=' => undef }
+                                                  ]);
 
     if(defined $outages and scalar @{$outages} > 0) {
         my $hostcomments = Thruk::Utils::get_hostcomments($c);
-        my $all_hosts = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts')."
-Columns: name childs num_services
-", 'name');
-
+        my $all_hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
         for my $host (@{$outages}) {
 
             # get number of comments
@@ -58,7 +53,7 @@ Columns: name childs num_services
     }
 
     # sort by severity
-    my $sortedoutages = Thruk::Utils::sort($c, $outages, 'severity', 'DESC');
+    my $sortedoutages = Thruk::Backend::Manager::_sort($c, $outages, { 'DESC' => 'severity' });
 
     $c->stash->{outages}        = $sortedoutages;
     $c->stash->{title}          = 'Network Outages';
@@ -82,7 +77,7 @@ sub _count_affected_hosts_and_services {
     return(0,0) if !defined $all_hosts->{$host};
 
     if(defined $all_hosts->{$host}->{'childs'} and $all_hosts->{$host}->{'childs'} ne '') {
-        for my $child (split/,/mx, $all_hosts->{$host}->{'childs'}) {
+        for my $child (@{$all_hosts->{$host}->{'childs'}}) {
             my($child_affected_hosts,$child_affected_services) = $self->_count_affected_hosts_and_services($c, $child, $all_hosts);
             $affected_hosts    += $child_affected_hosts;
             $affected_services += $child_affected_services;

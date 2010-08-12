@@ -173,7 +173,7 @@ sub get_hosts {
     $options{'columns'} = [qw/
         accept_passive_checks acknowledged action_url action_url_expanded
         active_checks_enabled address alias check_command check_freshness check_interval
-        check_options check_period check_type checks_enabled comments current_attempt
+        check_options check_period check_type checks_enabled childs comments current_attempt
         current_notification_number event_handler_enabled execution_time
         first_notification_delay flap_detection_enabled groups has_been_checked
         high_flap_threshold icon_image icon_image_alt icon_image_expanded
@@ -181,7 +181,7 @@ sub get_hosts {
         latency long_plugin_output low_flap_threshold max_check_attempts name
         next_check notes notes_expanded notes_url notes_url_expanded notification_interval
         notification_period notifications_enabled num_services_crit num_services_ok
-        num_services_pending num_services_unknown num_services_warn obsess_over_host
+        num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
         parents percent_state_change perf_data plugin_output process_performance_data
         retry_interval scheduled_downtime_depth state state_type
                 /];
