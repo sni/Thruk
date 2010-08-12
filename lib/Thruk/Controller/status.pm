@@ -48,8 +48,8 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{'entries'}            = $c->{'request'}->{'parameters'}->{'entries'}            || '';
     $c->stash->{'hidetop'}            = $c->{'request'}->{'parameters'}->{'hidetop'}            || '';
     $c->stash->{'sortoption'}         = $c->{'request'}->{'parameters'}->{'sortoption'}         || '';
-    $c->stash->{hidetop}              = $c->{'request'}->{'parameters'}->{'hidetop'}            || 0;
-    $c->stash->{hidesearch}           = $c->{'request'}->{'parameters'}->{'hidesearch'}         || 0;
+    $c->stash->{'hidetop'}            = $c->{'request'}->{'parameters'}->{'hidetop'}            || 0;
+    $c->stash->{'hidesearch'}         = $c->{'request'}->{'parameters'}->{'hidesearch'}         || 0;
     $c->stash->{'hostgroup'}          = $c->{'request'}->{'parameters'}->{'hostgroup'}          || '';
     $c->stash->{'servicegroup'}       = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';
     $c->stash->{'host'}               = $c->{'request'}->{'parameters'}->{'host'}               || '';
@@ -1290,12 +1290,12 @@ sub _do_search {
 
     for my $search ( @{$searches} ) {
         my( $tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter ) = $self->_single_search( $c, $search );
-        push @hostfilter,          $tmp_hostfilter;
-        push @servicefilter,       $tmp_servicefilter;
-        push @hostgroupfilter,     $tmp_hostgroupfilter;
-        push @servicegroupfilter,  $tmp_servicegroupfilter;
-        push @servicetotalsfilter, $tmp_servicetotalsfilter;
-        push @hosttotalsfilter,    $tmp_hosttotalsfilter;
+        push @hostfilter,          $tmp_hostfilter          if defined $tmp_hostfilter;
+        push @servicefilter,       $tmp_servicefilter       if defined $tmp_servicefilter;
+        push @hostgroupfilter,     $tmp_hostgroupfilter     if defined $tmp_hostgroupfilter;
+        push @servicegroupfilter,  $tmp_servicegroupfilter  if defined $tmp_servicegroupfilter ;
+        push @servicetotalsfilter, $tmp_servicetotalsfilter if defined $tmp_servicetotalsfilter;
+        push @hosttotalsfilter,    $tmp_hosttotalsfilter    if defined $tmp_hosttotalsfilter;
     }
 
     # combine the array of filters by OR

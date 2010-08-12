@@ -519,6 +519,7 @@ sub get_host_stats {
         'outages'                   => { -stats => [ 'state' => 1, 'childs' => {'!=' => undef } ]},
     ];
     my $class = $self->_get_class('hosts', \%options);
+
     my $rows = $class->stats($stats)->hashref_array();
     return(\%{$rows->[0]}, 'SUM');
 }
