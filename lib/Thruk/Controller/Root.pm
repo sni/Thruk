@@ -55,6 +55,7 @@ sub begin : Private {
     }
     $c->stash->{'use_frames'}      = $use_frames;
     $c->stash->{'show_nav_button'} = $show_nav_button;
+    $c->stash->{'reload_nav'}      = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
 
     # use pager?
     $c->stash->{'use_pager'}          = Thruk->config->{'use_pager'}          || 1;

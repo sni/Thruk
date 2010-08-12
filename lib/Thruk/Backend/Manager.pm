@@ -262,7 +262,13 @@ sub _do_on_peers {
 
     # howto merge the answers?
     my $data;
-    if(lc $type eq 'stats') {
+    if(lc $type eq 'uniq') {
+        $data = $self->_merge_answer($result, $type);
+        my %seen = ();
+        my @uniq = sort(grep { ! $seen{$_} ++ } @{$data});
+        $data = \@uniq;
+    }
+    elsif(lc $type eq 'stats') {
         $data = $self->_merge_stats_answer($result);
     }
     elsif(lc $type eq 'sum') {
@@ -290,6 +296,10 @@ sub _do_on_peers {
 
         if($arg{'sort'}) {
             $data = $self->_sort($data, $arg{'sort'});
+        }
+
+        if($arg{'limit'}) {
+            $data = $self->_limit($data, $arg{'limit'});
         }
 
         if($arg{'pager'}) {
@@ -370,7 +380,16 @@ sub _page_data {
     my $self                = shift;
     my $c                   = shift;
     my $data                = shift || [];
+    return $data unless defined $c;
+
+    # set some defaults
+    $c->stash->{'pager'} = "";
+
     my $default_result_size = shift || $c->stash->{'default_page_size'};
+
+    # page only in html mode
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    return $data unless $view_mode eq 'html';
 
     my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
     my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
@@ -823,6 +842,30 @@ sub _sort {
     $self->{'stats'}->profile(end => "_sort()") if defined $self->{'stats'};
 
     return(\@sorted);
+}
+
+########################################
+
+=head2 _limit
+
+  _limit($data, $limit)
+
+returns data limited by limit
+
+=cut
+sub _limit {
+    my $self  = shift;
+    my $data  = shift;
+    my $limit = shift;
+
+    return $data unless defined $limit and $limit > 0;
+
+    if(scalar @{$data} > $limit) {
+        @{$data} = @{$data}[0..$limit];
+        return $data;
+    }
+
+    return($data);
 }
 
 =head1 AUTHOR

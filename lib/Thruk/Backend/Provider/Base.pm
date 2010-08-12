@@ -202,6 +202,21 @@ sub get_hostgroups {
 
 ##########################################################
 
+=head2 get_hostgroup_names
+
+  get_hostgroup_names
+
+returns a list of hostgroup names
+
+=cut
+sub get_hostgroup_names {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_hosts
 
   get_hosts
@@ -210,6 +225,21 @@ returns a list of hosts
 
 =cut
 sub get_hosts {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_host_names
+
+  get_host_names
+
+returns a list of host names
+
+=cut
+sub get_host_names {
     my $self = shift;
     confess("unimplemented");
     return;
@@ -247,6 +277,21 @@ sub get_servicegroups {
 
 ##########################################################
 
+=head2 get_servicegroup_names
+
+  get_servicegroup_names
+
+returns a list of servicegroup names
+
+=cut
+sub get_servicegroup_names {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_services
 
   get_services
@@ -255,6 +300,21 @@ returns a list of services
 
 =cut
 sub get_services {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_service_names
+
+  get_service_names
+
+returns a list of service names
+
+=cut
+sub get_service_names {
     my $self = shift;
     confess("unimplemented");
     return;

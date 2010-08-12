@@ -97,7 +97,7 @@
     </form>
   </div>
   [% IF use_frames %]
-      [% IF c.request.parameters.reload_nav %]
+      [% IF reload_nav %]
       <script type="text/javascript">
       <!--
       if(parent.frames[0] != null) {

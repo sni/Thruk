@@ -62,7 +62,7 @@
 
           [% PROCESS _message.tt %]
 
-          [% IF c.request.parameters.sortoption %]
+          [% IF sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
           <br>
@@ -108,7 +108,7 @@
         [% SET peer_key      = h.peer_key %]
         [% SET program_start = pi_detail.$peer_key.program_start %]
 
-        [% SET comment_count = h.comments.split(',').size %]
+        [% SET comment_count = h.comments.size %]
 
         [% IF h.has_been_checked == 0 %]
           [% statusClass='statusHOSTPENDING' %]

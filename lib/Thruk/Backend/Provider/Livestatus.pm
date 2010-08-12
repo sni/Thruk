@@ -174,7 +174,7 @@ sub get_hosts {
         accept_passive_checks acknowledged action_url action_url_expanded
         active_checks_enabled address alias check_command check_freshness
         check_interval check_options check_period check_type checks_enabled
-        current_attempt current_notification_number event_handler_enabled
+        comments current_attempt current_notification_number event_handler_enabled
         execution_time first_notification_delay flap_detection_enabled groups
         has_been_checked high_flap_threshold icon_image icon_image_alt
         icon_image_expanded is_executing is_flapping last_check last_notification
@@ -184,8 +184,27 @@ sub get_hosts {
         notifications_enabled obsess_over_host parents percent_state_change
         perf_data plugin_output process_performance_data retry_interval
         scheduled_downtime_depth state state_type
+        num_services_ok num_services_unknown num_services_warn num_services_crit num_services_pending
                 /];
+    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     return $self->_get_table('hosts', \%options);
+}
+
+##########################################################
+
+=head2 get_host_names
+
+  get_host_names
+
+returns a list of host names
+
+=cut
+sub get_host_names{
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/name/];
+    my $data = $self->_get_hash_table('hosts', 'name', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+    return($keys, 'uniq');
 }
 
 ##########################################################
@@ -207,6 +226,23 @@ sub get_hostgroups {
 
 ##########################################################
 
+=head2 get_hostgroup_names
+
+  get_hostgroup_names
+
+returns a list of hostgroup names
+
+=cut
+sub get_hostgroup_names {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/name/];
+    my $data = $self->_get_hash_table('hostgroups', 'name', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+    return($keys, 'uniq');
+}
+
+##########################################################
+
 =head2 get_services
 
   get_services
@@ -218,11 +254,11 @@ sub get_services {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
         accept_passive_checks acknowledged action_url action_url_expanded
-        active_checks_enabled check_command check_interval check_options
-        check_period check_type checks_enabled current_attempt current_notification_number
-        description event_handler event_handler_enabled execution_time
-        first_notification_delay flap_detection_enabled groups has_been_checked
-        high_flap_threshold host_address host_alias host_name icon_image
+        active_checks_enabled check_command check_interval check_options host_is_executing host_notes_url_expanded host_action_url_expanded host_icon_image_expanded
+        check_period check_type checks_enabled current_attempt current_notification_number host_groups host_checks_enabled
+        comments description event_handler event_handler_enabled execution_time host_active_checks_enabled host_is_flapping host_scheduled_downtime_depth
+        first_notification_delay flap_detection_enabled groups has_been_checked host_notifications_enabled host_has_been_checked
+        high_flap_threshold host_address host_alias host_name host_acknowledged host_state host_comments icon_image
         icon_image_alt icon_image_expanded is_executing is_flapping last_check
         last_notification last_state_change latency long_plugin_output
         low_flap_threshold max_check_attempts next_check notes notes_expanded
@@ -231,7 +267,25 @@ sub get_services {
         plugin_output process_performance_data retry_interval scheduled_downtime_depth
         state state_type
         /];
+    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     return $self->_get_table('services', \%options);
+}
+
+##########################################################
+
+=head2 get_service_names
+
+  get_service_names
+
+returns a list of service names
+
+=cut
+sub get_service_names {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/description/];
+    my $data = $self->_get_hash_table('services', 'description', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+    return($keys, 'uniq');
 }
 
 ##########################################################
@@ -250,6 +304,24 @@ sub get_servicegroups {
         /];
     return $self->_get_table('servicegroups', \%options);
 }
+
+##########################################################
+
+=head2 get_servicegroup_names
+
+  get_servicegroup_names
+
+returns a list of servicegroup names
+
+=cut
+sub get_servicegroup_names {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/name/];
+    my $data = $self->_get_hash_table('servicegroups', 'name', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+    return($keys, 'uniq');
+}
+
 ##########################################################
 
 =head2 get_comments
@@ -647,6 +719,26 @@ sub _get_table {
 
     my $class = $self->_get_class($table, $options);
     my $data  = $class->hashref_array() || [];
+    return $data;
+}
+
+##########################################################
+
+=head2 _get_hash_table
+
+  _get_hash_table
+
+generic function to return a hash table with options
+
+=cut
+sub _get_hash_table {
+    my $self      = shift;
+    my $table     = shift;
+    my $key       = shift;
+    my $options   = shift;
+
+    my $class = $self->_get_class($table, $options);
+    my $data  = $class->hashref_pk() || {};
     return $data;
 }
 

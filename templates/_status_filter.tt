@@ -3,10 +3,10 @@
 <input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
 <form action="[% c.request.uri %]" method="GET" id="filterForm">
 <input type="hidden" name="style" value="[% style %]">
-<input type="hidden" name="nav" value="[% c.request.parameters.nav %]">
-[% IF c.request.parameters.entries %]<input type="hidden" name="entries" value="[% c.request.parameters.entries %]">[% END %]
+<input type="hidden" name="nav" value="[% nav %]">
+[% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
-<input type="hidden" name="hidetop" id="hidetop" value="[% c.request.parameters.hidetop %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
 <table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr>
 [% FOR search = searches %]
 [% SET prefix = 's' _ loop.index %]

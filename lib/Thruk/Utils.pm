@@ -1013,6 +1013,42 @@ sub version_compare {
 
 
 ########################################
+
+=head2 combine_filter
+
+  combine_filter($operator, $filter)
+
+combine filter by operator
+
+=cut
+sub combine_filter {
+    my $operator = shift;
+    my $filter   = shift;
+
+    my $return;
+    if(!defined $operator and $operator ne '-or' and $operator ne '-and') {
+        confess("unknown operator: ".Dumper($operator));
+    }
+
+    return unless defined $filter;
+
+    if(ref $filter ne 'ARRAY') {
+        confess("expected arrayref, got: ".Dumper(ref $filter));
+    }
+
+    return if scalar @{$filter} == 0;
+
+    if(scalar @{$filter} == 1) {
+        return $filter->[0];
+    }
+
+    return { $operator => $filter };
+
+    return $return;
+}
+
+
+########################################
 sub _initialassumedhoststate_to_state {
     my $initialassumedhoststate = shift;
 

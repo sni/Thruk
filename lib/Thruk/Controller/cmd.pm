@@ -37,6 +37,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     Thruk::Utils::ssi_include($c);
 
+    $c->stash->{'cmd_typ'}      = $c->{'request'}->{'parameters'}->{'cmd_typ'} || '';
+
     # check if authorization is enabled
     if($c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
         $c->detach('/error/index/3');

@@ -73,7 +73,7 @@
 
           [% PROCESS _message.tt %]
 
-          [% IF c.request.parameters.sortoption %]
+          [% IF sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]
           <br>
@@ -140,7 +140,7 @@
         [% serviceclass = 'statusBGUNKNOWN' %]
       [% END %]
 
-      [% SET comment_count = s.comments.split(',').size %]
+      [% SET comment_count = s.comments.size %]
       [% SET peer_key      = s.peer_key %]
       [% SET program_start = pi_detail.$peer_key.program_start %]
 
@@ -153,7 +153,7 @@
         [% IF lasthost == s.host_name %]
         <td></td>
         [% ELSE %]
-        [% SET host_comment_count = s.host_comments.split(',').size %]
+        [% SET host_comment_count = s.host_comments.size %]
         <td class='[% hostclass %]'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
@@ -162,11 +162,11 @@
                 <table border="0" cellpadding="0" cellspacing="0">
                   <tr>
                     [% IF s.host_acknowledged                 %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]#comments"><img src="/thruk/themes/[% theme %]/images/ack.gif" alt="This host problem has been acknowledged" title="This host problem has been acknowledged" border="0" height="20" width="20"></a></td>[% END %]
-                    [% IF host_comment_count > 0              %]<td align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host_comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = s.host_name %][% FOR com = comments_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, com.entry_time) %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',CAPTION,'[% h.name %] Comments',WIDTH,600,[% c.config.info_popup_options %]);"></td>[% END %]
+                    [% IF host_comment_count > 0              %]<td align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host_comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = s.host_name %][% FOR com = comments_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, com.entry_time) %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',CAPTION,'[% s.host_name %] Comments',WIDTH,600,[% c.config.info_popup_options %]);"></td>[% END %]
                     [% IF s.host_notifications_enabled == 0   %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]"><img src="/thruk/themes/[% theme %]/images/ndisabled.gif" alt="Notifications for this host have been disabled" title="Notifications for this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
                     [% IF s.host_active_checks_enabled == 0   %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]"><img src="/thruk/themes/[% theme %]/images/disabled.gif" alt="Checks of this host have been disabled" title="Checks of this host have been disabled" border="0" height="20" width="20"></a></td>[% END %]
                     [% IF s.host_is_flapping                  %]<td align="center"><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]'><img src='/thruk/themes/[% theme %]/images/flapping.gif' border="0" width="20" height="20" alt='This host is flapping between states' title='This host is flapping between states'></a></td>[% END %]
-                    [% IF s.host_scheduled_downtime_depth > 0 %]<td align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = s.host_name %][% FOR d = downtimes_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.start_time) %] until </td><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.end_time) %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',CAPTION,'[% h.name %] Downtimes',[% c.config.info_popup_options %]);"></td>[% END %]
+                    [% IF s.host_scheduled_downtime_depth > 0 %]<td align="center" valign="middle"><img src="/thruk/themes/[% theme %]/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = s.host_name %][% FOR d = downtimes_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.start_time) %] until </td><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.end_time) %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',CAPTION,'[% s.host_name %] Downtimes',[% c.config.info_popup_options %]);"></td>[% END %]
                     [% IF s.host_is_executing > 0             %]<td align="center"><a href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]"><img src="/thruk/themes/[% theme %]/images/waiting.gif" alt="This host is currently executing its hostcheck" title="This host is currently executing its hostcheck" border="0" height="20" width="20"></a></td>[% END %]
                     [% IF s.host_notes_url_expanded           %]<td align="center" valign="middle"><a href='[% s.host_notes_url_expanded %]'[% IF c.config.cgi_cfg.notes_url_target %] target='[% c.config.cgi_cfg.notes_url_target %]'[% END %]><img src='/thruk/themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a></td>[% END %]
                     [% IF s.host_action_url_expanded          %]<td align="center" valign="middle"><a href='[% s.host_action_url_expanded %]'[% IF c.config.cgi_cfg.action_url_target %] target='[% c.config.cgi_cfg.action_url_target %]'[% END %]><img src='/thruk/themes/[% theme %]/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a></td>[% END %]

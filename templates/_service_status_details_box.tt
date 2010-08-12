@@ -29,7 +29,7 @@
           [% totalProblems = service_stats.warning + service_stats.critical + service_stats.unknown %]
           [% total         = service_stats.ok + totalProblems + service_stats.pending %]
           <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 28,    hoststatustypes => hoststatustypes) %]'><i>All Problems</i></a></th>
-          <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => undef, hoststatustypes => hoststatustypes) %]'><i>All Types</i></a></th>
+          <th class='serviceTotals'><a class='serviceTotals' href='[% uri_with(c, style => 'detail', servicestatustypes => 'undef', hoststatustypes => hoststatustypes) %]'><i>All Types</i></a></th>
         </tr>
         <tr>
           <td class='[% IF totalProblems > 0 %]serviceTotalsPROBLEMS[% ELSE %]serviceTotals[% END %]'>[% totalProblems %]</td>
