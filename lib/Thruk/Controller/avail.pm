@@ -44,7 +44,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $service        = $c->{'request'}->{'parameters'}->{'service'}      || '';
     my $servicegroup   = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
 
-
     # set them for our template
     $c->stash->{report_type}  = $report_type;
     $c->stash->{host}         = $host;
@@ -112,26 +111,27 @@ sub _show_step_2 {
 
     my $data;
     if($report_type eq 'hosts') {
-        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), 'name');
+        $data = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
     }
     elsif($report_type eq 'hostgroups') {
-        $data = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), 'name');
+        $data = $c->{'db'}->get_hostgroup_names(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups')]);
     }
     elsif($report_type eq 'servicegroups') {
-        $data = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), 'name');
+        $data = $c->{'db'}->get_servicegroup_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups')]);
     }
     elsif($report_type eq 'services') {
-        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }
+        my @sorted = sort keys %{$data};
+        $data = \@sorted;
     }
     else {
         return 0;
     }
 
-    my @sorted = sort keys %{$data};
-    $c->stash->{data}        = \@sorted;
+    $c->stash->{data}        = $data;
     $c->stash->{template}    = 'avail_step_2.tt';
 
     $c->stats->profile(end => "_show_step_2($report_type)");
@@ -145,14 +145,14 @@ sub _show_step_3 {
 
     $c->stats->profile(begin => "_show_step_3()");
 
-    my @timeperiods = sort keys %{$c->{'live'}->selectall_hashref("GET timeperiods\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods'), 'name')};
-    $c->stash->{timeperiods} = \@timeperiods;
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')]);
     $c->stash->{template}    = 'avail_step_3.tt';
 
     my($host,$service);
     $service = $c->{'request'}->{'parameters'}->{'service'};
+
     if($service and CORE::index($service, ';') > 0) {
-        ($host,$service) = split/;/mx, $c->{'request'}->{'parameters'}->{'service'};
+        ($host,$service) = split/;/mx, $service;
         $c->stash->{host}    = $host;
         $c->stash->{service} = $service;
     }

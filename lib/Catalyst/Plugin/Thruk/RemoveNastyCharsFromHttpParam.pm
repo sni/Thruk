@@ -19,6 +19,7 @@ sub prepare_uploads {
         next if $key eq 'referer';
         next if $key eq 'selected_hosts';
         next if $key eq 'selected_services';
+        next if $key eq 'service';
         my $value = $c->request->{'parameters'}->{$key};
         if ( ref $value && ref $value ne 'ARRAY' ) {
             next;

@@ -359,6 +359,22 @@ sub get_timeperiods {
 
 ##########################################################
 
+=head2 get_logs
+
+  get_logs
+
+returns logfile entries
+
+=cut
+
+sub get_logs {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_performance_stats
 
   get_performance_stats

@@ -603,7 +603,7 @@ sub calculate_availability {
                                           or $initialassumedservicestate ==  7  # Service Unknown
                                           or $initialassumedservicestate ==  9; # Service Critical
 
-    $c->stash->{rpttimeperiod}                = $rpttimeperiod;
+    $c->stash->{rpttimeperiod}                = $rpttimeperiod || '';
     $c->stash->{assumeinitialstates}          = $assumeinitialstates;
     $c->stash->{assumestateretention}         = $assumestateretention;
     $c->stash->{assumestatesduringnotrunning} = $assumestatesduringnotrunning;
@@ -611,14 +611,17 @@ sub calculate_availability {
     $c->stash->{initialassumedhoststate}      = $initialassumedhoststate;
     $c->stash->{initialassumedservicestate}   = $initialassumedservicestate;
     $c->stash->{backtrack}                    = $backtrack;
-    $c->stash->{show_log_entries}             = $show_log_entries;
-    $c->stash->{full_log_entries}             = $full_log_entries;
+    $c->stash->{show_log_entries}             = $show_log_entries || '';
+    $c->stash->{full_log_entries}             = $full_log_entries || '';
+    $c->stash->{showscheduleddowntime}        = '';
     $c->stash->{zoom}                         = $zoom;
+    $c->stash->{servicegroupname}             = '';
+    $c->stash->{hostgroupname}                = '';
 
     # get groups / hosts /services
-    my $groupfilter      = "";
-    my $hostfilter       = "";
-    my $servicefilter    = "";
+    my $groupfilter;
+    my $hostfilter;
+    my $servicefilter;
     my $logserviceheadfilter;
     my $loghostheadfilter;
     my $initial_states = { 'hosts' => {}, 'services' => {} };
@@ -627,36 +630,38 @@ sub calculate_availability {
     my $hosts = [];
     my $services = [];
 
-    my $softlogs = "";
+    my $softlogfilter;
     if(!$includesoftstates or $includesoftstates eq 'no') {
-        $softlogs = "Filter: options ~ ;HARD;\nAnd: 2\n"
+        $softlogfilter = { options => { '~' => ';HARD;' }};
     }
 
     my $logs;
     my $logstart = $start - $backtrack * 86400;
     $c->log->debug("logstart: ".$logstart." - ".(scalar localtime($logstart)));
-    my $logfilter = "Filter: time >= $logstart\n";
-    $logfilter   .= "Filter: time <= $end\n";
-    $logfilter   .= "And: 2\n";
+    my $logfilter = {
+        -and => [
+            time => { '>=' => $logstart },
+            time => { '<=' => $end },
+    ]};
 
     # a single service
     if(defined $service and $service ne 'all') {
         unless($c->check_permissions('service', $service, $host)) {
             $c->detach('/error/index/15');
         }
-        $logserviceheadfilter = "Filter: service_description = $service\n";
-        $loghostheadfilter    = "Filter: host_name = $host\n";
+        $logserviceheadfilter = { service_description => $service };
+        $loghostheadfilter    = { host_name => $host };
         push @{$services}, { 'host' => $host, 'service' => $service };
 
         if($initialassumedservicestate == -1) {
-            my $service_data = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: state\nLimit: 1", {Slice => 1});
+            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), description => $service, host_name => $host ], limit => 1);
             $initial_states->{'services'}->{$host}->{$service} = $service_data->[0]->{'state'};
         }
     }
 
     # all services
     elsif(defined $service and $service eq 'all') {
-        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: host_name description state", { Slice => 1});
+        my $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services') ]);
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
@@ -673,9 +678,10 @@ sub calculate_availability {
         unless($c->check_permissions('host', $host)) {
             $c->detach('/error/index/5');
         }
-        my $service_data = $c->{'live'}->selectall_hashref("GET services\nFilter: host_name = ".$host."\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: description state", 'description' );
-        $c->stash->{'services'} = { $host =>  $service_data };
-        $loghostheadfilter = "Filter: host_name = $host\n";
+        my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), host_name => $host ]);
+        $service_data = array2hash($service_data, 'description');
+        $c->stash->{'services'}->{$host} = $service_data;
+        $loghostheadfilter = { host_name => $host };
 
         for my $description (keys %{$service_data}) {
             push @{$services}, { 'host' => $host, 'service' => $description };
@@ -686,7 +692,7 @@ sub calculate_availability {
             }
         }
         if($initialassumedhoststate == -1) {
-            my $host_data = $c->{'live'}->selectall_arrayref("GET hosts\nFilter: name = $host\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts')."\nColumns: state\nLimit: 1", {Slice => 1});
+            my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), name => $host ], limit => 1);
             $initial_states->{'hosts'}->{$host} = $host_data->[0]->{'state'};
         }
         push @{$hosts}, $host;
@@ -694,13 +700,14 @@ sub calculate_availability {
 
     # all hosts
     elsif(defined $host and $host eq 'all') {
-        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts')."\nColumns: name state", 'name' );
-        $logserviceheadfilter = "Filter: service_description =\n";
-        $c->stash->{'hosts'} = $host_data;
+        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ], limit => 1);
+        $host_data    = array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
+        $logserviceheadfilter = { service_description => undef };
+        $c->stash->{'hosts'} = $host_data;
         if($initialassumedhoststate == -1) {
-            for my $hostname (keys %{$host_data}) {
-                $initial_states->{'hosts'}->{$hostname} = $host_data->{$hostname}->{'state'};
+            for my $host (keys %{$host_data}) {
+                $initial_states->{'hosts'}->{$host} = $host_data->{$host}->{'state'};
             }
         }
     }
@@ -708,12 +715,13 @@ sub calculate_availability {
     # one or all hostgroups
     elsif(defined $hostgroup and $hostgroup ne '') {
         if($hostgroup ne '' and $hostgroup ne 'all') {
-            $groupfilter       = "Filter: name = $hostgroup\n";
-            $hostfilter        = "Filter: groups >= $hostgroup\n";
-            $loghostheadfilter = "Filter: current_host_groups >= $hostgroup\n";
+            $groupfilter       = { name => $hostgroup };
+            $hostfilter        = { groups => { '>=' => $hostgroup }};
+            $loghostheadfilter = { current_host_groups => { '>=' => $hostgroup }};
         }
-        my $host_data = $c->{'live'}->selectall_hashref("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts')."\nColumns: name state\n$hostfilter", 'name' );
-        my $groups    = $c->{'live'}->selectall_arrayref("GET hostgroups\n".Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
+        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+        $host_data    = array2hash($host_data, 'name');
+        my $groups    = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $groupfilter ]);
 
         # join our groups together
         my %joined_groups;
@@ -724,14 +732,12 @@ sub calculate_availability {
                 $joined_groups{$name}->{'hosts'} = {};
             }
 
-            if(defined $group->{'members'}) {
-                for my $hostname (split /,/mx, $group->{'members'}) {
-                    # show only hosts with proper authorization
-                    next unless defined $host_data->{$hostname};
+            for my $hostname (@{$group->{'members'}}) {
+                # show only hosts with proper authorization
+                next unless defined $host_data->{$hostname};
 
-                    if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname} = 1;
-                    }
+                if(!defined $joined_groups{$name}->{'hosts'}->{$hostname}) {
+                    $joined_groups{$name}->{'hosts'}->{$hostname} = 1;
                 }
             }
             # remove empty groups
@@ -740,7 +746,7 @@ sub calculate_availability {
             }
         }
         $c->stash->{'groups'} = \%joined_groups;
-        $logserviceheadfilter = "Filter: service_description =\n";
+        $logserviceheadfilter = { service_description => undef };
 
         push @{$hosts}, keys %{$host_data};
 
@@ -755,12 +761,12 @@ sub calculate_availability {
     # one or all servicegroups
     elsif(defined $servicegroup and $servicegroup ne '') {
         if($servicegroup ne '' and $servicegroup ne 'all') {
-            $groupfilter          = "Filter: name = $servicegroup\n";
-            $servicefilter        = "Filter: groups >= $servicegroup\n";
-            $logserviceheadfilter = "Filter: current_service_groups >= $servicegroup\n";
+            $groupfilter          = { name => $servicegroup };
+            $servicefilter        = { groups => { '>=' => $servicegroup }};
+            $logserviceheadfilter = { current_service_groups => { '>=' => $servicegroup }};
         }
-        my $all_services = $c->{'live'}->selectall_arrayref("GET services\n".$servicefilter.Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: host_name description state host_state", { Slice => 1});
-        my $groups       = $c->{'live'}->selectall_arrayref("GET servicegroups\n".Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups')."\n$groupfilter\nColumns: name members", { Slice => {} });
+        my $all_services = $c->{'db'}->get_services(filter => [ $servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'services') ]);
+        my $groups       = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $groupfilter ]);
 
         my $service_data;
         for my $service (@{$all_services}) {
@@ -776,8 +782,8 @@ sub calculate_availability {
                 $joined_groups{$name}->{'services'} = {};
             }
 
-            for my $member (split /,/mx, $group->{'members'}) {
-                my($hostname,$description) = split/\|/mx, $member, 2;
+            for my $member (@{$group->{'members'}}) {
+                my($hostname,$description) = @{$member};
                 # show only services with proper authorization
                 next unless defined $service_data->{$hostname}->{$description};
 
@@ -818,55 +824,44 @@ sub calculate_availability {
     # fetch logs
     my(@loghostfilter,@logservicefilter);
     unless($service) {
-        push @loghostfilter, "Filter: type = HOST ALERT\n".$softlogs;
-        push @loghostfilter, "Filter: type = INITIAL HOST STATE\n".$softlogs;
-        push @loghostfilter, "Filter: type = CURRENT HOST STATE\n".$softlogs;
+        push @loghostfilter, [ { type => 'HOST ALERT' }, $softlogfilter ];
+        push @loghostfilter, [ { type => 'INITIAL HOST STATE' } , $softlogfilter ];
+        push @loghostfilter, [ { type => 'CURRENT HOST STATE' }, $softlogfilter ];
     }
-    push @loghostfilter, "Filter: type = HOST DOWNTIME ALERT\n";
+    push @loghostfilter, { type => 'HOST DOWNTIME ALERT' };
     if($service or $host or $servicegroup) {
-        push @logservicefilter, "Filter: type = SERVICE ALERT\n".$softlogs;
-        push @logservicefilter, "Filter: type = INITIAL SERVICE STATE\n".$softlogs;
-        push @logservicefilter, "Filter: type = CURRENT SERVICE STATE\n".$softlogs;
-        push @logservicefilter, "Filter: type = SERVICE DOWNTIME ALERT\n";
+        push @logservicefilter, [ { type => 'SERVICE ALERT' }, $softlogfilter ];
+        push @logservicefilter, [ { type => 'INITIAL SERVICE STATE' }, $softlogfilter ];
+        push @logservicefilter, [ { type => 'CURRENT SERVICE STATE' }, $softlogfilter ];
+        push @logservicefilter, { type => 'SERVICE DOWNTIME ALERT' };
     }
     my @typefilter;
     if(defined $loghostheadfilter) {
-        push @typefilter, $loghostheadfilter.join("\n", @loghostfilter)."\nOr: ".(scalar @loghostfilter)."\nAnd: 2";
+        push @typefilter, { -and => [ $loghostheadfilter, { -or => [@loghostfilter] }]};
     } else {
-        push @typefilter, join("\n", @loghostfilter)."\nOr: ".(scalar @loghostfilter)."\n";
+        push @typefilter, { -or => [ @loghostfilter ] };
     }
     if(scalar @logservicefilter > 0) {
         if(defined $logserviceheadfilter and defined $loghostheadfilter) {
-            push @typefilter, $loghostheadfilter.$logserviceheadfilter."\nAnd: 2\n".join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\nAnd: 2";
+            push @typefilter, { -and => [ $loghostheadfilter, $logserviceheadfilter, { -or => [ @logservicefilter ] } ] };
         }
         elsif(defined $logserviceheadfilter) {
-            push @typefilter, $logserviceheadfilter."\n".join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\nAnd: 2";
+            push @typefilter, { -and => [ $logserviceheadfilter, { -or => [ @logservicefilter ] } ] };
         }
         elsif(defined $loghostheadfilter) {
-            push @typefilter, $loghostheadfilter."\n".join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\nAnd: 2";
+            push @typefilter, { -and => [ $loghostheadfilter, { -or => [ @logservicefilter ] } ] };
         }
         else {
-            push @typefilter, join("\n", @logservicefilter)."\nOr: ".(scalar @logservicefilter)."\n";
+            push @typefilter, { -or => [ @logservicefilter ] };
         }
     }
-    push @typefilter, "Filter: class = 2\n"; # programm messages
-    $logfilter .= join("\n", @typefilter)."\nOr: ".(scalar @typefilter);
+    push @typefilter, { class => 2 }; # programm messages
 
-    my $log_query = "GET log\n".$logfilter.Thruk::Utils::Auth::get_auth_filter($c, 'log')."\nColumns: class time type options state host_name service_description plugin_output";
-    #$c->log->debug($log_query);
+    my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
+
     $c->stats->profile(begin => "avail.pm fetchlogs");
-    $logs = $c->{'live'}->selectall_arrayref($log_query, { Slice => 1} );
+    $logs = $c->{'db'}->get_logs(filter => $filter);
     $c->stats->profile(end   => "avail.pm fetchlogs");
-
-    #$Data::Dumper::Indent = 1;
-    #open(FH, '>', '/tmp/logs.txt') or die("cannot open logs.txt: $!");
-    ##print FH Dumper($logs);
-    #for my $line (@{$logs}) {
-    #    print FH '['.$line->{'time'}.'] '.$line->{'type'};
-    #    print FH ': '.$line->{'options'} if(defined $line->{'options'} and $line->{'options'} ne '');
-    #    print FH "\n";
-    #}
-    #close(FH);
 
     $c->stats->profile(begin => "calculate availability");
     my $ma = Monitoring::Availability->new(
@@ -1047,6 +1042,27 @@ sub combine_filter {
     return $return;
 }
 
+
+########################################
+
+=head2 array2hash
+
+  array2hash($data, $key)
+
+create a hash by key
+
+=cut
+sub array2hash {
+    my $data = shift;
+    my $key   = shift;
+    my $return;
+
+    return {} unless defined $data;
+
+    my %hash = map { $_->{$key} => $_ } @{$data};
+
+    return \%hash;
+}
 
 ########################################
 sub _initialassumedhoststate_to_state {

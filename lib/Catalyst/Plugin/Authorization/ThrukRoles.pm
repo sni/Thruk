@@ -45,26 +45,28 @@ sub check_permissions {
 
     my $count = 0;
     if($type eq 'host') {
-        $count = $c->{'live'}->selectscalar_value("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2)."\nStats: name = $value", { Sum => 1 });
+        my $hosts = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), name => $value ]);
+        $count = 1 if defined $hosts and scalar @{$hosts} > 0;
     }
     elsif($type eq 'service') {
-        $count = $c->{'live'}->selectscalar_value("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3)."\nStats: description = $value\nFilter: host_name = $value2", { Sum => 1 });
+        my $services = $c->{'db'}->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), description => $value, host_name => $value2 ]);
+        $count = 1 if defined $services and scalar @{$services} > 0;
     }
     elsif($type eq 'hostgroup') {
-        my $count1 = $c->{'live'}->selectscalar_value("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2)."\nStats: groups >= $value", { Sum => 1 });
-        my $count2 = $c->{'live'}->selectscalar_value("GET hosts\nStats: groups >= $value", { Sum => 1 });
+        my $hosts1 = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), groups => { '>=' => $value } ]);
+        my $hosts2 = $c->{'db'}->get_host_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of hosts is the same number as hosts with authorization
-        if(defined $count1 and defined $count2 and $count1 == $count2 and $count2 != 0) {
+        if(defined $hosts1 and defined $hosts2 and scalar @{$hosts1} == scalar @{$hosts2} and scalar @{$hosts1} != 0) {
             $count = 1;
         }
     }
     elsif($type eq 'servicegroup') {
-        my $count1 = $c->{'live'}->selectscalar_value("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3)."\nStats: groups >= $value", { Sum => 1 });
-        my $count2 = $c->{'live'}->selectscalar_value("GET services\nStats: groups >= $value", { Sum => 1 });
+        my $services1 = $c->{'db'}->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), groups => { '>=' => $value } ]);
+        my $services2 = $c->{'db'}->get_service_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of services is the same number as services with authorization
-        if(defined $count1 and defined $count2 and $count1 == $count2 and $count2 != 0) {
+        if(defined $services1 and defined $services2 and scalar @{$services1} == scalar @{$services2} and scalar @{$services1} != 0) {
             $count = 1;
         }
     }

@@ -383,6 +383,23 @@ sub get_contactgroups {
 
 ##########################################################
 
+=head2 get_logs
+
+  get_logs
+
+returns logfile entries
+
+=cut
+sub get_logs {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/
+        class time type options state host_name service_description plugin_output
+        /];
+    return $self->_get_table('log', \%options);
+}
+
+##########################################################
+
 =head2 get_timeperiods
 
   get_timeperiods
