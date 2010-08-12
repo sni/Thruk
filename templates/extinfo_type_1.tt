@@ -481,7 +481,7 @@
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
                     <td class='[% class %]'>[% IF comment.expires %][% date_format(c, comment.expires_time) %][% ELSE %]N/A[% END %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+                    <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% host.peer_key %]'><img src='/thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]

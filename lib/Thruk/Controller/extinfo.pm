@@ -18,65 +18,63 @@ Catalyst Controller.
 
 =cut
 
-
 =head2 index
 
 =cut
 
 ##########################################################
-sub index :Path :Args(0) :MyAction('AddDefaults') {
-    my ( $self, $c ) = @_;
+sub index : Path : Args(0) : MyAction('AddDefaults') {
+    my( $self, $c ) = @_;
     my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
 
     my $infoBoxTitle;
-    if($type == 0) {
+    if( $type == 0 ) {
         $infoBoxTitle = 'Process Information';
-        $c->detach('/error/index/1') unless $c->check_user_roles( "authorized_for_system_information" );
+        $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
         $self->_process_process_info_page($c);
     }
-    if($type == 1) {
+    if( $type == 1 ) {
         $infoBoxTitle = 'Host Information';
         $self->_process_host_page($c);
     }
-    if($type == 2) {
+    if( $type == 2 ) {
         $infoBoxTitle = 'Service Information';
         $self->_process_service_page($c);
     }
-    if($type == 3) {
+    if( $type == 3 ) {
         $infoBoxTitle = 'All Host and Service Comments';
         $self->_process_comments_page($c);
     }
-    if($type == 4) {
+    if( $type == 4 ) {
         $infoBoxTitle = 'Performance Information';
         $self->_process_perf_info_page($c);
     }
-    if($type == 5) {
+    if( $type == 5 ) {
         $infoBoxTitle = 'Hostgroup Information';
         $self->_process_hostgroup_cmd_page($c);
     }
-    if($type == 6) {
+    if( $type == 6 ) {
         $infoBoxTitle = 'All Host and Service Scheduled Downtime';
         $self->_process_downtimes_page($c);
     }
-    if($type == 7) {
+    if( $type == 7 ) {
         $infoBoxTitle = 'Check Scheduling Queue';
         $self->_process_scheduling_page($c);
     }
-    if($type == 8) {
+    if( $type == 8 ) {
         $infoBoxTitle = 'Servicegroup Information';
         $self->_process_servicegroup_cmd_page($c);
     }
 
-    $c->stash->{title}          = 'Extended Information';
-    $c->stash->{infoBoxTitle}   = $infoBoxTitle;
-    $c->stash->{page}           = 'extinfo';
-    $c->stash->{template}       = 'extinfo_type_'.$type.'.tt';
+    $c->stash->{title}        = 'Extended Information';
+    $c->stash->{infoBoxTitle} = $infoBoxTitle;
+    $c->stash->{page}         = 'extinfo';
+    $c->stash->{template}     = 'extinfo_type_' . $type . '.tt';
 
     Thruk::Utils::ssi_include($c);
 
     return 1;
 }
-
 
 ##########################################################
 # SUBS
@@ -85,42 +83,41 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 ##########################################################
 # create the downtimes page
 sub _process_comments_page {
-    my ( $self, $c ) = @_;
-    $c->stash->{'hostcomments'}    = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), { 'service_description' => undef }]);
-    $c->stash->{'servicecomments'} = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), { 'service_description' => { '!=' => undef } }]);
+    my( $self, $c ) = @_;
+    $c->stash->{'hostcomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ] );
+    $c->stash->{'servicecomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ] );
     return 1;
 }
 
 ##########################################################
 # create the downtimes page
 sub _process_downtimes_page {
-    my ( $self, $c ) = @_;
-    $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), { 'service_description' => undef }]);
-    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), { 'service_description' => { '!=' => undef } }]);
+    my( $self, $c ) = @_;
+    $c->stash->{'hostdowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ] );
+    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ] );
     return 1;
 }
 
 ##########################################################
 # create the host info page
 sub _process_host_page {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     my $host;
 
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
+    my $backend = $c->{'request'}->{'parameters'}->{'backend'} || '';
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
-    my $hosts = $c->{'db'}->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                 { 'name' => $hostname }]
-                                     );
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
 
     return $c->detach('/error/index/5') unless defined $hosts;
 
     # we only got one host
     $host = $hosts->[0];
+
     # we have more and backend param is used
-    if(scalar @{$hosts} == 1 and defined $backend) {
-        for my $h (@{$hosts}) {
-            if($h->{'peer_key'} eq $backend) {
+    if( scalar @{$hosts} == 1 and defined $backend ) {
+        for my $h ( @{$hosts} ) {
+            if( $h->{'peer_key'} eq $backend ) {
                 $host = $h;
                 last;
             }
@@ -130,20 +127,18 @@ sub _process_host_page {
     return $c->detach('/error/index/5') unless defined $host;
 
     my @backends;
-    for my $h (@{$hosts}) {
+    for my $h ( @{$hosts} ) {
         push @backends, $h->{'peer_key'};
     }
-    $self->_set_backend_selector($c, \@backends, $host->{'peer_key'});
+    $self->_set_backend_selector( $c, \@backends, $host->{'peer_key'} );
 
-    $c->stash->{'host'}     = $host;
-    my $comments   = $c->{'db'}->get_comments(filter =>  [Thruk::Utils::Auth::get_auth_filter($c, 'comments'),
-                                                         { 'host_name' => $hostname },
-                                                         { 'service_description' => undef }],
-                                              sort   =>  {'id' => 'DESC'});
-    my $downtimes  = $c->{'db'}->get_downtimes(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'),
-                                                         { 'host_name' => $hostname },
-                                                         { 'service_description' => undef }],
-                                               sort   => {'id' => 'DESC'});
+    $c->stash->{'host'} = $host;
+    my $comments = $c->{'db'}->get_comments(
+        filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
+        sort => { 'id' => 'DESC' } );
+    my $downtimes = $c->{'db'}->get_downtimes(
+        filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
+        sort => { 'id' => 'DESC' } );
 
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
@@ -154,26 +149,25 @@ sub _process_host_page {
 ##########################################################
 # create the hostgroup cmd page
 sub _process_hostgroup_cmd_page {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
     my $hostgroup = $c->{'request'}->{'parameters'}->{'hostgroup'};
     return $c->detach('/error/index/5') unless defined $hostgroup;
 
-    my $groups = $c->{'live'}->selectall_hashref("GET hostgroups\n".Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups')."\nColumns: name alias\nFilter: name = $hostgroup\nLimit: 1", 'name');
-    my @groups = values %{$groups};
-    return $c->detach('/error/index/5') unless defined $groups[0];
+    my $groups = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) , 'name' => $hostgroup ], limit => 1 );
+    return $c->detach('/error/index/5') unless defined $groups->[0];
 
-    $c->stash->{'hostgroup'}       = $groups[0]->{'name'};
-    $c->stash->{'hostgroup_alias'} = $groups[0]->{'alias'};
+    $c->stash->{'hostgroup'}       = $groups->[0]->{'name'};
+    $c->stash->{'hostgroup_alias'} = $groups->[0]->{'alias'};
     return 1;
 }
 
 ##########################################################
 # create the service info page
 sub _process_service_page {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
     my $service;
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
+    my $backend = $c->{'request'}->{'parameters'}->{'backend'} || '';
 
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     return $c->detach('/error/index/15') unless defined $hostname;
@@ -181,20 +175,17 @@ sub _process_service_page {
     my $servicename = $c->{'request'}->{'parameters'}->{'service'};
     return $c->detach('/error/index/15') unless defined $servicename;
 
-    my $services = $c->{'db'}->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
-                                                      { 'host_name' => $hostname },
-                                                      { 'description' => $servicename },
-                                                ]
-                                     );
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
 
     return $c->detach('/error/index/15') unless defined $services;
 
     # we only got one service
     $service = $services->[0];
+
     # we have more and backend param is used
-    if(scalar @{$services} == 1 and defined $services) {
-        for my $s (@{$services}) {
-            if($s->{'peer_key'} eq $backend) {
+    if( scalar @{$services} == 1 and defined $services ) {
+        for my $s ( @{$services} ) {
+            if( $s->{'peer_key'} eq $backend ) {
                 $service = $s;
                 last;
             }
@@ -204,23 +195,20 @@ sub _process_service_page {
     return $c->detach('/error/index/15') unless defined $service;
 
     my @backends;
-    for my $s (@{$services}) {
+    for my $s ( @{$services} ) {
         push @backends, $s->{'peer_key'};
     }
-    $self->_set_backend_selector($c, \@backends, $service->{'peer_key'});
+    $self->_set_backend_selector( $c, \@backends, $service->{'peer_key'} );
 
-    $c->stash->{'service'}  = $service;
+    $c->stash->{'service'} = $service;
 
-
-    my $comments   = $c->{'db'}->get_comments(filter =>  [Thruk::Utils::Auth::get_auth_filter($c, 'comments'),
-                                                         { 'host_name' => $hostname },
-                                                         { 'service_description' => $servicename }],
-                                              sort   =>  {'id' => 'DESC'});
-    my $downtimes  = $c->{'db'}->get_downtimes(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'),
-                                                         { 'host_name' => $hostname },
-                                                         { 'service_description' => $servicename }],
-                                               sort   => {'id' => 'DESC'});
-    $c->stash->{'comments'} = $comments;
+    my $comments = $c->{'db'}->get_comments(
+        filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
+        sort => { 'id' => 'DESC' } );
+    my $downtimes = $c->{'db'}->get_downtimes(
+        filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
+        sort => { 'id' => 'DESC' } );
+    $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
 
     return 1;
@@ -229,17 +217,17 @@ sub _process_service_page {
 ##########################################################
 # create the servicegroup cmd page
 sub _process_servicegroup_cmd_page {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
     my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'};
     return $c->detach('/error/index/5') unless defined $servicegroup;
 
-    my $groups = $c->{'live'}->selectall_hashref("GET servicegroups\n".Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups')."\nColumns: name alias\nFilter: name = $servicegroup\nLimit: 1", 'name');
-    my @groups = values %{$groups};
-    $c->detach('/error/index/5') unless defined $groups[0];
+    my $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $servicegroup ], limit => 1);
 
-    $c->stash->{'servicegroup'}       = $groups[0]->{'name'};
-    $c->stash->{'servicegroup_alias'} = $groups[0]->{'alias'};
+    $c->detach('/error/index/5') unless defined $groups->[0];
+
+    $c->stash->{'servicegroup'}       = $groups->[0]->{'name'};
+    $c->stash->{'servicegroup_alias'} = $groups->[0]->{'alias'};
 
     return 1;
 }
@@ -247,7 +235,7 @@ sub _process_servicegroup_cmd_page {
 ##########################################################
 # create the scheduling page
 sub _process_scheduling_page {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
     my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
     my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 7;
@@ -256,14 +244,14 @@ sub _process_scheduling_page {
     $order = "DESC" if $sorttype == 2;
 
     my $sortoptions = {
-                '1' => [ ['host_name', 'description'],   'host name'       ],
-                '2' => [ 'description',                  'service name'    ],
-                '4' => [ 'last_check',                   'last check time' ],
-                '7' => [ 'next_check',                   'next check time' ],
+        '1' => [ [ 'host_name', 'description' ], 'host name' ],
+        '2' => [ 'description', 'service name' ],
+        '4' => [ 'last_check',  'last check time' ],
+        '7' => [ 'next_check',  'next check time' ],
     };
     $sortoption = 7 if !defined $sortoptions->{$sortoption};
 
-    my $queue = $c->{'db'}->get_scheduling_queue(sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c, c => $c);
+    my $queue = $c->{'db'}->get_scheduling_queue( sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c, c => $c );
 
     $c->stash->{'order'}   = $order;
     $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];
@@ -271,23 +259,22 @@ sub _process_scheduling_page {
     return 1;
 }
 
-
 ##########################################################
 # create the process info page
 sub _process_process_info_page {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
-    return $c->detach('/error/index/1') unless $c->check_user_roles( "authorized_for_system_information" );
+    return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
     return 1;
 }
 
 ##########################################################
 # create the performance info page
 sub _process_perf_info_page {
-    my ( $self, $c ) = @_;
+    my( $self, $c ) = @_;
 
-    $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'status')]);
-    $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'status')]);
+    $c->stash->{'stats'} = $c->{'db'}->get_performance_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
     return 1;
 }
@@ -295,7 +282,7 @@ sub _process_perf_info_page {
 ##########################################################
 # show backend selector
 sub _set_backend_selector {
-    my ( $self, $c, $backends, $selected ) = @_;
+    my( $self, $c, $backends, $selected ) = @_;
     my %backends = map { $_ => 1 } @{$backends};
 
     my @backends;
