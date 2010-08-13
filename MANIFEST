@@ -996,6 +996,7 @@ templates/_get_content.tt
 templates/_header.tt
 templates/_host_status_details_box.tt
 templates/_infobox.tt
+templates/_logs.tt
 templates/_message.tt
 templates/_pager.tt
 templates/_service_status_details_box.tt

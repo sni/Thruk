@@ -136,7 +136,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($oldestfirst) {
         $order = "ASC";
     }
-    my $logs = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'});
+    my $logs = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
 
     $c->stash->{logs}             = $logs;
     $c->stash->{archive}          = $archive;

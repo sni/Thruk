@@ -78,17 +78,17 @@ my %config = ('name'                   => 'Thruk',
 
                                           'version'        => $VERSION,
                                           'backends'       => [],
-                                          'refresh_rate'   => "",
+                                          'refresh_rate'   => '',
                                           'remote_user'    => '?',
-                                          'infoBoxTitle'   => "",
+                                          'infoBoxTitle'   => '',
                                           'has_proc_info'  => 0,
                                           'no_auto_reload' => 0,
                                           'die_on_errors'  => 0,  # used in cmd.cgi
                                           'errorMessage'   => 0,  # used in errors
-                                          'js'             => "", # used in _header.tpl
-                                          'extra_header'   => "", # used in _header.tpl
-                                          'ssi_header'     => "", # used in _header.tpl
-                                          'ssi_footer'     => "", # used in _header.tpl
+                                          'js'             => '', # used in _header.tpl
+                                          'extra_header'   => '', # used in _header.tpl
+                                          'ssi_header'     => '', # used in _header.tpl
+                                          'ssi_footer'     => '', # used in _header.tpl
                                       },
                   PRE_CHOMP          => 1,
                   POST_CHOMP         => 1,

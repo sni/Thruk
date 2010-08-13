@@ -11,6 +11,7 @@
 [% IF statetype  != '' %][% link = link _ '&amp;' _ 'statetype='  _ statetype  %][% END %]
 
     <form method="get" action="history.cgi" id="date_form">
+    <input type="hidden" name="entries" value="[% entries_per_page %]">
     <table border="0" width="100%">
       <tr>
         <td align="left" valign="top" width="33%">
@@ -132,84 +133,6 @@
     </table>
     </form>
 
-[% SET last_hour = '' %]
-[% FOREACH l = logs %]
-[% this_hour = date.format(l.time, '%Y-%m-%d  %H') _ ':00' %]
-[% IF this_hour != last_hour %]
-  [% SET last_hour = this_hour %]
-    [% IF ! loop.first %]</div>[% END %]
-    <br clear='all'>
-    <div class='dateTimeBreak'>
-      <table border="0" width="95%">
-        <tr>
-          <td width="40%"><hr width="100%"></td>
-          <td align="center" class='dateTimeBreak'>[% date.format(l.time, datetime_format_log) _ ':00' %]</td>
-          <td width="40%"><hr width="100%"></td>
-        </tr>
-      </table>
-    </div>
-    <br clear='all'>
-    <div class='logEntries'>
-[% END %]
-
-[%    IF l.type == 'SERVICE NOTIFICATION'         %][% SET pic = "notify.gif"        desc = "Service Notification" %]
-[% ELSIF l.type == 'HOST NOTIFICATION'            %][% SET pic = "notify.gif"        desc = "Host Notification" %]
-[% ELSIF l.type == 'SERVICE ALERT'                %]
-                            [%    IF l.state == 0 %][% SET pic = "recovery.png"      desc = "Service Ok" %]
-                            [% ELSIF l.state == 1 %][% SET pic = "warning.png"       desc = "Service Warning" %]
-                            [% ELSIF l.state == 2 %][% SET pic = "critical.png"      desc = "Service Critical" %]
-                            [% ELSIF l.state == 3 %][% SET pic = "unknown.png"       desc = "Service Unknown" %]
-                               [% END %]
-[% ELSIF l.type == 'HOST ALERT'                   %]
-                            [%    IF l.state == 0 %][% SET pic = "recovery.png"      desc = "Host Up" %]
-                            [% ELSIF l.state == 1 %][% SET pic = "critical.png"      desc = "Host Down" %]
-                            [% ELSIF l.state == 2 %][% SET pic = "critical.png"      desc = "Host Unreachable" %]
-                               [% END %]
-[% ELSIF l.type == 'SERVICE EVENT HANDLER'        %][% SET pic = "serviceevent.gif"  desc = "Service Event Handler" %]
-[% ELSIF l.type == 'HOST EVENT HANDLER'           %][% SET pic = "hostevent.gif"     desc = "Host Event Handler" %]
-[% ELSIF l.type == 'EXTERNAL COMMAND'             %][% SET pic = "command.png"       desc = "External Command" %]
-[% ELSIF l.type == 'PASSIVE SERVICE CHECK'        %][% SET pic = "passiveonly.gif"   desc = "Passive Service Check" %]
-[% ELSIF l.type == 'PASSIVE HOST CHECK'           %][% SET pic = "passiveonly.gif"   desc = "Passive Host Check" %]
-
-[% ELSIF l.type == 'SERVICE FLAPPING ALERT'       %]
-          [%    IF l.options.match(';STARTED;')  %][% SET pic = "flapping.gif"      desc = "Service started flapping" %]
-          [% ELSIF l.options.match(';STOPPED;')  %][% SET pic = "flapping.gif"      desc = "Service stoppedflapping" %]
-          [% ELSIF l.options.match(';DISABLED;') %][% SET pic = "flapping.gif"      desc = "Service flap detection disabled" %]
-          [% END %]
-[% ELSIF l.type == 'HOST FLAPPING ALERT'       %]
-          [%    IF l.options.match(';STARTED;')  %][% SET pic = "flapping.gif"      desc = "Host started flapping" %]
-          [% ELSIF l.options.match(';STOPPED;')  %][% SET pic = "flapping.gif"      desc = "Host stoppedflapping" %]
-          [% ELSIF l.options.match(';DISABLED;') %][% SET pic = "flapping.gif"      desc = "Host flap detection disabled" %]
-          [% END %]
-[% ELSIF l.type == 'SERVICE DOWNTIME ALERT'       %]
-         [%    IF l.options.match(';STARTED;')   %][% SET pic = "downtime.gif"      desc = "Service entered a period of scheduled downtime" %]
-         [% ELSIF l.options.match(';STOPPED;')   %][% SET pic = "downtime.gif"      desc = "Service exited a period of scheduled downtime" %]
-         [% ELSIF l.options.match(';CANCELLED;') %][% SET pic = "downtime.gif"      desc = "Service scheduled downtime has been cancelled" %]
-         [% END %]
-[% ELSIF l.type == 'HOST DOWNTIME ALERT'          %]
-         [%    IF l.options.match(';STARTED;')   %][% SET pic = "downtime.gif"      desc = "Host entered a period of scheduled downtime" %]
-         [% ELSIF l.options.match(';STOPPED;')   %][% SET pic = "downtime.gif"      desc = "Host exited a period of scheduled downtime" %]
-         [% ELSIF l.options.match(';CANCELLED;') %][% SET pic = "downtime.gif"      desc = "Host scheduled downtime has been cancelled" %]
-         [% END %]
-[% ELSIF l.type == 'LOG ROTATION'                 %][% SET pic = "logrotate.png"     desc = "Log Rotation" %]
-[% ELSIF l.type.match('restarting\.\.\.')        %][% SET pic = "restart.gif"       desc = "Program Restart" %]
-[% ELSIF l.type.match('starting\.\.\.')          %][% SET pic = "start.gif"         desc = "Program Start" %]
-[% ELSIF l.type.match('shutting down\.\.\.')     %][% SET pic = "stop.gif"          desc = "Program End" %]
-[% ELSIF l.type.match('Bailing\ out')            %][% SET pic = "stop.gif"          desc = "Program End" %]
-[% ELSIF l.type.match('active mode\.\.\.')       %][% SET pic = "active.gif"        desc = "Active Mode" %]
-[% ELSIF l.type.match('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
-[% ELSE                                              %][% SET pic = "info.png"          desc = "Informational Message" %]
-[% END %]
-<img align='middle' src='/thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]' width="20" height="20">[[% date.format(l.time, datetime_format) %]] [% l.type %][% IF l.options %]: [% l.options %][% END %]<br clear='all'>
-[% END %]
-[% IF logs.size and logs.size > 0 %]</div>[% END %]
-
-  <hr>
-  [% IF !logs.size %]
-  <div class='warningMessage'>No history information was found for this service in the current log file</div>
-  [% ELSE %]
-  <div class="itemTotalsTitle">[% IF logs.size %][% logs.size %][% ELSE %]0[% END %] Matching Log Entries Displayed</div>
-  [% END %]
-
+[% PROCESS _logs.tt %]
 
 [% PROCESS _footer.tt %]
