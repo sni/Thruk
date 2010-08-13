@@ -27,7 +27,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     my($start,$end);
-    my $filter  = "";
+    my $filter;
     my $timeframe = 86400;
 
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
@@ -62,43 +62,40 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $end   = $tmp;
     }
 
-    $filter .= "Filter: time >= $start\n";
-    $filter .= "Filter: time <= $end\n";
+    push @{$filter}, { time => { '>=' => $start }};
+    push @{$filter}, { time => { '<=' => $end }};
 
 
     # additional filters set?
     my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
     my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
-    my @filter;
     my $errors = 0;
     if(defined $pattern and $pattern !~ m/^\s*$/mx) {
         $errors++ unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
-        push @filter, "Filter: message ~~ $pattern\n";
+        push @{$filter}, { message => { '~~' => $pattern }};
     }
     if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
         $errors++ unless Thruk::Utils::is_valid_regular_expression($c, $exclude_pattern);
-        push @filter, "Filter: message !~~ $exclude_pattern\n";
+        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
     }
+
+    my $order = "DESC";
+    if($oldestfirst) {
+        $order = "ASC";
+    }
+
     if($errors == 0) {
-        $filter .= Thruk::Utils::combine_filter(\@filter, 'And');
-        my $query = "GET log\nColumns: time type message state\n".$filter;
-        $query   .= Thruk::Utils::Auth::get_auth_filter($c, 'log');
+        my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
         $c->stats->profile(begin => "showlog::fetch");
-        my $logs = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
+        my $logs = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
         $c->stats->profile(end   => "showlog::fetch");
-        my $order = "DESC";
-        if($oldestfirst) {
-            $order = "ASC";
-        }
-        my $sortedlogs = Thruk::Utils::sort($c, $logs, 'time', $order);
-        Thruk::Utils::page_data($c, $sortedlogs);
     }
 
     $c->stash->{archive}          = $archive;
     $c->stash->{start}            = $start;
     $c->stash->{end}              = $end;
-    $c->stash->{pattern}          = $pattern;
-    $c->stash->{exclude_pattern}  = $exclude_pattern;
+    $c->stash->{pattern}          = $pattern         || '';
+    $c->stash->{exclude_pattern}  = $exclude_pattern || '';
     $c->stash->{oldestfirst}      = $oldestfirst;
     $c->stash->{title}            = 'Log File';
     $c->stash->{infoBoxTitle}     = 'Event Log';
