@@ -85,18 +85,9 @@ sub _show_step_1 {
     my ( $self, $c ) = @_;
     $c->stats->profile(begin => "_show_step_1()");
 
-    my $tmp_hosts         = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), 'name');
-    my $tmp_hostgroups    = $c->{'live'}->selectall_hashref("GET hostgroups\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), 'name');
-    my $tmp_servicegroups = $c->{'live'}->selectall_hashref("GET servicegroups\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), 'name');
-
-    my(@hosts, @hostgroups, @servicegroups);
-    @hosts         = sort keys %{$tmp_hosts}         if defined $tmp_hosts;
-    @hostgroups    = sort keys %{$tmp_hostgroups}    if defined $tmp_hostgroups;
-    @servicegroups = sort keys %{$tmp_servicegroups} if defined $tmp_servicegroups;
-
-    $c->stash->{hosts}         = \@hosts;
-    $c->stash->{hostgroups}    = \@hostgroups;
-    $c->stash->{servicegroups} = \@servicegroups;
+    $c->stash->{hosts}         = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
+    $c->stash->{hostgroups}    = $c->{'db'}->get_hostgroup_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups') ]);
+    $c->stash->{servicegroups} = $c->{'db'}->get_servicegroup_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups') ]);
     $c->stash->{template}      = 'summary_step_1.tt';
 
     $c->stats->profile(end => "_show_step_1()");
@@ -163,8 +154,8 @@ sub _create_report {
     # get filter from parameters
     my($hostfilter, $servicefilter) = $self->_get_filter($c);
 
-    $hostfilter    .= "Filter: time >= $start\nFilter: time <= $end";
-    $servicefilter .= "Filter: time >= $start\nFilter: time <= $end";
+    push @{$hostfilter},    { -and => [ time => { '>=' => $start }, time => { '<=' => $end } ] };
+    push @{$servicefilter}, { -and => [ time => { '>=' => $start }, time => { '<=' => $end } ] };
 
     my $alertlogs = $self->_get_alerts_from_log($c, $hostfilter, $servicefilter);
 
@@ -205,8 +196,8 @@ sub _display_recent_alerts {
     my ( $self, $c, $alerts ) = @_;
     $c->stats->profile(begin => "_display_recent_alerts()");
 
-    my $sortedtotals = Thruk::Utils::sort($c, $alerts, 'time', 'DESC');
-    Thruk::Utils::page_data($c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
+    my $sortedtotals = Thruk::Backend::Manager::_sort($c, $alerts, { 'DESC' => 'time'});
+    Thruk::Backend::Manager::_page_data(undef, $c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
 
     $c->stats->profile(end => "_display_recent_alerts()");
     return 1;
@@ -234,8 +225,8 @@ sub _display_top_alerts {
     }
 
     my @totals = values %{$totals};
-    my $sortedtotals = Thruk::Utils::sort($c, \@totals, 'alerts', 'DESC');
-    Thruk::Utils::page_data($c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
+    my $sortedtotals = Thruk::Backend::Manager::_sort($c, \@totals, { 'DESC' => 'alerts'});
+    Thruk::Backend::Manager::_page_data(undef, $c, $sortedtotals, $c->{'request'}->{'parameters'}->{'limit'});
 
     $c->stats->profile(end => "_display_top_alerts()");
     return 1;
@@ -254,21 +245,24 @@ sub _display_alert_totals {
     }
     elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Hostgroup';
-        my $tmp = $c->{'live'}->selectcol_arrayref("GET hostgroups\nColumns: name alias", { Columns => [1,2] });
-        %{$box_title_data} = @{$tmp} if defined $tmp;
+        my $tmp = $c->{'db'}->get_hostgroups();
+        Thruk::Utils::array2hash($tmp, 'name');
+        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Host';
-        my $tmp = $c->{'live'}->selectcol_arrayref("GET hosts\nColumns: name alias", { Columns => [1,2] });
-        %{$box_title_data} = @{$tmp} if defined $tmp;
+        my $tmp = $c->{'db'}->get_hosts(columns => [qw/name alias/]);
+        Thruk::Utils::array2hash($tmp, 'name');
+        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
     }
     elsif($displaytype == REPORT_SERVICE_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Service';
     }
     elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
         $c->stash->{'box_title'} = 'Totals By Servicegroup';
-        my $tmp = $c->{'live'}->selectcol_arrayref("GET servicegroups\nColumns: name alias", { Columns => [1,2] });
-        %{$box_title_data} = @{$tmp} if defined $tmp;
+        my $tmp = $c->{'db'}->get_servicegroups();
+        Thruk::Utils::array2hash($tmp, 'name');
+        $box_title_data = Thruk::Utils::array2hash($tmp, 'name');
     }
 
     my $totals = {};
@@ -314,6 +308,7 @@ sub _display_alert_totals {
                 }
                 $totals->{$ident} = {
                     'sub_title' => $sub_title,
+                    'no_hosts'  => 0,
                     'host'      => {
                                     'HARD' => {
                                                 'UP'          => 0,
@@ -379,18 +374,14 @@ sub _get_alerts_from_log {
     my($hostlogs, $servicelogs);
 
     if($c->stash->{alerttypefilter} ne "Service") {
-        my $host_log_query = "GET log\n".$hostfilter.Thruk::Utils::Auth::get_auth_filter($c, 'log')."\nColumns: time state state_type host_name service_description current_host_groups current_service_groups plugin_output";
-        $c->log->debug($host_log_query);
         $c->stats->profile(begin => "summary.pm fetch host logs");
-        $hostlogs = $c->{'live'}->selectall_arrayref($host_log_query, { Slice => 1} );
+        $hostlogs = $c->{'db'}->get_logs(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'log'), $hostfilter]);
         $c->stats->profile(end   => "summary.pm fetch host logs");
     }
 
     if($c->stash->{alerttypefilter} ne "Host") {
-        my $service_log_query = "GET log\n".$servicefilter.Thruk::Utils::Auth::get_auth_filter($c, 'log')."\nColumns: time state state_type  host_name service_description current_host_groups current_service_groups plugin_output";
-        $c->log->debug($service_log_query);
         $c->stats->profile(begin => "summary.pm fetch service logs");
-        $servicelogs = $c->{'live'}->selectall_arrayref($service_log_query, { Slice => 1} );
+        $servicelogs = $c->{'db'}->get_logs(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'log'), $servicefilter]);
         $c->stats->profile(end   => "summary.pm fetch service logs");
     }
 
@@ -405,39 +396,39 @@ sub _get_alerts_from_log {
 sub _get_filter {
     my( $self, $c ) = @_;
 
-    my($hostfilter, $servicefilter) = ("", "");
+    my(@hostfilter, @servicefilter);
 
     # host state filter
     my($hoststatusfiltername,$hoststatusfilter)
         = $self->_get_host_statustype_filter($c->{'request'}->{'parameters'}->{'hoststates'});
     $c->stash->{hoststatusfilter} = $hoststatusfiltername;
-    $hostfilter .= $hoststatusfilter;
+    push @hostfilter, $hoststatusfilter if $hoststatusfilter;
 
     # service state filter
     my($servicestatusfiltername,$servicestatusfilter)
         = $self->_get_service_statustype_filter($c->{'request'}->{'parameters'}->{'servicestates'});
     $c->stash->{servicestatusfilter} = $servicestatusfiltername;
-    $servicefilter .= $servicestatusfilter;
+    push @servicefilter, $servicestatusfilter if $servicestatusfilter;
 
     # hard or soft?
     my $statetypes = $c->{'request'}->{'parameters'}->{'statetypes'} || 3;
     if($statetypes == AE_SOFT) {
         $c->stash->{statetypefilter} = "Soft";
-        $servicefilter .= "Filter: options ~ ;SOFT;\n";
-        $hostfilter    .= "Filter: options ~ ;SOFT;\n";
+        push @servicefilter, { options => { '~' => ';SOFT;' }};
+        push @hostfilter,    { options => { '~' => ';SOFT;' }};
     }
     elsif($statetypes == AE_HARD) {
         $c->stash->{statetypefilter} = "Hard";
-        $servicefilter .= "Filter: options ~ ;HARD;\n";
-        $hostfilter    .= "Filter: options ~ ;HARD;\n";
+        push @servicefilter, { options => { '~' => ';HARD;' }};
+        push @hostfilter,    { options => { '~' => ';HARD;' }};
     }
     else {
         $c->stash->{statetypefilter} = "Hard &amp; Soft";
     }
 
     # only hosts or services?
-    $hostfilter    .= "Filter: type = HOST ALERT\n";
-    $servicefilter .= "Filter: type = SERVICE ALERT\n";
+    push @hostfilter,    { type => 'HOST ALERT'};
+    push @servicefilter, { type => 'SERVICE ALERT'};
     my $alerttypes = $c->{'request'}->{'parameters'}->{'alerttypes'} || 3;
     if($alerttypes == AE_HOST_ALERT) {
         $c->stash->{alerttypefilter} = "Host";
@@ -454,19 +445,19 @@ sub _get_filter {
     my $host         = $c->{'request'}->{'parameters'}->{'host'};
     my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'};
     if(defined $hostgroup and $hostgroup ne 'all') {
-        $hostfilter    .= "Filter: current_host_groups >= $hostgroup\n";
-        $servicefilter .= "Filter: current_host_groups >= $hostgroup\n";
+        push @hostfilter,    { current_host_groups => { '>=' => $hostgroup }};
+        push @servicefilter, { current_host_groups => { '>=' => $hostgroup }};
     }
     elsif(defined $host and $host ne 'all') {
-        $hostfilter    .= "Filter: host_name = $host\n";
-        $servicefilter .= "Filter: host_name = $host\n";
+        push @hostfilter,    { host_name => $host };
+        push @servicefilter, { host_name => $host };
     }
     elsif(defined $servicegroup and $servicegroup ne 'all') {
-        $hostfilter    .= "Filter: current_service_groups >= $servicegroup\n";
-        $servicefilter .= "Filter: current_service_groups >= $servicegroup\n";
+        push @hostfilter,    { current_service_groups => { '>=' => $servicegroup }};
+        push @servicefilter, { current_service_groups => { '>=' => $servicegroup }};
     }
 
-    return($hostfilter, $servicefilter);
+    return(\@hostfilter, \@servicefilter);
 }
 
 ##########################################################
@@ -475,33 +466,26 @@ sub _get_host_statustype_filter {
 
     $number = 7 if !defined $number or $number <= 0 or $number > 7;
     my $hoststatusfiltername = 'All';
-    my $hostfilter           = '';
+    my @hoststatusfilter;
     if($number and $number != 7) {
-        my @hoststatusfilter;
         my @hoststatusfiltername;
         my @bits = reverse split(/\ */mx, unpack("B*", pack("n", int($number))));
 
         if($bits[0]) {  # 1 - host down
-            push @hoststatusfilter,    "Filter: state = 1";
+            push @hoststatusfilter,    { state =>  1 };
             push @hoststatusfiltername, 'Down';
         }
         if($bits[1]) {  # 2 - host unreachable
-            push @hoststatusfilter,    "Filter: state = 2";
+            push @hoststatusfilter,    { state =>  2 };
             push @hoststatusfiltername, 'Unreachable';
         }
         if($bits[2]) {  # 4 - host up
-            push @hoststatusfilter,    "Filter: state = 0";
+            push @hoststatusfilter,    { state =>  0 };
             push @hoststatusfiltername, 'Up';
         }
         $hoststatusfiltername = join(', ', @hoststatusfiltername);
-
-        if(scalar @hoststatusfilter > 1) {
-            $hostfilter    .= join("\n", @hoststatusfilter)."\nOr: ".(scalar @hoststatusfilter)."\n";
-        }
-        elsif(scalar @hoststatusfilter == 1) {
-            $hostfilter    .= $hoststatusfilter[0]."\n";
-        }
     }
+    my $hostfilter = Thruk::Utils::combine_filter('-or', \@hoststatusfilter);
     return($hoststatusfiltername,$hostfilter);
 }
 
@@ -511,37 +495,30 @@ sub _get_service_statustype_filter {
 
     $number = 120 if !defined $number or $number <= 0 or $number > 120;
     my $servicestatusfiltername = 'All';
-    my $servicefilter           = '';
+    my @servicestatusfilter;
     if($number and $number != 120) {
-        my @servicestatusfilter;
         my @servicestatusfiltername;
         my @bits = reverse split(/\ */mx, unpack("B*", pack("n", int($number))));
 
         if($bits[3]) {  # 8 - service warning
-            push @servicestatusfilter,    "Filter: state = 1";
+            push @servicestatusfilter,    { state => 1 };
             push @servicestatusfiltername, 'Warning';
         }
         if($bits[4]) {  # 16 - service unknown
-            push @servicestatusfilter,    "Filter: state = 3";
+            push @servicestatusfilter,    { state => 3 };
             push @servicestatusfiltername, 'Unknown';
         }
         if($bits[5]) {  # 32 - service critical
-            push @servicestatusfilter,    "Filter: state = 2";
+            push @servicestatusfilter,    { state => 2 };
             push @servicestatusfiltername, 'Critical';
         }
         if($bits[6]) {  # 64 - service ok
-            push @servicestatusfilter,    "Filter: state = 0";
+            push @servicestatusfilter,    { state => 0 };
             push @servicestatusfiltername, 'Ok';
         }
         $servicestatusfiltername = join(', ', @servicestatusfiltername);
-
-        if(scalar @servicestatusfilter > 1) {
-            $servicefilter    .= join("\n", @servicestatusfilter)."\nOr: ".(scalar @servicestatusfilter)."\n";
-        }
-        elsif(scalar @servicestatusfilter == 1) {
-            $servicefilter    .= $servicestatusfilter[0]."\n";
-        }
     }
+    my $servicefilter = Thruk::Utils::combine_filter('-or', \@servicestatusfilter);
     return($servicestatusfiltername,$servicefilter);
 }
 

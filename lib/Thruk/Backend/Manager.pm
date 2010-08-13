@@ -417,11 +417,10 @@ sub _page_data {
     my $c    = shift;
     my $data = shift || [];
     return $data unless defined $c;
+    my $default_result_size = shift || $c->stash->{'default_page_size'};
 
     # set some defaults
     $c->stash->{'pager'} = "";
-
-    my $default_result_size = shift || $c->stash->{'default_page_size'};
 
     # page only in html mode
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
