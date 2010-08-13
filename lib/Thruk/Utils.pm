@@ -543,7 +543,7 @@ sub calculate_availability {
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
-    $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'};
+    $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'} || '';
 
     my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'};
     my $assumeinitialstates          = $c->{'request'}->{'parameters'}->{'assumeinitialstates'};

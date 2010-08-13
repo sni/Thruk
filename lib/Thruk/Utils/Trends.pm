@@ -48,21 +48,22 @@ sub _show_step_2 {
 
     my $data;
     if($input eq 'gethost') {
-        $data = $c->{'live'}->selectall_hashref("GET hosts\nColumns: name\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), 'name');
+        $data = $c->{'db'}->get_host_names(filter => Thruk::Utils::Auth::get_auth_filter($c, 'hosts'));
     }
     elsif($input eq 'getservice') {
-        my $services = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: host_name description", { Slice => 1});
+        my $services = $c->{'db'}->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services')], columns => [qw/host_name description/]);
         for my $service (@{$services}) {
             $data->{$service->{'host_name'}.";".$service->{'description'}} = 1;
         }
+        my @sorted = sort keys %{$data};
+        $data = \@sorted;
     }
     else {
         return;
     }
 
-    my @sorted = sort keys %{$data};
     $c->stash->{input}       = $input;
-    $c->stash->{data}        = \@sorted;
+    $c->stash->{data}        = $data;
     $c->stash->{template}    = 'trends_step_2.tt';
 
     return 1;
@@ -101,19 +102,17 @@ sub _show_step_3 {
 ##########################################################
 sub _show_report {
     my ( $self, $c ) = @_;
-    my $start_time   = time();
 
-    my $host    = $c->{'request'}->{'parameters'}->{'host'};
-    my $service = $c->{'request'}->{'parameters'}->{'service'};
+    $c->stats->profile(begin => "_show_report()");
 
-    if(!defined $host and !defined $service) {
-        return;
-    }
+    my $start_time = time();
+    my $host       = $c->{'request'}->{'parameters'}->{'host'}       || '';
+    my $service    = $c->{'request'}->{'parameters'}->{'service'}    || '';
 
-    $c->stash->{host}    = $host;
-    $c->stash->{service} = $service;
+    $c->stash->{host}       = $host;
+    $c->stash->{service}    = $service;
 
-    $c->stats->profile(begin => "_create_report()");
+    return unless $host or $service;
 
     # create the image map
     my $image_map = $self->_create_image($c, IMAGE_MAP_MODE);
@@ -121,10 +120,12 @@ sub _show_report {
         $c->stash->{image_map} = $image_map;
         $c->stash->{nomap}     = $c->{'request'}->{'parameters'}->{'nomap'};
     }
+    $c->stash->{nomap}     = '' unless defined $c->stash->{nomap};
+    $c->stash->{image_map} = '' unless defined $c->stash->{image_map};
 
     # finished
     $c->stash->{time_token} = time() - $start_time;
-    $c->stats->profile(end => "_create_report()");
+    $c->stats->profile(end => "_show_report()");
 
     $c->stash->{image_width}  = '900';
     $c->stash->{image_height} = '300';
