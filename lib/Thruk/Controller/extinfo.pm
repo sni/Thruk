@@ -93,8 +93,8 @@ sub _process_comments_page {
 # create the downtimes page
 sub _process_downtimes_page {
     my( $self, $c ) = @_;
-    $c->stash->{'hostdowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ] );
-    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ] );
+    $c->stash->{'hostdowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
+    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
     return 1;
 }
 
@@ -135,10 +135,10 @@ sub _process_host_page {
     $c->stash->{'host'} = $host;
     my $comments = $c->{'db'}->get_comments(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
-        sort => { 'id' => 'DESC' } );
+        sort => { 'DESC' => 'id' } );
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
-        sort => { 'id' => 'DESC' } );
+        sort => { 'DESC' => 'id' } );
 
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
@@ -204,10 +204,10 @@ sub _process_service_page {
 
     my $comments = $c->{'db'}->get_comments(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
-        sort => { 'id' => 'DESC' } );
+        sort => { 'DESC' => 'id' } );
     my $downtimes = $c->{'db'}->get_downtimes(
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => $servicename } ],
-        sort => { 'id' => 'DESC' } );
+        sort => { 'DESC' => 'id' } );
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
 

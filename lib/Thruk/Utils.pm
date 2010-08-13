@@ -40,12 +40,15 @@ sub parse_date {
             $timestamp = Mktime($1,$2,$3, $4,$5,$6);
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
         }
-        else {
+        elsif($string =~ m/^\d+$/mx) {
             $timestamp = UnixDate($string, '%s');
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
+        } else {
+            confess("not a date: ".Dumper($string));
         }
     };
     if($@) {
+        $c->log->error($@);
         $c->detach('/error/index/19');
         return;
     }

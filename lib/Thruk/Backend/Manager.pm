@@ -259,11 +259,33 @@ returns a result for a sub called on all peers
 sub _do_on_peers {
     my( $self, $sub, $arg ) = @_;
 
+    my(%arg, $backends);
+    if(     ( $sub =~ m/^get_/mx or $sub eq 'send_command')
+        and ref $arg eq 'ARRAY'
+        and scalar @{$arg} % 2 == 0 )
+    {
+        %arg = @{$arg};
+
+        if( $arg{'backend'} ) {
+            if(ref $arg{'backend'} eq 'ARRAY') {
+                for my $b (@{$arg{'backend'}}) {
+                    $backends->{$b} = 1;
+                }
+            } else {
+                $backends->{$arg{'backend'}} = 1;
+            }
+        }
+    }
+
     my( $result, $type );
     eval {
         for my $peer ( @{ $self->get_peers() } )
         {
-            next unless $peer->{'enabled'} == 1;
+            if(defined $backends) {
+                next unless defined $backends->{$peer->{'key'}};
+            } else {
+                next unless $peer->{'enabled'} == 1;
+            }
             $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
             ( $result->{ $peer->{'key'} }, $type ) = $peer->{'class'}->$sub( @{$arg} );
             $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
@@ -296,12 +318,8 @@ sub _do_on_peers {
         $data = $self->_merge_answer( $result, $type );
     }
 
-    if(     $sub =~ m/^get_/mx
-        and ref $arg eq 'ARRAY'
-        and scalar @{$arg} % 2 == 0 )
-    {
-        my %arg = @{$arg};
 
+    if(scalar keys %arg > 0) {
         if( $arg{'remove_duplicates'} and scalar keys %{$result} > 1 ) {
             $data = $self->_remove_duplicates($data);
         }

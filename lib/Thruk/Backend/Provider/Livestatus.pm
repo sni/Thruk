@@ -75,6 +75,19 @@ sub peer_name {
 
 ##########################################################
 
+=head2 send_command
+
+send a command
+
+=cut
+sub send_command {
+    my($self, %options) = @_;
+    $self->{'live'}->{'backend_obj'}->do($options{'command'});
+    return;
+}
+
+##########################################################
+
 =head2 get_processinfo
 
 return the process info
@@ -712,10 +725,18 @@ sub _get_class {
 
     my $class = $self->{'live'}->table($table);
     if(defined $options->{'columns'}) {
+        if(ref $options->{'columns'} ne 'ARRAY') {
+            confess("not a arrayref: ".Dumper($options->{'confess'}));
+        }
         $class = $class->columns(@{$options->{'columns'}});
     }
-    if(defined $options->{'filter'} and scalar @{$options->{'filter'}} > 0) {
-        $class = $class->filter([@{$options->{'filter'}}]);
+    if(defined $options->{'filter'}) {
+        if(ref $options->{'filter'} ne 'ARRAY') {
+            confess("not a arrayref: ".Dumper($options->{'filter'}));
+        }
+        if(scalar @{$options->{'filter'}} > 0) {
+            $class = $class->filter([@{$options->{'filter'}}]);
+        }
     }
 
     $options->{'options'}->{'AddPeer'} = 1;

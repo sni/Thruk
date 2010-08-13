@@ -33,6 +33,11 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{infoBoxTitle}   = "External Command Interface";
     $c->stash->{no_auto_reload} = 1;
     $c->stash->{page}           = 'cmd';
+    $c->stash->{'form_errors'}  = [];
+
+    for my $param (qw/com_id down_id hostgroup host service start_time end_time force_check hour minutes childoptions servicegroup/) {
+        $c->request->parameters->{$param} = '' unless defined $c->request->parameters->{$param};
+    }
 
     Thruk::Utils::ssi_include($c);
 
@@ -57,12 +62,12 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 
     # for comment ids
     if( defined $c->{'request'}->{'parameters'}->{'com_id'} ) {
-        $data = $c->{'live'}->selectall_arrayref( "GET comments\nColumns: host_name service_description\nFilter: id = " . $c->{'request'}->{'parameters'}->{'com_id'}, $query_options );
+        $data = $c->{'db'}->get_comments(filter => [ id => $c->{'request'}->{'parameters'}->{'com_id'} ]);
     }
 
     # for downtime ids
     if( defined $c->{'request'}->{'parameters'}->{'down_id'} ) {
-        $data = $c->{'live'}->selectall_arrayref( "GET downtimes\nColumns: host_name service_description\nFilter: id = " . $c->{'request'}->{'parameters'}->{'down_id'}, $query_options );
+        $data = $c->{'db'}->get_downtimes(filter => [ id => $c->{'request'}->{'parameters'}->{'down_id'} ]);
     }
     if( defined $data->[0] ) {
         $c->{'request'}->{'parameters'}->{'host'}    = $data->[0]->{'host_name'};
@@ -182,14 +187,16 @@ sub _remove_all_downtimes {
     my( $self, $c, $host, $service ) = @_;
 
     # get list of all downtimes
-    my $ids;
+    my @ids;
     if( defined $service ) {
-        $ids = $c->{'live'}->selectcol_arrayref( "GET downtimes\n" . Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) . "\nFilter: service_description = $service\nFilter: host_name = $host\nColumns: id" );
+        my $data = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $host, service_description => $service ]);
+        @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
     }
     else {
-        $ids = $c->{'live'}->selectcol_arrayref( "GET downtimes\n" . Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) . "\nFilter: service_description = \nFilter: host_name = $host\nColumns: id" );
+        my $data = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $host, service_description => undef ]);
+        @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
     }
-    for my $id ( @{$ids} ) {
+    for my $id ( @ids ) {
         $c->{'request'}->{'parameters'}->{'down_id'} = $id;
         if( $self->_do_send_command($c) ) {
             $c->log->debug("removing downtime $id succeeded");
@@ -224,12 +231,12 @@ sub _check_for_commands {
 
         # no command submited, view commands page
         if( $cmd_typ == 55 or $cmd_typ == 56 ) {
-            $c->stash->{'hostdowntimes'} = $c->{'live'}->selectall_arrayref( "GET downtimes\n" . Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) . "\nFilter: service_description = \nColumns: id host_name start_time", { Slice => {} } );
-            $c->stash->{'servicedowntimes'} = $c->{'live'}->selectall_arrayref( "GET downtimes\n" . Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) . "\nFilter: service_description != \nColumns: id host_name start_time service_description", { Slice => {} } );
+            $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => undef ]);
+            $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => { '!=' => undef } ]);
         }
 
-        my @possible_backends = $c->{'live'}->peer_key();
-        $c->stash->{'backends'} = \@possible_backends;
+        #my @possible_backends = $c->{'db'}->peer_key();
+        #$c->stash->{'backends'} = \@possible_backends;
         $c->stash->{'backend'} = $c->{'request'}->{'parameters'}->{'backend'} || '';
 
         my $comment_author = $c->user->username;
@@ -317,7 +324,7 @@ sub _do_send_command {
         $c->log->debug( "setting spreaded start date to: " . $new_date );
         $c->request->parameters->{'start_time'} = $new_date;
     }
-    elsif ( defined $c->request->parameters->{'start_time'} ) {
+    elsif ( $c->request->parameters->{'start_time'} ) {
         if( $c->request->parameters->{'start_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
             my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->request->parameters->{'start_time'} ), '%Y-%m-%d %H:%M:%S' );
             $c->log->debug( "setting start date to: " . $new_date );
@@ -325,7 +332,7 @@ sub _do_send_command {
         }
         $start_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'start_time'} );
     }
-    if( defined $c->request->parameters->{'end_time'} ) {
+    if( $c->request->parameters->{'end_time'} ) {
         if( $c->request->parameters->{'end_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
             my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->request->parameters->{'end_time'} ), '%Y-%m-%d %H:%M:%S' );
             $c->log->debug( "setting end date to: " . $new_date );
@@ -339,17 +346,22 @@ sub _do_send_command {
     eval {
         $tt->process(
             'cmd/cmd_typ_' . $cmd_typ . '.tt',
-            {   c               => $c,
-                cmd_tt          => 'cmd_line.tt',
-                start_time_unix => $start_time_unix,
-                end_time_unix   => $end_time_unix,
-                die_on_errors   => 1,
+            {   c                => $c,
+                cmd_tt           => 'cmd_line.tt',
+                start_time_unix  => $start_time_unix,
+                end_time_unix    => $end_time_unix,
+                die_on_errors    => 1,
+                theme            => $c->stash->{'theme'},
+                comment_author   => '',
+                hostdowntimes    => '',
+                servicedowntimes => '',
             },
             \$cmd
         ) || die $tt->error();
         $cmd =~ s/^\s+//gmx;
         $cmd =~ s/\s+$//gmx;
     };
+    $c->log->error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@) if $@;
 
     # unknown command given?
     $c->detach('/error/index/7') unless defined $cmd;
@@ -359,15 +371,25 @@ sub _do_send_command {
 
     # check for required fields
     my( $form, @errors );
-    $tt->process(
-        'cmd/cmd_typ_' . $cmd_typ . '.tt',
-        {   c               => $c,
-            cmd_tt          => '_get_content.tt',
-            start_time_unix => $start_time_unix,
-            end_time_unix   => $end_time_unix,
-        },
-        \$form
-    ) || die $tt->error();
+    eval {
+        $tt->process(
+            'cmd/cmd_typ_' . $cmd_typ . '.tt',
+            {   c               => $c,
+                cmd_tt          => '_get_content.tt',
+                start_time_unix => $start_time_unix,
+                end_time_unix   => $end_time_unix,
+                theme           => $c->stash->{'theme'},
+                comment_author   => '',
+                hostdowntimes    => '',
+                servicedowntimes => '',
+            },
+            \$form
+        ) || die $tt->error();
+    };
+    if($@) {
+        $c->error('error in second cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@);
+        return;
+    }
     if( my @matches = $form =~ m/class='(optBoxRequiredItem|optBoxItem)'>(.*?):<\/td>.*?input\s+type='.*?'\s+name='(.*?)'/gmx ) {
         while ( scalar @matches > 0 ) {
             my $req  = shift @matches;
@@ -386,7 +408,7 @@ sub _do_send_command {
 
     # is a backend selected?
     my $backends          = $c->{'request'}->{'parameters'}->{'backend'};
-    my @possible_backends = $c->{'live'}->peer_key();
+    my @possible_backends = $c->{'db'}->peer_key();
     if( scalar @possible_backends > 1 and !defined $backends ) {
         delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
         push @errors, { message => 'please select a backend' };
@@ -398,13 +420,14 @@ sub _do_send_command {
     my $options = {};
     if( defined $backends ) {
         $c->log->debug( "sending to backends: " . Dumper($backends) );
-        $options = { Backend => $backends };
+        $options->{backend} = $backends;
     }
 
     for my $cmd_line ( split /\n/mx, $cmd ) {
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
+        $options->{'command'} = $cmd_line;
         $c->log->debug( 'sending ' . $cmd_line );
-        $c->{'live'}->do( $cmd_line, $options );
+        $c->{'db'}->send_command( %{$options} );
         $c->log->info( '[' . $c->user->username . '] cmd: ' . $cmd_line );
     }
 
@@ -422,7 +445,7 @@ sub _generate_spread_startdates {
     my $spread_dates = [];
 
     # check for a valid number
-    if( $spread !~ m/^\d+$/mx or $spread <= 1 ) {
+    if( !defined $spread or $spread !~ m/^\d+$/mx or $spread <= 1 ) {
         return;
     }
 

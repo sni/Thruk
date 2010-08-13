@@ -75,6 +75,20 @@ sub peer_name {
 
 ##########################################################
 
+=head2 send_command
+
+sends a command
+
+=cut
+
+sub send_command {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_processinfo
 
 return the process info
