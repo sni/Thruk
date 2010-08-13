@@ -35,8 +35,12 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{page}           = 'cmd';
     $c->stash->{'form_errors'}  = [];
 
-    for my $param (qw/com_id down_id hostgroup host service start_time end_time force_check hour minutes childoptions servicegroup/) {
+    # fill in some defaults
+    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data not_dly persistent hostgroup host service force_check childoptions ptc servicegroup/) {
         $c->request->parameters->{$param} = '' unless defined $c->request->parameters->{$param};
+    }
+    for my $param (qw/com_id down_id hour minutes start_time end_time plugin_state trigger /) {
+        $c->request->parameters->{$param} = 0 unless defined $c->request->parameters->{$param};
     }
 
     Thruk::Utils::ssi_include($c);
@@ -426,9 +430,13 @@ sub _do_send_command {
     for my $cmd_line ( split /\n/mx, $cmd ) {
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
         $options->{'command'} = $cmd_line;
-        $c->log->debug( 'sending ' . $cmd_line );
-        $c->{'db'}->send_command( %{$options} );
-        $c->log->info( '[' . $c->user->username . '] cmd: ' . $cmd_line );
+        if($c->request->parameters->{'test_only'}) {
+            $c->log->debug( 'not sending (TESTMODE) ' . $cmd_line );
+        } else {
+            $c->log->debug( 'sending ' . $cmd_line );
+            $c->{'db'}->send_command( %{$options} );
+            $c->log->info( '[' . $c->user->username . '] cmd: ' . $cmd_line );
+        }
     }
 
     return (1);

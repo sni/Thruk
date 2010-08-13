@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 653;
+use Test::More tests => 1304;
 
 BEGIN {
     use lib('t');
@@ -15,6 +15,11 @@ for my $file (glob("templates/cmd/*")) {
     elsif($file =~ m/templates\/cmd\/cmd_typ_(\d+)\.tt/mx) {
         TestUtils::test_page(
             'url'     => '/cmd?cmd_typ='.$1,
+            'like'    => 'External Command Interface',
+            'unlike'  => 'internal server error',
+        );
+        TestUtils::test_page(
+            'url'     => '/cmd?cmd_typ='.$1.'&cmd_mod=2&test_only=1',
             'like'    => 'External Command Interface',
             'unlike'  => 'internal server error',
         );
