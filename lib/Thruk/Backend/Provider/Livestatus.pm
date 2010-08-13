@@ -393,7 +393,7 @@ returns logfile entries
 sub get_logs {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
-        class time type state host_name service_description plugin_output message
+        class time type state host_name service_description plugin_output message contact_name command_name
         /];
     return $self->_get_table('log', \%options);
 }

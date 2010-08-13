@@ -28,6 +28,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     my($start,$end);
     my $timeframe = 86400;
+    my $filter;
 
     my $type        = $c->{'request'}->{'parameters'}->{'type'}        || 0;
     my $archive     = $c->{'request'}->{'parameters'}->{'archive'}     || 0;
@@ -36,7 +37,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $service     = $c->{'request'}->{'parameters'}->{'service'}     || '';
     my $oldestfirst = $c->{'request'}->{'parameters'}->{'oldestfirst'} || 0;
 
-    my $filter  = $self->_get_log_prop_filter($type);
+    push @{$filter}, $self->_get_log_prop_filter($type);
 
     my $param_start = $c->{'request'}->{'parameters'}->{'start'};
     my $param_end   = $c->{'request'}->{'parameters'}->{'end'};
@@ -68,8 +69,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $end   = $tmp;
     }
 
-    $filter .= "Filter: time >= $start\n";
-    $filter .= "Filter: time <= $end\n";
+    push @{$filter}, { time => { '>=' => $start }};
+    push @{$filter}, { time => { '<=' => $end }};
 
     if($host eq '' and $service eq '' and $contact eq '') {
         $host = 'all';
@@ -77,30 +78,30 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     if($service ne '') {
         $c->stash->{infoBoxTitle}   = 'Service Notifications';
-        $filter .= "Filter: host_name = $host\n" if $host ne 'all';
-        $filter .= "Filter: service_description = $service\n";
+        push @{$filter}, { host_name => $host } if $host ne 'all';
+        push @{$filter}, { service_description => $service };
     }
     elsif($host ne '') {
         $c->stash->{infoBoxTitle}   = 'Host Notifications';
-        $filter .= "Filter: host_name = $host\n" if $host ne 'all';
+        push @{$filter}, { host_name => $host } if $host ne 'all';
     }
     elsif($contact ne '') {
         $c->stash->{infoBoxTitle}   = 'Contact Notifications';
-        $filter .= "Filter: contact_name = $contact\n" if $contact ne 'all';
+        push @{$filter}, { contact_name => $contact } if $contact ne 'all';
     }
 
-    my $query = "GET log\n$filter\n";
-    $query   .= "Columns: type host_name service_description plugin_output state time command_name contact_name options\n";
-    $query   .= "Filter: class = 3\n";
-    $query   .= Thruk::Utils::Auth::get_auth_filter($c, 'log');
+    push @{$filter}, { class => 3 };
 
-    my $notifications = $c->{'live'}->selectall_arrayref($query, { Slice => 1, AddPeer => 1});
+    my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
 
     my $order = "DESC";
     if($oldestfirst) {
         $order = "ASC";
     }
-    my $sortednotifications = Thruk::Utils::sort($c, $notifications, 'time', $order);
+
+    $c->stats->profile(begin => "notifications::fetch");
+    $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
+    $c->stats->profile(end => "notifications::fetch");
 
     $c->stash->{oldestfirst}      = $oldestfirst;
     $c->stash->{type}             = $type;
@@ -110,7 +111,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{host}             = $host;
     $c->stash->{service}          = $service;
     $c->stash->{contact}          = $contact;
-    $c->stash->{notifications}    = $sortednotifications;
     $c->stash->{title}            = 'Alert Notifications';
     $c->stash->{page}             = 'notifications';
     $c->stash->{template}         = 'notifications.tt';
@@ -127,65 +127,57 @@ sub _get_log_prop_filter {
     my ( $self, $number ) = @_;
 
     $number = 0 if !defined $number or $number <= 0 or $number > 32767;
-    my $filter = '';
+    my @prop_filter;
     if($number > 0) {
-        my @prop_filter;
         my @bits = reverse split(/\ */mx, unpack("B*", pack("N", int($number))));
 
         if($bits[0]) {  # 1 - All service notifications
-            push @prop_filter, "Filter: service_description !=";
+            push @prop_filter, { service_description => { '!=' => undef }};
         }
         if($bits[1]) {  # 2 - All host notifications
-            push @prop_filter, "Filter: service_description = ";
+            push @prop_filter, { service_description => undef };
         }
         if($bits[2]) {  # 4 - Service warning
-            push @prop_filter, "Filter: state = 1\nFilter: service_description != \nAnd: 2";
+            push @prop_filter, { -and => [ state => 1, service_description => { '!=' => undef }]};
         }
         if($bits[3]) {  # 8 - Service unknown
-            push @prop_filter, "Filter: state = 3\nFilter: service_description != \nAnd: 2";
+            push @prop_filter, { -and => [ state => 3, service_description => { '!=' => undef }]};
         }
         if($bits[4]) {  # 16 - Service critical
-            push @prop_filter, "Filter: state = 2\nFilter: service_description != \nAnd: 2";
+            push @prop_filter, { -and => [ state => 2, service_description => { '!=' => undef }]};
         }
         if($bits[5]) {  # 32 - Service recovery
-            push @prop_filter, "Filter: state = 0\nFilter: service_description != \nAnd: 2";
+            push @prop_filter, { -and => [ state => 0, service_description => { '!=' => undef }]};
         }
         if($bits[6]) {  # 64 - Host down
-            push @prop_filter, "Filter: state = 1\nFilter: service_description = \nAnd: 2";
+            push @prop_filter, { -and => [ state => 1, service_description => undef ]};
         }
         if($bits[7]) {  # 128 - Host unreachable
-            push @prop_filter, "Filter: state = 2\nFilter: service_description = \nAnd: 2";
+            push @prop_filter, { -and => [ state => 2, service_description => undef ]};
         }
         if($bits[8]) {  # 256 - Host recovery
-            push @prop_filter, "Filter: state = 0\nFilter: service_description = \nAnd: 2";
+            push @prop_filter, { -and => [ state => 0, service_description => undef ]};
         }
         if($bits[9]) {  # 512 - Service acknowledgements
-            push @prop_filter, "Filter: service_description != \nFilter: options ~ ;ACKNOWLEDGEMENT\nAnd: 2";
+            push @prop_filter, { -and => [ options => { '~' => ';ACKNOWLEDGEMENT' }, service_description => { '!=' => undef }]};
         }
         if($bits[10]) {  # 1024 - Host acknowledgements
-            push @prop_filter, "Filter: service_description = \nFilter: options ~ ;ACKNOWLEDGEMENT\nAnd: 2";
+            push @prop_filter, { -and => [ options => { '~' => ';ACKNOWLEDGEMENT' }, service_description => undef ]};
         }
         if($bits[11]) {  # 2048 - Service flapping
-            push @prop_filter, "Filter: service_description != \nFilter: options ~ ;FLAPPING\nAnd: 2";
+            push @prop_filter, { -and => [ options => { '~' => ';FLAPPING' }, service_description => { '!=' => undef }]};
         }
         if($bits[12]) {  # 4096 - Host flapping
-            push @prop_filter, "Filter: service_description = \nFilter: options ~ ;FLAPPING\nAnd: 2";
+            push @prop_filter, { -and => [ options => { '~' => ';FLAPPING' }, service_description => undef ]};
         }
         if($bits[13]) {  # 8192 - Service custom
-            push @prop_filter, "Filter: service_description != \nFilter: options ~ ;CUSTOM\nAnd: 2";
+            push @prop_filter, { -and => [ options => { '~' => ';CUSTOM' }, service_description => { '!=' => undef }]};
         }
         if($bits[14]) {  # 16384 - Host custom
-            push @prop_filter, "Filter: service_description = \nFilter: options ~ ;CUSTOM\nAnd: 2";
-        }
-
-        if(scalar @prop_filter > 1) {
-            $filter .= join("\n", @prop_filter)."\nOr: ".(scalar @prop_filter)."\n";
-        }
-        elsif(scalar @prop_filter == 1) {
-            $filter .= $prop_filter[0]."\n";
+            push @prop_filter, { -and => [ options => { '~' => ';CUSTOM' }, service_description => undef ]};
         }
     }
-    return($filter);
+    return Thruk::Utils::combine_filter('-or', \@prop_filter);
 }
 
 =head1 AUTHOR

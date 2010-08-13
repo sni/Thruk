@@ -87,7 +87,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($errors == 0) {
         my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
         $c->stats->profile(begin => "showlog::fetch");
-        my $logs = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
+        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
         $c->stats->profile(end   => "showlog::fetch");
     }
 
