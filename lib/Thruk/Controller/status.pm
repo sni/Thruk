@@ -46,9 +46,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{'serviceprops'}       = $c->{'request'}->{'parameters'}->{'serviceprops'}       || '';
     $c->stash->{'nav'}                = $c->{'request'}->{'parameters'}->{'nav'}                || '';
     $c->stash->{'entries'}            = $c->{'request'}->{'parameters'}->{'entries'}            || '';
-    $c->stash->{'hidetop'}            = $c->{'request'}->{'parameters'}->{'hidetop'}            || '';
     $c->stash->{'sortoption'}         = $c->{'request'}->{'parameters'}->{'sortoption'}         || '';
-    $c->stash->{'hidetop'}            = $c->{'request'}->{'parameters'}->{'hidetop'}            || 0;
     $c->stash->{'hidesearch'}         = $c->{'request'}->{'parameters'}->{'hidesearch'}         || 0;
     $c->stash->{'hostgroup'}          = $c->{'request'}->{'parameters'}->{'hostgroup'}          || '';
     $c->stash->{'servicegroup'}       = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';

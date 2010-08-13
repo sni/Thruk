@@ -108,8 +108,7 @@ sub begin : Private {
     }
     $c->stash->{'all_problems_link'} = $all_problems_link;
 
-    my $hidetop = $c->{'request'}->{'parameters'}->{'hidetop'};
-    $c->stash->{hidetop} = $hidetop;
+    $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
 
     $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
 

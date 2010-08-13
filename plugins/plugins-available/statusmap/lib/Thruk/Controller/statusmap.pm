@@ -53,16 +53,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     $self->{'all_nodes'} = {};
 
-    my $hosts = $c->{'live'}->selectall_arrayref("GET hosts\n".Thruk::Utils::Auth::get_auth_filter($c, 'hosts')."\nColumns: state name alias address address has_been_checked last_state_change plugin_output groups parents", { Slice => {}, AddPeer => 1 });
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
 
     # do we need servicegroups?
     if($c->stash->{groupby} eq 'servicegroup') {
         my $new_hosts;
-        my $servicegroups = $c->{'live'}->selectall_arrayref("GET services\n".Thruk::Utils::Auth::get_auth_filter($c, 'services')."\nColumns: host_name groups\nFilter: groups !=", { Slice => {} });
+        my $servicegroups = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), groups => { '!=' => undef }], columns => [qw/host_name groups/]);
         my $servicegroupsbyhost = {};
         if(defined $servicegroups) {
             for my $data (@{$servicegroups}) {
-                for my $group ( split/,/mx,$data->{'groups'}) {
+                for my $group ( @{$data->{groups}}) {
                     $servicegroupsbyhost->{$data->{'host_name'}}->{$group} = 1;
                 }
             }
@@ -370,7 +370,7 @@ sub _fill_subtree {
             $host->{'parents'} = 'rootid';
         }
         my $found_parent = 0;
-        if(grep {/$parent/mx} split(/,/mx, $host->{'parents'})) {
+        if(grep {/$parent/mx} @{$host->{'parents'}}) {
             $tree->{$host->{'name'}} = {};
         }
         else {
