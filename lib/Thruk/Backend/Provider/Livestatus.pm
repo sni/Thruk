@@ -183,6 +183,13 @@ returns a list of hosts
 sub get_hosts {
     my($self, %options) = @_;
 
+    # try to reduce the amount of transfered data
+    my($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
+    if(defined $size) {
+        # then set the limit for the real query
+        $options{'options'}->{'limit'} = $limit;
+    }
+
     $options{'columns'} = [qw/
         accept_passive_checks acknowledged action_url action_url_expanded
         active_checks_enabled address alias check_command check_freshness check_interval
@@ -199,7 +206,8 @@ sub get_hosts {
         retry_interval scheduled_downtime_depth state state_type
                 /];
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
-    return $self->_get_table('hosts', \%options);
+    my $data = $self->_get_table('hosts', \%options);
+    return($data, undef, $size);
 }
 
 ##########################################################
@@ -264,6 +272,14 @@ returns a list of services
 =cut
 sub get_services {
     my($self, %options) = @_;
+
+    # try to reduce the amount of transfered data
+    my($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
+    if(defined $size) {
+        # then set the limit for the real query
+        $options{'options'}->{'limit'} = $limit;
+    }
+
     $options{'columns'} = [qw/
         accept_passive_checks acknowledged action_url action_url_expanded
         active_checks_enabled check_command check_interval check_options
@@ -283,8 +299,10 @@ sub get_services {
         plugin_output process_performance_data retry_interval scheduled_downtime_depth
         state state_type
         /];
+
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
-    return $self->_get_table('services', \%options);
+    my $data = $self->_get_table('services', \%options);
+    return($data, undef, $size);
 }
 
 ##########################################################
@@ -782,6 +800,53 @@ sub _get_hash_table {
     my $class = $self->_get_class($table, $options);
     my $data  = $class->hashref_pk() || {};
     return $data;
+}
+
+
+##########################################################
+
+=head2 _get_query_size
+
+  _get_query_size
+
+returns the size of a query, used to reduce the amount of transfered data
+
+=cut
+sub _get_query_size {
+    my $self    = shift;
+    my $table   = shift;
+    my $options = shift;
+    my $key     = shift;
+    my $sortby1 = shift;
+    my $sortby2 = shift;
+
+    # only if paging is enabled
+    return unless defined $options->{'pager'};
+    return unless defined $options->{'sort'};
+    return unless ref $options->{'sort'} eq 'HASH';
+    return unless defined $options->{'sort'}->{'ASC'};
+    if(ref $options->{'sort'}->{'ASC'} eq 'ARRAY') {
+        return if defined $sortby1 and $options->{'sort'}->{'ASC'}->[0] ne $sortby1;
+        return if defined $sortby2 and $options->{'sort'}->{'ASC'}->[1] ne $sortby2;
+    } else {
+        return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
+    }
+
+    my $c = $options->{'pager'};
+    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $c->stash->{'default_page_size'};
+    return if $entries !~ m/^\d+$/mx;
+
+    my $page = $c->{'request'}->{'parameters'}->{'page'} || 1;
+    $entries = $entries * $page;
+
+    my $stats = [
+        'total' => { -stats => [ $key => { '!=' => undef } ]},
+    ];
+    my $class = $self->_get_class($table, $options);
+    my $rows = $class->stats($stats)->hashref_array();
+    my $size = $rows->[0]->{'total'};
+
+    return($size, $entries);
 }
 
 =head1 AUTHOR

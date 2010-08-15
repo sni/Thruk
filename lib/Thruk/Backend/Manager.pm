@@ -6,6 +6,7 @@ use Carp;
 use Module::Find;
 use Digest::MD5 qw(md5_hex);
 use Data::Page;
+use Data::Dumper;
 use Thruk::Utils::Livestatus;
 use Scalar::Util qw/ looks_like_number /;
 
@@ -259,6 +260,7 @@ returns a result for a sub called on all peers
 sub _do_on_peers {
     my( $self, $sub, $arg ) = @_;
 
+    # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
     if(     ( $sub =~ m/^get_/mx or $sub eq 'send_command')
         and ref $arg eq 'ARRAY'
@@ -277,7 +279,9 @@ sub _do_on_peers {
         }
     }
 
-    my( $result, $type );
+    # send query to selected backends
+    my( $result, $type, $size );
+    my $totalsize = 0;
     for my $peer ( @{ $self->get_peers() } )
     {
         if(defined $backends) {
@@ -287,7 +291,19 @@ sub _do_on_peers {
         }
         $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
         eval {
-            ( $result->{ $peer->{'key'} }, $type ) = $peer->{'class'}->$sub( @{$arg} );
+            my( $data, $typ, $size ) = $peer->{'class'}->$sub( @{$arg} );
+            if(defined $data and !defined $size) {
+                if(ref $data eq 'ARRAY') {
+                    $size = scalar @{$data};
+                }
+                elsif(ref $data eq 'HASH') {
+                    $size = scalar keys %{$data};
+                }
+            }
+            $size = 0 unless defined $size;
+            $type = $typ if defined $typ;
+            $totalsize += $size;
+            $result->{ $peer->{'key'} } = $data;
         };
         $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
     }
@@ -319,6 +335,7 @@ sub _do_on_peers {
     }
 
 
+    # additional data processing, paging, sorting and limiting
     if(scalar keys %arg > 0) {
         if( $arg{'remove_duplicates'} and scalar keys %{$result} > 1 ) {
             $data = $self->_remove_duplicates($data);
@@ -333,7 +350,7 @@ sub _do_on_peers {
         }
 
         if( $arg{'pager'} ) {
-            $data = $self->_page_data( $arg{'pager'}, $data );
+            $data = $self->_page_data( $arg{'pager'}, $data, undef, $totalsize );
         }
     }
 
@@ -404,7 +421,7 @@ sub _remove_duplicates {
 
 =head2 _page_data
 
-  _page_data($c, $data)
+  _page_data($c, $data, [$result_size], [$total_size])
 
 adds paged data set to the template stash.
 Data will be available as 'data'
@@ -413,11 +430,12 @@ The pager itself as 'pager'
 =cut
 
 sub _page_data {
-    my $self = shift;
-    my $c    = shift;
-    my $data = shift || [];
+    my $self                = shift;
+    my $c                   = shift;
+    my $data                = shift || [];
     return $data unless defined $c;
     my $default_result_size = shift || $c->stash->{'default_page_size'};
+    my $totalsize           = shift;
 
     # set some defaults
     $c->stash->{'pager'} = "";
@@ -437,7 +455,11 @@ sub _page_data {
     $c->stash->{'entries_per_page'} = $entries;
 
     my $pager = new Data::Page;
-    $pager->total_entries( scalar @{$data} );
+    if(defined $totalsize) {
+        $pager->total_entries( $totalsize );
+    } else {
+        $pager->total_entries( scalar @{$data} );
+    }
     if( $entries eq 'all' ) { $entries = $pager->total_entries; }
     my $pages = 0;
     if( $entries > 0 ) {
@@ -838,6 +860,9 @@ sub _sort {
 
     $key = $sortby;
     if( ref $sortby eq 'HASH' ) {
+        if(defined $sortby->{'ASC'} and defined $sortby->{'DESC'}) {
+            confess('unusual sort config:\n'.Dumper($sortby));
+        }
         for my $ord (qw/ASC DESC/) {
             if( defined $sortby->{$ord} ) {
                 $key   = $sortby->{$ord};
