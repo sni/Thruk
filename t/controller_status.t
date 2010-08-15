@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 286;
+use Test::More tests => 405;
 
 BEGIN {
     use lib('t');
@@ -9,6 +9,10 @@ BEGIN {
     import TestUtils;
 }
 BEGIN { use_ok 'Thruk::Controller::status' }
+
+my($host,$service) = TestUtils::get_test_service();
+my $hostgroup      = TestUtils::get_test_hostgroup();
+my $servicegroup   = TestUtils::get_test_servicegroup();
 
 my $pages = [
     '/status',
@@ -20,23 +24,39 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=summary',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=grid',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=overview',
-    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=hostdetail',
-    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=detail',
-    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=summary',
-    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=overview',
-    '/thruk/cgi-bin/status.cgi?hostgroup=hostgroup_01&style=grid',
+    '/thruk/cgi-bin/status.cgi?hostgroup='.$hostgroup.'&style=hostdetail',
+    '/thruk/cgi-bin/status.cgi?hostgroup='.$hostgroup.'&style=detail',
+    '/thruk/cgi-bin/status.cgi?hostgroup='.$hostgroup.'&style=summary',
+    '/thruk/cgi-bin/status.cgi?hostgroup='.$hostgroup.'&style=overview',
+    '/thruk/cgi-bin/status.cgi?hostgroup='.$hostgroup.'&style=grid',
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=1&hostgroup=all&sorttype=1',
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=1&hostgroup=all&sorttype=2',
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=8&hostgroup=all&sorttype=1',
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=4&hostgroup=all&sorttype=1',
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=6&hostgroup=all&sorttype=1',
+
 # Services
     '/thruk/cgi-bin/status.cgi?host=all',
-    '/thruk/cgi-bin/status.cgi?host=test_host_00',
+    '/thruk/cgi-bin/status.cgi?host=does_not_exist',
+    '/thruk/cgi-bin/status.cgi?host='.$host,
+    '/thruk/cgi-bin/status.cgi?sortoption=1&sorttype=1&host=all',
+    '/thruk/cgi-bin/status.cgi?sortoption=1&sorttype=2&host=all',
+    '/thruk/cgi-bin/status.cgi?sortoption=2&sorttype=1&host=all',
+    '/thruk/cgi-bin/status.cgi?sortoption=2&sorttype=2&host=all',
+    '/thruk/cgi-bin/status.cgi?sortoption=3&sorttype=1&host=all',
+    '/thruk/cgi-bin/status.cgi?sortoption=4&sorttype=1&host=all',
+    '/thruk/cgi-bin/status.cgi?sortoption=6&sorttype=1&host=all',
+    '/thruk/cgi-bin/status.cgi?sortoption=5&sorttype=1&host=all',
+
 # Servicegroups
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=detail',
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=summary',
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=grid',
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview',
-    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=detail',
-    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=summary',
-    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=grid',
-    '/thruk/cgi-bin/status.cgi?servicegroup=servicegroup_01&style=overview',
+    '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=detail',
+    '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=summary',
+    '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=grid',
+    '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=overview',
 # Problems
     '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28',
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28',
@@ -44,8 +64,8 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42',
 # Search
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
-    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=hostgroup_01',
-    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=servicegroup_01',
+    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$servicegroup,
 
 # Bugs
     # Paging all when nothing found -> div by zero
