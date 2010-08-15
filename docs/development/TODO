@@ -60,7 +60,6 @@ Known Bugs:
       /mnt/c1/data/projects/git/Thruk/script/../lib/Thruk/Controller/cmd.pm
       line 416.
       occured when deleting all downtimes
-    - min_livestatus_version must be more generic
 
 =========================================================
 ideas for after 1.0

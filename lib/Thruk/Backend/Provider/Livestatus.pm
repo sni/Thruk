@@ -272,7 +272,7 @@ sub get_services {
         execution_time first_notification_delay flap_detection_enabled groups
         has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
         host_active_checks_enabled host_address host_alias host_checks_enabled
-        host_comments host_groups host_has_been_checked host_icon_image_expanded
+        host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
         host_is_executing host_is_flapping host_name host_notes_url_expanded
         host_notifications_enabled host_scheduled_downtime_depth host_state
         icon_image icon_image_alt icon_image_expanded is_executing is_flapping
