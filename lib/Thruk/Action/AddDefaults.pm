@@ -95,6 +95,7 @@ before 'execute' => sub {
     my $last_program_restart = 0;
     eval {
         my $processinfo              = $c->{'db'}->get_processinfo($c, $cache);
+        die($@) unless defined $processinfo;
         my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
         $c->stash->{'pi'}            = $overall_processinfo;
         $c->stash->{'pi_detail'}     = $processinfo;

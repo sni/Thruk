@@ -78,6 +78,7 @@ my %config = ('name'                   => 'Thruk',
 
                                           'version'        => $VERSION,
                                           'backends'       => [],
+                                          'param_backend'  => '',
                                           'refresh_rate'   => '',
                                           'page'           => '',
                                           'remote_user'    => '?',

@@ -278,20 +278,20 @@ sub _do_on_peers {
     }
 
     my( $result, $type );
-    eval {
-        for my $peer ( @{ $self->get_peers() } )
-        {
-            if(defined $backends) {
-                next unless defined $backends->{$peer->{'key'}};
-            } else {
-                next unless $peer->{'enabled'} == 1;
-            }
-            $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
-            ( $result->{ $peer->{'key'} }, $type ) = $peer->{'class'}->$sub( @{$arg} );
-            $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
+    for my $peer ( @{ $self->get_peers() } )
+    {
+        if(defined $backends) {
+            next unless defined $backends->{$peer->{'key'}};
+        } else {
+            next unless $peer->{'enabled'} == 1;
         }
-    };
-    $self->{'log'}->error($@) if $@;
+        $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
+        eval {
+            ( $result->{ $peer->{'key'} }, $type ) = $peer->{'class'}->$sub( @{$arg} );
+        };
+        $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
+    }
+    die($@) unless defined $result;
     $type = '' unless defined $type;
 
     # howto merge the answers?
