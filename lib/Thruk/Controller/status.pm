@@ -1498,16 +1498,6 @@ sub _single_search {
     my $hosttotalsfilter    = Thruk::Utils::combine_filter( '-and', \@hosttotalsfilter );
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-and', \@servicetotalsfilter );
 
-    ## filter does not work when it is empty,
-    # TODO: verify if this is still not working
-    ## so add useless filter which matches everything
-    ### no critic
-    #if($hostfilter         =~ m/^\s*$/) { $hostfilter         = "Filter: name !=";        }
-    #if($servicefilter      =~ m/^\s*$/) { $servicefilter      = "Filter: description !="; }
-    #if($hostgroupfilter    =~ m/^\s*$/) { $hostgroupfilter    = "Filter: name !=";        }
-    #if($servicegroupfilter =~ m/^\s*$/) { $servicegroupfilter = "Filter: name !=";        }
-    ### use critic
-
     if($errors) {
         $c->stash->{'has_error'} = 1;
     }
@@ -1521,6 +1511,8 @@ sub _get_comments_filter {
 
     my(@hostfilter, @servicefilter);
 
+    return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
+
     if($value eq '') {
         if($op eq '=' or $op eq '~~') {
             push @hostfilter,          { -or => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
@@ -1531,11 +1523,11 @@ sub _get_comments_filter {
         }
     }
     else {
-        my $comments     = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), comment => { $op => $value } ] );
+        my $comments     = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @comment_ids  = sort keys %{ Thruk::Utils::array2hash([@{$comments}], 'id') };
         if(scalar @comment_ids == 0) { @comment_ids = (-1); }
 
-        my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), comment => { $op => $value } ] );
+        my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ] );
         my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
         if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
 
