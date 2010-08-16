@@ -1393,12 +1393,28 @@ sub _single_search {
             }
         }
         elsif ( $filter->{'type'} eq 'search' ) {
-            my $host_search_filter = [ { name => { $op => $value } }, { alias => { $op => $value } }, { groups => { $listop => $value } }, { plugin_output => { $op => $value } }, { long_plugin_output => { $op => $value } }, ];
+            my($hfilter, $sfilter) = $self->_get_comments_filter($c, $op, $value);
+
+            my $host_search_filter = [ { name               => { $op     => $value } },
+                                       { alias              => { $op     => $value } },
+                                       { groups             => { $listop => $value } },
+                                       { plugin_output      => { $op     => $value } },
+                                       { long_plugin_output => { $op     => $value } },
+                                       $hfilter,
+                                    ];
             push @hostfilter,       { $joinop => $host_search_filter };
             push @hosttotalsfilter, { $joinop => $host_search_filter };
 
             # and some for services
-            my $service_search_filter = [ { description => { $op => $value } }, { groups => { $listop => $value } }, { plugin_output => { $op => $value } }, { long_plugin_output => { $op => $value } }, { host_name => { $op => $value } }, { host_alias => { $op => $value } }, { host_groups => { $listop => $value } }, ];
+            my $service_search_filter = [ { description        => { $op     => $value } },
+                                          { groups             => { $listop => $value } },
+                                          { plugin_output      => { $op     => $value } },
+                                          { long_plugin_output => { $op     => $value } },
+                                          { host_name          => { $op     => $value } },
+                                          { host_alias         => { $op     => $value } },
+                                          { host_groups        => { $listop => $value } },
+                                          $sfilter,
+                                        ];
             push @servicefilter,       { $joinop => $service_search_filter };
             push @servicetotalsfilter, { $joinop => $service_search_filter };
         }
@@ -1464,6 +1480,11 @@ sub _single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
+        elsif ( $filter->{'type'} eq 'comment' ) {
+            my($hfilter, $sfilter) = $self->_get_comments_filter($c, $op, $value);
+            push @hostfilter,          $hfilter;
+            push @servicefilter,       $sfilter;
+        }
         else {
             confess( "unknown filter: " . $filter->{'type'} );
         }
@@ -1495,6 +1516,40 @@ sub _single_search {
 }
 
 ##########################################################
+sub _get_comments_filter {
+    my($self, $c, $op, $value) = @_;
+
+    my(@hostfilter, @servicefilter);
+
+    if($value eq '') {
+        if($op eq '=' or $op eq '~~') {
+            push @hostfilter,          { -or => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
+            push @servicefilter,       { -or => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
+        } else {
+            push @hostfilter,          { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
+            push @servicefilter,       { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
+        }
+    }
+    else {
+        my $comments     = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), comment => { $op => $value } ] );
+        my @comment_ids  = sort keys %{ Thruk::Utils::array2hash([@{$comments}], 'id') };
+        if(scalar @comment_ids == 0) { @comment_ids = (-1); }
+
+        my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), comment => { $op => $value } ] );
+        my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
+        if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
+
+        my $comment_op = '<=';
+        if($op eq '=' or $op eq '~~') {
+            $comment_op = '>=';
+        }
+        push @hostfilter,          { -or => [ comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
+        push @servicefilter,       { -or => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
+    }
+
+    return(\@hostfilter, \@servicefilter);
+}
+
 
 =head1 AUTHOR
 

@@ -1145,7 +1145,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Last Check', 'Next Check');
+  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Comment', 'Last Check', 'Next Check');
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', search_prefix + 'type');
   typeselect.setAttribute('id', search_prefix + nr + '_ts');
@@ -1345,7 +1345,7 @@ function verify_op(event) {
   for(var x = 0; x< opElem.options.length; x++) {
     var curOp = opElem.options[x].value;
     if(curOp == '~' || curOp == '!~') {
-      if(selValue != 'search' && selValue != 'host' && selValue != 'service' ) {
+      if(selValue != 'search' && selValue != 'host' && selValue != 'service' && selValue != 'comment') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only = and != are allowed for list searches
