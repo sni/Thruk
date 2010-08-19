@@ -251,7 +251,7 @@ sub _process_scheduling_page {
     };
     $sortoption = 7 if !defined $sortoptions->{$sortoption};
 
-    my $queue = $c->{'db'}->get_scheduling_queue( sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c, c => $c );
+    $c->{'db'}->get_scheduling_queue( sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c, c => $c );
 
     $c->stash->{'order'}   = $order;
     $c->stash->{'sortkey'} = $sortoptions->{$sortoption}->[1];

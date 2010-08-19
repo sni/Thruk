@@ -337,7 +337,7 @@ sub _do_on_peers {
 
     # additional data processing, paging, sorting and limiting
     if(scalar keys %arg > 0) {
-        if( $arg{'remove_duplicates'} and scalar keys %{$result} > 1 ) {
+        if( $arg{'remove_duplicates'} ) {
             $data = $self->_remove_duplicates($data);
         }
 

@@ -207,6 +207,11 @@ sub get_hosts {
                 /];
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('hosts', \%options);
+
+    unless(wantarray) {
+        confess("get_hosts() should not be called in scalar context");
+    }
+
     return($data, undef, $size);
 }
 
@@ -224,6 +229,11 @@ sub get_host_names{
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hosts', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
+
+    unless(wantarray) {
+        confess("get_host_names () should not be called in scalar context");
+    }
+
     return($keys, 'uniq');
 }
 
@@ -258,6 +268,10 @@ sub get_hostgroup_names {
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('hostgroups', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
+
+    unless(wantarray) {
+        confess("get_hostgroup_names() should not be called in scalar context");
+    }
     return($keys, 'uniq');
 }
 
@@ -302,6 +316,9 @@ sub get_services {
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('services', \%options);
+    unless(wantarray) {
+        confess("get_services() should not be called in scalar context");
+    }
     return($data, undef, $size);
 }
 
@@ -319,6 +336,9 @@ sub get_service_names {
     $options{'columns'} = [qw/description/];
     my $data = $self->_get_hash_table('services', 'description', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
+    unless(wantarray) {
+        confess("get_service_names() should not be called in scalar context");
+    }
     return($keys, 'uniq');
 }
 
@@ -353,6 +373,9 @@ sub get_servicegroup_names {
     $options{'columns'} = [qw/name/];
     my $data = $self->_get_hash_table('servicegroups', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
+    unless(wantarray) {
+        confess("get_servicegroup_names() should not be called in scalar context");
+    }
     return($keys, 'uniq');
 }
 
@@ -502,13 +525,13 @@ returns the scheduling queue
 =cut
 sub get_scheduling_queue {
     my($self, %options) = @_;
-    my $services = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'services'),
+    my($services) = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'services'),
                                                  { '-or' => [{ 'active_checks_enabled' => '1' },
                                                             { 'check_options' => { '!=' => '0' }}]
                                                  }
                                                  ]
                                       );
-    my $hosts    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'hosts'),
+    my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'hosts'),
                                               { '-or' => [{ 'active_checks_enabled' => '1' },
                                                          { 'check_options' => { '!=' => '0' }}]
                                               }
@@ -569,6 +592,10 @@ sub get_host_stats {
     my $class = $self->_get_class('hosts', \%options);
 
     my $rows = $class->stats($stats)->hashref_array();
+
+    unless(wantarray) {
+        confess("get_host_stats() should not be called in scalar context");
+    }
     return(\%{$rows->[0]}, 'SUM');
 }
 
@@ -621,6 +648,10 @@ sub get_service_stats {
     ];
     my $class = $self->_get_class('services', \%options);
     my $rows = $class->stats($stats)->hashref_array();
+
+    unless(wantarray) {
+        confess("get_service_stats() should not be called in scalar context");
+    }
     return(\%{$rows->[0]}, 'SUM');
 }
 
@@ -695,6 +726,9 @@ sub get_performance_stats {
         $data = { %{$data}, %{$rows->[0]} };
     }
 
+    unless(wantarray) {
+        confess("get_performance_stats() should not be called in scalar context");
+    }
     return($data, 'STATS');
 }
 
@@ -723,6 +757,9 @@ sub get_extra_perf_stats {
         $data = shift @{$data};
     }
 
+    unless(wantarray) {
+        confess("get_extra_perf_stats() should not be called in scalar context");
+    }
     return($data, 'SUM');
 }
 
@@ -846,6 +883,9 @@ sub _get_query_size {
     my $rows = $class->stats($stats)->hashref_array();
     my $size = $rows->[0]->{'total'};
 
+    unless(wantarray) {
+        confess("_get_query_size() should not be called in scalar context");
+    }
     return($size, $entries);
 }
 
