@@ -1,4 +1,5 @@
 use inc::Module::Install;
+use lib 'lib';
 
 use FindBin;
 if(-e "$FindBin::Bin/local-lib") {
@@ -33,7 +34,7 @@ requires 'parent'                                 => 0.223;
 requires 'Moose'                                  => 0.98;
 requires 'MooseX::MethodAttributes::Inheritable'  => 0.20;
 requires 'MooseX::Role::WithOverloading'          => 0.05;
-requires 'Monitoring::Livestatus'                 => 0.58;
+requires 'Monitoring::Livestatus'                 => 0.60;
 requires 'Monitoring::Livestatus::Class'          => 0.03;
 requires 'Monitoring::Availability'               => 0.12;
 requires 'MIME::Types'                            => 0.00;
