@@ -69,7 +69,7 @@
         <cell>[% IF s.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>
         <cell>[% IF s.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>
         <cell>[% IF s.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.een_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% html_escape(s.plugin_output) %][% END %]</cell>
+        <cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% html_escape(s.plugin_output) %][% END %]</cell>
       </row>
     [% END %]
   </worksheet>
