@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 106;
+use Test::More tests => 91;
 
 BEGIN {
     use lib('t');
@@ -18,7 +18,6 @@ for my $theme (TestUtils::get_themes()) {
     for my $url (@{$pages}) {
         TestUtils::test_page(
             'url'     => $url."?theme=".$theme,
-            'like'    => 'Configuration',
             'unlike'  => 'internal server error',
         );
     }

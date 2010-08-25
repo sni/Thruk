@@ -269,6 +269,8 @@ sub thruk_index_html : Path('/thruk/index.html') {
         $c->detach("thruk_main_html");
     }
     $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
+    $c->stash->{'main'}     = '';
+    $c->stash->{'target'}   = '';
     $c->stash->{'template'} = 'index.tt';
 
     return 1;

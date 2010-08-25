@@ -188,7 +188,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         $c->stash->{'refresh_rate'} = $c->config->{'cgi_cfg'}->{'refresh_rate'};
     }
 
-    $c->stash->{'title'}          = "Error"  unless defined $c->stash->{'title'};
+    $c->stash->{'title'}          = "Error"  unless defined $c->stash->{'title'} and $c->stash->{'title'} ne '';
     $c->stash->{'page'}           = "status" unless defined $c->stash->{'page'};
     $c->stash->{'infoBoxTitle'}   = "Error"  unless defined $c->stash->{'infoBoxTitle'} and $c->stash->{'infoBoxTitle'} eq '';
 
