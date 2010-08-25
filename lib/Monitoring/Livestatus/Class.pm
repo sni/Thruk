@@ -65,6 +65,7 @@ sub BUILD {
         verbose   => $self->{verbose},
         logger    => $self->{logger},
     );
+    return $self;
 }
 
 

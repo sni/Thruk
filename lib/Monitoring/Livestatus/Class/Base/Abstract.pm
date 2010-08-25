@@ -29,7 +29,7 @@ has 'operators' => (
 sub build_operators {
     return [
         {
-            regexp   => qr/(and|or)/ix,
+            regexp   => qr/(and|or)/mix,
             handler => '_cond_compining',
         }
     ]
@@ -106,7 +106,7 @@ sub _cond_HASHREF {
         my $value = $cond->{$key};
         my $method ;
 
-        if ( $key =~ /^-/ ){
+        if ( $key =~ /^-/mx ){
             # Child key for combining filters ( -and / -or )
             ( $child_combining_count, @child_statment ) = $self->_cond_op_in_hash($key, $value, $combining_count);
             $combining_count = $child_combining_count;
@@ -123,9 +123,9 @@ sub _cond_HASHREF {
 }
 
 sub _cond_hashpair_UNDEF {
-    my $self = shift;
-    my $key = shift || '';
-    my $value = shift;
+    my $self     = shift;
+    my $key      = shift || '';
+    my $value    = shift;
     my $operator = shift || '=';
     print STDERR "# _cond_hashpair_SCALAR\n" if $TRACE > 9 ;
 
@@ -138,9 +138,9 @@ sub _cond_hashpair_UNDEF {
 };
 
 sub _cond_hashpair_SCALAR {
-    my $self = shift;
-    my $key = shift || '';
-    my $value = shift;
+    my $self     = shift;
+    my $key      = shift || '';
+    my $value    = shift;
     my $operator = shift || '=';
     print STDERR "# _cond_hashpair_SCALAR\n" if $TRACE > 9 ;
 
@@ -153,10 +153,10 @@ sub _cond_hashpair_SCALAR {
 };
 
 sub _cond_hashpair_ARRAYREF {
-    my $self = shift;
-    my $key = shift || '';
-    my $values = shift || [];
-    my $operator = shift || '=';
+    my $self            = shift;
+    my $key             = shift || '';
+    my $values          = shift || [];
+    my $operator        = shift || '=';
     my $combining_count = shift || 0;
     print STDERR "#IN _cond_hashpair_ARRAYREF $combining_count\n" if $TRACE > 9;
 
@@ -183,7 +183,7 @@ sub _cond_hashpair_HASHREF {
     foreach my $child_key ( keys %{ $values } ){
         my $child_value = $values->{ $child_key };
 
-        if ( $child_key =~ /^-/ ){
+        if ( $child_key =~ /^-/mx ){
             # Child key for combining filters ( -and / -or )
             my ( $child_combining_count, @child_statment ) = $self->_dispatch_refkind($child_value, {
                 ARRAYREF  => sub { $self->_cond_op_in_hash($child_key, { $key => $child_value } , 0) },
@@ -191,7 +191,7 @@ sub _cond_hashpair_HASHREF {
             });
             $combining_count += $child_combining_count;
             push @statment, @child_statment;
-        } elsif ( $child_key =~ /^[!<>=~]/ ){
+        } elsif ( $child_key =~ /^[!<>=~]/mx ){
             # Child key is a operator like:
             # =     equality
             # ~     match regular expression (substring match)
@@ -223,9 +223,9 @@ sub _cond_op_in_hash {
     my $combining_count = shift;
     print STDERR "#IN  _cond_op_in_hash $operator $value $combining_count\n" if $TRACE > 9;
 
-    if ( defined $operator and $operator =~ /^-/ ){
-        $operator =~ s/^-//; # remove -
-        $operator =~ s/^\s+|\s+$//g; # remove leading/trailing space
+    if ( defined $operator and $operator =~ /^-/mx ){
+        $operator =~ s/^-//mx;         # remove -
+        $operator =~ s/^\s+|\s+$//mxg; # remove leading/trailing space
         $operator = ucfirst( $operator );
         $operator = 'GroupBy' if ( $operator eq 'Groupby' );
         $operator = $self->compining_prefix.$operator;
@@ -251,9 +251,9 @@ sub _cond_compining {
     $combining_count++;
     my @statment = ();
 
-    if ( defined $combining and $combining =~ /^-/ ){
-        $combining =~ s/^-//; # remove -
-        $combining =~ s/^\s+|\s+$//g; # remove leading/trailing space
+    if ( defined $combining and $combining =~ /^-/mx ){
+        $combining =~ s/^-//mx;         # remove -
+        $combining =~ s/^\s+|\s+$//mxg; # remove leading/trailing space
         $combining = ucfirst( $combining );
     }
     my ( $child_combining_count, @child_statment )= $self->_recurse_cond($value, 0 );

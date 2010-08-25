@@ -16,7 +16,7 @@ sub build_operators {
     my $operators = $self->SUPER::build_operators();
 
     push @{ $operators }, {
-        regexp  => qr/(groupby)/ix,
+        regexp  => qr/(groupby)/mix,
         handler => '_cond_op_groupby',
     };
 
@@ -74,7 +74,7 @@ sub _cond_HASHREF {
     my $self            = shift;
     my $cond            = shift;
     my $combining_count = shift || 0;
-    
+
     print STDERR "# _cond_HASHREF\n" if $TRACE > 9 ;
 
     foreach my $key ( keys %{ $cond } ){
@@ -82,7 +82,7 @@ sub _cond_HASHREF {
             return(++$combining_count, sprintf("%s: %s",$self->mode,$key));
         }
     }
-    
+
     return $self->SUPER::_cond_HASHREF($cond, $combining_count);
 }
 
