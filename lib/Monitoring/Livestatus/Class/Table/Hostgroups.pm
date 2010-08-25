@@ -8,8 +8,8 @@ sub build_table_name { return 'hostgroups' };
 
 sub build_primary_keys { return [qw/name/] };
 
-__END__
 1;
+__END__
 =head1 NAME
 
 Monitoring::Livestatus::Class::Table::Hostgroups - Class for hostgroups table

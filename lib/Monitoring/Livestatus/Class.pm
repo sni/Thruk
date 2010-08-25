@@ -5,7 +5,8 @@ use Module::Find;
 
 our $VERSION = '0.03';
 
-our $TRACE = $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} || 0;
+sub TRACE { return $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} || 0 };
+our $TRACE = TRACE();
 
 has 'peer' => (
     is       => 'rw',
@@ -154,6 +155,10 @@ Returns a table object based on L<Monitoring::Livestatus::Class::Base::Table>
 =item BUILD
 
 Initializes the internal L<Monitoring::Livestatus> object.
+
+=item TRACE
+
+Get the trace level
 
 =back
 
