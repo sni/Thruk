@@ -993,7 +993,7 @@ sub _get_service_statustype_filter {
         $servicestatusfiltername = 'All problems' if $number == 28;
     }
 
-    my $servicefilter = Thruk::Utils::combine_filter( '-and', \@servicestatusfilter );
+    my $servicefilter = Thruk::Utils::combine_filter( '-or', \@servicestatusfilter );
 
     return ( $number, $servicestatusfiltername, $servicefilter );
 }
