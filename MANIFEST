@@ -648,6 +648,7 @@ root/thruk/themes/Exfoliation/stylesheets/ministatus.css
 root/thruk/themes/Exfoliation/stylesheets/notifications.css
 root/thruk/themes/Exfoliation/stylesheets/outages.css
 root/thruk/themes/Exfoliation/stylesheets/showlog.css
+root/thruk/themes/Exfoliation/stylesheets/splashpage.css
 root/thruk/themes/Exfoliation/stylesheets/status.css
 root/thruk/themes/Exfoliation/stylesheets/statusmap.css
 root/thruk/themes/Exfoliation/stylesheets/summary.css
@@ -961,6 +962,7 @@ root/thruk/themes/Vautour/stylesheets/ministatus.css
 root/thruk/themes/Vautour/stylesheets/notifications.css
 root/thruk/themes/Vautour/stylesheets/outages.css
 root/thruk/themes/Vautour/stylesheets/showlog.css
+root/thruk/themes/Vautour/stylesheets/splashpage.css
 root/thruk/themes/Vautour/stylesheets/status.css
 root/thruk/themes/Vautour/stylesheets/statusmap.css
 root/thruk/themes/Vautour/stylesheets/summary.css
@@ -1007,6 +1009,7 @@ t/controller_tac.t
 t/controller_trends.t
 t/perlcriticrc
 t/TestUtils.pm
+t/themes.t
 t/view_Excel.t
 t/view_GD.t
 t/view_TT.t

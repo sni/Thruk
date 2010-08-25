@@ -81,14 +81,17 @@ requires 'FCGI::ProcManager::MaxRequests'         => 0;
 requires 'Module::Find'                           => 0;
 
 # test requirements
-test_requires 'HTML::Lint';
-test_requires 'File::BOM';
-test_requires 'Test::Pod'                         => 1.40;
-test_requires 'Test::Perl::Critic';
-test_requires 'Test::Pod::Coverage';
-test_requires 'Perl::Critic::Policy::Dynamic::NoIndirect';
-test_requires 'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs';
-test_requires 'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData';
+feature     ('authortests',
+  -default                                                                  => 0,
+  'HTML::Lint'                                                              => 0,
+  'File::BOM'                                                               => 0,
+  'Test::Pod'                                                               => 1.40,
+  'Test::Perl::Critic'                                                      => 0,
+  'Test::Pod::Coverage'                                                     => 0,
+  'Perl::Critic::Policy::Dynamic::NoIndirect'                               => 0,
+  'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs'          => 0,
+  'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
+);
 
 ##################################
 # should come with Catalyst::Devel
