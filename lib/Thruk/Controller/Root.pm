@@ -81,13 +81,15 @@ sub begin : Private {
     $c->stash->{'datetime_format_log'}   = Thruk->config->{'datetime_format_log'};
 
     # which theme?
-    my $theme;
-    if( defined $c->request->cookie('thruk_theme') ) {
-        my $theme_cookie = $c->request->cookie('thruk_theme');
-        $theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
-        $c->log->debug( "Set theme: '" . $theme . "' by cookie" ) if defined $theme;
+    my($param_theme, $cookie_theme);
+    if( $c->{'request'}->{'parameters'}->{'theme'} ) {
+        $param_theme = $c->{'request'}->{'parameters'}->{'theme'};
     }
-    $theme = $theme || Thruk->config->{'default_theme'} || 'Classic';
+    elsif( defined $c->request->cookie('thruk_theme') ) {
+        my $theme_cookie = $c->request->cookie('thruk_theme');
+        $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
+    }
+    my $theme = $param_theme || $cookie_theme || Thruk->config->{'default_theme'} || 'Classic';
     if( defined $c->config->{templates_paths} ) {
         $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }

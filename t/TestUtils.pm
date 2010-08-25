@@ -13,7 +13,7 @@ use Test::More;
 BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
 my $use_html_lint = 0;
-eval { 
+eval {
     require HTML::Lint;
     $use_html_lint = 1;
 };
@@ -177,7 +177,7 @@ sub test_page {
         }
         is( $errors, 0, 'All stylesheets, images and javascript exist' );
     }
-    
+
     return $return;
 }
 
@@ -194,6 +194,12 @@ sub diag_lint_errors_and_remove_some_exceptions {
         push @return, $error;
     }
     return @return;
+}
+
+#########################
+sub get_themes {
+    my @themes = @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}};
+    return @themes;
 }
 
 #########################
