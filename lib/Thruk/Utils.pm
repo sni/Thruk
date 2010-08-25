@@ -150,7 +150,7 @@ sub is_valid_regular_expression {
     my $c          = shift;
     my $expression = shift;
     return 1 unless defined $expression;
-    local $SIG{__DIE__} = undef;
+    local $SIG{__DIE__} = '';
     eval { "test" =~ m/$expression/mx; };
     if($@) {
         my $error_message = "invalid regular expression: ".$@;
