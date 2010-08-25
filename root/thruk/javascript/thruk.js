@@ -103,6 +103,7 @@ function prefSubmit(url, current_theme) {
   var now         = new Date();
   var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
   if(current_theme != sel.value) {
+    additionalParams.set('theme', '');
     additionalParams.set('reload_nav', 1);
     document.cookie = "thruk_theme="+sel.value + "; path=/; expires=" + expires.toGMTString() + ";";
     window.status   = "thruk preferences saved";
@@ -137,8 +138,6 @@ function stopRefresh() {
 }
 
 /* reloads the current page and adds some parameter from a hash */
-var a;
-var b;
 function reloadPage() {
   var obj = document.getElementById('refresh_rate');
   obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
@@ -155,7 +154,7 @@ function reloadPage() {
 
   additionalParams.each(function(pair) {
     // check for valid options to set here
-    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' || pair.key == 'host' || pair.key == 'reload_nav' ) {
+    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' || pair.key == 'host' || pair.key == 'reload_nav' || pair.key == 'theme' ) {
       urlArgs.set(pair.key, pair.value);
     }
   });

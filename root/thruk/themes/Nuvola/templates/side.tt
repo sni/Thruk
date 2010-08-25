@@ -23,6 +23,7 @@
 
 [% sublink.name = "" %]
 [% icon_open    = '' %]
+[% icon         = '' %]
 
 [% BLOCK set_icons %]
   [% icon = '/thruk/themes/Nuvola/side/icons/info.gif' %]
