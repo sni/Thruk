@@ -29,10 +29,7 @@ create new manager
 sub new {
     my( $class, $config ) = @_;
 
-    # set name of backend
-    $config->{'options'}->{'name'} = $config->{'name'};
-
-    die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>") unless defined $config->{'options'}->{'peer'};
+    die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($config)) unless defined $config->{'peer'};
 
     my $self = {
         'live' => Monitoring::Livestatus::Class->new($config),
