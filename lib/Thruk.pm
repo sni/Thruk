@@ -221,7 +221,7 @@ unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log))
 # check if logdir exists
 if(!-d $project_root.'/logs') { mkdir($project_root.'/logs') or die("failed to create logs directory: $!"); }
 
-if(-s $project_root.'log4perl.conf') {
+if(-s $project_root.'/log4perl.conf') {
     __PACKAGE__->log(Catalyst::Log::Log4perl->new($project_root.'log4perl.conf'));
 }
 elsif(!__PACKAGE__->debug) {
