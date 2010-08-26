@@ -141,13 +141,14 @@ sub get_can_submit_commands {
     my $self = shift;
     my $user = shift;
     confess("no user") unless defined $user;
-    return $self->{'live'}
-            ->table('contacts')
-            ->columns(qw/can_submit_commands
-                         alias/)
-            ->filter({ name => $user })
-            ->options({AddPeer => 1})
-            ->hashref_array();
+    my $data = $self->{'live'}
+                 ->table('contacts')
+                 ->columns(qw/can_submit_commands
+                              alias/)
+                 ->filter({ name => $user })
+                 ->options({AddPeer => 1})
+                 ->hashref_array();
+    return($data);
 }
 
 ##########################################################
