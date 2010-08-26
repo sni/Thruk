@@ -575,10 +575,6 @@ sub _initialise_peer {
     confess "unknown type in peer configuration" unless scalar @provider > 0;
     my $class = $provider[0];
 
-    if( lc $config->{'type'} eq 'livestatus' ) {
-        $config->{'options'}->{'name'} = $config->{'name'};
-    }
-
     my $require = $class;
     $require =~ s/::/\//gmx;
     require $require . ".pm";

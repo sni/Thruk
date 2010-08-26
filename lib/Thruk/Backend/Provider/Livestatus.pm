@@ -28,6 +28,10 @@ create new manager
 =cut
 sub new {
     my( $class, $config ) = @_;
+
+    # set name of backend
+    $config->{'options'}->{'name'} = $config->{'name'};
+
     my $self = {
         'live' => Monitoring::Livestatus::Class->new($config),
     };
