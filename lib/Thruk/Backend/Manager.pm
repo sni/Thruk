@@ -7,7 +7,6 @@ use Module::Find;
 use Digest::MD5 qw(md5_hex);
 use Data::Page;
 use Data::Dumper;
-use Thruk::Utils::Livestatus;
 use Scalar::Util qw/ looks_like_number /;
 
 our $AUTOLOAD;
@@ -51,12 +50,6 @@ sub new {
     }
 
     my $config = Thruk->config->{'Thruk::Backend'};
-
-    # do we have a deprecated config in use?
-    my $deprecated_conf = Thruk::Utils::Livestatus::get_livestatus_conf();
-    if( defined $deprecated_conf and !defined $config ) {
-        croak( "The <Component Monitoring::Livestatus> configuration is deprecated, please use '<Component Thruk::Backend>' instead.\nYour converted config would be:\n\n" . Thruk::Utils::Livestatus::convert_config($deprecated_conf) . "\nplease update your thruk_local.conf" );
-    }
 
     return unless defined $config;
     return unless defined $config->{'peer'};

@@ -120,7 +120,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '14'  => {
             'mess' => 'missing backend configuration',
-            'dscr' => 'please specify at least one livestatus backend in your thruk_local.conf<br>Please refer the <a href="/thruk/documentation.html#_configuration_2">documentation</a> on how to setup Thruk.',
+            'dscr' => 'please specify at least one backend in your thruk_local.conf<br>Please refer the <a href="/thruk/documentation.html#_configuration_2">documentation</a> on how to setup Thruk.',
             'code' => 500, # internal server error
         },
         '15'  => {
@@ -146,6 +146,11 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         '19'  => {
             'mess' => 'not a valid date',
             'dscr' => 'this is not a valid date',
+            'code' => 500, # internal server error
+        },
+        '20'  => {
+            'mess' => 'deprecated backend configuration',
+            'dscr' => 'You use an old style of backend configuration, you will find converting hints in your error log.<br>General configuration information is available in your Thruk <a href="/thruk/documentation.html#_configuration_2">documentation</a>.',
             'code' => 500, # internal server error
         },
     };

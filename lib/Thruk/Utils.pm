@@ -167,65 +167,6 @@ sub is_valid_regular_expression {
 
 ########################################
 
-=head2 get_hostcomments
-
-  my $comments = get_hostcomments($c, $filter)
-
-return all host comments for a given filter
-
-=cut
-sub get_hostcomments {
-die("deprecated");
-    my $c      = shift;
-    my $filter = shift;
-
-    $c->stats->profile(begin => "Utils::get_hostcomments()");
-
-    $filter = '' unless defined $filter;
-    my $hostcomments;
-    my $comments    = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::Auth::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description =\nColumns: host_name id", { Slice => 1 });
-
-    for my $comment (@{$comments}) {
-        $hostcomments->{$comment->{'host_name'}}->{$comment->{'id'}} = $comment;
-    }
-
-    $c->stats->profile(end => "Utils::get_hostcomments()");
-
-    return $hostcomments;
-}
-
-
-########################################
-
-=head2 get_servicecomments
-
-  my $comments = get_servicecomments($c, $filter);
-
-returns all comments for a given filter
-
-=cut
-sub get_servicecomments {
-die("deprecated");
-    my $c      = shift;
-    my $filter = shift;
-
-    $c->stats->profile(begin => "Utils::get_servicecomments()");
-
-    my $servicecomments;
-    my $comments = $c->{'live'}->selectall_arrayref("GET comments\n".Thruk::Utils::Auth::get_auth_filter($c, 'comments')."\n$filter\nFilter: service_description !=\nColumns: host_name service_description id", { Slice => 1 });
-
-    for my $comment (@{$comments}) {
-        $servicecomments->{$comment->{'host_name'}}->{$comment->{'service_description'}}->{$comment->{'id'}} = $comment;
-    }
-
-    $c->stats->profile(end => "Utils::get_servicecomments()");
-
-    return $servicecomments;
-}
-
-
-########################################
-
 =head2 calculate_overall_processinfo
 
   my $process_info = calculate_overall_processinfo($process_info)
@@ -426,15 +367,9 @@ sub set_can_submit_commands {
         $data = $cached_data->{'can_submit_commands'};
     }
     else {
-        eval {
-            $data = $c->{'db'}->get_can_submit_commands($username);
-            $cached_data->{'can_submit_commands'} = $data;
-            $cache->set($username, $cached_data);
-        }
-    };
-    if($@) {
-        $c->log->error("livestatus error: $@");
-        $c->detach('/error/index/9');
+        $data = $c->{'db'}->get_can_submit_commands($username);
+        $cached_data->{'can_submit_commands'} = $data;
+        $cache->set($username, $cached_data);
     }
 
     if(defined $data) {

@@ -8,7 +8,7 @@ Thruk::Action::AddDefaults - Add Defaults to the context
 
 loads cgi.cfg
 
-creates MKLivestatus object
+creates backend manager
 
 =head1 METHODS
 
@@ -60,7 +60,7 @@ before 'execute' => sub {
     $c->log->debug(Dumper($cached_data));
 
     ###############################
-    # get livesocket object
+    # get backend object
     my $disabled_backends = {};
     if(defined $c->request->cookie('thruk_backends')) {
         for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {

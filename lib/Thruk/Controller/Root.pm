@@ -6,6 +6,7 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use URI::Escape;
+use Thruk::Utils::Livestatus;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -115,7 +116,7 @@ sub begin : Private {
     $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
 
     # initialize our backends
-    unless ( defined $c->{'query'} ) {
+    unless ( defined $c->{'db'} ) {
         $c->{'db'} = Thruk::Backend::Manager->new(
             'stats' => $c->stats,
             'log'   => $c->log,
@@ -124,6 +125,14 @@ sub begin : Private {
 
     # redirect to error page unless we have a connection
     if( !defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
+
+        # do we have a deprecated config in use?
+        my $deprecated_conf = Thruk::Utils::Livestatus::get_livestatus_conf();
+        if( defined $deprecated_conf ) {
+            $c->log->error( "The <Component Monitoring::Livestatus> configuration is deprecated, please use '<Component Thruk::Backend>' instead.\nYour converted config would be:\n\n" . Thruk::Utils::Livestatus::convert_config($deprecated_conf) . "\nplease update your thruk_local.conf" );
+            $c->detach("/error/index/20");
+        }
+
         $c->detach("/error/index/14");
     }
 
