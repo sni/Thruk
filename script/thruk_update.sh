@@ -32,4 +32,4 @@ if [ $? != 0 ]; then
   exit 1;
 fi
 
-find . -exec touch {} \;
+#find . -exec touch {} \;
