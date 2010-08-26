@@ -32,6 +32,8 @@ sub new {
     # set name of backend
     $config->{'options'}->{'name'} = $config->{'name'};
 
+    die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>") unless defined $config->{'options'}->{'peer'};
+
     my $self = {
         'live' => Monitoring::Livestatus::Class->new($config),
     };

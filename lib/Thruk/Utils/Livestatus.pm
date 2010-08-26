@@ -116,9 +116,9 @@ sub convert_config {
         $new_conf .= "  <peer>\n";
         $new_conf .= "    name   = ".$peer->{'name'}."\n";
         $new_conf .= "    type   = livestatus\n";
-        $new_conf .= "    <option>\n";
-        $new_conf .= "      name   = ".$peer->{'peer'}."\n";
-        $new_conf .= "    </option>\n";
+        $new_conf .= "    <options>\n";
+        $new_conf .= "      peer   = ".$peer->{'peer'}."\n";
+        $new_conf .= "    </options>\n";
         $new_conf .= "  </peer>\n";
     }
     $new_conf .= "</Component>\n";
