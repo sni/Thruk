@@ -71,7 +71,6 @@ lib/Thruk/Action/AddDefaults.pm
 lib/Thruk/Backend/Manager.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
-lib/Thruk/Backend/Provider/Merlin.pm
 lib/Thruk/Controller/avail.pm
 lib/Thruk/Controller/cmd.pm
 lib/Thruk/Controller/config.pm
