@@ -327,6 +327,7 @@ sub _do_send_command {
         my $new_date = Thruk::Utils::format_date( $new_start_time, '%Y-%m-%d %H:%M:%S' );
         $c->log->debug( "setting spreaded start date to: " . $new_date );
         $c->request->parameters->{'start_time'} = $new_date;
+        $start_time_unix = $new_start_time;
     }
     elsif ( $c->request->parameters->{'start_time'} ) {
         if( $c->request->parameters->{'start_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
@@ -471,7 +472,7 @@ sub _generate_spread_startdates {
     my $delta = $spread / $number;
     $c->log->debug( "calculating spread with delta: " . $delta . " seconds" );
 
-    for my $x ( 0 .. $number ) {
+    for my $x ( 1 .. $number ) {
         push @{$spread_dates}, int( $starttimestamp + ( $x * $delta ) );
     }
 
