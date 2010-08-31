@@ -877,9 +877,6 @@ sub _get_query_size {
     my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $c->stash->{'default_page_size'};
     return if $entries !~ m/^\d+$/mx;
 
-    my $page = $c->{'request'}->{'parameters'}->{'page'} || 1;
-    $entries = $entries * $page;
-
     my $stats = [
         'total' => { -stats => [ $key => { '!=' => undef } ]},
     ];
@@ -887,9 +884,21 @@ sub _get_query_size {
     my $rows = $class->stats($stats)->hashref_array();
     my $size = $rows->[0]->{'total'};
 
+    my $pages = 0;
+    my $page  = $c->{'request'}->{'parameters'}->{'page'} || 1;
+    if( $entries > 0 ) {
+        $pages = POSIX::ceil( $size / $entries );
+    }
+    if( exists $c->{'request'}->{'parameters'}->{'next'} )         { $page++; }
+    elsif ( exists $c->{'request'}->{'parameters'}->{'previous'} ) { $page--; }
+    elsif ( exists $c->{'request'}->{'parameters'}->{'first'} )    { $page = 1; }
+    elsif ( exists $c->{'request'}->{'parameters'}->{'last'} )     { $page = $pages; }
+    if( $page < 0 ) { $page = 1; }
+
     unless(wantarray) {
         confess("_get_query_size() should not be called in scalar context");
     }
+    $entries  = $entries * $page;
     return($size, $entries);
 }
 
