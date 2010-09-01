@@ -141,7 +141,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Last Check Time:</td>
-                            <td class='dataVal'>[% date_format(c, host.last_check) %]</td>
+                            <td class='dataVal'>[% IF host.last_check %][% date_format(c, host.last_check) %][% ELSE %]never[% END %]</td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Check Type:</td>
