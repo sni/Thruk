@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 0.70    Wed Aug 25 08:49:45 CEST 2010
           - search does include comments and downtimes now
           - added new backend abstraction layer to support new backends
+          - added noheader parameter for status pages
 
 0.68    Fri Jul 23 21:29:02 CEST 2010
           - added mobile version for iPhones, iPad and Android mobile phones
