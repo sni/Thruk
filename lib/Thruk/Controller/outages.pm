@@ -33,15 +33,21 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                                   ]);
 
     if(defined $outages and scalar @{$outages} > 0) {
-        my $hostcomments = Thruk::Utils::get_hostcomments($c);
-        my $all_hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
+        my $hostcomments = {};
+        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+        for my $com (@{$tmp}) {
+            $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
+            $hostcomments->{$com->{'host_name'}}++;
+
+        }
+
+        my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
+        my $all_hosts = Thruk::Utils::array2hash($tmp2, 'name');
         for my $host (@{$outages}) {
 
             # get number of comments
             $host->{'comment_count'} = 0;
-            if(defined $hostcomments->{$host->{'name'}}) {
-                $host->{'comment_count'} = scalar keys %{$hostcomments->{$host->{'name'}}};
-            }
+            $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of affected hosts / services
             my($affected_hosts,$affected_services) = $self->_count_affected_hosts_and_services($c, $host->{'name'}, $all_hosts);
