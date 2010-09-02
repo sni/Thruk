@@ -20,3 +20,4 @@ script/thruk_update_table_docs.pl
 script/thruk_extract_cmd_templates.pl
 t/xt
 root/thruk/plugins/*
+.author

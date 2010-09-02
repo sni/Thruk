@@ -100,7 +100,7 @@ my %config = ('name'                   => 'Thruk',
                   COMPILE_EXT        => '.ttc',
                   COMPILE_DIR        => '/tmp/ttc_'.$>, # use uid to make tmp dir uniq
                   STAT_TTL           => 60,
-                  STRICT             => 1,
+                  STRICT             => 0,
                   render_die         => 1,
               },
               'View::GD'               => {
@@ -132,6 +132,10 @@ my %config = ('name'                   => 'Thruk',
                   },
               },
 );
+# set TT strict mode only for authors
+if(-f $project_root."/.author") {
+    $config{'View::TT'}->{'STRICT'} = 1;
+}
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
 __PACKAGE__->config(%config);

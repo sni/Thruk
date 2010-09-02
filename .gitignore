@@ -18,3 +18,4 @@ ssi/*.ssi
 root/thruk/plugins/*
 t/xt
 *.swp
+.author
