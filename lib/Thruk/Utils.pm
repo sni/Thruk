@@ -42,6 +42,10 @@ sub parse_date {
         }
         else {
             $timestamp = UnixDate($string, '%s');
+            if(!defined $timestamp) {
+                $c->detach('/error/index/19');
+                return;
+            }
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
         }
     };
