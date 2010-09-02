@@ -62,7 +62,7 @@
     </tr>
     <tr id="row_comment">
       <td class="statusOdd">Comment:</td>
-      <td class="statusOdd"><input type="text" value="" name="com_data" id="com_data" size="30"></td>
+      <td class="statusOdd"><input type="text" value="" name="com_data" id="com_data" size="37"></td>
     </tr>
     <tr id="row_start">
       <td class="statusOdd">Start:</td>
@@ -121,11 +121,11 @@
           </td></tr>
           <tr>
             <td>Check Output:</td>
-            <td><input type="text" value="" name="plugin_output" id="plugin_output" size="30"></td>
+            <td><input type="text" value="" name="plugin_output" id="plugin_output" size="27"></td>
           </tr>
           <tr>
             <td>Performance Data:</td>
-            <td><input type="text" value="" name="performance_data" size="30"></td>
+            <td><input type="text" value="" name="performance_data" size="27"></td>
           </tr>
         </table>
       </td>
