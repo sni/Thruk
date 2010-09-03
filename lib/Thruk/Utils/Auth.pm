@@ -86,17 +86,21 @@ sub get_auth_filter {
     # comments / downtimes authorization
     elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;
-        if(!$c->check_user_roles('authorized_for_all_services')) {
+        if($c->check_user_roles('authorized_for_all_services')) {
+            push @filter, { 'service_description' => { '!=' => undef } };
+        } else {
             push @filter, { 'service_contacts' => { '>=' => $c->user->get('username') }, 'service_description' => { '!=' => undef } };
         }
-        if(!$c->check_user_roles('authorized_for_all_hosts')) {
+        if($c->check_user_roles('authorized_for_all_hosts')) {
+            push @filter, { 'service_description' => undef };
+        } else {
             if(Thruk->config->{'use_strict_host_authorization'}) {
                 push @filter, { 'host_contacts' => { '>=' => $c->user->get('username') }, 'service_description' => undef };
             } else {
                 push @filter, { 'host_contacts' => { '>=' => $c->user->get('username') }};
             }
         }
-        return \@filter;
+        return Thruk::Utils::combine_filter('-or', \@filter);
     }
 
     # logfile authorization
