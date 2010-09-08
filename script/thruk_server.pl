@@ -5,9 +5,13 @@ use warnings;
 
 BEGIN {
     use FindBin;
-    if(-e "$FindBin::Bin/../local-lib") {
-        use lib "$FindBin::Bin/../local-lib/lib/perl5";
-        require local::lib; local::lib->import("$FindBin::Bin/../local-lib/perl5/");
+    use Config;
+    if(-e $FindBin::Bin."/../local-lib") {
+        use lib $FindBin::Bin."/../local-lib/lib/perl5";
+        if(! -e $FindBin::Bin."/../local-lib/lib/perl5/".$Config{archname}) {
+            die("\nERROR: this is the wrong precompiled version, your archname is: ".$Config{archname}."\n\n");
+        }
+        require local::lib; local::lib->import($FindBin::Bin."/../local-lib/perl5/");
     }
     $ENV{CATALYST_SCRIPT_GEN} = 40;
 }
