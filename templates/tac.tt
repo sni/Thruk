@@ -343,7 +343,7 @@
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
-              [% IF empty || pi.enable_flap_detection == 1 %]
+              [% IF pi.keys.size == 0 || pi.enable_flap_detection == 1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='/thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled' width="20" height="76"></a></td>
               [% ELSIF pi.enable_flap_detection == -1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='/thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Flap Detection Ambiguous' title='Flap Detection Ambiguous' width="20" height="76"></a></td>
@@ -352,7 +352,7 @@
               [% END %]
               <td width="10">&nbsp;</td>
 
-              [% IF pi.enable_flap_detection == 0 %]
+              [% IF pi.keys.size > 0 && pi.enable_flap_detection == 0 %]
               <td valign="middle" width="100%" class='featureDisabledFlapDetection'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledFlapDetection'>
@@ -394,7 +394,7 @@
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
-              [% IF empty || pi.enable_notifications == 1 %]
+              [% IF pi.keys.size == 0 || pi.enable_notifications == 1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='/thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled' width="20" height="76"></a></td>
               [% ELSIF pi.enable_notifications == -1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='/thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Notifications Ambiguous' title='Notifications Ambiguous' width="20" height="76"></a></td>
@@ -402,7 +402,7 @@
               <td valign="top"><a href='cmd.cgi?cmd_typ=12'><img src='/thruk/themes/[% theme %]/images/tacdisabled.png' border="0" alt='Notifications Disabled' title='Notifications Disabled' width="20" height="76"></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
-              [% IF pi.enable_notifications == 0 %]
+              [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]
               <td valign="middle" width="100%" class='featureDisabledNotifications'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledNotifications'>
@@ -430,7 +430,7 @@
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
-              [% IF empty || pi.enable_event_handlers == 1 %]
+              [% IF pi.keys.size == 0 || pi.enable_event_handlers == 1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='/thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled' width="20" height="76"></a></td>
               [% ELSIF pi.enable_event_handlers == -1 %]
               <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='/thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Event Handlers Ambiguous' title='Event Handlers Ambiguous' width="20" height="76"></a></td>
@@ -439,7 +439,7 @@
               [% END %]
               <td width="10">&nbsp;</td>
 
-              [% IF pi.enable_event_handlers == 0 %]
+              [% IF pi.keys.size > 0 && pi.enable_event_handlers == 0 %]
               <td valign="middle" width="100%" class='featureDisabledHandlers'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledHandlers'>
@@ -467,7 +467,7 @@
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
-              [% IF empty || pi.execute_service_checks == 1 %]
+              [% IF pi.keys.size == 0 || pi.execute_service_checks == 1 %]
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/themes/[% theme %]/images/tacenabled.png' border='0' alt='Active Checks Enabled' title='Active Checks Enabled' width="20" height="76"></a></td>
               [% ELSIF pi.execute_service_checks == -1 %]
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/themes/[% theme %]/images/tacdiverse.png' border='0' alt='Active Checks Ambiguous' title='Active Checks Ambiguous' width="20" height="76"></a></td>
@@ -475,7 +475,7 @@
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/themes/[% theme %]/images/tacdisabled.png' border='0' alt='Active Checks Disabled' title='Active Checks Disabled' width="20" height="76"></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
-              [% IF pi.execute_service_checks == 0 %]
+              [% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]
               <td valign="middle" width="100%" class='featureDisabledActiveChecks'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledActiveChecks'>
@@ -503,7 +503,7 @@
         <td valign="top">
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
-              [% IF empty || pi.accept_passive_service_checks == 1 %]
+              [% IF pi.keys.size == 0 || pi.accept_passive_service_checks == 1 %]
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/themes/[% theme %]/images/tacenabled.png' border='0' alt='Passive Checks Enabled' title='Passive Checks Enabled' width="20" height="76"></a></td>
               [% ELSIF pi.accept_passive_service_checks == -1 %]
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/themes/[% theme %]/images/tacdiverse.png' border='0' alt='Passive Checks Ambiguous' title='Passive Checks Ambiguous' width="20" height="76"></a></td>
@@ -511,7 +511,7 @@
               <td valign="top"><a href='extinfo.cgi?type=0'><img src='/thruk/themes/[% theme %]/images/tacdisabled.png' border='0' alt='Passive Checks Disabled' title='Passive Checks Disabled' width="20" height="76"></a></td>
               [% END %]
               <td width="10">&nbsp;</td>
-              [% IF pi.accept_passive_service_checks == 0 %]
+              [% IF pi.keys.size > 0 && pi.accept_passive_service_checks == 0 %]
               <td valign="middle" width="100%" class='featureDisabledPassiveChecks'>N/A</td>
               [% ELSE %]
               <td valign="top" width="100%" class='featureEnabledPassiveChecks'>

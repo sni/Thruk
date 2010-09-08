@@ -275,6 +275,7 @@ sub _do_on_peers {
     # send query to selected backends
     my( $result, $type, $size );
     my $totalsize = 0;
+    my $selected_backends = 0;
     for my $peer ( @{ $self->get_peers() } )
     {
         if(defined $backends) {
@@ -283,6 +284,7 @@ sub _do_on_peers {
             next unless $peer->{'enabled'} == 1;
         }
         $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
+        $selected_backends++;
         eval {
             my( $data, $typ, $size ) = $peer->{'class'}->$sub( @{$arg} );
             if(defined $data and !defined $size) {
@@ -300,7 +302,7 @@ sub _do_on_peers {
         };
         $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
     }
-    die($@) unless defined $result;
+    die($@) unless defined $result or $selected_backends == 0;
     $type = '' unless defined $type;
 
     # howto merge the answers?
@@ -344,6 +346,42 @@ sub _do_on_peers {
 
         if( $arg{'pager'} ) {
             $data = $self->_page_data( $arg{'pager'}, $data, undef, $totalsize );
+        }
+    }
+
+    # set some defaults if no backends where selected
+    if($sub eq "get_performance_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $type (qw{hosts services}) {
+            for my $key (qw{_active_sum _active_1_sum _active_5_sum _active_15_sum _active_60_sum _active_all_sum
+                            _passive_sum _passive_1_sum _passive_5_sum _passive_15_sum _passive_60_sum _passive_all_sum
+                            _execution_time_sum _latency_sum _active_state_change_sum _execution_time_min _latency_min _active_state_change_min _execution_time_max _latency_max
+                            _active_state_change_max _passive_state_change_sum _passive_state_change_min _passive_state_change_max
+                            _execution_time_avg _latency_avg }) {
+                $data->{$type.$key} = 0;
+            }
+        }
+    }
+    if($sub eq "get_service_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $key (qw{
+                        total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
+                        warning warning_and_disabled warning_and_scheduled warning_and_ack warning_on_down_host warning_and_unhandled critical
+                        critical_and_disabled critical_and_scheduled critical_and_ack critical_on_down_host critical_and_unhandled
+                        unknown unknown_and_disabled unknown_and_scheduled unknown_and_ack unknown_on_down_host unknown_and_unhandled
+                        flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled
+                     }) {
+            $data->{$key} = 0;
+        }
+    }
+    if($sub eq "get_host_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $key (qw{
+                        total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
+                        down down_and_ack down_and_scheduled down_and_disabled down_and_unhandled unreachable unreachable_and_ack unreachable_and_scheduled
+                        unreachable_and_disabled unreachable_and_unhandled flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled outages
+                     }) {
+            $data->{$key} = 0;
         }
     }
 

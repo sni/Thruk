@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.70.1  Wed Sep  8 14:07:18 CEST 2010
+          - fixed problem when deselected all backends
+
 0.70    Wed Aug 25 08:49:45 CEST 2010
           - search does include comments and downtimes now
           - added new backend abstraction layer to support new backends

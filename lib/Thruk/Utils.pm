@@ -180,7 +180,11 @@ computes a combined status for process infos
 =cut
 sub calculate_overall_processinfo {
     my $pi = shift;
-    my $return;
+    my $return = {};
+
+    # if no backend is available
+    return($return) if ref $pi ne 'HASH';
+
     for my $peer (keys %{$pi}) {
         for my $key (keys %{$pi->{$peer}}) {
             my $value = $pi->{$peer}->{$key};

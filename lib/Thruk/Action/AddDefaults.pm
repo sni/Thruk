@@ -102,8 +102,10 @@ before 'execute' => sub {
         $c->stash->{'has_proc_info'} = 1;
 
         # set last programm restart
-        for my $backend (keys %{$processinfo}) {
-            $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
+        if(ref $processinfo eq 'HASH') {
+            for my $backend (keys %{$processinfo}) {
+                $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
+            }
         }
 
         # check if we have to build / clean our per user cache
@@ -221,7 +223,9 @@ sub _set_possible_backends {
                 "disabled" => $disabled_backends->{$back} || 0,
                 "running"  => 0,
             };
-            $backend_detail{$back}->{'running'} = 1 if defined $c->stash->{'pi_detail'}->{$back}->{'program_start'};
+            if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
+                $backend_detail{$back}->{'running'} = 1
+            }
             push @new_possible_backends, $back;
         }
     }

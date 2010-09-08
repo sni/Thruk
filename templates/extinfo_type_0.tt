@@ -260,130 +260,130 @@
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=13'>Restart the Backend process</a></td>
                     </tr>
 
-                    [% IF pi.enable_notifications != 0 %]
+                    [% IF pi.keys.size > 0 && pi.enable_notifications != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications' title='Disable Notifications' width="20" height="20"></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=11'>Disable notifications</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.enable_notifications != 1 %]
+                    [% IF pi.keys.size == 0 || pi.enable_notifications != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Notifications' title='Enable Notifications' width="20" height="20"></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=12'>Enable notifications</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.execute_service_checks != 0 %]
+                    [% IF pi.keys.size > 0 && pi.execute_service_checks != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Executing Service Checks' title='Stop Executing Service Checks' width="20" height="20"></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=36'>Stop executing service checks</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.execute_service_checks != 1 %]
+                    [% IF pi.keys.size == 0 || pi.execute_service_checks != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Executing Service Checks' title='Start Executing Service Checks' width="20" height="20"></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=35'>Start executing service checks</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.accept_passive_service_checks != 0 %]
+                    [% IF pi.keys.size > 0 && pi.accept_passive_service_checks != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Service Checks' title='Stop Accepting Passive Service Checks' width="20" height="20"></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=38'>Stop accepting passive service checks</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.accept_passive_service_checks != 1 %]
+                    [% IF pi.keys.size == 0 || pi.accept_passive_service_checks != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Service Checks' title='Start Accepting Passive Service Checks' width="20" height="20"></td>
                       <td class='command' nowrap><a href='cmd.cgi?cmd_typ=37'>Start accepting passive service checks</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.execute_host_checks != 0 %]
+                    [% IF pi.keys.size > 0 && pi.execute_host_checks != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Executing Host Checks' title='Stop Executing Host Checks' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=89'>Stop executing host checks</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.execute_host_checks != 1 %]
+                    [% IF pi.keys.size == 0 || pi.execute_host_checks != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Executing Host Checks' title='Start Executing Host Checks' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=88'>Start executing host checks</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.accept_passive_host_checks != 0 %]
+                    [% IF pi.keys.size > 0 && pi.accept_passive_host_checks != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Accepting Passive Host Checks' title='Stop Accepting Passive Host Checks' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=91'>Stop accepting passive host checks</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.accept_passive_host_checks != 1 %]
+                    [% IF pi.keys.size == 0 || pi.accept_passive_host_checks != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Accepting Passive Host Checks' title='Start Accepting Passive Host Checks' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=90'>Start accepting passive host checks</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.enable_event_handlers != 0 %]
+                    [% IF pi.keys.size > 0 && pi.enable_event_handlers != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handlers' title='Disable Event Handlers' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=42'>Disable event handlers</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.enable_event_handlers != 1 %]
+                    [% IF pi.keys.size == 0 || pi.enable_event_handlers != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Event Handlers' title='Enable Event Handlers' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=41'>Enable event handlers</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.obsess_over_services != 0 %]
+                    [% IF pi.keys.size > 0 && pi.obsess_over_services != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over Services' title='Stop Obsessing Over Services' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=50'>Stop obsessing over services</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.obsess_over_services != 1 %]
+                    [% IF pi.keys.size == 0 || pi.obsess_over_services != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over Services' title='Start Obsessing Over Services' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=49'>Start obsessing over services</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.obsess_over_hosts != 0 %]
+                    [% IF pi.keys.size > 0 && pi.obsess_over_hosts != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Stop Obsessing Over Hosts' title='Stop Obsessing Over Hosts' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=95'>Stop obsessing over hosts</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.obsess_over_hosts != 1 %]
+                    [% IF pi.keys.size == 0 || pi.obsess_over_hosts != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Start Obsessing Over Hosts' title='Start Obsessing Over Hosts' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=94'>Start obsessing over hosts</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.enable_flap_detection != 0 %]
+                    [% IF pi.keys.size > 0 && pi.enable_flap_detection != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection' title='Disable Flap Detection' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=62'>Disable flap detection</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.enable_flap_detection != 1 %]
+                    [% IF pi.keys.size == 0 || pi.enable_flap_detection != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection' title='Enable Flap Detection' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=61'>Enable flap detection</a></td>
                     </tr>
                     [% END %]
 
-                    [% IF pi.process_performance_data != 0 %]
+                    [% IF pi.keys.size > 0 && pi.process_performance_data != 0 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Performance Data' title='Disable Performance Data' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=83'>Disable performance data</a></td>
                     </tr>
                     [% END %]
-                    [% IF pi.process_performance_data != 1 %]
+                    [% IF pi.keys.size == 0 || pi.process_performance_data != 1 %]
                     <tr class='command'>
                       <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Performance Data' title='Enable Performance Data' width="20" height="20"></td>
                       <td class='command'><a href='cmd.cgi?cmd_typ=82'>Enable performance data</a></td>

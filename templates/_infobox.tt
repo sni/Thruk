@@ -8,10 +8,10 @@
       Thruk [% version %] - <a href='http://www.thruk.org' target='_blank' class='homepageURL'>www.thruk.org</a><br />
       Logged in as <i>[% remote_user %]</i><br />
       [% IF has_proc_info %]
-      [% IF pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
-      [% IF pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partial disabled</div>[% END %]
-      [% IF pi.execute_service_checks == 0 %]<div class='infoBoxBadProcStatus'> - Service checks are disabled </div>[% END %]
-      [% IF pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partial disabled </div>[% END %]
+      [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
+      [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partial disabled</div>[% END %]
+      [% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]<div class='infoBoxBadProcStatus'> - Service checks are disabled </div>[% END %]
+      [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='infoBoxBadProcStatus'> - Service checks are partial disabled </div>[% END %]
       [% END %]
     </td>
   </tr>
