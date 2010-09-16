@@ -110,7 +110,7 @@ sub get_auth_filter {
         # service log entries
         if($c->check_user_roles('authorized_for_all_services')) {
             # allowed for all services related log entries
-            push @filter, 'current_service_description' => { '!=' => undef };
+            push @filter, { 'current_service_description' => { '!=' => undef } };
         }
         else {
             push @filter, { '-and' => [
@@ -132,7 +132,7 @@ sub get_auth_filter {
                 push @filter, { -and => [ 'current_host_contacts' => { '>=' => $c->user->get('username') }, { 'service_description' => undef }]};
             } else {
                 # allowed for all hosts and its services
-                push @filter, 'current_host_contacts' => { '>=' => $c->user->get('username') };
+                push @filter, { 'current_host_contacts' => { '>=' => $c->user->get('username') } };
             }
         }
 
