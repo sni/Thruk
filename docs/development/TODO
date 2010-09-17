@@ -54,8 +54,6 @@ Known Bugs:
       &FCGI::ProcManager::MaxRequestsThruk::self_or_default called at
       /home/thruk/Thruk/script/../lib/FCGI/ProcManager/MaxRequestsThruk.pm
 
-    - Sorting does not work with numbers srv-1, srv-11, srv-2
-
     - Use of uninitialized value $spread in pattern match (m//) at
       /mnt/c1/data/projects/git/Thruk/script/../lib/Thruk/Controller/cmd.pm
       line 416.
@@ -80,6 +78,7 @@ general:
     - bookmarks
     - use livestatus wait feature where possible
     - page by attribute a,b,c,d,e...z
+    - graph about how checks are scheduled in the next minutes
 
 
 reports:

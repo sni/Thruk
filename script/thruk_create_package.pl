@@ -6,6 +6,7 @@ use Data::Dumper;
 use Getopt::Long;
 use Pod::Usage;
 use File::Copy;
+use Config;
 
 $Data::Dumper::Sortkeys = 1;
 
@@ -28,7 +29,12 @@ if(defined $opt_h) {
 
 #########################################################################
 # set perl version
-my $perl = $opt_p || "perl";
+my $perl    = $opt_p || "perl";
+my @scripts = qw|script/thruk_cgi.pl
+                 script/thruk_create.pl
+                 script/thruk_fastcgi.pl
+                 script/thruk_server.pl
+                 script/thruk_test.pl|;
 
 #########################################################################
 unless(-d './script/') {
@@ -42,7 +48,10 @@ unlink(glob("*.gz"));
 cmd("$perl Makefile.PL");
 cmd("make distclean");
 cmd("$perl Makefile.PL");
+reset_scripts();
+replace_perl_version();
 cmd("make dist");
+reset_scripts();
 
 #########################################################################
 # fix name of source tarball
@@ -90,6 +99,7 @@ exit;
 #########################################################################
 # SUBS
 #########################################################################
+# execute a command
 sub cmd {
     my $cmd = shift;
     print "cmd: $cmd\n";
@@ -99,6 +109,31 @@ sub cmd {
     }
     close($ph) or die("cmd '$cmd' failed (rc:$?): $!");
     return 1;
+}
+
+#########################################################################
+# replace the "use 5.10.0" in our start files with current perl version
+sub replace_perl_version {
+    my $perl_version = $Config{'version'};
+    for my $file (@scripts) {
+        my $content;
+        open(my $fp, '<', $file) or die("cannot open $file: ".$!);
+        while(<$fp>) { $content .= $_; }
+        close($fp);
+        $content =~ s/### use.*# only required for packages ###/use $perl_version;/;
+        open(my $fp, '>', $file) or die("cannot write $file: ".$!);
+        print $fp $content;
+        close($fp);
+    }
+}
+
+
+#########################################################################
+# reset script to curren git defaults
+sub reset_scripts {
+    for my $file (@scripts) {
+        cmd("git checkout $file");
+    }
 }
 
 #########################################################################
