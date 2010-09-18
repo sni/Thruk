@@ -566,32 +566,32 @@ sub get_host_stats {
     my($self, %options) = @_;
 
     my $stats = [
-        'total'                     => { -stats => [ 'name' => { '!=' => '' } ]},
-        'total_active'              => { -stats => [ 'check_type' => 0 ]},
-        'total_passive'             => { -stats => [ 'check_type' => 1 ]},
-        'pending'                   => { -stats => [ 'has_been_checked' => 0 ]},
-        'pending_and_disabled'      => { -stats => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]},
-        'pending_and_scheduled'     => { -stats => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'up'                        => { -stats => [ 'has_been_checked' => 1, 'state' => 0 ]},
-        'up_and_disabled'           => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]},
-        'up_and_scheduled'          => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'down'                      => { -stats => [ 'has_been_checked' => 1, 'state' => 1 ]},
-        'down_and_ack'              => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'acknowledged' => 1 ]},
-        'down_and_scheduled'        => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'down_and_disabled'         => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]},
-        'down_and_unhandled'        => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
-        'unreachable'               => { -stats => [ 'has_been_checked' => 1, 'state' => 2 ]},
-        'unreachable_and_ack'       => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'acknowledged' => 1 ]},
-        'unreachable_and_scheduled' => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'unreachable_and_disabled'  => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]},
-        'unreachable_and_unhandled' => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
-        'flapping'                  => { -stats => [ 'is_flapping' => 1 ]},
-        'flapping_disabled'         => { -stats => [ 'flap_detection_enabled' => 0 ]},
-        'notifications_disabled'    => { -stats => [ 'notifications_enabled' => 0 ]},
-        'eventhandler_disabled'     => { -stats => [ 'event_handler_enabled' => 0 ]},
-        'active_checks_disabled'    => { -stats => [ 'active_checks_enabled' => 0 ]},
-        'passive_checks_disabled'   => { -stats => [ 'accept_passive_checks' => 0 ]},
-        'outages'                   => { -stats => [ 'state' => 1, 'childs' => {'!=' => undef } ]},
+        'total'                     => { -isa => [ 'name' => { '!=' => '' } ]},
+        'total_active'              => { -isa => [ 'check_type' => 0 ]},
+        'total_passive'             => { -isa => [ 'check_type' => 1 ]},
+        'pending'                   => { -isa => [ 'has_been_checked' => 0 ]},
+        'pending_and_disabled'      => { -isa => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]},
+        'pending_and_scheduled'     => { -isa => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'up'                        => { -isa => [ 'has_been_checked' => 1, 'state' => 0 ]},
+        'up_and_disabled'           => { -isa => [ 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]},
+        'up_and_scheduled'          => { -isa => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'down'                      => { -isa => [ 'has_been_checked' => 1, 'state' => 1 ]},
+        'down_and_ack'              => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'acknowledged' => 1 ]},
+        'down_and_scheduled'        => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'down_and_disabled'         => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]},
+        'down_and_unhandled'        => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'unreachable'               => { -isa => [ 'has_been_checked' => 1, 'state' => 2 ]},
+        'unreachable_and_ack'       => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'acknowledged' => 1 ]},
+        'unreachable_and_scheduled' => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'unreachable_and_disabled'  => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]},
+        'unreachable_and_unhandled' => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'flapping'                  => { -isa => [ 'is_flapping' => 1 ]},
+        'flapping_disabled'         => { -isa => [ 'flap_detection_enabled' => 0 ]},
+        'notifications_disabled'    => { -isa => [ 'notifications_enabled' => 0 ]},
+        'eventhandler_disabled'     => { -isa => [ 'event_handler_enabled' => 0 ]},
+        'active_checks_disabled'    => { -isa => [ 'active_checks_enabled' => 0 ]},
+        'passive_checks_disabled'   => { -isa => [ 'accept_passive_checks' => 0 ]},
+        'outages'                   => { -isa => [ 'state' => 1, 'childs' => {'!=' => undef } ]},
     ];
     my $class = $self->_get_class('hosts', \%options);
 
@@ -616,39 +616,39 @@ sub get_service_stats {
     my($self, %options) = @_;
 
     my $stats = [
-        'total'                     => { -stats => [ 'description' => { '!=' => '' } ]},
-        'total_active'              => { -stats => [ 'check_type' => 0 ]},
-        'total_passive'             => { -stats => [ 'check_type' => 1 ]},
-        'pending'                   => { -stats => [ 'has_been_checked' => 0 ]},
-        'pending_and_disabled'      => { -stats => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]},
-        'pending_and_scheduled'     => { -stats => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'ok'                        => { -stats => [ 'has_been_checked' => 1, 'state' => 0 ]},
-        'ok_and_disabled'           => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]},
-        'ok_and_scheduled'          => { -stats => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'warning'                   => { -stats => [ 'has_been_checked' => 1, 'state' => 1 ]},
-        'warning_and_disabled'      => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]},
-        'warning_and_scheduled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'warning_and_ack'           => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'acknowledged' => 1 ]},
-        'warning_on_down_host'      => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => { '!=' => 0 } ]},
-        'warning_and_unhandled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
-        'critical'                  => { -stats => [ 'has_been_checked' => 1, 'state' => 2 ]},
-        'critical_and_disabled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]},
-        'critical_and_scheduled'    => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'critical_and_ack'          => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'acknowledged' => 1 ]},
-        'critical_on_down_host'     => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => { '!=' => 0 } ]},
-        'critical_and_unhandled'    => { -stats => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
-        'unknown'                   => { -stats => [ 'has_been_checked' => 1, 'state' => 3 ]},
-        'unknown_and_disabled'      => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'active_checks_enabled' => 0 ]},
-        'unknown_and_scheduled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]},
-        'unknown_and_ack'           => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'acknowledged' => 1 ]},
-        'unknown_on_down_host'      => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => { '!=' => 0 } ]},
-        'unknown_and_unhandled'     => { -stats => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
-        'flapping'                  => { -stats => [ 'is_flapping' => 1 ]},
-        'flapping_disabled'         => { -stats => [ 'flap_detection_enabled' => 0 ]},
-        'notifications_disabled'    => { -stats => [ 'notifications_enabled' => 0 ]},
-        'eventhandler_disabled'     => { -stats => [ 'event_handler_enabled' => 0 ]},
-        'active_checks_disabled'    => { -stats => [ 'active_checks_enabled' => 0 ]},
-        'passive_checks_disabled'   => { -stats => [ 'accept_passive_checks' => 0 ]},
+        'total'                     => { -isa => [ 'description' => { '!=' => '' } ]},
+        'total_active'              => { -isa => [ 'check_type' => 0 ]},
+        'total_passive'             => { -isa => [ 'check_type' => 1 ]},
+        'pending'                   => { -isa => [ 'has_been_checked' => 0 ]},
+        'pending_and_disabled'      => { -isa => [ 'has_been_checked' => 0, 'active_checks_enabled' => 0 ]},
+        'pending_and_scheduled'     => { -isa => [ 'has_been_checked' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'ok'                        => { -isa => [ 'has_been_checked' => 1, 'state' => 0 ]},
+        'ok_and_disabled'           => { -isa => [ 'has_been_checked' => 1, 'state' => 0, 'active_checks_enabled' => 0 ]},
+        'ok_and_scheduled'          => { -isa => [ 'has_been_checked' => 1, 'state' => 0, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'warning'                   => { -isa => [ 'has_been_checked' => 1, 'state' => 1 ]},
+        'warning_and_disabled'      => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'active_checks_enabled' => 0 ]},
+        'warning_and_scheduled'     => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'warning_and_ack'           => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'acknowledged' => 1 ]},
+        'warning_on_down_host'      => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => { '!=' => 0 } ]},
+        'warning_and_unhandled'     => { -isa => [ 'has_been_checked' => 1, 'state' => 1, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'critical'                  => { -isa => [ 'has_been_checked' => 1, 'state' => 2 ]},
+        'critical_and_disabled'     => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'active_checks_enabled' => 0 ]},
+        'critical_and_scheduled'    => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'critical_and_ack'          => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'acknowledged' => 1 ]},
+        'critical_on_down_host'     => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => { '!=' => 0 } ]},
+        'critical_and_unhandled'    => { -isa => [ 'has_been_checked' => 1, 'state' => 2, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'unknown'                   => { -isa => [ 'has_been_checked' => 1, 'state' => 3 ]},
+        'unknown_and_disabled'      => { -isa => [ 'has_been_checked' => 1, 'state' => 3, 'active_checks_enabled' => 0 ]},
+        'unknown_and_scheduled'     => { -isa => [ 'has_been_checked' => 1, 'state' => 3, 'scheduled_downtime_depth' => { '>' => 0 } ]},
+        'unknown_and_ack'           => { -isa => [ 'has_been_checked' => 1, 'state' => 3, 'acknowledged' => 1 ]},
+        'unknown_on_down_host'      => { -isa => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => { '!=' => 0 } ]},
+        'unknown_and_unhandled'     => { -isa => [ 'has_been_checked' => 1, 'state' => 3, 'host_state' => 0, 'active_checks_enabled' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0 ]},
+        'flapping'                  => { -isa => [ 'is_flapping' => 1 ]},
+        'flapping_disabled'         => { -isa => [ 'flap_detection_enabled' => 0 ]},
+        'notifications_disabled'    => { -isa => [ 'notifications_enabled' => 0 ]},
+        'eventhandler_disabled'     => { -isa => [ 'event_handler_enabled' => 0 ]},
+        'active_checks_disabled'    => { -isa => [ 'active_checks_enabled' => 0 ]},
+        'passive_checks_disabled'   => { -isa => [ 'accept_passive_checks' => 0 ]},
     ];
     my $class = $self->_get_class('services', \%options);
     my $rows = $class->stats($stats)->hashref_array();
@@ -681,19 +681,19 @@ sub get_performance_stats {
     my $data = {};
     for my $type (qw{hosts services}) {
         my $stats = [
-            $type.'_active_sum'      => { -stats => [ 'check_type' => 0 ]},
-            $type.'_active_1_sum'    => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
-            $type.'_active_5_sum'    => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
-            $type.'_active_15_sum'   => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
-            $type.'_active_60_sum'   => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
-            $type.'_active_all_sum'  => { -stats => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
+            $type.'_active_sum'      => { -isa => [ 'check_type' => 0 ]},
+            $type.'_active_1_sum'    => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
+            $type.'_active_5_sum'    => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
+            $type.'_active_15_sum'   => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
+            $type.'_active_60_sum'   => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
+            $type.'_active_all_sum'  => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
 
-            $type.'_passive_sum'     => { -stats => [ 'check_type' => 1 ]},
-            $type.'_passive_1_sum'   => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
-            $type.'_passive_5_sum'   => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
-            $type.'_passive_15_sum'  => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
-            $type.'_passive_60_sum'  => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
-            $type.'_passive_all_sum' => { -stats => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
+            $type.'_passive_sum'     => { -isa => [ 'check_type' => 1 ]},
+            $type.'_passive_1_sum'   => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
+            $type.'_passive_5_sum'   => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
+            $type.'_passive_15_sum'  => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
+            $type.'_passive_60_sum'  => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
+            $type.'_passive_all_sum' => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
         ];
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
@@ -701,15 +701,15 @@ sub get_performance_stats {
 
         # add stats for active checks
         $stats = [
-            $type.'_execution_time_sum'      => { -stats => [ 'sum execution_time' ]},
-            $type.'_latency_sum'             => { -stats => [ 'sum latency' ]},
-            $type.'_active_state_change_sum' => { -stats => [ 'sum percent_state_change' ]},
-            $type.'_execution_time_min'      => { -stats => [ 'min execution_time' ]},
-            $type.'_latency_min'             => { -stats => [ 'min latency' ]},
-            $type.'_active_state_change_min' => { -stats => [ 'min percent_state_change' ]},
-            $type.'_execution_time_max'      => { -stats => [ 'max execution_time' ]},
-            $type.'_latency_max'             => { -stats => [ 'max latency' ]},
-            $type.'_active_state_change_max' => { -stats => [ 'max percent_state_change' ]},
+            $type.'_execution_time_sum'      => { -isa => [ 'sum execution_time' ]},
+            $type.'_latency_sum'             => { -isa => [ 'sum latency' ]},
+            $type.'_active_state_change_sum' => { -isa => [ 'sum percent_state_change' ]},
+            $type.'_execution_time_min'      => { -isa => [ 'min execution_time' ]},
+            $type.'_latency_min'             => { -isa => [ 'min latency' ]},
+            $type.'_active_state_change_min' => { -isa => [ 'min percent_state_change' ]},
+            $type.'_execution_time_max'      => { -isa => [ 'max execution_time' ]},
+            $type.'_latency_max'             => { -isa => [ 'max latency' ]},
+            $type.'_active_state_change_max' => { -isa => [ 'max percent_state_change' ]},
         ];
         $class = $self->_get_class($type, \%options);
         $rows = $class
@@ -719,9 +719,9 @@ sub get_performance_stats {
 
         # add stats for passive checks
         $stats = [
-            $type.'_passive_state_change_sum' => { -stats => [ 'sum percent_state_change' ]},
-            $type.'_passive_state_change_min' => { -stats => [ 'min percent_state_change' ]},
-            $type.'_passive_state_change_max' => { -stats => [ 'max percent_state_change' ]},
+            $type.'_passive_state_change_sum' => { -isa => [ 'sum percent_state_change' ]},
+            $type.'_passive_state_change_min' => { -isa => [ 'min percent_state_change' ]},
+            $type.'_passive_state_change_max' => { -isa => [ 'max percent_state_change' ]},
         ];
         $class = $self->_get_class($type, \%options);
         $rows = $class
@@ -878,7 +878,7 @@ sub _get_query_size {
     return if $entries !~ m/^\d+$/mx;
 
     my $stats = [
-        'total' => { -stats => [ $key => { '!=' => undef } ]},
+        'total' => { -isa => [ $key => { '!=' => undef } ]},
     ];
     my $class = $self->_get_class($table, $options);
     my $rows = $class->stats($stats)->hashref_array();
