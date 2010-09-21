@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.72    ...
+          - fixed action urls in host details
           - added warning when trying to start a precompiled version on wrong arch
 
 0.70.1  Wed Sep  8 14:07:18 CEST 2010
