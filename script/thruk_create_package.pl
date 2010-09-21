@@ -120,11 +120,12 @@ sub replace_perl_version {
         open(my $fp, '<', $file) or die("cannot open $file: ".$!);
         while(<$fp>) { $content .= $_; }
         close($fp);
-        $content =~ s/### use.*# only required for packages ###/use $perl_version;/;
+        $content =~ s/###\s+use.*#\s+only\s+required\s+for\s+packages\s+###/use $perl_version;/mx;
         open(my $fp, '>', $file) or die("cannot write $file: ".$!);
         print $fp $content;
         close($fp);
     }
+    return;
 }
 
 
@@ -134,6 +135,7 @@ sub reset_scripts {
     for my $file (@scripts) {
         cmd("git checkout $file");
     }
+    return;
 }
 
 #########################################################################
