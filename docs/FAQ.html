@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.2" />
+<meta name="generator" content="AsciiDoc 8.5.3" />
 <title>Frequently Asked Questions</title>
 <style type="text/css">
 /* Debug borders */
@@ -180,8 +180,8 @@ div.quoteblock > div.attribution {
   text-align: right;
 }
 
-div.verseblock > div.content {
-  white-space: pre;
+div.verseblock > pre.content {
+  font-family: inherit;
 }
 div.verseblock > div.attribution {
   padding-top: 0.75em;
@@ -399,8 +399,8 @@ div.quoteblock-attribution {
   text-align: right;
 }
 
-div.verseblock-content {
-  white-space: pre;
+pre.verseblock-content {
+  font-family: inherit;
 }
 div.verseblock-attribution {
   padding-top: 0.75em;
@@ -563,8 +563,9 @@ footnotes: function () {
 <h3 id="_is_thruk_an_abbreviation_what_does_thruk_mean">Is Thruk an Abbreviation? What does Thruk mean?</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Thruk is just a random word and has no meaning. Pronounce it like <em>Truck</em>.</p></div>
 <h3 id="_where_is_the_statusmap">Where is the statusmap?</h3><div style="clear:left"></div>
-<div class="paragraph"><p>The statusmap is currently under development and will be included in future
-releases.</p></div>
+<div class="paragraph"><p>The statusmap got replaced by a own variant which is more scalable in
+large environments. Its shipped as Thruk addon, but enabled by
+default.</p></div>
 <h3 id="_authorization_authentication_is_not_working">Authorization/Authentication is not working</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Authentication is done by the webserver, so authentication is only available
 with the fastcgi version.</p></div>
@@ -577,6 +578,31 @@ if you do not click on a link.</p></div>
 </div>
 <h2 id="_customization">Customization</h2>
 <div class="sectionbody">
+<h3 id="_how_can_i_integrate_nagvis_maps">How can i integrate Nagvis Maps</h3><div style="clear:left"></div>
+<div class="paragraph"><p>Integrating Nagivs is currently only possible when frames are enabled.
+So first step is editing the thruk_local.conf and set</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt> use_frames = 1</tt></pre>
+</div></div>
+<div class="paragraph"><p>Integration is easy. Just copy and edit your menu_local.conf.
+For Nagvis 1.4 add something like:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt> add_section('name' =&gt; 'Nagvis');
+ add_link('name' =&gt; "Nagvis",        'href' =&gt; '/nagvis/frontend/nagvis-js/index.php');
+ add_sub_link('name' =&gt; "demo",      'href' =&gt; '/nagvis/index.php?Map=demo');
+ add_sub_link('name' =&gt; "demo-map2", 'href' =&gt; '/nagvis/index.php?Map=demo-map2');</tt></pre>
+</div></div>
+<div class="paragraph"><p>For Nagvis 1.5:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>add_section('name' =&gt; 'Nagvis');
+add_link('name' =&gt; "Nagvis",         'href' =&gt; '/nagvis/frontend/nagvis-js/index.php');
+add_sub_link('name' =&gt; "demo",       'href' =&gt; '/nagvis/frontend/nagvis-js/index.php?mod=Map&amp;act=view&amp;show=demo');
+add_sub_link('name' =&gt; "demo-map2",  'href' =&gt; '/nagvis/frontend/nagvis-js/index.php?mod=Map&amp;act=view&amp;show=demo-map2');</tt></pre>
+</div></div>
+<div class="paragraph"><p>Thruk has to be restarted.</p></div>
 <h3 id="_how_can_i_add_more_themes">How can i add more themes?</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Themes are located under <em>root/thruk/themes/</em>. Just copy and modify the one you
 like.</p></div>
@@ -621,7 +647,7 @@ Finally restart your fastcgi server.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-06-18 16:52:05 CEST
+Last updated 2010-09-21 09:10:21 CEST
 </div>
 </div>
 </body>
