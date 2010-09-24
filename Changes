@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.72    ...
           - added warning when trying to start a precompiled version on wrong arch
+          - fixed stats querys
 
 0.70.1  Wed Sep  8 14:07:18 CEST 2010
           - fixed problem when deselected all backends
