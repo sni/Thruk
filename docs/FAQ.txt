@@ -10,8 +10,9 @@ Thruk is just a random word and has no meaning. Pronounce it like 'Truck'.
 
 === Where is the statusmap?
 
-The statusmap is currently under development and will be included in future
-releases.
+The statusmap got replaced by a own variant which is more scalable in
+large environments. Its shipped as Thruk addon, but enabled by
+default.
 
 
 === Authorization/Authentication is not working
@@ -34,6 +35,32 @@ if you do not click on a link.
 
 == Customization
 
+=== How can i integrate Nagvis Maps
+Integrating Nagivs is currently only possible when frames are enabled.
+So first step is editing the thruk_local.conf and set
+....
+ use_frames = 1
+....
+
+Integration is easy. Just copy and edit your menu_local.conf.
+For Nagvis 1.4 add something like:
+....
+ add_section('name' => 'Nagvis');
+ add_link('name' => "Nagvis",        'href' => '/nagvis/frontend/nagvis-js/index.php');
+ add_sub_link('name' => "demo",      'href' => '/nagvis/index.php?Map=demo');
+ add_sub_link('name' => "demo-map2", 'href' => '/nagvis/index.php?Map=demo-map2');
+....
+
+For Nagvis 1.5:
+....
+add_section('name' => 'Nagvis');
+add_link('name' => "Nagvis",         'href' => '/nagvis/frontend/nagvis-js/index.php');
+add_sub_link('name' => "demo",       'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo');
+add_sub_link('name' => "demo-map2",  'href' => '/nagvis/frontend/nagvis-js/index.php?mod=Map&act=view&show=demo-map2');
+....
+Thruk has to be restarted.
+
+
 === How can i add more themes?
 
 Themes are located under 'root/thruk/themes/'. Just copy and modify the one you
@@ -45,7 +72,6 @@ like.
 This is not possible at the moment. However, you could remove the theme
 physically from 'root/thruk/themes/'. Make sure you replace symlinks from other
 themes with proper files if you remove the Classic theme.
-
 
 
 
