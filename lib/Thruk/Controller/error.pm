@@ -202,6 +202,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
+    # do not cache errors
+    $c->response->headers->last_modified(time);
+    $c->response->headers->expires(time - 3600);
+    $c->response->headers->header(cache_control => "public, max-age=0");
 
     return 1;
 }
