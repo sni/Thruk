@@ -119,6 +119,19 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         my @servicedata = split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'};
         $self->{'spread_startdates'} = $self->_generate_spread_startdates( $c, scalar @hostdata + scalar @servicedata, $c->request->parameters->{'start_time'}, $c->request->parameters->{'spread'} );
 
+        # persistent can be set in two ways
+        if(    $c->{'request'}->{'parameters'}->{'persistent'} eq 'ack'
+           and $c->{'request'}->{'parameters'}->{'persistent_ack'}) {
+            $c->{'request'}->{'parameters'}->{'persistent'} = 1;
+        }
+        elsif(    $c->{'request'}->{'parameters'}->{'persistent'} eq 'comments'
+           and $c->{'request'}->{'parameters'}->{'persistent_comments'}) {
+            $c->{'request'}->{'parameters'}->{'persistent'} = 1;
+        }
+        else {
+            $c->{'request'}->{'parameters'}->{'persistent'} = 0;
+        }
+
         for my $hostdata (@hostdata) {
             if( defined $host_quick_commands->{$quick_command} ) {
                 $cmd_typ = $host_quick_commands->{$quick_command};

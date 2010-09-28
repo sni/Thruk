@@ -874,10 +874,12 @@ function check_selected_command() {
     if(value == 3) { /* add comment */
         enableFormElement('row_comment');
         enableFormElement('row_comment_options');
+        document.getElementById('opt_persistent').value = 'comments';
     }
     if(value == 4) { /* add acknowledgement */
         enableFormElement('row_comment');
         enableFormElement('row_ack_options');
+        document.getElementById('opt_persistent').value = 'ack';
     }
     if(value == 5) { /* remove downtimes */
     }
