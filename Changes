@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fixed sending multiple persistent acknowledgements
           - fixed action urls in host details
           - fixed stats querys
+          - fixed statusmap for hosts with nasty chars
 
 0.70.1  Wed Sep  8 14:07:18 CEST 2010
           - fixed problem when deselected all backends
