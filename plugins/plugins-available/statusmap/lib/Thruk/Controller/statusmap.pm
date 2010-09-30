@@ -370,7 +370,10 @@ sub _fill_subtree {
             $host->{'parents'} = [qw/rootid/];
         }
         my $found_parent = 0;
-        if(grep {/$parent/mx} @{$host->{'parents'}}) {
+        for my $par (@{$host->{'parents'}}) {
+            if($par eq $parent) { $found_parent = 1; last; }
+        }
+        if($found_parent) {
             $tree->{$host->{'name'}} = {};
         }
         else {
