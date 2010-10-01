@@ -97,7 +97,7 @@ feature     ('authortests',
 ##################################
 # should come with Catalyst::Devel
 eval {
-    catalyst;
+    catalyst();
 };
 
 ##################################
