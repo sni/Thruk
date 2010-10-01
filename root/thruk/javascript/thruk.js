@@ -1582,6 +1582,11 @@ var ajax_search = {
         pattern = input.value;
         if(pattern.length >= 1 || ajax_search.search_type != 'all') {
 
+            prefix = pattern.substr(0,3);
+            if(prefix == 'ho:' || prefix == 'hg:' || prefix == 'se:' || prefix == 'sg:') {
+                pattern = pattern.substr(3);
+            }
+
             // remove empty strings from pattern array
             pattern = pattern.split(" ");
             var trimmed_pattern = new Array();
@@ -1670,7 +1675,12 @@ var ajax_search = {
                     if(selected != -1 && selected == x) {
                         classname = "item ajax_search_selected";
                     }
-                    resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search.set_result(\'' + data.display +'\')"> ' + name +'<\/a><\/li>';
+                    var prefix = '';
+                    if(type.name == 'hosts')         { prefix = 'ho:';  }
+                    if(type.name == 'hostgroups')    { prefix = 'hg:'; }
+                    if(type.name == 'services')      { prefix = 'se:';  }
+                    if(type.name == 'servicegroups') { prefix = 'sg:'; }
+                    resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search.set_result(\'' + prefix+data.display +'\')"> ' + name +'<\/a><\/li>';
                     x++;
                     cur_count++;
                 }
