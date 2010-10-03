@@ -285,7 +285,7 @@ sub _get_hosts_by_attribute {
         $host->{$attr} = 'unknown' unless defined $host->{$attr};
 
         # where should we put the host onto?
-        for my $val (split/,/mx, $host->{$attr}) {
+        for my $val (@{$host->{$attr}}) {
             $host_tree->{$val}->{$id} = $json_host;
         }
     }
@@ -366,11 +366,14 @@ sub _fill_subtree {
 
     # find direct childs
     for my $host (@{$hosts}) {
-        if(!defined $host->{'parents'}) {
-            $host->{'parents'} = 'rootid';
+        if(scalar @{$host->{'parents'}} == 0) {
+            $host->{'parents'} = [qw/rootid/];
         }
         my $found_parent = 0;
-        if(grep {/$parent/mx} @{$host->{'parents'}}) {
+        for my $par (@{$host->{'parents'}}) {
+            if($par eq $parent) { $found_parent = 1; last; }
+        }
+        if($found_parent) {
             $tree->{$host->{'name'}} = {};
         }
         else {
@@ -458,9 +461,11 @@ sub _get_json_host {
 
     my $alias = $host->{'alias'};
     $alias =~ s/"//gmx;
+    $alias =~ s/'//gmx;
 
     my $address = $host->{'address'};
     $address =~ s/"//gmx;
+    $address =~ s/'//gmx;
 
     my $json_host = {
         'id'   => $host->{'name'},
