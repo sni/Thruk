@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.72    ...
+          - added utf8 support for navigation
           - added prefixes for search terms ho: hg: se: and sg:
           - added link to childs on host details page
           - added warning when trying to start a precompiled version on wrong arch
