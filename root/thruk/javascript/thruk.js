@@ -1676,10 +1676,12 @@ var ajax_search = {
                         classname = "item ajax_search_selected";
                     }
                     var prefix = '';
-                    if(type.name == 'hosts')         { prefix = 'ho:';  }
-                    if(type.name == 'hostgroups')    { prefix = 'hg:'; }
-                    if(type.name == 'services')      { prefix = 'se:';  }
-                    if(type.name == 'servicegroups') { prefix = 'sg:'; }
+                    if(ajax_search.search_type == "all") {
+                        if(type.name == 'hosts')         { prefix = 'ho:'; }
+                        if(type.name == 'hostgroups')    { prefix = 'hg:'; }
+                        if(type.name == 'services')      { prefix = 'se:'; }
+                        if(type.name == 'servicegroups') { prefix = 'sg:'; }
+                    }
                     resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search.set_result(\'' + prefix+data.display +'\')"> ' + name +'<\/a><\/li>';
                     x++;
                     cur_count++;
