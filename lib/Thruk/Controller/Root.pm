@@ -280,6 +280,18 @@ sub thruk_index_html : Path('/thruk/index.html') {
     unless ( $c->stash->{'use_frames'} ) {
         $c->detach("thruk_main_html");
     }
+
+    if(-f "templates/index.tt") {
+        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat("templates/index.tt");
+        if(defined $c->{'request'}->{'headers'}->{'if-modified-since'}
+           and $c->req->headers->if_modified_since == $mtime) {
+            # set not modified status
+            $c->response->status(304);
+            return 1;
+        }
+        $c->response->headers->last_modified($mtime);
+    }
+
     $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
     $c->stash->{'main'}     = '';
     $c->stash->{'target'}   = '';
