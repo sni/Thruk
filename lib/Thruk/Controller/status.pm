@@ -1367,10 +1367,10 @@ sub _single_search {
         my $dateop = '=';
         my $joinop = "-or";
         if( $filter->{'op'} eq '!~' ) { $op = '!~~'; $joinop = "-and"; $listop = '!>='; }
-        if( $filter->{'op'} eq '~' ) { $op = '~~'; }
+        if( $filter->{'op'} eq '~'  ) { $op = '~~'; }
         if( $filter->{'op'} eq '!=' ) { $op = '!='; $joinop = "-and"; $listop = '!>='; $dateop = '!='; }
-        if( $filter->{'op'} eq '>=' ) { $dateop = '>='; }
-        if( $filter->{'op'} eq '<=' ) { $dateop = '<='; }
+        if( $filter->{'op'} eq '>=' ) { $op = '>='; $dateop = '>='; }
+        if( $filter->{'op'} eq '<=' ) { $op = '<='; $dateop = '<='; }
 
         if( $op eq '!~~' or $op eq '~~' ) {
             $errors++ unless Thruk::Utils::is_valid_regular_expression( $c, $value );
@@ -1466,6 +1466,14 @@ sub _single_search {
                 push @hostfilter,    { next_check => { $dateop => $date } };
                 push @servicefilter, { next_check => { $dateop => $date } };
             }
+        }
+        elsif ( $filter->{'type'} eq 'latency' ) {
+            push @hostfilter,    { latency => { $op => $value } };
+            push @servicefilter, { latency => { $op => $value } };
+        }
+        elsif ( $filter->{'type'} eq 'execution time' ) {
+            push @hostfilter,    { execution_time => { $op => $value } };
+            push @servicefilter, { execution_time => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'last check' ) {
             my $date = Thruk::Utils::parse_date( $c, $value );

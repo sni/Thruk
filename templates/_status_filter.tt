@@ -293,6 +293,8 @@
               <option value="comment"[% IF s.type == 'comment' %] selected[% END %]>Comment</option>
               <option value="last check"[% IF s.type == 'last check' %] selected[% END %]>Last Check</option>
               <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
+              <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
+              <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
             </select><select name="[% prefix %]_op" id="[% prefix %]_[% loop.index %]_to">
               <option value="~"[% IF s.op == '~' %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>

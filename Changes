@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.72    ...
+          - added filter for latency and execution time
           - added link to childs on host details page
           - added warning when trying to start a precompiled version on wrong arch
           - fixed removing comments with unprivileged user

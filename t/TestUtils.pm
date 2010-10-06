@@ -169,6 +169,7 @@ sub test_page {
         }
         my $errors = 0;
         for my $test_url (keys %{$links_to_check}) {
+            next if $test_url =~ m/\/pnp4nagios\//mx;
             my $request = request($test_url);
             unless($request->is_success) {
                 $errors++;
