@@ -7,13 +7,11 @@ general
     - add backend name to logs
     - add go back button on error page
     - authorization docs
-    - Filter: latency, execution_time
     - configure url path in config (ex.: /thruk/ )
     - add extra grapher url
     - use title for quick downtimes popups
     - specify columns for excel export
         -> http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=129935#post129935
-    - search with s:service h:host sg and hg
     - different icon for passive checks
 
 extinfo:
