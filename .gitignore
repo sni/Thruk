@@ -19,3 +19,4 @@ root/thruk/plugins/*
 t/xt
 *.swp
 .author
+cgi_local.cfg
