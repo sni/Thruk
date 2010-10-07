@@ -11,6 +11,9 @@ function makeHTMLFromData(name, data){
   html += '<div class="tip-text"><pre>';
 
   if(data.status != undefined) {
+    if(data.alias.length         > 80) { data.alias         = data.alias.substr(0,80) + '...'; }
+    if(data.address.length       > 80) { data.address       = data.address.substr(0,80) + '...'; }
+    if(data.plugin_output.length > 80) { data.plugin_output = data.plugin_output.substr(0,80) + '...'; }
     html += 'Alias:   ' + data.alias + '<br \/>';
     html += 'Address: ' + data.address + '<br \/>';
     html += 'Status:  <span class="' + data.cssClass + '">&nbsp;' + data.status + '&nbsp;<\/span> ' + data.duration + '<br \/>';
@@ -137,39 +140,48 @@ function show_tree_map(id_to_show) {
           if(!node) {
             return;
           }
-          if(isLeaf && node.data.cssClass != undefined && head) {
+          var total      = 0;
+          var failed     = 0;
+          var totalClass = '';
+          if(head && node.data) {
+            total  = node.data.state_up + node.data.state_down + node.data.state_unreachable + node.data.state_pending;
+            failed = node.data.state_down + node.data.state_unreachable;
+            totalClass = '';
+          }
+
+          // calculate colour of node
+          if(node.data.cssClass != undefined && node.data.cssClass != 'hostUP') {
+              totalClass = node.data.cssClass;
+          }
+          else if(total == node.data.state_up) {
+              totalClass = 'hostUP';
+          }
+          else if(total == node.data.state_down) {
+              totalClass = 'hostDOWN';
+          }
+          else if(total == node.data.state_unreachable) {
+              totalClass = 'hostUNREACHABLE';
+          }
+          else if(total == node.data.state_pending) {
+              totalClass = 'hostPENDING';
+          }
+          else if(total > 0) {
+              var perc = (failed /(total-node.data.state_pending))*100;
+              if(failed == 0) {
+                  totalClass = 'hostUP';
+              }
+                else if(perc > 75) {
+                  totalClass = 'hostDOWN';
+              }
+              else {
+                  totalClass = 'serviceWARNING';
+              }
+          }
+
+          if(isLeaf && node.data.cssClass != undefined && head && failed == 0) {
             head.className = (head.className + " " + node.data.cssClass);
           }
           else if(isLeaf && head && node.data) {
-            var total  = node.data.state_up + node.data.state_down + node.data.state_unreachable + node.data.state_pending;
-            var failed = node.data.state_down + node.data.state_unreachable;
-            var totalClass = '';
-            // calculate colour of node
-            if(total == node.data.state_up) {
-                totalClass = 'hostUP';
-            }
-            else if(total == node.data.state_down) {
-                totalClass = 'hostDOWN';
-            }
-            else if(total == node.data.state_unreachable) {
-                totalClass = 'hostUNREACHABLE';
-            }
-            else if(total == node.data.state_pending) {
-                totalClass = 'hostPENDING';
-            }
-            else if(total > 0) {
-                var perc = (failed /(total-node.data.state_pending))*100;
-                if(failed == 0) {
-                    totalClass = 'hostUP';
-                }
-                else if(perc > 75) {
-                    totalClass = 'hostDOWN';
-                }
-                else {
-                    totalClass = 'serviceWARNING';
-                }
-            }
-
             head.className = (head.className + " " + totalClass);
           }
           head.onmouseover = function (e){showTip((e||window.event), node)};

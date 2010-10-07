@@ -1361,6 +1361,16 @@ sub _single_search {
 
     # do the text filter
     foreach my $filter ( @{ $search->{'text_filter'} } ) {
+
+        # resolve search prefix
+        if($filter->{'type'} eq 'search' and $filter->{'value'} =~ m/^(ho|hg|se|sg):/) {
+            if($1 eq 'ho') { $filter->{'type'} = 'host';         }
+            if($1 eq 'hg') { $filter->{'type'} = 'hostgroup';    }
+            if($1 eq 'se') { $filter->{'type'} = 'service';      }
+            if($1 eq 'sg') { $filter->{'type'} = 'servicegroup'; }
+            $filter->{'value'} = substr($filter->{'value'}, 3);
+        }
+
         my $value  = $filter->{'value'};
         my $op     = '=';
         my $listop = '>=';
