@@ -681,19 +681,19 @@ sub get_performance_stats {
     my $data = {};
     for my $type (qw{hosts services}) {
         my $stats = [
-            $type.'_active_sum'      => { -isa => [ 'check_type' => 0 ]},
-            $type.'_active_1_sum'    => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
-            $type.'_active_5_sum'    => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
-            $type.'_active_15_sum'   => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
-            $type.'_active_60_sum'   => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
-            $type.'_active_all_sum'  => { -isa => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
+            $type.'_active_sum'      => { -isa => { -and => [ 'check_type' => 0 ]}},
+            $type.'_active_1_sum'    => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]}},
+            $type.'_active_5_sum'    => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]}},
+            $type.'_active_15_sum'   => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]}},
+            $type.'_active_60_sum'   => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]}},
+            $type.'_active_all_sum'  => { -isa => { -and => [ 'check_type' => 0, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]}},
 
-            $type.'_passive_sum'     => { -isa => [ 'check_type' => 1 ]},
-            $type.'_passive_1_sum'   => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]},
-            $type.'_passive_5_sum'   => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]},
-            $type.'_passive_15_sum'  => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]},
-            $type.'_passive_60_sum'  => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]},
-            $type.'_passive_all_sum' => { -isa => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]},
+            $type.'_passive_sum'     => { -isa => { -and => [ 'check_type' => 1 ]}},
+            $type.'_passive_1_sum'   => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min1 } ]}},
+            $type.'_passive_5_sum'   => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min5 } ]}},
+            $type.'_passive_15_sum'  => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min15 }]}},
+            $type.'_passive_60_sum'  => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]}},
+            $type.'_passive_all_sum' => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]}},
         ];
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
