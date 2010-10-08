@@ -46,7 +46,6 @@ requires 'Template'                               => 2.22;
 requires 'Class::C3'                              => 0.22;
 requires 'Algorithm::C3'                          => 0.08;
 requires 'Time::HiRes'                            => 0;
-requires 'Thread::Queue'                          => 2.11;
 requires 'Date::Calc'                             => 6.3;
 requires 'Data::Page'                             => 2.02;
 requires 'HTML::Entities'                         => 3.64;
