@@ -13,6 +13,7 @@ general
     - specify columns for excel export
         -> http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=129935#post129935
     - different icon for passive checks
+    - paging for service/host groups pages
 
 extinfo:
     - finish performance data on extinfo type 4

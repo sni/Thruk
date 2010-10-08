@@ -145,7 +145,7 @@
           </td>
           <td class='[% class %]' align="center" valign="middle">
             <table border="0">
-              [% IF group.services_ok      > 0 %]<tr><td class='miniStatusOK'><a href='status.cgi?hostgroup=[% group.name | uri %]&amp;style=detail&amp;&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_ok %] OK</a></td></tr>[% END %]
+              [% IF group.services_ok      > 0 %]<tr><td class='miniStatusOK'><a href='status.cgi?[% servicelink %]&amp;&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_ok %] OK</a></td></tr>[% END %]
               [% IF group.services_warning > 0 %]
               <tr>
                 <td class='miniStatusWARNING'>
