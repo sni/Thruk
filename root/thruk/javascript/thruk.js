@@ -1606,7 +1606,7 @@ var ajax_search = {
                       result_obj = new Object({ 'name': data, 'relevance': 0 });
                       var found = 0;
                       pattern.each(function(sub_pattern) {
-                          var index = data.indexOf(sub_pattern);
+                          var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
                           if(index != -1) {
                               found++;
                               if(index == 0) { // perfect match, starts with pattern
@@ -1669,7 +1669,7 @@ var ajax_search = {
                 if(cur_count <= results_per_type) {
                     var name = data.display;
                     pattern.each(function(sub_pattern) {
-                        name = name.replace(sub_pattern, "<b>" + sub_pattern + "<\/b>");
+                        name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
                     });
                     var classname = "item";
                     if(selected != -1 && selected == x) {
