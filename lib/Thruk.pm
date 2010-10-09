@@ -50,8 +50,8 @@ our $VERSION = '0.72';
 my $project_root = __PACKAGE__->config->{home};
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
-              'released'               => 'September 08, 2010',
-              'encoding'               => 'UTF-8',
+              'released'               => 'October 09, 2010',
+              'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
               'project_root'           => $project_root,
               'min_livestatus_version' => '1.1.3',

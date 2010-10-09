@@ -25,7 +25,7 @@ function changeMenuState(menuID)
 		document.getElementById(menuDiv).title = "Expand";
 
 		if (document.images)
-			document.getElementById(menuImg).src = "/thruk/themes/Nuvola/side/expand.gif";
+			document.getElementById(menuImg).src = url_prefix + "thruk/themes/Nuvola/side/expand.gif";
 
 	}
 	else
@@ -35,7 +35,7 @@ function changeMenuState(menuID)
 		document.getElementById(menuDiv).title = "Collapse";
 
 		if (document.images)
-			document.getElementById(menuImg).src = "/thruk/themes/Nuvola/side/collapse.gif";
+			document.getElementById(menuImg).src = url_prefix + "thruk/themes/Nuvola/side/collapse.gif";
 	}
 }
 
@@ -74,20 +74,20 @@ function dTree(objName) {
 		showRoot				: false
 	}
 	this.icon = {
-		root				: '/thruk/themes/Nuvola/side/icons/home.gif',
-		folder				: '/thruk/themes/Nuvola/side/empty.gif',
-		folderOpen			: '/thruk/themes/Nuvola/side/empty.gif',
-		node				: '/thruk/themes/Nuvola/side/empty.gif',
-		empty				: '/thruk/themes/Nuvola/side/empty.gif',
-		line				: '/thruk/themes/Nuvola/side/empty.gif',
-		join				: '/thruk/themes/Nuvola/side/empty.gif',
-		joinBottom			: '/thruk/themes/Nuvola/side/empty.gif',
-		plus				: '/thruk/themes/Nuvola/side/empty.gif',
-		plusBottom			: '/thruk/themes/Nuvola/side/empty.gif',
-		minus				: '/thruk/themes/Nuvola/side/minus.gif',
-		minusBottom			: '/thruk/themes/Nuvola/side/empty.gif',
-		nlPlus				: '/thruk/themes/Nuvola/side/plus.gif',
-		nlMinus				: '/thruk/themes/Nuvola/side/minus.gif'
+		root				: url_prefix + 'thruk/themes/Nuvola/side/icons/home.gif',
+		folder				: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		folderOpen			: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		node				: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		empty				: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		line				: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		join				: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		joinBottom			: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		plus				: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		plusBottom			: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		minus				: url_prefix + 'thruk/themes/Nuvola/side/minus.gif',
+		minusBottom			: url_prefix + 'thruk/themes/Nuvola/side/empty.gif',
+		nlPlus				: url_prefix + 'thruk/themes/Nuvola/side/plus.gif',
+		nlMinus				: url_prefix + 'thruk/themes/Nuvola/side/minus.gif'
 	};
 	this.obj = objName;
 	this.aNodes = [];
@@ -131,7 +131,7 @@ dTree.prototype.header = function(title,icon,height,bgImage,bgColor,open) {
 	header += '<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">';
 	header += '<tbody>';
 	header += '<tr>';
-	header += '<td colspan="2"><img src="/thruk/themes/Nuvola/side/blank.gif" height="9" width="0"></td>';
+	header += '<td colspan="2"><img src="'+url_prefix+'thruk/themes/Nuvola/side/blank.gif" height="9" width="0"></td>';
 	header += '</tr>';
 	header += '<tr>';
 	header += '<td class="header" style="background-repeat: repeat-y;" background="' + bgImage + '" bgcolor="' + bgColor + '" height="100%" nowrap="nowrap" width="100%">';
@@ -140,9 +140,9 @@ dTree.prototype.header = function(title,icon,height,bgImage,bgColor,open) {
 	header += '<td><img id="menu_img_' + this.obj + '" src="';
 
 	if ( open )
-		header += '/thruk/themes/Nuvola/side/collapse.gif';
+		header += url_prefix + 'thruk/themes/Nuvola/side/collapse.gif';
 	else
-		header += '/thruk/themes/Nuvola/side/expand.gif';
+		header += url_prefix + 'thruk/themes/Nuvola/side/expand.gif';
 
 	header += '"></td>';
 	header += '</tr>';

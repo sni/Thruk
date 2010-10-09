@@ -67,11 +67,11 @@
     </tr>
     <tr id="row_start">
       <td class="statusOdd">Start:</td>
-      <td class="statusOdd"><a href="javascript:show_cal('start_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20"></td>
+      <td class="statusOdd"><a href="javascript:show_cal('start_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20"></td>
     </tr>
     <tr id="row_end">
       <td class="statusOdd">End:</td>
-      <td class="statusOdd"><a href="javascript:show_cal('end_time')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20"></td>
+      <td class="statusOdd"><a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a> <input type="text" value="[% date.format(date.now+7200, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20"></td>
     </tr>
     <tr id="row_reschedule_options">
       <td class="statusOdd">Options:</td>

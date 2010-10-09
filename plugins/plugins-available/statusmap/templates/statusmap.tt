@@ -1,7 +1,7 @@
 ﻿[% statusmap_header = BLOCK %]
-  <link type="text/css" href="/thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
-  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/jit-yc.js"></script>
-  <script language="javascript" type="text/javascript" src="/thruk/plugins/statusmap/statusmap.js"></script>
+  <link type="text/css" href="[% url_prefix %]thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/statusmap/jit-yc.js"></script>
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/statusmap/statusmap.js"></script>
 [% END %]
 [% PROCESS _header.tt extra_header => statusmap_header %]
 
@@ -59,7 +59,7 @@
         </tr>
       </table>
       [% IF show_context_help %]
-      <br><a href='/thruk/docs/statusmap' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+      <br><a href='[% url_prefix %]thruk/docs/statusmap' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
       [% END %]
     </td>
   </tr>

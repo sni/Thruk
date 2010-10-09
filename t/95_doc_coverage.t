@@ -13,7 +13,7 @@ my $conf = get_thruk_conf();
 my $docs = get_docs();
 for my $key (keys %{$conf}) {
     next if $key eq 'Component';
-    is($docs->{$key}, 1, $key);
+    is($docs->{$key}, 1, "documentation entry for: $key");
 }
 for my $key (keys %{$conf->{'Component'}}) {
     is($docs->{"Component $key"}, 1, "documentation entry for: $key");

@@ -4,15 +4,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Thruk</title>
-    <link href="/thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
-    <link href="/thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
-    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <script type="text/javascript" src="/thruk/javascript/prototype-1.6.1.js"></script>
-    <script type="text/javascript" src="/thruk/javascript/thruk.js"></script>
+    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.6.1.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
   </head>
   <body class='navbar'>
 [% END %]
-    <a href="http://www.thruk.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="139" height="43" class="nav_small_logo" /></a>
+    <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="139" height="43" class="nav_small_logo" /></a>
 
     [% FOREACH section = navigation %]
     <div class="navsection">
@@ -37,7 +37,7 @@
           [%+ ELSIF link.search %]
           <li>
           <div class="navbarsearch">
-            <form method="get" action="/thruk/cgi-bin/status.cgi" target="[% link.target %]">
+            <form method="get" action="[% url_prefix %]thruk/cgi-bin/status.cgi" target="[% link.target %]">
               <fieldset>
                 <legend>[% link.name %]</legend>
                 [% IF use_new_search%]
@@ -60,8 +60,8 @@
     </div>
     [% END %]
 
-    <img src="/thruk/themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
-    <img src="/thruk/themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
+    <img src="[% url_prefix %]thruk/themes/[% theme %]/images/greendot.gif" class="hidepics" alt="" width="0" height="0" />
+    <img src="[% url_prefix %]thruk/themes/[% theme %]/images/orangedot.gif" class="hidepics" alt="" width="0" height="0" />
 
 [% PROCESS _ajax_search.tt %]
 

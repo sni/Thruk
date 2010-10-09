@@ -100,9 +100,9 @@ add a new link to last section
 sub add_link {
     my %link = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
-    $link{'target'} = get_target() unless defined $link{'target'};
     $link{'links'}  = [] unless defined $link{'links'};
-    $link{'href'}   = "" unless defined $link{'href'};
+    $link{'target'} = _get_menu_target() unless defined $link{'target'};
+    $link{'href'}   = _get_menu_link($link{'href'});
     push(@{$last_section->{'links'}}, \%link);
     return;
 }
@@ -121,9 +121,9 @@ sub add_sub_link {
     my %link = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link    = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
-    $link{'target'} = get_target() unless defined $link{'target'};
+    $link{'target'} = _get_menu_target() unless defined $link{'target'};
     $link{'links'}  = [] unless defined $link{'links'};
-    $link{'href'}   = "" unless defined $link{'href'};
+    $link{'href'}   = _get_menu_link($link{'href'});
     $link{'name'}   = "" unless defined $link{'name'};
     push(@{$last_link->{'links'}}, \%link);
     return;
@@ -144,8 +144,8 @@ sub add_sub_sub_link {
     my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link     = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
     my $last_sub_link = $last_link->{'links'}->[scalar @{$last_link->{'links'}} - 1];
-    $link{'target'}   = get_target() unless defined $link{'target'};
-    $link{'href'}     = "" unless defined $link{'href'};
+    $link{'target'}   = _get_menu_target() unless defined $link{'target'};
+    $link{'href'}     = _get_menu_link($link{'href'});
     $link{'name'}     = "" unless defined $link{'name'};
     push(@{$last_sub_link->{'links'}}, \%link);
     return;
@@ -165,8 +165,8 @@ sub add_search {
     my %search = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $search{'search'} = 1;
-    $search{'target'} = get_target() unless defined $search{'target'};
-    $search{'href'}   = "" unless defined $search{'href'};
+    $search{'target'} = _get_menu_target() unless defined $search{'target'};
+    $search{'href'}   = _get_menu_link($search{'href'});
     push(@{$last_section->{'links'}}, \%search);
     return;
 }
@@ -174,14 +174,14 @@ sub add_search {
 
 ##############################################
 
-=head2 get_target
+=head2 _get_menu_target
 
-  get_target()
+  _get_menu_target()
 
 returns the current prefered target
 
 =cut
-sub get_target {
+sub _get_menu_target {
     my $c = $Thruk::Utils::Menu::c;
 
     return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'};
@@ -191,6 +191,23 @@ sub get_target {
     return("_self");
 }
 
+
+##############################################
+
+=head2 _get_menu_link
+
+  _get_menu_link()
+
+returns the link with prefix
+
+=cut
+sub _get_menu_link {
+    my $link = shift;
+    my $c = $Thruk::Utils::Menu::c;
+    return "" unless defined $link;
+    return $c->stash->{'url_prefix'}.substr($link,1) if $link =~ m/\/thruk\//mx;
+    return $link;
+}
 
 1;
 

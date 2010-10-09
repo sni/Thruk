@@ -435,6 +435,17 @@ The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.
 
 
+==== url_prefix
+
+Changes the usual url path for Thruk. Don't change it unless you plan
+to run multiple Thruk instances on the same webserver. You will have
+to change your fastcgi configuration too.
+
+ex.:
+
+  url_prefix = /
+
+
 ==== use_strict_host_authorization
 
 When set to a true value, every contact will only see the hosts where

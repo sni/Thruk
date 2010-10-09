@@ -16,19 +16,26 @@ done_testing();
 
 sub check_templates {
     my $dir = shift;
+    my(@files, @folders);
     opendir(my $dh, $dir) || die $!;
     while(my $file = readdir $dh) {
         next if $file eq '.';
         next if $file eq '..';
-
         if($file =~ m/\.tt/mx) {
-            check_file($dir.$file);
+            push @files, $dir.$file;
         }
         elsif(-d $dir.$file) {
-            check_templates($dir.$file.'/');
+            push @folders, $dir.$file.'/';
         }
     }
     closedir $dh;
+
+    for my $folder (sort @folders) {
+        check_templates($folder);
+    }
+    for my $file (sort @files) {
+        check_file($file);
+    }
     return;
 }
 

@@ -2,13 +2,13 @@
 <html>
   <head>
     <title>Mobile Thruk</title>
-    <link rel='stylesheet' type='text/css' href='/thruk/themes/Classic/stylesheets/Classic.css' />
-    <style type="text/css" media="screen">@import "/thruk/plugins/mobile/jqtouch/jqtouch.min.css";</style>
-    <style type="text/css" media="screen">@import "/thruk/plugins/mobile/jqtouch/theme.min.css";</style>
-    <script src="/thruk/javascript/dojo-release-1.5.0/dojo/dojo.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/thruk/javascript/dojo-release-1.5.0/dojox/date/posix.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/thruk/plugins/mobile/jqtouch/jquery.1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/thruk/plugins/mobile/jqtouch/jqtouch.min.js" type="application/x-javascript" charset="utf-8"></script>
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/Classic/stylesheets/Classic.css' />
+    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.min.css";</style>
+    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/theme.min.css";</style>
+    <script src="[% url_prefix %]thruk/javascript/dojo-release-1.5.0/dojo/dojo.js" type="text/javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]thruk/javascript/dojo-release-1.5.0/dojox/date/posix.js" type="text/javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jquery.1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.min.js" type="application/x-javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
       function get_host_class_for_state(state) {
         if(state == 0) { return("hostUP"); }
@@ -37,20 +37,20 @@
       }
       
       var jQT = new $.jQTouch({
-            icon: '/thruk/plugins/mobile/jqtouch/img/thruk.png',
+            icon: '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/thruk.png',
             addGlossToIcon: false,
-            startupScreen: '/thruk/plugins/mobile/jqtouch/img/startup.png',
+            startupScreen: '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/startup.png',
             statusBar: 'black',
             initializeTouch: 'a, .touch',
             preloadImages: [
-                '/thruk/plugins/mobile/jqtouch/img/whiteButton.png',
-                '/thruk/plugins/mobile/jqtouch/img/toolButton.png',
-                '/thruk/plugins/mobile/jqtouch/img/loading.gif',
-                '/thruk/plugins/mobile/jqtouch/img/02-redo.png',
-                '/thruk/plugins/mobile/jqtouch/img/thruk.png',
-                '/thruk/plugins/mobile/jqtouch/img/startup.png',
-                '/thruk/plugins/mobile/jqtouch/img/06-search.png',
-                '/thruk/themes/Classic/images/logo_thruk_small.png'
+                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/whiteButton.png',
+                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/toolButton.png',
+                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif',
+                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/02-redo.png',
+                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/thruk.png',
+                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/startup.png',
+                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/06-search.png',
+                '[% url_prefix %]thruk/themes/Classic/images/logo_thruk_small.png'
               ]
       });
 
@@ -63,7 +63,7 @@
         $('#last_notification').bind('pageAnimationEnd', function(event, info){
           if(info.direction == 'in') {
             //alert("in");
-            $.get('/thruk/cgi-bin/mobile.cgi',
+            $.get('[% url_prefix %]thruk/cgi-bin/mobile.cgi',
                   {
                     data: 'host_notifications',
                     limit:10
@@ -88,7 +88,7 @@
           } else {
             // empty list
             $('#notification_list').children().remove();
-            $('#notification_list').append('<li><img src="/thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>');
+            $('#notification_list').append('<li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>');
           }
         });
       });
@@ -130,7 +130,7 @@
 <!-- Home -->
     <div id="home" class="current">
       <div class="toolbar">
-        <a href="#reload" onClick="window.location.reload(true);" class="button slideup cancel"><img src="/thruk/plugins/mobile/jqtouch/img/02-redo.png" alt="reload"></a>
+        <a href="#reload" onClick="window.location.reload(true);" class="button slideup cancel"><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/02-redo.png" alt="reload"></a>
         <h1>Mobile Thruk</h1>
         <a class="button slideup" href="#about">About</a>
       </div>
@@ -161,7 +161,7 @@
         <ul class="rounded">
           <li class="" style="position:relative">
             <input type="text" placeholder="search" name="search" id="search" autocapitalize="off" autocorrect="off" autocomplete="off" />
-            <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="/thruk/plugins/mobile/jqtouch/img/06-search.png" alt="search"></a>
+            <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/06-search.png" alt="search"></a>
           </li>
         </ul>
         
@@ -174,7 +174,7 @@
 
         <h2>Links</h2>
         <ul class="rounded">
-          <li class=""><a href="/thruk/index.html" onclick="window.location.assign(this.href)">Access as Full Client</a></li>
+          <li class=""><a href="[% url_prefix %]thruk/index.html" onclick="window.location.assign(this.href)">Access as Full Client</a></li>
         </ul>
         <div class="info">
         <p>Add this page to your home screen to view the custom icon, startup screen, and full screen mode.</p>
@@ -184,7 +184,7 @@
 
 <!-- About -->
     <div id="about" class="selectable">
-      <p><img src="/thruk/themes/Classic/images/logo_thruk_small.png" /></p>
+      <p><img src="[% url_prefix %]thruk/themes/Classic/images/logo_thruk_small.png" /></p>
       <p>
         <strong>Thruk Monitoring Webinterface</strong><br />
         Version [% version %]<br />
@@ -216,7 +216,7 @@
         <h1>Notifications</h1>
       </div>
       <ul class="rounded notifications" id='notification_list'>
-        <li><img src="/thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
+        <li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
       </ul>
     </div>
   </body>

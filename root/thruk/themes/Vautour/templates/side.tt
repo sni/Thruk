@@ -5,11 +5,11 @@
   <head>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>Thruk</title>
-    <link href="/thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
-    <link href="/thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
-    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <script type="text/javascript" src="/thruk/javascript/prototype-1.6.1.js"></script>
-    <script type="text/javascript" src="/thruk/javascript/thruk.js"></script>
+    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.6.1.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
     [% PROCESS extra_headers.tt %]
   </head>
   <body class='navbar'>
@@ -33,7 +33,7 @@
         [%+ ELSIF link.search %]
           <li>
           <div id="search_box">
-            <form action="/thruk/cgi-bin/status.cgi" method="get" target="[% link.target %]">
+            <form action="[% url_prefix %]thruk/cgi-bin/status.cgi" method="get" target="[% link.target %]">
             [% IF use_new_search%]
             <input type='hidden' name='hidesearch' value='2' />
             <input type='hidden' name='s0_op' value='~' />
@@ -43,7 +43,7 @@
             <input id="search" name="host" type="text" />
             <input type="hidden" name="navbarsearch" id="NavBarSearchItem" value="1" />
             [% END %]
-            <input src="/thruk/themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
+            <input src="[% url_prefix %]thruk/themes/[% theme %]/images/interface/search.gif" alt="OK" title="Search" id="search_submit" type="image" />
             </form>
           </div>
           </li>

@@ -1363,7 +1363,7 @@ sub _single_search {
     foreach my $filter ( @{ $search->{'text_filter'} } ) {
 
         # resolve search prefix
-        if($filter->{'type'} eq 'search' and $filter->{'value'} =~ m/^(ho|hg|se|sg):/) {
+        if($filter->{'type'} eq 'search' and $filter->{'value'} =~ m/^(ho|hg|se|sg):/mx) {
             if($1 eq 'ho') { $filter->{'type'} = 'host';         }
             if($1 eq 'hg') { $filter->{'type'} = 'hostgroup';    }
             if($1 eq 'se') { $filter->{'type'} = 'service';      }

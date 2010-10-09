@@ -1,6 +1,6 @@
 ﻿[% PROCESS _header.tt %]
     <div id="mainbrandsplash">
-      <div id="mainlogo"><a href="http://www.thruk.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
+      <div id="mainlogo"><a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     </div>
     <div id="currentversioninfo">
       <div class="product">Thruk Monitoring Webinterface</div>
@@ -10,7 +10,7 @@
         <a href="http://www.thruk.org" target="_blank">Check for updates</a>
       </div>
       <div class="whatsnew">
-        <a href="/thruk/changes.html">Read what's new in Thruk</a>
+        <a href="[% url_prefix %]thruk/changes.html">Read what's new in Thruk</a>
       </div>
     </div>
     <div id="updateversioninfo"></div>
@@ -25,9 +25,9 @@
         Nagios, Nagios Core and the Nagios logo are trademarks, servicemarks, registered trademarks or registered servicemarks owned by Nagios Enterprises, LLC. Usage of the Nagios marks are governed by their <a href="http://www.nagios.org/legal/trademarkpolicy/">trademark policy</a>.
       </div>
       <div class="logos">
-        <a href="http://www.thruk.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/logo_thruk_mid.png" width="139" height="50" border="0" style="padding: 0 20px 0 0;" title="Thruk" alt="Thruk"></a>
-        <a href="http://catalystframework.org" target="_blank"><img src="/thruk/themes/[% theme %]/images/catalyst_170pix.png" width="170" height="58" border="0" style="padding: 0 40px 0 40px;" title="Catalystframework.org" alt="Catalystframework.org"></a>
-        <a href="http://github.com/sni/Thruk" target="_blank"><img src="/thruk/themes/[% theme %]/images/github.png" width="100" height="45" border="0" alt="Github.com Logo"></a>
+        <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk_mid.png" width="139" height="50" border="0" style="padding: 0 20px 0 0;" title="Thruk" alt="Thruk"></a>
+        <a href="http://catalystframework.org" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/catalyst_170pix.png" width="170" height="58" border="0" style="padding: 0 40px 0 40px;" title="Catalystframework.org" alt="Catalystframework.org"></a>
+        <a href="http://github.com/sni/Thruk" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/github.png" width="100" height="45" border="0" alt="Github.com Logo"></a>
       </div>
     </div>
 

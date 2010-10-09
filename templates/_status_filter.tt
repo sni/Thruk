@@ -1,6 +1,6 @@
 ﻿[% SET show_filter_table = 0 IF hidesearch == "1" %]
 [% SET show_filter_table = 1 IF hidesearch == "2" %]
-<input type="image" src="/thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
+<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
 <form action="[% c.request.uri %]" method="GET" id="filterForm">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% nav %]">
@@ -19,7 +19,7 @@
           <td valign="top" align="left" class='filterTitle' nowrap>
            [% IF loop.first %]
            <div id="[% prefix %]_filter_title">
-            <a href="#" onClick="toggleFilterPane(); return false;"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% prefix %]_filter_button_mini" alt="filter"></a>
+            <a href="#" onClick="toggleFilterPane(); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% prefix %]_filter_button_mini" alt="filter"></a>
             Display Filters:
            </div>
            [% END %]
@@ -29,11 +29,11 @@
             <input type="hidden" name="[% prefix %]_serviceprops" value="[% search.serviceprops %]">
           </td>
           <td colspan=2 align="right">
-            <input type="image" src="/thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% prefix %]_btn_accept_search">
-            <input type="image" src="/thruk/themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
+            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% prefix %]_btn_accept_search">
+            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
           </td>
           <td rowspan=99 align="right" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('filter_pane', 'all_filter_table', this.id)" id="[% prefix %]_new_filter">
-            <img src="/thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
           </td>
         </tr>
 <!-- HOST STATUS TYPES -->
@@ -48,7 +48,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle' nowrap>Host Status Types:</td>
-                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_ht2n" onclick="toggleFilterCheckBox(this.id)">Up</td>
@@ -85,7 +85,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle' nowrap>Host Properties:</td>
-                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
@@ -167,7 +167,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle' nowrap>Service Status Types:</td>
-                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">Ok</td>
@@ -208,7 +208,7 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle'>Service Properties:</td>
-                      <td align="right"><input type="image" src="/thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;"></td>
                     </tr>
                     <tr>
                       <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
@@ -304,8 +304,8 @@
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>
           </td>
-          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% prefix %]_value" id="[% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
-          <td align="right" class='filterValueNoHighlight'><input type="image" src="/thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
+          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% prefix %]_value" id="[% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+          <td align="right" class='filterValueNoHighlight'><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
             <script type="text/javascript">
             <!--
               verify_op("[% prefix %]_[% loop.index %]_ts");
@@ -317,7 +317,7 @@
 <!-- NEW FILTER -->
         <tr>
           <td colspan=3 class='newfilter' align="center" id="[% prefix %]_add_new_filter_button" onClick="add_new_filter(this.id, 'filterTable')">
-            <img src="/thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
           </td>
         </tr>
       </table>

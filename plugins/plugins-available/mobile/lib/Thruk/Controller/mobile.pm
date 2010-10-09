@@ -28,7 +28,7 @@ Thruk->config->{'use_feature_mobile'} = 1;
 page: /thruk/cgi-bin/mobile.cgi
 
 =cut
-sub mobile_cgi : Path('/thruk/cgi-bin/mobile.cgi') {
+sub mobile_cgi : Regex('thruk\/cgi\-bin\/mobile\.cgi') {
     my ( $self, $c ) = @_;
     return $c->detach('/mobile/index');
 }

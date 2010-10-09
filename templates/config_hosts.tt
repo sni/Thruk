@@ -97,7 +97,7 @@
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
-    <td class='[% class %]' valign="middle">[% IF d.icon_image %]<img src="/thruk/themes/[% theme %]/images/logos/[% d.icon_image %]" border="0" height="20" width="20" alt="host icon"> [% d.icon_image %][% END %]</td>
+    <td class='[% class %]' valign="middle">[% IF d.icon_image %]<img src="[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% d.icon_image %]" border="0" height="20" width="20" alt="host icon"> [% d.icon_image %][% END %]</td>
     <td class='[% class %]'>[% d.icon_image_alt %]</td>
     <td class='[% class %]'>TODO</td>
   </tr>

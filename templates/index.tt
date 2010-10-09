@@ -4,10 +4,10 @@
   <head>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>Thruk</title>
-    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
   </head>
   <frameset cols="180,*">
-    <frame src="/thruk/side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" />
+    <frame src="[% url_prefix %]thruk/side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" />
     <frame src="[% IF main %][% main %][% ELSE %][% start_page %][% END %]" name="main" frameborder="0" id="main" />
     <noframes>
       <!-- This page requires a web browser which supports frames. -->

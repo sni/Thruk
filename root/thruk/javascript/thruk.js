@@ -1178,7 +1178,7 @@ function add_new_filter(search_prefix, table) {
   newCell1.appendChild(newInput);
 
   var calImg = document.createElement('img');
-  calImg.src = "/thruk/themes/"+theme+"/images/calendar.png";
+  calImg.src = url_prefix + "thruk/themes/"+theme+"/images/calendar.png";
   calImg.className = "cal_icon";
   calImg.alt = "choose date";
   var link   = document.createElement('a');
@@ -1192,7 +1192,7 @@ function add_new_filter(search_prefix, table) {
   // add third cell
   var img            = document.createElement('input');
   img.type           = 'image';
-  img.src            = "/thruk/themes/"+theme+"/images/minus.gif";
+  img.src            = url_prefix + "thruk/themes/"+theme+"/images/minus.gif";
   img.className      = 'filter_button';
   img.onclick        = delete_filter_row;
   var newCell2       = newRow.insertCell(2);
@@ -1456,7 +1456,7 @@ Y8a     a8P 88           d8'        `8b  88     `8b   Y8a.    .a8P 88        88
  "Y88888P"  88888888888 d8'          `8b 88      `8b   `"Y8888Y"'  88        88
 *******************************************************************************/
 var ajax_search = {
-    url             : '/thruk/cgi-bin/status.cgi?format=search',
+    url             : url_prefix + 'thruk/cgi-bin/status.cgi?format=search',
     max_results     : 12,
     input_field     : 'NavBarSearchItem',
     result_pan      : 'search-results',

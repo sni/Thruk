@@ -3,20 +3,20 @@
 <html>
   <head>
     <title>[% title %]</title>
-    <link rel="shortcut icon" href="/thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/common.css' />
+    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
 
     [% SET page = 'status' IF page == '' %]
-    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% page %].css' />
-    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk.css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% page %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css' />
 
     [% UNLESS use_frames %]
-      <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk_noframes.css' />
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes.css' />
       <!--[if IE 5]>
-      <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
       <![endif]-->
       <!--[if IE 6]>
-      <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
       <![endif]-->
     [% END %]
     [% IF show_nav_button && use_frames %]
@@ -27,11 +27,11 @@
     </style>
     [% END %]
 
-    <link rel='stylesheet' type='text/css' href='/thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
-    <script type="text/javascript" src="/thruk/javascript/prototype-1.6.1.js"></script>
-    <script type="text/javascript" src="/thruk/javascript/thruk.js"></script>
-    <script type="text/javascript" src="/thruk/javascript/cal/jscal2.js"></script>
-    <link rel='stylesheet' type='text/css' href='/thruk/javascript/cal/jscal2.css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.6.1.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/cal/jscal2.js"></script>
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
     [% IF js %]<script type="text/javascript" src="[% js %]"></script>[% END %]
 
     <script type="text/javascript">
@@ -49,6 +49,7 @@
     var current_backend_states = initial_backend_states.clone();
     var theme                  = '[% theme %]';
     var ajax_search_enabled    = '[% ajax_search %]';
+    var url_prefix             = '[% url_prefix %]';
 
     [% IF refresh_rate %]    var refresh_rate = [% refresh_rate %];[% END %]
 
@@ -63,7 +64,7 @@
   <div style="display:none;" id="search-results"></div>
 
   <div class="pref_pane" id="pref_pane" style="display:none; visibility:hidden;">
-    <a href="javascript:togglePreferencePane()"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
+    <a href="javascript:togglePreferencePane()"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
     <form action="[% c.request.uri %]" method="GET">
     <table class="pref_pane" border=1 width="450">
       <tr>
@@ -151,5 +152,5 @@
   </tr>
 </table>
 [% IF page == 'status' || page == 'statusmap' %]
-<a href="#" onClick="toggleTopPane(); return false;"><img src="/thruk/themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
+<a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
 [% END %]

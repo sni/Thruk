@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.72    ...
+          - added flexible url prefix
           - added filter for latency and execution time
           - added utf8 support for navigation
           - added prefixes for search terms ho: hg: se: and sg:

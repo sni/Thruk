@@ -32,14 +32,14 @@
             <tr>
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 Previous Day<br>
-                <img style="cursor: pointer;" src='/thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
+                <img style="cursor: pointer;" src='[% url_prefix %]thruk/themes/[% theme %]/images/left.gif' alt='Previous Day' title='Previous Day' onclick="document.getElementById('archive').value='-1'; document.getElementById('date_form').submit();">
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate' nowrap>
                 <div class='navBoxTitle'>Log File Navigation</div>
-                <input type="text" value="[% date.format(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:show_cal('start')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% date.format(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:show_cal('start')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>to<br>
-                <input type="text" value="[% date.format(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:show_cal('end')"><img src="/thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% date.format(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:show_cal('end')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>
               </td>
               <td valign="middle">
@@ -48,7 +48,7 @@
               </td>
               <td align="center" valign="middle" class='navBoxItem' width="75">
                 Next Day<br>
-                <img style="cursor: pointer;" src='/thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
+                <img style="cursor: pointer;" src='[% url_prefix %]thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
               </td>
             </tr>
           </table>
@@ -105,7 +105,7 @@
             </tr>
           </table>
           [% IF show_context_help %]
-          <br><a href='/thruk/docs/notifications' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          <br><a href='[% url_prefix %]thruk/docs/notifications' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>

@@ -22,7 +22,7 @@
         </td>
         <td align="right" valign="bottom" width="33%">
           [% IF show_context_help %]
-          <br><a href='/thruk/docs/extinfo_5' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='/thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          <br><a href='[% url_prefix %]thruk/docs/extinfo_5' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>
@@ -38,35 +38,35 @@
             <div class='dataTitle'>Hostgroup Commands</div>
             <table border="0" cellspacing="0" cellpadding="0" class='command'>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Hostgroup' title='Schedule Downtime For All Hosts In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Hostgroup' title='Schedule Downtime For All Hosts In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=84&amp;hostgroup=[% hostgroup | uri %]'>Schedule downtime for all hosts in this hostgroup</a></td>
               </tr>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Hostgroup' title='Schedule Downtime For All Services In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Hostgroup' title='Schedule Downtime For All Services In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=85&amp;hostgroup=[% hostgroup | uri %]'>Schedule downtime for all services in this hostgroup</a></td>
               </tr>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Hostgroup' title='Enable Notifications For All Hosts In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Hostgroup' title='Enable Notifications For All Hosts In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=65&amp;hostgroup=[% hostgroup | uri %]'>Enable notifications for all hosts in this hostgroup</a></td>
               </tr>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Hostgroup' title='Disable Notifications For All Hosts In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Hostgroup' title='Disable Notifications For All Hosts In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=66&amp;hostgroup=[% hostgroup | uri %]'>Disable notifications for all hosts in this hostgroup</a> </td>
               </tr>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Hostgroup' title='Enable Notifications For All Services In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Hostgroup' title='Enable Notifications For All Services In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=63&amp;hostgroup=[% hostgroup | uri %]'>Enable notifications for all services in this hostgroup</a></td>
               </tr>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Hostgroup' title='Disable Notifications For All Services In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Hostgroup' title='Disable Notifications For All Services In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=64&amp;hostgroup=[% hostgroup | uri %]'>Disable notifications for all services in this hostgroup</a></td>
               </tr>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Hostgroup' title='Enable Active Checks Of All Services In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Hostgroup' title='Enable Active Checks Of All Services In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=67&amp;hostgroup=[% hostgroup | uri %]'>Enable active checks of all services in this hostgroup</a></td>
               </tr>
               <tr class='command'>
-                <td><img src='/thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Hostgroup' title='Disable Active Checks Of All Services In This Hostgroup' width="20" height="20"></td>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Hostgroup' title='Disable Active Checks Of All Services In This Hostgroup' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=68&amp;hostgroup=[% hostgroup | uri %]'>Disable active checks of all services in this hostgroup</a></td>
               </tr>
             </table>
