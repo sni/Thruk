@@ -314,6 +314,8 @@ page: /thruk/side.html
 sub thruk_side_html : Regex('thruk\/side\.html$') {
     my( $self, $c ) = @_;
 
+    # reset navigatio cache
+    $c->cache->set('menu_conf_stat', undef);
     Thruk::Utils::Menu::read_navigation($c);
 
     $c->stash->{'use_frames'} = 1;
