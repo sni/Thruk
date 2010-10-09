@@ -122,7 +122,7 @@ sub test_page {
 
     # memory usage
 #    open(my $fh, '>>', '/tmp/memory_stats.txt') or die('cannot write: '.$!);
-    open(my $ph, '-|', "ps -p $$ -o rss");
+    open(my $ph, '-|', "ps -p $$ -o rss") or die("ps failed: $!");
     while(my $line = <$ph>) {
         if($line =~ m/(\d+)/) {
             my $rsize = sprintf("%.2f", $1/1024);
