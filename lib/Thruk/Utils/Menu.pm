@@ -205,7 +205,7 @@ sub _get_menu_link {
     my $link = shift;
     my $c = $Thruk::Utils::Menu::c;
     return "" unless defined $link;
-    return $c->stash->{'url_prefix'}.substr($link,1) if $link =~ m/\/thruk\//mx;
+    return $c->stash->{'url_prefix'}.substr($link,1) if $link =~ m/^\/thruk\//mx;
     return $link;
 }
 

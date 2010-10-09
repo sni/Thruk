@@ -521,6 +521,15 @@ ex.:
   log4perl_conf = ./log4perl.conf
 
 
+==== ssi_path
+
+The path to your ssi (server side includes) files.
+
+ex.:
+
+  ssi_path = ssi/
+
+
 ==== delay_pages_after_backend_reload
 
 Delay the page delivery until the backends uptime is at least this
