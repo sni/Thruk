@@ -695,6 +695,7 @@ sub get_performance_stats {
             $type.'_passive_60_sum'  => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $min60 }]}},
             $type.'_passive_all_sum' => { -isa => { -and => [ 'check_type' => 1, 'has_been_checked' => 1, 'last_check' => { '>=' => $minall }]}},
         ];
+        $options{'filter'} = $options{$type.'_filter'};
         my $class = $self->_get_class($type, \%options);
         my $rows = $class->stats($stats)->hashref_array();
         $data = { %{$data}, %{$rows->[0]} };

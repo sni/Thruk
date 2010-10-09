@@ -25,7 +25,7 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{'stats'}         = $c->{'db'}->get_performance_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'status')]);
+    $c->stash->{'stats'}         = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'host_stats'}    = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     $c->stash->{'service_stats'} = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
     $c->stash->{'title'}         = 'Tactical Monitoring Overview';

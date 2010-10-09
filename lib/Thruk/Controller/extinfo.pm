@@ -273,8 +273,8 @@ sub _process_process_info_page {
 sub _process_perf_info_page {
     my( $self, $c ) = @_;
 
-    $c->stash->{'stats'} = $c->{'db'}->get_performance_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
-    $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    $c->stash->{'stats'}      = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+    $c->stash->{'perf_stats'} = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
 
     return 1;
 }
