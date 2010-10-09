@@ -188,9 +188,15 @@ for my $entry (readdir($dh)) {
 closedir $dh;
 __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
+
+###################################################
+# Start the application
+__PACKAGE__->setup();
+
+
 ###################################################
 # set installed themes
-my $ssi_dir = $project_root."/ssi/";
+my $ssi_dir = __PACKAGE__->config->{'ssi_path'} || $project_root."/ssi/";
 my %ssi;
 opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
 for my $entry (readdir($dh)) {
@@ -201,11 +207,6 @@ for my $entry (readdir($dh)) {
 closedir $dh;
 __PACKAGE__->config->{'ssi_includes'} = \%ssi;
 __PACKAGE__->config->{'ssi_path'}     = $ssi_dir;
-
-###################################################
-# Start the application
-__PACKAGE__->setup();
-
 
 ###################################################
 # load and parse cgi.cfg into $c->config

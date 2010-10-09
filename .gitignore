@@ -20,3 +20,4 @@ t/xt
 *.swp
 .author
 cgi_local.cfg
+ssi_local

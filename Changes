@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.72    ...
+          - added ssi_path config option
           - added flexible url prefix
           - added filter for latency and execution time
           - added utf8 support for navigation

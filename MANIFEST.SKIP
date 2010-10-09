@@ -21,3 +21,5 @@ script/thruk_extract_cmd_templates.pl
 t/xt
 root/thruk/plugins/*
 .author
+ssi_local
+cgi_local.cfg
