@@ -20,7 +20,9 @@ sub prepare_uploads {
         next if $key eq 'selected_hosts';
         next if $key eq 'selected_services';
         next if $key eq 'service';
+        next if $key eq 'pattern';
         next if $key =~ /^s\d+_op/mx;
+        next if $key =~ /^s\d+_value/mx;
         my $value = $c->request->{'parameters'}->{$key};
         if ( ref $value && ref $value ne 'ARRAY' ) {
             next;
