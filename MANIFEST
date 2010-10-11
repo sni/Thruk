@@ -1115,6 +1115,7 @@ templates/cmd/cmd_typ_94.tt
 templates/cmd/cmd_typ_95.tt
 templates/cmd/cmd_typ_96.tt
 templates/cmd/cmd_typ_99.tt
+templates/cmd/cmd_typ_c5.tt
 templates/cmd_line.tt
 templates/cmd_success.tt
 templates/config.tt
