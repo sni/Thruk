@@ -109,7 +109,27 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 
     # did we receive a quick command from the status page?
     my $quick_command = $c->{'request'}->{'parameters'}->{'quick_command'};
-    if( defined $quick_command and $quick_command ) {
+    my $quick_confirm = $c->{'request'}->{'parameters'}->{'confirm'};
+    if( defined $quick_confirm and $quick_confirm eq 'no' ) {
+        $c->{'request'}->{'parameters'}->{'cmd_typ'} = 'c'.$quick_command;
+        delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+        $c->stash->{'cmd_typ'} = 'c'.$quick_command;
+        $self->_check_for_commands($c);
+    }
+    elsif( defined $quick_command and $quick_command or $c->stash->{'cmd_typ'} =~ m/^c(\d+)$/mx ) {
+        if(defined $1) {
+            $quick_command = $1;
+            if(defined $c->{'request'}->{'parameters'}->{'service'} and $c->{'request'}->{'parameters'}->{'service'} ne '') {
+                $c->{'request'}->{'parameters'}->{'selected_services'} =
+                        $c->{'request'}->{'parameters'}->{'host'}
+                        .';'.$c->{'request'}->{'parameters'}->{'service'}
+                        .';'.$c->{'request'}->{'parameters'}->{'backend'};
+            } else {
+                $c->{'request'}->{'parameters'}->{'selected_hosts'}    =
+                        $c->{'request'}->{'parameters'}->{'host'}
+                        .';;'.$c->{'request'}->{'parameters'}->{'backend'};
+            }
+        }
         my $cmd_typ;
         $c->{'request'}->{'parameters'}->{'cmd_mod'}           = 1;
         $c->{'request'}->{'parameters'}->{'trigger'}           = 0;
@@ -246,14 +266,12 @@ sub _check_for_commands {
     }
     else {
 
-        # no command submited, view commands page
-        if( $cmd_typ == 55 or $cmd_typ == 56 ) {
+        # no command submited, view commands page (can be nonnumerical)
+        if( $cmd_typ eq "55" or $cmd_typ eq "56" ) {
             $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => undef ]);
             $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => { '!=' => undef } ]);
         }
 
-        #my @possible_backends = $c->{'db'}->peer_key();
-        #$c->stash->{'backends'} = \@possible_backends;
         $c->stash->{'backend'} = $c->{'request'}->{'parameters'}->{'backend'} || '';
 
         my $comment_author = $c->user->username;

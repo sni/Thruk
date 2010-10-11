@@ -8,6 +8,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added prefixes for search terms ho: hg: se: and sg:
           - added link to childs on host details page
           - added warning when trying to start a precompiled version on wrong arch
+          - added commit page when deleting all downtimes
           - fixed removing comments with unprivileged user
           - fixed sending multiple persistent acknowledgements
           - fixed action urls in host details

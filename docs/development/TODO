@@ -7,7 +7,6 @@ general
     - add backend name to logs
     - add go back button on error page
     - authorization docs
-    - configure url path in config (ex.: /thruk/ )
     - add extra grapher url
     - use title for quick downtimes popups
     - specify columns for excel export
@@ -52,11 +51,6 @@ Known Bugs:
     - FastCGI: server "/tmp/thruk_fastcgi.fcgi" stderr: Undefined subroutine
       &FCGI::ProcManager::MaxRequestsThruk::self_or_default called at
       /home/thruk/Thruk/script/../lib/FCGI/ProcManager/MaxRequestsThruk.pm
-
-    - Use of uninitialized value $spread in pattern match (m//) at
-      /mnt/c1/data/projects/git/Thruk/script/../lib/Thruk/Controller/cmd.pm
-      line 416.
-      occured when deleting all downtimes
 
 =========================================================
 ideas for after 1.0

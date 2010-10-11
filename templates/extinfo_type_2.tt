@@ -474,7 +474,7 @@
                 <td class='comment'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a></td>
                 [% IF downtimes %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;selected_services=[% service.host_name | uri %]%3B[% service.description | uri %]%3B[% service.peer_key %]&amp;referer=[% c.request.uri | uri %]' class='comment'>Delete all downtimes</a></td>
+                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% c.request.uri | uri %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]
               </tr>
             </table>
