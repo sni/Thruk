@@ -67,7 +67,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 }
             }
             for my $data (@{$hosts}) {
-                $data->{'servicegroups'} = join(',', keys %{$servicegroupsbyhost->{$data->{'name'}}});
+                $data->{'servicegroups'} = [ keys %{$servicegroupsbyhost->{$data->{'name'}}} ];
                 push @{$new_hosts}, $data;
             }
         }

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 103;
+use Test::More tests => 124;
 
 BEGIN {
     use lib('t');
@@ -30,6 +30,12 @@ my $pages = [
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=hostgroup&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=hostgroup&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=hostgroup&host='.$host,
+
+    '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=servicegroup&hidetop=',
+    '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=servicegroup&host='.$host,
+    '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=servicegroup&host='.$host,
+
+# bugs
 ];
 
 
