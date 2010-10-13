@@ -8,6 +8,12 @@
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.6.1.js"></script>
+    <script type="text/javascript">
+    <!--
+    var theme      = '[% theme %]';
+    var url_prefix = '[% url_prefix %]';
+    -->
+    </script>
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
   </head>
   <body class='navbar'>
