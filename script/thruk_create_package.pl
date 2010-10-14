@@ -120,7 +120,7 @@ sub replace_perl_version {
         open($fp, '<', $file) or die("cannot open $file: ".$!);
         while(<$fp>) { $content .= $_; }
         close($fp);
-        $content =~ s/###\s+use.*#\s+only\s+required\s+for\s+packages\s+###/use $perl_version;/mx;
+        $content =~ s/\#\#\#\s+use.*?\#\s+only\s+required\s+for\s+packages\s+\#\#\#/use $perl_version; # package is build with perl $perl_version/mx;
         open($fp, '>', $file) or die("cannot write $file: ".$!);
         print $fp $content;
         close($fp);
