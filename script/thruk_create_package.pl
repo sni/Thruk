@@ -85,10 +85,10 @@ if(defined $local_lib and $local_lib ne '') {
   print "creating Thruk-".$version."-".$arch.".tar\n";
   cmd("tar zxf $archive");
   cmd("rsync --modify-window=300 --exclude=man -a $local_lib/ Thruk-".$version."/local-lib");
-  cmd("tar cf Thruk-".$version."-".$arch.".tar Thruk-".$version);
-  cmd("gzip -9 Thruk-".$version."-".$arch.".tar");
+  cmd("tar cf Thruk-".$version."-".$arch."-".$Config{'version'}.".tar Thruk-".$version);
+  cmd("gzip -9 Thruk-".$version."-".$arch."-".$Config{'version'}.".tar");
   cmd("rm -rf Thruk-".$version);
-  print "created Thruk-".$version."-".$arch.".tar.gz\n";
+  print "created Thruk-".$version."-".$arch."-".$Config{'version'}.".tar.gz\n";
 }
 
 #########################################################################
