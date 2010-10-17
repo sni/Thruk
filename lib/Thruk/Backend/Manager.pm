@@ -617,6 +617,7 @@ sub _initialise_peer {
     $require =~ s/::/\//gmx;
     require $require . ".pm";
     $class->import;
+    $config->{'options'}->{'name'} = $config->{'name'} unless defined $config->{'options'}->{'name'};
     my $peer = {
         'name'    => $config->{'name'},
         'type'    => $config->{'type'},
