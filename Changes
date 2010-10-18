@@ -10,6 +10,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added warning when trying to start a precompiled version on wrong arch
           - added commit page when deleting all downtimes
           - added select all hosts link to service details
+          - added use_timezone configuration option
           - fixed removing comments with unprivileged user
           - fixed sending multiple persistent acknowledgements
           - fixed action urls in host details

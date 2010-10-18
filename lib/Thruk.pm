@@ -193,6 +193,13 @@ __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 # Start the application
 __PACKAGE__->setup();
 
+###################################################
+# set timezone
+my $timezone = __PACKAGE__->config->{'use_timezone'};
+if(defined $timezone) {
+    $ENV{'TZ'} = $timezone;
+}
+
 
 ###################################################
 # set installed themes

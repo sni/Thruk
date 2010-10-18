@@ -436,6 +436,16 @@ The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.
 
 
+==== use_timezone
+
+Changes the timezone from the systems default to this timezone.
+Only set this if you have trouble with displaying the right timestamps.
+
+ex.:
+
+  use_timezone = CET
+
+
 ==== url_prefix
 
 Changes the usual url path for Thruk. Don't change it unless you plan

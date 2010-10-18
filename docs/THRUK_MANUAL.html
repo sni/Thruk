@@ -2211,6 +2211,14 @@ instead.</p></div>
 <div class="paragraph"><p>The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
 The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.</p></div>
+<h4 id="_use_timezone">use_timezone</h4>
+<div class="paragraph"><p>Changes the timezone from the systems default to this timezone.
+Only set this if you have trouble with displaying the right timestamps.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_timezone = CET</tt></pre>
+</div></div>
 <h4 id="_url_prefix">url_prefix</h4>
 <div class="paragraph"><p>Changes the usual url path for Thruk. Don&#8217;t change it unless you plan
 to run multiple Thruk instances on the same webserver. You will have
@@ -2943,7 +2951,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-10-15 15:05:02 CEST
+Last updated 2010-10-18 12:43:38 CEST
 </div>
 </div>
 </body>
