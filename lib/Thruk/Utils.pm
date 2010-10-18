@@ -71,7 +71,8 @@ return date from timestamp in given format
 sub format_date {
     my $timestamp = shift;
     my $format    = shift;
-    return Template::Plugin::Date::format(undef, $timestamp, $format);
+    my $tpd = Template::Plugin::Date->new();
+    return $tpd->format($timestamp, $format);
 }
 
 
