@@ -165,7 +165,7 @@
           [% ELSE %]
             [% IF h.long_plugin_output %]
               [% IF escape_html_tags %]
-                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib('[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]',CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);"><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
+                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]'><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
               [% ELSE %]
                 <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);" abbr='[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
               [% END %]
