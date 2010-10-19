@@ -21,6 +21,11 @@ Authentication is done by the webserver, so authentication is only available
 with the fastcgi version.
 
 
+=== All dates and times are displayed with the wrong timezone
+
+Try to set the use_timezone configuration option in your
+thruk_local.conf
+
 
 
 == Usage

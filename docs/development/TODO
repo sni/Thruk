@@ -46,8 +46,6 @@ livestatus:
                 Service Escalations
 
 Known Bugs:
-    - Alerts - top 25 hard alert producer
-
     - FastCGI: server "/tmp/thruk_fastcgi.fcgi" stderr: Undefined subroutine
       &FCGI::ProcManager::MaxRequestsThruk::self_or_default called at
       /home/thruk/Thruk/script/../lib/FCGI/ProcManager/MaxRequestsThruk.pm

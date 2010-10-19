@@ -18,6 +18,7 @@ use Data::Dumper;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
 use Date::Manip;
 use File::Slurp;
+use Template::Plugin::Date;
 
 
 ##############################################
@@ -70,7 +71,8 @@ return date from timestamp in given format
 sub format_date {
     my $timestamp = shift;
     my $format    = shift;
-    return UnixDate("epoch $timestamp", $format);
+    my $tpd = Template::Plugin::Date->new();
+    return $tpd->format($timestamp, $format);
 }
 
 

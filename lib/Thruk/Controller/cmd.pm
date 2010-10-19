@@ -36,7 +36,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{'form_errors'}  = [];
 
     # fill in some defaults
-    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc servicegroup/) {
+    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc servicegroup backend/) {
         $c->request->parameters->{$param} = '' unless defined $c->request->parameters->{$param};
     }
     for my $param (qw/com_id down_id hour minutes start_time end_time plugin_state trigger not_dly/) {
@@ -388,6 +388,7 @@ sub _do_send_command {
                 end_time_unix    => $end_time_unix,
                 die_on_errors    => 1,
                 theme            => $c->stash->{'theme'},
+                url_prefix       => $c->stash->{'url_prefix'},
                 comment_author   => '',
                 hostdowntimes    => '',
                 servicedowntimes => '',
@@ -415,6 +416,7 @@ sub _do_send_command {
                 start_time_unix => $start_time_unix,
                 end_time_unix   => $end_time_unix,
                 theme           => $c->stash->{'theme'},
+                url_prefix       => $c->stash->{'url_prefix'},
                 comment_author   => '',
                 hostdowntimes    => '',
                 servicedowntimes => '',
