@@ -453,7 +453,8 @@ sub get_logs {
     $options{'columns'} = [qw/
         class time type state host_name service_description plugin_output message contact_name command_name state_type
         /];
-    return $self->_get_table('log', \%options);
+    my @logs = reverse @{$self->_get_table('log', \%options)};
+    return \@logs;
 }
 
 ##########################################################
