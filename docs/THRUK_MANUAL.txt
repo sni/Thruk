@@ -1081,6 +1081,10 @@ Here is a list of common tasks and configurations.
 
 === Remote Livestatus with SSL
 
+IMPORTANT: unfortunately this does not work with latest Thruk
+versions. Socat somehow disconnects after a few packets. Please use
+stunnel or ssh with the usual xinetd configuration.
+
 Generate ssl key for the remote machine:
 
 ---------------------

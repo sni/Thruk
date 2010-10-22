@@ -112,3 +112,18 @@ should look like this:
 
 Then make sure you have a log4perl.conf with DEBUG threshold configured. 
 Finally restart your fastcgi server.
+
+
+== Errors
+=== Backend not available
+
+The socat solution for using livestatus with SSL does not longer work
+due to problems with socat and json data. If you see errors like:
+
+------------------
+[ERROR][Thruk.Controller.Root] Caught exception in Thruk::Controller::status->index "socket error at thruk/script/../lib/Monitoring/Livestatus/Class/Base/Table.pm line 186"
+[ERROR][Thruk.Controller.error] internal server error
+------------------
+
+and you use socat for livestatus over ssl, please change to stunnel or
+ssh with the normal xinetd solution.
