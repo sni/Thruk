@@ -532,6 +532,16 @@ ex.:
   log4perl_conf = ./log4perl.conf
 
 
+==== tmp_path
+
+Path to a temporary directory. Defaults to /tmp if not set and usually
+this is a good place.
+
+ex.:
+
+  tmp_path = /tmp
+
+
 ==== ssi_path
 
 The path to your ssi (server side includes) files.

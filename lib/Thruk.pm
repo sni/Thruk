@@ -98,7 +98,6 @@ my %config = ('name'                   => 'Thruk',
                   TRIM               => 1,
                   CACHE_SIZE         => 0,
                   COMPILE_EXT        => '.ttc',
-                  COMPILE_DIR        => '/tmp/ttc_'.$>, # use uid to make tmp dir uniq
                   STAT_TTL           => 60,
                   STRICT             => 0,
                   render_die         => 1,
@@ -188,6 +187,11 @@ for my $entry (readdir($dh)) {
 closedir $dh;
 __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
+###################################################
+# set tmp dir
+my $tmp_dir = __PACKAGE__->config->{'tmp_path'} || '/tmp';
+$config{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>; # use uid to make tmp dir more uniq
+
 
 ###################################################
 # Start the application
@@ -199,7 +203,6 @@ my $timezone = __PACKAGE__->config->{'use_timezone'};
 if(defined $timezone) {
     $ENV{'TZ'} = $timezone;
 }
-
 
 ###################################################
 # set installed themes
