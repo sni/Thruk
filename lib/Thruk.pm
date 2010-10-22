@@ -96,9 +96,8 @@ my %config = ('name'                   => 'Thruk',
                   PRE_CHOMP          => 1,
                   POST_CHOMP         => 1,
                   TRIM               => 1,
-                  CACHE_SIZE         => 0,
                   COMPILE_EXT        => '.ttc',
-                  STAT_TTL           => 60,
+                  STAT_TTL           => 3600,
                   STRICT             => 0,
                   render_die         => 1,
               },
@@ -133,7 +132,9 @@ my %config = ('name'                   => 'Thruk',
 );
 # set TT strict mode only for authors
 if(-f $project_root."/.author") {
-    $config{'View::TT'}->{'STRICT'} = 1;
+    $config{'View::TT'}->{'STRICT'}     = 1;
+    $config{'View::TT'}->{'CACHE_SIZE'} = 0;
+    $config{'View::TT'}->{'STAT_TTL'}   = 3600;
 }
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
