@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-0.72    Mon Oct 18 12:35:49 CEST 2010
+0.72    Sun Oct 24 12:35:49 CEST 2010
           - added ssi_path config option
           - added flexible url prefix
           - added filter for latency and execution time

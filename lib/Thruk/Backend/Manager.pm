@@ -302,7 +302,9 @@ sub _do_on_peers {
         };
         $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
     }
-    die($@) unless defined $result or $selected_backends == 0;
+    if(!defined $result and $selected_backends != 0) {
+        confess("Error in _do_on_peers: $@\ncalled as ".Dumper($sub)."\nwith args: ".Dumper($arg));
+    }
     $type = '' unless defined $type;
 
     # howto merge the answers?
