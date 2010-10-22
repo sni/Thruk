@@ -191,6 +191,7 @@ __PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 # set tmp dir
 my $tmp_dir = __PACKAGE__->config->{'tmp_path'} || '/tmp';
 $config{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>; # use uid to make tmp dir more uniq
+__PACKAGE__->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>; # use uid to make tmp dir more uniq
 
 
 ###################################################
