@@ -233,7 +233,11 @@ sub get_contactgroups_by_contact {
         return $cached_data->{'contactgroups'};
     }
 
-    my $contactgroups = $self->_do_on_peers( "get_contactgroups_by_contact", $username );
+    my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ]);
+    my $contactgroups = {};
+    for my $group (@{$data}) {
+        $contactgroups->{$group} = 1;
+    }
 
     $cached_data->{'contactgroups'} = $contactgroups;
     $c->cache->set( $username, $cached_data );
@@ -303,7 +307,7 @@ sub _do_on_peers {
         $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
     }
     if(!defined $result and $selected_backends != 0) {
-        confess("Error in _do_on_peers: $@\ncalled as ".Dumper($sub)."\nwith args: ".Dumper($arg));
+        confess("Error in _do_on_peers: ".$@."called as ".Dumper($sub)."with args: ".Dumper($arg));
     }
     $type = '' unless defined $type;
 

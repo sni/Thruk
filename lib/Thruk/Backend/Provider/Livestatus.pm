@@ -168,11 +168,8 @@ sub get_contactgroups_by_contact {
                 ->filter({ members => { '>=' => $username }})
                 ->options({AddPeer => 1})
                 ->hashref_array();
-    for my $group (@{$data}) {
-        $contactgroups->{$group->{'name'}} = 1;
-    }
 
-    return $contactgroups;
+    return $data;
 }
 
 ##########################################################

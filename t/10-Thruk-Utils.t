@@ -3,11 +3,12 @@
 #########################
 
 use strict;
-use Test::More tests => 8;
+use Test::More tests => 10;
 use Data::Dumper;
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Backend::Manager');
+BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
 #########################
 # sort
@@ -67,3 +68,8 @@ is_deeply($sorted_by_ba_reverse, \@sorted_by_ba_exp_reverse, 'sort by colum b,a 
 
 my $sorted_by_abc = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => ['a','b','c'] });
 is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
+
+#########################
+my($res, $c) = ctx_request('/thruk/cgi-bin/tac.cgi');
+my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
+is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(thrukadmin)');
