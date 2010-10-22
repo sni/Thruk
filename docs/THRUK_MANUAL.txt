@@ -803,7 +803,6 @@ xinetd.conf. You can enter local unix sockets too.
             - verbose           let this connection be verbose
             - connect_timeout   connect timeout setting
             - query_timeout     query timeout setting
-            - keepalive         enable/disable keepalive for this connection
 
 ex.:
 

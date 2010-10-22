@@ -624,6 +624,10 @@ sub _initialise_peer {
     require $require . ".pm";
     $class->import;
     $config->{'options'}->{'name'} = $config->{'name'} unless defined $config->{'options'}->{'name'};
+
+    # disable keepalive for now, it does not work and causes lots of problems
+    $config->{'options'}->{'keepalive'} = 0 if defined $config->{'options'}->{'keepalive'};
+
     my $peer = {
         'name'    => $config->{'name'},
         'type'    => $config->{'type'},
