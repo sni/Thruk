@@ -913,17 +913,20 @@ reads a ssi file or executes it if its executable
 
 =cut
 sub read_ssi {
-   my $c    = shift;
-   my $file = shift;
-   # retun if file is execitabel
-   if( -x $c->config->{'ssi_path'}.$file ){
+    my $c    = shift;
+    my $file = shift;
+    # retun if file is execitabel
+    if( -x $c->config->{'ssi_path'}.$file ){
        open(my $ph, '-|', $c->config->{'ssi_path'}.$file.' 2>&1') or carp("cannot execute ssi: $!");
        my $output = <$ph>;
        close($ph);
        return $output;
-   }
-   return read_file($c->config->{'ssi_path'}.$file) or carp("cannot open ssi: $!");
-
+    }
+    elsif( -r $c->config->{'ssi_path'}.$file ){
+        return read_file($c->config->{'ssi_path'}.$file) or carp("cannot open ssi: $!");
+    }
+    $c->log->warn($c->config->{'ssi_path'}.$file." is no longer accessible, please restart thruk to initialize ssi information");
+    return "";
 }
 
 
