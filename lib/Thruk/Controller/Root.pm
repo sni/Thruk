@@ -126,10 +126,6 @@ sub begin : Private {
         $c->{'db'} = $c->model('Thruk');
         $c->{'db'}->{'stats'} = $c->stats;
         $c->{'db'}->{'log'}   = $c->log;
-        #$c->{'db'} = Thruk::Backend::Manager->new(
-        #    'stats' => $c->stats,
-        #    'log'   => $c->log,
-        #);
     }
 
     # redirect to error page unless we have a connection

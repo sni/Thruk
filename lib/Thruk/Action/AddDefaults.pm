@@ -60,6 +60,12 @@ before 'execute' => sub {
     $c->log->debug(Dumper($cached_data));
 
     ###############################
+    # first all backends are enabled
+    if(defined $c->{'db'}) {
+        $c->{'db'}->enable_backends();
+    }
+
+    ###############################
     # get backend object
     my $disabled_backends = {};
     if(defined $c->request->cookie('thruk_backends')) {
