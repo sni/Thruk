@@ -32,7 +32,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{template}         = 'config.tt';
     $c->stash->{'no_auto_reload'} = 1;
 
-    $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
+    return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
 
     my $type = $c->{'request'}->{'parameters'}->{'type'};
     $c->stash->{type}             = $type;

@@ -37,6 +37,15 @@ before 'execute' => sub {
     Thruk::Utils::read_cgi_cfg($c);
 
     ###############################
+    $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
+    $c->stash->{'show_context_help'}  = $c->config->{'cgi_cfg'}->{'show_context_help'};
+    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
+
+    ###############################
+    # no backend?
+    return unless defined $c->{'db'};
+
+    ###############################
     # Authentication
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
@@ -44,7 +53,7 @@ before 'execute' => sub {
         unless ($c->authenticate( {} )) {
             # return 403 forbidden or kick out the user in other way
             $c->log->debug("user is not authenticated");
-            $c->detach('/error/index/10');
+            return $c->detach('/error/index/10');
         };
     }
     $c->log->debug("user authenticated as: ".$c->user->get('username'));
@@ -140,7 +149,7 @@ before 'execute' => sub {
     if($@) {
         $self->_set_possible_backends($c, $disabled_backends);
         $c->log->error("data source error: $@");
-        $c->detach('/error/index/9');
+        return $c->detach('/error/index/9');
     }
 
     ###############################
@@ -161,23 +170,15 @@ before 'execute' => sub {
         }
     }
 
-    ###############################
-    $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
-    $c->stash->{'show_context_help'}  = $c->config->{'cgi_cfg'}->{'show_context_help'};
-
     if(!defined $c->stash->{'pi_detail'} and $self->_any_backend_enabled($c)) {
         $c->log->error("got no result from any backend, please check backend connection and logfiles");
-        $c->detach('/error/index/9');
+        return $c->detach('/error/index/9');
     }
     $c->stats->profile(end => "AddDefaults::get_proc_info");
 
     ###############################
     # set some more roles
     Thruk::Utils::set_can_submit_commands($c);
-
-    ###############################
-
-    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
     $c->stats->profile(end => "AddDefaults::before");

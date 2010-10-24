@@ -124,8 +124,10 @@ sub begin : Private {
     # initialize our backends
     unless ( defined $c->{'db'} ) {
         $c->{'db'} = $c->model('Thruk');
-        $c->{'db'}->{'stats'} = $c->stats;
-        $c->{'db'}->{'log'}   = $c->log;
+        if( defined $c->{'db'} ) {
+            $c->{'db'}->{'stats'} = $c->stats;
+            $c->{'db'}->{'log'}   = $c->log;
+        }
     }
 
     # redirect to error page unless we have a connection
@@ -135,10 +137,10 @@ sub begin : Private {
         my $deprecated_conf = Thruk::Utils::Livestatus::get_livestatus_conf();
         if( defined $deprecated_conf ) {
             $c->log->error( "The <Component Monitoring::Livestatus> configuration is deprecated, please use '<Component Thruk::Backend>' instead.\nYour converted config would be:\n\n" . Thruk::Utils::Livestatus::convert_config($deprecated_conf) . "\nplease update your thruk_local.conf" );
-            $c->detach("/error/index/20");
+            return $c->detach("/error/index/20");
         }
 
-        $c->detach("/error/index/14");
+        return $c->detach("/error/index/14");
     }
 
     my $target = $c->{'request'}->{'parameters'}->{'target'};
@@ -205,7 +207,7 @@ redirect from /
 sub index : Path('/') {
     my( $self, $c ) = @_;
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
-        $c->detach("default");
+        return $c->detach("default");
     }
     return $c->redirect($c->stash->{'url_prefix'}."thruk/");
 }
@@ -280,7 +282,7 @@ page: /thruk/index.html
 sub thruk_index_html : Regex('thruk\/index\.html$') {
     my( $self, $c ) = @_;
     unless ( $c->stash->{'use_frames'} ) {
-        $c->detach("thruk_main_html");
+        return $c->detach("thruk_main_html");
     }
 
     if(-f "templates/index.tt") {
@@ -362,9 +364,7 @@ sub thruk_frame_html : Regex('thruk\/frame\.html$') {
     }
 
     # no link or none matched, display the usual index.html
-    $c->detach("thruk_index_html");
-
-    return 1;
+    return $c->detach("thruk_index_html");
 }
 
 ######################################
@@ -413,7 +413,7 @@ page: /thruk/docs/
 sub thruk_docs : Regex('thruk\/docs\/') {
     my( $self, $c ) = @_;
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
-        $c->detach("default");
+        return $c->detach("default");
     }
     $c->stash->{'title'}          = 'Documentation';
     $c->stash->{'no_auto_reload'} = 1;
@@ -432,6 +432,7 @@ page: /thruk/cgi-bin/tac.cgi
 
 sub tac_cgi : Regex('thruk\/cgi\-bin\/tac\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/tac/index');
 }
 
@@ -445,6 +446,7 @@ page: /thruk/cgi-bin/status.cgi
 
 sub status_cgi : Regex('thruk\/cgi\-bin\/status\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/status/index');
 }
 
@@ -458,6 +460,7 @@ page: /thruk/cgi-bin/cmd.cgi
 
 sub cmd_cgi : Regex('thruk\/cgi\-bin\/cmd\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/cmd/index');
 }
 
@@ -471,6 +474,7 @@ page: /thruk/cgi-bin/outages.cgi
 
 sub outages_cgi : Regex('thruk\/cgi\-bin\/outages\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/outages/index');
 }
 
@@ -484,6 +488,7 @@ page: /thruk/cgi-bin/avail.cgi
 
 sub avail_cgi : Regex('thruk\/cgi\-bin\/avail\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/avail/index');
 }
 
@@ -497,6 +502,7 @@ page: /thruk/cgi-bin/trends.cgi
 
 sub trends_cgi : Regex('thruk\/cgi\-bin\/trends\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/trends/index');
 }
 
@@ -510,6 +516,7 @@ page: /thruk/cgi-bin/history.cgi
 
 sub history_cgi : Regex('thruk\/cgi\-bin\/history\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/history/index');
 }
 
@@ -523,6 +530,7 @@ page: /thruk/cgi-bin/summary.cgi
 
 sub summary_cgi : Regex('thruk\/cgi\-bin\/summary\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/summary/index');
 }
 
@@ -536,6 +544,7 @@ page: /thruk/cgi-bin/histogram.cgi
 
 sub histogram_cgi : Regex('thruk\/cgi\-bin\/histogram\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/histogram/index');
 }
 
@@ -549,6 +558,7 @@ page: /thruk/cgi-bin/notifications.cgi
 
 sub notifications_cgi : Regex('thruk\/cgi\-bin\/notifications\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/notifications/index');
 }
 
@@ -562,6 +572,7 @@ page: /thruk/cgi-bin/showlog.cgi
 
 sub showlog_cgi : Regex('thruk\/cgi\-bin\/showlog\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/showlog/index');
 }
 
@@ -575,6 +586,7 @@ page: /thruk/cgi-bin/extinfo.cgi
 
 sub extinfo_cgi : Regex('thruk\/cgi\-bin\/extinfo\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/extinfo/index');
 }
 
@@ -588,6 +600,7 @@ page: /thruk/cgi-bin/config.cgi
 
 sub config_cgi : Regex('thruk\/cgi\-bin\/config\.cgi') {
     my( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
     return $c->detach('/config/index');
 }
 

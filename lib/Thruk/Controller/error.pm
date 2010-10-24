@@ -30,6 +30,8 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         confess("undefined c in error/index");
     }
 
+    $c->{'cancled'} = 1;
+
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
 
@@ -120,7 +122,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         },
         '14'  => {
             'mess' => 'missing backend configuration',
-            'dscr' => 'please specify at least one backend in your thruk_local.conf<br>Please refer the <a href="'.$c->stash->{'url_prefix'}.'thruk/documentation.html#_configuration_2">documentation</a> on how to setup Thruk.',
+            'dscr' => 'please specify at least one backend in your thruk_local.conf<br>Please read the <a href="'.$c->stash->{'url_prefix'}.'thruk/documentation.html#_configuration_2">setup instructions</a>.',
             'code' => 500, # internal server error
         },
         '15'  => {

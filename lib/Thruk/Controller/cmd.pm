@@ -49,11 +49,11 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 
     # check if authorization is enabled
     if( $c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0 ) {
-        $c->detach('/error/index/3');
+        return $c->detach('/error/index/3');
     }
 
     # read only user?
-    $c->detach('/error/index/11') if $c->check_user_roles('is_authorized_for_read_only');
+    return $c->detach('/error/index/11') if $c->check_user_roles('is_authorized_for_read_only');
 
     # set authorization information
     my $query_options = { Slice => 1 };
@@ -157,7 +157,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                 $cmd_typ = $host_quick_commands->{$quick_command};
             }
             else {
-                $c->detach('/error/index/7');
+                return $c->detach('/error/index/7');
             }
             $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             my( $host, $service, $backend ) = split /;/mx, $hostdata;
@@ -184,7 +184,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                 $cmd_typ = $service_quick_commands->{$quick_command};
             }
             else {
-                $c->detach('/error/index/7');
+                return $c->detach('/error/index/7');
             }
             $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             my( $host, $service, $backend ) = split /;/mx, $servicedata;
@@ -256,7 +256,7 @@ sub _check_for_commands {
 
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
-    $c->detach('/error/index/6') unless defined $cmd_typ;
+    return $c->detach('/error/index/6') unless defined $cmd_typ;
     $self->_cmd_is_disabled( $c, $cmd_typ );
 
     # command commited?
@@ -307,7 +307,7 @@ sub _cmd_is_disabled {
             $command_disabled{$not_allowed} = 1;
         }
         if( defined $command_disabled{$cmd_typ} ) {
-            $c->detach('/error/index/12');
+            return $c->detach('/error/index/12');
         }
     }
 
@@ -341,7 +341,7 @@ sub _do_send_command {
     my( $self, $c ) = @_;
 
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
-    $c->detach('/error/index/6') unless defined $cmd_typ;
+    return $c->detach('/error/index/6') unless defined $cmd_typ;
 
     # locked author names?
     if( $c->config->{'cgi_cfg'}->{'lock_author_names'} or !defined $c->{'request'}->{'parameters'}->{'com_author'} ) {
@@ -401,10 +401,10 @@ sub _do_send_command {
     $c->log->error('error in first cmd/cmd_typ_' . $cmd_typ . '.tt: '.$@) if $@;
 
     # unknown command given?
-    $c->detach('/error/index/7') unless defined $cmd;
+    return $c->detach('/error/index/7') unless defined $cmd;
 
     # unauthorized?
-    $c->detach('/error/index/10') unless $cmd ne '';
+    return $c->detach('/error/index/10') unless $cmd ne '';
 
     # check for required fields
     my( $form, @errors );

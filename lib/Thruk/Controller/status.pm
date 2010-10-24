@@ -269,8 +269,7 @@ sub _process_details_page {
         $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'data'}     = $services;
         $c->stash->{'template'} = 'excel/status_detail.tt';
-        $c->detach('View::Excel');
-        return 1;
+        return $c->detach('View::Excel');
     }
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
@@ -330,8 +329,7 @@ sub _process_hostdetails_page {
         $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'data'}     = $hosts;
         $c->stash->{'template'} = 'excel/status_hostdetail.tt';
-        $c->detach('View::Excel');
-        return 1;
+        return $c->detach('View::Excel');
     }
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];

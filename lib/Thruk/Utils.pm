@@ -44,16 +44,14 @@ sub parse_date {
         else {
             $timestamp = UnixDate($string, '%s');
             if(!defined $timestamp) {
-                $c->detach('/error/index/19');
-                return;
+                return $c->detach('/error/index/19');
             }
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
         }
     };
     if($@) {
         $c->log->error($@);
-        $c->detach('/error/index/19');
-        return;
+        return $c->detach('/error/index/19');
     }
     return $timestamp;
 }
@@ -101,7 +99,7 @@ sub read_cgi_cfg {
         if(defined $c) {
             $c->log->error("cgi.cfg not set");
             $c->error("cgi.cfg not set");
-            $c->detach('/error/index/4');
+            return $c->detach('/error/index/4');
         }
         print STDERR "cgi_cfg option must be set in thruk.conf or thruk_local.conf\n\n";
         return;
@@ -116,7 +114,7 @@ sub read_cgi_cfg {
         if(defined $c) {
             $c->log->error("cgi.cfg not readable: ".$!);
             $c->error("cgi.cfg not readable: ".$!);
-            $c->detach('/error/index/4');
+            return $c->detach('/error/index/4');
         }
         print STDERR "$file not readable: ".$!."\n\n";
         return;
@@ -593,7 +591,7 @@ sub calculate_availability {
     # a single service
     if(defined $service and $service ne 'all') {
         unless($c->check_permissions('service', $service, $host)) {
-            $c->detach('/error/index/15');
+            return $c->detach('/error/index/15');
         }
         $logserviceheadfilter = { service_description => $service };
         $loghostheadfilter    = { host_name => $host };
@@ -622,7 +620,7 @@ sub calculate_availability {
     # a single host
     elsif(defined $host and $host ne 'all') {
         unless($c->check_permissions('host', $host)) {
-            $c->detach('/error/index/5');
+            return $c->detach('/error/index/5');
         }
         my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), host_name => $host ]);
         $service_data = array2hash($service_data, 'description');

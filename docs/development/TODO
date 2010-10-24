@@ -26,6 +26,10 @@ avail:
     - add switch to exclude downtimes for example hostgroup
       availability calculations
 
+mobile:
+    - change auto to return 0, so other auto subs will be executed too
+      http://dev.catalystframework.org/attachment/wiki/WikiStart/catalyst-flow.png
+
 livestatus:
     - Contacts: Service Notification Options, Host Notification Options,
                 Retention Options, Service Notification Commands,

@@ -30,7 +30,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my $infoBoxTitle;
     if( $type == 0 ) {
         $infoBoxTitle = 'Process Information';
-        $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
+        return $c->detach('/error/index/1') unless $c->check_user_roles("authorized_for_system_information");
         $self->_process_process_info_page($c);
     }
     if( $type == 1 ) {
@@ -224,7 +224,7 @@ sub _process_servicegroup_cmd_page {
 
     my $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $servicegroup ], limit => 1);
 
-    $c->detach('/error/index/5') unless defined $groups->[0];
+    return $c->detach('/error/index/5') unless defined $groups->[0];
 
     $c->stash->{'servicegroup'}       = $groups->[0]->{'name'};
     $c->stash->{'servicegroup_alias'} = $groups->[0]->{'alias'};

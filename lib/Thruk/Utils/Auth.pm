@@ -36,6 +36,8 @@ sub get_auth_filter {
 
     return if $type eq 'status';
 
+    confess("no backend!") unless defined $c->{'db'};
+
     # if authentication is completly disabled
     if($c->config->{'cgi_cfg'}->{'use_authentication'} == 0 and $c->config->{'cgi_cfg'}->{'use_ssl_authentication'} == 0) {
         return;
