@@ -1370,6 +1370,9 @@ sub _single_search {
         }
 
         my $value  = $filter->{'value'};
+
+        next if $value =~ m/^\s*$/mx;
+
         my $op     = '=';
         my $listop = '>=';
         my $dateop = '=';
