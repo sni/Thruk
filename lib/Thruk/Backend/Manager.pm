@@ -307,7 +307,8 @@ sub _do_on_peers {
         $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
     }
     if(!defined $result and $selected_backends != 0) {
-        confess("Error in _do_on_peers: ".$@."called as ".Dumper($sub)."with args: ".Dumper($arg));
+        #confess("Error in _do_on_peers: ".$@."called as ".Dumper($sub)."with args: ".Dumper($arg));
+        die($@);
     }
     $type = '' unless defined $type;
 
