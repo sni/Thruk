@@ -17,8 +17,8 @@ td { font-size: 8pt; border: 0; }
 a.homepageURL:Hover { color: #ff3300; }
 
 table.linkBox { margin-top: 20px; border: 0; }
-td.linkBox a { margin-left: 5px;  padding-left: 10px;  background: url(../../images/interface/menu_li1.gif) 0 0.35em no-repeat;  }
-td.linkBox a:hover { background: url(../../images/interface/menu_li2.gif) 0 0.35em no-repeat;  }
+td.linkBox a { margin-left: 5px;  padding-left: 10px;  background: url(../images/interface/menu_li1.gif) 0 0.35em no-repeat;  }
+td.linkBox a:hover { background: url(../images/interface/menu_li2.gif) 0 0.35em no-repeat;  }
 
 div.dataTitle { text-align: center; font-weight: bold; font-size: 10pt; margin-bottom: 15px; }
 div.data { text-align: center; font-size: 10pt; }

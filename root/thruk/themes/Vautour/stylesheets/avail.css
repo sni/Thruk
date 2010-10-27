@@ -17,8 +17,8 @@ a.homepageURL:Hover { color: #ff3300; }
 
 .linkBox { border: 0; }
 table.linkBox { margin-top: 20px; }
-td.linkBox a { margin-left: 5px; padding-left: 10px; background: url(../../images/interface/menu_li1.gif) 0 0.35em no-repeat;  }
-td.linkBox a:hover { background: url(../../images/interface/menu_li2.gif) 0 0.35em no-repeat;  }
+td.linkBox a { margin-left: 5px; padding-left: 10px; background: url(../images/interface/menu_li1.gif) 0 0.35em no-repeat;  }
+td.linkBox a:hover { background: url(../images/interface/menu_li2.gif) 0 0.35em no-repeat;  }
 
 .reportRange { text-align: center; font-weight: bold; }
 .reportDuration { text-align: center; }

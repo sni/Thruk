@@ -30,6 +30,8 @@ ul {
 
 #menu {
   width: 166px;
+  font-family: arial,serif;
+  font-size: 8pt;
 }
 
 #menu h2 {

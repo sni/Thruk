@@ -15,6 +15,7 @@ div.navbar {
   top: 0px;
   left: 0px;
   text-align: left;
+  overflow-x: hidden;
 }
 
 body {
