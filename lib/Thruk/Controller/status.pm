@@ -693,6 +693,17 @@ sub _process_summary_page {
         }
     }
 
+    # overwrite groups totals with correct values
+    if( $c->stash->{'servicegroup'} and defined $all_groups->{$c->stash->{'servicegroup'}} ) {
+        my $stats = $all_groups->{$c->stash->{'servicegroup'}};
+        $c->stash->{'host_stats'} = {
+            'pending'     => $stats->{'hosts_pending'},
+            'up'          => $stats->{'hosts_up'},
+            'down'        => $stats->{'hosts_down'},
+            'unreachable' => $stats->{'hosts_unreachable'},
+        };
+    }
+
     $c->stash->{'groups'} = $all_groups;
     $c->stash->{'style'}  = 'summary';
 
