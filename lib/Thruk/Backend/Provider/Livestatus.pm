@@ -700,15 +700,15 @@ sub get_performance_stats {
 
         # add stats for active checks
         $stats = [
-            $type.'_execution_time_sum'      => { -isa => [ 'sum execution_time' ]},
-            $type.'_latency_sum'             => { -isa => [ 'sum latency' ]},
-            $type.'_active_state_change_sum' => { -isa => [ 'sum percent_state_change' ]},
-            $type.'_execution_time_min'      => { -isa => [ 'min execution_time' ]},
-            $type.'_latency_min'             => { -isa => [ 'min latency' ]},
-            $type.'_active_state_change_min' => { -isa => [ 'min percent_state_change' ]},
-            $type.'_execution_time_max'      => { -isa => [ 'max execution_time' ]},
-            $type.'_latency_max'             => { -isa => [ 'max latency' ]},
-            $type.'_active_state_change_max' => { -isa => [ 'max percent_state_change' ]},
+            $type.'_execution_time_sum'      => { -isa => [ -sum => 'execution_time' ]},
+            $type.'_latency_sum'             => { -isa => [ -sum => 'latency' ]},
+            $type.'_active_state_change_sum' => { -isa => [ -sum => 'percent_state_change' ]},
+            $type.'_execution_time_min'      => { -isa => [ -min => 'execution_time' ]},
+            $type.'_latency_min'             => { -isa => [ -min => 'latency' ]},
+            $type.'_active_state_change_min' => { -isa => [ -min => 'percent_state_change' ]},
+            $type.'_execution_time_max'      => { -isa => [ -max => 'execution_time' ]},
+            $type.'_latency_max'             => { -isa => [ -max => 'latency' ]},
+            $type.'_active_state_change_max' => { -isa => [ -max => 'percent_state_change' ]},
         ];
         $class = $self->_get_class($type, \%options);
         $rows = $class
@@ -718,9 +718,9 @@ sub get_performance_stats {
 
         # add stats for passive checks
         $stats = [
-            $type.'_passive_state_change_sum' => { -isa => [ 'sum percent_state_change' ]},
-            $type.'_passive_state_change_min' => { -isa => [ 'min percent_state_change' ]},
-            $type.'_passive_state_change_max' => { -isa => [ 'max percent_state_change' ]},
+            $type.'_passive_state_change_sum' => { -isa => [ -sum => 'percent_state_change' ]},
+            $type.'_passive_state_change_min' => { -isa => [ -min => 'percent_state_change' ]},
+            $type.'_passive_state_change_max' => { -isa => [ -max => 'percent_state_change' ]},
         ];
         $class = $self->_get_class($type, \%options);
         $rows = $class

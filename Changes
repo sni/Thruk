@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.72.2  Mon Nov  1 18:31:17 CET 2010
+          - fixed livestatus stats query for shinken
+
 0.72.1  Thu Oct 28 00:07:40 CEST 2010
           - fixed Vautour theme css
           - fixed host status totals for groups summary pages
