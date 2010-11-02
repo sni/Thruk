@@ -506,6 +506,7 @@ function selectService(event, state)
     var row_id;
     // find id of current row
     if(event && event.target) {
+        /* ex.: FF */
         row_id = getFirstParentId(event.target);
 
         // dont select row when clicked on a link
@@ -518,6 +519,11 @@ function selectService(event, state)
         row_id = getFirstParentId(event);
     }
     else {
+        /* ex.: IE 7/8 */
+        if(window.event.srcElement.tagName == 'A' || window.event.srcElement.tagName == 'IMG') {
+            resetServiceRow(event);
+            return;
+        }
         row_id = getFirstParentId(this);
         event  = this;
     }
@@ -602,6 +608,7 @@ function selectHost(event, state)
     var row_id;
     // find id of current row
     if(event && event.target) {
+        /* ex.: FF */
         row_id = getFirstParentId(event.target);
 
         // dont select row when clicked on a link
@@ -614,6 +621,11 @@ function selectHost(event, state)
         row_id = getFirstParentId(event);
     }
     else {
+        /* ex.: IE 7/8 */
+        if(window.event.srcElement.tagName == 'A' || window.event.srcElement.tagName == 'IMG') {
+            resetHostRow(event);
+            return;
+        }
         row_id = getFirstParentId(this);
         event  = this;
     }
@@ -1464,6 +1476,7 @@ var ajax_search = {
     search_type     : 'all',
 
     base            : new Array(),
+    res             : new Array(),
     initialized     : false,
     cur_select      : -1,
     result_size     : false,
@@ -1555,7 +1568,7 @@ var ajax_search = {
         hideElement(panel);
     },
 
-    /* wrapper around suggest() to avoid multiple running searches */
+    /* wrapper around suggest_do() to avoid multiple running searches */
     suggest: function(evt) {
         window.clearTimeout(ajax_search.timer);
 
@@ -1642,10 +1655,6 @@ var ajax_search = {
 
     /* present the results */
     show_results: function(results, pattern, selected) {
-        ajax_search_res = results;
-        ajax_search_pat = pattern;
-        ajax_search_sel = selected;
-
         var panel = document.getElementById(ajax_search.result_pan);
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
@@ -1662,6 +1671,7 @@ var ajax_search = {
         var resultHTML = '<ul>';
         var x = 0;
         var results_per_type = Math.ceil(ajax_search.max_results / results.size());
+        ajax_search.res = new Array();
         results.each(function(type) {
             var cur_count = 0;
             resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
@@ -1682,7 +1692,9 @@ var ajax_search = {
                         if(type.name == 'services')      { prefix = 'se:'; }
                         if(type.name == 'servicegroups') { prefix = 'sg:'; }
                     }
-                    resultHTML += '<li> <a href="" class="' + classname + '" onclick="return ajax_search.set_result(\'' + prefix+data.display +'\')"> ' + name +'<\/a><\/li>';
+                    var id = "suggest_item_"+x
+                    resultHTML += '<li> <a href="" class="' + classname + '" id="'+id+'" rev="' + prefix+data.display +'" onclick="return ajax_search.set_result(this.rev)"> ' + name +'<\/a><\/li>';
+                    ajax_search.res[x] = prefix+data.display;
                     x++;
                     cur_count++;
                 }
@@ -1755,12 +1767,19 @@ var ajax_search = {
             }
             ajax_search.show_results(ajax_search.cur_results, ajax_search.cur_pattern, ajax_search.cur_select);
             if(focus) {
-                var el = document.getElementsByClassName('ajax_search_selected');
-                if(el[0]) {
-                    el[0].focus();
+                var el = document.getElementById('suggest_item_'+ajax_search.cur_select);
+                if(el) {
+                    el.focus();
                 }
             }
             return false;
+        }
+        if(keyCode == 13 || keyCode == 108) {
+            if(ajax_search.cur_select == -1) {
+                return true
+            }
+            ajax_search.set_result(ajax_search.res[ajax_search.cur_select]);
+            return false
         }
         return true;
     },
