@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.74    Tue ...
+          - added current number of notifications to status details page
+
 0.72.2  Tue Nov  2 19:15:07 CET 2010
           - fixed livestatus stats query for shinken
           - fixed js for IE (search suggest && host/service selection)

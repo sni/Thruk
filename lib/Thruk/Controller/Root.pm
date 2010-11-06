@@ -121,6 +121,9 @@ sub begin : Private {
 
     $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
 
+    # status page settings
+    $c->stash->{'show_notification_number'} = Thruk->config->{'show_notification_number'} || 1;
+
     # initialize our backends
     unless ( defined $c->{'db'} ) {
         $c->{'db'} = $c->model('Thruk');

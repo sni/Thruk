@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.2" />
+<meta name="generator" content="AsciiDoc 8.5.3" />
 <title>Thruk Users Guide</title>
 <style type="text/css">
 /* Debug borders */
@@ -180,8 +180,8 @@ div.quoteblock > div.attribution {
   text-align: right;
 }
 
-div.verseblock > div.content {
-  white-space: pre;
+div.verseblock > pre.content {
+  font-family: inherit;
 }
 div.verseblock > div.attribution {
   padding-top: 0.75em;
@@ -399,8 +399,8 @@ div.quoteblock-attribution {
   text-align: right;
 }
 
-div.verseblock-content {
-  white-space: pre;
+pre.verseblock-content {
+  font-family: inherit;
 }
 div.verseblock-attribution {
   padding-top: 0.75em;
@@ -2514,6 +2514,14 @@ what options are available</p></div>
 <div class="content">
 <pre><tt>info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF</tt></pre>
 </div></div>
+<h4 id="_show_notification_number">show_notification_number</h4>
+<div class="paragraph"><p>Display the current number of notification after the current / max
+attempts on the status details page.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>show_notification_number = 0</tt></pre>
+</div></div>
 <h4 id="_component_thruk_backend">Component Thruk::Backend</h4>
 <div class="paragraph"><p>Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the
@@ -3017,7 +3025,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-11-01 20:50:54 CEST
+Last updated 2010-11-06 12:41:14 CEST
 </div>
 </div>
 </body>

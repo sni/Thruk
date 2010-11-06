@@ -793,6 +793,16 @@ ex.:
   info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF
 
 
+==== show_notification_number
+Display the current number of notification after the current / max
+attempts on the status details page.
+
+ex.:
+
+  show_notification_number = 0
+
+
+
 
 ==== Component Thruk::Backend
 Enter your backend connection settings here. At the moment only
