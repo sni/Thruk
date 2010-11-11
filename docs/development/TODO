@@ -13,6 +13,7 @@ general
         -> http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=129935#post129935
     - different icon for passive checks
     - paging for service/host groups pages
+    - add output filter plugins (ex.: check_multi, disk checks)
 
 extinfo:
     - finish performance data on extinfo type 4

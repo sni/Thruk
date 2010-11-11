@@ -200,7 +200,7 @@ function show_tree_map(id_to_show) {
 /* create and show a circle map */
 function show_circle_map(id_to_show, w, h) {
     // distance between circles
-    var levelDistance = 100;
+    var levelDistance = 150;
 
     //Create a new canvas instance.
     var canvas = new Canvas('mycanvas', {
@@ -270,7 +270,6 @@ function show_circle_map(id_to_show, w, h) {
         //This method is called each time a label is plotted.
         onPlaceLabel: function(domElement, node){
             var style = domElement.style;
-            //style.visibility = 'visible';
             style.cursor = 'pointer';
             style.height = '';
             style.width  = '';
@@ -279,7 +278,7 @@ function show_circle_map(id_to_show, w, h) {
                 style.fontSize = '0.9em';
                 style.color    = '#000000';
             }
-            else if(node._depth <= 3){
+            else if(node._depth < 2){
                 style.fontSize = '0.8em';
                 style.color    = '#494949';
             }else {
@@ -288,155 +287,14 @@ function show_circle_map(id_to_show, w, h) {
                 style.width    = '10px';
             }
             domElement.onmouseover = function (e){showTip((e||window.event), node)};
-
-            if(node.name == '') {
-                style.fontSize = '0px';
-                style.height   = 2*node.data.$dim + 'px';
-                style.width    = 2*node.data.$dim + 'px';
-
-                var left = parseInt(style.left);
-                var w = domElement.offsetWidth;
-                style.left = (left - w / 2) + 'px';
-
-                var top = parseInt(style.top);
-                var h = domElement.offsetHeight;
-                style.top = (top - h / 2) + 'px';
-
-
-                //Create new canvas instances.
-                var newCanvas            = document.createElement('div');
-                newCanvas.id             = "canvas_" + node.id;
-                newCanvas.style.position = 'absolute';
-                newCanvas.style.left     = style.left;
-                newCanvas.style.top      = style.top;
-                newCanvas.style.width    = style.width;
-                newCanvas.style.height   = style.height;
-                document.getElementById('infovis').appendChild(newCanvas);
-                var child_canvas = new Canvas('piecanvas'+newCanvas.id, {
-                    'injectInto': newCanvas.id,
-                    'width':  2*node.data.$dim,
-                    'height': 2*node.data.$dim
-                });
-                var child_json = node.data.children.sortBy(function(c) {
-                  return c.data.status;
-                });
-
-                var newRootNode = Object({
-                  'id': node.id + "_sum_root",
-                  'name':   "",
-                  'data': {},
-                  'adjacencies': []
-                });
-                child_json.each(function(n) { n.adjacencies = new Array(node.id + "_sum_root"); });
-                child_json.unshift(newRootNode);
-                insert_pie_graph_into_canvas(child_json, child_canvas);
-
-            } else {
-                var left = parseInt(style.left);
-                var w = domElement.offsetWidth;
-                style.left = (left - w / 2) + 'px';
-            }
-
-
         }
     });
 
     //load JSON data
     var tree = eval('(' + json + ')');
     rgraph.loadJSON(tree);
-    rgraph.root = id_to_show;
-    rgraph.compute();
-
-    var nodes = new Hash(rgraph.graph.nodes);
-    nodes.values().each(function(node) {
-        if(node._depth >= 1) {
-            h = new Hash(node.adjacencies);
-            if(h.size() >= 5) {
-                var removed = new Array();
-                h.values().each(function(adj) {
-                    if(adj.nodeTo._depth > node._depth) {
-                        removed.push(adj.nodeTo);
-                        rgraph.graph.removeNode(adj.nodeTo.id);
-                    }
-                    if(adj.nodeFrom._depth > node._depth) {
-                        removed.push(adj.nodeFrom);
-                        rgraph.graph.removeNode(adj.nodeFrom.id);
-                    }
-                });
-                if(removed.size() > 0) {
-                  var dim = Math.sqrt(removed.size() * Math.pow(rgraph.config.Node.dim, 2));
-                    var newNode = Object({
-                        'id':     node.id + "_sum",
-                        'name':   "",
-                        'data': {
-                            '$dim':              dim,
-                            'clickid':           node.id,
-                            'state_up':          node.data.state_up,
-                            'state_down':        node.data.state_down,
-                            'state_unreachable': node.data.state_unreachable,
-                            'state_pending':     node.data.state_pending,
-                            'children':          removed
-                        }
-                    });
-                    rgraph.graph.addAdjacence(node, newNode, {});
-                }
-            }
-        }
-    });
-
     rgraph.refresh();
 }
-
-
-
-
-/* create and show a pie graph map */
-function insert_pie_graph_into_canvas(json, canvas) {
-    // distance between circles
-    var size = canvas.getSize();
-    var levelDistance = size.width/2;
-    RGraph.Plot.NodeTypes.implement({
-      //This node type is used for plotting the pie charts
-      'nodepie': function(node, canvas) {
-        var span = node.angleSpan, begin = span.begin, end = span.end;
-        var polarNode = node.pos.getp(true);
-        var polar = new Polar(polarNode.rho, begin);
-        var p1coord = polar.getc(true);
-        polar.theta = end;
-        var p2coord = polar.getc(true);
-
-        var ctx = canvas.getCtx();
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(p1coord.x, p1coord.y);
-        ctx.moveTo(0, 0);
-        ctx.lineTo(p2coord.x, p2coord.y);
-        ctx.moveTo(0, 0);
-        ctx.arc(0, 0, polarNode.rho, begin, end, false);
-        ctx.fill();
-      }
-    });
-
-    var rgraph = new RGraph(canvas, {
-        levelDistance: levelDistance,
-        duration: 700,
-        fps: 40,
-
-        Node: { //Set Node and Edge colors.
-            overridable: true,
-            type: 'nodepie'
-        },
-        Edge: {
-            color: '#333333',
-            type: 'none'
-        }
-    });
-
-    //load JSON data
-    rgraph.loadJSON(json);
-    rgraph.refresh();
-}
-
 
 
 

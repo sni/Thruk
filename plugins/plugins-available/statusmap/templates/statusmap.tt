@@ -25,8 +25,8 @@
           <td align="left" class='optBoxItem'>
             <select name='type'>
               <option value="table"[% IF type == 'table' %] selected[% END %]>Table Layout</option>
-              <!--
               <option value="circle"[% IF type == 'circle' %] selected[% END %]>Circular Layout</option>
+              <!--
               <option value="hyper"[% IF type == 'hyper' %] selected[% END %]>Hyper Layout</option>
               -->
             </select>
