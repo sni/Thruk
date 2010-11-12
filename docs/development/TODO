@@ -6,13 +6,9 @@ general
     - write tests ( with admin user, limited user, unknown user )
     - add backend name to logs
     - add go back button on error page
-    - authorization docs
-    - add extra grapher url
     - use title for quick downtimes popups
     - specify columns for excel export
         -> http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=129935#post129935
-    - different icon for passive checks
-    - paging for service/host groups pages
     - add output filter plugins (ex.: check_multi, disk checks)
 
 extinfo:
@@ -60,7 +56,6 @@ Known Bugs:
 ideas for after 1.0
 
 general:
-    - create models for hosts / services / contacts
     - webservice api, passthrough querys to livestatus and return json
       result
     - query builder, click to add filter or stats
@@ -70,12 +65,12 @@ general:
     - add multiple notes url or action urls, maybe add an "_html" cust var
     - add ability to display contacts for machine
     - uc,lc option for auth user -> monitoring
-    - multi language support
     - add context sensitive help
     - bookmarks
     - use livestatus wait feature where possible
     - page by attribute a,b,c,d,e...z
     - graph about how checks are scheduled in the next minutes
+    - add extra grapher url
 
 
 reports:

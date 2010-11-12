@@ -262,6 +262,7 @@ sub set_passive_mode {
     for my $backend (@{ $self->{'backends'} }) {
         $backend->{'class'}->{'strict_passive_mode'} = $value;
     }
+    return;
 }
 
 
