@@ -7,8 +7,6 @@ general
     - add backend name to logs
     - add go back button on error page
     - use title for quick downtimes popups
-    - specify columns for excel export
-        -> http://www.nagios-portal.org/wbb/index.php?page=Thread&postID=129935#post129935
     - add output filter plugins (ex.: check_multi, disk checks)
 
 extinfo:

@@ -1,5 +1,6 @@
 ﻿[% USE date %]
 <div class="cmd_pane" id="cmd_pane">
+<div class="shadow"><div class="shadowcontent">
 <form action="cmd.cgi" method="POST">
   <input type="hidden" name="referer" value="[% c.request.uri | replace('&', '&amp;') %]">
   <input type="hidden" name="fixed" value="1">
@@ -136,4 +137,5 @@
     </tr>
   </table>
 </form>
+</div></div>
 </div>

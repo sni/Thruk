@@ -265,6 +265,7 @@ sub _process_details_page {
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( defined $view_mode and $view_mode eq 'xls' ) {
+        $self->_set_selected_columns($c);
         my $filename = 'status.xls';
         $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'data'}     = $services;
@@ -325,6 +326,7 @@ sub _process_hostdetails_page {
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( defined $view_mode and $view_mode eq 'xls' ) {
+        $self->_set_selected_columns($c);
         my $filename = 'status.xls';
         $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'data'}     = $hosts;
@@ -1590,6 +1592,28 @@ sub _get_comments_filter {
     }
 
     return(\@hostfilter, \@servicefilter);
+}
+
+
+##########################################################
+# set selected columns for the excel export
+sub _set_selected_columns {
+    my($self, $c) = @_;
+    my $columns = {};
+    my $last_col = 30;
+    for my $x (0..30) { $columns->{$x} = 1; }
+    if(defined $c->{'request'}->{'parameters'}->{'columns'}) {
+        $last_col = 0;
+        for my $x (0..30) { $columns->{$x} = 0; }
+        my $cols = $c->{'request'}->{'parameters'}->{'columns'};
+        for my $nr (ref $cols eq 'ARRAY' ? @{$cols} : ($cols)) {
+            $columns->{$nr} = 1;
+            $last_col++;
+        }
+    }
+    $c->stash->{'last_col'} = chr(65+$last_col-1);
+    $c->stash->{'columns'}  = $columns;
+    return;
 }
 
 

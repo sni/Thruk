@@ -42,6 +42,7 @@
           <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes')" id="[% prefix %]_htn">[% search.host_statustype_filtername %]</td>
           <td>
             <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_hoststatustypes_pane">
+            <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
                 <td class='filter'>
@@ -70,6 +71,7 @@
                 </td>
               </tr>
             </table>
+            </div></div>
             </div>
           </td>
         </tr>
@@ -79,6 +81,7 @@
           <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'hostprops')" id="[% prefix %]_hpn">[% search.host_prop_filtername %]</td>
           <td>
             <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_hostprops_pane">
+            <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
                 <td class='filter'>
@@ -151,6 +154,7 @@
                 </td>
               </tr>
             </table>
+            </div></div>
             </div>
           </td>
         </tr>
@@ -161,6 +165,7 @@
           <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes')" id="[% prefix %]_stn">[% search.service_statustype_filtername %]</td>
           <td>
             <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_servicestatustypes_pane">
+            <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
                 <td class='filter'>
@@ -193,6 +198,7 @@
                 </td>
               </tr>
             </table>
+            </div></div>
             </div>
           </td>
         </tr>
@@ -202,6 +208,7 @@
           <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'serviceprops')" id="[% prefix %]_spn">[% search.service_prop_filtername %]</td>
           <td>
             <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_serviceprops_pane">
+            <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
                 <td class='filter'>
@@ -274,6 +281,7 @@
                 </td>
               </tr>
             </table>
+            </div></div>
             </div>
           </td>
         </tr>

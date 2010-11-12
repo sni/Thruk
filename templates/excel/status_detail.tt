@@ -2,27 +2,27 @@
 [% size = 1 %]
 [% IF data %][% size = data.size + 1 %][% END %]
 <workbook>
-  <worksheet name='Status' autofilter='A1:H[% size %]'>
+  <worksheet name='Status' autofilter='A1:[% last_col %][% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
-        <cell width='30'>Hostname</cell>
-        <cell width='10'>IP</cell>
-        <cell width='16'>Host Acknowledged</cell>
-        <cell width='14'>Host Downtime</cell>
-        <cell width='14'>Host Notifications</cell>
-        <cell width='16'>Host Active Checks</cell>
-        <cell width='11'>Host Flapping</cell>
-        <cell width='30'>Service</cell>
-        <cell width='20'>Status</cell>
-        <cell width='20'>Last Check</cell>
-        <cell width='15'>Duration</cell>
-        <cell width='10'>Attempt</cell>
-        <cell width='14'>Acknowledged</cell>
-        <cell width='12'>Downtime</cell>
-        <cell width='12'>Notifications</cell>
-        <cell width='14'>Active Checks</cell>
-        <cell width='9'>Flapping</cell>
-        <cell width='80'>Status Information</cell>
+        [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
+        [% IF columns.2  %]<cell width='10'>IP</cell>[% END %]
+        [% IF columns.3  %]<cell width='16'>Host Acknowledged</cell>[% END %]
+        [% IF columns.4  %]<cell width='14'>Host Downtime</cell>[% END %]
+        [% IF columns.5  %]<cell width='14'>Host Notifications</cell>[% END %]
+        [% IF columns.6  %]<cell width='16'>Host Active Checks</cell>[% END %]
+        [% IF columns.7  %]<cell width='11'>Host Flapping</cell>[% END %]
+        [% IF columns.8  %]<cell width='30'>Service</cell>[% END %]
+        [% IF columns.9  %]<cell width='20'>Status</cell>[% END %]
+        [% IF columns.10 %]<cell width='20'>Last Check</cell>[% END %]
+        [% IF columns.11 %]<cell width='15'>Duration</cell>[% END %]
+        [% IF columns.12 %]<cell width='10'>Attempt</cell>[% END %]
+        [% IF columns.13 %]<cell width='14'>Acknowledged</cell>[% END %]
+        [% IF columns.14 %]<cell width='12'>Downtime</cell>[% END %]
+        [% IF columns.15 %]<cell width='12'>Notifications</cell>[% END %]
+        [% IF columns.16 %]<cell width='14'>Active Checks</cell>[% END %]
+        [% IF columns.17 %]<cell width='9'>Flapping</cell>[% END %]
+        [% IF columns.18 %]<cell width='80'>Status Information</cell>[% END %]
       </format>
     </row>
     [% FOREACH s = data %]
@@ -46,30 +46,30 @@
         [% state_color = 'orange' %]
       [% END %]
       <row>
-        <cell>[% s.host_name %]</cell>
-        <cell>[% s.host_address %]</cell>
-        <cell>[% IF s.host_acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.host_scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.host_notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.host_active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.host_is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% s.description %]</cell>
-        <format bg_color='[% state_color %]'>
+        [% IF columns.1  %]<cell>[% s.host_name %]</cell>[% END %]
+        [% IF columns.2  %]<cell>[% s.host_address %]</cell>[% END %]
+        [% IF columns.3  %]<cell>[% IF s.host_acknowledged             %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.4  %]<cell>[% IF s.host_scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.5  %]<cell>[% IF s.host_notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.6  %]<cell>[% IF s.host_active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.7  %]<cell>[% IF s.host_is_flapping              %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.8  %]<cell>[% s.description %]</cell>[% END %]
+        [% IF columns.9 %]<format bg_color='[% state_color %]'>
           <cell>[% state %]</cell>
-        </format>
-        <format num_format='yyyy-mm-dd hh:mm:ss'>
+        </format>[% END %]
+        [% IF columns.10 %]<format num_format='yyyy-mm-dd hh:mm:ss'>
           <cell type='date_time'>[% IF s.has_been_checked == 0 %][% ELSE %][% date.format(s.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
-        </format>
-        <cell>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>
-        <format align='center'>
+        </format>[% END %]
+        [% IF columns.11 %]<cell>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>[% END %]
+        [% IF columns.12 %]<format align='center'>
           <cell>[% s.current_attempt %]/[% s.max_check_attempts %]</cell>
-        </format>
-        <cell>[% IF s.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
-        <cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% html_escape(s.plugin_output) %][% END %]</cell>
+        </format>[% END %]
+        [% IF columns.13 %]<cell>[% IF s.acknowledged             %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.14 %]<cell>[% IF s.scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.15 %]<cell>[% IF s.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.16 %]<cell>[% IF s.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.17 %]<cell>[% IF s.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF columns.18 %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% html_escape(s.plugin_output) %][% END %]</cell>[% END %]
       </row>
     [% END %]
   </worksheet>

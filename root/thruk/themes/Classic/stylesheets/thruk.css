@@ -25,6 +25,22 @@ body.navbar {
   margin: 0px;
 }
 
+
+/* shadow definition */
+.shadowcontent, .shadow {
+  position: relative;
+  bottom: 6px;
+  right: 6px;
+}
+.shadow {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.shadowcontent {
+  background-color: #fff;
+  color: #000;
+}
+
+
 /* preferences pane */
 div.pref_pane {
   width:450px;
@@ -270,7 +286,7 @@ div.cmd_pane {
   height:100px;
   visibility:hidden;
   position:fixed;
-  top: 70px;
+  top: 60px;
   right: 0px;
   z-index: 99;
   color: black;
