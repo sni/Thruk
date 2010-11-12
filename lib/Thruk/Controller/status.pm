@@ -463,7 +463,10 @@ sub _process_overview_page {
         }
     }
 
-    $c->stash->{'groups'} = \%joined_groups;
+    my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
+    Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_overview'});
+    Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
+
     $c->stash->{'style'}  = 'overview';
 
     return 1;
@@ -555,7 +558,10 @@ sub _process_grid_page {
         }
     }
 
-    $c->stash->{'groups'} = \%joined_groups;
+    my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
+    Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_grid'});
+    Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
+
     $c->stash->{'style'}  = 'grid';
 
     return 1;
@@ -704,7 +710,10 @@ sub _process_summary_page {
         };
     }
 
-    $c->stash->{'groups'} = $all_groups;
+    my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %{$all_groups})], { 'ASC' => 'name'});
+    Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_summary'});
+    Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
+
     $c->stash->{'style'}  = 'summary';
 
     return 1;

@@ -69,12 +69,14 @@
         <td valign="top" align="right" width="33%"></td>
       </tr>
     </table>
+
+    <div align="center">[% PROCESS _pager.tt %]</div>
+
     <div align="center">
 
       <table border="0" cellpadding="10">
         <tr>
-          [% FOR groupname IN groups.keys.sort %]
-          [% SET g = groups.$groupname %]
+          [% FOR g IN data %]
           <td valign="top" align="center">
             [% IF hostgroup != '' %]
             <div class='status'><a href='status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]'>[% g.name %]</a>)</div>
@@ -160,5 +162,7 @@
         </tr>
       </table>
     </div>
+
+    <div align="center">[% PROCESS _pager.tt %]</div>
 
 [% PROCESS _footer.tt %]

@@ -669,25 +669,37 @@ ex.:
   use_pager = 1
 
 
-==== default_page_size
-Set the default value for paging. Only used when paging is enabled. Should be a
-value of the paging_steps.
-
-ex.:
-
-  default_page_size = 100
-
-
 ==== paging_steps
-Define the single selectable values for paging sizes.
+Define the selectable paging steps. Use the * to set the default
+selected value.
 
 ex.:
 
-  paging_steps        = 100
-  paging_steps        = 500
-  paging_steps        = 1000
-  paging_steps        = 5000
-  paging_steps        = all
+  paging_steps = *100, 500, 1000, all
+
+
+==== group_paging_overview
+Just like the paging_steps, but only for the groups overview page.
+
+ex.:
+
+  group_paging_overview =  *3,  10, 100, all
+
+
+==== group_paging_summary
+Just like the paging_steps, but only for the groups summary page.
+
+ex.:
+
+  group_paging_summary = *10, 50, 100, all
+
+
+==== group_paging_grid
+Just like the paging_steps, but only for the groups grip page.
+
+ex.:
+
+  group_paging_grid = *5,  10, 50,  all
 
 
 ==== can_submit_commands

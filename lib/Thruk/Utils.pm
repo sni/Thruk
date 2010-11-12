@@ -1002,7 +1002,6 @@ create a hash by key
 sub array2hash {
     my $data = shift;
     my $key   = shift;
-    my $return;
 
     return {} unless defined $data;
 
@@ -1010,6 +1009,50 @@ sub array2hash {
 
     return \%hash;
 }
+
+
+########################################
+
+=head2 set_paging_steps
+
+  set_paging_steps($c, $data)
+
+sets the pagins stepts, needs string like:
+
+  *100, 500, 1000, all
+
+=cut
+sub set_paging_steps {
+    my $c    = shift;
+    my $data = shift;
+
+    $c->stash->{'paging_steps'}      = [ '100', '500', '1000', '5000', 'all' ];
+    $c->stash->{'default_page_size'} = 100;
+
+    return unless defined $data;
+
+    # we need an array
+    $data = ref $data eq 'ARRAY' ? $data : [split(/\s*,\s*/mx, $data)];
+
+    $c->stash->{'paging_steps'}      = [];
+    $c->stash->{'default_page_size'} = undef;
+
+    for my $step (@{$data}) {
+        if($step =~ m/^\*(.*)$/mx) {
+            $step                            = $1;
+            $c->stash->{'default_page_size'} = $step;
+        }
+        push @{$c->stash->{'paging_steps'}}, $step;
+    }
+
+    # no default yet?
+    unless(defined $c->stash->{'default_page_size'}) {
+        $c->stash->{'default_page_size'} = $c->stash->{'paging_steps'}->[0];
+    }
+
+    return;
+}
+
 
 ########################################
 sub _initialassumedhoststate_to_state {

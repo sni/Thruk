@@ -65,6 +65,9 @@
         <td valign="top" align="right" width="33%"></td>
       </tr>
     </table>
+
+    <div align="center">[% PROCESS _pager.tt %]</div>
+
     <div align="center">
       <table border="1" class='status statusgroups'>
         <tr>
@@ -76,7 +79,8 @@
           <th class='status'>Host Status Summary</th>
           <th class='status'>Service Status Summary</th>
         </tr>
-        [% FOR groupname IN groups.keys.sort %]
+        [% FOR group IN data %]
+        [% groupname = group.name %]
 
         [% IF hostgroup != '' %]
         [% SET hostgroup_uri = groupname | uri %]
@@ -87,7 +91,6 @@
         [% SET link        = "servicegroup=" _ servicegroup_uri _ "&amp;style=detail" %]
         [% SET servicelink = "servicegroup=" _ servicegroup_uri _ "&amp;style=detail" %]
         [% END %]
-        [% SET group = groups.$groupname %]
         [% SET class = 'statusEven' IF loop.odd  %]
         [% SET class = 'statusOdd'  IF loop.even %]
         <tr class='[% class %]'>
@@ -212,7 +215,8 @@
         </tr>
         [% END %]
       </table>
-
     </div>
+
+    <div align="center">[% PROCESS _pager.tt %]</div>
 
 [% PROCESS _footer.tt %]

@@ -2401,24 +2401,34 @@ need it.</p></div>
 <div class="content">
 <pre><tt>use_pager = 1</tt></pre>
 </div></div>
-<h4 id="_default_page_size">default_page_size</h4>
-<div class="paragraph"><p>Set the default value for paging. Only used when paging is enabled. Should be a
-value of the paging_steps.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>default_page_size = 100</tt></pre>
-</div></div>
 <h4 id="_paging_steps">paging_steps</h4>
-<div class="paragraph"><p>Define the single selectable values for paging sizes.</p></div>
+<div class="paragraph"><p>Define the selectable paging steps. Use the * to set the default
+selected value.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>paging_steps        = 100
-paging_steps        = 500
-paging_steps        = 1000
-paging_steps        = 5000
-paging_steps        = all</tt></pre>
+<pre><tt>paging_steps = *100, 500, 1000, all</tt></pre>
+</div></div>
+<h4 id="_group_paging_overview">group_paging_overview</h4>
+<div class="paragraph"><p>Just like the paging_steps, but only for the groups overview page.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>group_paging_overview =  *3,  10, 100, all</tt></pre>
+</div></div>
+<h4 id="_group_paging_summary">group_paging_summary</h4>
+<div class="paragraph"><p>Just like the paging_steps, but only for the groups summary page.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>group_paging_summary = *10, 50, 100, all</tt></pre>
+</div></div>
+<h4 id="_group_paging_grid">group_paging_grid</h4>
+<div class="paragraph"><p>Just like the paging_steps, but only for the groups grip page.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>group_paging_grid = *5,  10, 50,  all</tt></pre>
 </div></div>
 <h4 id="_can_submit_commands">can_submit_commands</h4>
 <div class="paragraph"><p>Set this if a contact should be allowed to send commands unless defined for the
@@ -3035,7 +3045,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-11-12 09:26:53 CEST
+Last updated 2010-11-12 13:48:58 CEST
 </div>
 </div>
 </body>

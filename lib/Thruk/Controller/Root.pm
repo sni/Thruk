@@ -57,14 +57,13 @@ sub begin : Private {
     if( Thruk->config->{'use_frames'} == 1 ) {
         $show_nav_button = 0;
     }
-    $c->stash->{'use_frames'}      = $use_frames;
-    $c->stash->{'show_nav_button'} = $show_nav_button;
-    $c->stash->{'reload_nav'}      = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
+    $c->stash->{'use_frames'}         = $use_frames;
+    $c->stash->{'show_nav_button'}    = $show_nav_button;
+    $c->stash->{'reload_nav'}         = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
 
     # use pager?
-    $c->stash->{'use_pager'}         = Thruk->config->{'use_pager'}         || 1;
-    $c->stash->{'default_page_size'} = Thruk->config->{'default_page_size'} || 100;
-    $c->stash->{'paging_steps'}      = Thruk->config->{'paging_steps'}      || [ '100', '500', '1000', '5000', 'all' ];
+    $c->stash->{'use_pager'}          = Thruk->config->{'use_pager'} || 1;
+    Thruk::Utils::set_paging_steps($c, Thruk->config->{'paging_steps'});
 
     $c->stash->{'start_page'}         = Thruk->config->{'start_page'}         || $c->stash->{'url_prefix'}.'thruk/main.html';
     $c->stash->{'documentation_link'} = Thruk->config->{'documentation_link'} || $c->stash->{'url_prefix'}.'thruk/docs/index.html';
