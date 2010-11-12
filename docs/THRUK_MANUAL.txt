@@ -583,7 +583,9 @@ ex.:
 Normally passive checks would be marked as disabled. With this
 option set, disabled checks will only be displayed as disabled if their
 last result was active. Otherwise they would be marked as passive
-checks.
+checks. This option also changes the passive icon only to be shown
+when the last check was passive, otherwise the disabled icon will be
+displayed.
 
 ex.:
 

@@ -117,7 +117,12 @@
                           [% IF group.hosts_down_unhandled > 0 %]<tr><td width="100%" class='hostImportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=42'>[% group.hosts_down_unhandled %] Unhandled</a></td></tr>[% END %]
                           [% IF group.hosts_down_downtime > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=1'>[% group.hosts_down_downtime %] Scheduled</a></td></tr>[% END %]
                           [% IF group.hosts_down_ack > 0       %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=4'>[% group.hosts_down_ack %] Acknowledged</a></td></tr>[% END %]
-                          [% IF group.hosts_down_disabled > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled %] Disabled</a></td></tr>[% END %]
+                          [% IF strict_passive_mode %]
+                            [% IF group.hosts_down_disabled_active > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.hosts_down_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_passive %] Passive</a></td></tr>[% END %]
+                          [% ELSE %]
+                            [% IF group.hosts_down_disabled_active + group.hosts_down_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_active + group.hosts_down_disabled_passive %] Disabled</a></td></tr>[% END %]
+                          [% END %]
                         </table>
                       </td>
                     </tr>
@@ -136,7 +141,12 @@
                           [% IF group.hosts_unreachable_unhandled > 0 %]<tr><td width="100%" class='hostImportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=42'>[% group.hosts_unreachable_unhandled %] Unhandled</a></td></tr>[% END %]
                           [% IF group.hosts_unreachable_downtime > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=1'>[% group.hosts_unreachable_downtime %] Scheduled</a></td></tr>[% END %]
                           [% IF group.hosts_unreachable_ack > 0       %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=4'>[% group.hosts_unreachable_ack %] Acknowledged</a></td></tr>[% END %]
-                          [% IF group.hosts_unreachable_disabled > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=16'>[% group.hosts_unreachable_disabled %] Disabled</a></td></tr>[% END %]
+                          [% IF strict_passive_mode %]
+                            [% IF group.hosts_unreachable_disabled_active > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=131088'>[% group.hosts_unreachable_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.hosts_unreachable_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=65552'>[% group.hosts_unreachable_disabled_passive %] Passive</a></td></tr>[% END %]
+                          [% ELSE %]
+                            [% IF group.hosts_unreachable_disabled_active +group.hosts_unreachable_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=16'>[% group.hosts_unreachable_disabled_active + group.hosts_unreachable_disabled_passive %] Disabled</a></td></tr>[% END %]
+                          [% END %]
                         </table>
                       </td>
                     </tr>
@@ -160,7 +170,12 @@
                           [% IF group.services_warning_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_warning_unhandled %] Unhandled</a></td></tr>[% END %]
                           [% IF group.services_warning_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=12'>[% group.services_warning_prob_host %] on Problem Hosts</a></td></tr>[% END %]
                           [% IF group.services_warning_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=4'>[% group.services_warning_ack %] Acknowledged</a></td></tr>[% END %]
-                          [% IF group.services_warning_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=16'>[% group.services_warning_disabled %] Disabled</a></td></tr>[% END %]
+                          [% IF strict_passive_mode %]
+                            [% IF group.services_warning_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=131088'>[% group.services_warning_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_warning_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=65552'>[% group.services_warning_disabled_passive %] Passive</a></td></tr>[% END %]
+                          [% ELSE %]
+                            [% IF group.services_warning_disabled_active + group.services_warning_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=16'>[% group.services_warning_disabled_active + group.services_warning_disabled_passive %] Disabled</a></td></tr>[% END %]
+                          [% END %]
                         </table>
                       </td>
                     </tr>
@@ -179,7 +194,12 @@
                           [% IF group.services_unknown_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_unknown_unhandled %] Unhandled</a></td></tr>[% END %]
                           [% IF group.services_unknown_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=12'>[% group.services_unknown_prob_host %] on Problem Hosts</a></td></tr>[% END %]
                           [% IF group.services_unknown_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=4'>[% group.services_unknown_ack %] Acknowledged</a></td></tr>[% END %]
-                          [% IF group.services_unknown_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=16'>[% group.services_unknown_disabled %] Disabled</a></td></tr>[% END %]
+                          [% IF strict_passive_mode %]
+                            [% IF group.services_unknown_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=131088'>[% group.services_unknown_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_unknown_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=65552'>[% group.services_unknown_disabled_passive %] Passive</a></td></tr>[% END %]
+                          [% ELSE %]
+                            [% IF group.services_unknown_disabled_active + group.services_unknown_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=16'>[% group.services_unknown_disabled_active + group.services_unknown_disabled_passive %] Disabled</a></td></tr>[% END %]
+                          [% END %]
                         </table>
                       </td>
                     </tr>
@@ -198,7 +218,12 @@
                           [% IF group.services_critical_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_critical_unhandled %] Unhandled</a></td></tr>[% END %]
                           [% IF group.services_critical_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=12'>[% group.services_critical_prob_host %] on Problem Hosts</a></td></tr>[% END %]
                           [% IF group.services_critical_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=4'>[% group.services_critical_ack %] Acknowledged</a></td></tr>[% END %]
-                          [% IF group.services_critical_disabled > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=16'>[% group.services_critical_disabled %] Disabled</a></td></tr>[% END %]
+                          [% IF strict_passive_mode %]
+                            [% IF group.services_critical_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=131088'>[% group.services_critical_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_critical_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=65552'>[% group.services_critical_disabled_passive %] Passive</a></td></tr>[% END %]
+                          [% ELSE %]
+                            [% IF group.services_critical_disabled_active + group.services_critical_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=16'>[% group.services_critical_disabled_active + group.services_critical_disabled_passive %] Disabled</a></td></tr>[% END %]
+                          [% END %]
                         </table>
                       </td>
                     </tr>
