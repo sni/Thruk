@@ -54,6 +54,7 @@ Known Bugs:
     - FastCGI: server "/tmp/thruk_fastcgi.fcgi" stderr: Undefined subroutine
       &FCGI::ProcManager::MaxRequestsThruk::self_or_default called at
       /home/thruk/Thruk/script/../lib/FCGI/ProcManager/MaxRequestsThruk.pm
+    - fix totals in status page
 
 =========================================================
 ideas for after 1.0

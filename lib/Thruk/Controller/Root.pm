@@ -128,10 +128,12 @@ sub begin : Private {
     unless ( defined $c->{'db'} ) {
         $c->{'db'} = $c->model('Thruk');
         if( defined $c->{'db'} ) {
-            $c->{'db'}->{'stats'} = $c->stats;
-            $c->{'db'}->{'log'}   = $c->log;
+            $c->{'db'}->{'stats'}               = $c->stats;
+            $c->{'db'}->{'log'}                 = $c->log;
+            $c->{'db'}->set_passive_mode($c->config->{'strict_passive_mode'} || 0);
         }
     }
+    $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 0;
 
     # redirect to error page unless we have a connection
     if( !defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {

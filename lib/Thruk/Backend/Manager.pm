@@ -34,9 +34,10 @@ create new manager
 sub new {
     my( $class, %options ) = @_;
     my $self = {
-        'stats'    => undef,
-        'log'      => undef,
-        'backends' => [],
+        'stats'               => undef,
+        'log'                 => undef,
+        'strict_passive_mode' => undef,
+        'backends'            => [],
     };
     bless $self, $class;
 
@@ -243,6 +244,26 @@ sub get_contactgroups_by_contact {
     $c->cache->set( $username, $cached_data );
     return $contactgroups;
 }
+
+
+########################################
+
+=head2 set_passive_mode
+
+  set_passive_mode
+
+sets the strict passive mode
+
+=cut
+
+sub set_passive_mode {
+    my( $self, $value ) = @_;
+    $self->{'strict_passive_mode'} = $value;
+    for my $backend (@{ $self->{'backends'} }) {
+        $backend->{'class'}->{'strict_passive_mode'} = $value;
+    }
+}
+
 
 ########################################
 

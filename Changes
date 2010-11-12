@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.74    Tue ...
+          - added strict disabled mode ( make passive hosts/services more intuitive )
           - enabled circle layout for statusmap
           - added current number of notifications to status details page
 

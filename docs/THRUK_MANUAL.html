@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.3" />
+<meta name="generator" content="AsciiDoc 8.5.2" />
 <title>Thruk Users Guide</title>
 <style type="text/css">
 /* Debug borders */
@@ -180,8 +180,8 @@ div.quoteblock > div.attribution {
   text-align: right;
 }
 
-div.verseblock > pre.content {
-  font-family: inherit;
+div.verseblock > div.content {
+  white-space: pre;
 }
 div.verseblock > div.attribution {
   padding-top: 0.75em;
@@ -399,8 +399,8 @@ div.quoteblock-attribution {
   text-align: right;
 }
 
-pre.verseblock-content {
-  font-family: inherit;
+div.verseblock-content {
+  white-space: pre;
 }
 div.verseblock-attribution {
   padding-top: 0.75em;
@@ -2327,6 +2327,16 @@ See allowed_frame_links option for how to integrate addons.</p></div>
 <div class="content">
 <pre><tt>use_frames = 0</tt></pre>
 </div></div>
+<h4 id="_strict_passive_mode">strict_passive_mode</h4>
+<div class="paragraph"><p>Normally passive checks would be marked as disabled. With this
+option set, disabled checks will only be displayed as disabled if their
+last result was active. Otherwise they would be marked as passive
+checks.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>strict_passive_mode = 1</tt></pre>
+</div></div>
 <h4 id="_use_new_search">use_new_search</h4>
 <div class="paragraph"><p>Use the old or the classic search from the navigation. The new search
 supports regular expressions and searches in many attributes. For
@@ -3025,7 +3035,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-11-06 12:41:14 CEST
+Last updated 2010-11-12 09:26:53 CEST
 </div>
 </div>
 </body>

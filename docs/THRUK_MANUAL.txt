@@ -578,6 +578,18 @@ ex.:
   use_frames = 0
 
 
+==== strict_passive_mode
+
+Normally passive checks would be marked as disabled. With this
+option set, disabled checks will only be displayed as disabled if their
+last result was active. Otherwise they would be marked as passive
+checks.
+
+ex.:
+
+  strict_passive_mode = 1
+
+
 ==== use_new_search
 
 Use the old or the classic search from the navigation. The new search
