@@ -40,6 +40,38 @@ if you do not click on a link.
 
 == Customization
 
+=== How to change the side menu
+Thruks web frontend look & feel is much like the Nagios web frontend.
+The main left menu is highly editable through local menu.cfg. It is
+recommended to copy menu.cfg to menu_local.cfg in order to keep the
+own menu on updating Thruk. Now you can edit your own menu.
+
+Open your menu_local.cfg with your preferred text editor and check the
+config. You can add new sections with: 
+
+....
+add_section('name' => 'General');
+....
+
+To add a new link use the following syntax:
+
+....
+add_link('name' => 'Home', 'href' => '/thruk/main.html');
+....
+
+.Available parameters
+* name: This is how the link is called in the web front end.
+* href: This is the destination link optional you can add.
+* target: If Link shall open in a new window.
+* icon: Used for themes which support icons.
+
+Then the config looks like this: 
+
+....
+add_link('name' => 'Nagios, 'href' => '/nagios', 'target' => '_new'); 
+....
+
+
 === How can i integrate Nagvis Maps
 Integrating Nagivs is currently only possible when frames are enabled.
 So first step is editing the thruk_local.conf and set

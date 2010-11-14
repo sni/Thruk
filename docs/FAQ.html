@@ -581,6 +581,49 @@ if you do not click on a link.</p></div>
 </div>
 <h2 id="_customization">Customization</h2>
 <div class="sectionbody">
+<h3 id="_how_to_change_the_side_menu">How to change the side menu</h3><div style="clear:left"></div>
+<div class="paragraph"><p>Thruks web frontend look &amp; feel is much like the Nagios web frontend.
+The main left menu is highly editable through local menu.cfg. It is
+recommended to copy menu.cfg to menu_local.cfg in order to keep the
+own menu on updating Thruk. Now you can edit your own menu.</p></div>
+<div class="paragraph"><p>Open your menu_local.cfg with your preferred text editor and check the
+config. You can add new sections with:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>add_section('name' =&gt; 'General');</tt></pre>
+</div></div>
+<div class="paragraph"><p>To add a new link use the following syntax:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>add_link('name' =&gt; 'Home', 'href' =&gt; '/thruk/main.html');</tt></pre>
+</div></div>
+<div class="ulist"><div class="title">Available parameters</div><ul>
+<li>
+<p>
+name: This is how the link is called in the web front end.
+</p>
+</li>
+<li>
+<p>
+href: This is the destination link optional you can add.
+</p>
+</li>
+<li>
+<p>
+target: If Link shall open in a new window.
+</p>
+</li>
+<li>
+<p>
+icon: Used for themes which support icons.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Then the config looks like this:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>add_link('name' =&gt; 'Nagios, 'href' =&gt; '/nagios', 'target' =&gt; '_new');</tt></pre>
+</div></div>
 <h3 id="_how_can_i_integrate_nagvis_maps">How can i integrate Nagvis Maps</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Integrating Nagivs is currently only possible when frames are enabled.
 So first step is editing the thruk_local.conf and set</p></div>
@@ -663,7 +706,7 @@ ssh with the normal xinetd solution.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-11-06 12:58:09 CEST
+Last updated 2010-11-14 18:28:57 CEST
 </div>
 </div>
 </body>
