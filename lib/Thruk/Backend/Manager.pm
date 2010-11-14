@@ -837,7 +837,7 @@ sub _merge_stats_answer {
                 my $nkey = $type . '_' . $akey;
                 $nkey =~ s/_sum$/_avg/mx;
                 $return->{$nkey} = 0;
-                if( $return->{$key} > 0 ) {
+                if( $return->{$key} > 0 and $return->{ $type . '_active_sum' } > 0 ) {
                     $return->{$nkey} = $return->{$key} / $return->{ $type . '_active_sum' };
                 }
             }
