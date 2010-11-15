@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added paging for group pages
           - added current number of notifications to status details page
           - added column selector for excel export
+          - fixed some issues with shinken livestatus
 
 0.72.2  Tue Nov  2 19:15:07 CET 2010
           - fixed livestatus stats query for shinken

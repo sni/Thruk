@@ -11,10 +11,11 @@ $Data::Dumper::Sortkeys = 1;
 
 #########################################################################
 # parse and check cmd line arguments
-my ($opt_h, $opt_v, @opt_f);
+my ($opt_h, $opt_v, @opt_f, $opt_l);
 Getopt::Long::Configure('no_ignore_case');
 if(!GetOptions (
    "h"              => \$opt_h,
+   "l=i"            => \$opt_l,
    "<>"             => \&add_file,
 )) {
     pod2usage( { -verbose => 1, -message => 'error in options' } );
@@ -25,6 +26,7 @@ if(defined $opt_h) {
     pod2usage( { -verbose => 1 } );
     exit 3;
 };
+$opt_l = 1 unless defined $opt_l;
 
 #########################################################################
 my $ml = Monitoring::Livestatus->new(
@@ -44,7 +46,7 @@ for my $type (@tables) {
     $filter  = "Filter: time > ".(time() - 86400)."\n" if $type eq 'log';
     $filter .= "Filter: time < ".(time())."\n"       if $type eq 'log';
 
-    my $statement = "GET $type\n".$filter."Limit: 1";
+    my $statement = "GET $type\n".$filter."Limit: ".$opt_l;
     my $keys  = $ml->selectrow_hashref($statement );
 
     my $file = 'docs/development/tables/'.$type.'.txt';

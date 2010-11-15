@@ -544,6 +544,7 @@ sub _process_grid_page {
             }
 
             # add all services
+            $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'} = {} unless defined $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'};
             if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
                 for my $service ( sort keys %{ $services_data->{$hostname} } ) {
                     $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{ $services_data->{$hostname}->{$service}->{'description'} } = $services_data->{$hostname}->{$service};
