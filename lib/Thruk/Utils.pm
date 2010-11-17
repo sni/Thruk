@@ -878,9 +878,9 @@ puts the ssi templates into the stash
 =cut
 sub ssi_include {
     my $c = shift;
-    my $global_header_file = "global-header.ssi";
+    my $global_header_file = "common-header.ssi";
     my $header_file        = $c->stash->{'page'}."-header.ssi";
-    my $global_footer_file = "global-footer.ssi";
+    my $global_footer_file = "common-footer.ssi";
     my $footer_file        = $c->stash->{'page'}."-footer.ssi";
 
     if ( defined $c->config->{ssi_includes}->{$global_header_file} ){

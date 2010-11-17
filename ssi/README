@@ -1,8 +1,8 @@
 # Server Side Includes
 
 # global includes for every page:
-ssi/global-footer.ssi
-ssi/global-header.ssi
+ssi/common-footer.ssi
+ssi/common-header.ssi
 
 # page specific includes
 ssi/status-footer.ssi
