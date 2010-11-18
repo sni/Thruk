@@ -49,9 +49,7 @@ cmd("$perl Makefile.PL");
 cmd("make distclean");
 cmd("$perl Makefile.PL");
 reset_scripts();
-replace_perl_version();
 cmd("make dist");
-reset_scripts();
 
 #########################################################################
 # fix name of source tarball
@@ -68,7 +66,11 @@ my $newarchive = "Thruk-".$version."-src.tar.gz";
 # replace with src name
 move($archive, $newarchive);
 print "moved $archive to $newarchive\n";
-$archive = $newarchive;
+
+#########################################################################
+replace_perl_version();
+cmd("make dist");
+reset_scripts();
 
 #########################################################################
 # add local lib dir
@@ -84,12 +86,14 @@ elsif(-d "$ENV{'HOME'}/perl5") {
 if(defined $local_lib and $local_lib ne '') {
   print "creating Thruk-".$version."-".$arch.".tar\n";
   cmd("tar zxf $archive");
-  cmd("rsync --modify-window=300 --exclude=man -a $local_lib/ Thruk-".$version."/local-lib");
+  cmd("rsync --modify-window=300 --exclude=man --exclude=bin -a $local_lib/ Thruk-".$version."/local-lib");
   cmd("tar cf Thruk-".$version."-".$arch."-".$Config{'version'}.".tar Thruk-".$version);
   cmd("gzip -9 Thruk-".$version."-".$arch."-".$Config{'version'}.".tar");
   cmd("rm -rf Thruk-".$version);
   print "created Thruk-".$version."-".$arch."-".$Config{'version'}.".tar.gz\n";
 }
+
+cmd("rm -f $archive");
 
 #########################################################################
 # finished
