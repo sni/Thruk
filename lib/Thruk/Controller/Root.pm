@@ -147,6 +147,15 @@ sub begin : Private {
         return $c->detach("/error/index/14");
     }
 
+    # when adding nav=1 to a url in frame mode, redirect to frame.html with this url
+    if( defined $c->{'request'}->{'parameters'}->{'nav'}
+            and $c->{'request'}->{'parameters'}->{'nav'} eq '1'
+            and Thruk->config->{'use_frames'} == 1 ) {
+        my $path = $c->request->uri->path_query;
+        $path =~ s/nav=1//gmx;
+        return $c->redirect($c->stash->{'url_prefix'}."thruk/frame.html?link=".uri_escape($path));
+    }
+
     my $target = $c->{'request'}->{'parameters'}->{'target'};
     if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
         $c->stash->{'target'} = '_parent';
@@ -342,7 +351,7 @@ sub thruk_frame_html : Regex('thruk\/frame\.html$') {
     my( $self, $c ) = @_;
 
     # allowed links to be framed
-    my $valid_links = [ quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
+    my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."thruk/cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
     my $additional_links = Thruk->config->{'allowed_frame_links'};
     if( defined $additional_links ) {
         if( ref $additional_links eq 'ARRAY' ) {
