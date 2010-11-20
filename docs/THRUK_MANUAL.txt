@@ -60,9 +60,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
   %> vers=$(perl -e 'use Config; print $Config{version}')
-  %> wget http://www.thruk.org/files/Thruk-0.72.2-$arch-$vers.tar.gz
-  %> tar zxf Thruk-0.72.2-$arch-$vers.tar.gz
-  %> cd Thruk-0.72.2
+  %> wget http://www.thruk.org/files/Thruk-0.74-$arch-$vers.tar.gz
+  %> tar zxf Thruk-0.74-$arch-$vers.tar.gz
+  %> cd Thruk-0.74
   %> ./script/thruk_server.pl
 ----
 
@@ -856,14 +856,11 @@ ex.:
     <peer>
         name   = Local Nagios
         type   = livestatus
-        hidden = 1             # make this backend hidden by default
-        groups = admins,locals # make this backend only visible to the admin and the locals group
+        hidden = 1             # makes this backend hidden by default
+        groups = admins,locals # makes this backend only visible to the
+                               # admin and the locals contactgroup
         <options>
-            peer            = /tmp/livestatus.socket
-            verbose         = 0
-            connect_timeout = 5
-            query_timeout   = 60
-            keepalive       = 0
+            peer   = /tmp/livestatus.socket
        </options>
     </peer>
     <peer>
@@ -877,7 +874,7 @@ ex.:
         name   = External Shinken
         type = livestatus
         <options>
-            peer   = 172.16.0.3:9999
+            peer   = 172.16.0.3:50000
        </options>
     </peer>
   </Component>

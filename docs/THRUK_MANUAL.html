@@ -1655,9 +1655,9 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <div class="content">
 <pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
   %&gt; vers=$(perl -e 'use Config; print $Config{version}')
-  %&gt; wget http://www.thruk.org/files/Thruk-0.72.2-$arch-$vers.tar.gz
-  %&gt; tar zxf Thruk-0.72.2-$arch-$vers.tar.gz
-  %&gt; cd Thruk-0.72.2
+  %&gt; wget http://www.thruk.org/files/Thruk-0.74-$arch-$vers.tar.gz
+  %&gt; tar zxf Thruk-0.74-$arch-$vers.tar.gz
+  %&gt; cd Thruk-0.74
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
 <div class="paragraph"><p>For the FastCGI installation follow the steps at <a href="#_fastcgi">fastcgi installation</a>.</p></div>
@@ -2613,14 +2613,11 @@ query_timeout     query timeout setting
   &lt;peer&gt;
       name   = Local Nagios
       type   = livestatus
-      hidden = 1             # make this backend hidden by default
-      groups = admins,locals # make this backend only visible to the admin and the locals group
+      hidden = 1             # makes this backend hidden by default
+      groups = admins,locals # makes this backend only visible to the
+                             # admin and the locals contactgroup
       &lt;options&gt;
-          peer            = /tmp/livestatus.socket
-          verbose         = 0
-          connect_timeout = 5
-          query_timeout   = 60
-          keepalive       = 0
+          peer   = /tmp/livestatus.socket
      &lt;/options&gt;
   &lt;/peer&gt;
   &lt;peer&gt;
@@ -2634,7 +2631,7 @@ query_timeout     query timeout setting
       name   = External Shinken
       type = livestatus
       &lt;options&gt;
-          peer   = 172.16.0.3:9999
+          peer   = 172.16.0.3:50000
      &lt;/options&gt;
   &lt;/peer&gt;
 &lt;/Component&gt;</tt></pre>
@@ -3047,7 +3044,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-11-12 14:27:59 CEST
+Last updated 2010-11-20 12:53:21 CEST
 </div>
 </div>
 </body>
