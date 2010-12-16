@@ -1584,7 +1584,7 @@ sub _get_comments_filter {
         my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
         if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
 
-        my $comment_op = '<=';
+        my $comment_op = '!>=';
         if($op eq '=' or $op eq '~~') {
             $comment_op = '>=';
         }
