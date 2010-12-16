@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 100;
+use Test::More tests => 128;
 
 BEGIN {
     use lib('t');
@@ -30,6 +30,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Configuration',
-        'unlike'  => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 16;
+use Test::More tests => 20;
 
 
 BEGIN {
@@ -20,6 +20,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Host and Service Alert Histogram',
-        'unlike'  => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

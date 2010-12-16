@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 77;
+use Test::More tests => 107;
 
 BEGIN {
     use lib('t');
@@ -23,6 +23,7 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'fail'    => 1,
+        'unlike'  => [ 'HASH', 'ARRAY' ],
     );
 }
 delete $ENV{'TEST_ERROR'};

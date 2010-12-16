@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 49;
+use Test::More tests => 65;
 
 BEGIN {
     use lib('t');
@@ -34,7 +34,7 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Host and Service State Trends',
-        'unlike'  => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -42,6 +42,6 @@ for my $url (@{$pictures}) {
     TestUtils::test_page(
         'url'          => $url,
         'content_type' => 'image/png',
-        'unlike'       => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

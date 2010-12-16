@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 75;
+use Test::More tests => 97;
 
 BEGIN {
     use lib('t');
@@ -31,6 +31,6 @@ my $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
-        'unlike'  => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

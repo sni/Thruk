@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 405;
+use Test::More tests => 511;
 
 BEGIN {
     use lib('t');
@@ -82,7 +82,7 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => [ 'Current Network Status', 'statusTitle' ],
-        'unlike'  => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -97,7 +97,7 @@ $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'          => $url,
-        'unlike'       => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/x-msexcel',
     );
 }
@@ -113,7 +113,7 @@ $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'          => $url,
-        'unlike'       => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/json; charset=utf-8',
     );
 }

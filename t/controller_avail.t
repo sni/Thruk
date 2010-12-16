@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 167;
+use Test::More tests => 215;
 
 BEGIN {
     use lib('t');
@@ -49,7 +49,7 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Availability Report',
-        'unlike'  => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -64,6 +64,6 @@ for my $url (@{$csv_pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'HOST_NAME, ',
-        'unlike'  => 'internal server error',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
