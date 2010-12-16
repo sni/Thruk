@@ -275,7 +275,7 @@ sub _display_alert_totals {
         }
         elsif($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
             next unless defined $alert->{'current_host_groups'};
-            @idents = split/,/mx, $alert->{'current_host_groups'};
+            @idents = @{$alert->{'current_host_groups'}};
         }
         elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
             $idents[0] = $alert->{'host_name'};
@@ -286,7 +286,7 @@ sub _display_alert_totals {
         }
         elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
             next unless defined $alert->{'current_service_groups'};
-            @idents = split/,/mx, $alert->{'current_service_groups'};
+            @idents = @{$alert->{'current_service_groups'}};
         }
 
         for my $ident (@idents) {
@@ -294,7 +294,7 @@ sub _display_alert_totals {
             if(!defined $totals->{$ident}) {
                 my $sub_title = '';
                 if($displaytype == REPORT_HOSTGROUP_ALERT_TOTALS) {
-                    $sub_title = "Hostgroup '".$ident."' (".$box_title_data->{$ident}.")";
+                    $sub_title = "Hostgroup '".$ident."' (".$box_title_data->{$ident}->{'alias'}.")";
                 }
                 elsif($displaytype == REPORT_HOST_ALERT_TOTALS) {
                     $sub_title = "Host '".$ident."' (".$box_title_data->{$ident}->{'alias'}.")";
@@ -304,7 +304,7 @@ sub _display_alert_totals {
                     $sub_title = "Service '".$service."' on Host '".$host."'";
                 }
                 elsif($displaytype == REPORT_SERVICEGROUP_ALERT_TOTALS) {
-                    $sub_title = "Servicegroup '".$ident."' (".$box_title_data->{$ident}.")";
+                    $sub_title = "Servicegroup '".$ident."' (".$box_title_data->{$ident}->{'alias'}.")";
                 }
                 $totals->{$ident} = {
                     'sub_title' => $sub_title,
