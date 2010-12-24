@@ -844,6 +844,34 @@ ex.:
   show_notification_number = 0
 
 
+==== show_full_commandline
+Display the full command line for host / service checks .
+Be warned, the command line could contain passwords and other confidential data.
+In order to replace the user macros for commands, you have to set the
+'resource_file' in your peer config or the general 'resource_file' option.
+
+ * 0 = off, don't show the command line at all
+ * 1 = show them for contacts with the role: authorized_for_configuration_information
+ * 2 = show them for everyone
+
+ex.:
+
+  show_full_commandline = 0
+
+
+==== resource_file
+Set a general resource file. Make sure it does not contain any
+passwords or any other data which should not be displayed. Instead of
+using a general 'resource_file' you could define one file per peer in your
+peer config.
+
+ex.:
+
+  resource_file = /etc/nagios3/resource.cfg
+
+
+
+
 
 
 ==== Component Thruk::Backend
@@ -865,6 +893,7 @@ xinetd.conf. You can enter local unix sockets too.
             - verbose           let this connection be verbose
             - connect_timeout   connect timeout setting
             - query_timeout     query timeout setting
+            - resource_file     resource_file for this peer
 
 ex.:
 

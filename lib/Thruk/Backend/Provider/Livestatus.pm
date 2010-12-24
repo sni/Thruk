@@ -197,6 +197,7 @@ sub get_hosts {
         active_checks_enabled address alias check_command check_freshness check_interval
         check_options check_period check_type checks_enabled childs comments current_attempt
         current_notification_number event_handler_enabled execution_time
+        custom_variable_names custom_variable_values
         first_notification_delay flap_detection_enabled groups has_been_checked
         high_flap_threshold icon_image icon_image_alt icon_image_expanded
         is_executing is_flapping last_check last_notification last_state_change
@@ -301,6 +302,7 @@ sub get_services {
         active_checks_enabled check_command check_interval check_options
         check_period check_type checks_enabled comments current_attempt
         current_notification_number description event_handler event_handler_enabled
+        custom_variable_names custom_variable_values
         execution_time first_notification_delay flap_detection_enabled groups
         has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
         host_active_checks_enabled host_address host_alias host_checks_enabled

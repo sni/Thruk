@@ -19,7 +19,7 @@ Thruk::Class Model Class.
 
 =head1 AUTHOR
 
-sven,,,
+Sven Nierlein, 2010, <nierlein@cpan.org>
 
 =head1 LICENSE
 

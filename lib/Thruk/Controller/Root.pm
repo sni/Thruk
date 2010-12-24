@@ -130,6 +130,7 @@ sub begin : Private {
             $c->{'db'}->{'stats'}               = $c->stats;
             $c->{'db'}->{'log'}                 = $c->log;
             $c->{'db'}->set_passive_mode($c->config->{'strict_passive_mode'} || 0);
+            $c->{'db'}->set_resource_file($c->config->{'resource_file'});
         }
     }
     $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 0;
@@ -164,6 +165,8 @@ sub begin : Private {
     if( Thruk->config->{'use_frames'} == 0 ) {
         Thruk::Utils::Menu::read_navigation($c);
     }
+
+    $c->stash->{'show_full_commandline'} = $c->config->{'show_full_commandline'} || 0;
 
     return 1;
 }

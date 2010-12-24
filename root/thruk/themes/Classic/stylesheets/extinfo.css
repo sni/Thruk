@@ -35,7 +35,7 @@ DIV.commentNav { font-family: arial,serif;  font-size: 10pt;  text-align: center
 A.commentNav { font-family: arial,serif;  font-size: 10pt; }
 
 TABLE.comment { font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 2; }
-TH.comment { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; }
+TH.comment { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; vertical-align: text-top; }
 .commentOdd { font-family: arial,serif;  font-size: 9pt;  background-color: #DBDBDB; }
 .commentEven { font-family: arial,serif;  font-size: 9pt;  background-color: #C4C2C2; }
 DIV.comment,A.comment { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: center; }
@@ -103,5 +103,3 @@ TH.queue { font-family: arial,serif;  font-size: 10pt;  background-color: white;
 .queueEven { font-family: arial,serif;  font-size: 9pt;  background-color: #C4C2C2; }
 .queueENABLED { font-family: arial,serif;  font-size: 9pt;  background-color: #33FF00; }
 .queueDISABLED { font-family: arial,serif;  font-size: 9pt;  background-color: #F83838; }
-
-

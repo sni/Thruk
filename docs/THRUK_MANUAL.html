@@ -2420,6 +2420,43 @@ attempts on the status details page.</p></div>
 <div class="content">
 <pre><tt>show_notification_number = 0</tt></pre>
 </div></div>
+<h4 id="_show_full_commandline">show_full_commandline</h4>
+<div class="para"><p>Display the full command line for host / service checks .
+Be warned, the command line could contain passwords and other confidential data.
+In order to replace the user macros for commands, you have to set the
+<em>resource_file</em> in your peer config or the general <em>resource_file</em> option.</p></div>
+<div class="ilist"><ul>
+<li>
+<p>
+0 = off, don't show the command line at all
+</p>
+</li>
+<li>
+<p>
+1 = show them for contacts with the role: authorized_for_configuration_information
+</p>
+</li>
+<li>
+<p>
+2 = show them for everyone
+</p>
+</li>
+</ul></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>show_full_commandline = 0</tt></pre>
+</div></div>
+<h4 id="_resource_file">resource_file</h4>
+<div class="para"><p>Set a general resource file. Make sure it does not contain any
+passwords or any other data which should not be displayed. Instead of
+using a general <em>resource_file</em> you could define one file per peer in your
+peer config.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>resource_file = /etc/nagios3/resource.cfg</tt></pre>
+</div></div>
 <h4 id="_component_thruk_backend">Component Thruk::Backend</h4>
 <div class="para"><p>Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the
@@ -2477,6 +2514,11 @@ connect_timeout   connect timeout setting
 <li>
 <p>
 query_timeout     query timeout setting
+</p>
+</li>
+<li>
+<p>
+resource_file     resource_file for this peer
 </p>
 </li>
 </ul></div>
@@ -2908,7 +2950,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-12-24 12:36:40 CEST
+Last updated 2010-12-24 10:56:27 CEST
 </div>
 </div>
 </body>

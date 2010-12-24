@@ -67,7 +67,7 @@
 
   <div class="pref_pane" id="pref_pane" style="display:none; visibility:hidden;">
     <a href="javascript:togglePreferencePane()"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" id="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
-    <form action="[% c.request.uri %]" method="GET">
+    <form action="[% uri(c) %]" method="GET">
     <table class="pref_pane" border=1 width="450">
       <tr>
         <td>
