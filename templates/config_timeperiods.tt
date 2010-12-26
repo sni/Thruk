@@ -2,6 +2,8 @@
    dataTitle = 'Time Periods'
 %]
 
+<div align="center">[% PROCESS _pager.tt %]</div>
+
 <table border="0" class='data'>
   <tr>
     [% IF backends.size > 1 %]
@@ -16,6 +18,7 @@
   [% FOREACH d = data %]
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
+  [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]'>
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
@@ -47,5 +50,7 @@
     [% END %]
   [% END %]
 </table>
+
+<div align="center">[% PROCESS _pager.tt %]</div>
 
 [% END %]

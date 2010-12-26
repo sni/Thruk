@@ -589,19 +589,17 @@ sub _page_data {
 
     # set some defaults
     $c->stash->{'pager'} = "";
+    $c->stash->{'data'}  = $data;
 
     # page only in html mode
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     return $data unless $view_mode eq 'html';
 
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
-    my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
-
     # we dont use paging at all?
-    if( !$c->stash->{'use_pager'} or !defined $entries ) {
-        $c->stash->{'data'} = $data, return 1;
-    }
+    return 1 unless $c->stash->{'use_pager'};
 
+    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    return 1 unless defined $entries;
     $c->stash->{'entries_per_page'} = $entries;
 
     my $pager = new Data::Page;
@@ -616,9 +614,40 @@ sub _page_data {
         $pages = POSIX::ceil( $pager->total_entries / $entries );
     }
     else {
-        $c->stash->{'data'} = $data, return $data;
+        $c->stash->{'data'} = $data;
+        return $data;
     }
 
+    my $page = 1;
+    # current page set by get parameter
+    if(defined $c->{'request'}->{'parameters'}->{'page'}) {
+        $page = $c->{'request'}->{'parameters'}->{'page'};
+    }
+    # current page set by jump anchor
+    elsif(defined $c->{'request'}->{'parameters'}->{'jump'}) {
+        my $nr = 0;
+        my $jump = $c->{'request'}->{'parameters'}->{'jump'};
+        if(exists $data->[0]->{'description'}) {
+            for my $row (@{$data}) {
+                $nr++;
+                if(defined $row->{'host_name'} and defined $row->{'description'} and $row->{'host_name'}."_".$row->{'description'} eq $jump) {
+                    $page = POSIX::ceil($pages * $nr / $pager->total_entries);
+                    last;
+                }
+            }
+        }
+        elsif(exists $data->[0]->{'name'}) {
+            for my $row (@{$data}) {
+                $nr++;
+                if(defined $row->{'name'} and $row->{'name'} eq $jump) {
+                    $page = POSIX::ceil($pages * $nr / $pager->total_entries);
+                    last;
+                }
+            }
+        }
+    }
+
+    # last/first/prev or next button pressed?
     if( exists $c->{'request'}->{'parameters'}->{'next'} ) {
         $page++;
     }
@@ -638,13 +667,13 @@ sub _page_data {
     $c->stash->{'current_page'} = $page;
 
     if( $entries eq 'all' ) {
-        $c->stash->{'data'} = $data,;
+        $c->stash->{'data'} = $data;
     }
     else {
         $pager->entries_per_page($entries);
         $pager->current_page($page);
         my @data = $pager->splice($data);
-        $c->stash->{'data'} = \@data,;
+        $c->stash->{'data'} = \@data;
     }
 
     $c->stash->{'pager'} = $pager;

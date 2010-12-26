@@ -61,8 +61,9 @@ my %config = ('name'                   => 'Thruk',
                   ENCODING           => 'utf8',
                   INCLUDE_PATH       => $project_root.'/templates',
                   FILTERS            => {
-                                          'duration'     => \&Thruk::Utils::Filter::duration,
-                                          'nl2br'        => \&Thruk::Utils::Filter::nl2br,
+                                          'duration'            => \&Thruk::Utils::Filter::duration,
+                                          'nl2br'               => \&Thruk::Utils::Filter::nl2br,
+                                          'strip_command_args'  => \&Thruk::Utils::Filter::strip_command_args,
                                       },
                   PRE_DEFINE         => {
                                           'sprintf'        => \&Thruk::Utils::Filter::sprintf,

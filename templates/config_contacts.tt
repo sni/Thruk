@@ -2,6 +2,8 @@
    dataTitle = 'Contacts'
 %]
 
+<div align="center">[% PROCESS _pager.tt %]</div>
+
 <table border="0" class='data'>
   <tr>
     [% IF backends.size > 1 %]
@@ -11,17 +13,22 @@
     <th class='data'>Alias</th>
     <th class='data'>Email Address</th>
     <th class='data'>Pager Address/Number</th>
+<!--
     <th class='data'>Service Notification Options</th>
     <th class='data'>Host Notification Options</th>
+-->
     <th class='data'>Service Notification Period</th>
     <th class='data'>Host Notification Period</th>
+<!--
     <th class='data'>Service Notification Commands</th>
     <th class='data'>Host Notification Commands</th>
     <th class='data'>Retention Options</th>
+-->
   </tr>
   [% FOREACH d = data %]
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
+  [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]'>
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
@@ -36,15 +43,21 @@
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'><a href="mailto:[% d.email | uri %]">[% d.email %]</a></td>
     <td class='[% class %]'>[% d.pager %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.service_notification_period | uri %]">[% d.service_notification_period %]</a></td>
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.host_notification_period | uri %]">[% d.host_notification_period %]</a></td>
+-->
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.service_notification_period | uri %]#[% d.service_notification_period | uri %]">[% d.service_notification_period %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.host_notification_period | uri %]#[% d.host_notification_period | uri %]">[% d.host_notification_period %]</a></td>
+<!--
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
+-->
   </tr>
   [% END %]
 </table>
+
+<div align="center">[% PROCESS _pager.tt %]</div>
 
 [% END %]

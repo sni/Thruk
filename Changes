@@ -3,6 +3,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 0.76    not yet released
           - added full command line to host / service extinfo page (show_full_commandline option)
           - added user_template_path config option to specify additional template paths
+          - made configuration page more readable
+          - added paging to config page
 
 0.74    Sat Dec 18 13:45:08 CET 2010
           - added strict disabled mode ( make passive hosts/services more intuitive )
