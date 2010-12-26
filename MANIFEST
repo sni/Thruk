@@ -456,6 +456,7 @@ root/thruk/themes/Classic/images/icon_right.gif
 root/thruk/themes/Classic/images/info.png
 root/thruk/themes/Classic/images/left.gif
 root/thruk/themes/Classic/images/left.png
+root/thruk/themes/Classic/images/link.png
 root/thruk/themes/Classic/images/logo_thruk.png
 root/thruk/themes/Classic/images/logo_thruk_mid.png
 root/thruk/themes/Classic/images/logo_thruk_small.png
@@ -566,6 +567,7 @@ root/thruk/themes/Exfoliation/images/icon_right.gif
 root/thruk/themes/Exfoliation/images/info.png
 root/thruk/themes/Exfoliation/images/left.gif
 root/thruk/themes/Exfoliation/images/left.png
+root/thruk/themes/Exfoliation/images/link.png
 root/thruk/themes/Exfoliation/images/logo_thruk.png
 root/thruk/themes/Exfoliation/images/logo_thruk_mid.png
 root/thruk/themes/Exfoliation/images/logo_thruk_small.png
@@ -730,6 +732,7 @@ root/thruk/themes/Nuvola/images/icon_right.gif
 root/thruk/themes/Nuvola/images/info.png
 root/thruk/themes/Nuvola/images/left.gif
 root/thruk/themes/Nuvola/images/left.png
+root/thruk/themes/Nuvola/images/link.png
 root/thruk/themes/Nuvola/images/logo_thruk.png
 root/thruk/themes/Nuvola/images/logo_thruk_mid.png
 root/thruk/themes/Nuvola/images/logo_thruk_small.png
@@ -885,6 +888,7 @@ root/thruk/themes/Vautour/images/interface/menu_more.gif
 root/thruk/themes/Vautour/images/interface/search.gif
 root/thruk/themes/Vautour/images/left.gif
 root/thruk/themes/Vautour/images/left.png
+root/thruk/themes/Vautour/images/link.png
 root/thruk/themes/Vautour/images/logo_thruk.png
 root/thruk/themes/Vautour/images/logo_thruk_mid.png
 root/thruk/themes/Vautour/images/logo_thruk_small.png
@@ -1010,6 +1014,7 @@ templates/_logs.tt
 templates/_message.tt
 templates/_pager.tt
 templates/_service_status_details_box.tt
+templates/_show_link.tt
 templates/_status_cmd_pane.tt
 templates/_status_filter.tt
 templates/avail_report_form_box.tt
