@@ -99,6 +99,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         my $custom_title = $c->{'request'}->{'parameters'}->{'title'};
         $custom_title =~ s/\+/\ /gmx;
         $c->stash->{custom_title} = $custom_title;
+        $c->stash->{title} = $custom_title;
     }
 
     return 1;
