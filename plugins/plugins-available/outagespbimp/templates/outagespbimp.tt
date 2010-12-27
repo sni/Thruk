@@ -19,7 +19,7 @@
       <div class='dataTitle'>Blocking Outages problem impacts</div>
       <table border="0" class='data'>
         <tr>
-          <th class='data'>Severity</th>
+          <th class='data'>Criticity</th>
           <th class='data'>Host</th>
           <th class='data'>State</th>
           <th class='data'>Notes</th>
@@ -34,7 +34,7 @@
         [% SET class = 'dataOdd'  IF loop.odd %]
         [% SET class = 'dataEven' IF loop.even %]
         <tr class='[% class %]'>
-          <td class='[% class %]'>[% host.severity %]</td>
+          <td class='[% class %]'>[% host.criticity %]</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
           <td class='hostDOWN'>DOWN</td>
           <td class='[% class %]'>
