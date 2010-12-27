@@ -67,6 +67,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
             # count number of affected hosts / services
             my($affected_hosts,$affected_services) = $self->_count_affected_hosts_and_services($c, $host->{'name'}, $all_hosts);
+	    # impact based, but do not work from now
+#            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($c, $host->{'name'}, $all_hosts);
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
 
@@ -115,6 +117,34 @@ sub _count_affected_hosts_and_services {
 
     return($affected_hosts, $affected_services);
 }
+
+##########################################################
+# create the status details page
+sub _count_hosts_and_services_impacts {
+    my($self, $c, $host, $all_hosts ) = @_;
+
+    my $affected_hosts    = 0;
+    my $affected_services = 0;
+
+    return(0,0) if !defined $all_hosts->{$host};
+
+    if(defined $all_hosts->{$host}->{'impacts'} and $all_hosts->{$host}->{'impacts'} ne '') {
+        for my $child (@{$all_hosts->{$host}->{'impacts'}}) {
+            my($child_affected_hosts,$child_affected_services) = $self->_count_affected_hosts_and_services($c, $child, $all_hosts);
+            $affected_hosts    += $child_affected_hosts;
+            $affected_services += $child_affected_services;
+        }
+    }
+
+    # add number of directly affected hosts
+    $affected_hosts++;
+
+    # add number of directly affected services
+    $affected_services += $all_hosts->{$host}->{'num_services'};
+
+    return($affected_hosts, $affected_services);
+}
+
 
 =head1 AUTHOR
 
