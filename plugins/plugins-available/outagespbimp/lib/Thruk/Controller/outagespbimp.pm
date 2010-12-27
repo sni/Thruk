@@ -43,8 +43,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 
     my $outages = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    state => 1,
-                                                    childs => { '!=' => undef }
+                                                    #state => 1,
+                                                    #childs => { '!=' => undef }
+						    is_problem => 1
                                                   ]);
 
     if(defined $outages and scalar @{$outages} > 0) {
@@ -70,11 +71,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $host->{'affected_services'} = $affected_services;
 
             $host->{'severity'} = int($affected_hosts + $affected_services/4);
+	    
         }
     }
 
     # sort by severity
-    my $sortedoutages = Thruk::Backend::Manager::_sort($c, $outages, { 'DESC' => 'severity' });
+    my $sortedoutages = Thruk::Backend::Manager::_sort($c, $outages, { 'DESC' => 'criticity' });
 
     $c->stash->{outages}        = $sortedoutages;
     $c->stash->{title}          = 'Network Outages problem impacts';
