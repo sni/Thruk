@@ -13,6 +13,7 @@ my $conf = get_thruk_conf();
 my $docs = get_docs();
 for my $key (keys %{$conf}) {
     next if $key eq 'Component';
+    next if $key =~ /^\d+$/mx;
     is($docs->{$key}, 1, "documentation entry for: $key");
 }
 for my $key (keys %{$conf->{'Component'}}) {

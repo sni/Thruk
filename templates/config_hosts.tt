@@ -2,6 +2,8 @@
    dataTitle = 'Hosts'
 %]
 
+<div align="center">[% PROCESS _pager.tt %]</div>
+
 <table border="0" class='data'>
   <tr>
     [% IF backends.size > 1 %]
@@ -19,38 +21,55 @@
     <th class='data'>Obsess Over</th>
     <th class='data'>Enable Active Checks</th>
     <th class='data'>Enable Passive Checks</th>
+<!--
     <th class='data'>Check Freshness</th>
     <th class='data'>Freshness Threshold</th>
+-->
     <th class='data'>Default Contacts/Groups</th>
     <th class='data'>Notification Interval</th>
     <th class='data'>First Notification Delay</th>
+<!--
     <th class='data'>Notification Options</th>
+-->
     <th class='data'>Notification Period</th>
+<!--
     <th class='data'>Event Handler</th>
+-->
     <th class='data'>Enable Event Handler</th>
+<!--
     <th class='data'>Stalking Options</th>
+-->
     <th class='data'>Enable Flap Detection</th>
     <th class='data'>Low Flap Threshold</th>
     <th class='data'>High Flap Threshold</th>
+<!--
     <th class='data'>Flap Detection Options</th>
+-->
     <th class='data'>Process Performance Data</th>
+<!--
     <th class='data'>Enable Failure Prediction</th>
     <th class='data'>Failure Prediction Options</th>
+-->
     <th class='data'>Notes</th>
     <th class='data'>Notes URL</th>
     <th class='data'>Action URL</th>
+<!--
     <th class='data'>2-D Coords</th>
     <th class='data'>3-D Coords</th>
     <th class='data'>Statusmap Image</th>
     <th class='data'>VRML Image</th>
+-->
     <th class='data'>Logo Image</th>
     <th class='data'>Image Alt</th>
+<!--
     <th class='data'>Retention Options</th>
+-->
   </tr>
   [% FOREACH d = data %]
   [% SET pd = d.peer_key %]
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
+  [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]'>
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
@@ -64,44 +83,62 @@
     <td class='[% class %]'><a id="[% name2id(d.name, 'host') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>[% d.address %]</td>
-    <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts#[% parent | uri %]">[% parent %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts&amp;jump=[% parent | uri %]#[% parent | uri %]">[% parent %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.max_check_attempts %]</td>
     <td class='[% class %]'>[% duration(d.check_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
     <td class='[% class %]'>[% duration(d.retry_interval * pi_detail.$pd.interval_length, 0 ) %]</td>
-    <td class='[% class %]'><a href="config.cgi?type=commands#[% d.check_command | uri %]">[% d.check_command %]</a></td>
+    <td class='[% class %]'><a href="config.cgi?type=commands&amp;jump=[% d.check_command | strip_command_args | uri %]#[% d.check_command | strip_command_args | uri %]">[% d.check_command %]</a></td>
     <td class='[% class %]'>[% d.check_period %]</td>
     <td class='[% class %]'>[% IF d.obsess_over_host %]Yes[% ELSE %]No[% END %]</td>
     <td class='[% class %]'>[% IF d.active_checks_enabled %]Yes[% ELSE %]No[% END %]</td>
     <td class='[% class %]'>[% IF d.accept_passive_checks %]Yes[% ELSE %]No[% END %]</td>
     <td class='[% class %]'>[% IF d.check_freshness %]Yes[% ELSE %]No[% END %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
+-->
     <td class='[% class %]'>[% IF d.notification_interval %][% duration(d.notification_interval * pi_detail.$pd.interval_length, 0 ) %][% ELSE %]<i>No Re-notification</i>[% END %]</td>
     <td class='[% class %]'>[% duration(d.first_notification_delay * pi_detail.$pd.interval_length, 0 ) %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'><a href="config.cgi?type=timeperiods#[% d.notification_period | uri %]">[% d.notification_period %]</a></td>
+-->
+    <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.notification_period | uri %]#[% d.notification_period | uri %]">[% d.notification_period %]</a></td>
+<!--
     <td class='[% class %]'>TODO</td>
+-->
     <td class='[% class %]'>[% IF d.event_handler_enabled %]Yes[% ELSE %]No[% END %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
+-->
     <td class='[% class %]'>[% IF d.flap_detection_enabled %]Yes[% ELSE %]No[% END %]</td>
     <td class='[% class %]'>[% IF d.low_flap_threshold %][% d.low_flap_threshold %]%[% ELSE %]Program-wide value[% END %]</td>
     <td class='[% class %]'>[% IF d.high_flap_threshold %][% d.high_flap_threshold %]%[% ELSE %]Program-wide value[% END %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
+-->
     <td class='[% class %]'>[% IF d.process_performance_data %]Yes[% ELSE %]No[% END %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
+-->
     <td class='[% class %]'>[% d.notes %]</td>
     <td class='[% class %]'>[% d.notes_url %]</td>
     <td class='[% class %]'>[% d.action_url %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
     <td class='[% class %]'>TODO</td>
+-->
     <td class='[% class %]' valign="middle">[% IF d.icon_image %]<img src="[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% d.icon_image %]" border="0" height="20" width="20" alt="host icon"> [% d.icon_image %][% END %]</td>
     <td class='[% class %]'>[% d.icon_image_alt %]</td>
+<!--
     <td class='[% class %]'>TODO</td>
+-->
   </tr>
   [% END %]
 </table>
+
+<div align="center">[% PROCESS _pager.tt %]</div>
 
 [% END %]

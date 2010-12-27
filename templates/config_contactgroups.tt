@@ -2,6 +2,8 @@
    dataTitle = 'Contactgroups'
 %]
 
+<div align="center">[% PROCESS _pager.tt %]</div>
+
 <table border="0" class='data'>
   <tr>
     [% IF backends.size > 1 %]
@@ -14,6 +16,7 @@
   [% FOREACH d = data %]
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
+  [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]'>
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
@@ -26,9 +29,11 @@
     [% END %]
     <td class='[% class %]'><a id="[% name2id(d.name, 'contactgroup') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts#[% contact | uri %]">[% contact %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact %]</a>[% END %]</td>
   </tr>
   [% END %]
 </table>
+
+<div align="center">[% PROCESS _pager.tt %]</div>
 
 [% END %]

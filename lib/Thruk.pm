@@ -36,7 +36,7 @@ use Catalyst qw/
                 Compress::Gzip
                 Thruk::RemoveNastyCharsFromHttpParam
                 /;
-our $VERSION = '0.74';
+our $VERSION = '0.76';
 
 ###################################################
 # Configure the application.
@@ -50,7 +50,7 @@ our $VERSION = '0.74';
 my $project_root = __PACKAGE__->config->{home};
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
-              'released'               => 'December 18, 2010',
+              'released'               => 'December 26, 2010',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
               'project_root'           => $project_root,
@@ -61,8 +61,9 @@ my %config = ('name'                   => 'Thruk',
                   ENCODING           => 'utf8',
                   INCLUDE_PATH       => $project_root.'/templates',
                   FILTERS            => {
-                                          'duration'     => \&Thruk::Utils::Filter::duration,
-                                          'nl2br'        => \&Thruk::Utils::Filter::nl2br,
+                                          'duration'            => \&Thruk::Utils::Filter::duration,
+                                          'nl2br'               => \&Thruk::Utils::Filter::nl2br,
+                                          'strip_command_args'  => \&Thruk::Utils::Filter::strip_command_args,
                                       },
                   PRE_DEFINE         => {
                                           'sprintf'        => \&Thruk::Utils::Filter::sprintf,
@@ -258,6 +259,12 @@ if($@) {
     croak('cannot start');
 }
 
+
+###################################################
+# additional user template paths?
+if(defined __PACKAGE__->config->{'user_template_path'}) {
+    unshift @{__PACKAGE__->config->{templates_paths}}, __PACKAGE__->config->{'user_template_path'};
+}
 
 ###################################################
 

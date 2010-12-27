@@ -2,6 +2,8 @@
    dataTitle = 'Service Groups'
 %]
 
+<div align="center">[% PROCESS _pager.tt %]</div>
+
 <table border="0" class='data'>
   <tr>
     [% IF backends.size > 1 %]
@@ -19,6 +21,7 @@
   [% SET pd = d.peer_key %]
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
+  [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]'>
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
@@ -34,7 +37,7 @@
     <td class='[% class %]'>
       [% FOREACH service = d.members %]
         [% IF !loop.first() %] , [% END %]
-        <a href="config.cgi?type=hosts#[% service.0 | uri %]">[% service.0 %]</a> / <a href="config.cgi?type=services#[% service.0 | uri %]_[% service.1 %]">[% service.1 %]</a>
+        <a href="config.cgi?type=hosts&amp;jump=[% service.0 | uri %]#[% service.0 | uri %]">[% service.0 %]</a> / <a href="config.cgi?type=services&amp;jump=[% service.0 | uri %]_[% service.1 %]#[% service.0 | uri %]_[% service.1 %]">[% service.1 %]</a>
       [% END %]
     </td>
     <td class='[% class %]'>[% d.notes %]</td>
@@ -44,5 +47,7 @@
 
   [% END %]
 </table>
+
+<div align="center">[% PROCESS _pager.tt %]</div>
 
 [% END %]

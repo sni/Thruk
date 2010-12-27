@@ -85,7 +85,9 @@
             - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
           </div>
         </td>
-        <td valign="bottom" align="right" width="10%">
+        <td valign="bottom" align="right" width="10%" nowrap>
+          [% IF use_frames %][% PROCESS _show_link.tt %][% END %]
+
           <a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns'); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>&nbsp;
 
           <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">

@@ -545,3 +545,12 @@ td.stateInfoTable1 .dataVal {
   background-color:#88BBD8;
   cursor: pointer;
 }
+
+/* generic rules */
+.no_margin {
+  margin: 0px;
+}
+
+.command_line {
+  max-width:800px;
+}

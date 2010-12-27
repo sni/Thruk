@@ -3,7 +3,6 @@ Todo List:
 
 for version 1.0
 general
-    - write tests ( with admin user, limited user, unknown user )
     - add backend name to logs
     - add go back button on error page
     - use title for quick downtimes popups
@@ -14,7 +13,6 @@ extinfo:
 
 config:
     - add missing values
-    - add paging
 
 avail:
     - check availability calculation on multibackend (restarts)

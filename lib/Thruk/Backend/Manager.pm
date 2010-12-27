@@ -37,6 +37,7 @@ sub new {
         'stats'               => undef,
         'log'                 => undef,
         'strict_passive_mode' => undef,
+        'resource_file'       => undef,
         'backends'            => [],
     };
     bless $self, $class;
@@ -263,6 +264,95 @@ sub set_passive_mode {
         $backend->{'class'}->{'strict_passive_mode'} = $value;
     }
     return;
+}
+
+
+########################################
+
+=head2 set_resource_file
+
+  set_resource_file
+
+sets the resource_file
+
+=cut
+
+sub set_resource_file {
+    my( $self, $value ) = @_;
+    $self->{'resource_file'} = $value;
+    return;
+}
+
+########################################
+
+=head2 expand_command
+
+  expand_command
+
+expand a command line with host/service data
+
+=cut
+
+sub expand_command {
+    my( $self, %data ) = @_;
+    croak("no host")    unless defined $data{'host'};
+    my $host     = $data{'host'};
+    my $service  = $data{'service'};
+
+    my $command_name = $host->{'check_command'};
+    if(defined $service) {
+        $command_name = $service->{'check_command'};
+    }
+    my($name, @com_args) = split/!/mx, $command_name;
+
+    # get command data
+    my $commands = $self->get_commands( filter => [ { 'name' => $name } ] );
+    croak("no command for $name") unless defined $commands->[0]->{'line'};
+    my $expanded = $commands->[0]->{'line'};
+
+    # arguments
+    my $x = 1;
+    for my $arg (@com_args) {
+        $expanded =~ s/\$ARG$x\$/$arg/gmx;
+        $x++;
+    }
+
+    # user macros...
+    my $user_macros = $self->_get_user_macros($host->{'peer_key'});
+    if(defined $user_macros) {
+        for my $x (1..32) {
+            $expanded =~ s/\$USER$x\$/$user_macros->{'$USER'.$x.'$'}/gmx if defined $user_macros->{'$USER'.$x.'$'};
+        }
+    }
+
+    # host macros
+    $expanded =~ s/\$HOSTADDRESS\$/$host->{'address'}/gmx;
+    $expanded =~ s/\$HOSTNAME\$/$host->{'name'}/gmx;
+    $expanded =~ s/\$HOSTALIAS\$/$host->{'alias'}/gmx;
+
+    # host user macros
+    $x = 0;
+    for my $key (@{$host->{'custom_variable_names'}}) {
+        $expanded =~ s/\$_HOST$key\$/$host->{'custom_variable_values'}->[$x]/gmx;
+        $x++;
+    }
+
+    # service macros
+    if(defined $service) {
+        $expanded =~ s/\$SERVICEDESC\$/$service->{'description'}/gmx;
+        # service user macros...
+        $x = 0;
+        for my $key (@{$service->{'custom_variable_names'}}) {
+            $expanded =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
+            $x++;
+        }
+    }
+
+    my $command = {
+        'line'          => $command_name,
+        'line_expanded' => $expanded,
+    };
+    return $command;
 }
 
 
@@ -499,19 +589,17 @@ sub _page_data {
 
     # set some defaults
     $c->stash->{'pager'} = "";
+    $c->stash->{'data'}  = $data;
 
     # page only in html mode
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     return $data unless $view_mode eq 'html';
 
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
-    my $page    = $c->{'request'}->{'parameters'}->{'page'}    || 1;
-
     # we dont use paging at all?
-    if( !$c->stash->{'use_pager'} or !defined $entries ) {
-        $c->stash->{'data'} = $data, return 1;
-    }
+    return 1 unless $c->stash->{'use_pager'};
 
+    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    return 1 unless defined $entries;
     $c->stash->{'entries_per_page'} = $entries;
 
     my $pager = new Data::Page;
@@ -526,9 +614,40 @@ sub _page_data {
         $pages = POSIX::ceil( $pager->total_entries / $entries );
     }
     else {
-        $c->stash->{'data'} = $data, return $data;
+        $c->stash->{'data'} = $data;
+        return $data;
     }
 
+    my $page = 1;
+    # current page set by get parameter
+    if(defined $c->{'request'}->{'parameters'}->{'page'}) {
+        $page = $c->{'request'}->{'parameters'}->{'page'};
+    }
+    # current page set by jump anchor
+    elsif(defined $c->{'request'}->{'parameters'}->{'jump'}) {
+        my $nr = 0;
+        my $jump = $c->{'request'}->{'parameters'}->{'jump'};
+        if(exists $data->[0]->{'description'}) {
+            for my $row (@{$data}) {
+                $nr++;
+                if(defined $row->{'host_name'} and defined $row->{'description'} and $row->{'host_name'}."_".$row->{'description'} eq $jump) {
+                    $page = POSIX::ceil($pages * $nr / $pager->total_entries);
+                    last;
+                }
+            }
+        }
+        elsif(exists $data->[0]->{'name'}) {
+            for my $row (@{$data}) {
+                $nr++;
+                if(defined $row->{'name'} and $row->{'name'} eq $jump) {
+                    $page = POSIX::ceil($pages * $nr / $pager->total_entries);
+                    last;
+                }
+            }
+        }
+    }
+
+    # last/first/prev or next button pressed?
     if( exists $c->{'request'}->{'parameters'}->{'next'} ) {
         $page++;
     }
@@ -548,13 +667,13 @@ sub _page_data {
     $c->stash->{'current_page'} = $page;
 
     if( $entries eq 'all' ) {
-        $c->stash->{'data'} = $data,;
+        $c->stash->{'data'} = $data;
     }
     else {
         $pager->entries_per_page($entries);
         $pager->current_page($page);
         my @data = $pager->splice($data);
-        $c->stash->{'data'} = \@data,;
+        $c->stash->{'data'} = \@data;
     }
 
     $c->stash->{'pager'} = $pager;
@@ -652,12 +771,13 @@ sub _initialise_peer {
     $config->{'options'}->{'keepalive'} = 0 if defined $config->{'options'}->{'keepalive'};
 
     my $peer = {
-        'name'    => $config->{'name'},
-        'type'    => $config->{'type'},
-        'hidden'  => $config->{'hidden'},
-        'groups'  => $config->{'groups'},
-        'enabled' => 1,
-        'class'   => $class->new( $config->{'options'} ),
+        'name'          => $config->{'name'},
+        'type'          => $config->{'type'},
+        'hidden'        => $config->{'hidden'},
+        'groups'        => $config->{'groups'},
+        'resource_file' => $config->{'options'}->{'resource_file'},
+        'enabled'       => 1,
+        'class'         => $class->new( $config->{'options'} ),
     };
     $peer->{'key'}  = $peer->{'class'}->peer_key();
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
@@ -1005,6 +1125,48 @@ sub _limit {
 
     return ($data);
 }
+
+
+########################################
+
+=head2 _get_user_macros
+
+  _get_user_macros($peer_key)
+
+returns the USER1-32 macros from a resource file
+
+=cut
+
+sub _get_user_macros {
+    my $self     = shift;
+    my $peer_key = shift;
+    my $backend = $self->get_peer_by_key($peer_key);
+    if(defined $backend->{'resource_file'}) {
+        return $self->_read_resource_file($backend->{'resource_file'});
+    }
+    return $self->_read_resource_file($self->{'resource_file'});
+}
+
+
+########################################
+
+=head2 _read_resource_file
+
+  _read_resource_file($file)
+
+returns a hash with all USER1-32 macros
+
+=cut
+
+sub _read_resource_file {
+    my $self   = shift;
+    my $file   = shift;
+    return unless defined $file;
+    return unless -f $file;
+    my %macros = Config::General::ParseConfig($file);
+    return \%macros;
+}
+
 
 =head1 AUTHOR
 

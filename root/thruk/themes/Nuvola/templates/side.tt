@@ -4,6 +4,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Thruk</title>
+    <script type="text/javascript">
+    <!--
+    var url_prefix = '[% url_prefix %]';
+    -->
+    </script>
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css" type="text/css" rel="stylesheet" />

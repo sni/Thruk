@@ -296,6 +296,24 @@ sub get_message {
 }
 
 
+########################################
+
+=head2 strip_command_args
+
+  my $striped_string = strip_command_args($command_name)
+
+returns a string without the arguments for a command
+
+check_nrpe!$HOSTNAME$!check_disk -> check_nrpe
+
+=cut
+sub strip_command_args {
+    my $text = shift;
+    $text =~ s/!.*$//gmx;
+    return($text);
+}
+
+
 1;
 
 =head1 AUTHOR

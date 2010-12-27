@@ -3,8 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.2" />
-<title>Thruk Users Guide</title>
+<meta name="generator" content="AsciiDoc 8.2.7" />
 <style type="text/css">
 /* Debug borders */
 p, li, dt, dd, div, pre, h1, h2, h3, h4, h5, h6 {
@@ -91,7 +90,7 @@ span#author {
 }
 span#email {
 }
-span#revnumber, span#revdate, span#revremark {
+span#revision {
   font-family: sans-serif;
 }
 
@@ -111,21 +110,17 @@ div#footer-badges {
   padding-bottom: 0.5em;
 }
 
-div#preamble {
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
-}
+div#preamble,
 div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
 div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
 div.admonitionblock {
-  margin-top: 1.0em;
+  margin-right: 10%;
+  margin-top: 1.5em;
   margin-bottom: 1.5em;
 }
 div.admonitionblock {
-  margin-top: 2.0em;
-  margin-bottom: 2.0em;
-  margin-right: 10%;
-  color: #606060;
+  margin-top: 2.5em;
+  margin-bottom: 2.5em;
 }
 
 div.content { /* Block element content. */
@@ -161,25 +156,26 @@ div.sidebarblock > div.content {
   padding: 0.5em;
 }
 
+div.listingblock {
+  margin-right: 0%;
+}
 div.listingblock > div.content {
   border: 1px solid silver;
   background: #f4f4f4;
   padding: 0.5em;
 }
 
-div.quoteblock, div.verseblock {
-  padding-left: 1.0em;
-  margin-left: 1.0em;
-  margin-right: 10%;
-  border-left: 5px solid #dddddd;
-  color: #777777;
+div.quoteblock {
+  padding-left: 2.0em;
 }
-
 div.quoteblock > div.attribution {
   padding-top: 0.5em;
   text-align: right;
 }
 
+div.verseblock {
+  padding-left: 2.0em;
+}
 div.verseblock > div.content {
   white-space: pre;
 }
@@ -202,17 +198,17 @@ div.admonitionblock .icon {
 }
 div.admonitionblock td.content {
   padding-left: 0.5em;
-  border-left: 3px solid #dddddd;
+  border-left: 2px solid silver;
 }
 
 div.exampleblock > div.content {
-  border-left: 3px solid #dddddd;
-  padding-left: 0.5em;
+  border-left: 2px solid silver;
+  padding: 0.5em;
 }
 
 div.imageblock div.content { padding-left: 0; }
+div.imageblock img { border: 1px solid silver; }
 span.image img { border-style: none; }
-a.image:visited { color: white; }
 
 dl {
   margin-top: 0.8em;
@@ -222,7 +218,6 @@ dt {
   margin-top: 0.5em;
   margin-bottom: 0;
   font-style: normal;
-  color: navy;
 }
 dd > *:first-child {
   margin-top: 0.1em;
@@ -231,121 +226,42 @@ dd > *:first-child {
 ul, ol {
     list-style-position: outside;
 }
-ol.arabic {
+div.olist > ol {
   list-style-type: decimal;
 }
-ol.loweralpha {
+div.olist2 > ol {
   list-style-type: lower-alpha;
-}
-ol.upperalpha {
-  list-style-type: upper-alpha;
-}
-ol.lowerroman {
-  list-style-type: lower-roman;
-}
-ol.upperroman {
-  list-style-type: upper-roman;
-}
-
-div.compact ul, div.compact ol,
-div.compact p, div.compact p,
-div.compact div, div.compact div {
-  margin-top: 0.1em;
-  margin-bottom: 0.1em;
 }
 
 div.tableblock > table {
   border: 3px solid #527bbd;
 }
-thead, p.table.header {
+thead {
   font-family: sans-serif;
   font-weight: bold;
 }
 tfoot {
   font-weight: bold;
 }
-td > div.verse {
-  white-space: pre;
-}
-p.table {
-  margin-top: 0;
-}
-/* Because the table frame attribute is overriden by CSS in most browsers. */
-div.tableblock > table[frame="void"] {
-  border-style: none;
-}
-div.tableblock > table[frame="hsides"] {
-  border-left-style: none;
-  border-right-style: none;
-}
-div.tableblock > table[frame="vsides"] {
-  border-top-style: none;
-  border-bottom-style: none;
-}
 
-
-div.hdlist {
+div.hlist {
   margin-top: 0.8em;
   margin-bottom: 0.8em;
 }
-div.hdlist tr {
+div.hlist td {
   padding-bottom: 15px;
 }
-dt.hdlist1.strong, td.hdlist1.strong {
-  font-weight: bold;
-}
-td.hdlist1 {
+td.hlist1 {
   vertical-align: top;
   font-style: normal;
   padding-right: 0.8em;
-  color: navy;
 }
-td.hdlist2 {
+td.hlist2 {
   vertical-align: top;
 }
-div.hdlist.compact tr {
-  margin: 0;
-  padding-bottom: 0;
-}
-
-.comment {
-  background: yellow;
-}
-
-.footnote, .footnoteref {
-  font-size: 0.8em;
-}
-
-span.footnote, span.footnoteref {
-  vertical-align: super;
-}
-
-#footnotes {
-  margin: 20px 0 20px 0;
-  padding: 7px 0 0 0;
-}
-
-#footnotes div.footnote {
-  margin: 0 0 5px 0;
-}
-
-#footnotes hr {
-  border: none;
-  border-top: 1px solid silver;
-  height: 1px;
-  text-align: left;
-  margin-left: 0;
-  width: 20%;
-  min-width: 100px;
-}
-
 
 @media print {
   div#footer-badges { display: none; }
-}
-
-div#toc {
-  margin-bottom: 2.5em;
 }
 
 div#toctitle {
@@ -408,22 +324,24 @@ div.verseblock-attribution {
 }
 
 div.exampleblock-content {
-  border-left: 3px solid #dddddd;
+  border-left: 2px solid silver;
   padding-left: 0.5em;
 }
 
 /* IE6 sets dynamically generated links as visited. */
 div#toc a:visited { color: blue; }
+
+/* Because IE6 child selector is broken. */
+div.olist2 ol {
+  list-style-type: lower-alpha;
+}
+div.olist2 div.olist ol {
+  list-style-type: decimal;
+}
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
-window.onload = function(){asciidoc.footnotes(); asciidoc.toc(2);}
-var asciidoc = {  // Namespace.
-
-/////////////////////////////////////////////////////////////////////
-// Table Of Contents generator
-/////////////////////////////////////////////////////////////////////
-
+window.onload = function(){generateToc(2)}
 /* Author: Mihai Bazon, September 2002
  * http://students.infoiasi.ro/~mishoo
  *
@@ -435,55 +353,53 @@ var asciidoc = {  // Namespace.
  */
 
  /* modified by Troy D. Hanson, September 2006. License: GPL */
- /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+ /* modified by Stuart Rackham, October 2006. License: GPL */
 
-// toclevels = 1..4.
-toc: function (toclevels) {
+function getText(el) {
+  var text = "";
+  for (var i = el.firstChild; i != null; i = i.nextSibling) {
+    if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+      text += i.data;
+    else if (i.firstChild != null)
+      text += getText(i);
+  }
+  return text;
+}
 
-  function getText(el) {
-    var text = "";
+function TocEntry(el, text, toclevel) {
+  this.element = el;
+  this.text = text;
+  this.toclevel = toclevel;
+}
+
+function tocEntries(el, toclevels) {
+  var result = new Array;
+  var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
+  // Function that scans the DOM tree for header elements (the DOM2
+  // nodeIterator API would be a better technique but not supported by all
+  // browsers).
+  var iterate = function (el) {
     for (var i = el.firstChild; i != null; i = i.nextSibling) {
-      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
-        text += i.data;
-      else if (i.firstChild != null)
-        text += getText(i);
-    }
-    return text;
-  }
-
-  function TocEntry(el, text, toclevel) {
-    this.element = el;
-    this.text = text;
-    this.toclevel = toclevel;
-  }
-
-  function tocEntries(el, toclevels) {
-    var result = new Array;
-    var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
-    // Function that scans the DOM tree for header elements (the DOM2
-    // nodeIterator API would be a better technique but not supported by all
-    // browsers).
-    var iterate = function (el) {
-      for (var i = el.firstChild; i != null; i = i.nextSibling) {
-        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
-          var mo = re.exec(i.tagName);
-          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
-            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
-          }
-          iterate(i);
-        }
+      if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+        var mo = re.exec(i.tagName)
+        if (mo)
+          result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+        iterate(i);
       }
     }
-    iterate(el);
-    return result;
   }
+  iterate(el);
+  return result;
+}
 
+// This function does the work. toclevels = 1..4.
+function generateToc(toclevels) {
   var toc = document.getElementById("toc");
-  var entries = tocEntries(document.getElementById("content"), toclevels);
+  var entries = tocEntries(document.getElementsByTagName("body")[0], toclevels);
   for (var i = 0; i < entries.length; ++i) {
     var entry = entries[i];
     if (entry.element.id == "")
-      entry.element.id = "_toc_" + i;
+      entry.element.id = "toc" + i;
     var a = document.createElement("a");
     a.href = "#" + entry.element.id;
     a.appendChild(document.createTextNode(entry.text));
@@ -493,63 +409,13 @@ toc: function (toclevels) {
     toc.appendChild(div);
   }
   if (entries.length == 0)
-    toc.parentNode.removeChild(toc);
-},
-
-
-/////////////////////////////////////////////////////////////////////
-// Footnotes generator
-/////////////////////////////////////////////////////////////////////
-
-/* Based on footnote generation code from:
- * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
- */
-
-footnotes: function () {
-  var cont = document.getElementById("content");
-  var noteholder = document.getElementById("footnotes");
-  var spans = cont.getElementsByTagName("span");
-  var refs = {};
-  var n = 0;
-  for (i=0; i<spans.length; i++) {
-    if (spans[i].className == "footnote") {
-      n++;
-      // Use [\s\S] in place of . so multi-line matches work.
-      // Because JavaScript has no s (dotall) regex flag.
-      note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
-      noteholder.innerHTML +=
-        "<div class='footnote' id='_footnote_" + n + "'>" +
-        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
-        n + "</a>. " + note + "</div>";
-      spans[i].innerHTML =
-        "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
-        "' title='View footnote' class='footnote'>" + n + "</a>]";
-      var id =spans[i].getAttribute("id");
-      if (id != null) refs["#"+id] = n;
-    }
-  }
-  if (n == 0)
-    noteholder.parentNode.removeChild(noteholder);
-  else {
-    // Process footnoterefs.
-    for (i=0; i<spans.length; i++) {
-      if (spans[i].className == "footnoteref") {
-        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
-        href = href.match(/#.*/)[0];  // Because IE return full URL.
-        n = refs[href];
-        spans[i].innerHTML =
-          "[<a href='#_footnote_" + n +
-          "' title='View footnote' class='footnote'>" + n + "</a>]";
-      }
-    }
-  }
-}
-
+    document.getElementById("header").removeChild(toc);
 }
 /*]]>*/
 </script>
+<title>Thruk Users Guide</title>
 </head>
-<body style="max-width:800">
+<body>
 <div id="header">
 <h1>Thruk Users Guide</h1>
 <div id="toc">
@@ -557,16 +423,15 @@ footnotes: function () {
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
 </div>
 </div>
-<div id="content">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Thruk is an multibackend monitoring web interface which currently
+<div class="para"><p>Thruk is an multibackend monitoring web interface which currently
 supports Nagios and Icinga using the Livestatus NEB module. It is
 designed to be a "drop-in" replacement and targets covering 100% of
 the original features plus additional enhancements for large
 installations.</p></div>
-<div class="paragraph"><p>Main Features / Advantages</p></div>
-<div class="ulist"><ul>
+<div class="para"><p>Main Features / Advantages</p></div>
+<div class="ilist"><ul>
 <li>
 <p>
 multiple backends
@@ -656,7 +521,7 @@ Adjustable side menu
 </div>
 <h2 id="_how_it_works">How it works</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Thruk is written in Perl using the
+<div class="para"><p>Thruk is written in Perl using the
 <a href="http://www.catalystframework.org">Catalyst Framework</a>. Backend
 monitoring systems will be connected with the
 <a href="http://search.cpan.org/dist/Monitoring-Livestatus">Monitoring::Livestatus</a>
@@ -665,8 +530,8 @@ Availability will be calculated with
 <a href="http://search.cpan.org/dist/Monitoring-Availability">Monitoring::Availability</a>.
 Authentication is provided by the Apache webserver (For example with
 mod_auth).</p></div>
-<div class="paragraph"><div class="title">Thruk Architecture</div><p><span class="image">
-<img alt="Thruk Architecture" src="data:image/png;base64,
+<div class="para"><div class="title">Thruk Architecture</div><p><span class="image">
+<img alt="Thruk Architecture" title="Thruk Architecture" src="data:image/png;base64,
 iVBORw0KGgoAAAANSUhEUgAAASwAAAF4CAIAAABhAFPDAAAKQ2lDQ1BJQ0MgcHJvZmlsZQAAeNqd
 U3dYk/cWPt/3ZQ9WQtjwsZdsgQAiI6wIyBBZohCSAGGEEBJAxYWIClYUFRGcSFXEgtUKSJ2I4qAo
 uGdBiohai1VcOO4f3Ke1fXrv7e371/u855zn/M55zw+AERImkeaiagA5UoU8Otgfj09IxMm9gAIV
@@ -1586,67 +1451,61 @@ JpQAAAAASUVORK5CYII=" />
 </div>
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The clean and proper way to install Thruk is to create a new local
+<div class="para"><p>The clean and proper way to install Thruk is to create a new local
 user and install the missing perl modules with local::lib.</p></div>
 <h3 id="_use_package">Use Package</h3><div style="clear:left"></div>
-<div class="paragraph"><p>Installation from a package is easy and should be painless:</p></div>
+<div class="para"><p>Installation from a package is easy and should be painless:</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img alt="Important" src="data:image/png;base64,
-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
-EQn3XQAAAABJRU5ErkJggg==" />
+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" />
 </td>
 <td class="content">you may need to install libgd and libxpm.</td>
 </tr></table>
@@ -1655,12 +1514,12 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <div class="content">
 <pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
   %&gt; vers=$(perl -e 'use Config; print $Config{version}')
-  %&gt; wget http://www.thruk.org/files/Thruk-0.74-$arch-$vers.tar.gz
-  %&gt; tar zxf Thruk-0.74-$arch-$vers.tar.gz
-  %&gt; cd Thruk-0.74
+  %&gt; wget http://www.thruk.org/files/Thruk-0.76-$arch-$vers.tar.gz
+  %&gt; tar zxf Thruk-0.76-$arch-$vers.tar.gz
+  %&gt; cd Thruk-0.76
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
-<div class="paragraph"><p>For the FastCGI installation follow the steps at <a href="#_fastcgi">fastcgi installation</a>.</p></div>
+<div class="para"><p>For the FastCGI installation follow the steps at <a href="#_fastcgi">fastcgi installation</a>.</p></div>
 <h3 id="_quick_installation_guide_for_debian">Quick Installation Guide for Debian</h3><div style="clear:left"></div>
 <div class="listingblock">
 <div class="content">
@@ -1687,9 +1546,9 @@ EQn3XQAAAABJRU5ErkJggg==" />
 </div></div>
 <h3 id="_install_from_source">Install from Source</h3><div style="clear:left"></div>
 <h4 id="_requirements">Requirements</h4>
-<div class="paragraph"><p>In order to install the Thruk Monitoring Webinterface from source for Nagios/Icinga you
+<div class="para"><p>In order to install the Thruk Monitoring Webinterface from source for Nagios/Icinga you
 will need the following:</p></div>
-<div class="ulist"><ul>
+<div class="ilist"><ul>
 <li>
 <p>
 Perl
@@ -1712,7 +1571,7 @@ Apache Webserver (optional for fastcgi only)
 </li>
 </ul></div>
 <h4 id="_create_new_user">Create New User</h4>
-<div class="paragraph"><p>refer to your systems manual on howto add new user.
+<div class="para"><p>refer to your systems manual on howto add new user.
 This guide uses the following:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -1723,66 +1582,60 @@ This guide uses the following:</p></div>
 <table><tr>
 <td class="icon">
 <img alt="Important" src="data:image/png;base64,
-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
-EQn3XQAAAABJRU5ErkJggg==" />
+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" />
 </td>
 <td class="content">all following steps should be done by the thruk user.</td>
 </tr></table>
 </div>
 <h4 id="_install_local_lib">Install Local::Lib</h4>
-<div class="paragraph"><p>Follow the steps on <a href="http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique">http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique</a></p></div>
-<div class="paragraph"><p>quick guide:</p></div>
+<div class="para"><p>Follow the steps on <a href="http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique">http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique</a></p></div>
+<div class="para"><p>quick guide:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  %&gt; su - thruk
@@ -1795,73 +1648,71 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <table><tr>
 <td class="icon">
 <img alt="Tip" src="data:image/png;base64,
-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" />
+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" />
 </td>
 <td class="content">
 <div class="title">proxy configuration</div>
-<div class="paragraph"><p>if you need a proxy configuration, you should answer &lt;no&gt; at this question:</p></div>
+<div class="para"><p>if you need a proxy configuration, you should answer &lt;no&gt; at this question:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>Would you like me to configure as much as possible automatically? [yes]</tt></pre>
 </div></div>
-<div class="paragraph"><p>Setting a proper http_proxy/ftp_proxy environment should work for the automatic
+<div class="para"><p>Setting a proper http_proxy/ftp_proxy environment should work for the automatic
 configuration.</p></div>
 </td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Add the following line to the thruk users .profile or .bashrc</p></div>
+<div class="para"><p>Add the following line to the thruk users .profile or .bashrc</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)</tt></pre>
 </div></div>
-<div class="paragraph"><p>logout and login again and verify that your perl env looks like this:</p></div>
+<div class="para"><p>logout and login again and verify that your perl env looks like this:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt> %&gt; env | grep perl
@@ -1882,84 +1733,84 @@ configuration.</p></div>
     cd Thruk
     perl Makefile.PL</tt></pre>
 </div></div>
-<div class="paragraph"><p>press &lt;enter&gt; here:</p></div>
+<div class="para"><p>press &lt;enter&gt; here:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  ==&gt; Auto-install the 35 mandatory module(s) from CPAN? [y]</tt></pre>
 </div></div>
-<div class="paragraph"><p>then run make</p></div>
+<div class="para"><p>then run make</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    make</tt></pre>
 </div></div>
-<div class="paragraph"><p>This may take a while, as there are probably several modules missing.</p></div>
-<div class="paragraph"><p>Press &lt;y&gt; at this questions:</p></div>
+<div class="para"><p>This may take a while, as there are probably several modules missing.</p></div>
+<div class="para"><p>Press &lt;y&gt; at this questions:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  Do you want to build the XS Stash module? [y]
   Do you want to use the XS Stash by default? [y]</tt></pre>
 </div></div>
-<div class="paragraph"><p>Tell me if someone knows a way to answer this questions automatically.</p></div>
-<div class="paragraph"><p>run perl Makefile.PL again to see if all dependecies are now installed properly.</p></div>
+<div class="para"><p>Tell me if someone knows a way to answer this questions automatically.</p></div>
+<div class="para"><p>run perl Makefile.PL again to see if all dependecies are now installed properly.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    perl Makefile.PL</tt></pre>
 </div></div>
 <h4 id="_install_livestatus">Install Livestatus</h4>
-<div class="paragraph"><p>Refer to <a href="http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus">http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus</a>
+<div class="para"><p>Refer to <a href="http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus">http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus</a>
 on how to install livestatus onto your monitoring box.</p></div>
-<div class="paragraph"><p>Basically you have to build the NDO addon and add it to your nagios/icinga.cfg.</p></div>
+<div class="para"><p>Basically you have to build the NDO addon and add it to your nagios/icinga.cfg.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt> broker_module=/opt/local/livestatus/livestatus.o /tmp/live.sock</tt></pre>
 </div></div>
 <h4 id="_configuration">Configuration</h4>
-<div class="paragraph"><p>Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.</p></div>
+<div class="para"><p>Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  %&gt; cp thruk.conf thruk_local.conf</tt></pre>
 </div></div>
-<div class="paragraph"><p>The thruk.conf will be overwritten with new defaults on updates. The
+<div class="para"><p>The thruk.conf will be overwritten with new defaults on updates. The
 thruk_local.conf contains the local overrides and will never be
 overwritten.</p></div>
-<div class="paragraph"><p>Edit "cgi.conf" and adjust settings to your needs.</p></div>
-<div class="paragraph"><p>See the <a href="#Configuration">[Configuration]</a> section for detailed explaination of configuration options.</p></div>
+<div class="para"><p>Edit "cgi.conf" and adjust settings to your needs.</p></div>
+<div class="para"><p>See the <a href="#Configuration">[Configuration]</a> section for detailed explaination of configuration options.</p></div>
 <h4 id="_start_server">Start Server</h4>
-<div class="paragraph"><p>After running these steps successfully, you should be able to test your
+<div class="para"><p>After running these steps successfully, you should be able to test your
 installation:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    ./script/thruk_server.pl</tt></pre>
 </div></div>
-<div class="paragraph"><p>Open your browser and open <a href="http://&lt;your_host&gt;:3000">http://&lt;your_host&gt;:3000</a></p></div>
+<div class="para"><p>Open your browser and open <a href="http://&lt;your_host&gt;:3000">http://&lt;your_host&gt;:3000</a></p></div>
 </div>
 <h2 id="_fastcgi">FastCGI</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>There are two fast cgi modules for apache at the moment. Choose the
+<div class="para"><p>There are two fast cgi modules for apache at the moment. Choose the
 one which fits best into your environment.</p></div>
 <h3 id="_mod_fastcgi">mod_fastcgi</h3><div style="clear:left"></div>
-<div class="paragraph"><p>start your fcgi server:</p></div>
+<div class="para"><p>start your fcgi server:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    %&gt;./script/thruk_fastcgi.pl -n 5 \
                 -l /tmp/thruk_fastcgi.socket \
                 -p /tmp/thruk_fastcgi.pid</tt></pre>
 </div></div>
-<div class="paragraph"><p>you may want to copy the init.d script to /etc/init.d and adjust its paths:</p></div>
+<div class="para"><p>you may want to copy the init.d script to /etc/init.d and adjust its paths:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    %&gt; sudo cp ./script/thruk_fastcgi_server.sh /etc/init.d/thruk_fastcgi_server
     %&gt; vi /etc/init.d/thruk_fastcgi_server
     %&gt; sudo chown root: /etc/init.d/thruk_fastcgi_server</tt></pre>
 </div></div>
-<div class="paragraph"><p>Or create a custom init.d script (additional modules required) with:</p></div>
+<div class="para"><p>Or create a custom init.d script (additional modules required) with:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    %&gt; ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid</tt></pre>
 </div></div>
 <h4 id="_apache_configuration">Apache Configuration</h4>
-<div class="paragraph"><p>use this apache example configuration:</p></div>
-<div class="ulist"><ul>
+<div class="para"><p>use this apache example configuration:</p></div>
+<div class="ilist"><ul>
 <li>
 <p>
 replace /home/thruk/Thruk with your installation path
@@ -1982,7 +1833,7 @@ make sure the /home/thruk/Thruk/logs/ directory exists
 </li>
 </ul></div>
 <div class="listingblock">
-<div class="title">Apache configuration within existing vhost</div>
+<div class="title">Example: Apache configuration within existing vhost</div>
 <div class="content">
 <pre><tt>&lt;VirtualHost *:80&gt;
     # ... existing configuration
@@ -2022,7 +1873,7 @@ make sure the /home/thruk/Thruk/logs/ directory exists
 &lt;/VirtualHost&gt;</tt></pre>
 </div></div>
 <div class="listingblock">
-<div class="title">Apache configuration with own vhost</div>
+<div class="title">Example: Apache configuration with own vhost</div>
 <div class="content">
 <pre><tt>&lt;VirtualHost *:80&gt;
     ServerName   thruk.your-host.local
@@ -2073,66 +1924,60 @@ make sure the /home/thruk/Thruk/logs/ directory exists
 <table><tr>
 <td class="icon">
 <img alt="Important" src="data:image/png;base64,
-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
-EQn3XQAAAABJRU5ErkJggg==" />
+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" />
 </td>
 <td class="content">Thruk runs with the webserver user in this scenario, make
 sure the webserver user has access to all files and perl modules.</td>
 </tr></table>
 </div>
 <div class="listingblock">
-<div class="title">Apache configuration with mod_fcgid</div>
+<div class="title">Example: Apache configuration with mod_fcgid</div>
 <div class="content">
 <pre><tt>LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
 &lt;VirtualHost *:80&gt;
@@ -2170,8 +2015,8 @@ sure the webserver user has access to all files and perl modules.</td>
 </div>
 <h2 id="_configuration_2">Configuration</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Configuration is managed mainly in these configuration files.</p></div>
-<div class="ulist"><ul>
+<div class="para"><p>Configuration is managed mainly in these configuration files.</p></div>
+<div class="ilist"><ul>
 <li>
 <p>
 thruk.conf
@@ -2204,108 +2049,139 @@ menu_local.conf
 </li>
 </ul></div>
 <h3 id="_thruk_conf">thruk.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>The thruk.conf contains the shipped defaults. You should not edit this
+<div class="para"><p>The thruk.conf contains the shipped defaults. You should not edit this
 file directly. Overwrite your settings in your thruk_local.conf
 instead.</p></div>
 <h3 id="_thruk_local_conf">thruk_local.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
+<div class="para"><p>The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
 The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.</p></div>
 <h4 id="_use_timezone">use_timezone</h4>
-<div class="paragraph"><p>Changes the timezone from the systems default to this timezone.
+<div class="para"><p>Changes the timezone from the systems default to this timezone.
 Only set this if you have trouble with displaying the right timestamps.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_timezone = CET</tt></pre>
 </div></div>
 <h4 id="_url_prefix">url_prefix</h4>
-<div class="paragraph"><p>Changes the usual url path for Thruk. Don&#8217;t change it unless you plan
+<div class="para"><p>Changes the usual url path for Thruk. Don't change it unless you plan
 to run multiple Thruk instances on the same webserver. You will have
 to change your fastcgi configuration too.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>url_prefix = /</tt></pre>
 </div></div>
 <h4 id="_use_strict_host_authorization">use_strict_host_authorization</h4>
-<div class="paragraph"><p>When set to a true value, every contact will only see the hosts where
+<div class="para"><p>When set to a true value, every contact will only see the hosts where
 he is contact for plus the services where he is contact for. When
 disabled, a host contact will see all services for this host
 regardless of wheter he is a service contact or not.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_strict_host_authorization = 1</tt></pre>
 </div></div>
 <h4 id="_start_page">start_page</h4>
-<div class="paragraph"><p>This link is used as startpage and points usually to the main.html
+<div class="para"><p>This link is used as startpage and points usually to the main.html
 with displays version information and general links.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>start_page = /thruk/main.html</tt></pre>
 </div></div>
 <h4 id="_documentation_link">documentation_link</h4>
-<div class="paragraph"><p>This link is used in the side navigation menu as link to the documentation.
+<div class="para"><p>This link is used in the side navigation menu as link to the documentation.
 Replace it with whatever your documentation is located. Set it to a blank value
-if you don&#8217;t want a documentation link in the menu at all.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+if you don't want a documentation link in the menu at all.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>documentation_link = /thruk/docs/</tt></pre>
 </div></div>
 <h4 id="_all_problems_link">all_problems_link</h4>
-<div class="paragraph"><p>Customizable link for the "problems" link in side menu. Can be useful
+<div class="para"><p>Customizable link for the "problems" link in side menu. Can be useful
 to reflect your companys process of error handling.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>all_problems_link = /thruk/cgi-bin/status.cgi?...</tt></pre>
 </div></div>
 <h4 id="_allowed_frame_links">allowed_frame_links</h4>
-<div class="paragraph"><p>List of allowed patterns, where links inside frames can be set to.
+<div class="para"><p>List of allowed patterns, where links inside frames can be set to.
 You can link to /thruk/frame.html?link=http://wiki.my-company.com/page/blah
 Your wiki will then be displayed with the Thruk navigation frame.
-Useful for other addons, so they don&#8217;t have to display a own
+Useful for other addons, so they don't have to display a own
 navigation.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>allowed_frame_links = http://intranet.my-company.com
 allowed_frame_links = https://wiki.my-company.com</tt></pre>
 </div></div>
 <h4 id="_cgi_cfg">cgi_cfg</h4>
-<div class="paragraph"><p>The path to your cgi.cfg. See <a href="#cgi.cfg">[cgi.cfg]</a> for details.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>The path to your cgi.cfg. See <a href="#cgi.cfg">[cgi.cfg]</a> for details.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>cgi_cfg = cgi.cfg</tt></pre>
 </div></div>
 <h4 id="_log4perl_conf">log4perl_conf</h4>
-<div class="paragraph"><p>The path to your log4perl configuration file.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>The path to your log4perl configuration file.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>log4perl_conf = ./log4perl.conf</tt></pre>
 </div></div>
 <h4 id="_tmp_path">tmp_path</h4>
-<div class="paragraph"><p>Path to a temporary directory. Defaults to /tmp if not set and usually
+<div class="para"><p>Path to a temporary directory. Defaults to /tmp if not set and usually
 this is a good place.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>tmp_path = /tmp</tt></pre>
 </div></div>
 <h4 id="_ssi_path">ssi_path</h4>
-<div class="paragraph"><p>The path to your ssi (server side includes) files.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>The path to your ssi (server side includes) files.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>ssi_path = ssi/</tt></pre>
 </div></div>
+<h4 id="_user_template_path">user_template_path</h4>
+<div class="para"><p>Specify a additional directory for user supplied templates. This makes
+it easy to override thruks own templates.
+Template search order is:</p></div>
+<div class="ilist"><ul>
+<li>
+<p>
+users template path
+</p>
+</li>
+<li>
+<p>
+plugins template path
+</p>
+</li>
+<li>
+<p>
+themes template path
+</p>
+</li>
+<li>
+<p>
+thruks template path
+</p>
+</li>
+</ul></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>user_template_path = ./my_templates</tt></pre>
+</div></div>
 <h4 id="_delay_pages_after_backend_reload">delay_pages_after_backend_reload</h4>
-<div class="paragraph"><p>Delay the page delivery until the backends uptime is at least this
+<div class="para"><p>Delay the page delivery until the backends uptime is at least this
 amount of seconds. Displaying pages soon after backend restarts
 may display wrong results and all services are pending. Enable this if
 you experience problems with pending services after reloading your
@@ -2313,146 +2189,146 @@ backend.
 Should be obsolete with Livestatus versions greater than 1.1.6
 ex.: setting this to 10 would start serving pages 10 seconds
 after the backend reload</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>delay_pages_after_backend_reload = 10</tt></pre>
 </div></div>
 <h4 id="_use_frames">use_frames</h4>
-<div class="paragraph"><p>Set whether you want to use a framed navigation or not. With using frames it&#8217;s
+<div class="para"><p>Set whether you want to use a framed navigation or not. With using frames it's
 sometimes easier to include addons.
 See allowed_frame_links option for how to integrate addons.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_frames = 0</tt></pre>
 </div></div>
 <h4 id="_strict_passive_mode">strict_passive_mode</h4>
-<div class="paragraph"><p>Normally passive checks would be marked as disabled. With this
+<div class="para"><p>Normally passive checks would be marked as disabled. With this
 option set, disabled checks will only be displayed as disabled if their
 last result was active. Otherwise they would be marked as passive
 checks. This option also changes the passive icon only to be shown
 when the last check was passive, otherwise the disabled icon will be
 displayed.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>strict_passive_mode = 1</tt></pre>
 </div></div>
 <h4 id="_use_new_search">use_new_search</h4>
-<div class="paragraph"><p>Use the old or the classic search from the navigation. The new search
+<div class="para"><p>Use the old or the classic search from the navigation. The new search
 supports regular expressions and searches in many attributes. For
 example: plugin_output, groups, names, descriptions</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_new_search = 1</tt></pre>
 </div></div>
 <h4 id="_use_ajax_search">use_ajax_search</h4>
-<div class="paragraph"><p>Enables the ajax search field. There will be suggestions while typing
+<div class="para"><p>Enables the ajax search field. There will be suggestions while typing
 into the search field.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_ajax_search = 1</tt></pre>
 </div></div>
 <h4 id="_ajax_search_hosts">ajax_search_hosts</h4>
-<div class="paragraph"><p>Enables the suggestion of hosts in the ajax search field.
+<div class="para"><p>Enables the suggestion of hosts in the ajax search field.
 Depending on the number of hosts, this can make the search slow.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>ajax_search_hosts = 1</tt></pre>
 </div></div>
 <h4 id="_ajax_search_hostgroups">ajax_search_hostgroups</h4>
-<div class="paragraph"><p>Enables the suggestion of hostgroups in the ajax search field.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Enables the suggestion of hostgroups in the ajax search field.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>ajax_search_hostgroups = 1</tt></pre>
 </div></div>
 <h4 id="_ajax_search_services">ajax_search_services</h4>
-<div class="paragraph"><p>Enables the suggestion of services in the ajax search field.
+<div class="para"><p>Enables the suggestion of services in the ajax search field.
 Depending on the number of services, this can make the search slow.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>ajax_search_services = 1</tt></pre>
 </div></div>
 <h4 id="_ajax_search_servicegroups">ajax_search_servicegroups</h4>
-<div class="paragraph"><p>Enables the suggestion of servicegroups in the ajax search field.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Enables the suggestion of servicegroups in the ajax search field.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>ajax_search_servicegroups = 1</tt></pre>
 </div></div>
 <h4 id="_default_theme">default_theme</h4>
-<div class="paragraph"><p>Default theme to use for all users. Must be a valid subdirectory in
+<div class="para"><p>Default theme to use for all users. Must be a valid subdirectory in
 the themes folder.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>default_theme = Classic</tt></pre>
 </div></div>
 <h4 id="_use_pager">use_pager</h4>
-<div class="paragraph"><p>Using the pager will make huge pages much faster as most people don&#8217;t want a
-services page with 100.000 services displayed. Can be disabled if you don&#8217;t
+<div class="para"><p>Using the pager will make huge pages much faster as most people don't want a
+services page with 100.000 services displayed. Can be disabled if you don't
 need it.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_pager = 1</tt></pre>
 </div></div>
 <h4 id="_paging_steps">paging_steps</h4>
-<div class="paragraph"><p>Define the selectable paging steps. Use the * to set the default
+<div class="para"><p>Define the selectable paging steps. Use the * to set the default
 selected value.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>paging_steps = *100, 500, 1000, all</tt></pre>
 </div></div>
 <h4 id="_group_paging_overview">group_paging_overview</h4>
-<div class="paragraph"><p>Just like the paging_steps, but only for the groups overview page.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Just like the paging_steps, but only for the groups overview page.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>group_paging_overview =  *3,  10, 100, all</tt></pre>
 </div></div>
 <h4 id="_group_paging_summary">group_paging_summary</h4>
-<div class="paragraph"><p>Just like the paging_steps, but only for the groups summary page.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Just like the paging_steps, but only for the groups summary page.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>group_paging_summary = *10, 50, 100, all</tt></pre>
 </div></div>
 <h4 id="_group_paging_grid">group_paging_grid</h4>
-<div class="paragraph"><p>Just like the paging_steps, but only for the groups grip page.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Just like the paging_steps, but only for the groups grip page.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>group_paging_grid = *5,  10, 50,  all</tt></pre>
 </div></div>
 <h4 id="_can_submit_commands">can_submit_commands</h4>
-<div class="paragraph"><p>Set this if a contact should be allowed to send commands unless defined for the
+<div class="para"><p>Set this if a contact should be allowed to send commands unless defined for the
 contact itself. This is the default value for all contacts unless the user has
 a can_submit_commands setting in your monitoring configuration.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>can_submit_commands = 1</tt></pre>
 </div></div>
 <h4 id="_command_disabled">command_disabled</h4>
-<div class="paragraph"><p>Use this to disabled specific commands. Can be use multiple times to disabled
+<div class="para"><p>Use this to disabled specific commands. Can be use multiple times to disabled
 multiple commands. Use the number from the cmd_typ cgi parameter.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>command_disabled = 14
 command_disabled = 35</tt></pre>
 </div></div>
 <h4 id="_cmd_defaults">cmd_defaults</h4>
-<div class="paragraph"><p>Set the default checked state for command options.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Set the default checked state for command options.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;cmd_defaults&gt;
@@ -2468,8 +2344,8 @@ command_disabled = 35</tt></pre>
 &lt;/cmd_defaults&gt;</tt></pre>
 </div></div>
 <h4 id="_cmd_quick_status">cmd_quick_status</h4>
-<div class="paragraph"><p>Configure which commands should be available as quick status commands.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Configure which commands should be available as quick status commands.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;cmd_quick_status&gt;
@@ -2483,78 +2359,115 @@ command_disabled = 35</tt></pre>
 &lt;/cmd_quick_status&gt;</tt></pre>
 </div></div>
 <h4 id="_datetime_format">datetime_format</h4>
-<div class="paragraph"><p>Default timeformat. Use POSIX format.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Default timeformat. Use POSIX format.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>datetime_format = %Y-%m-%d  %H:%M:%S</tt></pre>
 </div></div>
 <h4 id="_datetime_format_long">datetime_format_long</h4>
-<div class="paragraph"><p>Default long timeformat.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Default long timeformat.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>datetime_format_long = %a %b %e %H:%M:%S %Z %Y</tt></pre>
 </div></div>
 <h4 id="_datetime_format_log">datetime_format_log</h4>
-<div class="paragraph"><p>Default log timeformat.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Default log timeformat.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>datetime_format_log = %B %d, %Y  %H</tt></pre>
 </div></div>
 <h4 id="_datetime_format_trends">datetime_format_trends</h4>
-<div class="paragraph"><p>Default trends timeformat.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Default trends timeformat.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>datetime_format_trends = %a %b %e %H:%M:%S %Y</tt></pre>
 </div></div>
 <h4 id="_datetime_format_today">datetime_format_today</h4>
-<div class="paragraph"><p>Default timeformat for todays date. Can be useful if you want a
+<div class="para"><p>Default timeformat for todays date. Can be useful if you want a
 shorter date format for today.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>datetime_format_today = %H:%M:%S</tt></pre>
 </div></div>
 <h4 id="_info_popup_event_type">info_popup_event_type</h4>
-<div class="paragraph"><p>On which event should the comments / downtime or longpluginout popup
+<div class="para"><p>On which event should the comments / downtime or longpluginout popup
 show up. Valid values are onclick or onmouseover.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>info_popup_event_type = onmouseover</tt></pre>
 </div></div>
 <h4 id="_info_popup_options">info_popup_options</h4>
-<div class="paragraph"><p>Options for the popup window used for long pluginoutput, downtimes and
+<div class="para"><p>Options for the popup window used for long pluginoutput, downtimes and
 comments.
 See <a href="http://www.bosrup.com/web/overlib/?Command_Reference">http://www.bosrup.com/web/overlib/?Command_Reference</a> for
 what options are available</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF</tt></pre>
 </div></div>
 <h4 id="_show_notification_number">show_notification_number</h4>
-<div class="paragraph"><p>Display the current number of notification after the current / max
+<div class="para"><p>Display the current number of notification after the current / max
 attempts on the status details page.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>show_notification_number = 0</tt></pre>
 </div></div>
+<h4 id="_show_full_commandline">show_full_commandline</h4>
+<div class="para"><p>Display the full command line for host / service checks .
+Be warned, the command line could contain passwords and other confidential data.
+In order to replace the user macros for commands, you have to set the
+<em>resource_file</em> in your peer config or the general <em>resource_file</em> option.</p></div>
+<div class="ilist"><ul>
+<li>
+<p>
+0 = off, don't show the command line at all
+</p>
+</li>
+<li>
+<p>
+1 = show them for contacts with the role: authorized_for_configuration_information
+</p>
+</li>
+<li>
+<p>
+2 = show them for everyone
+</p>
+</li>
+</ul></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>show_full_commandline = 0</tt></pre>
+</div></div>
+<h4 id="_resource_file">resource_file</h4>
+<div class="para"><p>Set a general resource file. Make sure it does not contain any
+passwords or any other data which should not be displayed. Instead of
+using a general <em>resource_file</em> you could define one file per peer in your
+peer config.</p></div>
+<div class="para"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>resource_file = /etc/nagios3/resource.cfg</tt></pre>
+</div></div>
 <h4 id="_component_thruk_backend">Component Thruk::Backend</h4>
-<div class="paragraph"><p>Enter your backend connection settings here. At the moment only
+<div class="para"><p>Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.</p></div>
-<div class="ulist"><ul>
+<div class="ilist"><ul>
 <li>
 <p>
 peer             enter the peer configuration. You have to enter a name for
                      each peer.
 </p>
-<div class="ulist"><ul>
+<div class="ilist"><ul>
 <li>
 <p>
 name      name for this connection
@@ -2603,10 +2516,15 @@ connect_timeout   connect timeout setting
 query_timeout     query timeout setting
 </p>
 </li>
+<li>
+<p>
+resource_file     resource_file for this peer
+</p>
+</li>
 </ul></div>
 </li>
 </ul></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Backend&gt;
@@ -2637,144 +2555,144 @@ query_timeout     query timeout setting
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>
-<div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga itself stripped
+<div class="para"><p>The cgi.cfg is mainly the same as in Nagios or Icinga itself stripped
 down some unneeded values.</p></div>
 <h4 id="_show_context_help">show_context_help</h4>
-<div class="paragraph"><p>Displays an icon with context specific help on most pages.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Displays an icon with context specific help on most pages.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>show_context_help = 1</tt></pre>
 </div></div>
 <h4 id="_use_authentication">use_authentication</h4>
-<div class="paragraph"><p>Determines whether to use authentication or not. If enabled, Thruk will
+<div class="para"><p>Determines whether to use authentication or not. If enabled, Thruk will
 use the REMOTE_USER from the apache environment as authenticated user
 name. So the authentication has to be done by the webserver.
 Authorization is done by Thruk.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_authentication = 1</tt></pre>
 </div></div>
 <h4 id="_use_ssl_authentication">use_ssl_authentication</h4>
-<div class="paragraph"><p>If enabled, the authenticated username is taken from the
+<div class="para"><p>If enabled, the authenticated username is taken from the
 SSL_CLIENT_S_DN_CN environment instead of the remote user.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>use_ssl_authentication = 1</tt></pre>
 </div></div>
 <h4 id="_default_user_name">default_user_name</h4>
-<div class="paragraph"><p>The default user will be used if no username has been provided by the
-webserver. You don&#8217;t have to set a default user.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>The default user will be used if no username has been provided by the
+webserver. You don't have to set a default user.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>default_user_name = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_authorized_for_system_information">authorized_for_system_information</h4>
-<div class="paragraph"><p>List of usernames who have access to the system and process
+<div class="para"><p>List of usernames who have access to the system and process
 information pages.
 You may use wildcards here.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>authorized_for_system_information = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_authorized_for_configuration_information">authorized_for_configuration_information</h4>
-<div class="paragraph"><p>List of usernames who have access to the configuration
+<div class="para"><p>List of usernames who have access to the configuration
 information pages.
 You may use wildcards here.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>authorized_for_configuration_information = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_authorized_for_system_commands">authorized_for_system_commands</h4>
-<div class="paragraph"><p>List of usernames who are allowed to send system commands.
+<div class="para"><p>List of usernames who are allowed to send system commands.
 You may use wildcards here.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>authorized_for_system_commands = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_authorized_for_all_services">authorized_for_all_services</h4>
-<div class="paragraph"><p>List of usernames who are authorized to view all services.
+<div class="para"><p>List of usernames who are authorized to view all services.
 You may use wildcards here.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>authorized_for_all_services = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_authorized_for_all_hosts">authorized_for_all_hosts</h4>
-<div class="paragraph"><p>List of usernames who are authorized to view all hosts.
+<div class="para"><p>List of usernames who are authorized to view all hosts.
 You may use wildcards here.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>authorized_for_all_hosts = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_authorized_for_all_service_commands">authorized_for_all_service_commands</h4>
-<div class="paragraph"><p>List of usernames who are authorized to send commands for all
+<div class="para"><p>List of usernames who are authorized to send commands for all
 services.
 You may use wildcards here.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>authorized_for_all_service_commands = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_authorized_for_all_host_commands">authorized_for_all_host_commands</h4>
-<div class="paragraph"><p>List of usernames who are authorized to send commands for all
+<div class="para"><p>List of usernames who are authorized to send commands for all
 hosts.
 You may use wildcards here.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>authorized_for_all_host_commands = thrukadmin</tt></pre>
 </div></div>
 <h4 id="_refresh_rate">refresh_rate</h4>
-<div class="paragraph"><p>Number of seconds after which most pages are refreshed automatically.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Number of seconds after which most pages are refreshed automatically.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>refresh_rate = 90</tt></pre>
 </div></div>
 <h4 id="_escape_html_tags">escape_html_tags</h4>
-<div class="paragraph"><p>Determines whether html output from plugins is escaped or not.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Determines whether html output from plugins is escaped or not.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>escape_html_tags = 1</tt></pre>
 </div></div>
 <h4 id="_action_url_target">action_url_target</h4>
-<div class="paragraph"><p>Sets the target of the action url links.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Sets the target of the action url links.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>action_url_target = _blank</tt></pre>
 </div></div>
 <h4 id="_notes_url_target">notes_url_target</h4>
-<div class="paragraph"><p>Sets the target of the notes url links.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>Sets the target of the notes url links.</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>notes_url_target = _blank</tt></pre>
 </div></div>
 <h4 id="_lock_author_names">lock_author_names</h4>
-<div class="paragraph"><p>If enabled, user are not allowed to change the author name for
+<div class="para"><p>If enabled, user are not allowed to change the author name for
 commands.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>lock_author_names = 1</tt></pre>
 </div></div>
 <h3 id="_log4perl_conf_2">log4perl.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>This file contains the log4perl configuration. You can configure whatever is
+<div class="para"><p>This file contains the log4perl configuration. You can configure whatever is
 possible in log4perl. Refer to the log4perl manual for detailed
 information:
 <a href="http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html">http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html</a>
 There is a log4perl.conf.example file shiped with the package.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
+<div class="para"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>log4perl.logger=ALL, ErrorLog, DebugLog
@@ -2789,71 +2707,69 @@ log4perl.appender.ErrorLog.layout.ConversionPattern=[%d][%H][%p][%c] %m%n</tt></
 <table><tr>
 <td class="icon">
 <img alt="Tip" src="data:image/png;base64,
-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" />
+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" />
 </td>
 <td class="content">
 <div class="title">command logging</div>
-<div class="paragraph"><p>if you want to log all sent commands, just set the loglevel to INFO.</p></div>
-<div class="paragraph"><p>ex.: log4perl.appender.ErrorLog.Threshold=INFO</p></div>
+<div class="para"><p>if you want to log all sent commands, just set the loglevel to INFO.</p></div>
+<div class="para"><p>ex.: log4perl.appender.ErrorLog.Threshold=INFO</p></div>
 </td>
 </tr></table>
 </div>
 <h3 id="_menu_conf">menu.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>This file contains the default side menu configuration. Do not change
+<div class="para"><p>This file contains the default side menu configuration. Do not change
 it. If you want to change the configuration copy this file to
 menu_local.conf and change that file.</p></div>
 <h3 id="_menu_local_conf">menu_local.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>This file contains the user configuration for the side menu. The file
+<div class="para"><p>This file contains the user configuration for the side menu. The file
 is not shipped with the Thruk package. Just copy the menu.conf to
 menu_local.conf to create it.</p></div>
-<div class="paragraph"><p>The file itself is perl syntax, so you can do whatever perl can do.
+<div class="para"><p>The file itself is perl syntax, so you can do whatever perl can do.
 Make sure you verify the syntax after changing the file. The changes
 will be used immediately. So maybe you want to test your changes
 on a test instance first.</p></div>
@@ -2861,54 +2777,52 @@ on a test instance first.</p></div>
 <table><tr>
 <td class="icon">
 <img alt="Tip" src="data:image/png;base64,
-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" />
+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" />
 </td>
 <td class="content">
 <div class="title">syntax check for menu configuration</div>
@@ -2921,89 +2835,83 @@ menu_local.conf syntax OK</tt></pre>
 </tr></table>
 </div>
 <h3 id="_server_side_includes">Server Side Includes</h3><div style="clear:left"></div>
-<div class="paragraph"><p>You can place static include files or executables in the ssi folder.
+<div class="para"><p>You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
 end of the body.</p></div>
-<div class="paragraph"><p>There are two global includes, which will be included in every cgi
+<div class="para"><p>There are two global includes, which will be included in every cgi
 page:
  - ssi/global-footer.ssi
  - ssi/global-header.ssi</p></div>
-<div class="paragraph"><p>and there are page specific includes, which will only be placed in the
+<div class="para"><p>and there are page specific includes, which will only be placed in the
 specific page:
 ssi/status-footer.ssi
 ssi/status-header.ssi</p></div>
-<div class="paragraph"><p>Files will be statically placed inside the output of the normal cgi
+<div class="para"><p>Files will be statically placed inside the output of the normal cgi
 output. Executables will be executed and the output will then be used
 as content.</p></div>
 </div>
 <h2 id="_examples">Examples</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Here is a list of common tasks and configurations.</p></div>
+<div class="para"><p>Here is a list of common tasks and configurations.</p></div>
 <h3 id="_remote_livestatus_with_ssl">Remote Livestatus with SSL</h3><div style="clear:left"></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img alt="Important" src="data:image/png;base64,
-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
-EQn3XQAAAABJRU5ErkJggg==" />
+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" />
 </td>
 <td class="content">unfortunately this does not work with latest Thruk
 versions. Socat somehow disconnects after a few packets. Please use
 stunnel or ssh with the usual xinetd configuration.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Generate ssl key for the remote machine:</p></div>
+<div class="para"><p>Generate ssl key for the remote machine:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  %&gt; FILENAME=remote-livestatus
@@ -3012,23 +2920,23 @@ stunnel or ssh with the usual xinetd configuration.</td>
   %&gt; cat $FILENAME.key $FILENAME.crt &gt;$FILENAME.pem
   %&gt; chmod 600 $FILENAME.key $FILENAME.pem</tt></pre>
 </div></div>
-<div class="paragraph"><p>Generate ssl key for thruk. Use the same command with a different FILENAME.</p></div>
+<div class="para"><p>Generate ssl key for thruk. Use the same command with a different FILENAME.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  %&gt; FILENAME=thruk-host</tt></pre>
 </div></div>
-<div class="paragraph"><p>Now start socat on both machines:</p></div>
+<div class="para"><p>Now start socat on both machines:</p></div>
 <div class="listingblock">
-<div class="title">Remote Machine</div>
+<div class="title">Example: Remote Machine</div>
 <div class="content">
 <pre><tt>  %&gt; /usr/bin/socat \
        -L/tmp/liveststatus-socat.lock \
        openssl-listen:9999,reuseaddr,fork,cert=/path_to_your/certs/remote-livestatus.pem,cafile=/path_to_your/certs/thruk-host.crt,keepalive,nodelay \
        UNIX-CLIENT:/usr/local/nagios/var/live.sock,keepalive</tt></pre>
 </div></div>
-<div class="paragraph"><p>Socat will then listen on port 9999 and connect to the local unix socket from livestatus.
+<div class="para"><p>Socat will then listen on port 9999 and connect to the local unix socket from livestatus.
 Change the paths to your needs.</p></div>
-<div class="paragraph"><p>Start another socat on the thruk host:
+<div class="para"><p>Start another socat on the thruk host:
 .Thruk Machine</p></div>
 <div class="listingblock">
 <div class="content">
@@ -3037,14 +2945,12 @@ Change the paths to your needs.</p></div>
        UNIX-LISTEN:/home/thruk/var/remote.sock,fork,keepalive,mode=0660,group=thruk \
        openssl-connect:remote-host:9999,cert=/path_to_your/certs/thruk-host.pem,cafile=/path_to_your/certs/remote-livestatus.crt</tt></pre>
 </div></div>
-<div class="paragraph"><p>Socat will then connect to the remote host on port 9999 and listen on the local unix socket. The tcp connection is encrypted.
+<div class="para"><p>Socat will then connect to the remote host on port 9999 and listen on the local unix socket. The tcp connection is encrypted.
 You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></div>
 </div>
-</div>
-<div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2010-11-20 12:53:21 CEST
+Last updated 2010-12-24 10:56:27 CEST
 </div>
 </div>
 </body>

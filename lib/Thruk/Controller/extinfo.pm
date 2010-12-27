@@ -143,6 +143,13 @@ sub _process_host_page {
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
 
+    # generate command line
+    if($c->{'stash'}->{'show_full_commandline'} == 2 ||
+       $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
+        my $command             = $c->{'db'}->expand_command('host' => $host );
+        $c->stash->{'command'}  = $command;
+    }
+
     return 1;
 }
 
@@ -210,6 +217,25 @@ sub _process_service_page {
         sort => { 'DESC' => 'id' } );
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
+
+    # generate command line
+    if($c->{'stash'}->{'show_full_commandline'} == 2 ||
+       $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
+        my $hosts               = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
+        # we only got one host
+        my $host = $hosts->[0];
+        # we have more and backend param is used
+        if( scalar @{$hosts} == 1 and defined $backend ) {
+            for my $h ( @{$hosts} ) {
+                if( $h->{'peer_key'} eq $backend ) {
+                    $host = $h;
+                    last;
+                }
+            }
+        }
+        my $command             = $c->{'db'}->expand_command('host' => $host, 'service' => $service );
+        $c->stash->{'command'}  = $command;
+    }
 
     return 1;
 }

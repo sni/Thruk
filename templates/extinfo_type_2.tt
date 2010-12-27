@@ -482,7 +482,7 @@
                 <td class='comment'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a></td>
                 [% IF downtimes %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% c.request.uri | uri %]' class='comment'>Delete all downtimes</a></td>
+                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% uri(c) %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]
               </tr>
             </table>
@@ -525,6 +525,35 @@
           [% END %]
           </td>
         </tr>
+
+        [% IF   show_full_commandline == 2 ||
+              ( show_full_commandline == 1 && c.check_user_roles_wrapper('authorized_for_configuration_information') )
+        %]
+        <tr>
+          <td colspan="2" align="center" valign="top" class='commentPanel'>
+            <br>
+            <a name="command" id="command"></a>
+            <div class='commentTitle'>Configuration Information</div>
+            <table border="0">
+              <tr>
+                <th class='comment' nowrap>Check Command</th>
+                <td class='comment'><pre class="no_margin">[% command.line %]</pre></td>
+              </tr>
+              <tr>
+                <th class='comment' nowrap>Expanded Command</th>
+                <td class='comment'><i>
+                  <b>Note:</b> only the most common macros will be replaced:</i>
+                  <br><br>
+                  <pre class="no_margin command_line">[% command.line_expanded %]</pre>
+                </td>
+              </tr>
+            </table>
+            <br>
+            <br>
+          </td>
+        </tr>
+        [% END %]
+
       </table>
     </div>
 [% PROCESS _footer.tt %]

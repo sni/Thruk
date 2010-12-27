@@ -2,6 +2,8 @@
    dataTitle = 'Host Groups'
 %]
 
+<div align="center">[% PROCESS _pager.tt %]</div>
+
 <table border="0" class='data'>
   <tr>
     [% IF backends.size > 1 %]
@@ -19,6 +21,7 @@
   [% SET pd = d.peer_key %]
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
+  [% SET class = 'tableRowHover' IF jump == d.name %]
   <tr class='[% class %]'>
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
@@ -31,12 +34,14 @@
     [% END %]
     <td class='[% class %]'><a id="[% name2id(d.name, 'hostgroup') %]"></a>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
-    <td class='[% class %]'>[% FOREACH host = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts#[% host | uri %]">[% host %]</a>[% END %]</td>
+    <td class='[% class %]'>[% FOREACH host = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=hosts&amp;jump=[% host | uri %]#[% host | uri %]">[% host %]</a>[% END %]</td>
     <td class='[% class %]'>[% d.notes %]</td>
     <td class='[% class %]'>[% d.notes_url %]</td>
     <td class='[% class %]'>[% d.action_url %]</td>
   </tr>
   [% END %]
 </table>
+
+<div align="center">[% PROCESS _pager.tt %]</div>
 
 [% END %]
