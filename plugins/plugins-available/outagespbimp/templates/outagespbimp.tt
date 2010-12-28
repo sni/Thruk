@@ -17,6 +17,7 @@
     <div align="center">
       <br>
       <div class='dataTitle'>Problems</div>
+
       <table border="0" class='data'>
         <tr>
           <th class='data'>Criticity</th>
@@ -59,6 +60,53 @@
         </tr>
         [% END %]
       </table>
+
+      <table border="0" class='data'>
+        <tr>
+          <th class='data'>Criticity</th>
+          <th class='data'>Host</th>
+	  <th class='data'>Description</th>
+          <th class='data'>State</th>
+          <th class='data'>Notes</th>
+          <th class='data'>State Duration</th>
+          <th class='data'># Hosts Affected</th>
+          <th class='data'># Services Affected</th>
+          <th class='data'>Actions</th>
+        </tr>
+        [% SET num = 0 %]
+        [% FOREACH srv = srv_pbs %]
+        [% SET num = num + 1 %]
+        [% SET class = 'dataOdd'  IF loop.odd %]
+        [% SET class = 'dataEven' IF loop.even %]
+        <tr class='[% class %]'>
+          <td class='[% class %]'>[% srv.criticity %]</td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.host_name %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>
+          <td class='hostDOWN'>DOWN</td>
+          <td class='[% class %]'>
+            [% IF srv.comment_count > 0 %]
+            <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20"></a>
+            [% ELSE %]
+            N/A
+            [% END %]
+          </td>
+          <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
+          <td class='[% class %]'>[% srv.affected_hosts %]</td>
+          <td class='[% class %]'>[% srv.affected_services %]</td>
+          <td class='[% class %]'>
+            <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+            [% IF use_feature_statusmap %]
+            <a href='statusmap.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
+            [% END %]
+            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
+            [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
+            <a href='history.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+            <a href='notifications.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
+        </tr>
+        [% END %]
+      </table>
+
+
     </div>
 
     <div class='itemTotalsTitle'>[% num %] Problems Displayed</div>
