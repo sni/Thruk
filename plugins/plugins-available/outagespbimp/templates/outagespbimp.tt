@@ -80,6 +80,25 @@
         [% FOREACH srv = srv_pbs %]
 	[% IF srv.criticity == crit.value %]
 
+
+	[% IF srv.has_been_checked == 0 %]
+           [% SET s_status = 'statusPENDING' %]
+	   [% SET s_status_text = 'PENDING' %]
+        [% ELSIF srv.state == 0 %]
+           [% SET s_status = 'statusOK' %]
+	   [% SET s_status_text = 'OK' %]
+        [% ELSIF srv.state == 1 %]
+           [% SET s_status = 'statusWARNING' %]
+	   [% SET s_status_text = 'WARNING' %]
+        [% ELSIF srv.state == 2 %]
+           [% SET s_status = 'statusCRITICAL' %]
+	   [% SET s_status_text = 'CRITICAL' %]
+        [% ELSIF srv.state == 3 %]
+           [% SET s_status = 'statusUNKNOWN' %]
+	   [% SET s_status_text = 'UNKNOWN' %]
+        [% END %]
+
+
         [% SET num = num + 1 %]
         [% SET class = 'dataOdd'  IF loop.odd %]
         [% SET class = 'dataEven' IF loop.even %]
@@ -87,7 +106,7 @@
 	  <td class='[% class %]'>Service</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.host_name %]</a></td>
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>
-          <td class='hostDOWN'>DOWN</td>
+          <td class='[% s_status %]'>[% s_status_text %]</td>
           <td class='[% class %]'>
             [% IF srv.comment_count > 0 %]
             <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20"></a>
