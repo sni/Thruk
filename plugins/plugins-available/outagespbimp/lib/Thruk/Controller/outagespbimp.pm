@@ -41,14 +41,20 @@ sub outagespbimp_cgi : Regex('thruk\/cgi\-bin\/outagespbimp\.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-
-    my $outages = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    #state => 1,
-                                                    #childs => { '!=' => undef }
+    # We want root problems only
+    my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+						    is_problem => 1
+                                                  ]);
+    my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
 						    is_problem => 1
                                                   ]);
 
-    if(defined $outages and scalar @{$outages} > 0) {
+    #use Data::Dumper;
+    #print STDERR "Service pb";
+    #print STDERR Dumper($srv_pbs);
+    
+    # First for hosts
+    if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
         my $hostcomments = {};
         my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
         for my $com (@{$tmp}) {
@@ -59,30 +65,56 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
         my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
         my $all_hosts = Thruk::Utils::array2hash($tmp2, 'name');
-        for my $host (@{$outages}) {
+        for my $host (@{$hst_pbs}) {
 
             # get number of comments
             $host->{'comment_count'} = 0;
             $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
-            # count number of affected hosts / services
-            my($affected_hosts,$affected_services) = $self->_count_affected_hosts_and_services($c, $host->{'name'}, $all_hosts);
-	    # impact based, but do not work from now
-#            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($c, $host->{'name'}, $all_hosts);
+            # count number of impacted hosts / services
+	    my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($host);
+
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
 
-            $host->{'severity'} = int($affected_hosts + $affected_services/4);
-	    
         }
     }
 
-    # sort by severity
-    my $sortedoutages = Thruk::Backend::Manager::_sort($c, $outages, { 'DESC' => 'criticity' });
+    # Then for services
+    if(defined $srv_pbs and scalar @{$srv_pbs} > 0) {
+        my $srvcomments = {};
+#        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+#        for my $com (@{$tmp}) {
+#            $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
+#            $hostcomments->{$com->{'host_name'}}++;
+#
+#        }
 
-    $c->stash->{outages}        = $sortedoutages;
-    $c->stash->{title}          = 'Network Outages problem impacts';
-    $c->stash->{infoBoxTitle}   = 'Network Outages problem impacts';
+	#print STDERR "POULET";
+        for my $srv (@{$srv_pbs}) {
+
+            # get number of comments
+            $srv->{'comment_count'} = 0;
+            #$srv->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
+
+            # count number of impacted hosts / services
+            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($srv);
+
+            $srv->{'affected_hosts'}    = $affected_hosts;
+            $srv->{'affected_services'} = $affected_services;
+
+        }
+    }
+
+    # sort by criticity
+    my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
+    my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
+
+    $c->stash->{hst_pbs}        = $sortedhst_pbs;
+    $c->stash->{srv_pbs}        = $sortedsrv_pbs;
+    $c->stash->{criticities}    = {'0' => 'Not important', '1' => 'Devel level', '2' => 'Qualification', '3' => 'Simple production', '4' => 'Production', '5' => 'Top production'};
+    $c->stash->{title}          = 'Problems and impacts';
+    $c->stash->{infoBoxTitle}   = 'Problems and impacts';
     $c->stash->{page}           = 'outagespbimp';
     $c->stash->{template}       = 'outagespbimp.tt';
 
@@ -91,56 +123,35 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     return 1;
 }
 
-##########################################################
-# create the status details page
-sub _count_affected_hosts_and_services {
-    my($self, $c, $host, $all_hosts ) = @_;
-
-    my $affected_hosts    = 0;
-    my $affected_services = 0;
-
-    return(0,0) if !defined $all_hosts->{$host};
-
-    if(defined $all_hosts->{$host}->{'childs'} and $all_hosts->{$host}->{'childs'} ne '') {
-        for my $child (@{$all_hosts->{$host}->{'childs'}}) {
-            my($child_affected_hosts,$child_affected_services) = $self->_count_affected_hosts_and_services($c, $child, $all_hosts);
-            $affected_hosts    += $child_affected_hosts;
-            $affected_services += $child_affected_services;
-        }
-    }
-
-    # add number of directly affected hosts
-    $affected_hosts++;
-
-    # add number of directly affected services
-    $affected_services += $all_hosts->{$host}->{'num_services'};
-
-    return($affected_hosts, $affected_services);
-}
 
 ##########################################################
-# create the status details page
+# Count the impacts for an host
 sub _count_hosts_and_services_impacts {
-    my($self, $c, $host, $all_hosts ) = @_;
+    my($self, $host ) = @_;
 
     my $affected_hosts    = 0;
     my $affected_services = 0;
 
-    return(0,0) if !defined $all_hosts->{$host};
+#    use Data::Dumper;
+#    print STDERR "Impact sum for".Dumper($host);
+    return(0,0) if !defined $host;
 
-    if(defined $all_hosts->{$host}->{'impacts'} and $all_hosts->{$host}->{'impacts'} ne '') {
-        for my $child (@{$all_hosts->{$host}->{'impacts'}}) {
-            my($child_affected_hosts,$child_affected_services) = $self->_count_affected_hosts_and_services($c, $child, $all_hosts);
-            $affected_hosts    += $child_affected_hosts;
-            $affected_services += $child_affected_services;
+#    use Data::Dumper;
+#    print STDERR "Impact";
+#    print STDERR Dumper($host); #$all_hosts->{$host}->{'childs'});
+    #print STDERR Dumper($all_hosts->{$host}->{'impacts'});
+
+    if(defined $host->{'impacts'} and $host->{'impacts'} ne '') {
+        for my $child (@{$host->{'impacts'}}) {
+	    # Look at if we match an host or a service here
+	    # a service will have a /, not for hosts
+	    if($child =~ /\//){
+		$affected_services += 1;
+	    }else{
+		$affected_hosts += 1;
+	    }
         }
     }
-
-    # add number of directly affected hosts
-    $affected_hosts++;
-
-    # add number of directly affected services
-    $affected_services += $all_hosts->{$host}->{'num_services'};
 
     return($affected_hosts, $affected_services);
 }

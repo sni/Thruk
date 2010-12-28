@@ -209,6 +209,8 @@ sub get_hosts {
         retry_interval scheduled_downtime_depth state state_type 
         is_impact source_problems is_problem impacts criticity
                 /];
+    #TODO: shinken-specific : added is_impact source_problems is_problem impacts criticity
+
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('hosts', \%options);
 
@@ -316,8 +318,10 @@ sub get_services {
         notes_url notes_url_expanded notification_interval notification_period
         notifications_enabled obsess_over_service percent_state_change perf_data
         plugin_output process_performance_data retry_interval scheduled_downtime_depth
-        state state_type
+        state state_type is_impact source_problems is_problem impacts criticity
         /];
+
+    #TODO: shinken-specific : added is_impact source_problems is_problem impacts criticity
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('services', \%options);
