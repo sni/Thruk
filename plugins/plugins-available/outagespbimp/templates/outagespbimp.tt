@@ -73,7 +73,7 @@
           <th class='data'># Services Affected</th>
           <th class='data'>Actions</th>
         </tr>
-        [% SET num = 0 %]
+
         [% FOREACH srv = srv_pbs %]
         [% SET num = num + 1 %]
         [% SET class = 'dataOdd'  IF loop.odd %]
