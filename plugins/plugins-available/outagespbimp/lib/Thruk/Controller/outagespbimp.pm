@@ -98,7 +98,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             #$srv->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of impacted hosts / services
-            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($c, $srv);
+            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($srv);
 
             $srv->{'affected_hosts'}    = $affected_hosts;
             $srv->{'affected_services'} = $affected_services;
@@ -132,6 +132,8 @@ sub _count_hosts_and_services_impacts {
     my $affected_hosts    = 0;
     my $affected_services = 0;
 
+#    use Data::Dumper;
+#    print STDERR "Impact sum for".Dumper($host);
     return(0,0) if !defined $host;
 
 #    use Data::Dumper;
