@@ -16,7 +16,7 @@
     </table>
     <div align="center">
       <br>
-      <div class='dataTitle'>Blocking Outages problem impacts</div>
+      <div class='dataTitle'>Problems</div>
       <table border="0" class='data'>
         <tr>
           <th class='data'>Criticity</th>
@@ -29,7 +29,7 @@
           <th class='data'>Actions</th>
         </tr>
         [% SET num = 0 %]
-        [% FOREACH host = outages %]
+        [% FOREACH host = hst_pbs %]
         [% SET num = num + 1 %]
         [% SET class = 'dataOdd'  IF loop.odd %]
         [% SET class = 'dataEven' IF loop.even %]
@@ -61,6 +61,6 @@
       </table>
     </div>
 
-    <div class='itemTotalsTitle'>[% num %] Blocking Outages problem impacts Displayed</div>
+    <div class='itemTotalsTitle'>[% num %] Problems Displayed</div>
 
 [% PROCESS _footer.tt %]

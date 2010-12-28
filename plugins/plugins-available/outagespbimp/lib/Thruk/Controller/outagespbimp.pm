@@ -42,13 +42,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     # We want root problems only
-    my $outages = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    #state => 1,
-                                                    #childs => { '!=' => undef }
+    my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
 						    is_problem => 1
                                                   ]);
 
-    if(defined $outages and scalar @{$outages} > 0) {
+    if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
         my $hostcomments = {};
         my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
         for my $com (@{$tmp}) {
@@ -59,32 +57,27 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
         my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
         my $all_hosts = Thruk::Utils::array2hash($tmp2, 'name');
-        for my $host (@{$outages}) {
+        for my $host (@{$hst_pbs}) {
 
             # get number of comments
             $host->{'comment_count'} = 0;
             $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
-            # count number of affected hosts / services
-#            my($affected_hosts,$affected_services) = $self->_count_affected_hosts_and_services($c, $host->{'name'}, $all_hosts);
-
-	    # impact based, but do not work from now
+            # count number of impacted hosts / services
             my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($c, $host->{'name'}, $all_hosts);
 
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
 
-            $host->{'severity'} = int($affected_hosts + $affected_services/4);
-	    
         }
     }
 
-    # sort by severity
-    my $sortedoutages = Thruk::Backend::Manager::_sort($c, $outages, { 'DESC' => 'criticity' });
+    # sort by criticity
+    my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
 
-    $c->stash->{outages}        = $sortedoutages;
-    $c->stash->{title}          = 'Network Outages problem impacts';
-    $c->stash->{infoBoxTitle}   = 'Network Outages problem impacts';
+    $c->stash->{hst_pbs}        = $sortedhst_pbs;
+    $c->stash->{title}          = 'Problems and impacts';
+    $c->stash->{infoBoxTitle}   = 'Problems and impacts';
     $c->stash->{page}           = 'outagespbimp';
     $c->stash->{template}       = 'outagespbimp.tt';
 
