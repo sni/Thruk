@@ -45,7 +45,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
 						    is_problem => 1
                                                   ]);
+    my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+						    is_problem => 1
+                                                  ]);
 
+    #use Data::Dumper;
+    #print STDERR "Service pb";
+    #print STDERR Dumper($srv_pbs);
+    
+    # First for hosts
     if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
         my $hostcomments = {};
         my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
@@ -64,7 +72,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of impacted hosts / services
-            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($c, $host->{'name'}, $all_hosts);
+	    my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($host);
 
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
@@ -72,10 +80,39 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
     }
 
+    # Then for services
+    if(defined $srv_pbs and scalar @{$srv_pbs} > 0) {
+        my $srvcomments = {};
+#        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+#        for my $com (@{$tmp}) {
+#            $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
+#            $hostcomments->{$com->{'host_name'}}++;
+#
+#        }
+
+	#print STDERR "POULET";
+        for my $srv (@{$srv_pbs}) {
+
+            # get number of comments
+            $srv->{'comment_count'} = 0;
+            #$srv->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
+
+            # count number of impacted hosts / services
+            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($c, $srv);
+
+            $srv->{'affected_hosts'}    = $affected_hosts;
+            $srv->{'affected_services'} = $affected_services;
+
+        }
+    }
+
     # sort by criticity
     my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
+    my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
+    $c->stash->{srv_pbs}        = $sortedsrv_pbs;
+    $c->stash->{criticities}    = {'0' => 'Not important', '1' => 'Devel level', '2' => 'Qualification', '3' => 'Simple production', '4' => 'Production', '5' => 'Top production'};
     $c->stash->{title}          = 'Problems and impacts';
     $c->stash->{infoBoxTitle}   = 'Problems and impacts';
     $c->stash->{page}           = 'outagespbimp';
@@ -90,20 +127,20 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 ##########################################################
 # Count the impacts for an host
 sub _count_hosts_and_services_impacts {
-    my($self, $c, $host, $all_hosts ) = @_;
+    my($self, $host ) = @_;
 
     my $affected_hosts    = 0;
     my $affected_services = 0;
 
-    return(0,0) if !defined $all_hosts->{$host};
+    return(0,0) if !defined $host;
 
-    use Data::Dumper;
-    #print STDERR "Impact";
-    #print STDERR Dumper($all_hosts->{$host}->{'childs'});
+#    use Data::Dumper;
+#    print STDERR "Impact";
+#    print STDERR Dumper($host); #$all_hosts->{$host}->{'childs'});
     #print STDERR Dumper($all_hosts->{$host}->{'impacts'});
 
-    if(defined $all_hosts->{$host}->{'impacts'} and $all_hosts->{$host}->{'impacts'} ne '') {
-        for my $child (@{$all_hosts->{$host}->{'impacts'}}) {
+    if(defined $host->{'impacts'} and $host->{'impacts'} ne '') {
+        for my $child (@{$host->{'impacts'}}) {
 	    # Look at if we match an host or a service here
 	    # a service will have a /, not for hosts
 	    if($child =~ /\//){
