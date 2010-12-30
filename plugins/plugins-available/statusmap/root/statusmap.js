@@ -33,6 +33,15 @@ function makeHTMLFromData(name, data){
   return html;
 };
 
+
+/* open a link */
+function openLink(e, node) {
+  // only open the link when clicked on a link
+  if(e.target.tagName == 'A') {
+    window.location = e.target.href;
+  }
+}
+
 /* create and show tooltop */
 function showTip(e, node) {
 
@@ -149,6 +158,10 @@ function show_tree_map(id_to_show) {
             totalClass = '';
           }
 
+          if( node.data.alias != undefined ) {
+            head.innerHTML = '<a href="'+ url_prefix +'thruk\/cgi-bin\/extinfo.cgi?type=1&amp;host=' + head.innerHTML + '">' + head.innerHTML + '<\/a>';
+          }
+
           // calculate colour of node
           if(node.data.cssClass != undefined && node.data.cssClass != 'hostUP') {
               totalClass = node.data.cssClass;
@@ -185,6 +198,7 @@ function show_tree_map(id_to_show) {
             head.className = (head.className + " " + totalClass);
           }
           head.onmouseover = function (e){showTip((e||window.event), node)};
+          head.onmouseup   = function (e){openLink((e||window.event), node)};
         }
     });
 
