@@ -252,13 +252,14 @@ table.serviceTotals {
   border-collapse: separate;
   background-color: #DBDBDB;*/
 }
-table.serviceTotals td {
+
+/*table.serviceTotals td {*/
 /*  padding: 2px;
   margin: 0px;
   border-width: 1px;
   border-style: inset;
   border-color: #DBDBDB;*/
-}
+/*}*/
 
 
 /* fix for status box */

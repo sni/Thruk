@@ -106,19 +106,55 @@ TABLE.serviceTotals {
 /* font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 2;*/
 }
 TH.serviceTotals,A.serviceTotals { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: center;  background-color: #999797;  color: #DCE5C1; }
-TD.serviceTotals {} /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #e9e9e9; }*/
+
+/*TD.serviceTotals {*/
+/*    border-collapse: collapse;
+    empty-cells: show;
+    background-image: url("../images/alpha_red.png");
+    background-repeat: repeat;
+    border-spacing: 0px;
+    text-align: center;
+*/
+/*} font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #e9e9e9; }*/
 
 .serviceTotalsOK {}; /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #33FF00; }*/
 .serviceTotalsWARNING {}; /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #FFFF00;  font-weight: bold; }*/
 .serviceTotalsUNKNOWN {}; /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #FF9900;  font-weight: bold; }*/
-/*.serviceTotalsCRITICAL { font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #F83838;  font-weight: bold; }*/
+.serviceTotalsCRITICAL { font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #F83838;  font-weight: bold; }
 
-.serviceTotalsCRITICAL {
-/*    background-image: url("../images/someproblem.png");
+/*.serviceTotalsCRITICAL td{
+    border-collapse: collapse;
+    empty-cells: show;
+    background-image: url("../images/alpha_red.png");
+    background-repeat: repeat;
+    border-spacing: 0px;
+    text-align: center;
+}*/
+
+.serviceTotalsOK {
+    background-image: url("../images/alpha_green.png");
     background-position: center center;
     background-repeat: repeat;
-    color: #000;*/
+    color: #000;
 }
+
+.serviceTotalsWARNING {
+    background-image: url("../images/alpha_orange.png");
+    background-position: center center;
+    background-repeat: repeat;
+    color: #000;
+}
+
+
+
+.serviceTotalsCRITICAL {
+    background-image: url("../images/alpha_red.png");
+    background-position: center center;
+    background-repeat: repeat;
+    color: #000;
+}
+
+
 .serviceTotalsPENDING { font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #ACACAC; }
 /*.serviceTotalsPROBLEMS { font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: orange;  font-weight: bold; }*/
 .serviceTotalsPROBLEMS {background-image: url("../images/someproblem.png");
@@ -144,7 +180,29 @@ TD.hostTotals {} /* font-family: arial,serif;  font-size: 8pt;  text-align: cent
 .hostTotalsUP {}/* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #33FF00; }*/
 .hostTotalsDOWN {} /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #F83838;  font-weight: bold; }*/
 .hostTotalsUNREACHABLE {} /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #F83838;  font-weight: bold; }*/
-.hostTotalsPENDING {} /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #ACACAC; }*/
+.hostTotalsPENDING {} /* font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #ACACAC;*/
+
+.hostTotalsUP {
+    background-image: url("../images/alpha_green.png");
+    background-position: center center;
+    background-repeat: repeat;
+    color: #000;
+}
+
+.hostTotalsDOWN {
+    background-image: url("../images/alpha_red.png");
+    background-position: center center;
+    background-repeat: repeat;
+    color: #000;
+}
+
+
+.hostTotalsUNREACHABLE {
+    background-image: url("../images/alpha_orange.png");
+    background-position: center center;
+    background-repeat: repeat;
+    color: #000;
+}
 
 .hostTotalsPROBLEMS {background-image: url("../images/someproblem.png");
     background-position: center center;
