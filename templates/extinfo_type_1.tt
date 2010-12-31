@@ -63,6 +63,16 @@
         </td>
         <td align="right" valign="bottom" width="33%">
           <table border='0'>
+	  [% IF problem_impact_enabled %]
+	  <tr>
+              <td align='right'>
+            <div class='dataTitle'>Criticity : [% host.criticity %]/5
+	    	  <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% host.criticity %].png"
+		  </div>
+	  </td>
+	  </tr>
+	  [% END %]
+
           [% IF host.action_url_expanded %]
             <tr>
               <td align='right'>
