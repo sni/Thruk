@@ -27,13 +27,13 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $config ) = @_;
+    my( $class, $peer_config, $config ) = @_;
 
-    die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($config)) unless defined $config->{'peer'};
+    die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
-        'live'                => Monitoring::Livestatus::Class->new($config),
-        'strict_passive_mode' => 0,
+        'live'   => Monitoring::Livestatus::Class->new($peer_config),
+        'config' => $config,
     };
     bless $self, $class;
 
@@ -101,6 +101,7 @@ sub get_processinfo {
     my $self  = shift;
     my $c     = shift;
     my $cache = shift;
+
     my $data  =  $self->{'live'}
                   ->table('status')
                   ->columns(qw/
@@ -206,12 +207,13 @@ sub get_hosts {
         notification_period notifications_enabled num_services_crit num_services_ok
         num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
         parents percent_state_change perf_data plugin_output process_performance_data
-        retry_interval scheduled_downtime_depth state state_type 
-        is_impact source_problems impacts criticity
+        retry_interval scheduled_downtime_depth state state_type
                 /];
-    #TODO: shinken-specific : added is_impact source_problems is_problem impacts criticity
-    #use Data::Dumper;
-    #print STDERR Dumper($self); #$all_hosts->{$host}->{'childs'});
+
+    if($self->{'config'}->{'problem_impact_enabled'}) {
+        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity/;
+    }
+
     my @col = $options{'columns'};
     push(@col, 'is_problem');
 
@@ -322,10 +324,13 @@ sub get_services {
         notes_url notes_url_expanded notification_interval notification_period
         notifications_enabled obsess_over_service percent_state_change perf_data
         plugin_output process_performance_data retry_interval scheduled_downtime_depth
-        state state_type is_impact source_problems is_problem impacts criticity
+        state state_type
         /];
 
-    #TODO: shinken-specific : added is_impact source_problems is_problem impacts criticity
+    if($self->{'config'}->{'problem_impact_enabled'}) {
+        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity/;
+    }
+
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('services', \%options);

@@ -32,15 +32,30 @@ create new manager
 =cut
 
 sub new {
-    my( $class, %options ) = @_;
+    my( $class ) = @_;
     my $self = {
+        'initialized'         => 0,
         'stats'               => undef,
         'log'                 => undef,
-        'strict_passive_mode' => undef,
-        'resource_file'       => undef,
+        'config'              => undef,
         'backends'            => [],
     };
     bless $self, $class;
+    return $self;
+}
+
+##########################################################
+
+=head2 init
+
+initialize this model
+
+=cut
+
+sub init {
+    my( $self, %options ) = @_;
+
+    return if $self->{'initialized'} == 1;
 
     for my $opt_key ( keys %options ) {
         if( exists $self->{$opt_key} ) {
@@ -51,17 +66,17 @@ sub new {
         }
     }
 
-    my $config = Thruk->config->{'Thruk::Backend'};
+    return unless defined $self->{'config'}->{'Thruk::Backend'};
+    return unless defined $self->{'config'}->{'Thruk::Backend'}->{'peer'};
 
-    return unless defined $config;
-    return unless defined $config->{'peer'};
-
-    $self->_initialise_backends( $config->{'peer'} );
+    $self->_initialise_backends( $self->{'config'}->{'Thruk::Backend'}->{'peer'} );
 
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;
 
-    return $self;
+    $self->{'initialized'} = 1;
+
+    return 1;
 }
 
 ##########################################################
@@ -244,43 +259,6 @@ sub get_contactgroups_by_contact {
     $cached_data->{'contactgroups'} = $contactgroups;
     $c->cache->set( $username, $cached_data );
     return $contactgroups;
-}
-
-
-########################################
-
-=head2 set_passive_mode
-
-  set_passive_mode
-
-sets the strict passive mode
-
-=cut
-
-sub set_passive_mode {
-    my( $self, $value ) = @_;
-    $self->{'strict_passive_mode'} = $value;
-    for my $backend (@{ $self->{'backends'} }) {
-        $backend->{'class'}->{'strict_passive_mode'} = $value;
-    }
-    return;
-}
-
-
-########################################
-
-=head2 set_resource_file
-
-  set_resource_file
-
-sets the resource_file
-
-=cut
-
-sub set_resource_file {
-    my( $self, $value ) = @_;
-    $self->{'resource_file'} = $value;
-    return;
 }
 
 ########################################
@@ -785,7 +763,7 @@ sub _initialise_peer {
         'groups'        => $config->{'groups'},
         'resource_file' => $config->{'options'}->{'resource_file'},
         'enabled'       => 1,
-        'class'         => $class->new( $config->{'options'} ),
+        'class'         => $class->new( $config->{'options'}, $self->{'config'} ),
     };
     $peer->{'key'}  = $peer->{'class'}->peer_key();
     $peer->{'addr'} = $peer->{'class'}->peer_addr();

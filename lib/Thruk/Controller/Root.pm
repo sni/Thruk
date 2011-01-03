@@ -39,10 +39,10 @@ sub begin : Private {
     my( $self, $c ) = @_;
 
     # Prefix
-    $c->stash->{'url_prefix'} = Thruk->config->{'url_prefix'} || '/';
+    $c->stash->{'url_prefix'} = $c->config->{'url_prefix'} || '/';
 
     # frame options
-    my $use_frames = Thruk->config->{'use_frames'};
+    my $use_frames = $c->config->{'use_frames'};
     $use_frames = 1 unless defined $use_frames;
     my $show_nav_button = 1;
     if( exists $c->{'request'}->{'parameters'}->{'nav'} and $c->{'request'}->{'parameters'}->{'nav'} ne '' ) {
@@ -54,7 +54,7 @@ sub begin : Private {
             $use_frames = 0;
         }
     }
-    if( Thruk->config->{'use_frames'} == 1 ) {
+    if( $c->config->{'use_frames'} == 1 ) {
         $show_nav_button = 0;
     }
     $c->stash->{'use_frames'}         = $use_frames;
@@ -62,26 +62,26 @@ sub begin : Private {
     $c->stash->{'reload_nav'}         = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
 
     # use pager?
-    $c->stash->{'use_pager'}          = Thruk->config->{'use_pager'} || 1;
-    Thruk::Utils::set_paging_steps($c, Thruk->config->{'paging_steps'});
+    $c->stash->{'use_pager'}          = $c->config->{'use_pager'} || 1;
+    Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
 
-    $c->stash->{'start_page'}         = Thruk->config->{'start_page'}         || $c->stash->{'url_prefix'}.'thruk/main.html';
-    $c->stash->{'documentation_link'} = Thruk->config->{'documentation_link'} || $c->stash->{'url_prefix'}.'thruk/docs/index.html';
+    $c->stash->{'start_page'}         = $c->config->{'start_page'}         || $c->stash->{'url_prefix'}.'thruk/main.html';
+    $c->stash->{'documentation_link'} = $c->config->{'documentation_link'} || $c->stash->{'url_prefix'}.'thruk/docs/index.html';
 
     # these features are not implemented yet
-    $c->stash->{'use_feature_statusmap'} = Thruk->config->{'use_feature_statusmap'} || 0;
-    $c->stash->{'use_feature_statuswrl'} = Thruk->config->{'use_feature_statuswrl'} || 0;
-    $c->stash->{'use_feature_histogram'} = Thruk->config->{'use_feature_histogram'} || 0;
+    $c->stash->{'use_feature_statusmap'} = $c->config->{'use_feature_statusmap'} || 0;
+    $c->stash->{'use_feature_statuswrl'} = $c->config->{'use_feature_statuswrl'} || 0;
+    $c->stash->{'use_feature_histogram'} = $c->config->{'use_feature_histogram'} || 0;
 
     # enable trends if gd loaded
     if( $c->config->{'has_gd'} ) {
         $c->stash->{'use_feature_trends'} = 1;
     }
 
-    $c->stash->{'datetime_format'}       = Thruk->config->{'datetime_format'};
-    $c->stash->{'datetime_format_today'} = Thruk->config->{'datetime_format_today'};
-    $c->stash->{'datetime_format_long'}  = Thruk->config->{'datetime_format_long'};
-    $c->stash->{'datetime_format_log'}   = Thruk->config->{'datetime_format_log'};
+    $c->stash->{'datetime_format'}       = $c->config->{'datetime_format'};
+    $c->stash->{'datetime_format_today'} = $c->config->{'datetime_format_today'};
+    $c->stash->{'datetime_format_long'}  = $c->config->{'datetime_format_long'};
+    $c->stash->{'datetime_format_log'}   = $c->config->{'datetime_format_log'};
 
     # which theme?
     my($param_theme, $cookie_theme);
@@ -92,7 +92,7 @@ sub begin : Private {
         my $theme_cookie = $c->request->cookie('thruk_theme');
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
-    my $theme = $param_theme || $cookie_theme || Thruk->config->{'default_theme'} || 'Classic';
+    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'} || 'Classic';
     if( defined $c->config->{templates_paths} ) {
         $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
@@ -102,12 +102,12 @@ sub begin : Private {
     $c->stash->{'theme'} = $theme;
 
     # new or classic search?
-    my $use_new_search = Thruk->config->{'use_new_search'};
+    my $use_new_search = $c->config->{'use_new_search'};
     $use_new_search = 1 unless defined $use_new_search;
     $c->stash->{'use_new_search'} = $use_new_search;
 
     # all problems link?
-    my $all_problems_link = Thruk->config->{'all_problems_link'};
+    my $all_problems_link = $c->config->{'all_problems_link'};
     if( !defined $all_problems_link ) {
         $all_problems_link = $c->stash->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=detail&amp;hidesearch=1&amp;s0_hoststatustypes=12&amp;s0_servicestatustypes=31&amp;s0_hostprops=10&amp;s0_serviceprops=0&amp;s1_hoststatustypes=15&amp;s1_servicestatustypes=28&amp;s1_hostprops=10&amp;s1_serviceprops=10&amp;s1_hostprop=2&amp;s1_hostprop=8&amp;title=All%20Unhandled%20Problems";
     }
@@ -118,22 +118,25 @@ sub begin : Private {
     }
     $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
 
-    $c->stash->{'ajax_search'} = Thruk->config->{'use_ajax_search'} || 1;
+    $c->stash->{'ajax_search'} = $c->config->{'use_ajax_search'} || 1;
 
     # status page settings
-    $c->stash->{'show_notification_number'} = Thruk->config->{'show_notification_number'} || 1;
+    $c->stash->{'show_notification_number'} = $c->config->{'show_notification_number'} || 1;
+
+    # set strict passive mode
+    $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 1;
 
     # initialize our backends
     unless ( defined $c->{'db'} ) {
         $c->{'db'} = $c->model('Thruk');
         if( defined $c->{'db'} ) {
-            $c->{'db'}->{'stats'}               = $c->stats;
-            $c->{'db'}->{'log'}                 = $c->log;
-            $c->{'db'}->set_passive_mode($c->config->{'strict_passive_mode'} || 0);
-            $c->{'db'}->set_resource_file($c->config->{'resource_file'});
+            $c->{'db'}->init(
+                'stats'               => $c->stats,
+                'log'                 => $c->log,
+                'config'              => $c->config,
+            );
         }
     }
-    $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 0;
 
     # redirect to error page unless we have a connection
     if( !defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
@@ -151,7 +154,7 @@ sub begin : Private {
     # when adding nav=1 to a url in frame mode, redirect to frame.html with this url
     if( defined $c->{'request'}->{'parameters'}->{'nav'}
             and $c->{'request'}->{'parameters'}->{'nav'} eq '1'
-            and Thruk->config->{'use_frames'} == 1 ) {
+            and $c->config->{'use_frames'} == 1 ) {
         my $path = $c->request->uri->path_query;
         $path =~ s/nav=1//gmx;
         return $c->redirect($c->stash->{'url_prefix'}."thruk/frame.html?link=".uri_escape($path));
@@ -162,7 +165,7 @@ sub begin : Private {
         $c->stash->{'target'} = '_parent';
     }
     $c->stash->{'navigation'} = "";
-    if( Thruk->config->{'use_frames'} == 0 ) {
+    if( $c->config->{'use_frames'} == 0 ) {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
@@ -184,7 +187,7 @@ redirects mobile browser to mobile cgis if enabled
 sub auto : Private {
     my( $self, $c ) = @_;
 
-    if( !defined Thruk->config->{'use_feature_mobile'} or Thruk->config->{'use_feature_mobile'} != 1 ) {
+    if( !defined $c->config->{'use_feature_mobile'} or $c->config->{'use_feature_mobile'} != 1 ) {
         return 1;
     }
 
@@ -355,7 +358,7 @@ sub thruk_frame_html : Regex('thruk\/frame\.html$') {
 
     # allowed links to be framed
     my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."thruk/cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
-    my $additional_links = Thruk->config->{'allowed_frame_links'};
+    my $additional_links = $c->config->{'allowed_frame_links'};
     if( defined $additional_links ) {
         if( ref $additional_links eq 'ARRAY' ) {
             $valid_links = [ @{$valid_links}, @{$additional_links} ];
