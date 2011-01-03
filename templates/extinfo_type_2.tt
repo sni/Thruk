@@ -389,13 +389,12 @@
                             <td class='command'><a href='cmd.cgi?cmd_typ=45&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Enable event handler for this service</a></td>
                             [% END %]
                           </tr>
-
-			  <tr class='command'>
-			    <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
-			    <td class='command'><a href='cmd.cgi?cmd_typ=200&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Launch event handler</a></td>
-			    </tr>
-
-
+                          [% IF enable_shinken_features %]
+                          <tr class='command'>
+                            <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=200&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Launch event handler</a></td>
+                          </tr>
+                          [% END %]
                           <tr class='command'>
                             [% IF service.flap_detection_enabled %]
                             <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Flap Detection For This Service' title='Disable Flap Detection For This Service' width="20" height="20"></td>

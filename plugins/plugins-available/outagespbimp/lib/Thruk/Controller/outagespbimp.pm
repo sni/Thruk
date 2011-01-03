@@ -43,26 +43,26 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # We want root problems only
     my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-						    is_problem => 1
+                                                    is_problem => 1
                                                   ]);
     my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-						    is_problem => 1
+                                                    is_problem => 1
                                                   ]);
 
-    # Main data given for the criticities level, and know 
+    # Main data given for the criticities level, and know
     # if we have elements in it or not
     my @criticities = (
-	{value => 5, text => 'Top production', nb => 0},
-	{value => 4, text => 'Production', nb => 0},
-	{value => 3, text => 'Standard', nb => 0},
-	{value => 2, text => 'Qualification', nb => 0},
-	{value => 1, text => 'Devel', nb => 0},
-	{value => 0, text => 'Nearly nothing', nb => 0});
+        {value => 5, text => 'Top production',  nb => 0},
+        {value => 4, text => 'Production',      nb => 0},
+        {value => 3, text => 'Standard',        nb => 0},
+        {value => 2, text => 'Qualification',   nb => 0},
+        {value => 1, text => 'Devel',           nb => 0},
+        {value => 0, text => 'Nearly nothing',  nb => 0});
 
     #use Data::Dumper;
     #print STDERR "Service pb";
     #print STDERR Dumper($srv_pbs);
-    
+
     # First for hosts
     if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
         my $hostcomments = {};
@@ -82,17 +82,17 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of impacted hosts / services
-	    my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($host);
+            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($host);
 
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
-	    
-	    # add a criticity to this crit level
-	    my $crit = $host->{'criticity'};
-	    #print STDERR "ADD crit $crit for\n";
-	    $criticities[5 - $crit]{"nb"}++;
 
-	    
+            # add a criticity to this crit level
+            my $crit = $host->{'criticity'};
+            #print STDERR "ADD crit $crit for\n";
+            $criticities[5 - $crit]{"nb"}++;
+
+
         }
     }
 
@@ -106,7 +106,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 #
 #        }
 
-	#print STDERR "POULET";
+        #print STDERR "POULET";
         for my $srv (@{$srv_pbs}) {
 
             # get number of comments
@@ -119,10 +119,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $srv->{'affected_hosts'}    = $affected_hosts;
             $srv->{'affected_services'} = $affected_services;
 
-	    # add a criticity to this crit level
-	    my $crit = $srv->{'criticity'};
-	    #print STDERR "ADD crit $crit for service\n";
-	    $criticities[5 - $crit]{"nb"}++;
+            # add a criticity to this crit level
+            my $crit = $srv->{'criticity'};
+            #print STDERR "ADD crit $crit for service\n";
+            $criticities[5 - $crit]{"nb"}++;
 
         }
     }
@@ -170,13 +170,13 @@ sub _count_hosts_and_services_impacts {
 
     if(defined $host->{'impacts'} and $host->{'impacts'} ne '') {
         for my $child (@{$host->{'impacts'}}) {
-	    # Look at if we match an host or a service here
-	    # a service will have a /, not for hosts
-	    if($child =~ /\//){
-		$affected_services += 1;
-	    }else{
-		$affected_hosts += 1;
-	    }
+            # Look at if we match an host or a service here
+            # a service will have a /, not for hosts
+            if($child =~ /\//mx){
+                $affected_services += 1;
+            }else{
+                $affected_hosts += 1;
+            }
         }
     }
 
