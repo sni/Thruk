@@ -126,6 +126,9 @@ sub begin : Private {
     # set strict passive mode
     $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 1;
 
+    # shinken mode?
+    $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'} || 0;
+
     # initialize our backends
     unless ( defined $c->{'db'} ) {
         $c->{'db'} = $c->model('Thruk');

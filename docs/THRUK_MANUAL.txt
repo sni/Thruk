@@ -870,14 +870,14 @@ ex.:
   resource_file = /etc/nagios3/resource.cfg
 
 
-==== problem_impact_enabled
+==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
 unless all your backends are shinken.
 
 ex.:
 
-  problem_impact_enabled = 1
+  enable_shinken_features = 1
 
 
 

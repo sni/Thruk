@@ -210,7 +210,7 @@ sub get_hosts {
         retry_interval scheduled_downtime_depth state state_type
                 /];
 
-    if($self->{'config'}->{'problem_impact_enabled'}) {
+    if($self->{'config'}->{'enable_shinken_features'}) {
         push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity/;
     }
 
@@ -327,7 +327,7 @@ sub get_services {
         state state_type
         /];
 
-    if($self->{'config'}->{'problem_impact_enabled'}) {
+    if($self->{'config'}->{'enable_shinken_features'}) {
         push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity/;
     }
 

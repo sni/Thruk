@@ -143,9 +143,6 @@ sub _process_host_page {
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
     
-    #TODO: pure shinken
-    $c->stash->{'problem_impact_enabled'} = $c->config->{'problem_impact_enabled'} || 0;
-
     # generate command line
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
@@ -220,9 +217,6 @@ sub _process_service_page {
         sort => { 'DESC' => 'id' } );
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
-
-    #TODO: pure shinken
-    $c->stash->{'problem_impact_enabled'} = $c->config->{'problem_impact_enabled'} || 0;
 
     # generate command line
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||

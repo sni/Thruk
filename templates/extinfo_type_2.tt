@@ -55,11 +55,11 @@
           [% IF service.notes_expanded %]<p>[% service.notes_expanded %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%">
-	  [% IF problem_impact_enabled %]
+          [% IF enable_shinken_features %]
             <div class='dataTitle'>Criticity : [% service.criticity %]/5
-	    	  <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% service.criticity %].png"
-		  </div>
-	  [% END %]
+              <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% service.criticity %].png">
+            </div>
+          [% END %]
 
           [% IF service.action_url_expanded %]
           <a href='[% service.action_url_expanded %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">

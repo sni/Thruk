@@ -63,15 +63,15 @@
         </td>
         <td align="right" valign="bottom" width="33%">
           <table border='0'>
-	  [% IF problem_impact_enabled %]
-	  <tr>
-              <td align='right'>
-            <div class='dataTitle'>Criticity : [% host.criticity %]/5
-	    	  <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% host.criticity %].png"
-		  </div>
-	  </td>
-	  </tr>
-	  [% END %]
+          [% IF enable_shinken_features %]
+          <tr>
+            <td align='right'>
+              <div class='dataTitle'>Criticity : [% host.criticity %]/5
+              <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% host.criticity %].png">
+              </div>
+            </td>
+          </tr>
+          [% END %]
 
           [% IF host.action_url_expanded %]
             <tr>
@@ -425,13 +425,10 @@
                             <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Checks Of All Services On This Host' title='Enable Checks Of All Services On This Host' width="20" height="20"></td>
                             <td class='command'><a href='cmd.cgi?cmd_typ=15&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable checks of all services on this host</a></td>
                           </tr>
-
-			  <tr class='command'>
-			    <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
-			    <td class='command'><a href='cmd.cgi?cmd_typ=201&amp;host=[% host.name | uri %]&amp;backend=[% service.peer_key %]'>Launch event handler</a></td>
-			    </tr>
-
-
+                          <tr class='command'>
+                            <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" alt='Launch event handler' title='Launch event handler' width="20" height="20"></td>
+                            <td class='command'><a href='cmd.cgi?cmd_typ=201&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Launch event handler</a></td>
+                          </tr>
                           <tr class='command'>
                             [% IF host.event_handler_enabled %]
                               <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Event Handler For This Host' title='Disable Event Handler For This Host' width="20" height="20"></td>
