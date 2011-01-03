@@ -19,18 +19,11 @@
       <div class='dataTitle'>Problems     <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/problem.png"></div>
       <br>
 
-      [% # crit_levels = [	
-#    { value => 5,   text => 'Top production'  },
-#    { value => 4,   text => 'Production'  },
-#    { value => 3,   text => 'Standard'  },
-#    { value => 2,   text => 'Qualification'  },
-#    { value => 1,   text => 'Devel'  },
-#    { value => 0,   text => 'Nearly nothing'  },
-#       ]	
-   %]
-
     [% FOREACH crit IN criticities %]
+    [% IF crit.nb != 0 %]
+    <center>
     <div class='dataTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% crit.value %].png"></div>
+
       <table border="0" class='data'>
         <tr>
           <th class='data'>Type</th>
@@ -130,12 +123,12 @@
 		[% END %]
         [% END %]
       </table>
-      
+      </center>
 
     </div>
     <br><br>
     [% END %]
-
+    [% END %]
 
 
 [% PROCESS _footer.tt %]

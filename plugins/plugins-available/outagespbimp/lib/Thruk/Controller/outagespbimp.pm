@@ -86,7 +86,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
+	    
+	    # add a criticity to this crit level
+	    my $crit = $host->{'criticity'};
+	    #print STDERR "ADD crit $crit for\n";
+	    $criticities[5 - $crit]{"nb"}++;
 
+	    
         }
     }
 
@@ -113,6 +119,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $srv->{'affected_hosts'}    = $affected_hosts;
             $srv->{'affected_services'} = $affected_services;
 
+	    # add a criticity to this crit level
+	    my $crit = $srv->{'criticity'};
+	    #print STDERR "ADD crit $crit for service\n";
+	    $criticities[5 - $crit]{"nb"}++;
+
         }
     }
 
@@ -121,9 +132,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
 
 
-    use Data::Dumper;
+#    use Data::Dumper;
 #    print STDERR "Impact";
-    print STDERR Dumper(@criticities); #$all_hosts->{$host}->{'childs'});
+#    print STDERR Dumper(@criticities); #$all_hosts->{$host}->{'childs'});
 
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
