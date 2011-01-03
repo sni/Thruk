@@ -305,9 +305,17 @@ sub expand_command {
     }
     my($name, @com_args) = split/!/mx, $command_name;
 
+    # it is possible to defined hosts without a command
+    if(!defined $name or $name =~ m/^\s*$/mx) {
+        my $command = {
+            'line'          => 'no command defined',
+            'line_expanded' => '',
+        };
+        return $command;
+    }
+
     # get command data
     my $commands = $self->get_commands( filter => [ { 'name' => $name } ] );
-    croak("no command for $name") unless defined $commands->[0]->{'line'};
     my $expanded = $commands->[0]->{'line'};
 
     # arguments

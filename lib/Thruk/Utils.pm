@@ -939,7 +939,7 @@ compare too version strings
 =cut
 sub version_compare {
     my($v1,$v2) = @_;
-    confess("version_compare() needs two params") unless defined $v2;
+    confess("version_compare() needs two params, got: ".Dumper(\@_)) unless defined $v2;
 
     my @v1 = split/\./mx,$v1;
     my @v2 = split/\./mx,$v2;
