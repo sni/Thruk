@@ -16,21 +16,14 @@
     </table>
     <div align="center">
       <br>
-      <div class='dataTitle'>Problems</div>
+      <div class='dataTitle'>Problems     <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/problem.png"></div>
       <br>
 
-      [% crit_levels = [	
-    { value => 5,   text => 'Top production'  },
-    { value => 4,   text => 'Production'  },
-    { value => 3,   text => 'Standard'  },
-    { value => 2,   text => 'Qualification'  },
-    { value => 1,   text => 'Devel'  },
-    { value => 0,   text => 'Nearly nothing'  },
-       ]	
-   %]
+    [% FOREACH crit IN criticities %]
+    [% IF crit.nb != 0 %]
+    <center>
+    <div class='dataTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% crit.value %].png"></div>
 
-    [% FOREACH crit IN crit_levels %]
-    <div class='dataTitle'>Criticity : [% crit.text %] </div>
       <table border="0" class='data'>
         <tr>
           <th class='data'>Type</th>
@@ -82,19 +75,19 @@
 
 
 	[% IF srv.has_been_checked == 0 %]
-           [% SET s_status = 'statusPENDING' %]
+           [% SET s_status = 'servicePENDING' %]
 	   [% SET s_status_text = 'PENDING' %]
         [% ELSIF srv.state == 0 %]
-           [% SET s_status = 'statusOK' %]
+           [% SET s_status = 'serviceOK' %]
 	   [% SET s_status_text = 'OK' %]
         [% ELSIF srv.state == 1 %]
-           [% SET s_status = 'statusWARNING' %]
+           [% SET s_status = 'serviceWARNING' %]
 	   [% SET s_status_text = 'WARNING' %]
         [% ELSIF srv.state == 2 %]
-           [% SET s_status = 'statusCRITICAL' %]
+           [% SET s_status = 'serviceCRITICAL' %]
 	   [% SET s_status_text = 'CRITICAL' %]
         [% ELSIF srv.state == 3 %]
-           [% SET s_status = 'statusUNKNOWN' %]
+           [% SET s_status = 'serviceUNKNOWN' %]
 	   [% SET s_status_text = 'UNKNOWN' %]
         [% END %]
 
@@ -130,10 +123,12 @@
 		[% END %]
         [% END %]
       </table>
-      
+      </center>
 
     </div>
     <br><br>
     [% END %]
+    [% END %]
+
 
 [% PROCESS _footer.tt %]

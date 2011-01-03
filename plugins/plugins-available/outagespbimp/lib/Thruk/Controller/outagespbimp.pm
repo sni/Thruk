@@ -49,6 +49,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 						    is_problem => 1
                                                   ]);
 
+    # Main data given for the criticities level, and know 
+    # if we have elements in it or not
+    my @criticities = (
+	{value => 5, text => 'Top production', nb => 0},
+	{value => 4, text => 'Production', nb => 0},
+	{value => 3, text => 'Standard', nb => 0},
+	{value => 2, text => 'Qualification', nb => 0},
+	{value => 1, text => 'Devel', nb => 0},
+	{value => 0, text => 'Nearly nothing', nb => 0});
+
     #use Data::Dumper;
     #print STDERR "Service pb";
     #print STDERR Dumper($srv_pbs);
@@ -76,7 +86,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
+	    
+	    # add a criticity to this crit level
+	    my $crit = $host->{'criticity'};
+	    #print STDERR "ADD crit $crit for\n";
+	    $criticities[5 - $crit]{"nb"}++;
 
+	    
         }
     }
 
@@ -103,6 +119,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $srv->{'affected_hosts'}    = $affected_hosts;
             $srv->{'affected_services'} = $affected_services;
 
+	    # add a criticity to this crit level
+	    my $crit = $srv->{'criticity'};
+	    #print STDERR "ADD crit $crit for service\n";
+	    $criticities[5 - $crit]{"nb"}++;
+
         }
     }
 
@@ -110,9 +131,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
     my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
 
+
+#    use Data::Dumper;
+#    print STDERR "Impact";
+#    print STDERR Dumper(@criticities); #$all_hosts->{$host}->{'childs'});
+
+
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;
-    $c->stash->{criticities}    = {'0' => 'Not important', '1' => 'Devel level', '2' => 'Qualification', '3' => 'Simple production', '4' => 'Production', '5' => 'Top production'};
+    $c->stash->{criticities}    = \@criticities;
     $c->stash->{title}          = 'Problems and impacts';
     $c->stash->{infoBoxTitle}   = 'Problems and impacts';
     $c->stash->{page}           = 'outagespbimp';

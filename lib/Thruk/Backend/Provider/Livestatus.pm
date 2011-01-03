@@ -207,9 +207,13 @@ sub get_hosts {
         num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
         parents percent_state_change perf_data plugin_output process_performance_data
         retry_interval scheduled_downtime_depth state state_type 
-        is_impact source_problems is_problem impacts criticity
+        is_impact source_problems impacts criticity
                 /];
     #TODO: shinken-specific : added is_impact source_problems is_problem impacts criticity
+    #use Data::Dumper;
+    #print STDERR Dumper($self); #$all_hosts->{$host}->{'childs'});
+    my @col = $options{'columns'};
+    push(@col, 'is_problem');
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('hosts', \%options);
