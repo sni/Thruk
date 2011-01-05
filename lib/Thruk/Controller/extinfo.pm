@@ -226,6 +226,14 @@ sub _process_service_page {
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
 
+    #If we use shinken, shoud show the impacts link if it's a problem
+    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $service->{'is_problem'}) {
+	$c->stash->{'show_impacts_link'} = 1;
+    }else{
+	$c->stash->{'show_impacts_link'} = 0;
+    }
+
+
     # generate command line
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {

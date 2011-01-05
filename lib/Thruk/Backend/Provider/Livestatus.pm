@@ -328,7 +328,7 @@ sub get_services {
         /];
 
     if($self->{'config'}->{'enable_shinken_features'}) {
-        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity/;
+        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem/;
     }
 
 
