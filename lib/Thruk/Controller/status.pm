@@ -1534,6 +1534,13 @@ sub _single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
+	# Impact are only available in Shinken
+	elsif ( $filter->{'type'} eq 'impact' && $c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'}) {
+            push @hostfilter,          { source_problems      => { $listop => $value } };
+            push @hosttotalsfilter,    { source_problems      => { $listop => $value } };
+            push @servicefilter,       { source_problems => { $listop => $value } };
+            push @servicetotalsfilter, { source_problems => { $listop => $value } };
+        }
         elsif ( $filter->{'type'} eq 'comment' ) {
             my($hfilter, $sfilter) = $self->_get_comments_filter($c, $op, $value);
             push @hostfilter,          $hfilter;

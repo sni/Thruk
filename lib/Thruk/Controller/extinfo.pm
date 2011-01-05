@@ -140,6 +140,14 @@ sub _process_host_page {
         filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $hostname }, { 'service_description' => undef } ],
         sort => { 'DESC' => 'id' } );
 
+
+    #If we use shinken, shoud show the impacts link if it's a problem
+    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $host->{'is_problem'}) {
+	$c->stash->{'show_impacts_link'} = 1;
+    }else{
+	$c->stash->{'show_impacts_link'} = 0;
+    }
+
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
     
