@@ -16,13 +16,13 @@
     </table>
     <div align="center">
       <br>
-      <div class='dataTitle'>Problems     <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/problem.png"></div>
+      <div class='dataTitle'>Problems     <img src="[% url_prefix %]thruk/themes/[% theme %]/images/problem.png"></div>
       <br>
 
     [% FOREACH crit IN criticities %]
     [% IF crit.nb != 0 %]
     <center>
-    <div class='dataTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% crit.value %].png"></div>
+    <div class='dataTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png"></div>
 
       <table border="0" class='data'>
         <tr>
