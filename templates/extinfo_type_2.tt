@@ -14,7 +14,9 @@
                 <a href='status.cgi?host=[% service.host_name | uri %]'>View Status Detail For This Host</a><br>
                 <a href='history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert History For This Service</a><br>
 		[% IF show_impacts_link %]
-		<a href='status.cgi?style=detail&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]'>View Impacts of this root problem</a><br>[% END %]
+		<a href='status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Impacts of [% service.host_name | uri %]/[% service.description | uri %]'>View Impacts of this root problem</a><br>[% END %]
+		[% IF show_rootproblems_link %]					     
+		<a href='status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% service.host_name | uri %]/[% service.description | uri %]&amp;title=Root problem of [% service.host_name | uri %]/[% service.description | uri %]'>View the root problems of this impact</a><br>[% END %]
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Trends For This Service</a><br>[% END %]
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert Histogram For This Service</a><br>[% END %]
                 <a href='avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries'>View Availability Report For This Service</a><br>

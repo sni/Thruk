@@ -27,7 +27,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
 
     # which style to display?
-    my $allowed_subpages = { 'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summary' => 1 };
+    my $allowed_subpages = { 'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summary' => 1, 'bothtypes' => 1 };
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
 
     if( $style eq '' ) {
@@ -86,6 +86,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     elsif ( $style eq 'summary' ) {
         $self->_process_summary_page($c);
     }
+    elsif ( $style eq 'bothtypes' ) {
+        $self->_process_bothtypes_page($c);
+    }
+
 
     $c->stash->{title}        = 'Current Network Status';
     $c->stash->{infoBoxTitle} = 'Current Network Status';
@@ -730,6 +734,90 @@ sub _process_summary_page {
 
     return 1;
 }
+
+
+##########################################################
+# create the status details page
+sub _process_bothtypes_page {
+    my( $self, $c ) = @_;
+
+    # which host to display?
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    # add comments and downtimes
+    my $comments = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
+    my $downtimes = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
+    my $downtimes_by_host;
+    my $downtimes_by_host_service;
+    if($downtimes) {
+        for my $downtime ( @{$downtimes} ) {
+            if( defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '' ) {
+                push @{ $downtimes_by_host_service->{ $downtime->{'host_name'} }->{ $downtime->{'service_description'} } }, $downtime;
+            }
+            else {
+                push @{ $downtimes_by_host->{ $downtime->{'host_name'} } }, $downtime;
+            }
+        }
+    }
+    $c->stash->{'downtimes_by_host'}         = $downtimes_by_host;
+    $c->stash->{'downtimes_by_host_service'} = $downtimes_by_host_service;
+    my $comments_by_host;
+    my $comments_by_host_service;
+    if($comments) {
+        for my $comment ( @{$comments} ) {
+            if( defined $comment->{'service_description'} and $comment->{'service_description'} ne '' ) {
+                push @{ $comments_by_host_service->{ $comment->{'host_name'} }->{ $comment->{'service_description'} } }, $comment;
+            }
+            else {
+                push @{ $comments_by_host->{ $comment->{'host_name'} } }, $comment;
+            }
+        }
+    }
+    $c->stash->{'comments_by_host'}         = $comments_by_host;
+    $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
+
+    # do the sort
+    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
+    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $order      = "ASC";
+    $order = "DESC" if $sorttype == 2;
+    my $sortoptions = {
+        '1' => [ [ 'host_name',   'description' ], 'host name' ],
+        '2' => [ [ 'description', 'host_name' ],   'service name' ],
+        '3' => [ [ 'has_been_checked', 'state', 'host_name', 'description' ], 'service status' ],
+        '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
+        '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+    };
+    $sortoption = 1 if !defined $sortoptions->{$sortoption};
+
+    # get all services
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c );
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c );
+    if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'data'} } = reverse @{ $c->stash->{'data'} }; }
+
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    if( defined $view_mode and $view_mode eq 'xls' ) {
+        $self->_set_selected_columns($c);
+        my $filename = 'status.xls';
+        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+        $c->stash->{'servicedata'}     = $services;
+        $c->stash->{'hostdata'}     = $hosts;
+        $c->stash->{'template'} = 'excel/status_detail.tt';
+        return $c->detach('View::Excel');
+    }
+
+    $c->stash->{'servicedata'}     = $services;
+    $c->stash->{'hostdata'}     = $hosts;
+
+    $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'orderdir'} = $order;
+    $c->stash->{'style'}    = 'bothtypes';
+
+    return 1;
+}
+
 
 ##########################################################
 sub _summary_add_host_stats {
@@ -1538,8 +1626,15 @@ sub _single_search {
 	elsif ( $filter->{'type'} eq 'impact' && $c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'}) {
             push @hostfilter,          { source_problems      => { $listop => $value } };
             push @hosttotalsfilter,    { source_problems      => { $listop => $value } };
-            push @servicefilter,       { source_problems => { $listop => $value } };
-            push @servicetotalsfilter, { source_problems => { $listop => $value } };
+            push @servicefilter,       { source_problems      => { $listop => $value } };
+            push @servicetotalsfilter, { source_problems      => { $listop => $value } };
+        }
+	# Root Problems are only available in Shinken
+	elsif ( $filter->{'type'} eq 'rootproblem' && $c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'}) {
+            push @hostfilter,          { impacts      => { $listop => $value } };
+            push @hosttotalsfilter,    { impacts      => { $listop => $value } };
+            push @servicefilter,       { impacts      => { $listop => $value } };
+            push @servicetotalsfilter, { impacts      => { $listop => $value } };
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
             my($hfilter, $sfilter) = $self->_get_comments_filter($c, $op, $value);

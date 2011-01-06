@@ -148,6 +148,13 @@ sub _process_host_page {
 	$c->stash->{'show_impacts_link'} = 0;
     }
 
+    #If we use shinken, shoud show the root problems ofthis impact
+    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $host->{'is_impact'}) {
+	$c->stash->{'show_rootproblems_link'} = 1;
+    }else{
+	$c->stash->{'show_rootproblems_link'} = 0;
+    }
+
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
     
@@ -233,6 +240,12 @@ sub _process_service_page {
 	$c->stash->{'show_impacts_link'} = 0;
     }
 
+    #If we use shinken, shoud show the root problems ofthis impact
+    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $service->{'is_impact'}) {
+	$c->stash->{'show_rootproblems_link'} = 1;
+    }else{
+	$c->stash->{'show_rootproblems_link'} = 0;
+    }
 
     # generate command line
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
