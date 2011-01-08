@@ -102,6 +102,20 @@ my %config = ('name'                   => 'Thruk',
                   STRICT             => 0,
                   render_die         => 1,
               },
+              nagios => {
+                  service_state_by_number => {
+                                    0 => 'OK',
+                                    1 => 'WARNING',
+                                    2 => 'CRITICAL',
+                                    3 => 'UNKNOWN',
+                                    4 => 'PENDING',
+                                },
+                  host_state_by_number => {
+                                    0 => 'OK',
+                                    1 => 'DOWN',
+                                    2 => 'UNREACHABLE',
+                                },
+              },
               'View::GD'               => {
                   gd_image_type      => 'png',
               },

@@ -81,6 +81,27 @@ sub init {
 
 ##########################################################
 
+=head2 disable_hidden_backends
+
+  disable_hidden_backends()
+
+returns list of hidden backends
+
+=cut
+
+sub disable_hidden_backends {
+    my $self               = shift;
+    my $disabled_backends  = shift || {};
+    for my $peer (@{$self->get_peers()}) {
+        if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
+            $disabled_backends->{$peer->{'key'}} = 2;
+        }
+    }
+    return $disabled_backends;
+}
+
+##########################################################
+
 =head2 get_peers
 
   get_peers()
@@ -283,7 +304,7 @@ sub expand_command {
     }
     my($name, @com_args) = split/!/mx, $command_name;
 
-    # it is possible to defined hosts without a command
+    # it is possible to define hosts without a command
     if(!defined $name or $name =~ m/^\s*$/mx) {
         my $command = {
             'line'          => 'no command defined',
@@ -303,36 +324,7 @@ sub expand_command {
         $x++;
     }
 
-    # user macros...
-    my $user_macros = $self->_get_user_macros($host->{'peer_key'});
-    if(defined $user_macros) {
-        for my $x (1..32) {
-            $expanded =~ s/\$USER$x\$/$user_macros->{'$USER'.$x.'$'}/gmx if defined $user_macros->{'$USER'.$x.'$'};
-        }
-    }
-
-    # host macros
-    $expanded =~ s/\$HOSTADDRESS\$/$host->{'address'}/gmx;
-    $expanded =~ s/\$HOSTNAME\$/$host->{'name'}/gmx;
-    $expanded =~ s/\$HOSTALIAS\$/$host->{'alias'}/gmx;
-
-    # host user macros
-    $x = 0;
-    for my $key (@{$host->{'custom_variable_names'}}) {
-        $expanded =~ s/\$_HOST$key\$/$host->{'custom_variable_values'}->[$x]/gmx;
-        $x++;
-    }
-
-    # service macros
-    if(defined $service) {
-        $expanded =~ s/\$SERVICEDESC\$/$service->{'description'}/gmx;
-        # service user macros...
-        $x = 0;
-        for my $key (@{$service->{'custom_variable_names'}}) {
-            $expanded =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
-            $x++;
-        }
-    }
+    $expanded = $self->_replace_macros({string => $expanded, host => $host, service => $service});
 
     my $command = {
         'line'          => $command_name,
@@ -341,6 +333,78 @@ sub expand_command {
     return $command;
 }
 
+########################################
+
+=head2 _replace_macros
+
+  _replace_macros
+
+returns a result for a sub called on all peers
+
+=cut
+
+sub _replace_macros {
+    my( $self, $args ) = @_;
+
+    my $string  = $args->{'string'};
+    my $host    = $args->{'host'};
+    my $service = $args->{'service'};
+
+    # user macros...
+    my $user_macros = $self->_get_user_macros($host->{'peer_key'});
+    if(defined $user_macros) {
+        for my $x (1..32) {
+            $string =~ s/\$USER$x\$/$user_macros->{'$USER'.$x.'$'}/gmx if defined $user_macros->{'$USER'.$x.'$'};
+        }
+    }
+
+    # host macros
+    my $hostmacros = {
+        'HOSTADDRESS'   => $host->{'address'},
+        'HOSTNAME'      => $host->{'name'},
+        'HOSTSTATEID'   => $host->{'name'},
+        'HOSTSTATE'     => $self->{'config'}->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}},
+        'HOSTLATENCY'   => $host->{'latency'},
+        'HOSTOUTPUT'    => $host->{'plugin_output'},
+        'HOSTPERFDATA'  => $host->{'perf_data'},
+        'HOSTATTEMPT'   => $host->{'current_attempt'},
+    };
+    for my $key (keys %{$hostmacros}) {
+        $string =~ s/\$$key\$/$hostmacros->{$key}/gmx;
+    }
+
+    # host user macros
+    my $x = 0;
+    for my $key (@{$host->{'custom_variable_names'}}) {
+        $string =~ s/\$_HOST$key\$/$host->{'custom_variable_values'}->[$x]/gmx;
+        $x++;
+    }
+
+    # service macros
+    if(defined $service) {
+        my $servicemacros = {
+            'SERVICEDESC'      => $service->{'description'},
+            'SERVICESTATEID'   => $service->{'name'},
+            'SERVICESTATE'     => $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}},
+            'SERVICELATENCY'   => $service->{'latency'},
+            'SERVICEOUTPUT'    => $service->{'plugin_output'},
+            'SERVICEPERFDATA'  => $service->{'perf_data'},
+            'SERVICEATTEMPT'   => $service->{'current_attempt'},
+        };
+        for my $key (keys %{$servicemacros}) {
+            $string =~ s/\$$key\$/$servicemacros->{$key}/gmx;
+        }
+
+        # service user macros...
+        $x = 0;
+        for my $key (@{$service->{'custom_variable_names'}}) {
+            $string =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
+            $x++;
+        }
+    }
+
+    return($string);
+}
 
 ########################################
 

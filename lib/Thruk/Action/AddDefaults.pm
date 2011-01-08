@@ -85,12 +85,9 @@ before 'execute' => sub {
         }
     }
     elsif(defined $c->{'db'}) {
-        for my $peer (@{$c->{'db'}->get_peers()}) {
-            if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
-                $disabled_backends->{$peer->{'key'}} = 2;
-            }
-        }
+        $disabled_backends = $c->{'db'}->disable_hidden_backends($disabled_backends);
     }
+
     my $has_groups = 0;
     if(defined $c->{'db'}) {
         for my $peer (@{$c->{'db'}->get_peers()}) {
