@@ -10,7 +10,7 @@ BEGIN {
 
 BEGIN { use_ok 'Thruk::Controller::cmd' }
 
-for my $file (glob("templates/cmd/*")) {
+for my $file (sort glob("templates/cmd/*")) {
     if($file eq '.' or $file eq '..') {}
     elsif($file =~ m/templates\/cmd\/cmd_typ_(\d+)\.tt/mx) {
         TestUtils::test_page(
