@@ -1,13 +1,20 @@
 use strict;
 use warnings;
-use Test::More tests => 20;
+use Test::More;
 
-BEGIN {
-    use lib('t');
-    require TestUtils;
-    import TestUtils;
+use Catalyst::Test 'Thruk';
+
+if(Thruk->config->{'enable_shinken_features'}) {
+    plan(tests => 20);
+} else {
+    plan( skip_all => 'enable_shinken_features disabled by config' ) 
 }
-BEGIN { use_ok 'Thruk::Controller::outagespbimp' }
+
+use lib('t');
+require TestUtils;
+import TestUtils;
+
+use_ok 'Thruk::Controller::outagespbimp';
 
 my $pages = [
     '/outagespbimp',
