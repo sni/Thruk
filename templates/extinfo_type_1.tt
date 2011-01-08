@@ -586,9 +586,11 @@
               </tr>
               <tr>
                 <th class='comment' nowrap>Expanded Command</th>
-                <td class='comment'><i>
-                  <b>Note:</b> only the most common macros will be replaced:</i>
+                <td class='comment'>
+                  [% IF command.note %]
+                  <i><b>Note:</b> [% command.note %]</i>
                   <br><br>
+                  [% END %]
                   <pre class="no_margin command_line">[% command.line_expanded %]</pre>
                 </td>
               </tr>

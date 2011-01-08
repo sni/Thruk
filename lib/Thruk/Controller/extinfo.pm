@@ -141,23 +141,23 @@ sub _process_host_page {
         sort => { 'DESC' => 'id' } );
 
 
-    #If we use shinken, shoud show the impacts link if it's a problem
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $host->{'is_problem'}) {
-	$c->stash->{'show_impacts_link'} = 1;
+    # If we use shinken, shoud show the impacts link if it's a problem
+    if($c->{'config'}->{'enable_shinken_features'} && $host->{'is_problem'}) {
+        $c->stash->{'show_impacts_link'} = 1;
     }else{
-	$c->stash->{'show_impacts_link'} = 0;
+        $c->stash->{'show_impacts_link'} = 0;
     }
 
     #If we use shinken, shoud show the root problems ofthis impact
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $host->{'is_impact'}) {
-	$c->stash->{'show_rootproblems_link'} = 1;
+    if($c->{'config'}->{'enable_shinken_features'} && $host->{'is_impact'}) {
+        $c->stash->{'show_rootproblems_link'} = 1;
     }else{
-	$c->stash->{'show_rootproblems_link'} = 0;
+        $c->stash->{'show_rootproblems_link'} = 0;
     }
 
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
-    
+
     # generate command line
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {

@@ -326,9 +326,16 @@ sub expand_command {
 
     $expanded = $self->_replace_macros({string => $expanded, host => $host, service => $service});
 
+    # does it still contain macros?
+    my $note = "";
+    if($expanded =~ m/\$[\w:]+\$/mx) {
+        $note = "could not expand all macros!";
+    }
+
     my $command = {
         'line'          => $command_name,
         'line_expanded' => $expanded,
+        'note'          => $note,
     };
     return $command;
 }
@@ -359,6 +366,30 @@ sub _replace_macros {
     }
 
     # host macros
+    $string = $self->_replace_host_macros($string, $host);
+
+    # service macros
+    if(defined $service) {
+        $string = $self->_replace_service_macros($string, $service);
+    }
+
+    return($string);
+}
+
+########################################
+
+=head2 _replace_host_macros
+
+  _replace_host_macros
+
+returns a string with replaced host macros
+
+=cut
+
+sub _replace_host_macros {
+    my( $self, $string, $host ) = @_;
+
+    # normal host macros
     my $hostmacros = {
         'HOSTADDRESS'   => $host->{'address'},
         'HOSTNAME'      => $host->{'name'},
@@ -380,32 +411,45 @@ sub _replace_macros {
         $x++;
     }
 
-    # service macros
-    if(defined $service) {
-        my $servicemacros = {
-            'SERVICEDESC'      => $service->{'description'},
-            'SERVICESTATEID'   => $service->{'name'},
-            'SERVICESTATE'     => $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}},
-            'SERVICELATENCY'   => $service->{'latency'},
-            'SERVICEOUTPUT'    => $service->{'plugin_output'},
-            'SERVICEPERFDATA'  => $service->{'perf_data'},
-            'SERVICEATTEMPT'   => $service->{'current_attempt'},
-        };
-        for my $key (keys %{$servicemacros}) {
-            $string =~ s/\$$key\$/$servicemacros->{$key}/gmx;
-        }
-
-        # service user macros...
-        $x = 0;
-        for my $key (@{$service->{'custom_variable_names'}}) {
-            $string =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
-            $x++;
-        }
-    }
-
-    return($string);
+    return $string;
 }
 
+########################################
+
+=head2 _replace_service_macros
+
+  _replace_service_macros
+
+returns a string with replaced service macros
+
+=cut
+
+sub _replace_service_macros {
+    my( $self, $string, $service ) = @_;
+
+    # normal host macros
+    my $servicemacros = {
+        'SERVICEDESC'      => $service->{'description'},
+        'SERVICESTATEID'   => $service->{'name'},
+        'SERVICESTATE'     => $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}},
+        'SERVICELATENCY'   => $service->{'latency'},
+        'SERVICEOUTPUT'    => $service->{'plugin_output'},
+        'SERVICEPERFDATA'  => $service->{'perf_data'},
+        'SERVICEATTEMPT'   => $service->{'current_attempt'},
+    };
+    for my $key (keys %{$servicemacros}) {
+        $string =~ s/\$$key\$/$servicemacros->{$key}/gmx;
+    }
+
+    # service user macros...
+    my $x = 0;
+    for my $key (@{$service->{'custom_variable_names'}}) {
+        $string =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
+        $x++;
+    }
+
+    return $string;
+}
 ########################################
 
 =head2 _do_on_peers
@@ -1190,9 +1234,11 @@ returns the USER1-32 macros from a resource file
 sub _get_user_macros {
     my $self     = shift;
     my $peer_key = shift;
-    my $backend = $self->get_peer_by_key($peer_key);
-    if(defined $backend->{'resource_file'}) {
-        return $self->_read_resource_file($backend->{'resource_file'});
+    if(defined $peer_key) {
+        my $backend = $self->get_peer_by_key($peer_key);
+        if(defined $backend->{'resource_file'}) {
+            return $self->_read_resource_file($backend->{'resource_file'});
+        }
     }
     return $self->_read_resource_file($self->{'resource_file'});
 }
