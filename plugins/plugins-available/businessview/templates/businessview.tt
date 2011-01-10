@@ -188,17 +188,21 @@
 
 		  [%# Sublevel Element %]
 		  <li>
-		    <table><tr><td class='[% s_status %]'> I=[% i %] J=[% j %]Sublevel [% s_status_text %]</td><td><div class='dataTitle'>[% parent.host_name %]/ [% parent.description %]</div></td></tr></table>
+		    <table><tr><td class='[% s_status %]'> I=[% i %] J=[% j %]Sublevel [% s_status_text %]</td><td><div class='dataTitle'>[% parent.host_name %]/ [% parent.description %]</div></td>
 		    [% IF subparents.size > 0 %]
 		      Son of level2:
+			<td><a id="togglelink" class="internal" href="javascript:toggleToc('son-[% i %]-[% j %]')">Show sons</a>
+			  </td>
+		    </tr></table>
 		    [% ELSE %] 	   [%# Fin du sub level item %]
-		      </li>
+                    </tr></table>
+                    </li>
 		    [% END %]
 		  
 		    [%# if subparent, print them %]
 		    [% IF subparents.size >= 1 %]
-	  
-		      <ul>UL3
+		  
+		      <ul id="son-[% i %]-[% j %]" style="display: none;">UL3
 		      [% FOREACH subparent = subparents %]
 			[% k = k + 1 %]
 		        [% IF subparent.has_been_checked == 0 %]
