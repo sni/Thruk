@@ -27,13 +27,14 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config ) = @_;
+    my( $class, $peer_config, $config, $log ) = @_;
 
     die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
         'live'   => Monitoring::Livestatus::Class->new($peer_config),
         'config' => $config,
+        'log'    => $log,
     };
     bless $self, $class;
 
@@ -793,6 +794,22 @@ sub get_extra_perf_stats {
     return($data, 'SUM');
 }
 
+##########################################################
+
+=head2 set_verbose
+
+  set_verbose
+
+sets verbose mode for this backend and returns old value
+
+=cut
+sub set_verbose {
+    my($self, $val) = @_;
+    my $old = $self->{'live'}->{'backend_obj'}->{'verbose'};
+    $self->{'live'}->{'backend_obj'}->{'verbose'} = $val;
+    $self->{'live'}->{'backend_obj'}->{'logger'}  = $self->{'log'};
+    return($old);
+}
 
 ##########################################################
 

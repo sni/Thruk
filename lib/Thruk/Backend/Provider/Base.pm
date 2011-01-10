@@ -451,6 +451,22 @@ sub get_service_stats {
     return;
 }
 
+##########################################################
+
+=head2 set_verbose
+
+  set_verbose
+
+sets verbose mode for this backend and returns old value
+
+=cut
+
+sub set_verbose {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
 =head1 AUTHOR
 
 Sven Nierlein, 2010, <nierlein@cpan.org>

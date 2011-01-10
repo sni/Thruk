@@ -871,10 +871,14 @@ sub _initialise_peer {
         'groups'        => $config->{'groups'},
         'resource_file' => $config->{'options'}->{'resource_file'},
         'enabled'       => 1,
-        'class'         => $class->new( $config->{'options'}, $self->{'config'} ),
+        'class'         => $class->new( $config->{'options'}, $self->{'config'}, $self->{'log'} ),
     };
     $peer->{'key'}  = $peer->{'class'}->peer_key();
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
+
+    if(Thruk->debug) {
+        $peer->{'class'}->set_verbose(1);
+    }
 
     return $peer;
 }
