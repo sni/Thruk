@@ -1,6 +1,7 @@
 ﻿[% statusmap_header = BLOCK %]
   <link type="text/css" href="[% url_prefix %]thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
   <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/businessview/businessview.js"></script>
+  <script language="javascript" type="text/javascript"> var img_src="[% url_prefix %]thruk/plugins/businessview/images/";</script>
 [% END %]
 [% PROCESS _header.tt extra_header => statusmap_header %]
 
@@ -134,7 +135,7 @@
       <tr>
 	<td>
 	  [%# Higer level List %]
-	  <ul>UL1
+	  <ul>
 	    [% i=0 %]
 	  [% FOREACH service = srv_pbs %]
 	    [% i = i + 1 %]
@@ -157,12 +158,13 @@
                [% END %]
 	       [%# Global table %]
             <li>
-	      <table><tr><td class='[% s_status %]'>I=[% i %] [% s_status_text %]</td><td><div class='dataTitle'>[% service.host_name %]/[% service.description %]</div></td>
-	      <td>Son of level1:
+	      <table><tr><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='dataTitle'>[% service.host_name %]/[% service.description %]</div></td>
+	      <td>
 	      [%# Sublevel list %]
-	      <a id="togglelink" class="internal" href="javascript:toggleToc('son-[% i %]')">Show sons</a>
+		<a id="togglelink-son-[% i %]" class="internal" href="javascript:toggleToc('son-[% i %]')">Expand
+		  <img id="img-son-[% i %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png"> </a>
 	      </td></tr></table>
-	      <ul id="son-[% i %]" style="display: none;">UL2
+	      <ul id="son-[% i %]" style="display: none;">
 		[% parents = service.services_parents %]
 		[% FOREACH parent = parents %]
 		  [% j = j + 1 %]
@@ -188,10 +190,10 @@
 
 		  [%# Sublevel Element %]
 		  <li>
-		    <table><tr><td class='[% s_status %]'> I=[% i %] J=[% j %]Sublevel [% s_status_text %]</td><td><div class='dataTitle'>[% parent.host_name %]/ [% parent.description %]</div></td>
+		    <table><tr><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='dataTitle'>[% parent.host_name %]/ [% parent.description %]</div></td>
 		    [% IF subparents.size > 0 %]
-		      Son of level2:
-			<td><a id="togglelink" class="internal" href="javascript:toggleToc('son-[% i %]-[% j %]')">Show sons</a>
+			<td><a id="togglelink-son-[% i %]-[% j %]" class="internal" href="javascript:toggleToc('son-[% i %]-[% j %]')">
+			    Expand <img id="img-son-[% i %]-[% j %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png"></a>
 			  </td>
 		    </tr></table>
 		    [% ELSE %] 	   [%# Fin du sub level item %]
@@ -202,7 +204,7 @@
 		    [%# if subparent, print them %]
 		    [% IF subparents.size >= 1 %]
 		  
-		      <ul id="son-[% i %]-[% j %]" style="display: none;">UL3
+		      <ul id="son-[% i %]-[% j %]" style="display: none;">
 		      [% FOREACH subparent = subparents %]
 			[% k = k + 1 %]
 		        [% IF subparent.has_been_checked == 0 %]
@@ -222,36 +224,19 @@
 		        [% SET s_status_text = 'UNKNOWN' %]
 		        [% END %]	
 		         [%# subsub element %]
-		         <li>I=[% i %] J=[% j %] K=[% k %]<table><tr><td class='[% s_status %]'>LEVEL3 [% s_status_text %]</td><td><div class='dataTitle'>[% subparent.host_name %]/ [% subparent.description %]</div></td></tr></table></li>
+		         <li><table><tr><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='dataTitle'>[% subparent.host_name %]/ [% subparent.description %]</div></td></tr></table></li>
 		      [% END %]
 		      [%# End of subsub parent listing%]
-		      FINUL3</ul>
+		      </ul>
 		      [%# end of the sub element item %]
 	            </li>
 	        [%# end parent loop %]
 	        [% END %]
 	    [% END %]
-	    FINUL2</ul>
+            </ul>
      </li>
     [% END %]
-    FINUL1</ul></td></tr></table>
-
-<table id="toc" class="toc" summary="Sommaire">
-  <tbody>
-    <tr>
-      <td>
-	<a id="togglelink" class="internal" href="javascript:toggleToc('toc')">Show</a>
-	<ul style="display: none; ">
-	  <li class="toclevel-1">Mon cul c'estdu poulet</li>
-	  <li class="toclevel-1">Mon cul c'estdu poulet2</li>
-	  <li class="toclevel-1">Mon cul c'estdu poulet3</li>
-	</ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<A id="togglelink" href="javascript:;" onClick="toggleToc('toc');">Hide</A>
+    </ul></td></tr></table>
 
 
 [% PROCESS _footer.tt %]
