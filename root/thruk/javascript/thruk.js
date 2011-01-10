@@ -1496,10 +1496,6 @@ var ajax_search = {
         ajax_search.input_field = elem.id;
 
         var input = document.getElementById(ajax_search.input_field);
-        input.onkeyup = ajax_search.suggest;
-        input.setAttribute("autocomplete", "off");
-        input.blur();   // blur & focus the element, otherwise the first
-        input.focus();  // click would result in the browser autocomplete
 
         var tmpElem = input;
         while(tmpElem && tmpElem.parentNode) {
@@ -1514,6 +1510,11 @@ var ajax_search = {
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
         if(selector && selector.tagName == 'SELECT') {
+            input.onkeyup = ajax_search.suggest;
+            input.setAttribute("autocomplete", "off");
+            input.blur();   // blur & focus the element, otherwise the first
+            input.focus();  // click would result in the browser autocomplete
+
             var search_type = selector.options[selector.selectedIndex].value;
             if(search_type == 'host' || search_type == 'hostgroup' || search_type == 'service' || search_type == 'servicegroup') {
                 ajax_search.search_type = search_type;
@@ -1521,6 +1522,13 @@ var ajax_search = {
             if(search_type == 'parent') {
                 ajax_search.search_type = 'host';
             }
+            if(search_type == 'contact' || search_type == 'comment' || search_type == 'next check' || search_type == 'last check' || search_type == 'latency' || search_type == 'execution time') {
+                ajax_search.search_type = 'none';
+            }
+        }
+        if(ajax_search.search_type == 'none') {
+            removeEvent( input, 'keyup', ajax_search.suggest );
+            return true;
         }
 
         var date = new Date;
