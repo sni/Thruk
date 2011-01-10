@@ -1,5 +1,10 @@
-﻿[% USE date %]
-[% PROCESS _header.tt %]
+﻿[% statusmap_header = BLOCK %]
+  <link type="text/css" href="[% url_prefix %]thruk/plugins/statusmap/Treemap.css" rel="stylesheet" />
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/businessview/businessview.js"></script>
+[% END %]
+[% PROCESS _header.tt extra_header => statusmap_header %]
+
+
 
     <table border="0" width="100%">
       <tr>
@@ -32,8 +37,6 @@
           <th class='data'>State</th>
           <th class='data'>Notes</th>
           <th class='data'>State Duration</th>
-          <th class='data'># Hosts Affected</th>
-          <th class='data'># Services Affected</th>
           <th class='data'>Actions</th>
         </tr>
         [% SET num = 0 %]
@@ -55,8 +58,6 @@
             [% END %]
           </td>
           <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
-          <td class='[% class %]'>[% host.affected_hosts %]</td>
-          <td class='[% class %]'>[% host.affected_services %]</td>
           <td class='[% class %]'>
             <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
@@ -108,8 +109,6 @@
             [% END %]
           </td>
           <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
-          <td class='[% class %]'>[% srv.affected_hosts %]</td>
-          <td class='[% class %]'>[% srv.affected_services %]</td>
           <td class='[% class %]'>
             <a href='status.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
@@ -129,6 +128,119 @@
     <br><br>
     [% END %]
     [% END %]
+
+    [%# Global table %]
+    <table class='infoBox' border=0>
+      <tr>
+	<td>
+	  [%# Higer level List %]
+	  <ul>UL1
+	  [% FOREACH service = srv_pbs %]
+	       [% IF service.has_been_checked == 0 %]
+               [% SET s_status = 'servicePENDING' %]
+               [% SET s_status_text = 'PENDING' %]
+               [% ELSIF service.state == 0 %]
+               [% SET s_status = 'serviceOK' %]
+	       [% SET s_status_text = 'OK' %]
+               [% ELSIF service.state == 1 %]
+               [% SET s_status = 'serviceWARNING' %]
+	       [% SET s_status_text = 'WARNING' %]
+               [% ELSIF service.state == 2 %]
+               [% SET s_status = 'serviceCRITICAL' %]
+	       [% SET s_status_text = 'CRITICAL' %]
+               [% ELSIF service.state == 3 %]
+               [% SET s_status = 'serviceUNKNOWN' %]
+	       [% SET s_status_text = 'UNKNOWN' %]
+               [% END %]
+	       [%# Global table %]
+            <li>
+	      <table><tr><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='dataTitle'>[% service.host_name %]/[% service.description %]</div></td></tr></table>
+	      Son of level1:
+	      [%# Sublevel list %]
+	      <ul>UL2
+		[% parents = service.services_parents %]
+		[% FOREACH parent = parents %]
+		  [% subparents = parent.services_parents %]
+
+		  [% IF parent.has_been_checked == 0 %]
+		  [% SET s_status = 'servicePENDING' %]
+		  [% SET s_status_text = 'PENDING' %]
+		  [% ELSIF parent.state == 0 %]
+		  [% SET s_status = 'serviceOK' %]
+		  [% SET s_status_text = 'OK' %]
+		  [% ELSIF parent.state == 1 %]
+		  [% SET s_status = 'serviceWARNING' %]
+		  [% SET s_status_text = 'WARNING' %]
+		  [% ELSIF parent.state == 2 %]
+		  [% SET s_status = 'serviceCRITICAL' %]
+		  [% SET s_status_text = 'CRITICAL' %]
+		  [% ELSIF parent.state == 3 %]
+		  [% SET s_status = 'serviceUNKNOWN' %]
+		  [% SET s_status_text = 'UNKNOWN' %]
+		  [% END %]
+
+		  [%# Sublevel Element %]
+		  <li>
+		    <table><tr><td class='[% s_status %]'>Sublevel [% s_status_text %]</td><td><div class='dataTitle'>[% parent.host_name %]/ [% parent.description %]</div></td></tr></table>
+		    [% IF subparents.size > 0 %]
+		      Son of level2:
+		    [% ELSE %] 	   [%# Fin du sub level item %]
+		      </li>
+		    [% END %]
+		  
+		    [%# if subparent, print them %]
+		    [% IF subparents.size >= 1 %]
+	  
+		      <ul>UL3
+		      [% FOREACH subparent = subparents %]
+
+		        [% IF subparent.has_been_checked == 0 %]
+		        [% SET s_status = 'servicePENDING' %]
+		        [% SET s_status_text = 'PENDING' %]
+		        [% ELSIF subparent.state == 0 %]
+		        [% SET s_status = 'serviceOK' %]
+		        [% SET s_status_text = 'OK' %]
+		        [% ELSIF subparent.state == 1 %]
+		        [% SET s_status = 'serviceWARNING' %]
+		        [% SET s_status_text = 'WARNING' %]
+		        [% ELSIF subparent.state == 2 %]
+		        [% SET s_status = 'serviceCRITICAL' %]
+		        [% SET s_status_text = 'CRITICAL' %]
+		        [% ELSIF subparent.state == 3 %]
+		        [% SET s_status = 'serviceUNKNOWN' %]
+		        [% SET s_status_text = 'UNKNOWN' %]
+		        [% END %]	
+		         [%# subsub element %]
+		         <li><table><tr><td class='[% s_status %]'>LEVEL3 [% s_status_text %]</td><td><div class='dataTitle'>[% subparent.host_name %]/ [% subparent.description %]</div></td></tr></table></li>
+		      [% END %]
+		      [%# End of subsub parent listing%]
+		      FINUL3</ul>
+		      [%# end of the sub element item %]
+	            </li>
+	        [%# end parent loop %]
+	        [% END %]
+	    [% END %]
+	    FINUL2</ul>
+     </li>
+    [% END %]
+    FINUL1</ul></td></tr></table>
+
+<table id="toc" class="toc" summary="Sommaire">
+  <tbody>
+    <tr>
+      <td>
+	<a id="togglelink" class="internal" href="javascript:toggleToc('toc')">Show</a>
+	<ul style="display: none; ">
+	  <li class="toclevel-1">Mon cul c'estdu poulet</li>
+	  <li class="toclevel-1">Mon cul c'estdu poulet2</li>
+	  <li class="toclevel-1">Mon cul c'estdu poulet3</li>
+	</ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<A id="togglelink" href="javascript:;" onClick="toggleToc('toc');">Hide</A>
 
 
 [% PROCESS _footer.tt %]

@@ -211,7 +211,8 @@ sub get_hosts {
                 /];
 
     if($self->{'config'}->{'enable_shinken_features'}) {
-        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem got_business_rule/;
+        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem 
+                                         got_business_rule parent_dependencies/;
     }
 
     my @col = $options{'columns'};
@@ -328,7 +329,8 @@ sub get_services {
         /];
 
     if($self->{'config'}->{'enable_shinken_features'}) {
-        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem got_business_rule/;
+        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem 
+                                         got_business_rule parent_dependencies/;
     }
 
 

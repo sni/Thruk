@@ -82,10 +82,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of impacted hosts / services
-            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($host);
-
-            $host->{'affected_hosts'}    = $affected_hosts;
-            $host->{'affected_services'} = $affected_services;
+            $self->_link_parent_hosts_and_services($c, $host);
 
             # add a criticity to this crit level
             my $crit = $host->{'criticity'};
@@ -114,10 +111,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             #$srv->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of impacted hosts / services
-            my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($srv);
-
-            $srv->{'affected_hosts'}    = $affected_hosts;
-            $srv->{'affected_services'} = $affected_services;
+            $self->_link_parent_hosts_and_services($c, $srv);
 
             # add a criticity to this crit level
             my $crit = $srv->{'criticity'};
@@ -153,34 +147,69 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 ##########################################################
 # Count the impacts for an host
-sub _count_hosts_and_services_impacts {
-    my($self, $host ) = @_;
+sub _link_parent_hosts_and_services {
+    my($self, $c,  $elt ) = @_;
 
-    my $affected_hosts    = 0;
-    my $affected_services = 0;
+    my @host_parents = ();
+    my @services_parents = ();
 
-#    use Data::Dumper;
+    use Data::Dumper;
 #    print STDERR "Impact sum for".Dumper($host);
-    return(0,0) if !defined $host;
+    return 0 if !defined $elt;
 
-#    use Data::Dumper;
 #    print STDERR "Impact";
-#    print STDERR Dumper($host); #$all_hosts->{$host}->{'childs'});
-    #print STDERR Dumper($all_hosts->{$host}->{'impacts'});
+    print STDERR "Element".Dumper($elt); #$all_elts->{$elt}->{'childs'});
+    #print STDERR Dumper($all_elts->{$elt}->{'impacts'});
 
-    if(defined $host->{'impacts'} and $host->{'impacts'} ne '') {
-        for my $child (@{$host->{'impacts'}}) {
-            # Look at if we match an host or a service here
-            # a service will have a /, not for hosts
-            if($child =~ /\//mx){
-                $affected_services += 1;
+    if(defined $elt->{'parent_dependencies'} and $elt->{'parent_dependencies'} ne '') {
+	print STDERR "Parent dep\n".$elt->{'parent_dependencies'}.'TOTO\n';
+        for my $parent (@{$elt->{'parent_dependencies'}}) {
+            # Look at if we match an elt or a service here
+            # a service will have a /, not for elts
+            if($parent =~ /\//mx){
+		# We need to look for the service object
+		my @elts = split '\/', $parent;
+		# Why is it reversed here?
+		my $hname = $elts[0];
+		my $desc = $elts[1];
+		my $servicefilter = [ { description        => { '='     => $desc } },
+                                          { host_name          => { '='     => $hname } },
+                                        ];
+		print STDERR "look for $hname/$desc\n";
+		my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+		my $srv = $tmp_services->[0];
+                push(@services_parents, $srv);
+		# And call this on this parent too to build a tree
+		# TODO : limit the level
+		print STDERR "rec call srv\n";
+		$self->_link_parent_hosts_and_services($c, $srv);
             }else{
-                $affected_hosts += 1;
+		my $host_search_filter = [ { name               => { '='     => $parent } },
+		    ];
+		print STDERR "look for $parent\n";
+		my $tmp_hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $host_search_filter ] );
+                # we only got one host
+		my $hst = $tmp_hosts->[0];
+
+		push(@host_parents, $hst);
+		# And call this on this parent too to build a tree
+		# TODO : limit the level
+		print STDERR "rec call hst\n";
+		print STDERR "Call host".Dumper($hst);
+		$self->_link_parent_hosts_and_services($c, $hst);
             }
         }
     }
 
-    return($affected_hosts, $affected_services);
+    print STDERR Dumper(@host_parents);
+    $elt->{'host_parents'} = \@host_parents;
+    $elt->{'services_parents'} = \@services_parents;
+
+
+    print STDERR "Element";
+    print STDERR Dumper($elt); #$all_elts->{$elt}->{'childs'});
+
+    return 0;
 }
 
 
