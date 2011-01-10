@@ -1,6 +1,7 @@
 function toggleToc(e) {
     alert(e);
-    var toc = document.getElementById('toc').getElementsByTagName('ul')[0];
+    /*var toc = document.getElementById('toc').getElementsByTagName('ul')[0];*/
+    var toc = document.getElementById(e);
     /*var toggleLink = document.getElementById('togglelink')*/
 
 	if (toc && toc.style.display == 'none') {

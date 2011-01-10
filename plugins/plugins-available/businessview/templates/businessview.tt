@@ -135,7 +135,10 @@
 	<td>
 	  [%# Higer level List %]
 	  <ul>UL1
+	    [% i=0 %]
 	  [% FOREACH service = srv_pbs %]
+	    [% i = i + 1 %]
+	    [% j=0 %]
 	       [% IF service.has_been_checked == 0 %]
                [% SET s_status = 'servicePENDING' %]
                [% SET s_status_text = 'PENDING' %]
@@ -154,12 +157,16 @@
                [% END %]
 	       [%# Global table %]
             <li>
-	      <table><tr><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='dataTitle'>[% service.host_name %]/[% service.description %]</div></td></tr></table>
-	      Son of level1:
+	      <table><tr><td class='[% s_status %]'>I=[% i %] [% s_status_text %]</td><td><div class='dataTitle'>[% service.host_name %]/[% service.description %]</div></td>
+	      <td>Son of level1:
 	      [%# Sublevel list %]
-	      <ul>UL2
+	      <a id="togglelink" class="internal" href="javascript:toggleToc('son-[% i %]')">Show sons</a>
+	      </td></tr></table>
+	      <ul id="son-[% i %]" style="display: none;">UL2
 		[% parents = service.services_parents %]
 		[% FOREACH parent = parents %]
+		  [% j = j + 1 %]
+		  [% k=0 %]
 		  [% subparents = parent.services_parents %]
 
 		  [% IF parent.has_been_checked == 0 %]
@@ -181,7 +188,7 @@
 
 		  [%# Sublevel Element %]
 		  <li>
-		    <table><tr><td class='[% s_status %]'>Sublevel [% s_status_text %]</td><td><div class='dataTitle'>[% parent.host_name %]/ [% parent.description %]</div></td></tr></table>
+		    <table><tr><td class='[% s_status %]'> I=[% i %] J=[% j %]Sublevel [% s_status_text %]</td><td><div class='dataTitle'>[% parent.host_name %]/ [% parent.description %]</div></td></tr></table>
 		    [% IF subparents.size > 0 %]
 		      Son of level2:
 		    [% ELSE %] 	   [%# Fin du sub level item %]
@@ -193,7 +200,7 @@
 	  
 		      <ul>UL3
 		      [% FOREACH subparent = subparents %]
-
+			[% k = k + 1 %]
 		        [% IF subparent.has_been_checked == 0 %]
 		        [% SET s_status = 'servicePENDING' %]
 		        [% SET s_status_text = 'PENDING' %]
@@ -211,7 +218,7 @@
 		        [% SET s_status_text = 'UNKNOWN' %]
 		        [% END %]	
 		         [%# subsub element %]
-		         <li><table><tr><td class='[% s_status %]'>LEVEL3 [% s_status_text %]</td><td><div class='dataTitle'>[% subparent.host_name %]/ [% subparent.description %]</div></td></tr></table></li>
+		         <li>I=[% i %] J=[% j %] K=[% k %]<table><tr><td class='[% s_status %]'>LEVEL3 [% s_status_text %]</td><td><div class='dataTitle'>[% subparent.host_name %]/ [% subparent.description %]</div></td></tr></table></li>
 		      [% END %]
 		      [%# End of subsub parent listing%]
 		      FINUL3</ul>
