@@ -126,9 +126,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
 
 
-    use Data::Dumper;
-    print STDERR "Impact";
-    print STDERR Dumper(@criticities); #$all_hosts->{$host}->{'childs'});
+    #use Data::Dumper;
+    #print STDERR "Impact";
+    #print STDERR Dumper(@criticities); #$all_hosts->{$host}->{'childs'});
 
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
@@ -158,11 +158,11 @@ sub _link_parent_hosts_and_services {
     return 0 if !defined $elt;
 
 #    print STDERR "Impact";
-    print STDERR "Element".Dumper($elt); #$all_elts->{$elt}->{'childs'});
+    #print STDERR "Element".Dumper($elt); #$all_elts->{$elt}->{'childs'});
     #print STDERR Dumper($all_elts->{$elt}->{'impacts'});
 
     if(defined $elt->{'parent_dependencies'} and $elt->{'parent_dependencies'} ne '') {
-	print STDERR "Parent dep\n".$elt->{'parent_dependencies'}.'TOTO\n';
+	#print STDERR "Parent dep\n".$elt->{'parent_dependencies'}.'TOTO\n';
         for my $parent (@{$elt->{'parent_dependencies'}}) {
             # Look at if we match an elt or a service here
             # a service will have a /, not for elts
@@ -175,18 +175,18 @@ sub _link_parent_hosts_and_services {
 		my $servicefilter = [ { description        => { '='     => $desc } },
                                           { host_name          => { '='     => $hname } },
                                         ];
-		print STDERR "look for $hname/$desc\n";
+		#print STDERR "look for $hname/$desc\n";
 		my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
 		my $srv = $tmp_services->[0];
                 push(@services_parents, $srv);
 		# And call this on this parent too to build a tree
 		# TODO : limit the level
-		print STDERR "rec call srv\n";
+		#print STDERR "rec call srv\n";
 		$self->_link_parent_hosts_and_services($c, $srv);
             }else{
 		my $host_search_filter = [ { name               => { '='     => $parent } },
 		    ];
-		print STDERR "look for $parent\n";
+		#print STDERR "look for $parent\n";
 		my $tmp_hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $host_search_filter ] );
                 # we only got one host
 		my $hst = $tmp_hosts->[0];
@@ -194,20 +194,20 @@ sub _link_parent_hosts_and_services {
 		push(@host_parents, $hst);
 		# And call this on this parent too to build a tree
 		# TODO : limit the level
-		print STDERR "rec call hst\n";
-		print STDERR "Call host".Dumper($hst);
+		#print STDERR "rec call hst\n";
+		#print STDERR "Call host".Dumper($hst);
 		$self->_link_parent_hosts_and_services($c, $hst);
             }
         }
     }
 
-    print STDERR Dumper(@host_parents);
+    #print STDERR Dumper(@host_parents);
     $elt->{'host_parents'} = \@host_parents;
     $elt->{'services_parents'} = \@services_parents;
 
 
-    print STDERR "Element";
-    print STDERR Dumper($elt); #$all_elts->{$elt}->{'childs'});
+    #print STDERR "Element";
+    #print STDERR Dumper($elt); #$all_elts->{$elt}->{'childs'});
 
     return 0;
 }
