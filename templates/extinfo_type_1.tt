@@ -71,7 +71,7 @@
           <tr>
             <td align='right'>
               <div class='dataTitle'>Criticity : [% host.criticity %]/5
-              <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% host.criticity %].png">
+              <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% host.criticity %].png" alt="Criticity : [% host.criticity %]/5">
               </div>
             </td>
           </tr>

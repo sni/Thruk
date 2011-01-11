@@ -61,7 +61,7 @@
         <td align="right" valign="bottom" width="33%">
           [% IF enable_shinken_features %]
             <div class='dataTitle'>Criticity : [% service.criticity %]/5
-              <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% service.criticity %].png">
+              <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% service.criticity %].png" alt="Criticity : [% service.criticity %]/5">
             </div>
           [% END %]
 
