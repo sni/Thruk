@@ -59,10 +59,9 @@
 	       [%# Global table %]
             <li>
 	      <table><tr class='dataOdd'><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='elementTitle'><a href='extinfo.cgi?type=2&amp;host=[% service.host_name | uri %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>[% service.host_name %]/[% service.description %]</a></div></td>
-	      <td>
+	      <td class='void'>
 	      [%# Sublevel list %]
-		<a id="togglelink-son-[% crit.value %]-[% i %]" class="internal" href="javascript:toggleToc('son-[% crit.value %]-[% i %]')">Expand
-		  <img id="img-son-[% crit.value %]-[% i %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png"> </a>
+		<a id="togglelink-son-[% crit.value %]-[% i %]" class="internal" href="javascript:toggleToc('son-[% crit.value %]-[% i %]')"><img id="img-son-[% crit.value %]-[% i %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png"> </a>
 	      </td></tr></table>
 	      <ul id="son-[% crit.value %]-[% i %]" style="display: none;">
 		[% parents = service.services_parents %]
@@ -92,8 +91,8 @@
 		  <li>
 		    <table><tr class='dataOdd'><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='elementTitle'><a href='extinfo.cgi?type=2&amp;host=[% parent.host_name | uri %]&amp;service=[% parent.description %]&amp;backend=[% parent.peer_key %]'>[% parent.host_name %]/[% parent.description %]</a></div></td>
 		    [% IF subparents.size > 0 %]
-			<td><a id="togglelink-son-[% crit.value %]-[% i %]-[% j %]" class="internal" href="javascript:toggleToc('son-[% crit.value %]-[% i %]-[% j %]')">
-			    Expand <img id="img-son-[% crit.value %]-[% i %]-[% j %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png"></a>
+			<td class='void'><a id="togglelink-son-[% crit.value %]-[% i %]-[% j %]" class="internal" href="javascript:toggleToc('son-[% crit.value %]-[% i %]-[% j %]')">
+			    <img id="img-son-[% crit.value %]-[% i %]-[% j %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png"></a>
 			  </td>
 		    </tr></table>
 		    [% ELSE %] 	   [%# Fin du sub level item %]

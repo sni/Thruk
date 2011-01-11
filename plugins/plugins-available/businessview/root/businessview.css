@@ -8,3 +8,26 @@ list-style-type: none;
     font-weight: bold;
     font-size: 12pt;
 }
+
+
+table.infoBox td {
+  padding: 2px;
+  margin: 0px;
+  border-width: 0px;
+  border-style: inset;
+/*  border-color: #C4C2C2;*/
+/*  background-color: #C4C2C2;*/
+  background-color: none !important;
+}
+
+
+.void { background-color: none !important; }
+
+
+.dataOdd {
+    border-collapse: collapse;
+    empty-cells: show;
+    background-image: none;
+    border-spacing: 0px;
+    margin: 10px;
+} /* font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }*/
