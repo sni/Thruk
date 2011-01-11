@@ -35,33 +35,27 @@ sub read_navigation {
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
 
-    # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
-    my @menu_conf_stat = stat($file);
-    my $last_stat = $c->cache->get('menu_conf_stat');
-    if(!defined $last_stat
-       or $last_stat->[1] != $menu_conf_stat[1] # inode changed
-       or $last_stat->[9] != $menu_conf_stat[9] # modify time changed
-      ) {
-        $c->log->info("menu.conf has changed, updating...") if defined $last_stat;
-        $c->cache->set('menu_conf_stat', \@menu_conf_stat);
+    if( exists $c->config->{'cache_navigation'} and $c->config->{'cache_navigation'} == 0 ) {
+        _renew_navigation($c, $file);
+    }
+    else {
+        # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
+        my @menu_conf_stat = stat($file);
+        my $last_stat = $c->cache->get('menu_conf_stat');
+        if(!defined $last_stat
+           or $last_stat->[1] != $menu_conf_stat[1] # inode changed
+           or $last_stat->[9] != $menu_conf_stat[9] # modify time changed
+          ) {
+            $c->log->info("menu.conf has changed, updating...") if defined $last_stat;
+            $c->cache->set('menu_conf_stat', \@menu_conf_stat);
 
-        $Thruk::Utils::Menu::c          = $c;
-        $Thruk::Utils::Menu::navigation = [];
-
-        ## no critic
-        eval(read_file($file));
-        ## use critic
-        if($@) {
-            $c->log->error("error while loading navigation from ".$file.": ".$@);
-            confess($@);
+            _renew_navigation($c, $file);
+        } elsif(!$c->config->{'cache_navigation'}) {
+            _renew_navigation($c, $file);
+        } else {
+            # return cached version
+            $c->stash->{'navigation'}  = $c->cache->get('navigation');
         }
-
-        $c->stash->{'navigation'}  = $Thruk::Utils::Menu::navigation;
-        $c->cache->set('navigation', $Thruk::Utils::Menu::navigation);
-    } else {
-        # return cached version
-        $c->stash->{'navigation'}  = $c->cache->get('navigation');
-        return;
     }
 
     $c->stats->profile(end => "Utils::Menu::read_navigation()");
@@ -171,6 +165,35 @@ sub add_search {
     return;
 }
 
+##############################################
+
+=head2 _get_menu_target
+
+  _get_menu_target()
+
+returns the current prefered target
+
+=cut
+sub _renew_navigation {
+    my($c, $file) = @_;
+
+    $Thruk::Utils::Menu::c          = $c;
+    $Thruk::Utils::Menu::navigation = [];
+
+    ## no critic
+    eval(read_file($file));
+    ## use critic
+    if($@) {
+        $c->log->error("error while loading navigation from ".$file.": ".$@);
+        confess($@);
+    }
+
+    $c->stash->{'navigation'}  = $Thruk::Utils::Menu::navigation;
+    if($c->config->{'cache_navigation'}) {
+        $c->cache->set('navigation', $Thruk::Utils::Menu::navigation);
+    }
+    return;
+}
 
 ##############################################
 

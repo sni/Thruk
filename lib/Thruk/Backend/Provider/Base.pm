@@ -467,6 +467,23 @@ sub set_verbose {
     return;
 }
 
+
+##########################################################
+
+=head2 set_stash
+
+  set_stash
+
+make stash accessible for the backend
+
+=cut
+sub set_stash {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+
 =head1 AUTHOR
 
 Sven Nierlein, 2010, <nierlein@cpan.org>

@@ -106,7 +106,7 @@ before 'execute' => sub {
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     my $last_program_restart = 0;
     eval {
-        my $processinfo              = $c->{'db'}->get_processinfo($c, $cache);
+        my $processinfo              = $c->{'db'}->get_processinfo($cache);
         die($@) unless defined $processinfo;
         my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
         $c->stash->{'pi'}            = $overall_processinfo;
@@ -176,6 +176,31 @@ before 'execute' => sub {
     ###############################
     # set some more roles
     Thruk::Utils::set_can_submit_commands($c);
+
+    ###############################
+    # do we have only shinken backends?
+    if(exists $c->config->{'enable_shinken_features'}) {
+        $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
+    } else {
+        $c->config->{'cache_navigation'}       = 0;
+        $c->stash->{'enable_shinken_features'} = 0;
+        if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH') {
+            $c->stash->{'enable_shinken_features'} = 1;
+            for my $b (values %{$c->stash->{'pi_detail'}}) {
+                if(defined $b->{'data_source_version'} and $b->{'data_source_version'} !~ m/\-shinken/mx) {
+                    $c->stash->{'enable_shinken_features'} = 0;
+                    last;
+                }
+            }
+        }
+    }
+    # make stash available for our backends
+    $c->{'db'}->set_stash($c->stash);
+
+    $c->stash->{'navigation'} = "";
+    if( $c->config->{'use_frames'} == 0 ) {
+        Thruk::Utils::Menu::read_navigation($c);
+    }
 
     ###############################
     $c->stats->profile(end => "AddDefaults::before");

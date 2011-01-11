@@ -35,6 +35,7 @@ sub new {
         'live'   => Monitoring::Livestatus::Class->new($peer_config),
         'config' => $config,
         'log'    => $log,
+        'stash'  => undef,
     };
     bless $self, $class;
 
@@ -100,7 +101,6 @@ return the process info
 =cut
 sub get_processinfo {
     my $self  = shift;
-    my $c     = shift;
     my $cache = shift;
 
     my $data  =  $self->{'live'}
@@ -117,10 +117,10 @@ sub get_processinfo {
 
     # do the livestatus version check
     my $cached_already_warned_about_livestatus_version = $cache->get('already_warned_about_livestatus_version');
-    if(!defined $cached_already_warned_about_livestatus_version and defined $c->config->{'min_livestatus_version'}) {
-        unless(Thruk::Utils::version_compare($c->config->{'min_livestatus_version'}, $data->{$self->peer_key()}->{'data_source_version'})) {
+    if(!defined $cached_already_warned_about_livestatus_version and defined $self->{'config'}->{'min_livestatus_version'}) {
+        unless(Thruk::Utils::version_compare($self->{'config'}->{'min_livestatus_version'}, $data->{$self->peer_key()}->{'data_source_version'})) {
             $cache->set('already_warned_about_livestatus_version', 1);
-            $c->log->warn("backend '".$self->peer_name()."' uses too old livestatus version: '".$data->{$self->peer_key()}->{'data_source_version'}."', minimum requirement is at least '".$c->config->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
+            $self->{'log'}->warn("backend '".$self->peer_name()."' uses too old livestatus version: '".$data->{$self->peer_key()}->{'data_source_version'}."', minimum requirement is at least '".$self->{'config'}->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
         }
     }
     $data->{$self->peer_key()}->{'data_source_version'} = "Livestatus ".$data->{$self->peer_key()}->{'data_source_version'};
@@ -211,7 +211,7 @@ sub get_hosts {
         retry_interval scheduled_downtime_depth state state_type
                 /];
 
-    if($self->{'config'}->{'enable_shinken_features'}) {
+    if($self->{'stash'}->{'enable_shinken_features'}) {
         push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem/;
     }
 
@@ -328,7 +328,7 @@ sub get_services {
         state state_type
         /];
 
-    if($self->{'config'}->{'enable_shinken_features'}) {
+    if($self->{'stash'}->{'enable_shinken_features'}) {
         push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem/;
     }
 
@@ -809,6 +809,21 @@ sub set_verbose {
     $self->{'live'}->{'backend_obj'}->{'verbose'} = $val;
     $self->{'live'}->{'backend_obj'}->{'logger'}  = $self->{'log'};
     return($old);
+}
+
+##########################################################
+
+=head2 set_stash
+
+  set_stash
+
+make stash accessible for the backend
+
+=cut
+sub set_stash {
+    my($self, $stash) = @_;
+    $self->{'stash'} = $stash;
+    return;
 }
 
 ##########################################################

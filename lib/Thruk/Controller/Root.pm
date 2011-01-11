@@ -126,9 +126,6 @@ sub begin : Private {
     # set strict passive mode
     $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 1;
 
-    # shinken mode?
-    $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'} || 0;
-
     # initialize our backends
     unless ( defined $c->{'db'} ) {
         $c->{'db'} = $c->model('Thruk');
@@ -166,10 +163,6 @@ sub begin : Private {
     my $target = $c->{'request'}->{'parameters'}->{'target'};
     if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
         $c->stash->{'target'} = '_parent';
-    }
-    $c->stash->{'navigation'} = "";
-    if( $c->config->{'use_frames'} == 0 ) {
-        Thruk::Utils::Menu::read_navigation($c);
     }
 
     $c->stash->{'show_full_commandline'} = $c->config->{'show_full_commandline'} || 0;
@@ -334,10 +327,10 @@ page: /thruk/side.html
 
 =cut
 
-sub thruk_side_html : Regex('thruk\/side\.html$') {
+sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
 
-    # reset navigatio cache
+    # reset navigation cache
     $c->cache->set('menu_conf_stat', undef);
     Thruk::Utils::Menu::read_navigation($c);
 
@@ -654,6 +647,9 @@ check and display errors (if any)
 
 sub end : ActionClass('RenderView') {
     my( $self, $c ) = @_;
+
+    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'};
+
     my @errors = @{ $c->error };
     if( scalar @errors > 0 ) {
         for my $error (@errors) {
