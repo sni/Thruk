@@ -47,6 +47,7 @@ requires 'Class::C3'                              => 0.22;
 requires 'Algorithm::C3'                          => 0.08;
 requires 'Time::HiRes'                            => 0;
 requires 'Date::Calc'                             => 6.3;
+requires 'Date::Calc::XS'                         => 0;
 requires 'Data::Page'                             => 2.02;
 requires 'HTML::Entities'                         => 3.64;
 requires 'File::Slurp'                            => 0.00;

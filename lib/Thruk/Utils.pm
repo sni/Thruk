@@ -15,7 +15,7 @@ use warnings;
 use Config::General;
 use Carp;
 use Data::Dumper;
-use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
+use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use Date::Manip;
 use File::Slurp;
 use Template::Plugin::Date;
@@ -295,23 +295,31 @@ sub get_start_end_for_timeperiod {
         $start = Mktime($year-1,1,1,  0,0,0);
         $end   = Mktime($year,1,1,  0,0,0);
     }
-    elsif(defined $t1 and defined $t2) {
-        $start = $t1;
-        $end   = $t2;
-        if(!defined $start) {
-            $start = Mktime($syear,$smon,$sday, $shour,$smin,$ssec);
+    else {
+        if(defined $t1) {
+            $start = $t1;
+        } else {
+            $start = normal_mktime($syear,$smon,$sday, $shour,$smin,$ssec);
         }
-        if(!defined $end) {
-            $end   = Mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
+
+        if(defined $t2) {
+            $end   = $t2;
+        } else {
+            $end   = normal_mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
         }
-    } else {
+    }
+
+    if(!defined $start or !defined $end) {
         return(undef, undef);
     }
 
     $c->log->debug("start: ".$start." - ".(scalar localtime($start)));
     $c->log->debug("end  : ".$end." - ".(scalar localtime($end)));
 
-    return($start, $end);
+    if($end >= $start) {
+        return($start, $end);
+    }
+    return($end, $start);
 }
 
 
@@ -335,15 +343,15 @@ sub get_start_end_for_timeperiod_from_param {
     my $smon         = $c->{'request'}->{'parameters'}->{'smon'};
     my $sday         = $c->{'request'}->{'parameters'}->{'sday'};
     my $syear        = $c->{'request'}->{'parameters'}->{'syear'};
-    my $shour        = $c->{'request'}->{'parameters'}->{'shour'};
-    my $smin         = $c->{'request'}->{'parameters'}->{'smin'};
-    my $ssec         = $c->{'request'}->{'parameters'}->{'ssec'};
+    my $shour        = $c->{'request'}->{'parameters'}->{'shour'}  || 0;
+    my $smin         = $c->{'request'}->{'parameters'}->{'smin'}   || 0;
+    my $ssec         = $c->{'request'}->{'parameters'}->{'ssec'}   || 0;
     my $emon         = $c->{'request'}->{'parameters'}->{'emon'};
     my $eday         = $c->{'request'}->{'parameters'}->{'eday'};
     my $eyear        = $c->{'request'}->{'parameters'}->{'eyear'};
-    my $ehour        = $c->{'request'}->{'parameters'}->{'ehour'};
-    my $emin         = $c->{'request'}->{'parameters'}->{'emin'};
-    my $esec         = $c->{'request'}->{'parameters'}->{'esec'};
+    my $ehour        = $c->{'request'}->{'parameters'}->{'ehour'}  || 0;
+    my $emin         = $c->{'request'}->{'parameters'}->{'emin'}   || 0;
+    my $esec         = $c->{'request'}->{'parameters'}->{'esec'}   || 0;
     my $t1           = $c->{'request'}->{'parameters'}->{'t1'};
     my $t2           = $c->{'request'}->{'parameters'}->{'t2'};
 
@@ -1051,6 +1059,33 @@ sub set_paging_steps {
     }
 
     return;
+}
+
+
+########################################
+
+=head2 normal_mktime
+
+  normal_mktime($year,$mon,$day,$hour,$min,$sec)
+
+returns normalized timestamp for given date
+
+=cut
+
+sub normal_mktime {
+    my($year,$mon,$day,$hour,$min,$sec) = @_;
+
+    # calculate borrow
+    my $add_time = 0;
+    if($hour == 24) {
+        $add_time = 86400;
+        $hour = 0;
+    }
+
+    ($day, $hour, $min, $sec) = Normalize_DHMS($day, $hour, $min, $sec);
+    my $timestamp = Mktime($year,$mon,$day, $hour,$min,$sec);
+    $timestamp += $add_time;
+    return $timestamp;
 }
 
 

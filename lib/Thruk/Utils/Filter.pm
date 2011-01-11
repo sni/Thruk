@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
-use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
+use Date::Calc qw/Localtime Today/;
 use Date::Manip;
 
 
