@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 20;
+use Test::More tests => 25;
 
 use Catalyst::Test 'Thruk';
 
@@ -17,7 +17,7 @@ my $side = TestUtils::test_page(
 );
 
 SKIP: {
-    skip("plugin not enabled", 13) unless $side->{'content'} =~ m/Root\ problems/mx;
+    skip("plugin not enabled", 18) unless $side->{'content'} =~ m/Root\ problems/mx;
     my $pages = [
         '/outagespbimp',
         '/thruk/cgi-bin/outagespbimp.cgi',

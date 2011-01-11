@@ -478,7 +478,7 @@ sub calculate_availability {
         }
     }
     else {
-        $c->log->debug("unknown report type");
+        $c->log->error("unknown report type");
         return;
     }
 
@@ -490,7 +490,7 @@ sub calculate_availability {
 
     # get start/end from timeperiod in params
     my($start,$end) = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
-    return 0 if (!defined $start or !defined $end);
+    return $c->detach('/error/index/19') if (!defined $start or !defined $end);
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
@@ -840,11 +840,11 @@ sub calculate_availability {
     $c->stats->profile(end => "calculate availability");
 
     if($full_log_entries) {
-        $c->stash->{'logs'} = $ma->get_full_logs();
+        $c->stash->{'logs'} = $ma->get_full_logs() || [];
         #$c->log->debug("got full logs: ".Dumper($c->stash->{'logs'}));
     }
     elsif($show_log_entries) {
-        $c->stash->{'logs'} = $ma->get_condensed_logs();
+        $c->stash->{'logs'} = $ma->get_condensed_logs() || [];
         #$c->log->debug("got condensed logs: ".Dumper($c->stash->{'logs'}));
     }
 
