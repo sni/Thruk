@@ -155,6 +155,11 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'dscr' => 'You use an old style of backend configuration, you will find converting hints in your error log.<br>General configuration information is available in your Thruk <a href="'.$c->stash->{'url_prefix'}.'thruk/documentation.html#_configuration_2">documentation</a>.',
             'code' => 500, # internal server error
         },
+        '21'  => {
+            'mess' => 'This plugin is not available or enabled',
+            'dscr' => 'If you believe this is an error, check the documentation for this plugin',
+            'code' => 404, # not found
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

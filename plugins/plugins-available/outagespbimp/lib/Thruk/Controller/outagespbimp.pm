@@ -36,10 +36,13 @@ sub outagespbimp_cgi : Regex('thruk\/cgi\-bin\/outagespbimp\.cgi') {
 }
 
 
-
 ##########################################################
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
+
+    unless($c->stash->{'enable_shinken_features'}) {
+        return $c->detach('/error/index/21');
+    }
 
     # We want root problems only
     my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
@@ -58,10 +61,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         {value => 2, text => 'Qualification',   nb => 0},
         {value => 1, text => 'Devel',           nb => 0},
         {value => 0, text => 'Nearly nothing',  nb => 0});
-
-    #use Data::Dumper;
-    #print STDERR "Service pb";
-    #print STDERR Dumper($srv_pbs);
 
     # First for hosts
     if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
@@ -99,19 +98,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # Then for services
     if(defined $srv_pbs and scalar @{$srv_pbs} > 0) {
         my $srvcomments = {};
-#        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
-#        for my $com (@{$tmp}) {
-#            $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
-#            $hostcomments->{$com->{'host_name'}}++;
-#
-#        }
-
-        #print STDERR "POULET";
         for my $srv (@{$srv_pbs}) {
 
             # get number of comments
             $srv->{'comment_count'} = 0;
-            #$srv->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of impacted hosts / services
             my($affected_hosts,$affected_services) = $self->_count_hosts_and_services_impacts($srv);
@@ -121,7 +111,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
             # add a criticity to this crit level
             my $crit = $srv->{'criticity'};
-            #print STDERR "ADD crit $crit for service\n";
             $criticities[5 - $crit]{"nb"}++;
 
         }
@@ -130,12 +119,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # sort by criticity
     my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
     my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
-
-
-#    use Data::Dumper;
-#    print STDERR "Impact";
-#    print STDERR Dumper(@criticities); #$all_hosts->{$host}->{'childs'});
-
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;
@@ -159,14 +142,7 @@ sub _count_hosts_and_services_impacts {
     my $affected_hosts    = 0;
     my $affected_services = 0;
 
-#    use Data::Dumper;
-#    print STDERR "Impact sum for".Dumper($host);
     return(0,0) if !defined $host;
-
-#    use Data::Dumper;
-#    print STDERR "Impact";
-#    print STDERR Dumper($host); #$all_hosts->{$host}->{'childs'});
-    #print STDERR Dumper($all_hosts->{$host}->{'impacts'});
 
     if(defined $host->{'impacts'} and $host->{'impacts'} ne '') {
         for my $child (@{$host->{'impacts'}}) {
