@@ -1,3 +1,10 @@
 ul {
 list-style-type: none;
 }
+
+
+.elementTitle {
+    color : white;
+    font-weight: bold;
+    font-size: 12pt;
+}
