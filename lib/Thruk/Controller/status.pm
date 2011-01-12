@@ -1622,15 +1622,15 @@ sub _single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
-	# Impact are only available in Shinken
-	elsif ( $filter->{'type'} eq 'impact' && $c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'}) {
+        # Impact are only available in Shinken
+        elsif ( $filter->{'type'} eq 'impact' && $c->config->{'enable_shinken_features'}) {
             push @hostfilter,          { source_problems      => { $listop => $value } };
             push @hosttotalsfilter,    { source_problems      => { $listop => $value } };
             push @servicefilter,       { source_problems      => { $listop => $value } };
             push @servicetotalsfilter, { source_problems      => { $listop => $value } };
         }
-	# Root Problems are only available in Shinken
-	elsif ( $filter->{'type'} eq 'rootproblem' && $c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'}) {
+        # Root Problems are only available in Shinken
+        elsif ( $filter->{'type'} eq 'rootproblem' && $c->config->{'enable_shinken_features'}) {
             push @hostfilter,          { impacts      => { $listop => $value } };
             push @hosttotalsfilter,    { impacts      => { $listop => $value } };
             push @servicefilter,       { impacts      => { $listop => $value } };
