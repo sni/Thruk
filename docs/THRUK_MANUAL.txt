@@ -871,6 +871,25 @@ ex.:
   resource_file = /etc/nagios3/resource.cfg
 
 
+
+=== statusmap_default_type
+You may change the default map type of the statusmap here. Valid 
+types are: 'table' and 'circle'
+
+ex.:
+
+  statusmap_default_type = table
+
+
+=== statusmap_default_groupby
+And the statusmap default group by which has to be one of:
+'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
+
+ex.:
+
+  statusmap_default_groupby = address
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it

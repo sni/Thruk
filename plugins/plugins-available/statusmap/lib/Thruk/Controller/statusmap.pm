@@ -44,8 +44,8 @@ sub statusmap_cgi : Regex('thruk\/cgi\-bin\/statusmap\.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    $c->stash->{type}    = $c->request->parameters->{'type'}    || 'table';
-    $c->stash->{groupby} = $c->request->parameters->{'groupby'} || 'address';
+    $c->stash->{type}    = $c->request->parameters->{'type'}    || $c->config->{'statusmap_default_type'}    || 'table';
+    $c->stash->{groupby} = $c->request->parameters->{'groupby'} || $c->config->{'statusmap_default_groupby'} || 'address';
     $c->stash->{host}    = $c->request->parameters->{'host'}    || 'rootid';
     $c->stash->{detail}  = $c->request->parameters->{'detail'}  || '0';
     if($c->stash->{host} eq 'all') {
