@@ -39,7 +39,8 @@ sub begin : Private {
     my( $self, $c ) = @_;
 
     # Prefix
-    $c->stash->{'url_prefix'} = $c->config->{'url_prefix'} || '/';
+    $c->stash->{'url_prefix'}   = $c->config->{'url_prefix'} || '/';
+    $c->stash->{'title_prefix'} = $c->config->{'title_prefix'} || '';
 
     # frame options
     my $use_frames = $c->config->{'use_frames'};
@@ -312,6 +313,7 @@ sub thruk_index_html : Regex('thruk\/index\.html$') {
     }
 
     $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
+    $c->stash->{'title'}    = $c->config->{'name'};
     $c->stash->{'main'}     = '';
     $c->stash->{'target'}   = '';
     $c->stash->{'template'} = 'index.tt';
@@ -335,6 +337,7 @@ sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
     Thruk::Utils::Menu::read_navigation($c);
 
     $c->stash->{'use_frames'} = 1;
+    $c->stash->{'title'}      = $c->config->{'name'};
     $c->stash->{'template'}   = 'side.tt';
 
     return 1;
@@ -371,6 +374,7 @@ sub thruk_frame_html : Regex('thruk\/frame\.html$') {
             if( $link =~ m/$pattern/mx ) {
                 $c->stash->{'target'}   = '_parent';
                 $c->stash->{'main'}     = $link;
+                $c->stash->{'title'}    = $c->config->{'name'};
                 $c->stash->{'template'} = 'index.tt';
 
                 return 1;

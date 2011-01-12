@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
-    <title>Thruk</title>
+    <title>[% title_prefix %][% title %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
   </head>
   <frameset cols="180,*">

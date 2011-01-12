@@ -1,9 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-0.78    Wed ...
+0.78    Sun ...
           - added new Theme (Wakizashi, thanks Jean)
           - added root problems plugin (thanks Jean) *shinken backend only
           - added new config option for default statusmap settings
+          - added new config option title_prefix
           - fixed problem with custom timerange for availability reports
 
 0.76.1  Wed Dec 29 11:28:03 CET 2010

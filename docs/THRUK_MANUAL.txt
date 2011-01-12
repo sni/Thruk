@@ -447,6 +447,17 @@ ex.:
   use_timezone = CET
 
 
+==== title_prefix
+
+set the title prefix for all urls
+this piece of text will be prepended to
+all page titles.
+
+ex.:
+
+  title_prefix = Prod
+
+
 ==== url_prefix
 
 Changes the usual url path for Thruk. Don't change it unless you plan
@@ -872,7 +883,7 @@ ex.:
 
 
 
-=== statusmap_default_type
+==== statusmap_default_type
 You may change the default map type of the statusmap here. Valid 
 types are: 'table' and 'circle'
 
@@ -881,7 +892,7 @@ ex.:
   statusmap_default_type = table
 
 
-=== statusmap_default_groupby
+==== statusmap_default_groupby
 And the statusmap default group by which has to be one of:
 'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
 
