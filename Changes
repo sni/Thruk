@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added new config option for default statusmap settings
           - added new config option title_prefix
           - fixed problem with custom timerange for availability reports
+          - fixed minor problems when using the shinken backend
 
 0.76.1  Wed Dec 29 11:28:03 CET 2010
           - fixed error when host/service has no command defined
