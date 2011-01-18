@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 14;
+use Test::More tests => 24;
 use Data::Dumper;
 use Log::Log4perl qw(:easy);
 
@@ -55,6 +55,9 @@ my $cmd = $b->expand_command(
 
 isnt($cmd, undef, 'got expanded command for host');
 isnt($cmd->{'line_expanded'}, undef, 'expanded command: '.$cmd->{'line_expanded'});
+unlike($cmd->{'line_expanded'}, qr/HOSTNAME/, 'expanded command line must not contain HOSTNAME');
+unlike($cmd->{'line_expanded'}, qr/HOSTALIAS/, 'expanded command line must not contain HOSTALIAS');
+unlike($cmd->{'line_expanded'}, qr/HOSTADDRESS/, 'expanded command line must not contain HOSTADDRESS');
 
 ################################################################################
 # expand service command
@@ -68,3 +71,22 @@ $cmd = $b->expand_command(
 
 isnt($cmd, undef, 'got expanded command for service');
 isnt($cmd->{'line_expanded'}, undef, 'expanded command: '.$cmd->{'line_expanded'});
+unlike($cmd->{'line_expanded'}, qr/HOSTNAME/, 'expanded command line must not contain HOSTNAME');
+unlike($cmd->{'line_expanded'}, qr/HOSTALIAS/, 'expanded command line must not contain HOSTALIAS');
+unlike($cmd->{'line_expanded'}, qr/HOSTADDRESS/, 'expanded command line must not contain HOSTADDRESS');
+unlike($cmd->{'line_expanded'}, qr/SERVICEDESC/, 'expanded command line must not contain SERVICEDESC');
+
+################################################################################
+# now set a ressource file
+$b->{'config'}->{'resource_file'} = 't/data/resource.cfg';
+$cmd = $b->expand_command(
+    'host'    => $hosts->[0],
+    'service' => $services->[0],
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$'
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}, 'expanded command: '.$cmd->{'line_expanded'});
+is($cmd->{'command'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'note'}, '', 'note should be empty');

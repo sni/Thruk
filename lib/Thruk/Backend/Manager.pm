@@ -297,6 +297,7 @@ sub expand_command {
     croak("no host")    unless defined $data{'host'};
     my $host     = $data{'host'};
     my $service  = $data{'service'};
+    my $command  = $data{'command'};
 
     my $command_name = $host->{'check_command'};
     if(defined $service) {
@@ -306,16 +307,21 @@ sub expand_command {
 
     # it is possible to define hosts without a command
     if(!defined $name or $name =~ m/^\s*$/mx) {
-        my $command = {
+        my $return = {
             'line'          => 'no command defined',
             'line_expanded' => '',
         };
-        return $command;
+        return $return;
     }
 
     # get command data
-    my $commands = $self->get_commands( filter => [ { 'name' => $name } ] );
-    my $expanded = $commands->[0]->{'line'};
+    my $expanded;
+    if(defined $command) {
+        $expanded = $command->{'line'};
+    } else {
+        my $commands = $self->get_commands( filter => [ { 'name' => $name } ] );
+        $expanded = $commands->[0]->{'line'};
+    }
 
     # arguments
     my $x = 1;
@@ -332,12 +338,12 @@ sub expand_command {
         $note = "could not expand all macros!";
     }
 
-    my $command = {
+    my $return = {
         'line'          => $command_name,
         'line_expanded' => $expanded,
         'note'          => $note,
     };
-    return $command;
+    return $return;
 }
 
 ########################################
