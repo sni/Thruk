@@ -81,12 +81,12 @@ unlike($cmd->{'line_expanded'}, qr/SERVICEDESC/, 'expanded command line must not
 $b->{'config'}->{'resource_file'} = 't/data/resource.cfg';
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
-    'service' => $services->[0],
     'command' => {
         'name' => 'check_test',
         'line' => '$USER1$/check_test -H $HOSTNAME$'
     },
 );
 is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}, 'expanded command: '.$cmd->{'line_expanded'});
-is($cmd->{'command'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
 is($cmd->{'note'}, '', 'note should be empty');
+
