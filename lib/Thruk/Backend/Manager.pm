@@ -393,7 +393,8 @@ sub _replace_host_macros {
     my $hostmacros = {
         'HOSTADDRESS'   => $host->{'address'},
         'HOSTNAME'      => $host->{'name'},
-        'HOSTSTATEID'   => $host->{'name'},
+        'HOSTALIAS'     => $host->{'alias'},
+        'HOSTSTATEID'   => $host->{'state'},
         'HOSTSTATE'     => $self->{'config'}->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}},
         'HOSTLATENCY'   => $host->{'latency'},
         'HOSTOUTPUT'    => $host->{'plugin_output'},
@@ -430,7 +431,7 @@ sub _replace_service_macros {
     # normal host macros
     my $servicemacros = {
         'SERVICEDESC'      => $service->{'description'},
-        'SERVICESTATEID'   => $service->{'name'},
+        'SERVICESTATEID'   => $service->{'state'},
         'SERVICESTATE'     => $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}},
         'SERVICELATENCY'   => $service->{'latency'},
         'SERVICEOUTPUT'    => $service->{'plugin_output'},
@@ -1244,7 +1245,7 @@ sub _get_user_macros {
             return $self->_read_resource_file($backend->{'resource_file'});
         }
     }
-    return $self->_read_resource_file($self->{'resource_file'});
+    return $self->_read_resource_file($self->{'config'}->{'resource_file'});
 }
 
 
