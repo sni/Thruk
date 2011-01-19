@@ -140,7 +140,12 @@ sub begin : Private {
     }
 
     # redirect to error page unless we have a connection
-    if( !defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
+    if( (    !defined $c->{'db'}
+          or !defined $c->{'db'}->{'backends'}
+          or ref $c->{'db'}->{'backends'} ne 'ARRAY'
+          or scalar @{$c->{'db'}->{'backends'}} == 0
+        )
+       and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
 
         # do we have a deprecated config in use?
         my $deprecated_conf = Thruk::Utils::Livestatus::get_livestatus_conf();
