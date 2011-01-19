@@ -167,6 +167,7 @@ returns a correct uri
 =cut
 sub uri {
     my $c = shift;
+    carp("no c") unless defined $c;
     my $uri = $c->request->uri();
     $uri =~ s/&/&amp;/gmx;
     return $uri;
