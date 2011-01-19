@@ -1,6 +1,6 @@
 ﻿[% IF use_pager AND pager %]
 
-  <form action="/[% c.request.path %]" method="GET">
+  <form action="[% uri %]" method="GET">
   [% FOREACH par = c.request.query_params.keys %]
     [% NEXT IF par == 'entries' %]
     [% NEXT IF par == 'next' %]
