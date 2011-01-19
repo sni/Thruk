@@ -126,6 +126,7 @@ plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
 plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
+plugins/plugins-enabled/outagespbimp
 plugins/plugins-enabled/statusmap
 README
 root/favicon.ico
@@ -1221,6 +1222,7 @@ ssi/README
 ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
+t/11-Thruk-Backend.t
 t/94_template_encoding.t
 t/95_doc_coverage.t
 t/97-Pod.t
@@ -1242,6 +1244,7 @@ t/controller_status.t
 t/controller_summary.t
 t/controller_tac.t
 t/controller_trends.t
+t/data/resource.cfg
 t/model_Thruk.t
 t/perlcriticrc
 t/TestUtils.pm
