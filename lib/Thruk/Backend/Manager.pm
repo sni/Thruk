@@ -303,7 +303,7 @@ sub expand_command {
     if(defined $service) {
         $command_name = $service->{'check_command'};
     }
-    my($name, @com_args) = split/!/mx, $command_name;
+    my($name, @com_args) = split(/!/mx, $command_name, 255);
 
     # it is possible to define hosts without a command
     if(!defined $name or $name =~ m/^\s*$/mx) {

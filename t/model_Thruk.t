@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 24;
+use Test::More tests => 26;
 use Data::Dumper;
 use Log::Log4perl qw(:easy);
 
@@ -88,5 +88,20 @@ $cmd = $b->expand_command(
 );
 is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}, 'expanded command: '.$cmd->{'line_expanded'});
 is($cmd->{'line'}, $hosts->[0]->{'check_command'}, 'host command is: '.$hosts->[0]->{'check_command'});
+is($cmd->{'note'}, '', 'note should be empty');
+
+
+################################################################################
+$cmd = $b->expand_command(
+    'host'    => {
+        'state'         => 0,
+        'check_command' => 'check_test!',
+    },
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test $ARG1$'
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test ', 'expanded command: '.$cmd->{'line_expanded'});
 is($cmd->{'note'}, '', 'note should be empty');
 
