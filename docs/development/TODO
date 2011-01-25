@@ -14,6 +14,7 @@ extinfo:
 
 config:
     - add missing values
+    - add excel export button
 
 avail:
     - check availability calculation on multibackend (restarts)
