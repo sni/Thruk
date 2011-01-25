@@ -554,3 +554,7 @@ td.stateInfoTable1 .dataVal {
 .command_line {
   max-width:800px;
 }
+
+.config_info {
+    white-space: pre-wrap;
+}

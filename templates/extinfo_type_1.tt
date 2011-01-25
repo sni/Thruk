@@ -582,7 +582,8 @@
             <table border="0">
               <tr>
                 <th class='comment' nowrap>Check Command</th>
-                <td class='comment'><pre class="no_margin">[% command.line %]</pre></td>
+                <td class='comment'>
+                <pre class="no_margin command_line config_info">foo [% command.line | html %]</pre></td>
               </tr>
               <tr>
                 <th class='comment' nowrap>Expanded Command</th>
@@ -591,7 +592,7 @@
                   <i><b>Note:</b> [% command.note %]</i>
                   <br><br>
                   [% END %]
-                  <pre class="no_margin command_line">[% command.line_expanded %]</pre>
+                  <pre class="no_margin command_line config_info">foo [% command.line_expanded | html %]</pre>
                 </td>
               </tr>
             </table>
