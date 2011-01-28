@@ -1271,6 +1271,11 @@ sub _read_resource_file {
     return unless defined $file;
     return unless -f $file;
     my %macros = Config::General::ParseConfig($file);
+    for my $key (keys %macros) {
+        if(ref $macros{$key} eq 'ARRAY') {
+            $macros{$key} = $macros{$key}[$#{$macros{$key}}];
+        }
+    }
     return \%macros;
 }
 

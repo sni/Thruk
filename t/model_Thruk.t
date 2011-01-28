@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 26;
+use Test::More tests => 27;
 use Data::Dumper;
 use Log::Log4perl qw(:easy);
 
@@ -105,3 +105,7 @@ $cmd = $b->expand_command(
 is($cmd->{'line_expanded'}, '/tmp/check_test ', 'expanded command: '.$cmd->{'line_expanded'});
 is($cmd->{'note'}, '', 'note should be empty');
 
+################################################################################
+my $res1 = $b->_read_resource_file('t/data/resource.cfg');
+my $res2 = $b->_read_resource_file('t/data/resource2.cfg');
+is_deeply($res1, $res2, 'parsing resource.cfg');

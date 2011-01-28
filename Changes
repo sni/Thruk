@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.80    Tue...
+          - fix parsing of resource.cfg when macros are used twice
           - fixed macro expansion when using commands like check_test!
 
 0.78.2  Tue Jan 18 10:29:08 CET 2011
