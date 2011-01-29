@@ -6,7 +6,6 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use URI::Escape;
-use Thruk::Utils::Livestatus;
 
 #
 # Sets the actions in this controller to be registered with no prefix

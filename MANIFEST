@@ -1245,6 +1245,7 @@ t/controller_summary.t
 t/controller_tac.t
 t/controller_trends.t
 t/data/resource.cfg
+t/data/resource2.cfg
 t/model_Thruk.t
 t/perlcriticrc
 t/TestUtils.pm
