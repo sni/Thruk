@@ -277,7 +277,17 @@ sub _disable_backends_by_group {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
                 if(defined $contactgroups->{$group}) {
                     $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+                    # delete old completly hidden state
                     delete $disabled_backends->{$peer->{'key'}};
+                    # but disabled by cookie?
+                    if(defined $c->request->cookie('thruk_backends')) {
+                        for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
+                            my($key, $value) = split/=/mx, $val;
+                            if(defined $value and $key eq $peer->{'key'}) {
+                                $disabled_backends->{$key} = $value;
+                            }
+                        }
+                    }
                     last;
                 }
             }
