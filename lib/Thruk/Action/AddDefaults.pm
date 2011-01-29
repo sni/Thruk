@@ -98,6 +98,7 @@ before 'execute' => sub {
         }
         $c->{'db'}->disable_backends($disabled_backends);
     }
+    $c->log->debug("backend groups filter enabled") if $has_groups;
 
     ###############################
     # add program status

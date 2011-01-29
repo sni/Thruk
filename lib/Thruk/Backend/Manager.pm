@@ -274,7 +274,7 @@ sub get_contactgroups_by_contact {
     my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ]);
     my $contactgroups = {};
     for my $group (@{$data}) {
-        $contactgroups->{$group} = 1;
+        $contactgroups->{$group->{'name'}} = 1;
     }
 
     $cached_data->{'contactgroups'} = $contactgroups;
