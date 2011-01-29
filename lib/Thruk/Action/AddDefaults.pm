@@ -77,7 +77,8 @@ before 'execute' => sub {
     ###############################
     # get backend object
     my $disabled_backends = {};
-    if(defined $c->request->cookie('thruk_backends')) {
+    my $num_backends      = @{$c->{'db'}->get_peers()};
+    if($num_backends > 1 and defined $c->request->cookie('thruk_backends')) {
         for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -145,6 +146,7 @@ before 'execute' => sub {
         }
     };
     if($@) {
+        return if $c->request->uri->path_query =~ m/\/side\.html$/mx;
         $self->_set_possible_backends($c, $disabled_backends);
         $c->log->error("data source error: $@");
         return $c->detach('/error/index/9');
@@ -244,6 +246,9 @@ sub _set_possible_backends {
     my @new_possible_backends;
 
     for my $back (@possible_backends) {
+        if(defined $disabled_backends->{$back} and $disabled_backends->{$back} == 4) {
+            $c->{'db'}->disable_backend($back);
+        }
         if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 4) {
             my $peer = $c->{'db'}->get_peer_by_key($back);
             $backend_detail{$back} = {

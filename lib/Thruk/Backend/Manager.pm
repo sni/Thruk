@@ -497,9 +497,9 @@ sub _do_on_peers {
     {
         if(defined $backends) {
             next unless defined $backends->{$peer->{'key'}};
-        } else {
-            next unless $peer->{'enabled'} == 1;
         }
+        next unless $peer->{'enabled'} == 1;
+
         $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
         $selected_backends++;
         eval {
