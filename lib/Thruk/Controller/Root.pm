@@ -147,13 +147,6 @@ sub begin : Private {
         )
        and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
 
-        # do we have a deprecated config in use?
-        my $deprecated_conf = Thruk::Utils::Livestatus::get_livestatus_conf();
-        if( defined $deprecated_conf ) {
-            $c->log->error( "The <Component Monitoring::Livestatus> configuration is deprecated, please use '<Component Thruk::Backend>' instead.\nYour converted config would be:\n\n" . Thruk::Utils::Livestatus::convert_config($deprecated_conf) . "\nplease update your thruk_local.conf" );
-            return $c->detach("/error/index/20");
-        }
-
         return $c->detach("/error/index/14");
     }
 
