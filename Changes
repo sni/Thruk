@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.82    Sun...
+          - fixed Undefined subroutine &FCGI::ProcManager::MaxRequestsThruk::self_or_default error
+
 0.80    Sun Jan 30 14:07:49 CET 2011
           - fixed backends using groups authentication
           - fixed parsing of resource.cfg when macros are used twice
