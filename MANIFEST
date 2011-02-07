@@ -72,7 +72,6 @@ lib/Thruk/Model/Thruk.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Filter.pm
-lib/Thruk/Utils/Livestatus.pm
 lib/Thruk/Utils/Menu.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/Excel.pm
@@ -1228,7 +1227,6 @@ t/95_doc_coverage.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
 t/99-Perl-Critic.t
-t/backend.t
 t/controller_avail.t
 t/controller_cmd.t
 t/controller_config.t
