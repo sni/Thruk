@@ -69,7 +69,7 @@
         [% IF columns.15 %]<cell>[% IF s.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.16 %]<cell>[% IF s.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.17 %]<cell>[% IF s.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.18 %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% s.plugin_output %][% END %]</cell>[% END %]
+        [% IF columns.18 %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% escape_xml(s.plugin_output) %][% END %]</cell>[% END %]
       </row>
     [% END %]
   </worksheet>

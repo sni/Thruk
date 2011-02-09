@@ -239,6 +239,22 @@ sub escape_quotes {
 
 ########################################
 
+=head2 xml_escape
+
+  xml_escape($text)
+
+returns an escaped string for xml output
+
+=cut
+sub xml_escape {
+    my $text = shift;
+
+    return HTML::Entities::encode($text, '<>');
+}
+
+
+########################################
+
 =head2 name2id
 
   my $striped_string = name2id($name)
