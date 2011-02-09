@@ -7,7 +7,7 @@
         </td>
         <td align="center" valign="top" width="33%">
           <div align="center" class='dataTitle'>[% report_title %]</div><br>
-          <div align="center" class='reportRange'>[% date.format(start, datetime_format) %] to [% date.format(end, datetime_format) %]</div>
+          <div align="center" class='reportRange'>[% format_date(start, datetime_format) %] to [% format_date(end, datetime_format) %]</div>
           <div align="center" class='reportDuration'>Duration: [% SET dur = end - start %][% duration(dur) %]</div>
         </td>
         <td align="right" valign="bottom" width="33%">

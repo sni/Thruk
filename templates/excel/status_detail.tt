@@ -58,7 +58,7 @@
           <cell>[% state %]</cell>
         </format>[% END %]
         [% IF columns.10 %]<format num_format='yyyy-mm-dd hh:mm:ss'>
-          <cell type='date_time'>[% IF s.has_been_checked == 0 %][% ELSE %][% date.format(s.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
+          <cell type='date_time'>[% IF s.has_been_checked == 0 %][% ELSE %][% format_date(s.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
         </format>[% END %]
         [% IF columns.11 %]<cell>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>[% END %]
         [% IF columns.12 %]<format align='center'>
@@ -69,7 +69,7 @@
         [% IF columns.15 %]<cell>[% IF s.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.16 %]<cell>[% IF s.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.17 %]<cell>[% IF s.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>[% END %]
-        [% IF columns.18 %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% date.format(s.next_check, datetime_format_long) %][% ELSE %][% escape_xml(s.plugin_output) %][% END %]</cell>[% END %]
+        [% IF columns.18 %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% format_date(s.next_check, datetime_format_long) %][% ELSE %][% xml_escape(s.plugin_output) %][% END %]</cell>[% END %]
       </row>
     [% END %]
   </worksheet>

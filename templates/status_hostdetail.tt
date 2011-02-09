@@ -197,7 +197,7 @@
           <td class='[% class %]' nowrap align="center">[% date_format(c, h.last_check) %]</td>
           <td class='[% class %]' nowrap>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
           [% IF h.has_been_checked == 0 %]
-            <td class='[% class %]' valign='middle'>Host check scheduled for [% date.format(h.next_check, datetime_format_long) %]</td>
+            <td class='[% class %]' valign='middle'>Host check scheduled for [% format_date(h.next_check, datetime_format_long) %]</td>
           [% ELSE %]
             [% IF h.long_plugin_output %]
               [% IF escape_html_tags %]

@@ -18,6 +18,7 @@ use Data::Dumper;
 use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today Normalize_DHMS/;
 use Date::Manip;
 use File::Slurp;
+use Encode qw/decode/;
 use Template::Plugin::Date;
 
 
@@ -69,8 +70,9 @@ return date from timestamp in given format
 sub format_date {
     my $timestamp = shift;
     my $format    = shift;
-    my $tpd = Template::Plugin::Date->new();
-    return $tpd->format($timestamp, $format);
+    my $tpd  = Template::Plugin::Date->new();
+    my $date = $tpd->format($timestamp, $format);
+    return decode("utf-8", $date);
 }
 
 

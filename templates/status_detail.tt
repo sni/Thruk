@@ -246,7 +246,7 @@
         <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
         <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number && s.current_notification_number > 0 %] <span title="notifications">#[% s.current_notification_number %]</span>[% END %]</td>
           [% IF s.has_been_checked == 0 %]
-            <td class='[% serviceclass %]'>Service check scheduled for [% date.format(s.next_check, datetime_format_long) %]</td>
+            <td class='[% serviceclass %]'>Service check scheduled for [% format_date(s.next_check, datetime_format_long) %]</td>
           [% ELSE %]
             [% IF s.long_plugin_output %]
               [% IF escape_html_tags %]

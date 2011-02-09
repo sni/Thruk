@@ -4,12 +4,12 @@
 
 [% SET last_hour = '' %]
 [% FOREACH l = data %]
-[% this_hour = date.format(l.time, '%Y-%m-%d  %H') _ ':00' %]
+[% this_hour = format_date(l.time, '%Y-%m-%d  %H') _ ':00' %]
 [% IF this_hour != last_hour %]
   [% SET last_hour = this_hour %]
 
 [% IF ! loop.first %]</div>[% END %]
-<div class='dateTimeBreak'><table border="0" width="95%"><tr><td width="40%"><hr width="100%"></td><td align="center" class='dateTimeBreak'>[% date.format(l.time, datetime_format_log) _ ':00' %]</td><td width="40%"><hr width="100%"></td></tr></table></div>
+<div class='dateTimeBreak'><table border="0" width="95%"><tr><td width="40%"><hr width="100%"></td><td align="center" class='dateTimeBreak'>[% format_date(l.time, datetime_format_log) _ ':00' %]</td><td width="40%"><hr width="100%"></td></tr></table></div>
 <div class='logEntries'>
 
 [% END %]
@@ -66,7 +66,7 @@
 [% ELSIF l.type.match('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
 [% ELSE                                          %][% SET pic = "info.png"          desc = "Informational Message" %]
 [% END %]
-<img align='middle' src='[% url_prefix %]thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% date.format(l.time, datetime_format) %]] [% IF escape_html_tags %][% html_escape(message) %][% ELSE %][% message %][% END %]<br clear='all'>
+<img align='middle' src='[% url_prefix %]thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]] [% IF escape_html_tags %][% html_escape(message) %][% ELSE %][% message %][% END %]<br clear='all'>
 
 [% END %]
 

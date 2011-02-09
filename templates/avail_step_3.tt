@@ -52,21 +52,21 @@
             <td align="left" valign="top" class='reportSelectItem'>
               [% SET yesterday = date.now - 86400 %]
               <select name='smon'>
-                <option value='1'[%  IF date.format(yesterday, '%m') == "01" %] selected[% END %]>January</option>
-                <option value='2'[%  IF date.format(yesterday, '%m') == "02" %] selected[% END %]>February</option>
-                <option value='3'[%  IF date.format(yesterday, '%m') == "03" %] selected[% END %]>March</option>
-                <option value='4'[%  IF date.format(yesterday, '%m') == "04" %] selected[% END %]>April</option>
-                <option value='5'[%  IF date.format(yesterday, '%m') == "05" %] selected[% END %]>May</option>
-                <option value='6'[%  IF date.format(yesterday, '%m') == "06" %] selected[% END %]>June</option>
-                <option value='7'[%  IF date.format(yesterday, '%m') == "07" %] selected[% END %]>July</option>
-                <option value='8'[%  IF date.format(yesterday, '%m') == "08" %] selected[% END %]>August</option>
-                <option value='9'[%  IF date.format(yesterday, '%m') == "09" %] selected[% END %]>September</option>
-                <option value='10'[% IF date.format(yesterday, '%m') == "10" %] selected[% END %]>October</option>
-                <option value='11'[% IF date.format(yesterday, '%m') == "11" %] selected[% END %]>November</option>
-                <option value='12'[% IF date.format(yesterday, '%m') == "12" %] selected[% END %]>December</option>
+                <option value='1'[%  IF format_date(yesterday, '%m') == "01" %] selected[% END %]>January</option>
+                <option value='2'[%  IF format_date(yesterday, '%m') == "02" %] selected[% END %]>February</option>
+                <option value='3'[%  IF format_date(yesterday, '%m') == "03" %] selected[% END %]>March</option>
+                <option value='4'[%  IF format_date(yesterday, '%m') == "04" %] selected[% END %]>April</option>
+                <option value='5'[%  IF format_date(yesterday, '%m') == "05" %] selected[% END %]>May</option>
+                <option value='6'[%  IF format_date(yesterday, '%m') == "06" %] selected[% END %]>June</option>
+                <option value='7'[%  IF format_date(yesterday, '%m') == "07" %] selected[% END %]>July</option>
+                <option value='8'[%  IF format_date(yesterday, '%m') == "08" %] selected[% END %]>August</option>
+                <option value='9'[%  IF format_date(yesterday, '%m') == "09" %] selected[% END %]>September</option>
+                <option value='10'[% IF format_date(yesterday, '%m') == "10" %] selected[% END %]>October</option>
+                <option value='11'[% IF format_date(yesterday, '%m') == "11" %] selected[% END %]>November</option>
+                <option value='12'[% IF format_date(yesterday, '%m') == "12" %] selected[% END %]>December</option>
               </select>
-              <input type='text' size='2' maxlength='2' name='sday' value='[% date.format(yesterday, '%d') %]'>
-              <input type='text' size='4' maxlength='4' name='syear' value='[% date.format(yesterday, '%Y') %]'>
+              <input type='text' size='2' maxlength='2' name='sday' value='[% format_date(yesterday, '%d') %]'>
+              <input type='text' size='4' maxlength='4' name='syear' value='[% format_date(yesterday, '%Y') %]'>
               <input type='hidden' name='shour' value='0'>
               <input type='hidden' name='smin' value='0'>
               <input type='hidden' name='ssec' value='0'>
@@ -76,21 +76,21 @@
             <td valign="top" class='reportSelectSubTitle'>End Date (Inclusive):</td>
             <td align="left" valign="top" class='reportSelectItem'>
               <select name='emon'>
-                <option value='1'[%  IF date.format(date.now, '%m') == "01" %] selected[% END %]>January</option>
-                <option value='2'[%  IF date.format(date.now, '%m') == "02" %] selected[% END %]>February</option>
-                <option value='3'[%  IF date.format(date.now, '%m') == "03" %] selected[% END %]>March</option>
-                <option value='4'[%  IF date.format(date.now, '%m') == "04" %] selected[% END %]>April</option>
-                <option value='5'[%  IF date.format(date.now, '%m') == "05" %] selected[% END %]>May</option>
-                <option value='6'[%  IF date.format(date.now, '%m') == "06" %] selected[% END %]>June</option>
-                <option value='7'[%  IF date.format(date.now, '%m') == "07" %] selected[% END %]>July</option>
-                <option value='8'[%  IF date.format(date.now, '%m') == "08" %] selected[% END %]>August</option>
-                <option value='9'[%  IF date.format(date.now, '%m') == "09" %] selected[% END %]>September</option>
-                <option value='10'[% IF date.format(date.now, '%m') == "10" %] selected[% END %]>October</option>
-                <option value='11'[% IF date.format(date.now, '%m') == "11" %] selected[% END %]>November</option>
-                <option value='12'[% IF date.format(date.now, '%m') == "12" %] selected[% END %]>December</option>
+                <option value='1'[%  IF format_date(date.now, '%m') == "01" %] selected[% END %]>January</option>
+                <option value='2'[%  IF format_date(date.now, '%m') == "02" %] selected[% END %]>February</option>
+                <option value='3'[%  IF format_date(date.now, '%m') == "03" %] selected[% END %]>March</option>
+                <option value='4'[%  IF format_date(date.now, '%m') == "04" %] selected[% END %]>April</option>
+                <option value='5'[%  IF format_date(date.now, '%m') == "05" %] selected[% END %]>May</option>
+                <option value='6'[%  IF format_date(date.now, '%m') == "06" %] selected[% END %]>June</option>
+                <option value='7'[%  IF format_date(date.now, '%m') == "07" %] selected[% END %]>July</option>
+                <option value='8'[%  IF format_date(date.now, '%m') == "08" %] selected[% END %]>August</option>
+                <option value='9'[%  IF format_date(date.now, '%m') == "09" %] selected[% END %]>September</option>
+                <option value='10'[% IF format_date(date.now, '%m') == "10" %] selected[% END %]>October</option>
+                <option value='11'[% IF format_date(date.now, '%m') == "11" %] selected[% END %]>November</option>
+                <option value='12'[% IF format_date(date.now, '%m') == "12" %] selected[% END %]>December</option>
               </select>
-              <input type='text' size='2' maxlength='2' name='eday' value='[% date.format(date.now, '%d') %]'>
-              <input type='text' size='4' maxlength='4' name='eyear' value='[% date.format(date.now, '%Y') %]'>
+              <input type='text' size='2' maxlength='2' name='eday' value='[% format_date(date.now, '%d') %]'>
+              <input type='text' size='4' maxlength='4' name='eyear' value='[% format_date(date.now, '%Y') %]'>
               <input type='hidden' name='ehour' value='24'>
               <input type='hidden' name='emin' value='0'>
               <input type='hidden' name='esec' value='0'>
