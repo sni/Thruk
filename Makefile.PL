@@ -101,13 +101,33 @@ eval {
 };
 
 ##################################
-# create symlinks for tests
-mkdir('t/xt') unless -d 't/xt';
-unlink(glob('t/xt/*.t'));
+# check plugin test symlinks
+my $testlinks = {};
 for my $test (glob('plugins/plugins-enabled/*/t/*.t')) {
     my $testfile = $test;
     $testfile    =~ s/.*\///gmx;
-    symlink('../../'.$test, 't/xt/'.$testfile) or die("cannot create symlink: $!");
+    if(!-s 't/xt/'.$testfile) {
+        die('t/xt/'.$testfile.' is missing, should be link to: ../../'.$test);
+        next;
+    }
+    my $target = readlink('t/xt/'.$testfile);
+    if($target ne '../../'.$test) {
+        die('t/xt/'.$testfile.' has wrong target');
+    }
+    $testlinks->{$testfile} = $target;
+}
+# check if there are some links too much
+my @cur_t_links = glob('t/xt/*.t');
+for my $link (@cur_t_links) {
+    my $target = readlink($link);
+    my $linkbasename = $link;
+    $linkbasename =~ s/.*\///gmx;
+    if(!defined $testlinks->{$linkbasename}) {
+        die($link.' should be deleted');
+    }
+    if($testlinks->{$linkbasename} ne $target) {
+        die($link.' has wrong target');
+    }
 }
 
 tests_recursive;

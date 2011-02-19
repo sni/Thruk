@@ -44,6 +44,7 @@ lib/Catalyst/Authentication/Store/FromCGIConf.pm
 lib/Catalyst/Helper/Model/Thruk/Class.pm
 lib/Catalyst/Model/Thruk/Class.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
+lib/Catalyst/Plugin/Thruk/ConfigLoader.pm
 lib/Catalyst/Plugin/Thruk/RemoveNastyCharsFromHttpParam.pm
 lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/View/GD.pm
@@ -793,6 +794,7 @@ root/thruk/themes/Nuvola/images/status3.gif
 root/thruk/themes/Nuvola/images/status4.gif
 root/thruk/themes/Nuvola/images/stop.gif
 root/thruk/themes/Nuvola/images/tacdisabled.png
+root/thruk/themes/Nuvola/images/tacdiverse.png
 root/thruk/themes/Nuvola/images/tacenabled.png
 root/thruk/themes/Nuvola/images/thermcrit.png
 root/thruk/themes/Nuvola/images/thermok.png

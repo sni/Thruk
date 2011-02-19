@@ -24,10 +24,10 @@ binmode(STDERR, ":utf8");
 
 use parent qw/Catalyst/;
 use Catalyst qw/
+                Thruk::ConfigLoader
                 Authentication
                 Authorization::ThrukRoles
                 CustomErrorMessage
-                ConfigLoader
                 StackTrace
                 Static::Simple
                 Redirect
@@ -125,7 +125,7 @@ my %config = ('name'                   => 'Thruk',
                   expose_stash       => 'json',
                   json_driver        => 'XS',
               },
-              'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
+              'Plugin::Thruk::ConfigLoader' => { file => $project_root.'/thruk.conf' },
               'Plugin::Authentication' => {
                   default_realm => 'Thruk',
                   realms => {
@@ -155,40 +155,6 @@ if(-f $project_root."/.author") {
 }
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
-__PACKAGE__->config(%config);
-
-###################################################
-# get installed plugins
-BEGIN {
-    my $project_root = __PACKAGE__->config->{home};
-    for my $addon (glob($project_root.'/plugins/plugins-enabled/*/')) {
-        my $addon_name = $addon;
-        $addon_name =~ s/\/$//gmx;
-        $addon_name =~ s/^.*\///gmx;
-
-        # does the plugin directory exist?
-        if(! -d $project_root.'/root/thruk/plugins/') {
-            mkdir($project_root.'/root/thruk/plugins/') or die('cannot create '.$project_root.'/root/thruk/plugins/ : '.$!);
-        }
-
-        # lib directory included?
-        if(-d $addon.'lib') {
-            unshift(@INC, $addon.'lib')
-        }
-
-        # template directory included?
-        if(-d $addon.'templates') {
-            unshift @{__PACKAGE__->config->{templates_paths}}, $addon.'templates'
-        }
-
-        # static content included?
-        if(-d $addon.'root') {
-            my $target_symlink = $project_root.'/root/thruk/plugins/'.$addon_name;
-            if(-e $target_symlink) { unlink($target_symlink) or die("cannot unlink: ".$target_symlink." : $!"); }
-            symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
-        }
-    }
-}
 
 ###################################################
 # set installed themes
@@ -203,17 +169,16 @@ for my $entry (readdir($dh)) {
 }
 @themes = sort @themes;
 closedir $dh;
-__PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
+$config{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
 ###################################################
-# set tmp dir
-my $tmp_dir = __PACKAGE__->config->{'tmp_path'} || '/tmp';
-$config{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>; # use uid to make tmp dir more uniq
-__PACKAGE__->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>; # use uid to make tmp dir more uniq
-
+# load config loader
+__PACKAGE__->config(%config);
 
 ###################################################
-# Start the application
+# Start the application and make __PACKAGE__->config
+# accessible
+# override config in Catalyst::Plugin::ThrukConfigLoader
 __PACKAGE__->setup();
 
 ###################################################
@@ -299,7 +264,6 @@ sub check_user_roles_wrapper {
     return 0;
 }
 
-###################################################
 
 =head1 NAME
 

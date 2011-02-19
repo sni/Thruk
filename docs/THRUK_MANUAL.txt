@@ -552,6 +552,18 @@ ex.:
   log4perl_conf = ./log4perl.conf
 
 
+==== plugin_path
+
+Path to your plugins directory. Can be used to specify different
+location for you Thruk plugins. Don't forget to set appropriate apache
+alias or rewrite rules when changing the plugin path. Otherwise the
+static content from plugins is not accessible.
+
+ex.:
+
+  plugin_path = ./plugins
+
+
 ==== tmp_path
 
 Path to a temporary directory. Defaults to /tmp if not set and usually

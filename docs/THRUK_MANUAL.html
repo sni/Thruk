@@ -2310,6 +2310,16 @@ allowed_frame_links = https://wiki.my-company.com</tt></pre>
 <div class="content">
 <pre><tt>log4perl_conf = ./log4perl.conf</tt></pre>
 </div></div>
+<h4 id="_plugin_path">plugin_path</h4>
+<div class="paragraph"><p>Path to your plugins directory. Can be used to specify different
+location for you Thruk plugins. Don&#8217;t forget to set appropriate apache
+alias or rewrite rules when changing the plugin path. Otherwise the
+static content from plugins is not accessible.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>plugin_path = ./plugins</tt></pre>
+</div></div>
 <h4 id="_tmp_path">tmp_path</h4>
 <div class="paragraph"><p>Path to a temporary directory. Defaults to /tmp if not set and usually
 this is a good place.</p></div>
@@ -3169,7 +3179,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-02-09 16:06:53 CEST
+Last updated 2011-02-19 20:07:25 CEST
 </div>
 </div>
 </body>
