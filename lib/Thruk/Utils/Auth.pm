@@ -109,10 +109,16 @@ sub get_auth_filter {
     elsif($type eq 'log') {
         my @filter;
 
+        if(    $c->check_user_roles('authorized_for_all_services')
+           and $c->check_user_roles('authorized_for_all_hosts')
+           and $c->check_user_roles('authorized_for_system_information')) {
+            return;
+        }
+
         # service log entries
         if($c->check_user_roles('authorized_for_all_services')) {
             # allowed for all services related log entries
-            push @filter, { 'current_service_description' => { '!=' => undef } };
+            push @filter, { 'service_description' => { '!=' => undef } };
         }
         else {
             push @filter, { '-and' => [
