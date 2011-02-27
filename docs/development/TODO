@@ -8,6 +8,9 @@ general
     - use title for quick downtimes popups
     - add output filter plugins (ex.: check_multi, disk checks)
     - support more macros
+    - nice error message when using dates > 2038
+    - multiple lines for comment/downtime input
+    - include comments in export
 
 extinfo:
     - finish performance data on extinfo type 4
