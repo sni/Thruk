@@ -107,12 +107,13 @@ for my $test (glob('plugins/plugins-enabled/*/t/*.t')) {
     my $testfile = $test;
     $testfile    =~ s/.*\///gmx;
     if(!-s 't/xt/'.$testfile) {
-        die('t/xt/'.$testfile.' is missing, should be link to: ../../'.$test);
+        symlink('../../'.$test, 't/xt/'.$testfile) or die("cannot create symlink: $!");
+        $testlinks->{$testfile} = '../../'.$test;
         next;
     }
     my $target = readlink('t/xt/'.$testfile);
     if($target ne '../../'.$test) {
-        die('t/xt/'.$testfile.' has wrong target');
+        die('t/xt/'.$testfile.' has wrong target: '.$target.' vs. ../../'.$test);
     }
     $testlinks->{$testfile} = $target;
 }
@@ -126,7 +127,7 @@ for my $link (@cur_t_links) {
         die($link.' should be deleted');
     }
     if($testlinks->{$linkbasename} ne $target) {
-        die($link.' has wrong target');
+        die($link.' has wrong target: '.$target.' vs. '.$testlinks->{$linkbasename});
     }
 }
 
