@@ -576,7 +576,8 @@ ex.:
 
 ==== ssi_path
 
-The path to your ssi (server side includes) files.
+The path to your ssi (server side includes) files. See
+<<_server_side_includes,Server Side Includes>> for details.
 
 ex.:
 
@@ -1212,17 +1213,22 @@ on a test instance first.
 
 You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
-end of the body.
+end of the body. 
+
+IMPORTANT: This has *nothing to do* with the Apache module 'mod_include'
+and just implements the nagios way of SSIs.
 
 There are two global includes, which will be included in every cgi
 page:
- - ssi/global-footer.ssi
- - ssi/global-header.ssi
+
+* ssi/global-footer.ssi
+* ssi/global-header.ssi
 
 and there are page specific includes, which will only be placed in the
 specific page:
-ssi/status-footer.ssi
-ssi/status-header.ssi
+
+* ssi/status-footer.ssi
+* ssi/status-header.ssi
 
 Files will be statically placed inside the output of the normal cgi
 output. Executables will be executed and the output will then be used
