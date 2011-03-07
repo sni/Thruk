@@ -34,6 +34,10 @@ sub read_navigation {
 
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
+    if(defined $ENV{'CATALYST_CONFIG'}) {
+        $file = $ENV{'CATALYST_CONFIG'}.'/menu.conf'       if -e $ENV{'CATALYST_CONFIG'}.'/menu.conf';
+        $file = $ENV{'CATALYST_CONFIG'}.'/menu_local.conf' if -e $ENV{'CATALYST_CONFIG'}.'/menu_local.conf';
+    }
 
     if( exists $c->config->{'cache_navigation'} and $c->config->{'cache_navigation'} == 0 ) {
         _renew_navigation($c, $file);
