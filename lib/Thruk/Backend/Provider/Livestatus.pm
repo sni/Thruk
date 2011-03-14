@@ -230,6 +230,29 @@ sub get_hosts {
 
 ##########################################################
 
+=head2 get_hosts_by_servicequery
+
+  get_hosts_by_servicequery
+
+returns a list of host by a services query
+
+=cut
+sub get_hosts_by_servicequery {
+    my($self, %options) = @_;
+
+    $options{'columns'} = [qw/
+        host_has_been_checked host_name host_state
+        /];
+
+    my $data = $self->_get_table('services', \%options);
+    unless(wantarray) {
+        confess("get_services() should not be called in scalar context");
+    }
+    return($data, undef);
+}
+
+##########################################################
+
 =head2 get_host_names
 
   get_host_names

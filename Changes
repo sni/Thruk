@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added missing image for the Nuvola theme
           - fixed tmp_path option
           - fixed accessing logfiles from changing backends
+          - fixed host totals when using servicegroup filter
 
 0.82.1  Wed Feb  9 15:27:54 CET 2011
           - fixed encoding problem with french date format

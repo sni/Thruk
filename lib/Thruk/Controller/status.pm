@@ -63,6 +63,12 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $style = $self->_process_search_request($c);
     }
 
+    $c->stash->{title}        = 'Current Network Status';
+    $c->stash->{infoBoxTitle} = 'Current Network Status';
+    $c->stash->{page}         = 'status';
+    $c->stash->{template}     = 'status_' . $style . '.tt';
+    $c->stash->{style}        = $style;
+
     # raw data request?
     $c->stash->{'output_format'} = $c->{'request'}->{'parameters'}->{'format'} || 'html';
     if( $c->stash->{'output_format'} ne 'html' ) {
@@ -90,11 +96,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $self->_process_bothtypes_page($c);
     }
 
-
-    $c->stash->{title}        = 'Current Network Status';
-    $c->stash->{infoBoxTitle} = 'Current Network Status';
-    $c->stash->{page}         = 'status';
-    $c->stash->{template}     = 'status_' . $style . '.tt';
 
     Thruk::Utils::ssi_include($c);
 
@@ -280,7 +281,6 @@ sub _process_details_page {
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'} = $order;
-    $c->stash->{'style'}    = 'detail';
 
     return 1;
 }
@@ -341,7 +341,6 @@ sub _process_hostdetails_page {
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'} = $order;
-    $c->stash->{'style'}    = 'hostdetail';
 
     return 1;
 }
@@ -474,8 +473,6 @@ sub _process_overview_page {
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_overview'});
     Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
 
-    $c->stash->{'style'}  = 'overview';
-
     return 1;
 }
 
@@ -569,8 +566,6 @@ sub _process_grid_page {
     my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_grid'});
     Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
-
-    $c->stash->{'style'}  = 'grid';
 
     return 1;
 }
@@ -730,8 +725,6 @@ sub _process_summary_page {
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_summary'});
     Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
 
-    $c->stash->{'style'}  = 'summary';
-
     return 1;
 }
 
@@ -813,7 +806,6 @@ sub _process_bothtypes_page {
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'} = $order;
-    $c->stash->{'style'}    = 'bothtypes';
 
     return 1;
 }
@@ -854,12 +846,37 @@ sub _fill_totals_box {
     my( $self, $c, $hostfilter, $servicefilter ) = @_;
 
     # host status box
-    my $host_stats = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+    my $host_stats = {};
+    if( $c->stash->{style} eq 'detail' ) {
+        # set host status from service query
+        my $services = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+        $host_stats = {
+            'pending'     => 0,
+            'up'          => 0,
+            'down'        => 0,
+            'unreachable' => 0,
+        };
+        my %hosts;
+        for my $service (@{$services}) {
+            next if defined $hosts{$service->{'host_name'}};
+            $hosts{$service->{'host_name'}} = 1;
+
+            if($service->{'host_has_been_checked'} == 0) {
+                $host_stats->{'pending'}++;
+            } else{
+                $host_stats->{'up'}++          if $service->{'host_state'} == 0;
+                $host_stats->{'down'}++        if $service->{'host_state'} == 1;
+                $host_stats->{'unreachable'}++ if $service->{'host_state'} == 2;
+            }
+        }
+    } else {
+        $host_stats = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+    }
+    $c->stash->{'host_stats'} = $host_stats;
 
     # services status box
     my $service_stats = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
 
-    $c->stash->{'host_stats'}    = $host_stats;
     $c->stash->{'service_stats'} = $service_stats;
 
     return 1;

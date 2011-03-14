@@ -261,6 +261,22 @@ sub get_hosts {
 
 ##########################################################
 
+=head2 get_hosts_by_servicequery
+
+  get_hosts_by_servicequery
+
+returns a list of host by a services query
+
+=cut
+
+sub get_hosts_by_servicequery {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_host_names
 
   get_host_names

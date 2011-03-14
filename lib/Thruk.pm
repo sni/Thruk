@@ -14,8 +14,8 @@ use Thruk::Utils::Filter;
 use Thruk::Utils::Menu;
 use Catalyst::Runtime '5.70';
 
-binmode(STDOUT, ":utf8");
-binmode(STDERR, ":utf8");
+binmode(STDOUT, ":encoding(UTF-8)");
+binmode(STDERR, ":encoding(UTF-8)");
 
 ###################################################
 # Set flags and add plugins for the application
