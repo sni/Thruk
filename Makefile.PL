@@ -103,6 +103,7 @@ eval {
 ##################################
 # check plugin test symlinks
 my $testlinks = {};
+mkdir("t/xt") unless -d "t/xt";
 for my $test (glob('plugins/plugins-enabled/*/t/*.t')) {
     my $testfile = $test;
     $testfile    =~ s/.*\///gmx;
