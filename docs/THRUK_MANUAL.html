@@ -2315,6 +2315,8 @@ allowed_frame_links = https://wiki.my-company.com</tt></pre>
 location for you Thruk plugins. Don&#8217;t forget to set appropriate apache
 alias or rewrite rules when changing the plugin path. Otherwise the
 static content from plugins is not accessible.</p></div>
+<div class="paragraph"><p>Example redirect rule for apache:</p></div>
+ AliasMatch /thruk/plugins/(.*?)/(.*)$ <your-plugin-dir>/plugins/plugins-enabled/$1/root/$2
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -3262,7 +3264,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-03-14 16:50:38 CEST
+Last updated 2011-03-14 20:31:58 CEST
 </div>
 </div>
 </body>

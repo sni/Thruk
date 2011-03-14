@@ -11,22 +11,26 @@ sub finalize_config {
     ###################################################
     # get installed plugins
     my $plugin_dir = $c->config->{'plugin_path'} || $project_root."/plugins/";
-    for my $addon (glob($project_root.'/plugins/plugins-enabled/*/')) {
+    $plugin_dir = $plugin_dir.'/plugins-enabled/*/';
+
+    print STDERR "using plugins: ".$plugin_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+
+    for my $addon (glob($plugin_dir)) {
         my $addon_name = $addon;
         $addon_name =~ s/\/$//gmx;
         $addon_name =~ s/^.*\///gmx;
 
         # does the plugin directory exist?
-        if(! -d $project_root.'/root/thruk/plugins/') {
+        if(! -d $project_root.'/root/thruk/plugins/' and -w $project_root.'/root/thruk' ) {
             mkdir($project_root.'/root/thruk/plugins/') or die('cannot create '.$project_root.'/root/thruk/plugins/ : '.$!);
         }
 
         print STDERR "loading plugin: ".$addon_name."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
 
         # lib directory included?
-        if(-d $addon.'lib') {
+        if(-d $addon.'/lib') {
             print STDERR " -> lib\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-            unshift(@INC, $addon.'lib')
+            unshift(@INC, $addon.'/lib')
         }
 
         # template directory included?

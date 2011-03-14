@@ -178,7 +178,7 @@ __PACKAGE__->config(%config);
 ###################################################
 # Start the application and make __PACKAGE__->config
 # accessible
-# override config in Catalyst::Plugin::ThrukConfigLoader
+# override config in Catalyst::Plugin::Thruk::ConfigLoader
 __PACKAGE__->setup();
 
 ###################################################

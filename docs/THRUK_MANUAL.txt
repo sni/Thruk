@@ -559,6 +559,12 @@ location for you Thruk plugins. Don't forget to set appropriate apache
 alias or rewrite rules when changing the plugin path. Otherwise the
 static content from plugins is not accessible.
 
+Example redirect rule for apache:
+
++++++
+ AliasMatch /thruk/plugins/(.*?)/(.*)$ <your-plugin-dir>/plugins/plugins-enabled/$1/root/$2
++++++
+
 ex.:
 
   plugin_path = ./plugins
