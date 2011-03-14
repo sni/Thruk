@@ -20,7 +20,7 @@ resources(
 requires 'YAML'                                   => 0.70;
 requires 'YAML::Tiny'                             => 1.41;
 requires 'JSON'                                   => 0.00;
-requires 'JSON::XS'                               => 0.00;
+requires 'JSON::XS'                               => 2.00;
 requires 'Compress::Raw::Zlib'                    => 2.024;
 requires 'Sub::Uplevel'                           => 0.22;
 requires 'Variable::Magic'                        => 0.40;
