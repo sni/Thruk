@@ -47,9 +47,6 @@ livestatus:
                 Service Dependencies
                 Service Escalations
 
-Known Bugs:
-    - fix totals in status page
-
 =========================================================
 ideas for after 1.0
 
