@@ -710,17 +710,6 @@ sub _process_summary_page {
         }
     }
 
-    # overwrite groups totals with correct values
-    if( $c->stash->{'servicegroup'} and defined $all_groups->{$c->stash->{'servicegroup'}} ) {
-        my $stats = $all_groups->{$c->stash->{'servicegroup'}};
-        $c->stash->{'host_stats'} = {
-            'pending'     => $stats->{'hosts_pending'},
-            'up'          => $stats->{'hosts_up'},
-            'down'        => $stats->{'hosts_down'},
-            'unreachable' => $stats->{'hosts_unreachable'},
-        };
-    }
-
     my $sortedgroups = Thruk::Backend::Manager::_sort($c, [(values %{$all_groups})], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk->config->{'group_paging_summary'});
     Thruk::Backend::Manager::_page_data(undef, $c, $sortedgroups);
@@ -847,7 +836,11 @@ sub _fill_totals_box {
 
     # host status box
     my $host_stats = {};
-    if( $c->stash->{style} eq 'detail' ) {
+    if(   $c->stash->{style} eq 'detail'
+       or ( $c->stash->{'servicegroup'}
+            and ( $c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' )
+          )
+      ) {
         # set host status from service query
         my $services = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
         $host_stats = {
