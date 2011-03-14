@@ -106,7 +106,7 @@ $pages = [
 # json export
     '/thruk/cgi-bin/status.cgi?host=all&format=json',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json',
-    '/thruk/cgi-bin/status.cgi?host=all&format=json&column=host_name&column=description&limit=5',
+    '/thruk/cgi-bin/status.cgi?host=all&format=json&column=name&column=state&limit=5',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json&column=name',
 ];
 

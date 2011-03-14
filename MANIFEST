@@ -26,7 +26,6 @@ docs/source/arch.png
 docs/source/arch_preview.png
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
-inc/File/Copy/Recursive.pm
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm

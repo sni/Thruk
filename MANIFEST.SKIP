@@ -23,3 +23,5 @@ root/thruk/plugins/*
 .author
 ssi_local
 cgi_local.cfg
+# does not work for centos without F::C::R installed
+inc/File/Copy/Recursive.pm

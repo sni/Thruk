@@ -209,14 +209,11 @@ sub get_hosts {
         num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
         parents percent_state_change perf_data plugin_output process_performance_data
         retry_interval scheduled_downtime_depth state state_type
-                /];
+        /] unless defined $options{'columns'};
 
     if($self->{'stash'}->{'enable_shinken_features'}) {
         push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem/;
     }
-
-    my @col = $options{'columns'};
-    push(@col, 'is_problem');
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('hosts', \%options);
@@ -349,7 +346,7 @@ sub get_services {
         notifications_enabled obsess_over_service percent_state_change perf_data
         plugin_output process_performance_data retry_interval scheduled_downtime_depth
         state state_type
-        /];
+        /] unless defined $options{'columns'};
 
     if($self->{'stash'}->{'enable_shinken_features'}) {
         push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem/;
