@@ -255,6 +255,13 @@ Open your browser and open http://<your_host>:3000
 There are two fast cgi modules for apache at the moment. Choose the
 one which fits best into your environment.
 
+[TIP]
+.lighthttpd
+=======
+Francois Ponsard wrote an article on how to integrate Thruk in Lighthttpd:
+http://www.dahwa.fr/dotclear/index.php?post/2011/03/15/Thruk-in-Lighttpd
+=======
+
 === mod_fastcgi
 
 start your fcgi server:
