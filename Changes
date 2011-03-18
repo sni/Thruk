@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.86    Mon...
+          - fixed ajax autocomplete
           - fixed paging on config page
           - fixed ajax search in menu when using theme Vautour (Vincent Besancon)
 

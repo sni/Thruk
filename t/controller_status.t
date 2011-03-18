@@ -1,7 +1,8 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 511;
+use Test::More tests => 527;
+use JSON::XS;
 
 BEGIN {
     use lib('t');
@@ -97,7 +98,7 @@ $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'          => $url,
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/x-msexcel',
     );
 }
@@ -108,12 +109,16 @@ $pages = [
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json',
     '/thruk/cgi-bin/status.cgi?host=all&format=json&column=name&column=state&limit=5',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json&column=name',
+    '/thruk/cgi-bin/status.cgi?format=search',
 ];
 
 for my $url (@{$pages}) {
-    TestUtils::test_page(
+    my $page = TestUtils::test_page(
         'url'          => $url,
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/json; charset=utf-8',
     );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'ARRAY', "json result is an array");
+    ok(scalar @{$data} > 0, "json result has content");
 }

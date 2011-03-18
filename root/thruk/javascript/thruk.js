@@ -336,6 +336,7 @@ function addEventHandler(elem, type) {
 
 /* add additional eventhandler to object */
 function addEvent( obj, type, fn ) {
+  debug("addEvent("+obj+","+type+", ...)");
   if ( obj.attachEvent ) {
     obj['e'+type+fn] = fn;
     obj[type+fn] = function(){obj['e'+type+fn]( window.event );}
@@ -346,6 +347,7 @@ function addEvent( obj, type, fn ) {
 
 /* remove an eventhandler from object */
 function removeEvent( obj, type, fn ) {
+  debug("addEvent("+obj+","+type+", ...)");
   if ( obj.detachEvent ) {
     obj.detachEvent( 'on'+type, obj[type+fn] );
     obj[type+fn] = null;
@@ -1502,6 +1504,7 @@ var ajax_search = {
             tmpElem = tmpElem.parentNode;
             if(tmpElem.tagName == 'FORM') {
                 tmpElem.onsubmit = ajax_search.hide_results;
+                tmpElem.setAttribute("autocomplete", "off");
             }
         }
 
@@ -1509,9 +1512,9 @@ var ajax_search = {
         var type_selector_id = elem.id.replace('_value', '_ts');
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
+        addEvent(input, 'keyup', ajax_search.suggest);
+        input.setAttribute("autocomplete", "off");
         if(selector && selector.tagName == 'SELECT') {
-            input.onkeyup = ajax_search.suggest;
-            input.setAttribute("autocomplete", "off");
             input.blur();   // blur & focus the element, otherwise the first
             input.focus();  // click would result in the browser autocomplete
 
@@ -1550,8 +1553,8 @@ var ajax_search = {
             }
         });
 
-        document.onkeydown  = ajax_search.arrow_keys;
-        document.onclick    = ajax_search.hide_results;
+        addEvent(document, 'keydown', ajax_search.arrow_keys);
+        addEvent(document, 'click', ajax_search.hide_results);
 
         return false;
     },
@@ -1579,7 +1582,6 @@ var ajax_search = {
     /* wrapper around suggest_do() to avoid multiple running searches */
     suggest: function(evt) {
         window.clearTimeout(ajax_search.timer);
-
         // dont suggest on enter
         evt = (evt) ? evt : ((window.event) ? event : null);
         if(evt) {
@@ -1652,6 +1654,7 @@ var ajax_search = {
                     results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
                 }
             });
+
             ajax_search.cur_results = results;
             ajax_search.cur_pattern = pattern;
             ajax_search.show_results(results, pattern, ajax_search.cur_select);
@@ -1666,11 +1669,6 @@ var ajax_search = {
         var panel = document.getElementById(ajax_search.result_pan);
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
-
-        size = results.size();
-        if(size == 1 && results[0].results[0].display == input.value) {
-            return;
-        }
 
         results = results.sortBy(function(s) {
             return(-1 * s.top_hits);
@@ -1805,5 +1803,12 @@ var ajax_search = {
             element = element.offsetParent;
         }
         return [offsetLeft, offsetTop];
+    }
+}
+
+
+function debug(str) {
+    if (window.console != undefined) {
+        console.log("DEBUG: " + str);
     }
 }
