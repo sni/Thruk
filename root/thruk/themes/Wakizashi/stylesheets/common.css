@@ -1,11 +1,11 @@
 body {
     background-attachment: fixed;
-    background-image: url("../images/background.jpg"); 
+    background-image: url("../images/background.jpg");
     background-repeat: repeat;
     /* background-color: #4E4E4E;*/
     font-family: arial, helvetica, sans-serif;
     font-size: 9pt;
-    padding: 0px 20px 0px 20px;
+    /*padding: 0px 20px 0px 20px; */
     margin: 0px;
 	font-family: arial, verdana, serif;
 /*	font-weight: normal;
@@ -31,7 +31,7 @@ body.navbar {
 	margin: 50px 50px 10px 0;
 /*	color: #DEE7C6;*/
 	}
-	
+
 .navsectiontitle {
 /*    background-image: url("../images/snapin_header.png");
     height: 15px;
@@ -63,7 +63,7 @@ ul.navsectionlinks li a {
 	color: #DEE7C6;
 	font-weight: bold;
 	font-size: 8pt;
-	text-decoration: none;	
+	text-decoration: none;
 
 	padding: 0 0 0 15px;
 /*	background: transparent url(../images/greendot.gif) no-repeat scroll 0 0*/
@@ -120,13 +120,13 @@ ul.navsectionlinks li ul li ul {
 	background-color: white;
 	}
 
-	
+
 
 /* main page */
 #splashpage{
 	text-align: center;
 	}
-	
+
 #mainbrandsplash{
 	font-size: 12pt;
 	font-weight: bold;
@@ -136,7 +136,7 @@ ul.navsectionlinks li ul li ul {
 #maincopy{
 	margin: 0 0 15px 0;
 	}
-	
+
 #currentversioninfo{
 	font-size: 12pt;
 	}
@@ -186,7 +186,7 @@ ul.navsectionlinks li ul li ul {
 	font-size: 12pt;
 	font-weight: bold;
 	}
-	
+
 #splashpage #mainfooter{
 	margin: 100px 0 0 0;
 	font-size: 8pt;
@@ -206,4 +206,3 @@ a {
 a img {
 	border: none;
 	}
-

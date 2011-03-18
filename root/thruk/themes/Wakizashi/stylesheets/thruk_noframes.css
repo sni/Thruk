@@ -1,11 +1,10 @@
 /* navbar */
 div.navbar {
-    background-attachment: fixed;
-    background-repeat: repeat;
-    background-image: url("../images/nav_background.jpg");
-/*    background-color: #4E4E4E;*/
-    font-family: arial, helvetica, sans-serif;
-    font-size: 9pt;
+  background-attachment: fixed;
+  background-repeat: repeat;
+  background-image: url("../images/nav_background.jpg");
+  font-family: arial, helvetica, sans-serif;
+  font-size: 9pt;
   color: white;
   width: 170px;
   height: 100%;
@@ -23,21 +22,8 @@ div.navbar {
   overflow-x: hidden;
 }
 
-div.navbarnew {
-    background-attachment: fixed;
-    background-repeat: repeat;
-    background-image: url("../images/snapinframe_background.jpg");
-    font-family: arial, helvetica, sans-serif;
-    font-size: 9pt;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow:hidden;
-}
 
 body {
   margin: 0px;
-  margin-left: 230px;
-  margin-right: 50px;
+  margin-left: 183px;
 }
