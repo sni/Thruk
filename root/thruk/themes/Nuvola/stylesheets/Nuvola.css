@@ -21,7 +21,7 @@ body {
   background-color: #C3C7D3;
   border-color: #C3C7D3;
   font-family: arial, verdana, serif;
-  font-weight: normal;
+/*  font-weight: normal; */
   font-size: 10pt;
 }
 
@@ -123,13 +123,9 @@ th.status a:hover {
 
 .tableRowHover {
   background-color:#88BBD8;
-  height:22px;
-  padding:1px;
 }
 .tableRowSelected {
   background-color:#609FD2;
-  height:22px;
-  padding:1px;
 }
 
 /* fix for navigation table header */
