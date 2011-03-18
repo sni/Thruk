@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-0.86    Mon...
+0.86    Sun Mar 20 19:24:34 CET 2011
           - fixed themes
             - removed useless scrollbar in Nuvola theme
             - removed margin from Wakizashi
