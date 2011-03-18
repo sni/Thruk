@@ -2,8 +2,6 @@
    dataTitle = 'Services'
 %]
 
-<div align="center">[% PROCESS _pager.tt %]</div>
-
 <table border="0" class='data'>
   <tr>
     [% IF backends.size > 1 %]
@@ -135,7 +133,5 @@
   </tr>
   [% END %]
 </table>
-
-<div align="center">[% PROCESS _pager.tt %]</div>
 
 [% END %]

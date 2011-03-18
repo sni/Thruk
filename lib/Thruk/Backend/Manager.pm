@@ -554,6 +554,7 @@ sub _do_on_peers {
     if(scalar keys %arg > 0) {
         if( $arg{'remove_duplicates'} ) {
             $data = $self->_remove_duplicates($data);
+            $totalsize = scalar @{$data};
         }
 
         if( $arg{'sort'} ) {

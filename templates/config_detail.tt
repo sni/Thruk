@@ -42,6 +42,13 @@
     <br>
     <div align="center" class='dataTitle'>[% dataTitle %]</div>
     <br>
+
+    <div align="center">[% PROCESS _pager.tt %]</div>
+
     <div align="center">[% content %]</div>
+
+    <div align="center">[% PROCESS _pager.tt %]</div>
+    <br>
+    <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Entries Displayed</div>
 
 [% PROCESS _footer.tt %]
