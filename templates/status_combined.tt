@@ -1,0 +1,84 @@
+[% USE date %]
+[% PROCESS _header.tt
+  js = url_prefix _ "thruk/javascript/overlib.js"
+%]
+
+<script type="text/javascript">
+  var hst_Hash = new Hash({[% FOREACH h = hosts %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+</script>
+
+<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
+[% PROCESS _status_cmd_pane.tt %]
+<table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="top" width="33%">[% PROCESS _host_status_details_box.tt %]</td>
+    <td align="center" valign="top" width="33%">[% PROCESS _service_status_details_box.tt %]</td>
+    <td align="right" valign="bottom">
+      [% IF show_context_help %]
+      <br><a href='[% url_prefix %]thruk/docs/status_detail' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+      [% END %]
+    </td>
+  </tr>
+  <tr><td colspan=4><br></td></tr>
+</table>
+
+<form action="[% uri(c) %]" method="GET" id="[% paneprefix %]filterForm">
+<input type="hidden" name="style" value="[% style %]">
+<input type="hidden" name="nav" value="[% nav %]">
+[% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
+<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
+<input type="hidden" name="title" id="title" value="[% custom_title %]">
+
+<table border="0" width="100%" cellpadding=0 cellspacing=0>
+  <tr>
+    <td valign="top" align="left" width="33%" nowrap>
+      [% PROCESS _status_filter.tt style='hostdetail' paneprefix='hst_' show_form=0 %]
+    </td>
+    <td valign="top" align="center" width="33%" nowrap>
+      <div align="center" class='statusTitle'>
+        [% IF custom_title != '' %][% custom_title %]
+        [% ELSE %]Host &amp; Service Details
+        [% END %]
+      </div>
+
+      [% PROCESS _message.tt %]
+
+      </td>
+    <td valign="bottom" align="right" width="33%"></td>
+  </tr>
+</table>
+
+[% IF hosts.size > 0 %]
+[% PROCESS _status_hostdetail_table.tt data = hosts paneprefix='hst_' %]
+<br>
+<div class='itemTotalsTitle'>[% hosts.size %] of [% hosts.size %] Matching Host Entries Displayed</div>
+[% END %]
+
+<table border="0" width="100%" cellpadding=0 cellspacing=0>
+  <tr>
+    <td valign="top" align="left" width="33%" nowrap>
+      [% PROCESS _status_filter.tt style='detail' paneprefix='svc_' show_form=0 %]
+    </td>
+    <td valign="top" align="center" width="33%" nowrap>
+      </td>
+    <td valign="bottom" align="right" width="33%"></td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+</script>
+
+[% IF services.size > 0 %]
+[% PROCESS _status_detail_table.tt  data = services paneprefix='svc_' %]
+<br>
+<div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
+[% END %]
+
+</form>
+
+[% PROCESS _footer.tt %]
