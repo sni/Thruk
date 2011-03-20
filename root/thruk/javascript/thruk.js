@@ -9,7 +9,7 @@
 88          88      `8b 88888888888 88
 *******************************************************************************/
 
-var thruk_debug_js   = 1;  // enable debugging messages in javascript
+var thruk_debug_js   = 0;  // enable debugging messages in javascript
 var refreshPage      = 1;
 var cmdPaneState     = 0;
 var curRefreshVal    = 0;
