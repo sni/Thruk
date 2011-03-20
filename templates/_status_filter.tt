@@ -1,47 +1,49 @@
 ﻿[% SET show_filter_table = 0 IF hidesearch == "1" %]
 [% SET show_filter_table = 1 IF hidesearch == "2" %]
-<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="filter_button" alt="filter" onClick="toggleFilterPane(); return false;">
-<form action="[% uri(c) %]" method="GET" id="filterForm">
+<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;">
+[% IF show_form %]
+<form action="[% uri(c) %]" method="GET" id="[% paneprefix %]filterForm">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% nav %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
-<table id="all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr>
-[% FOR search = searches %]
+[% END %]
+<table id="[% paneprefix %]all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0><tr>
+[% FOR search = searches.$paneprefix %]
 [% SET prefix = 's' _ loop.index %]
 <td valign="top" class="filter_table">
-<table border="1" class='filter' cellspacing="0" cellpadding="0" id="[% prefix %]_filter_pane">
+<table border="1" class='filter' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
   <tr>
     <td class='filter'>
-      <table border="0" cellspacing="2" cellpadding="0" id="[% prefix %]_filterTable">
+      <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable">
         <tr>
           <td valign="top" align="left" class='filterTitle' nowrap>
            [% IF loop.first %]
-           <div id="[% prefix %]_filter_title">
-            <a href="#" onClick="toggleFilterPane(); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% prefix %]_filter_button_mini" alt="filter"></a>
+           <div id="[% paneprefix %][% prefix %]_filter_title">
+            <a href="#" onClick="toggleFilterPane('[% paneprefix %]'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% paneprefix %][% prefix %]_filter_button_mini" alt="filter"></a>
             Display Filters:
            </div>
            [% END %]
-            <input type="hidden" name="[% prefix %]_hoststatustypes" value="[% search.hoststatustypes %]">
-            <input type="hidden" name="[% prefix %]_servicestatustypes" value="[% search.servicestatustypes %]">
-            <input type="hidden" name="[% prefix %]_hostprops" value="[% search.hostprops %]">
-            <input type="hidden" name="[% prefix %]_serviceprops" value="[% search.serviceprops %]">
+            <input type="hidden" name="[% paneprefix %][% prefix %]_hoststatustypes" value="[% search.hoststatustypes %]">
+            <input type="hidden" name="[% paneprefix %][% prefix %]_servicestatustypes" value="[% search.servicestatustypes %]">
+            <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops %]">
+            <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
           </td>
           <td colspan=2 align="right">
-            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% prefix %]_btn_accept_search">
-            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
+            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search">
+            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
           </td>
-          <td rowspan=99 align="right" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('filter_pane', 'all_filter_table', this.id)" id="[% prefix %]_new_filter">
+          <td rowspan=99 align="right" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">
             <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
           </td>
         </tr>
 <!-- HOST STATUS TYPES -->
         <tr>
           <td valign="top" align="left" class='filterName' nowrap>Host Status Types:</td>
-          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes')" id="[% prefix %]_htn">[% search.host_statustype_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes')" id="[% paneprefix %][% prefix %]_htn">[% search.host_statustype_filtername %]</td>
           <td>
-            <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_hoststatustypes_pane">
+            <div class="filter_pane" style="visibility:hidden;" id="[% paneprefix %][% prefix %]_hoststatustypes_pane">
             <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
@@ -49,23 +51,23 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle' nowrap>Host Status Types:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_ht2n" onclick="toggleFilterCheckBox(this.id)">Up</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% prefix %]_ht2" name="[% prefix %]_hoststatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_ht2n" onclick="toggleFilterCheckBox(this.id)">Up</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% paneprefix %][% prefix %]_ht2" name="[% paneprefix %][% prefix %]_hoststatustype"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_ht4n" onclick="toggleFilterCheckBox(this.id)">Down</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% prefix %]_ht4" name="[% prefix %]_hoststatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_ht4n" onclick="toggleFilterCheckBox(this.id)">Down</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% paneprefix %][% prefix %]_ht4" name="[% paneprefix %][% prefix %]_hoststatustype"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_ht8n" onclick="toggleFilterCheckBox(this.id)">Unreachable</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% prefix %]_ht8" name="[% prefix %]_hoststatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_ht8n" onclick="toggleFilterCheckBox(this.id)">Unreachable</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% paneprefix %][% prefix %]_ht8" name="[% paneprefix %][% prefix %]_hoststatustype"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_ht1n" onclick="toggleFilterCheckBox(this.id)">Pending</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% prefix %]_ht1" name="[% prefix %]_hoststatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_ht1n" onclick="toggleFilterCheckBox(this.id)">Pending</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% paneprefix %][% prefix %]_ht1" name="[% paneprefix %][% prefix %]_hoststatustype"></td>
                     </tr>
                   </table>
                 </td>
@@ -78,9 +80,9 @@
 <!-- HOST PROPERTIES -->
         <tr>
           <td valign="top" align="left" class='filterName' nowrap>Host Properties:</td>
-          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'hostprops')" id="[% prefix %]_hpn">[% search.host_prop_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'hostprops')" id="[% paneprefix %][% prefix %]_hpn">[% search.host_prop_filtername %]</td>
           <td>
-            <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_hostprops_pane">
+            <div class="filter_pane" style="visibility:hidden;" id="[% paneprefix %][% prefix %]_hostprops_pane">
             <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
@@ -88,67 +90,67 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle' nowrap>Host Properties:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% prefix %]_hp1" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% prefix %]_hp2" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp2n" onclick="toggleFilterCheckBox(this.id)">Not In Scheduled Downtime</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% paneprefix %][% prefix %]_hp1" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% paneprefix %][% prefix %]_hp2" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp2n" onclick="toggleFilterCheckBox(this.id)">Not In Scheduled Downtime</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp4n" onclick="toggleFilterCheckBox(this.id)">Has Been Acknowledged</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% prefix %]_hp4" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% prefix %]_hp8" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp8n" onclick="toggleFilterCheckBox(this.id)">Has Not Been Acknowledged</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp4n" onclick="toggleFilterCheckBox(this.id)">Has Been Acknowledged</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% paneprefix %][% prefix %]_hp4" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% paneprefix %][% prefix %]_hp8" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp8n" onclick="toggleFilterCheckBox(this.id)">Has Not Been Acknowledged</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp16n" onclick="toggleFilterCheckBox(this.id)">Checks Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="[% prefix %]_hp16" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32" id="[% prefix %]_hp32" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp32n" onclick="toggleFilterCheckBox(this.id)">Checks Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp16n" onclick="toggleFilterCheckBox(this.id)">Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="[% paneprefix %][% prefix %]_hp16" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32" id="[% paneprefix %][% prefix %]_hp32" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp32n" onclick="toggleFilterCheckBox(this.id)">Checks Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp64n" onclick="toggleFilterCheckBox(this.id)">Event Handler Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="64" id="[% prefix %]_hp64" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="128" id="[% prefix %]_hp128" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp128n" onclick="toggleFilterCheckBox(this.id)">Event Handler Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp64n" onclick="toggleFilterCheckBox(this.id)">Event Handler Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="64" id="[% paneprefix %][% prefix %]_hp64" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="128" id="[% paneprefix %][% prefix %]_hp128" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp128n" onclick="toggleFilterCheckBox(this.id)">Event Handler Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp256n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="256" id="[% prefix %]_hp256" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="512" id="[% prefix %]_hp512" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp512n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp256n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="256" id="[% paneprefix %][% prefix %]_hp256" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="512" id="[% paneprefix %][% prefix %]_hp512" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp512n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp1024n" onclick="toggleFilterCheckBox(this.id)">Is Flapping</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1024" id="[% prefix %]_hp1024" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2048" id="[% prefix %]_hp2048" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp2048n" onclick="toggleFilterCheckBox(this.id)">Is Not Flapping</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp1024n" onclick="toggleFilterCheckBox(this.id)">Is Flapping</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1024" id="[% paneprefix %][% prefix %]_hp1024" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2048" id="[% paneprefix %][% prefix %]_hp2048" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp2048n" onclick="toggleFilterCheckBox(this.id)">Is Not Flapping</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp4096n" onclick="toggleFilterCheckBox(this.id)">Notifications Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4096" id="[% prefix %]_hp4096" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8192" id="[% prefix %]_hp8192" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp8192n" onclick="toggleFilterCheckBox(this.id)">Notifications Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp4096n" onclick="toggleFilterCheckBox(this.id)">Notifications Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4096" id="[% paneprefix %][% prefix %]_hp4096" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8192" id="[% paneprefix %][% prefix %]_hp8192" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp8192n" onclick="toggleFilterCheckBox(this.id)">Notifications Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp16384n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16384" id="[% prefix %]_hp16384" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32768" id="[% prefix %]_hp32768" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp32768n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp16384n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16384" id="[% paneprefix %][% prefix %]_hp16384" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32768" id="[% paneprefix %][% prefix %]_hp32768" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp32768n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp65536n" onclick="toggleFilterCheckBox(this.id)">Passive Checks</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="65536" id="[% prefix %]_hp65536" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="131072" id="[% prefix %]_hp131072" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp131072n" onclick="toggleFilterCheckBox(this.id)">Active Checks</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp65536n" onclick="toggleFilterCheckBox(this.id)">Passive Checks</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="65536" id="[% paneprefix %][% prefix %]_hp65536" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="131072" id="[% paneprefix %][% prefix %]_hp131072" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp131072n" onclick="toggleFilterCheckBox(this.id)">Active Checks</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp262144n" onclick="toggleFilterCheckBox(this.id)">In Hard State</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="262144" id="[% prefix %]_hp262144" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="524288" id="[% prefix %]_hp524288" name="[% prefix %]_hostprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_hp524288n" onclick="toggleFilterCheckBox(this.id)">In Soft State</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp262144n" onclick="toggleFilterCheckBox(this.id)">In Hard State</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="262144" id="[% paneprefix %][% prefix %]_hp262144" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="524288" id="[% paneprefix %][% prefix %]_hp524288" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp524288n" onclick="toggleFilterCheckBox(this.id)">In Soft State</td>
                     </tr>
                   </table>
                 </td>
@@ -162,9 +164,9 @@
 [% IF style != 'hostdetail' %]
         <tr>
           <td valign="top" align="left" class='filterName' nowrap>Service Status Types:</td>
-          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes')" id="[% prefix %]_stn">[% search.service_statustype_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes')" id="[% paneprefix %][% prefix %]_stn">[% search.service_statustype_filtername %]</td>
           <td>
-            <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_servicestatustypes_pane">
+            <div class="filter_pane" style="visibility:hidden;" id="[% paneprefix %][% prefix %]_servicestatustypes_pane">
             <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
@@ -172,27 +174,27 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle' nowrap>Service Status Types:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">Ok</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% prefix %]_st2" name="[% prefix %]_servicestatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st2n" onclick="toggleFilterCheckBox(this.id)">Ok</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% paneprefix %][% prefix %]_st2" name="[% paneprefix %][% prefix %]_servicestatustype"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_st4n" onclick="toggleFilterCheckBox(this.id)">Warning</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% prefix %]_st4" name="[% prefix %]_servicestatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st4n" onclick="toggleFilterCheckBox(this.id)">Warning</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% paneprefix %][% prefix %]_st4" name="[% paneprefix %][% prefix %]_servicestatustype"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName' id="[% prefix %]_st8n" onclick="toggleFilterCheckBox(this.id)">Unknown</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% prefix %]_st8" name="[% prefix %]_servicestatustype"></td>
+                      <td valign="top" align="left" class='filterName' id="[% paneprefix %][% prefix %]_st8n" onclick="toggleFilterCheckBox(this.id)">Unknown</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% paneprefix %][% prefix %]_st8" name="[% paneprefix %][% prefix %]_servicestatustype"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_st16n" onclick="toggleFilterCheckBox(this.id)">Critical</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="[% prefix %]_st16" name="[% prefix %]_servicestatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st16n" onclick="toggleFilterCheckBox(this.id)">Critical</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="[% paneprefix %][% prefix %]_st16" name="[% paneprefix %][% prefix %]_servicestatustype"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_st1n" onclick="toggleFilterCheckBox(this.id)">Pending</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% prefix %]_st1" name="[% prefix %]_servicestatustype"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_st1n" onclick="toggleFilterCheckBox(this.id)">Pending</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% paneprefix %][% prefix %]_st1" name="[% paneprefix %][% prefix %]_servicestatustype"></td>
                     </tr>
                   </table>
                 </td>
@@ -205,9 +207,9 @@
 <!-- SERVICE PROPERTIES -->
         <tr>
           <td valign="top" align="left" class='filterName' nowrap>Service Properties:</td>
-          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'serviceprops')" id="[% prefix %]_spn">[% search.service_prop_filtername %]</td>
+          <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'serviceprops')" id="[% paneprefix %][% prefix %]_spn">[% search.service_prop_filtername %]</td>
           <td>
-            <div class="filter_pane" style="visibility:hidden;" id="[% prefix %]_serviceprops_pane">
+            <div class="filter_pane" style="visibility:hidden;" id="[% paneprefix %][% prefix %]_serviceprops_pane">
             <div class="shadow"><div class="shadowcontent">
             <table border="1" class='filter' cellspacing="0" cellpadding="0">
               <tr>
@@ -215,67 +217,67 @@
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
                       <td valign="top" align="left" class='filterTitle'>Service Properties:</td>
-                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;"></td>
+                      <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;"></td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% prefix %]_sp1" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% prefix %]_sp2" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp2n" onclick="toggleFilterCheckBox(this.id)">Not In Scheduled Downtime</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp1n" onclick="toggleFilterCheckBox(this.id)">In Scheduled Downtime</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1" id="[% paneprefix %][% prefix %]_sp1" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2" id="[% paneprefix %][% prefix %]_sp2" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp2n" onclick="toggleFilterCheckBox(this.id)">Not In Scheduled Downtime</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp4n" onclick="toggleFilterCheckBox(this.id)">Has Been Acknowledged</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% prefix %]_sp4" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% prefix %]_sp8" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp8n" onclick="toggleFilterCheckBox(this.id)">Has Not Been Acknowledged</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp4n" onclick="toggleFilterCheckBox(this.id)">Has Been Acknowledged</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4" id="[% paneprefix %][% prefix %]_sp4" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8" id="[% paneprefix %][% prefix %]_sp8" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp8n" onclick="toggleFilterCheckBox(this.id)">Has Not Been Acknowledged</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp16n" onclick="toggleFilterCheckBox(this.id)">Active Checks Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="[% prefix %]_sp16" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32" id="[% prefix %]_sp32" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp32n" onclick="toggleFilterCheckBox(this.id)">Active Checks Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp16n" onclick="toggleFilterCheckBox(this.id)">Active Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16" id="[% paneprefix %][% prefix %]_sp16" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32" id="[% paneprefix %][% prefix %]_sp32" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp32n" onclick="toggleFilterCheckBox(this.id)">Active Checks Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp64n" onclick="toggleFilterCheckBox(this.id)">Event Handler Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="64" id="[% prefix %]_sp64" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="128" id="[% prefix %]_sp128" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp128n" onclick="toggleFilterCheckBox(this.id)">Event Handler Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp64n" onclick="toggleFilterCheckBox(this.id)">Event Handler Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="64" id="[% paneprefix %][% prefix %]_sp64" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="128" id="[% paneprefix %][% prefix %]_sp128" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp128n" onclick="toggleFilterCheckBox(this.id)">Event Handler Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp512n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="512" id="[% prefix %]_sp512" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="256" id="[% prefix %]_sp256" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp256n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp512n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="512" id="[% paneprefix %][% prefix %]_sp512" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="256" id="[% paneprefix %][% prefix %]_sp256" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp256n" onclick="toggleFilterCheckBox(this.id)">Flap Detection Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp1024n" onclick="toggleFilterCheckBox(this.id)">Is Flapping</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1024" id="[% prefix %]_sp1024" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2048" id="[% prefix %]_sp2048" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp2048n" onclick="toggleFilterCheckBox(this.id)">Is Not Flapping</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp1024n" onclick="toggleFilterCheckBox(this.id)">Is Flapping</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="1024" id="[% paneprefix %][% prefix %]_sp1024" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="2048" id="[% paneprefix %][% prefix %]_sp2048" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp2048n" onclick="toggleFilterCheckBox(this.id)">Is Not Flapping</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp4096n" onclick="toggleFilterCheckBox(this.id)">Notifications Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4096" id="[% prefix %]_sp4096" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8192" id="[% prefix %]_sp8192" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp8192n" onclick="toggleFilterCheckBox(this.id)">Notifications Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp4096n" onclick="toggleFilterCheckBox(this.id)">Notifications Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4096" id="[% paneprefix %][% prefix %]_sp4096" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8192" id="[% paneprefix %][% prefix %]_sp8192" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp8192n" onclick="toggleFilterCheckBox(this.id)">Notifications Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp16384n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Disabled</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16384" id="[% prefix %]_sp16384" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32768" id="[% prefix %]_sp32768" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp32768n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Enabled</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp16384n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Disabled</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16384" id="[% paneprefix %][% prefix %]_sp16384" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="32768" id="[% paneprefix %][% prefix %]_sp32768" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp32768n" onclick="toggleFilterCheckBox(this.id)">Passive Checks Enabled</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp65536n" onclick="toggleFilterCheckBox(this.id)">Passive Checks</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="65536" id="[% prefix %]_sp65536" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="131072" id="[% prefix %]_sp131072" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp131072n" onclick="toggleFilterCheckBox(this.id)">Active Checks</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp65536n" onclick="toggleFilterCheckBox(this.id)">Passive Checks</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="65536" id="[% paneprefix %][% prefix %]_sp65536" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="131072" id="[% paneprefix %][% prefix %]_sp131072" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp131072n" onclick="toggleFilterCheckBox(this.id)">Active Checks</td>
                     </tr>
                     <tr>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp262144n" onclick="toggleFilterCheckBox(this.id)">In Hard State</td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="262144" id="[% prefix %]_sp262144" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="524288" id="[% prefix %]_sp524288" name="[% prefix %]_serviceprop"></td>
-                      <td valign="top" align="left" class='filterName clickable' id="[% prefix %]_sp524288n" onclick="toggleFilterCheckBox(this.id)">In Soft State</td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp262144n" onclick="toggleFilterCheckBox(this.id)">In Hard State</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="262144" id="[% paneprefix %][% prefix %]_sp262144" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="524288" id="[% paneprefix %][% prefix %]_sp524288" name="[% paneprefix %][% prefix %]_serviceprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp524288n" onclick="toggleFilterCheckBox(this.id)">In Soft State</td>
                     </tr>
                   </table>
                 </td>
@@ -290,7 +292,7 @@
         [% FOR s = search.text_filter %]
         <tr>
           <td class='filterName' nowrap>
-            <select name="[% prefix %]_type" id="[% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
+            <select name="[% paneprefix %][% prefix %]_type" id="[% paneprefix %][% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
               <option value="search">Search</option>
               <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
               <option value="service"[% IF s.type == 'service' %] selected[% END %]>Service</option>
@@ -303,7 +305,7 @@
               <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
               <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
               <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
-            </select><select name="[% prefix %]_op" id="[% prefix %]_[% loop.index %]_to">
+            </select><select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to">
               <option value="~"[% IF s.op == '~' %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
               <option value="="[% IF s.op == '=' %] selected[% END %]>=</option>
@@ -312,7 +314,7 @@
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>
           </td>
-          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% prefix %]_value" id="[% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
           <td align="right" class='filterValueNoHighlight'><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
             <script type="text/javascript">
             <!--
@@ -324,7 +326,7 @@
         [% END %]
 <!-- NEW FILTER -->
         <tr>
-          <td colspan=3 class='newfilter' align="center" id="[% prefix %]_add_new_filter_button" onClick="add_new_filter(this.id, 'filterTable')">
+          <td colspan=3 class='newfilter' align="center" id="[% paneprefix %][% prefix %]_add_new_filter_button" onClick="add_new_filter(this.id, '[% paneprefix %]filterTable')">
             <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
           </td>
         </tr>
@@ -335,4 +337,6 @@
 </td>
 [% END %]
 </tr></table>
+[% IF show_form %]
 </form>
+[% END %]

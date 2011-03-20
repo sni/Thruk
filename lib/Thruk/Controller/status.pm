@@ -27,7 +27,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
 
     # which style to display?
-    my $allowed_subpages = { 'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summary' => 1, 'bothtypes' => 1 };
+    my $allowed_subpages = { 'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summary' => 1, 'bothtypes' => 1, 'combined' => 1 };
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
 
     if( $style eq '' ) {
@@ -94,6 +94,9 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
     elsif ( $style eq 'bothtypes' ) {
         $self->_process_bothtypes_page($c);
+    }
+    elsif ( $style eq 'combined' ) {
+        $self->_process_combined_page($c);
     }
 
 
@@ -720,6 +723,61 @@ sub _process_summary_page {
 
 ##########################################################
 # create the status details page
+sub _process_combined_page {
+    my( $self, $c ) = @_;
+
+    $c->stash->{hidetop}    = 1 unless $c->stash->{hidetop} ne '';
+    $c->stash->{hidesearch} = 1;
+
+    # which host to display?
+    my( $hostfilter)           = $self->_do_filter($c, 'hst_');
+    my( undef, $servicefilter) = $self->_do_filter($c, 'svc_');
+    return if $c->stash->{'has_error'};
+
+    # add comments and downtimes
+    my $comments = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ) ] );
+    my $downtimes = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
+    my $downtimes_by_host;
+    my $downtimes_by_host_service;
+    if($downtimes) {
+        for my $downtime ( @{$downtimes} ) {
+            if( defined $downtime->{'service_description'} and $downtime->{'service_description'} ne '' ) {
+                push @{ $downtimes_by_host_service->{ $downtime->{'host_name'} }->{ $downtime->{'service_description'} } }, $downtime;
+            }
+            else {
+                push @{ $downtimes_by_host->{ $downtime->{'host_name'} } }, $downtime;
+            }
+        }
+    }
+    $c->stash->{'downtimes_by_host'}         = $downtimes_by_host;
+    $c->stash->{'downtimes_by_host_service'} = $downtimes_by_host_service;
+    my $comments_by_host;
+    my $comments_by_host_service;
+    if($comments) {
+        for my $comment ( @{$comments} ) {
+            if( defined $comment->{'service_description'} and $comment->{'service_description'} ne '' ) {
+                push @{ $comments_by_host_service->{ $comment->{'host_name'} }->{ $comment->{'service_description'} } }, $comment;
+            }
+            else {
+                push @{ $comments_by_host->{ $comment->{'host_name'} } }, $comment;
+            }
+        }
+    }
+    $c->stash->{'comments_by_host'}         = $comments_by_host;
+    $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
+
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], pager => $c );
+    my $hosts    = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], pager => $c );
+
+    $c->stash->{'services'} = $services;
+    $c->stash->{'hosts'}    = $hosts;
+
+    return 1;
+}
+
+
+##########################################################
+# create the status details page
 sub _process_bothtypes_page {
     my( $self, $c ) = @_;
 
@@ -1231,7 +1289,7 @@ sub _get_service_prop_filter {
 
 ##########################################################
 sub _do_filter {
-    my( $self, $c ) = @_;
+    my( $self, $c, $prefix ) = @_;
 
     my $hostfilter;
     my $servicefilter;
@@ -1239,8 +1297,10 @@ sub _do_filter {
     my $servicegroupfilter;
     my $searches;
 
-    unless ( exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}
-        or exists $c->{'request'}->{'parameters'}->{'s0_type'} )
+    $prefix = 'dfl_' unless defined $prefix;
+
+    unless ( exists $c->{'request'}->{'parameters'}->{$prefix.'s0_hoststatustypes'}
+        or exists $c->{'request'}->{'parameters'}->{$prefix.'s0_type'} )
     {
 
         # classic search
@@ -1253,15 +1313,15 @@ sub _do_filter {
     else {
 
         # complex filter search?
-        push @{$searches}, $self->_get_search_from_param( $c, 's0', 1 );
+        push @{$searches}, $self->_get_search_from_param( $c, $prefix.'s0', 1 );
         for ( my $x = 1; $x <= 99; $x++ ) {
-            my $search = $self->_get_search_from_param( $c, 's' . $x );
+            my $search = $self->_get_search_from_param( $c, $prefix.'s' . $x );
             push @{$searches}, $search if defined $search;
         }
-        ( $searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_search( $c, $searches );
+        ( $searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_search( $c, $searches, $prefix );
     }
 
-    $c->stash->{'searches'} = $searches;
+    $c->stash->{'searches'}->{$prefix} = $searches;
 
     return ( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
 }
@@ -1418,7 +1478,7 @@ sub _get_search_from_param {
 
 ##########################################################
 sub _do_search {
-    my( $self, $c, $searches ) = @_;
+    my( $self, $c, $searches, $prefix ) = @_;
 
     my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
 
@@ -1441,7 +1501,7 @@ sub _do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    unless($c->stash->{'has_error'}) {
+    if(!$c->stash->{'has_error'} and $prefix ne 'dfl_') {
         $self->_fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 

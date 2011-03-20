@@ -89,12 +89,14 @@ my %config = ('name'                   => 'Thruk',
                                           'infoBoxTitle'   => '',
                                           'has_proc_info'  => 0,
                                           'no_auto_reload' => 0,
-                                          'die_on_errors'  => 0,  # used in cmd.cgi
-                                          'errorMessage'   => 0,  # used in errors
-                                          'js'             => '', # used in _header.tpl
-                                          'extra_header'   => '', # used in _header.tpl
-                                          'ssi_header'     => '', # used in _header.tpl
-                                          'ssi_footer'     => '', # used in _header.tpl
+                                          'die_on_errors'  => 0,        # used in cmd.cgi
+                                          'errorMessage'   => 0,        # used in errors
+                                          'js'             => '',       # used in _header.tt
+                                          'extra_header'   => '',       # used in _header.tt
+                                          'ssi_header'     => '',       # used in _header.tt
+                                          'ssi_footer'     => '',       # used in _header.tt
+                                          'paneprefix'     => 'dfl_',   # used in _status_filter.tt
+                                          'show_form'      => '1',      # used in _status_filter.tt
                                       },
                   PRE_CHOMP          => 1,
                   POST_CHOMP         => 1,

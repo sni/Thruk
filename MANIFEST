@@ -1265,7 +1265,9 @@ templates/_pager.tt
 templates/_service_status_details_box.tt
 templates/_show_link.tt
 templates/_status_cmd_pane.tt
+templates/_status_detail_table.tt
 templates/_status_filter.tt
+templates/_status_hostdetail_table.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt
@@ -1415,6 +1417,7 @@ templates/outages.tt
 templates/showlog.tt
 templates/side.tt
 templates/status_bothtypes.tt
+templates/status_combined.tt
 templates/status_detail.tt
 templates/status_grid.tt
 templates/status_hostdetail.tt

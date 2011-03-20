@@ -9,7 +9,7 @@
 88          88      `8b 88888888888 88
 *******************************************************************************/
 
-var thruk_debug_js   = 0;  // enable debugging messages in javascript
+var thruk_debug_js   = 1;  // enable debugging messages in javascript
 var refreshPage      = 1;
 var cmdPaneState     = 0;
 var curRefreshVal    = 0;
@@ -303,6 +303,15 @@ function addRowSelector(id)
         resetServiceRow(e);
     });
 
+    if(cells.length == 5) {
+      pagetype = 'hostdetail'
+    }
+    else if(cells.length == 7) {
+      pagetype = 'servicedetail'
+    } else {
+      if(thruk_debug_js) { alert("ERROR: unknown table addRowSelector(): " + cells.length); }
+    }
+
     // for each cell in a row
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         if(pagetype == "hostdetail" || (cell_nr == 0 && cells[0].innerHTML != '')) {
@@ -375,7 +384,7 @@ function getFirstParentId(elem) {
 }
 
 /* set style for each cell */
-function setRowStyle(row_id, style, type, force) {
+function setRowStyle(row_id, style, type, force ) {
 
     var row = document.getElementById(row_id);
     if(!row) {
@@ -385,6 +394,14 @@ function setRowStyle(row_id, style, type, force) {
 
     // for each cells in this row
     var cells = row.cells;
+    if(cells.length == 5) {
+      pagetype = 'hostdetail'
+    }
+    else if(cells.length == 7) {
+      pagetype = 'servicedetail'
+    } else {
+      if(thruk_debug_js) { alert("ERROR: unknown table setRowStyle(): " + cells.length); }
+    }
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         // only the first cell for hosts
         // all except the first cell for services
@@ -855,14 +872,22 @@ function collectFormData() {
 
     var services = new Array();
     selectedServices.keys().each(function(row_id) {
-        services.push(servicesHash.get(row_id));
+        if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
+        if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
+        if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
+        row_id = row_id.substr(4);
+        services.push(obj_hash.get(row_id));
     });
     service_form = document.getElementById('selected_services');
     service_form.value = services.join(',');
 
     var hosts = new Array();
     selectedHosts.keys().each(function(row_id) {
-        hosts.push(servicesHash.get(row_id));
+        if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
+        if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
+        if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
+        row_id = row_id.substr(4);
+        hosts.push(obj_hash.get(row_id));
     });
     host_form = document.getElementById('selected_hosts');
     host_form.value = hosts.join(',');
@@ -945,9 +970,9 @@ on status / host details page
 *******************************************************************************/
 
 /* toggle the visibility of the filter pane */
-function toggleFilterPane() {
-  var pane = document.getElementById('all_filter_table');
-  var img  = document.getElementById('filter_button');
+function toggleFilterPane(prefix) {
+  var pane = document.getElementById(prefix+'all_filter_table');
+  var img  = document.getElementById(prefix+'filter_button');
   if(pane.style.display == 'none') {
     pane.style.display    = '';
     pane.style.visibility = 'visible';
@@ -973,7 +998,7 @@ function toggleFilterPaneSelector(search_prefix, id) {
   var input_name;
   var checkbox_prefix;
 
-  search_prefix = search_prefix.substring(0, 3);
+  search_prefix = search_prefix.substring(0, 7);
 
   if(id == "hoststatustypes") {
     panel           = 'hoststatustypes_pane';
@@ -1029,13 +1054,6 @@ function accept_filter_types(search_prefix, checkbox_names, result_name, checkbo
     inp[0].value = sum;
 
     set_filter_name(search_prefix, checkbox_names, checkbox_prefix, parseInt(sum));
-
-    /* removed submit, its inconsistend to submit the form sometimes and sometimes not */
-    /* submit the form if something changed */
-    //if(sum != orig) {
-    //  form = document.getElementById('filterForm');
-    //  form.submit();
-    //}
 }
 
 /* set the initial state of filter checkboxes */
@@ -1139,22 +1157,25 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
 
 /* add a new filter selector to this table */
 function add_new_filter(search_prefix, table) {
+  pane_prefix   = search_prefix.substring(0,4);
+  search_prefix = search_prefix.substring(4);
   search_prefix = search_prefix.substring(0,3);
-  table = document.getElementById(search_prefix+table);
-  if(!table) {
-    if(thruk_debug_js) { alert("ERROR: got no table for id in add_new_filter(): " + search_prefix+table); }
+  table         = table.substring(4);
+  tbl           = document.getElementById(pane_prefix+search_prefix+table);
+  if(!tbl) {
+    if(thruk_debug_js) { alert("ERROR: got no table for id in add_new_filter(): " + pane_prefix+search_prefix+table); }
     return;
   }
 
   // add new row
-  var tblBody        = table.tBodies[0];
+  var tblBody        = tbl.tBodies[0];
   var currentLastRow = tblBody.rows.length - 1;
   var newRow         = tblBody.insertRow(currentLastRow);
 
   // get first free number of typeselects
   var nr = 0;
   for(var x = 0; x<= 99; x++) {
-    tst = document.getElementById(search_prefix + x + '_ts');
+    tst = document.getElementById(pane_prefix + search_prefix + x + '_ts');
     if(tst) { nr = x+1; }
   }
 
@@ -1162,14 +1183,14 @@ function add_new_filter(search_prefix, table) {
   var typeselect        = document.createElement('select');
   var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Comment', 'Last Check', 'Next Check', 'Latency', 'Execution Time');
   typeselect.onchange   = verify_op;
-  typeselect.setAttribute('name', search_prefix + 'type');
-  typeselect.setAttribute('id', search_prefix + nr + '_ts');
+  typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
+  typeselect.setAttribute('id', pane_prefix + search_prefix + nr + '_ts');
   add_options(typeselect, options);
 
   var opselect          = document.createElement('select');
   var options           = new Array('~', '!~', '=', '!=', '<=', '>=');
-  opselect.setAttribute('name', search_prefix + 'op');
-  opselect.setAttribute('id', search_prefix + nr + '_to');
+  opselect.setAttribute('name', pane_prefix + search_prefix + 'op');
+  opselect.setAttribute('id', pane_prefix + search_prefix + nr + '_to');
   add_options(opselect, options);
 
   var newCell0 = newRow.insertCell(0);
@@ -1182,8 +1203,8 @@ function add_new_filter(search_prefix, table) {
   var newInput       = document.createElement('input');
   newInput.type      = 'text';
   newInput.value     = '';
-  newInput.setAttribute('name', search_prefix + 'value');
-  newInput.setAttribute('id',   search_prefix + nr + '_value');
+  newInput.setAttribute('name', pane_prefix + search_prefix + 'value');
+  newInput.setAttribute('id',   pane_prefix + search_prefix + nr + '_value');
   if(ajax_search_enabled) {
     newInput.onclick = ajax_search.init;
   }
@@ -1196,8 +1217,8 @@ function add_new_filter(search_prefix, table) {
   calImg.className = "cal_icon";
   calImg.alt = "choose date";
   var link   = document.createElement('a');
-  link.href  = "javascript:show_cal('" + search_prefix + nr + "_value')";
-  link.setAttribute('id',   search_prefix + nr + '_cal');
+  link.href  = "javascript:show_cal('" + pane_prefix + search_prefix + nr + "_value')";
+  link.setAttribute('id', pane_prefix + search_prefix + nr + '_cal');
   link.style.display    = "none";
   link.style.visibility = "hidden";
   link.appendChild(calImg);
@@ -1240,10 +1261,13 @@ function add_options(select, options) {
 
 /* create a complete new filter pane */
 function new_filter(cloneObj, parentObj, btnId) {
+  pane_prefix       = btnId.substring(0,4);
+  btnId             = btnId.substring(4);
   var search_prefix = btnId.substring(0, 3);
-  var origObj  = document.getElementById(search_prefix+cloneObj);
+  cloneObj          = cloneObj.substring(4);
+  var origObj       = document.getElementById(pane_prefix+search_prefix+cloneObj);
   if(!origObj) {
-    if(thruk_debug_js) { alert("ERROR: no elem to clone in new_filter() for: " + search_prefix + cloneObj); }
+    if(thruk_debug_js) { alert("ERROR: no elem to clone in new_filter() for: " + pane_prefix + search_prefix + cloneObj); }
   }
   var newObj   = origObj.cloneNode(true);
 
@@ -1253,11 +1277,11 @@ function new_filter(cloneObj, parentObj, btnId) {
   var tags = new Array('A', 'INPUT', 'TABLE', 'TR', 'TD', 'SELECT', 'INPUT', 'DIV', 'IMG');
   tags.each(function(tag) {
       var elems = newObj.getElementsByTagName(tag);
-      replaceIdAndNames(elems, new_prefix);
+      replaceIdAndNames(elems, pane_prefix+new_prefix);
   });
 
   // replace id of panel itself
-  replaceIdAndNames(newObj, new_prefix);
+  replaceIdAndNames(newObj, pane_prefix+new_prefix);
 
   var tblObj   = document.getElementById(parentObj);
   var tblBody  = tblObj.tBodies[0];
@@ -1267,13 +1291,13 @@ function new_filter(cloneObj, parentObj, btnId) {
   newCell.appendChild(newObj);
 
   // hide the original button
-  hideElement(btnId);
-  hideBtn = document.getElementById(new_prefix + 'filter_button_mini');
-  if(hideBtn) { hideElement(hideBtn); }
-  hideElement(new_prefix + 'btn_accept_search');
-  showElement(new_prefix + 'btn_del_search');
+  hideElement(pane_prefix + btnId);
+  hideBtn = document.getElementById(pane_prefix+new_prefix + 'filter_button_mini');
+  if(hideBtn) { hideElement( hideBtn); }
+  hideElement(pane_prefix + new_prefix + 'btn_accept_search');
+  showElement(pane_prefix + new_prefix + 'btn_del_search');
 
-  hideBtn = document.getElementById(new_prefix + 'filter_title');
+  hideBtn = document.getElementById(pane_prefix + new_prefix + 'filter_title');
   if(hideBtn) { hideElement(hideBtn); }
 }
 
@@ -1285,11 +1309,11 @@ function replaceIdAndNames(elems, new_prefix) {
   for(var x = 0; x < elems.length; x++) {
     var elem = elems[x];
     if(elem.id) {
-        var new_id = elem.id.replace(/^s\d+_/, new_prefix);
+        var new_id = elem.id.replace(/^\w{3}_s\d+_/, new_prefix);
         elem.setAttribute('id', new_id);
     }
     if(elem.name) {
-        var new_name = elem.name.replace(/^s\d+_/, new_prefix);
+        var new_name = elem.name.replace(/^\w{3}_s\d+_/, new_prefix);
         elem.setAttribute('name', new_name);
     }
 
@@ -1301,9 +1325,11 @@ function replaceIdAndNames(elems, new_prefix) {
 
 /* remove a search panel */
 function deleteSearchPane(id) {
-  var search_prefix = id.substring(0, 3);
+  pane_prefix   = id.substring(0,4);
+  id            = id.substring(4);
+  search_prefix = id.substring(0,3);
 
-  var pane = document.getElementById(search_prefix + 'filter_pane');
+  var pane = document.getElementById(pane_prefix + search_prefix + 'filter_pane');
   var cell = pane.parentNode;
   while(cell.firstChild) {
       child = cell.firstChild;
@@ -1313,10 +1339,10 @@ function deleteSearchPane(id) {
   // show last "new search" button
   var last_nr = 0;
   for(var x = 0; x<= 99; x++) {
-      tst = document.getElementById('s'+x+'_' + 'new_filter');
-      if(tst && 's'+x+'_' != search_prefix) { last_nr = x; }
+      tst = document.getElementById(pane_prefix + 's'+x+'_' + 'new_filter');
+      if(tst && pane_prefix + 's'+x+'_' != search_prefix) { last_nr = x; }
   }
-  showElement('s'+last_nr+'_' + 'new_filter');
+  showElement( pane_prefix + 's'+last_nr+'_' + 'new_filter');
 
   return false;
 }
