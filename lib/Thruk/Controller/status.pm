@@ -776,7 +776,7 @@ sub _process_bothtypes_page {
 
     # get all services
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c );
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c );
+    my $hosts    = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c );
     if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'data'} } = reverse @{ $c->stash->{'data'} }; }
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
@@ -790,11 +790,10 @@ sub _process_bothtypes_page {
         return $c->detach('View::Excel');
     }
 
-    $c->stash->{'servicedata'}     = $services;
-    $c->stash->{'hostdata'}     = $hosts;
-
-    $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
-    $c->stash->{'orderdir'} = $order;
+    $c->stash->{'servicedata'} = $services;
+    $c->stash->{'hostdata'}    = $hosts;
+    $c->stash->{'orderby'}     = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'orderdir'}    = $order;
 
     return 1;
 }
