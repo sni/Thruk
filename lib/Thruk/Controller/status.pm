@@ -766,11 +766,46 @@ sub _process_combined_page {
     $c->stash->{'comments_by_host'}         = $comments_by_host;
     $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
 
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], pager => $c );
-    my $hosts    = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], pager => $c );
+    # services
+    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
+    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $order      = "ASC";
+    $order = "DESC" if $sorttype == 2;
+    my $sortoptions = {
+        '1' => [ [ 'host_name',   'description' ], 'host name' ],
+        '2' => [ [ 'description', 'host_name' ],   'service name' ],
+        '3' => [ [ 'has_been_checked', 'state', 'host_name', 'description' ], 'service status' ],
+        '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
+        '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
+        '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+    };
+    $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
+    my $services            = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                                        sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                                        pager  => $c );
     $c->stash->{'services'} = $services;
-    $c->stash->{'hosts'}    = $hosts;
+    if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
+
+
+    # hosts
+    $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
+    $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 7;
+    $order      = "ASC";
+    $order = "DESC" if $sorttype == 2;
+    $sortoptions = {
+        '1' => [ 'name', 'host name' ],
+        '4' => [ [ 'last_check',             'name' ], 'last check time' ],
+        '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration' ],
+        '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
+    };
+    $sortoption = 1 if !defined $sortoptions->{$sortoption};
+
+    my $hosts            = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                                  sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                                  pager  => $c );
+    $c->stash->{'hosts'} = $hosts;
+    if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
     return 1;
 }
