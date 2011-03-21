@@ -559,8 +559,9 @@ function selectServiceByIdEvent(row_id, state, event)
 {
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
-      var id1 = parseInt(row_id.substring(1));
-      var id2 = parseInt(lastRowSelected.substring(1));
+      var id1         = parseInt(row_id.substring(5));
+      var id2         = parseInt(lastRowSelected.substring(5));
+      var pane_prefix = row_id.substring(0,4);
 
       // all selected should get the same state
       state = false;
@@ -576,7 +577,7 @@ function selectServiceByIdEvent(row_id, state, event)
       }
 
       for(var x = id1; x < id2; x++) {
-        selectServiceByIdEvent('r'+x, state);
+        selectServiceByIdEvent(pane_prefix+'r'+x, state);
       }
       lastRowSelected = undefined;
       no_more_events  = 0;
@@ -662,8 +663,9 @@ function selectHostByIdEvent(row_id, state, event) {
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
-      var id1 = parseInt(row_id.substring(1));
-      var id2 = parseInt(lastRowSelected.substring(1));
+      var id1         = parseInt(row_id.substring(5));
+      var id2         = parseInt(lastRowSelected.substring(5));
+      var pane_prefix = row_id.substring(0,4);
 
       // all selected should get the same state
       state = false;
@@ -679,7 +681,7 @@ function selectHostByIdEvent(row_id, state, event) {
       }
 
       for(var x = id1; x < id2; x++) {
-        selectHostByIdEvent('r'+x, state);
+        selectHostByIdEvent(pane_prefix+'r'+x, state);
       }
       lastRowSelected = undefined;
       no_more_events  = 0;
