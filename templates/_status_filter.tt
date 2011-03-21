@@ -318,7 +318,7 @@
           <td align="right" class='filterValueNoHighlight'><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
             <script type="text/javascript">
             <!--
-              verify_op("[% prefix %]_[% loop.index %]_ts");
+              verify_op("[% paneprefix %][% prefix %]_[% loop.index %]_ts");
             -->
             </script>
           </td>
