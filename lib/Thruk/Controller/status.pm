@@ -1300,7 +1300,9 @@ sub _do_filter {
     $prefix = 'dfl_' unless defined $prefix;
 
     unless ( exists $c->{'request'}->{'parameters'}->{$prefix.'s0_hoststatustypes'}
-        or exists $c->{'request'}->{'parameters'}->{$prefix.'s0_type'} )
+          or exists $c->{'request'}->{'parameters'}->{$prefix.'s0_type'}
+          or exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}
+          or exists $c->{'request'}->{'parameters'}->{'s0_type'} )
     {
 
         # classic search
@@ -1312,6 +1314,11 @@ sub _do_filter {
     }
     else {
 
+        if(   exists $c->{'request'}->{'parameters'}->{'s0_hoststatustypes'}
+           or exists $c->{'request'}->{'parameters'}->{'s0_type'} ) {
+            $prefix = '';
+        }
+
         # complex filter search?
         push @{$searches}, $self->_get_search_from_param( $c, $prefix.'s0', 1 );
         for ( my $x = 1; $x <= 99; $x++ ) {
@@ -1321,6 +1328,7 @@ sub _do_filter {
         ( $searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_search( $c, $searches, $prefix );
     }
 
+    $prefix = 'dfl_' unless $prefix ne '';
     $c->stash->{'searches'}->{$prefix} = $searches;
 
     return ( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
@@ -1501,7 +1509,7 @@ sub _do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    if(!$c->stash->{'has_error'} and $prefix eq 'dfl_') {
+    if(!$c->stash->{'has_error'} and ( $prefix eq 'dfl_' or $prefix eq '')) {
         $self->_fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 
