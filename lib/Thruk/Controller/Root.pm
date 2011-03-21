@@ -109,7 +109,7 @@ sub begin : Private {
     # all problems link?
     my $all_problems_link = $c->config->{'all_problems_link'};
     if( !defined $all_problems_link ) {
-        $all_problems_link = $c->stash->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=12&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;hst_s0_hostprop=2&amp;hst_s0_hostprop=8&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=0&amp;svc_s0_serviceprops=10&amp;svc_s0_serviceprop=2&amp;svc_s0_serviceprop=8&amp;title=All%20Unhandled%20Problems";
+        $all_problems_link = $c->stash->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems";
     }
     $c->stash->{'all_problems_link'} = $all_problems_link;
 
