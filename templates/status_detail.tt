@@ -89,10 +89,10 @@
         <td valign="top" align="center" width="80%">
           <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
           <div class="hint">
-              <a href="javascript:selectAllServices(true, '[% paneprefix %]');">select all</a> (<a href="javascript:selectAllHosts(true, '[% paneprefix %]');">hosts</a>)
-            - <a href="javascript:selectAllHosts(false, '[% paneprefix %]');selectAllServices(false, '[% paneprefix %]');">unselect all</a>
-            - <a href="javascript:selectAllHosts(false, '[% paneprefix %]');selectAllServices(false, '[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-            - <a href="javascript:selectAllHosts(false, '[% paneprefix %]');selectAllServices(false, '[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+              <a href="javascript:selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="javascript:selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
+            - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
+            - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+            - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
           </div>
         </td>
         <td valign="bottom" align="right" width="10%" nowrap>
@@ -134,10 +134,10 @@
     [% PROCESS _status_detail_table.tt %]
 
     <div class="hint">
-        <a href="javascript:selectAllServices(true);">select all</a> (<a href="javascript:selectAllHosts(true);">hosts</a>)
-      - <a href="javascript:selectAllHosts(false);selectAllServices(false);">unselect all</a>
-      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-      - <a href="javascript:selectAllHosts(false);selectAllServices(false);selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+        <a href="javascript:selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="javascript:selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
+      - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
+      - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+      - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
     </div>
 
     <div align="center">[% PROCESS _pager.tt %]</div>
