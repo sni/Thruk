@@ -1501,7 +1501,7 @@ sub _do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    if(!$c->stash->{'has_error'} and $prefix ne 'dfl_') {
+    if(!$c->stash->{'has_error'} and $prefix eq 'dfl_') {
         $self->_fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 
