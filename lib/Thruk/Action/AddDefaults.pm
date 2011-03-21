@@ -37,9 +37,9 @@ before 'execute' => sub {
     Thruk::Utils::read_cgi_cfg($c);
 
     ###############################
-    $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
-    $c->stash->{'show_context_help'}  = $c->config->{'cgi_cfg'}->{'show_context_help'};
-    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
+    $c->stash->{'escape_html_tags'}      = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
+    $c->stash->{'show_context_help'}     = $c->config->{'cgi_cfg'}->{'show_context_help'};
+    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'}           || 'onmouseover';
 
     ###############################
     # no backend?
@@ -100,6 +100,11 @@ before 'execute' => sub {
         $c->{'db'}->disable_backends($disabled_backends);
     }
     $c->log->debug("backend groups filter enabled") if $has_groups;
+
+    # renew state of connections
+    if($c->config->{'check_local_states'}) {
+        $c->{'db'}->set_backend_state_from_local_connections($cache, $disabled_backends);
+    }
 
     ###############################
     # add program status

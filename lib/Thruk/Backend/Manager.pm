@@ -8,6 +8,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Page;
 use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
+use Thruk::Utils;
 
 our $AUTOLOAD;
 
@@ -38,6 +39,8 @@ sub new {
         'stats'               => undef,
         'log'                 => undef,
         'config'              => undef,
+        'state_hosts'         => {},
+        'local_hosts'         => {},
         'backends'            => [],
     };
     bless $self, $class;
@@ -73,6 +76,15 @@ sub init {
 
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;
+
+    for my $peer (@{$self->get_peers()}) {
+        $peer->{'local'} = 1;
+        if($peer->{'addr'} =~ m/^(.*):/mx) {
+            $self->{'state_hosts'}->{$peer->{'key'}} = $1;
+        } else {
+            $self->{'local_hosts'}->{$peer->{'key'}} = 1;
+        }
+    }
 
     $self->{'initialized'} = 1;
 
@@ -344,6 +356,72 @@ sub expand_command {
         'note'          => $note,
     };
     return $return;
+}
+
+########################################
+
+=head2 set_backend_state_from_local_connections
+
+  set_backend_state_from_local_connections
+
+enables/disables remote backends based on a state from local instances
+
+=cut
+
+sub set_backend_state_from_local_connections {
+    my( $self, $disabled ) = @_;
+
+    $self->{'stats'}->profile( begin => "set_backend_state_from_local_connections() " ) if defined $self->{'stats'};
+
+    return unless scalar keys %{$self->{'local_hosts'}} >= 1;
+    return unless scalar keys %{$self->{'state_hosts'}} >= 1;
+
+    my $options = [
+        'backend', keys %{$self->{'local_hosts'}},
+        'columns', [qw/address name alias state/],
+    ];
+
+    my @filter;
+    for my $host (values %{$self->{'state_hosts'}}) {
+        push @filter, { '-or' => [ { name    => { '=' => $host } },
+                                   { alias   => { '=' => $host } },
+                                   { address => { '=' => $host } },
+                      ]};
+    }
+    push @{$options}, 'filter', [ Thruk::Utils::combine_filter( '-or', \@filter ) ];
+    eval {
+        my $data = $self->_do_on_peers( "get_hosts", $options );
+        for my $host (@{$data}) {
+            # find matching key
+            my $key;
+            for my $state_key (keys %{$self->{'state_hosts'}}) {
+                my $name = $self->{'state_hosts'}->{$state_key};
+                $key = $state_key if $host->{'name'}    eq $name;
+                $key = $state_key if $host->{'address'} eq $name;
+                $key = $state_key if $host->{'alias'}   eq $name;
+            }
+            next unless defined $key;
+            my $peer = $self->get_peer_by_key($key);
+            next if $disabled->{$key};
+
+            if($host->{'state'} == 0) {
+                $self->{'log'}->debug($key." -> enabled by local state check");
+                $peer->{'enabled'}  = 1 unless $peer->{'enabled'} == 2;
+                $peer->{'runnning'} = 1;
+            } else {
+                $self->{'log'}->debug($key." -> disabled by local state check");
+                $self->disable_backend($key);
+                $peer->{'runnning'} = 0;
+            }
+        }
+    };
+    if($@) {
+        $self->{'log'}->error("failed setting states by local check: ".$@);
+    }
+
+    $self->{'stats'}->profile( end => "set_backend_state_from_local_connections() " ) if defined $self->{'stats'};
+
+    return;
 }
 
 ########################################

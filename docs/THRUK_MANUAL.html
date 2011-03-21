@@ -2733,6 +2733,17 @@ shinken backends.</p></div>
 <div class="content">
 <pre><tt>enable_shinken_features = 1</tt></pre>
 </div></div>
+<h4 id="_check_local_states">check_local_states</h4>
+<div class="paragraph"><p>Get the status for remote backends from local instances. This can
+increase performance when using multiple remote sites. It is enabled
+by default when using more than one site. You have to define
+hostchecks in any local backend (using unix sockets) with a name or
+alias of the address of your remote backends.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>check_local_states = 1</tt></pre>
+</div></div>
 <h4 id="_component_thruk_backend">Component Thruk::Backend</h4>
 <div class="paragraph"><p>Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the
@@ -3324,7 +3335,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-03-18 19:27:05 CEST
+Last updated 2011-03-21 13:30:05 CEST
 </div>
 </div>
 </body>

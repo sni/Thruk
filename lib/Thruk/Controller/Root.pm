@@ -149,6 +149,14 @@ sub begin : Private {
         return $c->detach("/error/index/14");
     }
 
+    # set check_local_states
+    unless(defined $c->config->{'check_local_states'}) {
+        $c->config->{'check_local_states'} = 0;
+        if(scalar @{$c->{'db'}->{'backends'}} > 1) {
+            $c->config->{'check_local_states'} = 1;
+        }
+    }
+
     # when adding nav=1 to a url in frame mode, redirect to frame.html with this url
     if( defined $c->{'request'}->{'parameters'}->{'nav'}
             and $c->{'request'}->{'parameters'}->{'nav'} eq '1'
