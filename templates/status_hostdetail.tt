@@ -78,10 +78,10 @@
         <td valign="top" align="center" width="80%">
           <div class="hint">select host with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
           <div class="hint">
-              <a href="javascript:selectAllHosts(true);">select all</a>
-            - <a href="javascript:selectAllHosts(false);">unselect all</a>
-            - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
-            - <a href="javascript:selectAllHosts(false);selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+              <a href="javascript:selectAllHosts(true, '[% paneprefix %]');">select all</a>
+            - <a href="javascript:selectAllHosts(false, '[% paneprefix %]');">unselect all</a>
+            - <a href="javascript:selectAllHosts(false, '[% paneprefix %]');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+            - <a href="javascript:selectAllHosts(false, '[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
           </div>
         </td>
         <td valign="bottom" align="right" width="10%" nowrap>

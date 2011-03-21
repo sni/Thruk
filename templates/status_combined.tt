@@ -52,11 +52,9 @@
   </tr>
 </table>
 
-[% IF hosts.size > 0 %]
 [% PROCESS _status_hostdetail_table.tt data = hosts paneprefix='hst_' %]
 <br>
 <div class='itemTotalsTitle'>[% hosts.size %] of [% hosts.size %] Matching Host Entries Displayed</div>
-[% END %]
 
 <table border="0" width="100%" cellpadding=0 cellspacing=0>
   <tr>
@@ -73,11 +71,9 @@
   var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
 </script>
 
-[% IF services.size > 0 %]
 [% PROCESS _status_detail_table.tt  data = services paneprefix='svc_' %]
 <br>
 <div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
-[% END %]
 
 </form>
 

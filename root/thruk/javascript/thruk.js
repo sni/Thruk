@@ -765,9 +765,9 @@ function resetHostRow(event)
 }
 
 /* select or deselect all services */
-function selectAllServices(state) {
+function selectAllServices(state, pane_prefix) {
     var x = 0;
-    while(selectServiceById('r'+x, state)) {
+    while(selectServiceById(pane_prefix+'r'+x, state)) {
         // disable next row
         x++;
     };
@@ -793,9 +793,9 @@ function selectHostsByClass(classes) {
 }
 
 /* select or deselect all hosts */
-function selectAllHosts(state) {
+function selectAllHosts(state, pane_prefix) {
     var x = 0;
-    while(selectHostById('r'+x, state)) {
+    while(selectHostById(pane_prefix+'r'+x, state)) {
         // disable next row
         x++;
     };
