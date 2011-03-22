@@ -144,14 +144,14 @@ sub _process_host_page {
     # If we use shinken, shoud show the impacts link if it's a problem
     if($c->{'config'}->{'enable_shinken_features'} && $host->{'is_problem'}) {
         $c->stash->{'show_impacts_link'} = 1;
-    }else{
+    } else {
         $c->stash->{'show_impacts_link'} = 0;
     }
 
-    #If we use shinken, shoud show the root problems ofthis impact
+    # If we use shinken, should show the root problems of this impact
     if($c->{'config'}->{'enable_shinken_features'} && $host->{'is_impact'}) {
         $c->stash->{'show_rootproblems_link'} = 1;
-    }else{
+    } else {
         $c->stash->{'show_rootproblems_link'} = 0;
     }
 
