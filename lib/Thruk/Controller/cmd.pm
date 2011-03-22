@@ -6,7 +6,6 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use Template;
-use Time::HiRes qw( usleep );
 
 =head1 NAME
 
@@ -29,6 +28,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     my $errors = 0;
 
+    $c->stash->{'now'}          = time();
     $c->stash->{title}          = "External Command Interface";
     $c->stash->{infoBoxTitle}   = "External Command Interface";
     $c->stash->{no_auto_reload} = 1;
@@ -163,6 +163,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             my( $host, $service, $backend ) = split /;/mx, $hostdata;
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'backend'} = $backend;
+            $c->stash->{'lasthost'} = $host;
             if( $quick_command == 5 ) {
                 $self->_remove_all_downtimes( $c, $host );
             }
@@ -179,6 +180,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             }
         }
 
+        my $lastservice;
         for my $servicedata ( split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'} ) {
             if( defined $service_quick_commands->{$quick_command} ) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
@@ -191,6 +193,8 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'service'} = $service;
             $c->{'request'}->{'parameters'}->{'backend'} = $backend;
+            $c->stash->{'lasthost'}    = $host;
+            $c->stash->{'lastservice'} = $service;
             if( $quick_command == 5 ) {
                 $self->_remove_all_downtimes( $c, $host, $service );
             }
@@ -207,6 +211,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             }
         }
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' ) unless $errors;
+
         $self->_redirect_or_success( $c, -1 );
     }
 
@@ -324,8 +329,20 @@ sub _redirect_or_success {
     my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';
     if( $referer ne '' ) {
 
-        # wait 0.3 seconds, so the command is probably already processed
-        usleep(300000);
+        # send a wait header?
+        if($c->config->{'use_wait_feature'} and $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96) {
+            if(defined $c->stash->{'lasthost'} and !defined $c->stash->{'lastservice'}) {
+                $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ], columns => [ "name\nWaitTimeout: 20000\nWaitTrigger: check\nWaitObject: ".$c->stash->{'lasthost'}."\nWaitCondition: last_check >= ".$c->stash->{'now'}."\nFilter: name = ".$c->stash->{'lasthost'} ] );
+            }
+            if(defined $c->stash->{'lasthost'} and defined $c->stash->{'lastservice'}) {
+                $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], columns => [ "description\nWaitTimeout: 20000\nWaitTrigger: check\nWaitObject: ".$c->stash->{'lasthost'}." ".$c->stash->{'lastservice'}."\nWaitCondition: last_check >= ".$c->stash->{'now'}."\nFilter: host_name = ".$c->stash->{'lasthost'}."\nFilter: description = ".$c->stash->{'lastservice'} ] );
+            }
+        }
+        else {
+            # just do nothing for a second
+            sleep(1);
+        }
+
         $c->redirect($referer);
     }
     else {
@@ -473,7 +490,10 @@ sub _do_send_command {
         }
     }
 
-    return (1);
+    $c->stash->{'lasthost'}    = $c->{'request'}->{'parameters'}->{'host'};
+    $c->stash->{'lastservice'} = $c->{'request'}->{'parameters'}->{'service'};
+
+    return(1);
 }
 
 ######################################

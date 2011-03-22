@@ -1667,9 +1667,9 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <div class="content">
 <pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
   %&gt; vers=$(perl -e 'use Config; print $Config{version}')
-  %&gt; wget http://www.thruk.org/files/Thruk-0.86.1-$arch-$vers.tar.gz
-  %&gt; tar zxf Thruk-0.86.1-$arch-$vers.tar.gz
-  %&gt; cd Thruk-0.86.1
+  %&gt; wget http://www.thruk.org/files/Thruk-0.90-$arch-$vers.tar.gz
+  %&gt; tar zxf Thruk-0.90-$arch-$vers.tar.gz
+  %&gt; cd Thruk-0.90
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
 <div class="paragraph"><p>For the FastCGI installation follow the steps at <a href="#_fastcgi">fastcgi installation</a>.</p></div>
@@ -2731,6 +2731,15 @@ types are: <em>table</em> and <em>circle</em></p></div>
 <div class="content">
 <pre><tt>statusmap_default_groupby = address</tt></pre>
 </div></div>
+<h4 id="_use_wait_feature">use_wait_feature</h4>
+<div class="paragraph"><p>Waiting is a livestatus feature. When enabled, Thruk will wait
+after rescheduling hosts/services checks until the
+check has been really executed up to a maximum of 20 seconds.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>use_wait_feature = 1</tt></pre>
+</div></div>
 <h4 id="_enable_shinken_features">enable_shinken_features</h4>
 <div class="paragraph"><p>This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
@@ -3344,7 +3353,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-03-22 18:47:03 CEST
+Last updated 2011-03-22 22:53:45 CEST
 </div>
 </div>
 </body>

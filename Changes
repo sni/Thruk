@@ -1,7 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-0.86.1  Sun 
+0.90    Sun Mar 27 22:52:23 CET 2011
           - added inline pnp graphs
+          - added wait feature when rescheduling checks
 
 0.86    Sun Mar 20 19:24:34 CET 2011
           - added new problems view
