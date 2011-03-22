@@ -330,12 +330,31 @@ sub _redirect_or_success {
     if( $referer ne '' ) {
 
         # send a wait header?
-        if($c->config->{'use_wait_feature'} and $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96) {
+        if(    $c->config->{'use_wait_feature'}
+           and ( $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7
+               or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96)
+        ) {
+            my $options = {
+                        'header' => {
+                            'WaitTimeout'   => 20000,
+                            'WaitTrigger'   => 'check',
+                            'WaitCondition' => 'last_check >= '.$c->stash->{'now'},
+                        }
+            };
             if(defined $c->stash->{'lasthost'} and !defined $c->stash->{'lastservice'}) {
-                $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ], columns => [ "name\nWaitTimeout: 20000\nWaitTrigger: check\nWaitObject: ".$c->stash->{'lasthost'}."\nWaitCondition: last_check >= ".$c->stash->{'now'}."\nFilter: name = ".$c->stash->{'lasthost'} ] );
+                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
+                $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                                   { 'name' => $c->stash->{'lasthost'} } ],
+                                        columns => [ 'name' ],
+                                        options => $options
+                                    );
             }
+            $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}." ".$c->stash->{'lastservice'};
             if(defined $c->stash->{'lasthost'} and defined $c->stash->{'lastservice'}) {
-                $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], columns => [ "description\nWaitTimeout: 20000\nWaitTrigger: check\nWaitObject: ".$c->stash->{'lasthost'}." ".$c->stash->{'lastservice'}."\nWaitCondition: last_check >= ".$c->stash->{'now'}."\nFilter: host_name = ".$c->stash->{'lasthost'}."\nFilter: description = ".$c->stash->{'lastservice'} ] );
+                $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ],
+                                          columns => [ 'description' ],
+                                          options => $options
+                                        );
             }
         }
         else {
