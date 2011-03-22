@@ -62,7 +62,7 @@ sub begin : Private {
     $c->stash->{'reload_nav'}         = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
 
     # use pager?
-    $c->stash->{'use_pager'}          = $c->config->{'use_pager'} || 1;
+    $c->stash->{'use_pager'}          = exists $c->config->{'use_pager'}  ? $c->config->{'use_pager'} : 1;
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
 
     $c->stash->{'start_page'}         = $c->config->{'start_page'}         || $c->stash->{'url_prefix'}.'thruk/main.html';
@@ -118,8 +118,9 @@ sub begin : Private {
     }
     $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
 
-    $c->stash->{'ajax_search'}       = $c->config->{'use_ajax_search'}  || 1;
-    $c->config->{'shown_inline_pnp'} = $c->config->{'shown_inline_pnp'} || 1;
+    $c->stash->{'ajax_search'}       = exists $c->config->{'use_ajax_search'}  ? $c->config->{'use_ajax_search'}  : 1;
+    $c->config->{'shown_inline_pnp'} = exists $c->config->{'shown_inline_pnp'} ? $c->config->{'shown_inline_pnp'} : 1;
+    $c->config->{'use_wait_feature'} = exists $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 1;
 
     # status page settings
     $c->stash->{'show_notification_number'} = $c->config->{'show_notification_number'} || 1;
