@@ -118,7 +118,8 @@ sub begin : Private {
     }
     $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
 
-    $c->stash->{'ajax_search'} = $c->config->{'use_ajax_search'} || 1;
+    $c->stash->{'ajax_search'}       = $c->config->{'use_ajax_search'}  || 1;
+    $c->config->{'shown_inline_pnp'} = $c->config->{'shown_inline_pnp'} || 1;
 
     # status page settings
     $c->stash->{'show_notification_number'} = $c->config->{'show_notification_number'} || 1;

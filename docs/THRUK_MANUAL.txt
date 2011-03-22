@@ -69,9 +69,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
   %> vers=$(perl -e 'use Config; print $Config{version}')
-  %> wget http://www.thruk.org/files/Thruk-0.86-$arch-$vers.tar.gz
-  %> tar zxf Thruk-0.86-$arch-$vers.tar.gz
-  %> cd Thruk-0.86
+  %> wget http://www.thruk.org/files/Thruk-0.86.1-$arch-$vers.tar.gz
+  %> tar zxf Thruk-0.86.1-$arch-$vers.tar.gz
+  %> cd Thruk-0.86.1
   %> ./script/thruk_server.pl
 ----
 
@@ -914,6 +914,17 @@ peer config.
 ex.:
 
   resource_file = /etc/nagios3/resource.cfg
+
+
+
+==== shown_inline_pnp
+Show inline pnp graph if available. If a service or host has a
+pnp4nagios action url set, Thruk will show a inline graph on the
+extinfo page.
+
+ex.:
+
+  shown_inline_pnp = 1
 
 
 

@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.86.1  Sun 
+          - added inline pnp graphs
+
 0.86    Sun Mar 20 19:24:34 CET 2011
           - added new problems view
           - added new option 'check_local_states'

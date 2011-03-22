@@ -1667,9 +1667,9 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <div class="content">
 <pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
   %&gt; vers=$(perl -e 'use Config; print $Config{version}')
-  %&gt; wget http://www.thruk.org/files/Thruk-0.86-$arch-$vers.tar.gz
-  %&gt; tar zxf Thruk-0.86-$arch-$vers.tar.gz
-  %&gt; cd Thruk-0.86
+  %&gt; wget http://www.thruk.org/files/Thruk-0.86.1-$arch-$vers.tar.gz
+  %&gt; tar zxf Thruk-0.86.1-$arch-$vers.tar.gz
+  %&gt; cd Thruk-0.86.1
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
 <div class="paragraph"><p>For the FastCGI installation follow the steps at <a href="#_fastcgi">fastcgi installation</a>.</p></div>
@@ -2706,6 +2706,15 @@ peer config.</p></div>
 <div class="content">
 <pre><tt>resource_file = /etc/nagios3/resource.cfg</tt></pre>
 </div></div>
+<h4 id="_shown_inline_pnp">shown_inline_pnp</h4>
+<div class="paragraph"><p>Show inline pnp graph if available. If a service or host has a
+pnp4nagios action url set, Thruk will show a inline graph on the
+extinfo page.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>shown_inline_pnp = 1</tt></pre>
+</div></div>
 <h4 id="_statusmap_default_type">statusmap_default_type</h4>
 <div class="paragraph"><p>You may change the default map type of the statusmap here. Valid
 types are: <em>table</em> and <em>circle</em></p></div>
@@ -3335,7 +3344,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-03-21 13:30:05 CEST
+Last updated 2011-03-22 18:47:03 CEST
 </div>
 </div>
 </body>
