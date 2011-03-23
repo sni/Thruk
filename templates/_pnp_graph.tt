@@ -1,0 +1,17 @@
+[% USE date %]
+<div class='commentTitle'>Performance Graph</div>
+<table border="0" class='comment'>
+  <tr class='comment' style="cursor:pointer">
+    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 14400 %]&end=[% date.now %]'; return false;">4 hours</th>
+    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]'; return false;">day</th>
+    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 540000 %]&end=[% date.now %]'; return false;">week</th>
+    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 2764800 %]&end=[% date.now %]'; return false;">month</th>
+    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 30067200 %]&end=[% date.now %]'; return false;">year</th>
+  </tr>
+  <tr>
+  <td colspan=5>
+    <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]">
+    <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]">
+    </a>
+  </td>
+</table>

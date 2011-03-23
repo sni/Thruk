@@ -417,17 +417,13 @@
                 </td>
               </tr>
             </table>
-%%[% pnp_url %]%%
           </td>
         </tr>
 
         [% IF pnp_url %]
         <tr>
           <td colspan="2" align="center">
-          <div class='commentTitle'>Performance Graph</div>
-          <a href="[% pnp_url %]/graph?host=[% service.host_name | uri %]&srv=[% service.description | uri %]">
-          <img src="[% pnp_url %]/image?host=[% service.host_name | uri %]&srv=[% service.description | uri %]&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]">
-          </a>
+          [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]
           </td>
         </tr>
         [% END %]

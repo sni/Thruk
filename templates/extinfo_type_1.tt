@@ -468,10 +468,7 @@
         [% IF pnp_url %]
         <tr>
           <td colspan="2" align="center">
-          <div class='commentTitle'>Performance Graph</div>
-          <a href="[% pnp_url %]/graph?host=[% host.name | uri %]&srv=_HOST_">
-          <img src="[% pnp_url %]/image?host=[% host.name | uri %]&srv=_HOST_&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]">
-          </a>
+          [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
           </td>
         </tr>
         [% END %]
