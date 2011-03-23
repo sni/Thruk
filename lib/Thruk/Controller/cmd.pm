@@ -331,8 +331,10 @@ sub _redirect_or_success {
 
         # send a wait header?
         if(    $c->config->{'use_wait_feature'}
-           and ( $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7
-               or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96)
+           and defined $c->stash->{'lasthost'}
+           and (   $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7
+                or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96
+               )
         ) {
             my $options = {
                         'header' => {
@@ -341,7 +343,7 @@ sub _redirect_or_success {
                             'WaitCondition' => 'last_check >= '.$c->stash->{'now'},
                         }
             };
-            if(defined $c->stash->{'lasthost'} and !defined $c->stash->{'lastservice'}) {
+            if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
                 $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
                 $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                                    { 'name' => $c->stash->{'lasthost'} } ],
@@ -349,9 +351,12 @@ sub _redirect_or_success {
                                         options => $options
                                     );
             }
-            $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}." ".$c->stash->{'lastservice'};
-            if(defined $c->stash->{'lasthost'} and defined $c->stash->{'lastservice'}) {
-                $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ],
+            if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
+                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}." ".$c->stash->{'lastservice'};
+                $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
+                                                      { 'host_name'   => $c->stash->{'lasthost'} },
+                                                      { 'description' => $c->stash->{'lastservice'} }
+                                                     ],
                                           columns => [ 'description' ],
                                           options => $options
                                         );
