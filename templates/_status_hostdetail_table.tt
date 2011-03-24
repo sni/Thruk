@@ -1,4 +1,4 @@
-﻿      <table border="0" class='status' width="100%" id="statusTable">
+﻿      <table border="0" class='status' width="100%" id="hoststatusTable">
         <tr>
           <th class='status'>Host&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
           <th class='status'>Status&nbsp;<a href='[% uri_with(c, 'sorttype' => 1, 'sortoption' => 8) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host status (ascending)' title='Sort by host status (ascending)'></a><a href='[% uri_with(c, 'sorttype' => 2, 'sortoption' => 8) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host status (descending)' title='Sort by host status (descending)'></a></th>

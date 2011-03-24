@@ -973,6 +973,7 @@ on status / host details page
 
 /* toggle the visibility of the filter pane */
 function toggleFilterPane(prefix) {
+  debug("toggleFilterPane(): " + toggleFilterPane.caller);
   var pane = document.getElementById(prefix+'all_filter_table');
   var img  = document.getElementById(prefix+'filter_button');
   if(pane.style.display == 'none') {
@@ -980,6 +981,7 @@ function toggleFilterPane(prefix) {
     pane.style.visibility = 'visible';
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
+    img.disable();
     additionalParams.set('hidesearch', 2);
     document.getElementById('hidesearch').value = 2;
   }
@@ -988,6 +990,7 @@ function toggleFilterPane(prefix) {
     pane.style.visibility = 'hidden';
     img.style.display     = '';
     img.style.visibility  = 'visible';
+    img.enable();
     additionalParams.set('hidesearch', 1);
     document.getElementById('hidesearch').value = 1;
   }

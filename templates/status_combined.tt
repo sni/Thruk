@@ -25,7 +25,9 @@
   <tr><td colspan=4><br></td></tr>
 </table>
 
-<form action="[% uri(c) %]" method="GET" id="[% paneprefix %]filterForm">
+<form action="[% uri(c) %]" method="GET" id="[% paneprefix %]filterForm" onsubmit="alert('test'); return false;">
+<!-- ff simulates a click on the first submit input found when pressing enter, so this should submit the form -->
+<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:none;">
 <input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% nav %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
