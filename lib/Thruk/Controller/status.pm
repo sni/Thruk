@@ -27,7 +27,14 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
 
     # which style to display?
-    my $allowed_subpages = { 'detail' => 1, 'grid' => 1, 'hostdetail' => 1, 'overview' => 1, 'summary' => 1, 'bothtypes' => 1, 'combined' => 1 };
+    my $allowed_subpages = {
+                            'detail'     => 1, 'hostdetail'   => 1,
+                            'grid'       => 1, 'hostgrid'     => 1, 'servicegrid'     => 1,
+                            'overview'   => 1, 'hostoverview' => 1, 'serviceoverview' => 1,
+                            'summary'    => 1, 'hostsummary'  => 1, 'servicesummary'  => 1,
+                            'bothtypes'  => 1,
+                            'combined'   => 1,
+                        };
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
 
     if( $style eq '' ) {
@@ -68,8 +75,21 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{title}        = 'Current Network Status';
     $c->stash->{infoBoxTitle} = 'Current Network Status';
     $c->stash->{page}         = 'status';
-    $c->stash->{template}     = 'status_' . $style . '.tt';
     $c->stash->{style}        = $style;
+
+    $c->stash->{substyle}     = undef;
+    if($c->stash->{'hostgroup'}) {
+        $c->stash->{substyle} = 'host';
+    }
+    elsif($c->stash->{'servicegroup'}) {
+        $c->stash->{substyle} = 'service';
+    }
+    elsif( $style =~ m/^host/mx ) {
+        $c->stash->{substyle} = 'host';
+    }
+    elsif( $style =~ m/^service/mx ) {
+        $c->stash->{substyle} = 'service';
+    }
 
     # raw data request?
     $c->stash->{'output_format'} = $c->{'request'}->{'parameters'}->{'format'} || 'html';
@@ -80,18 +100,22 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 
     # normal pages
     elsif ( $style eq 'detail' ) {
+        $c->stash->{substyle} = 'service';
         $self->_process_details_page($c);
     }
     elsif ( $style eq 'hostdetail' ) {
         $self->_process_hostdetails_page($c);
     }
-    elsif ( $style eq 'overview' ) {
+    elsif ( $style =~ m/overview$/mx ) {
+        $style = 'overview';
         $self->_process_overview_page($c);
     }
-    elsif ( $style eq 'grid' ) {
+    elsif ( $style =~ m/grid$/mx ) {
+        $style = 'grid';
         $self->_process_grid_page($c);
     }
-    elsif ( $style eq 'summary' ) {
+    elsif ( $style =~ m/summary$/mx ) {
+        $style = 'summary';
         $self->_process_summary_page($c);
     }
     elsif ( $style eq 'bothtypes' ) {
@@ -101,15 +125,16 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $self->_process_combined_page($c);
     }
 
+    $c->stash->{template} = 'status_' . $style . '.tt';
 
     Thruk::Utils::ssi_include($c);
 
     $c->stash->{custom_title} = '';
     if( exists $c->{'request'}->{'parameters'}->{'title'} ) {
-        my $custom_title = $c->{'request'}->{'parameters'}->{'title'};
-        $custom_title =~ s/\+/\ /gmx;
+        my $custom_title          = $c->{'request'}->{'parameters'}->{'title'};
+        $custom_title             =~ s/\+/\ /gmx;
         $c->stash->{custom_title} = $custom_title;
-        $c->stash->{title} = $custom_title;
+        $c->stash->{title}        = $custom_title;
     }
 
     return 1;
@@ -360,6 +385,8 @@ sub _process_overview_page {
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
 
+    die("no substyle!") unless defined $c->stash->{substyle};
+
     # we need the hostname, address etc...
     my $host_data;
     my $services_data;
@@ -370,7 +397,7 @@ sub _process_overview_page {
         }
     }
 
-    if( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+    if( $c->stash->{substyle} eq 'service' ) {
         # we have to sort in all services and states
         my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description has_been_checked state host_name/ ] );
         if( defined $tmp_services ) {
@@ -383,10 +410,10 @@ sub _process_overview_page {
 
     # get all host/service groups
     my $groups;
-    if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
+    if( $c->stash->{substyle} eq 'host' ) {
         $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ] );
     }
-    elsif ( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+    else {
         $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), $servicegroupfilter ] );
     }
 
@@ -404,7 +431,7 @@ sub _process_overview_page {
         }
 
         my( $hostname, $servicename );
-        if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
+        if( $c->stash->{substyle} eq 'host' ) {
             for my $hostname ( @{ $group->{'members'} } ) {
 
                 # show only hosts with proper authorization
@@ -429,12 +456,13 @@ sub _process_overview_page {
                 $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} += $host_data->{$hostname}->{'num_services_crit'};
             }
         }
-        elsif ( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+        else {
             for my $member ( @{ $group->{'members'} } ) {
                 my( $hostname, $servicename ) = @{$member};
 
                 # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
+                next unless defined $services_data->{$hostname}->{$servicename};
 
                 if( !defined $joined_groups{$name}->{'hosts'}->{$hostname} ) {
 
@@ -487,6 +515,8 @@ sub _process_overview_page {
 sub _process_grid_page {
     my( $self, $c ) = @_;
 
+    die("no substyle!") unless defined $c->stash->{substyle};
+
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
@@ -511,10 +541,10 @@ sub _process_grid_page {
 
     # get all host/service groups
     my $groups;
-    if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
+    if( $c->stash->{substyle} eq 'host' ) {
         $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ] );
     }
-    elsif ( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+    else {
         $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), $servicegroupfilter ] );
     }
 
@@ -534,10 +564,9 @@ sub _process_grid_page {
 
         for my $member ( @{ $group->{'members'} } ) {
             my( $hostname, $servicename );
-            if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
+            if( $c->stash->{substyle} eq 'host' ) {
                 $hostname = $member;
-            }
-            if( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+            } else {
                 ( $hostname, $servicename ) = @{$member};
             }
 
@@ -553,12 +582,12 @@ sub _process_grid_page {
 
             # add all services
             $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'} = {} unless defined $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'};
-            if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
+            if( $c->stash->{substyle} eq 'host' ) {
                 for my $service ( sort keys %{ $services_data->{$hostname} } ) {
                     $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{ $services_data->{$hostname}->{$service}->{'description'} } = $services_data->{$hostname}->{$service};
                 }
             }
-            elsif ( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+            else {
                 $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{ $services_data->{$hostname}->{$servicename}->{'description'} } = $services_data->{$hostname}->{$servicename};
             }
         }
@@ -581,16 +610,18 @@ sub _process_grid_page {
 sub _process_summary_page {
     my( $self, $c ) = @_;
 
+    die("no substyle!") unless defined $c->stash->{substyle};
+
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
 
     # get all host/service groups
     my $groups;
-    if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
+    if( $c->stash->{substyle} eq 'host' ) {
         $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ] );
     }
-    elsif ( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+    else {
         $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), $servicegroupfilter ] );
     }
 
@@ -638,16 +669,9 @@ sub _process_summary_page {
         $all_groups->{ $group->{'name'} }              = $group;
     }
 
-    my $services_data;
-    my $groupsname = "host_groups";
-    if( defined $hostgroupfilter or $c->stash->{'hostgroup'} ) {
-
+    if( $c->stash->{substyle} eq 'host' ) {
         # we need the hosts data
         my $host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
-
-        # create a hash of all services
-        $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
-
         for my $host ( @{$host_data} ) {
             for my $group ( @{ $host->{'groups'} } ) {
                 next if !defined $all_groups->{$group};
@@ -655,11 +679,11 @@ sub _process_summary_page {
             }
         }
     }
+    # create a hash of all services
+    my $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
 
-    if( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
-
-        # create a hash of all services
-        $services_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+    my $groupsname = "host_groups";
+    if( $c->stash->{substyle} eq 'service' ) {
         $groupsname = "groups";
     }
 
@@ -668,7 +692,7 @@ sub _process_summary_page {
         for my $group ( @{ $service->{$groupsname} } ) {
             next if !defined $all_groups->{$group};
 
-            if( defined $servicegroupfilter or $c->stash->{'servicegroup'} ) {
+            if( $c->stash->{substyle} eq 'service' ) {
                 if( !defined $host_already_added{$group}->{ $service->{'host_name'} } ) {
                     $self->_summary_add_host_stats( "host_", $all_groups->{$group}, $service );
                     $host_already_added{$group}->{ $service->{'host_name'} } = 1;
@@ -1382,13 +1406,8 @@ sub _do_filter {
 sub _classic_filter {
     my( $self, $c ) = @_;
 
-    my $hostfilter;
-    my $servicefilter;
-    my $hostgroupfilter;
-    my $servicegroupfilter;
-    my $errors = 0;
-
     # classic search
+    my $errors       = 0;
     my $host         = $c->{'request'}->{'parameters'}->{'host'}         || '';
     my $hostgroup    = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
@@ -1397,35 +1416,39 @@ sub _classic_filter {
     $c->stash->{'hostgroup'}    = $hostgroup;
     $c->stash->{'servicegroup'} = $servicegroup;
 
+    my @hostfilter;
+    my @hostgroupfilter;
+    my @servicefilter;
+    my @servicegroupfilter;
     if( $host ne 'all' and $host ne '' ) {
-        $hostfilter    = [ { 'name'      => $host } ];
-        $servicefilter = [ { 'host_name' => $host } ];
-
         # check for wildcards
         if( CORE::index( $host, '*' ) >= 0 ) {
-
             # convert wildcards into real regexp
             my $searchhost = $host;
             $searchhost =~ s/\.\*/*/gmx;
             $searchhost =~ s/\*/.*/gmx;
             $errors++ unless Thruk::Utils::is_valid_regular_expression( $c, $searchhost );
-            $hostfilter    = [ { 'name'      => { '~~' => $searchhost } } ];
-            $servicefilter = [ { 'host_name' => { '~~' => $searchhost } } ];
+            push @hostfilter,    [ { 'name'      => { '~~' => $searchhost } } ];
+            push @servicefilter, [ { 'host_name' => { '~~' => $searchhost } } ];
+        } else {
+            push @hostfilter,    [ { 'name'      => $host } ];
+            push @servicefilter, [ { 'host_name' => $host } ];
         }
     }
-    elsif ( $hostgroup ne 'all' and $hostgroup ne '' ) {
-        $hostfilter    = [ { 'groups'      => { '>=' => $hostgroup } } ];
-        $servicefilter = [ { 'host_groups' => { '>=' => $hostgroup } } ];
-        $hostgroupfilter = [ { 'name' => $hostgroup } ];
+    if ( $hostgroup ne 'all' and $hostgroup ne '' ) {
+        push @hostfilter,       [ { 'groups'      => { '>=' => $hostgroup } } ];
+        push @servicefilter,    [ { 'host_groups' => { '>=' => $hostgroup } } ];
+        push @hostgroupfilter,  [ { 'name' => $hostgroup } ];
     }
-    elsif ( $hostgroup eq 'all' ) {
+    if ( $servicegroup ne 'all' and $servicegroup ne '' ) {
+        push @servicefilter,       [ { 'groups' => { '>=' => $servicegroup } } ];
+        push @servicegroupfilter,  [ { 'name' => $servicegroup } ];
     }
-    elsif ( $servicegroup ne 'all' and $servicegroup ne '' ) {
-        $servicefilter = [ { 'groups' => { '>=' => $servicegroup } } ];
-        $servicegroupfilter = [ { 'name' => $servicegroup } ];
-    }
-    elsif ( $servicegroup eq 'all' ) {
-    }
+
+    my $hostfilter         = Thruk::Utils::combine_filter( '-and', \@hostfilter );
+    my $hostgroupfilter    = Thruk::Utils::combine_filter( '-and', \@hostgroupfilter );
+    my $servicefilter      = Thruk::Utils::combine_filter( '-and', \@servicefilter );
+    my $servicegroupfilter = Thruk::Utils::combine_filter( '-and', \@servicegroupfilter );
 
     # fill the host/service totals box
     unless($errors) {
@@ -1463,7 +1486,7 @@ sub _classic_filter {
             'op'    => '=',
             };
     }
-    elsif ( $hostgroup ne '' ) {
+    if ( $hostgroup ne '' ) {
         push @{ $search->{'text_filter'} },
             {
             'type'  => 'hostgroup',
@@ -1471,7 +1494,7 @@ sub _classic_filter {
             'op'    => '=',
             };
     }
-    elsif ( $servicegroup ne '' ) {
+    if ( $servicegroup ne '' ) {
         push @{ $search->{'text_filter'} },
             {
             'type'  => 'servicegroup',
@@ -1506,6 +1529,13 @@ sub _get_search_from_param {
 
     return $search unless defined $c->{'request'}->{'parameters'}->{ $prefix . '_type' };
 
+    # store global searches, these will be added to our search
+    my $globals = {
+        'host'         => $c->stash->{'host'},
+        'hostgroup'    => $c->stash->{'hostgroup'},
+        'servicegroup' => $c->stash->{'servicegroup'},
+    };
+
     if( ref $c->{'request'}->{'parameters'}->{ $prefix . '_type' } eq 'ARRAY' ) {
         for ( my $x = 0; $x < scalar @{ $c->{'request'}->{'parameters'}->{ $prefix . '_type' } }; $x++ ) {
             my $text_filter = {
@@ -1514,6 +1544,7 @@ sub _get_search_from_param {
                 op    => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
             };
             push @{ $search->{'text_filter'} }, $text_filter;
+            if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
         }
     }
     else {
@@ -1523,6 +1554,18 @@ sub _get_search_from_param {
             op    => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
         };
         push @{ $search->{'text_filter'} }, $text_filter;
+        if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
+    }
+
+    for my $key (keys %{$globals}) {
+        if(defined $globals->{$key} and $globals->{$key} ne '') {
+            my $text_filter = {
+                type  => $key,
+                value => $globals->{$key},
+                op    => '=',
+            };
+            push @{ $search->{'text_filter'} }, $text_filter;
+        }
     }
 
     return $search;

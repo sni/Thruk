@@ -3,7 +3,6 @@
 <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;">
 [% IF show_form %]
 <form action="[% uri(c) %]" method="GET" id="[% paneprefix %]filterForm">
-<input type="hidden" name="style" value="[% style %]">
 <input type="hidden" name="nav" value="[% nav %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
@@ -24,13 +23,31 @@
             <a href="#" onClick="toggleFilterPane('[% paneprefix %]'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% paneprefix %][% prefix %]_filter_button_mini" alt="filter"></a>
             Display Filters:
            </div>
+           <input type="hidden" name="[% paneprefix %][% prefix %]_hoststatustypes" value="[% search.hoststatustypes %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_servicestatustypes" value="[% search.servicestatustypes %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
            [% END %]
-            <input type="hidden" name="[% paneprefix %][% prefix %]_hoststatustypes" value="[% search.hoststatustypes %]">
-            <input type="hidden" name="[% paneprefix %][% prefix %]_servicestatustypes" value="[% search.servicestatustypes %]">
-            <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops %]">
-            <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
           </td>
-          <td colspan=2 align="right">
+          <td align="left" class='filterTitle' nowrap>
+           [% IF loop.first %]
+            <select name="style">
+              <optgroup label="Host">
+                <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
+                <option value="hostoverview"[% IF style == 'hostoverview' %] selected[% END %]>Overview</option>
+                <option value="hostsummary"[% IF  style == 'hostsummary'  %] selected[% END %]>Summary</option>
+                <option value="hostgrid"[% IF     style == 'hostgrid'     %] selected[% END %]>Grid</option>
+              </optgroup>
+              <optgroup label="Service">
+                <option value="detail"[% IF          style == 'detail'          %] selected[% END %]>Detail</option>
+                <option value="serviceoverview"[% IF style == 'serviceoverview' %] selected[% END %]>Overview</option>
+                <option value="servicesummary"[% IF  style == 'servicesummary'  %] selected[% END %]>Summary</option>
+                <option value="servicegrid"[% IF     style == 'servicegrid'     %] selected[% END %]>Grid</option>
+              </optgroup>
+             </select>
+           [% END %]
+          </td>
+          <td align="right">
             <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search">
             <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
           </td>
@@ -161,7 +178,7 @@
           </td>
         </tr>
 <!-- SERVICE STATUS TYPES -->
-[% IF style != 'hostdetail' %]
+[% IF substyle == 'service' %]
         <tr>
           <td valign="top" align="left" class='filterName' nowrap>Service Status Types:</td>
           <td valign="top" align="left" class='filterValue' onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes')" id="[% paneprefix %][% prefix %]_stn">[% search.service_statustype_filtername %]</td>
