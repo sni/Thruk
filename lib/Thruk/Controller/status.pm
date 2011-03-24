@@ -344,8 +344,9 @@ sub _process_hostdetails_page {
         return $c->detach('View::Excel');
     }
 
-    $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
-    $c->stash->{'orderdir'} = $order;
+    $c->stash->{'orderby'}            = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'orderdir'}           = $order;
+    $c->stash->{'show_host_attempts'} = 0;
 
     return 1;
 }
@@ -800,8 +801,9 @@ sub _process_combined_page {
     $sortoptions = {
         '1' => [ 'name', 'host name' ],
         '4' => [ [ 'last_check',             'name' ], 'last check time' ],
-        '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration' ],
-        '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
+        '5' => [ [ 'current_attempt',        'name' ], 'attempt number'  ],
+        '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration'  ],
+        '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status'  ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'hst_orderby'}  = $sortoptions->{$sortoption}->[1];
@@ -811,6 +813,7 @@ sub _process_combined_page {
                                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
                                                   pager  => $c );
     $c->stash->{'hosts'} = $hosts;
+    $c->stash->{'show_host_attempts'} = 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
     return 1;
