@@ -66,7 +66,9 @@
           <div align="center" class='statusTitle'>Service Grid</div><br>
           [% END %]
         </td>
-        <td valign="top" align="right" width="33%"></td>
+        <td valign="bottom" align="right" width="33%">
+          [% PROCESS _show_link.tt %]
+        </td>
       </tr>
     </table>
 
