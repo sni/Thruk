@@ -96,6 +96,7 @@ my %config = ('name'                   => 'Thruk',
                                           'ssi_header'     => '',       # used in _header.tt
                                           'ssi_footer'     => '',       # used in _header.tt
                                           'paneprefix'     => 'dfl_',   # used in _status_filter.tt
+                                          'sortprefix'     => '',       # used in _status_detail_table.tt / _status_hostdetail_table.tt
                                           'show_form'      => '1',      # used in _status_filter.tt
                                       },
                   PRE_CHOMP          => 1,

@@ -54,13 +54,16 @@
   </tr>
 </table>
 
+[% IF sortoption_hst %]
+<div class="statusSort" align="CENTER">Hosts sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+[% END %]
 <div class="hint">
     <a href="javascript:selectAllHosts(true,'hst_');">select all</a>
   - <a href="javascript:selectAllHosts(false,'hst_');">unselect all</a>
   - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
   - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
 </div>
-[% PROCESS _status_hostdetail_table.tt data = hosts paneprefix='hst_' %]
+[% PROCESS _status_hostdetail_table.tt data=hosts paneprefix='hst_' sortprefix='_hst' %]
 <br>
 <div class='itemTotalsTitle'>[% hosts.size %] of [% hosts.size %] Matching Host Entries Displayed</div>
 
@@ -79,13 +82,16 @@
   var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
 </script>
 
+[% IF sortoption_svc %]
+<div class="statusSort" align="CENTER">Services sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+[% END %]
 <div class="hint">
     <a href="javascript:selectAllServices(true,'svc_');">select all</a> (<a href="javascript:selectAllHosts(true,'svc_');">hosts</a>)
   - <a href="javascript:selectAllHosts(false,'svc_');selectAllServices(false,'svc_');">unselect all</a>
   - <a href="javascript:selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
   - <a href="javascript:selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
 </div>
-[% PROCESS _status_detail_table.tt  data = services paneprefix='svc_' %]
+[% PROCESS _status_detail_table.tt  data=services paneprefix='svc_' sortprefix='_svc' %]
 <br>
 <div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
 

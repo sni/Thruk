@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 <div class='commentTitle'>Performance Graph</div>
 <table border="0" class='comment'>
   <tr class='comment' style="cursor:pointer">

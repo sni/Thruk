@@ -47,6 +47,8 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{'nav'}                = $c->{'request'}->{'parameters'}->{'nav'}                || '';
     $c->stash->{'entries'}            = $c->{'request'}->{'parameters'}->{'entries'}            || '';
     $c->stash->{'sortoption'}         = $c->{'request'}->{'parameters'}->{'sortoption'}         || '';
+    $c->stash->{'sortoption_hst'}     = $c->{'request'}->{'parameters'}->{'sortoption_hst'}     || '';
+    $c->stash->{'sortoption_svc'}     = $c->{'request'}->{'parameters'}->{'sortoption_svc'}     || '';
     $c->stash->{'hidesearch'}         = $c->{'request'}->{'parameters'}->{'hidesearch'}         || 0;
     $c->stash->{'hostgroup'}          = $c->{'request'}->{'parameters'}->{'hostgroup'}          || '';
     $c->stash->{'servicegroup'}       = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';
@@ -767,8 +769,8 @@ sub _process_combined_page {
     $c->stash->{'comments_by_host_service'} = $comments_by_host_service;
 
     # services
-    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
-    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 1;
+    my $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_svc'}   || 1;
+    my $sortoption = $c->{'request'}->{'parameters'}->{'sortoption_svc'} || 1;
     my $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
     my $sortoptions = {
@@ -780,6 +782,8 @@ sub _process_combined_page {
         '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
+    $c->stash->{'svc_orderby'}  = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'svc_orderdir'} = $order;
 
     my $services            = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
                                                         sort   => { $order => $sortoptions->{$sortoption}->[0] },
@@ -789,8 +793,8 @@ sub _process_combined_page {
 
 
     # hosts
-    $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype'}   || 1;
-    $sortoption = $c->{'request'}->{'parameters'}->{'sortoption'} || 7;
+    $sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_hst'}   || 1;
+    $sortoption = $c->{'request'}->{'parameters'}->{'sortoption_hst'} || 7;
     $order      = "ASC";
     $order = "DESC" if $sorttype == 2;
     $sortoptions = {
@@ -800,6 +804,8 @@ sub _process_combined_page {
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
+    $c->stash->{'hst_orderby'}  = $sortoptions->{$sortoption}->[1];
+    $c->stash->{'hst_orderdir'} = $order;
 
     my $hosts            = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
