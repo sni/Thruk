@@ -64,8 +64,8 @@
   - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
 </div>
 [% PROCESS _status_hostdetail_table.tt data=hosts paneprefix='hst_' sortprefix='_hst' %]
-<br>
 <div class='itemTotalsTitle'>[% hosts.size %] of [% hosts.size %] Matching Host Entries Displayed</div>
+<br><br>
 
 <table border="0" width="100%" cellpadding=0 cellspacing=0>
   <tr>
@@ -92,7 +92,6 @@
   - <a href="javascript:selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
 </div>
 [% PROCESS _status_detail_table.tt  data=services paneprefix='svc_' sortprefix='_svc' %]
-<br>
 <div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
 
 </form>
