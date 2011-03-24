@@ -30,7 +30,7 @@
            [% END %]
           </td>
           <td align="left" class='filterTitle' nowrap>
-           [% IF loop.first %]
+           [% IF loop.first && show_form == '1' %]
             <select name="style">
               <optgroup label="Host">
                 <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
