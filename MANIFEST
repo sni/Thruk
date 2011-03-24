@@ -1262,6 +1262,7 @@ templates/_infobox.tt
 templates/_logs.tt
 templates/_message.tt
 templates/_pager.tt
+templates/_pnp_graph.tt
 templates/_service_status_details_box.tt
 templates/_show_link.tt
 templates/_status_cmd_pane.tt
