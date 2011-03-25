@@ -289,8 +289,7 @@ var selectedHosts    = new Hash;
 var noEventsForId    = new Hash;
 
 /* add mouseover eventhandler for all cells and execute it once */
-function addRowSelector(id)
-{
+function addRowSelector(id) {
     var row   = document.getElementById(id);
     var cells = row.cells;
 
@@ -310,7 +309,7 @@ function addRowSelector(id)
         resetServiceRow(e);
     });
 
-    if(cells.length == 5) {
+    if(cells.length == 5 || cells.length == 6) {
       pagetype = 'hostdetail'
     }
     else if(cells.length == 7) {
@@ -329,6 +328,13 @@ function addRowSelector(id)
             setRowStyle(id, 'tableRowHover', 'service');
             addEventHandler(cells[cell_nr], 'service');
         }
+    }
+
+    // initial mouseover highlights host&service, reset class here
+    if(pagetype == "servicedetail") {
+        $$('td.tableRowHover').each(function(e) {
+            resetHostRow(e);
+        });
     }
 }
 
@@ -401,7 +407,7 @@ function setRowStyle(row_id, style, type, force ) {
 
     // for each cells in this row
     var cells = row.cells;
-    if(cells.length == 5) {
+    if(cells.length == 5 || cells.length == 6) {
       pagetype = 'hostdetail'
     }
     else if(cells.length == 7) {
