@@ -35,6 +35,13 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
   `"Y88888P"  88888888888 88      `888 88888888888 88      `8b 88   `"Y8888Y"'
 *******************************************************************************/
 
+/* send debug output to firebug console */
+function debug(str) {
+    if (window.console != undefined) {
+        console.log("DEBUG: " + str);
+    }
+}
+
 /* hide a element by id */
 function hideElement(id) {
   var pane;
@@ -1837,9 +1844,45 @@ var ajax_search = {
     }
 }
 
+/*******************************************************************************
+88888888ba  888b      88 88888888ba
+88      "8b 8888b     88 88      "8b
+88      ,8P 88 `8b    88 88      ,8P
+88aaaaaa8P' 88  `8b   88 88aaaaaa8P'
+88""""""'   88   `8b  88 88""""""'
+88          88    `8b 88 88
+88          88     `8888 88
+88          88      `888 88
+*******************************************************************************/
 
-function debug(str) {
-    if (window.console != undefined) {
-        console.log("DEBUG: " + str);
+function set_png_img(start, end, id) {
+    var newUrl = pnp_url + "&start=" + start + "&end=" + end;
+    debug(newUrl);
+    $('pnpimg').src = newUrl;
+
+    if(id) {
+        for(x=1;x<=5;x++) {
+            obj = document.getElementById("pnp_th"+x);
+            styleElements(obj, "original", 1);
+        }
+        obj = document.getElementById(id);
+        styleElements(obj, "commentEven", 1);
     }
+
+    return false;
+}
+
+function move_png_img(factor) {
+    var urlArgs = new Hash($('pnpimg').src.parseQuery());
+
+    start = urlArgs.get("start");
+    end   = urlArgs.get("end");
+    diff  = end - start;
+
+    start = parseInt(diff * factor) + parseInt(start);
+    end   = parseInt(diff * factor) + parseInt(end);
+    debug(start);
+    debug(end);
+
+    return set_png_img(start, end);
 }

@@ -1,16 +1,28 @@
 ﻿[% USE date %]
+<script type="text/javascript">
+  var pnp_url = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0"
+</script>
 <div class='commentTitle'>Performance Graph</div>
-<table border="0" class='comment'>
+<table border="0" class='comment' style="width:572px">
   <tr class='comment' style="cursor:pointer">
-    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 14400 %]&end=[% date.now %]'; return false;">4 hours</th>
-    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]'; return false;">day</th>
-    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 540000 %]&end=[% date.now %]'; return false;">week</th>
-    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 2764800 %]&end=[% date.now %]'; return false;">month</th>
-    <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 30067200 %]&end=[% date.now %]'; return false;">year</th>
+    <th class='comment' width="20" nowrap>
+      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
+    </th>
+    <th id="pnp_th1" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id)">4 hours</th>
+    <th id="pnp_th2" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id)">day</th>
+    <th id="pnp_th3" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -   540000 %], [% date.now %], this.id)">week</th>
+    <th id="pnp_th4" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id)">month</th>
+    <th id="pnp_th5" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id)">year</th>
+    <th class='comment' width="20" nowrap>
+      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_png_img(0.5)">
+    </th>
   </tr>
   <tr>
-    <td colspan=5>
-      <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]"><img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]"></a>
+    <td colspan=7 align="center">
+      <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]"><img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif"></a>
     </td>
   </tr>
 </table>
+<script type="text/javascript">
+  set_png_img([% date.now - 90000 %], [% date.now %], 'pnp_th2');
+</script>
