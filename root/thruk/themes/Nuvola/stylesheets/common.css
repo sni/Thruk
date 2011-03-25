@@ -181,7 +181,7 @@ height: 22px;
 
 TD.hostDOWN,TD.hostUNREACHABLE
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #FFC0C0;
 font-weight: bold;
 height: 22px;
@@ -189,14 +189,14 @@ height: 22px;
 
 TD.statusPENDING,TD.statusHOSTPENDING
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #C0C0FF;
 height: 22px;
 }
 
 TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #C0FFC0;
 height: 22px;
 }
@@ -204,36 +204,36 @@ height: 22px;
 
 TD.statusWARNING,TD.serviceWarning
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #FFFFC0;
 height: 22px;
 }
 
 TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #FFC0C0;
-font-weight: bold;
+/* font-weight: bold; */
 height: 22px;
 }
 
 
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #FFEBEB;
 height: 22px;
 }
 
 TD.statusUNKNOWN,TD.statusBGUNKNOWN,TD.statusBGUNKNOWNACK,TD.statusBGUNKNOWNSCHED
 {
-padding: 1px;
+/* padding: 1px; */
 height: 22px;
 }
 
 TD.statusBGWARNING,TD.statusBGWARNINGACK,TD.statusBGWARNINGSCHED
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #FFFFEB;
 height: 22px;
 }

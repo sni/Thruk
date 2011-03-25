@@ -1,5 +1,5 @@
-.status 
-{ 
+.status
+{
 font-family: Tahoma, Arial, Sans-Serif;
 background-color: #C3C7D3;
 color: #3F3D3D;
@@ -46,8 +46,8 @@ padding-right: 2px;
 height: 20px;
 }
 
-TD.hostTotalsUP,TD.serviceTotalsOK 
-{ 
+TD.hostTotalsUP,TD.serviceTotalsOK
+{
 padding: 0px;
 padding-left: 2px;
 padding-right: 2px;
@@ -57,8 +57,8 @@ background-position: center;
 height: 20px;
 }
 
-TD.hostTotalsDOWN,TD.hostTotalsUNREACHABLE,TD.serviceTotalsCRITICAL 
-{ 
+TD.hostTotalsDOWN,TD.hostTotalsUNREACHABLE,TD.serviceTotalsCRITICAL
+{
 padding: 0px;
 padding-left: 2px;
 padding-right: 2px;
@@ -68,8 +68,8 @@ background-position: center;
 height: 20px;
 }
 
-TD.hostTotalsPENDING,TD.serviceTotalsPENDING,TD.serviceTotalsUNKNOWN 
-{ 
+TD.hostTotalsPENDING,TD.serviceTotalsPENDING,TD.serviceTotalsUNKNOWN
+{
 padding: 0px;
 padding-left: 2px;
 padding-right: 2px;
@@ -79,8 +79,8 @@ background-position: center;
 height: 20px;
 }
 
-TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS 
-{ 
+TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS
+{
 padding: 0px;
 padding-left: 2px;
 padding-right: 2px;
@@ -90,8 +90,8 @@ background-position: center;
 height: 20px;
 }
 
-TD.hostTotalsPROBLEMS,TD.serviceTotalsWARNING 
-{ 
+TD.hostTotalsPROBLEMS,TD.serviceTotalsWARNING
+{
 padding: 0px;
 padding-left: 2px;
 padding-right: 2px;
@@ -140,7 +140,7 @@ padding: 0px;
 
 TD.statusOdd
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #E7E5DD;
 height: 22px;
 }
@@ -148,9 +148,7 @@ height: 22px;
 
 TD.statusEven
 {
-padding: 1px;
+/* padding: 1px; */
 background-color: #DEDBD2;
 height: 22px;
 }
-
-

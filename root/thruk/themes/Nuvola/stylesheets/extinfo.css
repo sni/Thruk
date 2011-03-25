@@ -1,5 +1,5 @@
-.extinfo 
-{ 
+.extinfo
+{
 font-family: Tahoma, Arial, Sans-Serif;
 background-color: #C3C7D3;
 color: #3F3D3D;
@@ -79,14 +79,14 @@ width: 500px;
 }
 
 .dataVar
-{ 
+{
 font-weight: bold;
 width: 300px;
 text-align: left;
 }
 
 .dataVal
-{ 
+{
 width: 200px;
 text-align: left;
 }
@@ -107,7 +107,7 @@ background-color: #FFC0C0;
 background-color: #C0FFC0;
 }
 
-.processWARNING,.serviceWARNING 
+.processWARNING,.serviceWARNING
 {
 background-color: #FFFFC0;
 
@@ -141,7 +141,7 @@ vertical-align: top;
 
 TABLE.comment,TABLE.downtime
 {
-margin: 2px;
+/*margin: 2px;*/
 text-align: center;
 background-color: #F0F1F5;
 border: 1px #E2DECD outset;
@@ -186,7 +186,7 @@ height: 22px;
 
 TABLE.queue
 {
-margin: 2px;
+/* margin: 2px; */
 text-align: center;
 background-color: #F0F1F5;
 border: 1px #E2DECD outset;
@@ -224,5 +224,3 @@ padding: 1px;
 background-color: #DEDBD2;
 height: 22px;
 }
-
-

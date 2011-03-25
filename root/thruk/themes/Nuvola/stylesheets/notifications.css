@@ -1,5 +1,5 @@
 .notifications
-{ 
+{
 font-family: Tahoma, Arial, Sans-Serif;
 background-color: #C3C7D3;
 color: #3F3D3D;
@@ -9,7 +9,7 @@ font-size: 8pt;
 
 TABLE.notifications
 {
-margin: 2px;
+/* margin: 2px; */
 text-align: center;
 background-color: #F0F1F5;
 border: 1px #E2DECD outset;
@@ -72,5 +72,3 @@ TD.notificationsACKNOWLEDGEMENT,TD.notificationsHOSTACKNOWLEDGEMENT
 padding: 1px;
 height: 22px;
 }
-
-
