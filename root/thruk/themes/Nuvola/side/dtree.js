@@ -18,8 +18,10 @@ function changeMenuState(menuID)
 
 	var currentState = document.getElementById(menuDiv).title;
 
+	var state;
 	if ( currentState == "Collapse" )
 	{
+		state = 1;
 		document.getElementById(menuDiv).style.overflow = "hidden";
 		document.getElementById(menuDiv).style.height = "32px";
 		document.getElementById(menuDiv).title = "Expand";
@@ -30,6 +32,7 @@ function changeMenuState(menuID)
 	}
 	else
 	{
+		state = 2;
 		document.getElementById(menuDiv).style.overflow = "visible";
 		document.getElementById(menuDiv).style.height = "auto";
 		document.getElementById(menuDiv).title = "Collapse";
@@ -105,6 +108,12 @@ var footer = '</td></tr></tbody></table></div></td></tr></tbody></table>';
 dTree.prototype.header = function(title,icon,height,bgImage,bgColor,open) {
     if ( title != "" )
     {
+	var menu_open = this.getCookie('cm' + this.obj);
+	if(menu_open) {
+		if(menu_open == 1) { open = 0; }
+		if(menu_open == 2) { open = 1; }
+	}
+
     	header = '';
 	header += '<table style="margin-bottom: 10px;" cellpadding="0" cellspacing="0" width="100%">';
 	header += '<tbody>';
