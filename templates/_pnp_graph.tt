@@ -9,9 +9,8 @@
     <th class='comment' width="115" nowrap onclick="$('pnpimg').src='[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 30067200 %]&end=[% date.now %]'; return false;">year</th>
   </tr>
   <tr>
-  <td colspan=5>
-    <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]">
-    <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]">
-    </a>
-  </td>
+    <td colspan=5>
+      <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]"><img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0&start=[% date.now - 90000 %]&end=[% date.now %]"></a>
+    </td>
+  </tr>
 </table>
