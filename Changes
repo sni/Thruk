@@ -4,6 +4,10 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - made style selectable within filter
           - added inline pnp graphs
           - added wait feature when rescheduling checks
+          - Nuvola theme saves collapsed state of menu
+          - fixed themes
+            - removed useless scrollbar in Nuvola theme
+            - fixed jumping rows in Nuvola theme
 
 0.86    Sun Mar 20 19:24:34 CET 2011
           - added new problems view
