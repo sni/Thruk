@@ -305,19 +305,21 @@ use this apache example configuration:
     <Directory /home/thruk/Thruk/root/>
         order allow,deny
         allow from all
+        Options FollowSymLinks
+        AllowOverride All
     </Directory>
 
     Alias /thruk/ /home/thruk/Thruk/root/thruk/
-    <Directory "/home/thruk/Thruk/root/thruk/">
-        Options FollowSymLinks
-        AllowOverride All
+
+    # authorization
+    <Location "/thruk">
         AuthName "Monitoring Access"
         AuthType Basic
         AuthUserFile /home/thruk/Thruk/htpasswd.users
         Order Allow,Deny
         Allow from all
         require valid-user
-    </Directory>
+    </Location>
 
     # Load fastcgi module unless already loaded
     LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
