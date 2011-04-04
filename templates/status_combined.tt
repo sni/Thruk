@@ -49,20 +49,28 @@
 
       [% PROCESS _message.tt %]
 
-      </td>
+    </td>
     <td valign="bottom" align="right" width="33%"></td>
+  </tr>
+  <tr>
+    <td align="left" width="33%" nowrap></td>
+    <td valign="bottom" align="center" width="33%" nowrap>
+      [% IF sortoption_hst %]
+      <div class="statusSort" align="CENTER">Hosts sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
+      [% END %]
+      <div class="hint">
+          <a href="javascript:selectAllHosts(true,'hst_');">select all</a>
+        - <a href="javascript:selectAllHosts(false,'hst_');">unselect all</a>
+        - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+        - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+      </div>
+    </td>
+    <td valign="bottom" align="right" width="33%">
+      [% PROCESS _show_link.tt %]
+    </td>
   </tr>
 </table>
 
-[% IF sortoption_hst %]
-<div class="statusSort" align="CENTER">Hosts sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
-[% END %]
-<div class="hint">
-    <a href="javascript:selectAllHosts(true,'hst_');">select all</a>
-  - <a href="javascript:selectAllHosts(false,'hst_');">unselect all</a>
-  - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
-  - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
-</div>
 [% PROCESS _status_hostdetail_table.tt data=hosts paneprefix='hst_' sortprefix='_hst' %]
 <div class='itemTotalsTitle'>[% hosts.size %] of [% hosts.size %] Matching Host Entries Displayed</div>
 <br><br>
