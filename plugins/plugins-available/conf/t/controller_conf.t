@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 41;
+use Test::More tests => 50;
 
 BEGIN {
     use lib('t');
@@ -32,7 +32,7 @@ my $conf_exp = "# blah comment
 test=10,1,5
 # more comments
 blub=5
-foo=2
+foo = 2
 
 
 ";
@@ -52,7 +52,7 @@ my $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
-        'like'    => 'Configuration Tool',
+        'like'    => 'Config Tool',
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
