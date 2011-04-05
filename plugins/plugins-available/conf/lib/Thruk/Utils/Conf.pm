@@ -32,7 +32,6 @@ sub update_conf {
     my $update_c = shift;
 
     my($old_content, $old_data, $old_md5) = read_conf($file, $defaults);
-
     if($md5 ne $old_md5) {
         return("cannot update, file has been changed since reading it.");
     }

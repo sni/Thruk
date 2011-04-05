@@ -83,14 +83,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $update_in_conf = $c;
     }
 
+    # save changes
     if(defined $file and $c->stash->{action} eq 'store') {
         my $old_md5 = $c->{'request'}->{'parameters'}->{'md5'} || '';
         my $new_dat = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         my $res     = Thruk::Utils::Conf::update_conf($file, $new_dat, $old_md5, $defaults, $update_in_conf);
         if(defined $res) {
             Thruk::Utils::set_message( $c, 'fail_message', $res );
+        } else {
+            Thruk::Utils::set_message( $c, 'success_message', 'Saved successfully' );
         }
-        Thruk::Utils::set_message( $c, 'success_message', 'Saved successfully' );
         return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/conf.cgi?type=".$type);
     }
 
