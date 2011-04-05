@@ -1,0 +1,25 @@
+[% WRAPPER _conf_frame.tt %]
+
+<div align="center">
+
+  <table border="0" class='data'>
+    <tr>
+      <th class='data'>Module</th>
+      <th class='data'>Description</th>
+    </tr>
+    <tr>
+      <td class='data'><a href="conf.cgi?type=thruk">Thruk Settings</a></td>
+      <td class='data'>Thruks settings from the thruk_local.conf</td>
+    </tr>
+    <tr>
+      <td class='data'><a href="conf.cgi?type=access">Users &amp; Access</a></td>
+      <td class='data'>Change user permissions and global authentication settings from your cgi.cfg</td>
+    </tr>
+    <tr>
+      <td class='data'><a href="conf.cgi?type=cgi">CGI Settings</a></td>
+      <td class='data'>other settings from your cgi.cfg</td>
+    </tr>
+  </table>
+</div>
+
+[% END %]

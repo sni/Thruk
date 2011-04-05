@@ -1,0 +1,45 @@
+[% PROCESS _header.tt %]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="50%">
+        [% PROCESS _infobox.tt %]
+        </td>
+        <td align="right" valign="bottom" width="50%">
+          <form method="get" action="conf.cgi">
+            <table border="0">
+              <tr>
+                <td align="left" class='reportSelectSubTitle'>Configuration Type:</td>
+              </tr>
+              <tr>
+                <td align="left" class='reportSelectItem'>
+                  <select name='type'>
+                    <option value='all'[%    IF type == 'all'    %] selected [% END %]>Overview</option>
+                    <option value='thruk'[%  IF type == 'thruk'  %] selected [% END %]>Thruk</option>
+                    <option value='access'[% IF type == 'access' %] selected [% END %]>Users &amp; Access</option>
+                    <option value='cgi'[%    IF type == 'cgi'    %] selected [% END %]>CGI</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td class='reportSelectItem'>
+                  <input type='submit' value='Show'>
+                </td>
+              </tr>
+            </table>
+          </form>
+
+          [% IF show_context_help %]
+          <br><a href='[% url_prefix %]thruk/docs/conf' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          [% END %]
+        </td>
+      </tr>
+    </table>
+    [% PROCESS _message.tt %]
+    <br>
+    <div align="center" class='dataTitle'>[% subtitle %]</div>
+    <br>
+
+    [% content %]
+
+[% PROCESS _footer.tt %]

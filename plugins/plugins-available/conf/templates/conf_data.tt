@@ -1,0 +1,42 @@
+[% WRAPPER _conf_frame.tt %]
+
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="type" value="[% type %]">
+<input type="hidden" name="action" value="store">
+<input type="hidden" name="md5" value="[% md5 %]">
+<div align="center">
+  <table border="0" class='data'>
+    <tr>
+      <th class='data'>Item</th>
+      <th class='data'>Value</th>
+    </tr>
+    [% FOREACH key = keys %]
+    [% d = data.$key %]
+    <tr>
+      <td class='data'>[% key %]</td>
+      <td class='data'>
+      [% IF d.0 == 'BOOL' %]
+        <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes
+        <input type="radio" name="data.[% key %]" value="0"[% IF d.1 == 0 %] checked[% END %]> No
+      [% ELSIF d.0 == 'STRING' %]
+        <input type="text" name="data.[% key %]" value="[% d.1 %]" size=80>
+      [% ELSIF d.0 == 'INT' %]
+        <input type="text" name="data.[% key %]" value="[% d.1 %]" size=80>
+      [% ELSIF d.0 == 'ARRAY' %]
+        <input type="text" name="data.[% key %]" value="[% d.1.join(', ') %]" size=80>
+      [% ELSE %]
+      [% d.list.join(', ') %]
+      [% END %]
+      </td>
+    </tr>
+  [% END %]
+  <tr>
+    <td colspan=2 align="center">
+      <input type="submit" name="submit" value="save">
+    </td>
+  </tr>
+  </table>
+</div>
+</form>
+
+[% END %]
