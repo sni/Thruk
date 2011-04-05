@@ -55,7 +55,7 @@ sub get_thruk_cfg {
                 group_paging_overview                   => ['ARRAY',  []],
                 group_paging_summary                    => ['ARRAY',  []],
                 group_paging_grid                       => ['ARRAY',  []],
-                info_popup_event_type                   => ['STRING', ''],
+                info_popup_event_type                   => ['LIST', 'onclick', Thruk::Utils::Conf::to_hash([qw/onclick onmouseover/]) ],
                 info_popup_options                      => ['STRING', ''],
                 show_notification_number                => ['BOOL',   '1'],
                 show_full_commandline                   => ['LIST',   '', { '0' => 'off', '1' => 'authorized_for_configuration_information only', '2' => 'everyone' } ],
@@ -73,8 +73,23 @@ sub get_thruk_cfg {
                 use_wait_feature                        => ['BOOL',   '1'],
 #                check_local_states
     };
+
+    # search useful defaults
     for my $key (keys %{$conf}) {
-        $conf->{$key}->[1] = $c->stash->{$key} || $c->config->{$key} || '';
+        if(exists $c->stash->{$key}) {
+            $conf->{$key}->[1] = $c->stash->{$key};
+        } elsif(exists $c->config->{$key}) {
+            $conf->{$key}->[1] = $c->config->{$key};
+        } elsif(   $key eq 'use_timezone'
+                or $key eq 'allowed_frame_links'
+                or $key eq 'resource_file'
+                or $key eq 'plugin_path'
+                or $key eq 'user_template_path'
+               ) {
+            # no useful default for these onse
+        } else {
+            die('no default for '.$key);
+        }
         if($conf->{$key}->[0] eq 'ARRAY' and ref $conf->{$key}->[1] ne 'ARRAY') {
             $conf->{$key}->[1] = [ split(/\s*,\s*/mx,$conf->{$key}->[1]) ];
         }

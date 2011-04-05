@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 50;
+use Test::More tests => 51;
 
 BEGIN {
     use lib('t');
@@ -39,6 +39,21 @@ foo = 2
 my $data = { test => ["10","1","5"], blub => "5" };
 my $got  = Thruk::Utils::Conf::merge_conf($conf_in, $data);
 is($got, $conf_exp, "merge config");
+
+###########################################################
+# test some functions
+$conf_in = "
+test = 1
+test = 2
+test = 3
+";
+$conf_exp = "
+test=1,4,5
+blub=5
+";
+$data = { test => ["1","4","5"], blub => "5" };
+$got  = Thruk::Utils::Conf::merge_conf($conf_in, $data);
+is($got, $conf_exp, "merge config II");
 
 ###########################################################
 # test some pages

@@ -121,6 +121,9 @@ sub begin : Private {
     $c->stash->{'ajax_search'}       = exists $c->config->{'use_ajax_search'}  ? $c->config->{'use_ajax_search'}  : 1;
     $c->config->{'shown_inline_pnp'} = exists $c->config->{'shown_inline_pnp'} ? $c->config->{'shown_inline_pnp'} : 1;
     $c->config->{'use_wait_feature'} = exists $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 1;
+    $c->config->{'use_frames'}       = exists $c->config->{'use_frames'}       ? $c->config->{'use_frames'}       : 0;
+    $c->config->{'use_strict_host_authorization'}
+                        = exists $c->config->{'use_strict_host_authorization'} ? $c->config->{'use_strict_host_authorization'} : 0;
 
     # status page settings
     $c->stash->{'show_notification_number'} = $c->config->{'show_notification_number'} || 1;

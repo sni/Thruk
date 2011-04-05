@@ -122,6 +122,7 @@ sub merge_conf {
     my $text = shift;
     my $data = shift;
 
+    my $keys_placed = {};
     my $new = "";
     for my $line (split/(\n)/mx, $text, -1) {
         if(    $line eq ''
@@ -134,6 +135,10 @@ sub merge_conf {
             my $key   = $1;
             my $value = $2;
             $value    =~ s/^"(.*)"$/$1/gmx;
+            if(defined $keys_placed->{$key}) {
+                chomp($new);
+                next;
+            }
             if(defined $data->{$key}) {
                 if(ref($data->{$key}) eq 'ARRAY') {
                     $value = join(',', @{$data->{$key}});
@@ -142,6 +147,7 @@ sub merge_conf {
                 }
                 $new .= $key."=".$value;
                 delete $data->{$key};
+                $keys_placed->{$key} = 1;
             } else {
                 $new .= $line;
             }
