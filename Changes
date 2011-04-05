@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.92    Sun Apr 10 20:15:13 CEST 2011
+          - sidebar search autosubmits on select
+
 0.90    Sun Mar 27 22:52:23 CET 2011
           - made style selectable within filter
           - added inline pnp graphs
