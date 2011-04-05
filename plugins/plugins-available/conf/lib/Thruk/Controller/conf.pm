@@ -170,7 +170,68 @@ sub _process_thruk_page {
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
-    $c->stash->{'keys'}     = [ sort keys %{$data} ];
+    my $keys = [
+        [ 'General', [qw/
+                        title_prefix
+                        use_wait_feature
+                        use_frames
+                        use_timezone
+                        use_strict_host_authorization
+                        info_popup_event_type
+                        info_popup_options
+                        resource_file
+                        can_submit_commands
+                     /]
+        ],
+        [ 'Paths', [qw/
+                        tmp_path
+                        ssi_path
+                        plugin_path
+                        user_template_path
+                    /]
+        ],
+        [ 'Menu', [qw/
+                        start_page
+                        documentation_link
+                        all_problems_link
+                        allowed_frame_links
+                    /]
+        ],
+        [ 'Display', [qw/
+                        default_theme
+                        strict_passive_mode
+                        show_notification_number
+                        show_full_commandline
+                        shown_inline_pnp
+                        statusmap_default_type
+                        statusmap_default_groupby
+                        datetime_format
+                        datetime_format_today
+                        datetime_format_long
+                        datetime_format_log
+                        datetime_format_trends
+                    /]
+        ],
+        [ 'Search', [qw/
+                        use_new_search
+                        use_ajax_search
+                        ajax_search_hosts
+                        ajax_search_hostgroups
+                        ajax_search_services
+                        ajax_search_servicegroups
+                    /]
+        ],
+        [ 'Paging', [qw/
+                        use_pager
+                        paging_steps
+                        group_paging_overview
+                        group_paging_summary
+                        group_paging_grid
+                    /]
+        ],
+    ];
+
+    $c->stash->{'keys'}     = $keys;
     $c->stash->{'data'}     = $data;
     $c->stash->{'md5'}      = $md5;
     $c->stash->{'subtitle'} = "Thruk Configuration";
