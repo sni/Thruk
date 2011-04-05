@@ -1774,7 +1774,19 @@ var ajax_search = {
         ajax_search.cur_select = -1;
         ajax_search.hide_results();
         input.focus();
-        return false;
+
+        if(ajax_search.input_field == "NavBarSearchItem") {
+            var tmpElem = input;
+            while(tmpElem && tmpElem.parentNode) {
+                tmpElem = tmpElem.parentNode;
+                if(tmpElem.tagName == 'FORM') {
+                    tmpElem.submit();
+                }
+            }
+            return false;
+        } else {
+            return false;
+        }
     },
 
     /* eventhandler for arrow keys */
