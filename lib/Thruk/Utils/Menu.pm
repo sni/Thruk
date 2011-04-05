@@ -119,10 +119,10 @@ sub add_sub_link {
     my %link = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link    = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
-    $link{'target'} = _get_menu_target() unless defined $link{'target'};
-    $link{'links'}  = [] unless defined $link{'links'};
-    $link{'href'}   = _get_menu_link($link{'href'});
-    $link{'name'}   = "" unless defined $link{'name'};
+    $link{'target'}  = _get_menu_target() unless defined $link{'target'};
+    $link{'links'}   = [] unless defined $link{'links'};
+    $link{'href'}    = _get_menu_link($link{'href'});
+    $link{'name'}    = "" unless defined $link{'name'};
     push(@{$last_link->{'links'}}, \%link);
     return;
 }
@@ -161,12 +161,30 @@ add a new search to the last section
 =cut
 sub add_search {
     my %search = @_;
-    my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
+    my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $search{'search'} = 1;
     $search{'target'} = _get_menu_target() unless defined $search{'target'};
     $search{'href'}   = _get_menu_link($search{'href'});
     push(@{$last_section->{'links'}}, \%search);
     return;
+}
+
+##############################################
+
+=head2 insert_item
+
+  insert_item()
+
+add a new item in existing category
+
+=cut
+sub insert_item {
+    my($category, $item) = @_;
+
+    $Thruk::Utils::Menu::additional_items = [] unless defined $Thruk::Utils::Menu::additional_items;
+    push @{$Thruk::Utils::Menu::additional_items}, [ $category, $item ];
+
+    return 1;
 }
 
 ##############################################
@@ -190,6 +208,17 @@ sub _renew_navigation {
     if($@) {
         $c->log->error("error while loading navigation from ".$file.": ".$@);
         confess($@);
+    }
+
+    if(defined $Thruk::Utils::Menu::additional_items) {
+        for my $to_add (@{$Thruk::Utils::Menu::additional_items}) {
+            my $section       = _get_section_by_name($to_add->[0]) || next;
+            my $link          = $to_add->[1];
+            $link->{'links'}  = [] unless defined $link->{'links'};
+            $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
+            $link->{'href'}   = _get_menu_link($link->{'href'});
+            push(@{$section->{'links'}}, $link);
+        }
     }
 
     $c->stash->{'navigation'}  = $Thruk::Utils::Menu::navigation;
@@ -235,6 +264,27 @@ sub _get_menu_link {
     return $c->stash->{'url_prefix'}.substr($link,1) if $link =~ m/^\/thruk\//mx;
     return $link;
 }
+
+
+##############################################
+
+=head2 _get_section_by_name
+
+  _get_section_by_name()
+
+returns a section by name
+
+=cut
+sub _get_section_by_name {
+    my $name = shift;
+
+    for my $section (@{$Thruk::Utils::Menu::navigation}) {
+        return $section if $section->{'name'} eq $name;
+    }
+    return;
+}
+
+##############################################
 
 1;
 

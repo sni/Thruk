@@ -38,7 +38,7 @@ sub begin : Private {
     my( $self, $c ) = @_;
 
     # Prefix
-    $c->stash->{'url_prefix'}   = $c->config->{'url_prefix'} || '/';
+    $c->stash->{'url_prefix'}   = $c->config->{'url_prefix'}   || '/';
     $c->stash->{'title_prefix'} = $c->config->{'title_prefix'} || '';
 
     # frame options
