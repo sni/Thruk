@@ -1,6 +1,6 @@
 [% WRAPPER _conf_frame.tt %]
 
-<form action="conf.cgi" method="POST">
+<form action="conf.cgi" method="POST" onsubmit="multi_select_all(this)">
 <input type="hidden" name="type" value="[% type %]">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
@@ -45,8 +45,12 @@
               <tr>
                 <td>
                   <select id="avail.[% key %]" name="avail.[% key %]" size=6 multiple style="width:250px;" ondblclick="data_select_move('avail.[% key %]', 'data.[% key %]')">
+                      [% test = {} %]
+                      [% FOREACH t = d.1 %]
+                        [% test.$t = t %]
+                      [% END %]
                       [% FOREACH opt = d.2 %]
-                        [% NEXT UNLESS opt.key != d.1 %]
+                        [% NEXT IF test.exists(opt.key) %]
                         <option value="[% opt.key %]">[% opt.value %]</option>
                       [% END %]
                   </select>
@@ -58,9 +62,12 @@
                 </td>
                 <td>
                   <select id="data.[% key %]" name="data.[% key %]" size=6 multiple style="width:250px;" ondblclick="data_select_move('data.[% key %]', 'avail.[% key %]')">
-                      [% FOREACH opt = d.2 %]
-                        [% NEXT UNLESS opt.key == d.1 %]
-                        <option value="[% opt.key %]">[% opt.value %]</option>
+                      [% FOREACH opt = d.1 %]
+                        [% IF d.2.exists(opt) %]
+                          <option value="[% opt %]">[% d.2.$opt %]</option>
+                        [% ELSE %]
+                          <option value="[% opt %]">[% opt %]</option>
+                        [% END %]
                       [% END %]
                   </select>
                 </td>

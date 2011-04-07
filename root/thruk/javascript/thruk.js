@@ -323,20 +323,34 @@ function sortlist(id) {
         if(thruk_debug_js) { alert("ERROR: no element in sortlist() for: " + id ); }
     }
 
-    arrTexts = new Array();
+    arrTexts  = new Array();
+    arrValues = new Array();
 
     for(i=0; i<lb.length; i++)  {
-      arrTexts[i] = lb.options[i].text;
+      arrTexts[i]  = lb.options[i].text;
+      arrValues[i] = lb.options[i].value;
     }
 
     arrTexts.sort();
 
     for(i=0; i<lb.length; i++)  {
-      lb.options[i].text = arrTexts[i];
-      lb.options[i].value = arrTexts[i];
+      lb.options[i].text  = arrTexts[i];
+      lb.options[i].value = arrValues[i];
     }
 }
 
+/* fetch all select fields and select all options when it is multiple select */
+function multi_select_all(form) {
+    elems = form.getElementsByTagName('select');
+    for(var x = 0; x < elems.length; x++) {
+        var sel = elems[x];
+        if(sel.multiple == true) {
+            for(var nr = 0; nr < sel.length; nr++) {
+                sel.options[nr].selected = true;
+            }
+        }
+    }
+}
 
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,

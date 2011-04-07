@@ -3,7 +3,7 @@ package Thruk::Utils::Conf;
 use strict;
 use warnings;
 use File::Slurp;
-use Digest::MD5 qw(md5_hex);;
+use Digest::MD5 qw(md5_hex);
 
 =head1 NAME
 
@@ -47,10 +47,13 @@ sub update_conf {
                 delete $data->{$key}
             }
         }
-        if($old_data->{$key}->[0] eq 'ARRAY') {
+        elsif(   $old_data->{$key}->[0] eq 'ARRAY'
+              or $old_data->{$key}->[0] eq 'MULTI_LIST') {
             if(join(',',@{$old_data->{$key}->[1]}) eq join(',',@{$data->{$key}})) {
                 delete $data->{$key}
             }
+        } else {
+            confess("unknown type: ".$old_data->{$key}->[0]);
         }
     }
 
@@ -62,6 +65,10 @@ sub update_conf {
     }
 
     my $new_content = merge_conf($old_content, $data);
+
+    if($new_content eq $old_content) {
+        return("no changes made");
+    }
 
     open(my $fh, ">", $file) or return("cannot update, failed to write to $file: $!");
     print $fh $new_content;
@@ -94,7 +101,8 @@ sub read_conf {
             my $key   = $1;
             my $value = $2;
             if(defined $data->{$key}) {
-                if($data->{$key}->[0] eq 'ARRAY') {
+                if(   $data->{$key}->[0] eq 'ARRAY'
+                   or $data->{$key}->[0] eq 'MULTI_LIST') {
                     $data->{$key}->[1] = [] unless defined $arrays_defined->{$key};
                     $arrays_defined->{$key} = 1;
                     push @{$data->{$key}->[1]}, split(/\s*,\s*/mx,$value);
@@ -140,7 +148,8 @@ sub merge_conf {
                 next;
             }
             if(defined $data->{$key}) {
-                if(ref($data->{$key}) eq 'ARRAY') {
+                if(   ref($data->{$key}) eq 'ARRAY'
+                   or ref($data->{$key}) eq 'MULTI_LIST') {
                     $value = join(',', @{$data->{$key}});
                 } else {
                     $value = $data->{$key};
@@ -160,7 +169,8 @@ sub merge_conf {
     # no append all keys which doesn't have been changed already
     for my $key (keys %{$data}) {
         my $value;
-        if(ref($data->{$key}) eq 'ARRAY') {
+        if(   ref($data->{$key}) eq 'ARRAY'
+           or ref($data->{$key}) eq 'MULTI_LIST') {
             $value = join(',', @{$data->{$key}});
         } else {
             $value = $data->{$key};
@@ -189,12 +199,19 @@ sub get_data_from_param {
         next unless $key =~ m/^data\./mx;
         my $value = $param->{$key};
         $key =~ s/^data\.//mx;
-        if($defaults->{$key}->[0] eq 'ARRAY') {
-            $data->{$key} = [ split(/\s*,\s*/mx, $value) ];
+        if(   $defaults->{$key}->[0] eq 'ARRAY'
+           or $defaults->{$key}->[0] eq 'MULTI_LIST') {
+            if(ref $value eq 'ARRAY') {
+                $data->{$key} = $value;
+            } else {
+                $data->{$key} = [ split(/\s*,\s*/mx, $value) ];
+            }
         } else {
             $data->{$key} = $value;
         }
     }
+use Data::Dumper;
+print STDERR Dumper($data);
     return $data;
 }
 
