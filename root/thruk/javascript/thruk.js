@@ -270,6 +270,74 @@ function is_shift_pressed(e) {
   return false;
 }
 
+/* moves element from one select to another */
+function data_select_move(from, to) {
+    var from_sel = document.getElementsByName(from);
+    if(!from_sel || from_sel.length == 0) {
+        if(thruk_debug_js) { alert("ERROR: no element in data_select_move() for: " + from ); }
+    }
+    var to_sel = document.getElementsByName(to);
+    if(!to_sel || to_sel.length == 0) {
+        if(thruk_debug_js) { alert("ERROR: no element in data_select_move() for: " + to ); }
+    }
+
+    from_sel = from_sel[0];
+    to_sel   = to_sel[0];
+
+    if(from_sel.selectedIndex < 0) {
+        return;
+    }
+
+    var elements = new Array();
+    for(var nr = 0; nr < from_sel.length; nr++) {
+        if(from_sel.options[nr].selected == true) {
+            elements.push(nr);
+        }
+    }
+    // reverse elements so the later remove does disorder the select
+    elements.reverse();
+
+    for(var x = 0; x < elements.length; x++) {
+        var elem       = from_sel.options[elements[x]];
+        var elOptNew   = document.createElement('option');
+        elOptNew.text  = elem.text;
+        elOptNew.value = elem.value;
+        from_sel.remove(elements[x]);
+        try {
+          to_sel.add(elOptNew, null); // standards compliant; doesn't work in IE
+        }
+        catch(ex) {
+          to_sel.add(elOptNew); // IE only
+        }
+    }
+
+    /* sort elements of to field */
+    sortlist(to_sel.id);
+}
+
+/* sort select by value */
+function sortlist(id) {
+    var lb = document.getElementById(id);
+
+    if(!lb) {
+        if(thruk_debug_js) { alert("ERROR: no element in sortlist() for: " + id ); }
+    }
+
+    arrTexts = new Array();
+
+    for(i=0; i<lb.length; i++)  {
+      arrTexts[i] = lb.options[i].text;
+    }
+
+    arrTexts.sort();
+
+    for(i=0; i<lb.length; i++)  {
+      lb.options[i].text = arrTexts[i];
+      lb.options[i].value = arrTexts[i];
+    }
+}
+
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b

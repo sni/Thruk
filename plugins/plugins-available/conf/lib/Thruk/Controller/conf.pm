@@ -60,6 +60,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     Thruk::Utils::ssi_include($c);
 
     return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
+    return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_system_commands" );
 
     my $type = $c->{'request'}->{'parameters'}->{'type'} || '';
     $c->stash->{type} = $type;
@@ -71,11 +72,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my($file, $defaults, $update_in_conf);
     if($type eq 'access') {
         $file           = $c->config->{'cgi.cfg'};
-        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
     }
     elsif($type eq 'cgi') {
         $file           = $c->config->{'cgi.cfg'};
-        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
     }
     elsif($type eq 'thruk') {
         $file           = 'thruk_local.conf';
@@ -85,6 +86,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # save changes
     if(defined $file and $c->stash->{action} eq 'store') {
+        if(defined $c->{'request'}->{'parameters'}->{'cancel'} and $c->{'request'}->{'parameters'}->{'cancel'} eq 'cancel') {
+            return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/conf.cgi");
+        }
         my $old_md5 = $c->{'request'}->{'parameters'}->{'md5'} || '';
         my $new_dat = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         my $res     = Thruk::Utils::Conf::update_conf($file, $new_dat, $old_md5, $defaults, $update_in_conf);
@@ -117,19 +121,22 @@ sub _process_access_page {
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
-    my $keys = [qw/
-                use_authentication
-                use_ssl_authentication
-                default_user_name
-                authorized_for_all_services
-                authorized_for_all_hosts
-                authorized_for_all_service_commands
-                authorized_for_all_host_commands
-                authorized_for_system_information
-                authorized_for_system_commands
-                authorized_for_configuration_information
-                lock_author_names
-               /];
+    my $keys = [
+        [ 'Authorization', [qw/
+                        use_authentication
+                        use_ssl_authentication
+                        default_user_name
+                        lock_author_names
+                        authorized_for_all_services
+                        authorized_for_all_hosts
+                        authorized_for_all_service_commands
+                        authorized_for_all_host_commands
+                        authorized_for_system_information
+                        authorized_for_system_commands
+                        authorized_for_configuration_information
+                    /]
+        ],
+    ];
 
     $c->stash->{'keys'}     = $keys;
     $c->stash->{'data'}     = $data;
@@ -147,14 +154,17 @@ sub _process_cgi_page {
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
-    my $keys = [qw/
-                show_context_help
-                use_pending_states
-                refresh_rate
-                escape_html_tags
-                action_url_target
-                notes_url_target
-               /];
+    my $keys = [
+        [ 'CGI Settings', [qw/
+                        show_context_help
+                        use_pending_states
+                        refresh_rate
+                        escape_html_tags
+                        action_url_target
+                        notes_url_target
+                    /]
+        ],
+    ];
 
     $c->stash->{'keys'}     = $keys;
     $c->stash->{'data'}     = $data;
@@ -237,7 +247,7 @@ sub _process_thruk_page {
     $c->stash->{'data'}     = $data;
     $c->stash->{'md5'}      = $md5;
     $c->stash->{'subtitle'} = "Thruk Configuration";
-    $c->stash->{'template'} = 'conf_data_thruk.tt';
+    $c->stash->{'template'} = 'conf_data.tt';
 
     return 1;
 }

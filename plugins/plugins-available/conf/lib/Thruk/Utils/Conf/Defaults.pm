@@ -106,7 +106,14 @@ return defaults for the cgi.cfg
 
 =cut
 sub get_cgi_cfg {
-    my ( $self ) = @_;
+    my ( $self, $c ) = @_;
+
+    my $contacts = $c->{'db'}->get_contacts(sort => 'name', remove_duplicates => 1);
+    my $all_contacts = {};
+    for my $contact (@{$contacts}) {
+        $all_contacts->{$contact->{'name'}} = $contact->{'name'}." - ".$contact->{'alias'};
+    }
+
     my $conf = {
 #        'main_config_file'                          => ['STRING', ''],
 #        'physical_html_path'                        => ['STRING', ''],
@@ -117,13 +124,13 @@ sub get_cgi_cfg {
         'default_user_name'                         => ['STRING', 'thrukadmin' ],
         'use_authentication'                        => ['BOOL',   '1'],
         'use_ssl_authentication'                    => ['BOOL',   '0'],
-        'authorized_for_system_commands'            => ['ARRAY',   []],
-        'authorized_for_all_services'               => ['ARRAY',   []],
-        'authorized_for_all_hosts'                  => ['ARRAY',   []],
-        'authorized_for_all_service_commands'       => ['ARRAY',   []],
-        'authorized_for_all_host_commands'          => ['ARRAY',   []],
-        'authorized_for_system_information'         => ['ARRAY',   []],
-        'authorized_for_configuration_information'  => ['ARRAY',   []],
+        'authorized_for_system_commands'            => ['MULTI_LIST', [], $all_contacts ],
+        'authorized_for_all_services'               => ['MULTI_LIST', [], $all_contacts ],
+        'authorized_for_all_hosts'                  => ['MULTI_LIST', [], $all_contacts ],
+        'authorized_for_all_service_commands'       => ['MULTI_LIST', [], $all_contacts ],
+        'authorized_for_all_host_commands'          => ['MULTI_LIST', [], $all_contacts ],
+        'authorized_for_system_information'         => ['MULTI_LIST', [], $all_contacts ],
+        'authorized_for_configuration_information'  => ['MULTI_LIST', [], $all_contacts ],
         'lock_author_names'                         => ['BOOL',   '1'],
 #        'default_statusmap_layout'                  =>
 #        'default_statuswrl_layout'                  =>
