@@ -1,0 +1,67 @@
+[% WRAPPER _conf_frame.tt %]
+
+<div align="center">
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="type" value="users">
+<input type="hidden" name="action" value="change">
+  <table border="0" class='data' width=370>
+    <tr>
+      <th colspan=2 class='data' style="text-align:center">select user to change</th>
+    </tr>
+    <tr>
+      <th align="left">Username</th>
+      <td class='data'>
+        <input type="text" name="data.username" id="data.username" value="[% user_name %]"[% IF ajax_search %] onclick="ajax_search.init(this, 'contact')"[% END %] size=40>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=2 align="center">
+        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi'">
+        <input type="submit" name="send" value="show" style="width:80px">
+      </td>
+    </tr>
+  </table>
+</form>
+
+<br></br>
+
+[% IF show_user %]
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="type" value="users">
+<input type="hidden" name="action" value="change">
+<input type="hidden" name="md5" value="[% md5 %]">
+<input type="hidden" name="user" value="[% user_name %]">
+  <table border="0" class='data' width=370>
+    <tr>
+      <th colspan=2 class='data' style="text-align:center">[% user_name %]</th>
+    </tr>
+    <tr>
+      <th align="left">Password</th>
+      <td class='data'><input type="password" name="data.password" value="" size=15></td>
+    </tr>
+    <tr>
+      <th align="left">Verify Password</th>
+      <td class='data'><input type="password" name="data.password2" value="" size=15></td>
+    </tr>
+    [% FOR auth = roles %]
+    <tr>
+      <th align="left">[% auth.key %]</th>
+      <td class='data'>
+        <input type="radio" name="data.[% auth.key %]" value="0"[% IF auth.value == 0 %] checked[% END %]> No
+        <input type="radio" name="data.[% auth.key %]" value="1"[% IF auth.value == 1 %] checked[% END %]> Yes
+      </td>
+    </tr>
+    [% END %]
+    <tr>
+      <td colspan=2 align="center">
+        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi?type=users'">
+        <input type="submit" name="send" value="save" style="width:80px">
+      </td>
+    </tr>
+  </table>
+</form>
+[% END %]
+
+</div>
+
+[% END %]

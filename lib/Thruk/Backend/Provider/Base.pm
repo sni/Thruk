@@ -197,6 +197,22 @@ sub get_contacts {
 
 ##########################################################
 
+=head2 get_contact_names
+
+  get_contact_names
+
+returns a list of contact names
+
+=cut
+
+sub get_contact_names {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_downtimes
 
   get_downtimes

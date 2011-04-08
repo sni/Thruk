@@ -21,8 +21,8 @@
           <th align="left" valign="top">[% key %]</th>
           <td class='data'>
           [% IF d.0 == 'BOOL' %]
-            <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes
             <input type="radio" name="data.[% key %]" value="0"[% IF d.1 == 0 %] checked[% END %]> No
+            <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes
           [% ELSIF d.0 == 'STRING' %]
             <input type="text" name="data.[% key %]" value="[% escape_quotes(d.1) %]" size=80>
           [% ELSIF d.0 == 'INT' %]
@@ -82,8 +82,8 @@
     [% END %]
     <tr>
       <td colspan=2 align="center">
-        <input type="submit" name="cancel" value="cancel" style="width:60px">
-        <input type="submit" name="submit" value="save" style="width:80px">
+        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi'">
+        <input type="submit" name="send" value="save" style="width:80px">
       </td>
     </tr>
   </table>

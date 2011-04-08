@@ -210,8 +210,6 @@ sub get_data_from_param {
             $data->{$key} = $value;
         }
     }
-use Data::Dumper;
-print STDERR Dumper($data);
     return $data;
 }
 

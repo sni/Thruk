@@ -556,6 +556,27 @@ sub get_contacts {
 
 ##########################################################
 
+=head2 get_contact_names
+
+  get_contact_names
+
+returns a list of contact names
+
+=cut
+sub get_contact_names {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/name/];
+    my $data = $self->_get_hash_table('contacts', 'name', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+
+    unless(wantarray) {
+        confess("get_contact_names() should not be called in scalar context");
+    }
+    return($keys, 'uniq');
+}
+
+##########################################################
+
 =head2 get_scheduling_queue
 
   get_scheduling_queue

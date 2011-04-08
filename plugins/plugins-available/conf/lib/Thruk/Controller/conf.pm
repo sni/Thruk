@@ -79,18 +79,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $defaults       = Thruk::Utils::Conf::Defaults->get_thruk_cfg($c);
         $update_in_conf = $c;
     }
-    #elsif($type eq 'user') {
-    #    $file           = $c->config->{'cgi.cfg'};
-    #    $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
-    #}
+    elsif($type eq 'users') {
+        $file           = $c->config->{'cgi.cfg'};
+        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
+    }
 
     # save changes
     if(defined $file and $c->stash->{action} eq 'store') {
-        if(defined $c->{'request'}->{'parameters'}->{'cancel'} and $c->{'request'}->{'parameters'}->{'cancel'} eq 'cancel') {
-            return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/conf.cgi");
-        }
         my $old_md5 = $c->{'request'}->{'parameters'}->{'md5'} || '';
         my $new_dat = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
+        $c->log->debug("saving config changes to ".$file);
         my $res     = Thruk::Utils::Conf::update_conf($file, $new_dat, $old_md5, $defaults, $update_in_conf);
         if(defined $res) {
             Thruk::Utils::set_message( $c, 'fail_message', $res );
@@ -107,9 +105,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     elsif($type eq 'thruk') {
         $self->_process_thruk_page($c, $file, $defaults);
     }
-    #elsif($type eq 'cgi') {
-    #    $self->_process_cgi_page($c, $file, $defaults);
-    #}
+    elsif($type eq 'users') {
+        $self->_process_users_page($c, $file, $defaults);
+    }
 
     return 1;
 }
@@ -150,7 +148,7 @@ sub _process_cgi_page {
     $c->stash->{'keys'}     = $keys;
     $c->stash->{'data'}     = $data;
     $c->stash->{'md5'}      = $md5;
-    $c->stash->{'subtitle'} = "User &amp; Access Configuration";
+    $c->stash->{'subtitle'} = "CGI &amp; Access Configuration";
     $c->stash->{'template'} = 'conf_data.tt';
 
     return 1;
@@ -234,7 +232,44 @@ sub _process_thruk_page {
 }
 
 ##########################################################
+# create the users config page
+sub _process_users_page {
+    my( $self, $c, $file, $defaults ) = @_;
 
+    $c->stash->{'show_user'}  = 0;
+    $c->stash->{'user_name'}  = '';
+
+    my $action = $c->{'request'}->{'parameters'}->{'action'}        || '';
+    my $user   = $c->{'request'}->{'parameters'}->{'data.username'} || '';
+    if($action eq 'change' and $user ne '') {
+        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        $c->stash->{'show_user'}  = 1;
+        my($name, $alias)         = split(/\ \-\ /mx,$user, 2);
+        $c->stash->{'user_name'}  = $name;
+        $c->stash->{'md5'}        = $md5;
+        $c->stash->{'roles'}      = {
+                        authorized_for_all_services                 => 0,
+                        authorized_for_all_hosts                    => 0,
+                        authorized_for_all_service_commands         => 0,
+                        authorized_for_all_host_commands            => 0,
+                        authorized_for_system_information           => 0,
+                        authorized_for_system_commands              => 0,
+                        authorized_for_configuration_information    => 0,
+        };
+        for my $role (keys %{$c->stash->{'roles'}}) {
+            if(grep($name, @{$data->{$role}->[1]})) {
+                $c->stash->{'roles'}->{$role} = 1;
+            }
+        }
+    }
+
+    $c->stash->{'subtitle'} = "User Configuration";
+    $c->stash->{'template'} = 'conf_data_users.tt';
+
+    return 1;
+}
+
+##########################################################
 
 =head1 AUTHOR
 

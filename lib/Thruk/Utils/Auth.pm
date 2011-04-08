@@ -153,12 +153,18 @@ sub get_auth_filter {
         # combine all filter by OR
         return('-or' => \@filter);
     }
-
-    else {
-        croak("type $type not supported");
+    elsif($type eq 'contact') {
+        if($c->check_user_roles('authorized_for_configuration_information')) {
+            return();
+        }
+        return('name' => { '>=' => $c->user->get('username') });
     }
 
-    croak("cannot authorize query");
+    else {
+        confess("type $type not supported");
+    }
+
+    confess("cannot authorize query");
     return;
 }
 

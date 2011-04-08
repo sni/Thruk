@@ -16,7 +16,7 @@
       <td class='data'>Change CGI and access settings from your cgi.cfg</td>
     </tr>
     <tr>
-      <td class='data'><a href="conf.cgi?type=user">User settings</a></td>
+      <td class='data'><a href="conf.cgi?type=users">User settings</a></td>
       <td class='data'>user settings</td>
     </tr>
   </table>

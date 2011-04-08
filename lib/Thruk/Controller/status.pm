@@ -146,6 +146,25 @@ sub _process_raw_request {
     my( $self, $c ) = @_;
 
     if( $c->stash->{'output_format'} eq 'search' ) {
+        if( exists $c->{'request'}->{'parameters'}->{'type'} ) {
+            my $type = $c->{'request'}->{'parameters'}->{'type'};
+            my $data;
+            if($type eq 'contact') {
+                my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ] );
+                if(ref($contacts) eq 'ARRAY') {
+                    for my $contact (@{$contacts}) {
+                        push @{$data}, $contact->{'name'} . ' - '.$contact->{'alias'};
+                    }
+                }
+            } else {
+                die("unknown type: " . $type);
+            }
+            my $json = [ { 'name' => $type."s", 'data' => $data } ];
+            $c->stash->{'json'} = $json;
+            $c->forward('Thruk::View::JSON');
+            return;
+        }
+
         my( $hostgroups, $servicegroups, $hosts, $services );
         if( $c->config->{ajax_search_hostgroups} ) {
             $hostgroups = $c->{'db'}->get_hostgroup_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ] );

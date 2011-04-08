@@ -108,7 +108,9 @@ return defaults for the cgi.cfg
 sub get_cgi_cfg {
     my ( $self, $c ) = @_;
 
-    my $contacts = $c->{'db'}->get_contacts(sort => 'name', remove_duplicates => 1);
+    my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
+                                             sort   => 'name',
+                                             remove_duplicates => 1);
     my $all_contacts = {};
     for my $contact (@{$contacts}) {
         $all_contacts->{$contact->{'name'}} = $contact->{'name'}." - ".$contact->{'alias'};

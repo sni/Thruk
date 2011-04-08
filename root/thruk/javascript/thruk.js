@@ -1606,6 +1606,7 @@ var ajax_search = {
     base            : new Array(),
     res             : new Array(),
     initialized     : false,
+    initialized_t   : false,
     cur_select      : -1,
     result_size     : false,
     cur_results     : false,
@@ -1613,7 +1614,7 @@ var ajax_search = {
     timer           : false,
 
     /* initialize search */
-    init: function(elem) {
+    init: function(elem, type) {
         if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
@@ -1639,6 +1640,15 @@ var ajax_search = {
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
         addEvent(input, 'keyup', ajax_search.suggest);
+
+        search_url = ajax_search.url;
+        if(type != undefined) {
+            ajax_search.search_type = type;
+            search_url              = ajax_search.url + "&type=" + type;
+        } else {
+            type = 'all';
+        }
+
         input.setAttribute("autocomplete", "off");
         if(selector && selector.tagName == 'SELECT') {
             input.blur();   // blur & focus the element, otherwise the first
@@ -1663,12 +1673,18 @@ var ajax_search = {
         var date = new Date;
         var now  = parseInt(date.getTime() / 1000);
         // update every hour (frames searches wont update otherwise)
-        if(ajax_search.initialized && now > ajax_search.initialized - ajax_search.update_interval) {
+        if(   ajax_search.initialized
+           && now > ajax_search.initialized - ajax_search.update_interval
+           && ajax_search.initialized_t == type
+        ) {
             ajax_search.suggest();
             return false;
         }
-        ajax_search.initialized = now;
-        new Ajax.Request(ajax_search.url, {
+
+        ajax_search.initialized   = now;
+        ajax_search.initialized_t = type;
+
+        new Ajax.Request(search_url, {
             onSuccess: function(transport) {
                 if(transport.responseJSON != null) {
                     ajax_search.base = transport.responseJSON;
@@ -1851,18 +1867,20 @@ var ajax_search = {
 
     /* set the value into the input field */
     set_result: function(value) {
-        var input = document.getElementById(ajax_search.input_field);
+        var input   = document.getElementById(ajax_search.input_field);
         input.value = value;
         ajax_search.cur_select = -1;
         ajax_search.hide_results();
         input.focus();
 
-        if(ajax_search.input_field == "NavBarSearchItem") {
+        if(   ajax_search.input_field == "NavBarSearchItem"
+           || ajax_search.input_field == "data.username") {
             var tmpElem = input;
             while(tmpElem && tmpElem.parentNode) {
                 tmpElem = tmpElem.parentNode;
                 if(tmpElem.tagName == 'FORM') {
                     tmpElem.submit();
+                    return false;
                 }
             }
             return false;
