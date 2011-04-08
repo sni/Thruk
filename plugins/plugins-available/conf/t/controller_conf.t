@@ -60,9 +60,9 @@ is($got, $conf_exp, "merge config II");
 my $pages = [
     '/conf',
     '/thruk/cgi-bin/conf.cgi',
-    '/thruk/cgi-bin/conf.cgi?type=access',
     '/thruk/cgi-bin/conf.cgi?type=cgi',
     '/thruk/cgi-bin/conf.cgi?type=thruk',
+    '/thruk/cgi-bin/conf.cgi?type=user',
 ];
 for my $url (@{$pages}) {
     TestUtils::test_page(

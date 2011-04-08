@@ -70,11 +70,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # which file to change
     my($file, $defaults, $update_in_conf);
-    if($type eq 'access') {
-        $file           = $c->config->{'cgi.cfg'};
-        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
-    }
-    elsif($type eq 'cgi') {
+    if($type eq 'cgi') {
         $file           = $c->config->{'cgi.cfg'};
         $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
     }
@@ -83,6 +79,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $defaults       = Thruk::Utils::Conf::Defaults->get_thruk_cfg($c);
         $update_in_conf = $c;
     }
+    #elsif($type eq 'user') {
+    #    $file           = $c->config->{'cgi.cfg'};
+    #    $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
+    #}
 
     # save changes
     if(defined $file and $c->stash->{action} eq 'store') {
@@ -101,27 +101,36 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     # show settings page
-    if($type eq 'access') {
-        $self->_process_access_page($c, $file, $defaults);
-    }
-    elsif($type eq 'cgi') {
+    if($type eq 'cgi') {
         $self->_process_cgi_page($c, $file, $defaults);
     }
     elsif($type eq 'thruk') {
         $self->_process_thruk_page($c, $file, $defaults);
     }
+    #elsif($type eq 'cgi') {
+    #    $self->_process_cgi_page($c, $file, $defaults);
+    #}
 
     return 1;
 }
 
 ##########################################################
-# create the access config page
-sub _process_access_page {
+# create the cgi.cfg config page
+sub _process_cgi_page {
     my( $self, $c, $file, $defaults ) = @_;
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
     my $keys = [
+        [ 'CGI Settings', [qw/
+                        show_context_help
+                        use_pending_states
+                        refresh_rate
+                        escape_html_tags
+                        action_url_target
+                        notes_url_target
+                    /]
+        ],
         [ 'Authorization', [qw/
                         use_authentication
                         use_ssl_authentication
@@ -142,34 +151,6 @@ sub _process_access_page {
     $c->stash->{'data'}     = $data;
     $c->stash->{'md5'}      = $md5;
     $c->stash->{'subtitle'} = "User &amp; Access Configuration";
-    $c->stash->{'template'} = 'conf_data.tt';
-
-    return 1;
-}
-
-##########################################################
-# create the cgi config page
-sub _process_cgi_page {
-    my( $self, $c, $file, $defaults ) = @_;
-
-    my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
-
-    my $keys = [
-        [ 'CGI Settings', [qw/
-                        show_context_help
-                        use_pending_states
-                        refresh_rate
-                        escape_html_tags
-                        action_url_target
-                        notes_url_target
-                    /]
-        ],
-    ];
-
-    $c->stash->{'keys'}     = $keys;
-    $c->stash->{'data'}     = $data;
-    $c->stash->{'md5'}      = $md5;
-    $c->stash->{'subtitle'} = "CGI Configuration";
     $c->stash->{'template'} = 'conf_data.tt';
 
     return 1;

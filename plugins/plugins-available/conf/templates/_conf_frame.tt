@@ -14,10 +14,10 @@
               <tr>
                 <td align="left" class='reportSelectItem'>
                   <select name='type'>
-                    <option value='all'[%    IF type == 'all'    %] selected [% END %]>Overview</option>
-                    <option value='thruk'[%  IF type == 'thruk'  %] selected [% END %]>Thruk</option>
-                    <option value='access'[% IF type == 'access' %] selected [% END %]>Users &amp; Access</option>
-                    <option value='cgi'[%    IF type == 'cgi'    %] selected [% END %]>CGI</option>
+                    <option value='all'[%   IF type == 'all'   %] selected [% END %]>Overview</option>
+                    <option value='thruk'[% IF type == 'thruk' %] selected [% END %]>Thruk</option>
+                    <option value='cgi'[%   IF type == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>
+                    <option value='user'[%  IF type == 'user'  %] selected [% END %]>Users</option>
                   </select>
                 </td>
               </tr>
