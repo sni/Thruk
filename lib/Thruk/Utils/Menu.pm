@@ -214,6 +214,17 @@ sub _renew_navigation {
         for my $to_add (@{$Thruk::Utils::Menu::additional_items}) {
             my $section       = _get_section_by_name($to_add->[0]) || next;
             my $link          = $to_add->[1];
+
+            # only visible for some roles?
+            if(defined $link->{'roles'}) {
+                my $has_access = 1;
+                my @roles = ref $link->{'roles'} eq 'ARRAY' ? @{$link->{'roles'}} : [ $link->{'roles'} ];
+                for my $role (@roles) {
+                    $has_access = 0 unless $c->check_user_roles( $role );
+                }
+                next unless $has_access;
+            }
+
             $link->{'links'}  = [] unless defined $link->{'links'};
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});

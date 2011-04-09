@@ -1039,6 +1039,19 @@ ex.:
 
 
 
+==== Component Thruk::Plugin::ConfigTool
+
+Enable config tool by setting path to different components config
+files. Users with the roles 'authorized_for_configuration_information'
+and 'authorized_for_system_commands' will then have access to the
+config tool.
+
+  <Component Thruk::Plugin::ConfigTool>
+    cgi.cfg  = ./cgi.cfg
+    htpasswd = ./htpasswd
+    thruk    = ./thruk_local.conf
+  </Component>
+
 
 === cgi.cfg
 

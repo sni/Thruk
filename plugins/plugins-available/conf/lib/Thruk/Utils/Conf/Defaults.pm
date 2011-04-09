@@ -106,15 +106,7 @@ return defaults for the cgi.cfg
 
 =cut
 sub get_cgi_cfg {
-    my ( $self, $c ) = @_;
-
-    my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
-                                             sort   => 'name',
-                                             remove_duplicates => 1);
-    my $all_contacts = {};
-    for my $contact (@{$contacts}) {
-        $all_contacts->{$contact->{'name'}} = $contact->{'name'}." - ".$contact->{'alias'};
-    }
+    my ( $self ) = @_;
 
     my $conf = {
 #        'main_config_file'                          => ['STRING', ''],
@@ -126,13 +118,13 @@ sub get_cgi_cfg {
         'default_user_name'                         => ['STRING', 'thrukadmin' ],
         'use_authentication'                        => ['BOOL',   '1'],
         'use_ssl_authentication'                    => ['BOOL',   '0'],
-        'authorized_for_system_commands'            => ['MULTI_LIST', [], $all_contacts ],
-        'authorized_for_all_services'               => ['MULTI_LIST', [], $all_contacts ],
-        'authorized_for_all_hosts'                  => ['MULTI_LIST', [], $all_contacts ],
-        'authorized_for_all_service_commands'       => ['MULTI_LIST', [], $all_contacts ],
-        'authorized_for_all_host_commands'          => ['MULTI_LIST', [], $all_contacts ],
-        'authorized_for_system_information'         => ['MULTI_LIST', [], $all_contacts ],
-        'authorized_for_configuration_information'  => ['MULTI_LIST', [], $all_contacts ],
+        'authorized_for_system_commands'            => ['MULTI_LIST', [], {} ],
+        'authorized_for_all_services'               => ['MULTI_LIST', [], {} ],
+        'authorized_for_all_hosts'                  => ['MULTI_LIST', [], {} ],
+        'authorized_for_all_service_commands'       => ['MULTI_LIST', [], {} ],
+        'authorized_for_all_host_commands'          => ['MULTI_LIST', [], {} ],
+        'authorized_for_system_information'         => ['MULTI_LIST', [], {} ],
+        'authorized_for_configuration_information'  => ['MULTI_LIST', [], {} ],
         'lock_author_names'                         => ['BOOL',   '1'],
 #        'default_statusmap_layout'                  =>
 #        'default_statuswrl_layout'                  =>

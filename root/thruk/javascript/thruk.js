@@ -294,6 +294,7 @@ function data_select_move(from, to) {
             elements.push(nr);
         }
     }
+
     // reverse elements so the later remove does disorder the select
     elements.reverse();
 
@@ -323,19 +324,17 @@ function sortlist(id) {
         if(thruk_debug_js) { alert("ERROR: no element in sortlist() for: " + id ); }
     }
 
-    arrTexts  = new Array();
-    arrValues = new Array();
+    opts  = new Hash;
 
     for(i=0; i<lb.length; i++)  {
-      arrTexts[i]  = lb.options[i].text;
-      arrValues[i] = lb.options[i].value;
+        opts.set(lb.options[i].text, lb.options[i].value)
     }
 
-    arrTexts.sort();
+    var sortedkeys = opts.keys().sort();
 
     for(i=0; i<lb.length; i++)  {
-      lb.options[i].text  = arrTexts[i];
-      lb.options[i].value = arrValues[i];
+      lb.options[i].text  = sortedkeys[i];
+      lb.options[i].value = opts.get(sortedkeys[i]);
     }
 }
 

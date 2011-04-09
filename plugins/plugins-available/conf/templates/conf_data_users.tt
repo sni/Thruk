@@ -23,7 +23,7 @@
   </table>
 </form>
 
-<br></br>
+<br><br>
 
 [% IF show_user %]
 <form action="conf.cgi" method="POST">

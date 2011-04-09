@@ -235,6 +235,64 @@ sub to_hash {
 
 ##########################################################
 
+=head2 get_cgi_user_list
+
+get list of cgi users from cgi.cfg, htpasswd and contacts table
+
+=cut
+
+sub get_cgi_user_list {
+    my ( $c, $extra_users ) = @_;
+
+    # get users from core contacts
+    my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
+                                             remove_duplicates => 1);
+    my $all_contacts = {};
+    for my $contact (@{$contacts}) {
+        $all_contacts->{$contact->{'name'}} = $contact->{'name'}." - ".$contact->{'alias'};
+    }
+
+    # add users from htpasswd
+    if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
+        my $htpasswd = read_htpasswd($c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'});
+        for my $user (keys %{$htpasswd}) {
+            $all_contacts->{$user} = $user unless defined $all_contacts->{$user};
+        }
+    }
+
+    for my $user (@{$extra_users}) {
+        $all_contacts->{$user} = $user unless defined $all_contacts->{$user};
+    }
+
+    # add special users
+    $all_contacts->{'*'} = '*';
+
+    return $all_contacts;
+}
+
+##########################################################
+
+=head2 read_htpasswd
+
+read htpasswd file
+
+=cut
+
+sub read_htpasswd {
+    my ( $file ) = @_;
+    my $htpasswd = {};
+    my $content  = read_file($file);
+    for my $line (split/\n/mx, $content) {
+        my($user,$hash) = split/:/mx, $line;
+        next unless defined $hash;
+        $htpasswd->{$user} = $hash;
+    }
+    return($htpasswd);
+}
+
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2011, <nierlein@cpan.org>

@@ -2865,6 +2865,19 @@ resource_file     resource_file for this peer
   &lt;/peer&gt;
 &lt;/Component&gt;</tt></pre>
 </div></div>
+<h4 id="_component_thruk_plugin_configtool">Component Thruk::Plugin::ConfigTool</h4>
+<div class="paragraph"><p>Enable config tool by setting path to different components config
+files. Users with the roles <em>authorized_for_configuration_information</em>
+and <em>authorized_for_system_commands</em> will then have access to the
+config tool.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Component Thruk::Plugin::ConfigTool&gt;
+  cgi.cfg  = ./cgi.cfg
+  htpasswd = ./htpasswd
+  thruk    = ./thruk_local.conf
+&lt;/Component&gt;</tt></pre>
+</div></div>
 <h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga itself stripped
 down some unneeded values.</p></div>
@@ -3355,7 +3368,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-04-05 16:36:30 CEST
+Last updated 2011-04-09 22:39:25 CEST
 </div>
 </div>
 </body>

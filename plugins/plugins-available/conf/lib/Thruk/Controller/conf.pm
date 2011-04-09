@@ -22,10 +22,13 @@ Catalyst Controller.
 =cut
 
 ######################################
-# add new menu item
+# add new menu item, but only if user has all of the
+# requested roles
 Thruk::Utils::Menu::insert_item('System', {
-                           'href' => '/thruk/cgi-bin/conf.cgi',
-                           'name' => 'Config Tool',
+                           'href'  => '/thruk/cgi-bin/conf.cgi',
+                           'name'  => 'Config Tool',
+                           'roles' => [qw/authorized_for_configuration_information
+                                         authorized_for_system_commands/],
                          });
 
 ######################################
@@ -72,7 +75,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my($file, $defaults, $update_in_conf);
     if($type eq 'cgi') {
         $file           = $c->config->{'cgi.cfg'};
-        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
+        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
     }
     elsif($type eq 'thruk') {
         $file           = 'thruk_local.conf';
@@ -81,7 +84,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     elsif($type eq 'users') {
         $file           = $c->config->{'cgi.cfg'};
-        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg($c);
+        $defaults       = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
     }
 
     # save changes
@@ -118,6 +121,20 @@ sub _process_cgi_page {
     my( $self, $c, $file, $defaults ) = @_;
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+
+    my $extra_user = [];
+    for my $key (keys %{$data}) {
+        next unless $key =~ m/^authorized_for_/mx;
+        push @{$extra_user}, @{$data->{$key}->[1]};
+    }
+
+    # get list of cgi users
+    my $cgi_contacts = Thruk::Utils::Conf::get_cgi_user_list($c, $extra_user);
+
+    for my $key (keys %{$data}) {
+        next unless $key =~ m/^authorized_for_/mx;
+        $data->{$key}->[2] = $cgi_contacts;
+    }
 
     my $keys = [
         [ 'CGI Settings', [qw/
@@ -257,8 +274,8 @@ sub _process_users_page {
                         authorized_for_configuration_information    => 0,
         };
         for my $role (keys %{$c->stash->{'roles'}}) {
-            if(grep($name, @{$data->{$role}->[1]})) {
-                $c->stash->{'roles'}->{$role} = 1;
+            for my $tst (@{$data->{$role}->[1]}) {
+                $c->stash->{'roles'}->{$role}++ if $tst eq $name;
             }
         }
     }
