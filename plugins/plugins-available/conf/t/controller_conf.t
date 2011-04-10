@@ -91,7 +91,7 @@ for my $url (@{$pages}) {
 my $redirects = [
     '/thruk/cgi-bin/conf.cgi?type=cgi&action=store',
     '/thruk/cgi-bin/conf.cgi?type=thruk&action=store',
-    '/thruk/cgi-bin/conf.cgi?type=users&action=store&user=testuser',
+    '/thruk/cgi-bin/conf.cgi?type=users&action=store&data.username=testuser',
 ];
 for my $url (@{$redirects}) {
     TestUtils::test_page(

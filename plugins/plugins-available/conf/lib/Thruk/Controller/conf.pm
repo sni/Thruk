@@ -316,8 +316,8 @@ sub _process_users_page {
 
     if($c->stash->{action} eq 'change' and $user ne '') {
         my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
-        $c->stash->{'show_user'}  = 1;
         my($name, $alias)         = split(/\ \-\ /mx,$user, 2);
+        $c->stash->{'show_user'}  = 1;
         $c->stash->{'user_name'}  = $name;
         $c->stash->{'md5'}        = $md5;
         $c->stash->{'roles'}      = {};
@@ -336,6 +336,19 @@ sub _process_users_page {
                 $c->stash->{'roles'}->{$role}++ if $tst eq $name;
             }
         }
+
+        $c->stash->{'has_htpasswd_entry'} = 0;
+        if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
+            my $htpasswd = Thruk::Utils::Conf::read_htpasswd($c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'});
+            $c->stash->{'has_htpasswd_entry'} = 1 if defined $htpasswd->{$name};
+        }
+
+        $c->stash->{'has_contact'} = 0;
+        my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ), name => $name ] );
+        if(defined $contacts and scalar @{$contacts} >= 1) {
+            $c->stash->{'has_contact'} = 1;
+        }
+
     }
 
     $c->stash->{'subtitle'} = "User Configuration";

@@ -4,7 +4,7 @@
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="type" value="users">
 <input type="hidden" name="action" value="change">
-  <table border="0" class='data' width=370>
+  <table border="0" class='data' width=400>
     <tr>
       <th colspan=2 class='data' style="text-align:center">select user to change</th>
     </tr>
@@ -31,11 +31,19 @@
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <input type="hidden" name="data.username" value="[% user_name %]">
-  <table border="0" class='data' width=370>
+  <table border="0" class='data' width=400>
     <tr>
       <th colspan=2 class='data' style="text-align:center">[% user_name %]</th>
     </tr>
+    <tr>
+      <th align="left">Contact Exists</th>
+      <td class='data'>[% IF has_contact %]Yes[% ELSE %]No[% END %]</td>
+    </tr>
     [% IF conf_config.exists('htpasswd') %]
+    <tr>
+      <th align="left">Password Set</th>
+      <td class='data'>[% IF has_htpasswd_entry %]Yes[% ELSE %]No[% END %]</td>
+    </tr>
     <tr>
       <th align="left">Password</th>
       <td class='data'><input type="password" name="data.password" value="" size=15></td>
