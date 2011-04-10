@@ -199,6 +199,7 @@ sub get_data_from_param {
         next unless $key =~ m/^data\./mx;
         my $value = $param->{$key};
         $key =~ s/^data\.//mx;
+        next unless defined $defaults->{$key};
         if(   $defaults->{$key}->[0] eq 'ARRAY'
            or $defaults->{$key}->[0] eq 'MULTI_LIST') {
             if(ref $value eq 'ARRAY') {

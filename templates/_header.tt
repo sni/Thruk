@@ -136,7 +136,7 @@
       <table border=0 cellpadding=0 cellspacing=0>
         <tr>
           <td>
-          [% IF backends && backends.size > 1 %]
+          [% IF hide_backends_chooser == 0 && backends && backends.size > 1 %]
           [% FOREACH pd IN backends %]
           <div class='backend'>
             [% SET name  = 'unknown'                                         %]

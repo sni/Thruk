@@ -545,7 +545,7 @@ ex.:
 
 ==== cgi_cfg
 
-The path to your cgi.cfg. See <<cgi.cfg>> for details.
+The path to your cgi.cfg. See <<_cgi_cfg_2,cgi.cfg>> for details.
 
 ex.:
 
@@ -988,8 +988,7 @@ Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.
 
-  * peer             enter the peer configuration. You have to enter a name for
-                     each peer.
+  * peer
          - name      name for this connection
          - type      type of this connection. Only "livestatus" possible at the
                      moment
@@ -1045,18 +1044,30 @@ Enable config tool by setting path to different components config
 files. Users with the roles 'authorized_for_configuration_information'
 and 'authorized_for_system_commands' will then have access to the
 config tool.
+You don't have to restart Thruk when changing the config with the
+config tool.
+
+  * you can manage 3 types of files with the config tool:
+      - thruk               path to your thruk_local.conf. Enables
+                            adjusting Thruks config.
+      - cgi.cfg             path to your cgi.cfg. Enables adjusting the
+                            cgi.cfg.
+      - htpasswd            path to your htpasswd. Enables user management
+                            based an apaches basic auth with htpasswd.
+
+ex.:
 
   <Component Thruk::Plugin::ConfigTool>
+    thruk    = ./thruk_local.conf
     cgi.cfg  = ./cgi.cfg
     htpasswd = ./htpasswd
-    thruk    = ./thruk_local.conf
   </Component>
 
 
 === cgi.cfg
 
-The cgi.cfg is mainly the same as in Nagios or Icinga itself stripped
-down some unneeded values.
+The cgi.cfg is mainly the same as in Nagios or Icinga but not all
+values are used.
 
 
 ==== show_context_help

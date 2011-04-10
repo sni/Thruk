@@ -7,18 +7,24 @@
       <th class='data'>Module</th>
       <th class='data'>Description</th>
     </tr>
+    [% IF conf_config.exists('thruk') %]
     <tr>
       <td class='data'><a href="conf.cgi?type=thruk">Thruk Settings</a></td>
       <td class='data'>Thruks settings from the thruk_local.conf</td>
     </tr>
+    [% END %]
+    [% IF conf_config.exists('cgi.cfg') %]
     <tr>
       <td class='data'><a href="conf.cgi?type=cgi">CGI &amp; Access</a></td>
       <td class='data'>Change CGI and access settings from your cgi.cfg</td>
     </tr>
+    [% END %]
+    [% IF conf_config.exists('cgi.cfg') || c.config.exists('htpasswd') %]
     <tr>
       <td class='data'><a href="conf.cgi?type=users">User settings</a></td>
       <td class='data'>user settings</td>
     </tr>
+    [% END %]
   </table>
 </div>
 

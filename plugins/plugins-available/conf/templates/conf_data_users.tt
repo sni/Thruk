@@ -28,13 +28,14 @@
 [% IF show_user %]
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="type" value="users">
-<input type="hidden" name="action" value="change">
+<input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
-<input type="hidden" name="user" value="[% user_name %]">
+<input type="hidden" name="data.username" value="[% user_name %]">
   <table border="0" class='data' width=370>
     <tr>
       <th colspan=2 class='data' style="text-align:center">[% user_name %]</th>
     </tr>
+    [% IF conf_config.exists('htpasswd') %]
     <tr>
       <th align="left">Password</th>
       <td class='data'><input type="password" name="data.password" value="" size=15></td>
@@ -43,6 +44,8 @@
       <th align="left">Verify Password</th>
       <td class='data'><input type="password" name="data.password2" value="" size=15></td>
     </tr>
+    [% END %]
+    [% IF conf_config.exists('cgi.cfg') %]
     [% FOR auth = roles %]
     <tr>
       <th align="left">[% auth.key %]</th>
@@ -51,6 +54,7 @@
         <input type="radio" name="data.[% auth.key %]" value="1"[% IF auth.value == 1 %] checked[% END %]> Yes
       </td>
     </tr>
+    [% END %]
     [% END %]
     <tr>
       <td colspan=2 align="center">

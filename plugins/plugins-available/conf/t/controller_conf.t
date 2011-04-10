@@ -78,7 +78,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?type=cgi',
     '/thruk/cgi-bin/conf.cgi?type=thruk',
     '/thruk/cgi-bin/conf.cgi?type=users',
-    '/thruk/cgi-bin/conf.cgi?type=users&action=show&data.username=testuser',
+    '/thruk/cgi-bin/conf.cgi?type=users&action=change&data.username=testuser',
 ];
 for my $url (@{$pages}) {
     TestUtils::test_page(

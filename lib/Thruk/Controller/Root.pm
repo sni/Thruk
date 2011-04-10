@@ -301,11 +301,10 @@ sub thruk_index : Regex('thruk$') {
 =head2 thruk_index_html
 
 page: /thruk/index.html
-# but if used not via fastcgi/apache, there is no way around
 
 =cut
 
-sub thruk_index_html : Regex('thruk\/index\.html$') {
+sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     unless ( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_main_html");
@@ -404,11 +403,12 @@ page: /thruk/main.html
 
 =cut
 
-sub thruk_main_html : Regex('thruk\/main\.html$') {
+sub thruk_main_html : Regex('thruk\/main\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
-    $c->stash->{'title'}    = 'Thruk Monitoring Webinterface';
-    $c->stash->{'page'}     = 'splashpage';
-    $c->stash->{'template'} = 'main.tt';
+    $c->stash->{'title'}                 = 'Thruk Monitoring Webinterface';
+    $c->stash->{'page'}                  = 'splashpage';
+    $c->stash->{'template'}              = 'main.tt';
+    $c->stash->{'hide_backends_chooser'} = 1;
 
     return 1;
 }

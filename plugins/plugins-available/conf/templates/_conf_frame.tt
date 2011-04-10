@@ -15,9 +15,15 @@
                 <td align="left" class='reportSelectItem'>
                   <select name='type'>
                     <option value='all'[%    IF type == 'all'   %] selected [% END %]>Overview</option>
+                    [% IF conf_config.exists('thruk') %]
                     <option value='thruk'[%  IF type == 'thruk' %] selected [% END %]>Thruk</option>
+                    [% END %]
+                    [% IF conf_config.exists('cgi.cfg') %]
                     <option value='cgi'[%    IF type == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>
+                    [% END %]
+                    [% IF conf_config.exists('cgi.cfg') || conf_config.exists('htpasswd') %]
                     <option value='users'[%  IF type == 'users' %] selected [% END %]>Users</option>
+                    [% END %]
                   </select>
                 </td>
               </tr>

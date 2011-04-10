@@ -99,6 +99,7 @@ my %config = ('name'                   => 'Thruk',
                                           'sortprefix'     => '',       # used in _status_detail_table.tt / _status_hostdetail_table.tt
                                           'show_form'      => '1',      # used in _status_filter.tt
                                           'author'         => 0,
+                                          'hide_backends_chooser' => 0,
                                       },
                   PRE_CHOMP          => 1,
                   POST_CHOMP         => 1,

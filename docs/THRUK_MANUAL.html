@@ -2359,7 +2359,7 @@ navigation.</p></div>
 allowed_frame_links = https://wiki.my-company.com</tt></pre>
 </div></div>
 <h4 id="_cgi_cfg">cgi_cfg</h4>
-<div class="paragraph"><p>The path to your cgi.cfg. See <a href="#cgi.cfg">[cgi.cfg]</a> for details.</p></div>
+<div class="paragraph"><p>The path to your cgi.cfg. See <a href="#_cgi_cfg_2">cgi.cfg</a> for details.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -2771,8 +2771,7 @@ xinetd.conf. You can enter local unix sockets too.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-peer             enter the peer configuration. You have to enter a name for
-                     each peer.
+peer
 </p>
 <div class="ulist"><ul>
 <li>
@@ -2869,18 +2868,48 @@ resource_file     resource_file for this peer
 <div class="paragraph"><p>Enable config tool by setting path to different components config
 files. Users with the roles <em>authorized_for_configuration_information</em>
 and <em>authorized_for_system_commands</em> will then have access to the
+config tool.
+You don&#8217;t have to restart Thruk when changing the config with the
 config tool.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+you can manage 3 types of files with the config tool:
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+thruk               path to your thruk_local.conf. Enables
+                            adjusting Thruks config.
+</p>
+</li>
+<li>
+<p>
+cgi.cfg             path to your cgi.cfg. Enables adjusting the
+                            cgi.cfg.
+</p>
+</li>
+<li>
+<p>
+htpasswd            path to your htpasswd. Enables user management
+                            based an apaches basic auth with htpasswd.
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+<div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::ConfigTool&gt;
+  thruk    = ./thruk_local.conf
   cgi.cfg  = ./cgi.cfg
   htpasswd = ./htpasswd
-  thruk    = ./thruk_local.conf
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>
-<div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga itself stripped
-down some unneeded values.</p></div>
+<div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga but not all
+values are used.</p></div>
 <h4 id="_show_context_help">show_context_help</h4>
 <div class="paragraph"><p>Displays an icon with context specific help on most pages.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -3368,7 +3397,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-04-09 22:39:25 CEST
+Last updated 2011-04-10 19:27:45 CEST
 </div>
 </div>
 </body>
