@@ -275,6 +275,23 @@ sub _process_users_page {
         }
 
         # save changes to cgi.cfg
+        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        my $new_data              = {};
+        for my $key (keys %{$c->{'request'}->{'parameters'}}) {
+            next unless $key =~ m/data\.authorized_for_/;
+            $key =~ s/^data\.//gmx;
+            my $users = {};
+            for my $usr (@{$data->{$key}->[1]}) {
+                $users->{$usr} = 1;
+            }
+            if($c->{'request'}->{'parameters'}->{'data.'.$key}) {
+                $users->{$user} = 1;
+            } else {
+                delete $users->{$user};
+            }
+            @{$new_data->{$key}} = sort keys %{$users};
+        }
+        $self->_store_changes($c, $file, $new_data, $defaults);
 
         Thruk::Utils::set_message( $c, 'success_message', 'User saved successfully' );
         return $c->redirect($redirect);
@@ -289,16 +306,18 @@ sub _process_users_page {
         my($name, $alias)         = split(/\ \-\ /mx,$user, 2);
         $c->stash->{'user_name'}  = $name;
         $c->stash->{'md5'}        = $md5;
-        $c->stash->{'roles'}      = {
-                        authorized_for_all_services                 => 0,
-                        authorized_for_all_hosts                    => 0,
-                        authorized_for_all_service_commands         => 0,
-                        authorized_for_all_host_commands            => 0,
-                        authorized_for_system_information           => 0,
-                        authorized_for_system_commands              => 0,
-                        authorized_for_configuration_information    => 0,
-        };
-        for my $role (keys %{$c->stash->{'roles'}}) {
+        $c->stash->{'roles'}      = {};
+        my $roles = [qw/authorized_for_all_services
+                        authorized_for_all_hosts
+                        authorized_for_all_service_commands
+                        authorized_for_all_host_commands
+                        authorized_for_system_information
+                        authorized_for_system_commands
+                        authorized_for_configuration_information
+                    /];
+        $c->stash->{'role_keys'}  = $roles;
+        for my $role (@{$roles}) {
+            $c->stash->{'roles'}->{$role} = 0;
             for my $tst (@{$data->{$role}->[1]}) {
                 $c->stash->{'roles'}->{$role}++ if $tst eq $name;
             }

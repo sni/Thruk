@@ -46,12 +46,12 @@
     </tr>
     [% END %]
     [% IF conf_config.exists('cgi.cfg') %]
-    [% FOR auth = roles %]
+    [% FOR auth = role_keys %]
     <tr>
-      <th align="left">[% auth.key %]</th>
+      <th align="left">[% auth %]</th>
       <td class='data'>
-        <input type="radio" name="data.[% auth.key %]" value="0"[% IF auth.value == 0 %] checked[% END %]> No
-        <input type="radio" name="data.[% auth.key %]" value="1"[% IF auth.value == 1 %] checked[% END %]> Yes
+        <input type="radio" name="data.[% auth %]" value="0"[% IF roles.$auth == 0 %] checked[% END %]> No
+        <input type="radio" name="data.[% auth %]" value="1"[% IF roles.$auth == 1 %] checked[% END %]> Yes
       </td>
     </tr>
     [% END %]
