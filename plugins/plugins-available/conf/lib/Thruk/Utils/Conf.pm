@@ -243,7 +243,7 @@ get list of cgi users from cgi.cfg, htpasswd and contacts table
 =cut
 
 sub get_cgi_user_list {
-    my ( $c, $extra_users ) = @_;
+    my ( $c ) = @_;
 
     # get users from core contacts
     my $contacts = $c->{'db'}->get_contacts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contact' ) ],
@@ -261,8 +261,19 @@ sub get_cgi_user_list {
         }
     }
 
-    for my $user (@{$extra_users}) {
-        $all_contacts->{$user} = $user unless defined $all_contacts->{$user};
+    # add users from cgi.cfg
+    if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'}) {
+        my $file                  = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
+        my $defaults              = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        my $extra_user = [];
+        for my $key (keys %{$data}) {
+            next unless $key =~ m/^authorized_for_/mx;
+            push @{$extra_user}, @{$data->{$key}->[1]};
+        }
+        for my $user (@{$extra_user}) {
+            $all_contacts->{$user} = $user unless defined $all_contacts->{$user};
+        }
     }
 
     # add special users

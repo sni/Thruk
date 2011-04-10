@@ -1613,7 +1613,7 @@ var ajax_search = {
     timer           : false,
 
     /* initialize search */
-    init: function(elem, type) {
+    init: function(elem, type, url) {
         if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
@@ -1645,7 +1645,10 @@ var ajax_search = {
             ajax_search.search_type = type;
             search_url              = ajax_search.url + "&type=" + type;
         } else {
-            type = 'all';
+            type                    = 'all';
+        }
+        if(url != undefined) {
+            search_url              = url;
         }
 
         input.setAttribute("autocomplete", "off");

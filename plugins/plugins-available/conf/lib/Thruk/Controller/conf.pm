@@ -81,6 +81,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{action}      = $action;
     $c->stash->{conf_config} = $c->config->{'Thruk::Plugin::ConfigTool'};
 
+    if($action eq 'cgi_contacts') {
+        return $self->_process_cgiusers_page($c);
+    }
+
     # show settings page
     if($type eq 'cgi') {
         $self->_process_cgi_page($c);
@@ -94,6 +98,22 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     return 1;
 }
+
+
+##########################################################
+# create the cgi.cfg config page
+sub _process_cgiusers_page {
+    my( $self, $c ) = @_;
+
+    my $contacts        = Thruk::Utils::Conf::get_cgi_user_list($c);
+    delete $contacts->{'*'}; # we dont need this user here
+    my $data            = [ values %{$contacts} ];
+    my $json            = [ { 'name' => "contacts", 'data' => $data } ];
+    $c->stash->{'json'} = $json;
+    $c->forward('Thruk::View::JSON');
+    return;
+}
+
 
 ##########################################################
 # create the cgi.cfg config page
@@ -118,14 +138,8 @@ sub _process_cgi_page {
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
 
-    my $extra_user = [];
-    for my $key (keys %{$data}) {
-        next unless $key =~ m/^authorized_for_/mx;
-        push @{$extra_user}, @{$data->{$key}->[1]};
-    }
-
     # get list of cgi users
-    my $cgi_contacts = Thruk::Utils::Conf::get_cgi_user_list($c, $extra_user);
+    my $cgi_contacts = Thruk::Utils::Conf::get_cgi_user_list($c);
 
     for my $key (keys %{$data}) {
         next unless $key =~ m/^authorized_for_/mx;
