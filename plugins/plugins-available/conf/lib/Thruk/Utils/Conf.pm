@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use File::Slurp;
 use Digest::MD5 qw(md5_hex);
+use Config::General;
 
 =head1 NAME
 
@@ -90,14 +91,49 @@ sub read_conf {
     my $file = shift;
     my $data = shift;
 
-    my $arrays_defined = {};
-
     my $content  = read_file($file);
     my $md5      = md5_hex($content);
+
+    _parse_config($content, $data);
+
+    return($content, $data, $md5);
+}
+
+######################################
+
+=head2 _parse_config
+
+parse config string
+
+=cut
+
+sub _parse_config {
+    my $content = shift;
+    my $data    = shift;
+
+    my $arrays_defined = {};
+    my $last_cat;
+    my $category;
+    my $cat_content;
+
     for my $line (split/\n/mx, $content) {
         next if $line eq '';
         next if substr($line, 0, 1) eq '#';
-        if($line =~ m/\s*(\w+)\s*=\s*(.*)\s*(\#.*|)$/mx) {
+
+        if(defined $last_cat && $line =~ m/<\/\s*$last_cat\s*>/mx) {
+            $data->{$category}->[1] = _parse_config($cat_content, $data->{$last_cat}->[2]);
+            undef $last_cat;
+            undef $cat_content;
+        }
+        elsif(defined $last_cat) {
+            $cat_content .= $line."\n";
+        }
+        elsif($line =~ m/<(\w+\s+|)(.*)>\s*(\#.*|)$/mx) {
+            $category = $2;
+            $last_cat = $1 || $2;
+            $cat_content = '';
+        }
+        elsif($line =~ m/(\w+)\s*=\s*(.*?)\s*(\#.*|)$/mx) {
             my $key   = $1;
             my $value = $2;
             if(defined $data->{$key}) {
@@ -114,7 +150,7 @@ sub read_conf {
         }
     }
 
-    return($content, $data, $md5);
+    return($data);
 }
 
 
@@ -139,9 +175,10 @@ sub merge_conf {
            ) {
             $new .= $line;
         }
-        elsif($line =~ m/\s*(\w+)\s*=\s*(.*)\s*(\#.*|)$/mx) {
-            my $key   = $1;
-            my $value = $2;
+        elsif($line =~ m/\s*(\w+)\s*=\s*(.*?)(\s*\#.*|)$/mx) {
+            my $key     = $1;
+            my $value   = $2;
+            my $comment = $3;
             $value    =~ s/^"(.*)"$/$1/gmx;
             if(defined $keys_placed->{$key}) {
                 chomp($new);
@@ -155,6 +192,7 @@ sub merge_conf {
                     $value = $data->{$key};
                 }
                 $new .= $key."=".$value;
+                $new .= $comment if $comment;
                 delete $data->{$key};
                 $keys_placed->{$key} = 1;
             } else {

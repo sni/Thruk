@@ -16,7 +16,12 @@
             </th>
         </tr>
         [% FOREACH key = cat.1 %]
-        [% d = data.$key %]
+        [% IF cat.size() == 3 %]
+          [% subcat = cat.2 %]
+          [% d = data.$subcat.1.$key %]
+        [% ELSE %]
+          [% d = data.$key %]
+        [% END %]
         <tr>
           <th align="left" valign="top">[% key %]</th>
           <td class='data'>

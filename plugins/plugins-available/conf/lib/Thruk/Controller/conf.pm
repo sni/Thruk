@@ -241,6 +241,19 @@ sub _process_thruk_page {
                         datetime_format_trends
                     /]
         ],
+        [ 'Command Defaults', [qw/
+                        ahas
+                        broadcast_notification
+                        force_check
+                        force_notification
+                        send_notification
+                        sticky_ack
+                        persistent_comments
+                        persistent_ack
+                        ptc
+                    /],
+                    'cmd_defaults'
+        ],
         [ 'Search', [qw/
                         use_new_search
                         use_ajax_search

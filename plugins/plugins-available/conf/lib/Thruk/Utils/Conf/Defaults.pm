@@ -63,6 +63,17 @@ sub get_thruk_cfg {
                 shown_inline_pnp                        => ['BOOL',   '1'],
                 can_submit_commands                     => ['BOOL',   '1'],
 #                command_disabled
+                cmd_defaults                            => ['CATEGORY', {}, {
+                    ahas                   => ['BOOL',   '0'],
+                    broadcast_notification => ['BOOL',   '0'],
+                    force_check            => ['BOOL',   '0'],
+                    force_notification     => ['BOOL',   '0'],
+                    send_notification      => ['BOOL',   '1'],
+                    sticky_ack             => ['BOOL',   '1'],
+                    persistent_comments    => ['BOOL',   '1'],
+                    persistent_ack         => ['BOOL',   '0'],
+                    ptc                    => ['BOOL',   '0'],
+                }],
                 datetime_format                         => ['STRING', ''],
                 datetime_format_today                   => ['STRING', ''],
                 datetime_format_long                    => ['STRING', ''],
@@ -72,6 +83,16 @@ sub get_thruk_cfg {
                 statusmap_default_groupby               => ['LIST', '', Thruk::Utils::Conf::to_hash([qw/parent address domain hostgroup servicegroup/]) ],
                 use_wait_feature                        => ['BOOL',   '1'],
 #                check_local_states
+#                'Thruk::Backend'                        => ['CATEGORY', {}, {
+#                    peer                                    => ['CATEGORY', {}, {
+#                        name                                    => ['STRING', ''],
+#                        hidden                                  => ['BOOL',   '0'],
+#                        type                                    => ['LIST', 'livestatus', Thruk::Utils::Conf::to_hash([qw/livestatus/]) ],
+#                        options                                 => ['CATEGORY', {}, {
+#                            peer                                    => ['STRING', ''],
+#                        }],
+#                    }],
+#                }],
     };
 
     # search useful defaults
