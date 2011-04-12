@@ -92,7 +92,7 @@ sub begin : Private {
         my $theme_cookie = $c->request->cookie('thruk_theme');
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
-    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'} || 'Classic';
+    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'} || 'Thruk';
     if( defined $c->config->{templates_paths} ) {
         $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }

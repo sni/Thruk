@@ -10,6 +10,10 @@ body {
   margin: 0px;
 }
 
+a img {
+    border: none;
+}
+
 td.dataVal {
   text-align: left;
 }
@@ -23,6 +27,7 @@ td.command {
 body.navbar {
   font-family:arial,verdana,serif;
   margin: 0px;
+  text-align: center;
 }
 
 
@@ -178,7 +183,11 @@ div.navbarsearch form fieldset {
 }
 
 div.navsection {
-  margin:2px 0 8px;
+  margin:0px 0 8px;
+}
+
+div.navsectionlinks {
+  text-align: left;
 }
 
 .pager_direct_link {
@@ -379,11 +388,11 @@ table.overDivTable > tbody > tr > td {
   color:#DCE5C1;
   font-size:10pt;
   text-align:left;
-  border: 0x none;
+  border: 0x none #000000;
 }
 .overDivContent {
   background-color: #DBDBDB;
-  border: 0x none;
+  border: 0x none #000000;
 }
 
 table.overDivTable a {
