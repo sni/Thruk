@@ -331,7 +331,7 @@
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>
           </td>
-          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
           <td align="right" class='filterValueNoHighlight'><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
             <script type="text/javascript">
             <!--

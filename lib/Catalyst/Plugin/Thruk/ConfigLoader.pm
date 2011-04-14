@@ -51,7 +51,8 @@ sub finalize_config {
     ###################################################
     # set tmp dir
     # use uid to make tmp dir more uniq
-    my $tmp_dir = $c->config->{'tmp_path'} || '/tmp';
+    $c->config->{'tmp_path'} = exists $c->config->{'tmp_path'} ? $c->config->{'tmp_path'} : '/tmp';
+    my $tmp_dir = $c->config->{'tmp_path'};
     $c->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>;
 
     return;

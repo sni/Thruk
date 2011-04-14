@@ -37,13 +37,82 @@ begin, running at the begin of every req
 sub begin : Private {
     my( $self, $c ) = @_;
 
-    # Prefix
-    $c->stash->{'url_prefix'}   = $c->config->{'url_prefix'}   || '/';
-    $c->stash->{'title_prefix'} = $c->config->{'title_prefix'} || '';
+    # defaults
+    $c->config->{'url_prefix'} = exists $c->config->{'url_prefix'} ? $c->config->{'url_prefix'} : '/';
+    my $defaults = {
+        use_ajax_search                 => 1,
+        ajax_search_hosts               => 1,
+        ajax_search_hostgroups          => 1,
+        ajax_search_services            => 1,
+        ajax_search_servicegroups       => 1,
+        shown_inline_pnp                => 1,
+        use_wait_feature                => 1,
+        use_frames                      => 1,
+        use_strict_host_authorization   => 0,
+        can_submit_commands             => 1,
+        group_paging_overview           => '*3, 10, 100, all',
+        group_paging_grid               => '*5, 10, 50, all',
+        group_paging_summary            => '*10, 50, 100, all',
+        default_theme                   => 'Classic',
+        datetime_format                 => '%Y-%m-%d  %H:%M:%S',
+        datetime_format_long            => '%a %b %e %H:%M:%S %Z %Y',
+        datetime_format_today           => '%H:%M:%S',
+        datetime_format_log             => '%B %d, %Y  %H',
+        datetime_format_trends          => '%a %b %e %H:%M:%S %Y',
+        title_prefix                    => '',
+        use_pager                       => 1,
+        start_page                      => $c->config->{'url_prefix'}.'thruk/main.html',
+        documentation_link              => $c->config->{'url_prefix'}.'thruk/docs/index.html',
+        show_notification_number        => 1,
+        strict_passive_mode             => 1,
+        show_full_commandline           => 1,
+        use_feature_statusmap           => 0,
+        use_feature_statuswrl           => 0,
+        use_feature_histogram           => 0,
+        use_new_search                  => 1,
+        all_problems_link               => $c->config->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",
+        statusmap_default_groupby       => 'address',
+        statusmap_default_type          => 'table',
+        info_popup_event_type           => 'onclick',
+        info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
+        cmd_quick_status                => {
+                    reschedule             => 1,
+                    downtime               => 1,
+                    comment                => 1,
+                    acknowledgement        => 1,
+                    active_checks          => 1,
+                    notifications          => 1,
+                    submit_result          => 1,
+        },
+        cmd_defaults                    => {
+                    ahas                   => 0,
+                    broadcast_notification => 0,
+                    force_check            => 0,
+                    force_notification     => 0,
+                    send_notification      => 1,
+                    sticky_ack             => 1,
+                    persistent_comments    => 1,
+                    persistent_ack         => 0,
+                    ptc                    => 0,
+        },
+        command_disabled                    => [],
+    };
+    for my $key (keys %{$defaults}) {
+        $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
+    }
+
+    # make some configs available in stash
+    for my $key (qw/url_prefix title_prefix use_pager start_page documentation_link
+                  use_feature_statusmap use_feature_statuswrl use_feature_histogram
+                  datetime_format datetime_format_today datetime_format_long datetime_format_log
+                  use_new_search ajax_search show_notification_number strict_passive_mode
+                  show_full_commandline all_problems_link use_ajax_search
+                /) {
+        $c->stash->{$key} = $c->config->{$key};
+    }
 
     # frame options
     my $use_frames = $c->config->{'use_frames'};
-    $use_frames = 1 unless defined $use_frames;
     my $show_nav_button = 1;
     if( exists $c->{'request'}->{'parameters'}->{'nav'} and $c->{'request'}->{'parameters'}->{'nav'} ne '' ) {
         if( $c->{'request'}->{'parameters'}->{'nav'} ne '1' ) {
@@ -62,26 +131,12 @@ sub begin : Private {
     $c->stash->{'reload_nav'}         = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
 
     # use pager?
-    $c->stash->{'use_pager'}          = exists $c->config->{'use_pager'}  ? $c->config->{'use_pager'} : 1;
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
-
-    $c->stash->{'start_page'}         = $c->config->{'start_page'}         || $c->stash->{'url_prefix'}.'thruk/main.html';
-    $c->stash->{'documentation_link'} = $c->config->{'documentation_link'} || $c->stash->{'url_prefix'}.'thruk/docs/index.html';
-
-    # these features are not implemented yet
-    $c->stash->{'use_feature_statusmap'} = $c->config->{'use_feature_statusmap'} || 0;
-    $c->stash->{'use_feature_statuswrl'} = $c->config->{'use_feature_statuswrl'} || 0;
-    $c->stash->{'use_feature_histogram'} = $c->config->{'use_feature_histogram'} || 0;
 
     # enable trends if gd loaded
     if( $c->config->{'has_gd'} ) {
         $c->stash->{'use_feature_trends'} = 1;
     }
-
-    $c->stash->{'datetime_format'}       = $c->config->{'datetime_format'};
-    $c->stash->{'datetime_format_today'} = $c->config->{'datetime_format_today'};
-    $c->stash->{'datetime_format_long'}  = $c->config->{'datetime_format_long'};
-    $c->stash->{'datetime_format_log'}   = $c->config->{'datetime_format_log'};
 
     # which theme?
     my($param_theme, $cookie_theme);
@@ -92,7 +147,7 @@ sub begin : Private {
         my $theme_cookie = $c->request->cookie('thruk_theme');
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
-    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'} || 'Classic';
+    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
     if( defined $c->config->{templates_paths} ) {
         $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
@@ -101,35 +156,10 @@ sub begin : Private {
     }
     $c->stash->{'theme'} = $theme;
 
-    # new or classic search?
-    my $use_new_search = $c->config->{'use_new_search'};
-    $use_new_search = 1 unless defined $use_new_search;
-    $c->stash->{'use_new_search'} = $use_new_search;
-
-    # all problems link?
-    my $all_problems_link = $c->config->{'all_problems_link'};
-    if( !defined $all_problems_link ) {
-        $all_problems_link = $c->stash->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems";
-    }
-    $c->stash->{'all_problems_link'} = $all_problems_link;
-
     if(exists $c->{'request'}->{'parameters'}->{'noheader'}) {
         $c->{'request'}->{'parameters'}->{'hidetop'}  = 1;
     }
     $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
-
-    $c->stash->{'ajax_search'}       = exists $c->config->{'use_ajax_search'}  ? $c->config->{'use_ajax_search'}  : 1;
-    $c->config->{'shown_inline_pnp'} = exists $c->config->{'shown_inline_pnp'} ? $c->config->{'shown_inline_pnp'} : 1;
-    $c->config->{'use_wait_feature'} = exists $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 1;
-    $c->config->{'use_frames'}       = exists $c->config->{'use_frames'}       ? $c->config->{'use_frames'}       : 0;
-    $c->config->{'use_strict_host_authorization'}
-                        = exists $c->config->{'use_strict_host_authorization'} ? $c->config->{'use_strict_host_authorization'} : 0;
-
-    # status page settings
-    $c->stash->{'show_notification_number'} = $c->config->{'show_notification_number'} || 1;
-
-    # set strict passive mode
-    $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 1;
 
     # initialize our backends
     unless ( defined $c->{'db'} ) {
@@ -175,8 +205,6 @@ sub begin : Private {
     if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
         $c->stash->{'target'} = '_parent';
     }
-
-    $c->stash->{'show_full_commandline'} = $c->config->{'show_full_commandline'} || 0;
 
     return 1;
 }

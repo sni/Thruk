@@ -129,7 +129,7 @@ sub _process_cgi_page {
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         # check for empty multi selects
         for my $key (keys %{$defaults}) {
-            next if $key !~ m/^authorized_for_/;
+            next if $key !~ m/^authorized_for_/mx;
             $data->{$key} = [] unless defined $data->{$key};
         }
         $self->_store_changes($c, $file, $data, $defaults);
@@ -292,7 +292,7 @@ sub _process_users_page {
         my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
         my $new_data              = {};
         for my $key (keys %{$c->{'request'}->{'parameters'}}) {
-            next unless $key =~ m/data\.authorized_for_/;
+            next unless $key =~ m/data\.authorized_for_/mx;
             $key =~ s/^data\.//gmx;
             my $users = {};
             for my $usr (@{$data->{$key}->[1]}) {

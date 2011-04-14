@@ -44,7 +44,7 @@
     });
     var current_backend_states = initial_backend_states.clone();
     var theme                  = '[% theme %]';
-    var ajax_search_enabled    = '[% ajax_search %]';
+    var ajax_search_enabled    = '[% use_ajax_search %]';
     var url_prefix             = '[% url_prefix %]';
 
     [% IF refresh_rate %]    var refresh_rate = [% refresh_rate %];[% END %]
