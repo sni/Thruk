@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.92    Sun Apr 10 20:15:13 CEST 2011
+          - added Thruk theme
           - added config tool for cgi.cfg and thruk.conf
           - sidebar search autosubmits on select
           - fixed problem with "delete all downtimes" link
