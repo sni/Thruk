@@ -1,3 +1,14 @@
+.servicePENDING  { background-color: #ACACAC; }
+.serviceOK       { background-color: #C0FFC0; }
+.serviceUNKNOWN  { background-color: #FF9900; }
+.serviceWARNING  { background-color: #FFFFC0; }
+.serviceCRITICAL { background-color: #FFC0C0; }
+
+.hostUP          { background-color: #C0FFC0; }
+.hostDOWN        { background-color: #FFC0C0; }
+.hostUNREACHABLE { background-color: #FFC0C0; }
+.hostPENDING     { background-color: #ACACAC; }
+
 /* navbar */
 div.navbar {
   background: #F9F9F7 url('../images/bg.png') repeat-x;
@@ -6,4 +17,44 @@ div.navbar {
 
 div.navsection {
     margin: 3px 0 0 0;
+}
+
+TABLE.infoBox {
+  padding: 0px;
+  padding-left: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
+  background-color: #F0F1F5;
+  border-top: 1px #E2DECD outset;
+  border-left: 1px #E2DECD outset;
+  border-right: 1px #E2DECD outset;
+  border-bottom: 1px #E2DECD outset;
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+  width: 240px;
+}
+DIV.infoBoxTitle {
+  padding-bottom: 5px;
+  font-weight: bold;
+}
+TD.infoBox,TD.filter {
+  border: medium none;
+}
+
+.infoBoxBadProcStatus {
+    color: red;
+}
+
+
+TABLE.pref_pane {
+  padding-left: 5px;
+  background-color: #F0F1EE;
+  border-bottom: 1px #E2DECD outset;
+  border-left: 1px #E2DECD outset;
+  border-right: 1px #E2DECD outset;
+  color: #444444;
+}
+TABLE.pref_pane tbody > tr > td {
+  border: medium none;
+  background-color: #F0F1EE;
 }

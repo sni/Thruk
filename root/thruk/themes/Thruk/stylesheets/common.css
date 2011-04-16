@@ -2,7 +2,8 @@ body {
   background: #F9F9F7 url('../images/bg.png') repeat-x;
   font-size: 11px;
   font-family: "trebuchet ms", helvetica, sans-serif;
-  color: #8C8C73;
+  /* color: #8C8C73; */
+  color: #444444;
   line-height: 18px;
 }
 
