@@ -44,7 +44,7 @@ sub get_thruk_cfg {
                 ajax_search_hostgroups                  => ['BOOL',   '1'],
                 ajax_search_services                    => ['BOOL',   '1'],
                 ajax_search_servicegroups               => ['BOOL',   '1'],
-                default_theme                           => ['LIST',   'Classic', Thruk::Utils::Conf::to_hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}) ],
+                default_theme                           => ['LIST',   'Classic', Thruk::Utils::array2hash($c->stash->{'themes'}) ],
                 tmp_path                                => ['STRING', ''],
                 ssi_path                                => ['STRING', ''],
                 plugin_path                             => ['STRING', ''],
@@ -55,7 +55,7 @@ sub get_thruk_cfg {
                 group_paging_overview                   => ['ARRAY',  []],
                 group_paging_summary                    => ['ARRAY',  []],
                 group_paging_grid                       => ['ARRAY',  []],
-                info_popup_event_type                   => ['LIST', 'onclick', Thruk::Utils::Conf::to_hash([qw/onclick onmouseover/]) ],
+                info_popup_event_type                   => ['LIST', 'onclick', Thruk::Utils::array2hash([qw/onclick onmouseover/]) ],
                 info_popup_options                      => ['STRING', ''],
                 show_notification_number                => ['BOOL',   '1'],
                 show_full_commandline                   => ['LIST',   '', { '0' => 'off', '1' => 'authorized_for_configuration_information only', '2' => 'everyone' } ],
@@ -68,8 +68,8 @@ sub get_thruk_cfg {
                 datetime_format_long                    => ['STRING', ''],
                 datetime_format_log                     => ['STRING', ''],
                 datetime_format_trends                  => ['STRING', ''],
-                statusmap_default_type                  => ['LIST', '', Thruk::Utils::Conf::to_hash([qw/circle table/]) ],
-                statusmap_default_groupby               => ['LIST', '', Thruk::Utils::Conf::to_hash([qw/parent address domain hostgroup servicegroup/]) ],
+                statusmap_default_type                  => ['LIST', '', Thruk::Utils::array2hash([qw/circle table/]) ],
+                statusmap_default_groupby               => ['LIST', '', Thruk::Utils::array2hash([qw/parent address domain hostgroup servicegroup/]) ],
                 use_wait_feature                        => ['BOOL',   '1'],
 #                check_local_states
     };

@@ -217,25 +217,6 @@ sub get_data_from_param {
 
 ##########################################################
 
-=head2 get_data_from_param
-
-get data hash from post parameter
-
-=cut
-
-sub to_hash {
-    my $array = shift;
-    my $hash  = {};
-
-    for my $elem (@{$array}) {
-        $hash->{$elem} = $elem;
-    }
-
-    return $hash;
-}
-
-##########################################################
-
 =head2 get_cgi_user_list
 
 get list of cgi users from cgi.cfg, htpasswd and contacts table

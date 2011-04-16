@@ -148,13 +148,15 @@ sub begin : Private {
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
+    my $available_themes = Thruk::Utils::array2hash($c->stash->{'themes'});
+    $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
+    $c->stash->{'theme'} = $theme;
     if( defined $c->config->{templates_paths} ) {
         $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
     else {
         $c->stash->{additional_template_paths} = [ $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
-    $c->stash->{'theme'} = $theme;
 
     if(exists $c->{'request'}->{'parameters'}->{'noheader'}) {
         $c->{'request'}->{'parameters'}->{'hidetop'}  = 1;

@@ -1014,8 +1014,14 @@ sub array2hash {
     my $key   = shift;
 
     return {} unless defined $data;
+    confess("not an array") unless ref $data eq 'ARRAY';
 
-    my %hash = map { $_->{$key} => $_ } @{$data};
+    my %hash;
+    if(defined $key) {
+        %hash = map { $_->{$key} => $_ } @{$data};
+    } else {
+        %hash = map { $_ => $_ } @{$data};
+    }
 
     return \%hash;
 }
@@ -1089,7 +1095,6 @@ sub normal_mktime {
     $timestamp += $add_time;
     return $timestamp;
 }
-
 
 ########################################
 sub _initialassumedhoststate_to_state {
