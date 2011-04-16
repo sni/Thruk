@@ -37,7 +37,6 @@ TABLE.infoBox {
 }
 DIV.infoBoxTitle {
   padding-bottom: 5px;
-  font-weight: bold;
 }
 TABLE.linkBox {
   padding: 3px;
@@ -136,4 +135,46 @@ td.filterValue:hover {
 }
 #search-results a.ajax_search_selected, #search-results a:hover {
   background-color: #c0c0ff;
+}
+
+.infoMessage,.optionBoxTitle,.dataTitle,.infoBoxTitle,.filterTitle,.filterValue,.statusTitle,.itemTotalsTitle,.queueTitle,.optBoxTitle,.descriptionTitle,.navBoxTitle {
+  font-weight: bold;
+}
+
+
+
+
+TABLE.data {
+  margin: 0px;
+  text-align: center;
+  background-color: #F0F1F5;
+  border: 1px #E2DECD outset;
+}
+
+TH.data  {
+  padding: 0px;
+  border: none;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  height: 20px;
+  border-right: 1px #E2DECD solid;
+  background-color: #F0F1F5;
+  background-image: url(../images/border_small.gif);
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+TD.dataOdd  {
+  padding: 1px;
+  background-color: #E7E5DD;
+  height: 22px;
+}
+
+
+TD.dataEven  {
+  padding: 1px;
+  background-color: #DEDBD2;
+  height: 22px;
 }

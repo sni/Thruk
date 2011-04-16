@@ -1,0 +1,185 @@
+TABLE.command {
+  padding: 0px;
+  text-align: center;
+  background-color: #F0F1F5;
+}
+
+
+TD.commandPanel {
+  text-align: center;
+  background-color: #F0F1F5;
+  margin: 2px;
+  border: 1px #E2DECD outset;
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+}
+
+DIV.dataTitle,DIV.perfTypeTitle,DIV.commandTitle,DIV.dataTitle {
+  padding: 0px;
+  height: 20px;
+  font-weight: bold;
+  vertical-align: middle;
+  text-align: center;
+}
+
+DIV.data {
+  padding: 0px;
+  height: 20px;
+  font-style: italic;
+  font-weight: bold;
+  vertical-align: middle;
+  text-align: left;
+  text-decoration: underline ;
+}
+
+TD.command {
+  text-align: right;
+  padding: 0px;
+  padding-left: 2px;
+  padding-right: 2px;
+  height: 20px;
+}
+
+TD.stateInfoPanel {
+  text-align: center;
+  background-color: #F0F1F5;
+  margin: 2px;
+  border: 1px #E2DECD outset;
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+  width: 500px;
+}
+
+.stateInfoTable1 {
+  background-color: #F0F1F5;
+  width: 500px;
+}
+
+.stateInfoTable2 {
+  background-color: #F0F1F5;
+  width: 500px;
+}
+
+.dataVar {
+  font-weight: bold;
+  width: 300px;
+  text-align: left;
+}
+
+.dataVal {
+  width: 200px;
+  text-align: left;
+}
+
+.notificationsENABLED,.queueENABLED,.eventhandlersENABLED,.checksENABLED,.flapdetectionENABLED,.notflapping,.downtimeINACTIVE {
+  background-color: #C0FFC0;
+}
+
+.notificationsDISABLED,.queueDISABLED,.checksDISABLED,.eventhandlersDISABLED,.flapdetectionDISABLED,.flapping,.downtimeACTIVE {
+  background-color: #FFC0C0;
+
+}
+
+.processOK,.hostUP,.serviceOK {
+  background-color: #C0FFC0;
+}
+
+.processWARNING,.serviceWARNING {
+  background-color: #FFFFC0;
+
+}
+
+.processCRITICAL,.hostDOWN,.hostUNREACHABLE,.serviceCRITICAL {
+  background-color: #FFC0C0;
+
+}
+
+DIV.commentNav,DIV.downtimeNav {
+  text-align: center;
+  font-weight: bold;
+}
+
+DIV.commentTitle,DIV.downtimeTitle {
+  padding-top: 15px;
+  padding-bottom: 5px;
+  font-weight: bold;
+  text-align: center;
+}
+
+DIV.comment,DIV.downtime {
+  text-align: left;
+  vertical-align: top;
+}
+
+TABLE.comment,TABLE.downtime {
+  text-align: center;
+  background-color: #F0F1F5;
+  border: 1px #E2DECD outset;
+  width: 100%;
+}
+
+TH.comment,TH.downtime {
+  padding: 0px;
+  border: none;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  height: 20px;
+  border-right: 1px #E2DECD solid;
+  background-color: #F0F1F5;
+  background-image: url(../images/border_small.gif);
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+TD.comment,TD.downtime {
+  padding: 0px;
+}
+
+TD.commentOdd,TD.downtimeOdd {
+  padding: 1px;
+  background-color: #E7E5DD;
+  height: 22px;
+}
+
+TD.commentEven,TD.downtimeEven {
+  padding: 1px;
+  background-color: #DEDBD2;
+  height: 22px;
+}
+
+TABLE.queue {
+  text-align: center;
+  background-color: #F0F1F5;
+  border: 1px #E2DECD outset;
+  width: 100%;
+}
+
+TH.queue {
+  padding: 0px;
+  border: none;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  height: 20px;
+  border-right: 1px #E2DECD solid;
+  background-color: #F0F1F5;
+  background-image: url(../images/border_small.gif);
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+TD.queueOdd {
+  padding: 1px;
+  background-color: #E7E5DD;
+  height: 22px;
+}
+
+
+TD.queueEven {
+  padding: 1px;
+  background-color: #DEDBD2;
+  height: 22px;
+}

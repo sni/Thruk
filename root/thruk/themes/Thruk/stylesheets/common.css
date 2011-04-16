@@ -110,7 +110,6 @@ ul.navsectionlinks li ul li a:hover {
 
 .navbarsearch input{
     font-size: 8pt;
-    background-color: #F9F9F7;
     width:140px;
 }
 
@@ -161,4 +160,20 @@ ul.navsectionlinks li ul li a:hover {
 }
 #splashpage #mainfooter .logos{
     margin: 15px 0 0 0;
+}
+
+
+TD.filter_table {
+  background-color: #F0F1EE;
+}
+TABLE.filter_table {
+  padding-left: 5px;
+  background-color: #F0F1EE;
+  border-bottom: 1px #E2DECD outset;
+  border-left: 1px #E2DECD outset;
+  border-right: 1px #E2DECD outset;
+}
+
+td.filter {
+    padding-left: 5px;
 }

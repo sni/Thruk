@@ -90,8 +90,8 @@ sub _show_step_3 {
         ($host,$service) = split/;/mx, $service;
     }
 
-    $c->stash->{host}    = $host;
-    $c->stash->{service} = $service;
+    $c->stash->{host}    = $host    || '';
+    $c->stash->{service} = $service || '';
 
     $c->stash->{template}    = 'trends_step_3.tt';
 

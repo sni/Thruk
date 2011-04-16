@@ -90,8 +90,10 @@ A.hostTotals:hover,A.serviceTotals:hover {
 TABLE.status {
     text-align: center;
     background-color: #F0F1F5;
+    /*
     border: 1px #E2DECD outset;
     width: 100%;
+    */
 }
 
 TH.status {
@@ -121,21 +123,6 @@ TD.statusEven {
     background-color: #DEDBD2;
 }
 
-TD.filter_table {
-  background-color: #F0F1EE;
-}
-TABLE.filter_table {
-  padding-left: 5px;
-  background-color: #F0F1EE;
-  border-bottom: 1px #E2DECD outset;
-  border-left: 1px #E2DECD outset;
-  border-right: 1px #E2DECD outset;
-}
-
 td.statusEven, td.statusOdd {
     height: 22px;
-}
-
-td.filter {
-    padding-left: 5px;
 }

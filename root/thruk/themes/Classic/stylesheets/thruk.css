@@ -400,12 +400,8 @@ table.overDivTable a {
   color:#000000;
 }
 
-td.filter select {
-  border: 0px;
-}
 td.filterValueInput input {
   width: 135px;
-  border: 0px;
 }
 td.filterValueInput {
   white-space: nowrap;
