@@ -148,7 +148,7 @@ sub begin : Private {
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
     my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
-    my $available_themes = Thruk::Utils::array2hash($c->stash->{'themes'});
+    my $available_themes = Thruk::Utils::array2hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'});
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
     if( defined $c->config->{templates_paths} ) {
