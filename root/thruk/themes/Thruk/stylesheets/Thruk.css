@@ -73,25 +73,15 @@ TABLE.pref_pane tbody > tr > td {
 TABLE.cmd_pane {
   padding: 0px;
   margin: 0px;
-  background-color: #F0F1F5;
-  border: 3px #FFFFFF outset;
-  /*
-  border-top: 1px #E2DECD outset;
-  border-left: 1px #E2DECD outset;
-  border-right: 1px #E2DECD outset;
-  border-bottom: 1px #E2DECD outset;
-  */
-  /*
-  background-image: url(../images/border_big.gif);
-  background-repeat: repeat-x;
-  */
+  background-color: #FFFFFF;
+  border: 1px solid #666666;
 }
 TABLE.cmd_pane tbody > tr > th {
   background: #dfe0de;
 }
 TABLE.cmd_pane tbody > tr > td {
   border: medium none;
-  background-color: #F0F1EE;
+  background-color: #FFFFFF;
 }
 TABLE.cmd_pane th, TABLE.cmd_pane a, TABLE.cmd_pane a:hover {
   color: #444444;
@@ -100,7 +90,7 @@ TABLE.cmd_pane th, TABLE.cmd_pane a, TABLE.cmd_pane a:hover {
 .filter_button_mini {
   position:relative;
   top: -2px;
-  left: -2px;
+  /* left: -2px; */
 }
 
 .tableRowSelected {
@@ -177,4 +167,120 @@ TD.dataEven  {
   padding: 1px;
   background-color: #DEDBD2;
   height: 22px;
+}
+
+
+TD.hostUP {
+  background-color: #C0FFC0;
+}
+
+TD.hostDOWN,TD.hostUNREACHABLE {
+  background-color: #FFC0C0;
+  font-weight: bold;
+}
+
+TD.statusPENDING,TD.statusHOSTPENDING {
+  background-color: #C0C0FF;
+}
+
+TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK {
+  background-color: #C0FFC0;
+}
+
+
+TD.statusWARNING,TD.serviceWarning {
+  background-color: #FFFFC0;
+}
+
+TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED {
+  background-color: #FFC0C0;
+}
+
+
+TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
+  background-color: #FFEBEB;
+}
+
+TD.statusUNKNOWN,TD.statusBGUNKNOWN,TD.statusBGUNKNOWNACK,TD.statusBGUNKNOWNSCHED {
+}
+
+TD.statusBGWARNING,TD.statusBGWARNINGACK,TD.statusBGWARNINGSCHED {
+}
+
+TD.miniStatusUP,TD.miniStatusOK {
+  padding: 2px;
+  border: 2px #C0FFC0 dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
+  padding: 2px;
+  border: 2px #FFC0C0 dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusPENDING {
+  padding: 2px;
+  border: 2px #C0C0FF dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusWARNING {
+  padding: 2px;
+  border: 2px #FFFFC0 dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusUNKNOWN {
+  padding: 0px;
+  text-align: center;
+}
+
+
+/* overlay for status page */
+.overDivHead {
+  font-size: 9pt;
+  line-height: 9pt;
+  color: #8C8C73;
+}
+TABLE.overDivHead {
+  padding: 3px;
+  margin: 0px;
+  background-color: #F0F1F5;
+  border: 0px none;
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+}
+.overDivTable {
+  font-family: arial,serif;
+  font-size: 8pt;
+}
+table.overDivTable {
+  background-color: #F0F1F5;
+  border: 2px #E2DECD outset;
+  border-spacing: 0px;
+}
+table.overDivTable > tbody > tr > td {
+  margin: 0px;
+  border: 0px none;
+  background-color: #F0F1F5;
+}
+.overDivHead {
+  font-size: 9pt;
+  line-height: 9pt;
+  color: #444444;
+}
+.overDivContent {
+  background-color: #F0F1F5;
+  border: 0x none #000000;
+}
+
+table.overDivTable a {
+  font-size:9pt;
+  font-weight: bold;
+  color: #444444;
 }
