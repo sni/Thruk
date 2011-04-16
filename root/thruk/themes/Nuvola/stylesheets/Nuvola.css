@@ -149,3 +149,7 @@ div.tree td {
 #search-results a{
   width: 120px;
 }
+
+.tableRowHover, td.newfilter:hover {
+    height: 22px;
+}

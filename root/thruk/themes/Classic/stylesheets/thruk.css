@@ -333,7 +333,6 @@ th.cmd_pane a, th.cmd_pane {
 }
 th.status a:hover {
   color:#DCE5C1;
-  font-size:10pt;
   text-decoration: none;
 }
 td.submit {

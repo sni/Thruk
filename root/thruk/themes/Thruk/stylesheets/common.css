@@ -8,7 +8,8 @@ body {
 }
 
 a {
-  color: #FF7800;
+  /* color: #FF7800; */
+  color: #444444;
   text-decoration: underline;
 }
 
@@ -68,7 +69,6 @@ ul.navsectionlinks li.navbarsearch:hover {
 }
 
 ul.navsectionlinks li a {
-    color: #444444;
     font-weight: bold;
     font-size: 9pt;
     padding: 0 0 0 15px;

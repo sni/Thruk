@@ -12,7 +12,9 @@
 /* navbar */
 div.navbar {
   background: #F9F9F7 url('../images/bg.png') repeat-x;
+  background-color: #F9F9F7;
   color: #8C8C73;
+  border: 0px none;
 }
 
 div.navsection {
@@ -20,7 +22,7 @@ div.navsection {
 }
 
 TABLE.infoBox {
-  padding: 0px;
+  padding: 3px;
   padding-left: 5px;
   margin-left: 2px;
   margin-right: 2px;
@@ -37,7 +39,16 @@ DIV.infoBoxTitle {
   padding-bottom: 5px;
   font-weight: bold;
 }
-TD.infoBox,TD.filter {
+TABLE.linkBox {
+  padding: 3px;
+  padding-left: 5px;
+  background-color: #F0F1F5;
+  border-top: 1px #E2DECD outset;
+  border-left: 1px #E2DECD outset;
+  border-right: 1px #E2DECD outset;
+  border-bottom: 1px #E2DECD outset;
+}
+TD, TH {
   border: medium none;
 }
 
@@ -57,4 +68,72 @@ TABLE.pref_pane {
 TABLE.pref_pane tbody > tr > td {
   border: medium none;
   background-color: #F0F1EE;
+}
+
+
+TABLE.cmd_pane {
+  padding: 0px;
+  margin: 0px;
+  background-color: #F0F1F5;
+  border: 3px #FFFFFF outset;
+  /*
+  border-top: 1px #E2DECD outset;
+  border-left: 1px #E2DECD outset;
+  border-right: 1px #E2DECD outset;
+  border-bottom: 1px #E2DECD outset;
+  */
+  /*
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+  */
+}
+TABLE.cmd_pane tbody > tr > th {
+  background: #dfe0de;
+}
+TABLE.cmd_pane tbody > tr > td {
+  border: medium none;
+  background-color: #F0F1EE;
+}
+TABLE.cmd_pane th, TABLE.cmd_pane a, TABLE.cmd_pane a:hover {
+  color: #444444;
+}
+
+.filter_button_mini {
+  position:relative;
+  top: -2px;
+  left: -2px;
+}
+
+.tableRowSelected {
+    background: #8fc6ff;
+    height: 22px;
+}
+.tableRowHover, td.newfilter:hover {
+    background: #c0c0ff;
+}
+element.style {
+    visibility: visible;
+}
+
+TD.statusHOSTPENDING,
+TD.statusHOSTDOWN,
+TD.statusHOSTUP,
+TD.statusHOSTUNREACHABLE,
+TD.statusSERVICEOK,
+TD.statusSERVICEWARNING,
+TD.statusSERVICECRITICAL,
+TD.statusSERVICEUNKNOWN,
+TD.statusSERVICEPENDING,
+TABLE.status tbody tr td.tableRowHover {
+    height: 22px;
+}
+
+td.filterValue:hover {
+  background-color: #c0c0ff;
+}
+#search-results {
+    background: #F9F9F7;
+}
+#search-results a.ajax_search_selected, #search-results a:hover {
+  background-color: #c0c0ff;
 }
