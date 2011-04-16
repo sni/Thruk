@@ -1,13 +1,85 @@
-.servicePENDING  { background-color: #ACACAC; }
-.serviceOK       { background-color: #C0FFC0; }
-.serviceUNKNOWN  { background-color: #FF9900; }
-.serviceWARNING  { background-color: #FFFFC0; }
-.serviceCRITICAL { background-color: #FFC0C0; }
+input.button_peerUP   { background-color: #00FF33; }
+input.button_peerDOWN { background-color: #FF3300; }
 
-.hostUP          { background-color: #C0FFC0; }
-.hostDOWN        { background-color: #FFC0C0; }
-.hostUNREACHABLE { background-color: #FFC0C0; }
+.servicePENDING  { background-color: #ACACAC; }
+.serviceOK       { background-color: #00FF33; }
+.serviceUNKNOWN  { background-color: #FF9E00; }
+.serviceWARNING  { background-color: #FFDE00; }
+.serviceCRITICAL { background-color: #FF3300; }
+
+.hostUP          { background-color: #00FF33; }
+.hostDOWN        { background-color: #FF3300; }
+.hostUNREACHABLE { background-color: #FF0038; }
 .hostPENDING     { background-color: #ACACAC; }
+
+/* status colors */
+TD.hostUP {
+  background-color: #00FF33;
+}
+
+TD.hostDOWN {
+  background-color: #FF3300;
+  font-weight: bold;
+}
+TD.hostUNREACHABLE {
+  background-color: #FF0038;
+  font-weight: bold;
+}
+TD.statusPENDING,TD.statusHOSTPENDING {
+  background-color: #ACACAC;
+}
+TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK {
+  background-color: #00FF33;
+}
+TD.statusWARNING,TD.serviceWarning {
+  background-color: #FFDE00;
+}
+TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED {
+  background-color: #FF3300;
+}
+TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
+  background-color: #FFC0C0;
+}
+TD.statusUNKNOWN {
+  background-color: #FF9E00;
+}
+TD.statusBGUNKNOWN,TD.statusBGUNKNOWNACK,TD.statusBGUNKNOWNSCHED {
+}
+TD.statusBGWARNING,TD.statusBGWARNINGACK,TD.statusBGWARNINGSCHED {
+}
+
+TD.miniStatusUP,TD.miniStatusOK {
+  padding: 2px;
+  border: 2px #C0FFC0 dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
+  padding: 2px;
+  border: 2px #FFC0C0 dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusPENDING {
+  padding: 2px;
+  border: 2px #C0C0FF dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusWARNING {
+  padding: 2px;
+  border: 2px #FFFFC0 dotted;
+  font-weight: bold;
+  text-align: center;
+}
+
+TD.miniStatusUNKNOWN {
+  padding: 0px;
+  text-align: center;
+}
 
 /* navbar */
 div.navbar {
@@ -168,78 +240,6 @@ TD.dataEven  {
   background-color: #DEDBD2;
   height: 22px;
 }
-
-
-TD.hostUP {
-  background-color: #C0FFC0;
-}
-
-TD.hostDOWN,TD.hostUNREACHABLE {
-  background-color: #FFC0C0;
-  font-weight: bold;
-}
-
-TD.statusPENDING,TD.statusHOSTPENDING {
-  background-color: #C0C0FF;
-}
-
-TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK {
-  background-color: #C0FFC0;
-}
-
-
-TD.statusWARNING,TD.serviceWarning {
-  background-color: #FFFFC0;
-}
-
-TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED {
-  background-color: #FFC0C0;
-}
-
-
-TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
-  background-color: #FFEBEB;
-}
-
-TD.statusUNKNOWN,TD.statusBGUNKNOWN,TD.statusBGUNKNOWNACK,TD.statusBGUNKNOWNSCHED {
-}
-
-TD.statusBGWARNING,TD.statusBGWARNINGACK,TD.statusBGWARNINGSCHED {
-}
-
-TD.miniStatusUP,TD.miniStatusOK {
-  padding: 2px;
-  border: 2px #C0FFC0 dotted;
-  font-weight: bold;
-  text-align: center;
-}
-
-TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
-  padding: 2px;
-  border: 2px #FFC0C0 dotted;
-  font-weight: bold;
-  text-align: center;
-}
-
-TD.miniStatusPENDING {
-  padding: 2px;
-  border: 2px #C0C0FF dotted;
-  font-weight: bold;
-  text-align: center;
-}
-
-TD.miniStatusWARNING {
-  padding: 2px;
-  border: 2px #FFFFC0 dotted;
-  font-weight: bold;
-  text-align: center;
-}
-
-TD.miniStatusUNKNOWN {
-  padding: 0px;
-  text-align: center;
-}
-
 
 /* overlay for status page */
 .overDivHead {

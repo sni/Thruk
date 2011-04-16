@@ -30,11 +30,11 @@ TD.healthBox,TD.perfBox,TD.featureHeader,TD.outageHeader,TD.hostHeader,TD.servic
 
 
 .outageImportantProblem,.hostImportantProblem,.serviceImportantProblem {
-    background-color: #FFC0C0;
+    background-color: #FF3300;
 }
 
 .outageUnimportantProblem,.hostUnimportantProblem,.serviceUnimportantProblem {
-    background-color: #FFEBEB;
+    background-color: #FFC0C0;
 }
 
 
@@ -57,7 +57,7 @@ TD.healthBox,TD.perfBox,TD.featureHeader,TD.outageHeader,TD.hostHeader,TD.servic
 .featureItemEnabledPassiveServiceChecks,
 .featureItemEnabledPassiveHostChecks
 {
-    background-color: #C0FFC0;
+    background-color: #00FF33;
 }
 
 .featureDisabled,
