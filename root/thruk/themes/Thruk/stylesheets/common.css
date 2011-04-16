@@ -41,7 +41,8 @@ a:hover {
 
 .navsectionfooter {
     background: transparent url(../images/menu-bottom.png) no-repeat;
-    height: 12px;
+    height: 7px;
+    line-height: 7px;
 }
 
 div.navsectionlinks {
@@ -61,6 +62,9 @@ ul.navsectionlinks li:hover {
     background: transparent url(../images/menu-body-hover.png) no-repeat;
 }
 
+ul.navsectionlinks li.navbarsearch:hover {
+    background: none;
+}
 
 ul.navsectionlinks li a {
     color: #444444;
@@ -75,12 +79,7 @@ ul.navsectionlinks li ul {
     list-style: none;
 }
 
-ul.navsectionlinks li ul li {
-}
-
 ul.navsectionlinks li ul li a {
-    color: #444444;
-    background: none;
     padding: 0;
     font-weight: normal;
 }
@@ -111,6 +110,7 @@ ul.navsectionlinks li ul li a:hover {
 .navbarsearch input{
     font-size: 8pt;
     background-color: #F9F9F7;
+    width:140px;
 }
 
 
@@ -161,4 +161,3 @@ ul.navsectionlinks li ul li a:hover {
 #splashpage #mainfooter .logos{
     margin: 15px 0 0 0;
 }
-

@@ -41,7 +41,7 @@
             [%+ END %]
           </li>
           [%+ ELSIF link.search %]
-          <li>
+          <li class="navbarsearch">
           <div class="navbarsearch">
             <form method="get" action="[% url_prefix %]thruk/cgi-bin/status.cgi" target="[% link.target %]">
               <fieldset>
