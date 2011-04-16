@@ -178,6 +178,10 @@ closedir $dh;
 $config{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
 ###################################################
+# set some defaults
+__PACKAGE__->config->{'cgi.cfg'}  = exists __PACKAGE__->config->{'cgi.cfg'}  ? __PACKAGE__->config->{'cgi.cfg'}  : 'cgi.cfg';
+
+###################################################
 # load config loader
 __PACKAGE__->config(%config);
 
