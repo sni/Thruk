@@ -16,7 +16,6 @@ input.button_peerDOWN { background-color: #FF3300; }
 TD.hostUP {
   background-color: #00FF33;
 }
-
 TD.hostDOWN {
   background-color: #FF3300;
   font-weight: bold;
@@ -40,8 +39,14 @@ TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.s
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
   background-color: #FFC0C0;
 }
+TD.statusBGWARNING {
+    background-color: #FFEB66;
+}
 TD.statusUNKNOWN {
   background-color: #FF9E00;
+}
+TD.statusBGUNKNOWN {
+  background-color: #FFC566;
 }
 
 TD.miniStatusUP,TD.miniStatusOK {
@@ -118,9 +123,9 @@ div.navsection {
 TABLE.infoBox {
   padding: 3px;
   padding-left: 5px;
-  margin-left: 2px;
+  margin-left: 0px;
   margin-right: 2px;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border-top: 1px #E2DECD outset;
   border-left: 1px #E2DECD outset;
   border-right: 1px #E2DECD outset;
@@ -138,7 +143,7 @@ DIV.infoBoxTitle {
 TABLE.linkBox {
   padding: 3px;
   padding-left: 5px;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border-top: 1px #E2DECD outset;
   border-left: 1px #E2DECD outset;
   border-right: 1px #E2DECD outset;
@@ -186,8 +191,8 @@ TABLE.cmd_pane th, TABLE.cmd_pane a, TABLE.cmd_pane a:hover {
 
 .filter_button_mini {
   position:relative;
-  top: -2px;
-  /* left: -2px; */
+  top: -3px;
+  left: -7px;
 }
 
 .tableRowSelected {
@@ -234,7 +239,7 @@ td.filterValue:hover {
 TABLE.data {
   margin: 0px;
   text-align: center;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border: 1px #E2DECD outset;
 }
 
@@ -247,7 +252,7 @@ TH.data  {
   padding-top: 0px;
   height: 20px;
   border-right: 1px #E2DECD solid;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   background-image: url(../images/border_small.gif);
   background-repeat: repeat-x;
   background-position: bottom;
@@ -274,7 +279,7 @@ TD.dataEven  {
 TABLE.overDivHead {
   padding: 3px;
   margin: 0px;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border: 0px none;
   background-image: url(../images/border_big.gif);
   background-repeat: repeat-x;
@@ -284,14 +289,14 @@ TABLE.overDivHead {
   font-size: 8pt;
 }
 table.overDivTable {
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border: 2px #E2DECD outset;
   border-spacing: 0px;
 }
 table.overDivTable > tbody > tr > td {
   margin: 0px;
   border: 0px none;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
 }
 .overDivHead {
   font-size: 9pt;
@@ -299,7 +304,7 @@ table.overDivTable > tbody > tr > td {
   color: #444444;
 }
 .overDivContent {
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border: 0x none #000000;
 }
 

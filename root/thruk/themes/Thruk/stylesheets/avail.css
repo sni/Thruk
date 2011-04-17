@@ -1,7 +1,7 @@
 TABLE.logEntries {
   margin: 2px;
   text-align: center;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border: 1px #E2DECD outset;
   width: 100%;
 }
@@ -15,7 +15,7 @@ TH.logEntries {
   padding-top: 0px;
   height: 20px;
   border-right: 1px #E2DECD solid;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   background-image: url(../images/border_small.gif);
   background-repeat: repeat-x;
   background-position: bottom;

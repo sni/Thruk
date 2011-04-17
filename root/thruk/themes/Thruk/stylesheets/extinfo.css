@@ -1,13 +1,13 @@
 TABLE.command {
   padding: 0px;
   text-align: center;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
 }
 
 
 TD.commandPanel {
   text-align: center;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   margin: 2px;
   border: 1px #E2DECD outset;
   background-image: url(../images/border_big.gif);
@@ -42,7 +42,7 @@ TD.command {
 
 TD.stateInfoPanel {
   text-align: center;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   margin: 2px;
   border: 1px #E2DECD outset;
   background-image: url(../images/border_big.gif);
@@ -50,11 +50,11 @@ TD.stateInfoPanel {
 }
 
 .stateInfoTable1 {
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
 }
 
 .stateInfoTable2 {
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
 }
 
 TD.stateInfoTable1 > TABLE {
@@ -118,7 +118,7 @@ DIV.comment,DIV.downtime {
 
 TABLE.comment,TABLE.downtime {
   text-align: center;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border: 1px #E2DECD outset;
 }
 
@@ -131,10 +131,11 @@ TH.comment,TH.downtime {
   padding-top: 0px;
   height: 20px;
   border-right: 1px #E2DECD solid;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   background-image: url(../images/border_small.gif);
   background-repeat: repeat-x;
   background-position: bottom;
+  white-space: nowrap;
 }
 
 TD.comment,TD.downtime {
@@ -155,7 +156,7 @@ TD.commentEven,TD.downtimeEven {
 
 TABLE.queue {
   text-align: center;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border: 1px #E2DECD outset;
 }
 
@@ -168,7 +169,7 @@ TH.queue {
   padding-top: 0px;
   height: 20px;
   border-right: 1px #E2DECD solid;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   background-image: url(../images/border_small.gif);
   background-repeat: repeat-x;
   background-position: bottom;
@@ -189,7 +190,7 @@ TD.queueEven {
 DIV.dataTitle, DIV.commandTitle {
   padding: 0px;
   margin: 0px;
-  background-color: #F0F1F5;
+  background-color: #F0F1EE;
   border-top: 1px #E2DECD outset;
   border-left: 1px #E2DECD outset;
   border-right: 1px #E2DECD outset;
