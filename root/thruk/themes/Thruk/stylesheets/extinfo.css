@@ -35,8 +35,8 @@ DIV.data {
 TD.command {
   text-align: right;
   padding: 0px;
-  padding-left: 2px;
-  padding-right: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
   height: 20px;
 }
 
@@ -47,50 +47,55 @@ TD.stateInfoPanel {
   border: 1px #E2DECD outset;
   background-image: url(../images/border_big.gif);
   background-repeat: repeat-x;
-  width: 500px;
 }
 
 .stateInfoTable1 {
   background-color: #F0F1F5;
-  width: 500px;
 }
 
 .stateInfoTable2 {
   background-color: #F0F1F5;
-  width: 500px;
+}
+
+TD.stateInfoTable1 > TABLE {
+    width: 300px;
+}
+TD.stateInfoTable2 > TABLE {
+    width: 300px;
+}
+
+TD.stateInfoTable1 > table > tbody > tr > TD.dataVal {
+    white-space: nowrap;
+}
+DIV.peerDIS, DIV.peerDOWN {
+  text-align: center;
 }
 
 .dataVar {
   font-weight: bold;
-  width: 300px;
-  text-align: left;
-}
-
-.dataVal {
-  width: 200px;
   text-align: left;
 }
 
 .notificationsENABLED,.queueENABLED,.eventhandlersENABLED,.checksENABLED,.flapdetectionENABLED,.notflapping,.downtimeINACTIVE {
-  background-color: #C0FFC0;
+  background-color: #00FF33;
 }
 
 .notificationsDISABLED,.queueDISABLED,.checksDISABLED,.eventhandlersDISABLED,.flapdetectionDISABLED,.flapping,.downtimeACTIVE {
-  background-color: #FFC0C0;
+  background-color: #FF3300;
 
 }
 
 .processOK,.hostUP,.serviceOK {
-  background-color: #C0FFC0;
+  background-color: #00FF33;
 }
 
 .processWARNING,.serviceWARNING {
-  background-color: #FFFFC0;
+  background-color: #FFDE00;
 
 }
 
 .processCRITICAL,.hostDOWN,.hostUNREACHABLE,.serviceCRITICAL {
-  background-color: #FFC0C0;
+  background-color: #FF3300;
 
 }
 
@@ -107,7 +112,7 @@ DIV.commentTitle,DIV.downtimeTitle {
 }
 
 DIV.comment,DIV.downtime {
-  text-align: left;
+  text-align: center;
   vertical-align: top;
 }
 
@@ -115,7 +120,6 @@ TABLE.comment,TABLE.downtime {
   text-align: center;
   background-color: #F0F1F5;
   border: 1px #E2DECD outset;
-  width: 100%;
 }
 
 TH.comment,TH.downtime {
@@ -153,7 +157,6 @@ TABLE.queue {
   text-align: center;
   background-color: #F0F1F5;
   border: 1px #E2DECD outset;
-  width: 100%;
 }
 
 TH.queue {
@@ -177,9 +180,23 @@ TD.queueOdd {
   height: 22px;
 }
 
-
 TD.queueEven {
   padding: 1px;
   background-color: #DEDBD2;
   height: 22px;
+}
+
+DIV.dataTitle, DIV.commandTitle {
+  padding: 0px;
+  margin: 0px;
+  background-color: #F0F1F5;
+  border-top: 1px #E2DECD outset;
+  border-left: 1px #E2DECD outset;
+  border-right: 1px #E2DECD outset;
+  border-bottom: 1px #E2DECD outset;
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+  line-height: 15px;
+  font-size: 16px;
+  font-weight: bold;
 }

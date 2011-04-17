@@ -25,16 +25,16 @@ TD.hostUNREACHABLE {
   background-color: #FF0038;
   font-weight: bold;
 }
-TD.statusPENDING,TD.statusHOSTPENDING {
+TD.statusPENDING,TD.statusHOSTPENDING, A.statusPENDING {
   background-color: #ACACAC;
 }
-TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK {
+TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK, A.statusOK {
   background-color: #00FF33;
 }
-TD.statusWARNING,TD.serviceWarning {
+TD.statusWARNING,TD.serviceWarning, A.statusWARNING {
   background-color: #FFDE00;
 }
-TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED {
+TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED, A.statusCRITICAL {
   background-color: #FF3300;
 }
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
@@ -43,35 +43,31 @@ TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGD
 TD.statusUNKNOWN {
   background-color: #FF9E00;
 }
-TD.statusBGUNKNOWN,TD.statusBGUNKNOWNACK,TD.statusBGUNKNOWNSCHED {
-}
-TD.statusBGWARNING,TD.statusBGWARNINGACK,TD.statusBGWARNINGSCHED {
-}
 
 TD.miniStatusUP,TD.miniStatusOK {
+  background-color: #00FF33;
   padding: 2px;
-  border: 2px #C0FFC0 dotted;
   font-weight: bold;
   text-align: center;
 }
 
 TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
   padding: 2px;
-  border: 2px #FFC0C0 dotted;
+  background-color: #FF3300;
   font-weight: bold;
   text-align: center;
 }
 
 TD.miniStatusPENDING {
+  background-color: #ACACAC;
   padding: 2px;
-  border: 2px #C0C0FF dotted;
   font-weight: bold;
   text-align: center;
 }
 
 TD.miniStatusWARNING {
   padding: 2px;
-  border: 2px #FFFFC0 dotted;
+  background-color: #FFDE00;
   font-weight: bold;
   text-align: center;
 }
@@ -79,6 +75,32 @@ TD.miniStatusWARNING {
 TD.miniStatusUNKNOWN {
   padding: 0px;
   text-align: center;
+  background-color: #FF9E00;
+}
+
+DIV.statusTitle, DIV.dataTitle, DIV.reportSelectTitle, DIV.dateSelectTitle, DIV.navBoxTitle {
+    font-size: 16px;
+    font-weight: bold;
+}
+TD.navBoxItem, TD.navBoxDate {
+    font-size: 12px;
+    font-weight: bold;
+}
+TD.optBoxItem {
+    font-size: 12px;
+    font-weight: bold;
+}
+DIV.perfTypeTitle {
+    font-size: 13px;
+    font-weight: bold;
+}
+td.dataVal {
+    text-align: center;
+}
+
+DIV.errorMessage {
+    text-align: center;
+    color: #FF3300;
 }
 
 /* navbar */
@@ -236,7 +258,6 @@ TD.dataOdd  {
   background-color: #E7E5DD;
   height: 22px;
 }
-
 
 TD.dataEven  {
   padding: 1px;
