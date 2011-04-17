@@ -2311,6 +2311,19 @@ to change your fastcgi configuration too.</p></div>
 <div class="content">
 <pre><tt>url_prefix = /</tt></pre>
 </div></div>
+<h4 id="_logo_path_prefix">logo_path_prefix</h4>
+<div class="paragraph"><p>Changes the path to your logo images. Default is
+$url_prefix+<em>thruk/themes/</em><tt>$current_theme</tt><em>/images/logos/</em> and
+therefor relative to the current selected theme. You could set a fixed
+path here.
+Like usual, paths starting with a / will be absolute from your
+webserver root directory. Paths starting without a / will be relative
+to the cgi directory.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>logo_path_prefix = /icons/</tt></pre>
+</div></div>
 <h4 id="_use_strict_host_authorization">use_strict_host_authorization</h4>
 <div class="paragraph"><p>When set to a true value, every contact will only see the hosts where
 he is contact for plus the services where he is contact for. When
@@ -3397,7 +3410,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-04-10 19:27:45 CEST
+Last updated 2011-04-17 18:32:16 CEST
 </div>
 </div>
 </body>
