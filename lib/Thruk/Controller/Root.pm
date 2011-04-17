@@ -208,6 +208,10 @@ sub begin : Private {
         $c->stash->{'target'} = '_parent';
     }
 
+    # icon image path
+    $c->config->{'logo_path_prefix'} = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/logos/';
+    $c->stash->{'logo_path_prefix'}  = $c->config->{'logo_path_prefix'};
+
     return 1;
 }
 

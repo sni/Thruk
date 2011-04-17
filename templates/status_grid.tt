@@ -113,7 +113,7 @@
                     <tr>
                       <td>
                         [% IF h.icon_image_expanded %]
-                        <a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a>
+                        <a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a>
                         [% END %]
                       </td>
                     </tr>

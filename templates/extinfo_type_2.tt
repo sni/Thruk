@@ -53,7 +53,7 @@
           </div><br>
           <div class='data'>[% service.host_address %]</div>
           [% IF service.icon_image_expanded %]
-          <img src='[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% service.icon_image_expanded %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
+          <img src='[% logo_path_prefix %][% service.icon_image_expanded %]' border="0" alt='[% service.icon_image_alt %]' title='[% service.icon_image_alt %]'><br clear="all">
           [% IF service.icon_image_alt %]<font size="-1"><i>( [% service.icon_image_alt %] )</i></font>[% END %]
           [% END %]
           [% IF service.notes_expanded %]<p>[% service.notes_expanded %]</p>[% END %]

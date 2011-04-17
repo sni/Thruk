@@ -111,7 +111,7 @@
 
                         [% IF h.icon_image_expanded %]
                         <td class='[% hostclass %]' width="5"></td>
-                        <td class='[% hostclass %]' align="right"><a href='extinfo.cgi?type=1&amp;host=[% host_name %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a></td>
+                        <td class='[% hostclass %]' align="right"><a href='extinfo.cgi?type=1&amp;host=[% host_name %]'><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a></td>
                         [% END %]
 
                       </tr>

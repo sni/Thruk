@@ -60,7 +60,7 @@
 
           <div class='data'>[% host.address %]</div>
           [% IF host.icon_image_expanded %]
-          <img src='[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% host.icon_image_expanded %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
+          <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
           [% IF host.icon_image_alt %]<font size="-1"><i>( [% host.icon_image_alt %] )</i></font>[% END %]
           [% END %]
           [% IF host.notes_expanded %]<p>[% host.notes_expanded %]</p>[% END %]
