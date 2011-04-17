@@ -40,10 +40,12 @@ TD.healthBox,TD.perfBox,TD.featureHeader,TD.outageHeader,TD.hostHeader,TD.servic
 
 .outageImportantProblem,.hostImportantProblem,.serviceImportantProblem {
     background-color: #FF3300;
+    white-space: nowrap;
 }
 
 .outageUnimportantProblem,.hostUnimportantProblem,.serviceUnimportantProblem {
     background-color: #FFC0C0;
+    white-space: nowrap;
 }
 
 
