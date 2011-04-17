@@ -109,6 +109,9 @@ TABLE.infoBox {
 }
 DIV.infoBoxTitle {
   padding-bottom: 5px;
+  font-size: 12px;
+  vertical-align: top;
+  line-height: 13px;
 }
 TABLE.linkBox {
   padding: 3px;

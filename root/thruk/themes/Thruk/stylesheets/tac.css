@@ -8,6 +8,15 @@ TD.healthTitle,TD.perfTitle,TD.featureTitle,TD.outageTitle,TD.hostTitle,TD.servi
     background-image: url(../images/border_big.gif);
     background-repeat: repeat-x;
     font-weight: bold;
+    font-size: 12px;
+    vertical-align: middle;
+    line-height: 13px;
+}
+
+TABLE.perfTitleTable, TABLE.perfTitleTable TD, TABLE.perfTitleTable TR {
+    margin: 0px;
+    padding: 0px;
+    border-spacing: 0px;
 }
 
 a.perfTitle, a.perfItem, a.perfValue {

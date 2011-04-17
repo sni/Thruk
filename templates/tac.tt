@@ -15,7 +15,7 @@
               [% END %]
               </td>
               <td>
-                <table border="0" cellspacing="4">
+                <table border="0" cellspacing="4" class="perfTitleTable">
                   <tr>
                     <td class='perfTitle'>&nbsp;<a href='extinfo.cgi?type=4' class='perfTitle'>Monitoring Performance</a></td>
                   </tr>
