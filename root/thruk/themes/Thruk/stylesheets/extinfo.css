@@ -14,7 +14,7 @@ TD.commandPanel {
   background-repeat: repeat-x;
 }
 
-DIV.dataTitle,DIV.perfTypeTitle,DIV.commandTitle,DIV.dataTitle {
+DIV.dataTitle,DIV.perfTypeTitle,DIV.commandTitle {
   padding: 0px;
   height: 20px;
   font-weight: bold;
@@ -27,9 +27,8 @@ DIV.data {
   height: 20px;
   font-style: italic;
   font-weight: bold;
-  vertical-align: middle;
-  text-align: left;
-  text-decoration: underline ;
+  text-align: center;
+  font-size: 12px;
 }
 
 TD.command {
@@ -39,7 +38,15 @@ TD.command {
   padding-right: 4px;
   height: 20px;
 }
+TABLE.command {
+    border-spacing: 4px;
+    border: 0px none;
+    background-color: #E7E5DD;
+}
 
+TABLE.extdetails {
+  width: auto;
+}
 TD.stateInfoPanel {
   text-align: center;
   background-color: #F0F1EE;
@@ -52,16 +59,33 @@ TD.stateInfoPanel {
 .stateInfoTable1 {
   background-color: #F0F1EE;
 }
-
 .stateInfoTable2 {
   background-color: #F0F1EE;
 }
 
+TD.stateInfoTable1, TD.stateInfoTable2  {
+  border: 1px #E2DECD outset;
+}
+
+TABLE.commandPanel {
+  border: 1px #E2DECD outset;
+}
+TABLE.commandPanel TD {
+  background-color: #E7E5DD;
+}
+TABLE.commandPanel TH {
+  background-color: #E7E5DD;
+  vertical-align: top;
+  border: 0px none;
+  background-image: none;
+}
+
+/* used on performance page */
 TD.stateInfoTable1 > TABLE {
-    width: 300px;
+    width: 100%;
 }
 TD.stateInfoTable2 > TABLE {
-    width: 300px;
+    width: 100%;
 }
 
 TD.stateInfoTable1 > table > tbody > tr > TD.dataVal {
@@ -69,11 +93,13 @@ TD.stateInfoTable1 > table > tbody > tr > TD.dataVal {
 }
 DIV.peerDIS, DIV.peerDOWN {
   text-align: center;
+  width: 100%;
 }
 
 .dataVar {
   font-weight: bold;
   text-align: left;
+  vertical-align: top;
 }
 
 .notificationsENABLED,.queueENABLED,.eventhandlersENABLED,.checksENABLED,.flapdetectionENABLED,.notflapping,.downtimeINACTIVE {
@@ -187,7 +213,7 @@ TD.queueEven {
   height: 22px;
 }
 
-DIV.dataTitle, DIV.commandTitle {
+DIV.commandTitle {
   padding: 0px;
   margin: 0px;
   background-color: #F0F1EE;

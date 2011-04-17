@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  <table border="0" class='data'>
+  <table border="0" class='data confTable'>
     <tr>
       <th class='data'>Module</th>
       <th class='data'>Description</th>

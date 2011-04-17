@@ -23,7 +23,7 @@
       <table border="0" cellpadding="20">
         <tr>
           <td valign="top">
-            <div class='dataTitle'>Process Information</div>
+            <div class='dataTitle blockHead'>Process Information</div>
             <table border="1" cellspacing="0" cellpadding="0" class='data'>
               <tr>
                 <td class='stateInfoTable1'>

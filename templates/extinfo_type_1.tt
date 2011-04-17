@@ -107,7 +107,7 @@
     [% PROCESS _message.tt %]
 
     <div align="center">
-      <table border="0" cellpadding="0" width="100%">
+      <table border="0" cellpadding="0" width="100%" class="extdetails">
         <tr>
           <td align="center" valign="top" class='stateInfoPanel'>
             <div class='dataTitle'>Host State Information</div>
@@ -116,7 +116,7 @@
                 <td>
                   <table border="1" cellspacing="0" cellpadding="0" class="data">
                     <tr>
-                      <td class='stateInfoTable1'>
+                      <td class='stateInfoTable1 extdetails'>
                         <table border="0">
                           <tr>
                             <td class='dataVar'>Host Status:</td>
@@ -241,7 +241,7 @@
                 <td>
                   <table border="1" cellspacing="0" cellpadding="0" class="data">
                     <tr>
-                      <td class='stateInfoTable2'>
+                      <td class='stateInfoTable2 checkstatus'>
                         <table border="0">
                           <tr>
                             <td class='dataVar'>Active Checks:</td>
@@ -588,7 +588,7 @@
             <br>
             <a name="command" id="command"></a>
             <div class='commentTitle'>Configuration Information</div>
-            <table border="0">
+            <table border="0" class="commandPanel">
               <tr>
                 <th class='comment' nowrap>Check Command</th>
                 <td class='comment'>

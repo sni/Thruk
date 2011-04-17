@@ -19,34 +19,44 @@ TD.hostUP {
 TD.hostDOWN {
   background-color: #FF3300;
   font-weight: bold;
+  height: 22px;
 }
 TD.hostUNREACHABLE {
   background-color: #FF0038;
   font-weight: bold;
+  height: 22px;
 }
 TD.statusPENDING,TD.statusHOSTPENDING, A.statusPENDING {
   background-color: #ACACAC;
+  height: 22px;
 }
 TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK, A.statusOK {
   background-color: #00FF33;
+  height: 22px;
 }
 TD.statusWARNING,TD.serviceWarning, A.statusWARNING {
   background-color: #FFDE00;
+  height: 22px;
 }
 TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED, A.statusCRITICAL {
   background-color: #FF3300;
+  height: 22px;
 }
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
   background-color: #FFC0C0;
+  height: 22px;
 }
 TD.statusBGWARNING {
     background-color: #FFEB66;
+  height: 22px;
 }
 TD.statusUNKNOWN {
   background-color: #FF9E00;
+  height: 22px;
 }
 TD.statusBGUNKNOWN {
   background-color: #FFC566;
+  height: 22px;
 }
 
 TD.miniStatusUP,TD.miniStatusOK {
@@ -83,7 +93,7 @@ TD.miniStatusUNKNOWN {
   background-color: #FF9E00;
 }
 
-DIV.statusTitle, DIV.dataTitle, DIV.reportSelectTitle, DIV.dateSelectTitle, DIV.navBoxTitle {
+DIV.statusTitle, DIV.dataTitle, DIV.reportSelectTitle, DIV.dateSelectTitle, DIV.navBoxTitle, DIV.commentTitle, DIV.downtimeTitle {
     font-size: 16px;
     font-weight: bold;
 }
@@ -131,10 +141,7 @@ TABLE.infoBox {
   margin-left: 0px;
   margin-right: 2px;
   background-color: #F0F1EE;
-  border-top: 1px #E2DECD outset;
-  border-left: 1px #E2DECD outset;
-  border-right: 1px #E2DECD outset;
-  border-bottom: 1px #E2DECD outset;
+  border: 1px #E2DECD outset;
   background-image: url(../images/border_big.gif);
   background-repeat: repeat-x;
   width: 240px;
@@ -239,13 +246,29 @@ td.filterValue:hover {
 }
 
 
+DIV.blockHead {
+  padding: 0px;
+  margin: 0px;
+  background-color: #F0F1EE;
+  border: 1px #E2DECD outset;
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+  line-height: 15px;
+  font-size: 16px;
+  font-weight: bold;
+}
 
 
 TABLE.data {
   margin: 0px;
   text-align: center;
   background-color: #F0F1EE;
-  border: 1px #E2DECD outset;
+  /* border: 1px #E2DECD outset; */
+  border: 0px none;
+  width: 100%;
+}
+TD.stateInfoPanel > table {
+  width: 100%;
 }
 
 TH.data  {
@@ -317,4 +340,15 @@ table.overDivTable a {
   font-size:9pt;
   font-weight: bold;
   color: #444444;
+}
+
+TD.extdetails {
+    border: 0px none;
+}
+TD.checkstatus {
+    border: 0px none;
+    border-top: 1px solid #444444;
+}
+TD.checkstatus > table {
+    width: 300px;
 }
