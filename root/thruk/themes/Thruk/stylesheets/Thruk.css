@@ -104,8 +104,13 @@ td.dataVal {
 }
 
 DIV.errorMessage {
+    font-size: 13px;
     text-align: center;
     color: #FF3300;
+}
+DIV.errorDescription {
+    font-size: 10px;
+    text-align: center;
 }
 
 /* navbar */
