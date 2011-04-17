@@ -191,13 +191,16 @@ DIV.dataTitle, DIV.commandTitle {
   padding: 0px;
   margin: 0px;
   background-color: #F0F1EE;
-  border-top: 1px #E2DECD outset;
-  border-left: 1px #E2DECD outset;
-  border-right: 1px #E2DECD outset;
-  border-bottom: 1px #E2DECD outset;
+  border: 1px #E2DECD outset;
   background-image: url(../images/border_big.gif);
   background-repeat: repeat-x;
   line-height: 15px;
   font-size: 16px;
   font-weight: bold;
+}
+
+DIV.perfDataTitle {
+  background-color: transparent;
+  border: 1px none;
+  background-image: none;
 }

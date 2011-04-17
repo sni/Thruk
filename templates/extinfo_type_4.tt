@@ -14,7 +14,7 @@
       </tr>
     </table><br>
     <div align="center">
-      <div class='dataTitle'>Program-Wide Performance Information</div>
+      <div class='dataTitle perfDataTitle'>Program-Wide Performance Information</div>
 
       <table border='0' cellpadding='10'>
         <tr>
