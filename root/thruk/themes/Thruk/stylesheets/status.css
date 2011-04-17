@@ -1,5 +1,10 @@
+DIV.statusTitle {
+    font-size: 16px;
+    font-weight: bold;
+}
+
 DIV.hostTotals,DIV.serviceTotals,DIV.status {
-    font-size: 8pt;
+    font-size: 13px;
     font-weight: bold;
     margin-bottom: 2px;
 }
@@ -9,7 +14,7 @@ TABLE.serviceTotals,TABLE.hostTotals {
     text-align: center;
     background-color: #F0F1F5;
     border: 1px #E2DECD outset;
-    width: 260px;
+    width: 280px;
     background-image: url(../images/border_big.gif);
     background-repeat: repeat-x;
 }
@@ -24,63 +29,45 @@ TH.hostTotals,TH.serviceTotals {
     border-right: 1px #E2DECD solid;
     font-style: normal;
 }
-
-
-TD.hostTotals,TD.serviceTotals {
-    padding: 0px;
-    padding-left: 2px;
-    padding-right: 2px;
-    height: 20px;
+TH.hostTotals {
+    width: 25%;
+}
+TH.serviceTotals {
+    width: 20%;
 }
 
-TD.hostTotalsUP,TD.serviceTotalsOK {
-    padding: 0px;
-    padding-left: 2px;
-    padding-right: 2px;
-    background-image: url(../images/green.gif);
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 20px;
-}
-
-TD.hostTotalsDOWN,TD.hostTotalsUNREACHABLE,TD.serviceTotalsCRITICAL {
-    padding: 0px;
-    padding-left: 2px;
-    padding-right: 2px;
-    background-image: url(../images/red.gif);
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 20px;
-}
-
-TD.hostTotalsPENDING,TD.serviceTotalsPENDING,TD.serviceTotalsUNKNOWN {
-    padding: 0px;
-    padding-left: 2px;
-    padding-right: 2px;
-    background-image: url(../images/blue.gif);
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 20px;
-}
-
-TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS {
-    padding: 0px;
-    padding-left: 2px;
-    padding-right: 2px;
-    background-image: url(../images/orange.gif);
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 20px;
-}
-
+TD.hostTotals,TD.serviceTotals,
+TD.hostTotalsUP,TD.serviceTotalsOK,
+TD.hostTotalsDOWN,TD.hostTotalsUNREACHABLE,TD.serviceTotalsCRITICAL,
+TD.hostTotalsPENDING,TD.serviceTotalsPENDING,
+TD.serviceTotalsUNKNOWN,
+TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS,
 TD.hostTotalsPROBLEMS,TD.serviceTotalsWARNING {
     padding: 0px;
     padding-left: 2px;
     padding-right: 2px;
-    background-image: url(../images/yellow.gif);
+    height: 20px;
     background-repeat: no-repeat;
     background-position: center;
-    height: 20px;
+}
+
+TD.hostTotalsUP,TD.serviceTotalsOK {
+    background-image: url(../images/green.gif);
+}
+TD.hostTotalsDOWN,TD.hostTotalsUNREACHABLE,TD.serviceTotalsCRITICAL {
+    background-image: url(../images/red.gif);
+}
+TD.hostTotalsPENDING,TD.serviceTotalsPENDING {
+    background-image: url(../images/blue.gif);
+}
+TD.serviceTotalsUNKNOWN {
+    background-image: url(../images/orange.gif);
+}
+TD.hostTotalsPROBLEMS,TD.serviceTotalsPROBLEMS {
+    background-image: url(../images/orange.gif);
+}
+TD.serviceTotalsWARNING {
+    background-image: url(../images/yellow.gif);
 }
 
 A.hostTotals:hover,A.serviceTotals:hover {
@@ -90,10 +77,6 @@ A.hostTotals:hover,A.serviceTotals:hover {
 TABLE.status {
     text-align: center;
     background-color: #F0F1F5;
-    /*
-    border: 1px #E2DECD outset;
-    width: 100%;
-    */
 }
 
 TH.status {
