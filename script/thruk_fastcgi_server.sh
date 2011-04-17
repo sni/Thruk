@@ -1,11 +1,13 @@
 #!/bin/bash
 #
-# thruk_fastcgi_server.sh : thruk fastcgi daemon start/stop script
-#
-# chkconfig: 2345 84 16
-# description: thruk fastcgi daemon start/stop script
-# processname: fcgi
-# pidfile: /tmp/thruk_fastcgi.pid
+### BEGIN INIT INFO
+# Provides:          thruk_fastcgi
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: startup script for thruk fastcgi server
+### END INIT INFO
 #
 # 2010-02-12 by Sven Nierlein
 
