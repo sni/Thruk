@@ -562,3 +562,10 @@ td.stateInfoTable1 .dataVal {
 .config_info {
     white-space: pre-wrap;
 }
+
+body.config TABLE.conftool {
+    width: auto;
+}
+body.config TABLE.conftoolusers {
+    width: 400px;
+}

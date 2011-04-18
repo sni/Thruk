@@ -5,7 +5,7 @@
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <div align="center">
-  <table border="0" class='data'>
+  <table border="0" class='data conftool'>
     [% FOREACH cat = keys %]
         [% UNLESS loop.first %]
         <tr><td colspan=2>&nbsp;</td></tr>

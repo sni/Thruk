@@ -4,7 +4,7 @@
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="type" value="users">
 <input type="hidden" name="action" value="change">
-  <table border="0" class='data' width=400>
+  <table border="0" class='data conftoolusers'>
     <tr>
       <th colspan=2 class='data' style="text-align:center">select user to change</th>
     </tr>
@@ -31,7 +31,7 @@
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <input type="hidden" name="data.username" value="[% user_name %]">
-  <table border="0" class='data' width=400>
+  <table border="0" class='data conftoolusers'>
     <tr>
       <th colspan=2 class='data' style="text-align:center">[% user_name %]</th>
     </tr>
