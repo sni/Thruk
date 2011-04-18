@@ -1625,15 +1625,6 @@ var ajax_search = {
 
         var input = document.getElementById(ajax_search.input_field);
 
-        var tmpElem = input;
-        while(tmpElem && tmpElem.parentNode) {
-            tmpElem = tmpElem.parentNode;
-            if(tmpElem.tagName == 'FORM') {
-                tmpElem.onsubmit = ajax_search.hide_results;
-                tmpElem.setAttribute("autocomplete", "off");
-            }
-        }
-
         // set type from select
         var type_selector_id = elem.id.replace('_value', '_ts');
         var selector = document.getElementById(type_selector_id);
@@ -1652,10 +1643,10 @@ var ajax_search = {
         }
 
         input.setAttribute("autocomplete", "off");
-        if(selector && selector.tagName == 'SELECT') {
-            input.blur();   // blur & focus the element, otherwise the first
-            input.focus();  // click would result in the browser autocomplete
+        input.blur();   // blur & focus the element, otherwise the first
+        input.focus();  // click would result in the browser autocomplete
 
+        if(selector && selector.tagName == 'SELECT') {
             var search_type = selector.options[selector.selectedIndex].value;
             if(search_type == 'host' || search_type == 'hostgroup' || search_type == 'service' || search_type == 'servicegroup') {
                 ajax_search.search_type = search_type;
@@ -1686,6 +1677,17 @@ var ajax_search = {
         ajax_search.initialized   = now;
         ajax_search.initialized_t = type;
 
+        // disable autocomplete
+        var tmpElem = input;
+        while(tmpElem && tmpElem.parentNode) {
+            tmpElem = tmpElem.parentNode;
+            if(tmpElem.tagName == 'FORM') {
+                tmpElem.onsubmit = ajax_search.hide_results;
+                tmpElem.setAttribute("autocomplete", "off");
+            }
+        }
+
+         // fill data store
         new Ajax.Request(search_url, {
             onSuccess: function(transport) {
                 if(transport.responseJSON != null) {
