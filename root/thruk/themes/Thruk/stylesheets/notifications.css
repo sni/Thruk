@@ -4,21 +4,6 @@ TABLE.notifications {
     border: 1px #E2DECD outset;
 }
 
-TH.notifications {
-    padding: 0px;
-    border: none;
-    padding-left: 2px;
-    padding-right: 2px;
-    padding-bottom: 0px;
-    padding-top: 0px;
-    height: 20px;
-    border-right: 1px #E2DECD solid;
-    background-color: #F0F1EE;
-    background-image: url(../images/border_small.gif);
-    background-repeat: repeat-x;
-    background-position: bottom;
-}
-
 TD.notificationsEven {
     padding: 0px;
 }
@@ -43,7 +28,7 @@ TD.notificationsWARNING {
 
 TD.notificationsCRITICAL,TD.notificationsHOSTDOWN,TD.notificationsHOSTUNREACHABLE {
     padding: 1px;
-    background-color: #FF3300;
+    background-color: #FF5B33;
     font-weight: bold;
     height: 22px;
 }

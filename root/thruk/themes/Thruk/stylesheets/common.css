@@ -10,15 +10,14 @@ a {
   color: #000000;
   text-decoration: underline;
 }
-
 a:hover {
   text-decoration: none;
 }
 
+/* navigation */
 .navbarlogo {
     margin: 0 0 10px 0;
 }
-
 .navsection {
     margin: 5px 0 10px 0;
     font: small Georgia,"Times New Roman";
@@ -27,7 +26,6 @@ a:hover {
 .navsection a {
     text-decoration: none;
 }
-
 .navsectiontitle {
     font-size: 12pt;
     font-weight: bold;
@@ -38,74 +36,55 @@ a:hover {
     line-height: 20px;
     vertical-align: bottom;
 }
-
 .navsectionfooter {
     background: transparent url(../images/menu-bottom.png) no-repeat;
     height: 7px;
     line-height: 7px;
 }
-
-div.navsectionlinks {
-}
-
 ul.navsectionlinks {
     margin: 0px;
     padding: 0px;
     list-style: none;
     background: transparent url(../images/menu-body.png) repeat-y;
 }
-
-ul.navsectionlinks li {
-}
-
 ul.navsectionlinks li:hover {
     background: transparent url(../images/menu-body-hover.png) no-repeat;
 }
-
 ul.navsectionlinks li.navbarsearch:hover {
     background: none;
 }
-
 ul.navsectionlinks li a {
     font-weight: bold;
     font-size: 9pt;
     padding: 0 0 0 15px;
 }
-
 ul.navsectionlinks li ul {
     margin: 0px;
     padding: 0 0 0 30px;
     list-style: none;
 }
-
 ul.navsectionlinks li ul li a {
     padding: 0;
     font-weight: normal;
 }
-
 ul.navsectionlinks li ul li:hover {
     background: none;
 }
-
 ul.navsectionlinks li ul li ul {
     margin: 0px;
     padding: 0 0 0 15px;
     list-style: none;
 }
-
 ul.navsectionlinks li ul li a:hover {
     text-decoration: underline;
 }
-
 .navbarsearch fieldset {
     border: none;
 }
-
 .navbarsearch fieldset legend {
     visibility: hidden;
     line-height: 0px;
 }
-
 .navbarsearch input{
     font-size: 8pt;
     width:140px;
@@ -174,4 +153,78 @@ TABLE.filter_table {
 
 td.filter {
     padding-left: 5px;
+}
+
+/* generic table header */
+TH.status,
+TH.data,
+TH.logEntries,
+TH.comment,
+TH.downtime,
+TH.queue,
+TH.notifications
+{
+    padding: 0px;
+    border: none;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+    height: 20px;
+    border-right: 1px #E2DECD solid;
+    background-color: #E7E5DD;
+    background-image: url(../images/border_small.png);
+    background-repeat: repeat-x;
+    background-position: bottom;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+body.config TH.data {
+    padding: 5px;
+}
+
+TABLE.data,
+TABLE.queue,
+TABLE.command
+{
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+  background-color: #F0F1EE;
+  border: 1px #444444 outset;
+  border-spacing: 0px;
+}
+TD.dataOdd,
+TD.queueOdd {
+  padding: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
+  background-color: #E7E5DD;
+  height: 22px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+}
+TD.dataEven,
+TD.queueEven
+{
+  padding: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
+  background-color: #DEDBD2;
+  height: 22px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+}
+TD.dataVar, TD.dataVal, TD.command {
+  padding: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
+  height: 22px;
+}
+
+TD.dataVar {
+  font-weight: bold;
+  text-align: left;
+  vertical-align: top;
 }

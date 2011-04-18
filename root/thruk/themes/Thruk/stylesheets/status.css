@@ -74,21 +74,6 @@ TABLE.status {
     background-color: #F9F9F7;
 }
 
-TH.status {
-    padding: 0px;
-    border: none;
-    padding-left: 2px;
-    padding-right: 2px;
-    padding-bottom: 0px;
-    padding-top: 0px;
-    height: 20px;
-    border-right: 1px #E2DECD solid;
-    background-color: #F0F1EE;
-    background-image: url(../images/border_small.gif);
-    background-repeat: repeat-x;
-    background-position: bottom;
-}
-
 TD.status {
     padding: 0px;
 }

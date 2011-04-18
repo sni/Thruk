@@ -31,19 +31,6 @@ DIV.data {
   font-size: 12px;
 }
 
-TD.command {
-  text-align: right;
-  padding: 0px;
-  padding-left: 4px;
-  padding-right: 4px;
-  height: 20px;
-}
-TABLE.command {
-    border-spacing: 4px;
-    border: 0px none;
-    background-color: #E7E5DD;
-}
-
 TABLE.extdetails {
   width: auto;
 }
@@ -54,17 +41,6 @@ TD.stateInfoPanel {
   border: 1px #E2DECD outset;
   background-image: url(../images/border_big.gif);
   background-repeat: repeat-x;
-}
-
-.stateInfoTable1 {
-  background-color: #F0F1EE;
-}
-.stateInfoTable2 {
-  background-color: #F0F1EE;
-}
-
-TD.stateInfoTable1, TD.stateInfoTable2  {
-  border: 1px #E2DECD outset;
 }
 
 TABLE.commandPanel {
@@ -80,26 +56,14 @@ TABLE.commandPanel TH {
   background-image: none;
 }
 
-/* used on performance page */
-TD.stateInfoTable1 > TABLE {
-    width: 100%;
-}
-TD.stateInfoTable2 > TABLE {
-    width: 100%;
+/* on perfdata page */
+TD.stateInfoTable1 > TABLE, TD.stateInfoTable2 > TABLE {
+    width: 300px;
 }
 
-TD.stateInfoTable1 > table > tbody > tr > TD.dataVal {
-    white-space: nowrap;
-}
 DIV.peerDIS, DIV.peerDOWN {
   text-align: center;
   width: 100%;
-}
-
-.dataVar {
-  font-weight: bold;
-  text-align: left;
-  vertical-align: top;
 }
 
 .notificationsENABLED,.queueENABLED,.eventhandlersENABLED,.checksENABLED,.flapdetectionENABLED,.notflapping,.downtimeINACTIVE {
@@ -107,7 +71,7 @@ DIV.peerDIS, DIV.peerDOWN {
 }
 
 .notificationsDISABLED,.queueDISABLED,.checksDISABLED,.eventhandlersDISABLED,.flapdetectionDISABLED,.flapping,.downtimeACTIVE {
-  background-color: #FF3300;
+  background-color: #FF5B33;
 
 }
 
@@ -121,7 +85,7 @@ DIV.peerDIS, DIV.peerDOWN {
 }
 
 .processCRITICAL,.hostDOWN,.hostUNREACHABLE,.serviceCRITICAL {
-  background-color: #FF3300;
+  background-color: #FF5B33;
 
 }
 
@@ -148,22 +112,6 @@ TABLE.comment,TABLE.downtime {
   border: 1px #E2DECD outset;
 }
 
-TH.comment,TH.downtime {
-  padding: 0px;
-  border: none;
-  padding-left: 2px;
-  padding-right: 2px;
-  padding-bottom: 0px;
-  padding-top: 0px;
-  height: 20px;
-  border-right: 1px #E2DECD solid;
-  background-color: #F0F1EE;
-  background-image: url(../images/border_small.gif);
-  background-repeat: repeat-x;
-  background-position: bottom;
-  white-space: nowrap;
-}
-
 TD.comment,TD.downtime {
   padding: 0px;
 }
@@ -178,51 +126,6 @@ TD.commentEven,TD.downtimeEven {
   padding: 1px;
   background-color: #DEDBD2;
   height: 22px;
-}
-
-TABLE.queue {
-  text-align: center;
-  background-color: #F0F1EE;
-  border: 1px #E2DECD outset;
-}
-
-TH.queue {
-  padding: 0px;
-  border: none;
-  padding-left: 2px;
-  padding-right: 2px;
-  padding-bottom: 0px;
-  padding-top: 0px;
-  height: 20px;
-  border-right: 1px #E2DECD solid;
-  background-color: #F0F1EE;
-  background-image: url(../images/border_small.gif);
-  background-repeat: repeat-x;
-  background-position: bottom;
-}
-
-TD.queueOdd {
-  padding: 1px;
-  background-color: #E7E5DD;
-  height: 22px;
-}
-
-TD.queueEven {
-  padding: 1px;
-  background-color: #DEDBD2;
-  height: 22px;
-}
-
-DIV.commandTitle {
-  padding: 0px;
-  margin: 0px;
-  background-color: #F0F1EE;
-  border: 1px #E2DECD outset;
-  background-image: url(../images/border_big.gif);
-  background-repeat: repeat-x;
-  line-height: 15px;
-  font-size: 16px;
-  font-weight: bold;
 }
 
 DIV.perfDataTitle {

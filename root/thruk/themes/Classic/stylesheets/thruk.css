@@ -567,5 +567,13 @@ body.config TABLE.conftool {
     width: auto;
 }
 body.config TABLE.conftoolusers {
-    width: 400px;
+    width: 450px;
+}
+body.config TD.dataUserVar {
+    text-align: center;
+    font-weight: bold;
+}
+body.config TD.dataSubmit {
+    text-align:center;
+    padding: 4px;
 }

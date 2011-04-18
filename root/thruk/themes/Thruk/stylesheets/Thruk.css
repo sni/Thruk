@@ -1,14 +1,18 @@
+TD, TH {
+  border: medium none;
+}
+
 input.button_peerUP   { background-color: #00FF33; }
-input.button_peerDOWN { background-color: #FF3300; }
+input.button_peerDOWN { background-color: #FF5B33; }
 
 .servicePENDING  { background-color: #ACACAC; }
 .serviceOK       { background-color: #00FF33; }
 .serviceUNKNOWN  { background-color: #FF9E00; }
 .serviceWARNING  { background-color: #FFDE00; }
-.serviceCRITICAL { background-color: #FF3300; }
+.serviceCRITICAL { background-color: #FF5B33; }
 
 .hostUP          { background-color: #00FF33; }
-.hostDOWN        { background-color: #FF3300; }
+.hostDOWN        { background-color: #FF5B33; }
 .hostUNREACHABLE { background-color: #FF0038; }
 .hostPENDING     { background-color: #ACACAC; }
 
@@ -17,7 +21,7 @@ TD.hostUP {
   background-color: #00FF33;
 }
 TD.hostDOWN {
-  background-color: #FF3300;
+  background-color: #FF5B33;
   font-weight: bold;
   height: 22px;
 }
@@ -39,7 +43,7 @@ TD.statusWARNING,TD.serviceWarning, A.statusWARNING {
   height: 22px;
 }
 TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED, A.statusCRITICAL {
-  background-color: #FF3300;
+  background-color: #FF5B33;
   height: 22px;
 }
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
@@ -68,7 +72,7 @@ TD.miniStatusUP,TD.miniStatusOK {
 
 TD.miniStatusDOWN,TD.miniStatusUNREACHABLE,TD.miniStatusCRITICAL {
   padding: 2px;
-  background-color: #FF3300;
+  background-color: #FF5B33;
   font-weight: bold;
   text-align: center;
 }
@@ -116,7 +120,7 @@ td.dataVal {
 DIV.errorMessage {
     font-size: 14px;
     text-align: center;
-    color: #FF3300;
+    color: #FF5B33;
 }
 DIV.errorDescription {
     font-size: 12px;
@@ -130,11 +134,11 @@ div.navbar {
   color: #8C8C73;
   border: 0px none;
 }
-
 div.navsection {
     margin: 3px 0 0 0;
 }
 
+/* infobox */
 TABLE.infoBox {
   padding: 3px;
   padding-left: 5px;
@@ -156,19 +160,12 @@ TABLE.linkBox {
   padding: 3px;
   padding-left: 5px;
   background-color: #F0F1EE;
-  border-top: 1px #E2DECD outset;
-  border-left: 1px #E2DECD outset;
-  border-right: 1px #E2DECD outset;
-  border-bottom: 1px #E2DECD outset;
-}
-TD, TH {
-  border: medium none;
+  border: 1px #E2DECD outset;
 }
 
 .infoBoxBadProcStatus {
     color: red;
 }
-
 
 TABLE.pref_pane {
   padding-left: 5px;
@@ -246,57 +243,47 @@ td.filterValue:hover {
 }
 
 
-DIV.blockHead {
+DIV.blockHead, DIV.commandTitle {
   padding: 0px;
   margin: 0px;
   background-color: #F0F1EE;
-  border: 1px #E2DECD outset;
+  border-top: 1px #444444 outset;
+  border-right: 1px #444444 outset;
+  border-left: 1px #444444 outset;
+  border-bottom: 0px none;
   background-image: url(../images/border_big.gif);
   background-repeat: repeat-x;
-  line-height: 15px;
-  font-size: 16px;
+  line-height: 16px;
+  font-size: 14px;
   font-weight: bold;
 }
 
-
+/*
 TABLE.data {
-  margin: 0px;
-  text-align: center;
-  background-color: #F0F1EE;
-  /* border: 1px #E2DECD outset; */
-  border: 0px none;
-  width: 100%;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+    border: 1px #444444 outset;
+    width: 100%;
+    border-spacing: 0px;
+}
+TABLE.data TD, TABLE.data TH {
+    padding: 0px;
+}
+TABLE.data TD  {
+    background-color: #F0F1EE;
+}
+TABLE.data TD.dataVar, TABLE.data TD.dataVal {
+    padding: 4px;
+}
+TABLE.data TD.dataVar {
+    font-size: 12px;
+    font-weight: bold;
 }
 TD.stateInfoPanel > table {
   width: 100%;
 }
-
-TH.data  {
-  padding: 0px;
-  border: none;
-  padding-left: 2px;
-  padding-right: 2px;
-  padding-bottom: 0px;
-  padding-top: 0px;
-  height: 20px;
-  border-right: 1px #E2DECD solid;
-  background-color: #F0F1EE;
-  background-image: url(../images/border_small.gif);
-  background-repeat: repeat-x;
-  background-position: bottom;
-}
-
-TD.dataOdd  {
-  padding: 1px;
-  background-color: #E7E5DD;
-  height: 22px;
-}
-
-TD.dataEven  {
-  padding: 1px;
-  background-color: #DEDBD2;
-  height: 22px;
-}
+*/
 
 /* overlay for status page */
 .overDivHead {
@@ -333,7 +320,7 @@ table.overDivTable > tbody > tr > td {
 }
 .overDivContent {
   background-color: #F0F1EE;
-  border: 0x none #000000;
+  border: 0px none #000000;
 }
 
 table.overDivTable a {
@@ -342,6 +329,7 @@ table.overDivTable a {
   color: #444444;
 }
 
+/*
 TD.extdetails {
     border: 0px none;
 }
@@ -351,4 +339,8 @@ TD.checkstatus {
 }
 TD.checkstatus > table {
     width: 300px;
+}
+*/
+body.config TD.dataUserVar {
+    font-size: 14px;
 }
