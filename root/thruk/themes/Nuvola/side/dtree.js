@@ -1,7 +1,7 @@
 /*--------------------------------------------------|
 | dTree 2.05 | www.destroydrop.com/javascript/tree/ |
 |---------------------------------------------------|
-| Copyright (c) 2002-2003 Geir Landrö               |
+| Copyright (c) 2002-2003 Geir Landr?               |
 |                                                   |
 | This script can be used freely as long as all     |
 | copyright messages are intact.                    |
@@ -40,6 +40,7 @@ function changeMenuState(menuID)
 		if (document.images)
 			document.getElementById(menuImg).src = url_prefix + "thruk/themes/Nuvola/side/collapse.gif";
 	}
+	dTree.prototype.setCookie('cm' + menuID, state);
 }
 
 
@@ -396,6 +397,7 @@ dTree.prototype.clearCookie = function() {
 	var yesterday = new Date(now.getTime() - 1000 * 60 * 60 * 24);
 	this.setCookie('co'+this.obj, 'cookieValue', yesterday);
 	this.setCookie('cs'+this.obj, 'cookieValue', yesterday);
+	this.setCookie('cm'+this.obj, 'cookieValue', yesterday);
 };
 
 // [Cookie] Sets value in a cookie
