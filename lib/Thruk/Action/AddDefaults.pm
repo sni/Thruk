@@ -112,44 +112,18 @@ before 'execute' => sub {
     # backend availability checks here
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     my $last_program_restart = 0;
-    eval {
-        my $processinfo              = $c->{'db'}->get_processinfo($cache);
-        die($@) unless defined $processinfo;
-        my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
-        $c->stash->{'pi'}            = $overall_processinfo;
-        $c->stash->{'pi_detail'}     = $processinfo;
-        $c->stash->{'has_proc_info'} = 1;
+    my $retrys = 1;
+    # try 3 times if all cores are local
+    $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
 
-        # set last programm restart
-        if(ref $processinfo eq 'HASH') {
-            for my $backend (keys %{$processinfo}) {
-                $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
-            }
-        }
-
-        # check if we have to build / clean our per user cache
-        if(   !defined $cached_data
-           or !defined $cached_data->{'prev_last_program_restart'}
-           or $cached_data->{'prev_last_program_restart'} < $last_program_restart
-          ) {
-            $cached_data = {
-                'prev_last_program_restart' => $last_program_restart,
-            };
-            $cache->set($c->stash->{'remote_user'}, $cached_data);
-        }
-
-        # check our backends uptime
-        if(defined $c->config->{'delay_pages_after_backend_reload'} and $c->config->{'delay_pages_after_backend_reload'} > 0) {
-            my $delay_pages_after_backend_reload = $c->config->{'delay_pages_after_backend_reload'};
-            for my $backend (keys %{$processinfo}) {
-                my $delay = int($processinfo->{$backend}->{'program_start'} + $delay_pages_after_backend_reload - time());
-                if($delay > 0) {
-                    $c->log->debug("delaying page delivery by $delay seconds...");
-                    sleep($delay);
-                }
-            }
-        }
-    };
+    for my $x (1..$retrys) {
+        eval {
+            $last_program_restart = $self->_set_processinfo($c, $cache, $cached_data);
+        };
+        last unless $@;
+        last if $x == $retrys;
+        sleep 1;
+    }
     if($@) {
         return if $c->request->uri->path_query =~ m/\/side\.html$/mx;
         $self->_set_possible_backends($c, $disabled_backends);
@@ -317,7 +291,53 @@ sub _any_backend_enabled {
     return;
 }
 
+########################################
+sub _set_processinfo {
+    my($self, $c, $cache, $cached_data) = @_;
+    my $last_program_restart     = 0;
+    my $processinfo              = $c->{'db'}->get_processinfo($cache);
+    return unless defined $processinfo;
+    my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
+    $c->stash->{'pi'}            = $overall_processinfo;
+    $c->stash->{'pi_detail'}     = $processinfo;
+    $c->stash->{'has_proc_info'} = 1;
+
+    # set last programm restart
+    if(ref $processinfo eq 'HASH') {
+        for my $backend (keys %{$processinfo}) {
+            $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
+        }
+    }
+
+    # check if we have to build / clean our per user cache
+    if(   !defined $cached_data
+       or !defined $cached_data->{'prev_last_program_restart'}
+       or $cached_data->{'prev_last_program_restart'} < $last_program_restart
+      ) {
+        $cached_data = {
+            'prev_last_program_restart' => $last_program_restart,
+        };
+        $cache->set($c->stash->{'remote_user'}, $cached_data);
+    }
+
+    # check our backends uptime
+    if(defined $c->config->{'delay_pages_after_backend_reload'} and $c->config->{'delay_pages_after_backend_reload'} > 0) {
+        my $delay_pages_after_backend_reload = $c->config->{'delay_pages_after_backend_reload'};
+        for my $backend (keys %{$processinfo}) {
+            my $delay = int($processinfo->{$backend}->{'program_start'} + $delay_pages_after_backend_reload - time());
+            if($delay > 0) {
+                $c->log->debug("delaying page delivery by $delay seconds...");
+                sleep($delay);
+            }
+        }
+    }
+    return($last_program_restart);
+}
+
+########################################
 __PACKAGE__->meta->make_immutable;
+
+########################################
 
 =head1 AUTHOR
 

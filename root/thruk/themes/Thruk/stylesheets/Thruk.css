@@ -91,7 +91,6 @@
 }
 
 .navsection {
-  font:small Georgia,"Times New Roman";
   line-height:16px;
   margin:5px 0 10px;
 }
@@ -237,6 +236,9 @@ DIV.infoBoxTitle {
 DIV.peerDIS,DIV.peerDOWN {
   text-align:center;
   width:100%;
+}
+DIV.peerDOWN {
+  background-color: #FF5B33;
 }
 
 DIV.perfDataTitle {
@@ -735,18 +737,17 @@ body.config TH.data {
 }
 
 div.navbar {
-  font-family: Georgia,"Times New Roman";
   background:#F9F9F7 url(../images/bg.png) repeat-x;
   background-color:#F9F9F7;
   border:0 none;
   text-align: center;
   margin: 0px;
   line-height: 18px;
-  top: -5px
+  top: -6px
 }
 div.navbar img {
   position: relative;
-  top: 5px
+  top: 6px
 }
 div.navbar li {
   color: #444444;
