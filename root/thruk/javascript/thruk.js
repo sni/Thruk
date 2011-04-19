@@ -1994,6 +1994,9 @@ function set_png_img(start, end, id) {
         styleElements(obj, "commentEven", 1);
     }
 
+    // reset reload timer for page
+    setRefreshRate(refresh_rate);
+
     return false;
 }
 
