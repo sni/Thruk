@@ -274,8 +274,8 @@ sub _process_service_page {
 
     # pnp graph?
     $c->stash->{'pnp_url'} = '';
-    if($c->config->{'shown_inline_pnp'} and defined $service->{'action_url_expanded'} and $service->{'action_url_expanded'} =~ m|(^.*?/pnp4nagios/index\.php)|mx) {
-        $c->stash->{'pnp_url'} = $1;
+    if($c->config->{'shown_inline_pnp'} and defined $service->{'action_url_expanded'} and $service->{'action_url_expanded'} =~ m|(^.*?/pnp4nagios/)|mx) {
+        $c->stash->{'pnp_url'} = $1.'index.php';
     }
 
     return 1;
