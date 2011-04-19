@@ -1601,6 +1601,7 @@ var ajax_search = {
     result_pan      : 'search-results',
     update_interval : 3600, // update at least every hour
     search_type     : 'all',
+    size            : 150,
 
     base            : new Array(),
     res             : new Array(),
@@ -1624,6 +1625,7 @@ var ajax_search = {
         ajax_search.input_field = elem.id;
 
         var input = document.getElementById(ajax_search.input_field);
+        ajax_search.size = input.getWidth();
 
         // set type from select
         var type_selector_id = elem.id.replace('_value', '_ts');
@@ -1845,7 +1847,7 @@ var ajax_search = {
                         if(type.name == 'servicegroups') { prefix = 'sg:'; }
                     }
                     var id = "suggest_item_"+x
-                    resultHTML += '<li> <a href="" class="' + classname + '" id="'+id+'" rev="' + prefix+data.display +'" onclick="return ajax_search.set_result(this.rev)"> ' + name +'<\/a><\/li>';
+                    resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="return ajax_search.set_result(this.rev)"> ' + name +'<\/a><\/li>';
                     ajax_search.res[x] = prefix+data.display;
                     x++;
                     cur_count++;
@@ -1865,6 +1867,7 @@ var ajax_search = {
         style.left    = coords[0] + "px";
         style.top     = (coords[1] + input.offsetHeight + 2) + "px";
         style.display = "block";
+        style.width   = ( ajax_search.size -2 ) + "px";
 
         showElement(panel);
     },
