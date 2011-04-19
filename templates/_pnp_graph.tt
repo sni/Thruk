@@ -3,7 +3,7 @@
   var pnp_url = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0"
 </script>
 <div class='commentTitle'>Performance Graph</div>
-<table border="0" class='comment' style="width:572px">
+<table border="0" class='comment blockHeadBorder' style="width:572px">
   <tr class='comment' style="cursor:pointer">
     <th class='comment' width="20" nowrap>
       <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">

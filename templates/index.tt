@@ -6,7 +6,7 @@
     <title>[% title_prefix %][% title %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
   </head>
-  <frameset cols="180,*" frameborder="0" framespacing="0" border="0">
+  <frameset cols="170,*" frameborder="0" framespacing="0" border="0">
     <frame src="[% url_prefix %]thruk/side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" />
     <frame src="[% IF main %][% main %][% ELSE %][% start_page %][% END %]" name="main" frameborder="0" id="main" />
     <noframes>

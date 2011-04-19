@@ -8,6 +8,7 @@
 
 body {
   margin: 0px;
+  margin-left: 5px;
 }
 
 a img {
@@ -25,7 +26,6 @@ td.command {
 }
 
 body.navbar {
-  font-family:arial,verdana,serif;
   margin: 0px;
   text-align: center;
 }

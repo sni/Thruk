@@ -52,7 +52,7 @@
           <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF com.expires %][% date_format(c, com.expires_time) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td class='[% class %]'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF hostcommentscount == 0 %]
@@ -97,7 +97,7 @@
           <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF com.expires %][% date_format(c, com.expires_time) %][% ELSE %]N/A[% END %]</td>
-          <td><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          <td class='[% class %]'><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% IF servicecommentscount == 0 %]

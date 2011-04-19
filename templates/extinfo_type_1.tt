@@ -53,10 +53,12 @@
             [% FOREACH parent IN host.parents.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent | uri %]'>[% parent %]</a>[% END %]
           </div><br>
           [% END %]
+          [% IF host.groups.size > 0 %]
           <div class='data'>Member of</div>
           <div class='dataTitle'>
             [% FOREACH group IN host.groups.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group | uri %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
+          [% END %]
 
           <div class='data'>[% host.address %]</div>
           [% IF host.icon_image_expanded %]
@@ -512,7 +514,7 @@
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
                     <td class='[% class %]'>[% IF comment.expires %][% date_format(c, comment.expires_time) %][% ELSE %]N/A[% END %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+                    <td class='[% class %]'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]
@@ -566,7 +568,7 @@
                     <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
                     <td class='[% class %]'>[% downtime.id %]</td>
                     <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% downtime.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>
+                    <td class='[% class %]'><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% downtime.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]
