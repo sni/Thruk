@@ -157,7 +157,7 @@ td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:ho
 }
 
 .tableRowSelected {
-  background:#8fc6ff;
+  background:#FBFBC8;
   height:22px;
 }
 
@@ -257,19 +257,29 @@ DIV.statusTitle,DIV.dataTitle,DIV.reportSelectTitle,DIV.dateSelectTitle,DIV.navB
 }
 
 TABLE.cmd_pane {
-  background-color:#FFFFFF;
+  background-color:#F0F1EE;
   border:1px solid #444444;
   margin:0;
   padding:0;
+  border-spacing:0px;
 }
 
 TABLE.cmd_pane tbody > tr > td {
-  background-color:#FFFFFF;
+  background-color:#F0F1EE;
   border:medium none;
 }
 
 TABLE.cmd_pane tbody > tr > th {
-  background:#DFE0DE;
+  background-color:#E7E5DD;
+  background-image:url(../images/border_small.png);
+  background-position:bottom;
+  background-repeat:repeat-x;
+  border:none;
+  border-right:1px #E2DECD solid;
+  font-size:12px;
+  height:20px;
+  padding:0px;
+  white-space:nowrap;
 }
 
 TABLE.cmd_pane th,TABLE.cmd_pane a,TABLE.cmd_pane a:hover {
