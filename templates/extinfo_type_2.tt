@@ -93,7 +93,7 @@
             <table border="0">
               <tr>
                 <td>
-                  <table border="1" cellspacing="0" cellpadding="0" class="data">
+                  <table border="1" cellspacing="0" cellpadding="0" class="data extdetails2">
                     <tr>
                       <td class='stateInfoTable1 extdetails'>
                         <table border="0">
@@ -220,7 +220,7 @@
               </tr>
               <tr>
                 <td>
-                  <table border="1" cellspacing="0" cellpadding="0" class="data">
+                  <table border="1" cellspacing="0" cellpadding="0" class="data checkstatus">
                     <tr>
                       <td class='stateInfoTable2 checkstatus'>
                         <table border="0">
@@ -297,7 +297,7 @@
               <tr>
                 <td align="center" valign="top" class='commandPanel'>
                   <div class='dataTitle'>Service Commands</div>
-                  <table border='1' cellspacing="0" cellpadding="0" class="command">
+                  <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel">
                     <tr>
                       <td>
                         [% UNLESS c.check_cmd_permissions('service', service.description, service.host_name) %]

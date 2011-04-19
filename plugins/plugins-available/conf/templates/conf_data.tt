@@ -11,7 +11,7 @@
         <tr><td colspan=2>&nbsp;</td></tr>
         [% END %]
         <tr>
-            <th colspan=2 class='data' style="text-align:center">
+            <th colspan=2 class='data conftoolheader' style="text-align:center">
                 [% cat.0 %]
             </th>
         </tr>

@@ -7,7 +7,7 @@
         </td>
         <td align="right" valign="bottom" width="50%">
           <form method="get" action="conf.cgi">
-            <table border="0">
+            <table border="0" class="optBox">
               <tr>
                 <td align="left" class='reportSelectSubTitle'>Configuration Type:</td>
               </tr>

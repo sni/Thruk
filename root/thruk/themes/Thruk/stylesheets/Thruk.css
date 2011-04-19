@@ -142,11 +142,6 @@
   line-height:9pt;
 }
 
-.overDivTable {
-  font-family:arial,serif;
-  font-size:8pt;
-}
-
 .processWARNING,.serviceWARNING,.serviceWARNING {
   background-color:#FFDE00;
 }
@@ -172,10 +167,6 @@ DIV.blockHead,DIV.commandTitle {
   background-color:#F0F1EE;
   background-image:url(../images/border_big.gif);
   background-repeat:repeat-x;
-  border-bottom:0 none;
-  border-left:1px #444444 outset;
-  border-right:1px #444444 outset;
-  border-top:1px #444444 outset;
   font-size:14px;
   font-weight:bold;
   line-height:16px;
@@ -215,6 +206,8 @@ DIV.dataTitle,DIV.perfTypeTitle,DIV.commandTitle {
   padding:0;
   text-align:center;
   vertical-align:middle;
+  line-height: 18px;
+/* border-bottom: 5px solid #F0F1EE; */
 }
 
 DIV.errorDescription {
@@ -265,7 +258,7 @@ DIV.statusTitle,DIV.dataTitle,DIV.reportSelectTitle,DIV.dateSelectTitle,DIV.navB
 
 TABLE.cmd_pane {
   background-color:#FFFFFF;
-  border:1px solid #666666;
+  border:1px solid #444444;
   margin:0;
   padding:0;
 }
@@ -276,11 +269,11 @@ TABLE.cmd_pane tbody > tr > td {
 }
 
 TABLE.cmd_pane tbody > tr > th {
-  background:#dfe0de;
+  background:#DFE0DE;
 }
 
 TABLE.cmd_pane th,TABLE.cmd_pane a,TABLE.cmd_pane a:hover {
-  color:#444444;
+  color:#000000;
 }
 
 TABLE.command {
@@ -310,9 +303,16 @@ TABLE.comment,TABLE.downtime,TABLE.notifications {
   text-align:center;
 }
 
-TABLE.data,TABLE.queue,TABLE.command {
+TABLE.data,TABLE.queue {
   background-color:#F0F1EE;
   border:1px #444444 outset;
+  border-spacing:0;
+  margin:0;
+  padding:0;
+  text-align:center;
+}
+TABLE.command {
+  background-color:#F0F1EE;
   border-spacing:0;
   margin:0;
   padding:0;
@@ -339,7 +339,7 @@ TABLE.infoBox {
   margin-left:0;
   margin-right:2px;
   padding:3px 3px 3px 5px;
-  width:240px;
+  width:250px;
 }
 
 TABLE.linkBox {
@@ -366,7 +366,9 @@ TABLE.overDivHead {
 }
 
 TABLE.optBox {
+  padding: 2px;
   padding-right: 5px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 TABLE.perfTitleTable,TABLE.perfTitleTable TD,TABLE.perfTitleTable TR {
@@ -417,7 +419,7 @@ TD.commandPanel,TD.stateInfoPanel {
   background-color:#F0F1EE;
   background-image:url(../images/border_big.gif);
   background-repeat:repeat-x;
-  border:1px #E2DECD outset;
+  border:1px #444444 outset;
   margin:2px;
   text-align:center;
 }
@@ -708,7 +710,6 @@ a {
 
 a.perfTitle,a.perfItem,a.perfValue {
   color:#444444;
-  font-family:"trebuchet ms", helvetica, sans-serif;
   text-decoration:none;
 }
 
@@ -719,12 +720,13 @@ a:hover,.navsection a,A.hostTotals:hover,A.serviceTotals:hover {
 body {
   background:#F9F9F7 url(../images/bg.png) repeat-x;
   color:#444444;
-  font-family:"trebuchet ms", helvetica, sans-serif;
+  font-family: sans-serif;
   font-size:11px;
   line-height:18px;
 }
 
 body.config TD.dataUserVar {
+  padding:5px;
   font-size:14px;
 }
 
@@ -813,4 +815,31 @@ ul.navsectionlinks li.navbarsearch:hover,ul.navsectionlinks li ul li:hover {
 
 ul.navsectionlinks li:hover {
   background:transparent url(../images/menu-body-hover.png) no-repeat;
+}
+
+
+TD.checkstatus {
+  border: 0px none;
+}
+
+TABLE.checkstatus, TABLE.extdetails, TABLE.extCommandPanel {
+  border: 0px none;
+  width: auto;
+}
+TABLE.extdetails2 {
+  border: 0px none;
+}
+
+TD.extdetails > TABLE {
+  width: auto;
+}
+
+TH.conftoolheader {
+  border-bottom: 5px solid #F0F1EE;
+}
+
+DIV.blockHeadBorder {
+  border-top: 1px #444444 outset;
+  border-left: 1px #444444 outset;
+  border-right: 1px #444444 outset;
 }

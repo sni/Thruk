@@ -4,8 +4,8 @@
 
   <table border="0" class='data confTable'>
     <tr>
-      <th class='data'>Module</th>
-      <th class='data'>Description</th>
+      <th class='data conftoolheader'>Module</th>
+      <th class='data conftoolheader'>Description</th>
     </tr>
     [% IF conf_config.exists('thruk') %]
     <tr>

@@ -6,7 +6,7 @@
 <input type="hidden" name="action" value="change">
   <table border="0" class='data conftoolusers'>
     <tr>
-      <th colspan=2 class='data' style="text-align:center">select user to change</th>
+      <th colspan=2 class='data conftoolheader' style="text-align:center">select user to change</th>
     </tr>
     <tr>
       <td class='dataVar' align="left">Username</td>
