@@ -322,6 +322,7 @@
               <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
               <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
               <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
+              <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
             </select><select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to">
               <option value="~"[% IF s.op == '~' %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>

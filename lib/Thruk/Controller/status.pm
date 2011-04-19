@@ -1792,6 +1792,10 @@ sub _single_search {
             push @hostfilter,    { execution_time => { $op => $value } };
             push @servicefilter, { execution_time => { $op => $value } };
         }
+        elsif ( $filter->{'type'} eq '% state change' ) {
+            push @hostfilter,    { percent_state_change => { $op => $value } };
+            push @servicefilter, { percent_state_change => { $op => $value } };
+        }
         elsif ( $filter->{'type'} eq 'last check' ) {
             my $date = Thruk::Utils::parse_date( $c, $value );
             if($date) {

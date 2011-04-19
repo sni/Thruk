@@ -1280,7 +1280,7 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Comment', 'Last Check', 'Next Check', 'Latency', 'Execution Time');
+  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Comment', 'Last Check', 'Next Check', 'Latency', 'Execution Time', '% State Change');
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
   typeselect.setAttribute('id', pane_prefix + search_prefix + nr + '_ts');
@@ -1503,7 +1503,7 @@ function verify_op(event) {
     }
 
     if(curOp == '<=' || curOp == '>=') {
-      if(selValue != 'next check' && selValue != 'last check' && selValue != 'latency' && selValue != 'execution time' ) {
+      if(selValue != 'next check' && selValue != 'last check' && selValue != 'latency' && selValue != 'execution time' && selValue != '% state change') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only <= and >= are allowed for list searches
@@ -1656,7 +1656,7 @@ var ajax_search = {
             if(search_type == 'parent') {
                 ajax_search.search_type = 'host';
             }
-            if(search_type == 'contact' || search_type == 'comment' || search_type == 'next check' || search_type == 'last check' || search_type == 'latency' || search_type == 'execution time') {
+            if(search_type == 'contact' || search_type == 'comment' || search_type == 'next check' || search_type == 'last check' || search_type == 'latency' || search_type == 'execution time' || search_type == '% state change') {
                 ajax_search.search_type = 'none';
             }
         }
