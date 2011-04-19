@@ -1,25 +1,25 @@
 #currentversioninfo {
-  font-size:12pt;
+  font-size:14px;
 }
 
 #currentversioninfo .product,#currentversioninfo .version {
-  font-size:14pt;
+  font-size:16px;
   font-weight:bold;
 }
 
 #currentversioninfo .releasedate {
-  font-size:11pt;
+  font-size:13px;
   margin:5px 0 0;
 }
 
 #currentversioninfo .whatsnew {
-  font-size:11pt;
+  font-size:13px;
   font-weight:bold;
   margin:50px 0 0;
 }
 
 #mainbrandsplash {
-  font-size:12pt;
+  font-size:14px;
   font-weight:bold;
   margin:0 0 35px;
 }
@@ -33,7 +33,6 @@
 }
 
 #splashpage #mainfooter {
-  font-size:8pt;
   margin:100px 0 0;
 }
 
@@ -86,7 +85,7 @@
 }
 
 .navbarsearch input {
-  font-size:8pt;
+  font-size:12px;
   width:140px;
 }
 
@@ -103,10 +102,10 @@
 
 .navsectiontitle {
   background:transparent url(../images/menu-top.png) no-repeat;
-  font-size:12pt;
+  font-size:14px;
   font-weight:bold;
   height:20px;
-  line-height:20px;
+  line-height:22px;
   text-align:center;
   vertical-align:bottom;
   width:170px;
@@ -137,11 +136,11 @@
 
 .overDivHead {
   color:#444444;
-  font-size:9pt;
-  line-height:9pt;
+  font-size:12px;
+  line-height:12px;
 }
 
-.processWARNING,.serviceWARNING,.serviceWARNING {
+.processWARNING,.serviceWARNING {
   background-color:#FFDE00;
 }
 
@@ -408,7 +407,6 @@ TABLE.status {
 }
 
 TABLE.statusgroups TD {
-  font-size:11px;
   font-weight:normal;
 }
 
@@ -778,7 +776,7 @@ table.overDivTable > tbody > tr > td {
 
 table.overDivTable a {
   color:#444444;
-  font-size:9pt;
+  font-size:12px;
   font-weight:bold;
 }
 
@@ -798,7 +796,6 @@ ul.navsectionlinks {
 }
 
 ul.navsectionlinks li a {
-  font-size:9pt;
   font-weight:bold;
   padding:0 0 0 15px;
 }
