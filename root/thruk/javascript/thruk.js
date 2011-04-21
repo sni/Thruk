@@ -17,6 +17,7 @@ var additionalParams = new Hash({});
 var refreshTimer;
 var backendSelTimer;
 var lastRowSelected;
+var lastRowHighlighted;
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -216,10 +217,8 @@ function toggleBackend(backend) {
 
   /* save current selected backends in session cookie */
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
-  //if(initial_state != 3) {
-    window.clearTimeout(backendSelTimer);
-    backendSelTimer  = window.setTimeout('reloadPage()', 1000);
-  //}
+  window.clearTimeout(backendSelTimer);
+  backendSelTimer  = window.setTimeout('reloadPage()', 1000);
 }
 
 /* toogle checkbox by id */
@@ -469,7 +468,7 @@ function getFirstParentId(elem) {
     while(nr < 10 && !elem.id) {
         nr++;
         if(!elem.parentNode) {
-            if(thruk_debug_js) { alert("ERROR: element has no parentNode in getFirstParentId(): " + elem); }
+            // this may happen when looking for the parent of a event
             return false;
         }
         elem = elem.parentNode;
@@ -592,6 +591,7 @@ function highlightServiceRow()
     if(!row_id) {
       return;
     }
+    lastRowHighlighted = row_id;
     setRowStyle(row_id, 'tableRowHover', 'service');
 }
 
@@ -609,6 +609,7 @@ function highlightHostRow()
     if(!row_id) {
       return;
     }
+    lastRowHighlighted = row_id;
     setRowStyle(row_id, 'tableRowHover', 'host');
 }
 
@@ -836,6 +837,11 @@ function resetServiceRow(event)
         row_id = getFirstParentId(event);
     }
     if(!row_id) {
+        if(lastRowHighlighted) {
+            tmp = lastRowHighlighted;
+            lastRowHighlighted = undefined;
+            setRowStyle(tmp, 'original', 'service');
+        }
         return;
     }
     setRowStyle(row_id, 'original', 'service');
@@ -855,6 +861,11 @@ function resetHostRow(event)
         row_id = getFirstParentId(event);
     }
     if(!row_id) {
+        if(lastRowHighlighted) {
+            tmp = lastRowHighlighted;
+            lastRowHighlighted = undefined;
+            setRowStyle(tmp, 'original', 'host');
+        }
         return;
     }
     setRowStyle(row_id, 'original', 'host');
