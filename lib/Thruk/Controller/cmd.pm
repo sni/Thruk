@@ -344,7 +344,7 @@ sub _redirect_or_success {
         ) {
             my $options = {
                         'header' => {
-                            'WaitTimeout'   => 20000,
+                            'WaitTimeout'   => 10000,
                             'WaitTrigger'   => 'check',
                             'WaitCondition' => 'last_check >= '.$c->stash->{'now'},
                         }
