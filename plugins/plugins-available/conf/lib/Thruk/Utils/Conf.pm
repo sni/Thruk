@@ -92,6 +92,8 @@ sub read_conf {
 
     my $arrays_defined = {};
 
+    return('', $data, '') unless -e $file;
+
     my $content  = read_file($file);
     my $md5      = md5_hex($content);
     for my $line (split/\n/mx, $content) {

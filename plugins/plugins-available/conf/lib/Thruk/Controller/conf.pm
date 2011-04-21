@@ -72,14 +72,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
        or scalar keys %{$c->config->{'Thruk::Plugin::ConfigTool'}} == 0
     ) {
         $c->stash->{conf_config} = {};
-        Thruk::Utils::set_message( $c, 'fail_message', 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'thruk/documentation.html#_config_tool">config tool setup instructions</a>.' );
+        Thruk::Utils::set_message( $c, 'fail_message', 'Config Tool is disabled.<br>Please have a look at the <a href="'.$c->stash->{'url_prefix'}.'thruk/documentation.html#_component_thruk_plugin_configtool">config tool setup instructions</a>.' );
     }
 
     my $type                 = $c->{'request'}->{'parameters'}->{'type'}   || '';
     my $action               = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     $c->stash->{type}        = $type;
     $c->stash->{action}      = $action;
-    $c->stash->{conf_config} = $c->config->{'Thruk::Plugin::ConfigTool'};
+    $c->stash->{conf_config} = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
 
     if($action eq 'cgi_contacts') {
         return $self->_process_cgiusers_page($c);
@@ -133,7 +133,7 @@ sub _process_cgi_page {
             $data->{$key} = [] unless defined $data->{$key};
         }
         $self->_store_changes($c, $file, $data, $defaults);
-        return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/conf.cgi?type=cgi");
+        return $c->redirect('conf.cgi?type=cgi');
     }
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
@@ -194,7 +194,7 @@ sub _process_thruk_page {
     if($c->stash->{action} eq 'store') {
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         $self->_store_changes($c, $file, $data, $defaults, $c);
-        return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/conf.cgi?type=thruk");
+        return $c->redirect('conf.cgi?type=thruk');
     }
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
@@ -281,7 +281,7 @@ sub _process_users_page {
     # save changes to user
     my $user = $c->{'request'}->{'parameters'}->{'data.username'} || '';
     if($user ne '' and defined $file and $c->stash->{action} eq 'store') {
-        my $redirect = $c->stash->{'url_prefix'}."thruk/cgi-bin/conf.cgi?action=change&type=users&data.username=".$user;
+        my $redirect = 'conf.cgi?action=change&type=users&data.username='.$user;
         my $msg      = $self->_update_password($c);
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );

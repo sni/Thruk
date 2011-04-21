@@ -134,6 +134,7 @@ plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
 plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
+plugins/plugins-enabled/conf
 plugins/plugins-enabled/outagespbimp
 plugins/plugins-enabled/statusmap
 README
