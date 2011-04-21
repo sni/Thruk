@@ -773,9 +773,8 @@ element.style {
 }
 
 table.overDivTable {
-  background-color:#F0F1EE;
-  border:2px #E2DECD outset;
-  border-spacing:0;
+  border-spacing: 0px;
+  border: 1px #444444 outset;
 }
 
 table.overDivTable > tbody > tr > td {

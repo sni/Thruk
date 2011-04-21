@@ -7,7 +7,7 @@
   var dfl_Hash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
 </script>
 
-<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
+[% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
       <tr>
