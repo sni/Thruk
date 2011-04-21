@@ -774,7 +774,7 @@ element.style {
 
 table.overDivTable {
   border-spacing: 0px;
-  border: 1px #444444 outset;
+  border: 1px #444444 solid;
 }
 
 table.overDivTable > tbody > tr > td {
