@@ -531,7 +531,7 @@ sub _bulk_send {
         $options->{backend} = $backends;
     }
 
-    $options->{'command'} = join("\n", @{$c->stash->{'commands2send'}});
+    $options->{'command'} = join("\n\n", @{$c->stash->{'commands2send'}});
 
     if($c->request->parameters->{'test_only'}) {
         $c->log->debug( 'not sending (TESTMODE): ' . $options->{'command'} );
