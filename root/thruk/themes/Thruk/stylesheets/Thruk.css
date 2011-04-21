@@ -153,11 +153,11 @@
 }
 
 td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:hover, .tableRowHover,td.newfilter:hover {
-  background:#BBBBBB;
+  background:#FFFF88;
 }
 
 .tableRowSelected {
-  background:#FBFBC8;
+  background:#C3D9FF;
   height:22px;
 }
 
