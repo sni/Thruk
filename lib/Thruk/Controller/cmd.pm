@@ -28,12 +28,13 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     my $errors = 0;
 
-    $c->stash->{'now'}          = time();
-    $c->stash->{title}          = "External Command Interface";
-    $c->stash->{infoBoxTitle}   = "External Command Interface";
-    $c->stash->{no_auto_reload} = 1;
-    $c->stash->{page}           = 'cmd';
-    $c->stash->{'form_errors'}  = [];
+    $c->stash->{'now'}           = time();
+    $c->stash->{title}           = "External Command Interface";
+    $c->stash->{infoBoxTitle}    = "External Command Interface";
+    $c->stash->{no_auto_reload}  = 1;
+    $c->stash->{page}            = 'cmd';
+    $c->stash->{'form_errors'}   = [];
+    $c->stash->{'commands2send'} = [];
 
     # fill in some defaults
     for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc servicegroup backend/) {
@@ -210,6 +211,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                 }
             }
         }
+
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' ) unless $errors;
 
         $self->_redirect_or_success( $c, -1 );
@@ -323,6 +325,10 @@ sub _cmd_is_disabled {
 # view our success page or redirect to referer
 sub _redirect_or_success {
     my( $self, $c, $how_far_back ) = @_;
+
+    if($self->_bulk_send($c)) {
+        $c->log->debug("bulk sending commands succeeded");
+    }
 
     $c->stash->{how_far_back} = $how_far_back;
 
@@ -481,9 +487,27 @@ sub _do_send_command {
         if( scalar @errors > 0 ) {
             delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
             $c->stash->{'form_errors'} = \@errors;
-            return (0);
+            return;
         }
     }
+
+    for my $cmd_line ( split /\n/mx, $cmd ) {
+        $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
+        push @{$c->stash->{'commands2send'}}, $cmd_line;
+    }
+
+    $c->stash->{'lasthost'}    = $c->{'request'}->{'parameters'}->{'host'};
+    $c->stash->{'lastservice'} = $c->{'request'}->{'parameters'}->{'service'};
+
+    return 1;
+}
+
+######################################
+# send all collected commands at once
+sub _bulk_send {
+    my $self         = shift;
+    my $c            = shift;
+    my @errors;
 
     # is a backend selected?
     my $backends          = $c->{'request'}->{'parameters'}->{'backend'};
@@ -494,6 +518,11 @@ sub _do_send_command {
         $c->stash->{'form_errors'} = \@errors;
         return (0);
     }
+    if( scalar @errors > 0 ) {
+        delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+        $c->stash->{'form_errors'} = \@errors;
+        return;
+    }
 
     # send the command
     my $options = {};
@@ -502,22 +531,17 @@ sub _do_send_command {
         $options->{backend} = $backends;
     }
 
-    for my $cmd_line ( split /\n/mx, $cmd ) {
-        $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
-        $options->{'command'} = $cmd_line;
-        if($c->request->parameters->{'test_only'}) {
-            $c->log->debug( 'not sending (TESTMODE) ' . $cmd_line );
-        } else {
-            $c->log->debug( 'sending ' . $cmd_line );
-            $c->{'db'}->send_command( %{$options} );
-            $c->log->info( '[' . $c->user->username . '] cmd: ' . $cmd_line );
-        }
+    $options->{'command'} = join("\n", @{$c->stash->{'commands2send'}});
+
+    if($c->request->parameters->{'test_only'}) {
+        $c->log->debug( 'not sending (TESTMODE): ' . $options->{'command'} );
+    } else {
+        $c->log->debug( 'sending ' . $options->{'command'} );
+        $c->{'db'}->send_command( %{$options} );
+        map { $c->log->info( '[' . $c->user->username . '] cmd: ' . $_ ) } @{$c->stash->{'commands2send'}};
     }
 
-    $c->stash->{'lasthost'}    = $c->{'request'}->{'parameters'}->{'host'};
-    $c->stash->{'lastservice'} = $c->{'request'}->{'parameters'}->{'service'};
-
-    return(1);
+    return 1;
 }
 
 ######################################
