@@ -48,13 +48,13 @@ any passwords though the webinterface.
 == Customization
 
 === How to change the side menu
-Thruks web frontend look & feel is much like the Nagios web frontend.
-The main left menu is highly editable through local menu.cfg. It is
-recommended to copy menu.cfg to menu_local.cfg in order to keep the
-own menu on updating Thruk. Now you can edit your own menu.
+The main left menu is highly editable through menu_local.cfg. It is
+recommended apply changes only to your menu_local.cfg in order to
+avoid conflicts on updating Thruk.
 
-Open your menu_local.cfg with your preferred text editor and check the
-config. You can add new sections with: 
+Open your menu_local.cfg (create one if it does not exists) with your
+preferred text editor and check the config. You can add new sections
+with: 
 
 ....
 add_section('name' => 'General');
@@ -77,6 +77,20 @@ Then the config looks like this:
 ....
 add_link('name' => 'Nagios, 'href' => '/nagios', 'target' => '_new'); 
 ....
+
+
+You can include the main menu config with the perl do statement.
+Ex.: If you just want to add a new link to your config menu, your
+menu_local.conf could look like this:
+
+....
+do $ENV{'OMD_ROOT'}.'/share/thruk/menu.conf';
+add_link('name' => 'Wato', 'href' => '/'.$ENV{'OMD_SITE'}.'/check_mk/wato.py?filename=wato.mk');
+....
+
+This example just puts the Wato link from check_mks Multisite in your
+config section. Replace the ENV part with a proper path if you do not
+use [http://omdistro.org]OMD.
 
 
 === How can i integrate Nagvis Maps
