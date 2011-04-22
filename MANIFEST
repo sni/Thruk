@@ -1197,7 +1197,6 @@ root/thruk/themes/Wakizashi/images/link_search.gif
 root/thruk/themes/Wakizashi/images/logo_thruk.png
 root/thruk/themes/Wakizashi/images/logo_thruk_mid.png
 root/thruk/themes/Wakizashi/images/logo_thruk_small.png
-root/thruk/themes/Wakizashi/images/logos/tux.png
 root/thruk/themes/Wakizashi/images/logrotate.png
 root/thruk/themes/Wakizashi/images/metanav_30.png
 root/thruk/themes/Wakizashi/images/metanav_30_hi.png
@@ -1328,6 +1327,7 @@ templates/_host_status_details_box.tt
 templates/_infobox.tt
 templates/_logs.tt
 templates/_message.tt
+templates/_overdiv.tt
 templates/_pager.tt
 templates/_pnp_graph.tt
 templates/_service_status_details_box.tt
