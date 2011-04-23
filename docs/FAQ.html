@@ -641,6 +641,12 @@ add_link('name' =&gt; 'Wato', 'href' =&gt; '/'.$ENV{'OMD_SITE'}.'/check_mk/wato.
 <div class="paragraph"><p>This example just puts the Wato link from check_mks Multisite in your
 config section. Replace the ENV part with a proper path if you do not
 use [<a href="http://omdistro.org]OMD">http://omdistro.org]OMD</a>.</p></div>
+<div class="paragraph"><p>Adding Items to existing sections can also be achieved by
+<em>insert_item</em>:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>insert_item('General', { 'href' =&gt; 'http://your-company.com', 'name' =&gt; 'Company' });</tt></pre>
+</div></div>
 <h3 id="_how_can_i_integrate_nagvis_maps">How can i integrate Nagvis Maps</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Integrating Nagivs is currently only possible when frames are enabled.
 So first step is editing the thruk_local.conf and set</p></div>
@@ -723,7 +729,7 @@ ssh with the normal xinetd solution.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-04-22 12:33:37 CEST
+Last updated 2011-04-23 13:25:46 CEST
 </div>
 </div>
 </body>

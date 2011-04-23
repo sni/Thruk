@@ -93,6 +93,13 @@ config section. Replace the ENV part with a proper path if you do not
 use [http://omdistro.org]OMD.
 
 
+Adding Items to existing sections can also be achieved by
+'insert_item':
+....
+insert_item('General', { 'href' => 'http://your-company.com', 'name' => 'Company' });
+....
+
+
 === How can i integrate Nagvis Maps
 Integrating Nagivs is currently only possible when frames are enabled.
 So first step is editing the thruk_local.conf and set
