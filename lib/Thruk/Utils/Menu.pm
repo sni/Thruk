@@ -189,6 +189,24 @@ sub insert_item {
 
 ##############################################
 
+=head2 remove_item
+
+  remove_item()
+
+removes an existing item from an existing category
+
+=cut
+sub remove_item {
+    my($category, $item_name) = @_;
+
+    $Thruk::Utils::Menu::removed_items = {} unless defined $Thruk::Utils::Menu::removed_items;
+    $Thruk::Utils::Menu::removed_items->{$category}->{$item_name} = 1;
+
+    return 1;
+}
+
+##############################################
+
 =head2 _get_menu_target
 
   _get_menu_target()
@@ -210,6 +228,7 @@ sub _renew_navigation {
         confess($@);
     }
 
+    # add some more items
     if(defined $Thruk::Utils::Menu::additional_items) {
         for my $to_add (@{$Thruk::Utils::Menu::additional_items}) {
             my $section       = _get_section_by_name($to_add->[0]) || next;
@@ -229,6 +248,20 @@ sub _renew_navigation {
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});
             push(@{$section->{'links'}}, $link);
+        }
+    }
+
+    # remove unwanted items
+    if(defined $Thruk::Utils::Menu::removed_items) {
+        for my $section_name (keys %{$Thruk::Utils::Menu::removed_items}) {
+            my $section = _get_section_by_name($section_name) || next;
+            for my $item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}}) {
+                my $new_links = [];
+                for my $link (@{$section->{'links'}}) {
+                    push @{$new_links}, $link unless $link->{'name'} eq $item_name
+                }
+                $section->{'links'} = $new_links;
+            }
         }
     }
 

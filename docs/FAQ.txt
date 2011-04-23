@@ -100,6 +100,12 @@ insert_item('General', { 'href' => 'http://your-company.com', 'name' => 'Company
 ....
 
 
+Existing Items can be removed with the 'remove_item' function:
+....
+remove_item('Reports', 'Availability');
+....
+
+
 === How can i integrate Nagvis Maps
 Integrating Nagivs is currently only possible when frames are enabled.
 So first step is editing the thruk_local.conf and set
