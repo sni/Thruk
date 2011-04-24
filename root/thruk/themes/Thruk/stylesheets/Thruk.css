@@ -108,7 +108,7 @@
   line-height:22px;
   text-align:center;
   vertical-align:bottom;
-  width:170px;
+  width:172px;
 }
 
 .notificationsDISABLED,.queueDISABLED,.checksDISABLED,.eventhandlersDISABLED,.flapdetectionDISABLED,.flapping,.downtimeACTIVE,.processCRITICAL,.hostDOWN,.hostUNREACHABLE,.serviceCRITICAL,input.button_peerDOWN,.serviceCRITICAL,.hostDOWN {
