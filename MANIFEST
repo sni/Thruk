@@ -74,6 +74,7 @@ lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/Menu.pm
+lib/Thruk/Utils/Status.pm
 lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/Excel.pm
 lib/Thruk/View/GD.pm
@@ -125,9 +126,10 @@ plugins/plugins-available/mobile/root/jqtouch/theme.min.css
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
-plugins/plugins-available/outagespbimp/lib/Thruk/Controller/outagespbimp.pm
-plugins/plugins-available/outagespbimp/t/controller_outagespbimp.t
-plugins/plugins-available/outagespbimp/templates/outagespbimp.tt
+plugins/plugins-available/shinken_features/lib/Thruk/Controller/shinken_features.pm
+plugins/plugins-available/shinken_features/t/controller_shinken_features.t
+plugins/plugins-available/shinken_features/templates/shinken_outagespbimp.tt
+plugins/plugins-available/shinken_features/templates/shinken_status_bothtypes.tt
 plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
 plugins/plugins-available/statusmap/root/jit-yc.js
 plugins/plugins-available/statusmap/root/statusmap.js
@@ -135,7 +137,7 @@ plugins/plugins-available/statusmap/root/Treemap.css
 plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
 plugins/plugins-enabled/conf
-plugins/plugins-enabled/outagespbimp
+plugins/plugins-enabled/shinken_features
 plugins/plugins-enabled/statusmap
 README
 root/favicon.ico
@@ -898,6 +900,7 @@ root/thruk/themes/Thruk/images/link.png
 root/thruk/themes/Thruk/images/logo_thruk.png
 root/thruk/themes/Thruk/images/logo_thruk_mid.png
 root/thruk/themes/Thruk/images/logo_thruk_small.png
+root/thruk/themes/Thruk/images/logos
 root/thruk/themes/Thruk/images/logrotate.png
 root/thruk/themes/Thruk/images/menu-body-hover.png
 root/thruk/themes/Thruk/images/menu-body.png
@@ -1197,6 +1200,7 @@ root/thruk/themes/Wakizashi/images/link_search.gif
 root/thruk/themes/Wakizashi/images/logo_thruk.png
 root/thruk/themes/Wakizashi/images/logo_thruk_mid.png
 root/thruk/themes/Wakizashi/images/logo_thruk_small.png
+root/thruk/themes/Wakizashi/images/logos
 root/thruk/themes/Wakizashi/images/logrotate.png
 root/thruk/themes/Wakizashi/images/metanav_30.png
 root/thruk/themes/Wakizashi/images/metanav_30_hi.png
@@ -1290,6 +1294,7 @@ ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
 t/11-Thruk-Backend.t
+t/93_manifest.t
 t/94_template_encoding.t
 t/95_doc_coverage.t
 t/97-Pod.t
@@ -1484,7 +1489,6 @@ templates/notifications.tt
 templates/outages.tt
 templates/showlog.tt
 templates/side.tt
-templates/status_bothtypes.tt
 templates/status_combined.tt
 templates/status_detail.tt
 templates/status_grid.tt
