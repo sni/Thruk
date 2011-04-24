@@ -1,5 +1,7 @@
 ﻿[% USE date %]
-[% PROCESS _header.tt page => 'status' %]
+[% PROCESS _header.tt
+  js = url_prefix _ "thruk/javascript/overlib.js"
+%]
 
     <table border="0" width="100%">
       <tr>
@@ -36,27 +38,46 @@
           <th class='status'># Services Affected</th>
           <th class='status'>Actions</th>
         </tr>
+
         [% SET num = 0 %]
         [% FOREACH host = hst_pbs %]
         [% IF host.criticity == crit.value %]
+
+        [% IF host.has_been_checked == 0 %]
+          [% statusClass='statusHOSTPENDING' %]
+          [% status ='PENDING' %]
+        [% ELSIF host.state == 0 %]
+          [% statusClass='statusHOSTUP' %]
+          [% status ='UP' %]
+        [% ELSIF host.state == 1 %]
+          [% statusClass='statusHOSTDOWN' %]
+          [% status ='DOWN' %]
+        [% ELSIF host.state == 2 %]
+          [% statusClass='statusHOSTUNREACHABLE' %]
+          [% status ='UNREACHABLE' %]
+        [% END %]
+
         [% SET num = num + 1 %]
-        [% SET class = 'statusOdd'  IF loop.odd %]
-        [% SET class = 'statusEven' IF loop.even %]
+        [% SET class = 'statusOdd'  IF num % 2 == 1 %]
+        [% SET class = 'statusEven' IF num % 2 == 0 %]
         <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
           <td class='[% class %]'>Host</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
           <td>N/A</td>
-          <td class='hostDOWN'>DOWN</td>
+          <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]'>
             [% IF host.comment_count > 0 %]
-            <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20"></a>
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = host.name %][% FOR com = comments_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, com.entry_time) %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',CAPTION,'[% host.name %] Comments',WIDTH,600,[% c.config.info_popup_options %]);">
+            [% IF host.scheduled_downtime_depth > 0 %]
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = host.name %][% FOR d = downtimes_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.start_time) %] until </td><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.end_time) %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',CAPTION,'[% hostname %] Downtimes',[% c.config.info_popup_options %]);">
+            [% END %]
             [% ELSE %]
             N/A
             [% END %]
           </td>
           <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
-          <td class='[% class %]'>[% host.affected_hosts %]</td>
-          <td class='[% class %]'>[% host.affected_services %]</td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>[% host.affected_hosts %]</a></td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>[% host.affected_services %]</a></td>
           <td class='[% class %]'>
             <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
@@ -70,31 +91,34 @@
         [% END %]
         [% END %]
 
+        [% IF num >= 1 %]
+        <tr><td colspan=9></td></tr>
+        [% END %]
+
         [% FOREACH srv = srv_pbs %]
         [% IF srv.criticity == crit.value %]
 
 
         [% IF srv.has_been_checked == 0 %]
-          [% SET s_status = 'servicePENDING' %]
+          [% SET s_status = 'statusPENDING' %]
           [% SET s_status_text = 'PENDING' %]
         [% ELSIF srv.state == 0 %]
-          [% SET s_status = 'serviceOK' %]
+          [% SET s_status = 'statusOK' %]
           [% SET s_status_text = 'OK' %]
         [% ELSIF srv.state == 1 %]
-          [% SET s_status = 'serviceWARNING' %]
+          [% SET s_status = 'statusWARNING' %]
           [% SET s_status_text = 'WARNING' %]
         [% ELSIF srv.state == 2 %]
-          [% SET s_status = 'serviceCRITICAL' %]
+          [% SET s_status = 'statusCRITICAL' %]
           [% SET s_status_text = 'CRITICAL' %]
         [% ELSIF srv.state == 3 %]
-          [% SET s_status = 'serviceUNKNOWN' %]
+          [% SET s_status = 'statusUNKNOWN' %]
           [% SET s_status_text = 'UNKNOWN' %]
         [% END %]
 
-
         [% SET num = num + 1 %]
-        [% SET class = 'statusOdd'  IF loop.odd %]
-        [% SET class = 'statusEven' IF loop.even %]
+        [% SET class = 'statusOdd'  IF num % 2 == 1 %]
+        [% SET class = 'statusEven' IF num % 2 == 0 %]
         <tr class='[% class %]'[% IF loop.first %] id="dfl_r0"[% END %]>
           <td class='[% class %]'>Service</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.host_name %]</a></td>
@@ -102,14 +126,17 @@
           <td class='[% s_status %]'>[% s_status_text %]</td>
           <td class='[% class %]'>
             [% IF srv.comment_count > 0 %]
-            <a href="extinfo.cgi?type=1&amp;host=[% host.name | uri %]#comments"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host.comment_count %] comment associated with it" title="This host has [% host.comment_count %] comment associated with it" border="0" height="20" width="20"></a>
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This service has [% srv.comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = srv.host_name description = srv.description %][% FOR com = comments_by_host_service.$hostname.$description %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, com.entry_time) %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',CAPTION,'[% hostname %] - [% description %] Comments',WIDTH,600,[% c.config.info_popup_options %]);">
+            [% IF srv.scheduled_downtime_depth > 0 %]
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = srv.host_name description = srv.description %][% FOR d = downtimes_by_host_service.$hostname.$description %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.start_time) %] until </td><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.end_time) %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',CAPTION,'[% hostname %] - [% description %] Downtimes', WIDTH,500,[% c.config.info_popup_options %]);">
+            [% END %]
             [% ELSE %]
             N/A
             [% END %]
           </td>
           <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
-          <td class='[% class %]'>[% srv.affected_hosts %]</td>
-          <td class='[% class %]'>[% srv.affected_services %]</td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts of [% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_hosts %]</a> </td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts of [% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_services %]</a></td>
           <td class='[% class %]'>
             <a href='status.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]

@@ -141,18 +141,19 @@ sub _process_host_page {
         sort => { 'DESC' => 'id' } );
 
 
-    # If we use shinken, shoud show the impacts link if it's a problem
-    if($c->{'config'}->{'enable_shinken_features'} && $host->{'is_problem'}) {
-        $c->stash->{'show_impacts_link'} = 1;
-    } else {
-        $c->stash->{'show_impacts_link'} = 0;
-    }
+    # shinken only
+    $c->stash->{'show_impacts_link'}      = 0;
+    $c->stash->{'show_rootproblems_link'} = 0;
 
-    # If we use shinken, should show the root problems of this impact
-    if($c->{'config'}->{'enable_shinken_features'} && $host->{'is_impact'}) {
-        $c->stash->{'show_rootproblems_link'} = 1;
-    } else {
-        $c->stash->{'show_rootproblems_link'} = 0;
+    if($c->stash->{'enable_shinken_features'}) {
+        # show the impacts link for problem hosts
+        if($host->{'is_problem'}) {
+            $c->stash->{'show_impacts_link'}      = 1;
+        }
+        # show the root problems of this impact
+        if($host->{'is_impact'}) {
+            $c->stash->{'show_rootproblems_link'} = 1;
+        }
     }
 
     $c->stash->{'comments'}  = $comments;
@@ -239,18 +240,18 @@ sub _process_service_page {
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
 
-    # If we use shinken, we should show the impacts link if it's a problem
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $service->{'is_problem'}) {
-        $c->stash->{'show_impacts_link'} = 1;
-    }else{
-        $c->stash->{'show_impacts_link'} = 0;
-    }
-
-    # If we use shinken, shoud show the root problems of this impact
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $service->{'is_impact'}) {
-        $c->stash->{'show_rootproblems_link'} = 1;
-    }else{
-        $c->stash->{'show_rootproblems_link'} = 0;
+    # shinken only
+    $c->stash->{'show_impacts_link'}      = 0;
+    $c->stash->{'show_rootproblems_link'} = 0;
+    if($c->stash->{'enable_shinken_features'}) {
+        # show the impacts link for problem hosts
+        if($service->{'is_problem'}) {
+            $c->stash->{'show_impacts_link'}      = 1;
+        }
+        # show the root problems of this impact
+        if($service->{'is_impact'}) {
+            $c->stash->{'show_rootproblems_link'} = 1;
+        }
     }
 
     # generate command line

@@ -13,10 +13,8 @@
               <td class='linkBox'>
                 <a href='status.cgi?host=[% host.name | uri %]'>View Status Detail For This Host</a><br>
                 [% IF host.childs %]<a href='status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]'>View Childs Hosts For This Host</a><br>[% END %]
-                [% IF show_impacts_link %]
-                <a href='status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>View Impacts of this root problem</a><br>[% END %]
-                [% IF show_rootproblems_link %]
-                <a href='status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]'>View the root problems of this impact</a><br>[% END %]
+                [% IF show_impacts_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>View Impacts For This Problem</a><br>[% END %]
+                [% IF show_rootproblems_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]'>View Root Problem For This Impact</a><br>[% END %]
                 <a href='history.cgi?host=[% host.name | uri %]'>View Alert History For This Host</a><br>
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'>View Trends For This Host</a><br>[% END %]
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name | uri %]'>View Alert Histogram For This Host</a><br>[% END %]
