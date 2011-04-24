@@ -67,7 +67,7 @@
   color:red;
 }
 
-.infoMessage,.optionBoxTitle,.dataTitle,.infoBoxTitle,.filterTitle,.filterValue,.statusTitle,.itemTotalsTitle,.queueTitle,.optBoxTitle,.descriptionTitle,.navBoxTitle {
+.infoMessage,.optionBoxTitle,.dataTitle,.infoBoxTitle,.filterTitle,.statusTitle,.itemTotalsTitle,.queueTitle,.optBoxTitle,.descriptionTitle,.navBoxTitle {
   font-weight:bold;
 }
 
@@ -254,6 +254,11 @@ DIV.perfTypeTitle {
 DIV.statusTitle,DIV.dataTitle,DIV.reportSelectTitle,DIV.dateSelectTitle,DIV.navBoxTitle,DIV.commentTitle,DIV.downtimeTitle {
   font-size:16px;
   font-weight:bold;
+}
+
+DIV.statusTitle {
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 TABLE.cmd_pane {
@@ -464,7 +469,7 @@ TD.dataVar,TD.dataVal,TD.command {
   padding:0 3px;
 }
 
-TD.filter_table,body.showlog td.filter,body.showlog td.filterName,body.showlog td.filterValue,body.showlog td.filterTitle {
+TD.filter_table,body.showlog td.filter,body.showlog td.filterName,body.showlog td.filterValue,body.showlog td.filterTitle, TD.filter {
   background-color:#F0F1EE;
 }
 
