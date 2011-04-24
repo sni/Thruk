@@ -127,7 +127,7 @@ for my $link (@cur_t_links) {
     if(!defined $testlinks->{$linkbasename}) {
         unlink($link) or die($link.' should be deleted: '.$!);
     }
-    if($testlinks->{$linkbasename} ne $target) {
+    elsif($testlinks->{$linkbasename} ne $target) {
         die($link.' has wrong target: '.$target.' vs. '.$testlinks->{$linkbasename});
     }
 }
