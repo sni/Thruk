@@ -32,11 +32,9 @@ for my $url (@{$pages}) {
 
 
 # get a problem host
-my $hst_pbs = $c->{'db'}->get_hosts(filter => [ is_problem => 1 ]);
-my $problem_host = $hst_pbs->[0]->{'name'};
 my($host,$service) = TestUtils::get_test_service();
 $pages = [
-    '/thruk/cgi-bin/shinken_status.cgi?style=bothtypes&s0_type=impact&s0_op=%3D&s0_value='.$problem_host.'&title=Impacts of '.$problem_host,
+    '/thruk/cgi-bin/shinken_status.cgi?style=bothtypes&s0_type=impact&s0_op=%3D&s0_value='.$host.'&title=Impacts of '.$host,
     '/thruk/cgi-bin/shinken_status.cgi?style=bothtypes&s0_type=rootproblem&s0_op=%3D&s0_value='.$host.'/'.$service.'&title=Root%20problem%20of%20'.$host.'/'.$service,
 ];
 for my $url (@{$pages}) {

@@ -63,7 +63,7 @@
         <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
           <td class='[% class %]'>Host</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
-          <td>N/A</td>
+          <td class='[% class %]'></td>
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]'>
             [% IF host.comment_count > 0 %]
@@ -76,8 +76,8 @@
             [% END %]
           </td>
           <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>[% host.affected_hosts %]</a></td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>[% host.affected_services %]</a></td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]'>[% host.affected_hosts %]</a></td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]'>[% host.affected_services %]</a></td>
           <td class='[% class %]'>
             <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
@@ -91,7 +91,7 @@
         [% END %]
         [% END %]
 
-        [% IF num >= 1 %]
+        [% IF srv_pbs.size >= 1 %]
         <tr><td colspan=9></td></tr>
         [% END %]
 
@@ -135,8 +135,8 @@
             [% END %]
           </td>
           <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts of [% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_hosts %]</a> </td>
-          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts of [% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_services %]</a></td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_hosts %]</a> </td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_services %]</a></td>
           <td class='[% class %]'>
             <a href='status.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
@@ -152,10 +152,10 @@
       </table>
       </center>
 
-    </div>
-    <br><br>
     [% END %]
     [% END %]
 
+    </div>
+    <br><br>
 
 [% PROCESS _footer.tt %]

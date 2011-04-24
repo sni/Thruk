@@ -63,7 +63,7 @@
         <tr class='[% class %]'>
           <td class='[% class %]'>Host</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
-          <td>N/A</td>
+          <td class='[% class %]'></td>
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]'>
             [% IF host_comment_count > 0 %]
@@ -91,7 +91,7 @@
         [% END %]
         [% END %]
 
-        [% IF num >= 1 %]
+        [% IF servicedata.size >= 1 %]
         <tr><td colspan=9></td></tr>
         [% END %]
 

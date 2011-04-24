@@ -168,7 +168,7 @@ sub _process_outagespbimp {
     $c->stash->{criticities}    = \@criticities;
     $c->stash->{title}          = 'Problems and Impacts';
     $c->stash->{infoBoxTitle}   = 'Problems and Impacts';
-    $c->stash->{page}           = 'shinken';
+    $c->stash->{page}           = 'status';
     $c->stash->{template}       = 'shinken_outagespbimp.tt';
 
     return 1;
