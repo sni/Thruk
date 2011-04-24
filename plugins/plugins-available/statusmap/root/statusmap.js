@@ -92,120 +92,146 @@ function showTip(e, node) {
 /* create and show a treemap */
 function show_tree_map(id_to_show) {
 
-    var levelsToShow = 1;
-    if(id_to_show == 'rootid' && groupby == 'address') {
-      levelsToShow = 2;
-    }
-    levelsToShow = levelsToShow + detail;
+    levelsToShow = 2 + detail;
+
+    var elem = document.getElementById('infovis');
+    elem.style.backgroundColor = '#1A1A1A';
 
     // reset page refresh
     setRefreshRate(refresh_rate);
     additionalParams.set('host', id_to_show);
 
-    TM.Squarified.implement({
-        'onRightClick': function() {
-            // hide tip
-            tip = document.getElementById('tooltip');
-            tip.style.display = 'none';
+    var tm = new $jit.TM.Squarified({
+        injectInto: 'infovis',
 
-            // build up new tree, otherwise we wont find our parent again
-            var tree = eval('(' + json + ')');
-            var parent = TreeUtil.getParent(tree, this.shownTree.id);
-            if(parent) {
-                show_tree_map(parent.id);
-            }
-            return false;
-        },
-        'onLeftClick': function(elem) {
-            // hide tip
-            tip = document.getElementById('tooltip');
-            tip.style.display = 'none';
-
-            show_tree_map(elem.parentNode.id);
-            return false;
-        }
-    });
-    var tm = new TM.Squarified({
-        //The id of the treemap container
-        rootId: 'infovis',
         //Set the max. depth to be shown for a subtree
         levelsToShow: levelsToShow,
 
+        titleHeight: 15,
+
+        animate: true,
+        duration: 700,
+
         // space between divs
-        offset: 4,
+        offset: 2,
 
-        //Add click handlers for
-        //zooming the Treemap in and out
-        addLeftClickHandler: true,
-        addRightClickHandler: true,
+        Events: {
+          enable: true,
+            'onClick': function(node) {
+                // hide tip
+                tip = document.getElementById('tooltip');
+                tip.style.display = 'none';
 
-        //When hovering a node highlight the nodes
-        //between the root node and the hovered node. This
-        //is done by adding the 'in-path' CSS class to each node.
-        selectPathOnHover: true,
+                additionalParams.set('host', node.id);
+                tm.enter(node);
+                tm.refresh();
+            },
+            'onRightClick': function() {
+                // hide tip
+                tip = document.getElementById('tooltip');
+                tip.style.display = 'none';
 
-        // add host class for the host nodes
-        onCreateElement:  function(content, node, isLeaf, head, body) {
-          if(!node) {
-            return;
-          }
-          var total      = 0;
-          var failed     = 0;
-          var totalClass = '';
-          if(head && node.data) {
-            total  = node.data.state_up + node.data.state_down + node.data.state_unreachable + node.data.state_pending;
-            failed = node.data.state_down + node.data.state_unreachable;
-            totalClass = '';
-          }
+                var tree = eval('(' + json + ')');
+                var parent = $jit.json.getParent(tree, id_to_show);
+                if(parent) {
+                  additionalParams.set('host', parent.id);
+                }
+                tm.out();
+                tm.refresh();
+            }
+        },
 
-          if( node.data.alias != undefined ) {
-            head.innerHTML = '<a href="'+ url_prefix +'thruk\/cgi-bin\/extinfo.cgi?type=1&amp;host=' + head.innerHTML + '">' + head.innerHTML + '<\/a>';
+        Tips: {
+          enable: true,
+          offsetX: 20,
+          offsetY: 20,
+          onShow: function(tip, node, isLeaf, domElement) {
+            if(!node) { return; }
+            tip.innerHTML = makeHTMLFromData(node.name, node.data);
           }
+        },
 
-          // calculate colour of node
-          if(node.data.cssClass != undefined && node.data.cssClass != 'hostUP') {
-              totalClass = node.data.cssClass;
-          }
-          else if(total == node.data.state_up) {
-              totalClass = 'hostUP';
-          }
-          else if(total == node.data.state_down) {
-              totalClass = 'hostDOWN';
-          }
-          else if(total == node.data.state_unreachable) {
-              totalClass = 'hostUNREACHABLE';
-          }
-          else if(total == node.data.state_pending) {
-              totalClass = 'hostPENDING';
-          }
-          else if(total > 0) {
-              var perc = (failed /(total-node.data.state_pending))*100;
-              if(failed == 0) {
-                  totalClass = 'hostUP';
-              }
-                else if(perc > 75) {
-                  totalClass = 'hostDOWN';
-              }
-              else {
-                  totalClass = 'serviceWARNING';
-              }
-          }
+        onPlaceLabel: function(domElement, node){
+            domElement.innerHTML = node.name;
+            var style = domElement.style;
+            style.display = '';
+            style.border = '2px solid black';
+            domElement.onmouseover = function() {
+              style.border = '2px solid #9FD4FF';
+            };
+            domElement.onmouseout = function() {
+              style.border = '2px solid black';
+            };
 
-          if(isLeaf && node.data.cssClass != undefined && head && failed == 0) {
-            head.className = (head.className + " " + node.data.cssClass);
+            if(!node) {
+              return;
+            }
+            var total      = 0;
+            var failed     = 0;
+            var totalClass = '';
+            if(domElement && node.data) {
+              total  = node.data.state_up + node.data.state_down + node.data.state_unreachable + node.data.state_pending;
+              failed = node.data.state_down + node.data.state_unreachable;
+              totalClass = '';
+            }
+
+            if( node.data.alias != undefined ) {
+              domElement.innerHTML = '<a href="'+ url_prefix +'thruk\/cgi-bin\/extinfo.cgi?type=1&amp;host=' + domElement.innerHTML + '">' + domElement.innerHTML + '<\/a>';
+            }
+
+            // calculate colour of node
+            if(node.data.cssClass != undefined && node.data.cssClass != 'hostUP') {
+                totalClass = node.data.cssClass;
+            }
+            else if(total == node.data.state_up) {
+                totalClass = 'hostUP';
+            }
+            else if(total == node.data.state_down) {
+                totalClass = 'hostDOWN';
+            }
+            else if(total == node.data.state_unreachable) {
+                totalClass = 'hostUNREACHABLE';
+            }
+            else if(total == node.data.state_pending) {
+                totalClass = 'hostPENDING';
+            }
+            else if(total > 0) {
+                var perc = (failed /(total-node.data.state_pending))*100;
+                if(failed == 0) {
+                    totalClass = 'hostUP';
+                }
+                  else if(perc > 75) {
+                    totalClass = 'hostDOWN';
+                }
+                else {
+                    totalClass = 'serviceWARNING';
+                }
+            }
+
+            if(domElement.hasAttribute('origClass')) {
+                domElement.className = domElement.origClass;
+            }
+
+            if(tm.leaf(node) && node.data.cssClass != undefined && domElement && failed == 0) {
+              domElement.setAttribute('origclass', domElement.className);
+              domElement.className = (domElement.className + " " + node.data.cssClass);
+            }
+            else if(tm.leaf(node) && domElement && node.data) {
+              domElement.setAttribute('origclass', domElement.className);
+              domElement.className = (domElement.className + " " + totalClass);
+            }
           }
-          else if(isLeaf && head && node.data) {
-            head.className = (head.className + " " + totalClass);
-          }
-          head.onmouseover = function (e){showTip((e||window.event), node)};
-          head.onmouseup   = function (e){openLink((e||window.event), node)};
-        }
     });
 
     var tree    = eval('(' + json + ')');
-    var subtree = TreeUtil.getSubtree(tree, id_to_show);
-    TreeUtil.prune(subtree, tm.config.levelsToShow);
-    tm.loadJSON(subtree);
+    tm.loadJSON(tree);
+    if(id_to_show != 'rootid') {
+      var node = tm.graph.getNode(id_to_show);
+      if(node) {
+        tm.enter(node);
+      }
+    }
+    tm.refresh();
 
     return false;
 }
@@ -216,40 +242,24 @@ function show_circle_map(id_to_show, w, h) {
     // distance between circles
     var levelDistance = 150;
 
-    //Create a new canvas instance.
-    var canvas = new Canvas('mycanvas', {
-        //Where to append the canvas widget
-        'injectInto': 'infovis',
-        'width': w,
-        'height': h,
+    var elem = document.getElementById('infovis');
+    elem.style.backgroundColor = 'transparent';
 
-        //Optional: create a background canvas and plot
-        //concentric circles in it.
-        'backgroundCanvas': {
-            'styles': {
-                'strokeStyle': '#CCCCCC'
-            },
-
-            'impl': {
-                'init': function(){},
-                'plot': function(canvas, ctx){
-                    var times = 6, d = levelDistance;
-                    var pi2 = Math.PI * 2;
-                    for (var i = 1; i <= times; i++) {
-                        ctx.beginPath();
-                        ctx.arc(0, 0, i * d, 0, pi2, true);
-                        ctx.stroke();
-                        ctx.closePath();
-                    }
-                }
-            }
-        }
-    });
-
-    var rgraph = new RGraph(canvas, {
+    var rgraph = new $jit.RGraph({
+        injectInto: 'infovis',
+        width: w,
+        height: h,
         levelDistance: levelDistance,
         duration: 700,
-        fps: 40,
+        fps: 30,
+
+        'background': {
+          'CanvasStyles': {
+            'strokeStyle': '#CCCCCC',
+            'shadowBlur':  50,
+            'shadowColor': '#ccc'
+          }
+        },
 
         Node: { //Set Node and Edge colors.
             overridable: true
@@ -292,7 +302,7 @@ function show_circle_map(id_to_show, w, h) {
                 style.fontSize = '0.9em';
                 style.color    = '#000000';
             }
-            else if(node._depth < 2){
+            else if(node._depth <= 2){
                 style.fontSize = '0.8em';
                 style.color    = '#494949';
             }else {
@@ -308,6 +318,9 @@ function show_circle_map(id_to_show, w, h) {
     var tree = eval('(' + json + ')');
     rgraph.loadJSON(tree);
     rgraph.refresh();
+    if(id_to_show != 'rootid') {
+      rgraph.onClick(id_to_show);
+    }
 }
 
 
