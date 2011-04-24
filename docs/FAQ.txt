@@ -90,7 +90,7 @@ add_link('name' => 'Wato', 'href' => '/'.$ENV{'OMD_SITE'}.'/check_mk/wato.py?fil
 
 This example just puts the Wato link from check_mks Multisite in your
 config section. Replace the ENV part with a proper path if you do not
-use [http://omdistro.org]OMD.
+use http://omdistro.org[OMD].
 
 
 Adding Items to existing sections can also be achieved by
