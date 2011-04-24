@@ -16,33 +16,33 @@
     </table>
     <div align="center">
       <br>
-      <div class='dataTitle'>Problems <img src="[% url_prefix %]thruk/themes/[% theme %]/images/problem.png" alt="problems"></div>
+      <div class='statusTitle'>Problems <img src="[% url_prefix %]thruk/themes/[% theme %]/images/problem.png" alt="problems"></div>
       <br>
 
     [% FOREACH crit IN criticities %]
     [% IF crit.nb != 0 %]
     <center>
-    <div class='dataTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Criticity : [% crit.text %]"></div>
+    <div class='statusTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Criticity : [% crit.text %]"></div>
 
-      <table border="0" class='data'>
+      <table border="0" class='status'>
         <tr>
-          <th class='data'>Type</th>
-          <th class='data'>Host</th>
-          <th class='data'>Description</th>
-          <th class='data'>State</th>
-          <th class='data'>Notes</th>
-          <th class='data'>State Duration</th>
-          <th class='data'># Hosts Affected</th>
-          <th class='data'># Services Affected</th>
-          <th class='data'>Actions</th>
+          <th class='status'>Type</th>
+          <th class='status'>Host</th>
+          <th class='status'>Description</th>
+          <th class='status'>State</th>
+          <th class='status'>Notes</th>
+          <th class='status'>State Duration</th>
+          <th class='status'># Hosts Affected</th>
+          <th class='status'># Services Affected</th>
+          <th class='status'>Actions</th>
         </tr>
         [% SET num = 0 %]
         [% FOREACH host = hst_pbs %]
         [% IF host.criticity == crit.value %]
         [% SET num = num + 1 %]
-        [% SET class = 'dataOdd'  IF loop.odd %]
-        [% SET class = 'dataEven' IF loop.even %]
-        <tr class='[% class %]'>
+        [% SET class = 'statusOdd'  IF loop.odd %]
+        [% SET class = 'statusEven' IF loop.even %]
+        <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
           <td class='[% class %]'>Host</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
           <td>N/A</td>
@@ -93,9 +93,9 @@
 
 
         [% SET num = num + 1 %]
-        [% SET class = 'dataOdd'  IF loop.odd %]
-        [% SET class = 'dataEven' IF loop.even %]
-        <tr class='[% class %]'>
+        [% SET class = 'statusOdd'  IF loop.odd %]
+        [% SET class = 'statusEven' IF loop.even %]
+        <tr class='[% class %]'[% IF loop.first %] id="dfl_r0"[% END %]>
           <td class='[% class %]'>Service</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.host_name %]</a></td>
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>

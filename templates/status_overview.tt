@@ -103,7 +103,7 @@
                 [% ELSIF h.state == 2 %]
                   [% hostclass = 'statusHOSTUNREACHABLE' %]
                 [% END %]
-                <tr class='[% hostclass %]'>
+                <tr class='[% hostclass %][% IF loop.first %] firstrow[% END %]'>
                   <td class='[% hostclass %]'>
                     <table border="0" width="100%" cellpadding="0" cellspacing="0">
                       <tr class='[% hostclass %]'>

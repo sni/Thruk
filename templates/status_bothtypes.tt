@@ -17,24 +17,24 @@
     </table>
     <div align="center">
       <br>
-      <div class='dataTitle'>
+      <div class='statusTitle'>
            [% IF custom_title != '' %][% custom_title %]
            [% END %]
       </div>
       <br>
 
     <center>
-      <table border="0" class='data'>
+      <table border="0" class='status'>
         <tr>
-          <th class='data'>Type</th>
-          <th class='data'>Host</th>
-          <th class='data'>Description</th>
-          <th class='data'>State</th>
-          <th class='data'>Notes</th>
-          <th class='data'>State Duration</th>
-          <th class='data'># Hosts Affected</th>
-          <th class='data'># Services Affected</th>
-          <th class='data'>Actions</th>
+          <th class='status'>Type</th>
+          <th class='status'>Host</th>
+          <th class='status'>Description</th>
+          <th class='status'>State</th>
+          <th class='status'>Notes</th>
+          <th class='status'>State Duration</th>
+          <th class='status'># Hosts Affected</th>
+          <th class='status'># Services Affected</th>
+          <th class='status'>Actions</th>
         </tr>
         [% SET num = 0 %]
         [% FOREACH host = hostdata %]
@@ -42,8 +42,8 @@
         [% SET host_comment_count = host.comments.size IF host.comments %]
         [% IF 1 == 1 %]
         [% SET num = num + 1 %]
-        [% SET class = 'dataOdd'  IF loop.odd %]
-        [% SET class = 'dataEven' IF loop.even %]
+        [% SET class = 'statusOdd'  IF loop.odd %]
+        [% SET class = 'statusEven' IF loop.even %]
         <tr class='[% class %]'>
           <td class='[% class %]'>Host</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
@@ -93,8 +93,8 @@
 
 
         [% SET num = num + 1 %]
-        [% SET class = 'dataOdd'  IF loop.odd %]
-        [% SET class = 'dataEven' IF loop.even %]
+        [% SET class = 'statusOdd'  IF loop.odd %]
+        [% SET class = 'statusEven' IF loop.even %]
         <tr class='[% class %]'>
           <td class='[% class %]'>Service</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.host_name %]</a></td>

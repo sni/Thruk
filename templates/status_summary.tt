@@ -95,7 +95,7 @@
         [% END %]
         [% SET class = 'statusEven' IF loop.odd  %]
         [% SET class = 'statusOdd'  IF loop.even %]
-        <tr class='[% class %]'>
+        <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
           [% IF substyle == 'host' %]
           <td class='[% class %]'><a href='status.cgi?hostgroup=[% group.name | uri %]&amp;style=overview'>[% group.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% group.name | uri %]'>[% group.name %]</a>)</td>
           [% ELSIF substyle == 'service' %]
