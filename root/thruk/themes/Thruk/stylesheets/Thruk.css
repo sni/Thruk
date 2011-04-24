@@ -71,6 +71,10 @@
   font-weight:bold;
 }
 
+DIV.infoMessage {
+  text-align: center;
+}
+
 .navbarlogo {
   margin:0 0 10px;
 }
@@ -335,7 +339,7 @@ TABLE.command {
 }
 
 TABLE.extdetails {
-  width:70%;
+  width:90%;
 }
 
 TABLE.filter_table {
