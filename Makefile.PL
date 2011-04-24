@@ -125,7 +125,7 @@ for my $link (@cur_t_links) {
     my $linkbasename = $link;
     $linkbasename =~ s/.*\///gmx;
     if(!defined $testlinks->{$linkbasename}) {
-        die($link.' should be deleted');
+        unlink($link) or die($link.' should be deleted: '.$!);
     }
     if($testlinks->{$linkbasename} ne $target) {
         die($link.' has wrong target: '.$target.' vs. '.$testlinks->{$linkbasename});
