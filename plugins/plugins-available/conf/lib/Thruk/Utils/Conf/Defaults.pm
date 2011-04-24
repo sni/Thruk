@@ -109,10 +109,6 @@ sub get_cgi_cfg {
     my ( $self ) = @_;
 
     my $conf = {
-#        'main_config_file'                          => ['STRING', ''],
-#        'physical_html_path'                        => ['STRING', ''],
-#        'url_html_path'                             => ['STRING', ''],
-#        'cgi_base_url'                              => ['STRING', ''],
         'show_context_help'                         => ['BOOL',   '0'],
         'use_pending_states'                        => ['BOOL',   '1'],
         'default_user_name'                         => ['STRING', 'thrukadmin' ],
@@ -126,9 +122,6 @@ sub get_cgi_cfg {
         'authorized_for_system_information'         => ['MULTI_LIST', [], {} ],
         'authorized_for_configuration_information'  => ['MULTI_LIST', [], {} ],
         'lock_author_names'                         => ['BOOL',   '1'],
-#        'default_statusmap_layout'                  =>
-#        'default_statuswrl_layout'                  =>
-#        'ping_syntax'                               => ['STRING', ''],
         'refresh_rate'                              => ['INT', '90'],
         'escape_html_tags'                          => ['BOOL',   '1'],
         'action_url_target'                         => ['STRING', ''],

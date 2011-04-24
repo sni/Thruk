@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 0.94    Mon Apr 25 13:09:57 CEST 2011
           - added more menu control functions
+          - fixed small design issues
 
 0.92    Sun Apr 17 20:15:13 CEST 2011
           - added Thruk theme

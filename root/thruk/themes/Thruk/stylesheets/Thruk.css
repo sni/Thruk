@@ -322,7 +322,7 @@ TABLE.comment,TABLE.downtime,TABLE.notifications {
   text-align:center;
 }
 
-TABLE.data,TABLE.queue {
+TABLE.data,TABLE.queue,TABLE.commandDescription {
   background-color:#F0F1EE;
   border:1px #444444 outset;
   border-spacing:0;
@@ -607,8 +607,8 @@ TD.miniStatusWARNING {
   text-align:center;
 }
 
-TD.navBoxItem,TD.navBoxDate,TD.optBoxItem {
-  font-size:12px;
+TD.navBoxItem,TD.navBoxDate,TD.optBoxItem,TD.optBoxRequiredItem {
+  font-size:11px;
   font-weight:bold;
 }
 
@@ -800,6 +800,7 @@ table.overDivTable a {
 
 td.filter {
   padding-left:5px;
+  padding-right:3px;
 }
 
 td.statusEven,td.statusOdd,TD.statusHOSTPENDING,TD.statusHOSTDOWN,TD.statusHOSTUP,TD.statusHOSTUNREACHABLE,TD.statusSERVICEOK,TD.statusSERVICEWARNING,TD.statusSERVICECRITICAL,TD.statusSERVICEUNKNOWN,TD.statusSERVICEPENDING,TABLE.status tbody tr td.tableRowHover {
@@ -878,4 +879,40 @@ TABLE.blockHeadBorder, DIV.blockHeadBorder {
   border-top: 1px #444444 outset;
   border-left: 1px #444444 outset;
   border-right: 1px #444444 outset;
+  line-height: 18px;
+  height: 20px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+TABLE.cmdOptBox {
+  background-color:#F0F1EE;
+  border:1px #444444 outset;
+  border-spacing:0;
+  margin:0;
+  padding:0;
+  text-align:center;
+  width: 100%;
+}
+TABLE.commandDescription {
+  width: 100%;
+}
+TABLE.cmdOuterTable {
+  width: auto;
+}
+DIV.cmdType {
+  text-align: center;
+  color: red;
+  font-weight:bold;
+  font-size: 12px;
+}
+TABLE.optBoxInnerTable {
+  width: 100%;
+}
+table.filter > tbody > tr > td {
+  padding-right: 3px !important;
+}
+TABLE.statusgroups {
+  border: 0px none;
+  padding-bottom: 15px;
 }
