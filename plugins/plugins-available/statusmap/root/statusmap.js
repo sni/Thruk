@@ -92,7 +92,10 @@ function showTip(e, node) {
 /* create and show a treemap */
 function show_tree_map(id_to_show) {
 
-    levelsToShow = 2 + detail;
+    levelsToShow = 1 + detail;
+    if(groupby == 'address') {
+        levelsToShow = levelsToShow + 1;
+    }
 
     var elem = document.getElementById('infovis');
     elem.style.backgroundColor = '#1A1A1A';
