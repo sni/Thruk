@@ -260,3 +260,10 @@ body.avail table.logEntries td {
 div.logEntries {
   font-family:"Courier New",courier,monospace;
 }
+
+A {
+  color: #0000EE;
+}
+A:hover {
+  color: #000099;
+}
