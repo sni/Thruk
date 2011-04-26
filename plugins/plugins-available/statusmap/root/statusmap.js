@@ -127,7 +127,7 @@ function show_tree_map(id_to_show) {
 
                 additionalParams.set('host', node.id);
                 tm.enter(node);
-                tm.refresh();
+                return false;
             },
             'onRightClick': function() {
                 // hide tip
@@ -140,7 +140,7 @@ function show_tree_map(id_to_show) {
                   additionalParams.set('host', parent.id);
                 }
                 tm.out();
-                tm.refresh();
+                return false;
             }
         },
 
