@@ -530,7 +530,7 @@ TD.hostTotalsUP,TD.serviceTotalsOK {
 }
 
 TD.hostUNREACHABLE {
-  background-color:#FF0038;
+  background-color:#ff7a59;
   font-weight:bold;
   height:22px;
 }
@@ -634,8 +634,12 @@ TD.notificationsWARNING {
   padding:1px;
 }
 
-TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED,A.statusCRITICAL {
+TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,A.statusCRITICAL {
   background-color:#FF5B33;
+  height:22px;
+}
+TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED {
+  background-color:#ff7a59;
   height:22px;
 }
 
@@ -648,6 +652,7 @@ TD.serviceTotalsWARNING {
 }
 
 TD.stateInfoTable1 > TABLE,TD.stateInfoTable2 > TABLE {
+  border-collapse: collapse;
   width:300px;
 }
 
@@ -726,16 +731,11 @@ TR.command > TD {
 
 a {
   color:#000000;
+  text-decoration:none;
+}
+
+a:hover {
   text-decoration:underline;
-}
-
-a.perfTitle,a.perfItem,a.perfValue {
-  color:#444444;
-  text-decoration:none;
-}
-
-a:hover,.navsection a,A.hostTotals:hover,A.serviceTotals:hover {
-  text-decoration:none;
 }
 
 body {
@@ -831,10 +831,6 @@ ul.navsectionlinks li ul {
 ul.navsectionlinks li ul li a {
   font-weight:normal;
   padding:0;
-}
-
-ul.navsectionlinks li ul li a:hover,a.perfTitle:hover,a.perfItem:hover,a.perfValue:hover {
-  text-decoration:underline;
 }
 
 ul.navsectionlinks li ul li ul {
@@ -952,4 +948,8 @@ TABLE.status > TBODY > tr#hst_r0 > td, TABLE.status > TBODY > tr#svc_r0 > td, TA
 }
 TABLE.status > TBODY > tr > td:last-child {
   border-right: 0px none;
+}
+
+TABLE.hostTotals A I, TABLE.serviceTotals A I {
+    font-style: normal;
 }
