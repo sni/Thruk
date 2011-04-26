@@ -317,6 +317,8 @@ table.cmd_pane {
 }
 table.cmd_pane > tbody > tr > td {
   padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
   margin: 0px;
   border-width: 1px;
   border-style: inset;
@@ -579,4 +581,8 @@ body.config TD.dataUserVar {
 body.config TD.dataSubmit {
     text-align:center;
     padding: 4px;
+}
+
+TABLE.cmd_pane tbody > tr > th > A > IMG {
+  vertical-align: text-bottom;
 }

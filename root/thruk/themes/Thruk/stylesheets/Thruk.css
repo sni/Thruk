@@ -287,8 +287,14 @@ TABLE.cmd_pane tbody > tr > th {
   border-right:1px #E2DECD solid;
   font-size:12px;
   height:20px;
-  padding:0px;
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
   white-space:nowrap;
+}
+
+TABLE.cmd_pane tbody > tr > th > A > IMG {
+  vertical-align: middle;
 }
 
 TABLE.cmd_pane th,TABLE.cmd_pane a,TABLE.cmd_pane a:hover {

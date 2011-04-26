@@ -26,7 +26,7 @@
         - <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
         [% END %]
         &nbsp;
-        <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" height="14" width="14" alt="close" border=0 style="vertical-align:text-bottom"></a>
+        <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" height="14" width="14" alt="close"></a>
       </th>
     </tr>
     <tr>
