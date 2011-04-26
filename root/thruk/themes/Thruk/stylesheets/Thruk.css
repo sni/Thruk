@@ -928,6 +928,10 @@ TABLE.status {
   border-spacing: 0px;
   border:1px #444444 outset;
 }
+TABLE.status TD {
+  padding-left: 2px;
+  padding-right: 2px;
+}
 TABLE.status > TBODY > TR > TH {
   border-right: 1px solid #ACA899;
 }
