@@ -953,3 +953,7 @@ TABLE.status > TBODY > tr > td:last-child {
 TABLE.hostTotals A I, TABLE.serviceTotals A I {
     font-style: normal;
 }
+
+TABLE.tac TD.hostHeader, TABLE.tac TD.serviceHeader, TABLE.tac TD.featureHeader {
+    width: 150px;
+}
