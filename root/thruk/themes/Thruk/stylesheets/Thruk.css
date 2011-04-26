@@ -500,6 +500,9 @@ TD.healthTitle,TD.perfTitle,TD.featureTitle,TD.outageTitle,TD.hostTitle,TD.servi
   text-align:center;
   vertical-align:middle;
 }
+TD.outageTitle {
+  white-space: nowrap;
+}
 
 TD.hostDOWN {
   background-color:#FF5B33;
