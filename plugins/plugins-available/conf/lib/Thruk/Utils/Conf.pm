@@ -116,6 +116,17 @@ sub read_conf {
         }
     }
 
+    # sort and uniq options
+    for my $key (keys %{$data}) {
+        if($data->{$key}->[0] eq 'MULTI_LIST') {
+#use Data::Dumper;
+#print STDERR Dumper($data->{$key})
+            my %seen = ();
+            my @uniq = sort( grep { !$seen{$_}++ } @{$data->{$key}->[1]} );
+            $data->{$key}->[1] = [ sort @uniq ];
+        }
+    }
+
     return($content, $data, $md5);
 }
 
