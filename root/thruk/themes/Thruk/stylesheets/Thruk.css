@@ -157,7 +157,7 @@ DIV.infoMessage {
 }
 
 td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:hover, .tableRowHover,td.newfilter:hover {
-  background:#FFFF88;
+  background-color:#FFEB66;
 }
 
 .tableRowSelected {
@@ -662,7 +662,7 @@ TD.statusBGUNKNOWN {
 }
 
 TD.statusBGWARNING {
-  background-color:#FFEB66;
+  background-color:#FFFF88;
   height:22px;
 }
 
@@ -953,4 +953,3 @@ TABLE.status > TBODY > tr#hst_r0 > td, TABLE.status > TBODY > tr#svc_r0 > td, TA
 TABLE.status > TBODY > tr > td:last-child {
   border-right: 0px none;
 }
-
