@@ -3,13 +3,15 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Thruk</title>
+    <title>[% title_prefix %][% title %]</title>
     <script type="text/javascript">
     <!--
     var url_prefix = '[% url_prefix %]';
     -->
     </script>
+    [% UNLESS all_in_one_css %]
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
+    [% END %]
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css" type="text/css" rel="stylesheet" />
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />

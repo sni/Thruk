@@ -127,6 +127,7 @@ input.button_peerUP {
   font-weight:normal;
   overflow: hidden;
   width: 80px;
+  cursor: pointer;
 }
 input.button_peerDOWN {
   color:#444444;
@@ -138,6 +139,7 @@ input.button_peerDOWN {
   font-weight:normal;
   overflow: hidden;
   width: 80px;
+  cursor: pointer;
 }
 input.button_peerDIS {
   color:#444444;
@@ -149,6 +151,7 @@ input.button_peerDIS {
   font-weight:normal;
   overflow: hidden;
   width: 80px;
+  cursor: pointer;
 }
 input.button_peerHID {
   color:#444444;

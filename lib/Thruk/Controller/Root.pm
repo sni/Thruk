@@ -157,6 +157,7 @@ sub begin : Private {
     else {
         $c->stash->{additional_template_paths} = [ $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
+    $c->stash->{all_in_one_css} = 1 if $theme eq 'Thruk';
 
     if(exists $c->{'request'}->{'parameters'}->{'noheader'}) {
         $c->{'request'}->{'parameters'}->{'hidetop'}  = 1;
