@@ -66,7 +66,7 @@
       </div>
     </td>
     <td valign="bottom" align="right" width="33%">
-      [% PROCESS _show_link.tt %]
+      [% PROCESS _show_link.tt style='combined' %]
     </td>
   </tr>
 </table>
