@@ -1952,6 +1952,7 @@ var ajax_search = {
                     el.focus();
                 }
             }
+            Event.stop(evt);
             return false;
         }
         if(keyCode == 13 || keyCode == 108) {
@@ -1959,6 +1960,7 @@ var ajax_search = {
                 return true
             }
             ajax_search.set_result(ajax_search.res[ajax_search.cur_select]);
+            Event.stop(evt);
             return false
         }
         return true;
