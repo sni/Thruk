@@ -195,7 +195,6 @@ DIV.commentTitle,DIV.downtimeTitle {
 
 DIV.data {
   font-size:12px;
-  font-style:italic;
   font-weight:bold;
   height:20px;
   padding:0;
@@ -346,6 +345,7 @@ TABLE.command {
 
 TABLE.extdetails {
   width:90%;
+  max-width: 1000px;
 }
 
 TABLE.filter_table {
@@ -915,7 +915,6 @@ TABLE.optBoxInnerTable {
   width: 100%;
 }
 
-
 table.filter > tbody > tr > td {
   padding-right: 3px !important;
 }
@@ -948,7 +947,6 @@ TABLE.servicestatus > TBODY > TR > TH {
   border-left:1px #444444 outset;
 }
 
-
 TABLE.status > TBODY > TR > TD {
   border-right: 2px solid white;
   border-top: 2px solid white;
@@ -961,9 +959,57 @@ TABLE.status > TBODY > tr > td:last-child {
 }
 
 TABLE.hostTotals A I, TABLE.serviceTotals A I {
-    font-style: normal;
+  font-style: normal;
 }
 
 TABLE.tac TD.hostHeader, TABLE.tac TD.serviceHeader, TABLE.tac TD.featureHeader {
-    width: 150px;
+  width: 150px;
+}
+
+TABLE.extdetails TD.dataVal {
+  text-align: left;
+}
+TABLE.extdetails TD.dataVar {
+  white-space: nowrap;
+  width: 20%;
+}
+
+TABLE.extdetails DIV.hostUP,
+TABLE.extdetails DIV.hostDOWN,
+TABLE.extdetails DIV.hostUNREACHABLE,
+TABLE.extdetails DIV.hostPENDING,
+TABLE.extdetails DIV.serviceOK,
+TABLE.extdetails DIV.serviceWARNING,
+TABLE.extdetails DIV.serviceUNKNOWN,
+TABLE.extdetails DIV.serviceCRITICAL,
+TABLE.extdetails DIV.servicePENDING,
+TABLE.extdetails DIV.notflapping,
+TABLE.extdetails DIV.flapping,
+TABLE.extdetails DIV.downtimeINACTIVE,
+TABLE.extdetails DIV.downtimeACTIVE
+{
+  min-width: 80px;
+  float: left;
+  text-align: center;
+}
+
+TABLE.extdetails DIV.notificationsDISABLED,
+TABLE.extdetails DIV.notificationsENABLED,
+TABLE.extdetails DIV.checksDISABLED,
+TABLE.extdetails DIV.checksENABLED,
+TABLE.extdetails DIV.eventhandlersDISABLED,
+TABLE.extdetails DIV.eventhandlersENABLED,
+TABLE.extdetails DIV.flapdetectionDISABLED,
+TABLE.extdetails DIV.flapdetectionENABLED
+{
+  width: 120px;
+  text-align: center;
+}
+
+TABLE.extdetails TD.extdetails {
+  border-bottom: 1px solid #444444;
+}
+
+.commandNote {
+  color: red;
 }

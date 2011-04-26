@@ -119,7 +119,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar' valign='top'> Status Information: </td>
-                            <td class='dataVal'>
+                            <td class='dataVal detail_plugin_output'>
                               [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
                               [% IF escape_html_tags %][% html_escape(service.plugin_output) %][% ELSE %][% service.plugin_output %][% END %]
                               [% IF service.long_plugin_output %]
@@ -561,7 +561,7 @@
                 <th class='comment' nowrap>Expanded Command</th>
                 <td class='comment'>
                   [% IF command.note %]
-                  <i><b>Note:</b> [% command.note %]</i>
+                  <i class="commandNote"><b>Note:</b> [% command.note %]</i>
                   <br><br>
                   [% END %]
                   <pre class="no_margin command_line config_info">[% command.line_expanded | html %]</pre>
