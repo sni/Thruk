@@ -599,15 +599,29 @@ sub single_search {
             push @servicetotalsfilter, { description => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
-            push @hostfilter,          { groups      => { $listop => $value } };
-            push @hosttotalsfilter,    { groups      => { $listop => $value } };
-            push @servicefilter,       { host_groups => { $listop => $value } };
-            push @servicetotalsfilter, { host_groups => { $listop => $value } };
+            if($op eq '~~' or $op eq '!~~~') {
+                my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'hostgroup');
+                push @hostfilter,          $hfilter;
+                push @hosttotalsfilter,    $hfilter;
+                push @servicefilter,       $sfilter;
+                push @servicetotalsfilter, $sfilter;
+            } else {
+                push @hostfilter,          { groups      => { $listop => $value } };
+                push @hosttotalsfilter,    { groups      => { $listop => $value } };
+                push @servicefilter,       { host_groups => { $listop => $value } };
+                push @servicetotalsfilter, { host_groups => { $listop => $value } };
+            }
             push @hostgroupfilter,     { name        => { $op     => $value } };
         }
         elsif ( $filter->{'type'} eq 'servicegroup' ) {
-            push @servicefilter,       { groups => { $listop => $value } };
-            push @servicetotalsfilter, { groups => { $listop => $value } };
+            if($op eq '~~' or $op eq '!~~~') {
+                my($hfilter, $sfilter) = Thruk::Utils::Status::get_groups_filter($c, $op, $value, 'servicegroup');
+                push @servicefilter,       $sfilter;
+                push @servicetotalsfilter, $sfilter;
+            } else {
+                push @servicefilter,       { groups => { $listop => $value } };
+                push @servicetotalsfilter, { groups => { $listop => $value } };
+            }
             push @servicegroupfilter,  { name   => { $op     => $value } };
         }
         elsif ( $filter->{'type'} eq 'contact' ) {
@@ -1070,6 +1084,51 @@ sub get_comments_filter {
         }
         push @hostfilter,          { -or => [ comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
         push @servicefilter,       { -or => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
+    }
+
+    return(\@hostfilter, \@servicefilter);
+}
+
+
+##############################################
+
+=head2 get_groups_filter
+
+  get_groups_filter($c, $op, $value, $type)
+
+returns filter for comments
+
+=cut
+sub get_groups_filter {
+    my($c, $op, $value, $type) = @_;
+
+    my(@hostfilter, @servicefilter);
+
+    return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
+
+    return(\@hostfilter, \@servicefilter) if $value eq '';
+
+    my $groups;
+    if($type eq 'hostgroup') {
+        $groups = $c->{'db'}->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), { name => { $op => $value }} ] );
+    }
+    elsif($type eq 'servicegroup') {
+        $groups = $c->{'db'}->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), { name => { $op => $value }} ] );
+    }
+    my @names = sort keys %{ Thruk::Utils::array2hash([@{$groups}], 'name') };
+    if(scalar @names == 0) { @names = (''); }
+
+    my $group_op = '!>=';
+    if($op eq '=' or $op eq '~~') {
+        $group_op = '>=';
+    }
+
+    if($type eq 'hostgroup') {
+        push @hostfilter,    { -or => { groups      => { $group_op => \@names } } };
+        push @servicefilter, { -or => { host_groups => { $group_op => \@names } } };
+    }
+    elsif($type eq 'servicegroup') {
+        push @servicefilter, { groups => { $group_op => \@names } };
     }
 
     return(\@hostfilter, \@servicefilter);

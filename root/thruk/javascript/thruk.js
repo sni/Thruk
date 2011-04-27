@@ -1500,7 +1500,7 @@ function verify_op(event) {
   for(var x = 0; x< opElem.options.length; x++) {
     var curOp = opElem.options[x].value;
     if(curOp == '~' || curOp == '!~') {
-      if(selValue != 'search' && selValue != 'host' && selValue != 'service' && selValue != 'comment') {
+      if(selValue != 'search' && selValue != 'host' && selValue != 'service' && selValue != 'hostgroup' && selValue != 'servicegroup' && selValue != 'comment') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only = and != are allowed for list searches

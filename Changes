@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.94.2  Thu Apr 28 00:05:17 CEST 2011
+          - added regular expression filter for host/servicegroups
+
 0.94.1  Tue Apr 26 13:02:37 CEST 2011
           - fixed small design issues
           - fixed page scrolling when using cursor keys in search

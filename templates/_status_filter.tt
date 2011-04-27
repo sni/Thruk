@@ -34,15 +34,15 @@
             <select name="style" id="[% paneprefix %][% prefix %]_style_selector">
               <optgroup label="Host">
                 <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
-                <option value="hostoverview"[% IF style == 'hostoverview' %] selected[% END %]>Overview</option>
-                <option value="hostsummary"[% IF  style == 'hostsummary'  %] selected[% END %]>Summary</option>
-                <option value="hostgrid"[% IF     style == 'hostgrid'     %] selected[% END %]>Grid</option>
+                <option value="hostoverview"[% IF style == 'overview' && substyle == 'host' || style == 'hostoverview' %] selected[% END %]>Overview</option>
+                <option value="hostsummary"[% IF  style == 'summary'  && substyle == 'host' || style == 'hostsummary'  %] selected[% END %]>Summary</option>
+                <option value="hostgrid"[% IF     style == 'grid'     && substyle == 'host' || style == 'hostgrid'     %] selected[% END %]>Grid</option>
               </optgroup>
               <optgroup label="Service">
                 <option value="detail"[% IF          style == 'detail'          %] selected[% END %]>Detail</option>
-                <option value="serviceoverview"[% IF style == 'serviceoverview' %] selected[% END %]>Overview</option>
-                <option value="servicesummary"[% IF  style == 'servicesummary'  %] selected[% END %]>Summary</option>
-                <option value="servicegrid"[% IF     style == 'servicegrid'     %] selected[% END %]>Grid</option>
+                <option value="serviceoverview"[% IF style == 'overview' && substyle == 'service' || style == 'serviceoverview' %] selected[% END %]>Overview</option>
+                <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
+                <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
               </optgroup>
              </select>
            [% END %]
