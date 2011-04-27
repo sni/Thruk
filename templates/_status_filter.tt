@@ -23,11 +23,11 @@
             <a href="#" onClick="toggleFilterPane('[% paneprefix %]'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% paneprefix %][% prefix %]_filter_button_mini" alt="filter"></a>
             Display Filters:
            </div>
+           [% END %]
            <input type="hidden" name="[% paneprefix %][% prefix %]_hoststatustypes" value="[% search.hoststatustypes %]">
            <input type="hidden" name="[% paneprefix %][% prefix %]_servicestatustypes" value="[% search.servicestatustypes %]">
            <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops %]">
            <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
-           [% END %]
           </td>
           <td align="left" class='filterTitle' nowrap>
            [% IF loop.first && show_form == '1' %]
