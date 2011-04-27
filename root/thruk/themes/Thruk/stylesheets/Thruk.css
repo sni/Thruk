@@ -201,9 +201,16 @@ DIV.data {
   text-align:center;
 }
 
-DIV.dataTitle,DIV.perfTypeTitle,DIV.commandTitle {
+DIV.perfTypeTitle,DIV.commandTitle {
   font-weight:bold;
   height:20px;
+  padding:0;
+  text-align:center;
+  vertical-align:middle;
+  line-height: 18px;
+}
+DIV.dataTitle {
+  font-weight:bold;
   padding:0;
   text-align:center;
   vertical-align:middle;
@@ -1014,4 +1021,3 @@ TABLE.extdetails TD.extdetails {
 .commandNote {
   color: red;
 }
-
