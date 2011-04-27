@@ -416,6 +416,7 @@ function addRowSelector(id) {
             resetHostRow(e);
         });
     }
+    return true;
 }
 
 /* add the event handler */
@@ -1409,6 +1410,9 @@ function new_filter(cloneObj, parentObj, btnId) {
 
   hideBtn = document.getElementById(pane_prefix + new_prefix + 'filter_title');
   if(hideBtn) { hideElement(hideBtn); }
+
+  styler = document.getElementById(pane_prefix + new_prefix + 'style_selector');
+  if(styler) { styler.parentNode.removeChild(styler); }
 }
 
 /* replace ids and names for elements */

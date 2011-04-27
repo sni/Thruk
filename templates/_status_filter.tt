@@ -31,7 +31,7 @@
           </td>
           <td align="left" class='filterTitle' nowrap>
            [% IF loop.first && show_form == '1' %]
-            <select name="style">
+            <select name="style" id="[% paneprefix %][% prefix %]_style_selector">
               <optgroup label="Host">
                 <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
                 <option value="hostoverview"[% IF style == 'hostoverview' %] selected[% END %]>Overview</option>
