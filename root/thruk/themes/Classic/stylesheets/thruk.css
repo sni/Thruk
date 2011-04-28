@@ -462,6 +462,9 @@ td.clickable {
   cursor: pointer;
   vertical-align: middle;
 }
+.notclickable {
+  cursor: default;
+}
 
 table.filter > tbody > tr > td {
   padding-bottom: 0px !important;

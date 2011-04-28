@@ -75,7 +75,7 @@
         <td class='status[% state %]'>[% state %]</td>
         <td class='[% serviceclass %]' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
         <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
-        <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number && s.current_notification_number > 0 %] <span title="notifications">#[% s.current_notification_number %]</span>[% END %]</td>
+        <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number && s.current_notification_number > 0 %] <span title="This service has send out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %]</td>
           [% IF s.has_been_checked == 0 %]
             <td class='[% serviceclass %]'>Service check scheduled for [% format_date(s.next_check, datetime_format_long) %]</td>
           [% ELSE %]

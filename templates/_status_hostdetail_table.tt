@@ -56,7 +56,7 @@
           <td class='[% class %]' nowrap align="center">[% date_format(c, h.last_check) %]</td>
           <td class='[% class %]' nowrap>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
           [% IF show_host_attempts %]
-          <td class='[% class %]' align="center">[% h.current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number && h.current_notification_number > 0 %] <span title="notifications">#[% h.current_notification_number %]</span>[% END %]</td>
+          <td class='[% class %]' align="center">[% h.current_attempt %]/[% h.max_check_attempts %][% IF show_notification_number && h.current_notification_number > 0 %] <span title="This host has send out [% h.current_notification_number %] notifications">#[% h.current_notification_number %]</span>[% END %]</td>
           [% END %]
           [% IF h.has_been_checked == 0 %]
             <td class='[% class %]' valign='middle'>Host check scheduled for [% format_date(h.next_check, datetime_format_long) %]</td>
