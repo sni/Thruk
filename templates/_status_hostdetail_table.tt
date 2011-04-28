@@ -63,15 +63,15 @@
           [% ELSE %]
             [% IF h.long_plugin_output %]
               [% IF escape_html_tags %]
-                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]'><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
+                <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(h.long_plugin_output)) | nl2br %]'><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
               [% ELSE %]
-                <td  valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);" abbr='[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
+                <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,800,[% c.config.info_popup_options %]);" abbr='[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
               [% END %]
             [% ELSE %]
               [% IF escape_html_tags %]
-                <td  valign='middle' class='[% class %]'>[% html_escape(h.plugin_output) %]</td>
+                <td  valign='middle' align="left" class='[% class %]'>[% html_escape(h.plugin_output) %]</td>
               [% ELSE %]
-                <td  valign='middle' class='[% class %]'>[% h.plugin_output %]</td>
+                <td  valign='middle' align="left" class='[% class %]'>[% h.plugin_output %]</td>
               [% END %]
             [% END %]
           [% END %]
