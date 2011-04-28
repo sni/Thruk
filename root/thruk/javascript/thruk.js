@@ -139,6 +139,11 @@ function setRefreshRate(rate) {
   }
 }
 
+/* reset refresh interval */
+function resetRefresh() {
+    setRefreshRate(refresh_rate);
+}
+
 /* stops the reload interval */
 function stopRefresh() {
   refreshPage = 0;
@@ -930,7 +935,7 @@ function checkCmdPaneVisibility() {
         /* hide command panel */
         toggleCmdPane(0);
     } else {
-        setRefreshRate(refresh_rate);
+        resetRefresh();
 
         /* set submit button text */
         var btn = document.getElementById('multi_cmd_submit_button');
@@ -2012,7 +2017,7 @@ function set_png_img(start, end, id) {
     }
 
     // reset reload timer for page
-    setRefreshRate(refresh_rate);
+    resetRefresh();
 
     return false;
 }
