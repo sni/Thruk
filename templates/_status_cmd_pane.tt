@@ -1,7 +1,7 @@
 ﻿[% USE date %]
 <div class="cmd_pane" id="cmd_pane">
 <div class="shadow"><div class="shadowcontent">
-<form action="cmd.cgi" method="POST">
+<form action="cmd.cgi" method="POST" id="quick_cmd_form">
   <input type="hidden" name="referer" value="[% uri(c) %]">
   <input type="hidden" name="fixed" value="1">
   <input type="hidden" name="selected_services" id="selected_services" value="">
@@ -140,7 +140,7 @@
       </td>
     </tr>
     <tr>
-      <td class="statusOdd submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="return collectFormData()"></td>
+      <td class="statusOdd submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="return collectFormData('quick_cmd_form')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="" border="0" height="0" width="0"></td>
     </tr>
   </table>
 </form>

@@ -372,6 +372,7 @@ Y8,           88   `8b d8'   88 88         8P
 var selectedServices = new Hash;
 var selectedHosts    = new Hash;
 var noEventsForId    = new Hash;
+var submit_form_id;
 
 /* add mouseover eventhandler for all cells and execute it once */
 function addRowSelector(id) {
@@ -493,6 +494,9 @@ function setRowStyle(row_id, style, type, force ) {
 
     // for each cells in this row
     var cells = row.cells;
+    if(!cells) {
+        return false;
+    }
     if(cells.length == 5 || cells.length == 6) {
       pagetype = 'hostdetail'
     }
@@ -964,7 +968,9 @@ function checkCmdPaneVisibility() {
 }
 
 /* collect selected hosts and services and pack them into nice form data */
-function collectFormData() {
+function collectFormData(form_id) {
+
+    check_quick_command();
 
     // check form values
     var sel = document.getElementById('quick_command');
@@ -1005,7 +1011,22 @@ function collectFormData() {
     host_form = document.getElementById('selected_hosts');
     host_form.value = hosts.join(',');
 
+    if(value == 1 ) { // reschedule
+        var btn = document.getElementById(form_id);
+        if(btn) {
+            submit_form_id = form_id;
+            window.setTimeout(submit_form, 100);
+            return(false);
+        }
+    }
+
     return(true);
+}
+
+/* submit a form by id */
+function submit_form() {
+    var btn = document.getElementById(submit_form_id);
+    btn.submit();
 }
 
 /* show/hide options for commands based on the selected command*/
@@ -1065,6 +1086,42 @@ function disableAllFormElement() {
 function enableFormElement(id) {
     obj = document.getElementById(id);
     obj.style.display = "";
+}
+
+
+/* verify submited command */
+function check_quick_command() {
+    var sel   = document.getElementById('quick_command');
+    var value = sel.value;
+    var img;
+    if(value == 1 ) { // reschedule
+        selectedServices.keys().each(function(row_id) {
+            cell           = document.getElementById(row_id + "_s_exec");
+            if(cell.innerHTML == '') {
+                img            = document.createElement('img');
+                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.height     = 20;
+                img.width      = 20;
+                img.title      = "This service is currently executing its servicecheck";
+                img.alt        = "This service is currently executing its servicecheck";
+                cell.appendChild(img);
+            }
+        });
+        selectedHosts.keys().each(function(row_id) {
+            cell           = document.getElementById(row_id + "_h_exec");
+            if(cell.innerHTML == '') {
+                img            = document.createElement('img');
+                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.height     = 20;
+                img.width      = 20;
+                img.title      = "This host is currently executing its hostcheck";
+                img.alt        = "This host is currently executing its hostcheck";
+                cell.appendChild(img);
+            }
+        });
+    }
+
+    return true;
 }
 
 
