@@ -1027,3 +1027,13 @@ TABLE.extdetails TD.extdetails {
 .commandNote {
   color: red;
 }
+
+TABLE.hostcomments, TABLE.hostdowntimes {
+  min-width: 300px;
+}
+TABLE.hostcomments TD, TABLE.hostdowntimes TD {
+  border-right: 1px solid #DEDBD2;
+}
+TABLE.hostcomments TD:last-child, TABLE.hostdowntimes TD:last-child {
+  border-right: 0px none;
+}

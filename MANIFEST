@@ -1324,7 +1324,9 @@ templates/_show_link.tt
 templates/_status_cmd_pane.tt
 templates/_status_detail_table.tt
 templates/_status_filter.tt
+templates/_status_host_attributes.tt
 templates/_status_hostdetail_table.tt
+templates/_status_service_attributes.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt

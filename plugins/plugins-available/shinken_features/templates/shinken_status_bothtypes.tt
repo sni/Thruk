@@ -66,14 +66,7 @@
           <td class='[% class %]'></td>
           <td class='[% statusClass %]'>[% status %]</td>
           <td class='[% class %]'>
-            [% IF host_comment_count > 0 %]
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This host has [% host_comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = host.name %][% FOR com = comments_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, com.entry_time) %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',CAPTION,'[% host.name %] Comments',WIDTH,600,[% c.config.info_popup_options %]);">
-            [% IF host.scheduled_downtime_depth > 0 %]
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This host is currently in a period of scheduled downtime" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = host.name %][% FOR d = downtimes_by_host.$hostname %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.start_time) %] until </td><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.end_time) %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',CAPTION,'[% hostname %] Downtimes',[% c.config.info_popup_options %]);">
-            [% END %]
-            [% ELSE %]
-            N/A
-            [% END %]
+            [% PROCESS _status_host_attributes.tt hostprefix="" host=host host_comment_count=host_comment_count with_status=0 %]
           </td>
           <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
           <td class='[% class %]'>[% host.affected_hosts %]</td>
@@ -126,14 +119,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>
           <td class='[% s_status %]'>[% s_status_text %]</td>
           <td class='[% class %]'>
-            [% IF srv_comment_count > 0 %]
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif" alt="This service has [% srv_comment_count %] comment associated with it" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = srv.host_name description = srv.description %][% FOR com = comments_by_host_service.$hostname.$description %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, com.entry_time) %]</td><td nowrap valign=\'top\'>[% com.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(com.comment)) %][% ELSE %][% escape_quotes(html_escape(com.comment)) %][% END %]</td><td nowrap valign=\'top\'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td></tr>[% END %]</table>',CAPTION,'[% hostname %] - [% description %] Comments',WIDTH,600,[% c.config.info_popup_options %]);">
-            [% IF srv.scheduled_downtime_depth > 0 %]
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="This service is currently in a period of scheduled downtime" border="0" height="20" width="20" [% info_popup_event_type %]="return overlib('<table border=0 cellpadding=3 cellspacing=0>[% SET hostname = srv.host_name description = srv.description %][% FOR d = downtimes_by_host_service.$hostname.$description %]<tr><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.start_time) %] until </td><td nowrap valign=\'top\' align=\'right\'>[% date_format(c, d.end_time) %]</td><td nowrap valign=\'top\'>[% d.author %]</td><td>[% IF escape_html_tags %][% html_escape(html_escape(d.comment)) %][% ELSE %][% escape_quotes(html_escape(d.comment)) %][% END %]</td></tr>[% END %]</table>',CAPTION,'[% hostname %] - [% description %] Downtimes', WIDTH,500,[% c.config.info_popup_options %]);">
-            [% END %]
-            [% ELSE %]
-            N/A
-            [% END %]
+            [% PROCESS _status_service_attributes.tt service=srv service_comment_count=srv_comment_count %]
           </td>
           <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
           <td class='[% class %]'>[% srv.affected_hosts %]</td>
