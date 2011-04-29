@@ -2062,8 +2062,17 @@ var ajax_search = {
 function set_png_img(start, end, id) {
     var newUrl = pnp_url + "&start=" + start + "&end=" + end;
     debug(newUrl);
+
+    $('pnpwaitimg').style.display = "block";
+
     $('pnpimg').src = newUrl;
 
+    $('pnpimg').onload = function() {
+      $('pnpimg').style.display = "block";
+      $('pnpwaitimg').style.display = "none";
+    }
+
+    // set style of buttons
     if(id) {
         for(x=1;x<=5;x++) {
             obj = document.getElementById("pnp_th"+x);

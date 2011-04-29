@@ -19,7 +19,12 @@
   </tr>
   <tr>
     <td colspan=7 align="center">
-      <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]"><img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif"></a>
+      <div id="pnp_graph_pane" style="height:187px; width:582px; position: relative;">
+        <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]">
+          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:77px; left:275px;">
+          <img id="pnpimg" src="" style="display:none">
+        </a>
+      </div>
     </td>
   </tr>
 </table>
