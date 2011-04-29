@@ -6,7 +6,7 @@
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
-        <td align="left" valign="top" width="10%">
+        <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
@@ -25,7 +25,7 @@
             </tr>
           </table>
         </td>
-        <td align="center" valign="middle" width="80%">
+        <td align="center" valign="middle" width="33%">
           <div class='data'>Host</div>
           <div class='dataTitle'>[% host.alias %]</div>
           <div class='dataTitle'>([% host.name %])</div><br>
@@ -65,7 +65,7 @@
           [% END %]
           [% IF host.notes_expanded %]<p>[% host.notes_expanded %]</p>[% END %]
         </td>
-        <td align="right" valign="bottom" width="10%">
+        <td align="right" valign="bottom" width="33%">
           <table border='0'>
           [% IF enable_shinken_features %]
           <tr>
