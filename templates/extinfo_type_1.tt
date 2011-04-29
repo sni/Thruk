@@ -465,7 +465,7 @@
           </td>
         </tr>
 
-        [% IF pnp_url && host.perf_data %]
+        [% IF pnp_url %]
         <tr>
           <td colspan="2" align="center">
           [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
