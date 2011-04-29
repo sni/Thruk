@@ -22,7 +22,7 @@
       <div id="pnp_graph_pane" style="height:187px; width:582px; position: relative;">
         <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]">
           <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:77px; left:275px;">
-          <img id="pnpimg" src="" style="display:none">
+          <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none">
         </a>
       </div>
     </td>
