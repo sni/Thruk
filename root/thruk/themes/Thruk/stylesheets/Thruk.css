@@ -892,6 +892,10 @@ TH.conftoolheader {
   border-bottom: 5px solid #F0F1EE;
 }
 
+TABLE.conftool TD.dataVal {
+  text-align: left;
+}
+
 TABLE.blockHeadBorder, DIV.blockHeadBorder {
   border-top: 1px #444444 outset;
   border-left: 1px #444444 outset;
@@ -968,7 +972,7 @@ TABLE.status > TBODY > TR > TD {
 TABLE.status > TBODY > tr#hst_r0 > td, TABLE.status > TBODY > tr#svc_r0 > td, TABLE.status > TBODY > tr#dfl_r0 > td, TABLE.status > TBODY > tr.firstrow > td {
   border-top: 0px none;
 }
-TABLE.status > TBODY > tr > td:last-child {
+TABLE.status > TBODY > tr > td:last-child, TABLE.queue > TBODY > tr > td:last-child {
   border-right: 0px none;
 }
 

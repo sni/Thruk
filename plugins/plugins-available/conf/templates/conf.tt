@@ -22,7 +22,7 @@
     [% IF conf_config.exists('cgi.cfg') || c.config.exists('htpasswd') %]
     <tr>
       <td class='dataVar'><a href="conf.cgi?type=users">User settings</a></td>
-      <td class='dataVal'>user settings</td>
+      <td class='dataVal'>User settings, password and permissions</td>
     </tr>
     [% END %]
   </table>
