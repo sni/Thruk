@@ -21,8 +21,8 @@
     <td colspan=7 align="center">
       <div id="pnp_graph_pane" style="position: relative;">
         <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]">
-          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;">
-          <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none">
+          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;" alt="waiting">
+          <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none" alt="pnp graph">
         </a>
       </div>
     </td>
