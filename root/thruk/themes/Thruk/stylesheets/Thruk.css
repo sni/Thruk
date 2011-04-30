@@ -424,6 +424,10 @@ TABLE.pref_pane tbody > tr > td {
   border:medium none;
 }
 
+TABLE.pref_pane TH {
+  white-space: nowrap;
+}
+
 TABLE.serviceTotals,TABLE.hostTotals {
   background-color:#F0F1EE;
   background-image:url(../images/border_big.gif);
@@ -1047,3 +1051,4 @@ TH.pnpSelected {
   border: 1px #444444 inset;
   font-size: 12px;
 }
+

@@ -10,7 +10,7 @@
       </tr>
     </table><br>
 
-<pre>
+<pre style="text-align: left">
 [% INSERT Changes.txt %]
 </pre>
 [% PROCESS _footer.tt %]

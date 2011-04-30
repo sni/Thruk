@@ -36,7 +36,7 @@ use Catalyst qw/
                 Compress::Gzip
                 Thruk::RemoveNastyCharsFromHttpParam
                 /;
-our $VERSION = '0.94.3';
+our $VERSION = '0.94.4';
 
 ###################################################
 # Configure the application.

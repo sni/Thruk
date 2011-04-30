@@ -39,28 +39,7 @@ sub read_navigation {
         $file = $ENV{'CATALYST_CONFIG'}.'/menu_local.conf' if -e $ENV{'CATALYST_CONFIG'}.'/menu_local.conf';
     }
 
-    if( exists $c->config->{'cache_navigation'} and $c->config->{'cache_navigation'} == 0 ) {
-        _renew_navigation($c, $file);
-    }
-    else {
-        # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
-        my @menu_conf_stat = stat($file);
-        my $last_stat = $c->cache->get('menu_conf_stat');
-        if(!defined $last_stat
-           or $last_stat->[1] != $menu_conf_stat[1] # inode changed
-           or $last_stat->[9] != $menu_conf_stat[9] # modify time changed
-          ) {
-            $c->log->info("menu.conf has changed, updating...") if defined $last_stat;
-            $c->cache->set('menu_conf_stat', \@menu_conf_stat);
-
-            _renew_navigation($c, $file);
-        } elsif(!$c->config->{'cache_navigation'}) {
-            _renew_navigation($c, $file);
-        } else {
-            # return cached version
-            $c->stash->{'navigation'}  = $c->cache->get('navigation');
-        }
-    }
+    _renew_navigation($c, $file);
 
     $c->stats->profile(end => "Utils::Menu::read_navigation()");
 
@@ -207,9 +186,9 @@ sub remove_item {
 
 ##############################################
 
-=head2 _get_menu_target
+=head2 _renew_navigation
 
-  _get_menu_target()
+  _renew_navigation()
 
 returns the current prefered target
 
@@ -266,9 +245,7 @@ sub _renew_navigation {
     }
 
     $c->stash->{'navigation'}  = $Thruk::Utils::Menu::navigation;
-    if($c->config->{'cache_navigation'}) {
-        $c->cache->set('navigation', $Thruk::Utils::Menu::navigation);
-    }
+
     return;
 }
 
