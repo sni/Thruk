@@ -321,6 +321,10 @@ TABLE.commandPanel {
 TABLE.commandPanel TD,TD.statusOdd {
   background-color:#E7E5DD;
 }
+TABLE.commandPanel TD {
+  padding-left: 10px;
+  padding-right: 10px;
+}
 
 TABLE.commandPanel TH {
   background-color:#E7E5DD;
@@ -1051,4 +1055,3 @@ TH.pnpSelected {
   border: 1px #444444 inset;
   font-size: 12px;
 }
-
