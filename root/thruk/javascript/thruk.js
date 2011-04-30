@@ -2079,7 +2079,7 @@ function set_png_img(start, end, id) {
             styleElements(obj, "original", 1);
         }
         obj = document.getElementById(id);
-        styleElements(obj, "commentEven", 1);
+        styleElements(obj, "commentEven pnpSelected", 1);
     }
 
     // reset reload timer for page

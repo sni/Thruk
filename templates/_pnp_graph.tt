@@ -3,25 +3,25 @@
   var pnp_url = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0"
 </script>
 <div class='commentTitle'>Performance Graph</div>
-<table border="0" class='comment blockHeadBorder' style="width:572px">
+<table border="0" class='comment blockHeadBorder'>
   <tr class='comment' style="cursor:pointer">
     <th class='comment' width="20" nowrap>
       <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_previous.png" alt="previous" class="pager_input_img" onclick="return move_png_img(-0.5)">
     </th>
-    <th id="pnp_th1" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id)">4 hours</th>
-    <th id="pnp_th2" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id)">day</th>
-    <th id="pnp_th3" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -   540000 %], [% date.now %], this.id)">week</th>
-    <th id="pnp_th4" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id)">month</th>
-    <th id="pnp_th5" class='comment' style="text-align:center" width="100" nowrap onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id)">year</th>
+    <th id="pnp_th1" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    14400 %], [% date.now %], this.id)">4 hours</th>
+    <th id="pnp_th2" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -    90000 %], [% date.now %], this.id)">day</th>
+    <th id="pnp_th3" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -   540000 %], [% date.now %], this.id)">week</th>
+    <th id="pnp_th4" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now -  2764800 %], [% date.now %], this.id)">month</th>
+    <th id="pnp_th5" class='comment' style="text-align:center" width="18%" nowrap onclick="return set_png_img([% date.now - 30067200 %], [% date.now %], this.id)">year</th>
     <th class='comment' width="20" nowrap>
       <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/resultset_next.png" alt="next" class="pager_input_img" onclick="return move_png_img(0.5)">
     </th>
   </tr>
   <tr>
     <td colspan=7 align="center">
-      <div id="pnp_graph_pane" style="height:187px; width:582px; position: relative;">
+      <div id="pnp_graph_pane" style="position: relative;">
         <a href="[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]">
-          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:77px; left:275px;">
+          <img id="pnpwaitimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="z-index:100; position: absolute; top:45%; left:45%;">
           <img id="pnpimg" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" style="display:none">
         </a>
       </div>

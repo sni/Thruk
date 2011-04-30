@@ -1041,3 +1041,9 @@ TABLE.hostcomments TD, TABLE.hostdowntimes TD,TABLE.servicecomments TD, TABLE.se
 TABLE.hostcomments TD:last-child, TABLE.hostdowntimes TD:last-child, TABLE.servicecomments TD:last-child, TABLE.servicedowntimes TD:last-child {
   border-right: 0px none;
 }
+
+TH.pnpSelected {
+  background-color: #DEDBD2;
+  border: 1px #444444 inset;
+  font-size: 12px;
+}
