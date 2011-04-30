@@ -475,11 +475,12 @@ page: /thruk/changes.html
 
 sub thruk_changes_html : Regex('thruk\/changes\.html') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
-    $c->stash->{infoBoxTitle}     = 'Change Log';
-    $c->stash->{'title'}          = 'Change Log';
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'template'}       = 'changes.tt';
-    $c->stash->{page}             = 'splashpage';
+    $c->stash->{infoBoxTitle}            = 'Change Log';
+    $c->stash->{'title'}                 = 'Change Log';
+    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'template'}              = 'changes.tt';
+    $c->stash->{page}                    = 'splashpage';
 
     return 1;
 }
@@ -498,11 +499,12 @@ sub thruk_docs : Regex('thruk\/docs\/') :MyAction('AddDefaults') {
         return $c->detach("default");
     }
 
-    $c->stash->{infoBoxTitle}     = 'Documentation';
-    $c->stash->{'title'}          = 'Documentation';
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'template'}       = 'docs.tt';
-    $c->stash->{page}             = 'splashpage';
+    $c->stash->{infoBoxTitle}            = 'Documentation';
+    $c->stash->{'title'}                 = 'Documentation';
+    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'template'}              = 'docs.tt';
+    $c->stash->{page}                    = 'splashpage';
 
     return 1;
 }
