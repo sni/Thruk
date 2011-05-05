@@ -5,7 +5,7 @@
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
-        <td align="left" valign="top" width="10%">
+        <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
@@ -23,7 +23,7 @@
             </tr>
           </table>
         </td>
-        <td align="center" width="80%">
+        <td align="center" width="33%">
           <div class='data'>Service</div>
           <div class='dataTitle'>[% service.description %]</div>
           <div class='data'>On Host</div>
@@ -58,7 +58,7 @@
           [% END %]
           [% IF service.notes_expanded %]<p>[% service.notes_expanded %]</p>[% END %]
         </td>
-        <td align="right" valign="bottom" width="10%">
+        <td align="right" valign="bottom" width="33%">
           [% IF enable_shinken_features %]
             <div class='dataTitle'>Criticity : [% service.criticity %]/5
               <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% service.criticity %].png" alt="Criticity : [% service.criticity %]/5">
@@ -420,7 +420,7 @@
           </td>
         </tr>
 
-        [% IF pnp_url && service.perf_data %]
+        [% IF pnp_url %]
         <tr>
           <td colspan="2" align="center">
           [% PROCESS _pnp_graph.tt hst=service.host_name svc=service.description %]

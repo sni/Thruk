@@ -243,7 +243,7 @@ function show_tree_map(id_to_show) {
 /* create and show a circle map */
 function show_circle_map(id_to_show, w, h) {
     // distance between circles
-    var levelDistance = 150;
+    var levelDistance = 100;
 
     var elem = document.getElementById('infovis');
     elem.style.backgroundColor = 'transparent';

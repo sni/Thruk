@@ -61,6 +61,13 @@ sub update_conf {
     if($update_c) {
         for my $key (keys %{$data}) {
             $update_c->config->{$key} = $data->{$key};
+            if($key eq 'use_timezone') {
+                if($data->{$key} ne '') {
+                    $ENV{'TZ'} = $data->{$key}
+                } else {
+                    delete $ENV{'TZ'};
+                }
+            }
         }
     }
 

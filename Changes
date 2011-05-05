@@ -1,5 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.94.4  Sun Mai 01 12:57:43 CEST 2011
+          - view feedback icon when changing pnp images
+
+0.94.3  Sat Apr 30 14:40:28 CEST 2011
+          - view feedback icon when changing pnp images
+
 0.94.2  Thu Apr 28 00:05:17 CEST 2011
           - added regular expression filter for host/servicegroups
 

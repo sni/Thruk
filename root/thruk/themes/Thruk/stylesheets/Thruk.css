@@ -321,6 +321,10 @@ TABLE.commandPanel {
 TABLE.commandPanel TD,TD.statusOdd {
   background-color:#E7E5DD;
 }
+TABLE.commandPanel TD {
+  padding-left: 10px;
+  padding-right: 10px;
+}
 
 TABLE.commandPanel TH {
   background-color:#E7E5DD;
@@ -422,6 +426,10 @@ TABLE.pref_pane {
 TABLE.pref_pane tbody > tr > td {
   background-color:#F0F1EE;
   border:medium none;
+}
+
+TABLE.pref_pane TH {
+  white-space: nowrap;
 }
 
 TABLE.serviceTotals,TABLE.hostTotals {
@@ -892,6 +900,10 @@ TH.conftoolheader {
   border-bottom: 5px solid #F0F1EE;
 }
 
+TABLE.conftool TD.dataVal {
+  text-align: left;
+}
+
 TABLE.blockHeadBorder, DIV.blockHeadBorder {
   border-top: 1px #444444 outset;
   border-left: 1px #444444 outset;
@@ -968,7 +980,7 @@ TABLE.status > TBODY > TR > TD {
 TABLE.status > TBODY > tr#hst_r0 > td, TABLE.status > TBODY > tr#svc_r0 > td, TABLE.status > TBODY > tr#dfl_r0 > td, TABLE.status > TBODY > tr.firstrow > td {
   border-top: 0px none;
 }
-TABLE.status > TBODY > tr > td:last-child {
+TABLE.status > TBODY > tr > td:last-child, TABLE.queue > TBODY > tr > td:last-child {
   border-right: 0px none;
 }
 
@@ -1036,4 +1048,10 @@ TABLE.hostcomments TD, TABLE.hostdowntimes TD,TABLE.servicecomments TD, TABLE.se
 }
 TABLE.hostcomments TD:last-child, TABLE.hostdowntimes TD:last-child, TABLE.servicecomments TD:last-child, TABLE.servicedowntimes TD:last-child {
   border-right: 0px none;
+}
+
+TH.pnpSelected {
+  background-color: #DEDBD2;
+  border: 1px #444444 inset;
+  font-size: 12px;
 }

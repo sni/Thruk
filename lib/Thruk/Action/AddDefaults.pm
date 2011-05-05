@@ -42,10 +42,6 @@ before 'execute' => sub {
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'}           || 'onmouseover';
 
     ###############################
-    # no backend?
-    return unless defined $c->{'db'};
-
-    ###############################
     # Authentication
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
@@ -60,6 +56,10 @@ before 'execute' => sub {
     if($c->user_exists) {
         $c->stash->{'remote_user'}  = $c->user->get('username');
     }
+
+    ###############################
+    # no backend?
+    return unless defined $c->{'db'};
 
     ###############################
     # read cached data
@@ -164,7 +164,6 @@ before 'execute' => sub {
     if(exists $c->config->{'enable_shinken_features'}) {
         $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
     } else {
-        $c->config->{'cache_navigation'}       = 0;
         $c->stash->{'enable_shinken_features'} = 0;
         if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH') {
             $c->stash->{'enable_shinken_features'} = 1;

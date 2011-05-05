@@ -111,6 +111,11 @@ sub begin : Private {
         $c->stash->{$key} = $c->config->{$key};
     }
 
+    # username?
+    if($c->user_exists) {
+        $c->stash->{'remote_user'}  = $c->user->get('username');
+    }
+
     # frame options
     my $use_frames = $c->config->{'use_frames'};
     my $show_nav_button = 1;
@@ -176,15 +181,27 @@ sub begin : Private {
         }
     }
 
-    # redirect to error page unless we have a connection
-    if( (    !defined $c->{'db'}
-          or !defined $c->{'db'}->{'backends'}
-          or ref $c->{'db'}->{'backends'} ne 'ARRAY'
-          or scalar @{$c->{'db'}->{'backends'}} == 0
-        )
-       and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
+    my $target = $c->{'request'}->{'parameters'}->{'target'};
+    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
+        $c->stash->{'target'} = '_parent';
+    }
 
+    # redirect to error page unless we have a connection
+    if(    !defined $c->{'db'}
+        or !defined $c->{'db'}->{'backends'}
+        or ref $c->{'db'}->{'backends'} ne 'ARRAY'
+        or scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+
+        # return here for static content, no backend needed
+        if(   $c->request->action =~ m|thruk/\w+\.html|mx
+           or $c->request->action =~ m|thruk\\\/\w+\\.html|mx
+           or $c->request->action eq 'thruk$'
+           or $c->request->action eq 'thruk\\/docs\\/' ) {
+            $c->stash->{'no_auto_reload'} = 1;
+            return;
+        }
         return $c->detach("/error/index/14");
+
     }
 
     # set check_local_states
@@ -202,11 +219,6 @@ sub begin : Private {
         my $path = $c->request->uri->path_query;
         $path =~ s/nav=1//gmx;
         return $c->redirect($c->stash->{'url_prefix'}."thruk/frame.html?link=".uri_escape($path));
-    }
-
-    my $target = $c->{'request'}->{'parameters'}->{'target'};
-    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
-        $c->stash->{'target'} = '_parent';
     }
 
     # icon image path
@@ -357,10 +369,11 @@ sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
     }
 
     $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
-    $c->stash->{'title'}    = $c->config->{'name'};
-    $c->stash->{'main'}     = '';
-    $c->stash->{'target'}   = '';
-    $c->stash->{'template'} = 'index.tt';
+    $c->stash->{'title'}          = $c->config->{'name'};
+    $c->stash->{'main'}           = '';
+    $c->stash->{'target'}         = '';
+    $c->stash->{'template'}       = 'index.tt';
+    $c->stash->{'no_auto_reload'} = 1;
 
     return 1;
 }
@@ -376,13 +389,12 @@ page: /thruk/side.html
 sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
 
-    # reset navigation cache
-    $c->cache->set('menu_conf_stat', undef);
     Thruk::Utils::Menu::read_navigation($c);
 
-    $c->stash->{'use_frames'} = 1;
-    $c->stash->{'title'}      = $c->config->{'name'};
-    $c->stash->{'template'}   = 'side.tt';
+    $c->stash->{'use_frames'}     = 1;
+    $c->stash->{'title'}          = $c->config->{'name'};
+    $c->stash->{'template'}       = 'side.tt';
+    $c->stash->{'no_auto_reload'} = 1;
 
     return 1;
 }
@@ -421,10 +433,14 @@ sub thruk_frame_html : Regex('thruk\/frame\.html$') {
                 $c->stash->{'title'}    = $c->config->{'name'};
                 $c->stash->{'template'} = 'index.tt';
 
+                $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
+
                 return 1;
             }
         }
     }
+
+    $c->stash->{'no_auto_reload'} = 1;
 
     # no link or none matched, display the usual index.html
     return $c->detach("thruk_index_html");
@@ -444,6 +460,7 @@ sub thruk_main_html : Regex('thruk\/main\.html$') :MyAction('AddDefaults') {
     $c->stash->{'page'}                  = 'splashpage';
     $c->stash->{'template'}              = 'main.tt';
     $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'no_auto_reload'}        = 1;
 
     return 1;
 }
@@ -456,12 +473,14 @@ page: /thruk/changes.html
 
 =cut
 
-sub thruk_changes_html : Regex('thruk\/changes\.html') : MyAction('AddDefaults') {
+sub thruk_changes_html : Regex('thruk\/changes\.html') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
-    $c->stash->{infoBoxTitle}     = 'Change Log';
-    $c->stash->{'title'}          = 'Change Log';
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'template'}       = 'changes.tt';
+    $c->stash->{infoBoxTitle}            = 'Change Log';
+    $c->stash->{'title'}                 = 'Change Log';
+    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'template'}              = 'changes.tt';
+    $c->stash->{page}                    = 'splashpage';
 
     return 1;
 }
@@ -474,14 +493,18 @@ page: /thruk/docs/
 
 =cut
 
-sub thruk_docs : Regex('thruk\/docs\/') {
+sub thruk_docs : Regex('thruk\/docs\/') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
-    $c->stash->{'title'}          = 'Documentation';
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'template'}       = 'docs.tt';
+
+    $c->stash->{infoBoxTitle}            = 'Documentation';
+    $c->stash->{'title'}                 = 'Documentation';
+    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'template'}              = 'docs.tt';
+    $c->stash->{page}                    = 'splashpage';
 
     return 1;
 }
