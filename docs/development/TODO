@@ -50,7 +50,6 @@ general:
     - add ability to display contacts for machine
     - uc,lc option for auth user -> monitoring
     - add context sensitive help
-    - bookmarks
     - page by attribute a,b,c,d,e...z
     - add extra grapher url
     - graph about how checks are scheduled in the next minutes
@@ -74,7 +73,6 @@ reports:
       to parse logfiles twice
 
 status:
-    - save searches (like bookmarks would do it)
     - add flexible selector, ex.: select multiple hostgroups by comma
     - host table map with worst service state as color
 

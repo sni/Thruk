@@ -1,0 +1,87 @@
+[% IF style != 'combined' %]
+<a href="#" onclick="toggleElement('add_bookmark'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page'></a>&nbsp;
+<div class="filter_pane" style="visibility:hidden;position:absolute;right:60px;z-index:100" id="add_bookmark">
+  <div class="shadow"><div class="shadowcontent">
+
+
+      <div class='dataTitle blockHead blockHeadBorder' style="position: relative;">Bookmarks
+      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" onclick="toggleElement('add_bookmark'); return false;" style="height:14px; width:14px; position: absolute; top: 3px; right: 3px;">
+      </div>
+      <table border="1" class='filter' cellspacing="0" cellpadding="0">
+        <tr>
+          <td class='filter'>
+
+<form action='status.cgi' method="GET" id="bookmark_form">
+<input type="hidden" name="action" value="update_bookmarks">
+<input type="hidden" name="referer" value="[% uri(c) %]">
+
+<table cellpadding=2 cellspacing=2 border=0>
+  <tr>
+    <td>
+      Add New Bookmark<br>
+      <input type="text" size="60" value="[% short_uri(c) %]" name="bookmark">
+      <br>
+      in category
+      <select name="section">
+      [% FOREACH section = navigation %]
+        <option value="[% section.name %]">[% section.name %]
+      [% END %]
+      </select>
+      with name
+      <input type="text" size="15" value="" name="newname" id="newname">
+      <input type="submit" value="add bookmark" name="addb" onclick="return checknonempty('newname', 'name')">
+    </td>
+  </tr>
+</table>
+
+<br>
+<hr>
+
+
+<table cellpadding=2 cellspacing=2 border=0>
+  <tr>
+    <td>
+      Remove Existing Bookmarks:<br>
+
+
+      <script type="text/javascript"><!--
+      bookmarks = new Hash();
+      --></script>
+
+      [% nr = 0 %]
+      [% IF user_data.exists('bookmarks') %]
+        [% FOREACH section = user_data.bookmarks.keys.sort %]
+            [% FOREACH link = user_data.bookmarks.$section %]
+            <div id="bm[% nr %]" onClick="removeBookmark([% nr %]); return false;" class="clickable">
+              <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete" style="vertical-align: text-bottom;">
+              <input type="hidden" value="[% section %]::[% link.0 %]" name="bookmarks">
+              [% section %]: [% link.0 %]
+              <script type="text/javascript"><!--
+              bookmarks.set("bm[% nr %]", "[% section %]::[% link.0 %]");
+              --></script>
+              <br>
+            </div>
+            [% nr = nr + 1 %]
+            [% END %]
+        [% END %]
+      [% END %]
+
+      <br>
+      <input type="submit" value="save changes" name="save">
+    </td>
+  </tr>
+</table>
+
+
+
+
+
+</form>
+
+          </td>
+        </tr>
+      </table>
+  </div></div>
+</div>
+
+[% END %]

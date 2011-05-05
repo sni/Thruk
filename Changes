@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+0.96    Thu May  5 23:25:18 CEST 2011
+          - added bookmarks
+
 0.94.4  Sun Mai 01 12:57:43 CEST 2011
           - view feedback icon when changing pnp images
 

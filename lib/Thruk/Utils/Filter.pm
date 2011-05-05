@@ -176,6 +176,23 @@ sub uri {
 
 ########################################
 
+=head2 short_uri
+
+  short_uri($c)
+
+returns a correct uri but only the url part
+
+=cut
+sub short_uri {
+    my $c = shift;
+    my $uri = uri($c);
+    $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
+    return $uri;
+}
+
+
+########################################
+
 =head2 uri_with
 
   uri_with($c, $data)

@@ -46,6 +46,11 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         }
     }
 
+    my $action = $c->{'request'}->{'parameters'}->{'action'} || '';
+    if($action eq 'update_bookmarks') {
+        return $self->_process_bookmarks($c);
+    }
+
     # put some filter into the stash
     $c->stash->{'hoststatustypes'}    = $c->{'request'}->{'parameters'}->{'hoststatustypes'}    || '';
     $c->stash->{'hostprops'}          = $c->{'request'}->{'parameters'}->{'hostprops'}          || '';
@@ -779,6 +784,61 @@ sub _process_combined_page {
 
     return 1;
 }
+
+
+##########################################################
+# store bookmarks and redirect to last page
+sub _process_bookmarks {
+    my( $self, $c ) = @_;
+
+    my $referer   = $c->{'request'}->{'parameters'}->{'referer'} || 'status.cgi';
+    my $bookmark  = $c->{'request'}->{'parameters'}->{'bookmark'};
+    my $bookmarks = $c->{'request'}->{'parameters'}->{'bookmarks'};
+    my $section   = $c->{'request'}->{'parameters'}->{'section'};
+    my $newname   = $c->{'request'}->{'parameters'}->{'newname'};
+    my $button    = $c->{'request'}->{'parameters'}->{'addb'};
+    my $save      = $c->{'request'}->{'parameters'}->{'save'};
+
+    my $data = Thruk::Utils::get_user_data($c);
+
+    if(defined $newname and defined $bookmark and defined $section and defined $button and $button eq 'add bookmark') {
+        $data->{'bookmarks'}->{$section} = [] unless defined $data->{'bookmarks'}->{$section};
+        push @{$data->{'bookmarks'}->{$section}}, [ $newname, $bookmark ];
+        if(Thruk::Utils::store_user_data($c, $data)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
+        }
+    }
+
+    elsif(defined $save and $save eq 'save changes') {
+    $bookmarks = ref $bookmarks eq 'ARRAY' ? $bookmarks : [$bookmarks];
+        my $keep = {};
+        for my $bookmark (@{$bookmarks}) {
+            next unless defined $bookmark;
+            my($section, $name) = split(/::/mx, $bookmark ,2);
+            $keep->{$section}->{$name} = 1;
+        }
+
+        my $new = {};
+        for my $section (keys %{$data->{'bookmarks'}}) {
+            for my $link ( @{$data->{'bookmarks'}->{$section}} ) {
+                next unless exists $keep->{$section}->{$link->[0]};
+                push @{$new->{$section}}, $link;
+            }
+        }
+
+        $data->{'bookmarks'} = $new;
+        if(Thruk::Utils::store_user_data($c, $data)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'Bookmarks updated' );
+        }
+    }
+    else {
+        Thruk::Utils::set_message( $c, 'fail_message', 'nothing to do!' );
+    }
+
+    return $c->redirect($referer);
+}
+
+##########################################################
 
 =head1 AUTHOR
 

@@ -207,9 +207,25 @@ sub _renew_navigation {
         confess($@);
     }
 
+    $c->stash->{user_menu_items} = {};
+    my $user_items;
+    my $userdata = Thruk::Utils::get_user_data($c);
+    $c->stash->{user_data} = $userdata;
+    if(defined $userdata and defined $userdata->{'bookmarks'}) {
+        for my $section (keys %{$userdata->{'bookmarks'}}) {
+            for my $item (@{$userdata->{'bookmarks'}->{$section}}) {
+                my $item = {
+                        name => $item->[0],
+                        href => $item->[1]
+                };
+                push @{$user_items}, [ $section, $item ];
+            }
+        }
+    }
+
     # add some more items
     if(defined $Thruk::Utils::Menu::additional_items) {
-        for my $to_add (@{$Thruk::Utils::Menu::additional_items}) {
+        for my $to_add (@{$Thruk::Utils::Menu::additional_items}, @{$user_items}) {
             my $section       = _get_section_by_name($to_add->[0]) || next;
             my $link          = $to_add->[1];
 

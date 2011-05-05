@@ -1667,9 +1667,9 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <div class="content">
 <pre><tt>  %&gt; arch=$(perl -e 'use Config; print $Config{archname}')
   %&gt; vers=$(perl -e 'use Config; print $Config{version}')
-  %&gt; wget http://www.thruk.org/files/Thruk-0.94.4-$arch-$vers.tar.gz
-  %&gt; tar zxf Thruk-0.94.4-$arch-$vers.tar.gz
-  %&gt; cd Thruk-0.94.4
+  %&gt; wget http://www.thruk.org/files/Thruk-0.96-$arch-$vers.tar.gz
+  %&gt; tar zxf Thruk-0.96-$arch-$vers.tar.gz
+  %&gt; cd Thruk-0.96
   %&gt; ./script/thruk_server.pl</tt></pre>
 </div></div>
 <div class="paragraph"><p>For the FastCGI installation follow the steps at <a href="#_fastcgi">fastcgi installation</a>.</p></div>
@@ -2396,6 +2396,13 @@ static content from plugins is not accessible.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>plugin_path = ./plugins</tt></pre>
+</div></div>
+<h4 id="_var_path">var_path</h4>
+<div class="paragraph"><p>Path to the var directory. Thruk stores user specific date here.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>var_path = ./var</tt></pre>
 </div></div>
 <h4 id="_tmp_path">tmp_path</h4>
 <div class="paragraph"><p>Path to a temporary directory. Defaults to /tmp if not set and usually
@@ -3410,7 +3417,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-04-30 14:44:37 CEST
+Last updated 2011-05-05 23:27:17 CEST
 </div>
 </div>
 </body>

@@ -435,6 +435,7 @@ root/thruk/javascript/thruk.js
 root/thruk/themes/Classic/images/accept.png
 root/thruk/themes/Classic/images/ack.gif
 root/thruk/themes/Classic/images/action.gif
+root/thruk/themes/Classic/images/book_add.png
 root/thruk/themes/Classic/images/btn_close.png
 root/thruk/themes/Classic/images/calendar.png
 root/thruk/themes/Classic/images/catalyst_170pix.png
@@ -540,6 +541,7 @@ root/thruk/themes/Exfoliation/images/ack.gif
 root/thruk/themes/Exfoliation/images/action-graph.gif
 root/thruk/themes/Exfoliation/images/action-orig.gif
 root/thruk/themes/Exfoliation/images/action.gif
+root/thruk/themes/Exfoliation/images/book_add.png
 root/thruk/themes/Exfoliation/images/btn_close.png
 root/thruk/themes/Exfoliation/images/calendar.png
 root/thruk/themes/Exfoliation/images/catalyst_170pix.png
@@ -700,6 +702,7 @@ root/thruk/themes/Nuvola/images/accept.png
 root/thruk/themes/Nuvola/images/ack.gif
 root/thruk/themes/Nuvola/images/action.gif
 root/thruk/themes/Nuvola/images/blue.gif
+root/thruk/themes/Nuvola/images/book_add.png
 root/thruk/themes/Nuvola/images/border_big.gif
 root/thruk/themes/Nuvola/images/border_small.gif
 root/thruk/themes/Nuvola/images/btn_close.png
@@ -855,6 +858,7 @@ root/thruk/themes/Thruk/images/ack.gif
 root/thruk/themes/Thruk/images/action.gif
 root/thruk/themes/Thruk/images/bg.png
 root/thruk/themes/Thruk/images/blue.gif
+root/thruk/themes/Thruk/images/book_add.png
 root/thruk/themes/Thruk/images/border_big.gif
 root/thruk/themes/Thruk/images/border_small.png
 root/thruk/themes/Thruk/images/btn_close.png
@@ -950,6 +954,7 @@ root/thruk/themes/Thruk/stylesheets/thruk_noframes_ie_fix.css
 root/thruk/themes/Vautour/images/accept.png
 root/thruk/themes/Vautour/images/ack.gif
 root/thruk/themes/Vautour/images/action.gif
+root/thruk/themes/Vautour/images/book_add.png
 root/thruk/themes/Vautour/images/btn_close.png
 root/thruk/themes/Vautour/images/calendar.png
 root/thruk/themes/Vautour/images/catalyst_170pix.png
@@ -1089,6 +1094,7 @@ root/thruk/themes/Wakizashi/images/alpha_orange.png
 root/thruk/themes/Wakizashi/images/alpha_red.png
 root/thruk/themes/Wakizashi/images/background-side.jpg
 root/thruk/themes/Wakizashi/images/background.jpg
+root/thruk/themes/Wakizashi/images/book_add.png
 root/thruk/themes/Wakizashi/images/btn_close.png
 root/thruk/themes/Wakizashi/images/button_close14hi.png
 root/thruk/themes/Wakizashi/images/button_close14lo.png
@@ -1308,6 +1314,7 @@ t/themes.t
 t/view_Excel.t
 t/view_GD.t
 t/view_TT.t
+templates/_add_bookmark.tt
 templates/_ajax_search.tt
 templates/_footer.tt
 templates/_get_content.tt

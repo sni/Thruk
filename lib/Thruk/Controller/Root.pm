@@ -96,6 +96,7 @@ sub begin : Private {
                     ptc                    => 0,
         },
         command_disabled                    => [],
+        var_path                            => './var',
     };
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};

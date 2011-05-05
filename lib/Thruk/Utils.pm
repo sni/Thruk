@@ -20,6 +20,7 @@ use Date::Manip;
 use File::Slurp;
 use Encode qw/decode/;
 use Template::Plugin::Date;
+use File::Copy;
 
 
 ##############################################
@@ -1106,6 +1107,74 @@ sub _initialassumedhoststate_to_state {
     return 'down'        if $initialassumedhoststate ==  4; # Host Down
     return 'unreachable' if $initialassumedhoststate ==  5; # Host Unreachable
     croak('unknown state: '.$initialassumedhoststate);
+}
+
+
+########################################
+
+=head2 get_user_data
+
+  get_user_data()
+
+returns user data
+
+=cut
+
+sub get_user_data {
+    my($c) = @_;
+
+    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    return {} unless -f $file;
+
+    my $dump = read_file($file) or carp("cannot open file $file: $!");
+    my $VAR1 = {};
+
+    ## no critic
+    eval($dump);
+    ## use critic
+
+    carp("error in file $file: $@") if $@;
+
+    return($VAR1);
+}
+
+
+########################################
+
+=head2 store_user_data
+
+  store_user_data($section, $data)
+
+store user data for section
+
+=cut
+
+sub store_user_data {
+    my($c, $data) = @_;
+
+    for my $dir ($c->config->{'var_path'}, $c->config->{'var_path'}."/users") {
+        if(! -d $dir) {
+            mkdir($dir) or do {
+                Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: mkdir '.$dir.': '.$! );
+                return;
+            };
+        }
+    }
+
+    my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
+    open(my $fh, '>', $file.'.new') or do {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: open '.$file.'.new : '.$! );
+        return;
+    };
+    print $fh Dumper($data);
+    close($fh);
+
+    move($file.'.new', $file) or do {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: move '.$file.'.new '.$file.': '.$! );
+        return;
+    };
+
+    return 1;
 }
 
 

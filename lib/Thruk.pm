@@ -36,7 +36,7 @@ use Catalyst qw/
                 Compress::Gzip
                 Thruk::RemoveNastyCharsFromHttpParam
                 /;
-our $VERSION = '0.94.4';
+our $VERSION = '0.96';
 
 ###################################################
 # Configure the application.
@@ -70,6 +70,7 @@ my %config = ('name'                   => 'Thruk',
                                           'duration'       => \&Thruk::Utils::Filter::duration,
                                           'name2id'        => \&Thruk::Utils::Filter::name2id,
                                           'uri'            => \&Thruk::Utils::Filter::uri,
+                                          'short_uri'      => \&Thruk::Utils::Filter::short_uri,
                                           'uri_with'       => \&Thruk::Utils::Filter::uri_with,
                                           'html_escape'    => \&Thruk::Utils::Filter::html_escape,
                                           'xml_escape'     => \&Thruk::Utils::Filter::xml_escape,

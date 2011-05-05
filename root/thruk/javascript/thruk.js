@@ -355,6 +355,24 @@ function multi_select_all(form) {
     }
 }
 
+/* remove a bookmark */
+function removeBookmark(nr) {
+    var pan  = document.getElementById("bm" + nr);
+    var panP = pan.parentNode;
+    panP.removeChild(pan);
+    bookmarks.unset("bm" + nr);
+}
+
+/* check if element is not emty */
+function checknonempty(id, name) {
+    var elem = document.getElementById(id);
+    if( elem.value == undefined || elem.value == "" ) {
+        alert(name + " is a required field");
+        return(false);
+    }
+    return(true);
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -2102,3 +2120,5 @@ function move_png_img(factor) {
 
     return set_png_img(start, end);
 }
+
+

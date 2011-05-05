@@ -85,6 +85,7 @@
           </div>
         </td>
         <td valign="bottom" align="right" width="10%" nowrap>
+          [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
 
           <a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns'); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>&nbsp;

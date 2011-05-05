@@ -67,6 +67,7 @@
           [% END %]
         </td>
         <td valign="bottom" align="right" width="33%">
+          [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
         </td>
       </tr>
