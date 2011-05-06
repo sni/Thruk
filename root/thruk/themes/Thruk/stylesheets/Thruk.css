@@ -1055,3 +1055,7 @@ TH.pnpSelected {
   border: 1px #444444 inset;
   font-size: 12px;
 }
+
+TABLE.bookmarkTable {
+  border: 1px outset #444444;
+}

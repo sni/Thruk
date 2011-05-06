@@ -1,15 +1,15 @@
 [% IF style != 'combined' %]
-<a href="#" onclick="toggleElement('add_bookmark'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page'></a>&nbsp;
+<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page'></a>&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:60px;z-index:100" id="add_bookmark">
   <div class="shadow"><div class="shadowcontent">
 
 
-      <div class='dataTitle blockHead blockHeadBorder' style="position: relative;">Bookmarks
-      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" onclick="toggleElement('add_bookmark'); return false;" style="height:14px; width:14px; position: absolute; top: 3px; right: 3px;">
+      <div class='dataTitle blockHead blockHeadBorder bookmarkHead' style="position: relative; text-align: center;">Bookmarks
+      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" onclick="toggleElement('add_bookmark'); resetRefresh(); return false;" style="height:14px; width:14px; position: absolute; top: 3px; right: 3px;">
       </div>
-      <table border="1" class='filter' cellspacing="0" cellpadding="0">
+      <table border="1" class='filter bookmarkTable' cellspacing="0" cellpadding="0">
         <tr>
-          <td class='filter'>
+          <td class='filter bookmarkTable'>
 
 <form action='status.cgi' method="GET" id="bookmark_form">
 <input type="hidden" name="action" value="update_bookmarks">
@@ -29,7 +29,7 @@
       </select>
       with name
       <input type="text" size="15" value="" name="newname" id="newname">
-      <input type="submit" value="add bookmark" name="addb" onclick="return checknonempty('newname', 'name')">
+      <input type="submit" value="add bookmark" name="addb" onclick="resetRefresh(); return checknonempty('newname', 'name')">
     </td>
   </tr>
 </table>

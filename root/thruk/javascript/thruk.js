@@ -84,6 +84,7 @@ function toggleElement(id) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
     return false;
   }
+
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
     showElement(id);
     return true;
@@ -141,7 +142,9 @@ function setRefreshRate(rate) {
 
 /* reset refresh interval */
 function resetRefresh() {
+  if( typeof refresh_rate != "undefined" ) {
     setRefreshRate(refresh_rate);
+  }
 }
 
 /* stops the reload interval */
@@ -2120,5 +2123,3 @@ function move_png_img(factor) {
 
     return set_png_img(start, end);
 }
-
-

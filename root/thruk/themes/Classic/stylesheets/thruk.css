@@ -592,3 +592,22 @@ body.config TD.dataSubmit {
 TABLE.cmd_pane tbody > tr > th > A > IMG {
   vertical-align: text-bottom;
 }
+
+.bookmarkHead {
+  font-size: 9pt;
+  font-weight: bold;
+  background-color: #DBDBDB;
+  line-height: 13pt;
+}
+
+TABLE.bookmarkTable {
+  border: 0px;
+}
+
+TABLE.bookmarkTable TD {
+  border: 0px;
+}
+
+TABLE.bookmarkTable TD.bookmarkTable {
+  border: 0px;
+}
