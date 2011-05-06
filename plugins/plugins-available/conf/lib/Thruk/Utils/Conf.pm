@@ -292,6 +292,7 @@ read htpasswd file
 sub read_htpasswd {
     my ( $file ) = @_;
     my $htpasswd = {};
+    return $htpasswd unless -f $file;
     my $content  = read_file($file);
     for my $line (split/\n/mx, $content) {
         my($user,$hash) = split/:/mx, $line;

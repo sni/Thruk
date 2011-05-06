@@ -106,6 +106,20 @@ PNP4Nagios to get detailed information.
 image:source/PNP4nagios.png[PNP4Nagios]
 
 
+=== Multiple Lines of Plugin Output
+
+When your check returns multiple lines of plugin output. Thruk marks
+the output in blue and a click on it displays the complete output.
+This is especially usefull for check_multi checks. In addition to
+that, the comments and downtimes also have a small popup with their
+data. So you don't have to open the host/service page just to see who
+set a comment and when there is a downtime.
+
+image:source/PluginOutput.png[Multiple Lines of Plugin Output]
+
+
+
+
 
 == Installation
 
