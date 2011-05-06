@@ -40,6 +40,8 @@
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/reporting.gif' %]
   [% ELSIF section.name == 'System' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/configuration.gif' %]
+  [% ELSIF section.name == 'Bookmarks' %]
+    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/info.gif' %]
   [% END %]
 
   [% IF link.name == 'Map' %]
@@ -84,6 +86,8 @@
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/reporting.gif' %]
   [% ELSIF section.name == 'System' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/configuration.gif' %]
+  [% ELSIF section.name == 'Bookmarks' %]
+    [% icon = url_prefix _ 'thruk/themes/Nuvola/side/home.gif' %]
   [% END %]
 [% END %]
 

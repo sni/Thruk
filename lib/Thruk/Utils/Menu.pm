@@ -226,7 +226,7 @@ sub _renew_navigation {
     # add some more items
     if(defined $Thruk::Utils::Menu::additional_items) {
         for my $to_add (@{$Thruk::Utils::Menu::additional_items}, @{$user_items}) {
-            my $section       = _get_section_by_name($to_add->[0]) || next;
+            my $section       = _get_section_by_name($to_add->[0], 1);
             my $link          = $to_add->[1];
 
             # only visible for some roles?
@@ -260,7 +260,15 @@ sub _renew_navigation {
         }
     }
 
-    $c->stash->{'navigation'}  = $Thruk::Utils::Menu::navigation;
+    # remove empty sections
+    my $new_nav = [];
+    for my $section (@{$Thruk::Utils::Menu::navigation}) {
+        if(scalar @{$section->{'links'}} > 0) {
+            push @{$new_nav}, $section;
+        }
+    }
+
+    $c->stash->{'navigation'}  = $new_nav;
 
     return;
 }
@@ -313,11 +321,23 @@ returns a section by name
 
 =cut
 sub _get_section_by_name {
-    my $name = shift;
+    my $name   = shift;
+    my $create = shift;
 
     for my $section (@{$Thruk::Utils::Menu::navigation}) {
         return $section if $section->{'name'} eq $name;
     }
+
+    if($create) {
+        my $section = {
+            name  => $name,
+            links => [],
+            icon  => '',
+        };
+        push @{$Thruk::Utils::Menu::navigation}, $section;
+        return $section;
+    }
+
     return;
 }
 
