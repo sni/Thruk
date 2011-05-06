@@ -12,6 +12,7 @@ local-lib
 logs/debug.log
 logs/error.log
 logs/access.log
+logs/thruk.log
 thruk_local.conf
 docs/development/git.txt
 docs/images

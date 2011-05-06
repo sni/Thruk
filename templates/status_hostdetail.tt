@@ -109,6 +109,11 @@
                       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% counter %]" id="ht[% counter %]" name="columns" checked></td>
                     </tr>
                     [% END %]
+                    <tr>
+                      <td colspan=2 align="center">
+                        <input type="submit" name="export" value="export" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;">
+                      </td>
+                    </tr>
                   </table>
                 </td>
               </tr>
