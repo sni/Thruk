@@ -113,6 +113,11 @@
     </form>
     <br>
 
+<div align="right">
+  [% PROCESS _add_bookmark.tt style="detail" %]
+  [% PROCESS _show_link.tt style="detail" %]
+</div>
+
 <div align="center">[% PROCESS _pager.tt %]</div>
 
     <div align='center'>
