@@ -25,3 +25,4 @@ ssi_local
 cgi.cfg-*
 htpasswd
 var
+log4perl.conf
