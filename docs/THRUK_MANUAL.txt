@@ -29,6 +29,7 @@ Main Features / Advantages
   * Excel export
   * Adjustable side menu
   * Full expanded plugin commandline for easy testing
+  * Save searches like bookmarks
 
 
 
@@ -46,6 +47,64 @@ mod_auth).
 
 .Thruk Architecture
 image:source/arch_preview.png[Thruk Architecture]
+
+
+== What makes Thruk cool
+
+There are a couple of cool things in Thruk. A few of them are listed
+here.
+
+=== Excel Export and Bookmarks
+
+The Bookmarks feature allows you to save your searches and add them as
+your personal menu item. Besides the bookmarks, you can adjust the
+menu easiely with the menu_local.conf.
+
+The Excel export creates real Excel files to send by mail or extract
+hostnames to send to a different operations team.
+image:source/Bookmarks_and_excel_export.png[Bookmarks and Excel Export]
+
+
+=== Config Tool
+
+The Config Tool is great to make quick changes to your Thruk
+configuration. It is also possible to manage access with htpasswd
+files as well as adjusting your cgi.cfg.
+
+image:source/Config_Tool.png[Config Tool]
+
+
+=== Sending Multiple Commands
+
+The new status pages make it very convenient to send multiple commands
+at once. It is even possible to send host and service commands at the
+same time. When rescheduling hosts and services, Thruk will wait until
+your check is finished and display the result as soon as the check is
+over.
+
+image:source/Reschedule.png[Multiple Commands]
+
+
+=== Easy Filtering
+
+Remember the days when you had to guess numbers in the url to filter
+hosts or services. With Thruk it's possible to quickly change your
+display filter. You can combine multiple filter to create whatever
+views you like. An Ajax search supports you, so you don't have to
+guess host or service names.
+
+image:source/Filter.png[Easy Filtering]
+
+
+=== PNP4Nagios Graphs
+
+When your action_url contains /pnp4nagios/, there will be automatically
+a graph displayed for your host and service. This gives you a quick
+view about the performance history. The image is then linked to
+PNP4Nagios to get detailed information.
+
+image:source/PNP4nagios.png[PNP4Nagios]
+
 
 
 == Installation
@@ -69,9 +128,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
   %> vers=$(perl -e 'use Config; print $Config{version}')
-  %> wget http://www.thruk.org/files/Thruk-0.96-$arch-$vers.tar.gz
-  %> tar zxf Thruk-0.96-$arch-$vers.tar.gz
-  %> cd Thruk-0.96
+  %> wget http://www.thruk.org/files/Thruk-1.0.0-$arch-$vers.tar.gz
+  %> tar zxf Thruk-1.0.0-$arch-$vers.tar.gz
+  %> cd Thruk-1.0.0
   %> ./script/thruk_server.pl
 ----
 

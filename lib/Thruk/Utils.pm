@@ -1123,6 +1123,8 @@ returns user data
 sub get_user_data {
     my($c) = @_;
 
+    return {} unless defined $c->stash->{'remote_user'};
+
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
     return {} unless -f $file;
 

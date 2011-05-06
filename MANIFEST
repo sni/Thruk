@@ -24,6 +24,11 @@ docs/FAQ.txt
 docs/source/arch.graffle
 docs/source/arch.png
 docs/source/arch_preview.png
+docs/source/Bookmarks_and_excel_export.png
+docs/source/Config_Tool.png
+docs/source/Filter.png
+docs/source/PNP4nagios.png
+docs/source/Reschedule.png
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
 inc/Module/AutoInstall.pm
