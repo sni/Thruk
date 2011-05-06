@@ -116,6 +116,7 @@ sub begin : Private {
     if($c->user_exists) {
         $c->stash->{'remote_user'}  = $c->user->get('username');
     }
+    $c->stash->{'user_data'} = { bookmarks => {} };
 
     # frame options
     my $use_frames = $c->config->{'use_frames'};
@@ -721,7 +722,7 @@ check and display errors (if any)
 sub end : ActionClass('RenderView') {
     my( $self, $c ) = @_;
 
-    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'};
+    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
 
     my @errors = @{ $c->error };
     if( scalar @errors > 0 ) {

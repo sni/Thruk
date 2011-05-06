@@ -185,7 +185,9 @@ returns a correct uri but only the url part
 =cut
 sub short_uri {
     my $c = shift;
-    my $uri = uri($c);
+    my $uri = uri_with($c, {
+        reload_nav => 'undef',
+    });
     $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
     return $uri;
 }

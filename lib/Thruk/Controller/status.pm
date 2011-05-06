@@ -835,7 +835,7 @@ sub _process_bookmarks {
         Thruk::Utils::set_message( $c, 'fail_message', 'nothing to do!' );
     }
 
-    return $c->redirect($referer);
+    return $c->redirect($referer."&reload_nav=1");
 }
 
 ##########################################################
