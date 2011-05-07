@@ -33,7 +33,7 @@
       </select>
       with name
       <input type="text" size="15" value="" name="newname" id="newname">
-      <input type="submit" value="add bookmark" name="addb" onclick="resetRefresh(); return checknonempty('newname', 'name')">
+      <input type="submit" value="add bookmark" name="addb" onclick="return checknonempty('newname', 'name')">
     </td>
   </tr>
 </table>
