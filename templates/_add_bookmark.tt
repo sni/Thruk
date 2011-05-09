@@ -1,5 +1,4 @@
-﻿[% IF style != 'combined' %]
-<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page'></a>&nbsp;
+﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page'></a>&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:60px;z-index:100" id="add_bookmark">
   <div class="shadow"><div class="shadowcontent">
 
@@ -11,8 +10,9 @@
         <tr>
           <td class='filter bookmarkTable'>
 
+[% IF style != 'combined' %]
 <form action='status.cgi' method="GET" id="bookmark_form">
-<input type="hidden" name="action" value="update_bookmarks">
+[% END %]
 <input type="hidden" name="referer" value="[% uri(c) %]">
 
 <table cellpadding=2 cellspacing=2 border=0>
@@ -71,16 +71,15 @@
       [% END %]
 
       <br>
-      <input type="submit" value="save changes" name="save">
+      <input type="submit" value="save changes" name="saveb">
     </td>
   </tr>
 </table>
 
 
-
-
-
+[% IF style != 'combined' %]
 </form>
+[% END %]
 
           </td>
         </tr>
@@ -88,4 +87,3 @@
   </div></div>
 </div>
 
-[% END %]

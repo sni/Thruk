@@ -47,7 +47,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || '';
-    if($action eq 'update_bookmarks') {
+    if(defined $c->{'request'}->{'parameters'}->{'addb'} or defined $c->{'request'}->{'parameters'}->{'saveb'}) {
         return $self->_process_bookmarks($c);
     }
 
@@ -797,7 +797,7 @@ sub _process_bookmarks {
     my $section   = $c->{'request'}->{'parameters'}->{'section'};
     my $newname   = $c->{'request'}->{'parameters'}->{'newname'};
     my $button    = $c->{'request'}->{'parameters'}->{'addb'};
-    my $save      = $c->{'request'}->{'parameters'}->{'save'};
+    my $save      = $c->{'request'}->{'parameters'}->{'saveb'};
 
     my $data = Thruk::Utils::get_user_data($c);
 
