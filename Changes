@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.0.1   Mon May  9 10:22:57 CEST 2011
+          - fixed link target when using frames
+
 1.0.0   Sun May  8 23:25:18 CEST 2011
           - added bookmarks
 
