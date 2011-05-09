@@ -828,16 +828,20 @@ sub _page_data {
     }
 
     # last/first/prev or next button pressed?
-    if( exists $c->{'request'}->{'parameters'}->{'next'} ) {
+    if(   exists $c->{'request'}->{'parameters'}->{'next'}
+       or exists $c->{'request'}->{'parameters'}->{'next.x'} ) {
         $page++;
     }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'previous'} ) {
+    elsif (   exists $c->{'request'}->{'parameters'}->{'previous'}
+           or exists $c->{'request'}->{'parameters'}->{'previous.x'} ) {
         $page-- if $page > 1;
     }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'first'} ) {
+    elsif (    exists $c->{'request'}->{'parameters'}->{'first'}
+            or exists $c->{'request'}->{'parameters'}->{'first.x'} ) {
         $page = 1;
     }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'last'} ) {
+    elsif (    exists $c->{'request'}->{'parameters'}->{'last'}
+            or exists $c->{'request'}->{'parameters'}->{'last.x'} ) {
         $page = $pages;
     }
 
