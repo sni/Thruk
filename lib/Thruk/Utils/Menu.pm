@@ -285,7 +285,7 @@ returns the current prefered target
 sub _get_menu_target {
     my $c = $Thruk::Utils::Menu::c;
 
-    return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'};
+    return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'} and $c->{'stash'}->{'target'} ne '';
     if($c->{'stash'}->{'use_frames'}) {
         return("main");
     }
