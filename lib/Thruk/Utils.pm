@@ -927,6 +927,7 @@ sub read_ssi {
     # retun if file is execitabel
     if( -x $c->config->{'ssi_path'}.$file ){
        open(my $ph, '-|', $c->config->{'ssi_path'}.$file.' 2>&1') or carp("cannot execute ssi: $!");
+       local $/=undef;
        my $output = <$ph>;
        close($ph);
        return $output;
