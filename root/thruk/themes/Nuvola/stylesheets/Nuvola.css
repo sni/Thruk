@@ -153,3 +153,7 @@ div.tree td {
 .tableRowHover, td.newfilter:hover {
     height: 22px;
 }
+
+input#NavBarSearchItem {
+  width:105px;
+}
