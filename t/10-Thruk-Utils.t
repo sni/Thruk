@@ -3,7 +3,7 @@
 #########################
 
 use strict;
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Data::Dumper;
 
 use_ok('Thruk::Utils');
@@ -73,3 +73,13 @@ is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
 my($res, $c) = ctx_request('/thruk/main.html');
 my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
 is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(thrukadmin)');
+
+#########################
+use_ok('XML::Parser');
+
+my $escaped = Thruk::Utils::Filter::xml_escape("& <br> üöä?");
+my $p1 = XML::Parser->new();
+eval {
+    $p1->parse('<data>'.$escaped.'</data>');
+};
+is("$@", "", "no XML::Parser errors");

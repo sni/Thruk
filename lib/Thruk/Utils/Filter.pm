@@ -269,7 +269,7 @@ returns an escaped string for xml output
 sub xml_escape {
     my $text = shift;
 
-    return HTML::Entities::encode($text, '<>');
+    return HTML::Entities::encode($text, '<>&');
 }
 
 

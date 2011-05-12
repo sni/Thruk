@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.0.3   Thu May 12 20:05:16 CEST 2011
+          - fixed problem with some chars in excel export
+
 1.0.2   Tue May 10 11:50:44 CEST 2011
           - use host address for searches
           - fixed executable SSIs with multiple lines of output
