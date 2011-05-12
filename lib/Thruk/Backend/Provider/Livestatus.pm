@@ -29,7 +29,7 @@ create new manager
 sub new {
     my( $class, $peer_config, $config, $log ) = @_;
 
-    die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
         'live'   => Monitoring::Livestatus::Class->new($peer_config),
