@@ -377,7 +377,7 @@ sub set_backend_state_from_local_connections {
     return unless scalar keys %{$self->{'state_hosts'}} >= 1;
 
     my $options = [
-        'backend', keys %{$self->{'local_hosts'}},
+        'backend', [ keys %{$self->{'local_hosts'}} ],
         'columns', [qw/address name alias state/],
     ];
 
