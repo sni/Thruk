@@ -65,7 +65,7 @@
           [% END %]
           [% IF host.notes_expanded %]<p>[% host.notes_expanded %]</p>[% END %]
         </td>
-        <td align="right" valign="bottom" width="33%">
+        <td align="right" valign="bottom" width="33%" class="notesCell">
           <table border='0'>
           [% IF enable_shinken_features %]
           <tr>

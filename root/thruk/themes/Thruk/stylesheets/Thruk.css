@@ -524,6 +524,7 @@ TD.healthTitle,TD.perfTitle,TD.featureTitle,TD.outageTitle,TD.hostTitle,TD.servi
 }
 TD.outageTitle {
   white-space: nowrap;
+  padding-right: 3px;
 }
 
 TD.hostDOWN {
@@ -1053,6 +1054,10 @@ TABLE.bookmarkTable {
   border: 1px outset #444444;
 }
 
-TD.stateInfoTable1 TD.dataVal {
+TABLE.procInfoTable TD.dataVal {
   text-align: center;
+}
+
+TD.notesCell {
+  padding-right: 5px;
 }
