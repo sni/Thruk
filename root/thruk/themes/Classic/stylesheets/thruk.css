@@ -611,3 +611,12 @@ TABLE.bookmarkTable TD {
 TABLE.bookmarkTable TD.bookmarkTable {
   border: 0px;
 }
+
+
+TABLE.hostcomments TD, TABLE.hostdowntimes TD,TABLE.servicecomments TD, TABLE.servicedowntimes TD {
+  text-align: center;
+}
+TABLE.hostcomments TH, TABLE.hostdowntimes TH,TABLE.servicecomments TH, TABLE.servicedowntimes TH {
+  text-align: center;
+  white-space: nowrap;
+}

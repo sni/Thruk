@@ -1034,15 +1034,22 @@ TABLE.extdetails TD.extdetails {
   color: red;
 }
 
-TABLE.hostcomments, TABLE.hostdowntimes, TABLE.servicecomments, TABLE.servicedowntimes {
-  min-width: 300px;
-}
 TABLE.hostcomments TD, TABLE.hostdowntimes TD,TABLE.servicecomments TD, TABLE.servicedowntimes TD {
   border-right: 1px solid #DEDBD2;
+  text-align: center;
 }
 TABLE.hostcomments TD:last-child, TABLE.hostdowntimes TD:last-child, TABLE.servicecomments TD:last-child, TABLE.servicedowntimes TD:last-child {
   border-right: 0px none;
 }
+
+TABLE.hostcomments TH, TABLE.hostdowntimes TH,TABLE.servicecomments TH, TABLE.servicedowntimes TH {
+  border-right: 1px solid #DEDBD2;
+  border-bottom: 1px solid #DEDBD2;
+}
+TABLE.hostcomments TH:last-child, TABLE.hostdowntimes TH:last-child, TABLE.servicecomments TH:last-child, TABLE.servicedowntimes TH:last-child {
+  border-right: 0px none;
+}
+
 
 TH.pnpSelected {
   background-color: #DEDBD2;
