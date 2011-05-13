@@ -88,9 +88,9 @@
             [% IF s.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,500,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(s.plugin_output)) %]<br>[% html_escape(html_escape(s.long_plugin_output)) | nl2br %]'><span class="has_long_plugin_output">[% html_escape(s.plugin_output) %]</span></td>
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(s.plugin_output)) %]<br>[% html_escape(html_escape(s.long_plugin_output)) | nl2br %]'><span class="has_long_plugin_output">[% html_escape(s.plugin_output) %]</span></td>
                 [% ELSE %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,500,[% c.config.info_popup_options %]);" abbr='[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
                 [% END %]
               [% ELSIF show_long_plugin_output == 'inline' %]
                 [% IF escape_html_tags %]

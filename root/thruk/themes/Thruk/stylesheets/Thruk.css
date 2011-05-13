@@ -45,12 +45,13 @@
   margin:15px 0 0;
 }
 
-#splashpage,td.dataVal {
+#splashpage {
   text-align:center;
 }
 
 .featureDisabled,.featureDisabledNotifications,.featureItemDisabledServiceNotifications,.featureItemDisabledHostNotifications,.featureDisabledFlapDetection,.featureItemDisabledServiceFlapDetection,.featureItemDisabledHostFlapDetection,.featureItemServicesFlapping,.featureItemHostsFlapping,.featureDisabledHandlers,.featureItemDisabledServiceHandlers,.featureItemDisabledHostHandlers,.featureDisabledActiveChecks,.featureItemDisabledActiveServiceChecks,.featureItemDisabledActiveHostChecks,.featureDisabledPassiveChecks,.featureItemDisabledPassiveServiceChecks,.featureItemDisabledPassiveHostChecks {
   background-color:#FFC0C0;
+  white-space: nowrap;
 }
 
 .filter_button_mini {
@@ -121,6 +122,7 @@ DIV.infoMessage {
 
 .notificationsENABLED,.queueENABLED,.eventhandlersENABLED,.checksENABLED,.flapdetectionENABLED,.notflapping,.downtimeINACTIVE,.processOK,.hostUP,.serviceOK,.featureEnabled,.featureEnabledNotifications,.featureItemEnabledServiceNotifications,.featureItemEnabledHostNotifications,.featureEnabledFlapDetection,.featureItemEnabledServiceFlapDetection,.featureItemEnabledHostFlapDetection,.featureItemServicesNotFlapping,.featureItemHostsNotFlapping,.featureEnabledHandlers,.featureItemEnabledServiceHandlers,.featureItemEnabledHostHandlers,.featureEnabledActiveChecks,.featureItemEnabledActiveServiceChecks,.featureItemEnabledActiveHostChecks,.featureEnabledPassiveChecks,.featureItemEnabledPassiveServiceChecks,.featureItemEnabledPassiveHostChecks,input.button_peerUP,.serviceOK,.hostUP,TD.hostUP {
   background-color:#00FF33;
+  white-space: nowrap;
 }
 
 .outageImportantProblem,.hostImportantProblem,.serviceImportantProblem {
@@ -315,7 +317,6 @@ TABLE.command {
 
 TABLE.commandPanel {
   border:1px #E2DECD outset;
-  text-align: left;
 }
 
 TABLE.commandPanel TD,TD.statusOdd {
@@ -486,7 +487,6 @@ TD.dataOdd,TD.queueOdd {
 
 TD.dataVar {
   font-weight:bold;
-  text-align:left;
   vertical-align:top;
 }
 
@@ -900,10 +900,6 @@ TH.conftoolheader {
   border-bottom: 5px solid #F0F1EE;
 }
 
-TABLE.conftool TD.dataVal {
-  text-align: left;
-}
-
 TABLE.blockHeadBorder, DIV.blockHeadBorder {
   border-top: 1px #444444 outset;
   border-left: 1px #444444 outset;
@@ -992,9 +988,6 @@ TABLE.tac TD.hostHeader, TABLE.tac TD.serviceHeader, TABLE.tac TD.featureHeader 
   width: 150px;
 }
 
-TABLE.extdetails TD.dataVal {
-  text-align: left;
-}
 TABLE.extdetails TD.dataVar {
   white-space: nowrap;
   width: 20%;
@@ -1058,4 +1051,8 @@ TH.pnpSelected {
 
 TABLE.bookmarkTable {
   border: 1px outset #444444;
+}
+
+TD.stateInfoTable1 TD.dataVal {
+  text-align: center;
 }
