@@ -94,9 +94,9 @@
                 [% END %]
               [% ELSIF show_long_plugin_output == 'inline' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% serviceclass %]'>[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) %]</td>
+                  <td align="left" class='[% serviceclass %]'>[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) | nl2br %]</td>
                 [% ELSE %]
-                  <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]<br>[% s.long_plugin_output %]</td>
+                  <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]<br>[% s.long_plugin_output | nl2br %]</td>
                 [% END %]
               [% END %]
             [% ELSE %]

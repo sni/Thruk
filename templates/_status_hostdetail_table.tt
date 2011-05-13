@@ -76,9 +76,9 @@
                 [% END %]
               [% ELSIF show_long_plugin_output == 'inline' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% class %]'>[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) %]</td>
+                  <td align="left" class='[% class %]'>[% html_escape(h.plugin_output) %]<br>[% html_escape(h.long_plugin_output) | nl2br %]</td>
                 [% ELSE %]
-                  <td align="left" class='[% class %]'>[% h.plugin_output %]<br>[% h.long_plugin_output %]</td>
+                  <td align="left" class='[% class %]'>[% h.plugin_output %]<br>[% h.long_plugin_output | nl2br %]</td>
                 [% END %]
               [% END %]
             [% ELSE %]
