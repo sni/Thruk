@@ -73,6 +73,7 @@ sub begin : Private {
         all_problems_link               => $c->config->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",
         statusmap_default_groupby       => 'address',
         statusmap_default_type          => 'table',
+        show_long_plugin_output         => 'popup',
         info_popup_event_type           => 'onclick',
         info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
         cmd_quick_status                => {
@@ -107,7 +108,7 @@ sub begin : Private {
                   use_feature_statusmap use_feature_statuswrl use_feature_histogram
                   datetime_format datetime_format_today datetime_format_long datetime_format_log
                   use_new_search ajax_search show_notification_number strict_passive_mode
-                  show_full_commandline all_problems_link use_ajax_search
+                  show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

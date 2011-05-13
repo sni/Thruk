@@ -206,6 +206,7 @@ sub _process_thruk_page {
                         use_frames
                         use_timezone
                         use_strict_host_authorization
+                        show_long_plugin_output
                         info_popup_event_type
                         info_popup_options
                         resource_file

@@ -55,6 +55,7 @@ sub get_thruk_cfg {
                 group_paging_overview                   => ['ARRAY',  []],
                 group_paging_summary                    => ['ARRAY',  []],
                 group_paging_grid                       => ['ARRAY',  []],
+                show_long_plugin_output                 => ['LIST', 'popup', Thruk::Utils::array2hash([qw/popup inline off/]) ],
                 info_popup_event_type                   => ['LIST', 'onclick', Thruk::Utils::array2hash([qw/onclick onmouseover/]) ],
                 info_popup_options                      => ['STRING', ''],
                 show_notification_number                => ['BOOL',   '1'],

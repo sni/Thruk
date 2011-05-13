@@ -960,6 +960,18 @@ ex.:
   datetime_format_today = %H:%M:%S
 
 
+==== show_long_plugin_output
+
+When a plugin returns more than one line of output, the
+output can be displayed directly in the status table, as
+popup or not at all.
+Choose between popup, inline and off
+
+ex.:
+
+  show_long_plugin_output = popup
+
+
 ==== info_popup_event_type
 On which event should the comments / downtime or longpluginout popup
 show up. Valid values are onclick or onmouseover.
