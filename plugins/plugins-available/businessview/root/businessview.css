@@ -10,17 +10,6 @@ list-style-type: none;
 }
 
 
-table.infoBox td {
-  padding: 2px;
-  margin: 0px;
-  border-width: 0px;
-  border-style: inset;
-/*  border-color: #C4C2C2;*/
-/*  background-color: #C4C2C2;*/
-  background-color: none !important;
-}
-
-
 .void { background-color: none !important; }
 
 
@@ -30,4 +19,4 @@ table.infoBox td {
     background-image: none;
     border-spacing: 0px;
     margin: 10px;
-} /* font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }*/
+}
