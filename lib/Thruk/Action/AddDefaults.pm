@@ -37,13 +37,9 @@ before 'execute' => sub {
     Thruk::Utils::read_cgi_cfg($c);
 
     ###############################
-    $c->stash->{'escape_html_tags'}   = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
-    $c->stash->{'show_context_help'}  = $c->config->{'cgi_cfg'}->{'show_context_help'};
-    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
-
-    ###############################
-    # no backend?
-    return unless defined $c->{'db'};
+    $c->stash->{'escape_html_tags'}      = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
+    $c->stash->{'show_context_help'}     = $c->config->{'cgi_cfg'}->{'show_context_help'};
+    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'}           || 'onmouseover';
 
     ###############################
     # Authentication
@@ -62,6 +58,10 @@ before 'execute' => sub {
     }
 
     ###############################
+    # no backend?
+    return unless defined $c->{'db'};
+
+    ###############################
     # read cached data
     my $cache = $c->cache;
     my $cached_data = $cache->get($c->stash->{'remote_user'});
@@ -77,7 +77,8 @@ before 'execute' => sub {
     ###############################
     # get backend object
     my $disabled_backends = {};
-    if(defined $c->request->cookie('thruk_backends')) {
+    my $num_backends      = @{$c->{'db'}->get_peers()};
+    if($num_backends > 1 and defined $c->request->cookie('thruk_backends')) {
         for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -85,12 +86,9 @@ before 'execute' => sub {
         }
     }
     elsif(defined $c->{'db'}) {
-        for my $peer (@{$c->{'db'}->get_peers()}) {
-            if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
-                $disabled_backends->{$peer->{'key'}} = 2;
-            }
-        }
+        $disabled_backends = $c->{'db'}->disable_hidden_backends($disabled_backends);
     }
+
     my $has_groups = 0;
     if(defined $c->{'db'}) {
         for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -101,6 +99,12 @@ before 'execute' => sub {
         }
         $c->{'db'}->disable_backends($disabled_backends);
     }
+    $c->log->debug("backend groups filter enabled") if $has_groups;
+
+    # renew state of connections
+    if($c->config->{'check_local_states'}) {
+        $c->{'db'}->set_backend_state_from_local_connections($cache, $disabled_backends);
+    }
 
     ###############################
     # add program status
@@ -108,45 +112,20 @@ before 'execute' => sub {
     # backend availability checks here
     $c->stats->profile(begin => "AddDefaults::get_proc_info");
     my $last_program_restart = 0;
-    eval {
-        my $processinfo              = $c->{'db'}->get_processinfo($c, $cache);
-        die($@) unless defined $processinfo;
-        my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
-        $c->stash->{'pi'}            = $overall_processinfo;
-        $c->stash->{'pi_detail'}     = $processinfo;
-        $c->stash->{'has_proc_info'} = 1;
+    my $retrys = 1;
+    # try 3 times if all cores are local
+    $retrys = 3 if scalar keys %{$c->{'db'}->{'state_hosts'}} == 0;
 
-        # set last programm restart
-        if(ref $processinfo eq 'HASH') {
-            for my $backend (keys %{$processinfo}) {
-                $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
-            }
-        }
-
-        # check if we have to build / clean our per user cache
-        if(   !defined $cached_data
-           or !defined $cached_data->{'prev_last_program_restart'}
-           or $cached_data->{'prev_last_program_restart'} < $last_program_restart
-          ) {
-            $cached_data = {
-                'prev_last_program_restart' => $last_program_restart,
-            };
-            $cache->set($c->stash->{'remote_user'}, $cached_data);
-        }
-
-        # check our backends uptime
-        if(defined $c->config->{'delay_pages_after_backend_reload'} and $c->config->{'delay_pages_after_backend_reload'} > 0) {
-            my $delay_pages_after_backend_reload = $c->config->{'delay_pages_after_backend_reload'};
-            for my $backend (keys %{$processinfo}) {
-                my $delay = int($processinfo->{$backend}->{'program_start'} + $delay_pages_after_backend_reload - time());
-                if($delay > 0) {
-                    $c->log->debug("delaying page delivery by $delay seconds...");
-                    sleep($delay);
-                }
-            }
-        }
-    };
+    for my $x (1..$retrys) {
+        eval {
+            $last_program_restart = $self->_set_processinfo($c, $cache, $cached_data);
+        };
+        last unless $@;
+        last if $x == $retrys;
+        sleep 1;
+    }
     if($@) {
+        return if $c->request->uri->path_query =~ m/\/side\.html$/mx;
         $self->_set_possible_backends($c, $disabled_backends);
         $c->log->error("data source error: $@");
         return $c->detach('/error/index/9');
@@ -179,6 +158,30 @@ before 'execute' => sub {
     ###############################
     # set some more roles
     Thruk::Utils::set_can_submit_commands($c);
+
+    ###############################
+    # do we have only shinken backends?
+    if(exists $c->config->{'enable_shinken_features'}) {
+        $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
+    } else {
+        $c->stash->{'enable_shinken_features'} = 0;
+        if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH') {
+            $c->stash->{'enable_shinken_features'} = 1;
+            for my $b (values %{$c->stash->{'pi_detail'}}) {
+                if(defined $b->{'data_source_version'} and $b->{'data_source_version'} !~ m/\-shinken/mx) {
+                    $c->stash->{'enable_shinken_features'} = 0;
+                    last;
+                }
+            }
+        }
+    }
+    # make stash available for our backends
+    $c->{'db'}->set_stash($c->stash);
+
+    $c->stash->{'navigation'} = "";
+    if( $c->config->{'use_frames'} == 0 ) {
+        Thruk::Utils::Menu::read_navigation($c);
+    }
 
     ###############################
     $c->stats->profile(end => "AddDefaults::before");
@@ -221,6 +224,9 @@ sub _set_possible_backends {
     my @new_possible_backends;
 
     for my $back (@possible_backends) {
+        if(defined $disabled_backends->{$back} and $disabled_backends->{$back} == 4) {
+            $c->{'db'}->disable_backend($back);
+        }
         if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 4) {
             my $peer = $c->{'db'}->get_peer_by_key($back);
             $backend_detail{$back} = {
@@ -254,7 +260,17 @@ sub _disable_backends_by_group {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
                 if(defined $contactgroups->{$group}) {
                     $c->log->debug("found contact ".$c->user->get('username')." in contactgroup ".$group);
+                    # delete old completly hidden state
                     delete $disabled_backends->{$peer->{'key'}};
+                    # but disabled by cookie?
+                    if(defined $c->request->cookie('thruk_backends')) {
+                        for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
+                            my($key, $value) = split/=/mx, $val;
+                            if(defined $value and $key eq $peer->{'key'}) {
+                                $disabled_backends->{$key} = $value;
+                            }
+                        }
+                    }
                     last;
                 }
             }
@@ -274,7 +290,53 @@ sub _any_backend_enabled {
     return;
 }
 
+########################################
+sub _set_processinfo {
+    my($self, $c, $cache, $cached_data) = @_;
+    my $last_program_restart     = 0;
+    my $processinfo              = $c->{'db'}->get_processinfo($cache);
+    return unless defined $processinfo;
+    my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
+    $c->stash->{'pi'}            = $overall_processinfo;
+    $c->stash->{'pi_detail'}     = $processinfo;
+    $c->stash->{'has_proc_info'} = 1;
+
+    # set last programm restart
+    if(ref $processinfo eq 'HASH') {
+        for my $backend (keys %{$processinfo}) {
+            $last_program_restart = $processinfo->{$backend}->{'program_start'} if $last_program_restart < $processinfo->{$backend}->{'program_start'};
+        }
+    }
+
+    # check if we have to build / clean our per user cache
+    if(   !defined $cached_data
+       or !defined $cached_data->{'prev_last_program_restart'}
+       or $cached_data->{'prev_last_program_restart'} < $last_program_restart
+      ) {
+        $cached_data = {
+            'prev_last_program_restart' => $last_program_restart,
+        };
+        $cache->set($c->stash->{'remote_user'}, $cached_data);
+    }
+
+    # check our backends uptime
+    if(defined $c->config->{'delay_pages_after_backend_reload'} and $c->config->{'delay_pages_after_backend_reload'} > 0) {
+        my $delay_pages_after_backend_reload = $c->config->{'delay_pages_after_backend_reload'};
+        for my $backend (keys %{$processinfo}) {
+            my $delay = int($processinfo->{$backend}->{'program_start'} + $delay_pages_after_backend_reload - time());
+            if($delay > 0) {
+                $c->log->debug("delaying page delivery by $delay seconds...");
+                sleep($delay);
+            }
+        }
+    }
+    return($last_program_restart);
+}
+
+########################################
 __PACKAGE__->meta->make_immutable;
+
+########################################
 
 =head1 AUTHOR
 

@@ -28,6 +28,8 @@ Main Features / Advantages
   * multiple themes included
   * Excel export
   * Adjustable side menu
+  * Full expanded plugin commandline for easy testing
+  * Save searches like bookmarks
 
 
 
@@ -47,22 +49,102 @@ mod_auth).
 image:source/arch_preview.png[Thruk Architecture]
 
 
+== What makes Thruk cool
+
+There are a couple of cool things in Thruk. A few of them are listed
+here.
+
+=== Excel Export and Bookmarks
+
+The Bookmarks feature allows you to save your searches and add them as
+your personal menu item. Besides the bookmarks, you can adjust the
+menu easiely with the menu_local.conf.
+
+The Excel export creates real Excel files to send by mail or extract
+hostnames to send to a different operations team.
+image:source/Bookmarks_and_excel_export.png[Bookmarks and Excel Export]
+
+
+=== Config Tool
+
+The Config Tool is great to make quick changes to your Thruk
+configuration. It is also possible to manage access with htpasswd
+files as well as adjusting your cgi.cfg.
+
+image:source/Config_Tool.png[Config Tool]
+
+
+=== Sending Multiple Commands
+
+The new status pages make it very convenient to send multiple commands
+at once. It is even possible to send host and service commands at the
+same time. When rescheduling hosts and services, Thruk will wait until
+your check is finished and display the result as soon as the check is
+over.
+
+image:source/Reschedule.png[Multiple Commands]
+
+
+=== Easy Filtering
+
+Remember the days when you had to guess numbers in the url to filter
+hosts or services. With Thruk it's possible to quickly change your
+display filter. You can combine multiple filter to create whatever
+views you like. An Ajax search supports you, so you don't have to
+guess host or service names.
+
+image:source/Filter.png[Easy Filtering]
+
+
+=== PNP4Nagios Graphs
+
+When your action_url contains /pnp4nagios/, there will be automatically
+a graph displayed for your host and service. This gives you a quick
+view about the performance history. The image is then linked to
+PNP4Nagios to get detailed information.
+
+image:source/PNP4nagios.png[PNP4Nagios]
+
+
+=== Multiple Lines of Plugin Output
+
+When your check returns multiple lines of plugin output. Thruk marks
+the output in blue and a click on it displays the complete output.
+This is especially usefull for check_multi checks. In addition to
+that, the comments and downtimes also have a small popup with their
+data. So you don't have to open the host/service page just to see who
+set a comment and when there is a downtime.
+
+image:source/PluginOutput.png[Multiple Lines of Plugin Output]
+
+
+
+
+
 == Installation
 
-The clean and proper way to install Thruk is to create a new local
-user and install the missing perl modules with local::lib.
+There are several ways of installing Thruk.
+
+=== Use OMD
+The easiest way of installing thruk is using OMD from
+http://omdistro.org[omdistro.org].  There are Debian, Ubuntu, Centos
+and Suse Packages containing preconfigured latest versions of Nagios
+and Thruk. The package also includes pnp4nagios, check_mk and nagvis.
+Even shinken will be part of the next release. OMD is the recommended
+way of installing new Nagios / Thruk setups.
 
 === Use Package
-Installation from a package is easy and should be painless:
+Standalone installation from a tarball package should be not very
+difficult:
 
 IMPORTANT: you may need to install libgd and libxpm.
 
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
   %> vers=$(perl -e 'use Config; print $Config{version}')
-  %> wget http://www.thruk.org/files/Thruk-0.78-$arch-$vers.tar.gz
-  %> tar zxf Thruk-0.78-$arch-$vers.tar.gz
-  %> cd Thruk-0.78
+  %> wget http://www.thruk.org/files/Thruk-1.0.3-$arch-$vers.tar.gz
+  %> tar zxf Thruk-1.0.3-$arch-$vers.tar.gz
+  %> cd Thruk-1.0.3
   %> ./script/thruk_server.pl
 ----
 
@@ -246,6 +328,13 @@ Open your browser and open http://<your_host>:3000
 There are two fast cgi modules for apache at the moment. Choose the
 one which fits best into your environment.
 
+[TIP]
+.lighthttpd
+=======
+Francois Ponsard wrote an article on how to integrate Thruk in Lighthttpd:
+http://www.dahwa.fr/dotclear/index.php?post/2011/03/15/Thruk-in-Lighttpd
+=======
+
 === mod_fastcgi
 
 start your fcgi server:
@@ -289,19 +378,21 @@ use this apache example configuration:
     <Directory /home/thruk/Thruk/root/>
         order allow,deny
         allow from all
+        Options FollowSymLinks
+        AllowOverride All
     </Directory>
 
     Alias /thruk/ /home/thruk/Thruk/root/thruk/
-    <Directory "/home/thruk/Thruk/root/thruk/">
-        Options FollowSymLinks
-        AllowOverride All
+
+    # authorization
+    <Location "/thruk">
         AuthName "Monitoring Access"
         AuthType Basic
         AuthUserFile /home/thruk/Thruk/htpasswd.users
         Order Allow,Deny
         Allow from all
         require valid-user
-    </Directory>
+    </Location>
 
     # Load fastcgi module unless already loaded
     LoadModule fastcgi_module /usr/lib/apache2/modules/mod_fastcgi.so
@@ -446,6 +537,17 @@ ex.:
   use_timezone = CET
 
 
+==== title_prefix
+
+set the title prefix for all urls
+this piece of text will be prepended to
+all page titles.
+
+ex.:
+
+  title_prefix = Prod
+
+
 ==== url_prefix
 
 Changes the usual url path for Thruk. Don't change it unless you plan
@@ -455,6 +557,21 @@ to change your fastcgi configuration too.
 ex.:
 
   url_prefix = /
+
+
+==== logo_path_prefix
+
+Changes the path to your logo images. Default is
+$url_prefix+'thruk/themes/'+$current_theme+'/images/logos/' and
+therefor relative to the current selected theme. You could set a fixed
+path here.
+Like usual, paths starting with a / will be absolute from your
+webserver root directory. Paths starting without a / will be relative
+to the cgi directory.
+
+ex.:
+
+  logo_path_prefix = /icons/
 
 
 ==== use_strict_host_authorization
@@ -516,7 +633,7 @@ ex.:
 
 ==== cgi_cfg
 
-The path to your cgi.cfg. See <<cgi.cfg>> for details.
+The path to your cgi.cfg. See <<_cgi_cfg_2,cgi.cfg>> for details.
 
 ex.:
 
@@ -532,6 +649,33 @@ ex.:
   log4perl_conf = ./log4perl.conf
 
 
+==== plugin_path
+
+Path to your plugins directory. Can be used to specify different
+location for you Thruk plugins. Don't forget to set appropriate apache
+alias or rewrite rules when changing the plugin path. Otherwise the
+static content from plugins is not accessible.
+
+Example redirect rule for apache:
+
++++++
+ AliasMatch /thruk/plugins/(.*?)/(.*)$ <your-plugin-dir>/plugins/plugins-enabled/$1/root/$2
++++++
+
+ex.:
+
+  plugin_path = ./plugins
+
+
+==== var_path
+
+Path to the var directory. Thruk stores user specific date here.
+
+ex.:
+
+  var_path = ./var
+
+
 ==== tmp_path
 
 Path to a temporary directory. Defaults to /tmp if not set and usually
@@ -544,7 +688,8 @@ ex.:
 
 ==== ssi_path
 
-The path to your ssi (server side includes) files.
+The path to your ssi (server side includes) files. See
+<<_server_side_includes,Server Side Includes>> for details.
 
 ex.:
 
@@ -815,6 +960,18 @@ ex.:
   datetime_format_today = %H:%M:%S
 
 
+==== show_long_plugin_output
+
+When a plugin returns more than one line of output, the
+output can be displayed directly in the status table, as
+popup or not at all.
+Choose between popup, inline and off
+
+ex.:
+
+  show_long_plugin_output = popup
+
+
 ==== info_popup_event_type
 On which event should the comments / downtime or longpluginout popup
 show up. Valid values are onclick or onmouseover.
@@ -870,10 +1027,51 @@ ex.:
   resource_file = /etc/nagios3/resource.cfg
 
 
+
+==== shown_inline_pnp
+Show inline pnp graph if available. If a service or host has a
+pnp4nagios action url set, Thruk will show a inline graph on the
+extinfo page.
+
+ex.:
+
+  shown_inline_pnp = 1
+
+
+
+==== statusmap_default_type
+You may change the default map type of the statusmap here. Valid 
+types are: 'table' and 'circle'
+
+ex.:
+
+  statusmap_default_type = table
+
+
+==== statusmap_default_groupby
+And the statusmap default group by which has to be one of:
+'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
+
+ex.:
+
+  statusmap_default_groupby = address
+
+
+==== use_wait_feature
+Waiting is a livestatus feature. When enabled, Thruk will wait
+after rescheduling hosts/services checks until the
+check has been really executed up to a maximum of 20 seconds.
+
+ex.:
+
+  use_wait_feature = 1
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
 unless all your backends are shinken.
+If not set, it will be automatically enabled when using only
+shinken backends.
 
 ex.:
 
@@ -881,6 +1079,16 @@ ex.:
 
 
 
+==== check_local_states
+Get the status for remote backends from local instances. This can
+increase performance when using multiple remote sites. It is enabled
+by default when using more than one site. You have to define
+hostchecks in any local backend (using unix sockets) with a name or
+alias of the address of your remote backends.
+
+ex.:
+
+  check_local_states = 1
 
 
 
@@ -889,15 +1097,18 @@ Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.
 
-  * peer             enter the peer configuration. You have to enter a name for
-                     each peer.
+  * peer
          - name      name for this connection
          - type      type of this connection. Only "livestatus" possible at the
                      moment
          - hidden    should this peer be hidden initially ( can be reenabled
-                     via gui switch )
+                     via gui switch ) Only useful with more than one
+                     backend.
          - groups    if set, only contacts from these groups have access. You
-                     may add multiple groups seperated by comma.
+                     may add multiple groups seperated by comma. Users
+                     without the right contactgroup don't even see
+                     that there is a backend. Note that this implies
+                     one extra backend request per page.
          - options
             - peer              address of this connection.
             - verbose           let this connection be verbose
@@ -936,11 +1147,36 @@ ex.:
 
 
 
+==== Component Thruk::Plugin::ConfigTool
+
+Enable config tool by setting path to different components config
+files. Users with the roles 'authorized_for_configuration_information'
+and 'authorized_for_system_commands' will then have access to the
+config tool.
+You don't have to restart Thruk when changing the config with the
+config tool.
+
+  * you can manage 3 types of files with the config tool:
+      - thruk               path to your thruk_local.conf. Enables
+                            adjusting Thruks config.
+      - cgi.cfg             path to your cgi.cfg. Enables adjusting the
+                            cgi.cfg.
+      - htpasswd            path to your htpasswd. Enables user management
+                            based an apaches basic auth with htpasswd.
+
+ex.:
+
+  <Component Thruk::Plugin::ConfigTool>
+    thruk    = ./thruk_local.conf
+    cgi.cfg  = ./cgi.cfg
+    htpasswd = ./htpasswd
+  </Component>
+
 
 === cgi.cfg
 
-The cgi.cfg is mainly the same as in Nagios or Icinga itself stripped
-down some unneeded values.
+The cgi.cfg is mainly the same as in Nagios or Icinga but not all
+values are used.
 
 
 ==== show_context_help
@@ -1155,17 +1391,22 @@ on a test instance first.
 
 You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
-end of the body.
+end of the body. 
+
+IMPORTANT: This has *nothing to do* with the Apache module 'mod_include'
+and just implements the nagios way of SSIs.
 
 There are two global includes, which will be included in every cgi
 page:
- - ssi/global-footer.ssi
- - ssi/global-header.ssi
+
+* ssi/global-footer.ssi
+* ssi/global-header.ssi
 
 and there are page specific includes, which will only be placed in the
 specific page:
-ssi/status-footer.ssi
-ssi/status-header.ssi
+
+* ssi/status-footer.ssi
+* ssi/status-header.ssi
 
 Files will be statically placed inside the output of the normal cgi
 output. Executables will be executed and the output will then be used

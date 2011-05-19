@@ -27,13 +27,15 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config ) = @_;
+    my( $class, $peer_config, $config, $log ) = @_;
 
-    die("need at least a peer. Minmal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
         'live'   => Monitoring::Livestatus::Class->new($peer_config),
         'config' => $config,
+        'log'    => $log,
+        'stash'  => undef,
     };
     bless $self, $class;
 
@@ -99,7 +101,6 @@ return the process info
 =cut
 sub get_processinfo {
     my $self  = shift;
-    my $c     = shift;
     my $cache = shift;
 
     my $data  =  $self->{'live'}
@@ -116,10 +117,10 @@ sub get_processinfo {
 
     # do the livestatus version check
     my $cached_already_warned_about_livestatus_version = $cache->get('already_warned_about_livestatus_version');
-    if(!defined $cached_already_warned_about_livestatus_version and defined $c->config->{'min_livestatus_version'}) {
-        unless(Thruk::Utils::version_compare($c->config->{'min_livestatus_version'}, $data->{$self->peer_key()}->{'data_source_version'})) {
+    if(!defined $cached_already_warned_about_livestatus_version and defined $self->{'config'}->{'min_livestatus_version'}) {
+        unless(Thruk::Utils::version_compare($self->{'config'}->{'min_livestatus_version'}, $data->{$self->peer_key()}->{'data_source_version'})) {
             $cache->set('already_warned_about_livestatus_version', 1);
-            $c->log->warn("backend '".$self->peer_name()."' uses too old livestatus version: '".$data->{$self->peer_key()}->{'data_source_version'}."', minimum requirement is at least '".$c->config->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
+            $self->{'log'}->warn("backend '".$self->peer_name()."' uses too old livestatus version: '".$data->{$self->peer_key()}->{'data_source_version'}."', minimum requirement is at least '".$self->{'config'}->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
         }
     }
     $data->{$self->peer_key()}->{'data_source_version'} = "Livestatus ".$data->{$self->peer_key()}->{'data_source_version'};
@@ -193,30 +194,29 @@ sub get_hosts {
         $options{'options'}->{'limit'} = $limit + 50;
     }
 
-    $options{'columns'} = [qw/
-        accept_passive_checks acknowledged action_url action_url_expanded
-        active_checks_enabled address alias check_command check_freshness check_interval
-        check_options check_period check_type checks_enabled childs comments current_attempt
-        current_notification_number event_handler_enabled execution_time
-        custom_variable_names custom_variable_values
-        first_notification_delay flap_detection_enabled groups has_been_checked
-        high_flap_threshold icon_image icon_image_alt icon_image_expanded
-        is_executing is_flapping last_check last_notification last_state_change
-        latency long_plugin_output low_flap_threshold max_check_attempts name
-        next_check notes notes_expanded notes_url notes_url_expanded notification_interval
-        notification_period notifications_enabled num_services_crit num_services_ok
-        num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
-        parents percent_state_change perf_data plugin_output process_performance_data
-        retry_interval scheduled_downtime_depth state state_type
-                /];
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            accept_passive_checks acknowledged action_url action_url_expanded
+            active_checks_enabled address alias check_command check_freshness check_interval
+            check_options check_period check_type checks_enabled childs comments current_attempt
+            current_notification_number event_handler_enabled execution_time
+            custom_variable_names custom_variable_values
+            first_notification_delay flap_detection_enabled groups has_been_checked
+            high_flap_threshold icon_image icon_image_alt icon_image_expanded
+            is_executing is_flapping last_check last_notification last_state_change
+            latency long_plugin_output low_flap_threshold max_check_attempts name
+            next_check notes notes_expanded notes_url notes_url_expanded notification_interval
+            notification_period notifications_enabled num_services_crit num_services_ok
+            num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
+            parents percent_state_change perf_data plugin_output process_performance_data
+            retry_interval scheduled_downtime_depth state state_type
+        /];
 
-    if($self->{'config'}->{'enable_shinken_features'}) {
-        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem 
-                                         got_business_rule parent_dependencies/;
+        if($self->{'stash'}->{'enable_shinken_features'}) {
+            push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
+                                             got_business_rule parent_dependencies/;
+        }
     }
-
-    my @col = $options{'columns'};
-    push(@col, 'is_problem');
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('hosts', \%options);
@@ -226,6 +226,29 @@ sub get_hosts {
     }
 
     return($data, undef, $size);
+}
+
+##########################################################
+
+=head2 get_hosts_by_servicequery
+
+  get_hosts_by_servicequery
+
+returns a list of host by a services query
+
+=cut
+sub get_hosts_by_servicequery {
+    my($self, %options) = @_;
+
+    $options{'columns'} = [qw/
+        host_has_been_checked host_name host_state
+        /];
+
+    my $data = $self->_get_table('services', \%options);
+    unless(wantarray) {
+        confess("get_services() should not be called in scalar context");
+    }
+    return($data, undef);
 }
 
 ##########################################################
@@ -307,30 +330,32 @@ sub get_services {
         $options{'options'}->{'limit'} = $limit + 50;
     }
 
-    $options{'columns'} = [qw/
-        accept_passive_checks acknowledged action_url action_url_expanded
-        active_checks_enabled check_command check_interval check_options
-        check_period check_type checks_enabled comments current_attempt
-        current_notification_number description event_handler event_handler_enabled
-        custom_variable_names custom_variable_values
-        execution_time first_notification_delay flap_detection_enabled groups
-        has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
-        host_active_checks_enabled host_address host_alias host_checks_enabled
-        host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
-        host_is_executing host_is_flapping host_name host_notes_url_expanded
-        host_notifications_enabled host_scheduled_downtime_depth host_state
-        icon_image icon_image_alt icon_image_expanded is_executing is_flapping
-        last_check last_notification last_state_change latency long_plugin_output
-        low_flap_threshold max_check_attempts next_check notes notes_expanded
-        notes_url notes_url_expanded notification_interval notification_period
-        notifications_enabled obsess_over_service percent_state_change perf_data
-        plugin_output process_performance_data retry_interval scheduled_downtime_depth
-        state state_type
+    unless(defined $options{'columns'}) {
+        $options{'columns'} = [qw/
+            accept_passive_checks acknowledged action_url action_url_expanded
+            active_checks_enabled check_command check_interval check_options
+            check_period check_type checks_enabled comments current_attempt
+            current_notification_number description event_handler event_handler_enabled
+            custom_variable_names custom_variable_values
+            execution_time first_notification_delay flap_detection_enabled groups
+            has_been_checked high_flap_threshold host_acknowledged host_action_url_expanded
+            host_active_checks_enabled host_address host_alias host_checks_enabled host_check_type
+            host_comments host_groups host_has_been_checked host_icon_image_expanded host_icon_image_alt
+            host_is_executing host_is_flapping host_name host_notes_url_expanded
+            host_notifications_enabled host_scheduled_downtime_depth host_state host_accept_passive_checks
+            icon_image icon_image_alt icon_image_expanded is_executing is_flapping
+            last_check last_notification last_state_change latency long_plugin_output
+            low_flap_threshold max_check_attempts next_check notes notes_expanded
+            notes_url notes_url_expanded notification_interval notification_period
+            notifications_enabled obsess_over_service percent_state_change perf_data
+            plugin_output process_performance_data retry_interval scheduled_downtime_depth
+            state state_type
         /];
 
-    if($self->{'config'}->{'enable_shinken_features'}) {
-        push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem 
-                                         got_business_rule parent_dependencies/;
+        if($self->{'stash'}->{'enable_shinken_features'}) {
+            push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
+                                             got_business_rule parent_dependencies/;
+        }
     }
 
 
@@ -533,6 +558,27 @@ sub get_contacts {
         name alias email pager service_notification_period host_notification_period
         /];
     return $self->_get_table('contacts', \%options);
+}
+
+##########################################################
+
+=head2 get_contact_names
+
+  get_contact_names
+
+returns a list of contact names
+
+=cut
+sub get_contact_names {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/name/];
+    my $data = $self->_get_hash_table('contacts', 'name', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+
+    unless(wantarray) {
+        confess("get_contact_names() should not be called in scalar context");
+    }
+    return($keys, 'uniq');
 }
 
 ##########################################################
@@ -795,6 +841,37 @@ sub get_extra_perf_stats {
     return($data, 'SUM');
 }
 
+##########################################################
+
+=head2 set_verbose
+
+  set_verbose
+
+sets verbose mode for this backend and returns old value
+
+=cut
+sub set_verbose {
+    my($self, $val) = @_;
+    my $old = $self->{'live'}->{'backend_obj'}->{'verbose'};
+    $self->{'live'}->{'backend_obj'}->{'verbose'} = $val;
+    $self->{'live'}->{'backend_obj'}->{'logger'}  = $self->{'log'};
+    return($old);
+}
+
+##########################################################
+
+=head2 set_stash
+
+  set_stash
+
+make stash accessible for the backend
+
+=cut
+sub set_stash {
+    my($self, $stash) = @_;
+    $self->{'stash'} = $stash;
+    return;
+}
 
 ##########################################################
 

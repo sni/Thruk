@@ -15,3 +15,7 @@ body.showlog .filterTitle { font-size: 10pt; font-weight: bold; background-color
 body.showlog .filterValue { color: #707677; background-color: white; }
 body.showlog .filterName { background-color: white; }
 td.filter { background-color: white; }
+
+body.navbar {
+  text-align: left;
+}

@@ -66,7 +66,10 @@
           <div align="center" class='statusTitle'>Service Grid</div><br>
           [% END %]
         </td>
-        <td valign="top" align="right" width="33%"></td>
+        <td valign="bottom" align="right" width="33%">
+          [% PROCESS _add_bookmark.tt %]
+          [% PROCESS _show_link.tt %]
+        </td>
       </tr>
     </table>
 
@@ -75,9 +78,9 @@
     <div align="center">
 
       [% FOR g IN data %]
-      [% IF hostgroup != '' %]
+      [% IF substyle == 'host' %]
       <div class='status'><a href='status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]'>[% g.name %]</a>)</div>
-      [% ELSIF servicegroup != '' %]
+      [% ELSIF substyle == 'service' %]
       <div class='status'><a href='status.cgi?servicegroup=[% g.name | uri %]&amp;style=detail'>[% g.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]'>[% g.name %]</a>)</div>
       [% END %]
       <table border="1" class='status statusgroups' align="center">
@@ -95,7 +98,7 @@
         [% ELSIF h.state == 2 %]
           [% hostclass = 'statusHOSTUNREACHABLE' %]
         [% END %]
-        <tr class='[% hostclass %]'>
+        <tr class='[% hostclass %][% IF loop.first %] firstrow[% END %]'>
           <td class='[% hostclass %]'>
             <table border="0" width='100%' cellpadding="0" cellspacing="0">
               <tr>
@@ -111,7 +114,7 @@
                     <tr>
                       <td>
                         [% IF h.icon_image_expanded %]
-                        <a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a>
+                        <a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' border="0" width="20" height="20" alt='[% h.icon_image_alt %]' title='[% h.icon_image_alt %]'></a>
                         [% END %]
                       </td>
                     </tr>

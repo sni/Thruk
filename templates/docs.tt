@@ -1,10 +1,18 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-  "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <title>Thruk Documentation</title>
-  </head>
-  <body>
+﻿[% PROCESS _header.tt use_frames=1 show_nav_button=0 %]
+
+<table border="0" width="100%">
+   <tr>
+      <td align="left" valign="top" width="33%">
+         [% PROCESS _infobox.tt %]
+      </td>
+      <td align="center" valign="middle" width="33%"></td>
+      <td align="right" valign="bottom" width="33%"></td>
+    </tr>
+</table>
+<br>
+
+<table border="0" width="800">
+   <tr><td>
   <h2>Thruk Documentation</h2>
   <br>
   Thruks documentation itself is located in your project root under the /docs/ folder.<br>
@@ -15,5 +23,7 @@
   If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
   <br>
   For installation information look at the <a href="[% url_prefix %]thruk/documentation.html">Documentation</a>
-</body>
-</html>
+  </td></tr>
+</table>
+
+[% PROCESS _footer.tt %]

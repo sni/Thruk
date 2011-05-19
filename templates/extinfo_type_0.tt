@@ -1,26 +1,30 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
 
-    <table border="0" width="100%">
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
         [% PROCESS _infobox.tt %]
         </td>
-        <td align="center" valign="middle" width="33%"></td>
+        <td align="center" valign="middle" width="33%">
+          [% PROCESS _message.tt %]
+        </td>
         <td align="right" valign="bottom" width="33%">
           [% IF show_context_help %]
           <br><a href='[% url_prefix %]thruk/docs/extinfo_0' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
           [% END %]
         </td>
       </tr>
-    </table><br>
-    <br>
+    </table>
+
+    <br><br>
+
     <div align="center">
       <table border="0" cellpadding="20">
         <tr>
           <td valign="top">
-            <div class='dataTitle'>Process Information</div>
-            <table border="1" cellspacing="0" cellpadding="0" class='data'>
+            <div class='dataTitle blockHead blockHeadBorder'>Process Information</div>
+            <table border="1" cellspacing="0" cellpadding="0" class='data procInfoTable'>
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -243,7 +247,7 @@
             </table>
           </td>
           <td valign="top">
-            <div class='commandTitle'>Process Commands</div>
+            <div class='commandTitle blockHead blockHeadBorder'>Process Commands</div>
             <table border="1" cellpadding="0" cellspacing="0" class='command'>
               <tr>
                 <td>

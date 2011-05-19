@@ -197,6 +197,22 @@ sub get_contacts {
 
 ##########################################################
 
+=head2 get_contact_names
+
+  get_contact_names
+
+returns a list of contact names
+
+=cut
+
+sub get_contact_names {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_downtimes
 
   get_downtimes
@@ -254,6 +270,22 @@ returns a list of hosts
 =cut
 
 sub get_hosts {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
+=head2 get_hosts_by_servicequery
+
+  get_hosts_by_servicequery
+
+returns a list of host by a services query
+
+=cut
+
+sub get_hosts_by_servicequery {
     my $self = shift;
     confess("unimplemented");
     return;
@@ -450,6 +482,39 @@ sub get_service_stats {
     confess("unimplemented");
     return;
 }
+
+##########################################################
+
+=head2 set_verbose
+
+  set_verbose
+
+sets verbose mode for this backend and returns old value
+
+=cut
+
+sub set_verbose {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+
+##########################################################
+
+=head2 set_stash
+
+  set_stash
+
+make stash accessible for the backend
+
+=cut
+sub set_stash {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
 
 =head1 AUTHOR
 

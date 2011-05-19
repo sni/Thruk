@@ -20,7 +20,7 @@ resources(
 requires 'YAML'                                   => 0.70;
 requires 'YAML::Tiny'                             => 1.41;
 requires 'JSON'                                   => 0.00;
-requires 'JSON::XS'                               => 0.00;
+requires 'JSON::XS'                               => 2.00;
 requires 'Compress::Raw::Zlib'                    => 2.024;
 requires 'Sub::Uplevel'                           => 0.22;
 requires 'Variable::Magic'                        => 0.40;
@@ -34,7 +34,7 @@ requires 'parent'                                 => 0.223;
 requires 'Moose'                                  => 0.98;
 requires 'MooseX::MethodAttributes::Inheritable'  => 0.20;
 requires 'MooseX::Role::WithOverloading'          => 0.05;
-requires 'Monitoring::Livestatus'                 => 0.60;
+requires 'Monitoring::Livestatus'                 => 0.74;
 requires 'Monitoring::Livestatus::Class'          => 0.03;
 requires 'Monitoring::Availability'               => 0.12;
 requires 'MIME::Types'                            => 0.00;
@@ -47,6 +47,7 @@ requires 'Class::C3'                              => 0.22;
 requires 'Algorithm::C3'                          => 0.08;
 requires 'Time::HiRes'                            => 0;
 requires 'Date::Calc'                             => 6.3;
+requires 'Date::Calc::XS'                         => 0;
 requires 'Data::Page'                             => 2.02;
 requires 'HTML::Entities'                         => 3.64;
 requires 'File::Slurp'                            => 0.00;
@@ -100,13 +101,35 @@ eval {
 };
 
 ##################################
-# create symlinks for tests
-mkdir('t/xt') unless -d 't/xt';
-unlink(glob('t/xt/*.t'));
+# check plugin test symlinks
+my $testlinks = {};
+mkdir("t/xt") unless -d "t/xt";
 for my $test (glob('plugins/plugins-enabled/*/t/*.t')) {
     my $testfile = $test;
     $testfile    =~ s/.*\///gmx;
-    symlink('../../'.$test, 't/xt/'.$testfile) or die("cannot create symlink: $!");
+    if(!-s 't/xt/'.$testfile) {
+        symlink('../../'.$test, 't/xt/'.$testfile) or die("cannot create symlink: $!");
+        $testlinks->{$testfile} = '../../'.$test;
+        next;
+    }
+    my $target = readlink('t/xt/'.$testfile);
+    if($target ne '../../'.$test) {
+        die('t/xt/'.$testfile.' has wrong target: '.$target.' vs. ../../'.$test);
+    }
+    $testlinks->{$testfile} = $target;
+}
+# check if there are some links too much
+my @cur_t_links = glob('t/xt/*.t');
+for my $link (@cur_t_links) {
+    my $target = readlink($link);
+    my $linkbasename = $link;
+    $linkbasename =~ s/.*\///gmx;
+    if(!defined $testlinks->{$linkbasename}) {
+        unlink($link) or die($link.' should be deleted: '.$!);
+    }
+    elsif($testlinks->{$linkbasename} ne $target) {
+        die($link.' has wrong target: '.$target.' vs. '.$testlinks->{$linkbasename});
+    }
 }
 
 tests_recursive;

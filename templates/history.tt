@@ -12,7 +12,7 @@
 
     <form method="get" action="history.cgi" id="date_form">
     <input type="hidden" name="entries" value="[% entries_per_page %]">
-    <table border="0" width="100%">
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]
@@ -54,9 +54,9 @@
               <td width="15"></td>
               <td align="center" class='navBoxDate' nowrap>
                 <div class='navBoxTitle'>Log File Navigation</div>
-                <input type="text" value="[% date.format(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:show_cal('start')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% format_date(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:show_cal('start')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>to<br>
-                <input type="text" value="[% date.format(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:show_cal('end')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% format_date(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:show_cal('end')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>
               </td>
               <td valign="middle">

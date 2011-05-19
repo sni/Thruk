@@ -10,72 +10,29 @@ html, body {
   height:100%;
 }
 
-#infovis div {
-  position:absolute;
-  font-size:11px;
-}
-
-div#mycanvas div {
+.node {
+  color:#FFFFFF;
+  font-size:10px;
   overflow:hidden;
-}
-
-#infovis .content {
-  background-color:#333;
-  border:0px solid #111;
-}
-
-#infovis .head {
-  color:white;
-  background-color:#444;
-  font-weight: normal;
-}
-
-#infovis .head.in-path {
-  background-color:#655;
-  font-weight: normal;
-}
-
-#infovis .body {
-  background-color:black;
-  font-weight: normal;
-}
-
-#infovis .leaf {
-  display:table-cell;
-  vertical-align:middle;
-  border:1px solid #000;
-  font-weight: normal;
-  overflow:hidden;
-}
-
-
-#infovis .over-leaf {
-  border:1px solid #9FD4FF;
-}
-
-#infovis .over-content {
-  background-color: #9FD4FF;
-}
-
-#infovis .over-head { /* boy i'm funny! */
-  background-color:#A4D9FF;
-  color:black;
+  cursor:pointer;
 }
 
 /*TOOLTIPS*/
 .tip {
-  color: #fff;
-  min-width: 139px;
-  background-color: black;
-  opacity:0.9;
-  filter:alpha(opacity=90);
-  padding:7px;
-  white-space: nowrap;
-  font-weight: normal;
-  font-size:10px;
+    color: #111;
+    min-width: 139px;
+    background-color: white;
+    border:1px solid #ccc;
+    -moz-box-shadow:#555 2px 2px 8px;
+    -webkit-box-shadow:#555 2px 2px 8px;
+    -o-box-shadow:#555 2px 2px 8px;
+    box-shadow:#555 2px 2px 8px;
+    opacity:0.9;
+    filter:alpha(opacity=90);
+    padding:7px;
 }
 
-span.hostPENDING {
+DIV.hostPENDING, SPAN.hostPENDING {
   font-weight: normal;
   font-size:10px;
   float: none;

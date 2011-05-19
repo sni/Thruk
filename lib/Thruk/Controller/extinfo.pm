@@ -141,28 +141,35 @@ sub _process_host_page {
         sort => { 'DESC' => 'id' } );
 
 
-    #If we use shinken, shoud show the impacts link if it's a problem
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $host->{'is_problem'}) {
-	$c->stash->{'show_impacts_link'} = 1;
-    }else{
-	$c->stash->{'show_impacts_link'} = 0;
-    }
+    # shinken only
+    $c->stash->{'show_impacts_link'}      = 0;
+    $c->stash->{'show_rootproblems_link'} = 0;
 
-    #If we use shinken, shoud show the root problems ofthis impact
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $host->{'is_impact'}) {
-	$c->stash->{'show_rootproblems_link'} = 1;
-    }else{
-	$c->stash->{'show_rootproblems_link'} = 0;
+    if($c->stash->{'enable_shinken_features'}) {
+        # show the impacts link for problem hosts
+        if($host->{'is_problem'}) {
+            $c->stash->{'show_impacts_link'}      = 1;
+        }
+        # show the root problems of this impact
+        if($host->{'is_impact'}) {
+            $c->stash->{'show_rootproblems_link'} = 1;
+        }
     }
 
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
-    
+
     # generate command line
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
         my $command             = $c->{'db'}->expand_command('host' => $host );
         $c->stash->{'command'}  = $command;
+    }
+
+    # pnp graph?
+    $c->stash->{'pnp_url'} = '';
+    if($c->config->{'shown_inline_pnp'} and defined $host->{'action_url_expanded'} and $host->{'action_url_expanded'} =~ m|(^.*?/pnp4nagios/)|mx) {
+        $c->stash->{'pnp_url'} = $1.'index.php';
     }
 
     return 1;
@@ -233,18 +240,18 @@ sub _process_service_page {
     $c->stash->{'comments'}  = $comments;
     $c->stash->{'downtimes'} = $downtimes;
 
-    #If we use shinken, shoud show the impacts link if it's a problem
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $service->{'is_problem'}) {
-	$c->stash->{'show_impacts_link'} = 1;
-    }else{
-	$c->stash->{'show_impacts_link'} = 0;
-    }
-
-    #If we use shinken, shoud show the root problems ofthis impact
-    if($c->{'db'}{'backends'}[0]{'class'}{'config'}->{'enable_shinken_features'} && $service->{'is_impact'}) {
-	$c->stash->{'show_rootproblems_link'} = 1;
-    }else{
-	$c->stash->{'show_rootproblems_link'} = 0;
+    # shinken only
+    $c->stash->{'show_impacts_link'}      = 0;
+    $c->stash->{'show_rootproblems_link'} = 0;
+    if($c->stash->{'enable_shinken_features'}) {
+        # show the impacts link for problem hosts
+        if($service->{'is_problem'}) {
+            $c->stash->{'show_impacts_link'}      = 1;
+        }
+        # show the root problems of this impact
+        if($service->{'is_impact'}) {
+            $c->stash->{'show_rootproblems_link'} = 1;
+        }
     }
 
     # generate command line
@@ -264,6 +271,12 @@ sub _process_service_page {
         }
         my $command             = $c->{'db'}->expand_command('host' => $host, 'service' => $service );
         $c->stash->{'command'}  = $command;
+    }
+
+    # pnp graph?
+    $c->stash->{'pnp_url'} = '';
+    if($c->config->{'shown_inline_pnp'} and defined $service->{'action_url_expanded'} and $service->{'action_url_expanded'} =~ m|(^.*?/pnp4nagios/)|mx) {
+        $c->stash->{'pnp_url'} = $1.'index.php';
     }
 
     return 1;

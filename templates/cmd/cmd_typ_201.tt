@@ -14,10 +14,10 @@
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
 
-    [% IF c.request.parameters.force_check %]LAUNCH_HOST_EVENT_HANDLER[% ELSE %]LAUNCH_HOST_EVENT_HANDLER[% END %];[% sprintf("%s;%s",host_name) %]
+    [% IF c.request.parameters.force_check %]LAUNCH_HOST_EVENT_HANDLER[% ELSE %]LAUNCH_HOST_EVENT_HANDLER[% END %];[% sprintf("%s",host_name) %]
 [% END %]
 
-[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = date.format(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>

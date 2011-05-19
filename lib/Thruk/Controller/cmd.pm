@@ -6,7 +6,6 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use Template;
-use Time::HiRes qw( usleep );
 
 =head1 NAME
 
@@ -29,11 +28,13 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     my $errors = 0;
 
-    $c->stash->{title}          = "External Command Interface";
-    $c->stash->{infoBoxTitle}   = "External Command Interface";
-    $c->stash->{no_auto_reload} = 1;
-    $c->stash->{page}           = 'cmd';
-    $c->stash->{'form_errors'}  = [];
+    $c->stash->{'now'}           = time();
+    $c->stash->{title}           = "External Command Interface";
+    $c->stash->{infoBoxTitle}    = "External Command Interface";
+    $c->stash->{no_auto_reload}  = 1;
+    $c->stash->{page}            = 'cmd';
+    $c->stash->{'form_errors'}   = [];
+    $c->stash->{'commands2send'} = [];
 
     # fill in some defaults
     for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc servicegroup backend/) {
@@ -163,6 +164,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             my( $host, $service, $backend ) = split /;/mx, $hostdata;
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'backend'} = $backend;
+            $c->stash->{'lasthost'} = $host;
             if( $quick_command == 5 ) {
                 $self->_remove_all_downtimes( $c, $host );
             }
@@ -179,6 +181,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             }
         }
 
+        my $lastservice;
         for my $servicedata ( split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'} ) {
             if( defined $service_quick_commands->{$quick_command} ) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
@@ -191,6 +194,8 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'service'} = $service;
             $c->{'request'}->{'parameters'}->{'backend'} = $backend;
+            $c->stash->{'lasthost'}    = $host;
+            $c->stash->{'lastservice'} = $service;
             if( $quick_command == 5 ) {
                 $self->_remove_all_downtimes( $c, $host, $service );
             }
@@ -206,7 +211,9 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                 }
             }
         }
+
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' ) unless $errors;
+
         $self->_redirect_or_success( $c, -1 );
     }
 
@@ -319,13 +326,53 @@ sub _cmd_is_disabled {
 sub _redirect_or_success {
     my( $self, $c, $how_far_back ) = @_;
 
+    if($self->_bulk_send($c)) {
+        $c->log->debug("bulk sending commands succeeded");
+    }
+
     $c->stash->{how_far_back} = $how_far_back;
 
     my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';
     if( $referer ne '' ) {
 
-        # wait 0.3 seconds, so the command is probably already processed
-        usleep(300000);
+        # send a wait header?
+        if(    $c->config->{'use_wait_feature'}
+           and defined $c->stash->{'lasthost'}
+           and (   $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7
+                or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96
+               )
+        ) {
+            my $options = {
+                        'header' => {
+                            'WaitTimeout'   => 10000,
+                            'WaitTrigger'   => 'check',
+                            'WaitCondition' => 'last_check >= '.$c->stash->{'now'},
+                        }
+            };
+            if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
+                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
+                $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                                   { 'name' => $c->stash->{'lasthost'} } ],
+                                        columns => [ 'name' ],
+                                        options => $options
+                                    );
+            }
+            if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
+                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}." ".$c->stash->{'lastservice'};
+                $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
+                                                      { 'host_name'   => $c->stash->{'lasthost'} },
+                                                      { 'description' => $c->stash->{'lastservice'} }
+                                                     ],
+                                          columns => [ 'description' ],
+                                          options => $options
+                                        );
+            }
+        }
+        else {
+            # just do nothing for a second
+            sleep(1);
+        }
+
         $c->redirect($referer);
     }
     else {
@@ -440,9 +487,27 @@ sub _do_send_command {
         if( scalar @errors > 0 ) {
             delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
             $c->stash->{'form_errors'} = \@errors;
-            return (0);
+            return;
         }
     }
+
+    for my $cmd_line ( split /\n/mx, $cmd ) {
+        $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
+        push @{$c->stash->{'commands2send'}}, $cmd_line;
+    }
+
+    $c->stash->{'lasthost'}    = $c->{'request'}->{'parameters'}->{'host'};
+    $c->stash->{'lastservice'} = $c->{'request'}->{'parameters'}->{'service'};
+
+    return 1;
+}
+
+######################################
+# send all collected commands at once
+sub _bulk_send {
+    my $self         = shift;
+    my $c            = shift;
+    my @errors;
 
     # is a backend selected?
     my $backends          = $c->{'request'}->{'parameters'}->{'backend'};
@@ -453,6 +518,11 @@ sub _do_send_command {
         $c->stash->{'form_errors'} = \@errors;
         return (0);
     }
+    if( scalar @errors > 0 ) {
+        delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
+        $c->stash->{'form_errors'} = \@errors;
+        return;
+    }
 
     # send the command
     my $options = {};
@@ -461,19 +531,17 @@ sub _do_send_command {
         $options->{backend} = $backends;
     }
 
-    for my $cmd_line ( split /\n/mx, $cmd ) {
-        $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
-        $options->{'command'} = $cmd_line;
-        if($c->request->parameters->{'test_only'}) {
-            $c->log->debug( 'not sending (TESTMODE) ' . $cmd_line );
-        } else {
-            $c->log->debug( 'sending ' . $cmd_line );
-            $c->{'db'}->send_command( %{$options} );
-            $c->log->info( '[' . $c->user->username . '] cmd: ' . $cmd_line );
-        }
+    $options->{'command'} = join("\n\n", @{$c->stash->{'commands2send'}});
+
+    if($c->request->parameters->{'test_only'}) {
+        $c->log->debug( 'not sending (TESTMODE): ' . $options->{'command'} );
+    } else {
+        $c->log->debug( 'sending ' . $options->{'command'} );
+        $c->{'db'}->send_command( %{$options} );
+        map { $c->log->info( '[' . $c->user->username . '] cmd: ' . $_ ) } @{$c->stash->{'commands2send'}};
     }
 
-    return (1);
+    return 1;
 }
 
 ######################################

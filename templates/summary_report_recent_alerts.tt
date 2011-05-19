@@ -16,7 +16,7 @@
       [% SET class = 'dataOdd'  IF loop.even %]
       [% SET class = 'dataEven' IF loop.odd  %]
       <tr class='[% class %]'>
-        <td class='[% class %]'>[% date.format(d.time, datetime_format) %]</td>
+        <td class='[% class %]'>[% format_date(d.time, datetime_format) %]</td>
         [% IF d.service_description %]
         [% SET status = 'OK'       IF d.state == 0 %]
         [% SET status = 'WARNING'  IF d.state == 1 %]

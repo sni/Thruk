@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
-use Date::Calc qw/Localtime Mktime Monday_of_Week Week_of_Year Today/;
+use Date::Calc qw/Localtime Today/;
 use Date::Manip;
 
 
@@ -167,8 +167,28 @@ returns a correct uri
 =cut
 sub uri {
     my $c = shift;
+    carp("no c") unless defined $c;
     my $uri = $c->request->uri();
     $uri =~ s/&/&amp;/gmx;
+    return $uri;
+}
+
+
+########################################
+
+=head2 short_uri
+
+  short_uri($c)
+
+returns a correct uri but only the url part
+
+=cut
+sub short_uri {
+    my $c = shift;
+    my $uri = uri_with($c, {
+        reload_nav => 'undef',
+    });
+    $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
     return $uri;
 }
 
@@ -200,6 +220,7 @@ sub uri_with {
     }
     return $uri;
 }
+
 
 ########################################
 
@@ -233,6 +254,22 @@ sub escape_quotes {
     $text =~ s/&amp;gt;/>/gmx;
     $text =~ s/&amp;lt;/</gmx;
     return $text;
+}
+
+
+########################################
+
+=head2 xml_escape
+
+  xml_escape($text)
+
+returns an escaped string for xml output
+
+=cut
+sub xml_escape {
+    my $text = shift;
+
+    return HTML::Entities::encode($text, '<>&');
 }
 
 

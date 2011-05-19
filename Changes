@@ -1,5 +1,101 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.0.3   Thu May 12 20:05:16 CEST 2011
+          - fixed problem with some chars in excel export
+          - added show_long_plugin_output option
+
+1.0.2   Tue May 10 11:50:44 CEST 2011
+          - use host address for searches
+          - fixed executable SSIs with multiple lines of output
+
+1.0.1   Mon May  9 10:22:57 CEST 2011
+          - fixed link target when using frames
+
+1.0.0   Sun May  8 23:25:18 CEST 2011
+          - added bookmarks
+
+0.94.4  Sun Mai 01 12:57:43 CEST 2011
+          - view feedback icon when changing pnp images
+
+0.94.3  Sat Apr 30 14:40:28 CEST 2011
+          - view feedback icon when changing pnp images
+
+0.94.2  Thu Apr 28 00:05:17 CEST 2011
+          - added regular expression filter for host/servicegroups
+
+0.94.1  Tue Apr 26 13:02:37 CEST 2011
+          - fixed small design issues
+          - fixed page scrolling when using cursor keys in search
+
+0.94    Mon Apr 25 13:09:57 CEST 2011
+          - added more menu control functions
+          - fixed small design issues
+          - fixed shinken impacts
+
+0.92    Sun Apr 17 20:15:13 CEST 2011
+          - added Thruk theme
+          - added config tool for cgi.cfg and thruk.conf
+          - added logo_path_prefix option
+          - added state change filter
+          - sidebar search autosubmits on select
+          - fixed problem with "delete all downtimes" link
+
+0.90    Sun Mar 27 22:52:23 CET 2011
+          - made style selectable within filter
+          - added inline pnp graphs
+          - added wait feature when rescheduling checks
+          - Nuvola theme saves collapsed state of menu
+          - fixed themes
+            - removed useless scrollbar in Nuvola theme
+            - fixed jumping rows in Nuvola theme
+
+0.86    Sun Mar 20 19:24:34 CET 2011
+          - added new problems view
+          - added new option 'check_local_states'
+          - added optional check for remote backend status by local backends
+          - fixed themes
+            - removed useless scrollbar in Nuvola theme
+            - removed margin from Wakizashi
+            - fixed jumping rows in Nuvola theme
+            - fixed jumping status in Vautour theme
+          - fixed ajax autocomplete
+          - fixed paging on config page
+          - fixed ajax search in menu when using theme Vautour (Vincent Besancon)
+
+0.84    Mon Mar 14 16:49:56 CET 2011
+          - configurable plugins path
+          - added missing image for the Nuvola theme
+          - fixed tmp_path option
+          - fixed accessing logfiles from changing backends
+          - fixed host totals when using servicegroup filter
+
+0.82.1  Wed Feb  9 15:27:54 CET 2011
+          - fixed encoding problem with french date format
+
+0.82    Mon Feb  7 23:40:50 CET 2011
+          - fixed excel export with special characters in plugin output
+          - fixed Undefined subroutine &FCGI::ProcManager::MaxRequestsThruk::self_or_default error
+
+0.80    Sun Jan 30 14:07:49 CET 2011
+          - fixed backends using groups authentication
+          - fixed parsing of resource.cfg when macros are used twice
+          - fixed macro expansion when using commands like check_test!
+
+0.78.2  Tue Jan 18 10:29:08 CET 2011
+          - minor fixes for OMD integration
+          - fixed url for pager when using thruk with url prefix
+
+0.78.1  Tue Jan 18 10:29:08 CET 2011
+          - fixed macro expansion
+
+0.78    Sun Jan 16 14:44:55 CET 2011
+          - added new Theme (Wakizashi, thanks Jean)
+          - added root problems plugin (thanks Jean) *shinken backend only
+          - added new config option for default statusmap settings
+          - added new config option title_prefix
+          - fixed problem with custom timerange for availability reports
+          - fixed minor problems when using the shinken backend
+
 0.76.1  Wed Dec 29 11:28:03 CET 2010
           - fixed error when host/service has no command defined
 

@@ -1,0 +1,31 @@
+[% WRAPPER _conf_frame.tt %]
+
+<div align="center">
+
+  <table border="0" class='data confTable'>
+    <tr>
+      <th class='data conftoolheader'>Module</th>
+      <th class='data conftoolheader'>Description</th>
+    </tr>
+    [% IF conf_config.exists('thruk') %]
+    <tr>
+      <td class='dataVar'><a href="conf.cgi?type=thruk">Thruk Settings</a></td>
+      <td class='dataVal'>Thruks settings from the thruk_local.conf</td>
+    </tr>
+    [% END %]
+    [% IF conf_config.exists('cgi.cfg') %]
+    <tr>
+      <td class='dataVar'><a href="conf.cgi?type=cgi">CGI &amp; Access</a></td>
+      <td class='dataVal'>Change CGI and access settings from your cgi.cfg</td>
+    </tr>
+    [% END %]
+    [% IF conf_config.exists('cgi.cfg') || c.config.exists('htpasswd') %]
+    <tr>
+      <td class='dataVar'><a href="conf.cgi?type=users">User settings</a></td>
+      <td class='dataVal'>User settings, password and permissions</td>
+    </tr>
+    [% END %]
+  </table>
+</div>
+
+[% END %]

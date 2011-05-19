@@ -1,7 +1,8 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 511;
+use Test::More tests => 747;
+use JSON::XS;
 
 BEGIN {
     use lib('t');
@@ -35,6 +36,10 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=4&hostgroup=all&sorttype=1',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&sortoption=6&hostgroup=all&sorttype=1',
 
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostoverview',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostsummary',
+    '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostgrid',
+
 # Services
     '/thruk/cgi-bin/status.cgi?host=all',
     '/thruk/cgi-bin/status.cgi?host=does_not_exist',
@@ -57,6 +62,11 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=summary',
     '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=grid',
     '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=overview',
+
+    '/thruk/cgi-bin/status.cgi?servicegroup=all&style=serviceoverview',
+    '/thruk/cgi-bin/status.cgi?servicegroup=all&style=servicesummary',
+    '/thruk/cgi-bin/status.cgi?servicegroup=all&style=servicegrid',
+
 # Problems
     '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28',
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28',
@@ -66,6 +76,25 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$hostgroup,
     '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$servicegroup,
+
+# Styles
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?style=hostoverview&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?style=hostsummary&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?style=hostgrid&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?style=detail&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?style=serviceoverview&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?style=servicesummary&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?style=servicegrid&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,
+
+    '/thruk/cgi-bin/status.cgi?style=detail&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
+    '/thruk/cgi-bin/status.cgi?style=serviceoverview&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
+    '/thruk/cgi-bin/status.cgi?style=servicesummary&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
+    '/thruk/cgi-bin/status.cgi?style=servicegrid&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
+    '/thruk/cgi-bin/status.cgi?style=hostdetail&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
+    '/thruk/cgi-bin/status.cgi?style=hostoverview&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
+    '/thruk/cgi-bin/status.cgi?style=hostsummary&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
+    '/thruk/cgi-bin/status.cgi?style=hostgroup&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.$host,
 
 # Bugs
     # Paging all when nothing found -> div by zero
@@ -97,7 +126,7 @@ $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'          => $url,
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/x-msexcel',
     );
 }
@@ -106,14 +135,18 @@ $pages = [
 # json export
     '/thruk/cgi-bin/status.cgi?host=all&format=json',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json',
-    '/thruk/cgi-bin/status.cgi?host=all&format=json&column=host_name&column=description&limit=5',
+    '/thruk/cgi-bin/status.cgi?host=all&format=json&column=name&column=state&limit=5',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&format=json&column=name',
+    '/thruk/cgi-bin/status.cgi?format=search',
 ];
 
 for my $url (@{$pages}) {
-    TestUtils::test_page(
+    my $page = TestUtils::test_page(
         'url'          => $url,
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/json; charset=utf-8',
     );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'ARRAY', "json result is an array");
+    ok(scalar @{$data} > 0, "json result has content");
 }

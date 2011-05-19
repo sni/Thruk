@@ -1,0 +1,147 @@
+﻿[% USE date %]
+[% PROCESS _header.tt
+  js = url_prefix _ "thruk/javascript/overlib.js"
+%]
+
+    <table border="0" width="100%">
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% PROCESS _infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%"></td>
+        <td align="right" valign="bottom" width="33%">
+          [% IF show_context_help %]
+          <br><a href='[% url_prefix %]thruk/docs/outagespbimp' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          [% END %]
+        </td>
+      </tr>
+    </table>
+    <div align="center">
+      <br>
+      <div class='statusTitle'>Problems <img src="[% url_prefix %]thruk/themes/[% theme %]/images/problem.png" alt="problems"></div>
+      <br>
+
+    [% FOREACH crit IN criticities %]
+    [% IF crit.nb != 0 %]
+    <center>
+    <div class='statusTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Criticity : [% crit.text %]"></div>
+
+      <table border="0" class='status'>
+        <tr>
+          <th class='status'>Type</th>
+          <th class='status'>Host</th>
+          <th class='status'>Description</th>
+          <th class='status'>State</th>
+          <th class='status'>Notes</th>
+          <th class='status'>State Duration</th>
+          <th class='status'># Hosts Affected</th>
+          <th class='status'># Services Affected</th>
+          <th class='status'>Actions</th>
+        </tr>
+
+        [% SET num = 0 %]
+        [% FOREACH host = hst_pbs %]
+        [% IF host.criticity == crit.value %]
+
+        [% IF host.has_been_checked == 0 %]
+          [% statusClass='statusHOSTPENDING' %]
+          [% status ='PENDING' %]
+        [% ELSIF host.state == 0 %]
+          [% statusClass='statusHOSTUP' %]
+          [% status ='UP' %]
+        [% ELSIF host.state == 1 %]
+          [% statusClass='statusHOSTDOWN' %]
+          [% status ='DOWN' %]
+        [% ELSIF host.state == 2 %]
+          [% statusClass='statusHOSTUNREACHABLE' %]
+          [% status ='UNREACHABLE' %]
+        [% END %]
+
+        [% SET num = num + 1 %]
+        [% SET class = 'statusOdd'  IF num % 2 == 1 %]
+        [% SET class = 'statusEven' IF num % 2 == 0 %]
+        <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
+          <td class='[% class %]'>Host</td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>[% host.name %]</a></td>
+          <td class='[% class %]'></td>
+          <td class='[% statusClass %]'>[% status %]</td>
+          <td class='[% class %]'>
+            [% PROCESS _status_host_attributes.tt hostprefix="" host=host host_comment_count=host.comment_count with_status=0 %]
+          </td>
+          <td class='[% class %]'>[% duration(date.now - host.last_state_change) %]</td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]'>[% host.affected_hosts %]</a></td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]'>[% host.affected_services %]</a></td>
+          <td class='[% class %]'>
+            <a href='status.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+            [% IF use_feature_statusmap %]
+            <a href='statusmap.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
+            [% END %]
+            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
+            [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
+            <a href='history.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+            <a href='notifications.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
+        </tr>
+        [% END %]
+        [% END %]
+
+        [% IF srv_pbs.size >= 1 %]
+        <tr><td colspan=9></td></tr>
+        [% END %]
+
+        [% FOREACH srv = srv_pbs %]
+        [% IF srv.criticity == crit.value %]
+
+
+        [% IF srv.has_been_checked == 0 %]
+          [% SET s_status = 'statusPENDING' %]
+          [% SET s_status_text = 'PENDING' %]
+        [% ELSIF srv.state == 0 %]
+          [% SET s_status = 'statusOK' %]
+          [% SET s_status_text = 'OK' %]
+        [% ELSIF srv.state == 1 %]
+          [% SET s_status = 'statusWARNING' %]
+          [% SET s_status_text = 'WARNING' %]
+        [% ELSIF srv.state == 2 %]
+          [% SET s_status = 'statusCRITICAL' %]
+          [% SET s_status_text = 'CRITICAL' %]
+        [% ELSIF srv.state == 3 %]
+          [% SET s_status = 'statusUNKNOWN' %]
+          [% SET s_status_text = 'UNKNOWN' %]
+        [% END %]
+
+        [% SET num = num + 1 %]
+        [% SET class = 'statusOdd'  IF num % 2 == 1 %]
+        [% SET class = 'statusEven' IF num % 2 == 0 %]
+        <tr class='[% class %]'[% IF loop.first %] id="dfl_r0"[% END %]>
+          <td class='[% class %]'>Service</td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% srv.host_name | uri %]&amp;backend=[% srv.peer_key %]'>[% srv.host_name %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description %]&amp;backend=[% srv.peer_key %]'>[% srv.description %]</a></td>
+          <td class='[% s_status %]'>[% s_status_text %]</td>
+          <td class='[% class %]'>
+            [% PROCESS _status_service_attributes.tt service=srv service_comment_count=srv.comment_count %]
+          </td>
+          <td class='[% class %]'>[% duration(date.now - srv.last_state_change) %]</td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_hosts %]</a> </td>
+          <td class='[% class %]'><a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]'>[% srv.affected_services %]</a></td>
+          <td class='[% class %]'>
+            <a href='status.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View status detail for this host' title='View status detail for this host' width="20" height="20"></a>
+            [% IF use_feature_statusmap %]
+            <a href='statusmap.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
+            [% END %]
+            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
+            [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
+            <a href='history.cgi?host=[% host.name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+            <a href='notifications.cgi?host=[% host.name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
+        </tr>
+        [% END %]
+        [% END %]
+      </table>
+      </center>
+
+    [% END %]
+    [% END %]
+
+    </div>
+    <br><br>
+
+[% PROCESS _footer.tt %]

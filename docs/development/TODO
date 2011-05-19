@@ -1,19 +1,12 @@
 Todo List:
 =========================================================
 
-for version 1.0
-general
-    - add backend name to logs
-    - add go back button on error page
-    - use title for quick downtimes popups
-    - add output filter plugins (ex.: check_multi, disk checks)
-    - support more macros
-
 extinfo:
     - finish performance data on extinfo type 4
 
 config:
     - add missing values
+    - add excel export button
 
 avail:
     - check availability calculation on multibackend (restarts)
@@ -43,12 +36,6 @@ livestatus:
                 Service Dependencies
                 Service Escalations
 
-Known Bugs:
-    - FastCGI: server "/tmp/thruk_fastcgi.fcgi" stderr: Undefined subroutine
-      &FCGI::ProcManager::MaxRequestsThruk::self_or_default called at
-      /home/thruk/Thruk/script/../lib/FCGI/ProcManager/MaxRequestsThruk.pm
-    - fix totals in status page
-
 =========================================================
 ideas for after 1.0
 
@@ -63,11 +50,18 @@ general:
     - add ability to display contacts for machine
     - uc,lc option for auth user -> monitoring
     - add context sensitive help
-    - bookmarks
-    - use livestatus wait feature where possible
     - page by attribute a,b,c,d,e...z
-    - graph about how checks are scheduled in the next minutes
     - add extra grapher url
+    - graph about how checks are scheduled in the next minutes
+    - add output filter plugins (ex.: check_multi, disk checks)
+    - add backend name to logs
+    - add go back button on error page
+    - use title for quick downtimes popups
+    - support more macros
+    - nice error message when using dates > 2038
+    - multiple lines for comment/downtime input
+    - include comments in export
+
 
 
 reports:
@@ -79,8 +73,6 @@ reports:
       to parse logfiles twice
 
 status:
-    - proper search
-        save searches (like bookmarks would do it)
     - add flexible selector, ex.: select multiple hostgroups by comma
     - host table map with worst service state as color
 

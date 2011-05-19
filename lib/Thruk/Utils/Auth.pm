@@ -109,10 +109,16 @@ sub get_auth_filter {
     elsif($type eq 'log') {
         my @filter;
 
+        if(    $c->check_user_roles('authorized_for_all_services')
+           and $c->check_user_roles('authorized_for_all_hosts')
+           and $c->check_user_roles('authorized_for_system_information')) {
+            return;
+        }
+
         # service log entries
         if($c->check_user_roles('authorized_for_all_services')) {
             # allowed for all services related log entries
-            push @filter, { 'current_service_description' => { '!=' => undef } };
+            push @filter, { 'service_description' => { '!=' => undef } };
         }
         else {
             push @filter, { '-and' => [
@@ -147,12 +153,18 @@ sub get_auth_filter {
         # combine all filter by OR
         return('-or' => \@filter);
     }
-
-    else {
-        croak("type $type not supported");
+    elsif($type eq 'contact') {
+        if($c->check_user_roles('authorized_for_configuration_information')) {
+            return();
+        }
+        return('name' => { '>=' => $c->user->get('username') });
     }
 
-    croak("cannot authorize query");
+    else {
+        confess("type $type not supported");
+    }
+
+    confess("cannot authorize query");
     return;
 }
 

@@ -4,7 +4,7 @@
 [% SET peer_key      = host.peer_key %]
 [% SET program_start = pi_detail.$peer_key.program_start %]
 
-    <table border="0" width="100%">
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]
@@ -12,11 +12,9 @@
             <tr>
               <td class='linkBox'>
                 <a href='status.cgi?host=[% host.name | uri %]'>View Status Detail For This Host</a><br>
-                [% IF host.childs %]<a href='status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]'>View Childs Hosts For This Host</a><br>[% END %]
-		[% IF show_impacts_link %]
-		<a href='status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>View Impacts of this root problem</a><br>[% END %]
-		[% IF show_rootproblems_link %]
-		<a href='status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]'>View the root problems of this impact</a><br>[% END %]
+                [% IF host.childs.size > 0 %]<a href='status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]'>View Childs Hosts For This Host</a><br>[% END %]
+                [% IF show_impacts_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]'>View Impacts For This Problem</a><br>[% END %]
+                [% IF show_rootproblems_link %]<a href='shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]'>View Root Problem For This Impact</a><br>[% END %]
                 <a href='history.cgi?host=[% host.name | uri %]'>View Alert History For This Host</a><br>
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'>View Trends For This Host</a><br>[% END %]
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name | uri %]'>View Alert Histogram For This Host</a><br>[% END %]
@@ -53,25 +51,27 @@
             [% FOREACH parent IN host.parents.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?host=[% parent | uri %]'>[% parent %]</a>[% END %]
           </div><br>
           [% END %]
+          [% IF host.groups.size > 0 %]
           <div class='data'>Member of</div>
           <div class='dataTitle'>
             [% FOREACH group IN host.groups.sort %][% IF !loop.first() %], [% END %]<a href='status.cgi?hostgroup=[% group | uri %]&amp;style=overview'>[% group %]</a>[% END %]
           </div><br>
+          [% END %]
 
           <div class='data'>[% host.address %]</div>
           [% IF host.icon_image_expanded %]
-          <img src='[% url_prefix %]thruk/themes/[% theme %]/images/logos/[% host.icon_image_expanded %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
+          <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' border="0" alt='[% host.icon_image_alt %]' title='[% host.icon_image_alt %]'><br clear="all">
           [% IF host.icon_image_alt %]<font size="-1"><i>( [% host.icon_image_alt %] )</i></font>[% END %]
           [% END %]
           [% IF host.notes_expanded %]<p>[% host.notes_expanded %]</p>[% END %]
         </td>
-        <td align="right" valign="bottom" width="33%">
+        <td align="right" valign="bottom" width="33%" class="notesCell">
           <table border='0'>
           [% IF enable_shinken_features %]
           <tr>
             <td align='right'>
               <div class='dataTitle'>Criticity : [% host.criticity %]/5
-              <img src="[% url_prefix %]thruk/plugins/outagespbimp/images/criticity_[% host.criticity %].png">
+              <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% host.criticity %].png" alt="Criticity : [% host.criticity %]/5">
               </div>
             </td>
           </tr>
@@ -107,16 +107,16 @@
     [% PROCESS _message.tt %]
 
     <div align="center">
-      <table border="0" cellpadding="0" width="100%">
+      <table border="0" cellpadding="0" width="100%" class="extdetails">
         <tr>
           <td align="center" valign="top" class='stateInfoPanel'>
             <div class='dataTitle'>Host State Information</div>
             <table border="0">
               <tr>
                 <td>
-                  <table border="1" cellspacing="0" cellpadding="0" class="data">
+                  <table border="1" cellspacing="0" cellpadding="0" class="data extdetails2">
                     <tr>
-                      <td class='stateInfoTable1'>
+                      <td class='stateInfoTable1 extdetails'>
                         <table border="0">
                           <tr>
                             <td class='dataVar'>Host Status:</td>
@@ -138,7 +138,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar' valign='top'>Status Information:</td>
-                            <td class='dataVal'>
+                            <td class='dataVal detail_plugin_output'>
                               [% IF host.has_been_checked == 0 %]host has not been checked yet[% END %]
                               [% IF escape_html_tags %][% html_escape(host.plugin_output) %][% ELSE %][% host.plugin_output %][% END %]
                               [% IF host.long_plugin_output %]
@@ -239,9 +239,9 @@
               </tr>
               <tr>
                 <td>
-                  <table border="1" cellspacing="0" cellpadding="0" class="data">
+                  <table border="1" cellspacing="0" cellpadding="0" class="data checkstatus">
                     <tr>
-                      <td class='stateInfoTable2'>
+                      <td class='stateInfoTable2 checkstatus'>
                         <table border="0">
                           <tr>
                             <td class='dataVar'>Active Checks:</td>
@@ -317,7 +317,7 @@
               <tr>
                 <td align="center" valign="top" class='commandPanel'>
                   <div class='commandTitle'>Host Commands</div>
-                  <table border='1' cellpadding="0" cellspacing="0" class="command">
+                  <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel">
                     <tr>
                       <td>
                         [% UNLESS c.check_cmd_permissions('host', host.name) %]
@@ -464,6 +464,15 @@
             </table>
           </td>
         </tr>
+
+        [% IF pnp_url %]
+        <tr>
+          <td colspan="2" align="center">
+          [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
+          </td>
+        </tr>
+        [% END %]
+
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
           [% IF c.check_cmd_permissions('host', host.name) %]
@@ -503,7 +512,7 @@
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
                     <td class='[% class %]'>[% IF comment.expires %][% date_format(c, comment.expires_time) %][% ELSE %]N/A[% END %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+                    <td class='[% class %]'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]
@@ -529,7 +538,7 @@
                 <td class='comment'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]' class='comment'>Add a new downtime</a></td>
                 [% IF downtimes %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% uri(c) %]' class='comment'>Delete all downtimes</a></td>
+                <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% uri(c) | uri %]' class='comment'>Delete all downtimes</a></td>
                 [% END %]
               </tr>
             </table>
@@ -557,7 +566,7 @@
                     <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
                     <td class='[% class %]'>[% downtime.id %]</td>
                     <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
-                    <td><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% downtime.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>
+                    <td class='[% class %]'><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% downtime.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>
                   </tr>
                   [% END %]
                 [% ELSE %]
@@ -579,17 +588,20 @@
             <br>
             <a name="command" id="command"></a>
             <div class='commentTitle'>Configuration Information</div>
-            <table border="0">
+            <table border="0" class="commandPanel">
               <tr>
                 <th class='comment' nowrap>Check Command</th>
-                <td class='comment'><pre class="no_margin">[% command.line %]</pre></td>
+                <td class='comment'>
+                <pre class="no_margin command_line config_info">[% command.line | html %]</pre></td>
               </tr>
               <tr>
                 <th class='comment' nowrap>Expanded Command</th>
-                <td class='comment'><i>
-                  <b>Note:</b> only the most common macros will be replaced:</i>
+                <td class='comment'>
+                  [% IF command.note %]
+                  <i class="commandNote"><b>Note:</b> [% command.note %]</i>
                   <br><br>
-                  <pre class="no_margin command_line">[% command.line_expanded %]</pre>
+                  [% END %]
+                  <pre class="no_margin command_line config_info">[% command.line_expanded | html %]</pre>
                 </td>
               </tr>
             </table>

@@ -20,6 +20,10 @@ body {
   background: #ededed;
 }
 
+body.navbar {
+  text-align: left;
+}
+
 img {
   border: 0;
 }

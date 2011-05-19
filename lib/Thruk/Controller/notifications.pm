@@ -50,7 +50,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
     if(!defined $start or $start == 0 or !defined $end or $end == 0) {
         # start with today 00:00
-        $start = Thruk::Utils::parse_date($c, "today 00:00");
+        my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
+        $start = POSIX::mktime(0, 0, 0, $mday, $mon, $year);
         $end   = $start + $timeframe;
     }
     if($archive eq '+1') {

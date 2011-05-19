@@ -34,35 +34,12 @@ sub read_navigation {
 
     my $file = $c->config->{'project_root'}.'/menu.conf';
     $file    = $c->config->{'project_root'}.'/menu_local.conf' if -e $c->config->{'project_root'}.'/menu_local.conf';
-
-    # (dev,ino,mode,nlink,uid,gid,rdev,size,atime,mtime,ctime,blksize,blocks)
-    my @menu_conf_stat = stat($file);
-    my $last_stat = $c->cache->get('menu_conf_stat');
-    if(!defined $last_stat
-       or $last_stat->[1] != $menu_conf_stat[1] # inode changed
-       or $last_stat->[9] != $menu_conf_stat[9] # modify time changed
-      ) {
-        $c->log->info("menu.conf has changed, updating...") if defined $last_stat;
-        $c->cache->set('menu_conf_stat', \@menu_conf_stat);
-
-        $Thruk::Utils::Menu::c          = $c;
-        $Thruk::Utils::Menu::navigation = [];
-
-        ## no critic
-        eval(read_file($file));
-        ## use critic
-        if($@) {
-            $c->log->error("error while loading navigation from ".$file.": ".$@);
-            confess($@);
-        }
-
-        $c->stash->{'navigation'}  = $Thruk::Utils::Menu::navigation;
-        $c->cache->set('navigation', $Thruk::Utils::Menu::navigation);
-    } else {
-        # return cached version
-        $c->stash->{'navigation'}  = $c->cache->get('navigation');
-        return;
+    if(defined $ENV{'CATALYST_CONFIG'}) {
+        $file = $ENV{'CATALYST_CONFIG'}.'/menu.conf'       if -e $ENV{'CATALYST_CONFIG'}.'/menu.conf';
+        $file = $ENV{'CATALYST_CONFIG'}.'/menu_local.conf' if -e $ENV{'CATALYST_CONFIG'}.'/menu_local.conf';
     }
+
+    _renew_navigation($c, $file);
 
     $c->stats->profile(end => "Utils::Menu::read_navigation()");
 
@@ -121,10 +98,10 @@ sub add_sub_link {
     my %link = @_;
     my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     my $last_link    = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
-    $link{'target'} = _get_menu_target() unless defined $link{'target'};
-    $link{'links'}  = [] unless defined $link{'links'};
-    $link{'href'}   = _get_menu_link($link{'href'});
-    $link{'name'}   = "" unless defined $link{'name'};
+    $link{'target'}  = _get_menu_target() unless defined $link{'target'};
+    $link{'links'}   = [] unless defined $link{'links'};
+    $link{'href'}    = _get_menu_link($link{'href'});
+    $link{'name'}    = "" unless defined $link{'name'};
     push(@{$last_link->{'links'}}, \%link);
     return;
 }
@@ -163,7 +140,7 @@ add a new search to the last section
 =cut
 sub add_search {
     my %search = @_;
-    my $last_section = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
+    my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
     $search{'search'} = 1;
     $search{'target'} = _get_menu_target() unless defined $search{'target'};
     $search{'href'}   = _get_menu_link($search{'href'});
@@ -171,6 +148,130 @@ sub add_search {
     return;
 }
 
+##############################################
+
+=head2 insert_item
+
+  insert_item()
+
+add a new item in existing category
+
+=cut
+sub insert_item {
+    my($category, $item) = @_;
+
+    $Thruk::Utils::Menu::additional_items = [] unless defined $Thruk::Utils::Menu::additional_items;
+    push @{$Thruk::Utils::Menu::additional_items}, [ $category, $item ];
+
+    return 1;
+}
+
+##############################################
+
+=head2 remove_item
+
+  remove_item()
+
+removes an existing item from an existing category
+
+=cut
+sub remove_item {
+    my($category, $item_name) = @_;
+
+    $Thruk::Utils::Menu::removed_items = {} unless defined $Thruk::Utils::Menu::removed_items;
+    $Thruk::Utils::Menu::removed_items->{$category}->{$item_name} = 1;
+
+    return 1;
+}
+
+##############################################
+
+=head2 _renew_navigation
+
+  _renew_navigation()
+
+returns the current prefered target
+
+=cut
+sub _renew_navigation {
+    my($c, $file) = @_;
+
+    $Thruk::Utils::Menu::c          = $c;
+    $Thruk::Utils::Menu::navigation = [];
+
+    ## no critic
+    eval(read_file($file));
+    ## use critic
+    if($@) {
+        $c->log->error("error while loading navigation from ".$file.": ".$@);
+        confess($@);
+    }
+
+    $c->stash->{user_menu_items} = {};
+    my $user_items;
+    my $userdata = Thruk::Utils::get_user_data($c);
+    $c->stash->{user_data} = $userdata;
+    if(defined $userdata and defined $userdata->{'bookmarks'}) {
+        for my $section (keys %{$userdata->{'bookmarks'}}) {
+            for my $item (@{$userdata->{'bookmarks'}->{$section}}) {
+                my $item = {
+                        name => $item->[0],
+                        href => $item->[1]
+                };
+                push @{$user_items}, [ $section, $item ];
+            }
+        }
+    }
+
+    # add some more items
+    if(defined $Thruk::Utils::Menu::additional_items) {
+        for my $to_add (@{$Thruk::Utils::Menu::additional_items}, @{$user_items}) {
+            my $section       = _get_section_by_name($to_add->[0], 1);
+            my $link          = $to_add->[1];
+
+            # only visible for some roles?
+            if(defined $link->{'roles'}) {
+                my $has_access = 1;
+                my @roles = ref $link->{'roles'} eq 'ARRAY' ? @{$link->{'roles'}} : [ $link->{'roles'} ];
+                for my $role (@roles) {
+                    $has_access = 0 unless $c->check_user_roles( $role );
+                }
+                next unless $has_access;
+            }
+
+            $link->{'links'}  = [] unless defined $link->{'links'};
+            $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
+            $link->{'href'}   = _get_menu_link($link->{'href'});
+            push(@{$section->{'links'}}, $link);
+        }
+    }
+
+    # remove unwanted items
+    if(defined $Thruk::Utils::Menu::removed_items) {
+        for my $section_name (keys %{$Thruk::Utils::Menu::removed_items}) {
+            my $section = _get_section_by_name($section_name) || next;
+            for my $item_name (keys %{$Thruk::Utils::Menu::removed_items->{$section_name}}) {
+                my $new_links = [];
+                for my $link (@{$section->{'links'}}) {
+                    push @{$new_links}, $link unless $link->{'name'} eq $item_name
+                }
+                $section->{'links'} = $new_links;
+            }
+        }
+    }
+
+    # remove empty sections
+    my $new_nav = [];
+    for my $section (@{$Thruk::Utils::Menu::navigation}) {
+        if(scalar @{$section->{'links'}} > 0) {
+            push @{$new_nav}, $section;
+        }
+    }
+
+    $c->stash->{'navigation'}  = $new_nav;
+
+    return;
+}
 
 ##############################################
 
@@ -184,7 +285,7 @@ returns the current prefered target
 sub _get_menu_target {
     my $c = $Thruk::Utils::Menu::c;
 
-    return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'};
+    return $c->{'stash'}->{'target'} if defined $c->{'stash'}->{'target'} and $c->{'stash'}->{'target'} ne '';
     if($c->{'stash'}->{'use_frames'}) {
         return("main");
     }
@@ -208,6 +309,39 @@ sub _get_menu_link {
     return $c->stash->{'url_prefix'}.substr($link,1) if $link =~ m/^\/thruk\//mx;
     return $link;
 }
+
+
+##############################################
+
+=head2 _get_section_by_name
+
+  _get_section_by_name()
+
+returns a section by name
+
+=cut
+sub _get_section_by_name {
+    my $name   = shift;
+    my $create = shift;
+
+    for my $section (@{$Thruk::Utils::Menu::navigation}) {
+        return $section if $section->{'name'} eq $name;
+    }
+
+    if($create) {
+        my $section = {
+            name  => $name,
+            links => [],
+            icon  => '',
+        };
+        push @{$Thruk::Utils::Menu::navigation}, $section;
+        return $section;
+    }
+
+    return;
+}
+
+##############################################
 
 1;
 

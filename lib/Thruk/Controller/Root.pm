@@ -6,7 +6,6 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use URI::Escape;
-use Thruk::Utils::Livestatus;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -38,12 +37,90 @@ begin, running at the begin of every req
 sub begin : Private {
     my( $self, $c ) = @_;
 
-    # Prefix
-    $c->stash->{'url_prefix'} = $c->config->{'url_prefix'} || '/';
+    # defaults
+    $c->config->{'url_prefix'} = exists $c->config->{'url_prefix'} ? $c->config->{'url_prefix'} : '/';
+    my $defaults = {
+        use_ajax_search                 => 1,
+        ajax_search_hosts               => 1,
+        ajax_search_hostgroups          => 1,
+        ajax_search_services            => 1,
+        ajax_search_servicegroups       => 1,
+        shown_inline_pnp                => 1,
+        use_wait_feature                => 1,
+        use_frames                      => 1,
+        use_strict_host_authorization   => 0,
+        can_submit_commands             => 1,
+        group_paging_overview           => '*3, 10, 100, all',
+        group_paging_grid               => '*5, 10, 50, all',
+        group_paging_summary            => '*10, 50, 100, all',
+        default_theme                   => 'Thruk',
+        datetime_format                 => '%Y-%m-%d  %H:%M:%S',
+        datetime_format_long            => '%a %b %e %H:%M:%S %Z %Y',
+        datetime_format_today           => '%H:%M:%S',
+        datetime_format_log             => '%B %d, %Y  %H',
+        datetime_format_trends          => '%a %b %e %H:%M:%S %Y',
+        title_prefix                    => '',
+        use_pager                       => 1,
+        start_page                      => $c->config->{'url_prefix'}.'thruk/main.html',
+        documentation_link              => $c->config->{'url_prefix'}.'thruk/docs/index.html',
+        show_notification_number        => 1,
+        strict_passive_mode             => 1,
+        show_full_commandline           => 1,
+        use_feature_statusmap           => 0,
+        use_feature_statuswrl           => 0,
+        use_feature_histogram           => 0,
+        use_new_search                  => 1,
+        all_problems_link               => $c->config->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",
+        statusmap_default_groupby       => 'address',
+        statusmap_default_type          => 'table',
+        show_long_plugin_output         => 'popup',
+        info_popup_event_type           => 'onclick',
+        info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
+        cmd_quick_status                => {
+                    reschedule             => 1,
+                    downtime               => 1,
+                    comment                => 1,
+                    acknowledgement        => 1,
+                    active_checks          => 1,
+                    notifications          => 1,
+                    submit_result          => 1,
+        },
+        cmd_defaults                    => {
+                    ahas                   => 0,
+                    broadcast_notification => 0,
+                    force_check            => 0,
+                    force_notification     => 0,
+                    send_notification      => 1,
+                    sticky_ack             => 1,
+                    persistent_comments    => 1,
+                    persistent_ack         => 0,
+                    ptc                    => 0,
+        },
+        command_disabled                    => [],
+        var_path                            => './var',
+    };
+    for my $key (keys %{$defaults}) {
+        $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
+    }
+
+    # make some configs available in stash
+    for my $key (qw/url_prefix title_prefix use_pager start_page documentation_link
+                  use_feature_statusmap use_feature_statuswrl use_feature_histogram
+                  datetime_format datetime_format_today datetime_format_long datetime_format_log
+                  use_new_search ajax_search show_notification_number strict_passive_mode
+                  show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
+                /) {
+        $c->stash->{$key} = $c->config->{$key};
+    }
+
+    # username?
+    if($c->user_exists) {
+        $c->stash->{'remote_user'}  = $c->user->get('username');
+    }
+    $c->stash->{'user_data'} = { bookmarks => {} };
 
     # frame options
     my $use_frames = $c->config->{'use_frames'};
-    $use_frames = 1 unless defined $use_frames;
     my $show_nav_button = 1;
     if( exists $c->{'request'}->{'parameters'}->{'nav'} and $c->{'request'}->{'parameters'}->{'nav'} ne '' ) {
         if( $c->{'request'}->{'parameters'}->{'nav'} ne '1' ) {
@@ -62,26 +139,12 @@ sub begin : Private {
     $c->stash->{'reload_nav'}         = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
 
     # use pager?
-    $c->stash->{'use_pager'}          = $c->config->{'use_pager'} || 1;
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
-
-    $c->stash->{'start_page'}         = $c->config->{'start_page'}         || $c->stash->{'url_prefix'}.'thruk/main.html';
-    $c->stash->{'documentation_link'} = $c->config->{'documentation_link'} || $c->stash->{'url_prefix'}.'thruk/docs/index.html';
-
-    # these features are not implemented yet
-    $c->stash->{'use_feature_statusmap'} = $c->config->{'use_feature_statusmap'} || 0;
-    $c->stash->{'use_feature_statuswrl'} = $c->config->{'use_feature_statuswrl'} || 0;
-    $c->stash->{'use_feature_histogram'} = $c->config->{'use_feature_histogram'} || 0;
 
     # enable trends if gd loaded
     if( $c->config->{'has_gd'} ) {
         $c->stash->{'use_feature_trends'} = 1;
     }
-
-    $c->stash->{'datetime_format'}       = $c->config->{'datetime_format'};
-    $c->stash->{'datetime_format_today'} = $c->config->{'datetime_format_today'};
-    $c->stash->{'datetime_format_long'}  = $c->config->{'datetime_format_long'};
-    $c->stash->{'datetime_format_log'}   = $c->config->{'datetime_format_log'};
 
     # which theme?
     my($param_theme, $cookie_theme);
@@ -92,42 +155,22 @@ sub begin : Private {
         my $theme_cookie = $c->request->cookie('thruk_theme');
         $cookie_theme = $theme_cookie->value if defined $theme_cookie->value and grep $theme_cookie->value, $c->config->{'themes'};
     }
-    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'} || 'Classic';
+    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
+    my $available_themes = Thruk::Utils::array2hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'});
+    $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
+    $c->stash->{'theme'} = $theme;
     if( defined $c->config->{templates_paths} ) {
         $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
     else {
         $c->stash->{additional_template_paths} = [ $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
     }
-    $c->stash->{'theme'} = $theme;
-
-    # new or classic search?
-    my $use_new_search = $c->config->{'use_new_search'};
-    $use_new_search = 1 unless defined $use_new_search;
-    $c->stash->{'use_new_search'} = $use_new_search;
-
-    # all problems link?
-    my $all_problems_link = $c->config->{'all_problems_link'};
-    if( !defined $all_problems_link ) {
-        $all_problems_link = $c->stash->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=detail&amp;hidesearch=1&amp;s0_hoststatustypes=12&amp;s0_servicestatustypes=31&amp;s0_hostprops=10&amp;s0_serviceprops=0&amp;s1_hoststatustypes=15&amp;s1_servicestatustypes=28&amp;s1_hostprops=10&amp;s1_serviceprops=10&amp;s1_hostprop=2&amp;s1_hostprop=8&amp;title=All%20Unhandled%20Problems";
-    }
-    $c->stash->{'all_problems_link'} = $all_problems_link;
+    $c->stash->{all_in_one_css} = 1 if $theme eq 'Thruk';
 
     if(exists $c->{'request'}->{'parameters'}->{'noheader'}) {
         $c->{'request'}->{'parameters'}->{'hidetop'}  = 1;
     }
     $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
-
-    $c->stash->{'ajax_search'} = $c->config->{'use_ajax_search'} || 1;
-
-    # status page settings
-    $c->stash->{'show_notification_number'} = $c->config->{'show_notification_number'} || 1;
-
-    # set strict passive mode
-    $c->stash->{'strict_passive_mode'} = $c->config->{'strict_passive_mode'} || 1;
-
-    # shinken mode?
-    $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'} || 0;
 
     # initialize our backends
     unless ( defined $c->{'db'} ) {
@@ -141,17 +184,35 @@ sub begin : Private {
         }
     }
 
+    my $target = $c->{'request'}->{'parameters'}->{'target'};
+    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
+        $c->stash->{'target'} = '_parent';
+    }
+
     # redirect to error page unless we have a connection
-    if( !defined $c->{'db'} and $c->request->action !~ m|thruk/\w+\.html|mx and $c->request->action ne 'thruk/docs' ) {
+    if(    !defined $c->{'db'}
+        or !defined $c->{'db'}->{'backends'}
+        or ref $c->{'db'}->{'backends'} ne 'ARRAY'
+        or scalar @{$c->{'db'}->{'backends'}} == 0 ) {
 
-        # do we have a deprecated config in use?
-        my $deprecated_conf = Thruk::Utils::Livestatus::get_livestatus_conf();
-        if( defined $deprecated_conf ) {
-            $c->log->error( "The <Component Monitoring::Livestatus> configuration is deprecated, please use '<Component Thruk::Backend>' instead.\nYour converted config would be:\n\n" . Thruk::Utils::Livestatus::convert_config($deprecated_conf) . "\nplease update your thruk_local.conf" );
-            return $c->detach("/error/index/20");
+        # return here for static content, no backend needed
+        if(   $c->request->action =~ m|thruk/\w+\.html|mx
+           or $c->request->action =~ m|thruk\\\/\w+\\.html|mx
+           or $c->request->action eq 'thruk$'
+           or $c->request->action eq 'thruk\\/docs\\/' ) {
+            $c->stash->{'no_auto_reload'} = 1;
+            return;
         }
-
         return $c->detach("/error/index/14");
+
+    }
+
+    # set check_local_states
+    unless(defined $c->config->{'check_local_states'}) {
+        $c->config->{'check_local_states'} = 0;
+        if(scalar @{$c->{'db'}->{'backends'}} > 1) {
+            $c->config->{'check_local_states'} = 1;
+        }
     }
 
     # when adding nav=1 to a url in frame mode, redirect to frame.html with this url
@@ -163,16 +224,9 @@ sub begin : Private {
         return $c->redirect($c->stash->{'url_prefix'}."thruk/frame.html?link=".uri_escape($path));
     }
 
-    my $target = $c->{'request'}->{'parameters'}->{'target'};
-    if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
-        $c->stash->{'target'} = '_parent';
-    }
-    $c->stash->{'navigation'} = "";
-    if( $c->config->{'use_frames'} == 0 ) {
-        Thruk::Utils::Menu::read_navigation($c);
-    }
-
-    $c->stash->{'show_full_commandline'} = $c->config->{'show_full_commandline'} || 0;
+    # icon image path
+    $c->config->{'logo_path_prefix'} = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/logos/';
+    $c->stash->{'logo_path_prefix'}  = $c->config->{'logo_path_prefix'};
 
     return 1;
 }
@@ -297,11 +351,10 @@ sub thruk_index : Regex('thruk$') {
 =head2 thruk_index_html
 
 page: /thruk/index.html
-# but if used not via fastcgi/apache, there is no way around
 
 =cut
 
-sub thruk_index_html : Regex('thruk\/index\.html$') {
+sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     unless ( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_main_html");
@@ -319,9 +372,11 @@ sub thruk_index_html : Regex('thruk\/index\.html$') {
     }
 
     $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
-    $c->stash->{'main'}     = '';
-    $c->stash->{'target'}   = '';
-    $c->stash->{'template'} = 'index.tt';
+    $c->stash->{'title'}          = $c->config->{'name'};
+    $c->stash->{'main'}           = '';
+    $c->stash->{'target'}         = '';
+    $c->stash->{'template'}       = 'index.tt';
+    $c->stash->{'no_auto_reload'} = 1;
 
     return 1;
 }
@@ -334,15 +389,15 @@ page: /thruk/side.html
 
 =cut
 
-sub thruk_side_html : Regex('thruk\/side\.html$') {
+sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
 
-    # reset navigatio cache
-    $c->cache->set('menu_conf_stat', undef);
     Thruk::Utils::Menu::read_navigation($c);
 
-    $c->stash->{'use_frames'} = 1;
-    $c->stash->{'template'}   = 'side.tt';
+    $c->stash->{'use_frames'}     = 1;
+    $c->stash->{'title'}          = $c->config->{'name'};
+    $c->stash->{'template'}       = 'side.tt';
+    $c->stash->{'no_auto_reload'} = 1;
 
     return 1;
 }
@@ -378,12 +433,17 @@ sub thruk_frame_html : Regex('thruk\/frame\.html$') {
             if( $link =~ m/$pattern/mx ) {
                 $c->stash->{'target'}   = '_parent';
                 $c->stash->{'main'}     = $link;
+                $c->stash->{'title'}    = $c->config->{'name'};
                 $c->stash->{'template'} = 'index.tt';
+
+                $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
 
                 return 1;
             }
         }
     }
+
+    $c->stash->{'no_auto_reload'} = 1;
 
     # no link or none matched, display the usual index.html
     return $c->detach("thruk_index_html");
@@ -397,11 +457,13 @@ page: /thruk/main.html
 
 =cut
 
-sub thruk_main_html : Regex('thruk\/main\.html$') {
+sub thruk_main_html : Regex('thruk\/main\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
-    $c->stash->{'title'}    = 'Thruk Monitoring Webinterface';
-    $c->stash->{'page'}     = 'splashpage';
-    $c->stash->{'template'} = 'main.tt';
+    $c->stash->{'title'}                 = 'Thruk Monitoring Webinterface';
+    $c->stash->{'page'}                  = 'splashpage';
+    $c->stash->{'template'}              = 'main.tt';
+    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'no_auto_reload'}        = 1;
 
     return 1;
 }
@@ -414,12 +476,14 @@ page: /thruk/changes.html
 
 =cut
 
-sub thruk_changes_html : Regex('thruk\/changes\.html') : MyAction('AddDefaults') {
+sub thruk_changes_html : Regex('thruk\/changes\.html') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
-    $c->stash->{infoBoxTitle}     = 'Change Log';
-    $c->stash->{'title'}          = 'Change Log';
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'template'}       = 'changes.tt';
+    $c->stash->{infoBoxTitle}            = 'Change Log';
+    $c->stash->{'title'}                 = 'Change Log';
+    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'template'}              = 'changes.tt';
+    $c->stash->{page}                    = 'splashpage';
 
     return 1;
 }
@@ -432,14 +496,18 @@ page: /thruk/docs/
 
 =cut
 
-sub thruk_docs : Regex('thruk\/docs\/') {
+sub thruk_docs : Regex('thruk\/docs\/') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
-    $c->stash->{'title'}          = 'Documentation';
-    $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'template'}       = 'docs.tt';
+
+    $c->stash->{infoBoxTitle}            = 'Documentation';
+    $c->stash->{'title'}                 = 'Documentation';
+    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'hide_backends_chooser'} = 1;
+    $c->stash->{'template'}              = 'docs.tt';
+    $c->stash->{page}                    = 'splashpage';
 
     return 1;
 }
@@ -654,6 +722,9 @@ check and display errors (if any)
 
 sub end : ActionClass('RenderView') {
     my( $self, $c ) = @_;
+
+    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
+
     my @errors = @{ $c->error };
     if( scalar @errors > 0 ) {
         for my $error (@errors) {

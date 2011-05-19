@@ -14,8 +14,8 @@ use Thruk::Utils::Filter;
 use Thruk::Utils::Menu;
 use Catalyst::Runtime '5.70';
 
-binmode(STDOUT, ":utf8");
-binmode(STDERR, ":utf8");
+binmode(STDOUT, ":encoding(UTF-8)");
+binmode(STDERR, ":encoding(UTF-8)");
 
 ###################################################
 # Set flags and add plugins for the application
@@ -24,10 +24,10 @@ binmode(STDERR, ":utf8");
 
 use parent qw/Catalyst/;
 use Catalyst qw/
+                Thruk::ConfigLoader
                 Authentication
                 Authorization::ThrukRoles
                 CustomErrorMessage
-                ConfigLoader
                 StackTrace
                 Static::Simple
                 Redirect
@@ -36,7 +36,7 @@ use Catalyst qw/
                 Compress::Gzip
                 Thruk::RemoveNastyCharsFromHttpParam
                 /;
-our $VERSION = '0.78';
+our $VERSION = '1.0.3';
 
 ###################################################
 # Configure the application.
@@ -50,7 +50,7 @@ our $VERSION = '0.78';
 my $project_root = __PACKAGE__->config->{home};
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
-              'released'               => 'planned for January 30, 2010',
+              'released'               => 'May 12, 2011',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
               'project_root'           => $project_root,
@@ -70,12 +70,15 @@ my %config = ('name'                   => 'Thruk',
                                           'duration'       => \&Thruk::Utils::Filter::duration,
                                           'name2id'        => \&Thruk::Utils::Filter::name2id,
                                           'uri'            => \&Thruk::Utils::Filter::uri,
+                                          'short_uri'      => \&Thruk::Utils::Filter::short_uri,
                                           'uri_with'       => \&Thruk::Utils::Filter::uri_with,
                                           'html_escape'    => \&Thruk::Utils::Filter::html_escape,
+                                          'xml_escape'     => \&Thruk::Utils::Filter::xml_escape,
                                           'escape_quotes'  => \&Thruk::Utils::Filter::escape_quotes,
                                           'get_message'    => \&Thruk::Utils::Filter::get_message,
                                           'throw'          => \&Thruk::Utils::Filter::throw,
                                           'date_format'    => \&Thruk::Utils::Filter::date_format,
+                                          'format_date'    => \&Thruk::Utils::format_date,
 
                                           'version'        => $VERSION,
                                           'backends'       => [],
@@ -87,12 +90,18 @@ my %config = ('name'                   => 'Thruk',
                                           'infoBoxTitle'   => '',
                                           'has_proc_info'  => 0,
                                           'no_auto_reload' => 0,
-                                          'die_on_errors'  => 0,  # used in cmd.cgi
-                                          'errorMessage'   => 0,  # used in errors
-                                          'js'             => '', # used in _header.tpl
-                                          'extra_header'   => '', # used in _header.tpl
-                                          'ssi_header'     => '', # used in _header.tpl
-                                          'ssi_footer'     => '', # used in _header.tpl
+                                          'die_on_errors'  => 0,        # used in cmd.cgi
+                                          'errorMessage'   => 0,        # used in errors
+                                          'js'             => '',       # used in _header.tt
+                                          'extra_header'   => '',       # used in _header.tt
+                                          'ssi_header'     => '',       # used in _header.tt
+                                          'ssi_footer'     => '',       # used in _header.tt
+                                          'paneprefix'     => 'dfl_',   # used in _status_filter.tt
+                                          'sortprefix'     => '',       # used in _status_detail_table.tt / _status_hostdetail_table.tt
+                                          'show_form'      => '1',      # used in _status_filter.tt
+                                          'author'         => 0,
+                                          'all_in_one_css' => 0,
+                                          'hide_backends_chooser' => 0,
                                       },
                   PRE_CHOMP          => 1,
                   POST_CHOMP         => 1,
@@ -102,6 +111,20 @@ my %config = ('name'                   => 'Thruk',
                   STRICT             => 0,
                   render_die         => 1,
               },
+              nagios => {
+                  service_state_by_number => {
+                                    0 => 'OK',
+                                    1 => 'WARNING',
+                                    2 => 'CRITICAL',
+                                    3 => 'UNKNOWN',
+                                    4 => 'PENDING',
+                                },
+                  host_state_by_number => {
+                                    0 => 'OK',
+                                    1 => 'DOWN',
+                                    2 => 'UNREACHABLE',
+                                },
+              },
               'View::GD'               => {
                   gd_image_type      => 'png',
               },
@@ -109,7 +132,7 @@ my %config = ('name'                   => 'Thruk',
                   expose_stash       => 'json',
                   json_driver        => 'XS',
               },
-              'Plugin::ConfigLoader'   => { file => $project_root.'/thruk.conf' },
+              'Plugin::Thruk::ConfigLoader' => { file => $project_root.'/thruk.conf' },
               'Plugin::Authentication' => {
                   default_realm => 'Thruk',
                   realms => {
@@ -136,43 +159,10 @@ if(-f $project_root."/.author") {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0;
     $config{'View::TT'}->{'STAT_TTL'}   = 3600;
+    $config{'View::TT'}->{'PRE_DEFINE'}->{'author'} = 1;
 }
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
-__PACKAGE__->config(%config);
-
-###################################################
-# get installed plugins
-BEGIN {
-    my $project_root = __PACKAGE__->config->{home};
-    for my $addon (glob($project_root.'/plugins/plugins-enabled/*/')) {
-        my $addon_name = $addon;
-        $addon_name =~ s/\/$//gmx;
-        $addon_name =~ s/^.*\///gmx;
-
-        # does the plugin directory exist?
-        if(! -d $project_root.'/root/thruk/plugins/') {
-            mkdir($project_root.'/root/thruk/plugins/') or die('cannot create '.$project_root.'/root/thruk/plugins/ : '.$!);
-        }
-
-        # lib directory included?
-        if(-d $addon.'lib') {
-            unshift(@INC, $addon.'lib')
-        }
-
-        # template directory included?
-        if(-d $addon.'templates') {
-            unshift @{__PACKAGE__->config->{templates_paths}}, $addon.'templates'
-        }
-
-        # static content included?
-        if(-d $addon.'root') {
-            my $target_symlink = $project_root.'/root/thruk/plugins/'.$addon_name;
-            if(-e $target_symlink) { unlink($target_symlink) or die("cannot unlink: ".$target_symlink." : $!"); }
-            symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
-        }
-    }
-}
 
 ###################################################
 # set installed themes
@@ -187,17 +177,20 @@ for my $entry (readdir($dh)) {
 }
 @themes = sort @themes;
 closedir $dh;
-__PACKAGE__->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
+$config{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
 ###################################################
-# set tmp dir
-my $tmp_dir = __PACKAGE__->config->{'tmp_path'} || '/tmp';
-$config{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>; # use uid to make tmp dir more uniq
-__PACKAGE__->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>; # use uid to make tmp dir more uniq
-
+# set some defaults
+__PACKAGE__->config->{'cgi.cfg'}  = exists __PACKAGE__->config->{'cgi.cfg'}  ? __PACKAGE__->config->{'cgi.cfg'}  : 'cgi.cfg';
 
 ###################################################
-# Start the application
+# load config loader
+__PACKAGE__->config(%config);
+
+###################################################
+# Start the application and make __PACKAGE__->config
+# accessible
+# override config in Catalyst::Plugin::Thruk::ConfigLoader
 __PACKAGE__->setup();
 
 ###################################################
@@ -283,7 +276,6 @@ sub check_user_roles_wrapper {
     return 0;
 }
 
-###################################################
 
 =head1 NAME
 

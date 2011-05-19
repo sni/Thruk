@@ -47,10 +47,10 @@
         [% IF columns.7  %]<cell>[% IF h.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.8  %]<cell>[% IF h.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.9  %]<format num_format='yyyy-mm-dd hh:mm:ss'>
-          <cell type='date_time'>[% IF h.has_been_checked == 0 %][% ELSE %][% date.format(h.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
+          <cell type='date_time'>[% IF h.has_been_checked == 0 %][% ELSE %][% format_date(h.last_check, '%Y-%m-%dT%H:%M:%S') %][% END %]</cell>
         </format>[% END %]
         [% IF columns.10 %]<cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>[% END %]
-        [% IF columns.11 %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% date.format(h.next_check, datetime_format_long) %][% ELSE %][% html_escape(h.plugin_output) %][% END %]</cell>[% END %]
+        [% IF columns.11 %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% xml_escape(h.plugin_output) %][% END %]</cell>[% END %]
       </row>
     [% END %]
   </worksheet>

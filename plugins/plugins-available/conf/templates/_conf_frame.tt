@@ -1,0 +1,53 @@
+[% PROCESS _header.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="50%">
+        [% PROCESS _infobox.tt %]
+        </td>
+        <td align="right" valign="bottom" width="50%">
+          <form method="get" action="conf.cgi">
+            <table border="0" class="optBox">
+              <tr>
+                <td align="left" class='reportSelectSubTitle'>Configuration Type:</td>
+              </tr>
+              <tr>
+                <td align="left" class='reportSelectItem'>
+                  <select name='type'>
+                    <option value='all'[%    IF type == 'all'   %] selected [% END %]>Overview</option>
+                    [% IF conf_config.exists('thruk') %]
+                    <option value='thruk'[%  IF type == 'thruk' %] selected [% END %]>Thruk</option>
+                    [% END %]
+                    [% IF conf_config.exists('cgi.cfg') %]
+                    <option value='cgi'[%    IF type == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>
+                    [% END %]
+                    [% IF conf_config.exists('cgi.cfg') || conf_config.exists('htpasswd') %]
+                    <option value='users'[%  IF type == 'users' %] selected [% END %]>Users</option>
+                    [% END %]
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td class='reportSelectItem'>
+                  <input type='submit' value='Show'>
+                </td>
+              </tr>
+            </table>
+          </form>
+
+          [% IF show_context_help %]
+          <br><a href='[% url_prefix %]thruk/docs/conf' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          [% END %]
+        </td>
+      </tr>
+    </table>
+    [% PROCESS _message.tt %]
+    <br>
+    <div align="center" class='dataTitle'>[% subtitle %]</div>
+    <br>
+
+    [% content %]
+
+<br><br>
+
+[% PROCESS _footer.tt %]

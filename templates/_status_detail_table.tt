@@ -1,0 +1,114 @@
+﻿    <table border="0" width="100%" class='status servicestatus' id="statusTable">
+      <tr>
+        <th class='status' nowrap>Host&nbsp;<a href='[%       uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
+        <th class='status' nowrap>Service&nbsp;<a href='[%    uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by service name (ascending)' title='Sort by service name (ascending)'></a><a href='[%       uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 2) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by service name (descending)' title='Sort by service name (descending)'></a></th>
+        <th class='status' nowrap>Status&nbsp;<a href='[%     uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by service status (ascending)' title='Sort by service status (ascending)'></a><a href='[%   uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 3) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by service status (descending)' title='Sort by service status (descending)'></a></th>
+        <th class='status' nowrap>Last Check&nbsp;<a href='[% uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by last check time (ascending)' title='Sort by last check time (ascending)'></a><a href='[% uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 4) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by last check time (descending)' title='Sort by last check time (descending)'></a></th>
+        <th class='status' nowrap>Duration&nbsp;<a href='[%   uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by state duration (ascending)' title='Sort by state duration (ascending)'></a><a href='[%   uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 6) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by state duration time (descending)' title='Sort by state duration time (descending)'></a></th>
+        <th class='status' nowrap>Attempt&nbsp;<a href='[%    uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by current attempt (ascending)' title='Sort by current attempt (ascending)'></a><a href='[% uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 5) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by current attempt (descending)' title='Sort by current attempt (descending)'></a></th>
+        <th class='status' nowrap>Status Information</th>
+      </tr>
+
+      [% SET lasthost = '' %]
+
+      [% FOREACH s = data %]
+      [% SET serviceclass = 'statusOdd'  IF loop.even %]
+      [% SET serviceclass = 'statusEven' IF loop.odd %]
+      [% SET hostclass = 'statusOdd'  IF loop.even %]
+      [% SET hostclass = 'statusEven' IF loop.odd %]
+      [% IF s.host_state == 1 %]
+        [% hostclass = 'statusHOSTDOWN' %]
+      [% ELSIF s.host_state == 2 %]
+        [% hostclass = 'statusHOSTUNREACHABLE' %]
+      [% END %]
+      [% IF s.has_been_checked == 0 %]
+        [% state = 'PENDING' %]
+      [% ELSIF s.state == 0 %]
+        [% state = 'OK' %]
+      [% ELSIF s.state == 1 %]
+        [% state = 'WARNING' %]
+        [% serviceclass = 'statusBGWARNING' %]
+      [% ELSIF s.state == 2 %]
+        [% state = 'CRITICAL' %]
+        [% serviceclass = 'statusBGCRITICAL' %]
+      [% ELSIF s.state == 3 %]
+        [% state = 'UNKNOWN' %]
+        [% serviceclass = 'statusBGUNKNOWN' %]
+      [% END %]
+
+      [% SET comment_count = s.comments.size %]
+      [% SET peer_key      = s.peer_key %]
+      [% SET program_start = pi_detail.$peer_key.program_start %]
+
+      [% IF lasthost != '' && lasthost != s.host_name %]
+      <tr><td colspan="6"></td></tr>
+      <tr><td colspan="6"></td></tr>
+      [% END %]
+
+      <tr id="[% paneprefix %]r[% loop.index %]" onmouseover="addRowSelector(this.id)">
+        [% IF lasthost == s.host_name %]
+        <td></td>
+        [% ELSE %]
+        [% SET host_comment_count = 0 %]
+        [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
+        <td class='[% hostclass %]'>
+          <table border="0" width='100%' cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_name %]</a></td>
+              <td align="right">
+                [% PROCESS _status_host_attributes.tt hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
+              </td>
+            </tr>
+          </table>
+        </td>
+        [% END %]
+        <td class='[% serviceclass %]'>
+          <table border="0" width='100%' cellspacing="0" cellpadding="0">
+            <tr>
+              <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% s.description %]</a></td>
+              <td align="right" class='[% serviceclass %]'>
+              [% PROCESS _status_service_attributes.tt service=s service_comment_count=comment_count %]
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td class='status[% state %]'>[% state %]</td>
+        <td class='[% serviceclass %]' nowrap align="center">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td>
+        <td class='[% serviceclass %]' nowrap>[% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</td>
+        <td class='[% serviceclass %]' align="center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number && s.current_notification_number > 0 %] <span title="This service has send out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %]</td>
+          [% IF s.has_been_checked == 0 %]
+            <td class='[% serviceclass %]' align="left">
+              [% IF s.active_checks_enabled == 0 %]
+              Service is not scheduled to be checked...
+              [% ELSE %]
+              Service check scheduled for [% format_date(s.next_check, datetime_format_long) %]
+              [% END %]
+            </td>
+          [% ELSE %]
+            [% IF s.long_plugin_output and show_long_plugin_output != 'off' %]
+              [% IF show_long_plugin_output == 'popup' %]
+                [% IF escape_html_tags %]
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(s.plugin_output)) %]<br>[% html_escape(html_escape(s.long_plugin_output)) | nl2br %]'><span class="has_long_plugin_output">[% html_escape(s.plugin_output) %]</span></td>
+                [% ELSE %]
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) | nl2br %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
+                [% END %]
+              [% ELSIF show_long_plugin_output == 'inline' %]
+                [% IF escape_html_tags %]
+                  <td align="left" class='[% serviceclass %]'>[% html_escape(s.plugin_output) %]<br>[% html_escape(s.long_plugin_output) | nl2br %]</td>
+                [% ELSE %]
+                  <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]<br>[% s.long_plugin_output | nl2br %]</td>
+                [% END %]
+              [% END %]
+            [% ELSE %]
+              [% IF escape_html_tags %]
+                <td align="left" class='[% serviceclass %]'>[% html_escape(s.plugin_output) %]</td>
+              [% ELSE %]
+                <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]</td>
+              [% END %]
+            [% END %]
+          [% END %]
+      </tr>
+      [% SET lasthost = s.host_name %]
+      [% END %]
+
+    </table>

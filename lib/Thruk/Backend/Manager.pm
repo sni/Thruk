@@ -8,6 +8,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Page;
 use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
+use Thruk::Utils;
 
 our $AUTOLOAD;
 
@@ -38,6 +39,8 @@ sub new {
         'stats'               => undef,
         'log'                 => undef,
         'config'              => undef,
+        'state_hosts'         => {},
+        'local_hosts'         => {},
         'backends'            => [],
     };
     bless $self, $class;
@@ -74,9 +77,39 @@ sub init {
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;
 
+    for my $peer (@{$self->get_peers()}) {
+        $peer->{'local'} = 1;
+        if($peer->{'addr'} =~ m/^(.*):/mx) {
+            $self->{'state_hosts'}->{$peer->{'key'}} = $1;
+        } else {
+            $self->{'local_hosts'}->{$peer->{'key'}} = 1;
+        }
+    }
+
     $self->{'initialized'} = 1;
 
     return 1;
+}
+
+##########################################################
+
+=head2 disable_hidden_backends
+
+  disable_hidden_backends()
+
+returns list of hidden backends
+
+=cut
+
+sub disable_hidden_backends {
+    my $self               = shift;
+    my $disabled_backends  = shift || {};
+    for my $peer (@{$self->get_peers()}) {
+        if(defined $peer->{'hidden'} and $peer->{'hidden'} == 1) {
+            $disabled_backends->{$peer->{'key'}} = 2;
+        }
+    }
+    return $disabled_backends;
 }
 
 ##########################################################
@@ -253,7 +286,7 @@ sub get_contactgroups_by_contact {
     my $data = $self->_do_on_peers( "get_contactgroups_by_contact", [ $username ]);
     my $contactgroups = {};
     for my $group (@{$data}) {
-        $contactgroups->{$group} = 1;
+        $contactgroups->{$group->{'name'}} = 1;
     }
 
     $cached_data->{'contactgroups'} = $contactgroups;
@@ -276,25 +309,31 @@ sub expand_command {
     croak("no host")    unless defined $data{'host'};
     my $host     = $data{'host'};
     my $service  = $data{'service'};
+    my $command  = $data{'command'};
 
     my $command_name = $host->{'check_command'};
     if(defined $service) {
         $command_name = $service->{'check_command'};
     }
-    my($name, @com_args) = split/!/mx, $command_name;
+    my($name, @com_args) = split(/!/mx, $command_name, 255);
 
-    # it is possible to defined hosts without a command
+    # it is possible to define hosts without a command
     if(!defined $name or $name =~ m/^\s*$/mx) {
-        my $command = {
+        my $return = {
             'line'          => 'no command defined',
             'line_expanded' => '',
         };
-        return $command;
+        return $return;
     }
 
     # get command data
-    my $commands = $self->get_commands( filter => [ { 'name' => $name } ] );
-    my $expanded = $commands->[0]->{'line'};
+    my $expanded;
+    if(defined $command) {
+        $expanded = $command->{'line'};
+    } else {
+        my $commands = $self->get_commands( filter => [ { 'name' => $name } ] );
+        $expanded = $commands->[0]->{'line'};
+    }
 
     # arguments
     my $x = 1;
@@ -303,45 +342,199 @@ sub expand_command {
         $x++;
     }
 
+    $expanded = $self->_replace_macros({string => $expanded, host => $host, service => $service});
+
+    # does it still contain macros?
+    my $note = "";
+    if($expanded =~ m/\$[\w:]+\$/mx) {
+        $note = "could not expand all macros!";
+    }
+
+    my $return = {
+        'line'          => $command_name,
+        'line_expanded' => $expanded,
+        'note'          => $note,
+    };
+    return $return;
+}
+
+########################################
+
+=head2 set_backend_state_from_local_connections
+
+  set_backend_state_from_local_connections
+
+enables/disables remote backends based on a state from local instances
+
+=cut
+
+sub set_backend_state_from_local_connections {
+    my( $self, $disabled ) = @_;
+
+    $self->{'stats'}->profile( begin => "set_backend_state_from_local_connections() " ) if defined $self->{'stats'};
+
+    return unless scalar keys %{$self->{'local_hosts'}} >= 1;
+    return unless scalar keys %{$self->{'state_hosts'}} >= 1;
+
+    my $options = [
+        'backend', [ keys %{$self->{'local_hosts'}} ],
+        'columns', [qw/address name alias state/],
+    ];
+
+    my @filter;
+    for my $host (values %{$self->{'state_hosts'}}) {
+        push @filter, { '-or' => [ { name    => { '=' => $host } },
+                                   { alias   => { '=' => $host } },
+                                   { address => { '=' => $host } },
+                      ]};
+    }
+    push @{$options}, 'filter', [ Thruk::Utils::combine_filter( '-or', \@filter ) ];
+    eval {
+        my $data = $self->_do_on_peers( "get_hosts", $options );
+        for my $host (@{$data}) {
+            # find matching key
+            my $key;
+            for my $state_key (keys %{$self->{'state_hosts'}}) {
+                my $name = $self->{'state_hosts'}->{$state_key};
+                $key = $state_key if $host->{'name'}    eq $name;
+                $key = $state_key if $host->{'address'} eq $name;
+                $key = $state_key if $host->{'alias'}   eq $name;
+            }
+            next unless defined $key;
+            my $peer = $self->get_peer_by_key($key);
+            next if $disabled->{$key};
+
+            if($host->{'state'} == 0) {
+                $self->{'log'}->debug($key." -> enabled by local state check");
+                $peer->{'enabled'}  = 1 unless $peer->{'enabled'} == 2;
+                $peer->{'runnning'} = 1;
+            } else {
+                $self->{'log'}->debug($key." -> disabled by local state check");
+                $self->disable_backend($key);
+                $peer->{'runnning'} = 0;
+            }
+        }
+    };
+    if($@) {
+        $self->{'log'}->error("failed setting states by local check: ".$@);
+    }
+
+    $self->{'stats'}->profile( end => "set_backend_state_from_local_connections() " ) if defined $self->{'stats'};
+
+    return;
+}
+
+########################################
+
+=head2 _replace_macros
+
+  _replace_macros
+
+returns a result for a sub called on all peers
+
+=cut
+
+sub _replace_macros {
+    my( $self, $args ) = @_;
+
+    my $string  = $args->{'string'};
+    my $host    = $args->{'host'};
+    my $service = $args->{'service'};
+
     # user macros...
     my $user_macros = $self->_get_user_macros($host->{'peer_key'});
     if(defined $user_macros) {
         for my $x (1..32) {
-            $expanded =~ s/\$USER$x\$/$user_macros->{'$USER'.$x.'$'}/gmx if defined $user_macros->{'$USER'.$x.'$'};
+            $string =~ s/\$USER$x\$/$user_macros->{'$USER'.$x.'$'}/gmx if defined $user_macros->{'$USER'.$x.'$'};
         }
     }
 
     # host macros
-    $expanded =~ s/\$HOSTADDRESS\$/$host->{'address'}/gmx;
-    $expanded =~ s/\$HOSTNAME\$/$host->{'name'}/gmx;
-    $expanded =~ s/\$HOSTALIAS\$/$host->{'alias'}/gmx;
-
-    # host user macros
-    $x = 0;
-    for my $key (@{$host->{'custom_variable_names'}}) {
-        $expanded =~ s/\$_HOST$key\$/$host->{'custom_variable_values'}->[$x]/gmx;
-        $x++;
-    }
+    $string = $self->_replace_host_macros($string, $host);
 
     # service macros
     if(defined $service) {
-        $expanded =~ s/\$SERVICEDESC\$/$service->{'description'}/gmx;
-        # service user macros...
-        $x = 0;
-        for my $key (@{$service->{'custom_variable_names'}}) {
-            $expanded =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
-            $x++;
-        }
+        $string = $self->_replace_service_macros($string, $service);
     }
 
-    my $command = {
-        'line'          => $command_name,
-        'line_expanded' => $expanded,
-    };
-    return $command;
+    return($string);
 }
 
+########################################
 
+=head2 _replace_host_macros
+
+  _replace_host_macros
+
+returns a string with replaced host macros
+
+=cut
+
+sub _replace_host_macros {
+    my( $self, $string, $host ) = @_;
+
+    # normal host macros
+    my $hostmacros = {
+        'HOSTADDRESS'   => $host->{'address'},
+        'HOSTNAME'      => $host->{'name'},
+        'HOSTALIAS'     => $host->{'alias'},
+        'HOSTSTATEID'   => $host->{'state'},
+        'HOSTSTATE'     => $self->{'config'}->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}},
+        'HOSTLATENCY'   => $host->{'latency'},
+        'HOSTOUTPUT'    => $host->{'plugin_output'},
+        'HOSTPERFDATA'  => $host->{'perf_data'},
+        'HOSTATTEMPT'   => $host->{'current_attempt'},
+    };
+    for my $key (keys %{$hostmacros}) {
+        $string =~ s/\$$key\$/$hostmacros->{$key}/gmx;
+    }
+
+    # host user macros
+    my $x = 0;
+    for my $key (@{$host->{'custom_variable_names'}}) {
+        $string =~ s/\$_HOST$key\$/$host->{'custom_variable_values'}->[$x]/gmx;
+        $x++;
+    }
+
+    return $string;
+}
+
+########################################
+
+=head2 _replace_service_macros
+
+  _replace_service_macros
+
+returns a string with replaced service macros
+
+=cut
+
+sub _replace_service_macros {
+    my( $self, $string, $service ) = @_;
+
+    # normal host macros
+    my $servicemacros = {
+        'SERVICEDESC'      => $service->{'description'},
+        'SERVICESTATEID'   => $service->{'state'},
+        'SERVICESTATE'     => $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}},
+        'SERVICELATENCY'   => $service->{'latency'},
+        'SERVICEOUTPUT'    => $service->{'plugin_output'},
+        'SERVICEPERFDATA'  => $service->{'perf_data'},
+        'SERVICEATTEMPT'   => $service->{'current_attempt'},
+    };
+    for my $key (keys %{$servicemacros}) {
+        $string =~ s/\$$key\$/$servicemacros->{$key}/gmx;
+    }
+
+    # service user macros...
+    my $x = 0;
+    for my $key (@{$service->{'custom_variable_names'}}) {
+        $string =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
+        $x++;
+    }
+
+    return $string;
+}
 ########################################
 
 =head2 _do_on_peers
@@ -382,9 +575,9 @@ sub _do_on_peers {
     {
         if(defined $backends) {
             next unless defined $backends->{$peer->{'key'}};
-        } else {
-            next unless $peer->{'enabled'} == 1;
         }
+        next unless $peer->{'enabled'} == 1;
+
         $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
         $selected_backends++;
         eval {
@@ -439,6 +632,7 @@ sub _do_on_peers {
     if(scalar keys %arg > 0) {
         if( $arg{'remove_duplicates'} ) {
             $data = $self->_remove_duplicates($data);
+            $totalsize = scalar @{$data};
         }
 
         if( $arg{'sort'} ) {
@@ -634,16 +828,20 @@ sub _page_data {
     }
 
     # last/first/prev or next button pressed?
-    if( exists $c->{'request'}->{'parameters'}->{'next'} ) {
+    if(   exists $c->{'request'}->{'parameters'}->{'next'}
+       or exists $c->{'request'}->{'parameters'}->{'next.x'} ) {
         $page++;
     }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'previous'} ) {
+    elsif (   exists $c->{'request'}->{'parameters'}->{'previous'}
+           or exists $c->{'request'}->{'parameters'}->{'previous.x'} ) {
         $page-- if $page > 1;
     }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'first'} ) {
+    elsif (    exists $c->{'request'}->{'parameters'}->{'first'}
+            or exists $c->{'request'}->{'parameters'}->{'first.x'} ) {
         $page = 1;
     }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'last'} ) {
+    elsif (    exists $c->{'request'}->{'parameters'}->{'last'}
+            or exists $c->{'request'}->{'parameters'}->{'last.x'} ) {
         $page = $pages;
     }
 
@@ -763,10 +961,14 @@ sub _initialise_peer {
         'groups'        => $config->{'groups'},
         'resource_file' => $config->{'options'}->{'resource_file'},
         'enabled'       => 1,
-        'class'         => $class->new( $config->{'options'}, $self->{'config'} ),
+        'class'         => $class->new( $config->{'options'}, $self->{'config'}, $self->{'log'} ),
     };
     $peer->{'key'}  = $peer->{'class'}->peer_key();
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
+
+    if(Thruk->debug) {
+        $peer->{'class'}->set_verbose(1);
+    }
 
     return $peer;
 }
@@ -1126,11 +1328,13 @@ returns the USER1-32 macros from a resource file
 sub _get_user_macros {
     my $self     = shift;
     my $peer_key = shift;
-    my $backend = $self->get_peer_by_key($peer_key);
-    if(defined $backend->{'resource_file'}) {
-        return $self->_read_resource_file($backend->{'resource_file'});
+    if(defined $peer_key) {
+        my $backend = $self->get_peer_by_key($peer_key);
+        if(defined $backend->{'resource_file'}) {
+            return $self->_read_resource_file($backend->{'resource_file'});
+        }
     }
-    return $self->_read_resource_file($self->{'resource_file'});
+    return $self->_read_resource_file($self->{'config'}->{'resource_file'});
 }
 
 
@@ -1150,6 +1354,11 @@ sub _read_resource_file {
     return unless defined $file;
     return unless -f $file;
     my %macros = Config::General::ParseConfig($file);
+    for my $key (keys %macros) {
+        if(ref $macros{$key} eq 'ARRAY') {
+            $macros{$key} = $macros{$key}[$#{$macros{$key}}];
+        }
+    }
     return \%macros;
 }
 

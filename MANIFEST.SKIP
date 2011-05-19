@@ -12,6 +12,7 @@ local-lib
 logs/debug.log
 logs/error.log
 logs/access.log
+logs/thruk.log
 thruk_local.conf
 docs/development/git.txt
 docs/images
@@ -19,7 +20,14 @@ script/thruk_update_docs.sh
 script/thruk_update_table_docs.pl
 script/thruk_extract_cmd_templates.pl
 t/xt
-root/thruk/plugins/*
+root/thruk/plugins/.*
 .author
 ssi_local
 cgi_local.cfg
+htpasswd
+.*\.gz
+cgi\.cfg\-.*
+# does not work for centos without F::C::R installed
+inc/File/Copy/Recursive.pm
+var
+log4perl.conf

@@ -2,12 +2,16 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <title>[% title %]</title>
+    <title>[% title_prefix %][% title %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    [% UNLESS all_in_one_css %]
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
+    [% END %]
 
     [% SET page = 'status' IF page == '' %]
+    [% UNLESS all_in_one_css %]
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% page %].css' />
+    [% END %]
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css' />
 
     [% UNLESS use_frames %]
@@ -44,7 +48,7 @@
     });
     var current_backend_states = initial_backend_states.clone();
     var theme                  = '[% theme %]';
-    var ajax_search_enabled    = '[% ajax_search %]';
+    var ajax_search_enabled    = '[% use_ajax_search %]';
     var url_prefix             = '[% url_prefix %]';
 
     [% IF refresh_rate %]    var refresh_rate = [% refresh_rate %];[% END %]
@@ -53,6 +57,13 @@
     </script>
 
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
+    [% IF author %]
+    <script type="text/javascript">
+    <!--
+      thruk_debug_js=1;
+    -->
+    </script>
+    [% END %]
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/cal/jscal2.js"></script>
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
     [% IF js %]<script type="text/javascript" src="[% js %]"></script>[% END %]
@@ -129,7 +140,7 @@
       <table border=0 cellpadding=0 cellspacing=0>
         <tr>
           <td>
-          [% IF backends && backends.size > 1 %]
+          [% IF hide_backends_chooser == 0 && backends && backends.size > 1 %]
           [% FOREACH pd IN backends %]
           <div class='backend'>
             [% SET name  = 'unknown'                                         %]

@@ -28,7 +28,7 @@ DESCRIPTION:
 =cut
 
 sub pm_exit {
-  my ($this,$msg,$n) = self_or_default(@_);
+  my ($this,$msg,$n) = FCGI::ProcManager::self_or_default(@_);
   $n ||= 0;
 
   # if we still have children at this point, something went wrong.

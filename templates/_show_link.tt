@@ -1,7 +1,9 @@
 ﻿<a href="#" onclick="toggleElement('show_link'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/link.png' border="0" alt='Show link to this page' title='Show link to this page'></a>&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:30px;z-index:100" id="show_link">
   <div class="shadow"><div class="shadowcontent">
+    [% IF style != 'combined' %]
     <form action='#' method="GET" id="url_form">
+    [% END %]
       <table border="1" class='filter' cellspacing="0" cellpadding="0">
         <tr>
           <td class='filter'>
@@ -11,6 +13,8 @@
           </td>
         </tr>
       </table>
+    [% IF style != 'combined' %]
     </form>
+    [% END %]
   </div></div>
 </div>

@@ -17,6 +17,7 @@ var additionalParams = new Hash({});
 var refreshTimer;
 var backendSelTimer;
 var lastRowSelected;
+var lastRowHighlighted;
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -34,6 +35,13 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
  Y8a.    .a88 88          88     `8888 88          88     `8b  88  Y8a.    .a8P
   `"Y88888P"  88888888888 88      `888 88888888888 88      `8b 88   `"Y8888Y"'
 *******************************************************************************/
+
+/* send debug output to firebug console */
+function debug(str) {
+    if (window.console != undefined) {
+        console.log("DEBUG: " + str);
+    }
+}
 
 /* hide a element by id */
 function hideElement(id) {
@@ -76,6 +84,7 @@ function toggleElement(id) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
     return false;
   }
+
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
     showElement(id);
     return true;
@@ -128,6 +137,13 @@ function setRefreshRate(rate) {
       window.clearTimeout(refreshTimer);
       refreshTimer = window.setTimeout("setRefreshRate(newRate)", 1000);
     }
+  }
+}
+
+/* reset refresh interval */
+function resetRefresh() {
+  if( typeof refresh_rate != "undefined" ) {
+    setRefreshRate(refresh_rate);
   }
 }
 
@@ -209,10 +225,8 @@ function toggleBackend(backend) {
 
   /* save current selected backends in session cookie */
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
-  //if(initial_state != 3) {
-    window.clearTimeout(backendSelTimer);
-    backendSelTimer  = window.setTimeout('reloadPage()', 1000);
-  //}
+  window.clearTimeout(backendSelTimer);
+  backendSelTimer  = window.setTimeout('reloadPage()', 1000);
 }
 
 /* toogle checkbox by id */
@@ -263,6 +277,105 @@ function is_shift_pressed(e) {
   return false;
 }
 
+/* moves element from one select to another */
+function data_select_move(from, to) {
+    var from_sel = document.getElementsByName(from);
+    if(!from_sel || from_sel.length == 0) {
+        if(thruk_debug_js) { alert("ERROR: no element in data_select_move() for: " + from ); }
+    }
+    var to_sel = document.getElementsByName(to);
+    if(!to_sel || to_sel.length == 0) {
+        if(thruk_debug_js) { alert("ERROR: no element in data_select_move() for: " + to ); }
+    }
+
+    from_sel = from_sel[0];
+    to_sel   = to_sel[0];
+
+    if(from_sel.selectedIndex < 0) {
+        return;
+    }
+
+    var elements = new Array();
+    for(var nr = 0; nr < from_sel.length; nr++) {
+        if(from_sel.options[nr].selected == true) {
+            elements.push(nr);
+        }
+    }
+
+    // reverse elements so the later remove does disorder the select
+    elements.reverse();
+
+    for(var x = 0; x < elements.length; x++) {
+        var elem       = from_sel.options[elements[x]];
+        var elOptNew   = document.createElement('option');
+        elOptNew.text  = elem.text;
+        elOptNew.value = elem.value;
+        from_sel.remove(elements[x]);
+        try {
+          to_sel.add(elOptNew, null); // standards compliant; doesn't work in IE
+        }
+        catch(ex) {
+          to_sel.add(elOptNew); // IE only
+        }
+    }
+
+    /* sort elements of to field */
+    sortlist(to_sel.id);
+}
+
+/* sort select by value */
+function sortlist(id) {
+    var lb = document.getElementById(id);
+
+    if(!lb) {
+        if(thruk_debug_js) { alert("ERROR: no element in sortlist() for: " + id ); }
+    }
+
+    opts  = new Hash;
+
+    for(i=0; i<lb.length; i++)  {
+        opts.set(lb.options[i].text, lb.options[i].value)
+    }
+
+    var sortedkeys = opts.keys().sort();
+
+    for(i=0; i<lb.length; i++)  {
+      lb.options[i].text  = sortedkeys[i];
+      lb.options[i].value = opts.get(sortedkeys[i]);
+    }
+}
+
+/* fetch all select fields and select all options when it is multiple select */
+function multi_select_all(form) {
+    elems = form.getElementsByTagName('select');
+    for(var x = 0; x < elems.length; x++) {
+        var sel = elems[x];
+        if(sel.multiple == true) {
+            for(var nr = 0; nr < sel.length; nr++) {
+                sel.options[nr].selected = true;
+            }
+        }
+    }
+}
+
+/* remove a bookmark */
+function removeBookmark(nr) {
+    var pan  = document.getElementById("bm" + nr);
+    var panP = pan.parentNode;
+    panP.removeChild(pan);
+    bookmarks.unset("bm" + nr);
+}
+
+/* check if element is not emty */
+function checknonempty(id, name) {
+    var elem = document.getElementById(id);
+    if( elem.value == undefined || elem.value == "" ) {
+        alert(name + " is a required field");
+        return(false);
+    }
+    return(true);
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -280,10 +393,10 @@ Y8,           88   `8b d8'   88 88         8P
 var selectedServices = new Hash;
 var selectedHosts    = new Hash;
 var noEventsForId    = new Hash;
+var submit_form_id;
 
 /* add mouseover eventhandler for all cells and execute it once */
-function addRowSelector(id)
-{
+function addRowSelector(id) {
     var row   = document.getElementById(id);
     var cells = row.cells;
 
@@ -303,6 +416,15 @@ function addRowSelector(id)
         resetServiceRow(e);
     });
 
+    if(cells.length == 5 || cells.length == 6) {
+      pagetype = 'hostdetail'
+    }
+    else if(cells.length == 7) {
+      pagetype = 'servicedetail'
+    } else {
+      if(thruk_debug_js) { alert("ERROR: unknown table addRowSelector(): " + cells.length); }
+    }
+
     // for each cell in a row
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         if(pagetype == "hostdetail" || (cell_nr == 0 && cells[0].innerHTML != '')) {
@@ -314,6 +436,14 @@ function addRowSelector(id)
             addEventHandler(cells[cell_nr], 'service');
         }
     }
+
+    // initial mouseover highlights host&service, reset class here
+    if(pagetype == "servicedetail") {
+        $$('td.tableRowHover').each(function(e) {
+            resetHostRow(e);
+        });
+    }
+    return true;
 }
 
 /* add the event handler */
@@ -336,6 +466,7 @@ function addEventHandler(elem, type) {
 
 /* add additional eventhandler to object */
 function addEvent( obj, type, fn ) {
+  debug("addEvent("+obj+","+type+", ...)");
   if ( obj.attachEvent ) {
     obj['e'+type+fn] = fn;
     obj[type+fn] = function(){obj['e'+type+fn]( window.event );}
@@ -346,6 +477,7 @@ function addEvent( obj, type, fn ) {
 
 /* remove an eventhandler from object */
 function removeEvent( obj, type, fn ) {
+  debug("addEvent("+obj+","+type+", ...)");
   if ( obj.detachEvent ) {
     obj.detachEvent( 'on'+type, obj[type+fn] );
     obj[type+fn] = null;
@@ -364,7 +496,7 @@ function getFirstParentId(elem) {
     while(nr < 10 && !elem.id) {
         nr++;
         if(!elem.parentNode) {
-            if(thruk_debug_js) { alert("ERROR: element has no parentNode in getFirstParentId(): " + elem); }
+            // this may happen when looking for the parent of a event
             return false;
         }
         elem = elem.parentNode;
@@ -373,7 +505,7 @@ function getFirstParentId(elem) {
 }
 
 /* set style for each cell */
-function setRowStyle(row_id, style, type, force) {
+function setRowStyle(row_id, style, type, force ) {
 
     var row = document.getElementById(row_id);
     if(!row) {
@@ -383,6 +515,17 @@ function setRowStyle(row_id, style, type, force) {
 
     // for each cells in this row
     var cells = row.cells;
+    if(!cells) {
+        return false;
+    }
+    if(cells.length == 5 || cells.length == 6) {
+      pagetype = 'hostdetail'
+    }
+    else if(cells.length == 7) {
+      pagetype = 'servicedetail'
+    } else {
+      if(thruk_debug_js) { alert("ERROR: unknown table setRowStyle(): " + cells.length); }
+    }
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         // only the first cell for hosts
         // all except the first cell for services
@@ -479,6 +622,7 @@ function highlightServiceRow()
     if(!row_id) {
       return;
     }
+    lastRowHighlighted = row_id;
     setRowStyle(row_id, 'tableRowHover', 'service');
 }
 
@@ -496,6 +640,7 @@ function highlightHostRow()
     if(!row_id) {
       return;
     }
+    lastRowHighlighted = row_id;
     setRowStyle(row_id, 'tableRowHover', 'host');
 }
 
@@ -540,8 +685,9 @@ function selectServiceByIdEvent(row_id, state, event)
 {
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
-      var id1 = parseInt(row_id.substring(1));
-      var id2 = parseInt(lastRowSelected.substring(1));
+      var id1         = parseInt(row_id.substring(5));
+      var id2         = parseInt(lastRowSelected.substring(5));
+      var pane_prefix = row_id.substring(0,4);
 
       // all selected should get the same state
       state = false;
@@ -557,7 +703,7 @@ function selectServiceByIdEvent(row_id, state, event)
       }
 
       for(var x = id1; x < id2; x++) {
-        selectServiceByIdEvent('r'+x, state);
+        selectServiceByIdEvent(pane_prefix+'r'+x, state);
       }
       lastRowSelected = undefined;
       no_more_events  = 0;
@@ -643,8 +789,9 @@ function selectHostByIdEvent(row_id, state, event) {
 
     if(is_shift_pressed(event) && lastRowSelected != undefined) {
       no_more_events = 1;
-      var id1 = parseInt(row_id.substring(1));
-      var id2 = parseInt(lastRowSelected.substring(1));
+      var id1         = parseInt(row_id.substring(5));
+      var id2         = parseInt(lastRowSelected.substring(5));
+      var pane_prefix = row_id.substring(0,4);
 
       // all selected should get the same state
       state = false;
@@ -660,7 +807,7 @@ function selectHostByIdEvent(row_id, state, event) {
       }
 
       for(var x = id1; x < id2; x++) {
-        selectHostByIdEvent('r'+x, state);
+        selectHostByIdEvent(pane_prefix+'r'+x, state);
       }
       lastRowSelected = undefined;
       no_more_events  = 0;
@@ -721,6 +868,11 @@ function resetServiceRow(event)
         row_id = getFirstParentId(event);
     }
     if(!row_id) {
+        if(lastRowHighlighted) {
+            tmp = lastRowHighlighted;
+            lastRowHighlighted = undefined;
+            setRowStyle(tmp, 'original', 'service');
+        }
         return;
     }
     setRowStyle(row_id, 'original', 'service');
@@ -740,15 +892,20 @@ function resetHostRow(event)
         row_id = getFirstParentId(event);
     }
     if(!row_id) {
+        if(lastRowHighlighted) {
+            tmp = lastRowHighlighted;
+            lastRowHighlighted = undefined;
+            setRowStyle(tmp, 'original', 'host');
+        }
         return;
     }
     setRowStyle(row_id, 'original', 'host');
 }
 
 /* select or deselect all services */
-function selectAllServices(state) {
+function selectAllServices(state, pane_prefix) {
     var x = 0;
-    while(selectServiceById('r'+x, state)) {
+    while(selectServiceById(pane_prefix+'r'+x, state)) {
         // disable next row
         x++;
     };
@@ -774,9 +931,9 @@ function selectHostsByClass(classes) {
 }
 
 /* select or deselect all hosts */
-function selectAllHosts(state) {
+function selectAllHosts(state, pane_prefix) {
     var x = 0;
-    while(selectHostById('r'+x, state)) {
+    while(selectHostById(pane_prefix+'r'+x, state)) {
         // disable next row
         x++;
     };
@@ -803,7 +960,7 @@ function checkCmdPaneVisibility() {
         /* hide command panel */
         toggleCmdPane(0);
     } else {
-        setRefreshRate(refresh_rate);
+        resetRefresh();
 
         /* set submit button text */
         var btn = document.getElementById('multi_cmd_submit_button');
@@ -832,7 +989,9 @@ function checkCmdPaneVisibility() {
 }
 
 /* collect selected hosts and services and pack them into nice form data */
-function collectFormData() {
+function collectFormData(form_id) {
+
+    check_quick_command();
 
     // check form values
     var sel = document.getElementById('quick_command');
@@ -853,19 +1012,42 @@ function collectFormData() {
 
     var services = new Array();
     selectedServices.keys().each(function(row_id) {
-        services.push(servicesHash.get(row_id));
+        if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
+        if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
+        if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
+        row_id = row_id.substr(4);
+        services.push(obj_hash.get(row_id));
     });
     service_form = document.getElementById('selected_services');
     service_form.value = services.join(',');
 
     var hosts = new Array();
     selectedHosts.keys().each(function(row_id) {
-        hosts.push(servicesHash.get(row_id));
+        if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
+        if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
+        if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
+        row_id = row_id.substr(4);
+        hosts.push(obj_hash.get(row_id));
     });
     host_form = document.getElementById('selected_hosts');
     host_form.value = hosts.join(',');
 
+    if(value == 1 ) { // reschedule
+        var btn = document.getElementById(form_id);
+        if(btn) {
+            submit_form_id = form_id;
+            window.setTimeout(submit_form, 100);
+            return(false);
+        }
+    }
+
     return(true);
+}
+
+/* submit a form by id */
+function submit_form() {
+    var btn = document.getElementById(submit_form_id);
+    btn.submit();
 }
 
 /* show/hide options for commands based on the selected command*/
@@ -928,6 +1110,42 @@ function enableFormElement(id) {
 }
 
 
+/* verify submited command */
+function check_quick_command() {
+    var sel   = document.getElementById('quick_command');
+    var value = sel.value;
+    var img;
+    if(value == 1 ) { // reschedule
+        selectedServices.keys().each(function(row_id) {
+            cell           = document.getElementById(row_id + "_s_exec");
+            if(cell.innerHTML == '') {
+                img            = document.createElement('img');
+                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.height     = 20;
+                img.width      = 20;
+                img.title      = "This service is currently executing its servicecheck";
+                img.alt        = "This service is currently executing its servicecheck";
+                cell.appendChild(img);
+            }
+        });
+        selectedHosts.keys().each(function(row_id) {
+            cell           = document.getElementById(row_id + "_h_exec");
+            if(cell.innerHTML == '') {
+                img            = document.createElement('img');
+                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.height     = 20;
+                img.width      = 20;
+                img.title      = "This host is currently executing its hostcheck";
+                img.alt        = "This host is currently executing its hostcheck";
+                cell.appendChild(img);
+            }
+        });
+    }
+
+    return true;
+}
+
+
 /*******************************************************************************
 88888888888  88   88     888888888888 88888888888 88888888ba
 88           88   88          88      88          88      "8b
@@ -943,14 +1161,16 @@ on status / host details page
 *******************************************************************************/
 
 /* toggle the visibility of the filter pane */
-function toggleFilterPane() {
-  var pane = document.getElementById('all_filter_table');
-  var img  = document.getElementById('filter_button');
+function toggleFilterPane(prefix) {
+  debug("toggleFilterPane(): " + toggleFilterPane.caller);
+  var pane = document.getElementById(prefix+'all_filter_table');
+  var img  = document.getElementById(prefix+'filter_button');
   if(pane.style.display == 'none') {
     pane.style.display    = '';
     pane.style.visibility = 'visible';
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
+    img.disable();
     additionalParams.set('hidesearch', 2);
     document.getElementById('hidesearch').value = 2;
   }
@@ -959,6 +1179,7 @@ function toggleFilterPane() {
     pane.style.visibility = 'hidden';
     img.style.display     = '';
     img.style.visibility  = 'visible';
+    img.enable();
     additionalParams.set('hidesearch', 1);
     document.getElementById('hidesearch').value = 1;
   }
@@ -971,7 +1192,7 @@ function toggleFilterPaneSelector(search_prefix, id) {
   var input_name;
   var checkbox_prefix;
 
-  search_prefix = search_prefix.substring(0, 3);
+  search_prefix = search_prefix.substring(0, 7);
 
   if(id == "hoststatustypes") {
     panel           = 'hoststatustypes_pane';
@@ -1027,13 +1248,6 @@ function accept_filter_types(search_prefix, checkbox_names, result_name, checkbo
     inp[0].value = sum;
 
     set_filter_name(search_prefix, checkbox_names, checkbox_prefix, parseInt(sum));
-
-    /* removed submit, its inconsistend to submit the form sometimes and sometimes not */
-    /* submit the form if something changed */
-    //if(sum != orig) {
-    //  form = document.getElementById('filterForm');
-    //  form.submit();
-    //}
 }
 
 /* set the initial state of filter checkboxes */
@@ -1137,37 +1351,40 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
 
 /* add a new filter selector to this table */
 function add_new_filter(search_prefix, table) {
+  pane_prefix   = search_prefix.substring(0,4);
+  search_prefix = search_prefix.substring(4);
   search_prefix = search_prefix.substring(0,3);
-  table = document.getElementById(search_prefix+table);
-  if(!table) {
-    if(thruk_debug_js) { alert("ERROR: got no table for id in add_new_filter(): " + search_prefix+table); }
+  table         = table.substring(4);
+  tbl           = document.getElementById(pane_prefix+search_prefix+table);
+  if(!tbl) {
+    if(thruk_debug_js) { alert("ERROR: got no table for id in add_new_filter(): " + pane_prefix+search_prefix+table); }
     return;
   }
 
   // add new row
-  var tblBody        = table.tBodies[0];
+  var tblBody        = tbl.tBodies[0];
   var currentLastRow = tblBody.rows.length - 1;
   var newRow         = tblBody.insertRow(currentLastRow);
 
   // get first free number of typeselects
   var nr = 0;
   for(var x = 0; x<= 99; x++) {
-    tst = document.getElementById(search_prefix + x + '_ts');
+    tst = document.getElementById(pane_prefix + search_prefix + x + '_ts');
     if(tst) { nr = x+1; }
   }
 
   // add first cell
   var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Comment', 'Last Check', 'Next Check', 'Latency', 'Execution Time');
+  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Comment', 'Last Check', 'Next Check', 'Latency', 'Execution Time', '% State Change');
   typeselect.onchange   = verify_op;
-  typeselect.setAttribute('name', search_prefix + 'type');
-  typeselect.setAttribute('id', search_prefix + nr + '_ts');
+  typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
+  typeselect.setAttribute('id', pane_prefix + search_prefix + nr + '_ts');
   add_options(typeselect, options);
 
   var opselect          = document.createElement('select');
   var options           = new Array('~', '!~', '=', '!=', '<=', '>=');
-  opselect.setAttribute('name', search_prefix + 'op');
-  opselect.setAttribute('id', search_prefix + nr + '_to');
+  opselect.setAttribute('name', pane_prefix + search_prefix + 'op');
+  opselect.setAttribute('id', pane_prefix + search_prefix + nr + '_to');
   add_options(opselect, options);
 
   var newCell0 = newRow.insertCell(0);
@@ -1180,8 +1397,8 @@ function add_new_filter(search_prefix, table) {
   var newInput       = document.createElement('input');
   newInput.type      = 'text';
   newInput.value     = '';
-  newInput.setAttribute('name', search_prefix + 'value');
-  newInput.setAttribute('id',   search_prefix + nr + '_value');
+  newInput.setAttribute('name', pane_prefix + search_prefix + 'value');
+  newInput.setAttribute('id',   pane_prefix + search_prefix + nr + '_value');
   if(ajax_search_enabled) {
     newInput.onclick = ajax_search.init;
   }
@@ -1194,8 +1411,8 @@ function add_new_filter(search_prefix, table) {
   calImg.className = "cal_icon";
   calImg.alt = "choose date";
   var link   = document.createElement('a');
-  link.href  = "javascript:show_cal('" + search_prefix + nr + "_value')";
-  link.setAttribute('id',   search_prefix + nr + '_cal');
+  link.href  = "javascript:show_cal('" + pane_prefix + search_prefix + nr + "_value')";
+  link.setAttribute('id', pane_prefix + search_prefix + nr + '_cal');
   link.style.display    = "none";
   link.style.visibility = "hidden";
   link.appendChild(calImg);
@@ -1238,10 +1455,13 @@ function add_options(select, options) {
 
 /* create a complete new filter pane */
 function new_filter(cloneObj, parentObj, btnId) {
+  pane_prefix       = btnId.substring(0,4);
+  btnId             = btnId.substring(4);
   var search_prefix = btnId.substring(0, 3);
-  var origObj  = document.getElementById(search_prefix+cloneObj);
+  cloneObj          = cloneObj.substring(4);
+  var origObj       = document.getElementById(pane_prefix+search_prefix+cloneObj);
   if(!origObj) {
-    if(thruk_debug_js) { alert("ERROR: no elem to clone in new_filter() for: " + search_prefix + cloneObj); }
+    if(thruk_debug_js) { alert("ERROR: no elem to clone in new_filter() for: " + pane_prefix + search_prefix + cloneObj); }
   }
   var newObj   = origObj.cloneNode(true);
 
@@ -1251,11 +1471,11 @@ function new_filter(cloneObj, parentObj, btnId) {
   var tags = new Array('A', 'INPUT', 'TABLE', 'TR', 'TD', 'SELECT', 'INPUT', 'DIV', 'IMG');
   tags.each(function(tag) {
       var elems = newObj.getElementsByTagName(tag);
-      replaceIdAndNames(elems, new_prefix);
+      replaceIdAndNames(elems, pane_prefix+new_prefix);
   });
 
   // replace id of panel itself
-  replaceIdAndNames(newObj, new_prefix);
+  replaceIdAndNames(newObj, pane_prefix+new_prefix);
 
   var tblObj   = document.getElementById(parentObj);
   var tblBody  = tblObj.tBodies[0];
@@ -1265,14 +1485,17 @@ function new_filter(cloneObj, parentObj, btnId) {
   newCell.appendChild(newObj);
 
   // hide the original button
-  hideElement(btnId);
-  hideBtn = document.getElementById(new_prefix + 'filter_button_mini');
-  if(hideBtn) { hideElement(hideBtn); }
-  hideElement(new_prefix + 'btn_accept_search');
-  showElement(new_prefix + 'btn_del_search');
+  hideElement(pane_prefix + btnId);
+  hideBtn = document.getElementById(pane_prefix+new_prefix + 'filter_button_mini');
+  if(hideBtn) { hideElement( hideBtn); }
+  hideElement(pane_prefix + new_prefix + 'btn_accept_search');
+  showElement(pane_prefix + new_prefix + 'btn_del_search');
 
-  hideBtn = document.getElementById(new_prefix + 'filter_title');
+  hideBtn = document.getElementById(pane_prefix + new_prefix + 'filter_title');
   if(hideBtn) { hideElement(hideBtn); }
+
+  styler = document.getElementById(pane_prefix + new_prefix + 'style_selector');
+  if(styler) { styler.parentNode.removeChild(styler); }
 }
 
 /* replace ids and names for elements */
@@ -1283,11 +1506,11 @@ function replaceIdAndNames(elems, new_prefix) {
   for(var x = 0; x < elems.length; x++) {
     var elem = elems[x];
     if(elem.id) {
-        var new_id = elem.id.replace(/^s\d+_/, new_prefix);
+        var new_id = elem.id.replace(/^\w{3}_s\d+_/, new_prefix);
         elem.setAttribute('id', new_id);
     }
     if(elem.name) {
-        var new_name = elem.name.replace(/^s\d+_/, new_prefix);
+        var new_name = elem.name.replace(/^\w{3}_s\d+_/, new_prefix);
         elem.setAttribute('name', new_name);
     }
 
@@ -1299,9 +1522,11 @@ function replaceIdAndNames(elems, new_prefix) {
 
 /* remove a search panel */
 function deleteSearchPane(id) {
-  var search_prefix = id.substring(0, 3);
+  pane_prefix   = id.substring(0,4);
+  id            = id.substring(4);
+  search_prefix = id.substring(0,3);
 
-  var pane = document.getElementById(search_prefix + 'filter_pane');
+  var pane = document.getElementById(pane_prefix + search_prefix + 'filter_pane');
   var cell = pane.parentNode;
   while(cell.firstChild) {
       child = cell.firstChild;
@@ -1311,10 +1536,10 @@ function deleteSearchPane(id) {
   // show last "new search" button
   var last_nr = 0;
   for(var x = 0; x<= 99; x++) {
-      tst = document.getElementById('s'+x+'_' + 'new_filter');
-      if(tst && 's'+x+'_' != search_prefix) { last_nr = x; }
+      tst = document.getElementById(pane_prefix + 's'+x+'_' + 'new_filter');
+      if(tst && pane_prefix + 's'+x+'_' != search_prefix) { last_nr = x; }
   }
-  showElement('s'+last_nr+'_' + 'new_filter');
+  showElement( pane_prefix + 's'+last_nr+'_' + 'new_filter');
 
   return false;
 }
@@ -1358,7 +1583,7 @@ function verify_op(event) {
   for(var x = 0; x< opElem.options.length; x++) {
     var curOp = opElem.options[x].value;
     if(curOp == '~' || curOp == '!~') {
-      if(selValue != 'search' && selValue != 'host' && selValue != 'service' && selValue != 'comment') {
+      if(selValue != 'search' && selValue != 'host' && selValue != 'service' && selValue != 'hostgroup' && selValue != 'servicegroup' && selValue != 'comment') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only = and != are allowed for list searches
@@ -1376,7 +1601,7 @@ function verify_op(event) {
     }
 
     if(curOp == '<=' || curOp == '>=') {
-      if(selValue != 'next check' && selValue != 'last check' && selValue != 'latency' && selValue != 'execution time' ) {
+      if(selValue != 'next check' && selValue != 'last check' && selValue != 'latency' && selValue != 'execution time' && selValue != '% state change') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only <= and >= are allowed for list searches
@@ -1407,9 +1632,11 @@ function toggleTopPane() {
   if(toggleElement('top_pane')) {
     additionalParams.set('hidetop', 0);
     formInput.value = 0;
+    document.getElementById('btn_toggle_top_pane').src = "/thruk/themes/" + theme + "/images/icon_minimize.gif";
   } else {
     additionalParams.set('hidetop', 1);
     formInput.value = 1;
+    document.getElementById('btn_toggle_top_pane').src = "/thruk/themes/" + theme + "/images/icon_maximize.gif";
   }
 }
 
@@ -1474,10 +1701,12 @@ var ajax_search = {
     result_pan      : 'search-results',
     update_interval : 3600, // update at least every hour
     search_type     : 'all',
+    size            : 150,
 
     base            : new Array(),
     res             : new Array(),
     initialized     : false,
+    initialized_t   : false,
     cur_select      : -1,
     result_size     : false,
     cur_results     : false,
@@ -1485,7 +1714,7 @@ var ajax_search = {
     timer           : false,
 
     /* initialize search */
-    init: function(elem) {
+    init: function(elem, type, url) {
         if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
@@ -1496,23 +1725,29 @@ var ajax_search = {
         ajax_search.input_field = elem.id;
 
         var input = document.getElementById(ajax_search.input_field);
-        input.onkeyup = ajax_search.suggest;
-        input.setAttribute("autocomplete", "off");
-        input.blur();   // blur & focus the element, otherwise the first
-        input.focus();  // click would result in the browser autocomplete
-
-        var tmpElem = input;
-        while(tmpElem && tmpElem.parentNode) {
-            tmpElem = tmpElem.parentNode;
-            if(tmpElem.tagName == 'FORM') {
-                tmpElem.onsubmit = ajax_search.hide_results;
-            }
-        }
+        ajax_search.size = input.getWidth();
 
         // set type from select
         var type_selector_id = elem.id.replace('_value', '_ts');
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
+        addEvent(input, 'keyup', ajax_search.suggest);
+
+        search_url = ajax_search.url;
+        if(type != undefined) {
+            ajax_search.search_type = type;
+            search_url              = ajax_search.url + "&type=" + type;
+        } else {
+            type                    = 'all';
+        }
+        if(url != undefined) {
+            search_url              = url;
+        }
+
+        input.setAttribute("autocomplete", "off");
+        input.blur();   // blur & focus the element, otherwise the first
+        input.focus();  // click would result in the browser autocomplete
+
         if(selector && selector.tagName == 'SELECT') {
             var search_type = selector.options[selector.selectedIndex].value;
             if(search_type == 'host' || search_type == 'hostgroup' || search_type == 'service' || search_type == 'servicegroup') {
@@ -1521,17 +1756,41 @@ var ajax_search = {
             if(search_type == 'parent') {
                 ajax_search.search_type = 'host';
             }
+            if(search_type == 'contact' || search_type == 'comment' || search_type == 'next check' || search_type == 'last check' || search_type == 'latency' || search_type == 'execution time' || search_type == '% state change') {
+                ajax_search.search_type = 'none';
+            }
+        }
+        if(ajax_search.search_type == 'none') {
+            removeEvent( input, 'keyup', ajax_search.suggest );
+            return true;
         }
 
         var date = new Date;
         var now  = parseInt(date.getTime() / 1000);
         // update every hour (frames searches wont update otherwise)
-        if(ajax_search.initialized && now > ajax_search.initialized - ajax_search.update_interval) {
+        if(   ajax_search.initialized
+           && now > ajax_search.initialized - ajax_search.update_interval
+           && ajax_search.initialized_t == type
+        ) {
             ajax_search.suggest();
             return false;
         }
-        ajax_search.initialized = now;
-        new Ajax.Request(ajax_search.url, {
+
+        ajax_search.initialized   = now;
+        ajax_search.initialized_t = type;
+
+        // disable autocomplete
+        var tmpElem = input;
+        while(tmpElem && tmpElem.parentNode) {
+            tmpElem = tmpElem.parentNode;
+            if(tmpElem.tagName == 'FORM') {
+                tmpElem.onsubmit = ajax_search.hide_results;
+                tmpElem.setAttribute("autocomplete", "off");
+            }
+        }
+
+         // fill data store
+        new Ajax.Request(search_url, {
             onSuccess: function(transport) {
                 if(transport.responseJSON != null) {
                     ajax_search.base = transport.responseJSON;
@@ -1542,8 +1801,8 @@ var ajax_search = {
             }
         });
 
-        document.onkeydown  = ajax_search.arrow_keys;
-        document.onclick    = ajax_search.hide_results;
+        addEvent(document, 'keydown', ajax_search.arrow_keys);
+        addEvent(document, 'click', ajax_search.hide_results);
 
         return false;
     },
@@ -1571,7 +1830,6 @@ var ajax_search = {
     /* wrapper around suggest_do() to avoid multiple running searches */
     suggest: function(evt) {
         window.clearTimeout(ajax_search.timer);
-
         // dont suggest on enter
         evt = (evt) ? evt : ((window.event) ? event : null);
         if(evt) {
@@ -1644,6 +1902,7 @@ var ajax_search = {
                     results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
                 }
             });
+
             ajax_search.cur_results = results;
             ajax_search.cur_pattern = pattern;
             ajax_search.show_results(results, pattern, ajax_search.cur_select);
@@ -1658,11 +1917,6 @@ var ajax_search = {
         var panel = document.getElementById(ajax_search.result_pan);
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
-
-        size = results.size();
-        if(size == 1 && results[0].results[0].display == input.value) {
-            return;
-        }
 
         results = results.sortBy(function(s) {
             return(-1 * s.top_hits);
@@ -1693,7 +1947,7 @@ var ajax_search = {
                         if(type.name == 'servicegroups') { prefix = 'sg:'; }
                     }
                     var id = "suggest_item_"+x
-                    resultHTML += '<li> <a href="" class="' + classname + '" id="'+id+'" rev="' + prefix+data.display +'" onclick="return ajax_search.set_result(this.rev)"> ' + name +'<\/a><\/li>';
+                    resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="return ajax_search.set_result(this.rev)"> ' + name +'<\/a><\/li>';
                     ajax_search.res[x] = prefix+data.display;
                     x++;
                     cur_count++;
@@ -1713,18 +1967,33 @@ var ajax_search = {
         style.left    = coords[0] + "px";
         style.top     = (coords[1] + input.offsetHeight + 2) + "px";
         style.display = "block";
+        style.width   = ( ajax_search.size -2 ) + "px";
 
         showElement(panel);
     },
 
     /* set the value into the input field */
     set_result: function(value) {
-        var input = document.getElementById(ajax_search.input_field);
+        var input   = document.getElementById(ajax_search.input_field);
         input.value = value;
         ajax_search.cur_select = -1;
         ajax_search.hide_results();
         input.focus();
-        return false;
+
+        if(   ajax_search.input_field == "NavBarSearchItem"
+           || ajax_search.input_field == "data.username") {
+            var tmpElem = input;
+            while(tmpElem && tmpElem.parentNode) {
+                tmpElem = tmpElem.parentNode;
+                if(tmpElem.tagName == 'FORM') {
+                    tmpElem.submit();
+                    return false;
+                }
+            }
+            return false;
+        } else {
+            return false;
+        }
     },
 
     /* eventhandler for arrow keys */
@@ -1772,6 +2041,7 @@ var ajax_search = {
                     el.focus();
                 }
             }
+            Event.stop(evt);
             return false;
         }
         if(keyCode == 13 || keyCode == 108) {
@@ -1779,6 +2049,7 @@ var ajax_search = {
                 return true
             }
             ajax_search.set_result(ajax_search.res[ajax_search.cur_select]);
+            Event.stop(evt);
             return false
         }
         return true;
@@ -1798,4 +2069,59 @@ var ajax_search = {
         }
         return [offsetLeft, offsetTop];
     }
+}
+
+/*******************************************************************************
+88888888ba  888b      88 88888888ba
+88      "8b 8888b     88 88      "8b
+88      ,8P 88 `8b    88 88      ,8P
+88aaaaaa8P' 88  `8b   88 88aaaaaa8P'
+88""""""'   88   `8b  88 88""""""'
+88          88    `8b 88 88
+88          88     `8888 88
+88          88      `888 88
+*******************************************************************************/
+
+function set_png_img(start, end, id) {
+    var newUrl = pnp_url + "&start=" + start + "&end=" + end;
+    debug(newUrl);
+
+    $('pnpwaitimg').style.display = "block";
+
+    $('pnpimg').src = newUrl;
+
+    $('pnpimg').onload = function() {
+      $('pnpimg').style.display = "block";
+      $('pnpwaitimg').style.display = "none";
+    }
+
+    // set style of buttons
+    if(id) {
+        for(x=1;x<=5;x++) {
+            obj = document.getElementById("pnp_th"+x);
+            styleElements(obj, "original", 1);
+        }
+        obj = document.getElementById(id);
+        styleElements(obj, "commentEven pnpSelected", 1);
+    }
+
+    // reset reload timer for page
+    resetRefresh();
+
+    return false;
+}
+
+function move_png_img(factor) {
+    var urlArgs = new Hash($('pnpimg').src.parseQuery());
+
+    start = urlArgs.get("start");
+    end   = urlArgs.get("end");
+    diff  = end - start;
+
+    start = parseInt(diff * factor) + parseInt(start);
+    end   = parseInt(diff * factor) + parseInt(end);
+    debug(start);
+    debug(end);
+
+    return set_png_img(start, end);
 }

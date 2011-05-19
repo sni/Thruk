@@ -59,10 +59,14 @@
             [% ELSIF hostgroup    != ''    %]Status Summary For Host Group '[% hostgroup %]'
             [% ELSIF servicegroup == 'all' %]Status Summary For All Service Groups
             [% ELSIF servicegroup != ''    %]Status Summary For Service Group '[% servicegroup %]'
+            [% ELSE                        %]Status Summary
             [% END %]
           </div><br>
         </td>
-        <td valign="top" align="right" width="33%"></td>
+        <td valign="bottom" align="right" width="33%">
+          [% PROCESS _add_bookmark.tt %]
+          [% PROCESS _show_link.tt %]
+        </td>
       </tr>
     </table>
 
@@ -71,9 +75,9 @@
     <div align="center">
       <table border="1" class='status statusgroups'>
         <tr>
-          [% IF hostgroup != '' %]
+          [% IF substyle == 'host' %]
           <th class='status'>Host Group</th>
-          [% ELSIF servicegroup != '' %]
+          [% ELSIF substyle == 'service' %]
           <th class='status'>Service Group</th>
           [% END %]
           <th class='status'>Host Status Summary</th>
@@ -82,28 +86,32 @@
         [% FOR group IN data %]
         [% groupname = group.name %]
 
-        [% IF hostgroup != '' %]
-        [% SET hostgroup_uri = groupname | uri %]
-        [% SET link        = "hostgroup=" _ hostgroup_uri _ "&amp;style=hostdetail" %]
-        [% SET servicelink = "hostgroup=" _ hostgroup_uri _ "&amp;style=detail" %]
-        [% ELSIF servicegroup != '' %]
-        [% SET servicegroup_uri = groupname | uri %]
-        [% SET link        = "servicegroup=" _ servicegroup_uri _ "&amp;style=detail" %]
-        [% SET servicelink = "servicegroup=" _ servicegroup_uri _ "&amp;style=detail" %]
+        [% SET group_uri = groupname | uri %]
+        [% IF substyle == 'host' %]
+          [% SET link        = uri_with(c, 'hostgroup' => group_uri, style => 'hostdetail') %]
+          [% SET servicelink = uri_with(c, 'hostgroup' => group_uri, style => 'detail') %]
+        [% ELSIF substyle == 'service' %]
+          [% SET link        = uri_with(c, 'servicegroup' => group_uri, style => 'detail') %]
+          [% SET servicelink = uri_with(c, 'servicegroup' => group_uri, style => 'detail') %]
         [% END %]
         [% SET class = 'statusEven' IF loop.odd  %]
         [% SET class = 'statusOdd'  IF loop.even %]
-        <tr class='[% class %]'>
-          [% IF hostgroup != '' %]
+        <tr class='[% class %][% IF loop.first %] firstrow[% END %]'>
+          [% IF substyle == 'host' %]
           <td class='[% class %]'><a href='status.cgi?hostgroup=[% group.name | uri %]&amp;style=overview'>[% group.alias %]</a> (<a href='extinfo.cgi?type=5&amp;hostgroup=[% group.name | uri %]'>[% group.name %]</a>)</td>
-          [% ELSIF servicegroup != '' %]
+          [% ELSIF substyle == 'service' %]
           <td class='[% class %]'><a href='status.cgi?servicegroup=[% group.name | uri %]&amp;style=overview'>[% group.alias %]</a> (<a href='extinfo.cgi?type=8&amp;servicegroup=[% group.name | uri %]'>[% group.name %]</a>)</td>
           [% END %]
           <td class='[% class %]' align="center" valign="middle">
             <table border='0'>
+              [% IF group.hosts_pending > 0 %]
+              <tr>
+                <td class='miniStatusPENDING'><a href='[% link %]&amp;&amp;hoststatustypes=1&amp;hostprops=0'>[% group.hosts_pending %] PENDING</a></td>
+              </tr>
+              [% END %]
               [% IF group.hosts_up > 0 %]
               <tr>
-                <td class='miniStatusUP'><a href='status.cgi?[% link %]&amp;&amp;hoststatustypes=2&amp;hostprops=0'>[% group.hosts_up %] UP</a></td>
+                <td class='miniStatusUP'><a href='[% link %]&amp;&amp;hoststatustypes=2&amp;hostprops=0'>[% group.hosts_up %] UP</a></td>
               </tr>
               [% END %]
               [% IF group.hosts_down > 0 %]
@@ -111,17 +119,17 @@
                 <td class='miniStatusDOWN'>
                   <table border='0'>
                     <tr>
-                      <td class='miniStatusDOWN'><a href='status.cgi?[% link %]&amp;&amp;hoststatustypes=4&amp;hostprops=0'>[% group.hosts_down %] DOWN</a></td>
+                      <td class='miniStatusDOWN'><a href='[% link %]&amp;&amp;hoststatustypes=4&amp;hostprops=0'>[% group.hosts_down %] DOWN</a></td>
                       <td>
                         <table border='0'>
-                          [% IF group.hosts_down_unhandled > 0 %]<tr><td width="100%" class='hostImportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=42'>[% group.hosts_down_unhandled %] Unhandled</a></td></tr>[% END %]
-                          [% IF group.hosts_down_downtime > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=1'>[% group.hosts_down_downtime %] Scheduled</a></td></tr>[% END %]
-                          [% IF group.hosts_down_ack > 0       %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=4'>[% group.hosts_down_ack %] Acknowledged</a></td></tr>[% END %]
+                          [% IF group.hosts_down_unhandled > 0 %]<tr><td width="100%" class='hostImportantProblem'><a href='[% link %]&amp;hoststatustypes=4&amp;hostprops=42'>[% group.hosts_down_unhandled %] Unhandled</a></td></tr>[% END %]
+                          [% IF group.hosts_down_downtime > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=4&amp;hostprops=1'>[% group.hosts_down_downtime %] Scheduled</a></td></tr>[% END %]
+                          [% IF group.hosts_down_ack > 0       %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=4&amp;hostprops=4'>[% group.hosts_down_ack %] Acknowledged</a></td></tr>[% END %]
                           [% IF strict_passive_mode %]
-                            [% IF group.hosts_down_disabled_active > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_active %] Disabled</a></td></tr>[% END %]
-                            [% IF group.hosts_down_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_passive %] Passive</a></td></tr>[% END %]
+                            [% IF group.hosts_down_disabled_active > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.hosts_down_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_passive %] Passive</a></td></tr>[% END %]
                           [% ELSE %]
-                            [% IF group.hosts_down_disabled_active + group.hosts_down_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_active + group.hosts_down_disabled_passive %] Disabled</a></td></tr>[% END %]
+                            [% IF group.hosts_down_disabled_active + group.hosts_down_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=4&amp;hostprops=16'>[% group.hosts_down_disabled_active + group.hosts_down_disabled_passive %] Disabled</a></td></tr>[% END %]
                           [% END %]
                         </table>
                       </td>
@@ -135,17 +143,17 @@
                 <td class='miniStatusUNREACHABLE'>
                   <table border='0'>
                     <tr>
-                      <td class='miniStatusUNREACHABLE'><a href='status.cgi?[% link %]&amp;&amp;hoststatustypes=8&amp;hostprops=0'>[% group.hosts_unreachable %] UNREACHABLE</a></td>
+                      <td class='miniStatusUNREACHABLE'><a href='[% link %]&amp;&amp;hoststatustypes=8&amp;hostprops=0'>[% group.hosts_unreachable %] UNREACHABLE</a></td>
                       <td>
                         <table border='0'>
-                          [% IF group.hosts_unreachable_unhandled > 0 %]<tr><td width="100%" class='hostImportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=42'>[% group.hosts_unreachable_unhandled %] Unhandled</a></td></tr>[% END %]
-                          [% IF group.hosts_unreachable_downtime > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=1'>[% group.hosts_unreachable_downtime %] Scheduled</a></td></tr>[% END %]
-                          [% IF group.hosts_unreachable_ack > 0       %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=4'>[% group.hosts_unreachable_ack %] Acknowledged</a></td></tr>[% END %]
+                          [% IF group.hosts_unreachable_unhandled > 0 %]<tr><td width="100%" class='hostImportantProblem'><a href='[% link %]&amp;hoststatustypes=8&amp;hostprops=42'>[% group.hosts_unreachable_unhandled %] Unhandled</a></td></tr>[% END %]
+                          [% IF group.hosts_unreachable_downtime > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=8&amp;hostprops=1'>[% group.hosts_unreachable_downtime %] Scheduled</a></td></tr>[% END %]
+                          [% IF group.hosts_unreachable_ack > 0       %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=8&amp;hostprops=4'>[% group.hosts_unreachable_ack %] Acknowledged</a></td></tr>[% END %]
                           [% IF strict_passive_mode %]
-                            [% IF group.hosts_unreachable_disabled_active > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=131088'>[% group.hosts_unreachable_disabled_active %] Disabled</a></td></tr>[% END %]
-                            [% IF group.hosts_unreachable_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=65552'>[% group.hosts_unreachable_disabled_passive %] Passive</a></td></tr>[% END %]
+                            [% IF group.hosts_unreachable_disabled_active > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=8&amp;hostprops=131088'>[% group.hosts_unreachable_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.hosts_unreachable_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=8&amp;hostprops=65552'>[% group.hosts_unreachable_disabled_passive %] Passive</a></td></tr>[% END %]
                           [% ELSE %]
-                            [% IF group.hosts_unreachable_disabled_active +group.hosts_unreachable_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='status.cgi?[% link %]&amp;hoststatustypes=8&amp;hostprops=16'>[% group.hosts_unreachable_disabled_active + group.hosts_unreachable_disabled_passive %] Disabled</a></td></tr>[% END %]
+                            [% IF group.hosts_unreachable_disabled_active +group.hosts_unreachable_disabled_passive > 0  %]<tr><td width="100%" class='hostUnimportantProblem'><a href='[% link %]&amp;hoststatustypes=8&amp;hostprops=16'>[% group.hosts_unreachable_disabled_active + group.hosts_unreachable_disabled_passive %] Disabled</a></td></tr>[% END %]
                           [% END %]
                         </table>
                       </td>
@@ -158,23 +166,23 @@
           </td>
           <td class='[% class %]' align="center" valign="middle">
             <table border="0">
-              [% IF group.services_ok      > 0 %]<tr><td class='miniStatusOK'><a href='status.cgi?[% servicelink %]&amp;&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_ok %] OK</a></td></tr>[% END %]
+              [% IF group.services_ok      > 0 %]<tr><td class='miniStatusOK'><a href='[% servicelink %]&amp;&amp;servicestatustypes=2&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_ok %] OK</a></td></tr>[% END %]
               [% IF group.services_warning > 0 %]
               <tr>
                 <td class='miniStatusWARNING'>
                   <table border='0'>
                     <tr>
-                      <td class='miniStatusWARNING'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_warning %] WARNING</a>&nbsp;:</td>
+                      <td class='miniStatusWARNING'><a href='[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_warning %] WARNING</a>&nbsp;:</td>
                       <td>
                         <table border='0'>
-                          [% IF group.services_warning_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_warning_unhandled %] Unhandled</a></td></tr>[% END %]
-                          [% IF group.services_warning_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=12'>[% group.services_warning_prob_host %] on Problem Hosts</a></td></tr>[% END %]
-                          [% IF group.services_warning_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=4'>[% group.services_warning_ack %] Acknowledged</a></td></tr>[% END %]
+                          [% IF group.services_warning_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_warning_unhandled %] Unhandled</a></td></tr>[% END %]
+                          [% IF group.services_warning_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=4&amp;hoststatustypes=12'>[% group.services_warning_prob_host %] on Problem Hosts</a></td></tr>[% END %]
+                          [% IF group.services_warning_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=4'>[% group.services_warning_ack %] Acknowledged</a></td></tr>[% END %]
                           [% IF strict_passive_mode %]
-                            [% IF group.services_warning_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=131088'>[% group.services_warning_disabled_active %] Disabled</a></td></tr>[% END %]
-                            [% IF group.services_warning_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=65552'>[% group.services_warning_disabled_passive %] Passive</a></td></tr>[% END %]
+                            [% IF group.services_warning_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=131088'>[% group.services_warning_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_warning_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=65552'>[% group.services_warning_disabled_passive %] Passive</a></td></tr>[% END %]
                           [% ELSE %]
-                            [% IF group.services_warning_disabled_active + group.services_warning_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=16'>[% group.services_warning_disabled_active + group.services_warning_disabled_passive %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_warning_disabled_active + group.services_warning_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=4&amp;serviceprops=16'>[% group.services_warning_disabled_active + group.services_warning_disabled_passive %] Disabled</a></td></tr>[% END %]
                           [% END %]
                         </table>
                       </td>
@@ -188,17 +196,17 @@
                 <td class='miniStatusUNKNOWN'>
                   <table border='0'>
                     <tr>
-                      <td class='miniStatusUNKNOWN'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_unknown %] UNKNOWN</a>&nbsp;:</td>
+                      <td class='miniStatusUNKNOWN'><a href='[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_unknown %] UNKNOWN</a>&nbsp;:</td>
                       <td>
                         <table border='0'>
-                          [% IF group.services_unknown_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_unknown_unhandled %] Unhandled</a></td></tr>[% END %]
-                          [% IF group.services_unknown_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=12'>[% group.services_unknown_prob_host %] on Problem Hosts</a></td></tr>[% END %]
-                          [% IF group.services_unknown_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=4'>[% group.services_unknown_ack %] Acknowledged</a></td></tr>[% END %]
+                          [% IF group.services_unknown_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_unknown_unhandled %] Unhandled</a></td></tr>[% END %]
+                          [% IF group.services_unknown_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=8&amp;hoststatustypes=12'>[% group.services_unknown_prob_host %] on Problem Hosts</a></td></tr>[% END %]
+                          [% IF group.services_unknown_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=4'>[% group.services_unknown_ack %] Acknowledged</a></td></tr>[% END %]
                           [% IF strict_passive_mode %]
-                            [% IF group.services_unknown_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=131088'>[% group.services_unknown_disabled_active %] Disabled</a></td></tr>[% END %]
-                            [% IF group.services_unknown_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=65552'>[% group.services_unknown_disabled_passive %] Passive</a></td></tr>[% END %]
+                            [% IF group.services_unknown_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=131088'>[% group.services_unknown_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_unknown_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=65552'>[% group.services_unknown_disabled_passive %] Passive</a></td></tr>[% END %]
                           [% ELSE %]
-                            [% IF group.services_unknown_disabled_active + group.services_unknown_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=16'>[% group.services_unknown_disabled_active + group.services_unknown_disabled_passive %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_unknown_disabled_active + group.services_unknown_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=8&amp;serviceprops=16'>[% group.services_unknown_disabled_active + group.services_unknown_disabled_passive %] Disabled</a></td></tr>[% END %]
                           [% END %]
                         </table>
                       </td>
@@ -212,17 +220,17 @@
                 <td class='miniStatusCRITICAL'>
                   <table border='0'>
                     <tr>
-                      <td class='miniStatusCRITICAL'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_critical %] CRITICAL</a>&nbsp;:</td>
+                      <td class='miniStatusCRITICAL'><a href='[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_critical %] CRITICAL</a>&nbsp;:</td>
                       <td>
                         <table border='0'>
-                          [% IF group.services_critical_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_critical_unhandled %] Unhandled</a></td></tr>[% END %]
-                          [% IF group.services_critical_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=12'>[% group.services_critical_prob_host %] on Problem Hosts</a></td></tr>[% END %]
-                          [% IF group.services_critical_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=4'>[% group.services_critical_ack %] Acknowledged</a></td></tr>[% END %]
+                          [% IF group.services_critical_unhandled > 0 %]<tr><td width="100%" class='serviceImportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=3&amp;serviceprops=42'>[% group.services_critical_unhandled %] Unhandled</a></td></tr>[% END %]
+                          [% IF group.services_critical_prob_host > 0 %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=16&amp;hoststatustypes=12'>[% group.services_critical_prob_host %] on Problem Hosts</a></td></tr>[% END %]
+                          [% IF group.services_critical_ack > 0       %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=4'>[% group.services_critical_ack %] Acknowledged</a></td></tr>[% END %]
                           [% IF strict_passive_mode %]
-                            [% IF group.services_critical_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=131088'>[% group.services_critical_disabled_active %] Disabled</a></td></tr>[% END %]
-                            [% IF group.services_critical_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=65552'>[% group.services_critical_disabled_passive %] Passive</a></td></tr>[% END %]
+                            [% IF group.services_critical_disabled_active > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=131088'>[% group.services_critical_disabled_active %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_critical_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=65552'>[% group.services_critical_disabled_passive %] Passive</a></td></tr>[% END %]
                           [% ELSE %]
-                            [% IF group.services_critical_disabled_active + group.services_critical_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='status.cgi?[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=16'>[% group.services_critical_disabled_active + group.services_critical_disabled_passive %] Disabled</a></td></tr>[% END %]
+                            [% IF group.services_critical_disabled_active + group.services_critical_disabled_passive > 0  %]<tr><td width="100%" class='serviceUnimportantProblem'><a href='[% servicelink %]&amp;servicestatustypes=16&amp;serviceprops=16'>[% group.services_critical_disabled_active + group.services_critical_disabled_passive %] Disabled</a></td></tr>[% END %]
                           [% END %]
                         </table>
                       </td>
@@ -231,7 +239,7 @@
                 </td>
               </tr>
               [% END %]
-              [% IF group.services_pending > 0 %]<tr><td class='miniStatusPENDING'><a href='status.cgi?[% servicelink %]&amp;&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_pending %] PENDING</a></td></tr>[% END %]
+              [% IF group.services_pending > 0 %]<tr><td class='miniStatusPENDING'><a href='[% servicelink %]&amp;&amp;servicestatustypes=1&amp;hoststatustypes=15&amp;serviceprops=0&amp;hostprops=0'>[% group.services_pending %] PENDING</a></td></tr>[% END %]
             </table>
             [% IF group.services_ok + group.services_warning + group.services_unknown + group.services_critical + group.services_pending == 0 %]
             No matching services

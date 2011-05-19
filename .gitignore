@@ -9,6 +9,7 @@ logs/debug.log
 logs/error.log
 logs/access.log
 thruk_local.conf
+thruk_local.conf*
 menu_local.conf
 inc
 docs/images
@@ -21,3 +22,8 @@ t/xt
 .author
 cgi_local.cfg
 ssi_local
+cgi.cfg-*
+htpasswd
+var
+log4perl.conf
+logs
