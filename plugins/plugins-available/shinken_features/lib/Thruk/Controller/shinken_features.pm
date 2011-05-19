@@ -293,6 +293,10 @@ sub _count_hosts_and_services_impacts {
 sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+    unless($c->stash->{'enable_shinken_features'}) {
+        return $c->detach('/error/index/21');
+    }
+
     # We want root problems only
     my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     got_business_rule => 1

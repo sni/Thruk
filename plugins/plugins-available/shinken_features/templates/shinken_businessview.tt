@@ -1,7 +1,11 @@
 ﻿[% statusmap_header = BLOCK %]
   <link type="text/css" href="[% url_prefix %]thruk/plugins/shinken_features/businessview.css" rel="stylesheet" />
   <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/shinken_features/businessview.js"></script>
-  <script language="javascript" type="text/javascript"><!-- var img_src="[% url_prefix %]thruk/plugins/shinken_features/images/"; --> </script>
+  <script language="javascript" type="text/javascript">
+  <!--
+  var img_src="[% url_prefix %]thruk/plugins/shinken_features/images/";
+  -->
+  </script>
 [% END %]
 [% PROCESS _header.tt extra_header => statusmap_header %]
 

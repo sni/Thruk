@@ -86,6 +86,7 @@ lib/Thruk/View/Excel.pm
 lib/Thruk/View/GD.pm
 lib/Thruk/View/JSON.pm
 lib/Thruk/View/TT.pm
+LICENSE
 log4perl.conf.example
 Makefile.PL
 MANIFEST
@@ -133,7 +134,12 @@ plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
 plugins/plugins-available/shinken_features/lib/Thruk/Controller/shinken_features.pm
+plugins/plugins-available/shinken_features/root/businessview.css
+plugins/plugins-available/shinken_features/root/businessview.js
+plugins/plugins-available/shinken_features/root/images/go-next.png
+plugins/plugins-available/shinken_features/root/images/go-up.png
 plugins/plugins-available/shinken_features/t/controller_shinken_features.t
+plugins/plugins-available/shinken_features/templates/shinken_businessview.tt
 plugins/plugins-available/shinken_features/templates/shinken_outagespbimp.tt
 plugins/plugins-available/shinken_features/templates/shinken_status_bothtypes.tt
 plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
