@@ -153,7 +153,7 @@ sub test_page {
 
     # check for missing images / css or js
     if($content_type =~ 'text\/html') {
-        my @matches = $return->{'content'} =~ m/(src|href)=['|"](.+?)['|"]/gi;
+        my @matches = $return->{'content'} =~ m/\s+(src|href)=['|"](.+?)['|"]/gi;
         my $links_to_check;
         my $x=0;
         for my $match (@matches) {

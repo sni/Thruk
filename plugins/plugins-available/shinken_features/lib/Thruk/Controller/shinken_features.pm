@@ -47,6 +47,20 @@ sub outagespbimp_cgi : Regex('thruk\/cgi\-bin\/outagespbimp\.cgi') {
     return $c->detach('/shinken_features/outages_pbimp_index');
 }
 
+######################################
+
+=head2 businessview_cgi
+
+page: /thruk/cgi-bin/businessview.cgi
+
+=cut
+sub businessview_cgi : Regex('thruk\/cgi\-bin\/businessview\.cgi') {
+    my ( $self, $c ) = @_;
+    return if defined $c->{'cancled'};
+    return $c->detach('/shinken_features/businessview_index');
+}
+
+
 
 ##########################################################
 sub outages_pbimp_index :Path :Args(0) :MyAction('AddDefaults') {
@@ -273,6 +287,148 @@ sub _count_hosts_and_services_impacts {
 
     return($affected_hosts, $affected_services);
 }
+
+
+##########################################################
+sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
+    my ( $self, $c ) = @_;
+
+    # We want root problems only
+    my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                                    got_business_rule => 1
+                                                  ]);
+    my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                                    got_business_rule => 1
+                                                  ]);
+
+    # Main data given for the criticities level, and know
+    # if we have elements in it or not
+    my @criticities = (
+        {value => 5, text => 'Top production',  nb => 0},
+        {value => 4, text => 'Production',      nb => 0},
+        {value => 3, text => 'Standard',        nb => 0},
+        {value => 2, text => 'Qualification',   nb => 0},
+        {value => 1, text => 'Devel',           nb => 0},
+        {value => 0, text => 'Nearly nothing',  nb => 0});
+
+    # First for hosts
+    if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
+        my $hostcomments = {};
+        my $tmp = $c->{'db'}->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+        for my $com (@{$tmp}) {
+            $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
+            $hostcomments->{$com->{'host_name'}}++;
+
+        }
+
+        my $tmp2 = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
+        my $all_hosts = Thruk::Utils::array2hash($tmp2, 'name');
+        for my $host (@{$hst_pbs}) {
+
+            # get number of comments
+            $host->{'comment_count'} = 0;
+            $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
+
+            # count number of impacted hosts / services
+            $self->_link_parent_hosts_and_services($c, $host);
+
+            # add a criticity to this crit level
+            my $crit = $host->{'criticity'};
+            $criticities[5 - $crit]{"nb"}++;
+
+        }
+    }
+
+    # Then for services
+    if(defined $srv_pbs and scalar @{$srv_pbs} > 0) {
+        my $srvcomments = {};
+        for my $srv (@{$srv_pbs}) {
+
+            # get number of comments
+            $srv->{'comment_count'} = 0;
+
+            # count number of impacted hosts / services
+            $self->_link_parent_hosts_and_services($c, $srv);
+
+            # add a criticity to this crit level
+            my $crit = $srv->{'criticity'};
+            $criticities[5 - $crit]{"nb"}++;
+
+        }
+    }
+
+    # sort by criticity
+    my $sortedhst_pbs = Thruk::Backend::Manager::_sort($c, $hst_pbs, { 'DESC' => 'criticity' });
+    my $sortedsrv_pbs = Thruk::Backend::Manager::_sort($c, $srv_pbs, { 'DESC' => 'criticity' });
+
+    $c->stash->{hst_pbs}        = $sortedhst_pbs;
+    $c->stash->{srv_pbs}        = $sortedsrv_pbs;
+    $c->stash->{criticities}    = \@criticities;
+    $c->stash->{title}          = 'Business Elements';
+    $c->stash->{infoBoxTitle}   = 'Business Elements';
+    $c->stash->{page}           = 'businessview';
+    $c->stash->{template}       = 'shinken_businessview.tt';
+
+    Thruk::Utils::ssi_include($c);
+
+    return 1;
+}
+
+
+##########################################################
+# Count the impacts for an host
+sub _link_parent_hosts_and_services {
+    my($self, $c,  $elt ) = @_;
+
+    my @host_parents = ();
+    my @services_parents = ();
+
+    use Data::Dumper;
+    return 0 if !defined $elt;
+
+    if(defined $elt->{'parent_dependencies'} and $elt->{'parent_dependencies'} ne '') {
+        for my $parent (@{$elt->{'parent_dependencies'}}) {
+            # Look at if we match an elt or a service here
+            # a service will have a /, not for elts
+            if($parent =~ /\//mx){
+                # We need to look for the service object
+                my @elts = split '\/', $parent;
+                # Why is it reversed here?
+                my $hname = $elts[0];
+                my $desc = $elts[1];
+                my $servicefilter = [ { description        => { '='     => $desc } },
+                                      { host_name          => { '='     => $hname } },
+                                    ];
+
+                my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+                my $srv = $tmp_services->[0];
+                push(@services_parents, $srv);
+                # And call this on this parent too to build a tree
+                # TODO : limit the level
+
+                $self->_link_parent_hosts_and_services($c, $srv);
+            }else{
+                my $host_search_filter = [ { name               => { '='     => $parent } },
+                                         ];
+
+                my $tmp_hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $host_search_filter ] );
+                # we only got one host
+                my $hst = $tmp_hosts->[0];
+
+                push(@host_parents, $hst);
+                # And call this on this parent too to build a tree
+                # TODO : limit the level
+                $self->_link_parent_hosts_and_services($c, $hst);
+            }
+        }
+    }
+
+    $elt->{'host_parents'}     = \@host_parents;
+    $elt->{'services_parents'} = \@services_parents;
+
+    return 0;
+}
+
 
 ##########################################################
 

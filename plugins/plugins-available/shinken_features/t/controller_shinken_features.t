@@ -7,7 +7,7 @@ $Data::Dumper::Sortkeys = 1;
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
-    plan tests => 32;
+    plan tests => 41;
 } else {
     plan skip_all => 'pure shinken backend required'
 }
@@ -21,7 +21,6 @@ use_ok 'Thruk::Controller::shinken_features';
 my $pages = [
     '/thruk/cgi-bin/outagespbimp.cgi',
 ];
-my $problem_host;
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
@@ -41,6 +40,18 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Current Network Status',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+    );
+}
+
+
+$pages = [
+    '/thruk/cgi-bin/businessview.cgi',
+];
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => 'Business Elements',
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
