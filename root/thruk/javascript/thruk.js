@@ -223,6 +223,8 @@ function toggleBackend(backend) {
     current_backend_states.set(backend, 2);
   }
 
+  additionalParams.set('reload_nav', 1);
+
   /* save current selected backends in session cookie */
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
   window.clearTimeout(backendSelTimer);
