@@ -1634,11 +1634,11 @@ function toggleTopPane() {
   if(toggleElement('top_pane')) {
     additionalParams.set('hidetop', 0);
     formInput.value = 0;
-    document.getElementById('btn_toggle_top_pane').src = "/thruk/themes/" + theme + "/images/icon_minimize.gif";
+    document.getElementById('btn_toggle_top_pane').src = url_prefix + "thruk/themes/" + theme + "/images/icon_minimize.gif";
   } else {
     additionalParams.set('hidetop', 1);
     formInput.value = 1;
-    document.getElementById('btn_toggle_top_pane').src = "/thruk/themes/" + theme + "/images/icon_maximize.gif";
+    document.getElementById('btn_toggle_top_pane').src = url_prefix + "/thruk/themes/" + theme + "/images/icon_maximize.gif";
   }
 }
 
