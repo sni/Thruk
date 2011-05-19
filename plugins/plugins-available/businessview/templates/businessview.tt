@@ -32,9 +32,10 @@
 
     [% FOREACH crit IN criticities %]
     [% IF crit.nb != 0 %]
-    <div class='dataTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png"></div>
+    <table style="min-width: 600px;"><tr><td>
+    <div class='dataTitle blockHead blockHeadBorder'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" height="16" alt="[% crit.text %]" title="[% crit.text %]"></div>
     [%# Global table %]
-    <table class='infoBox' border=0>
+    <table class='data' style="min-width: 600px;">
       <tr>
         <td>
           [%# Higer level List %]
@@ -62,7 +63,10 @@
                [% END %]
                [%# Global table %]
             <li>
-              <table><tr class='dataOdd'><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='elementTitle'><a href='extinfo.cgi?type=2&amp;host=[% service.host_name | uri %]&amp;service=[% service.description %]&amp;backend=[% service.peer_key %]'>[% service.host_name %]/[% service.description %]</a></div></td>
+              <table>
+                <tr class='dataOdd'>
+                  <td class='[% s_status %]' width="80">[% s_status_text %]</td>
+                  <td><div class='elementTitle'><a href='extinfo.cgi?type=2&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>[% service.host_name %]/[% service.description %]</a></div></td>
               <td class='void'>
               [%# Sublevel list %]
                 <a id="togglelink-son-[% crit.value %]-[% i %]" class="internal" href="javascript:toggleToc('son-[% crit.value %]-[% i %]')"><img id="img-son-[% crit.value %]-[% i %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png" alt="Expand/Reduce"> </a>
@@ -93,7 +97,7 @@
 
                   [%# Sublevel Element %]
                   <li>
-                    <table><tr class='dataOdd'><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='elementTitle'><a href='extinfo.cgi?type=2&amp;host=[% parent.host_name | uri %]&amp;service=[% parent.description %]&amp;backend=[% parent.peer_key %]'>[% parent.host_name %]/[% parent.description %]</a></div></td>
+                    <table><tr class='dataOdd'><td class='[% s_status %]' width="80">[% s_status_text %]</td><td><div class='elementTitle2'><a href='extinfo.cgi?type=2&amp;host=[% parent.host_name | uri %]&amp;service=[% parent.description | uri %]&amp;backend=[% parent.peer_key %]'>[% parent.host_name %]/[% parent.description %]</a></div></td>
                     [% IF subparents.size > 0 %]
                         <td class='void'><a id="togglelink-son-[% crit.value %]-[% i %]-[% j %]" class="internal" href="javascript:toggleToc('son-[% crit.value %]-[% i %]-[% j %]')">
                             <img id="img-son-[% crit.value %]-[% i %]-[% j %]" src="[% url_prefix %]thruk/plugins/businessview/images/go-next.png" alt="Expand/Reduce"></a>
@@ -127,7 +131,7 @@
                         [% SET s_status_text = 'UNKNOWN' %]
                         [% END %]
                          [%# subsub element %]
-                         <li><table><tr class='dataOdd'><td class='[% s_status %]'>[% s_status_text %]</td><td><div class='elementTitle'><a href='extinfo.cgi?type=2&amp;host=[% subparent.host_name | uri %]&amp;service=[% subparent.description %]&amp;backend=[% subparent.peer_key %]'>[% subparent.host_name %]/[% subparent.description %]</a></div></td></tr></table></li>
+                         <li><table><tr class='dataOdd'><td class='[% s_status %]' width="80">[% s_status_text %]</td><td><div class='elementTitle3'><a href='extinfo.cgi?type=2&amp;host=[% subparent.host_name | uri %]&amp;service=[% subparent.description | uri %]&amp;backend=[% subparent.peer_key %]'>[% subparent.host_name %]/[% subparent.description %]</a></div></td></tr></table></li>
                       [% END %]
                       [%# End of subsub parent listing%]
                       </ul>
@@ -140,12 +144,17 @@
      </li>
     [% END %]
 
+
     [%# end of the test for this service criticity %]
     [% END %]
 
      </ul></td></tr></table>
     [%# end of the main foreach on criticities, and the look for void criticity %]
+</td></tr></table>
+<br>
     [% END %]
     [% END %]
+
+    </div>
 
 [% PROCESS _footer.tt %]

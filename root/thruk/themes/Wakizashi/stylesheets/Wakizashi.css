@@ -14,7 +14,7 @@
 table.infoBox {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -38,7 +38,7 @@ table.infoBox td {
 table.linkBox {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -129,7 +129,7 @@ table.data {
 td.stateInfoTable1 {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -143,7 +143,7 @@ td.stateInfoTable1 {
 td.stateInfoTable2 {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -172,7 +172,7 @@ table.command {
 table.command > tbody > tr > td {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -208,7 +208,7 @@ th.data {
 table.filter {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -292,7 +292,7 @@ table.statusgroups a{
 body.avail table.data {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -335,15 +335,15 @@ div.logEntries {
 .dataOdd {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
 } /* font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }*/
-.dataEven { 
+.dataEven {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -388,17 +388,17 @@ img {
     border-style: none;
 }
 /*
-   __  __       _        
-  |  \/  | __ _(_)_ __   
-  | |\/| |/ _` | | '_ \  
-  | |  | | (_| | | | | | 
-  |_|  |_|\__,_|_|_| |_| 
+   __  __       _
+  |  \/  | __ _(_)_ __
+  | |\/| |/ _` | | '_ \
+  | |  | | (_| | | | | |
+  |_|  |_|\__,_|_|_| |_|
 
 */
 
 body.main {
     background-attachment: fixed;
-    background-image: url("../images/contentframe_background.jpg"); 
+    background-image: url("../images/contentframe_background.jpg");
     background-repeat: repeat;
     font-family: arial, helvetica, sans-serif;
     font-size: 9pt;
@@ -412,7 +412,7 @@ body.main table.header {
     margin-left: 0px;
     padding: 8px 0px 10px 0px;
     border-spacing: 0px;
-} 
+}
 
 body.main hr.header {
     color: white;
@@ -458,7 +458,7 @@ body.main table.header td.right img {
 }
 
 
-body.main table.footer { 
+body.main table.footer {
     margin-top: 10px;
     width: 100%;
     color: white;
@@ -470,12 +470,12 @@ border-left: 1px solid red;
 }
 
 /*
-    ____  _     _      _                
-   / ___|(_) __| | ___| |__   __ _ _ __ 
+    ____  _     _      _
+   / ___|(_) __| | ___| |__   __ _ _ __
    \___ \| |/ _` |/ _ \ '_ \ / _` | '__|
-    ___) | | (_| |  __/ |_) | (_| | |   
-   |____/|_|\__,_|\___|_.__/ \__,_|_|   
-                                        
+    ___) | | (_| |  __/ |_) | (_| | |
+   |____/|_|\__,_|\___|_.__/ \__,_|_|
+
 */
 
 body.side {
@@ -750,13 +750,13 @@ div.snapin img.iconbutton {
 }
 
 /* state bullets at problem host or all hosts snapin */
-div.statebullet { 
-    margin-left: 0px; 
-    margin-right: 6px; 
-    width: 10px; 
-    height: 10px; 
-    border: 1px solid #eee; 
-    float: left; 
+div.statebullet {
+    margin-left: 0px;
+    margin-right: 6px;
+    width: 10px;
+    height: 10px;
+    border: 1px solid #eee;
+    float: left;
 }
 
 table.sidebarconfig {
@@ -810,7 +810,7 @@ table.heading td.right img {
     margin-left: 15px;
     margin-right: 8px;
 }
-table.heading b.headtime { 
+table.heading b.headtime {
   color: black;
   font-size: 120%;
 }
@@ -959,7 +959,7 @@ table.navi td.left.w40 {
 }
 
 table.navi td.left.w40.selected {
-    background-image: url("images/metanav_40_hi.png"); 
+    background-image: url("images/metanav_40_hi.png");
 }
 
 table.navi td.minigap {
@@ -1016,7 +1016,7 @@ width: 100%;
 
 /* table of services -------------------------------------------------------------- */
 
-table.services { 
+table.services {
     border-spacing: 0px;
     margin: 0px;
     padding: 0px;
@@ -1042,26 +1042,26 @@ table.services th.tablegap {
   background-position: center;
 }
 
-tr.odd0  { background-color: #eee; } 
+tr.odd0  { background-color: #eee; }
 tr.even0 { background-color: #ddd; }
 
-tr.odd1  { background-color: #ffc; } 
+tr.odd1  { background-color: #ffc; }
 tr.even1 { background-color: #ffa; }
 
-tr.odd2  { background-color: #fcc; } 
+tr.odd2  { background-color: #fcc; }
 tr.even2 { background-color: #faa; }
 
-tr.odd3  { background-color: #fdc; } 
+tr.odd3  { background-color: #fdc; }
 tr.even3 { background-color: #fea; }
 
 
 /* HACK */
-table.services tr.data td { 
+table.services tr.data td {
   border: 1px solid #bbb;
   padding: 3px 6px;
 }
 
-table.services td.host { 
+table.services td.host {
   border-style: none;
   font-weight: bold;
   padding-top: 1ex;
@@ -1087,7 +1087,7 @@ table.groupheader {
 }
 
 tr.groupheader td {
-    border-style: none; 
+    border-style: none;
     margin: 0px;
     padding-top: 2px;
     font-weight: bold;
@@ -1106,9 +1106,9 @@ tr.groupheader a:hover {
   width: 50px;
   padding: 2px 5px;
   border: 1px solid white;
-} 
+}
 
-.services div.hostdown { 
+.services div.hostdown {
     background-color: #f22;
     -moz-border-radius: 4px;
     border: 2px solid #000;
@@ -1118,23 +1118,23 @@ tr.groupheader a:hover {
 
 
 /*
-  ____       _       _                
- |  _ \ __ _(_)_ __ | |_ ___ _ __ ___ 
+  ____       _       _
+ |  _ \ __ _(_)_ __ | |_ ___ _ __ ___
  | |_) / _` | | '_ \| __/ _ \ '__/ __|
  |  __/ (_| | | | | | ||  __/ |  \__ \
  |_|   \__,_|_|_| |_|\__\___|_|  |___/
 
-*/                                    
+*/
 table.services img {
     border-style: none;
 }
-table.services td.age { 
+table.services td.age {
   text-align: right;
   color: #666;
   white-space: nowrap;
   width: 40px;
 }
-table.services td.age.recent { 
+table.services td.age.recent {
   font-weight: bold;
   color: #000;
 }
@@ -1142,7 +1142,7 @@ table.services td.age.recent {
 
 table.services td.nowrap {
   white-space: nowrap;
-}  
+}
 
 td.badflag {
     font-weight: bold;
@@ -1153,7 +1153,7 @@ td.goodflag {
 }
 
 
-td.state {  
+td.state {
   text-align: center;
   font-weight: bold;
   font-family: sans-serif;
@@ -1173,9 +1173,9 @@ table.services tr.data td.perfometer {
   vertical-align: middle;
 }
 td.perfometer div.title {
-   height: 0px; 
-   position: relative; 
-   top: 3px; 
+   height: 0px;
+   position: relative;
+   top: 3px;
    left: 0px;
    width: 120px;
    text-align: center;
@@ -1208,7 +1208,7 @@ td.statex {  /* zero count */
   color: #ccc;
 }
 
-/* Colors of the five possible host and service states 
+/* Colors of the five possible host and service states
   CRIT:    #e2001a
   UNKNOWN: #f79802
   WARN:    #e6c908
@@ -1216,7 +1216,7 @@ td.statex {  /* zero count */
 */
 
 /* OK/UP */
-.state0, .hstate0, .state0 a, .hstate0 a { 
+.state0, .hstate0, .state0 a, .hstate0 a {
   background-color: #0b3; color: #fff;
 }
 
@@ -1224,32 +1224,32 @@ td.statex {  /* zero count */
     white-space: nowrap;
 }
 /* WARN */
-.state1, .state1 a { 
+.state1, .state1 a {
   background-color: #ff0; color: #000;
 }
 
 /* CRIT/DOWN */
-.state2, .hstate1, .state2 a, .hstate2 a { 
+.state2, .hstate1, .state2 a, .hstate2 a {
   background-color: #f00; color: #fff;
 }
 
 /* UNKNOWN / UNREACH */
-.state3, .hstate2, .state3 a, .hstate2 a { 
+.state3, .hstate2, .state3 a, .hstate2 a {
   background-color: #f80; color: #fff;
 }
 
 /* PENDING */
-.statep, .hstatep, .statep a, .hstatep a { 
+.statep, .hstatep, .statep a, .hstatep a {
   background-color: #888; color: #fff;
 }
 
 /* in DOWNTIME */
-.stated, .hstated, .stated a, .hstated a { 
+.stated, .hstated, .stated a, .hstated a {
   background-color: #0af; color: #fff;
 }
 
 /* *some* problem */
-.states, .hstates { 
+.states, .hstates {
     background-image: url("images/someproblem.png");
     background-position: center center;
     background-repeat: repeat;
@@ -1300,12 +1300,12 @@ table.services tr.data td.pnpgraph {
 }
 
 /*
- _                            _       
-| |    __ _ _   _  ___  _   _| |_ ___ 
+ _                            _
+| |    __ _ _   _  ___  _   _| |_ ___
 | |   / _` | | | |/ _ \| | | | __/ __|
 | |__| (_| | |_| | (_) | |_| | |_\__ \
 |_____\__,_|\__, |\___/ \__,_|\__|___/
-            |___/                     
+            |___/
 */
 
 div.tableshadow {
@@ -1318,7 +1318,7 @@ div.tableshadow {
 div.tableshadow.left {
     /* margin-left: 5px; */
 }
-    
+
 td.shadowtop, td.shadowbottom {
     background-image: url("images/tableshadow.png");
     background-repeat: repeat;
@@ -1360,7 +1360,7 @@ table.boxlayout td.boxcolumn {
 }
 
 
-.inputerror input { 
+.inputerror input {
   background-color: #f84;
 }
 
@@ -1427,7 +1427,7 @@ height: 20px;
 
 /* forms in general */
 
-h2.formcaption { 
+h2.formcaption {
   font-size: 100%;
   margin-bottom: 0px;
 }
@@ -1435,7 +1435,7 @@ h2.formcaption {
 table.form {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("images/form_background.png"); 
+    background-image: url("images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -1446,10 +1446,10 @@ table.form textarea {
     height: 4em;
 }
 
-table.form input { 
+table.form input {
     font-size: 9pt;
 }
-table.form td { 
+table.form td {
     vertical-align: top;
     padding: 4px 10px;
 }
@@ -1470,7 +1470,7 @@ table.form b.toggleheader.hover {
     /* background-image: url("images/form_background.png"); */
 }
 
-table.form td.legend { 
+table.form td.legend {
     vertical-align: top;
     color: #274750;
     border: 1px solid white;
@@ -1480,34 +1480,34 @@ table.form td.legend {
     vertical-align: top;
     padding-top: 10px;
 }
-table.form td.legend.border { 
+table.form td.legend.border {
     border-right-style: solid;
 }
 table.form td.hilite {
-    background-image: url("images/form_background.png"); 
+    background-image: url("images/form_background.png");
     background-repeat: repeat;
     margin: 10px;
 }
 
-table.form td.legend.button { 
+table.form td.legend.button {
     text-align: right;
     border-right: 1px solid white;
 }
 
-table.form td.content { 
+table.form td.content {
     padding-right: 2ex;
     border: 1px solid white;
     border-left-style: none;
     vertical-align: top;
 }
 
-table#displayoptions td.content { 
+table#displayoptions td.content {
   background-image: url("images/background-brown.jpg");
   background-repeat: repeat;
   background-position: center;
 }
-table#displayoptions td.legend, 
-input.tab#displayoptions, 
+table#displayoptions td.legend,
+input.tab#displayoptions,
 input.tabactive#displayoptions    { background-color: #f84; }
 
 
@@ -1516,25 +1516,25 @@ input.tab#results, input.tabactive#results { background-color: #fe6; }
 
 /* input elements in forms */
 
-table.form input.text { 
+table.form input.text {
   width: 100%;
 }
 
-table.form input.number { 
+table.form input.number {
     text-align: right;
 }
 
-div.textinputlegend { 
+div.textinputlegend {
   font-size: 80%;
 }
 
-input.date, input.time { 
+input.date, input.time {
   padding: 0ex 0.5ex;
   font-family: monospace;
 }
 
 /* actions */
-div.really, div.success, div.error, div.message, div.warning { 
+div.really, div.success, div.error, div.message, div.warning {
   margin: 2em 2em 2em 2em;
   -moz-border-radius: 1ex;
   padding: 1em 2em;
@@ -1542,25 +1542,25 @@ div.really, div.success, div.error, div.message, div.warning {
   border-style: solid;
 }
 
-div.really h1, div.success h1, div.error h1, div.message h1, div.warning h1 { 
+div.really h1, div.success h1, div.error h1, div.message h1, div.warning h1 {
      font-size: 12pt;
      font-weight: bold;
      margin-bottom: 5px;
 color: black;
 }
 
-div.really { 
+div.really {
   background-color: #f88;
   border-color: #800;
 }
 
-div.really input { 
+div.really input {
   font-weight: bold;
   margin-top: 1em;
   padding: 0.5ex 2em;
 }
 
-div.success { 
+div.success {
   background-color: #8f8;
   border-color: #080;
 }
@@ -1569,12 +1569,12 @@ div.message {
   border-color: #048;
 }
 
-div.error { 
+div.error {
   background-color: #f84;
   border-color: #e40;
 }
 
-div.warning { 
+div.warning {
   background-color: #ff4;
   border-color: #fc0;
 }
@@ -1831,7 +1831,7 @@ td.legend {
     padding-top: 3px;
     color: #884;
     vertical-align: top;
-    white-space: nowrap; 
+    white-space: nowrap;
     width: 150px;
 }
 div.viewdescription {
@@ -2066,4 +2066,11 @@ table.add_snapin b {
 }
 table.add_snapin i {
     color: white;
+}
+
+body.businessview TABLE.data {
+    background-image: url("../images/form_background.png");
+}
+body.businessview TABLE.data TR.dataOdd {
+    background-image: none;
 }

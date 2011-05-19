@@ -1,22 +1,21 @@
 ul {
-list-style-type: none;
+    list-style-type: none;
 }
-
 
 .elementTitle {
     color : white;
     font-weight: bold;
-    font-size: 12pt;
+    font-size: 13px;
+}
+.elementTitle2 {
+    color : white;
+    font-weight: bold;
+    font-size: 12px;
+}
+.elementTitle3 {
+    font-size: 11px;
 }
 
-
-.void { background-color: none !important; }
-
-
-.dataOdd {
-    border-collapse: collapse;
-    empty-cells: show;
-    background-image: none;
-    border-spacing: 0px;
-    margin: 10px;
+.void {
+    background-color: none !important;
 }
