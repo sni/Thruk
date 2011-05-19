@@ -226,7 +226,7 @@
                     <tr>
                       <td class='dataVar' nowrap>Data Source:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>
+                      <td class='dataVal dataSource'>
                         [% backend_detail.$pd.type %]:[% backend_detail.$pd.addr %]
                       </td>
                       [% END %]

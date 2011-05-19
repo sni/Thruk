@@ -569,6 +569,10 @@ TD.logEntriesCRITICAL,TD.logEntriesDOWN,TD.logEntriesUNREACHABLE {
 table.procInfoTable tbody tr td.stateInfoTable1 table tbody tr td.dataVal {
   white-space: nowrap;
 }
+table.procInfoTable tbody tr td.stateInfoTable1 table tbody tr td.dataSource {
+  white-space: normal;
+  min-width: 120px;
+}
 
 TD.logEntriesEven,TD.commentEven,TD.downtimeEven,TD.reportDataEven {
   background-color:#DEDBD2;
