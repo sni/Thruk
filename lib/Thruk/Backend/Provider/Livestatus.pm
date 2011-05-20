@@ -492,7 +492,7 @@ returns logfile entries
 sub get_logs {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
-        class time type state host_name service_description plugin_output message contact_name command_name state_type current_host_groups current_service_groups
+        class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
         /];
     my @logs = reverse @{$self->_get_table('log', \%options)};
     return \@logs;
