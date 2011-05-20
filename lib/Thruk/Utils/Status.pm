@@ -1130,7 +1130,7 @@ sub get_groups_filter {
         push @servicefilter, { -or => { host_groups => { $group_op => \@names } } };
     }
     elsif($type eq 'servicegroup') {
-        push @servicefilter, { groups => { $group_op => \@names } };
+        push @servicefilter, { -or => { groups => { $group_op => \@names } } };
     }
 
     return(\@hostfilter, \@servicefilter);
