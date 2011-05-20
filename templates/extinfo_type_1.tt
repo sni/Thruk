@@ -70,8 +70,8 @@
           [% IF enable_shinken_features %]
           <tr>
             <td align='right'>
-              <div class='dataTitle'>Criticity : [% host.criticity %]/5
-              <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% host.criticity %].png" alt="Criticity : [% host.criticity %]/5">
+              <div class='dataTitle'>Criticity [% host.criticity %]/5
+              <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% host.criticity %].png" alt="Criticity [% host.criticity %]/5">
               </div>
             </td>
           </tr>
