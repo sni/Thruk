@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 1.0.4   Thu May 19 16:29:42 CEST 2011
           - added missing license file
           - added business view for shinken backend
+          - added better error message when log4perl config cannot be found
 
 1.0.3   Thu May 12 20:05:16 CEST 2011
           - fixed problem with some chars in excel export
