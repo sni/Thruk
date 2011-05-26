@@ -71,6 +71,8 @@ sub get_test_service {
     }
     isnt($host, undef, "got a host from status.cgi") or BAIL_OUT('got no test host, cannot test');
     isnt($service, undef, "got a service from status.cgi") or BAIL_OUT('got no test service, cannot test');
+    $service =~ s/%20/ /gmx;
+    $host    =~ s/%20/ /gmx;
     return($host, $service);
 }
 
