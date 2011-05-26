@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.0.5   Sun May 29 19:41:46 CEST 2011
+          - removed display of duplicate services where services are added twice to a servicegroup
+
 1.0.4   Fri May 20 14:05:18 CEST 2011
           - added missing license file
           - added business view for shinken backend
