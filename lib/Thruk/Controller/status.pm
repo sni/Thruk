@@ -428,8 +428,13 @@ sub _process_overview_page {
             }
         }
         else {
+            my $uniq = {};
             for my $member ( @{ $group->{'members'} } ) {
                 my( $hostname, $servicename ) = @{$member};
+
+                # filter duplicates
+                next if exists $uniq->{$hostname}->{$servicename};
+                $uniq->{$hostname}->{$servicename} = 1;
 
                 # show only hosts with proper authorization
                 next unless defined $host_data->{$hostname};
@@ -659,7 +664,10 @@ sub _process_summary_page {
     }
 
     my %host_already_added;
+    my $uniq_services;
     for my $service ( @{$services_data} ) {
+        next if exists $uniq_services->{$service->{'host_name'}}->{$service->{'description'}};
+        $uniq_services->{$service->{'host_name'}}->{$service->{'description'}} = 1;
         for my $group ( @{ $service->{$groupsname} } ) {
             next if !defined $all_groups->{$group};
 
