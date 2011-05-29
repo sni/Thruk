@@ -46,12 +46,18 @@
           '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
         [% END %]
     });
-    var current_backend_states = initial_backend_states.clone();
-    var theme                  = '[% theme %]';
-    var ajax_search_enabled    = '[% use_ajax_search %]';
-    var url_prefix             = '[% url_prefix %]';
+    var current_backend_states  = initial_backend_states.clone();
+    var theme                   = '[% theme %]';
+    var ajax_search_enabled     = '[% use_ajax_search %]';
+    var url_prefix              = '[% url_prefix %]';
+    var enable_shinken_features = [% enable_shinken_features %];
+    [% IF enable_shinken_features +%]
+    var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
+    [% END %]
 
-    [% IF refresh_rate %]    var refresh_rate = [% refresh_rate %];[% END %]
+    [% IF refresh_rate +%]
+    var refresh_rate            = [% refresh_rate %];
+    [% END %]
 
     -->
     </script>

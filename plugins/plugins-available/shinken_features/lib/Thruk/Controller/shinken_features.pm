@@ -106,15 +106,10 @@ sub _process_outagespbimp {
                                                     is_problem => 1
                                                   ]);
 
-    # Main data given for the criticities level, and know
-    # if we have elements in it or not
-    my @criticities = (
-        {value => 5, text => 'Top production',  nb => 0},
-        {value => 4, text => 'Production',      nb => 0},
-        {value => 3, text => 'Standard',        nb => 0},
-        {value => 2, text => 'Qualification',   nb => 0},
-        {value => 1, text => 'Devel',           nb => 0},
-        {value => 0, text => 'Nearly nothing',  nb => 0});
+    my $priorities = [];
+    for my $crit (sort keys %{$c->config->{'priorities'}}) {
+        push @{$priorities}, { value => $crit, text => $c->config->{'priorities'}->{$crit}, count => 0 },
+    }
 
     # First for hosts
     if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
@@ -142,8 +137,7 @@ sub _process_outagespbimp {
 
             # add a criticity to this crit level
             my $crit = $host->{'criticity'};
-            #print STDERR "ADD crit $crit for\n";
-            $criticities[5 - $crit]{"nb"}++;
+            $priorities->[$crit]->{'count'}++;
 
 
         }
@@ -165,7 +159,7 @@ sub _process_outagespbimp {
 
             # add a criticity to this crit level
             my $crit = $srv->{'criticity'};
-            $criticities[5 - $crit]{"nb"}++;
+            $priorities->[$crit]->{'count'}++;
 
         }
     }
@@ -179,7 +173,7 @@ sub _process_outagespbimp {
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;
-    $c->stash->{criticities}    = \@criticities;
+    $c->stash->{priorities}     = $priorities;
     $c->stash->{title}          = 'Problems and Impacts';
     $c->stash->{infoBoxTitle}   = 'Problems and Impacts';
     $c->stash->{page}           = 'status';
@@ -297,6 +291,11 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
         return $c->detach('/error/index/21');
     }
 
+    my $priorities = [];
+    for my $crit (sort keys %{$c->config->{'priorities'}}) {
+        push @{$priorities}, { value => $crit, text => $c->config->{'priorities'}->{$crit}, count => 0 },
+    }
+
     # We want root problems only
     my $hst_pbs = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     got_business_rule => 1
@@ -304,16 +303,6 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
     my $srv_pbs = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
                                                     got_business_rule => 1
                                                   ]);
-
-    # Main data given for the criticities level, and know
-    # if we have elements in it or not
-    my @criticities = (
-        {value => 5, text => 'Top production',  nb => 0},
-        {value => 4, text => 'Production',      nb => 0},
-        {value => 3, text => 'Standard',        nb => 0},
-        {value => 2, text => 'Qualification',   nb => 0},
-        {value => 1, text => 'Devel',           nb => 0},
-        {value => 0, text => 'Nearly nothing',  nb => 0});
 
     # First for hosts
     if(defined $hst_pbs and scalar @{$hst_pbs} > 0) {
@@ -338,7 +327,7 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
 
             # add a criticity to this crit level
             my $crit = $host->{'criticity'};
-            $criticities[5 - $crit]{"nb"}++;
+            $priorities->[$crit]->{'count'}++;
 
         }
     }
@@ -356,7 +345,7 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
 
             # add a criticity to this crit level
             my $crit = $srv->{'criticity'};
-            $criticities[5 - $crit]{"nb"}++;
+            $priorities->[$crit]->{'count'}++;
 
         }
     }
@@ -367,7 +356,7 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;
-    $c->stash->{criticities}    = \@criticities;
+    $c->stash->{priorities}     = $priorities;
     $c->stash->{title}          = 'Business Elements';
     $c->stash->{infoBoxTitle}   = 'Business Elements';
     $c->stash->{page}           = 'businessview';

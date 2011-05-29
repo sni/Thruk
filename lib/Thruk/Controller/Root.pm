@@ -98,6 +98,14 @@ sub begin : Private {
         },
         command_disabled                    => [],
         var_path                            => './var',
+        priorities                      => {
+                    5                       => 'Business Critical',
+                    4                       => 'Top Production',
+                    3                       => 'Production',
+                    2                       => 'Standard',
+                    1                       => 'Testing',
+                    0                       => 'Development',
+        },
     };
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
@@ -109,6 +117,7 @@ sub begin : Private {
                   datetime_format datetime_format_today datetime_format_long datetime_format_log
                   use_new_search ajax_search show_notification_number strict_passive_mode
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
+                  priorities
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

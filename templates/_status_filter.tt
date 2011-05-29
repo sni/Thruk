@@ -307,8 +307,11 @@
 [% END %]
 <!-- SEARCH PATTERN -->
         [% FOR s = search.text_filter %]
+        [% IF ! enable_shinken_features && s.type == 'priority' %]
+          [% NEXT %]
+        [% END %]
         <tr>
-          <td class='filterName' nowrap>
+          <td class='filterName' nowrap style="vertical-align: inherit;">
             <select name="[% paneprefix %][% prefix %]_type" id="[% paneprefix %][% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
               <option value="search">Search</option>
               <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
@@ -323,16 +326,30 @@
               <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
               <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
               <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
+              [% IF enable_shinken_features %]
+              <option value="priority"[% IF s.type == 'priority' %] selected[% END %]>Priority</option>
+              [% END %]
             </select><select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to">
-              <option value="~"[% IF s.op == '~' %] selected[% END %]>~</option>
+              <option value="~"[% IF  s.op == '~'  %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
-              <option value="="[% IF s.op == '=' %] selected[% END %]>=</option>
+              <option value="="[% IF  s.op == '='  %] selected[% END %]>=</option>
               <option value="!="[% IF s.op == '!=' %] selected[% END %]>!=</option>
               <option value="<="[% IF s.op == '<=' %] selected[% END %]>&lt;=</option>
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>
           </td>
-          <td align="left" nowrap class='filterValueInput'><input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this)"[% END %]><a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a></td>
+          <td align="left" nowrap class='filterValueInput' style="vertical-align: inherit;">
+            <input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this)"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]display: block; visibility: visible;[% END %]">
+            <a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="javascript:show_cal('[% prefix %]_[% loop.index %]_value')">
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+            <select name="[% paneprefix %][% prefix %]_value_sel" id="[% paneprefix %][% prefix %]_[% loop.index %]_value_sel" style="[% IF s.type == 'priority' %]display: block; visibility: visible;[% ELSE %]display: none; visibility: hidden;[% END %]">
+              [% FOREACH prio IN priorities.keys.sort.reverse %]
+              <option value="[% prio %]"[% IF s.value == prio %] selected[% END %]>[% priorities.$prio %]</option>
+              [% END %]
+            </select>
+          </td>
+
+
           <td align="right" class='filterValueNoHighlight'><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
             <script type="text/javascript">
             <!--

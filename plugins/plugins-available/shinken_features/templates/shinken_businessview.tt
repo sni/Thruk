@@ -26,14 +26,14 @@
     </table>
     <div align="center">
       <br>
-      <div class='dataTitle'>Business rules elements</div>
+      <div class='dataTitle'>Business Rule Elements</div>
       <br>
 
 
-    [% FOREACH crit IN criticities %]
-    [% IF crit.nb != 0 %]
+    [% FOREACH crit IN priorities.reverse %]
+    [% NEXT IF crit.count == 0 %]
     <table style="min-width: 600px;"><tr><td>
-    <div class='dataTitle blockHead blockHeadBorder'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" height="16" alt="[% crit.text %]" title="[% crit.text %]"></div>
+    <div class='dataTitle blockHead blockHeadBorder'>Priority: [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" height="16" alt="[% crit.text %]" title="[% crit.text %]"></div>
     [%# Global table %]
     <table class='data' style="min-width: 600px;">
       <tr>
@@ -152,7 +152,6 @@
     [%# end of the main foreach on criticities, and the look for void criticity %]
 </td></tr></table>
 <br>
-    [% END %]
     [% END %]
 
     </div>

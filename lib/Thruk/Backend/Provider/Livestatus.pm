@@ -988,6 +988,7 @@ sub _get_query_size {
     my $class = $self->_get_class($table, $options);
     my $rows = $class->stats($stats)->hashref_array();
     my $size = $rows->[0]->{'total'};
+    return unless defined $size;
 
     my $pages = 0;
     my $page  = $c->{'request'}->{'parameters'}->{'page'} || 1;

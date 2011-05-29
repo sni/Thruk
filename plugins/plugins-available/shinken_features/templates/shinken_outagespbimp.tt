@@ -18,13 +18,13 @@
     </table>
     <div align="center">
       <br>
-      <div class='statusTitle'>Problems <img src="[% url_prefix %]thruk/themes/[% theme %]/images/problem.png" alt="problems"></div>
+      <div class='statusTitle'>Problems <img src="[% url_prefix %]thruk/themes/[% theme %]/images/problem.png" alt="problems" style="vertical-align: text-bottom"></div>
       <br>
 
-    [% FOREACH crit IN criticities %]
-    [% IF crit.nb != 0 %]
+    [% FOREACH crit IN priorities.reverse %]
+    [% NEXT IF crit.count == 0 %]
     <center>
-    <div class='statusTitle'>Criticity : [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Criticity : [% crit.text %]"></div>
+    <div class='statusTitle'>Priority: [% crit.text %] <img class="crit_icon" src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Priority: [% crit.text %]"></div>
 
       <table border="0" class='status'>
         <tr>
@@ -137,8 +137,7 @@
         [% END %]
       </table>
       </center>
-
-    [% END %]
+      <br>
     [% END %]
 
     </div>

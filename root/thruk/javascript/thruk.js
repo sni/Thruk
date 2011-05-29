@@ -477,7 +477,7 @@ function addEventHandler(elem, type) {
 
 /* add additional eventhandler to object */
 function addEvent( obj, type, fn ) {
-  debug("addEvent("+obj+","+type+", ...)");
+  //debug("addEvent("+obj+","+type+", ...)");
   if ( obj.attachEvent ) {
     obj['e'+type+fn] = fn;
     obj[type+fn] = function(){obj['e'+type+fn]( window.event );}
@@ -488,7 +488,7 @@ function addEvent( obj, type, fn ) {
 
 /* remove an eventhandler from object */
 function removeEvent( obj, type, fn ) {
-  debug("addEvent("+obj+","+type+", ...)");
+  //debug("removeEvent("+obj+","+type+", ...)");
   if ( obj.detachEvent ) {
     obj.detachEvent( 'on'+type, obj[type+fn] );
     obj[type+fn] = null;
@@ -1383,8 +1383,23 @@ function add_new_filter(search_prefix, table) {
   }
 
   // add first cell
-  var typeselect        = document.createElement('select');
-  var options           = new Array('Search', 'Host', 'Service', 'Hostgroup', 'Servicegroup', 'Contact','Parent', 'Comment', 'Last Check', 'Next Check', 'Latency', 'Execution Time', '% State Change');
+  var typeselect = document.createElement('select');
+  var options    = new Array('Search',
+                             'Host',
+                             'Service',
+                             'Hostgroup',
+                             'Servicegroup',
+                             'Contact','Parent',
+                             'Comment',
+                             'Last Check',
+                             'Next Check',
+                             'Latency',
+                             'Execution Time',
+                             '% State Change'
+                            );
+  if(enable_shinken_features) {
+    options.push('Priority');
+  }
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
   typeselect.setAttribute('id', pane_prefix + search_prefix + nr + '_ts');
@@ -1414,6 +1429,16 @@ function add_new_filter(search_prefix, table) {
   var newCell1       = newRow.insertCell(1);
   newCell1.className = "filterValueInput";
   newCell1.appendChild(newInput);
+
+  if(enable_shinken_features) {
+    var newSelect      = document.createElement('select');
+    newSelect.setAttribute('name', pane_prefix + search_prefix + 'value_sel');
+    newSelect.setAttribute('id', pane_prefix + search_prefix + nr + '_value_sel');
+    add_options(newSelect, priorities, 2);
+    newSelect.style.display    = "none";
+    newSelect.style.visibility = "hidden";
+    newCell1.appendChild(newSelect);
+  }
 
   var calImg = document.createElement('img');
   calImg.src = url_prefix + "thruk/themes/"+theme+"/images/calendar.png";
@@ -1452,14 +1477,30 @@ function delete_filter_row(event) {
   return false;
 }
 
-/* add options to a select */
-function add_options(select, options) {
-  options.each(function(text) {
-    var opt = document.createElement('option');
-    opt.text     = text;
-    opt.value    = text.toLowerCase();
-    select.options[select.options.length] = opt;
-  });
+/* add options to a select
+ * numbered:
+ *   undef = value is lowercase text
+ *   1     = value is numbered starting at 0
+ *   2     = value is revese numbered
+ */
+function add_options(select, options, numbered) {
+    var x = 0;
+    if(numbered == 2) { x = options.size(); }
+    options.each(function(text) {
+        var opt  = document.createElement('option');
+        opt.text = text;
+        if(numbered) {
+            opt.value = x;
+        } else {
+            opt.value = text.toLowerCase();
+        }
+        select.options[select.options.length] = opt;
+        if(numbered == 2) {
+            x--;
+        } else {
+            x++;
+        }
+    });
 }
 
 /* create a complete new filter pane */
@@ -1588,11 +1629,28 @@ function verify_op(event) {
     hideElement(calElem);
   }
 
+  if(enable_shinken_features) {
+    var input  = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');
+    var select = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value_sel');
+    if(selValue == 'priority' ) {
+      showElement(select.id);
+      hideElement(input.id);
+    } else {
+      hideElement(select.id);
+      showElement(input.id);
+    }
+  }
+
   // check if the right operator are active
   for(var x = 0; x< opElem.options.length; x++) {
     var curOp = opElem.options[x].value;
     if(curOp == '~' || curOp == '!~') {
-      if(selValue != 'search' && selValue != 'host' && selValue != 'service' && selValue != 'hostgroup' && selValue != 'servicegroup' && selValue != 'comment') {
+      if(   selValue != 'search'
+         && selValue != 'host'
+         && selValue != 'service'
+         && selValue != 'hostgroup'
+         && selValue != 'servicegroup'
+         && selValue != 'comment') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only = and != are allowed for list searches
@@ -1610,7 +1668,12 @@ function verify_op(event) {
     }
 
     if(curOp == '<=' || curOp == '>=') {
-      if(selValue != 'next check' && selValue != 'last check' && selValue != 'latency' && selValue != 'execution time' && selValue != '% state change') {
+      if(   selValue != 'next check'
+         && selValue != 'last check'
+         && selValue != 'latency'
+         && selValue != 'execution time'
+         && selValue != '% state change'
+         && selValue != 'priority') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only <= and >= are allowed for list searches
@@ -1759,13 +1822,23 @@ var ajax_search = {
 
         if(selector && selector.tagName == 'SELECT') {
             var search_type = selector.options[selector.selectedIndex].value;
-            if(search_type == 'host' || search_type == 'hostgroup' || search_type == 'service' || search_type == 'servicegroup') {
+            if(   search_type == 'host'
+               || search_type == 'hostgroup'
+               || search_type == 'service'
+               || search_type == 'servicegroup') {
                 ajax_search.search_type = search_type;
             }
             if(search_type == 'parent') {
                 ajax_search.search_type = 'host';
             }
-            if(search_type == 'contact' || search_type == 'comment' || search_type == 'next check' || search_type == 'last check' || search_type == 'latency' || search_type == 'execution time' || search_type == '% state change') {
+            if(   search_type == 'contact'
+               || search_type == 'comment'
+               || search_type == 'next check'
+               || search_type == 'last check'
+               || search_type == 'latency'
+               || search_type == 'execution time'
+               || search_type == '% state change'
+               || search_type == 'priority' ) {
                 ajax_search.search_type = 'none';
             }
         }

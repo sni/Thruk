@@ -12,6 +12,7 @@ Status Utilities Collection for Thruk
 
 use strict;
 use warnings;
+use Carp;
 use utf8;
 
 ##############################################
@@ -92,6 +93,9 @@ sub get_search_from_param {
                 value => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
                 op    => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
             };
+            if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x] and $text_filter->{'type'} eq 'priority') {
+                $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x];
+            }
             push @{ $search->{'text_filter'} }, $text_filter;
             if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
         }
@@ -102,6 +106,9 @@ sub get_search_from_param {
             value => $c->{'request'}->{'parameters'}->{ $prefix . '_value' },
             op    => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
         };
+        if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'priority') {
+            $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'};
+        }
         push @{ $search->{'text_filter'} }, $text_filter;
         if(defined $globals->{$text_filter->{type}} and $text_filter->{op} eq '=' and $text_filter->{value} eq $globals->{$text_filter->{type}}) { delete $globals->{$text_filter->{type}}; }
     }
@@ -663,8 +670,9 @@ sub single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
-        # Impact are only available in Shinken
+        # Impacts are only available in Shinken
         elsif ( $filter->{'type'} eq 'impact' && $c->stash->{'enable_shinken_features'}) {
+            next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,          { source_problems      => { $listop => $value } };
             push @hosttotalsfilter,    { source_problems      => { $listop => $value } };
             push @servicefilter,       { source_problems      => { $listop => $value } };
@@ -672,10 +680,17 @@ sub single_search {
         }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
+            next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,          { impacts      => { $listop => $value } };
             push @hosttotalsfilter,    { impacts      => { $listop => $value } };
             push @servicefilter,       { impacts      => { $listop => $value } };
             push @servicetotalsfilter, { impacts      => { $listop => $value } };
+        }
+        # Priority (criticity) is only available in Shinken
+        elsif ( $filter->{'type'} eq 'priority' ) {
+            next unless $c->stash->{'enable_shinken_features'};
+            push @hostfilter,    { criticity => { $op => $value } };
+            push @servicefilter, { criticity => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);

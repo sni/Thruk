@@ -1072,3 +1072,7 @@ TABLE.procInfoTable TD.dataVal {
 TD.notesCell {
   padding-right: 5px;
 }
+
+IMG.crit_icon {
+  vertical-align: text-bottom;
+}

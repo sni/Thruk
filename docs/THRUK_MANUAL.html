@@ -7038,6 +7038,21 @@ shinken backends.</p></div>
 <div class="content">
 <pre><tt>enable_shinken_features = 1</tt></pre>
 </div></div>
+<h4 id="_priorities">priorities</h4>
+<div class="paragraph"><p>Set the names of the priority (criticity in shinken). Currently this
+will only work with shinken backends.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;priorities&gt;
+  5   = Business Critical
+  4   = Top Production
+  3   = Production
+  2   = Standard
+  1   = Testing
+  0   = Development
+&lt;/priorities&gt;</tt></pre>
+</div></div>
 <h4 id="_check_local_states">check_local_states</h4>
 <div class="paragraph"><p>Get the status for remote backends from local instances. This can
 increase performance when using multiple remote sites. It is enabled
@@ -7682,7 +7697,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-05-26 19:43:20 CEST
+Last updated 2011-05-29 18:55:50 CEST
 </div>
 </div>
 </body>

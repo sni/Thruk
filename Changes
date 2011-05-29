@@ -4,6 +4,9 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - removed display of duplicate services where services are added twice to a servicegroup
           - hide check activity icon after 5 seconds
           - conf tool: added remove password button
+          - shinken:
+            - added priority filter (criticity)
+            - added config option to rename priorities
 
 1.0.4   Fri May 20 14:05:18 CEST 2011
           - added missing license file
