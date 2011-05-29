@@ -5,6 +5,7 @@
 
 <script type="text/javascript">
   var dfl_Hash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+  window.setTimeout("hideActifityIcons()", 5000);
 </script>
 
 [% PROCESS _overdiv.tt %]

@@ -378,6 +378,15 @@ function checknonempty(id, name) {
     return(true);
 }
 
+/* hide all waiting icons */
+function hideActifityIcons() {
+    $$('img').each(function(e) {
+        if(e.src.indexOf("/images/waiting.gif") > 0) {
+            e.style.display = "none";
+        }
+    });
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -1120,27 +1129,25 @@ function check_quick_command() {
     if(value == 1 ) { // reschedule
         selectedServices.keys().each(function(row_id) {
             cell           = document.getElementById(row_id + "_s_exec");
-            if(cell.innerHTML == '') {
-                img            = document.createElement('img');
-                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
-                img.height     = 20;
-                img.width      = 20;
-                img.title      = "This service is currently executing its servicecheck";
-                img.alt        = "This service is currently executing its servicecheck";
-                cell.appendChild(img);
-            }
+            cell.innerHTML = '';
+            img            = document.createElement('img');
+            img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+            img.height     = 20;
+            img.width      = 20;
+            img.title      = "This service is currently executing its servicecheck";
+            img.alt        = "This service is currently executing its servicecheck";
+            cell.appendChild(img);
         });
         selectedHosts.keys().each(function(row_id) {
             cell           = document.getElementById(row_id + "_h_exec");
-            if(cell.innerHTML == '') {
-                img            = document.createElement('img');
-                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
-                img.height     = 20;
-                img.width      = 20;
-                img.title      = "This host is currently executing its hostcheck";
-                img.alt        = "This host is currently executing its hostcheck";
-                cell.appendChild(img);
-            }
+            cell.innerHTML = '';
+            img            = document.createElement('img');
+            img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+            img.height     = 20;
+            img.width      = 20;
+            img.title      = "This host is currently executing its hostcheck";
+            img.alt        = "This host is currently executing its hostcheck";
+            cell.appendChild(img);
         });
     }
 
