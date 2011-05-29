@@ -365,7 +365,23 @@ sub _update_password {
     my ( $self, $c ) = @_;
 
     my $user = $c->{'request'}->{'parameters'}->{'data.username'};
+    my $send = $c->{'request'}->{'parameters'}->{'send'} || 'save';
     if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'}) {
+        # remove password?
+        if($send eq 'remove password') {
+            my $cmd = sprintf("%s -D %s '%s' 2>&1",
+                                 '$(which htpasswd2 2>/dev/null || which htpasswd 2>/dev/null)',
+                                 $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'},
+                                 $user
+                             );
+            if($self->_cmd($c, $cmd)) {
+                $c->log->info("removed password for ".$user);
+                return;
+            }
+            return( 'failed to remove password, check the logfile!' );
+        }
+
+        # change password?
         my $pass1 = $c->{'request'}->{'parameters'}->{'data.password'}  || '';
         my $pass2 = $c->{'request'}->{'parameters'}->{'data.password2'} || '';
         if($pass1 ne '') {
@@ -380,17 +396,11 @@ sub _update_password {
                                         $user,
                                         $pass1
                                     );
-                $c->log->debug( "running cmd: ". $cmd );
-                my $output = qx( $cmd );
-                my $rc     = $?>>8;
-                if($rc != 0) {
-                    $c->log->error( "cmd:    ". $cmd );
-                    $c->log->error( "rc:     ". $rc );
-                    $c->log->error( "output: ". $output );
-                    return( 'failed to update password, check the logfile!' );
+                if($self->_cmd($c, $cmd)) {
+                    $c->log->info("changed password for ".$user);
+                    return;
                 }
-                $c->log->debug( "rc:     ". $rc );
-                $c->log->debug( "output: ". $output );
+                return( 'failed to update password, check the logfile!' );
             } else {
                 return( 'Passwords do not match' );
             }
@@ -413,6 +423,25 @@ sub _store_changes {
         Thruk::Utils::set_message( $c, 'success_message', 'Saved successfully' );
     }
     return;
+}
+
+##########################################################
+# execute cmd
+sub _cmd {
+    my ( $self, $c, $cmd ) = @_;
+
+    $c->log->debug( "running cmd: ". $cmd );
+    my $output = qx( $cmd );
+    my $rc     = $?>>8;
+    if($rc != 0) {
+        $c->log->error( "cmd:    ". $cmd );
+        $c->log->error( "rc:     ". $rc );
+        $c->log->error( "output: ". $output );
+        return 0;
+    }
+    $c->log->debug( "rc:     ". $rc );
+    $c->log->debug( "output: ". $output );
+    return 1;
 }
 
 =head1 AUTHOR

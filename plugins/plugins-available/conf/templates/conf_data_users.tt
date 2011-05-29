@@ -27,6 +27,7 @@
 
 [% IF show_user %]
 <form action="conf.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none">
 <input type="hidden" name="type" value="users">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
@@ -42,7 +43,7 @@
     [% IF conf_config.exists('htpasswd') %]
     <tr>
       <td class='dataVar' align="left">Password Set</td>
-      <td class='dataVal'>[% IF has_htpasswd_entry %]Yes[% ELSE %]No[% END %]</td>
+      <td class='dataVal'>[% IF has_htpasswd_entry %]Yes <input type="submit" name="send" value="remove password">[% ELSE %]No[% END %]</td>
     </tr>
     <tr>
       <td class='dataVar' align="left">Password</td>
