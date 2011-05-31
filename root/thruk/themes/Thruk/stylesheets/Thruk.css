@@ -1076,3 +1076,7 @@ TD.notesCell {
 IMG.crit_icon {
   vertical-align: text-bottom;
 }
+
+DIV.extinfo4 TD {
+  white-space: nowrap;
+}
