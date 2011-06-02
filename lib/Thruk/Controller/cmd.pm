@@ -213,7 +213,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         }
 
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' ) unless $errors;
-
+        delete $c->{'request'}->{'parameters'}->{'backend'};
         $self->_redirect_or_success( $c, -1 );
     }
 
@@ -326,8 +326,12 @@ sub _cmd_is_disabled {
 sub _redirect_or_success {
     my( $self, $c, $how_far_back ) = @_;
 
+    my $wait = defined $c->config->{'use_wait_feature'} ? $c->config->{'use_wait_feature'} : 0;
     if($self->_bulk_send($c)) {
         $c->log->debug("bulk sending commands succeeded");
+    } else {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Sending Commands failed' );
+        $wait = 0;
     }
 
     $c->stash->{how_far_back} = $how_far_back;
@@ -336,7 +340,7 @@ sub _redirect_or_success {
     if( $referer ne '' ) {
 
         # send a wait header?
-        if(    $c->config->{'use_wait_feature'}
+        if(    $wait
            and defined $c->stash->{'lasthost'}
            and (   $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7
                 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96
@@ -379,7 +383,7 @@ sub _redirect_or_success {
         $c->stash->{template} = 'cmd_success.tt';
     }
 
-    return 1;
+    return;
 }
 
 ######################################
@@ -509,20 +513,7 @@ sub _bulk_send {
     my $c            = shift;
     my @errors;
 
-    # is a backend selected?
-    my $backends          = $c->{'request'}->{'parameters'}->{'backend'};
-    my @possible_backends = $c->{'db'}->peer_key();
-    if( scalar @possible_backends > 1 and !defined $backends ) {
-        delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
-        push @errors, { message => 'please select a backend' };
-        $c->stash->{'form_errors'} = \@errors;
-        return (0);
-    }
-    if( scalar @errors > 0 ) {
-        delete $c->{'request'}->{'parameters'}->{'cmd_mod'};
-        $c->stash->{'form_errors'} = \@errors;
-        return;
-    }
+    my $backends = $c->{'request'}->{'parameters'}->{'backend'};
 
     # send the command
     my $options = {};
