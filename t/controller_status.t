@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 747;
+use Test::More tests => 767;
 use JSON::XS;
 
 BEGIN {
@@ -105,6 +105,10 @@ my $pages = [
 
     # search for service named '+ping' leads to err 500
     '/thruk/cgi-bin/status.cgi?style=detail&nav=&hidesearch=2&hidetop=0&s0_hoststatustypes=15&s0_servicestatustypes=31&s0_hostprops=0&s0_serviceprops=0&update.x=0&update.y=0&s0_type=search&s0_op=~&s0_value=%2Bping',
+
+    # internal error when searching for hostgroup/servicegroups
+    '/thruk/cgi-bin/status.cgi?dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&dfl_s0_type=hostgroup&dfl_s0_op=~&dfl_s0_value='.$hostgroup.'&dfl_s0_value_sel=5',
+    '/thruk/cgi-bin/status.cgi?dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&dfl_s0_type=hostgroup&dfl_s0_type=servicegroup&dfl_s0_op=~&dfl_s0_op=~&dfl_s0_value='.$hostgroup.'&dfl_s0_value='.$servicegroup.'&dfl_s0_value_sel=5',
 ];
 
 for my $url (@{$pages}) {

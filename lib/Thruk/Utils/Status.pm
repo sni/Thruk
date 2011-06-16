@@ -93,7 +93,7 @@ sub get_search_from_param {
                 value => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
                 op    => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
             };
-            if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x] and $text_filter->{'type'} eq 'priority') {
+            if($text_filter->{'type'} eq 'priority' and defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x]) {
                 $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x];
             }
             push @{ $search->{'text_filter'} }, $text_filter;
