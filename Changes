@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.0.6   Thu Jun 19 21:49:40 CEST 2011
           - fixed problem with multiple filters
+          - Nuvola Theme: small design fixes (Juergen Vigna)
 
 1.0.5   Thu Jun  2 22:03:30 CEST 2011
           - removed display of duplicate services where services are added twice to a servicegroup

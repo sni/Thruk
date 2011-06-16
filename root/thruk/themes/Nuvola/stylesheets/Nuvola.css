@@ -127,6 +127,7 @@ th.status a:hover {
 }
 .tableRowSelected {
   background-color:#609FD2;
+  height: 22px;
 }
 
 /* fix for navigation table header */
