@@ -25,6 +25,8 @@ binmode(STDERR, ":encoding(UTF-8)");
 use parent qw/Catalyst/;
 use Catalyst qw/
                 Thruk::ConfigLoader
+                Unicode::Encoding
+                Compress
                 Authentication
                 Authorization::ThrukRoles
                 CustomErrorMessage
@@ -32,8 +34,6 @@ use Catalyst qw/
                 Static::Simple
                 Redirect
                 Cache
-                Unicode::Encoding
-                Compress::Gzip
                 Thruk::RemoveNastyCharsFromHttpParam
                 /;
 our $VERSION = '1.0.6';
@@ -51,6 +51,7 @@ my $project_root = __PACKAGE__->config->{home};
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'released'               => 'June 19, 2011',
+              compression_format       => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
               'project_root'           => $project_root,
