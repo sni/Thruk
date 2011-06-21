@@ -169,7 +169,24 @@ sub uri {
     my $c = shift;
     carp("no c") unless defined $c;
     my $uri = $c->request->uri();
-    $uri =~ s/&/&amp;/gmx;
+    $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
+    return $uri;
+}
+
+
+########################################
+
+=head2 full_uri
+
+  full_uri($c)
+
+returns a correct uri
+
+=cut
+sub full_uri {
+    my $c = shift;
+    carp("no c") unless defined $c;
+    my $uri = $c->request->uri();
     return $uri;
 }
 
@@ -213,11 +230,11 @@ sub uri_with {
     my $uri;
     eval {
         $uri = $c->request->uri_with($data);
-        $uri =~ s/&/&amp;/gmx;
     };
     if($@) {
         confess("ERROR in uri_with(): ".$@);
     }
+    $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
     return $uri;
 }
 

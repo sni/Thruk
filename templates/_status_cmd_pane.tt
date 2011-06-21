@@ -2,7 +2,7 @@
 <div class="cmd_pane" id="cmd_pane">
 <div class="shadow"><div class="shadowcontent">
 <form action="cmd.cgi" method="POST" id="quick_cmd_form">
-  <input type="hidden" name="referer" value="[% uri(c) %]">
+  <input type="hidden" name="referer" value="[% full_uri(c) %]">
   <input type="hidden" name="fixed" value="1">
   <input type="hidden" name="selected_services" id="selected_services" value="">
   <input type="hidden" name="selected_hosts"    id="selected_hosts"    value="">
