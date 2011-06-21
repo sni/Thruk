@@ -37,9 +37,9 @@ before 'execute' => sub {
     Thruk::Utils::read_cgi_cfg($c);
 
     ###############################
-    $c->stash->{'escape_html_tags'}      = $c->config->{'cgi_cfg'}->{'escape_html_tags'};
-    $c->stash->{'show_context_help'}     = $c->config->{'cgi_cfg'}->{'show_context_help'};
-    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'}           || 'onmouseover';
+    $c->stash->{'escape_html_tags'}      = exists $c->config->{'cgi_cfg'}->{'escape_html_tags'}  ? $c->config->{'cgi_cfg'}->{'escape_html_tags'}  : 1;
+    $c->stash->{'show_context_help'}     = exists $c->config->{'cgi_cfg'}->{'show_context_help'} ? $c->config->{'cgi_cfg'}->{'show_context_help'} : 0;
+    $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
     # Authentication
