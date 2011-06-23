@@ -72,6 +72,7 @@ sub get_thruk_cfg {
                 statusmap_default_type                  => ['LIST', '', Thruk::Utils::array2hash([qw/circle table/]) ],
                 statusmap_default_groupby               => ['LIST', '', Thruk::Utils::array2hash([qw/parent address domain hostgroup servicegroup/]) ],
                 use_wait_feature                        => ['BOOL',   '1'],
+                wait_timeout                            => ['STRING',   '10'],
 #                check_local_states
     };
 

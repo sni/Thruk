@@ -342,13 +342,14 @@ sub _redirect_or_success {
         # send a wait header?
         if(    $wait
            and defined $c->stash->{'lasthost'}
+           and $c->stash->{'lasthost'} !~ m/\s+/gmx
            and (   $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7
                 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96
                )
         ) {
             my $options = {
                         'header' => {
-                            'WaitTimeout'   => 10000,
+                            'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
                             'WaitTrigger'   => 'check',
                             'WaitCondition' => 'last_check >= '.$c->stash->{'now'},
                         }

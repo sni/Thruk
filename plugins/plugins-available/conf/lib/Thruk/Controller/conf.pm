@@ -203,6 +203,7 @@ sub _process_thruk_page {
         [ 'General', [qw/
                         title_prefix
                         use_wait_feature
+                        wait_timeout
                         use_frames
                         use_timezone
                         use_strict_host_authorization
