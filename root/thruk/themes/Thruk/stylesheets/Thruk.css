@@ -378,6 +378,7 @@ TABLE.infoBox {
   margin-right:2px;
   padding:3px 3px 3px 5px;
   width:280px;
+  white-space: nowrap;
 }
 
 TABLE.linkBox {

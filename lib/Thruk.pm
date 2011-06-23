@@ -265,6 +265,14 @@ if(defined __PACKAGE__->config->{'user_template_path'}) {
 }
 
 ###################################################
+__PACKAGE__->config->{'omd_version'} = "";
+if(defined $ENV{'OMD_ROOT'}) {
+    my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
+    $omdlink    =~ s/.*?\///gmx;
+    __PACKAGE__->config->{'omd_version'} = $omdlink;
+}
+
+###################################################
 
 =head2 check_user_roles_wrapper
 
