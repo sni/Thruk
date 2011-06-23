@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.0.6   Thu Jun 26 12:41:09 CEST 2011
           - added wait_timeout option
+          - added nicer/clearer command boxes
           - fixed problem with multiple filters
           - disabled wait feature when rescheduling checks on hosts with spaces
             - livestatus does not support that

@@ -764,6 +764,14 @@ ex.:
   use_new_search = 1
 
 
+==== use_new_command_box
+Show the new split command box on the host / service details page.
+
+ex.:
+
+  use_new_command_box = 1
+
+
 ==== use_ajax_search
 
 Enables the ajax search field. There will be suggestions while typing

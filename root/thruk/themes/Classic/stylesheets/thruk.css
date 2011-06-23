@@ -163,9 +163,9 @@ input.button_peerHID {
   font-weight:normal;
   overflow: hidden;
   width: 80px;
-  filter:alpha(opacity=40); /* IE */
-  -moz-opacity: 0.40; /* Mozilla */
-  opacity: 0.40; /* Opera */
+  filter:alpha(opacity=60); /* IE */
+  -moz-opacity: 0.60;       /* Mozilla */
+  opacity: 0.60;            /* Opera */
 }
 
 /* class to preload images */

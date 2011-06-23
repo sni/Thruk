@@ -466,6 +466,10 @@ TD.commandPanel,TD.stateInfoPanel {
   text-align:center;
 }
 
+TD.commandPanel {
+  min-width: 265px;
+}
+
 TD.comment,TD.downtime,TD.notificationsEven,TD.status {
   padding:0;
 }
@@ -887,6 +891,9 @@ TD.checkstatus {
 TABLE.checkstatus, TABLE.extCommandPanel {
   border: 0px none;
   width: auto;
+}
+TABLE.extCommandPanel {
+  margin-top: 4px;
 }
 TABLE.extdetails, TABLE.extdetails2 {
   border: 0px none;

@@ -170,6 +170,8 @@ sub uri {
     carp("no c") unless defined $c;
     my $uri = $c->request->uri();
     $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
+    $uri    =~ s/&amp;/&/gmx;
+    $uri    =~ s/&/&amp;/gmx;
     return $uri;
 }
 

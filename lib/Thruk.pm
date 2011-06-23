@@ -266,7 +266,7 @@ if(defined __PACKAGE__->config->{'user_template_path'}) {
 
 ###################################################
 __PACKAGE__->config->{'omd_version'} = "";
-if(defined $ENV{'OMD_ROOT'}) {
+if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
     my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
     $omdlink    =~ s/.*?\///gmx;
     __PACKAGE__->config->{'omd_version'} = $omdlink;
