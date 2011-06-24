@@ -129,7 +129,7 @@ sub _show_report {
 
     $c->stash->{image_width}  = '900';
     $c->stash->{image_height} = '300';
-    if(defined $service) {
+    if($service ne '') {
         $c->stash->{image_height} = '320';
     }
 
@@ -370,27 +370,23 @@ sub _draw_states {
         if($x2 < $drawing_x_offset) { $x2 = $drawing_x_offset; }
 
         if($mode == IMAGE_MAP_MODE) {
-
-            my $t1   = $log->{'start'};
-            my $t2   = $log->{'end'};
+            my $t1         = $log->{'start'};
+            my $t2         = $log->{'end'};
             my $next_start = $t1;
             my $next_end   = $t2;
-            if(defined $zoom) {
-                # get the center of this time range
-                my $center_time = $start + (( $end - $start) / 2);
+            $zoom          = 1 unless defined $zoom;
 
-                # determine next start and end time range with zoom factor
-                if($zoom > 0){
-                    $next_start = int($center_time - ((( $t2 - $t1) / 2) / $zoom ));
-                    $next_end   = int($center_time + ((( $t2 - $t1) / 2) / $zoom ));
-                }
-                else {
-                    $next_start = $center_time + ((( $t2 - $t1) / 2) * $zoom );
-                    $next_end   = $center_time - ((( $t2 - $t1) / 2) * $zoom );
-                }
-                $t1 = $next_start;
-                $t2 = $next_end;
+            # determine next start and end time range with zoom factor
+            if($zoom > 0){
+                $next_start = $t1 - int((($end - $start) / 2) / $zoom);
+                $next_end   = $t2 + int((($end - $start) / 2) / $zoom);
+            } else {
+                $next_start = $t1 - int((($end - $start) / 2) * $zoom);
+                $next_end   = $t2 + int((($end - $start) / 2) * $zoom);
             }
+            $t1 = $next_start;
+            $t2 = $next_end;
+            if($t2 > time()) { $t2 = time(); }
 
             push @{$image_map}, {
                 "x1"                 => $x1,

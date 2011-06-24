@@ -497,7 +497,13 @@ sub calculate_availability {
 
     $c->stash->{start}      = $start;
     $c->stash->{end}        = $end;
-    $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'} || '';
+    if(defined $c->{'request'}->{'parameters'}->{'timeperiod'}) {
+        $c->stash->{timeperiod} = $c->{'request'}->{'parameters'}->{'timeperiod'};
+    } elsif(!defined $c->{'request'}->{'parameters'}->{'t1'} and !defined $c->{'request'}->{'parameters'}->{'t2'}) {
+        $c->stash->{timeperiod} = 'last24hours';
+    } else {
+        $c->stash->{timeperiod} = '';
+    }
 
     my $rpttimeperiod                = $c->{'request'}->{'parameters'}->{'rpttimeperiod'};
     my $assumeinitialstates          = $c->{'request'}->{'parameters'}->{'assumeinitialstates'};

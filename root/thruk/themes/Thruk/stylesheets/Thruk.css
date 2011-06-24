@@ -1088,3 +1088,7 @@ IMG.crit_icon {
 DIV.extinfo4 TD {
   white-space: nowrap;
 }
+
+DIV.reportRange {
+    font-weight: bold;
+}
