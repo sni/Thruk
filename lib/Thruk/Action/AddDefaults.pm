@@ -42,6 +42,12 @@ before 'execute' => sub {
     $c->stash->{'info_popup_event_type'} = $c->config->{'info_popup_event_type'} || 'onmouseover';
 
     ###############################
+    $c->stash->{'enable_shinken_features'} = 0;
+    if(exists $c->config->{'enable_shinken_features'}) {
+        $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
+    }
+
+    ###############################
     # Authentication
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
@@ -161,10 +167,7 @@ before 'execute' => sub {
 
     ###############################
     # do we have only shinken backends?
-    if(exists $c->config->{'enable_shinken_features'}) {
-        $c->stash->{'enable_shinken_features'} = $c->config->{'enable_shinken_features'};
-    } else {
-        $c->stash->{'enable_shinken_features'} = 0;
+    unless(exists $c->config->{'enable_shinken_features'}) {
         if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH') {
             $c->stash->{'enable_shinken_features'} = 1;
             for my $b (values %{$c->stash->{'pi_detail'}}) {
