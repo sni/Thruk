@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added nicer/clearer command boxes
           - fixed zoom of trends graph
           - fixed problem with multiple filters
+          - fixed availability when selected all hosts
           - disabled wait feature when rescheduling checks on hosts with spaces
             - livestatus does not support that
           - Nuvola Theme: small design fixes (Juergen Vigna)

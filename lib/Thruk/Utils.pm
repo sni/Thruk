@@ -661,7 +661,7 @@ sub calculate_availability {
 
     # all hosts
     elsif(defined $host and $host eq 'all') {
-        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ], limit => 1);
+        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
         $host_data    = array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
         $logserviceheadfilter = { service_description => undef };
