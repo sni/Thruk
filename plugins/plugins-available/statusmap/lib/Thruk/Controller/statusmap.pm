@@ -458,15 +458,13 @@ sub _get_json_host {
 
     # filter quotes as they break the json output
     my $plugin_output = $host->{'plugin_output'} || '';
-    $plugin_output =~ s/"//gmx;
+    $plugin_output =~ s/("|')//gmx;
 
     my $alias = $host->{'alias'};
-    $alias =~ s/"//gmx;
-    $alias =~ s/'//gmx;
+    $alias =~ s/("|')//gmx;
 
     my $address = $host->{'address'};
-    $address =~ s/"//gmx;
-    $address =~ s/'//gmx;
+    $address =~ s/("|')//gmx;
 
     my $json_host = {
         'id'   => $host->{'name'},
