@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.0.7   Wed Jun 29 21:57:04 CEST 2011
+          - fixed url in link popup
+
 1.0.6   Thu Jun 26 12:41:09 CEST 2011
           - added wait_timeout option
           - added nicer/clearer command boxes
