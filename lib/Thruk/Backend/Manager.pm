@@ -8,6 +8,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Page;
 use Data::Dumper;
 use Scalar::Util qw/ looks_like_number /;
+use Encode;
 use Thruk::Utils;
 
 our $AUTOLOAD;
@@ -712,7 +713,7 @@ sub _remove_duplicates {
         delete $dat->{'peer_name'};
         my $peer_addr = $dat->{'peer_addr'};
         delete $dat->{'peer_addr'};
-        my $md5 = md5_hex( join( ';', values %{$dat} ) );
+        my $md5 = md5_hex( encode_utf8( join( ';', values %{$dat} ) ) );
         if( !defined $uniq->{$md5} ) {
             $dat->{'peer_key'}  = $peer_key;
             $dat->{'peer_name'} = $peer_name;
@@ -811,7 +812,7 @@ sub _page_data {
             for my $row (@{$data}) {
                 $nr++;
                 if(defined $row->{'host_name'} and defined $row->{'description'} and $row->{'host_name'}."_".$row->{'description'} eq $jump) {
-                    $page = POSIX::ceil($pages * $nr / $pager->total_entries);
+                    $page = POSIX::ceil($nr / $entries);
                     last;
                 }
             }
@@ -820,7 +821,7 @@ sub _page_data {
             for my $row (@{$data}) {
                 $nr++;
                 if(defined $row->{'name'} and $row->{'name'} eq $jump) {
-                    $page = POSIX::ceil($pages * $nr / $pager->total_entries);
+                    $page = POSIX::ceil($nr / $entries);
                     last;
                 }
             }
