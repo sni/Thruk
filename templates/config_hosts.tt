@@ -69,7 +69,7 @@
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
   [% SET class = 'tableRowHover' IF jump == d.name %]
-  <tr class='[% class %]'>
+  <tr class='[% class %]' id="[% name2id(d.name, 'host') %]">
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.backend.peer_name.size < backends.size %]
@@ -79,7 +79,7 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a id="[% name2id(d.name, 'host') %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>[% d.address %]</td>
     <td class='[% class %]'>[% FOREACH parent = d.parents %][% IF !loop.first() %], [% END %]<a href="config.cgi?type=hosts&amp;jump=[% parent | uri %]#[% parent | uri %]">[% parent %]</a>[% END %]</td>

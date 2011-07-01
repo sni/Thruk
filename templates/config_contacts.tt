@@ -27,7 +27,7 @@
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
   [% SET class = 'tableRowHover' IF jump == d.name %]
-  <tr class='[% class %]'>
+  <tr class='[% class %]' id="[% name2id(d.name, 'contact') %]">
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.backend.peer_name.size < backends.size %]
@@ -37,7 +37,7 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a id="[% name2id(d.name, 'contact') %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'><a href="mailto:[% d.email | uri %]">[% d.email %]</a></td>
     <td class='[% class %]'>[% d.pager %]</td>

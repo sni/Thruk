@@ -20,7 +20,7 @@
   [% SET class = 'dataOdd'  IF loop.even %]
   [% SET class = 'dataEven' IF loop.odd %]
   [% SET class = 'tableRowHover' IF jump == d.name %]
-  <tr class='[% class %]'>
+  <tr class='[% class %]' id="[% name2id(d.name, 'servicegroup') %]">
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.backend.size < backends.size %]
@@ -30,7 +30,7 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a id="[% name2id(d.name, 'servicegroup') %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>
       [% FOREACH service = d.members %]

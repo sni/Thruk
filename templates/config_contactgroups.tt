@@ -15,7 +15,7 @@
   [% SET class = 'dataOdd'  IF loop.odd %]
   [% SET class = 'dataEven' IF loop.even %]
   [% SET class = 'tableRowHover' IF jump == d.name %]
-  <tr class='[% class %]'>
+  <tr class='[% class %]' id="[% name2id(d.name, 'contactgroup') %]">
     [% IF backends.size > 1 %]
       <td class='[% class %]'>
         [% IF d.backend.peer_name.size < backends.size %]
@@ -25,7 +25,7 @@
         [% END %]
       </td>
     [% END %]
-    <td class='[% class %]'><a id="[% name2id(d.name, 'contactgroup') %]"></a>[% d.name %]</td>
+    <td class='[% class %]'>[% d.name %]</td>
     <td class='[% class %]'>[% d.alias %]</td>
     <td class='[% class %]'>[% FOREACH contact = d.members.sort %][% IF !loop.first() %] , [% END %]<a href="config.cgi?type=contacts&amp;jump=[% contact | uri %]#[% contact | uri %]">[% contact %]</a>[% END %]</td>
   </tr>
