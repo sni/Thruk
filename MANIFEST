@@ -453,6 +453,7 @@ root/thruk/themes/Classic/images/calendar.png
 root/thruk/themes/Classic/images/catalyst_170pix.png
 root/thruk/themes/Classic/images/command.png
 root/thruk/themes/Classic/images/comment.gif
+root/thruk/themes/Classic/images/config.png
 root/thruk/themes/Classic/images/contexthelp1.gif
 root/thruk/themes/Classic/images/contexthelp2.gif
 root/thruk/themes/Classic/images/critical.png
@@ -559,6 +560,7 @@ root/thruk/themes/Exfoliation/images/calendar.png
 root/thruk/themes/Exfoliation/images/catalyst_170pix.png
 root/thruk/themes/Exfoliation/images/command.png
 root/thruk/themes/Exfoliation/images/comment.gif
+root/thruk/themes/Exfoliation/images/config.png
 root/thruk/themes/Exfoliation/images/contexthelp1.gif
 root/thruk/themes/Exfoliation/images/contexthelp2.gif
 root/thruk/themes/Exfoliation/images/critical.png
@@ -722,6 +724,7 @@ root/thruk/themes/Nuvola/images/calendar.png
 root/thruk/themes/Nuvola/images/catalyst_170pix.png
 root/thruk/themes/Nuvola/images/command.png
 root/thruk/themes/Nuvola/images/comment.gif
+root/thruk/themes/Nuvola/images/config.png
 root/thruk/themes/Nuvola/images/contexthelp1.gif
 root/thruk/themes/Nuvola/images/contexthelp2.gif
 root/thruk/themes/Nuvola/images/critical.png
@@ -878,6 +881,7 @@ root/thruk/themes/Thruk/images/calendar.png
 root/thruk/themes/Thruk/images/catalyst_170pix.png
 root/thruk/themes/Thruk/images/command.png
 root/thruk/themes/Thruk/images/comment.gif
+root/thruk/themes/Thruk/images/config.png
 root/thruk/themes/Thruk/images/contexthelp1.gif
 root/thruk/themes/Thruk/images/contexthelp2.gif
 root/thruk/themes/Thruk/images/critical.png
@@ -972,6 +976,7 @@ root/thruk/themes/Vautour/images/calendar.png
 root/thruk/themes/Vautour/images/catalyst_170pix.png
 root/thruk/themes/Vautour/images/command.png
 root/thruk/themes/Vautour/images/comment.gif
+root/thruk/themes/Vautour/images/config.png
 root/thruk/themes/Vautour/images/contexthelp1.gif
 root/thruk/themes/Vautour/images/contexthelp2.gif
 root/thruk/themes/Vautour/images/critical.png
@@ -1121,6 +1126,7 @@ root/thruk/themes/Wakizashi/images/catalyst_170pix.png
 root/thruk/themes/Wakizashi/images/closed.gif
 root/thruk/themes/Wakizashi/images/command.png
 root/thruk/themes/Wakizashi/images/comment.gif
+root/thruk/themes/Wakizashi/images/config.png
 root/thruk/themes/Wakizashi/images/contexthelp1.gif
 root/thruk/themes/Wakizashi/images/contexthelp2.gif
 root/thruk/themes/Wakizashi/images/contextlink.png

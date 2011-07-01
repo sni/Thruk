@@ -18,11 +18,10 @@
                 <a href='history.cgi?host=[% host.name | uri %]'>View Alert History For This Host</a><br>
                 [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]'>View Trends For This Host</a><br>[% END %]
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% host.name | uri %]'>View Alert Histogram For This Host</a><br>[% END %]
-
                 <a href='avail.cgi?host=[% host.name | uri %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
                 <a href='notifications.cgi?host=[% host.name | uri %]'>View Notifications For This Host</a>
                 [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
-                <br><a href='config.cgi?type=hosts&amp;jump=[% host.name | uri %]#[% host.name | uri %]'>View Configuration For This Host</a>
+                <br><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a>
                 [% END %]
               </td>
             </tr>
@@ -448,6 +447,12 @@
             <br>
             <a name="command" id="command"></a>
             <div class='commentTitle'>Configuration Information</div>
+            <table border="0">
+              <tr>
+                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
+                <td valign="middle"><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a></td>
+              </tr>
+            </table>
             <table border="0" class="commandPanel">
               <tr>
                 <th class='comment' nowrap>Check Command</th>

@@ -20,9 +20,8 @@
                 <a href='avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries'>View Availability Report For This Service</a><br>
                 <a href='notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Notifications For This Service</a>
                 [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
-                <br><a href='config.cgi?type=services&amp;jump=[% service.host_name | uri %]_[% service.description %]#[% service.host_name | uri %]_[% service.description %]'>View Configuration For This Service</a>
+                <br><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a>
                 [% END %]
-
               </td>
             </tr>
           </table>
@@ -438,6 +437,12 @@
             <br>
             <a name="command" id="command"></a>
             <div class='commentTitle'>Configuration Information</div>
+            <table border="0">
+              <tr>
+                <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
+                <td valign="middle"><a href='config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]'>View Configuration For This Service</a></td>
+              </tr>
+            </table>
             <table border="0" class="commandPanel">
               <tr>
                 <th class='comment' nowrap>Check Command</th>
