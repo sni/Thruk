@@ -19,6 +19,10 @@
                 [% IF use_feature_histogram %]<a href='histogram.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Alert Histogram For This Service</a><br>[% END %]
                 <a href='avail.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;show_log_entries'>View Availability Report For This Service</a><br>
                 <a href='notifications.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]'>View Notifications For This Service</a>
+                [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
+                <br><a href='config.cgi?type=services&amp;jump=[% service.host_name | uri %]_[% service.description %]#[% service.host_name | uri %]_[% service.description %]'>View Configuration For This Service</a>
+                [% END %]
+
               </td>
             </tr>
           </table>

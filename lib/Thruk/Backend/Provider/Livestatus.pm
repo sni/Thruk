@@ -216,6 +216,9 @@ sub get_hosts {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
                                              got_business_rule parent_dependencies/;
         }
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
+        }
     }
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
@@ -355,6 +358,9 @@ sub get_services {
         if($self->{'stash'}->{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
                                              got_business_rule parent_dependencies/;
+        }
+        if(defined $options{'extra_columns'}) {
+            push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
 

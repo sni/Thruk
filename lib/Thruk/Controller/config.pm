@@ -64,13 +64,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # hosts
     elsif($type eq 'hosts') {
-        $c->{'db'}->get_hosts(sort => 'name', remove_duplicates => 1, pager => $c);
+        $c->{'db'}->get_hosts(sort => 'name', remove_duplicates => 1, pager => $c, extra_columns => ['contacts'] );
         $c->stash->{template} = 'config_hosts.tt';
     }
 
     # services
     elsif($type eq 'services') {
-        $c->{'db'}->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => $c);
+        $c->{'db'}->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => $c, extra_columns => ['contacts']);
         $c->stash->{template} = 'config_services.tt';
     }
 

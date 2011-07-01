@@ -21,6 +21,9 @@
 
                 <a href='avail.cgi?host=[% host.name | uri %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
                 <a href='notifications.cgi?host=[% host.name | uri %]'>View Notifications For This Host</a>
+                [% IF c.check_user_roles_wrapper('authorized_for_configuration_information') %]
+                <br><a href='config.cgi?type=hosts&amp;jump=[% host.name | uri %]#[% host.name | uri %]'>View Configuration For This Host</a>
+                [% END %]
               </td>
             </tr>
           </table>
