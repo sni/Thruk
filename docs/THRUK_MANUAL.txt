@@ -268,13 +268,20 @@ then run make
 
 This may take a while, as there are probably several modules missing.
 
+
+[TIP]
+.yes
+=======
+you can use /usr/bin/yes to automatically answer all questions with
+yes. (yes | make)
+=======
+
+
 Press <y> at this questions:
 -------
   Do you want to build the XS Stash module? [y]
   Do you want to use the XS Stash by default? [y]
 -------
-
-Tell me if someone knows a way to answer this questions automatically.
 
 run perl Makefile.PL again to see if all dependecies are now installed properly.
 
