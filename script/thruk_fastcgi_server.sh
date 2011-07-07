@@ -7,6 +7,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: startup script for thruk fastcgi server
+# Description:       Thruk - Monitoring Webinterface. Gui for Nagios, Icinga and Shinken. 
 ### END INIT INFO
 #
 # 2010-02-12 by Sven Nierlein
