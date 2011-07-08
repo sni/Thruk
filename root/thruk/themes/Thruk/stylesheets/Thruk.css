@@ -1092,3 +1092,9 @@ DIV.extinfo4 TD {
 DIV.reportRange {
     font-weight: bold;
 }
+
+option.disable {
+    height: 8px !important;
+    line-height: 8px;
+    vertical-align: top;
+}

@@ -624,7 +624,7 @@ TABLE.hostcomments TH, TABLE.hostdowntimes TH,TABLE.servicecomments TH, TABLE.se
 select#quick_command option {
   background-repeat:no-repeat;
   background-position:center left;
-  padding-left:22px;
+  padding-left:24px;
   height: 22px;
 }
 select#quick_command {

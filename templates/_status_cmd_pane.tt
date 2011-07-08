@@ -36,32 +36,32 @@
         <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)">
           [% IF c.config.cmd_quick_status.reschedule %]
           <option value="1" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delay.gif); }">reschedule next check</option>
-          <option value="" disabled>-----------------</option>
+          <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.downtime %]
           <option value="2" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif); }">add downtime</option>
           <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove downtimes</option>
-          <option value="" disabled>-----------------</option>
+          <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.comment %]
           <option value="3" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/comment.gif); }">add comment</option>
           <option value="6" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove comments</option>
-          <option value="" disabled>-----------------</option>
+          <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.acknowledgement %]
           <option value="4" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/ack.gif); }">add acknowledgement</option>
           <option value="7" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/noack.gif); }">remove acknowledgement</option>
-          <option value="" disabled>-----------------</option>
+          <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.active_checks %]
           <option value="8" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif); }">enable active checks</option>
           <option value="9" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }">disable active checks</option>
-          <option value="" disabled>-----------------</option>
+          <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.notifications %]
           <option value="10" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif); }">enable notifications</option>
           <option value="11" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }">disable notifications</option>
-          <option value="" disabled>-----------------</option>
+          <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.submit_result %]
           <option value="12" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/passiveonly.gif); }">submit passive check result</option>
