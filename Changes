@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 1.0.8   Fri Jul  1 11:34:25 CEST 2011
           - added "view configuration" link in host/service extinfo page
           - added contacts to host/service config page
+          - added icons to command seletion
           - added description to init script (fixes #32)
           - fixed scheduling downtimes on mutliple backends (fixes #33)
 

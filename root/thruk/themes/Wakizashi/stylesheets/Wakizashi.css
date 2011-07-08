@@ -2074,3 +2074,14 @@ body.businessview TABLE.data {
 body.businessview TABLE.data TR.dataOdd {
     background-image: none;
 }
+
+
+select#quick_command option {
+  background-repeat:no-repeat;
+  background-position:center left;
+  padding-left:22px;
+  height: 22px;
+}
+select#quick_command {
+  height: inherit !important;
+}
