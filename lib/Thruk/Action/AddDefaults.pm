@@ -148,11 +148,13 @@ before 'execute' => sub {
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
     $c->stash->{'param_backend'}  = $backend;
     if($backend ne '' and defined $c->{'db'}) {
-        for my $back (@{$c->{'db'}->peer_key()}) {
-            if($back ne $backend) {
-                $c->{'db'}->disable_backend($back);
-            }
+        my $backends = {};
+        for my $b (ref $backend eq 'ARRAY' ? @{$backend} : ($backend)) {
+            $backends->{$b} = 1;
         }
+
+        $c->{'db'}->disable_backends();
+        $c->{'db'}->enable_backends($backends);
     }
 
     if(!defined $c->stash->{'pi_detail'} and $self->_any_backend_enabled($c)) {

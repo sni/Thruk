@@ -16,7 +16,7 @@
     [% END %]
 
     [%# definition of the html form data #%]
-    <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'><input type='hidden' name='backend' value='[% c.request.parameters.backend %]'></b></td></tr>
+    <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
 
     [% END %]
     [% END %]
@@ -41,7 +41,7 @@
     [% END %]
 
     [%# definition of the html form data #%]
-    <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'><input type='hidden' name='backend' value='[% c.request.parameters.backend %]'></b></td></tr>
+    <tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></td></tr>
     <tr><td class='optBoxRequiredItem'>Service:</td><td><b><input type='text' name='service' value='[% c.request.parameters.service %]'></b></td></tr>
 
     [% END %]

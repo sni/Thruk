@@ -120,15 +120,19 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     elsif( defined $quick_command and $quick_command or $c->stash->{'cmd_typ'} =~ m/^c(\d+)$/mx ) {
         if(defined $1) {
             $quick_command = $1;
+            my $backends = $c->{'request'}->{'parameters'}->{'backend'};
+            if(ref $c->{'request'}->{'parameters'}->{'backend'} eq 'ARRAY') {
+                $backends = join('|', @{$c->{'request'}->{'parameters'}->{'backend'}});
+            }
             if(defined $c->{'request'}->{'parameters'}->{'service'} and $c->{'request'}->{'parameters'}->{'service'} ne '') {
                 $c->{'request'}->{'parameters'}->{'selected_services'} =
                         $c->{'request'}->{'parameters'}->{'host'}
                         .';'.$c->{'request'}->{'parameters'}->{'service'}
-                        .';'.$c->{'request'}->{'parameters'}->{'backend'};
+                        .';'.$backends;
             } else {
                 $c->{'request'}->{'parameters'}->{'selected_hosts'}    =
                         $c->{'request'}->{'parameters'}->{'host'}
-                        .';;'.$c->{'request'}->{'parameters'}->{'backend'};
+                        .';;'.$backends;
             }
         }
         my $cmd_typ;
@@ -160,11 +164,12 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             else {
                 return $c->detach('/error/index/7');
             }
-            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             my( $host, $service, $backend ) = split /;/mx, $hostdata;
+            my @backends                    = split /\|/mx, $backend;
+            $c->stash->{'lasthost'}         = $host;
+            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
-            $c->{'request'}->{'parameters'}->{'backend'} = $backend;
-            $c->stash->{'lasthost'} = $host;
+            $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
                 $self->_remove_all_downtimes( $c, $host );
             }
@@ -189,13 +194,14 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             else {
                 return $c->detach('/error/index/7');
             }
-            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             my( $host, $service, $backend ) = split /;/mx, $servicedata;
+            my @backends                    = split /\|/mx, $backend;
+            $c->stash->{'lasthost'}         = $host;
+            $c->stash->{'lastservice'}      = $service;
+            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'service'} = $service;
-            $c->{'request'}->{'parameters'}->{'backend'} = $backend;
-            $c->stash->{'lasthost'}    = $host;
-            $c->stash->{'lastservice'} = $service;
+            $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
                 $self->_remove_all_downtimes( $c, $host, $service );
             }
@@ -230,16 +236,19 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 sub _remove_all_downtimes {
     my( $self, $c, $host, $service ) = @_;
 
+    my $backends = $c->{'request'}->{'parameters'}->{'backend'};
+
+    # send the command
+    my $options = {};
+    if( defined $backends ) {
+        $c->log->debug( "sending to backends: " . Dumper($backends) );
+        $options->{backend} = $backends;
+    }
+    $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $host, service_description => $service ];
+
     # get list of all downtimes
-    my @ids;
-    if( defined $service ) {
-        my $data = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $host, service_description => $service ]);
-        @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
-    }
-    else {
-        my $data = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $host, service_description => undef ]);
-        @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
-    }
+    my $data = $c->{'db'}->get_downtimes(%{$options});
+    my @ids     = keys %{Thruk::Utils::array2hash($data, 'id')};
     for my $id ( @ids ) {
         $c->{'request'}->{'parameters'}->{'down_id'} = $id;
         if( $self->_do_send_command($c) ) {
@@ -524,6 +533,8 @@ sub _bulk_send {
     }
 
     $options->{'command'} = join("\n\n", @{$c->stash->{'commands2send'}});
+
+    return 1 if $options->{'command'} eq '';
 
     if($c->request->parameters->{'test_only'}) {
         $c->log->debug( 'not sending (TESTMODE): ' . $options->{'command'} );

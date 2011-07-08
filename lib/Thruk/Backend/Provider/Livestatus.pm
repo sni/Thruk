@@ -88,6 +88,7 @@ send a command
 =cut
 sub send_command {
     my($self, %options) = @_;
+    cluck("empty command") if (!defined $options{'command'} or $options{'command'} eq '');
     $self->{'live'}->{'backend_obj'}->do($options{'command'});
     return;
 }
