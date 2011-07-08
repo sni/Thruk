@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 687;
+use Test::More tests => 694;
 
 BEGIN {
     use lib('t');
