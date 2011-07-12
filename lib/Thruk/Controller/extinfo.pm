@@ -162,8 +162,10 @@ sub _process_host_page {
     # generate command line
     if($c->{'stash'}->{'show_full_commandline'} == 2 ||
        $c->{'stash'}->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
-        my $command             = $c->{'db'}->expand_command('host' => $host );
-        $c->stash->{'command'}  = $command;
+        if(defined $host) {
+            my $command            = $c->{'db'}->expand_command('host' => $host );
+            $c->stash->{'command'} = $command;
+        }
     }
 
     # pnp graph?
@@ -269,8 +271,11 @@ sub _process_service_page {
                 }
             }
         }
-        my $command             = $c->{'db'}->expand_command('host' => $host, 'service' => $service );
-        $c->stash->{'command'}  = $command;
+        $c->stash->{'command'}  = '';
+        if(defined $host and defined $service) {
+            my $command            = $c->{'db'}->expand_command('host' => $host, 'service' => $service );
+            $c->stash->{'command'} = $command;
+        }
     }
 
     # pnp graph?
