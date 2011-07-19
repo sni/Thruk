@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added icons to command seletion
           - added description to init script (fixes #32)
           - fixed scheduling downtimes on mutliple backends (fixes #33)
+          - fixed custom icons in Nuvola theme
 
 1.0.7   Wed Jun 29 21:57:04 CEST 2011
           - fixed url in link popup

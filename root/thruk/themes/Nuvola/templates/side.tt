@@ -69,6 +69,10 @@
     [% icon_open = url_prefix _ 'thruk/themes/Nuvola/side/icons/folder_open.gif' %]
   [% END %]
 
+  [% IF link.exists('icon') %]
+      [% icon = link.icon %]
+  [% END %]
+
 [% END %]
 
 
