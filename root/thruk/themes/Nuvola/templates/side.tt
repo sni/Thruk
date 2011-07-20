@@ -73,6 +73,10 @@
       [% icon = link.icon %]
   [% END %]
 
+  [% IF sublink.exists('icon') %]
+    [% icon = sublink.icon %]
+  [% END %]
+
 [% END %]
 
 
