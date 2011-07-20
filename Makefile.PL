@@ -104,26 +104,30 @@ eval {
 # check plugin test symlinks
 my $testlinks = {};
 mkdir("t/xt") unless -d "t/xt";
-for my $test (glob('plugins/plugins-enabled/*/t/*.t')) {
-    my $testfile = $test;
-    $testfile    =~ s/.*\///gmx;
-    if(!-s 't/xt/'.$testfile) {
-        symlink('../../'.$test, 't/xt/'.$testfile) or die("cannot create symlink: $!");
-        $testlinks->{$testfile} = '../../'.$test;
+for my $testdir (glob('plugins/plugins-enabled/*/t')) {
+    $testdir =~ m|/plugins-enabled/(.*)/t|gmx or die("test directory $testdir does not have valid format!");
+    my $plugin = $1;
+
+    if(!-e 't/xt/'.$plugin and !-l 't/xt/'.$plugin) {
+        symlink('../../plugins/plugins-enabled/'.$plugin.'/t', 't/xt/'.$plugin) or die("cannot create symlink ('../../plugins/plugins-enabled/$plugin/t', 't/xt/$plugin'): $!");
+        $testlinks->{$plugin} = '../../plugins/plugins-enabled/'.$plugin.'/t';
         next;
     }
-    my $target = readlink('t/xt/'.$testfile);
-    if($target ne '../../'.$test) {
-        die('t/xt/'.$testfile.' has wrong target: '.$target.' vs. ../../'.$test);
+    my $target = readlink('t/xt/'.$plugin);
+    if($target ne '../../plugins/plugins-enabled/'.$plugin.'/t') {
+        die('t/xt/'.$plugin.' has wrong target: '.$target.' vs. ../../plugins/plugins-enabled/'.$plugin.'/t');
     }
-    $testlinks->{$testfile} = $target;
+    $testlinks->{$plugin} = $target;
 }
+
 # check if there are some links too much
-my @cur_t_links = glob('t/xt/*.t');
+my @cur_t_links = glob('t/xt/*');
 for my $link (@cur_t_links) {
     my $target = readlink($link);
     my $linkbasename = $link;
-    $linkbasename =~ s/.*\///gmx;
+    $linkbasename =~ s/\/\.$//gmx;
+    $linkbasename =~ s/^.*\///gmx;
+    $link         =~ s/\/\.$//gmx;
     if(!defined $testlinks->{$linkbasename}) {
         unlink($link) or die($link.' should be deleted: '.$!);
     }
@@ -165,6 +169,11 @@ EOT
         $cp_option = "-R" if $^O eq 'freebsd';
         $cp_option = "-R" if $^O eq 'darwin';
         $line = "\t".'for file in `cat MANIFEST`; do if [ -d $$file -a -L $$file ]; then $(CP) '.$cp_option.' $$file $(DISTVNAME)/`dirname $$file`/; fi; done'."\n".$line if defined $cp_option;
+    }
+
+    # set tests
+    if($line =~ m/^TEST_FILES\s*=/mx) {
+        $line = "TEST_FILES = t/*.t t/xt/*/*.t\n";
     }
     $new_makefile .= $line;
 }
