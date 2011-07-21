@@ -224,7 +224,7 @@ if(exists __PACKAGE__->config->{'cgi_cfg'}) {
     delete __PACKAGE__->config->{'cgi_cfg'};
 }
 unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log)) {
-    die("\n\n*****\nfailed to load cgi config\n*****\n\n");
+    die("\n\n*****\nfailed to load cgi config: ".__PACKAGE__->config->{'cgi.cfg'}."\n*****\n\n");
 }
 
 

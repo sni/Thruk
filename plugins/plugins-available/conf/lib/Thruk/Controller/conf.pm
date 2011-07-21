@@ -6,7 +6,7 @@ use Thruk::Utils::Menu;
 use Thruk::Utils::Conf::Defaults;
 use Thruk::Utils::Conf;
 use Carp;
-use Data::Dumper;
+use File::Copy;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -122,6 +122,12 @@ sub _process_cgi_page {
 
     my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
     return unless defined $file;
+
+    # create a default config from the current used cgi.cfg
+    if(!-e $file and $file ne $c->config->{'cgi.cfg_effective'}) {
+        copy($c->config->{'cgi.cfg_effective'}, $file) or die('cannot copy '.$c->config->{'cgi.cfg_effective'}.' to '.$file.': '.$!);
+    }
+
     my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
 
     # save changes

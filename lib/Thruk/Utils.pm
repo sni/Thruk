@@ -104,7 +104,7 @@ sub read_cgi_cfg {
             $c->error("cgi.cfg not set");
             return $c->detach('/error/index/4');
         }
-        print STDERR "cgi_cfg option must be set in thruk.conf or thruk_local.conf\n\n";
+        print STDERR "cgi.cfg option must be set in thruk.conf or thruk_local.conf\n\n";
         return;
     }
     elsif( -r $file ) {
@@ -134,6 +134,7 @@ sub read_cgi_cfg {
         $c->log->info("cgi.cfg has changed, updating...") if defined $last_stat;
         $c->log->debug("reading $file") if defined $c;
         $config->{'cgi_cfg_stat'} = \@cgi_cfg_stat;
+        $config->{'cgi.cfg_effective'} = $file;
         my $conf = new Config::General($file);
         %{$config->{'cgi_cfg'}} = $conf->getall;
     }
