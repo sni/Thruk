@@ -28,7 +28,7 @@
 // ------ DTree Tree-menu Data --------------------------------------------
 //******************************************************************************
 
-[% sublink.name = "" %]
+[% sublink.name = '' %]
 [% icon_open    = '' %]
 [% icon         = '' %]
 
@@ -44,38 +44,35 @@
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/info.gif' %]
   [% END %]
 
-  [% IF link.name == 'Map' %]
+  [% IF l.name == 'Map' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/map.gif' %]
-  [% ELSIF link.name == 'Comments' %]
+  [% ELSIF l.name == 'Comments' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/notes.gif' %]
-  [% ELSIF link.name == 'Downtime' %]
+  [% ELSIF l.name == 'Downtime' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/downtime.gif' %]
-  [% ELSIF link.name == 'Problems' %]
+  [% ELSIF l.name == 'Problems' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/error.gif' %]
-  [% ELSIF link.name == 'Notifications' %]
+  [% ELSIF l.name == 'Notifications' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/notifications.gif' %]
-  [% ELSIF link.name == 'Event Log' %]
+  [% ELSIF l.name == 'Event Log' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/notes.gif' %]
-  [% ELSIF link.name == 'Process Info' %]
+  [% ELSIF l.name == 'Process Info' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/processes.gif' %]
-  [% ELSIF link.name == 'Performance Info' %]
+  [% ELSIF l.name == 'Performance Info' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/performance.gif' %]
-  [% ELSIF link.name == 'Scheduling Queue' %]
+  [% ELSIF l.name == 'Scheduling Queue' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/icons/queue.gif' %]
   [% END %]
 
-  [% IF !sublink.name && link.links && link.links.size > 0 %]
+  [% IF l.exists('icon') %]
+      [% icon = l.icon %]
+  [% END %]
+
+  [% IF l.links && l.links.size > 0 %]
     [% icon      = url_prefix _ 'thruk/themes/Nuvola/side/icons/folder.gif' %]
     [% icon_open = url_prefix _ 'thruk/themes/Nuvola/side/icons/folder_open.gif' %]
   [% END %]
 
-  [% IF link.exists('icon') %]
-      [% icon = link.icon %]
-  [% END %]
-
-  [% IF sublink.exists('icon') %]
-    [% icon = sublink.icon %]
-  [% END %]
 
 [% END %]
 
@@ -105,11 +102,11 @@
   [% FOREACH link = section.links +%]
       [% index = index + 1 %]
       [% IF link.href %]
-        [% PROCESS set_icons %]
+        [% PROCESS set_icons l=link %]
         [%+ menu_name %].add([% index %],0,'[% link.name %]','[% link.href %]','','[% link.target %]', '[% icon %]', '[% icon_open %]');
         [%+ parent_index = index %]
         [% FOREACH sublink = link.links +%]
-          [% PROCESS set_icons %]
+          [% PROCESS set_icons l=sublink %]
           [% index = index + 1 %]
           [%+ menu_name %].add([% index %],[% parent_index %],'[% sublink.name %]','[% sublink.href %]','','[% sublink.target %]','[% icon %]');
         [% END %]
