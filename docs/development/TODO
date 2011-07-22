@@ -1,6 +1,12 @@
 Todo List:
 =========================================================
 
+Important:
+  - selecting dates > 2038 leads to an error
+
+services:
+    - add possibility for flexible downtimes
+
 extinfo:
     - finish performance data on extinfo type 4
 
@@ -42,12 +48,9 @@ ideas for after 1.0
 general:
     - webservice api, passthrough querys to livestatus and return json
       result
-    - query builder, click to add filter or stats
-    - _HTML field for hosts / services besides action_url/notes_url
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
     - show host/service dependencies
     - add multiple notes url or action urls, maybe add an "_html" cust var
-    - add ability to display contacts for machine
     - uc,lc option for auth user -> monitoring
     - add context sensitive help
     - page by attribute a,b,c,d,e...z
@@ -56,9 +59,7 @@ general:
     - add output filter plugins (ex.: check_multi, disk checks)
     - add backend name to logs
     - add go back button on error page
-    - use title for quick downtimes popups
     - support more macros
-    - nice error message when using dates > 2038
     - multiple lines for comment/downtime input
     - include comments in export
 
