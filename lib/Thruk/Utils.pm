@@ -866,7 +866,7 @@ sub calculate_availability {
 
 =head2 set_message
 
-  set_message($c, $style, $text)
+  set_message($c, $style, $text, [ $details ])
 
 set a message in an cookie for later display
 
@@ -875,11 +875,13 @@ sub set_message {
     my $c       = shift;
     my $style   = shift;
     my $message = shift;
+    my $details = shift;
 
     $c->res->cookies->{'thruk_message'} = {
         value => $style.'~~'.$message,
     };
-    $c->stash->{'thruk_message'} = $style.'~~'.$message;
+    $c->stash->{'thruk_message'}         = $style.'~~'.$message;
+    $c->stash->{'thruk_message_details'} = $details || [];
 
     return 1;
 }

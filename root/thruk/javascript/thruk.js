@@ -44,7 +44,7 @@ function debug(str) {
 }
 
 /* hide a element by id */
-function hideElement(id) {
+function hideElement(id, icon) {
   var pane;
   if(typeof(id) == 'object') {
     pane = id;
@@ -58,10 +58,15 @@ function hideElement(id) {
   }
   pane.style.display    = 'none';
   pane.style.visibility = 'hidden';
+
+  var img = document.getElementById(icon);
+  if(img) {
+    img.src = img.src.replace(/icon_minimize\.gif/g, "icon_maximize.gif");
+  }
 }
 
 /* show a element by id */
-function showElement(id) {
+function showElement(id, icon) {
   var pane;
   if(typeof(id) == 'object') {
     pane = id;
@@ -75,10 +80,15 @@ function showElement(id) {
   }
   pane.style.display    = '';
   pane.style.visibility = 'visible';
+
+  var img = document.getElementById(icon);
+  if(img) {
+    img.src = img.src.replace(/icon_maximize\.gif/g, "icon_minimize.gif");
+  }
 }
 
 /* toggle a element by id */
-function toggleElement(id) {
+function toggleElement(id, icon) {
   var pane = document.getElementById(id);
   if(!pane) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
@@ -86,11 +96,11 @@ function toggleElement(id) {
   }
 
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
-    showElement(id);
+    showElement(id, icon);
     return true;
   }
   else {
-    hideElement(id);
+    hideElement(id, icon);
     return false;
   }
 }
@@ -2010,7 +2020,9 @@ var ajax_search = {
         ajax_search.res = new Array();
         results.each(function(type) {
             var cur_count = 0;
-            resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + type.name.substring(0,1).toUpperCase() + type.name.substring(1) + '<\/i><\/b><\/li>';
+            var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
+            if(type.results.size() == 1) { name = name.substring(0, name.length -1); }
+            resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + name + '<\/i><\/b><\/li>';
             type.results.each(function(data) {
                 if(cur_count <= results_per_type) {
                     var name = data.display;
