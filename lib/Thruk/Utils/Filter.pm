@@ -237,6 +237,8 @@ sub uri_with {
         confess("ERROR in uri_with(): ".$@);
     }
     $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
+    $uri =~ s/&amp;/&/gmx;
+    $uri =~ s/&/&amp;/gmx;
     return $uri;
 }
 
