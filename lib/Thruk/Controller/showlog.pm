@@ -92,6 +92,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stats->profile(end   => "showlog::fetch");
     }
 
+    if( defined $c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c);
+        my $filename = 'logs.xls';
+        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+        $c->stash->{'template'} = 'excel/logs.tt';
+        return $c->detach('View::Excel');
+    }
+
     $c->stash->{archive}          = $archive;
     $c->stash->{start}            = $start;
     $c->stash->{end}              = $end;

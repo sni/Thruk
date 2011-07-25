@@ -140,6 +140,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
     $c->stats->profile(end => "history::fetch");
 
+    if( defined $c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c);
+        my $filename = 'history.xls';
+        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+        $c->stash->{'template'} = 'excel/logs.tt';
+        return $c->detach('View::Excel');
+    }
+
     $c->stash->{archive}          = $archive;
     $c->stash->{type}             = $type;
     $c->stash->{statetype}        = $statetype;

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 56;
+use Test::More tests => 62;
 
 BEGIN {
     use lib('t');
@@ -23,5 +23,18 @@ for my $url (@{$pages}) {
         'url'     => $url,
         'like'    => 'Event Log',
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+    );
+}
+
+$pages = [
+# Excel Export
+    '/thruk/cgi-bin/showlog.cgi?view_mode=xls',
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'          => $url,
+        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
+        'content_type' => 'application/x-msexcel',
     );
 }

@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.0.8   Fri Jul  1 11:34:25 CEST 2011
+1.0.8    Mon Jul 25 23:29:18 CEST 2011
+          - added excel export for all logfile pages
           - added "view configuration" link in host/service extinfo page
           - added contacts to host/service config page
           - added icons to command seletion

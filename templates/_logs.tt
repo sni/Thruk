@@ -1,6 +1,47 @@
 ﻿[% USE date %]
 
-<div align="center">[% PROCESS _pager.tt %]</div>
+<table width="100%"><tr>
+<td style="width:10%">&nbsp;</td>
+<td style="width:80%">
+  <div align="center">[% PROCESS _pager.tt %]</div>
+</td>
+<td style="width:10%" align="right">
+  [% PROCESS _add_bookmark.tt style="detail" %]
+  [% PROCESS _show_link.tt style="detail" %]
+  <a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns'); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>&nbsp;&nbsp;&nbsp;
+  <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
+  <div class="shadow"><div class="shadowcontent">
+  <form action='[% uri_with(c, 'view_mode' => 'xls') %]' method="POST" id="excel_form">
+  <table border="1" class='filter' cellspacing="0" cellpadding="0">
+    <tr>
+      <td class='filter'>
+        <table border="0" cellspacing="2" cellpadding="0">
+          <tr>
+            <td valign="top" align="left" class='filterTitle' nowrap>Columns to Export</td>
+            <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;"></td>
+          </tr>
+          [% counter = 0 %]
+          [% FOR column IN [ 'Time', 'Event', 'Hostname', 'Service Description', 'Info', 'Message' ] %]
+          [% counter = counter + 1 %]
+          <tr>
+            <td valign="top" align="left" class='filterName clickable' id="ht[% counter %]n" onclick="toggleFilterCheckBox(this.id)">[% column %]</td>
+            <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% counter %]" id="ht[% counter %]" name="columns" checked></td>
+          </tr>
+          [% END %]
+          <tr>
+            <td colspan=2 align="center">
+              <input type="submit" name="export" value="export" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;">
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  </form>
+  </div></div>
+  </div>
+</td>
+</tr></table>
 
 [% SET last_hour = '' %]
 [% FOREACH l = data %]
@@ -13,59 +54,7 @@
 <div class='logEntries'>
 
 [% END %]
-
-[% SET message = l.message.substr(13) %]
-
-[%    IF l.type == 'CURRENT SERVICE STATE'        %][% SET pic = "info.png"          desc = "Informational Message" %]
-[% ELSIF l.type == 'CURRENT HOST STATE'           %][% SET pic = "info.png"          desc = "Informational Message" %]
-[% ELSIF l.type == 'SERVICE NOTIFICATION'         %][% SET pic = "notify.gif"        desc = "Service Notification" %]
-[% ELSIF l.type == 'HOST NOTIFICATION'            %][% SET pic = "notify.gif"        desc = "Host Notification" %]
-[% ELSIF l.type == 'SERVICE ALERT'                %]
-                            [%    IF l.state == 0 %][% SET pic = "recovery.png"      desc = "Service Ok" %]
-                            [% ELSIF l.state == 1 %][% SET pic = "warning.png"       desc = "Service Warning" %]
-                            [% ELSIF l.state == 2 %][% SET pic = "critical.png"      desc = "Service Critical" %]
-                            [% ELSIF l.state == 3 %][% SET pic = "unknown.png"       desc = "Service Unknown" %]
-                            [% END %]
-[% ELSIF l.type == 'HOST ALERT'                   %]
-                            [%    IF l.state == 0 %][% SET pic = "recovery.png"      desc = "Host Up" %]
-                            [% ELSIF l.state == 1 %][% SET pic = "critical.png"      desc = "Host Down" %]
-                            [% ELSIF l.state == 2 %][% SET pic = "critical.png"      desc = "Host Unreachable" %]
-                            [% END %]
-[% ELSIF l.type == 'SERVICE EVENT HANDLER'        %][% SET pic = "serviceevent.gif"  desc = "Service Event Handler" %]
-[% ELSIF l.type == 'HOST EVENT HANDLER'           %][% SET pic = "hostevent.gif"     desc = "Host Event Handler" %]
-[% ELSIF l.type == 'EXTERNAL COMMAND'             %][% SET pic = "command.png"       desc = "External Command" %]
-[% ELSIF l.type == 'PASSIVE SERVICE CHECK'        %][% SET pic = "passiveonly.gif"   desc = "Passive Service Check" %]
-[% ELSIF l.type == 'PASSIVE HOST CHECK'           %][% SET pic = "passiveonly.gif"   desc = "Passive Host Check" %]
-
-[% ELSIF l.type == 'SERVICE FLAPPING ALERT'       %]
-          [%    IF l.message.match(';STARTED;')  %][% SET pic = "flapping.gif"      desc = "Service started flapping" %]
-          [% ELSIF l.message.match(';STOPPED;')  %][% SET pic = "flapping.gif"      desc = "Service stoppedflapping" %]
-          [% ELSIF l.message.match(';DISABLED;') %][% SET pic = "flapping.gif"      desc = "Service flap detection disabled" %]
-          [% END %]
-[% ELSIF l.type == 'HOST FLAPPING ALERT'       %]
-          [%    IF l.message.match(';STARTED;')  %][% SET pic = "flapping.gif"      desc = "Host started flapping" %]
-          [% ELSIF l.message.match(';STOPPED;')  %][% SET pic = "flapping.gif"      desc = "Host stoppedflapping" %]
-          [% ELSIF l.message.match(';DISABLED;') %][% SET pic = "flapping.gif"      desc = "Host flap detection disabled" %]
-          [% END %]
-[% ELSIF l.type == 'SERVICE DOWNTIME ALERT'       %]
-         [%    IF l.message.match(';STARTED;')   %][% SET pic = "downtime.gif"      desc = "Service entered a period of scheduled downtime" %]
-         [% ELSIF l.message.match(';STOPPED;')   %][% SET pic = "downtime.gif"      desc = "Service exited a period of scheduled downtime" %]
-         [% ELSIF l.message.match(';CANCELLED;') %][% SET pic = "downtime.gif"      desc = "Service scheduled downtime has been cancelled" %]
-         [% END %]
-[% ELSIF l.type == 'HOST DOWNTIME ALERT'          %]
-         [%    IF l.message.match(';STARTED;')   %][% SET pic = "downtime.gif"      desc = "Host entered a period of scheduled downtime" %]
-         [% ELSIF l.message.match(';STOPPED;')   %][% SET pic = "downtime.gif"      desc = "Host exited a period of scheduled downtime" %]
-         [% ELSIF l.message.match(';CANCELLED;') %][% SET pic = "downtime.gif"      desc = "Host scheduled downtime has been cancelled" %]
-         [% END %]
-[% ELSIF l.type == 'LOG ROTATION'                 %][% SET pic = "logrotate.png"     desc = "Log Rotation" %]
-[% ELSIF l.type.match('restarting\.\.\.')        %][% SET pic = "restart.gif"       desc = "Program Restart" %]
-[% ELSIF l.type.match('starting\.\.\.')          %][% SET pic = "start.gif"         desc = "Program Start" %]
-[% ELSIF l.type.match('shutting down\.\.\.')     %][% SET pic = "stop.gif"          desc = "Program End" %]
-[% ELSIF l.type.match('Bailing\ out')            %][% SET pic = "stop.gif"          desc = "Program End" %]
-[% ELSIF l.type.match('active mode\.\.\.')       %][% SET pic = "active.gif"        desc = "Active Mode" %]
-[% ELSIF l.type.match('standby mode\.\.\.')      %][% SET pic = "standby.gif"       desc = "Standby Mode" %]
-[% ELSE                                          %][% SET pic = "info.png"          desc = "Informational Message" %]
-[% END %]
+[% PROCESS _logs_line.tt %]
 <img align='middle' src='[% url_prefix %]thruk/themes/[% theme %]/images/[% pic %]' alt='[% desc %]' title='[% desc %]'>[[% format_date(l.time, datetime_format) %]] [% IF escape_html_tags %][% html_escape(message) %][% ELSE %][% message %][% END %]<br clear='all'>
 
 [% END %]

@@ -1302,6 +1302,7 @@ ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
 t/11-Thruk-Backend.t
+t/92_todo.t
 t/93_manifest.t
 t/94_template_encoding.t
 t/95_doc_coverage.t
@@ -1342,6 +1343,7 @@ templates/_host_command_box_full.tt
 templates/_host_status_details_box.tt
 templates/_infobox.tt
 templates/_logs.tt
+templates/_logs_line.tt
 templates/_message.tt
 templates/_overdiv.tt
 templates/_pager.tt
@@ -1484,6 +1486,7 @@ templates/config_services.tt
 templates/config_timeperiods.tt
 templates/docs.tt
 templates/error.tt
+templates/excel/logs.tt
 templates/excel/status_detail.tt
 templates/excel/status_hostdetail.tt
 templates/extinfo_type_0.tt

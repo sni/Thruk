@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 110;
+use Test::More tests => 116;
 
 BEGIN {
     use lib('t');
@@ -29,5 +29,18 @@ for my $url (@{$pages}) {
         'url'     => $url,
         'like'    => 'Alert History',
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+    );
+}
+
+$pages = [
+# Excel Export
+    '/thruk/cgi-bin/history.cgi?view_mode=xls',
+];
+
+for my $url (@{$pages}) {
+    TestUtils::test_page(
+        'url'          => $url,
+        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
+        'content_type' => 'application/x-msexcel',
     );
 }

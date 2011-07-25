@@ -445,6 +445,9 @@ div.filter_pane {
 div.logEntries {
   white-space: nowrap;
 }
+div.logEntries img {
+  vertical-align: middle;
+}
 
 .filter_button_mini {
   position:relative;

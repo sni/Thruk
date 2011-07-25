@@ -1,0 +1,42 @@
+﻿[% USE date %]
+[% size = 1 %]
+[% IF data %][% size = data.size + 1 %][% END %]
+<workbook>
+  <worksheet name='Log Events' autofilter='A1:[% last_col %][% size %]'>
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        [% IF columns.1  %]<cell width='18'>Timestamp</cell>[% END %]
+        [% IF columns.2  %]<cell width='23'>Event</cell>[% END %]
+        [% IF columns.3  %]<cell width='25'>Host Name</cell>[% END %]
+        [% IF columns.4  %]<cell width='30'>Service</cell>[% END %]
+        [% IF columns.5  %]<cell width='10'>Info</cell>[% END %]
+        [% IF columns.6  %]<cell width='50'>Message</cell>[% END %]
+      </format>
+    </row>
+    [% FOREACH l = data %]
+    [% PROCESS _logs_line.tt %]
+    [% IF has_type == 1 %]
+      [% message = message.remove('^\s*' _ l.type _ ':\s*') %]
+      [% IF l.host_name != '' %]
+        [% message = message.remove('^\s*' _ l.host_name _ '\;\s*') %]
+      [% END %]
+      [% IF l.service_description != '' %]
+        [% message = message.remove('^\s*' _ l.service_description _ '\;\s*') %]
+      [% END %]
+      [% IF info != '' %]
+        [% message = message.remove('^\s*' _ info _ '\;\s*') %]
+      [% END %]
+    [% ELSE %]
+      [% message = message.remove(type _ ':\s*') %]
+    [% END %]
+    <row>
+        [% IF columns.1  %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(l.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>[% END %]
+        [% IF columns.2  %]<cell>[% IF has_type == 1 %][% l.type %][% ELSE %][% type %][% END %]</cell>[% END %]
+        [% IF columns.3  %]<cell>[% l.host_name %]</cell>[% END %]
+        [% IF columns.4  %]<cell>[% l.service_description %]</cell>[% END %]
+        [% IF columns.5  %]<cell>[% info %]</cell>[% END %]
+        [% IF columns.6  %]<cell>[% message %]</cell>[% END %]
+    </row>
+    [% END %]
+  </worksheet>
+</workbook>

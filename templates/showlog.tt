@@ -79,11 +79,6 @@
   </table>
 </form>
 
-<div align="right">
-  [% PROCESS _add_bookmark.tt style="detail" %]
-  [% PROCESS _show_link.tt style="detail" %]
-</div>
-
 [% PROCESS _logs.tt %]
 
 [% PROCESS _footer.tt %]
