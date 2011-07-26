@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 20;
+use Test::More tests => 11;
 
 
 BEGIN {
@@ -12,7 +12,6 @@ BEGIN { use_ok 'Thruk::Controller::histogram' }
 
 my $pages = [
 # Step 1
-    '/histogram',
     '/thruk/cgi-bin/histogram.cgi',
 ];
 

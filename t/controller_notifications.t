@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 211;
+use Test::More tests => 202;
 
 BEGIN {
     use lib('t');
@@ -13,7 +13,6 @@ my $testcontact     = TestUtils::get_test_user();
 my ($host,$service) = TestUtils::get_test_service();
 
 my $pages = [
-    { url => '/notifications',                                                      like => 'All Hosts and Services' },
     { url => '/thruk/cgi-bin/notifications.cgi',                                    like => 'All Hosts and Services' },
     { url => '/thruk/cgi-bin/notifications.cgi?contact='.$testcontact,              like => 'Contact Notifications' },
     { url => '/thruk/cgi-bin/notifications.cgi?host='.$host,                        like => 'Host Notifications' },

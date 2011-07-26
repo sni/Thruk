@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 97;
+use Test::More tests => 89;
 
 BEGIN {
     use lib('t');
@@ -15,7 +15,6 @@ my $servicegroup   = TestUtils::get_test_servicegroup();
 my($host,$service) = TestUtils::get_test_service();
 
 my $pages = [
-    '/extinfo',
     '/thruk/cgi-bin/extinfo.cgi',
     '/thruk/cgi-bin/extinfo.cgi?type=0',
     '/thruk/cgi-bin/extinfo.cgi?type=1&host='.$host,

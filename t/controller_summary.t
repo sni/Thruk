@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 128;
+use Test::More tests => 119;
 
 BEGIN {
     use lib('t');
@@ -11,7 +11,6 @@ BEGIN { use_ok 'Thruk::Controller::summary' }
 
 my $pages = [
 # Step 1
-    '/summary',
     '/thruk/cgi-bin/summary.cgi',
 
 # standard reports

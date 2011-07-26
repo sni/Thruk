@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 62;
+use Test::More tests => 53;
 
 BEGIN {
     use lib('t');
@@ -10,7 +10,6 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::showlog' }
 
 my $pages = [
-    '/showlog',
     '/thruk/cgi-bin/showlog.cgi',
     '/thruk/cgi-bin/showlog.cgi?archive=-1',
     '/thruk/cgi-bin/showlog.cgi?archive=+1',

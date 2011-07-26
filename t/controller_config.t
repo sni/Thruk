@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 128;
+use Test::More tests => 119;
 
 BEGIN {
     use lib('t');
@@ -10,7 +10,6 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::config' }
 
 my $pages = [
-    '/config',
     '/thruk/cgi-bin/config.cgi',
     '/thruk/cgi-bin/config.cgi?type=hosts',
     '/thruk/cgi-bin/config.cgi?type=hostdependencies',

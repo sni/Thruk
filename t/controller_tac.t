@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 20;
+use Test::More tests => 11;
 
 BEGIN {
     use lib('t');
@@ -11,7 +11,6 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::tac' }
 
 my $pages = [
-    '/tac',
     '/thruk/cgi-bin/tac.cgi',
 ];
 

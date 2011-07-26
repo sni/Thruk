@@ -14,12 +14,12 @@ for my $file (sort glob("templates/cmd/*")) {
     if($file eq '.' or $file eq '..') {}
     elsif($file =~ m/templates\/cmd\/cmd_typ_(\d+)\.tt/mx) {
         TestUtils::test_page(
-            'url'     => '/cmd?cmd_typ='.$1,
+            'url'     => '/thruk/cgi-bin/cmd.cgi?cmd_typ='.$1,
             'like'    => 'External Command Interface',
             'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
         );
         TestUtils::test_page(
-            'url'     => '/cmd?cmd_typ='.$1.'&cmd_mod=2&test_only=1',
+            'url'     => '/thruk/cgi-bin/cmd.cgi?cmd_typ='.$1.'&cmd_mod=2&test_only=1',
             'like'    => 'External Command Interface',
             'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
         );

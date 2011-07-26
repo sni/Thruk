@@ -94,46 +94,46 @@
     <td class='[% class %]'>[% IF d.accept_passive_checks %]Yes[% ELSE %]No[% END %]</td>
     <td class='[% class %]'>[% IF d.check_freshness %]Yes[% ELSE %]No[% END %]</td>
 <!--
-    <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
+    <td class='[% class %]'></td>
 -->
     <td class='[% class %]'>[% IF d.notification_interval %][% duration(d.notification_interval * pi_detail.$pd.interval_length, 0 ) %][% ELSE %]<i>No Re-notification</i>[% END %]</td>
     <td class='[% class %]'>[% duration(d.first_notification_delay * pi_detail.$pd.interval_length, 0 ) %]</td>
 <!--
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
 -->
     <td class='[% class %]'><a href="config.cgi?type=timeperiods&amp;jump=[% d.notification_period | uri %]#[% d.notification_period | uri %]">[% d.notification_period %]</a></td>
 <!--
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
 -->
     <td class='[% class %]'>[% IF d.event_handler_enabled %]Yes[% ELSE %]No[% END %]</td>
 <!--
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
 -->
     <td class='[% class %]'>[% IF d.flap_detection_enabled %]Yes[% ELSE %]No[% END %]</td>
     <td class='[% class %]'>[% IF d.low_flap_threshold %][% d.low_flap_threshold %]%[% ELSE %]Program-wide value[% END %]</td>
     <td class='[% class %]'>[% IF d.high_flap_threshold %][% d.high_flap_threshold %]%[% ELSE %]Program-wide value[% END %]</td>
 <!--
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
 -->
     <td class='[% class %]'>[% IF d.process_performance_data %]Yes[% ELSE %]No[% END %]</td>
 <!--
-    <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
+    <td class='[% class %]'></td>
 -->
     <td class='[% class %]'>[% d.notes %]</td>
     <td class='[% class %]'>[% d.notes_url %]</td>
     <td class='[% class %]'>[% d.action_url %]</td>
 <!--
-    <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'>TODO</td>
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
+    <td class='[% class %]'></td>
+    <td class='[% class %]'></td>
+    <td class='[% class %]'></td>
 -->
     <td class='[% class %]' valign="middle">[% IF d.icon_image %]<img src="[% logo_path_prefix %][% d.icon_image_expanded %]" border="0" height="20" width="20" alt="host icon"> [% d.icon_image %][% END %]</td>
     <td class='[% class %]'>[% d.icon_image_alt %]</td>
 <!--
-    <td class='[% class %]'>TODO</td>
+    <td class='[% class %]'></td>
 -->
   </tr>
   [% END %]

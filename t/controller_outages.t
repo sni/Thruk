@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 20;
+use Test::More tests => 11;
 
 BEGIN {
     use lib('t');
@@ -10,7 +10,6 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::outages' }
 
 my $pages = [
-    '/outages',
     '/thruk/cgi-bin/outages.cgi',
 ];
 

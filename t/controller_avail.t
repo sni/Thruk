@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 233;
+use Test::More tests => 224;
 
 BEGIN {
     use lib('t');
@@ -14,7 +14,6 @@ my($host,$service) = TestUtils::get_test_service();
 
 my $pages = [
 # Step 1
-    '/avail',
     '/thruk/cgi-bin/avail.cgi',
 
 # Step 2

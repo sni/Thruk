@@ -21,6 +21,6 @@ while(<$ph>) {
     fail($line);
 }
 close($ph);
-ok($? == 1, 'grep exited with: '.$?);
+ok($? == 0, 'grep exited with: '.$?);
 
 done_testing();

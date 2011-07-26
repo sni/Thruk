@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 116;
+use Test::More tests => 107;
 
 BEGIN {
     use lib('t');
@@ -10,7 +10,6 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::history' }
 
 my $pages = [
-    '/history',
     '/thruk/cgi-bin/history.cgi',
     '/thruk/cgi-bin/history.cgi?host=all',
     '/thruk/cgi-bin/history.cgi?host=unknownhost',

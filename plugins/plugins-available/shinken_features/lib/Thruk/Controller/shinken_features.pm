@@ -371,13 +371,16 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
 ##########################################################
 # Count the impacts for an host
 sub _link_parent_hosts_and_services {
-    my($self, $c,  $elt ) = @_;
+    my($self, $c,  $elt, $level ) = @_;
 
-    my @host_parents = ();
+    $level               = 0 unless defined $level;
+    my @host_parents     = ();
     my @services_parents = ();
 
-    use Data::Dumper;
     return 0 if !defined $elt;
+
+    # avoid deep recursion
+    return 0 if $level > 10;
 
     if(defined $elt->{'parent_dependencies'} and $elt->{'parent_dependencies'} ne '') {
         for my $parent (@{$elt->{'parent_dependencies'}}) {
@@ -397,9 +400,7 @@ sub _link_parent_hosts_and_services {
                 my $srv = $tmp_services->[0];
                 push(@services_parents, $srv);
                 # And call this on this parent too to build a tree
-                # TODO : limit the level
-
-                $self->_link_parent_hosts_and_services($c, $srv);
+                $self->_link_parent_hosts_and_services($c, $srv, ($level + 1));
             }else{
                 my $host_search_filter = [ { name               => { '='     => $parent } },
                                          ];
@@ -410,8 +411,7 @@ sub _link_parent_hosts_and_services {
 
                 push(@host_parents, $hst);
                 # And call this on this parent too to build a tree
-                # TODO : limit the level
-                $self->_link_parent_hosts_and_services($c, $hst);
+                $self->_link_parent_hosts_and_services($c, $hst, ($level+1));
             }
         }
     }

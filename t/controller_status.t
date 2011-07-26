@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 767;
+use Test::More tests => 757;
 use JSON::XS;
 
 BEGIN {
@@ -16,7 +16,6 @@ my $hostgroup      = TestUtils::get_test_hostgroup();
 my $servicegroup   = TestUtils::get_test_servicegroup();
 
 my $pages = [
-    '/status',
     '/thruk/cgi-bin/status.cgi',
 
 # Host / Hostgroups
