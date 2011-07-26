@@ -881,7 +881,7 @@ sub set_message {
         value => $style.'~~'.$message,
     };
     $c->stash->{'thruk_message'}         = $style.'~~'.$message;
-    $c->stash->{'thruk_message_details'} = $details || [];
+    $c->stash->{'thruk_message_details'} = $details;
 
     return 1;
 }

@@ -331,6 +331,8 @@ get a message from an cookie, display and delete it
 sub get_message {
     my $c       = shift;
 
+    my $has_details = 0;
+
     # message from cookie?
     if(defined $c->request->cookie('thruk_message')) {
         my $cookie = $c->request->cookie('thruk_message');
@@ -341,13 +343,17 @@ sub get_message {
             expires => '-1M',
         };
 
-        return($style, $message);
+        return($style, $message, $has_details);
     }
     # message from stash
     elsif(defined $c->stash->{'thruk_message'}) {
         my($style,$message) = split/~~/mx, $c->stash->{'thruk_message'};
         delete $c->res->cookies->{'thruk_message'};
-        return($style, $message);
+
+        if(defined $c->stash->{'thruk_message_details'}) {
+            $has_details = 1;
+        }
+        return($style, $message, $has_details);
     }
 
     return '';

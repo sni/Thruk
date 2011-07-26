@@ -1098,3 +1098,10 @@ option.disable {
     line-height: 8px;
     vertical-align: top;
 }
+
+TH.confSelected {
+  background-color: #DEDBD2;
+  border: 1px #444444 inset;
+  font-size: 12px;
+}
+
