@@ -11,7 +11,9 @@
       [% END %]
       <td>
         <span class="[% message.0 %]">[% message.1 %]</span>
-        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Errors detected' title='Errors detected' width="16" height="16" style="vertical-align: text-bottom">
+        [% IF message.0 == 'fail_message' %]
+          <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Errors detected' title='Errors detected' width="16" height="16" style="vertical-align: text-bottom">
+        [% END %]
       </td>
       <td valign="top" align="right" width="50">
         <a href="javascript:close_message()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a>
