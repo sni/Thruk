@@ -1197,6 +1197,9 @@ function check_quick_command() {
             img.alt        = "This host is currently executing its hostcheck";
             cell.appendChild(img);
         });
+        var btn = document.getElementById('multi_cmd_submit_button');
+        btn.value = "processing commands...";
+        btn.disable();
     }
 
     return true;
