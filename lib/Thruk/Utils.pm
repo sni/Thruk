@@ -39,16 +39,11 @@ sub parse_date {
     my $string = shift;
     my $timestamp;
     eval {
-        if($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
-            $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+        $timestamp = Thruk::Utils::_parse_date($c, $string);
+        if(defined $timestamp) {
             $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
-        }
-        else {
-            $timestamp = UnixDate($string, '%s');
-            if(!defined $timestamp) {
-                return $c->detach('/error/index/19');
-            }
-            $c->log->debug("parse_date: '".$string."' to -> '".(scalar localtime $timestamp)."'");
+        } else {
+            return $c->detach('/error/index/19');
         }
     };
     if($@) {
@@ -1202,6 +1197,26 @@ sub _initialassumedservicestate_to_state {
     return 'critical'    if $initialassumedservicestate ==  9; # Service Critical
     croak('unknown state: '.$initialassumedservicestate);
 }
+
+
+##############################################
+sub _parse_date {
+    my $c      = shift;
+    my $string = shift;
+    my $timestamp;
+
+    if($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+        $timestamp = Mktime($1,$2,$3, $4,$5,$6);
+    }
+    else {
+        $timestamp = UnixDate($string, '%s');
+        if(!defined $timestamp) {
+            return;
+        }
+    }
+    return $timestamp;
+}
+
 
 
 1;

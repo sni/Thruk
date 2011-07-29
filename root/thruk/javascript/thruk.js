@@ -18,6 +18,7 @@ var refreshTimer;
 var backendSelTimer;
 var lastRowSelected;
 var lastRowHighlighted;
+var verifyTimer;
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -389,10 +390,41 @@ function checknonempty(id, name) {
 }
 
 /* hide all waiting icons */
-function hideActifityIcons() {
+function hide_activity_icons() {
     $$('img').each(function(e) {
         if(e.src.indexOf("/images/waiting.gif") > 0) {
             e.style.display = "none";
+        }
+    });
+}
+
+/* verify time */
+var verify_id;
+var verification_errors = new Hash;
+function verify_time(id) {
+    verify_id = id;
+    window.clearTimeout(verifyTimer);
+    verifyTimer = window.setTimeout("verify_time_do(verify_id)", 500);
+}
+function verify_time_do(id) {
+    var obj = document.getElementById(id);
+    debug(obj.value);
+
+    new Ajax.Request(url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value, {
+        onSuccess: function(transport) {
+            if(transport.responseJSON != null) {
+                data = transport.responseJSON;
+            } else {
+                data = eval(transport.responseText);
+            }
+            if(data.verified == "false") {
+                debug(data.error)
+                verification_errors.set(id, 1);
+                obj.style.background = "#f8c4c4";
+            } else {
+                obj.style.background = "";
+                verification_errors.unset(id);
+            }
         }
     });
 }
@@ -1012,6 +1044,12 @@ function checkCmdPaneVisibility() {
 /* collect selected hosts and services and pack them into nice form data */
 function collectFormData(form_id) {
 
+    if(verification_errors.keys().size() > 0) {
+        alert('please enter valid data');
+        return(false);
+    }
+
+    // set activity icon
     check_quick_command();
 
     // check form values

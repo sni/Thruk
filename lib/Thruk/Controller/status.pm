@@ -51,6 +51,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         return $self->_process_bookmarks($c);
     }
 
+    if(defined $c->{'request'}->{'parameters'}->{'verify'} and $c->{'request'}->{'parameters'}->{'verify'} eq 'time') {
+        return $self->_process_verify_time($c);
+    }
+
     # put some filter into the stash
     $c->stash->{'hoststatustypes'}    = $c->{'request'}->{'parameters'}->{'hoststatustypes'}    || '';
     $c->stash->{'hostprops'}          = $c->{'request'}->{'parameters'}->{'hostprops'}          || '';
@@ -845,6 +849,33 @@ sub _process_bookmarks {
 
     return $c->redirect($referer."&reload_nav=1");
 }
+
+
+##########################################################
+# check for search results
+sub _process_verify_time {
+    my( $self, $c ) = @_;
+
+    my $verified = 'false';
+    my $error    = 'false';
+    my $time = $c->{'request'}->{'parameters'}->{'time'};
+    if(defined $time) {
+        eval {
+            if(Thruk::Utils::_parse_date($c, $time)) {
+                $verified = 'true';
+            }
+        };
+        if($@) {
+            $error = $@;
+        }
+    }
+
+    my $json = { 'verified' => $verified, 'error' => $error };
+    $c->stash->{'json'} = $json;
+    $c->forward('Thruk::View::JSON');
+    return;
+}
+
 
 ##########################################################
 

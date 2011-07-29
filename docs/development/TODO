@@ -1,8 +1,5 @@
-Todo List:
+Todo & Wish List:
 =========================================================
-
-Important:
-  - selecting dates > 2038 leads to an error
 
 services:
     - add possibility for flexible downtimes
