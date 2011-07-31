@@ -32,7 +32,7 @@
     [% END %]
 
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
-    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.6.1.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.7.0.js"></script>
 
     <script type="text/javascript">
     <!--
@@ -72,7 +72,11 @@
     [% END %]
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/cal/jscal2.js"></script>
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
-    [% IF js %]<script type="text/javascript" src="[% js %]"></script>[% END %]
+    [% IF js.list.size > 0 %]
+      [% FOREACH j = js.list %]
+      <script type="text/javascript" src="[% j %]"></script>
+      [% END %]
+    [% END %]
 
     [% PROCESS extra_headers.tt %]
     [% IF extra_header %][% extra_header %][% END %]

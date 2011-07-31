@@ -1,14 +1,13 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="33%">
         [% PROCESS _infobox.tt %]
         </td>
-        <td align="center" valign="middle" width="33%">
-          [% PROCESS _message.tt %]
-        </td>
+        <td align="center" valign="middle" width="33%"></td>
         <td align="right" valign="bottom" width="33%">
           [% IF show_context_help %]
           <br><a href='[% url_prefix %]thruk/docs/extinfo_0' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>

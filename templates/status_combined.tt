@@ -2,6 +2,7 @@
 [% PROCESS _header.tt
   js = url_prefix _ "thruk/javascript/overlib.js"
 %]
+[% PROCESS _message.tt %]
 
 <script type="text/javascript">
   var hst_Hash = new Hash({[% FOREACH h = hosts %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
@@ -46,9 +47,6 @@
         [% ELSE %]Host &amp; Service Details
         [% END %]
       </div>
-
-      [% PROCESS _message.tt %]
-
     </td>
     <td valign="bottom" align="right" width="33%"></td>
   </tr>

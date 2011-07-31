@@ -2,6 +2,7 @@
 [% PROCESS _header.tt
   js = url_prefix _ "thruk/javascript/overlib.js"
 %]
+[% PROCESS _message.tt %]
 
 <script type="text/javascript">
   var dfl_Hash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
@@ -70,9 +71,6 @@
             [% ELSE %]Service Status Details
             [% END %]
           </div>
-
-          [% PROCESS _message.tt %]
-
           [% IF sortoption %]
           <div class="statusSort" align="CENTER">Entries sorted by <b>[% orderby %]</b> ([% IF orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
           [% END %]

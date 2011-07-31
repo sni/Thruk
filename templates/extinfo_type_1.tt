@@ -1,5 +1,6 @@
 ﻿[% PROCESS _header.tt %]
 [% USE date %]
+[% PROCESS _message.tt %]
 
 [% SET peer_key      = host.peer_key %]
 [% SET program_start = pi_detail.$peer_key.program_start %]
@@ -106,8 +107,6 @@
       </tr>
     </table>
     <br>
-
-    [% PROCESS _message.tt %]
 
     <div align="center">
       <table border="0" cellpadding="0" width="100%" class="extdetails">

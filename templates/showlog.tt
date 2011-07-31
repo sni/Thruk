@@ -1,5 +1,6 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 
 <form action="showlog.cgi" method="GET" id="date_form">
   <input type="hidden" name="entries" value="[% entries_per_page %]">
@@ -53,8 +54,6 @@
             </td>
           </tr>
         </table>
-        <br>
-        [% PROCESS _message.tt %]
       </td>
       <td align="right" valign="top" width="33%">
           <table border="0" cellspacing="0" cellpadding="0" class='optBox'>

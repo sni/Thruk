@@ -1,15 +1,15 @@
 ﻿[% SET message = get_message(c) %]
 [% IF message %]
-<div id="thruk_message" class="thruk_message">
-  <table border=0 cellspacing=2 cellpadding=2>
+<div id="thruk_message" class="thruk_message" style="position: absolute; z-index: 1000; width: 600px; top: 30px; left: 50%; margin-left:-300px;">
+  <div class="shadow"><div class="shadowcontent">
+  <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black">
     <tr>
-      <td width=30%>&nbsp;</td>
       [% IF message.2 %]
-      <td width="50" align="left">
+      <td width="50" align="left" valign="top">
         <a href="#" onclick="javascript:toggleElement('message_details', 'message_details_icon');return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" id="message_details_icon" alt="show details" width="13" height="12" class="close_button"></a>
       </td>
       [% END %]
-      <td>
+      <td align="center">
         <span class="[% message.0 %]">[% message.1 %]</span>
         [% IF message.0 == 'fail_message' %]
           <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Errors detected' title='Errors detected' width="16" height="16" style="vertical-align: text-bottom">
@@ -18,11 +18,10 @@
       <td valign="top" align="right" width="50">
         <a href="javascript:close_message()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a>
       </td>
-      <td width=30%>&nbsp;</td>
     </tr>
     [% IF message.2 %]
     <tr style="display:none" id="message_details">
-      <td colspan=5 align="center">
+      <td colspan=3 align="center">
         <div>
         <pre class="[% message.0 %]">
           [% FOREACH detail = thruk_message_details %]
@@ -34,5 +33,6 @@
     </tr>
     [% END %]
   </table>
+  </div></div>
 </div>
 [% END %]
