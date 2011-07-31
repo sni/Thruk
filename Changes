@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added "view configuration" link in host/service extinfo page
           - added contacts to host/service config page
           - added icons to command seletion
+          - added mine map plugin
           - improved input validation for date fields in quick commands
           - added description to init script (fixes #32)
           - fixed scheduling downtimes on mutliple backends (fixes #33)

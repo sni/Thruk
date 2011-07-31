@@ -670,11 +670,11 @@ TD.notificationsWARNING {
   padding:1px;
 }
 
-TD.serviceCRITICAL,TD.statusCRITICAL,TD.statusHOSTDOWN,TD.statusHOSTDOWNACK,TD.statusHOSTDOWNSCHED,A.statusCRITICAL {
+.serviceCRITICAL,.statusCRITICAL,.statusHOSTDOWN,.statusHOSTDOWNACK,.statusHOSTDOWNSCHED {
   background-color:#FF5B33;
   height:22px;
 }
-TD.statusHOSTUNREACHABLE,TD.statusHOSTUNREACHABLEACK,TD.statusHOSTUNREACHABLESCHED {
+.statusHOSTUNREACHABLE,.statusHOSTUNREACHABLEACK,.statusHOSTUNREACHABLESCHED {
   background-color:#ff7a59;
   height:22px;
 }
@@ -711,22 +711,22 @@ TD.statusEven {
   background-color:#DEDBD2;
 }
 
-TD.statusOK,TD.statusRECOVERY,TD.statusHOSTUP,TD.serviceOK,A.statusOK {
+.statusOK,.statusRECOVERY,.statusHOSTUP,.serviceOK {
   background-color:#00FF33;
   height:22px;
 }
 
-TD.statusPENDING,TD.statusHOSTPENDING,A.statusPENDING {
+.statusPENDING,.statusHOSTPENDING {
   background-color:#ACACAC;
   height:22px;
 }
 
-TD.statusUNKNOWN {
+.statusUNKNOWN {
   background-color:#FF9E00;
   height:22px;
 }
 
-TD.statusWARNING,TD.serviceWarning,A.statusWARNING {
+.statusWARNING,.serviceWarning {
   background-color:#FFDE00;
   height:22px;
 }
@@ -1105,3 +1105,7 @@ TH.confSelected {
   font-size: 12px;
 }
 
+TABLE.minemap th.status a:hover {
+  color:#000000;
+  text-decoration: underline;
+}

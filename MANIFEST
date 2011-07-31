@@ -100,6 +100,9 @@ plugins/plugins-available/conf/templates/_conf_frame.tt
 plugins/plugins-available/conf/templates/conf.tt
 plugins/plugins-available/conf/templates/conf_data.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt
+plugins/plugins-available/minemap/lib/Thruk/Controller/minemap.pm
+plugins/plugins-available/minemap/t/controller_minemap.t
+plugins/plugins-available/minemap/templates/minemap.tt
 plugins/plugins-available/mobile/lib/Thruk/Controller/mobile.pm
 plugins/plugins-available/mobile/root/jqtouch/img/01-refresh.png
 plugins/plugins-available/mobile/root/jqtouch/img/02-redo.png
@@ -151,6 +154,7 @@ plugins/plugins-available/statusmap/templates/statusmap.tt
 plugins/plugins-enabled/conf
 plugins/plugins-enabled/shinken_features
 plugins/plugins-enabled/statusmap
+plugins/plugins-enabled/minemap
 README
 root/favicon.ico
 root/index.html
@@ -442,7 +446,15 @@ root/thruk/javascript/dojo-release-1.5.0/dojox/date/zoneinfo/northamerica
 root/thruk/javascript/dojo-release-1.5.0/dojox/date/zoneinfo/pacificnew
 root/thruk/javascript/dojo-release-1.5.0/dojox/date/zoneinfo/southamerica
 root/thruk/javascript/overlib.js
-root/thruk/javascript/prototype-1.6.1.js
+root/thruk/javascript/prototype-1.7.0.js
+root/thruk/javascript/scriptaculous/builder.js
+root/thruk/javascript/scriptaculous/controls.js
+root/thruk/javascript/scriptaculous/dragdrop.js
+root/thruk/javascript/scriptaculous/effects.js
+root/thruk/javascript/scriptaculous/scriptaculous.js
+root/thruk/javascript/scriptaculous/slider.js
+root/thruk/javascript/scriptaculous/sound.js
+root/thruk/javascript/scriptaculous/unittest.js
 root/thruk/javascript/thruk.js
 root/thruk/themes/Classic/images/accept.png
 root/thruk/themes/Classic/images/ack.gif

@@ -8,7 +8,7 @@
         <tr>
           <td class='filter'>
             Link to this page:
-            <input type="text" size="60" value="[% full_uri(c) %]" id="url_input" onfocus="this.value='[% full_uri(c) %]'; this.select()" style="border:0px; padding:0px; margin:3px;">
+            <input type="text" size="60" value="[% full_uri(c) | uri %]" id="url_input" onfocus="this.value=unescape('[% full_uri(c) | uri %]'); this.select()" style="border:0px; padding:0px; margin:3px;">
             <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" onclick="toggleElement('show_link'); return false;" style="position:relative; top:3px; height:14px; width:14px;">
           </td>
         </tr>

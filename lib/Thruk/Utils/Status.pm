@@ -19,6 +19,42 @@ use utf8;
 
 =head1 METHODS
 
+=head2 set_default_stash
+
+  set_default_stash($c)
+
+sets some default stash variables
+
+=cut
+sub set_default_stash {
+    my( $c ) = @_;
+
+    $c->stash->{'hoststatustypes'}      = $c->{'request'}->{'parameters'}->{'hoststatustypes'}    || '';
+    $c->stash->{'hostprops'}            = $c->{'request'}->{'parameters'}->{'hostprops'}          || '';
+    $c->stash->{'servicestatustypes'}   = $c->{'request'}->{'parameters'}->{'servicestatustypes'} || '';
+    $c->stash->{'serviceprops'}         = $c->{'request'}->{'parameters'}->{'serviceprops'}       || '';
+    $c->stash->{'nav'}                  = $c->{'request'}->{'parameters'}->{'nav'}                || '';
+    $c->stash->{'entries'}              = $c->{'request'}->{'parameters'}->{'entries'}            || '';
+    $c->stash->{'sortoption'}           = $c->{'request'}->{'parameters'}->{'sortoption'}         || '';
+    $c->stash->{'sortoption_hst'}       = $c->{'request'}->{'parameters'}->{'sortoption_hst'}     || '';
+    $c->stash->{'sortoption_svc'}       = $c->{'request'}->{'parameters'}->{'sortoption_svc'}     || '';
+    $c->stash->{'hidesearch'}           = $c->{'request'}->{'parameters'}->{'hidesearch'}         || 0;
+    $c->stash->{'hostgroup'}            = $c->{'request'}->{'parameters'}->{'hostgroup'}          || '';
+    $c->stash->{'servicegroup'}         = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';
+    $c->stash->{'host'}                 = $c->{'request'}->{'parameters'}->{'host'}               || '';
+    $c->stash->{'service'}              = $c->{'request'}->{'parameters'}->{'service'}            || '';
+    $c->stash->{'data'}                 = "";
+    $c->stash->{'style'}                = "";
+    $c->stash->{'has_error'}            = 0;
+    $c->stash->{'pager'}                = "";
+    $c->stash->{show_substyle_selector} = 1;
+    $c->stash->{imgsize}                = 20;
+
+    return;
+}
+
+##############################################
+
 =head2 summary_add_host_stats
 
   summary_add_host_stats($prefix, $group, $host)
@@ -84,6 +120,7 @@ sub get_search_from_param {
         'host'         => $c->stash->{'host'},
         'hostgroup'    => $c->stash->{'hostgroup'},
         'servicegroup' => $c->stash->{'servicegroup'},
+        'service'      => $c->stash->{'service'},
     };
 
     if( ref $c->{'request'}->{'parameters'}->{ $prefix . '_type' } eq 'ARRAY' ) {

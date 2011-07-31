@@ -81,6 +81,7 @@ my %config = ('name'                   => 'Thruk',
                                           'throw'          => \&Thruk::Utils::Filter::throw,
                                           'date_format'    => \&Thruk::Utils::Filter::date_format,
                                           'format_date'    => \&Thruk::Utils::format_date,
+                                          'nl2br'          => \&Thruk::Utils::Filter::nl2br,
 
                                           'version'        => $VERSION,
                                           'backends'       => [],

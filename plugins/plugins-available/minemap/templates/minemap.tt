@@ -1,0 +1,139 @@
+﻿[% USE date %]
+[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+      <tr>
+        <td align="left" valign="top" width="33%">
+          [% PROCESS _infobox.tt %]
+        </td>
+        <td align="center" valign="top" width="33%">[% PROCESS _host_status_details_box.tt %]</td>
+        <td align="center" valign="top" width="33%">[% PROCESS _service_status_details_box.tt %]</td>
+        <td align="right" valign="bottom">
+          [% IF show_context_help %]
+          <br><a href='[% url_prefix %]thruk/docs/mine_map' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
+          [% END %]
+        </td>
+      </tr>
+    </table>
+    <br>
+    <table border="0" width="100%" cellpadding=0 cellspacing=0>
+      <tr>
+        <td valign="top" align="left" width="33%" nowrap>
+          [% PROCESS _status_filter.tt %]
+          <br>
+        </td>
+        <td valign="top" align="center" width="33%" nowrap>
+          <div align="center" class='statusTitle'>
+            [% IF custom_title != '' %][% custom_title %]
+            [% ELSIF hostgroup != '' %]Mine Map For Host Group '[% hostgroup %]'
+            [% ELSIF servicegroup %]Mine Map For Service Group '[% servicegroup %]'
+            [% ELSIF host == 'all' %]Mine Map For All Host
+            [% ELSIF host != '' %]Mine Map For Host '[% host %]'
+            [% ELSE %]
+            Mine Map
+            [% END %]
+          </div>
+          <br>
+          </td>
+        <td valign="bottom" align="right" width="33%"></td>
+      </tr>
+    </table>
+
+[% IF servicesnames.size == 0 %]
+<div align="center"><b>no matching hosts / services found</b></div>
+[% ELSIF toomany %]
+<div align="center"><b><font color="red">too many hosts / services found, please select a filter</font></b></div>
+[% ELSE %]
+<table class='status servicestatus minemap' id="statusTable" style="background: transparent; border: 0px;">
+<tr>
+  <td  style="background: transparent; border: 0px;"></td>
+  [% FOREACH svc = servicesnames.keys.sort %]
+  <th class='status' style="height:150px; vertical-align: bottom; overflow: hidden; border-top: 1px outset #444444"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></th>
+  [% END %]
+</tr>
+[% FOREACH hstname = hostnames.keys.sort %]
+[% SET hst       = hostnames.$hstname %]
+[% SET hostclass = 'statusOdd'  IF loop.even %]
+[% SET hostclass = 'statusEven' IF loop.odd %]
+[% SET svcbg = hostclass %]
+[% IF hst.host_state == 1 %]
+  [% hostclass = 'statusHOSTDOWN' %]
+[% ELSIF hst.host_state == 2 %]
+  [% hostclass = 'statusHOSTUNREACHABLE' %]
+[% END %]
+<tr>
+  [% SET host_comment_count = 0 %]
+  [% SET host_comment_count = hst.host_comments.size IF hst.host_comments %]
+  <td class='[% hostclass %]' style="height: 18px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <th align="left" class='[% hostclass %]' style="height: 18px;"><a href='[% uri_with(c, host => hst.host_name).replace("minemap.cgi", "status.cgi") %]' title='[% hst.host_address %]'>[% hst.host_name %]</a></th>
+        <td align="right" class='[% hostclass %]' style="height: 18px;">
+          [% PROCESS _status_host_attributes.tt hostprefix="host_" host=hst host_comment_count=host_comment_count with_status=0 imgsize=15 %]
+        </td>
+      </tr>
+    </table>
+  </td>
+  [% FOREACH svcname = servicesnames.keys.sort %]
+    [% IF data.exists(hstname) && data.$hstname.exists(svcname) %]
+        [% SET s = data.$hstname.$svcname %]
+        [% SET size = 6 %]
+        [% IF s.has_been_checked == 0 %]
+            [% SET serviceclass = 'servicePENDING' %]
+            [% state = 'PENDING' %]
+        [% ELSIF s.state == 0 %]
+            [% SET serviceclass = 'serviceOK' %]
+            [% state = 'OK' %]
+        [% ELSIF s.state == 1 %]
+            [% serviceclass = 'serviceWARNING' %]
+        [% state = 'WARNING' %]
+            [% SET size = 8 %]
+        [% ELSIF s.state == 2 %]
+            [% serviceclass = 'serviceCRITICAL' %]
+            [% state = 'CRITICAL' %]
+            [% SET size = 10 %]
+        [% ELSIF s.state == 3 %]
+            [% serviceclass = 'serviceUNKNOWN' %]
+            [% state = 'UNKNOWN' %]
+            [% SET size = 10 %]
+        [% END %]
+        [% SET comment_count = s.comments.size %]
+
+        [% info = BLOCK %]
+            <a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]'>View Service Details</a>
+            <table border=0 class="extdetails">
+            <tr><th class="dataVar">Status:</th><td class="dataVal"><div class="[% serviceclass %]">[% state %]</div>&nbsp;&nbsp;(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td></tr>
+            [% IF s.state != 0 %]
+            <tr><th class="dataVar">Current Attempt:</th><td class="dataVal">[% s.current_attempt %]/[% s.max_check_attempts %]&nbsp;&nbsp;([% IF s.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</td></tr>
+            <tr><th class="dataVar">Last Check Time:</th><td class="dataVal">[% IF s.has_been_checked == 0 %]never[% ELSE %][% date_format(c, s.last_check) %][% END %]</td></tr>
+            <tr><th class="dataVar">Next Scheduled Check:</th><td class="dataVal">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]N/A[% END %][% IF s.is_executing > 0 %]<img src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="This service is currently executing its servicecheck" title="This service is currently executing its servicecheck" border="0" height="20" width="20">[% END %]</td></tr>
+            <tr><th class="dataVar">In Scheduled Downtime?</th><td class="dataVal">[% IF s.scheduled_downtime_depth > 0 %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
+            <tr><th class="dataVar">Acknowledged?</th><td class="dataVal">[% IF s.acknowledged %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
+            [% END %]
+            <tr><th class="dataVar" nowrap valign="top">Plugin Output:<br></th><td class="dataVal">
+            [% IF escape_html_tags %]
+                [% html_escape(s.plugin_output) %]<br>
+                [% html_escape(nl2br(s.long_plugin_output)) %]
+            [% ELSE %]
+              [% s.plugin_output %]<br>
+              [% nl2br(s.long_plugin_output) %]
+            [% END %]
+            </td></tr>
+            </table>
+        [% END %]
+
+        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(info.replace("\n", "")) %]'>
+          <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
+        </td>
+    [% ELSE %]
+    <td class='[% svcbg %]'>-</td>
+    [% END %]
+  [% END %]
+</tr>
+[% END %]
+</table>
+
+[% END %]
+
+[% PROCESS _footer.tt %]

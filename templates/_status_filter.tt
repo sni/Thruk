@@ -30,7 +30,7 @@
            <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
           </td>
           <td align="left" class='filterTitle' nowrap>
-           [% IF loop.first && show_form == '1' %]
+           [% IF loop.first && show_form == '1' && show_substyle_selector == 1 %]
             <select name="style" id="[% paneprefix %][% prefix %]_style_selector">
               <optgroup label="Host">
                 <option value="hostdetail"[% IF   style == 'hostdetail'   %] selected[% END %]>Detail</option>
@@ -44,6 +44,11 @@
                 <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
                 <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
               </optgroup>
+              [% IF c.config.defined('has_feature_minemap') && c.config.defined('has_feature_minemap') == 1 %]
+              <optgroup label="Mine Map">
+                <option value="minemap"[% IF style == 'minemap' %] selected[% END %]>Mine Map</option>
+              </optgroup>
+              [% END %]
              </select>
            [% END %]
           </td>

@@ -36,6 +36,11 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                             'combined'   => 1,
                         };
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
+    if($style eq 'minemap' and exists $c->config->{'has_feature_minemap'} and $c->config->{'has_feature_minemap'} == 1) {
+        my $uri = $c->request->uri();
+        $uri    =~ s/status.cgi/minemap.cgi/gmx;
+        return $c->redirect($uri);
+    }
 
     if( $style eq '' ) {
         if( defined $c->{'request'}->{'parameters'}->{'hostgroup'} and $c->{'request'}->{'parameters'}->{'hostgroup'} ne '' ) {
@@ -55,24 +60,8 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         return $self->_process_verify_time($c);
     }
 
-    # put some filter into the stash
-    $c->stash->{'hoststatustypes'}    = $c->{'request'}->{'parameters'}->{'hoststatustypes'}    || '';
-    $c->stash->{'hostprops'}          = $c->{'request'}->{'parameters'}->{'hostprops'}          || '';
-    $c->stash->{'servicestatustypes'} = $c->{'request'}->{'parameters'}->{'servicestatustypes'} || '';
-    $c->stash->{'serviceprops'}       = $c->{'request'}->{'parameters'}->{'serviceprops'}       || '';
-    $c->stash->{'nav'}                = $c->{'request'}->{'parameters'}->{'nav'}                || '';
-    $c->stash->{'entries'}            = $c->{'request'}->{'parameters'}->{'entries'}            || '';
-    $c->stash->{'sortoption'}         = $c->{'request'}->{'parameters'}->{'sortoption'}         || '';
-    $c->stash->{'sortoption_hst'}     = $c->{'request'}->{'parameters'}->{'sortoption_hst'}     || '';
-    $c->stash->{'sortoption_svc'}     = $c->{'request'}->{'parameters'}->{'sortoption_svc'}     || '';
-    $c->stash->{'hidesearch'}         = $c->{'request'}->{'parameters'}->{'hidesearch'}         || 0;
-    $c->stash->{'hostgroup'}          = $c->{'request'}->{'parameters'}->{'hostgroup'}          || '';
-    $c->stash->{'servicegroup'}       = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';
-    $c->stash->{'host'}               = $c->{'request'}->{'parameters'}->{'host'}               || '';
-    $c->stash->{'data'}               = "";
-    $c->stash->{'style'}              = "";
-    $c->stash->{'has_error'}          = 0;
-    $c->stash->{'pager'}              = "";
+    # set some defaults
+    Thruk::Utils::Status::set_default_stash($c);
 
     $style = 'detail' unless defined $allowed_subpages->{$style};
 

@@ -162,6 +162,7 @@ sub test_page {
             $x++;
             next if $x%2==1;
             next if $match =~ m/^http/;
+            next if $match =~ m/^ssh/;
             next if $match =~ m/^mailto:/;
             next if $match =~ m/^#/;
             next if $match =~ m/^\/thruk\/cgi\-bin/;

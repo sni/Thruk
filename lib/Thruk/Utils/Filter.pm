@@ -99,9 +99,9 @@ replace newlines with linebreaks
 =cut
 sub nl2br {
     my $string = shift;
-    $string =~ s/\n/<br\ \/>/gmx;
+    $string =~ s/\n/<br>/gmx;
     $string =~ s/\r//gmx;
-    $string =~ s/\\n/<br\ \/>/gmx;
+    $string =~ s/\\n/<br>/gmx;
     return $string;
 }
 

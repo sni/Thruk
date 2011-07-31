@@ -14,6 +14,7 @@ while(<$ph>) {
     if(   $line =~ m|/dojo/dojo\.js|mx
        or $line =~ m|readme\.txt|mx
        or $line =~ m|Unicode/Encoding\.pm|mx
+       or $line =~ m|/scriptaculous/|mx
     ) {
       next;
     }

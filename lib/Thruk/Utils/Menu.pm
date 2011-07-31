@@ -168,6 +168,23 @@ sub insert_item {
 
 ##############################################
 
+=head2 insert_sub_item
+
+  insert_sub_item()
+
+add a new sub item in existing category
+
+=cut
+sub insert_sub_item {
+    my($category, $subcat, $item) = @_;
+
+    $Thruk::Utils::Menu::additional_subitems = [] unless defined $Thruk::Utils::Menu::additional_subitems;
+    push @{$Thruk::Utils::Menu::additional_subitems}, [ $category, $subcat, $item ];
+    return 1;
+}
+
+##############################################
+
 =head2 remove_item
 
   remove_item()
@@ -243,6 +260,34 @@ sub _renew_navigation {
             $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
             $link->{'href'}   = _get_menu_link($link->{'href'});
             push(@{$section->{'links'}}, $link);
+        }
+    }
+
+    # add some more sub items
+    if(defined $Thruk::Utils::Menu::additional_subitems) {
+        for my $to_add (@{$Thruk::Utils::Menu::additional_subitems}, @{$user_items}) {
+            my $section       = _get_section_by_name($to_add->[0], 1);
+            next unless defined $section;
+            my $sublink = _get_sublink_by_name($section, $to_add->[1]);
+            next unless defined $sublink;
+
+            my $link          = $to_add->[2];
+
+            # only visible for some roles?
+            if(defined $link->{'roles'}) {
+                my $has_access = 1;
+                my @roles = ref $link->{'roles'} eq 'ARRAY' ? @{$link->{'roles'}} : [ $link->{'roles'} ];
+                for my $role (@roles) {
+                    $has_access = 0 unless $c->check_user_roles( $role );
+                }
+                next unless $has_access;
+            }
+
+            $link->{'links'}  = [] unless defined $link->{'links'};
+            $link->{'target'} = _get_menu_target() unless defined $link->{'target'};
+            $link->{'href'}   = _get_menu_link($link->{'href'});
+
+            push(@{$sublink->{'links'}}, $link);
         }
     }
 
@@ -342,6 +387,26 @@ sub _get_section_by_name {
 }
 
 ##############################################
+
+=head2 _get_sublink_by_name
+
+  _get_sublink_by_name()
+
+returns a link by name
+
+=cut
+
+sub _get_sublink_by_name {
+    my $section = shift;
+    my $name    = shift;
+    next unless defined $section->{'links'};
+    for my $sublink (@{$section->{'links'}}) {
+        if($sublink->{'name'} eq $name) {
+            return($sublink);
+        }
+    }
+    return;
+}
 
 1;
 
