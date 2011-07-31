@@ -106,15 +106,19 @@ function toggleElement(id, icon) {
   }
 }
 
-/* hide message */
-function close_message() {
-    obj = document.getElementById('thruk_message');
-    obj.style.display = "none";
-}
+/* toggle an element and center it over the related object */
+function toggleElementCentered(id, obj) {
+  var pane = document.getElementById(id);
+  if(!pane) {
+    if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElementCentered(): " + id); }
+    return false;
+  }
 
-/* toggle the visibility of the preferences pane */
-function togglePreferencePane(state) {
-    toggleElement('pref_pane');
+  var dim    = pane.getDimensions();
+  var coords = ajax_search.get_coordinates(obj);
+  pane.style.top  = (coords[1] - dim.height - 10) + "px";
+  pane.style.left = (coords[0] - dim.width/2) + "px";
+  return toggleElement(id);
 }
 
 /* save settings in a cookie */
@@ -428,6 +432,99 @@ function verify_time_do(id) {
         }
     });
 }
+
+function set_sub(nr) {
+    for(x=1;x<=3;x++) {
+        /* reset table rows */
+        if(x != nr) {
+            $$('.sub_'+x).each(function(elem) {
+                elem.style.display = "none";
+            });
+        }
+        $$('.sub_'+nr).each(function(elem) {
+            elem.style.display = "";
+        });
+
+        /* reset buttons */
+        obj = document.getElementById("sub_"+x);
+        styleElements(obj, "data", 1);
+    }
+    obj = document.getElementById("sub_"+nr);
+    styleElements(obj, "data confSelected", 1);
+
+
+    return false;
+}
+
+function add_conf_attribute(table, id, key) {
+    hideElement('new_' + key + '_btn');
+
+    // add new row
+    tbl = $(table);
+    var tblBody        = tbl.tBodies[0];
+    var currentLastRow = tblBody.rows.length - 3;
+
+    var newObj   = tblBody.rows[0].cloneNode(true);
+    newObj.style.display      = "";
+    newObj.cells[0].innerHTML = key;
+    newObj.cells[0].abbr      = key;
+    newObj.cells[1].abbr      = key;
+    newObj.cells[1].innerHTML = newObj.cells[1].innerHTML.replace(/id="del_"/g, 'id="del_'+key+'"');
+    newObj.cells[2].innerHTML = unescape(fields.get(key).input.unescapeHTML().replace(/&quot;/g, '"'));
+    newObj.cells[3].abbr      = unescape(fields.get(key).help.unescapeHTML().replace(/&quot;/g, '"'));
+
+    tblBody.insertBefore(newObj, tblBody.rows[tblBody.rows.length -2]);
+
+    reset_table_row_classes(table, 'dataEven', 'dataOdd');
+
+    /* effect works only on table cells */
+    new Effect.Highlight(newObj.cells[0], { startcolor: '#ffff99', endcolor: '#ffffff' });
+    new Effect.Highlight(newObj.cells[1], { startcolor: '#ffff99', endcolor: '#ffffff' });
+    new Effect.Highlight(newObj.cells[2], { startcolor: '#ffff99', endcolor: '#ffffff' });
+    new Effect.Highlight(newObj.cells[3], { startcolor: '#ffff99', endcolor: '#ffffff' });
+
+    toggleElement(id);
+}
+
+/* remove an table row from the attributes table */
+function remove_conf_attribute(key) {
+    $('new_' + key + '_btn').style.display = "";
+
+    row = $("del_" + key).parentNode.parentNode;
+    table = row.parentNode.parentNode;
+
+    var field = fields.get(key)
+    field.input = escape(row.cells[2].innerHTML);
+
+    row.remove();
+    reset_table_row_classes(table.id, 'dataEven', 'dataOdd');
+    return false;
+}
+
+/* reset table row classes */
+function reset_table_row_classes(table, c1, c2) {
+    var x = 1;
+    $$('TABLE#'+table+' TR').each(function(row) {
+        row.removeClassName(c1);
+        row.removeClassName(c2);
+        x++;
+        var newclass = c2;
+        if(x%2 == 0) {
+            newclass = c1;
+        }
+        row.addClassName(newclass);
+        row.childElements().each(function(elem) {
+            if(elem.tagName == 'TD') {
+                if(elem.hasClassName(c1) || elem.hasClassName(c2)) {
+                    elem.removeClassName(c1);
+                    elem.removeClassName(c2);
+                    elem.addClassName(newclass);
+                }
+            }
+        });
+    });
+}
+
 
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
@@ -1835,17 +1932,35 @@ var ajax_search = {
     cur_results     : false,
     cur_pattern     : false,
     timer           : false,
+    striped         : false,
+    autosubmit      : undefined,
+    list            : false,
+    templates       : 'no',
 
     /* initialize search */
-    init: function(elem, type, url) {
+    init: function(elem, type, url, striped, autosubmit, list, templates) {
         if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
         } else {
+          if(thruk_debug_js) { alert("ERROR: got no element id in ajax_search.init(): " + elem); }
           return false;
         }
 
         ajax_search.input_field = elem.id;
+
+        if(striped != undefined) {
+            ajax_search.striped = striped;
+        }
+        if(autosubmit != undefined) {
+            ajax_search.autosubmit = autosubmit;
+        }
+        if(list != undefined) {
+            ajax_search.list = list;
+        }
+        if(templates != undefined) {
+            ajax_search.templates = templates;
+        }
 
         var input = document.getElementById(ajax_search.input_field);
         ajax_search.size = input.getWidth();
@@ -1984,6 +2099,11 @@ var ajax_search = {
         if(ajax_search.base == undefined || ajax_search.base.size() == 0) { return; }
 
         pattern = input.value;
+        if(ajax_search.list) {
+            /* only use the last list element for search */
+            var values = pattern.split(",");
+            pattern = values.pop();
+        }
         if(pattern.length >= 1 || ajax_search.search_type != 'all') {
 
             prefix = pattern.substr(0,3);
@@ -2005,7 +2125,10 @@ var ajax_search = {
             ajax_search.base.each(function(search_type) {
                 var sub_results = new Array();
                 var top_hits = 0;
-                if(ajax_search.search_type == 'all' || ajax_search.search_type + 's' == search_type.name) {
+                if(   ajax_search.search_type == 'all'
+                   || (ajax_search.templates == "templates" && search_type.name == "templates")
+                   || (ajax_search.templates != "templates" && ajax_search.search_type + 's' == search_type.name)
+                  ) {
                   search_type.data.each(function(data) {
                       result_obj = new Object({ 'name': data, 'relevance': 0 });
                       var found = 0;
@@ -2082,6 +2205,10 @@ var ajax_search = {
                         if(type.name == 'servicegroups') { prefix = 'sg:'; }
                     }
                     var id = "suggest_item_"+x
+                    if(type.name == 'icons') {
+                        file = data.display.split(" - ");
+                        name = "<img src='" + file[1] + "' style='vertical-align: text-bottom'> " + file[0];
+                    }
                     resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="return ajax_search.set_result(this.rev)"> ' + name +'<\/a><\/li>';
                     ajax_search.res[x] = prefix+data.display;
                     x++;
@@ -2109,14 +2236,35 @@ var ajax_search = {
 
     /* set the value into the input field */
     set_result: function(value) {
+
+        if(ajax_search.striped) {
+            var values = value.split(" - ", 2);
+            value = values[0];
+        }
+
         var input   = document.getElementById(ajax_search.input_field);
+
+        if(ajax_search.list) {
+            var values = input.value.split(",");
+            values.pop();
+            values.push(value);
+            value = values.join(",");
+        }
+
         input.value = value;
         ajax_search.cur_select = -1;
         ajax_search.hide_results();
         input.focus();
 
-        if(   ajax_search.input_field == "NavBarSearchItem"
-           || ajax_search.input_field == "data.username") {
+        if(( ajax_search.autosubmit == undefined
+             && (
+                    ajax_search.input_field == "NavBarSearchItem"
+                 || ajax_search.input_field == "data.username"
+                 || ajax_search.input_field == "data.name"
+                 )
+           )
+           || ajax_search.autosubmit == true
+           ) {
             var tmpElem = input;
             while(tmpElem && tmpElem.parentNode) {
                 tmpElem = tmpElem.parentNode;

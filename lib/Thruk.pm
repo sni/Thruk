@@ -94,7 +94,7 @@ my %config = ('name'                   => 'Thruk',
                                           'no_auto_reload' => 0,
                                           'die_on_errors'  => 0,        # used in cmd.cgi
                                           'errorMessage'   => 0,        # used in errors
-                                          'js'             => '',       # used in _header.tt
+                                          'js'             => [],       # used in _header.tt
                                           'extra_header'   => '',       # used in _header.tt
                                           'ssi_header'     => '',       # used in _header.tt
                                           'ssi_footer'     => '',       # used in _header.tt
