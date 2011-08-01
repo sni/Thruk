@@ -35,8 +35,11 @@
             [% END %]
           </div>
           <br>
-          </td>
-        <td valign="bottom" align="right" width="33%"></td>
+        </td>
+        <td valign="bottom" align="right" width="33%">
+          [% PROCESS _add_bookmark.tt %]
+          [% PROCESS _show_link.tt %]
+        </td>
       </tr>
     </table>
 
@@ -49,7 +52,7 @@
 <tr>
   <td  style="background: transparent; border: 0px;"></td>
   [% FOREACH svc = servicesnames.keys.sort %]
-  <th class='status' style="height:150px; vertical-align: bottom; overflow: hidden; border-top: 1px outset #444444"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></th>
+  <th class='status' style="height:150px; vertical-align: bottom; overflow: hidden; border-top: 1px outset #444444" title="[% svc %]"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></th>
   [% END %]
 </tr>
 [% FOREACH hstname = hostnames.keys.sort %]

@@ -21,7 +21,7 @@ Catalyst Controller.
 ######################################
 # add new menu item
 Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
-                                    'href'  => '/thruk/cgi-bin/minemap.cgi',
+                                    'href'  => '/thruk/cgi-bin/minemap.cgi?hoststatustypes=15&servicestatustypes=28',
                                     'name'  => 'Mine Map',
                          });
 
@@ -74,7 +74,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{servicesnames} = $uniq_services;
     $c->stash->{hostnames}     = $uniq_hosts;
     $c->stash->{toomany}       = 0;
-    if(scalar (keys %{$c->stash->{servicesnames}}) * scalar (keys %{$c->stash->{hostnames}}) > 10000) {
+    if(scalar (keys %{$c->stash->{servicesnames}}) > 200) {
         $c->stash->{toomany}        = 1;
         $c->stash->{hidesearch}     = 0;
     }
