@@ -57,6 +57,7 @@
 [% SET hostclass = 'statusOdd'  IF loop.even %]
 [% SET hostclass = 'statusEven' IF loop.odd %]
 [% SET svcbg = hostclass %]
+[% SET loopclass = hostclass %]
 [% IF hst.host_state == 1 %]
   [% hostclass = 'statusHOSTDOWN' %]
 [% ELSIF hst.host_state == 2 %]
@@ -79,24 +80,28 @@
     [% IF data.exists(hstname) && data.$hstname.exists(svcname) %]
         [% SET s = data.$hstname.$svcname %]
         [% SET size = 6 %]
+        [% SET icon_bg_class = loopclass %]
         [% IF s.has_been_checked == 0 %]
-            [% SET serviceclass = 'servicePENDING' %]
+            [% serviceclass = 'servicePENDING' %]
             [% state = 'PENDING' %]
         [% ELSIF s.state == 0 %]
-            [% SET serviceclass = 'serviceOK' %]
+            [% serviceclass = 'serviceOK' %]
             [% state = 'OK' %]
         [% ELSIF s.state == 1 %]
             [% serviceclass = 'serviceWARNING' %]
-        [% state = 'WARNING' %]
-            [% SET size = 8 %]
+            [% state = 'WARNING' %]
+            [% icon_bg_class = 'statusBGWARNING' %]
+            [% size = 8 %]
         [% ELSIF s.state == 2 %]
             [% serviceclass = 'serviceCRITICAL' %]
             [% state = 'CRITICAL' %]
-            [% SET size = 10 %]
+            [% size = 10 %]
+            [% icon_bg_class = 'statusBGCRITICAL' %]
         [% ELSIF s.state == 3 %]
             [% serviceclass = 'serviceUNKNOWN' %]
             [% state = 'UNKNOWN' %]
-            [% SET size = 10 %]
+            [% size = 10 %]
+            [% icon_bg_class = 'statusBGUNKNOWN' %]
         [% END %]
         [% SET comment_count = s.comments.size %]
 
@@ -123,9 +128,19 @@
             </table>
         [% END %]
 
-        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(info.replace("\n", "")) %]'>
+        [% content = BLOCK %]
+          [% IF s.acknowledged %]
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif" alt="acknowledged" height="15" width="15">
+            [% svcbg = icon_bg_class %]
+          [% ELSIF s.scheduled_downtime_depth > 0 %]
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="downtime" height="15" width="15">
+            [% svcbg = icon_bg_class %]
+          [% ELSE %]
+            [% svcbg = loopclass %]
           <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
-        </td>
+          [% END %]
+        [% END %]
+        <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(info.replace("\n", "")) %]'>[% content %]</td>
     [% ELSE %]
     <td class='[% svcbg %]'>-</td>
     [% END %]
