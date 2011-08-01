@@ -44,9 +44,9 @@
     </table>
 
 [% IF servicesnames.size == 0 %]
-<div align="center"><b>no matching hosts / services found</b></div>
+<div align="center"><b>No matching hosts / services found.</b></div>
 [% ELSIF toomany %]
-<div align="center"><b><font color="red">too many hosts / services found, please select a filter</font></b></div>
+<div align="center"><b><font color="red">Too many hosts / services found. Please select a filter.<br>This view works best on host- servicegroups with lot of common services.</font></b></div>
 [% ELSE %]
 <table class='status servicestatus minemap' id="statusTable" style="background: transparent; border: 0px; width: auto;">
 <tr>
