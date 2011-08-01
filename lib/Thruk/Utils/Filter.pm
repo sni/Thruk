@@ -186,9 +186,14 @@ returns a correct uri
 
 =cut
 sub full_uri {
-    my $c = shift;
+    my $c    = shift;
+    my $amps = shift || 0;
     carp("no c") unless defined $c;
     my $uri = $c->request->uri();
+    if($amps) {
+        $uri    =~ s/&amp;/&/gmx;
+        $uri    =~ s/&/&amp;/gmx;
+    }
     return $uri;
 }
 
