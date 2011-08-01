@@ -48,18 +48,19 @@
 [% ELSIF toomany %]
 <div align="center"><b><font color="red">too many hosts / services found, please select a filter</font></b></div>
 [% ELSE %]
-<table class='status servicestatus minemap' id="statusTable" style="background: transparent; border: 0px;">
+<table class='status servicestatus minemap' id="statusTable" style="background: transparent; border: 0px; width: auto;">
 <tr>
   <td  style="background: transparent; border: 0px;"></td>
   [% FOREACH svc = servicesnames.keys.sort %]
-  <th class='status' style="height:150px; vertical-align: bottom; overflow: hidden; border-top: 1px outset #444444" title="[% svc %]"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></th>
+  [% SET class = 'statusEven' IF loop.even %]
+  [% SET class = 'statusOdd'  IF loop.odd %]
+  <td class='[% class %]' style="height:150px; vertical-align: bottom; overflow: hidden;" title="[% svc %]"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></td>
   [% END %]
 </tr>
 [% FOREACH hstname = hostnames.keys.sort %]
 [% SET hst       = hostnames.$hstname %]
-[% SET hostclass = 'statusOdd'  IF loop.even %]
-[% SET hostclass = 'statusEven' IF loop.odd %]
-[% SET svcbg = hostclass %]
+[% SET hostclass = 'statusEven' IF loop.even %]
+[% SET hostclass = 'statusOdd'  IF loop.odd %]
 [% SET loopclass = hostclass %]
 [% IF hst.host_state == 1 %]
   [% hostclass = 'statusHOSTDOWN' %]
@@ -80,6 +81,7 @@
     </table>
   </td>
   [% FOREACH svcname = servicesnames.keys.sort %]
+    [% svcbg = loopclass %]
     [% IF data.exists(hstname) && data.$hstname.exists(svcname) %]
         [% SET s = data.$hstname.$svcname %]
         [% SET size = 6 %]
@@ -139,13 +141,12 @@
             <img src="[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif" alt="downtime" height="15" width="15">
             [% svcbg = icon_bg_class %]
           [% ELSE %]
-            [% svcbg = loopclass %]
           <div class="[% serviceclass %]" style="width:[% size %]px; height:[% size %]px; line-height:[% size %]px; border: 1px outset black;">&nbsp;</div>
           [% END %]
         [% END %]
         <td class='[% svcbg %] clickable' align="center" [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(info.replace("\n", "")) %]'>[% content %]</td>
     [% ELSE %]
-    <td class='[% svcbg %]'>-</td>
+    <td class='[% svcbg %]' align="center">-</td>
     [% END %]
   [% END %]
 </tr>
