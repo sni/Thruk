@@ -43,18 +43,15 @@
       </tr>
     </table>
 
-[% IF servicesnames.size == 0 %]
-<div align="center"><b>No matching hosts / services found.</b></div>
-[% ELSIF toomany %]
-<div align="center"><b><font color="red">Too many hosts / services found. Please select a filter.<br>This view works best on host- servicegroups with lot of common services.</font></b></div>
-[% ELSE %]
+    <div align="center">[% PROCESS _pager.tt %]</div>
+
 <table class='status servicestatus minemap' id="statusTable" style="background: transparent; border: 0px; width: auto;">
 <tr>
-  <td  style="background: transparent; border: 0px;"></td>
-  [% FOREACH svc = servicesnames.keys.sort %]
+  <td style="background: transparent; border: 0px;"></td>
+  [% FOREACH svc = services.keys.sort %]
   [% SET class = 'statusEven' IF loop.even %]
   [% SET class = 'statusOdd'  IF loop.odd %]
-  <td class='[% class %]' style="height:150px; vertical-align: bottom; overflow: hidden;" title="[% svc %]"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></td>
+  <td class='[% class %] minemap_head' title="[% svc %]"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></td>
   [% END %]
 </tr>
 [% FOREACH hstname = hostnames.keys.sort %]
@@ -80,10 +77,10 @@
       </tr>
     </table>
   </td>
-  [% FOREACH svcname = servicesnames.keys.sort %]
+  [% FOREACH svcname = services.keys.sort %]
     [% svcbg = loopclass %]
-    [% IF data.exists(hstname) && data.$hstname.exists(svcname) %]
-        [% SET s = data.$hstname.$svcname %]
+    [% IF matrix.exists(hstname) && matrix.$hstname.exists(svcname) %]
+        [% SET s = matrix.$hstname.$svcname %]
         [% SET size = 6 %]
         [% SET icon_bg_class = loopclass %]
         [% IF s.has_been_checked == 0 %]
@@ -153,6 +150,9 @@
 [% END %]
 </table>
 
-[% END %]
+
+<div align="center">[% PROCESS _pager.tt %]</div>
+<br>
+<div class='itemTotalsTitle'>[% IF !has_error && data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Host Entries Displayed</div>
 
 [% PROCESS _footer.tt %]

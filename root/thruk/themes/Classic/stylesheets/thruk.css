@@ -644,3 +644,11 @@ select#quick_command {
   -webkit-transform:  matrix(-0.00000000, -1.00000000, 1.00000000, -0.00000000, 0, 0);
   -o-transform:  matrix(-0.00000000, -1.00000000, 1.00000000, -0.00000000, 0, 0);
 }
+
+TABLE.minemap TD.minemap_head {
+    height:150px;
+    vertical-align: bottom;
+    overflow: hidden;
+    white-space: nowrap;
+    border-top: 0px;
+}

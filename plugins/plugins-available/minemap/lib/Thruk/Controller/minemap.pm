@@ -21,7 +21,7 @@ Catalyst Controller.
 ######################################
 # add new menu item
 Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
-                                    'href'  => '/thruk/cgi-bin/minemap.cgi?hoststatustypes=15&servicestatustypes=28',
+                                    'href'  => '/thruk/cgi-bin/minemap.cgi',
                                     'name'  => 'Mine Map',
                          });
 
@@ -62,23 +62,30 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # get all services
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
 
+    # get pages hosts
+    my $uniq_hosts    = {};
+    for my $svc (@{$services}) {
+        $uniq_hosts->{$svc->{'host_name'}} = 1;
+    }
+    my @keys = sort keys %{$uniq_hosts};
+    Thruk::Backend::Manager::_page_data(undef, $c, \@keys);
+    $uniq_hosts = Thruk::Utils::array2hash($c->{'stash'}->{'data'});
+
     # build matrix
     my $matrix        = {};
-    my $uniq_hosts    = {};
     my $uniq_services = {};
-    for my $svc (@$services) {
-        $uniq_hosts->{$svc->{'host_name'}} = $svc;
+    my $hosts         = {};
+    for my $svc (@{$services}) {
+        next unless defined $uniq_hosts->{$svc->{'host_name'}};
         $uniq_services->{$svc->{'description'}} = 1;
+        $hosts->{$svc->{'host_name'}} = $svc;
         $matrix->{$svc->{'host_name'}}->{$svc->{'description'}} = $svc;
     }
-    $c->stash->{servicesnames} = $uniq_services;
-    $c->stash->{hostnames}     = $uniq_hosts;
-    $c->stash->{toomany}       = 0;
-    if(scalar (keys %{$c->stash->{servicesnames}}) > 200) {
-        $c->stash->{toomany}        = 1;
-        $c->stash->{hidesearch}     = 0;
-    }
-    $c->stash->{data}          = $matrix;
+
+    $c->stash->{services}     = $uniq_services;
+    $c->stash->{hostnames}    = $hosts;
+    $c->stash->{matrix}       = $matrix;
+
 
     $c->stash->{style}        = 'minemap';
     $c->stash->{substyle}     = 'service';
