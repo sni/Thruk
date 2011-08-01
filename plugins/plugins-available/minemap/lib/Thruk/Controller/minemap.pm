@@ -81,7 +81,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{data}          = $matrix;
 
     $c->stash->{style}        = 'minemap';
-    $c->stash->{substyle}     = 'host';
+    $c->stash->{substyle}     = 'service';
     $c->stash->{title}        = 'Mine Map';
     $c->stash->{page}         = 'status';
     $c->stash->{template}     = 'minemap.tt';
