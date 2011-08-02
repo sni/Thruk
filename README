@@ -31,7 +31,7 @@ Main Features / Advantages
   * 100% Perl (using Catalyst Framework)
   * paging ( can be disabled and customized )
   * multiple themes included
-  * Excel export
+  * Excel export for status and logfiles
   * Adjustable side menu
   * Full expanded plugin commandline for easy testing
   * Save searches like bookmarks

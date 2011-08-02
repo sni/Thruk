@@ -26,7 +26,7 @@ Main Features / Advantages
   * 100% Perl (using Catalyst Framework)
   * paging ( can be disabled and customized )
   * multiple themes included
-  * Excel export
+  * Excel export for status and logfiles
   * Adjustable side menu
   * Full expanded plugin commandline for easy testing
   * Save searches like bookmarks
@@ -58,10 +58,11 @@ here.
 
 The Bookmarks feature allows you to save your searches and add them as
 your personal menu item. Besides the bookmarks, you can adjust the
-menu easiely with the menu_local.conf.
+menu easiely with the menu_local.conf for all users.
 
-The Excel export creates real Excel files to send by mail or extract
-hostnames to send to a different operations team.
+The Excel export creates real Excel files which can be send by mail or
+used to extract hostnames.
+
 image:source/Bookmarks_and_excel_export.png[Bookmarks and Excel Export]
 
 
@@ -116,6 +117,16 @@ data. So you don't have to open the host/service page just to see who
 set a comment and when there is a downtime.
 
 image:source/PluginOutput.png[Multiple Lines of Plugin Output]
+
+
+=== Mine Map
+
+The Mine Map is the perfect tool to get a quick overview. It is
+especially usefull if you have a lot of common services across your
+hosts. Otherwise use hostgroups or servicegroups for nice results.
+Normal filtering is possible too.
+
+image:source/MineMap.png[Mine Map]
 
 
 
