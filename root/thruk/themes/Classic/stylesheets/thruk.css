@@ -652,3 +652,12 @@ TABLE.minemap TD.minemap_head {
     white-space: nowrap;
     border-top: 0px;
 }
+
+TABLE.minemap DIV.servicePENDING {
+  float: inherit;
+  text-align: inherit;
+}
+
+TABLE.overDivContent TH.dataVar {
+  text-align: left;
+}

@@ -106,9 +106,11 @@
             [% icon_bg_class = 'statusBGUNKNOWN' %]
         [% END %]
         [% SET comment_count = s.comments.size %]
+        [% SET peer_key      = s.peer_key %]
+        [% SET program_start = pi_detail.$peer_key.program_start %]
 
         [% info = BLOCK %]
-            <a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]'>View Service Details</a>
+            <a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]'>View Full Service Details</a>
             <table border=0 class="extdetails">
             <tr><th class="dataVar">Status:</th><td class="dataVal"><div class="[% serviceclass %]">[% state %]</div>&nbsp;&nbsp;(since [% IF s.last_state_change %][% duration(date.now - s.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])</td></tr>
             [% IF s.state != 0 %]
@@ -119,6 +121,7 @@
             <tr><th class="dataVar">Acknowledged?</th><td class="dataVal">[% IF s.acknowledged %]<div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>[% ELSE %]<div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>[% END %]</td></tr>
             [% END %]
             <tr><th class="dataVar" nowrap valign="top">Plugin Output:<br></th><td class="dataVal">
+            [% IF s.has_been_checked == 0 %]service has not been checked yet[% END %]
             [% IF escape_html_tags %]
                 [% html_escape(s.plugin_output) %]<br>
                 [% html_escape(nl2br(s.long_plugin_output)) %]
