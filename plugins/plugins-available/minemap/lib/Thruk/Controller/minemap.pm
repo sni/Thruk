@@ -92,7 +92,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{title}        = 'Mine Map';
     $c->stash->{page}         = 'status';
     $c->stash->{template}     = 'minemap.tt';
-    $c->stash->{infoBoxTitle} = 'Mine Map For All Hosts';
+    $c->stash->{infoBoxTitle} = 'Mine Map';
 
     Thruk::Utils::ssi_include($c);
 
