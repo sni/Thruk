@@ -559,7 +559,13 @@ sub single_search {
 
         my $value  = $filter->{'value'};
 
-        next if $value =~ m/^\s*$/mx;
+        # skip most empty filter
+        if(    $value =~ m/^\s*$/mx
+           and $filter->{'type'} ne 'next check'
+           and $filter->{'type'} ne 'last check'
+        ) {
+            next;
+        }
 
         my $op     = '=';
         my $listop = '>=';
