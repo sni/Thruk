@@ -181,4 +181,5 @@ close($fh);
 open(my $fh, '>', 'Makefile') or die("cannot open Makefile for writing");
 print $fh $new_makefile;
 close($fh);
+`cat script/append.make >> Makefile`;
 print "patched Makefile\n";
