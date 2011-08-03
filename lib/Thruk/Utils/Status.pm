@@ -683,7 +683,7 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'next check' ) {
             my $date;
-            if($value == "N/A" or $value eq "") {
+            if($value eq "N/A" or $value eq "") {
                 $date = "";
             } else {
                 $date = Thruk::Utils::parse_date( $c, $value );
@@ -707,7 +707,7 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'last check' ) {
             my $date;
-            if($value == "N/A" or $value eq "") {
+            if($value eq "N/A" or $value eq "") {
                 $date = "";
             } else {
                 $date = Thruk::Utils::parse_date( $c, $value );
