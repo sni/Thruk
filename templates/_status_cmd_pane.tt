@@ -10,23 +10,23 @@
     <tr>
       <th colspan=2 class="status cmd_pane" style="text-align: right">
         [% IF style == 'combined' %]
-          <a href="javascript:selectAllHosts(true,'hst_');selectAllHosts(true,'svc_');selectAllServices(true,'svc_');">select all</a>
-        - <a href="javascript:selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');">unselect all</a>
-        - <a href="javascript:selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'))">all problems</a>
-        - <a href="javascript:selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.has_downtime'));selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="selectAllHosts(true,'hst_');selectAllHosts(true,'svc_');selectAllServices(true,'svc_');">select all</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');">unselect all</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'))">all problems</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.has_downtime'));selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
         [% ELSIF style == 'hostdetail' %]
-          <a href="javascript:selectAllHosts(true,'dfl_');">select all</a>
-        - <a href="javascript:selectAllHosts(false,'dfl_');">unselect all</a>
-        - <a href="javascript:selectAllHosts(false,'dfl_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
-        - <a href="javascript:selectAllHosts(false,'dfl_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="selectAllHosts(true,'dfl_');">select all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');">unselect all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
         [% ELSE %]
-          <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(true,'dfl_');">select all</a>
-        - <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');">unselect all</a>
-        - <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-        - <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(true,'dfl_');">select all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');">unselect all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
         [% END %]
         &nbsp;
-        <a href="javascript:selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" height="14" width="14" alt="close"></a>
+        <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" height="14" width="14" alt="close"></a>
       </th>
     </tr>
     <tr>
@@ -75,17 +75,17 @@
     </tr>
     <tr id="row_start">
       <td class="statusOdd">Start:</td>
-      <td class="statusOdd"><a href="javascript:show_cal('start_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id)"></td>
+      <td class="statusOdd"><a href="#" onclick="show_cal('start_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_end">
       <td class="statusOdd">End:</td>
-      <td class="statusOdd"><a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+7200, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id)"></td>
+      <td class="statusOdd"><a href="#" onclick="show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+7200, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_reschedule_options">
       <td class="statusOdd">Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
-          <tr><td onclick="javascript:toggleCheckBox('opt1')">Force Check:</td><td><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
+          <tr><td onclick="toggleCheckBox('opt1')">Force Check:</td><td><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
           <tr><td>Spread Checks:</td><td>
             <select name="spread">
               <option value="0">no</option>
@@ -102,9 +102,9 @@
       <td class="statusOdd" valign="top">Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
-          <tr><td onclick="javascript:toggleCheckBox('opt2')">Sticky Acknowledgement:</td><td><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack %] checked[% END %]></td></tr>
-          <tr><td onclick="javascript:toggleCheckBox('opt3')">Send Notification:</td><td><input type='checkbox' id="opt3" name='send_notification'[% IF c.config.cmd_defaults.send_notification %] checked[% END %]></td></tr>
-          <tr><td onclick="javascript:toggleCheckBox('opt4')">Persistent Comment:</td><td><input type='checkbox' id="opt4" name='persistent_ack'[% IF c.config.cmd_defaults.persistent_ack %] checked[% END %]></td></tr>
+          <tr><td onclick="toggleCheckBox('opt2')">Sticky Acknowledgement:</td><td><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack %] checked[% END %]></td></tr>
+          <tr><td onclick="toggleCheckBox('opt3')">Send Notification:</td><td><input type='checkbox' id="opt3" name='send_notification'[% IF c.config.cmd_defaults.send_notification %] checked[% END %]></td></tr>
+          <tr><td onclick="toggleCheckBox('opt4')">Persistent Comment:</td><td><input type='checkbox' id="opt4" name='persistent_ack'[% IF c.config.cmd_defaults.persistent_ack %] checked[% END %]></td></tr>
         </table>
       </td>
     </tr>
@@ -112,7 +112,7 @@
       <td class="statusOdd" valign="top">Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
-          <tr><td onclick="javascript:toggleCheckBox('opt5')">Persistent :</td><td><input type='checkbox' id="opt5" name='persistent_comments'[% IF c.config.cmd_defaults.persistent_comments %] checked[% END %]></td></tr>
+          <tr><td onclick="toggleCheckBox('opt5')">Persistent :</td><td><input type='checkbox' id="opt5" name='persistent_comments'[% IF c.config.cmd_defaults.persistent_comments %] checked[% END %]></td></tr>
         </table>
       </td>
     </tr>

@@ -48,9 +48,7 @@
         <td align="center" valign="top" width="33%">[% PROCESS _host_status_details_box.tt %]</td>
         <td align="center" valign="top" width="33%">[% PROCESS _service_status_details_box.tt %]</td>
         <td align="right" valign="bottom">
-          [% IF show_context_help %]
-          <br><a href='[% url_prefix %]thruk/docs/status_detail' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
-          [% END %]
+          [% PROCESS _help.tt topic = "status_detail" %]
         </td>
       </tr>
     </table>
@@ -86,10 +84,10 @@
         <td valign="top" align="center" width="80%">
           <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
           <div class="hint">
-              <a href="javascript:selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="javascript:selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
-            - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
-            - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-            - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+              <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
+            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
+            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
           </div>
         </td>
         <td valign="bottom" align="right" width="10%" nowrap>
@@ -137,10 +135,10 @@
     [% PROCESS _status_detail_table.tt %]
 
     <div class="hint">
-        <a href="javascript:selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="javascript:selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
-      - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
-      - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-      - <a href="javascript:selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+        <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
+      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
+      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
     </div>
 
     <div align="center">[% PROCESS _pager.tt %]</div>

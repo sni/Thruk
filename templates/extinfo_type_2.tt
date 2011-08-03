@@ -80,9 +80,7 @@
           <font size="-1"><i>Extra Notes</i></font><br clear="all">
           <br clear="all">
           [% END %]
-          [% IF show_context_help %]
-          <br><a href='[% url_prefix %]thruk/docs/extinfo_2' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
-          [% END %]
+          [% PROCESS _help.tt topic = "extinfo_2" %]
         </td>
       </tr>
     </table>

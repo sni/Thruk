@@ -13,7 +13,7 @@
       <br>
       Note: It may take a while before the command is actually processed.<br>
       <br>
-      <a href='javascript:window.history.go([% how_far_back %])'>Done</a>
+      <a href='#' onclick='window.history.go([% how_far_back %])'>Done</a>
     </div>
 
 [% PROCESS _footer.tt %]

@@ -37,9 +37,9 @@
               <td width="15"></td>
               <td align="center" class='navBoxDate' nowrap>
                 <div class='navBoxTitle'>Log File Navigation</div>
-                <input type="text" value="[% format_date(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="javascript:show_cal('start')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% format_date(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="#" onclick="show_cal('start')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>to<br>
-                <input type="text" value="[% format_date(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="javascript:show_cal('end')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
+                <input type="text" value="[% format_date(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="#" onclick="show_cal('end')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
                 <br>
               </td>
               <td valign="middle">
@@ -104,9 +104,7 @@
               <td align="right" valign="bottom"></td>
             </tr>
           </table>
-          [% IF show_context_help %]
-          <br><a href='[% url_prefix %]thruk/docs/notifications' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
-          [% END %]
+          [% PROCESS _help.tt topic = "notifications" %]
         </td>
       </tr>
     </table>

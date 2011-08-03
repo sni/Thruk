@@ -5,16 +5,53 @@
     <meta http-equiv="X-UA-Compatible" content="IE=8"/>
     <title>[% title_prefix %][% title %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
-    [% UNLESS all_in_one_css %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
-    [% END %]
 
     [% SET page = 'status' IF page == '' %]
+
+    <!-- javascript -->
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.7.0.js"></script>
+    <script type="text/javascript">
+    <!--
+      var theme                   = '[% theme %]';
+      var ajax_search_enabled     = '[% use_ajax_search %]';
+      var url_prefix              = '[% url_prefix %]';
+      [% IF refresh_rate +%]
+      var refresh_rate            = [% refresh_rate %];
+      [% END %]
+      [% IF author +%]
+      var thruk_debug_js          = 1;
+      [% END +%]
+      var initial_backend_states = new Hash({
+          [% FOREACH pd IN backends %]
+            [% SET val = '1'                                     %]
+            [% SET val = '0' IF backend_detail.$pd.running       %]
+            [% SET val = '2' IF backend_detail.$pd.disabled == 2 %]
+            [% SET val = '3' IF backend_detail.$pd.disabled == 3 %]
+            [% SET val = '3' IF param_backend && pd != param_backend %]
+            '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
+          [% END %]
+      });
+      var current_backend_states  = initial_backend_states.clone();
+      var enable_shinken_features = [% enable_shinken_features %];
+      [% IF enable_shinken_features +%]
+      var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
+      [% END +%]
+    -->
+    </script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/cal/jscal2.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/overlib.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/scriptaculous/scriptaculous.js"></script>
+    [% FOREACH j = js.list %]
+      <script type="text/javascript" src="[% url_prefix _ j %]"></script>
+    [% END %]
+
+    <!-- stylesheets -->
     [% UNLESS all_in_one_css %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% page %].css' />
     [% END %]
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css' />
-
     [% UNLESS use_frames %]
       <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes.css' />
       <!--[if IE 5]>
@@ -24,61 +61,17 @@
       <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
       <![endif]-->
     [% END %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
+    [% IF css.list.size > 0 %][% FOREACH cs = css.list %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix _ cs %]' />
+    [% END %][% END %]
     [% IF show_nav_button && use_frames %]
     <style type='text/css'>
       body {
         margin-left: 8px;
       }
     </style>
-    [% END %]
-
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
-    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.7.0.js"></script>
-
-    <script type="text/javascript">
-    <!--
-    var initial_backend_states = new Hash({
-        [% FOREACH pd IN backends %]
-          [% SET val = '1'                                     %]
-          [% SET val = '0' IF backend_detail.$pd.running       %]
-          [% SET val = '2' IF backend_detail.$pd.disabled == 2 %]
-          [% SET val = '3' IF backend_detail.$pd.disabled == 3 %]
-          [% SET val = '3' IF param_backend && pd != param_backend %]
-          '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
-        [% END %]
-    });
-    var current_backend_states  = initial_backend_states.clone();
-    var theme                   = '[% theme %]';
-    var ajax_search_enabled     = '[% use_ajax_search %]';
-    var url_prefix              = '[% url_prefix %]';
-    var enable_shinken_features = [% enable_shinken_features %];
-    [% IF enable_shinken_features +%]
-    var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
-    [% END %]
-
-    [% IF refresh_rate +%]
-    var refresh_rate            = [% refresh_rate %];
-    [% END %]
-
-    -->
-    </script>
-
-    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
-    [% IF author %]
-    <script type="text/javascript">
-    <!--
-      thruk_debug_js=1;
-    -->
-    </script>
-    [% END %]
-    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/cal/jscal2.js"></script>
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
-    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/overlib.js"></script>
-    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/scriptaculous/scriptaculous.js"></script>
-    [% IF js.list.size > 0 %]
-      [% FOREACH j = js.list %]
-      <script type="text/javascript" src="[% j %]"></script>
-      [% END %]
     [% END %]
 
     [% PROCESS extra_headers.tt %]

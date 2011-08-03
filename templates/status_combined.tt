@@ -3,8 +3,10 @@
 [% PROCESS _message.tt %]
 
 <script type="text/javascript">
+<!--
   var hst_Hash = new Hash({[% FOREACH h = hosts %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
   window.setTimeout("hide_activity_icons()", 5000);
+-->
 </script>
 
 [% PROCESS _overdiv.tt %]
@@ -17,9 +19,7 @@
     <td align="center" valign="top" width="33%">&nbsp;</td>
     <td align="center" valign="top" width="33%">&nbsp;</td>
     <td align="right" valign="bottom">
-      [% IF show_context_help %]
-      <br><a href='[% url_prefix %]thruk/docs/status_detail' target='cxhlp' onclick='javascript:window.open(this.href,"cxhlp","width=550,height=600,toolbar=0,location=0,status=0,resizable=1,scrollbars=1");return true'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/contexthelp1.gif' width="30" height="29" border="0" alt='Display context-sensitive help for this screen' title='Display context-sensitive help for this screen'></a>
-      [% END %]
+      [% PROCESS _help.tt topic = "status_detail" %]
     </td>
   </tr>
   <tr><td colspan=4><br></td></tr>
@@ -55,10 +55,10 @@
       <div class="statusSort" align="CENTER">Hosts sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
       [% END %]
       <div class="hint">
-          <a href="javascript:selectAllHosts(true,'hst_');">select all</a>
-        - <a href="javascript:selectAllHosts(false,'hst_');">unselect all</a>
-        - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
-        - <a href="javascript:selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="selectAllHosts(true,'hst_');">select all</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');">unselect all</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
       </div>
     </td>
     <td valign="bottom" align="right" width="33%">
@@ -84,17 +84,19 @@
 </table>
 
 <script type="text/javascript">
+<!--
   var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% s.host_name %];[% s.description %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+-->
 </script>
 
 [% IF sortoption_svc %]
 <div class="statusSort" align="CENTER">Services sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
 [% END %]
 <div class="hint">
-    <a href="javascript:selectAllServices(true,'svc_');">select all</a> (<a href="javascript:selectAllHosts(true,'svc_');">hosts</a>)
-  - <a href="javascript:selectAllHosts(false,'svc_');selectAllServices(false,'svc_');">unselect all</a>
-  - <a href="javascript:selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-  - <a href="javascript:selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+    <a href="#" onclick="selectAllServices(true,'svc_');">select all</a> (<a href="#" onclick="selectAllHosts(true,'svc_');">hosts</a>)
+  - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');">unselect all</a>
+  - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+  - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
 </div>
 [% PROCESS _status_detail_table.tt  data=services paneprefix='svc_' sortprefix='_svc' %]
 <div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
