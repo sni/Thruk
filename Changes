@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added icons to command seletion
           - added mine map plugin
           - improved input validation for date fields in quick commands
+          - added IE9 compatibility mode (Joerg Linge)
           - added description to init script (fixes #32)
           - fixed scheduling downtimes on mutliple backends (fixes #33)
           - fixed custom icons in Nuvola theme
