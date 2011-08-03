@@ -676,8 +676,13 @@ sub single_search {
             push @servicetotalsfilter, { contacts => { $listop => $value } };
         }
         elsif ( $filter->{'type'} eq 'next check' ) {
-            my $date = Thruk::Utils::parse_date( $c, $value );
-            if($date) {
+            my $date;
+            if($value == "N/A" or $value eq "") {
+                $date = "";
+            } else {
+                $date = Thruk::Utils::parse_date( $c, $value );
+            }
+            if(defined $date) {
                 push @hostfilter,    { next_check => { $dateop => $date } };
                 push @servicefilter, { next_check => { $dateop => $date } };
             }
@@ -695,8 +700,13 @@ sub single_search {
             push @servicefilter, { percent_state_change => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'last check' ) {
-            my $date = Thruk::Utils::parse_date( $c, $value );
-            if($date) {
+            my $date;
+            if($value == "N/A" or $value eq "") {
+                $date = "";
+            } else {
+                $date = Thruk::Utils::parse_date( $c, $value );
+            }
+            if(defined $date) {
                 push @hostfilter,    { last_check => { $dateop => $date } };
                 push @servicefilter, { last_check => { $dateop => $date } };
             }
