@@ -27,6 +27,7 @@ docs/source/arch_preview.png
 docs/source/Bookmarks_and_excel_export.png
 docs/source/Config_Tool.png
 docs/source/Filter.png
+docs/source/MineMap.png
 docs/source/PluginOutput.png
 docs/source/PNP4nagios.png
 docs/source/Reschedule.png
@@ -152,9 +153,9 @@ plugins/plugins-available/statusmap/root/Treemap.css
 plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
 plugins/plugins-enabled/conf
+plugins/plugins-enabled/minemap
 plugins/plugins-enabled/shinken_features
 plugins/plugins-enabled/statusmap
-plugins/plugins-enabled/minemap
 README
 root/favicon.ico
 root/index.html
@@ -987,8 +988,8 @@ root/thruk/themes/Thruk/images/up.gif
 root/thruk/themes/Thruk/images/waiting.gif
 root/thruk/themes/Thruk/images/warning.png
 root/thruk/themes/Thruk/images/yellow.gif
-root/thruk/themes/Thruk/stylesheets/Thruk.css
 root/thruk/themes/Thruk/stylesheets/thruk.css
+root/thruk/themes/Thruk/stylesheets/Thruk.css
 root/thruk/themes/Thruk/stylesheets/thruk_noframes.css
 root/thruk/themes/Thruk/stylesheets/thruk_noframes_ie_fix.css
 root/thruk/themes/Vautour/images/accept.png
@@ -1318,6 +1319,7 @@ root/thruk/themes/Wakizashi/stylesheets/thruk_noframes.css
 root/thruk/themes/Wakizashi/stylesheets/thruk_noframes_ie_fix.css
 root/thruk/themes/Wakizashi/stylesheets/trends.css
 root/thruk/themes/Wakizashi/stylesheets/Wakizashi.css
+script/append.make
 script/thruk_cgi.pl
 script/thruk_create.pl
 script/thruk_create_package.pl
