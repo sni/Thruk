@@ -6,7 +6,7 @@
     <tr>
       [% IF message.2 %]
       <td width="50" align="left" valign="top">
-        <a href="#" onclick="toggleElement('message_details', 'message_details_icon');return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" id="message_details_icon" alt="show details" width="13" height="12" class="close_button"></a>
+        <a href="#" onclick="toggleElement('message_details', 'message_details_icon');return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" id="message_details_icon" alt="show details" width="13" height="12" class="close_button" style="margin-left: 4px;"></a>
       </td>
       [% END %]
       <td align="center">
@@ -16,7 +16,7 @@
         [% END %]
       </td>
       <td valign="top" align="right" width="50">
-        <a href="#" onclick="$('thruk_message').fade({ duration: 0.5 })"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button"></a>
+        <a href="#" onclick="$('thruk_message').fade({ duration: 0.5 })"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/icon_close.gif' border="0" alt='Hide Message' title='Hide Message' width="13" height="12" class="close_button" style="margin-right: 4px;"></a>
       </td>
     </tr>
     [% IF message.2 %]
