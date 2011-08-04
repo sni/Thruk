@@ -22,8 +22,8 @@
     [% IF message.2 %]
     <tr style="display:none" id="message_details">
       <td colspan=3 align="center">
-        <div>
-        <pre class="[% message.0 %]">
+        <div style="float: left; position: relative; left: 50%;">
+        <pre class="[% message.0 %]" style="float: left; position: relative; left: -50%; text-align: left;">
           [% FOREACH detail = thruk_message_details %]
           [% detail %]<br>
           [% END %]
