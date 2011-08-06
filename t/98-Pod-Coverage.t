@@ -22,14 +22,17 @@ if ( $EVAL_ERROR ) {
 
 eval "use Test::Pod::Coverage 1.00";
 
-my @modules = all_modules();
+my @modules = all_modules('lib', glob("plugins/plugins-available/*/lib"));
 for my $module (@modules) {
 
-    next if $module =~ m/::plugins\-available::/;
-    next if $module =~ m/::plugins\-enabled::/;
+    $module =~ s/plugins::plugins\-available::\w+::lib:://gmx;
 
     # check module and skip UPPERCASE constants which are reported as fail
-    pod_coverage_ok( $module, { also_private => [ qr/^[A-Z_]+$/ ]} );
+    if($module eq 'Thruk::Controller::summary' or $module eq 'Thruk::Controller::trends') {
+        pod_coverage_ok( $module, { also_private => [ qr/^[A-Z_]+$/ ]} );
+    } else {
+        pod_coverage_ok( $module );
+    }
 }
 
 done_testing;

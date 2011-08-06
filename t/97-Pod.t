@@ -7,4 +7,4 @@ plan skip_all => 'Test::Pod 1.14 required' if $@;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $dirs = [ 'lib', glob("plugins/plugins-available/*/lib") ];
-all_pod_files_ok( all_pod_files($dirs) );
+all_pod_files_ok( all_pod_files(@{$dirs}) );

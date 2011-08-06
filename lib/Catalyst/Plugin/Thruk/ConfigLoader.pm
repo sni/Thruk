@@ -30,13 +30,13 @@ sub finalize_config {
         # lib directory included?
         if(-d $addon.'/lib') {
             print STDERR " -> lib\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-            unshift(@INC, $addon.'/lib')
+            unshift(@INC, $addon.'/lib');
         }
 
         # template directory included?
         if(-d $addon.'templates') {
             print STDERR " -> templates\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-            unshift @{$c->config->{templates_paths}}, $addon.'templates'
+            unshift @{$c->config->{templates_paths}}, $addon.'templates';
         }
 
         # static content included?

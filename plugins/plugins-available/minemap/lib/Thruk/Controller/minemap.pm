@@ -45,6 +45,8 @@ sub minemap_cgi : Regex('thruk\/cgi\-bin\/minemap\.cgi') {
 
 =head2 index
 
+minemap index page
+
 =cut
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;

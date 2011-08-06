@@ -63,6 +63,12 @@ sub businessview_cgi : Regex('thruk\/cgi\-bin\/businessview\.cgi') {
 
 
 ##########################################################
+
+=head2 outages_pbimp_index
+
+outages impacts index page
+
+=cut
 sub outages_pbimp_index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
@@ -79,6 +85,12 @@ sub outages_pbimp_index :Path :Args(0) :MyAction('AddDefaults') {
 
 
 ##########################################################
+
+=head2 shinken_status
+
+shinken status index page
+
+=cut
 sub shinken_status :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
@@ -284,6 +296,12 @@ sub _count_hosts_and_services_impacts {
 
 
 ##########################################################
+
+=head2 businessview_index
+
+businessview index page
+
+=cut
 sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 708;
+use Test::More;
 
 BEGIN {
     use lib('t');
@@ -34,3 +34,4 @@ for my $theme (@themes) {
     }
 }
 
+done_testing();
