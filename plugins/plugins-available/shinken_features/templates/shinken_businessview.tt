@@ -30,7 +30,7 @@
       <br>
 
 
-    [% FOREACH crit IN priorities.reverse %]
+    [% FOREACH crit IN prios.reverse %]
     [% NEXT IF crit.count == 0 %]
     <table style="min-width: 600px;"><tr><td>
     <div class='dataTitle blockHead blockHeadBorder'>Priority: [% crit.text %] <img src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" height="16" alt="[% crit.text %]" title="[% crit.text %]"></div>

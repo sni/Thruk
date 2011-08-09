@@ -185,7 +185,7 @@ sub _process_outagespbimp {
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;
-    $c->stash->{priorities}     = $priorities;
+    $c->stash->{prios}          = $priorities;
     $c->stash->{title}          = 'Problems and Impacts';
     $c->stash->{infoBoxTitle}   = 'Problems and Impacts';
     $c->stash->{page}           = 'status';
@@ -374,7 +374,7 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
 
     $c->stash->{hst_pbs}        = $sortedhst_pbs;
     $c->stash->{srv_pbs}        = $sortedsrv_pbs;
-    $c->stash->{priorities}     = $priorities;
+    $c->stash->{prios}          = $priorities;
     $c->stash->{title}          = 'Business Elements';
     $c->stash->{infoBoxTitle}   = 'Business Elements';
     $c->stash->{page}           = 'businessview';
