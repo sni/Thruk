@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.0.9    Tue Aug  9 19:00:49 CEST 2011
+          - moved mobile plugin to extra branch (not finished yet)
+          - Thruk theme: layout/design cleanup
           - fixed undefined value in shinken-features plugin
 
 1.0.8    Mon Aug  2 15:22:16 CEST 2011

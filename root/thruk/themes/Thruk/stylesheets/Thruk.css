@@ -951,6 +951,7 @@ DIV.cmdType {
 }
 TABLE.optBoxInnerTable {
   width: 100%;
+  margin: 5px;
 }
 
 table.filter > tbody > tr > td {
