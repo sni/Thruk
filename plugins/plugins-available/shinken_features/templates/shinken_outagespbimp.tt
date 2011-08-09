@@ -19,8 +19,10 @@
       <div class='statusTitle'>Problems <img src="[% url_prefix %]thruk/themes/[% theme %]/images/problem.png" alt="problems" style="vertical-align: text-bottom"></div>
       <br>
 
+    [% SET counter = 0 %]
     [% FOREACH crit IN prios.reverse %]
     [% NEXT IF crit.count == 0 %]
+    [% counter = counter + 1 %]
     <center>
     <div class='statusTitle'>Priority: [% crit.text %] <img class="crit_icon" src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% crit.value %].png" alt="Priority: [% crit.text %]"></div>
 
@@ -126,10 +128,10 @@
             [% IF use_feature_statusmap %]
             <a href='statusmap.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status3.gif' border="0" alt='View status map for this host and its children' title='View status map for this host and its children' width="20" height="20"></a>
             [% END %]
-            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% host.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
-            [% IF use_feature_trends %]<a href='trends.cgi?host=[% host.name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
-            <a href='history.cgi?host=[% host.name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
-            <a href='notifications.cgi?host=[% host.name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
+            [% IF use_feature_statuswrl %]<a href='statuswrl.cgi?host=[% srv.host_name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status4.gif' border="0" alt='View 3-D status map for this host and its children' title='View 3-D status map for this host and its children' width="20" height="20"></a>[% END %]
+            [% IF use_feature_trends %]<a href='trends.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/trends.gif' border="0" alt='View trends for this host' title='View trends for this host' width="20" height="20"></a>[% END %]
+            <a href='history.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/history.gif' border="0" alt='View alert history for this host' title='View alert history for this host' width="20" height="20"></a>
+            <a href='notifications.cgi?host=[% srv.host_name | uri %]&amp;service=[% srv.description %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='View notifications for this host' title='View notifications for this host' width="20" height="20"></a></td>
         </tr>
         [% END %]
         [% END %]
@@ -138,7 +140,12 @@
       <br>
     [% END %]
 
+    [% IF counter == 0 %]
+      <b>There are no problems at the moment</b>
+    [% END %]
+
     </div>
     <br><br>
+
 
 [% PROCESS _footer.tt %]
