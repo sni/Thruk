@@ -185,7 +185,7 @@ function reloadPage() {
 
   additionalParams.each(function(pair) {
     // check for valid options to set here
-    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' || pair.key == 'host' || pair.key == 'reload_nav' || pair.key == 'theme' ) {
+    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' || pair.key == 'host' || pair.key == 'reload_nav' || pair.key == 'theme' || pair.key == 'states') {
       urlArgs.set(pair.key, pair.value);
     }
   });
@@ -523,6 +523,22 @@ function reset_table_row_classes(table, c1, c2) {
             }
         });
     });
+}
+
+/* save variable decoded into location hash */
+function to_location_hash(data) {
+    window.location.hash = '#'+data.toQueryString();
+}
+
+/* create variable from a decoded location hash */
+function from_location_hash() {
+    var data = new Hash;
+    if(window.location.hash != '#') {
+        var hash = new String(window.location.hash);
+        hash = hash.replace(/^#/, '');
+        data = new Hash(hash.toQueryParams());
+    }
+    return data;
 }
 
 
