@@ -845,6 +845,9 @@ td.filter {
 td.statusEven,td.statusOdd,TD.statusHOSTPENDING,TD.statusHOSTDOWN,TD.statusHOSTUP,TD.statusHOSTUNREACHABLE,TD.statusSERVICEOK,TD.statusSERVICEWARNING,TD.statusSERVICECRITICAL,TD.statusSERVICEUNKNOWN,TD.statusSERVICEPENDING,TABLE.status tbody tr td.tableRowHover {
   height:22px;
 }
+TABLE.status tbody tr TABLE#multi_table td.tableRowHover {
+  height:auto;
+}
 
 ul.navsectionlinks {
   background:transparent url(../images/menu-body.png) repeat-y;
