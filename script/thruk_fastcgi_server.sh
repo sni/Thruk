@@ -7,7 +7,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: startup script for thruk fastcgi server
-# Description:       Thruk - Monitoring Webinterface. Gui for Nagios, Icinga and Shinken. 
+# Description:       Thruk - Monitoring Webinterface. Gui for Nagios, Icinga and Shinken.
 ### END INIT INFO
 #
 # 2010-02-12 by Sven Nierlein
@@ -47,7 +47,7 @@ fi
 
 ################################
 # execute script as $EXECUSER if the user is root
-if [ "$USER" = "root" ];then
+if [ $(id -u) = "0" ];then
   SCRIPT=`readlink -f $0`
   su - $EXECUSER -c "$SCRIPT $*"
   exit $?
