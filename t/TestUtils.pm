@@ -27,7 +27,7 @@ sub get_test_servicegroup {
     if($page =~ m/extinfo\.cgi\?type=8&amp;servicegroup=(.*?)'>(.*?)<\/a>/) {
         $group = $1;
     }
-    isnt($group, undef, "got a servicegroup from config.cgi") or BAIL_OUT('got no test servicegroup, cannot test');
+    isnt($group, undef, "got a servicegroup from config.cgi") or BAIL_OUT('got no test servicegroup, cannot test.'.diag(Dumper($request)));
     return($group);
 }
 
@@ -39,10 +39,8 @@ sub get_test_hostgroup {
     my $group;
     if($page =~ m/'extinfo\.cgi\?type=5&amp;hostgroup=(.*?)'>(.*?)<\/a>/) {
         $group = $1;
-    } else {
-        print Dumper($page);
     }
-    isnt($group, undef, "got a hostgroup from config.cgi") or BAIL_OUT('got no test hostgroup, cannot test');
+    isnt($group, undef, "got a hostgroup from config.cgi") or BAIL_OUT('got no test hostgroup, cannot test.'.diag(Dumper($request)));
     return($group);
 }
 
@@ -55,7 +53,7 @@ sub get_test_user {
     if($page =~ m/Logged in as <i>(.*?)<\/i>/) {
         $user = $1;
     }
-    isnt($user, undef, "got a user from config.cgi") or BAIL_OUT('got no test user, cannot test');
+    isnt($user, undef, "got a user from config.cgi") or BAIL_OUT('got no test user, cannot test.'.diag(Dumper($request)));
     return($user);
 }
 
@@ -69,8 +67,8 @@ sub get_test_service {
         $host    = $1;
         $service = $2;
     }
-    isnt($host, undef, "got a host from status.cgi") or BAIL_OUT('got no test host, cannot test');
-    isnt($service, undef, "got a service from status.cgi") or BAIL_OUT('got no test service, cannot test');
+    isnt($host, undef, "got a host from status.cgi") or BAIL_OUT('got no test host, cannot test.'.diag(Dumper($request)));
+    isnt($service, undef, "got a service from status.cgi") or BAIL_OUT('got no test service, cannot test.'.diag(Dumper($request)));
     $service =~ s/%20/ /gmx;
     $host    =~ s/%20/ /gmx;
     return($host, $service);
