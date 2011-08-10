@@ -21,6 +21,7 @@ script/thruk_update_table_docs.pl
 script/thruk_extract_cmd_templates.pl
 t/xt
 root/thruk/plugins/.*
+root/shinken
 .author
 ssi_local
 cgi_local.cfg
