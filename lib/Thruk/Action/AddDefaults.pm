@@ -173,6 +173,7 @@ before 'execute' => sub {
         if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH') {
             $c->stash->{'enable_shinken_features'} = 1;
             for my $b (values %{$c->stash->{'pi_detail'}}) {
+                next unless defined $b->{'peer_key'};
                 next unless defined $c->stash->{'backend_detail'}->{$b->{'peer_key'}};
                 if(defined $b->{'data_source_version'} and $b->{'data_source_version'} !~ m/\-shinken/mx) {
                     $c->stash->{'enable_shinken_features'} = 0;
