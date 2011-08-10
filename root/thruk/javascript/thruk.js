@@ -1085,6 +1085,7 @@ function selectServicesByClass(classes) {
             selectService(obj, true);
         })
     });
+    return false;
 }
 
 /* select hosts by class name */
@@ -1094,6 +1095,7 @@ function selectHostsByClass(classes) {
             selectHost(obj, true);
         })
     });
+    return false;
 }
 
 /* select or deselect all hosts */

@@ -84,10 +84,10 @@
         <td valign="top" align="center" width="80%">
           <div class="hint">select host / services with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
           <div class="hint">
-              <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
-            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
-            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+              <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');return false;">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
+            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');return false;">unselect all</a>
+            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));return false;">all problems</a>
+            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));return false;">all with downtime</a>
           </div>
         </td>
         <td valign="bottom" align="right" width="10%" nowrap>
@@ -135,10 +135,10 @@
     [% PROCESS _status_detail_table.tt %]
 
     <div class="hint">
-        <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
-      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');">unselect all</a>
-      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+        <a href="#" onclick="selectAllServices(true,'[% paneprefix %]');return false;">select all</a> (<a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');">hosts</a>)
+      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');return false;">unselect all</a>
+      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));return false;">all problems</a>
+      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectAllServices(false,'[% paneprefix %]');selectServicesByClass(Array('.has_downtime'));return false;">all with downtime</a>
     </div>
 
     <div align="center">[% PROCESS _pager.tt %]</div>

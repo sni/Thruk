@@ -17,6 +17,7 @@ htpasswd.users
 .DS_Store
 ssi/*.ssi
 root/thruk/plugins/*
+root/shinken
 t/xt
 *.swp
 .author
