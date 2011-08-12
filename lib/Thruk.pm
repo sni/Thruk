@@ -169,21 +169,6 @@ $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # 
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
 
 ###################################################
-# set installed themes
-my $themes_dir = $project_root."/root/thruk/themes/";
-my @themes;
-opendir(my $dh, $themes_dir) or die "can't opendir '$themes_dir': $!";
-for my $entry (readdir($dh)) {
-    next unless -d $themes_dir."/".$entry;
-    next if $entry =~ m/^\./mx; # hide hidden dirs
-    next if $entry eq 'images';
-    push @themes, $entry;
-}
-@themes = sort @themes;
-closedir $dh;
-$config{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
-
-###################################################
 # set some defaults
 __PACKAGE__->config->{'cgi.cfg'}  = exists __PACKAGE__->config->{'cgi.cfg'}  ? __PACKAGE__->config->{'cgi.cfg'}  : 'cgi.cfg';
 
@@ -205,9 +190,9 @@ if(defined $timezone) {
 }
 
 ###################################################
-# set installed themes
+# set installed server side includes
 my $ssi_dir = __PACKAGE__->config->{'ssi_path'} || $project_root."/ssi/";
-my %ssi;
+my (%ssi, $dh);
 opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
 for my $entry (readdir($dh)) {
     next if $entry eq '.' or $entry eq '..';

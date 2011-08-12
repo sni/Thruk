@@ -10,12 +10,13 @@ sub finalize_config {
 
     ###################################################
     # get installed plugins
-    my $plugin_dir = $c->config->{'plugin_path'} || $project_root."/plugins/";
+    my $plugin_dir = $c->config->{'plugin_path'} || $project_root."/plugins";
     $plugin_dir = $plugin_dir.'/plugins-enabled/*/';
 
     print STDERR "using plugins: ".$plugin_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
 
     for my $addon (glob($plugin_dir)) {
+
         my $addon_name = $addon;
         $addon_name =~ s/\/$//gmx;
         $addon_name =~ s/^.*\///gmx;
@@ -47,6 +48,23 @@ sub finalize_config {
             symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
         }
     }
+
+    ###################################################
+    # get installed / enabled themes
+    my $themes_dir = $c->config->{'themes_path'} || $project_root."/themes";
+    $themes_dir = $themes_dir.'/themes-enabled/*/';
+
+    my @themes;
+    for my $theme (sort glob($themes_dir)) {
+        $theme =~ s/\/$//gmx;
+        $theme =~ s/^.*\///gmx;
+        print STDERR "theme -> $theme\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+        push @themes, $theme;
+    }
+
+    print STDERR "using themes: ".$themes_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+
+    $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
     ###################################################
     # set tmp dir

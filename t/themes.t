@@ -11,11 +11,11 @@ BEGIN {
 my @themes = TestUtils::get_themes();
 
 # check if all themes have at least all images from the Classic theme
-my @images = glob("./root/thruk/themes/Classic/images/*.{png,jpg,gif}");
+my @images = glob("./themes/themes-available/Classic/images/*.{png,jpg,gif}");
 for my $theme (@themes) {
     for my $img (@images) {
         $img =~ s/.*\///gmx;
-        ok(-f "./root/thruk/themes/$theme/images/$img", "$img available in $theme");
+        ok(-f "./themes/themes-available/$theme/images/$img", "$img available in $theme");
     }
 }
 

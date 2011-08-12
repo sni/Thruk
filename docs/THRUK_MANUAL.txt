@@ -685,6 +685,22 @@ ex.:
   plugin_path = ./plugins
 
 
+==== themes_path
+
+Path to your themes directory. Can be used to specify different
+location for you Thruk themes. Don't forget to set appropriate apache
+alias or rewrite rules when changing the themes path. Otherwise the
+static content from your themes may not accessible.
+
++++++
+ Alias /thruk/themes/ <your-themes-dir>/themes/themes-enabled/
++++++
+
+ex.:
+
+  themes_path = ./themes
+
+
 ==== var_path
 
 Path to the var directory. Thruk stores user specific date here.
