@@ -467,7 +467,7 @@ TD.commandPanel,TD.stateInfoPanel {
 }
 
 TD.commandPanel {
-  min-width: 265px;
+  min-width: 300px;
 }
 
 TD.comment,TD.downtime,TD.notificationsEven,TD.status {

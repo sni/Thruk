@@ -29,5 +29,20 @@
   </tr>
 </table>
 <script type="text/javascript">
-  set_png_img([% date.now - 90000 %], [% date.now %], 'pnp_th2');
+  var pnp_id    = 'pnp_th2';
+  var pnp_start = [% date.now - 90000 %];
+  var pnp_end   = [% date.now %];
+  if(window.location.hash != '#') {
+    var values = window.location.hash.split("/");
+    if(values[0]) {
+      pnp_id = values[0].replace(/^#/, '');
+    }
+    if(values[1]) {
+      pnp_start = values[1];
+    }
+    if(values[2]) {
+      pnp_end = values[2];
+    }
+  }
+  set_png_img(pnp_start, pnp_end, pnp_id);
 </script>

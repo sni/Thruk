@@ -2404,6 +2404,18 @@ function set_png_img(start, end, id) {
         }
         obj = document.getElementById(id);
         styleElements(obj, "commentEven pnpSelected", 1);
+    } else {
+        // get id from hash
+        if(window.location.hash != '#') {
+            var values = window.location.hash.split("/");
+            if(values[0]) {
+                id = values[0].replace(/^#/, '');
+            }
+        }
+    }
+
+    if(id) {
+        window.location.hash = "#" + id + "/" + start + "/" + end;
     }
 
     // reset reload timer for page

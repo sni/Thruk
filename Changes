@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.0.9    Tue Aug 10 21:56:22 CEST 2011
           - themes: themes can be enabled/disabled by themes/themes-enabled directory (just like plugins)
+          - pnp preview: save graph state between reloads
           - shinken features: save status of businessview on reload
           - moved mobile plugin to extra branch (not finished yet)
           - Thruk theme: layout/design cleanup
