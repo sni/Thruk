@@ -533,7 +533,7 @@ page: /thruk/cgi-bin/tac.cgi
 
 sub tac_cgi : Regex('thruk\/cgi\-bin\/tac\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/tac/index');
 }
 
@@ -547,7 +547,7 @@ page: /thruk/cgi-bin/status.cgi
 
 sub status_cgi : Regex('thruk\/cgi\-bin\/status\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/status/index');
 }
 
@@ -561,7 +561,7 @@ page: /thruk/cgi-bin/cmd.cgi
 
 sub cmd_cgi : Regex('thruk\/cgi\-bin\/cmd\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/cmd/index');
 }
 
@@ -575,7 +575,7 @@ page: /thruk/cgi-bin/outages.cgi
 
 sub outages_cgi : Regex('thruk\/cgi\-bin\/outages\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/outages/index');
 }
 
@@ -589,7 +589,7 @@ page: /thruk/cgi-bin/avail.cgi
 
 sub avail_cgi : Regex('thruk\/cgi\-bin\/avail\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/avail/index');
 }
 
@@ -603,7 +603,7 @@ page: /thruk/cgi-bin/trends.cgi
 
 sub trends_cgi : Regex('thruk\/cgi\-bin\/trends\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/trends/index');
 }
 
@@ -617,7 +617,7 @@ page: /thruk/cgi-bin/history.cgi
 
 sub history_cgi : Regex('thruk\/cgi\-bin\/history\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/history/index');
 }
 
@@ -631,7 +631,7 @@ page: /thruk/cgi-bin/summary.cgi
 
 sub summary_cgi : Regex('thruk\/cgi\-bin\/summary\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/summary/index');
 }
 
@@ -645,7 +645,7 @@ page: /thruk/cgi-bin/histogram.cgi
 
 sub histogram_cgi : Regex('thruk\/cgi\-bin\/histogram\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/histogram/index');
 }
 
@@ -659,7 +659,7 @@ page: /thruk/cgi-bin/notifications.cgi
 
 sub notifications_cgi : Regex('thruk\/cgi\-bin\/notifications\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/notifications/index');
 }
 
@@ -673,7 +673,7 @@ page: /thruk/cgi-bin/showlog.cgi
 
 sub showlog_cgi : Regex('thruk\/cgi\-bin\/showlog\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/showlog/index');
 }
 
@@ -687,7 +687,7 @@ page: /thruk/cgi-bin/extinfo.cgi
 
 sub extinfo_cgi : Regex('thruk\/cgi\-bin\/extinfo\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/extinfo/index');
 }
 
@@ -701,7 +701,7 @@ page: /thruk/cgi-bin/config.cgi
 
 sub config_cgi : Regex('thruk\/cgi\-bin\/config\.cgi') {
     my( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/config/index');
 }
 

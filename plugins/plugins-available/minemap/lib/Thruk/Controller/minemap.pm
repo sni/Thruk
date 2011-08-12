@@ -36,7 +36,7 @@ page: /thruk/cgi-bin/minemap.cgi
 =cut
 sub minemap_cgi : Regex('thruk\/cgi\-bin\/minemap\.cgi') {
     my ( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/minemap/index');
 }
 

@@ -31,7 +31,7 @@ page: /thruk/cgi-bin/statusmap.cgi
 =cut
 sub statusmap_cgi : Regex('thruk\/cgi\-bin\/statusmap\.cgi') {
     my ( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/statusmap/index');
 }
 

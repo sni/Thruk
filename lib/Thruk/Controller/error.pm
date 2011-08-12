@@ -30,7 +30,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         confess("undefined c in error/index");
     }
 
-    $c->{'cancled'} = 1;
+    $c->{'canceled'} = 1;
 
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
