@@ -7104,6 +7104,17 @@ static content from plugins is not accessible.</p></div>
 <div class="content">
 <pre><tt>plugin_path = ./plugins</tt></pre>
 </div></div>
+<h4 id="_themes_path">themes_path</h4>
+<div class="paragraph"><p>Path to your themes directory. Can be used to specify different
+location for you Thruk themes. Don&#8217;t forget to set appropriate apache
+alias or rewrite rules when changing the themes path. Otherwise the
+static content from your themes may not accessible.</p></div>
+ Alias /thruk/themes/ <your-themes-dir>/themes/themes-enabled/
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>themes_path = ./themes</tt></pre>
+</div></div>
 <h4 id="_var_path">var_path</h4>
 <div class="paragraph"><p>Path to the var directory. Thruk stores user specific date here.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -8165,7 +8176,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-08-06 13:43:16 CEST
+Last updated 2011-08-12 19:08:47 CEST
 </div>
 </div>
 </body>
