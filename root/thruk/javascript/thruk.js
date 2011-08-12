@@ -1890,6 +1890,7 @@ Y8,            d8""""""""8b   88
 *******************************************************************************/
 
 function show_cal(id) {
+  debug(id);
   var dateObj   = new Date();
   var date_val  = document.getElementById(id).value;
   var date_time = date_val.split(" ");
