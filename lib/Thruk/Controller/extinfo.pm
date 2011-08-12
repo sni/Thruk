@@ -84,7 +84,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 # create the downtimes page
 sub _process_comments_page {
     my( $self, $c ) = @_;
-    $c->stash->{'hostcomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ] );
+    $c->stash->{'hostcomments'}    = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ] );
     $c->stash->{'servicecomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ] );
     return 1;
 }
@@ -93,7 +93,7 @@ sub _process_comments_page {
 # create the downtimes page
 sub _process_downtimes_page {
     my( $self, $c ) = @_;
-    $c->stash->{'hostdowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
+    $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
     $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
     return 1;
 }
