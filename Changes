@@ -1,11 +1,13 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.0.9    Sat Aug 13 01:19:30 CEST 2011
+          - delete multiple comments from the comments page
+          - delete multiple downtimes from the downtimes page
           - themes: themes can be enabled/disabled by themes/themes-enabled directory (just like plugins)
           - pnp preview: save graph state between reloads
           - shinken features: save status of businessview on reload
-          - moved mobile plugin to extra branch (not finished yet)
           - Thruk theme: layout/design cleanup
+          - moved mobile plugin to extra branch (not finished yet)
           - fixed undefined value in shinken-features plugin
           - fixed "select all with downtime" button for hosts (fixes #39)
           - fixed calendar not showing up in status filter (fixes #42)

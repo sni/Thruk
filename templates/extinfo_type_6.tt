@@ -1,5 +1,8 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+
+[% PROCESS _extinfo_cmd_pane.tt downtimes=1 comments=0 %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
@@ -36,7 +39,7 @@
         [%  FOREACH d = hostdowntimes %]
         [% SET class = 'downtimeOdd' IF loop.even %]
         [% SET class = 'downtimeEven'  IF loop.odd %]
-        <tr class='[% class %]'>
+        <tr class='[% class %] clickable' id="hst_[% d.id %]">
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
           <td class='[% class %]'>[% date_format(c, d.entry_time) %]</td>
           <td class='[% class %]'>[% d.author %]</td>
@@ -81,7 +84,7 @@
         [%  FOREACH d = servicedowntimes %]
         [% SET class = 'downtimeOdd' IF loop.even %]
         [% SET class = 'downtimeEven'  IF loop.odd %]
-        <tr class='[% class %]'>
+        <tr class='[% class %] clickable' id="svc_[% d.id %]">
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]'>[% d.service_description %]</a></td>
           <td class='[% class %]'>[% date_format(c, d.entry_time) %]</td>
@@ -103,5 +106,6 @@
         [% END %]
       </table>
     </div>
+<br>
 
 [% PROCESS _footer.tt %]

@@ -10,23 +10,23 @@
     <tr>
       <th colspan=2 class="status cmd_pane" style="text-align: right">
         [% IF style == 'combined' %]
-          <a href="#" onclick="selectAllHosts(true,'hst_');selectAllHosts(true,'svc_');selectAllServices(true,'svc_');">select all</a>
-        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');">unselect all</a>
-        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'))">all problems</a>
-        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.has_downtime'));selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="selectAllHosts(true,'hst_');selectAllHosts(true,'svc_');selectAllServices(true,'svc_');return false;">select all</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');return false;">unselect all</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));return false;">all problems</a>
+        - <a href="#" onclick="selectAllHosts(false,'hst_');selectAllServices(false,'svc_');selectAllHosts(false,'svc_');selectHostsByClass(Array('.has_downtime'));selectServicesByClass(Array('.has_downtime'));return false;">all with downtime</a>
         [% ELSIF style == 'hostdetail' %]
-          <a href="#" onclick="selectAllHosts(true,'dfl_');">select all</a>
-        - <a href="#" onclick="selectAllHosts(false,'dfl_');">unselect all</a>
-        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
-        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="selectAllHosts(true,'dfl_');return false;">select all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');return false;">unselect all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));return false;">all problems</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
         [% ELSE %]
-          <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(true,'dfl_');">select all</a>
-        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');">unselect all</a>
-        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(true,'dfl_');return false;">select all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');return false;">unselect all</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));return false;">all problems</a>
+        - <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectServicesByClass(Array('.has_downtime'));return false;">all with downtime</a>
         [% END %]
         &nbsp;
-        <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" height="14" width="14" alt="close"></a>
+        <a href="#" onclick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" height="14" width="14" alt="close"></a>
       </th>
     </tr>
     <tr>

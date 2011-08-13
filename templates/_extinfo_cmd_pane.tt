@@ -1,0 +1,46 @@
+﻿<script type="text/javascript">
+<!--
+  [%+ IF downtimes %]
+  type = "downtime";
+  [% ELSE %]
+  type = "comment";
+  [% END +%]
+
+  Event.observe(window, 'load', function() {
+    $$("TR.clickable").each(function(elem) {
+      elem.onclick=toggle_comment;
+    });
+  });
+-->
+</script>
+<div class="cmd_pane" id="cmd_pane">
+<div class="shadow"><div class="shadowcontent">
+<form action="cmd.cgi" method="POST" id="quick_cmd_form">
+  <input type="hidden" name="referer" value="[% full_uri(c, 1) %]">
+  <input type="hidden" name="selected_ids" id="selected_ids" value="">
+  <table class="cmd_pane" border=1 style="width: 400px">
+    <tr>
+      <th class="status cmd_pane" colspan=2 style="text-align: right;">
+        <a href="#" onclick="unset_comments(); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/btn_close.png" height="14" width="14" alt="close"></a>
+      </th>
+    </tr>
+    <tr>
+      <td class="statusOdd">Command:</td>
+      <td class="statusOdd">
+        <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" style="margin-top: 4px;">
+          [% IF c.config.cmd_quick_status.downtime && downtimes %]
+          <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove downtimes</option>
+          [% END %]
+          [% IF c.config.cmd_quick_status.comment && comments %]
+          <option value="13" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove comments</option>
+          [% END %]
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td class="statusOdd submit" colspan=2><input type="submit" id="multi_cmd_submit_button" value="send command" onClick="return collectFormData('quick_cmd_form')" style="margin-bottom: 4px;"></td>
+    </tr>
+  </table>
+</form>
+</div></div>
+</div>

@@ -1184,27 +1184,35 @@ function collectFormData(form_id) {
         }
     }
 
-    var services = new Array();
-    selectedServices.keys().each(function(row_id) {
-        if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
-        if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
-        if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
-        row_id = row_id.substr(4);
-        services.push(obj_hash.get(row_id));
-    });
-    service_form = document.getElementById('selected_services');
-    service_form.value = services.join(',');
+    ids_form = document.getElementById('selected_ids');
+    if(ids_form) {
+        // comments / downtime commands
+        ids_form.value = selectedHosts.keys().join(',');
+    }
+    else {
+        // regular services commands
+        var services = new Array();
+        selectedServices.keys().each(function(row_id) {
+            if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
+            if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
+            if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
+            row_id = row_id.substr(4);
+            services.push(obj_hash.get(row_id));
+        });
+        service_form = document.getElementById('selected_services');
+        service_form.value = services.join(',');
 
-    var hosts = new Array();
-    selectedHosts.keys().each(function(row_id) {
-        if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
-        if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
-        if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
-        row_id = row_id.substr(4);
-        hosts.push(obj_hash.get(row_id));
-    });
-    host_form = document.getElementById('selected_hosts');
-    host_form.value = hosts.join(',');
+        var hosts = new Array();
+        selectedHosts.keys().each(function(row_id) {
+            if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
+            if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
+            if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
+            row_id = row_id.substr(4);
+            hosts.push(obj_hash.get(row_id));
+        });
+        host_form = document.getElementById('selected_hosts');
+        host_form.value = hosts.join(',');
+    }
 
     if(value == 1 ) { // reschedule
         var btn = document.getElementById(form_id);
@@ -1320,6 +1328,66 @@ function check_quick_command() {
     return true;
 }
 
+/* toggle selection of comment on downtimes/comments page */
+function toggle_comment(event) {
+    if(!event) {
+        event = this;
+    }
+    if(event && event.target) {
+        // dont select row when clicked on a link
+        if(event.target.tagName == 'A' || event.target.tagName == 'IMG') {
+            return true;
+        }
+    }
+
+    // find id of current row
+    if(event.target) {
+        row_id = getFirstParentId(event.target);
+    } else {
+        row_id = getFirstParentId(event);
+    }
+    if(!row_id) {
+        return false;
+    }
+
+    var row   = document.getElementById(row_id);
+    var elems = row.getElementsByTagName('TD');
+
+    if(selectedHosts.get(row_id) != undefined) {
+        selectedHosts.unset(row_id);
+        styleElements(elems, "original", 1);
+    } else {
+        selectedHosts.set(row_id, row_id);
+        styleElements(elems, 'tableRowSelected', 1)
+    }
+
+    var number = selectedHosts.keys().size();
+    var text = "remove " + number + " " + type;
+    if(number != 1) {
+        text = text + "s";
+    }
+    $('quick_command').options[0].text = text;
+
+    if(selectedHosts.keys().size() > 0) {
+        showElement('cmd_pane');
+    } else {
+        hideElement('cmd_pane');
+    }
+
+    return false;
+}
+
+/* unselect all selections on downtimes/comments page */
+function unset_comments() {
+    selectedHosts.keys().each(function(nr) {
+        var row_id = selectedHosts.get(nr);
+        var row    = document.getElementById(row_id);
+        var elems  = row.getElementsByTagName('TD');
+        styleElements(elems, "original", 1);
+        selectedHosts.unset(nr);
+    });
+    hideElement('cmd_pane');
+}
 
 /*******************************************************************************
 88888888888  88   88     888888888888 88888888888 88888888ba

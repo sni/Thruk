@@ -92,6 +92,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         10 => 24,    # enable notifications
         11 => 25,    # disable notifications
         12 => 87,    # submit passive check result
+        13 => 2,     # delete single comment
     };
     my $service_quick_commands = {
         1  => 7,     # reschedule service check
@@ -106,6 +107,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         10 => 22,    # enable notifications
         11 => 23,    # disable notifications
         12 => 30,    # submit passive check result
+        13 => 4,     # delete single comment
     };
 
     # did we receive a quick command from the status page?
@@ -140,8 +142,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $c->{'request'}->{'parameters'}->{'trigger'}           = 0;
         $c->{'request'}->{'parameters'}->{'selected_hosts'}    = '' unless defined $c->{'request'}->{'parameters'}->{'selected_hosts'};
         $c->{'request'}->{'parameters'}->{'selected_services'} = '' unless defined $c->{'request'}->{'parameters'}->{'selected_services'};
+        $c->{'request'}->{'parameters'}->{'selected_ids'}      = '' unless defined $c->{'request'}->{'parameters'}->{'selected_ids'};
         my @hostdata    = split /,/mx, $c->{'request'}->{'parameters'}->{'selected_hosts'};
         my @servicedata = split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'};
+        my @idsdata     = split /,/mx, $c->{'request'}->{'parameters'}->{'selected_ids'};
         $self->{'spread_startdates'} = $self->_generate_spread_startdates( $c, scalar @hostdata + scalar @servicedata, $c->request->parameters->{'start_time'}, $c->request->parameters->{'spread'} );
 
         # persistent can be set in two ways
@@ -157,6 +161,34 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             $c->{'request'}->{'parameters'}->{'persistent'} = 0;
         }
 
+        # comments / downtimes quick commands
+        for my $id (@idsdata) {
+            my($typ, $id) = split(/_/m,$id, 2);
+            if($typ eq 'hst' and defined $host_quick_commands->{$quick_command} ) {
+                $cmd_typ = $host_quick_commands->{$quick_command};
+            }
+            elsif($typ eq 'svc' and defined $service_quick_commands->{$quick_command} ) {
+                $cmd_typ = $service_quick_commands->{$quick_command};
+            }
+            else {
+                return $c->detach('/error/index/7');
+            }
+            $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
+            if($quick_command == 5) {
+                $c->{'request'}->{'parameters'}->{'down_id'} = $id;
+            } elsif($quick_command == 13 ) {
+                $c->{'request'}->{'parameters'}->{'com_id'}  = $id;
+            }
+            if( $self->_do_send_command($c) ) {
+                $c->log->debug("command succeeded");
+            }
+            else {
+                $errors++;
+                Thruk::Utils::set_message( $c, 'fail_message', "command failed" );
+            }
+        }
+
+        # host quick commands
         for my $hostdata (@hostdata) {
             if( defined $host_quick_commands->{$quick_command} ) {
                 $cmd_typ = $host_quick_commands->{$quick_command};
@@ -186,6 +218,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             }
         }
 
+        # service quick commands
         my $lastservice;
         for my $servicedata ( split /,/mx, $c->{'request'}->{'parameters'}->{'selected_services'} ) {
             if( defined $service_quick_commands->{$quick_command} ) {

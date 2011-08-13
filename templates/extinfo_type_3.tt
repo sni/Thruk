@@ -1,5 +1,8 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+
+[% PROCESS _extinfo_cmd_pane.tt downtimes=0 comments=1 %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
@@ -41,7 +44,7 @@
         [% SET class = 'commentOdd'  IF loop.even %]
         [% SET class = 'commentEven' IF loop.odd %]
         [% SET hostcommentscount = hostcommentscount + 1 %]
-        <tr class='[% class %]'>
+        <tr class='[% class %] clickable' id="hst_[% com.id %]">
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]'>[% com.host_name %]</a></td>
           <td class='[% class %]'>[% date_format(c, com.entry_time) %]</td>
           <td class='[% class %]'>[% com.author %]</td>
@@ -85,7 +88,7 @@
         [% SET class = 'commentOdd'  IF loop.even %]
         [% SET class = 'commentEven' IF loop.odd %]
         [% SET servicecommentscount = servicecommentscount + 1 %]
-        <tr class='[% class %]'>
+        <tr class='[% class %] clickable' id="svc_[% com.id %]">
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]'>[% com.host_name %]</a></td>
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]'>[% com.service_description %]</a></td>
           <td class='[% class %]'>[% date_format(c, com.entry_time) %]</td>
@@ -105,5 +108,6 @@
         [% END %]
       </table>
     </div>
+<br>
 
 [% PROCESS _footer.tt %]
