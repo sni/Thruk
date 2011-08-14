@@ -136,6 +136,9 @@ for my $link (@cur_t_links) {
     }
 }
 
+# touch the Makefile, so Extutils skips its broken 'check_manifest()'
+`touch Makefile`;
+
 tests_recursive;
 install_script glob('script/*.pl');
 auto_install;
@@ -183,3 +186,4 @@ print $fh $new_makefile;
 close($fh);
 `cat script/append.make >> Makefile`;
 print "patched Makefile\n";
+print "finished\n";

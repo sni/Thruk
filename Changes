@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.0.9    Sat Aug 13 01:19:30 CEST 2011
+1.0.9    Sun Aug 14 12:47:30 CEST 2011
           - delete multiple comments from the comments page
           - delete multiple downtimes from the downtimes page
           - themes: themes can be enabled/disabled by themes/themes-enabled directory (just like plugins)
