@@ -642,12 +642,12 @@ sub _check_reschedule_alias {
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
     return unless defined $services;
     my $service = $services->[0];
+    return unless defined $service;
 
     # only passive services
-    return unless (    defined $service->{'has_been_checked'}
-                    and $service->{'has_been_checked'} == 0
-                  )
-                or $service->{'check_type'} != 0;
+    my $has_been_checked = $service->{'has_been_checked'} || 0;
+    my $check_type       = $service->{'check_type'}       || 0;
+    return if $service->{'has_been_checked'} == 1 and $service->{'check_type'} == 0;
 
     my $aliases     = ref $c->config->{'command_reschedule_alias'} eq 'ARRAY'
                         ? $c->config->{'command_reschedule_alias'}
