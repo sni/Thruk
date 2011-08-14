@@ -46,7 +46,7 @@ close($fh);
 ok(scalar keys %{$manifest} >  0, 'read entrys from MANIFEST: '.(scalar keys %{$manifest}));
 
 # verify that all symlinks are in our manifest file
-open($ph, '-|', 'bash -c "find {templates/,root/,plugins/} -type l" 2>&1') or die('find failed: '.$!);
+open($ph, '-|', 'bash -c "find {templates/,root/,plugins/,themes/} -type l" 2>&1') or die('find failed: '.$!);
 while(<$ph>) {
     my $line = $_;
     chomp($line);

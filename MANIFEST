@@ -1251,4 +1251,11 @@ themes/themes-available/Wakizashi/stylesheets/thruk_noframes.css
 themes/themes-available/Wakizashi/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Wakizashi/stylesheets/trends.css
 themes/themes-available/Wakizashi/stylesheets/Wakizashi.css
+themes/themes-enabled/Exfoliation
+themes/themes-enabled/Classic
+themes/themes-enabled/Neat
+themes/themes-enabled/Nuvola
+themes/themes-enabled/Thruk
+themes/themes-enabled/Vautour
+themes/themes-enabled/Wakizashi
 thruk.conf
