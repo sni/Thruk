@@ -1186,6 +1186,25 @@ sub store_user_data {
 
 
 ########################################
+
+=head2 array_uniq
+
+  array_uniq($array)
+
+return uniq elements of array
+
+=cut
+
+sub array_uniq {
+    my $array = shift;
+
+    my %seen = ();
+    my @unique = grep { ! $seen{ $_ }++ } @{$array};
+
+    return \@unique;
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 

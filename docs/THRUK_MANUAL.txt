@@ -961,6 +961,36 @@ ex.:
   </cmd_quick_status>
 
 
+
+==== command_reschedule_alias
+When you want to reschedule passive checks for which the result is fetched by
+an agent (For example check_mk or some scenarios of check_multi). You
+usually want to reschedule the agent instead of the passive check.
+
+The command reschedule alias can be used to translate the reschedule command
+from the passive service to the active agent service.
+
+  command_reschedule_alias = pattern;master_service_description
+
+.Notes
+* The pattern will be tested against the service description and the command_name
+  of the passive check.
+* The resulting service name be on the same host and the contact must
+  be authorized for that service too.
+* The pattern must be a valid perl regular expression.
+* Duplicates  will be removed. So if you reschedule 10 services which result in
+  the same master service will only trigger one reschedule.
+* Only passive services will be translated
+
+In this example, all passive check_mk checks will trigger the active agent check
+and therefor allow you to reschedule passive checks directly from the problems
+page.
+
+ex.:
+
+  command_reschedule_alias = ^check_mk\-(?!inventory);Check_MK
+
+
 ==== datetime_format
 Default timeformat. Use POSIX format.
 
@@ -1082,7 +1112,7 @@ ex.:
 
 
 ==== statusmap_default_type
-You may change the default map type of the statusmap here. Valid 
+You may change the default map type of the statusmap here. Valid
 types are: 'table' and 'circle'
 
 ex.:
@@ -1459,7 +1489,7 @@ on a test instance first.
 
 You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
-end of the body. 
+end of the body.
 
 IMPORTANT: This has *nothing to do* with the Apache module 'mod_include'
 and just implements the nagios way of SSIs.

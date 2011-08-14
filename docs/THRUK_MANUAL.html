@@ -7354,6 +7354,54 @@ command_disabled = 35</tt></pre>
   submit_result          = 0  # Submit passive check result
 &lt;/cmd_quick_status&gt;</tt></pre>
 </div></div>
+<h4 id="_command_reschedule_alias">command_reschedule_alias</h4>
+<div class="paragraph"><p>When you want to reschedule passive checks for which the result is fetched by
+an agent (For example check_mk or some scenarios of check_multi). You
+usually want to reschedule the agent instead of the passive check.</p></div>
+<div class="paragraph"><p>The command reschedule alias can be used to translate the reschedule command
+from the passive service to the active agent service.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>command_reschedule_alias = pattern;master_service_description</tt></pre>
+</div></div>
+<div class="ulist"><div class="title">Notes</div><ul>
+<li>
+<p>
+The pattern will be tested against the service description and the command_name
+  of the passive check.
+</p>
+</li>
+<li>
+<p>
+The resulting service name be on the same host and the contact must
+  be authorized for that service too.
+</p>
+</li>
+<li>
+<p>
+The pattern must be a valid perl regular expression.
+</p>
+</li>
+<li>
+<p>
+Duplicates  will be removed. So if you reschedule 10 services which result in
+  the same master service will only trigger one reschedule.
+</p>
+</li>
+<li>
+<p>
+Only passive services will be translated
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>In this example, all passive check_mk checks will trigger the active agent check
+and therefor allow you to reschedule passive checks directly from the problems
+page.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>command_reschedule_alias = ^check_mk\-(?!inventory);Check_MK</tt></pre>
+</div></div>
 <h4 id="_datetime_format">datetime_format</h4>
 <div class="paragraph"><p>Default timeformat. Use POSIX format.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -8176,7 +8224,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-08-12 19:08:47 CEST
+Last updated 2011-08-14 20:36:57 CEST
 </div>
 </div>
 </body>

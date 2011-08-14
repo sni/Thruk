@@ -414,6 +414,9 @@ sub _redirect_or_success {
                                           options => $options
                                         );
             }
+            if(defined $c->stash->{'additional_wait'}) {
+                sleep(1);
+            }
         }
         else {
             # just do nothing for a second
@@ -470,6 +473,8 @@ sub _do_send_command {
         }
         $end_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'end_time'} );
     }
+
+    return 1 if $self->_check_reschedule_alias($c);
 
     my $tt  = Template->new( $c->{'View::TT'} );
     my $cmd = '';
@@ -565,6 +570,9 @@ sub _bulk_send {
         $options->{backend} = $backends;
     }
 
+    # remove duplicate commands
+    $c->stash->{'commands2send'} = Thruk::Utils::array_uniq($c->stash->{'commands2send'});
+
     $options->{'command'} = join("\n\n", @{$c->stash->{'commands2send'}});
 
     return 1 if $options->{'command'} eq '';
@@ -615,6 +623,62 @@ sub _generate_spread_startdates {
 
     return $spread_dates;
 }
+
+
+######################################
+# generate spreaded start dates
+sub _check_reschedule_alias {
+    my( $self, $c ) = @_;
+
+    # only for service reschedule requests
+    return unless $c->request->parameters->{'cmd_typ'} == 7;
+
+    # only if we have alias definitons
+    return unless defined $c->config->{'command_reschedule_alias'};
+
+    my $servicename = $c->request->parameters->{'service'};
+    my $hostname    = $c->request->parameters->{'host'};
+
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
+    return unless defined $services;
+    my $service = $services->[0];
+
+    # only passive services
+    return unless (    defined $service->{'has_been_checked'}
+                    and $service->{'has_been_checked'} == 0
+                  )
+                or $service->{'check_type'} != 0;
+
+    my $aliases     = ref $c->config->{'command_reschedule_alias'} eq 'ARRAY'
+                        ? $c->config->{'command_reschedule_alias'}
+                        : [ $c->config->{'command_reschedule_alias'} ];
+
+    for my $alias (@{$aliases}) {
+        my($pattern, $master) = split/\s*;\s*/mx, $alias, 2;
+        if($c->request->parameters->{'service'} =~ /$pattern/mx) {
+            $c->request->parameters->{'service'} = $master;
+            $c->stash->{'additional_wait'} = 1;
+            return;
+        } else {
+        }
+
+        my $commands = $service->{'check_command'};
+        next unless defined $commands;
+        my($command, $args) = split(/!/mx, $commands, 2);
+        next unless defined $command;
+        if($command =~ /$pattern/mx) {
+            $c->request->parameters->{'service'} = $master;
+            $c->stash->{'additional_wait'} = 1;
+            return;
+        } else {
+        }
+    }
+
+    return;
+}
+
+
+######################################
 
 =head1 AUTHOR
 
