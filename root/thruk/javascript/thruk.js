@@ -394,6 +394,7 @@ function checknonempty(id, name) {
 }
 
 /* hide all waiting icons */
+var hide_activity_icons_timer;
 function hide_activity_icons() {
     $$('img').each(function(e) {
         if(e.src.indexOf("/images/waiting.gif") > 0) {
@@ -1297,6 +1298,10 @@ function check_quick_command() {
     var sel   = document.getElementById('quick_command');
     var value = sel.value;
     var img;
+
+    // disable hide timer
+    window.clearTimeout(hide_activity_icons_timer);
+
     if(value == 1 ) { // reschedule
         selectedServices.keys().each(function(row_id) {
             cell           = document.getElementById(row_id + "_s_exec");
