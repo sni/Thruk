@@ -1,0 +1,44 @@
+﻿[% USE date %]
+[%# which one is authorized? #%]
+[% IF !c.check_cmd_permissions('host', c.request.parameters.host) %]
+  [% WRAPPER error.tt errorMessage = "you are not authorized for this command" errorDescription = "check your configuration if you believe this is an error" %][% END %]
+[% ELSE %]
+
+[%# description used by the commands page #%]
+[% WRAPPER $cmd_tt
+   request     = 'You are requesting to schedule downtime for all services for a particular host'
+   description = 'This command is used to schedule downtime for all services on a particular host.  During the specified downtime, Nagios will not send notifications out about the host. Normally, a host in downtime will not send alerts about any services in a failed state. This option will explicitly set downtime for all services for this host. When the scheduled downtime expires, Nagios will send out notifications for this host as it normally would. Scheduled downtimes are preserved across program shutdowns and restarts.  Both the start and end times should be specified in the following format:  <b>mm/dd/yyyy hh:mm:ss</b>. If you select the <i>fixed</i> option, the downtime will be in effect between the start and end times you specify.  If you do not select the <i>fixed</i> option, Nagios will treat this as "flexible" downtime.  Flexible downtime starts when the host goes down or becomes unreachable (sometime between the start and end times you specified) and lasts as long as the duration of time you enter.  The duration fields do not apply for fixed downtime.' %]
+
+[%# definition of the command send to your backend #%]
+[% BLOCK action%]
+    [% IF   c.request.parameters.fixed   %][% SET fixed = 1 %][% ELSE %][% SET fixed = 0 %][% END %]
+    [% IF ! c.request.parameters.hour    %][% SET c.request.parameters.hour = 0 %][% END %]
+    [% IF ! c.request.parameters.minutes %][% SET c.request.parameters.minutes = 0 %][% END %]
+    [% duration             = c.request.parameters.hour * 3600 + c.request.parameters.minutes * 60 %]
+    [% triggered_by         = c.request.parameters.trigger %]
+    [% comment_data         = c.request.parameters.com_data %]
+    [% host_name            = c.request.parameters.host %]
+    [% comment_author       = c.request.parameters.com_author %]
+
+    SCHEDULE_HOST_SVC_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time_unix,end_time_unix,fixed,triggered_by,duration,comment_author,comment_data) %]
+[% END %]
+
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.end_time;   SET end_time   = c.request.parameters.end_time;   ELSE; SET end_time   = format_date(date.now+7200, '%Y-%m-%d %H:%M:%S'); END %]
+
+[%# definition of the html form data #%]
+<tr><td class='optBoxRequiredItem'>Host Name:</td><td><b><input type='text' name='host' value='[% c.request.parameters.host %]'></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.config.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
+<tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
+<tr><td class='optBoxItem'><br></td></tr>
+<tr><td class='optBoxItem'>Triggered By:</td><td><select name='trigger'><option value='0'> N/A </option>[% FOREACH d = hostdowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %][% FOREACH d = servicedowntimes %]<option value='[% d.id %]'> ID: [% d.id %], Service '[% d.service_description %]' on host '[% d.host_name %]' starting @ [% format_date(d.start_time, '%Y-%m-%d %H:%M:%S') %] </option>[% END %]</select></td></tr>
+<tr><td class='optBoxItem'><br></td></tr>
+<tr><td class='optBoxRequiredItem'>Start Time:</td><td><b><input type='text' name='start_time' id="start_time" value='[% start_time %]'> <a href="javascript:show_cal('start_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
+<tr><td class='optBoxRequiredItem'>End Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]'> <a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
+<tr><td class='optBoxItem'>Type:</td><td><b><select name='fixed'><option value="1"> Fixed </option><option value="0"> Flexible </option></select></b></td></tr>
+<tr><td class='optBoxItem'>If Flexible, Duration:</td><td><table border="0"><tr><td align="right"><input type='text' name='hours' value='2' size= "2" maxlength="2"></td><td align="left">Hours</td><td align="right"><input type='text' name='minutes' value='0' size= "2" maxlength="2"></td><td align="left">Minutes</td></tr>
+</table></td></tr>
+<tr><td class='optBoxItem'><br></td></tr>
+
+[% END %]
+[% END %]

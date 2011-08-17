@@ -53,6 +53,10 @@
                 <td class='command'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule downtime for this host</a></td>
               </tr>
               <tr class='command'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services On This Host' title='Schedule Downtime For All Services On This Host' width="20" height="20"></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=86&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule downtime for all services on this host</a></td>
+              </tr>
+              <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule a check of all services on this host</a></td>
               </tr>

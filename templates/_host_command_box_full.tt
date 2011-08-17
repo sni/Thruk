@@ -95,6 +95,10 @@
                 <td class='command'><a href='cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule downtime for this host</a></td>
               </tr>
               <tr class='command'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services On This Host' title='Schedule Downtime For All Services On This Host' width="20" height="20"></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=86&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule downtime for all services on this host</a></td>
+              </tr>
+              <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Notifications For All Services On This Host' title='Disable Notifications For All Services On This Host' width="20" height="20"></td>
                 <td class='command' nowrap><a href='cmd.cgi?cmd_typ=29&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable notifications for all services on this host</a></td>
               </tr>

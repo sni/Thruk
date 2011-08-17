@@ -316,7 +316,7 @@ sub _check_for_commands {
     else {
 
         # no command submited, view commands page (can be nonnumerical)
-        if( $cmd_typ eq "55" or $cmd_typ eq "56" ) {
+        if( $cmd_typ eq "55" or $cmd_typ eq "56" or $cmd_typ eq "86" ) {
             $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => undef ]);
             $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => { '!=' => undef } ]);
         }
