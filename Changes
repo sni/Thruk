@@ -1,7 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.1.0    Sun Aug 21 19:12:18 CEST 2011
-          - added host command "Schedule downtime for all services on this host"
+          - added config option 'show_custom_vars'
+          - added host command 'Schedule downtime for all services on this host'
           - fixed disappearing menu item name (fixes #45)
           - fixed changing views on the minemap (fixes #44)
 

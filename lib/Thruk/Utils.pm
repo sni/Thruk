@@ -1078,6 +1078,41 @@ sub set_paging_steps {
 
 ########################################
 
+=head2 set_custom_vars
+
+  set_custom_vars($c)
+
+set stash value for all allowed custom variables
+
+=cut
+sub set_custom_vars {
+    my $c    = shift;
+    my $data = shift;
+
+    $c->stash->{'custom_vars'} = {};
+
+    return unless defined $data;
+    return unless defined $data->{'custom_variable_names'};
+    return unless defined $c->config->{'show_custom_vars'};
+
+    my $vars = ref $c->config->{'show_custom_vars'} eq 'ARRAY' ? $c->config->{'show_custom_vars'} : [ $c->config->{'show_custom_vars'} ];
+    my $test = array2hash($vars);
+
+    my $x = 0;
+    while(defined $data->{'custom_variable_names'}->[$x]) {
+        unless(defined $test->{'_'.$data->{'custom_variable_names'}->[$x]}) {
+            $x++;
+            next;
+        }
+        $c->stash->{'custom_vars'}->{$data->{'custom_variable_names'}->[$x]} = $data->{'custom_variable_values'}->[$x];
+        $x++;
+    }
+    return;
+}
+
+
+########################################
+
 =head2 normal_mktime
 
   normal_mktime($year,$mon,$day,$hour,$min,$sec)

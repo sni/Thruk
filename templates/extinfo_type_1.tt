@@ -99,6 +99,24 @@
               </td>
             </tr>
           [% END %]
+          [% IF custom_vars.keys.size > 0 %]
+            <tr>
+              <td align='right'>
+                <table>
+                  [% FOREACH cust = custom_vars.keys.sort %]
+                  <tr>
+                    <td style="padding-right: 7px;">
+                      <font size="-1"><i>[% cust %]</i></font><br clear="all">
+                    </td>
+                    <td>
+                      <font size="-1">[% custom_vars.$cust %]</font>
+                    </td>
+                  </tr>
+                  [% END %]
+                </table>
+              </td>
+            </tr>
+          [% END %]
           </table>
           [% PROCESS _help.tt topic = "extinfo_1" %]
         </td>

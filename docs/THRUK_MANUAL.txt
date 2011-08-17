@@ -1111,6 +1111,18 @@ ex.:
 
 
 
+==== show_custom_vars
+Show custom vars in host / service ext info. List variable names to
+display in the host and service extinfo details page. Can be specified
+more than once to define multiple variables. You may use html in your
+variables.
+
+ex.:
+
+  show_custom_vars = _VAR1
+
+
+
 ==== statusmap_default_type
 You may change the default map type of the statusmap here. Valid
 types are: 'table' and 'circle'

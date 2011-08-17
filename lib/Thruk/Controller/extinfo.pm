@@ -174,6 +174,9 @@ sub _process_host_page {
         $c->stash->{'pnp_url'} = $1.'index.php';
     }
 
+    # set allowed custom vars into stash
+    Thruk::Utils::set_custom_vars($c, $host);
+
     return 1;
 }
 
@@ -283,6 +286,9 @@ sub _process_service_page {
     if($c->config->{'shown_inline_pnp'} and defined $service->{'action_url_expanded'} and $service->{'action_url_expanded'} =~ m|(^.*?/pnp4nagios/)|mx) {
         $c->stash->{'pnp_url'} = $1.'index.php';
     }
+
+    # set allowed custom vars into stash
+    Thruk::Utils::set_custom_vars($c, $service);
 
     return 1;
 }

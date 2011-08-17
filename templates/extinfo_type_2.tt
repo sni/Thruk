@@ -63,23 +63,55 @@
           [% IF service.notes_expanded %]<p>[% service.notes_expanded %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%" class="notesCell">
+          <table border='0'>
           [% IF enable_shinken_features %]
-            [% prio = service.criticity %]
-            <div class='dataTitle'>Priority [% prio %]/5
-              <img class="crit_icon" src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio %]">
-            </div>
+          <tr>
+            <td align='right'>
+              [% prio = service.criticity %]
+              <div class='dataTitle'>Priority [% prio %]/5
+                <img class="crit_icon" src="[% url_prefix %]thruk/themes/[% theme %]/images/criticity_[% prio %].png" alt="Priority [% prio %]/5" title="[% priorities.$prio %]">
+              </div>
+            </td>
+          </tr>
           [% END %]
 
           [% IF service.action_url_expanded %]
-          <a href='[% service.action_url_expanded %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
-          <font size="-1"><i>Extra Actions</i></font><br clear="all">
-          <br clear="all">
+          <tr>
+            <td align='right'>
+              <a href='[% service.action_url_expanded %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Service' title='Perform Additional Actions On This Service' width="40" height="40"></a><br clear="all">
+              <font size="-1"><i>Extra Actions</i></font><br clear="all">
+              <br clear="all">
+            </td>
+          </tr>
           [% END %]
           [% IF service.notes_url_expanded %]
-          <a href='[% service.notes_url_expanded %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40"></a><br clear="all">
-          <font size="-1"><i>Extra Notes</i></font><br clear="all">
-          <br clear="all">
+          <tr>
+            <td align='right'>
+              <a href='[% service.notes_url_expanded %]' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Service' title='View Additional Notes For This Service' width="40" height="40"></a><br clear="all">
+              <font size="-1"><i>Extra Notes</i></font><br clear="all">
+              <br clear="all">
+            </td>
+          </tr>
           [% END %]
+          [% IF custom_vars.keys.size > 0 %]
+            <tr>
+              <td align='right'>
+                <table>
+                  [% FOREACH cust = custom_vars.keys.sort %]
+                  <tr>
+                    <td style="padding-right: 7px;">
+                      <font size="-1"><i>[% cust %]</i></font><br clear="all">
+                    </td>
+                    <td>
+                      <font size="-1">[% custom_vars.$cust %]</font>
+                    </td>
+                  </tr>
+                  [% END %]
+                </table>
+              </td>
+            </tr>
+          [% END %]
+          </table>
           [% PROCESS _help.tt topic = "extinfo_2" %]
         </td>
       </tr>
