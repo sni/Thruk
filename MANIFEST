@@ -330,6 +330,7 @@ templates/cmd/cmd_typ_82.tt
 templates/cmd/cmd_typ_83.tt
 templates/cmd/cmd_typ_84.tt
 templates/cmd/cmd_typ_85.tt
+templates/cmd/cmd_typ_86.tt
 templates/cmd/cmd_typ_87.tt
 templates/cmd/cmd_typ_88.tt
 templates/cmd/cmd_typ_89.tt
@@ -1251,8 +1252,8 @@ themes/themes-available/Wakizashi/stylesheets/thruk_noframes.css
 themes/themes-available/Wakizashi/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Wakizashi/stylesheets/trends.css
 themes/themes-available/Wakizashi/stylesheets/Wakizashi.css
-themes/themes-enabled/Exfoliation
 themes/themes-enabled/Classic
+themes/themes-enabled/Exfoliation
 themes/themes-enabled/Neat
 themes/themes-enabled/Nuvola
 themes/themes-enabled/Thruk
