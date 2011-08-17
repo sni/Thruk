@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.1.0    Sun Aug 21 19:12:18 CEST 2011
+          - fixed changing views on the minemap (fixes #44)
+
 1.0.9    Sun Aug 14 12:47:30 CEST 2011
           - delete multiple comments from the comments page
           - delete multiple downtimes from the downtimes page

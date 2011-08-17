@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 69;
+use Test::More tests => 79;
 
 BEGIN {
     use lib('t');
@@ -30,3 +30,18 @@ for my $url (@{$pages}) {
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
+
+
+
+my $redirects = [
+    '/thruk/cgi-bin/minemap.cgi?style=hostdetail',
+    '/thruk/cgi-bin/status.cgi?style=minemap',
+];
+for my $url (@{$redirects}) {
+    TestUtils::test_page(
+        'url'      => $url,
+        'redirect' => 1,
+    );
+}
+
+

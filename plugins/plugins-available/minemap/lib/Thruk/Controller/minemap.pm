@@ -54,6 +54,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
 
+    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'minemap';
+    if($style ne 'minemap') {
+        my $uri = $c->request->uri();
+        $uri    =~ s/minemap.cgi/status.cgi/gmx;
+        return $c->redirect($uri);
+    }
+
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
