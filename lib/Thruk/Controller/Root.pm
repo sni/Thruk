@@ -403,7 +403,7 @@ page: /thruk/side.html
 sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
 
-    Thruk::Utils::Menu::read_navigation($c);
+    Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
 
     $c->stash->{'use_frames'}     = 1;
     $c->stash->{'title'}          = $c->config->{'name'};
