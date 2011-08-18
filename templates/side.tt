@@ -18,6 +18,14 @@
     -->
     </script>
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
+    <style type="text/css">
+    <!--
+    HTML {
+        overflow: inherit;
+        overflow-y: inherit;
+    }
+    -->
+    </style>
   </head>
   <body class='navbar'>
 [% END %]

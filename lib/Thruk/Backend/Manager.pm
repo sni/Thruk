@@ -547,11 +547,11 @@ returns a result for a sub called on all peers
 =cut
 
 sub _do_on_peers {
-    my( $self, $sub, $arg ) = @_;
+    my( $self, $function, $arg ) = @_;
 
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
-    if(     ( $sub =~ m/^get_/mx or $sub eq 'send_command')
+    if(     ( $function =~ m/^get_/mx or $function eq 'send_command')
         and ref $arg eq 'ARRAY'
         and scalar @{$arg} % 2 == 0 )
     {
@@ -582,7 +582,7 @@ sub _do_on_peers {
         $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
         $selected_backends++;
         eval {
-            my( $data, $typ, $size ) = $peer->{'class'}->$sub( @{$arg} );
+            my( $data, $typ, $size ) = $peer->{'class'}->$function( @{$arg} );
             if(defined $data and !defined $size) {
                 if(ref $data eq 'ARRAY') {
                     $size = scalar @{$data};
@@ -599,7 +599,7 @@ sub _do_on_peers {
         $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
     }
     if(!defined $result and $selected_backends != 0) {
-        #confess("Error in _do_on_peers: ".$@."called as ".Dumper($sub)."with args: ".Dumper($arg));
+        #confess("Error in _do_on_peers: ".$@."called as ".Dumper($function)."with args: ".Dumper($arg));
         die($@);
     }
     $type = '' unless defined $type;
@@ -618,10 +618,10 @@ sub _do_on_peers {
     elsif ( lc $type eq 'sum' ) {
         $data = $self->_sum_answer($result);
     }
-    elsif ( $sub eq 'get_hostgroups' ) {
+    elsif ( $function eq 'get_hostgroups' ) {
         $data = $self->_merge_hostgroup_answer($result);
     }
-    elsif ( $sub eq 'get_servicegroups' ) {
+    elsif ( $function eq 'get_servicegroups' ) {
         $data = $self->_merge_servicegroup_answer($result);
     }
     else {
@@ -650,7 +650,7 @@ sub _do_on_peers {
     }
 
     # set some defaults if no backends where selected
-    if($sub eq "get_performance_stats" and ref $data eq 'ARRAY') {
+    if($function eq "get_performance_stats" and ref $data eq 'ARRAY') {
         $data = {};
         for my $type (qw{hosts services}) {
             for my $key (qw{_active_sum _active_1_sum _active_5_sum _active_15_sum _active_60_sum _active_all_sum
@@ -662,7 +662,7 @@ sub _do_on_peers {
             }
         }
     }
-    if($sub eq "get_service_stats" and ref $data eq 'ARRAY') {
+    if($function eq "get_service_stats" and ref $data eq 'ARRAY') {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
@@ -674,7 +674,7 @@ sub _do_on_peers {
             $data->{$key} = 0;
         }
     }
-    if($sub eq "get_host_stats" and ref $data eq 'ARRAY') {
+    if($function eq "get_host_stats" and ref $data eq 'ARRAY') {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
@@ -963,10 +963,12 @@ sub _initialise_peer {
         'resource_file' => $config->{'options'}->{'resource_file'},
         'enabled'       => 1,
         'class'         => $class->new( $config->{'options'}, $self->{'config'}, $self->{'log'} ),
+        'configtool'    => $config->{'configtool'} || {},
     };
-    $peer->{'key'}  = $peer->{'class'}->peer_key();
+    # shorten backend id
+    $peer->{'key'} = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
+    $peer->{'class'}->{'live'}->{'backend_obj'}->{'key'} = $peer->{'key'};
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
-
     if(Thruk->debug) {
         $peer->{'class'}->set_verbose(1);
     }

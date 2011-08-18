@@ -215,7 +215,18 @@ function button_out(button)
 
 /* toggle querys for this backend */
 function toggleBackend(backend) {
+
   var button        = document.getElementById('button_' + backend);
+
+  if(backend_chooser == 'switch') {
+    $$('.button_peerUP').each(function(e) {
+        e.className = 'button_peerDIS';
+    });
+    button.className = 'button_peerUP';
+    document.cookie = "thruk_conf="+backend+ "; path=/;";
+    reloadPage();
+    return;
+  }
 
   initial_state = initial_backend_states.get(backend);
   if(button.className == "button_peerDIS") {
@@ -244,6 +255,7 @@ function toggleBackend(backend) {
   document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
   window.clearTimeout(backendSelTimer);
   backendSelTimer  = window.setTimeout('reloadPage()', 1000);
+  return;
 }
 
 /* toogle checkbox by id */
@@ -457,8 +469,14 @@ function set_sub(nr) {
     return false;
 }
 
-function add_conf_attribute(table, id, key) {
-    hideElement('new_' + key + '_btn');
+var running_number = -1;
+function add_conf_attribute(table, key) {
+
+    if(key == 'customvariable' || key == 'exception') {
+        running_number--;
+    } else {
+        $('new_' + key + '_btn').style.display = "none";
+    }
 
     // add new row
     tbl = $(table);
@@ -466,36 +484,50 @@ function add_conf_attribute(table, id, key) {
     var currentLastRow = tblBody.rows.length - 3;
 
     var newObj   = tblBody.rows[0].cloneNode(true);
+    newObj.id                 = "el_" + running_number;
     newObj.style.display      = "";
     newObj.cells[0].innerHTML = key;
     newObj.cells[0].abbr      = key;
     newObj.cells[1].abbr      = key;
-    newObj.cells[1].innerHTML = newObj.cells[1].innerHTML.replace(/id="del_"/g, 'id="del_'+key+'"');
+    newObj.cells[0].innerHTML = newObj.cells[0].innerHTML.replace(/del_0/g, 'del_'+running_number);
+    newObj.cells[1].innerHTML = newObj.cells[1].innerHTML.replace(/del_0/g, 'del_'+running_number);
     newObj.cells[2].innerHTML = unescape(fields.get(key).input.unescapeHTML().replace(/&quot;/g, '"'));
     newObj.cells[3].abbr      = unescape(fields.get(key).help.unescapeHTML().replace(/&quot;/g, '"'));
+
+    if(key == 'customvariable' || key == 'exception') {
+        var value = "";
+        if(key == 'customvariable') {
+            value = "_";
+        }
+        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"$('id_" + running_number + "').name='obj.'+this.value\">";
+        newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_'+running_number);
+    }
 
     tblBody.insertBefore(newObj, tblBody.rows[tblBody.rows.length -2]);
 
     reset_table_row_classes(table, 'dataEven', 'dataOdd');
 
     /* effect works only on table cells */
-    new Effect.Highlight(newObj.cells[0], { startcolor: '#ffff99', endcolor: '#ffffff' });
-    new Effect.Highlight(newObj.cells[1], { startcolor: '#ffff99', endcolor: '#ffffff' });
-    new Effect.Highlight(newObj.cells[2], { startcolor: '#ffff99', endcolor: '#ffffff' });
-    new Effect.Highlight(newObj.cells[3], { startcolor: '#ffff99', endcolor: '#ffffff' });
+    jQuery(newObj.cells).effect('highlight', {}, 2000);
 
-    toggleElement(id);
+    return false;
 }
 
 /* remove an table row from the attributes table */
-function remove_conf_attribute(key) {
-    $('new_' + key + '_btn').style.display = "";
+function remove_conf_attribute(key, nr) {
 
-    row = $("del_" + key).parentNode.parentNode;
+    var btn = $('new_' + key + '_btn');
+    if(btn) {
+        btn.style.display = "";
+    }
+
+    row   = $(nr).parentNode.parentNode;
     table = row.parentNode.parentNode;
 
     var field = fields.get(key)
-    field.input = escape(row.cells[2].innerHTML);
+    if(field) {
+        field.input = escape(row.cells[2].innerHTML);
+    }
 
     row.remove();
     reset_table_row_classes(table.id, 'dataEven', 'dataOdd');
@@ -2138,6 +2170,9 @@ var ajax_search = {
                     ajax_search.base = eval(transport.responseText);
                 }
                 ajax_search.suggest();
+            },
+            onFailure: function(transport) {
+                ajax_search.initialized = false;
             }
         });
 

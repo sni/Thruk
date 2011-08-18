@@ -457,7 +457,7 @@ TD,TH {
   border:medium none;
 }
 
-TD.commandPanel,TD.stateInfoPanel {
+TD.commandPanel,TD.stateInfoPanel, TD.confPanel {
   background-color:#F0F1EE;
   background-image:url(../images/border_big.gif);
   background-repeat:repeat-x;
@@ -468,6 +468,13 @@ TD.commandPanel,TD.stateInfoPanel {
 
 TD.commandPanel {
   min-width: 300px;
+}
+TD.confPanel TABLE.confPanel {
+  margin-top: 5px;
+  width: 100%;
+}
+TD.confPanel {
+  min-width: 200px;
 }
 
 TD.comment,TD.downtime,TD.notificationsEven,TD.status {
@@ -1103,13 +1110,22 @@ option.disable {
     vertical-align: top;
 }
 
+TABLE.minemap th.status a:hover {
+  color:#000000;
+  text-decoration: underline;
+}
+
 TH.confSelected {
   background-color: #DEDBD2;
   border: 1px #444444 inset;
   font-size: 12px;
 }
 
-TABLE.minemap th.status a:hover {
-  color:#000000;
-  text-decoration: underline;
+TABLE.confdetails {
+  width:90%;
+  max-width: 1000px;
+}
+
+td.attrValue:hover {
+  background-color:#FFEB66;
 }

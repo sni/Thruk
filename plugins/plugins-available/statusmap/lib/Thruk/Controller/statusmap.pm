@@ -2,6 +2,7 @@ package Thruk::Controller::statusmap;
 
 use strict;
 use warnings;
+use Thruk 1.0.8;
 use Carp;
 use JSON::XS;
 use Data::Dumper;

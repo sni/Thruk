@@ -28,3 +28,4 @@ htpasswd
 var
 log4perl.conf
 logs
+objectdefinitions.html

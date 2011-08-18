@@ -128,6 +128,7 @@ root/favicon.ico
 root/index.html
 root/robots.txt
 root/thruk/documentation.html
+root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
 root/thruk/javascript/cal/img/cool-bg-hard-inv.png
@@ -144,16 +145,24 @@ root/thruk/javascript/cal/img/time-down.png
 root/thruk/javascript/cal/img/time-up.png
 root/thruk/javascript/cal/jscal2.css
 root/thruk/javascript/cal/jscal2.js
+root/thruk/javascript/jquery-1.6.2.min.js
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_flat_0_aaaaaa_40x100.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_flat_75_ffffff_40x100.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_glass_55_fbf9ee_1x400.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_glass_65_ffffff_1x400.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_glass_75_dadada_1x400.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_glass_95_fef1ec_1x400.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_222222_256x240.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_2e83ff_256x240.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_454545_256x240.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_888888_256x240.png
+root/thruk/javascript/jquery-ui/css/smoothness/images/ui-icons_cd0a0a_256x240.png
+root/thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.8.14.custom.css
+root/thruk/javascript/jquery-ui/js/jquery-ui-1.8.14.custom.min.js
 root/thruk/javascript/overlib.js
 root/thruk/javascript/prototype-1.7.0.js
-root/thruk/javascript/scriptaculous/builder.js
-root/thruk/javascript/scriptaculous/controls.js
-root/thruk/javascript/scriptaculous/dragdrop.js
-root/thruk/javascript/scriptaculous/effects.js
-root/thruk/javascript/scriptaculous/scriptaculous.js
-root/thruk/javascript/scriptaculous/slider.js
-root/thruk/javascript/scriptaculous/sound.js
-root/thruk/javascript/scriptaculous/unittest.js
 root/thruk/javascript/thruk.js
 root/thruk/themes
 script/append.make
@@ -163,6 +172,7 @@ script/thruk_create_package.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
+script/thruk_link_images.sh
 script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
@@ -399,6 +409,7 @@ THANKS
 themes/themes-available/Classic/images/accept.png
 themes/themes-available/Classic/images/ack.gif
 themes/themes-available/Classic/images/action.gif
+themes/themes-available/Classic/images/add.png
 themes/themes-available/Classic/images/book_add.png
 themes/themes-available/Classic/images/btn_close.png
 themes/themes-available/Classic/images/calendar.png
@@ -453,6 +464,8 @@ themes/themes-available/Classic/images/noack.gif
 themes/themes-available/Classic/images/notes.gif
 themes/themes-available/Classic/images/notify.gif
 themes/themes-available/Classic/images/orangedot.gif
+themes/themes-available/Classic/images/page_add.png
+themes/themes-available/Classic/images/page_copy.png
 themes/themes-available/Classic/images/page_white_excel.png
 themes/themes-available/Classic/images/passiveonly.gif
 themes/themes-available/Classic/images/plus.gif
@@ -508,6 +521,7 @@ themes/themes-available/Exfoliation/images/ack.gif
 themes/themes-available/Exfoliation/images/action-graph.gif
 themes/themes-available/Exfoliation/images/action-orig.gif
 themes/themes-available/Exfoliation/images/action.gif
+themes/themes-available/Exfoliation/images/add.png
 themes/themes-available/Exfoliation/images/book_add.png
 themes/themes-available/Exfoliation/images/btn_close.png
 themes/themes-available/Exfoliation/images/calendar.png
@@ -563,6 +577,8 @@ themes/themes-available/Exfoliation/images/noack.gif
 themes/themes-available/Exfoliation/images/notes.gif
 themes/themes-available/Exfoliation/images/notify.gif
 themes/themes-available/Exfoliation/images/orangedot.gif
+themes/themes-available/Exfoliation/images/page_add.png
+themes/themes-available/Exfoliation/images/page_copy.png
 themes/themes-available/Exfoliation/images/page_white_excel.png
 themes/themes-available/Exfoliation/images/passiveonly.gif
 themes/themes-available/Exfoliation/images/plus.gif
@@ -671,6 +687,7 @@ themes/themes-available/Nuvola/changelog.txt
 themes/themes-available/Nuvola/images/accept.png
 themes/themes-available/Nuvola/images/ack.gif
 themes/themes-available/Nuvola/images/action.gif
+themes/themes-available/Nuvola/images/add.png
 themes/themes-available/Nuvola/images/blue.gif
 themes/themes-available/Nuvola/images/book_add.png
 themes/themes-available/Nuvola/images/border_big.gif
@@ -731,6 +748,8 @@ themes/themes-available/Nuvola/images/notes.gif
 themes/themes-available/Nuvola/images/notify.gif
 themes/themes-available/Nuvola/images/orange.gif
 themes/themes-available/Nuvola/images/orangedot.gif
+themes/themes-available/Nuvola/images/page_add.png
+themes/themes-available/Nuvola/images/page_copy.png
 themes/themes-available/Nuvola/images/page_white_excel.png
 themes/themes-available/Nuvola/images/passiveonly.gif
 themes/themes-available/Nuvola/images/plus.gif
@@ -829,6 +848,7 @@ themes/themes-available/Nuvola/templates/side.tt
 themes/themes-available/Thruk/images/accept.png
 themes/themes-available/Thruk/images/ack.gif
 themes/themes-available/Thruk/images/action.gif
+themes/themes-available/Thruk/images/add.png
 themes/themes-available/Thruk/images/bg.png
 themes/themes-available/Thruk/images/blue.gif
 themes/themes-available/Thruk/images/book_add.png
@@ -893,6 +913,8 @@ themes/themes-available/Thruk/images/notes.gif
 themes/themes-available/Thruk/images/notify.gif
 themes/themes-available/Thruk/images/orange.gif
 themes/themes-available/Thruk/images/orangedot.gif
+themes/themes-available/Thruk/images/page_add.png
+themes/themes-available/Thruk/images/page_copy.png
 themes/themes-available/Thruk/images/page_white_excel.png
 themes/themes-available/Thruk/images/passiveonly.gif
 themes/themes-available/Thruk/images/plus.gif
@@ -930,6 +952,7 @@ themes/themes-available/Thruk/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Vautour/images/accept.png
 themes/themes-available/Vautour/images/ack.gif
 themes/themes-available/Vautour/images/action.gif
+themes/themes-available/Vautour/images/add.png
 themes/themes-available/Vautour/images/book_add.png
 themes/themes-available/Vautour/images/btn_close.png
 themes/themes-available/Vautour/images/calendar.png
@@ -992,6 +1015,8 @@ themes/themes-available/Vautour/images/noack.gif
 themes/themes-available/Vautour/images/notes.gif
 themes/themes-available/Vautour/images/notify.gif
 themes/themes-available/Vautour/images/orangedot.gif
+themes/themes-available/Vautour/images/page_add.png
+themes/themes-available/Vautour/images/page_copy.png
 themes/themes-available/Vautour/images/page_white_excel.png
 themes/themes-available/Vautour/images/passiveonly.gif
 themes/themes-available/Vautour/images/plus.gif
@@ -1054,6 +1079,7 @@ themes/themes-available/Vautour/templates/side.tt
 themes/themes-available/Wakizashi/images/accept.png
 themes/themes-available/Wakizashi/images/ack.gif
 themes/themes-available/Wakizashi/images/action.gif
+themes/themes-available/Wakizashi/images/add.png
 themes/themes-available/Wakizashi/images/alert_command.png
 themes/themes-available/Wakizashi/images/alert_crit.png
 themes/themes-available/Wakizashi/images/alert_down.png
@@ -1196,6 +1222,8 @@ themes/themes-available/Wakizashi/images/notes.gif
 themes/themes-available/Wakizashi/images/notify.gif
 themes/themes-available/Wakizashi/images/open.gif
 themes/themes-available/Wakizashi/images/orangedot.gif
+themes/themes-available/Wakizashi/images/page_add.png
+themes/themes-available/Wakizashi/images/page_copy.png
 themes/themes-available/Wakizashi/images/page_white_excel.png
 themes/themes-available/Wakizashi/images/passiveonly.gif
 themes/themes-available/Wakizashi/images/plus.gif

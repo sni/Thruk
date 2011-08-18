@@ -2,6 +2,7 @@ package Thruk::Controller::minemap;
 
 use strict;
 use warnings;
+use Thruk 1.0.8;
 use Carp;
 use Data::Dumper;
 use parent 'Catalyst::Controller';

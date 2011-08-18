@@ -222,6 +222,11 @@ after 'execute' => sub {
     3 = hidden by backend param
     4 = disabled by missing group auth
 
+   override by the config tool
+    5 = disabled (overide by config tool)
+    6 = hidden   (overide by config tool)
+    7 = up       (overide by config tool)
+
 =cut
 sub _set_possible_backends {
     my ($self,$c,$disabled_backends) = @_;
