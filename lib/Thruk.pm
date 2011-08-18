@@ -12,6 +12,7 @@ use Thruk::Utils;
 use Thruk::Utils::Auth;
 use Thruk::Utils::Filter;
 use Thruk::Utils::Menu;
+use Thruk::Utils::External;
 use Catalyst::Runtime '5.70';
 
 binmode(STDOUT, ":encoding(UTF-8)");

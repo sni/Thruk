@@ -3,10 +3,11 @@
 #########################
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 25;
 use Data::Dumper;
 
 use_ok('Thruk::Utils');
+use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
 BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
@@ -83,3 +84,41 @@ eval {
     $p1->parse('<data>'.$escaped.'</data>');
 };
 is("$@", "", "no XML::Parser errors");
+
+#########################
+# external cmd
+my $id = Thruk::Utils::External::cmd($c, "sleep 1; echo 'test'; echo \"err\" >&2;");
+isnt($id, undef, "got an id");
+
+# wait for completion
+for(1..5) {
+    last unless Thruk::Utils::External::is_running($c, $id);
+    sleep(1);
+}
+
+is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
+my($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
+
+is($out,  "test\n", "got result");
+is($err,  "err\n",  "got error");
+is($time, 1,        "got time");
+isnt($dir, undef,   "got dir");
+
+#########################
+# external perl
+$id = Thruk::Utils::External::perl($c, "print STDERR 'blah'; print 'blub';");
+isnt($id, undef, "got an id");
+
+# wait for completion
+for(1..5) {
+    last unless Thruk::Utils::External::is_running($c, $id);
+    sleep(1);
+}
+
+is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
+($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
+
+is($out,   "blub",  "got result");
+is($err,   "blah",  "got error");
+is($time,  0,       "got time");
+isnt($dir, undef,   "got dir");
