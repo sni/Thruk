@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 79;
+use Test::More tests => 81;
 
 BEGIN {
     use lib('t');
@@ -32,16 +32,15 @@ for my $url (@{$pages}) {
 }
 
 
-
-my $redirects = [
-    '/thruk/cgi-bin/minemap.cgi?style=hostdetail',
-    '/thruk/cgi-bin/status.cgi?style=minemap',
-];
-for my $url (@{$redirects}) {
+# redirects
+my $redirects = {
+    '/thruk/cgi-bin/minemap.cgi?style=hostdetail' => 'status\.cgi\?style=hostdetail',
+    '/thruk/cgi-bin/status.cgi?style=minemap'     => 'minemap\.cgi\?style=minemap',
+};
+for my $url (keys %{$redirects}) {
     TestUtils::test_page(
         'url'      => $url,
+        'location' => $redirects->{$url},
         'redirect' => 1,
     );
 }
-
-

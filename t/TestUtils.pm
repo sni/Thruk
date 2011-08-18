@@ -85,6 +85,9 @@ sub test_page {
     }
     elsif(defined $opts{'redirect'}) {
         ok( $request->is_redirect, 'Request '.$opts{'url'}.' should redirect' );
+        if(defined $opts{'location'}) {
+            like($request->{'_headers'}->{'location'}, qr/$opts{'location'}/, "Content should redirect: ".$opts{'location'});
+        }
     } else {
         ok( $request->is_success, 'Request '.$opts{'url'}.' should succeed' );
     }
