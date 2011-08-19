@@ -17,6 +17,7 @@ use Data::Dumper;
 use Digest::MD5 qw(md5_hex);
 use Time::HiRes;
 use File::Slurp;
+use Storable;
 
 ##############################################
 
@@ -40,6 +41,9 @@ sub cmd {
         return _do_parent_stuff($c, $dir, $pid, $id);
     } else {
         _do_child_stuff($dir);
+
+        open STDERR, '>', $dir."/stderr";
+        open STDOUT, '>', $dir."/stdout";
 
         exec("/bin/sh -c '".$cmd."'");
         exit; # just to be sure
@@ -68,11 +72,28 @@ sub perl {
     } else {
         _do_child_stuff($dir);
 
-        ## no critic
-        eval($expr);
-        ## use critic
+        do {
+            ## no critic
+            local *STDOUT;
+            local *STDERR;
+            open STDERR, '>', $dir."/stderr";
+            open STDOUT, '>', $dir."/stdout";
+            eval($expr);
+            ## use critic
 
-        exit; # just to be sure
+            if($@) {
+                print STDERR $@;
+                exit;
+            }
+
+            close(STDOUT);
+            close(STDERR);
+        };
+
+        # save stash
+        store(\%{$c->stash}, $dir."/stash");
+
+        exit;
     }
 }
 
@@ -91,12 +112,12 @@ sub is_running {
     my $id  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
-    my $pid = read_file($dir."/pid");
-    if(kill(0, $pid) > 0) {
-        return 1;
-    }
+    return unless -f $dir."/user";
+    my $user = read_file($dir."/user");
+    chomp($user);
+    return unless $user eq $c->stash->{'remote_user'};
 
-    return 0;
+    return _is_running($dir);
 }
 
 
@@ -114,20 +135,53 @@ sub get_status {
     my $id  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
+    return unless -f $dir."/user";
+    my $user = read_file($dir."/user");
+    chomp($user);
+    return unless $user eq $c->stash->{'remote_user'};
+
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir."/pid");
     my $time  = time() - $start[9];
 
-    my $is_running = is_running($c, $id);
+    my $is_running = _is_running($dir);
 
-    my $percent;
+    my $percent = 0;
     if($is_running == 0) {
         $percent = 100;
+        my @end  = stat($dir."/stdout");
+        $time    = $end[9] - $start[9];
     } elsif(-f $dir."/status") {
         my $percent = read_file($dir."/status");
     }
 
     return($is_running,$time,$percent);
+}
+
+
+##############################################
+
+=head2 get_json_status
+
+  get_json_status($c, $id)
+
+return json status of a job
+
+=cut
+sub get_json_status {
+    my $c   = shift;
+    my $id  = shift;
+
+    my($is_running,$time,$percent) = get_status($c, $id);
+    return unless defined $time;
+
+    $c->stash->{'json'}   = {
+            'is_running' => $is_running,
+            'time'       => $time,
+            'percent'    => $percent,
+    };
+
+    return $c->forward('Thruk::View::JSON');
 }
 
 
@@ -140,10 +194,15 @@ sub get_status {
 return result of a job
 
 =cut
-sub get_result{
+sub get_result {
     my $c   = shift;
     my $id  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
+
+    return unless -f $dir."/user";
+    my $user = read_file($dir."/user");
+    chomp($user);
+    return unless $user eq $c->stash->{'remote_user'};
 
     my $out    = read_file($dir."/stdout");
     my $err    = read_file($dir."/stderr");
@@ -154,7 +213,10 @@ sub get_result{
 
     my $time = $end[9] - $start[9];
 
-    return($out,$err,$time, $dir);
+    my $stash;
+    $stash = retrieve($dir."/stash") if -f $dir."/stash";
+
+    return($out,$err,$time, $dir,$stash);
 }
 
 
@@ -163,13 +225,11 @@ sub _do_child_stuff {
     my $dir = shift;
 
     POSIX::setsid() or die "Can't start a new session: $!";
-    # close open filehandles except stdin,out,err
-    for(1..20) {
-        POSIX::close($_);
-    }
 
-    open STDERR, '>', $dir."/stderr";
-    open STDOUT, '>', $dir."/stdout";
+    # close open filehandles
+    for my $fd (0..30) {
+        POSIX::close($fd);
+    }
 
     $|=1; # autoflush
     return;
@@ -215,7 +275,7 @@ sub _init_external {
     }
 
     # cleanup old jobs
-    my $max_age = time() - 300; # keep them for 5 minutes
+    my $max_age = time() - 3600; # keep them for one hour
     for my $olddir (glob($c->config->{'var_path'}."/jobs/*")) {
         next unless -f $olddir.'/stdout';
         my @stat = stat($olddir.'/stdout');
@@ -227,7 +287,31 @@ sub _init_external {
 
     $SIG{CHLD} = 'IGNORE';
 
+    $c->stash->{job_id}       = $id;
+    $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c, 1);
+
     return($id, $dir);
+}
+
+
+##############################################
+
+=head2 _is_running
+
+  _is_running($dir)
+
+return true if process is still running
+
+=cut
+sub _is_running {
+    my $dir = shift;
+
+    my $pid = read_file($dir."/pid");
+    if(kill(0, $pid) > 0) {
+        return 1;
+    }
+
+    return 0;
 }
 
 

@@ -32,3 +32,5 @@ cgi\.cfg\-.*
 inc/File/Copy/Recursive.pm
 var
 log4perl.conf$
+TODO
+docs/development

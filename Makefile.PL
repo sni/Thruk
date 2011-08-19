@@ -80,6 +80,7 @@ requires 'FCGI'                                   => 0.69;
 requires 'FCGI::ProcManager'                      => 0.19;
 requires 'FCGI::ProcManager::MaxRequests'         => 0;
 requires 'Module::Find'                           => 0;
+requires 'Storable'                               => 0;
 
 # test requirements
 feature     ('authortests',

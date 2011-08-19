@@ -46,7 +46,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     Thruk::Utils::ssi_include($c);
 
     if(exists $c->{'request'}->{'parameters'}->{'createimage'}) {
-        $c->stash->{gd_image} = $trends_helper->_create_image($c, IMAGE_MODE);
+        if(exists $c->{'request'}->{'parameters'}->{'job_id'}) {
+            my $dir = $c->config->{'var_path'}."/jobs/".$c->{'request'}->{'parameters'}->{'job_id'};
+            $c->stash->{gd_image} = Thruk::Utils::Trends::_get_image($dir."/graph.png");
+        } else {
+            $c->stash->{gd_image} = Thruk::Utils::Trends::_create_image($c, IMAGE_MODE);
+        }
         $c->forward('Thruk::View::GD');
     }
     elsif($trends_helper->_show_step_2($c)) {

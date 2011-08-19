@@ -707,6 +707,57 @@ sub config_cgi : Regex('thruk\/cgi\-bin\/config\.cgi') {
 
 ######################################
 
+=head2 job_cgi
+
+page: /thruk/cgi-bin/job.cgi
+
+=cut
+
+sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
+    my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
+    my $job  = $c->{'request'}->{'parameters'}->{'job'};
+    my $json = $c->{'request'}->{'parameters'}->{'json'} || 0;
+    $c->stash->{no_auto_reload} = 1;
+    return $c->detach('/error/index/22') unless defined $job;
+    if($json) {
+        return Thruk::Utils::External::get_json_status($c, $job);
+    }
+
+    my($is_running,$time,$percent) = Thruk::Utils::External::get_status($c, $job);
+
+    # job still running?
+    if($is_running) {
+        $c->stash->{title}          = $c->config->{'name'};
+        $c->stash->{job_id}         = $job;
+        $c->stash->{job_time}       = $time;
+        $c->stash->{job_percent}    = $percent || 0;
+        $c->stash->{infoBoxTitle}   = 'please stand by';
+        $c->stash->{template}       = 'waiting_for_job.tt';
+    } else {
+        # job finished, display result
+        my($out,$err,$time,$dir,$stash) = Thruk::Utils::External::get_result($c, $job);
+        return $c->detach('/error/index/22') unless defined $dir;
+        if(defined $err and $err ne '') {
+            $c->log->error($err);
+            return $c->detach('/error/index/23')
+        }
+        if(defined $stash) {
+            delete($stash->{'all_in_one_css'});
+            # merge stash
+            for my $key (keys %{$stash}) {
+                $c->stash->{$key} = $stash->{$key} unless defined $c->stash->{$key};
+            }
+            return;
+        }
+        $c->stash->{text}     = $out;
+        $c->stash->{template} = 'passthrough.tt';
+    }
+    return;
+}
+
+######################################
+
 =head2 error
 
 page: /error/

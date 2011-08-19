@@ -9,6 +9,7 @@ package TestUtils;
 use strict;
 use Data::Dumper;
 use Test::More;
+use Thruk::Utils::External;
 
 BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
@@ -80,7 +81,14 @@ sub test_page {
     my $return = {};
 
     my $request = request($opts{'url'});
-    if(defined $opts{'fail'}) {
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job.cgi\?job=(.*)$/) {
+        # is it a background job page?
+        wait_for_job($1);
+        my $location = $request->{'_headers'}->{'location'};
+        $request = request($location);
+        ok( $request->is_success, 'Request '.$location.' should succeed' ) or BAIL_OUT(Dumper($request));
+    }
+    elsif(defined $opts{'fail'}) {
         ok( $request->is_error, 'Request '.$opts{'url'}.' should fail' );
     }
     elsif(defined $opts{'redirect'}) {
@@ -205,6 +213,18 @@ sub diag_lint_errors_and_remove_some_exceptions {
 sub get_themes {
     my @themes = @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}};
     return @themes;
+}
+
+#########################
+sub wait_for_job {
+    my $job = shift;
+    alarm(30);
+    while(Thruk::Utils::External::_is_running('./var/jobs/'.$job)) {
+        sleep(1);
+    }
+    is(Thruk::Utils::External::_is_running('./var/jobs/'.$job), 0, 'job is finished');
+    alarm(0);
+    return;
 }
 
 #########################

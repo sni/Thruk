@@ -103,19 +103,44 @@ sub _show_step_3 {
 sub _show_report {
     my ( $self, $c ) = @_;
 
-    $c->stats->profile(begin => "_show_report()");
-
-    my $start_time = time();
     my $host       = $c->{'request'}->{'parameters'}->{'host'}       || '';
     my $service    = $c->{'request'}->{'parameters'}->{'service'}    || '';
 
-    $c->stash->{host}       = $host;
-    $c->stash->{service}    = $service;
+    $c->stash->{host}    = $host;
+    $c->stash->{service} = $service;
 
     return unless $host or $service;
 
+    my $id = Thruk::Utils::External::perl($c, 'Thruk::Utils::Trends::_do_report($c)');
+    return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
+}
+
+
+##########################################################
+sub _do_report {
+    my ( $c ) = @_;
+
+    my $start_time = time();
+
+    my $host    = $c->stash->{host};
+    my $service = $c->stash->{service};
+
+    # calculate availability data
+    $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
+    Thruk::Utils::Avail::calculate_availability($c);
+
     # create the image map
-    my $image_map = $self->_create_image($c, IMAGE_MAP_MODE);
+    my $image_map = Thruk::Utils::Trends::_create_image($c, IMAGE_MAP_MODE);
+
+    if(defined $c->stash->{job_id}) {
+        # store resulting image in stash
+        my $gd_image = Thruk::Utils::Trends::_create_image($c, IMAGE_MODE);
+        my $dir = $c->config->{'var_path'}."/jobs/".$c->stash->{job_id};
+        open(my $fh, '>', $dir."/graph.png");
+        print $fh $gd_image->png;
+        close($fh);
+    }
+
     unless(exists $c->{'request'}->{'parameters'}->{'nomap'}) {
         $c->stash->{image_map} = $image_map;
         $c->stash->{nomap}     = $c->{'request'}->{'parameters'}->{'nomap'};
@@ -125,7 +150,6 @@ sub _show_report {
 
     # finished
     $c->stash->{time_token} = time() - $start_time;
-    $c->stats->profile(end => "_show_report()");
 
     $c->stash->{image_width}  = '900';
     $c->stash->{image_height} = '300';
@@ -141,7 +165,7 @@ sub _show_report {
 
 ##########################################################
 sub _create_image {
-    my ( $self, $c, $mode ) = @_;
+    my ( $c, $mode ) = @_;
 
     my $smallimage = 0;
     $smallimage = 1 if exists $c->{'request'}->{'parameters'}->{'smallimage'};
@@ -168,9 +192,10 @@ sub _create_image {
     my $small_svc_drawing_x_offset  = 0;
     my $small_svc_drawing_y_offset  = 0;
 
-    # calculate availability data
-    $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
-    Thruk::Utils::calculate_availability($c);
+    unless(defined $c->stash->{'logs'}) {
+        $c->{'request'}->{'parameters'}->{'full_log_entries'} = 1;
+        Thruk::Utils::Avail::calculate_availability($c);
+    }
 
     my($im, $width, $height, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
     if($smallimage) {
@@ -211,8 +236,9 @@ sub _create_image {
     }
 
     # allocate colors used for drawing
+    my $colors;
     unless($mode == IMAGE_MAP_MODE) {
-        $self->{'colors'} = {
+        $colors = {
             'white'     => $im->colorAllocate(255,255,255),
             'black'     => $im->colorAllocate(0,0,0),
             'red'       => $im->colorAllocate(255,0,0),
@@ -224,35 +250,35 @@ sub _create_image {
         };
 
         # set transparency index
-        $im->transparent($self->{'colors'}->{'white'});
+        $im->transparent($colors->{'white'});
 
         # make sure the graphic is interlaced
         $im->interlaced('true');
     }
 
     # draw service / host states
-    my $image_map = $self->_draw_states($c, $im, $mode, $self->{'colors'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->stash->{'zoom'});
+    my $image_map = _draw_states($c, $im, $mode, $colors, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->stash->{'zoom'});
 
     if($mode == IMAGE_MAP_MODE) {
         return $image_map;
     }
     else {
         # draw timestamps and dashed vertical lines
-        $self->_draw_timestamps($c, $im, $self->{'colors'}->{'black'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+        _draw_timestamps($c, $im, $colors->{'black'}, $c->stash->{'logs'}, $c->stash->{'start'}, $c->stash->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
 
         unless($smallimage) {
             # draw horizontal grid lines
-            $self->_draw_horizontal_grid_lines($c, $im, $self->{'colors'}->{'black'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_horizontal_grid_lines($c, $im, $colors->{'black'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'service'});
 
             # draw total times / percentages
-            $self->_draw_time_breakdowns($c, $im, $self->{'colors'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
+            _draw_time_breakdowns($c, $im, $colors, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'} );
 
             # draw text
-            $self->_draw_text($c, $im, $self->{'colors'}->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
+            _draw_text($c, $im, $colors->{'black'}, $c->stash->{'start'}, $c->stash->{'end'}, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $c->{'request'}->{'parameters'}->{'host'}, $c->{'request'}->{'parameters'}->{'service'});
         }
 
         # draw a border
-        $im->rectangle(0,0,$im->width-1,$im->height-1,$self->{'colors'}->{'black'});
+        $im->rectangle(0,0,$im->width-1,$im->height-1,$colors->{'black'});
 
         return $im;
     }
@@ -260,11 +286,11 @@ sub _create_image {
 
 ##########################################################
 sub _draw_timestamps {
-    my ( $self, $c, $im, $color, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset) = @_;
+    my ( $c, $im, $color, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset) = @_;
 
     my $report_duration = $end - $start;
 
-    $self->_draw_timestamp($c, $im, $color, 0, $start, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+    _draw_timestamp($c, $im, $color, 0, $start, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
 
     my $last_timestamp = 0;
 
@@ -277,19 +303,19 @@ sub _draw_timestamps {
 
         # draw start timestamp if possible
         if(( $x > $last_timestamp + MIN_TIMESTAMP_SPACING ) and ( $x < $drawing_width - 1 - MIN_TIMESTAMP_SPACING )){
-            $self->_draw_timestamp($c, $im, $color, $x, $log->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+            _draw_timestamp($c, $im, $color, $x, $log->{'end'}, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
             $last_timestamp = $x;
         }
     }
 
-    $self->_draw_timestamp($c, $im, $color, $drawing_width, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
+    _draw_timestamp($c, $im, $color, $drawing_width, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset);
 
     return 1;
 }
 
 ##########################################################
 sub _draw_timestamp {
-    my ( $self, $c, $im, $color, $x, $timestamp, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset) = @_;
+    my ( $c, $im, $color, $x, $timestamp, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset) = @_;
 
     my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
 
@@ -302,7 +328,7 @@ sub _draw_timestamp {
 
     # draw a dashed vertical line at this point
     if($x > 0 and $x < ($drawing_width-1)) {
-        $self->_draw_dashed_line($im, $x+$drawing_x_offset, $drawing_y_offset, $x+$drawing_x_offset, $drawing_y_offset+$drawing_height, $color);
+        _draw_dashed_line($im, $x+$drawing_x_offset, $drawing_y_offset, $x+$drawing_x_offset, $drawing_y_offset+$drawing_height, $color);
     }
 
     return 1;
@@ -310,7 +336,7 @@ sub _draw_timestamp {
 
 ##########################################################
 sub _draw_dashed_line {
-    my($self, $im, $x1, $y1, $x2, $y2, $color) = @_;
+    my($im, $x1, $y1, $x2, $y2, $color) = @_;
 
     my $style = [ $color, $color, gdTransparent, gdTransparent, $color, $color, gdTransparent, gdTransparent, $color, $color, gdTransparent, gdTransparent ];
 
@@ -326,7 +352,7 @@ sub _draw_dashed_line {
 
 ##########################################################
 sub _draw_states {
-    my ( $self, $c, $im, $mode, $colors, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset,$zoom) = @_;
+    my ( $c, $im, $mode, $colors, $logs, $start, $end, $smallimage, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset,$zoom) = @_;
 
     my $report_duration = $end - $start;
 
@@ -425,7 +451,7 @@ sub _draw_states {
 
 ##########################################################
 sub _draw_text {
-    my ($self, $c, $im, $color, $start, $end, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
+    my ($c, $im, $color, $start, $end, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
 
     my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
 
@@ -450,13 +476,13 @@ sub _draw_text {
 
 ##########################################################
 sub _draw_horizontal_grid_lines {
-    my ($self, $c, $im, $color, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $service ) = @_;
+    my ($c, $im, $color, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $service ) = @_;
 
-    $self->_draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+10,$drawing_x_offset+$drawing_width,$drawing_y_offset+10,$color);
-    $self->_draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+30,$drawing_x_offset+$drawing_width,$drawing_y_offset+30,$color);
-    $self->_draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+50,$drawing_x_offset+$drawing_width,$drawing_y_offset+50,$color);
+    _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+10,$drawing_x_offset+$drawing_width,$drawing_y_offset+10,$color);
+    _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+30,$drawing_x_offset+$drawing_width,$drawing_y_offset+30,$color);
+    _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+50,$drawing_x_offset+$drawing_width,$drawing_y_offset+50,$color);
     if(defined $service) {
-        $self->_draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+70,$drawing_x_offset+$drawing_width,$drawing_y_offset+70,$color);
+        _draw_dashed_line($im, $drawing_x_offset,$drawing_y_offset+70,$drawing_x_offset+$drawing_width,$drawing_y_offset+70,$color);
     }
 
     return 1;
@@ -464,7 +490,7 @@ sub _draw_horizontal_grid_lines {
 
 ##########################################################
 sub _draw_time_breakdowns {
-    my ($self, $c, $im, $colors, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
+    my ($c, $im, $colors, $drawing_width, $drawing_height, $drawing_x_offset, $drawing_y_offset, $host, $service ) = @_;
 
     my($font_width,$font_height) = (gdSmallFont->width,gdSmallFont->height);
 
@@ -480,23 +506,23 @@ sub _draw_time_breakdowns {
             + $avail_data->{'time_indeterminate_nodata'}
             + $avail_data->{'time_indeterminate_notrunning'};
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_ok'},"Ok");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_ok'},"Ok");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+5,$string,$colors->{'darkgreen'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*2),$drawing_y_offset+5,"Ok",$colors->{'darkgreen'});
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_warning'},"Warning");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_warning'},"Warning");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+25,$string,$colors->{'yellow'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*7),$drawing_y_offset+25,"Warning",$colors->{'yellow'});
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_unknown'},"Unknown");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_unknown'},"Unknown");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+45,$string,$colors->{'orange'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*7),$drawing_y_offset+45,"Unknown",$colors->{'orange'});
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_critical'},"Critical");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_critical'},"Critical");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+65,$string,$colors->{'red'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*8),$drawing_y_offset+65,"Critical",$colors->{'red'});
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_indeterminate_nodata'}+$avail_data->{'time_indeterminate_notrunning'},"Indeterminate");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_indeterminate_nodata'}+$avail_data->{'time_indeterminate_notrunning'},"Indeterminate");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+85,$string,$colors->{'black'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*13),$drawing_y_offset+85,"Indeterminate",$colors->{'black'});
 
@@ -511,19 +537,19 @@ sub _draw_time_breakdowns {
             + $avail_data->{'time_indeterminate_nodata'}
             + $avail_data->{'time_indeterminate_notrunning'};
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_up'},"Up");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_up'},"Up");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+5,$string,$colors->{'darkgreen'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*2),$drawing_y_offset+5,"Up",$colors->{'darkgreen'});
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_down'},"Down");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_down'},"Down");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+25,$string,$colors->{'red'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*4),$drawing_y_offset+25,"Down",$colors->{'red'});
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_unreachable'},"Unreachable");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_unreachable'},"Unreachable");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+45,$string,$colors->{'darkred'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*11),$drawing_y_offset+45,"Unreachable",$colors->{'darkred'});
 
-        $string = $self->_get_time_breakdown_string($total_time,$avail_data->{'time_indeterminate_nodata'}+$avail_data->{'time_indeterminate_notrunning'},"Indeterminate");
+        $string = _get_time_breakdown_string($total_time,$avail_data->{'time_indeterminate_nodata'}+$avail_data->{'time_indeterminate_notrunning'},"Indeterminate");
         $im->string(gdSmallFont,$drawing_x_offset+$drawing_width+20,$drawing_y_offset+65,$string,$colors->{'black'});
         $im->string(gdSmallFont,$drawing_x_offset-10-($font_width*13),$drawing_y_offset+65,"Indeterminate",$colors->{'black'});
     }
@@ -533,7 +559,7 @@ sub _draw_time_breakdowns {
 
 ##########################################################
 sub _get_time_breakdown_string {
-    my($self,$total_time,$time, $type) = @_;
+    my($total_time,$time, $type) = @_;
 
     my $duration     = Thruk::Utils::Filter::duration($time);
     my $percent_time = 0;
@@ -543,6 +569,14 @@ sub _get_time_breakdown_string {
     return sprintf("%-13s: (%.3f%%) %s",$type,$percent_time,$duration);
 }
 
+##########################################################
+sub _get_image {
+    my $file = shift;
+    my $im   = GD::Image->new($file);
+    return $im;
+}
+
+##########################################################
 
 =head1 AUTHOR
 

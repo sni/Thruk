@@ -155,6 +155,16 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'dscr' => 'If you believe this is an error, check the documentation for this plugin',
             'code' => 404, # not found
         },
+        '22'  => {
+            'mess' => 'No such job',
+            'dscr' => 'Job could not be found.',
+            'code' => 404, # not found
+        },
+        '23'  => {
+            'mess' => 'Background Job Failed',
+            'dscr' => 'background job failed, look at your logfile for details',
+            'code' => 500, # internal server error
+        },
     };
 
     $arg1 = 0 unless defined $errors->{$arg1}->{'mess'};

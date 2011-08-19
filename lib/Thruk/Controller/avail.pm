@@ -165,17 +165,8 @@ sub _show_step_3 {
 ##########################################################
 sub _create_report {
     my ( $self, $c ) = @_;
-    my $start_time   = time();
-
-    $c->stats->profile(begin => "_create_report()");
-
-    Thruk::Utils::calculate_availability($c);
-
-    # finished
-    $c->stash->{time_token} = time() - $start_time;
-    $c->stats->profile(end => "_create_report()");
-
-    return 1;
+    my $id = Thruk::Utils::External::perl($c, 'Thruk::Utils::Avail::calculate_availability($c)');
+    return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
 }
 
 =head1 AUTHOR

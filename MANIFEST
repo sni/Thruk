@@ -1,24 +1,5 @@
 cgi.cfg
 Changes
-docs/development/README
-docs/development/tables/columns.txt
-docs/development/tables/commands.txt
-docs/development/tables/comments.txt
-docs/development/tables/contactgroups.txt
-docs/development/tables/contacts.txt
-docs/development/tables/downtimes.txt
-docs/development/tables/hostgroups.txt
-docs/development/tables/hosts.txt
-docs/development/tables/hostsbygroup.txt
-docs/development/tables/log.txt
-docs/development/tables/servicegroups.txt
-docs/development/tables/services.txt
-docs/development/tables/servicesbygroup.txt
-docs/development/tables/servicesbyhostgroup.txt
-docs/development/tables/status.txt
-docs/development/tables/thruk_update_table_docs.pl
-docs/development/tables/timeperiods.txt
-docs/development/TODO
 docs/FAQ.html
 docs/FAQ.txt
 docs/source/arch.graffle
@@ -79,6 +60,7 @@ lib/Thruk/Controller/trends.pm
 lib/Thruk/Model/Thruk.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
+lib/Thruk/Utils/Avail.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/Menu.pm
@@ -147,6 +129,7 @@ root/thruk/javascript/cal/img/time-up.png
 root/thruk/javascript/cal/jscal2.css
 root/thruk/javascript/cal/jscal2.js
 root/thruk/javascript/jquery-1.6.2.min.js
+root/thruk/javascript/jquery-ui/css/smoothness/images/pbar-ani.gif
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_flat_0_aaaaaa_40x100.png
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_flat_75_ffffff_40x100.png
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_glass_55_fbf9ee_1x400.png
@@ -388,6 +371,7 @@ templates/index.tt
 templates/main.tt
 templates/notifications.tt
 templates/outages.tt
+templates/passthrough.tt
 templates/showlog.tt
 templates/side.tt
 templates/status_combined.tt
@@ -406,6 +390,7 @@ templates/trends_report.tt
 templates/trends_step_1.tt
 templates/trends_step_2.tt
 templates/trends_step_3.tt
+templates/waiting_for_job.tt
 THANKS
 themes/themes-available/Classic/images/accept.png
 themes/themes-available/Classic/images/ack.gif
