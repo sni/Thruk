@@ -17,7 +17,7 @@
 
     <div align="center">
     [% IF job_id %]
-    please stand by while you job is being processed...<br>
+    please stand by while your job is being processed...<br>
     <div id="progressbar" style="width: 400px; color: inherit;"><div align="center" id="job_time" style="z-index: 100;  line-height: 24px; position: absolute; width: 400px; color: inherit;">[% job_time %]s</div></div>
     <script type="text/javascript">
     <!--
