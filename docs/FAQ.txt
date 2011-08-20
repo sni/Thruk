@@ -12,7 +12,7 @@ Thruk is just a random word and has no meaning. Pronounce it like 'Truck'.
 
 The statusmap got replaced by a own variant which is more scalable in
 large environments. Its shipped as Thruk addon, but enabled by
-default.
+default. See the http://thruk.org/plugins.html[plugins page] for details and screenshots.
 
 
 === Authorization/Authentication is not working
@@ -134,19 +134,26 @@ Thruk has to be restarted.
 
 === How can i add more themes?
 
-Themes are located under 'root/thruk/themes/'. Just copy and modify the one you
-like.
+Themes are located under 'themes'. Just copy and modify the one you
+like. See the http://thruk.org/themes.html[themes page] for details.
 
 
 === How can i disable themes?
 
-This is not possible at the moment. However, you could remove the theme
-physically from 'root/thruk/themes/'. Make sure you replace symlinks from other
-themes with proper files if you remove the Classic theme.
+Themes can be disabled by removing the symlink from your
+'themes/themes-enabled' directory.
+See the http://thruk.org/themes.html[themes page] for details.
 
 
 
 == Installation
+
+=== Is it possible to operate Thruk in a cluster?
+Yes, just put a load balancer before 2 (or more) Thruk installations
+and make sure the 'var' directory is shared between all instances ( by
+NFS, DRBD or similar ). There is usually not much traffic in this
+folder.
+
 
 === How can i enable debug mode?
 ==== Thruk Server
