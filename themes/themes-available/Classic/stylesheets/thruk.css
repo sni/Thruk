@@ -729,3 +729,7 @@ td.attrName {
 .left {
   text-align: left;
 }
+
+DIV#progressbar .ui-progressbar-value {
+  background-image: url(../../../javascript/jquery-ui/css/smoothness/images/pbar-ani.gif);
+}

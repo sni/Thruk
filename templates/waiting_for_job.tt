@@ -19,9 +19,6 @@
     [% IF job_id %]
     please stand by while you job is being processed...<br>
     <div id="progressbar" style="width: 400px; color: inherit;"><div align="center" id="job_time" style="z-index: 100;  line-height: 24px; position: absolute; width: 400px; color: inherit;">[% job_time %]s</div></div>
-    <style>
-        .ui-progressbar-value { background-image: url(../javascript/jquery-ui/css/smoothness/images/pbar-ani.gif); }
-    </style>
     <script type="text/javascript">
     <!--
         jQuery(function() {
@@ -61,6 +58,9 @@
     -->
     </script>
     [% END %]
+
+    <br>
+    <a href="#" onclick="window.history.go(-1); return false;">go back</a>
     </div>
 
 [% PROCESS _footer.tt %]

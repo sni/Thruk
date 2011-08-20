@@ -18,6 +18,7 @@ use Digest::MD5 qw(md5_hex);
 use Time::HiRes;
 use File::Slurp;
 use Storable;
+use POSIX ":sys_wait_h";
 
 ##############################################
 
@@ -134,6 +135,9 @@ sub get_status {
     my $c   = shift;
     my $id  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
+
+    # reap pending zombies
+    waitpid(-1, WNOHANG);
 
     return unless -f $dir."/user";
     my $user = read_file($dir."/user");
