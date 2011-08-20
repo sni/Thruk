@@ -6,29 +6,24 @@ $VAR1 = {
           'action_url_expanded' => '',
           'active_checks_enabled' => 1,
           'address' => '127.0.0.1',
-          'alias' => 'n6_random_0',
+          'alias' => 'n6_random_00',
           'check_command' => 'check-host-alive!random',
+          'check_flapping_recovery_notification' => 0,
           'check_freshness' => 0,
-          'check_interval' => 30,
+          'check_interval' => '30',
           'check_options' => 0,
           'check_period' => '24x7',
           'check_type' => 0,
           'checks_enabled' => 1,
           'childs' => [],
           'comments' => [
-                          4008,
-                          4009
+                          4360
                         ],
           'comments_with_info' => [
                                     [
-                                      4008,
-                                      'nagiosadmin',
-                                      'test comment'
-                                    ],
-                                    [
-                                      4009,
-                                      '(Nagios Process)',
-                                      'This host has been scheduled for fixed downtime from 2010-08-12 11:01:01 to 2010-08-12 13:01:01.  Notifications for the host will not be sent out during that time period.'
+                                      4360,
+                                      'thrukadmin',
+                                      "\x{e2}\x{82}\x{ac}"
                                     ]
                                   ],
           'contacts' => [
@@ -36,22 +31,22 @@ $VAR1 = {
                         ],
           'current_attempt' => 1,
           'current_notification_number' => 0,
-          'custom_variable_names' => [],
-          'custom_variable_values' => [],
-          'display_name' => 'n6_test_host_0',
-          'downtimes' => [
-                           3159
-                         ],
-          'downtimes_with_info' => [
-                                     [
-                                       3159,
-                                       'nagiosadmin',
-                                       'test downtime'
-                                     ]
-                                   ],
+          'custom_variable_names' => [
+                                       'TEST1',
+                                       'TEST2',
+                                       'TEST3'
+                                     ],
+          'custom_variable_values' => [
+                                        'test1',
+                                        '<b>test2</b>',
+                                        '<b>test2</b>'
+                                      ],
+          'display_name' => 'n6_test_host_00',
+          'downtimes' => [],
+          'downtimes_with_info' => [],
           'event_handler_enabled' => 1,
-          'execution_time' => '0.086219',
-          'first_notification_delay' => 0,
+          'execution_time' => '0.09483',
+          'first_notification_delay' => '0',
           'flap_detection_enabled' => 1,
           'groups' => [
                         'random',
@@ -59,7 +54,7 @@ $VAR1 = {
                       ],
           'hard_state' => 0,
           'has_been_checked' => 1,
-          'high_flap_threshold' => 0,
+          'high_flap_threshold' => '0',
           'icon_image' => '',
           'icon_image_alt' => '',
           'icon_image_expanded' => '',
@@ -68,129 +63,101 @@ $VAR1 = {
           'initial_state' => 0,
           'is_executing' => 0,
           'is_flapping' => 0,
-          'last_check' => 1281602867,
+          'last_check' => 1313849874,
           'last_hard_state' => 0,
-          'last_hard_state_change' => 1281581870,
-          'last_notification' => 0,
+          'last_hard_state_change' => 1313594678,
+          'last_notification' => 1313594678,
           'last_state' => 0,
-          'last_state_change' => 1281581870,
-          'last_time_down' => 1281581540,
+          'last_state_change' => 1313594678,
+          'last_time_down' => 1313594388,
           'last_time_unreachable' => 0,
-          'last_time_up' => 1281602877,
-          'latency' => '0.132',
+          'last_time_up' => 1313849884,
+          'latency' => '0.195',
           'long_plugin_output' => 'sometimes with multiline and <b>html tags</b>\\n',
-          'low_flap_threshold' => 0,
+          'low_flap_threshold' => '0',
           'max_check_attempts' => 5,
-          'modified_attributes' => 2,
-          'modified_attributes_list' => [
-                                          'active_checks_enabled'
-                                        ],
-          'name' => 'n6_test_host_0',
-          'next_check' => 1281604677,
+          'modified_attributes' => 0,
+          'modified_attributes_list' => [],
+          'name' => 'n6_test_host_00',
+          'next_check' => 1313851684,
           'next_notification' => 0,
+          'no_more_notifications' => 0,
           'notes' => '',
           'notes_expanded' => '',
           'notes_url' => '',
           'notes_url_expanded' => '',
-          'notification_interval' => 0,
+          'notification_interval' => '0',
           'notification_period' => '24x7',
           'notifications_enabled' => 1,
-          'num_services' => 11,
-          'num_services_crit' => 1,
-          'num_services_hard_crit' => 1,
-          'num_services_hard_ok' => 8,
+          'num_services' => 3,
+          'num_services_crit' => 0,
+          'num_services_hard_crit' => 0,
+          'num_services_hard_ok' => 3,
           'num_services_hard_unknown' => 0,
-          'num_services_hard_warn' => 2,
-          'num_services_ok' => 8,
+          'num_services_hard_warn' => 0,
+          'num_services_ok' => 3,
           'num_services_pending' => 0,
           'num_services_unknown' => 0,
-          'num_services_warn' => 2,
+          'num_services_warn' => 0,
           'obsess_over_host' => 1,
           'parents' => [],
           'pending_flex_downtime' => 0,
-          'percent_state_change' => '8.552631579',
+          'percent_state_change' => '0',
           'perf_data' => '',
-          'plugin_output' => 'n6_test_host_0 (checked by mo) OK: random hostcheck ok',
+          'plugin_output' => 'n6_test_host_00 (checked by mo) OK: random hostcheck ok',
+          'pnpgraph_present' => -1,
           'process_performance_data' => 1,
-          'retry_interval' => 5,
-          'scheduled_downtime_depth' => 1,
+          'retry_interval' => '5',
+          'scheduled_downtime_depth' => 0,
           'services' => [
-                          'n6_test_warning_00',
-                          'n6_test_random_04',
-                          'n6_test_random_03',
-                          'n6_test_random_01',
-                          'n6_test_ok_09',
-                          'n6_test_ok_08',
-                          'n6_test_ok_07',
-                          'n6_test_ok_06',
-                          'n6_test_ok_02',
-                          'n6_test_critical_05',
-                          '+ping'
+                          'n6_test_ok_2',
+                          'n6_test_ok_1',
+                          'n6_test_ok_0'
                         ],
+          'services_with_info' => [
+                                    [
+                                      'n6_test_ok_2',
+                                      0,
+                                      1,
+                                      'n6_test_host_00 (checked by mo) OK: ok n6_test_ok_2'
+                                    ],
+                                    [
+                                      'n6_test_ok_1',
+                                      0,
+                                      1,
+                                      'n6_test_host_00 (checked by mo) OK: ok n6_test_ok_1'
+                                    ],
+                                    [
+                                      'n6_test_ok_0',
+                                      0,
+                                      1,
+                                      'n6_test_host_00 (checked by mo) OK: ok n6_test_ok_0'
+                                    ]
+                                  ],
           'services_with_state' => [
                                      [
-                                       'n6_test_warning_00',
-                                       1,
-                                       1
-                                     ],
-                                     [
-                                       'n6_test_random_04',
+                                       'n6_test_ok_2',
                                        0,
                                        1
                                      ],
                                      [
-                                       'n6_test_random_03',
+                                       'n6_test_ok_1',
                                        0,
                                        1
                                      ],
                                      [
-                                       'n6_test_random_01',
+                                       'n6_test_ok_0',
                                        0,
-                                       1
-                                     ],
-                                     [
-                                       'n6_test_ok_09',
-                                       0,
-                                       1
-                                     ],
-                                     [
-                                       'n6_test_ok_08',
-                                       0,
-                                       1
-                                     ],
-                                     [
-                                       'n6_test_ok_07',
-                                       0,
-                                       1
-                                     ],
-                                     [
-                                       'n6_test_ok_06',
-                                       0,
-                                       1
-                                     ],
-                                     [
-                                       'n6_test_ok_02',
-                                       0,
-                                       1
-                                     ],
-                                     [
-                                       'n6_test_critical_05',
-                                       2,
-                                       1
-                                     ],
-                                     [
-                                       '+ping',
-                                       1,
                                        1
                                      ]
                                    ],
           'state' => 0,
           'state_type' => 1,
           'statusmap_image' => '',
-          'total_services' => 11,
-          'worst_service_hard_state' => 2,
-          'worst_service_state' => 2,
-          'x_3d' => 0,
-          'y_3d' => 0,
-          'z_3d' => 0
+          'total_services' => 3,
+          'worst_service_hard_state' => 0,
+          'worst_service_state' => 0,
+          'x_3d' => '0',
+          'y_3d' => '0',
+          'z_3d' => '0'
         };

@@ -2002,6 +2002,9 @@ function show_cal(id) {
   if(date_time.length == 2) {
     var dates     = date_time[0].split('-');
     var times     = date_time[1].split(':');
+    if(times[2] == undefined) {
+        times[2] = 0;
+    }
     dateObj   = new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]);
   }
   else {
@@ -2016,12 +2019,21 @@ function show_cal(id) {
       weekNumbers: true,
       onSelect: function() {
         var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
-        document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+        if(Calendar.printDate(newDateObj, '%S') == 0) {
+            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M');
+        } else {
+            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+        }
         this.hide();
       },
       onBlur: function() {
         var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
         document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+        if(Calendar.printDate(newDateObj, '%S') == 0) {
+            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M');
+        } else {
+            document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
+        }
       }
   });
   cal.selection.set(Calendar.dateToInt(dateObj));

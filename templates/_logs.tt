@@ -8,38 +8,7 @@
 <td style="width:10%" align="right">
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
-  <a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns'); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>&nbsp;&nbsp;&nbsp;
-  <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
-  <div class="shadow"><div class="shadowcontent">
-  <form action='[% uri_with(c, 'view_mode' => 'xls') %]' method="POST" id="excel_form">
-  <table border="1" class='filter' cellspacing="0" cellpadding="0">
-    <tr>
-      <td class='filter'>
-        <table border="0" cellspacing="2" cellpadding="0">
-          <tr>
-            <td valign="top" align="left" class='filterTitle' nowrap>Columns to Export</td>
-            <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="accept_ht" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;"></td>
-          </tr>
-          [% counter = 0 %]
-          [% FOR column IN [ 'Time', 'Event', 'Hostname', 'Service Description', 'Info', 'Message' ] %]
-          [% counter = counter + 1 %]
-          <tr>
-            <td valign="top" align="left" class='filterName clickable' id="ht[% counter %]n" onclick="toggleFilterCheckBox(this.id)">[% column %]</td>
-            <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="[% counter %]" id="ht[% counter %]" name="columns" checked></td>
-          </tr>
-          [% END %]
-          <tr>
-            <td colspan=2 align="center">
-              <input type="submit" name="export" value="export" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;">
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-  </form>
-  </div></div>
-  </div>
+  [% PROCESS _excel_export.tt columns=[ 'Time', 'Event', 'Hostname', 'Service Description', 'Info', 'Message' ] %]
 </td>
 </tr></table>
 

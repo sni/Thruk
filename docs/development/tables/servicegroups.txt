@@ -1,36 +1,14 @@
 $VAR1 = {
           'action_url' => '',
-          'alias' => 'All Critical Services',
-          'members' => [
-                         [
-                           'n6_test_host_0',
-                           'n6_test_critical_05'
-                         ],
-                         [
-                           'n6_test_host_2',
-                           'n6_test_critical_05'
-                         ]
-                       ],
-          'members_with_state' => [
-                                    [
-                                      'n6_test_host_0',
-                                      'n6_test_critical_05',
-                                      2,
-                                      1
-                                    ],
-                                    [
-                                      'n6_test_host_2',
-                                      'n6_test_critical_05',
-                                      2,
-                                      1
-                                    ]
-                                  ],
-          'name' => 'critical',
+          'alias' => 'All Blocking Services',
+          'members' => [],
+          'members_with_state' => [],
+          'name' => 'block',
           'notes' => '',
           'notes_url' => '',
-          'num_services' => 2,
-          'num_services_crit' => 2,
-          'num_services_hard_crit' => 2,
+          'num_services' => 0,
+          'num_services_crit' => 0,
+          'num_services_hard_crit' => 0,
           'num_services_hard_ok' => 0,
           'num_services_hard_unknown' => 0,
           'num_services_hard_warn' => 0,
@@ -38,5 +16,5 @@ $VAR1 = {
           'num_services_pending' => 0,
           'num_services_unknown' => 0,
           'num_services_warn' => 0,
-          'worst_service_state' => 2
+          'worst_service_state' => 0
         };

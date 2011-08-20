@@ -108,7 +108,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         Thruk::Utils::Status::set_selected_columns($c);
         my $filename = 'notifications.xls';
         $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
-        $c->stash->{'template'} = 'excel/logs.tt';
+        $c->stash->{'template'} = 'excel/notifications.tt';
         return $c->detach('View::Excel');
     }
 

@@ -1,35 +1,27 @@
 $VAR1 = {
           'action_url' => '',
-          'alias' => 'All Down Hosts',
-          'members' => [
-                         'n6_test_host_1'
-                       ],
-          'members_with_state' => [
-                                    [
-                                      'n6_test_host_1',
-                                      1,
-                                      1
-                                    ]
-                                  ],
-          'name' => 'down',
+          'alias' => 'All Blocking Hosts',
+          'members' => [],
+          'members_with_state' => [],
+          'name' => 'block',
           'notes' => '',
           'notes_url' => '',
-          'num_hosts' => 1,
-          'num_hosts_down' => 1,
+          'num_hosts' => 0,
+          'num_hosts_down' => 0,
           'num_hosts_pending' => 0,
           'num_hosts_unreach' => 0,
           'num_hosts_up' => 0,
-          'num_services' => 10,
+          'num_services' => 0,
           'num_services_crit' => 0,
           'num_services_hard_crit' => 0,
           'num_services_hard_ok' => 0,
           'num_services_hard_unknown' => 0,
           'num_services_hard_warn' => 0,
-          'num_services_ok' => 8,
-          'num_services_pending' => 1,
+          'num_services_ok' => 0,
+          'num_services_pending' => 0,
           'num_services_unknown' => 0,
-          'num_services_warn' => 1,
-          'worst_host_state' => 1,
+          'num_services_warn' => 0,
+          'worst_host_state' => 0,
           'worst_service_hard_state' => 0,
-          'worst_service_state' => 1
+          'worst_service_state' => 0
         };

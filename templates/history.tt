@@ -53,11 +53,7 @@
               </td>
               <td width="15"></td>
               <td align="center" class='navBoxDate' nowrap>
-                <div class='navBoxTitle'>Log File Navigation</div>
-                <input type="text" value="[% format_date(start, '%Y-%m-%d %H:%M:%S') %]" id="start" name="start" size="20" class="date_input"> <a href="#" onclick="show_cal('start')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
-                <br>to<br>
-                <input type="text" value="[% format_date(end, '%Y-%m-%d %H:%M:%S') %]" id="end" name="end" size="20" class="date_input"> <a href="#" onclick="show_cal('end')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
-                <br>
+                [% PROCESS _log_date_select.tt %]
               </td>
               <td valign="middle">
                 &nbsp;&nbsp;<input type='submit' value='Update'>
