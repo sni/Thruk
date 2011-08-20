@@ -1509,8 +1509,8 @@ and just implements the nagios way of SSIs.
 There are two global includes, which will be included in every cgi
 page:
 
-* ssi/global-footer.ssi
-* ssi/global-header.ssi
+* ssi/common-footer.ssi
+* ssi/common-header.ssi
 
 and there are page specific includes, which will only be placed in the
 specific page:
