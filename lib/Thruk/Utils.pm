@@ -21,7 +21,7 @@ use File::Slurp;
 use Encode qw/decode/;
 use Template::Plugin::Date;
 use File::Copy;
-
+use Excel::Template::Plus;
 
 ##############################################
 =head1 METHODS
@@ -803,6 +803,36 @@ sub array_uniq {
 
     return \@unique;
 }
+
+
+########################################
+
+=head2 logs2xls
+
+  logs2xls($c)
+
+save excel file by background job
+
+=cut
+
+sub logs2xls {
+    my $c = shift;
+    $c->stash->{'res_header'} = [ 'Content-Disposition', qq[attachment; filename="] . $c->stash->{'file_name'} . q["] ];
+    $c->stash->{'res_ctype'}  = 'application/x-msexcel';
+    Thruk::Utils::Status::set_selected_columns($c);
+    $c->stash->{'data'} = $c->{'db'}->get_logs(%{$c->stash->{'log_filter'}});
+
+    my $template = Excel::Template::Plus->new(
+        engine   => 'TT',
+        template => $c->stash->{'template'},
+        config   => $c->config->{'View::TT'},
+        params   => {},
+    );
+    $template->param(%{ $c->stash });
+    $template->write_file($c->stash->{job_dir}."/".$c->stash->{'file_name'});
+    return 1;
+}
+
 
 ########################################
 sub _initialassumedservicestate_to_state {

@@ -6,6 +6,7 @@ use utf8;
 use parent 'Catalyst::Controller';
 use Data::Dumper;
 use URI::Escape;
+use File::Slurp;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -743,6 +744,16 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
             return $c->detach('/error/index/23')
         }
         if(defined $stash) {
+            if(defined $stash->{'file_name'}) {
+                $c->res->headers->header( @{$stash->{'res_header'}} )    if defined $stash->{'res_header'};
+                $c->res->content_type($stash->{'res_ctype'}) if defined $stash->{'res_ctype'};
+                my $file = $stash->{job_dir}."/".$stash->{'file_name'};
+                open(my $fh, '<', $file) or die("cannot open: $!");
+                binmode $fh;
+                local $/ = undef;
+                $c->res->body(<$fh>);
+                return;
+            }
             delete($stash->{'all_in_one_css'});
             # merge stash
             for my $key (keys %{$stash}) {

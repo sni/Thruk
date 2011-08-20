@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 1.1.0    Sun Aug 21 19:12:18 CEST 2011
           - availability / trends are now calculated in a background process
             - less ressources and independent from browser ttl
+          - excel export run as bg job
           - added config option 'show_custom_vars'
           - added host command 'Schedule downtime for all services on this host'
           - added excel export for notifications

@@ -85,19 +85,23 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $order = "ASC";
     }
 
+    my $total_filter;
     if($errors == 0) {
-        my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
-        $c->stats->profile(begin => "showlog::fetch");
-        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
-        $c->stats->profile(end   => "showlog::fetch");
+        $total_filter = Thruk::Utils::combine_filter('-and', $filter);
     }
 
     if( defined $c->{'request'}->{'parameters'}->{'view_mode'} and $c->{'request'}->{'parameters'}->{'view_mode'} eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c);
-        my $filename = 'logs.xls';
-        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
-        $c->stash->{'template'} = 'excel/logs.tt';
-        return $c->detach('View::Excel');
+        $c->stash->{'template'}   = 'excel/logs.tt';
+        $c->stash->{'file_name'}  = 'logs.xls';
+        $c->stash->{'log_filter'} = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
+                                      sort => {$order => 'time'},
+                                    };
+        my $id = Thruk::Utils::External::perl($c, 'Thruk::Utils::logs2xls($c)');
+        return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
+    } else {
+        $c->stats->profile(begin => "showlog::fetch");
+        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
+        $c->stats->profile(end   => "showlog::fetch");
     }
 
     $c->stash->{archive}          = $archive;

@@ -227,7 +227,7 @@ sub _do_child_stuff {
     POSIX::setsid() or die "Can't start a new session: $!";
 
     # close open filehandles
-    for my $fd (0..30) {
+    for my $fd (0..1024) {
         POSIX::close($fd);
     }
 
@@ -288,6 +288,7 @@ sub _init_external {
     $SIG{CHLD} = 'IGNORE';
 
     $c->stash->{job_id}       = $id;
+    $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id;
     $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c, 1);
 
     return($id, $dir);
