@@ -275,6 +275,7 @@ sub _init_external {
                 Thruk::Utils::set_message( $c, 'fail_message', 'background job failed to start, mkdir failed '.$mdir.': '.$! );
                 return;
             };
+            chmod 0660, $dir;
         }
     }
 
