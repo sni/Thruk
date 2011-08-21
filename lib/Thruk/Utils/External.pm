@@ -248,13 +248,13 @@ sub _do_parent_stuff {
     my $id  = shift;
 
     # write pid file
-    open(my $fh, '>', $dir."/pid");
+    open(my $fh, '>', $dir."/pid") or die("cannot write pid: $!");
     print $fh $pid;
     print $fh "\n";
     close($fh);
 
     # write user file
-    open($fh, '>', $dir."/user");
+    open($fh, '>', $dir."/user") or die("cannot write pid: $!");
     print $fh $c->stash->{'remote_user'};
     print $fh "\n";
     close($fh);
@@ -273,9 +273,9 @@ sub _init_external {
         if(! -d $mdir) {
             mkdir($mdir) or do {
                 Thruk::Utils::set_message( $c, 'fail_message', 'background job failed to start, mkdir failed '.$mdir.': '.$! );
-                return;
+                die("mkdir $mdir failed: $!");
             };
-            chmod 0660, $dir;
+            chmod 0770, $dir;
         }
     }
 

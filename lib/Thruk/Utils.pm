@@ -494,17 +494,17 @@ sub read_ssi {
     my $c    = shift;
     my $file = shift;
     # retun if file is execitabel
-    if( -x $c->config->{'ssi_path'}.$file ){
-       open(my $ph, '-|', $c->config->{'ssi_path'}.$file.' 2>&1') or carp("cannot execute ssi: $!");
+    if( -x $c->config->{'ssi_path'}."/".$file ){
+       open(my $ph, '-|', $c->config->{'ssi_path'}."/".$file.' 2>&1') or carp("cannot execute ssi: $!");
        local $/=undef;
        my $output = <$ph>;
        close($ph);
        return $output;
     }
-    elsif( -r $c->config->{'ssi_path'}.$file ){
-        return read_file($c->config->{'ssi_path'}.$file) or carp("cannot open ssi: $!");
+    elsif( -r $c->config->{'ssi_path'}."/".$file ){
+        return read_file($c->config->{'ssi_path'}."/".$file) or carp("cannot open ssi: $!");
     }
-    $c->log->warn($c->config->{'ssi_path'}.$file." is no longer accessible, please restart thruk to initialize ssi information");
+    $c->log->warn($c->config->{'ssi_path'}."/".$file." is no longer accessible, please restart thruk to initialize ssi information");
     return "";
 }
 
