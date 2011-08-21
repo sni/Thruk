@@ -405,6 +405,21 @@ sub get_timeperiods {
 
 ##########################################################
 
+=head2 get_timeperiod_names
+
+  get_timeperiod_names
+
+returns a list of timeperiod names
+
+=cut
+sub get_timeperiod_names {
+    my $self = shift;
+    confess("unimplemented");
+    return;
+}
+
+##########################################################
+
 =head2 get_logs
 
   get_logs

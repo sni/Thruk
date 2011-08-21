@@ -46,6 +46,7 @@ sub begin : Private {
         ajax_search_hostgroups          => 1,
         ajax_search_services            => 1,
         ajax_search_servicegroups       => 1,
+        ajax_search_timeperiods         => 1,
         shown_inline_pnp                => 1,
         use_wait_feature                => 1,
         wait_timeout                    => 10,

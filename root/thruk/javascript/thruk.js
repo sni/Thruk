@@ -1660,13 +1660,16 @@ function add_new_filter(search_prefix, table) {
                              'Service',
                              'Hostgroup',
                              'Servicegroup',
-                             'Contact','Parent',
+                             'Contact',
+                             'Parent',
                              'Comment',
                              'Last Check',
                              'Next Check',
                              'Latency',
                              'Execution Time',
-                             '% State Change'
+                             '% State Change',
+                             'Check Period',
+                             'Notification Period'
                             );
   if(enable_shinken_features) {
     options.push('Priority');
@@ -1916,11 +1919,13 @@ function verify_op(event) {
   for(var x = 0; x< opElem.options.length; x++) {
     var curOp = opElem.options[x].value;
     if(curOp == '~' || curOp == '!~') {
+      // list of fields which have a ~ or !~ operator
       if(   selValue != 'search'
          && selValue != 'host'
          && selValue != 'service'
          && selValue != 'hostgroup'
          && selValue != 'servicegroup'
+         && selValue != 'timeperiod'
          && selValue != 'comment') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
@@ -1933,11 +1938,14 @@ function verify_op(event) {
           }
         }
         opElem.options[x].style.display = "none";
+        opElem.options[x].disabled      = true;
       } else {
         opElem.options[x].style.display = "";
+        opElem.options[x].disabled      = false;
       }
     }
 
+    // list of fields which have a <= or >= operator
     if(curOp == '<=' || curOp == '>=') {
       if(   selValue != 'next check'
          && selValue != 'last check'
@@ -1951,8 +1959,10 @@ function verify_op(event) {
           selectByValue(opElem, '=');
         }
         opElem.options[x].style.display = "none";
+        opElem.options[x].disabled      = true;
       } else {
         opElem.options[x].style.display = "";
+        opElem.options[x].disabled      = false;
       }
     }
   }
@@ -2127,11 +2137,19 @@ var ajax_search = {
             if(   search_type == 'host'
                || search_type == 'hostgroup'
                || search_type == 'service'
-               || search_type == 'servicegroup') {
+               || search_type == 'servicegroup'
+               || search_type == 'timeperiod'
+            ) {
                 ajax_search.search_type = search_type;
             }
             if(search_type == 'parent') {
                 ajax_search.search_type = 'host';
+            }
+            if(search_type == 'check period') {
+                ajax_search.search_type = 'timeperiod';
+            }
+            if(search_type == 'notification period') {
+                ajax_search.search_type = 'timeperiod';
             }
             if(   search_type == 'contact'
                || search_type == 'comment'
@@ -2264,7 +2282,7 @@ var ajax_search = {
             ajax_search.base.each(function(search_type) {
                 var sub_results = new Array();
                 var top_hits = 0;
-                if(   ajax_search.search_type == 'all'
+                if(   (ajax_search.search_type == 'all' && search_type.name != 'timeperiods')
                    || (ajax_search.templates == "templates" && search_type.name == "templates")
                    || (ajax_search.templates != "templates" && ajax_search.search_type + 's' == search_type.name)
                   ) {

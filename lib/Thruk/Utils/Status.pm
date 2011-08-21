@@ -750,6 +750,14 @@ sub single_search {
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
         }
+        elsif ( $filter->{'type'} eq 'check period' ) {
+            push @hostfilter,    { check_period => { $op => $value } };
+            push @servicefilter, { check_period => { $op => $value } };
+        }
+        elsif ( $filter->{'type'} eq 'notification period' ) {
+            push @hostfilter,    { notification_period => { $op => $value } };
+            push @servicefilter, { notification_period => { $op => $value } };
+        }
         else {
             confess( "unknown filter: " . $filter->{'type'} );
         }

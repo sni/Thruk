@@ -535,6 +535,26 @@ sub get_timeperiods {
 
 ##########################################################
 
+=head2 get_timeperiod_names
+
+  get_timeperiod_names
+
+returns a list of timeperiod names
+
+=cut
+sub get_timeperiod_names {
+    my($self, %options) = @_;
+    $options{'columns'} = [qw/name/];
+    my $data = $self->_get_hash_table('timeperiods', 'name', \%options);
+    my $keys = defined $data ? [keys %{$data}] : [];
+    unless(wantarray) {
+        confess("get_timeperiods_names() should not be called in scalar context");
+    }
+    return($keys, 'uniq');
+}
+
+##########################################################
+
 =head2 get_commands
 
   get_commands

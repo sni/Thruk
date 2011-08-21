@@ -854,6 +854,17 @@ ex.:
   ajax_search_servicegroups = 1
 
 
+==== ajax_search_timeperiods
+
+Enables the suggestion of timeperiods in the ajax search field.
+Timeperiods will only displayed when filtering by check- or
+notification period.
+
+ex.:
+
+  ajax_search_timeperiods = 1
+
+
 ==== default_theme
 
 Default theme to use for all users. Must be a valid subdirectory in

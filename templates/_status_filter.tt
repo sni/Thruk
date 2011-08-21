@@ -355,6 +355,8 @@
               <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
               <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
               <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
+              <option value="check period"[% IF s.type == 'check period' %] selected[% END %]>Check Period</option>
+              <option value="notification period"[% IF s.type == 'notification period' %] selected[% END %]>Notification Period</option>
               [% IF enable_shinken_features %]
               <option value="priority"[% IF s.type == 'priority' %] selected[% END %]>Priority</option>
               [% END %]
