@@ -22,9 +22,6 @@
       [% IF refresh_rate +%]
       var refresh_rate            = [% refresh_rate %];
       [% END %]
-      [% IF author +%]
-      var thruk_debug_js          = 1;
-      [% END +%]
       var initial_backend_states = new Hash({
           [% FOREACH pd IN backends %]
             [% SET val = '1'                                     %]
@@ -49,6 +46,13 @@
     [% FOREACH j = js.list %]
       <script type="text/javascript" src="[% url_prefix _ j %]"></script>
     [% END %]
+    [% IF author +%]
+    <script type="text/javascript">
+    <!--
+      var thruk_debug_js          = 1;
+    -->
+    </script>
+    [% END +%]
 
     <!-- stylesheets -->
     [% UNLESS all_in_one_css %]

@@ -837,7 +837,7 @@ sub get_host_prop_filter {
     my @host_prop_filter;
     my @host_prop_filter_service;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 1048575;
+    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 16777215;
     my $host_prop_filtername = 'Any';
     if( $number > 0 ) {
         my @host_prop_filtername;
@@ -943,6 +943,26 @@ sub get_host_prop_filter {
             push @host_prop_filter_service, { host_state_type => 0 };
             push @host_prop_filtername, 'In Soft State';
         }
+        if( $bits[20] ) {    # 1048576 - In Check Period
+            push @host_prop_filter,         { in_check_period => 1 };
+            push @host_prop_filter_service, { host_in_check_period => 1 };
+            push @host_prop_filtername, 'In Check Period';
+        }
+        if( $bits[21] ) {    # 2097152 - Outside Check Period
+            push @host_prop_filter,         { in_check_period => 0 };
+            push @host_prop_filter_service, { host_in_check_period => 0 };
+            push @host_prop_filtername, 'Outside Check Period';
+        }
+        if( $bits[22] ) {    # 4194304 - In Notification Period
+            push @host_prop_filter,         { in_notification_period => 1 };
+            push @host_prop_filter_service, { host_in_notification_period => 1 };
+            push @host_prop_filtername, 'In Notification Period';
+        }
+        if( $bits[23] ) {    # 8388608 - Outside Notification Period
+            push @host_prop_filter,         { in_notification_period => 0 };
+            push @host_prop_filter_service, { host_in_notification_period => 0 };
+            push @host_prop_filtername, 'Outside Notification Period';
+        }
 
         $host_prop_filtername = join( ' &amp; ', @host_prop_filtername );
     }
@@ -1019,7 +1039,7 @@ sub get_service_prop_filter {
     my @service_prop_filter;
     my @service_prop_filtername;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 1048575;
+    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 16777215;
     my $service_prop_filtername = 'Any';
     if( $number > 0 ) {
         my @bits = reverse split( /\ */mx, unpack( "B*", pack( "N", int($number) ) ) );
@@ -1103,6 +1123,22 @@ sub get_service_prop_filter {
         if( $bits[19] ) {    # 524288 - In Soft State
             push @service_prop_filter, { state_type => 0 };
             push @service_prop_filtername, 'In Soft State';
+        }
+        if( $bits[20] ) {    # 1048576 - In Check Period
+            push @service_prop_filter, { in_check_period => 1 };
+            push @service_prop_filtername, 'In Check Period';
+        }
+        if( $bits[21] ) {    # 2097152 - Outside Check Period
+            push @service_prop_filter, { in_check_period => 0 };
+            push @service_prop_filtername, 'Outside Check Period';
+        }
+        if( $bits[22] ) {    # 4194304 - In Notification Period
+            push @service_prop_filter, { in_notification_period => 1 };
+            push @service_prop_filtername, 'In Notification Period';
+        }
+        if( $bits[23] ) {    # 8388608 - Outside Notification Period
+            push @service_prop_filter, { in_notification_period => 0 };
+            push @service_prop_filtername, 'Outside Notification Period';
         }
 
         $service_prop_filtername = join( ' &amp; ', @service_prop_filtername );

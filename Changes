@@ -7,6 +7,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added config option 'show_custom_vars'
           - added host command 'Schedule downtime for all services on this host'
           - added excel export for notifications
+          - added new host properties filter 'in_check_priod' and 'in_notification_period'
+          - added new service properties filter 'in_check_priod' and 'in_notification_period'
           - fixed disappearing menu item name (fixes #45)
           - fixed changing views on the minemap (fixes #44)
           - fixed statusmap in IE
