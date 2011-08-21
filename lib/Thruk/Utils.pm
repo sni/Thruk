@@ -765,6 +765,7 @@ sub store_user_data {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: mkdir '.$dir.': '.$! );
                 return;
             };
+            chmod 0770, $dir;
         }
     }
 
