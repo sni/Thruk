@@ -728,6 +728,12 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
 
     my($is_running,$time,$percent) = Thruk::Utils::External::get_status($c, $job);
 
+    # try to directly server the request if it takes less than 10seconds
+    while($is_running and $time < 10) {
+        sleep(1);
+        ($is_running,$time,$percent) = Thruk::Utils::External::get_status($c, $job);
+    }
+
     # job still running?
     if($is_running) {
         $c->stash->{title}          = $c->config->{'name'};
