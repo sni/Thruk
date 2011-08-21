@@ -101,7 +101,7 @@ my($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
 
 is($out,  "test\n", "got result");
 is($err,  "err\n",  "got error");
-is($time, 1,        "got time");
+ok($time >=1,       "got time (".$time."s)");
 isnt($dir, undef,   "got dir");
 
 #########################

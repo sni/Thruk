@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 
 [% SET message = n.message.substr(13) %]
 [% options = message.split(';') %]

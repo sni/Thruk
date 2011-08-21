@@ -97,6 +97,7 @@ plugins/plugins-available/shinken_features/templates/shinken_businessview.tt
 plugins/plugins-available/shinken_features/templates/shinken_outagespbimp.tt
 plugins/plugins-available/shinken_features/templates/shinken_status_bothtypes.tt
 plugins/plugins-available/statusmap/lib/Thruk/Controller/statusmap.pm
+plugins/plugins-available/statusmap/root/excanvas.js
 plugins/plugins-available/statusmap/root/jit-yc.js
 plugins/plugins-available/statusmap/root/statusmap.js
 plugins/plugins-available/statusmap/root/Treemap.css
@@ -199,6 +200,7 @@ t/view_GD.t
 t/view_TT.t
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
+templates/_excel_export.tt
 templates/_extinfo_cmd_pane.tt
 templates/_footer.tt
 templates/_get_content.tt
@@ -208,9 +210,11 @@ templates/_host_command_box.tt
 templates/_host_command_box_full.tt
 templates/_host_status_details_box.tt
 templates/_infobox.tt
+templates/_log_date_select.tt
 templates/_logs.tt
 templates/_logs_line.tt
 templates/_message.tt
+templates/_notifications_log_line.tt
 templates/_overdiv.tt
 templates/_pager.tt
 templates/_pnp_graph.tt
@@ -354,6 +358,7 @@ templates/config_timeperiods.tt
 templates/docs.tt
 templates/error.tt
 templates/excel/logs.tt
+templates/excel/notifications.tt
 templates/excel/status_detail.tt
 templates/excel/status_hostdetail.tt
 templates/extinfo_type_0.tt
