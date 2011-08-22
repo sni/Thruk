@@ -69,6 +69,7 @@ sub begin : Private {
         show_notification_number        => 1,
         strict_passive_mode             => 1,
         show_full_commandline           => 1,
+        show_modified_attributes        => 1,
         use_feature_statusmap           => 0,
         use_feature_statuswrl           => 0,
         use_feature_histogram           => 0,
@@ -102,6 +103,7 @@ sub begin : Private {
                     ptc                    => 0,
         },
         command_disabled                    => [],
+        show_custom_vars                    => [],
         var_path                            => './var',
         priorities                      => {
                     5                       => 'Business Critical',
@@ -128,7 +130,7 @@ sub begin : Private {
                   datetime_format datetime_format_today datetime_format_long datetime_format_log
                   use_new_search ajax_search show_notification_number strict_passive_mode
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
-                  priorities
+                  priorities show_modified_attributes
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

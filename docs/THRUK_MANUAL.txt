@@ -1056,6 +1056,15 @@ ex.:
   show_long_plugin_output = popup
 
 
+==== show_modified_attributes
+
+Show if a host / service has modified attributes.
+
+ex.:
+
+  show_modified_attributes = 1
+
+
 ==== info_popup_event_type
 On which event should the comments / downtime or longpluginout popup
 show up. Valid values are onclick or onmouseover.

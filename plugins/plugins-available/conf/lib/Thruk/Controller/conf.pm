@@ -240,6 +240,7 @@ sub _process_thruk_page {
                         show_notification_number
                         show_full_commandline
                         shown_inline_pnp
+                        show_modified_attributes
                         statusmap_default_type
                         statusmap_default_groupby
                         datetime_format
@@ -247,6 +248,8 @@ sub _process_thruk_page {
                         datetime_format_long
                         datetime_format_log
                         datetime_format_trends
+                        use_new_command_box
+                        show_custom_vars
                     /]
         ],
         [ 'Search', [qw/
@@ -256,6 +259,7 @@ sub _process_thruk_page {
                         ajax_search_hostgroups
                         ajax_search_services
                         ajax_search_servicegroups
+                        ajax_search_timeperiods
                     /]
         ],
         [ 'Paging', [qw/

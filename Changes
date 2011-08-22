@@ -12,6 +12,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added new filter options 'Check Period' and 'Notification Period'
           - added new filter option 'Has Modified Attributes'
           - added new command to reset 'Modified Attributes'
+          - added option 'show_modified_attributes'
           - fixed disappearing menu item name (fixes #45)
           - fixed changing views on the minemap (fixes #44)
           - fixed statusmap in IE

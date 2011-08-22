@@ -44,6 +44,7 @@ sub get_thruk_cfg {
                 ajax_search_hostgroups                  => ['BOOL',   '1'],
                 ajax_search_services                    => ['BOOL',   '1'],
                 ajax_search_servicegroups               => ['BOOL',   '1'],
+                ajax_search_timeperiods                 => ['BOOL',   '1'],
                 default_theme                           => ['LIST',   'Classic', Thruk::Utils::array2hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}) ],
                 tmp_path                                => ['STRING', ''],
                 ssi_path                                => ['STRING', ''],
@@ -62,6 +63,9 @@ sub get_thruk_cfg {
                 show_full_commandline                   => ['LIST',   '', { '0' => 'off', '1' => 'authorized_for_configuration_information only', '2' => 'everyone' } ],
                 resource_file                           => ['STRING', ''],
                 shown_inline_pnp                        => ['BOOL',   '1'],
+                show_modified_attributes                => ['BOOL',   '1'],
+                show_custom_vars                        => ['ARRAY',  []],
+                use_new_command_box                     => ['BOOL',   '1'],
                 can_submit_commands                     => ['BOOL',   '1'],
 #                command_disabled
                 datetime_format                         => ['STRING', ''],
