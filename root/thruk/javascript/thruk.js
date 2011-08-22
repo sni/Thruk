@@ -1365,7 +1365,8 @@ function check_quick_command() {
     return true;
 }
 
-/* toggle selection of comment on downtimes/comments page */
+
+/* select this service */
 function toggle_comment(event) {
     if(!event) {
         event = this;
@@ -1387,30 +1388,77 @@ function toggle_comment(event) {
         return false;
     }
 
-    var row   = document.getElementById(row_id);
-    var elems = row.getElementsByTagName('TD');
-
+    var state = true;
     if(selectedHosts.get(row_id) != undefined) {
-        selectedHosts.unset(row_id);
-        styleElements(elems, "original", 1);
-    } else {
-        selectedHosts.set(row_id, row_id);
-        styleElements(elems, 'tableRowSelected', 1)
+        state = false;
     }
 
+    if(is_shift_pressed(event) && lastRowSelected != undefined) {
+        no_more_events = 1;
+        var id1         = parseInt(row_id.substring(4));
+        var id2         = parseInt(lastRowSelected.substring(4));
+        var pane_prefix = row_id.substring(0,4);
+
+        // all selected should get the same state
+        state = false;
+        if(selectedHosts.get(lastRowSelected) != undefined) {
+            state = true;
+        }
+
+        // selected top down?
+        if(id1 > id2) {
+            var tmp = id2;
+            id2 = id1;
+            id1 = tmp;
+        }
+
+        for(var x = id1; x < id2; x++) {
+            if(document.getElementById(pane_prefix+x)) {
+                selectCommentById(pane_prefix+x, state);
+            }
+        }
+        lastRowSelected = undefined;
+        no_more_events  = 0;
+    } else {
+        lastRowSelected = row_id;
+    }
+
+    selectCommentById(row_id, state);
+
+    // check visibility of command pane
     var number = selectedHosts.keys().size();
     var text = "remove " + number + " " + type;
     if(number != 1) {
         text = text + "s";
     }
     $('quick_command').options[0].text = text;
-
     if(selectedHosts.keys().size() > 0) {
         showElement('cmd_pane');
     } else {
         hideElement('cmd_pane');
     }
 
+    unselectCurrentSelection();
+
+    return false;
+}
+
+/* toggle selection of comment on downtimes/comments page */
+function selectCommentById(row_id, state) {
+    var row   = document.getElementById(row_id);
+    if(!row) {
+        if(thruk_debug_js) { alert("ERROR: unknown id in selectCommentById(): " + row_id); }
+        return;
+    }
+    var elems = row.getElementsByTagName('TD');
+
+    if(state == false) {
+        selectedHosts.unset(row_id);
+        styleElements(elems, "original", 1);
+    } else {
+        selectedHosts.set(row_id, row_id);
+        styleElements(elems, 'tableRowSelected', 1)
+    }
     return false;
 }
 

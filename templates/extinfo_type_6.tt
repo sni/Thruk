@@ -21,6 +21,7 @@
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Host Downtime</div>
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
+    <div class="hint">mark host / services downtimes with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
@@ -65,6 +66,7 @@
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtime</div>
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
+    <div class="hint">mark host / services downtimes with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
       <table border="0" class='downtime'>
         <tr class='downtime'>
