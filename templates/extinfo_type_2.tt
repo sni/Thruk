@@ -241,7 +241,7 @@
                           </tr>
                           <tr>
                             <td class='dataVar'>Modified Attributes</td>
-                            <td class='dataVal'>[% IF service.modified_attributes_list.size > 0 %][% service.modified_attributes_list.join(', ') %][% ELSE %]none[% END %]</td>
+                            <td class='dataVal'>[% IF service.modified_attributes_list.size > 0 %]<div class='serviceWARNING' style="padding-right: 4px; padding-left: 4px;">[% service.modified_attributes_list.join(', ') %]</div>[% ELSE %]none[% END %]</td>
                           </tr>
                           [% IF backends && backends.size > 1 %]
                           <tr>
