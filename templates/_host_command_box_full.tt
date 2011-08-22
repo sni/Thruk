@@ -110,6 +110,12 @@
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Schedule A Check Of All Services On This Host' title='Schedule A Check Of All Services On This Host' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=17&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Schedule a check of all services on this host</a></td>
               </tr>
+              [% IF host.modified_attributes_list.size > 0 %]
+              <tr class='command'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Reset Modified Attributes Of This Host' title='Reset Modified Attributes Of This Host' width="20" height="20"></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=154&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Reset Modified Attributes</a></td>
+              </tr>
+              [% END %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Checks Of All Services On This Host' title='Disable Checks Of All Services On This Host' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=16&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Disable checks of all services on this host</a></td>

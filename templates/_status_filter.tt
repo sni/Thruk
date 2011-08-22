@@ -186,6 +186,12 @@
                       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8388608" id="[% paneprefix %][% prefix %]_hp8388608" name="[% paneprefix %][% prefix %]_hostprop"></td>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp8388608n" onclick="toggleFilterCheckBox(this.id)">Outside Notification Period</td>
                     </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp16777216n" onclick="toggleFilterCheckBox(this.id)">Has Modified Attributes</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16777216" id="[% paneprefix %][% prefix %]_hp16777216" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="33554432" id="[% paneprefix %][% prefix %]_hp33554432" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_hp33554432n" onclick="toggleFilterCheckBox(this.id)">No Modified Attributes</td>
+                    </tr>
                   </table>
                 </td>
               </tr>
@@ -324,6 +330,12 @@
                       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="4194304" id="[% paneprefix %][% prefix %]_sp4194304" name="[% paneprefix %][% prefix %]_hostprop"></td>
                       <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="8388608" id="[% paneprefix %][% prefix %]_sp8388608" name="[% paneprefix %][% prefix %]_hostprop"></td>
                       <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp8388608n" onclick="toggleFilterCheckBox(this.id)">Outside Notification Period</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp16777216n" onclick="toggleFilterCheckBox(this.id)">Has Modified Attributes</td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="16777216" id="[% paneprefix %][% prefix %]_sp16777216" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" value="33554432" id="[% paneprefix %][% prefix %]_sp33554432" name="[% paneprefix %][% prefix %]_hostprop"></td>
+                      <td valign="top" align="left" class='filterName clickable' id="[% paneprefix %][% prefix %]_sp33554432n" onclick="toggleFilterCheckBox(this.id)">No Modified Attributes</td>
                     </tr>
                   </table>
                 </td>

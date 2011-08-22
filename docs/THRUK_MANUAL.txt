@@ -969,6 +969,7 @@ ex.:
     active_checks          = 0  # Enable/disable active checks
     notifications          = 0  # Enable/disable notifications
     submit_result          = 0  # Submit passive check result
+    reset_attributes       = 0  # Reset modified attributes
   </cmd_quick_status>
 
 

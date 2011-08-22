@@ -88,6 +88,7 @@ sub begin : Private {
                     active_checks          => 1,
                     notifications          => 1,
                     submit_result          => 1,
+                    reset_attributes       => 1,
         },
         cmd_defaults                    => {
                     ahas                   => 0,
@@ -113,6 +114,12 @@ sub begin : Private {
     };
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
+    }
+
+    for my $key (qw/cmd_quick_status cmd_defaults/) {
+        for my $key2 ( %{$defaults->{$key}} ) {
+            $c->config->{$key}->{$key2} = $defaults->{$key}->{$key2} unless defined $c->config->{$key}->{$key2};
+        }
     }
 
     # make some configs available in stash

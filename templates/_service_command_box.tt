@@ -44,6 +44,12 @@
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For This Service' title='Schedule Downtime For This Service' width="20" height="20"></td>
                 <td class='command'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Schedule downtime for this service</a></td>
               </tr>
+              [% IF service.modified_attributes_list.size > 0 %]
+              <tr class='command'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Reset Modified Attributes Of This Service' title='Reset Modified Attributes Of This Service' width="20" height="20"></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=155&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]'>Reset Modified Attributes</a></td>
+              </tr>
+              [% END %]
             </table>
             [% END %]
           </td>

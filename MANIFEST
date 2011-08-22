@@ -264,6 +264,8 @@ templates/cmd/cmd_typ_122.tt
 templates/cmd/cmd_typ_13.tt
 templates/cmd/cmd_typ_14.tt
 templates/cmd/cmd_typ_15.tt
+templates/cmd/cmd_typ_154.tt
+templates/cmd/cmd_typ_155.tt
 templates/cmd/cmd_typ_159.tt
 templates/cmd/cmd_typ_16.tt
 templates/cmd/cmd_typ_160.tt

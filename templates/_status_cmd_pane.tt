@@ -66,6 +66,9 @@
           [% IF c.config.cmd_quick_status.submit_result %]
           <option value="12" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/passiveonly.gif); }">submit passive check result</option>
           [% END %]
+          [% IF c.config.cmd_quick_status.reset_attributes %]
+          <option value="14" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif); }">reset modified attributes</option>
+          [% END %]
         </select>
       </td>
     </tr>

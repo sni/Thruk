@@ -93,6 +93,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         11 => 25,    # disable notifications
         12 => 87,    # submit passive check result
         13 => 2,     # delete single comment
+        14 => 154,   # reset modified attributes
     };
     my $service_quick_commands = {
         1  => 7,     # reschedule service check
@@ -108,6 +109,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         11 => 23,    # disable notifications
         12 => 30,    # submit passive check result
         13 => 4,     # delete single comment
+        14 => 155,   # reset modified attributes
     };
 
     # did we receive a quick command from the status page?

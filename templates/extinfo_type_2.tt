@@ -239,6 +239,10 @@
                             <td class='dataVar'>Last Update:</td>
                             <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>
+                          <tr>
+                            <td class='dataVar'>Modified Attributes</td>
+                            <td class='dataVal'>[% IF service.modified_attributes_list.size > 0 %][% service.modified_attributes_list.join(', ') %][% ELSE %]none[% END %]</td>
+                          </tr>
                           [% IF backends && backends.size > 1 %]
                           <tr>
                             <td class='dataVar'>Monitored by:</td>

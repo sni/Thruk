@@ -845,7 +845,7 @@ sub get_host_prop_filter {
     my @host_prop_filter;
     my @host_prop_filter_service;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 16777215;
+    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 67108863;
     my $host_prop_filtername = 'Any';
     if( $number > 0 ) {
         my @host_prop_filtername;
@@ -971,6 +971,16 @@ sub get_host_prop_filter {
             push @host_prop_filter_service, { host_in_notification_period => 0 };
             push @host_prop_filtername, 'Outside Notification Period';
         }
+        if( $bits[24] ) {    # 16777216 - Has Modified Attributes
+            push @host_prop_filter,         { modified_attributes      => { '>' => 0 } };
+            push @host_prop_filter_service, { host_modified_attributes => { '>' => 0 } };
+            push @host_prop_filtername, 'Has Modified Attributes';
+        }
+        if( $bits[25] ) {    # 33554432 - No Modified Attributes
+            push @host_prop_filter,         { modified_attributes => 0 };
+            push @host_prop_filter_service, { host_modified_attributes => 0 };
+            push @host_prop_filtername, 'No Modified Attributes';
+        }
 
         $host_prop_filtername = join( ' &amp; ', @host_prop_filtername );
     }
@@ -1047,7 +1057,7 @@ sub get_service_prop_filter {
     my @service_prop_filter;
     my @service_prop_filtername;
 
-    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 16777215;
+    $number = 0 if !defined $number or $number !~ m/^\d+$/mx or $number <= 0 or $number > 67108863;
     my $service_prop_filtername = 'Any';
     if( $number > 0 ) {
         my @bits = reverse split( /\ */mx, unpack( "B*", pack( "N", int($number) ) ) );
@@ -1147,6 +1157,14 @@ sub get_service_prop_filter {
         if( $bits[23] ) {    # 8388608 - Outside Notification Period
             push @service_prop_filter, { in_notification_period => 0 };
             push @service_prop_filtername, 'Outside Notification Period';
+        }
+        if( $bits[24] ) {    # 16777216 - Has Modified Attributes
+            push @service_prop_filter, { modified_attributes => { '>' => 0 } };
+            push @service_prop_filtername, 'Has Modified Attributes';
+        }
+        if( $bits[25] ) {    # 33554432 - No Modified Attributes
+            push @service_prop_filter, { modified_attributes => 0 };
+            push @service_prop_filtername, 'No Modified Attributes';
         }
 
         $service_prop_filtername = join( ' &amp; ', @service_prop_filtername );

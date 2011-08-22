@@ -210,7 +210,7 @@ sub get_hosts {
             notification_period notifications_enabled num_services_crit num_services_ok
             num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
             parents percent_state_change perf_data plugin_output process_performance_data
-            retry_interval scheduled_downtime_depth state state_type
+            retry_interval scheduled_downtime_depth state state_type modified_attributes_list
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
@@ -353,7 +353,7 @@ sub get_services {
             notes_url notes_url_expanded notification_interval notification_period
             notifications_enabled obsess_over_service percent_state_change perf_data
             plugin_output process_performance_data retry_interval scheduled_downtime_depth
-            state state_type
+            state state_type modified_attributes_list
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
