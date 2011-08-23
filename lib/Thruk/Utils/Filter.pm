@@ -189,7 +189,7 @@ sub full_uri {
     my $c    = shift;
     my $amps = shift || 0;
     carp("no c") unless defined $c;
-    my $uri = $c->request->uri();
+    my $uri = $c->request->uri_with($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
     if($amps) {
         $uri    =~ s/&amp;/&/gmx;
         $uri    =~ s/&/&amp;/gmx;
@@ -209,9 +209,7 @@ returns a correct uri but only the url part
 =cut
 sub short_uri {
     my $c = shift;
-    my $uri = uri_with($c, {
-        reload_nav => 'undef',
-    });
+    my $uri = uri_with($c, $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
     $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
     return $uri;
 }
@@ -231,6 +229,7 @@ sub uri_with {
     my $data = shift;
 
     for my $key (keys %{$data}) {
+        next unless defined $data->{$key};
         $data->{$key} = undef if $data->{$key} eq 'undef';
     }
 
