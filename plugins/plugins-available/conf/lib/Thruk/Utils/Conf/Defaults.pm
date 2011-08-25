@@ -45,7 +45,7 @@ sub get_thruk_cfg {
                 ajax_search_services                    => ['BOOL',   '1'],
                 ajax_search_servicegroups               => ['BOOL',   '1'],
                 ajax_search_timeperiods                 => ['BOOL',   '1'],
-                default_theme                           => ['LIST',   'Classic', Thruk::Utils::array2hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}) ],
+                default_theme                           => ['LIST',   'Thruk', Thruk::Utils::array2hash($c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}) ],
                 tmp_path                                => ['STRING', ''],
                 ssi_path                                => ['STRING', ''],
                 plugin_path                             => ['STRING', ''],
