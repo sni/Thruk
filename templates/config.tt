@@ -24,13 +24,13 @@
             <td align="left" class='reportSelectItem'>
               <select name='type'>
                 <option value='hosts'>Hosts</option>
-                <option value='hostdependencies'>Host Dependencies</option>
-                <option value='hostescalations'>Host Escalations</option>
+                <!--<option value='hostdependencies'>Host Dependencies</option>-->
+                <!--<option value='hostescalations'>Host Escalations</option>-->
                 <option value='hostgroups'>Host Groups</option>
                 <option value='services'>Services</option>
                 <option value='servicegroups'>Service Groups</option>
-                <option value='servicedependencies'>Service Dependencies</option>
-                <option value='serviceescalations'>Service Escalations</option>
+                <!--<option value='servicedependencies'>Service Dependencies</option>-->
+                <!--<option value='serviceescalations'>Service Escalations</option>-->
                 <option value='contacts'>Contacts</option>
                 <option value='contactgroups'>Contact Groups</option>
                 <option value='timeperiods'>Timeperiods</option>

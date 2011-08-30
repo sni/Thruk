@@ -15,13 +15,13 @@
                 <td align="left" class='reportSelectItem'>
                   <select name='type'>
                     <option value='hosts'[%               IF type == 'hosts'               %] selected [% END %]>Hosts</option>
-                    <option value='hostdependencies'[%    IF type == 'hostdependencies'    %] selected [% END %]>Host Dependencies</option>
-                    <option value='hostescalations'[%     IF type == 'hostescalations'     %] selected [% END %]>Host Escalations</option>
+                    <!--<option value='hostdependencies'[%    IF type == 'hostdependencies'    %] selected [% END %]>Host Dependencies</option>-->
+                    <!--<option value='hostescalations'[%     IF type == 'hostescalations'     %] selected [% END %]>Host Escalations</option>-->
                     <option value='hostgroups'[%          IF type == 'hostgroups'          %] selected [% END %]>Host Groups</option>
                     <option value='services'[%            IF type == 'services'            %] selected [% END %]>Services</option>
                     <option value='servicegroups'[%       IF type == 'servicegroups'       %] selected [% END %]>Service Groups</option>
-                    <option value='servicedependencies'[% IF type == 'servicedependencies' %] selected [% END %]>Service Dependencies</option>
-                    <option value='serviceescalations'[%  IF type == 'serviceescalations'  %] selected [% END %]>Service Escalations</option>
+                    <!--<option value='servicedependencies'[% IF type == 'servicedependencies' %] selected [% END %]>Service Dependencies</option>-->
+                    <!--<option value='serviceescalations'[%  IF type == 'serviceescalations'  %] selected [% END %]>Service Escalations</option>-->
                     <option value='contacts'[%            IF type == 'contacts'            %] selected [% END %]>Contacts</option>
                     <option value='contactgroups'[%       IF type == 'contactgroups'       %] selected [% END %]>Contact Groups</option>
                     <option value='timeperiods'[%         IF type == 'timeperiods'         %] selected [% END %]>Timeperiods</option>
