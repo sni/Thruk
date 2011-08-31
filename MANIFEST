@@ -197,6 +197,7 @@ t/TestUtils.pm
 t/themes.t
 t/view_Excel.t
 t/view_GD.t
+t/view_JSON.t
 t/view_TT.t
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
