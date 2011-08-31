@@ -14,6 +14,7 @@ logs/error.log
 logs/access.log
 logs/thruk.log
 thruk_local.conf
+menu_local.conf
 docs/development/git.txt
 docs/images
 script/thruk_update_docs.sh

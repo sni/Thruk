@@ -1365,6 +1365,71 @@ sub set_comments_and_downtimes {
     return;
 }
 
+##############################################
+
+=head2 add_view
+
+  add_view($options)
+
+add a new view to the display filter selection
+
+=cut
+sub add_view {
+    my $options = shift;
+
+    confess("options missing") unless defined $options;
+    confess("group missing")   unless defined $options->{'group'};
+    confess("name missing")    unless defined $options->{'name'};
+    confess("value missing")   unless defined $options->{'value'};
+    confess("url missing")     unless defined $options->{'url'};
+
+    $Thruk::Utils::Status::additional_views = {} unless defined $Thruk::Utils::Status::additional_views;
+
+    my $group = $Thruk::Utils::Status::additional_views->{$options->{'group'}};
+
+    $group = {
+        'name'    => $options->{'group'},
+        'options' => {},
+    } unless defined $group;
+
+    $group->{'options'}->{$options->{'name'}} = $options;
+    $Thruk::Utils::Status::additional_views->{$options->{'group'}} = $group;
+
+    return;
+}
+
+##############################################
+
+=head2 redirect_view
+
+  redirect_view($c)
+
+redirect to right url when switching displays
+
+=cut
+sub redirect_view {
+    my $c     = shift;
+    my $style = shift || 'detail';
+
+    my $new = 'status.cgi';
+    my $uri = $c->request->uri();
+    $uri =~ m/\/cgi\-bin\/(.*?\.cgi)/mx;
+    my $old = $1 || 'status.cgi';
+
+    VIEW_SEARCH:
+    for my $groupname (keys %{$c->stash->{'additional_views'}}) {
+        for my $optname (keys %{$c->stash->{'additional_views'}->{$groupname}->{'options'}}) {
+            if($c->stash->{'additional_views'}->{$groupname}->{'options'}->{$optname}->{'value'} eq $style) {
+                $new = $c->stash->{'additional_views'}->{$groupname}->{'options'}->{$optname}->{'url'};
+                last VIEW_SEARCH;
+            }
+        }
+    }
+    return if $old eq $new;
+
+    $uri    =~ s/$old/$new/gmx;
+    return $c->redirect($uri);
+}
 
 
 =head1 AUTHOR

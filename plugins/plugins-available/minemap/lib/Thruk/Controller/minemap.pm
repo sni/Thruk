@@ -2,7 +2,7 @@ package Thruk::Controller::minemap;
 
 use strict;
 use warnings;
-use Thruk 1.0.8;
+use Thruk 1.1.1;
 use Carp;
 use Data::Dumper;
 use parent 'Catalyst::Controller';
@@ -25,6 +25,12 @@ Thruk::Utils::Menu::insert_sub_item('Current Status', 'Service Groups', {
                                     'href'  => '/thruk/cgi-bin/minemap.cgi',
                                     'name'  => 'Mine Map',
                          });
+
+Thruk::Utils::Status::add_view({'group' => 'Mine Map',
+                                'name'  => 'Mine Map',
+                                'value' => 'minemap',
+                                'url'   => 'minemap.cgi'
+                            });
 
 Thruk->config->{'has_feature_minemap'} = 1;
 
@@ -56,10 +62,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     Thruk::Utils::Status::set_default_stash($c);
 
     my $style = $c->{'request'}->{'parameters'}->{'style'} || 'minemap';
+    $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
     if($style ne 'minemap') {
-        my $uri = $c->request->uri();
-        $uri    =~ s/minemap.cgi/status.cgi/gmx;
-        return $c->redirect($uri);
+        return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
     # which host to display?

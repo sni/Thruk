@@ -44,9 +44,12 @@
                 <option value="servicesummary"[% IF  style == 'summary'  && substyle == 'service' || style == 'servicesummary'  %] selected[% END %]>Summary</option>
                 <option value="servicegrid"[% IF     style == 'grid'    && substyle == 'service'  || style == 'servicegrid'     %] selected[% END %]>Grid</option>
               </optgroup>
-              [% IF c.config.defined('has_feature_minemap') && c.config.defined('has_feature_minemap') == 1 %]
-              <optgroup label="Mine Map">
-                <option value="minemap"[% IF style == 'minemap' %] selected[% END %]>Mine Map</option>
+              [% FOREACH groupname = additional_views.keys.sort %]
+              <optgroup label="[% groupname %]">
+                [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
+                [% opt = additional_views.$groupname.options.$optname %]
+                <option value="[% opt.value %]"[% IF style == opt.value %] selected[% END %]>[% opt.name %]</option>
+                [% END %]
               </optgroup>
               [% END %]
              </select>
