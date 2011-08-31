@@ -15,9 +15,9 @@
 <table border="1" class='filter' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
   <tr>
     <td class='filter'>
-      <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable">
+      <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable" width="100%">
         <tr>
-          <td valign="top" align="left" class='filterTitle' nowrap>
+          <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>
            [% IF loop.first %]
            <div id="[% paneprefix %][% prefix %]_filter_title">
             <a href="#" onClick="toggleFilterPane('[% paneprefix %]'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% paneprefix %][% prefix %]_filter_button_mini" alt="filter"></a>
@@ -29,7 +29,7 @@
            <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops %]">
            <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
           </td>
-          <td align="left" class='filterTitle' nowrap>
+          <td align="left" class='filterTitle filterDisplayTitle' nowrap>
            [% IF loop.first && show_form == '1' && show_substyle_selector == 1 %]
             <select name="style" id="[% paneprefix %][% prefix %]_style_selector">
               <optgroup label="Host">
@@ -75,7 +75,7 @@
                 <td class='filter'>
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
-                      <td valign="top" align="left" class='filterTitle' nowrap>Host Status Types:</td>
+                      <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Host Status Types:</td>
                       <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_ht" onclick="toggleFilterPaneSelector(this.id, 'hoststatustypes'); return false;"></td>
                     </tr>
                     <tr>
@@ -114,7 +114,7 @@
                 <td class='filter'>
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
-                      <td valign="top" align="left" class='filterTitle' nowrap>Host Properties:</td>
+                      <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Host Properties:</td>
                       <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_hp" onclick="toggleFilterPaneSelector(this.id, 'hostprops'); return false;"></td>
                     </tr>
                     <tr>
@@ -216,7 +216,7 @@
                 <td class='filter'>
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
-                      <td valign="top" align="left" class='filterTitle' nowrap>Service Status Types:</td>
+                      <td valign="top" align="left" class='filterTitle filterDisplayTitle' nowrap>Service Status Types:</td>
                       <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_st" onclick="toggleFilterPaneSelector(this.id, 'servicestatustypes'); return false;"></td>
                     </tr>
                     <tr>
@@ -259,7 +259,7 @@
                 <td class='filter'>
                   <table border="0" cellspacing="2" cellpadding="0">
                     <tr>
-                      <td valign="top" align="left" class='filterTitle'>Service Properties:</td>
+                      <td valign="top" align="left" class='filterTitle filterDisplayTitle'>Service Properties:</td>
                       <td align="right"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" name="update" id="[% paneprefix %][% prefix %]_accept_sp" onclick="toggleFilterPaneSelector(this.id, 'serviceprops'); return false;"></td>
                     </tr>
                     <tr>
