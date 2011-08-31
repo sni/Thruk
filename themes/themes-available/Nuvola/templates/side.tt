@@ -81,6 +81,7 @@
 [%+ menu_name %] = new dTree('[% menu_name %]');
 
 [% IF section.icon %]
+  [% icon = url_prefix _ section.icon %]
 [% ELSE %]
   [% IF section.name == 'General' %]
     [% icon = url_prefix _ 'thruk/themes/Nuvola/side/home.gif' %]
