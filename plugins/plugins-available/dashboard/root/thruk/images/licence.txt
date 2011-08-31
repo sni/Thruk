@@ -1,0 +1,42 @@
+--------------------------------------------------------------------------------
+The following icons are under the licence Creative Commons Attribution-Share Alike 3.0 Unported
+
+- server.png
+- server_ack.png
+- server_downtime.png
+- server_error.png
+- server_ok.png
+- server_unknown.png
+- server_warning.png
+- hostgroup.png
+
+source : http://commons.wikimedia.org/wiki/File:Gorilla-server.svg
+Authors : Erwan SEITE (SIGMA Informatique), George Boukeas, original Gorilla icon theme artwork by Jakub Steiner
+
+    You are free:
+
+        to share – to copy, distribute and transmit the work
+        to remix – to adapt the work
+
+    Under the following conditions:
+
+        attribution – You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
+        share alike – If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
+The following icons are under LGPL Licence
+
+- servicegroup.png 
+- dashboard.png
+
+AUTHOR:	Erwan SEITE (SIGMA Informatique), based on the work by Everaldo Coelho (Crystal Project Icons)
+SITE:	http://www.everaldo.com
+CONTACT: everaldo@everaldo.com
+LICENSE: LGPL
+
+Staff:
+Ingolfur Haraldsson (ingo@linpire.com)
+Luiz Claudio dos Santos (luiz@yellowicon.com)Rhandros Dembicki (rhandros@yellowicon.com)Paulo andre (paulo@yellowicon.com)Edson Farias (edson@yellowicon.com)Andre Souza (andre@yellowicon.com)
+--------------------------------------------------------------------------------

@@ -1,0 +1,86 @@
+/*
+################################################################
+#                     SIGMA Informatique
+################################################################
+#
+# AUTEUR :	SIGMA INFORMATIQUE
+#
+# OBJET  :	Dashboard plugin
+#
+# DESC   :	CSS for dashboard plugin
+#
+#
+################################################################
+# Copyright © 2011 Sigma Informatique. All rights reserved.
+# Copyright © 2010 Thruk Developer Team.
+# Copyright © 2009 Nagios Core Development Team and Community Contributors.
+# Copyright © 1999-2009 Ethan Galstad.
+################################################################
+*/
+.group_name {
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+table.dashboard_group {
+	border:2px solid black;
+	text-align: center;
+	width: 100%;
+}
+
+td.dashboard_group {
+	padding: 10px;
+	margin-down:10px;
+	padding: 10px;
+}
+
+table.group_ok {
+	background-color : #109d10;
+
+}
+
+table.group_warning {
+	background-color : #fdf200;
+}
+
+table.group_critical {
+	background-color : #f70000;
+}
+
+table.group_unknown {
+	background-color : #fd8f00;
+}
+
+table.group_downtime {
+	background-color : #4a99fc;
+}
+
+table.info_dashboard {
+	background-color : #c3c7d3;
+	margin: 0 auto;
+	margin-top: 3px;
+	border: 1px solid black;
+	padding: 4px;
+	padding-top: 10px;
+	width: 100%;
+}
+
+
+
+td.info_dashboard_data {
+	padding-bottom: 4px;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+td.info_dashboard_icon {
+	padding-top: 4px;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+
+
+

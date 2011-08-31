@@ -1,0 +1,16 @@
+################################################################
+#                     SIGMA Informatique
+################################################################
+#
+#
+# OBJECT  :	Dashboard Plugin
+#
+# DESC   :	New view for get stats on hostgroups and 
+#		servicegroups. tested with Thruk 1.0.8.
+#
+# PREREQUISITE : List::Compare
+#
+#
+################################################################
+# Copyright (c) 2011 Sigma Informatique. All rights reserved.
+################################################################

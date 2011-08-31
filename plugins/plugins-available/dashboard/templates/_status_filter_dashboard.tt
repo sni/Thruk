@@ -1,0 +1,124 @@
+﻿<!--
+################################################################
+#                     SIGMA Informatique
+################################################################
+#
+# AUTEUR :	SIGMA INFORMATIQUE
+#
+# OBJET  :	Dashboard plugin
+#
+# DESC   :	Overload _status_filter for delete some filters on display filter
+#
+#
+################################################################
+# Copyright © 2011 Sigma Informatique. All rights reserved.
+# Copyright © 2010 Thruk Developer Team.
+# Copyright © 2009 Nagios Core Development Team and Community Contributors.
+# Copyright © 1999-2009 Ethan Galstad.
+################################################################
+-->
+
+[% SET show_filter_table = 0 IF hidesearch == "1" %]
+[% SET show_filter_table = 1 IF hidesearch == "2" %]
+<input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;">
+[% IF show_form %]
+<form action="[% uri(c) %]" method="GET" id="[% paneprefix %]filterForm">
+<input type="hidden" name="nav" value="[% nav %]">
+[% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
+<input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
+<input type="hidden" name="hidetop" id="hidetop" value="[% hidetop %]">
+[% END %]
+<table id="[% paneprefix %]all_filter_table" style="display:[% IF show_filter_table %][% ELSE %]none[% END %];" border=0 cellspacing=0 cellpadding=0 onclick="resetRefresh()"><tr>
+[% FOR search = searches.$paneprefix %]
+[% SET prefix = 's' _ loop.index %]
+<td valign="top" class="filter_table">
+<table border="1" class='filter' cellspacing="0" cellpadding="0" id="[% paneprefix %][% prefix %]_filter_pane">
+  <tr>
+    <td class='filter'>
+      <table border="0" cellspacing="2" cellpadding="0" id="[% paneprefix %][% prefix %]_filterTable">
+        <tr>
+          <td valign="top" align="left" class='filterTitle' nowrap>
+           [% IF loop.first %]
+           <div id="[% paneprefix %][% prefix %]_filter_title">
+            <a href="#" onClick="toggleFilterPane('[% paneprefix %]'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="filter_button_mini" id="[% paneprefix %][% prefix %]_filter_button_mini" alt="filter"></a>
+            Display Filters:
+           </div>
+           [% END %]
+		   <input type="hidden" name="[% paneprefix %][% prefix %]_hoststatustypes" value="[% search.hoststatustypes %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_servicestatustypes" value="[% search.servicestatustypes %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_hostprops" value="[% search.hostprops %]">
+           <input type="hidden" name="[% paneprefix %][% prefix %]_serviceprops" value="[% search.serviceprops %]">
+          </td>
+          <td align="left" class='filterTitle' nowrap>
+           [% IF loop.first && show_form == '1' && show_substyle_selector == 1 %]
+            <select name="style" id="[% paneprefix %][% prefix %]_style_selector">
+			  [% IF substyle == 'host' %]
+              <optgroup label="Host">
+                <option value="hostoverview"[% IF style == 'overview' && substyle == 'host' || style == 'hostoverview' %] selected[% END %]>Overview</option>
+              </optgroup>
+			  [% END %]
+			  [% IF substyle == 'service' %]
+              <optgroup label="Service">
+                <option value="serviceoverview"[% IF style == 'overview' && substyle == 'service' || style == 'serviceoverview' %] selected[% END %]>Overview</option>
+              </optgroup>
+			  [% END %]
+             </select>
+           [% END %]
+          </td>
+          <td align="right">
+            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/accept.png" style="display:[% IF loop.first %][% ELSE %]none[% END %];" name="update" id="[% paneprefix %][% prefix %]_btn_accept_search">
+            <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
+          </td>
+          <td rowspan=99 align="right" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
+          </td>
+        </tr>
+
+        [% FOR s = search.text_filter %]
+        [% IF ! enable_shinken_features && s.type == 'priority' %]
+          [% NEXT %]
+        [% END %]
+        <tr>
+          <td class='filterName' nowrap style="vertical-align: inherit;">
+            <select name="[% paneprefix %][% prefix %]_type" id="[% paneprefix %][% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
+			  [% IF substyle == 'host' %]
+              <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
+			  [% END %]
+			  [% IF substyle == 'service' %]
+              <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
+			  [% END %]
+            </select><select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to">
+              <option value="~"[% IF  s.op == '~'  %] selected[% END %]>~</option>
+              <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
+              <option value="="[% IF  s.op == '='  %] selected[% END %]>=</option>
+              <option value="!="[% IF s.op == '!=' %] selected[% END %]>!=</option>
+            </select>
+          </td>
+          <td align="left" nowrap class='filterValueInput' style="vertical-align: inherit;">
+            <input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this)"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]display: block; visibility: visible;[% END %]">
+          </td>
+		  <td align="right" class='filterValueNoHighlight'><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
+            <script type="text/javascript">
+            <!--
+              verify_op("[% paneprefix %][% prefix %]_[% loop.index %]_ts");
+            -->
+            </script>
+          </td>
+        </tr>
+        [% END %]
+		<!-- NEW FILTER -->
+        <tr>
+          <td colspan=3 class='newfilter' align="center" id="[% paneprefix %][% prefix %]_add_new_filter_button" onClick="add_new_filter(this.id, '[% paneprefix %]filterTable')">
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter">
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</td>
+[% END %]
+</tr></table>
+[% IF show_form %]
+</form>
+[% END %]
