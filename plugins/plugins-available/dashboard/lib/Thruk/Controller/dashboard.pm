@@ -55,20 +55,8 @@ Catalyst Controller.
 sub index : Path : Args(0) : MyAction('AddDefaults') : Regex('thruk\/cgi\-bin\/dashboard\.cgi') {
 my( $self, $c ) = @_;
 
-
-
-     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
+    my $style = 'overview';
  
-
-    if( $style eq '' ) {
-        if( defined $c->{'request'}->{'parameters'}->{'hostgroup'} and $c->{'request'}->{'parameters'}->{'hostgroup'} ne '' ) {
-            $style = 'overview';
-        }
-        if( defined $c->{'request'}->{'parameters'}->{'servicegroup'} and $c->{'request'}->{'parameters'}->{'servicegroup'} ne '' ) {
-            $style = 'overview';
-        }
-    }
-
     my $action = $c->{'request'}->{'parameters'}->{'action'} || '';
     if(defined $c->{'request'}->{'parameters'}->{'addb'} or defined $c->{'request'}->{'parameters'}->{'saveb'}) {
         return $self->_process_bookmarks($c);
@@ -81,8 +69,6 @@ my( $self, $c ) = @_;
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
 
-
-
     $c->stash->{title}        = 'Current Network Status';
     $c->stash->{infoBoxTitle} = 'Current Network Status';
     $c->stash->{page}         = 'status';
@@ -93,23 +79,15 @@ my( $self, $c ) = @_;
 	if($c->stash->{'hostgroup'}) {
         $c->stash->{substyle} = 'host';
     }
-    elsif($c->stash->{'servicegroup'}) {
-        $c->stash->{substyle} = 'service';
-    }
-    elsif( $style =~ m/^host/mx ) {
-        $c->stash->{substyle} = 'host';
-    }
-    elsif( $style =~ m/^service/mx ) {
+    else {
         $c->stash->{substyle} = 'service';
     }
 
-    
-	$style = 'dashboard';
     $self->_process_dashboard_page($c);
     	
 	Thruk::Utils::set_paging_steps($c, ['*16', 32, 48, 96]);
 	
-    $c->stash->{template} = 'status_' . $style . '.tt';
+    $c->stash->{template} = 'status_dashboard.tt';
 
     Thruk::Utils::ssi_include($c);
 
