@@ -16,9 +16,9 @@ add_section('name' => 'Dashboard', 'icon' => '/thruk/plugins/dashboard/thruk/ima
   add_link('icon'	=> '/thruk/plugins/dashboard/thruk/images/hostgroup_16.png', 'href'  => '/thruk/cgi-bin/dashboard.cgi?hostgroup=all&style=overview','name'  => 'DB Hostgroups','roles' => [qw/authorized_for_system_information/]);
 
 
-
-
-
 ################################################################
-# Copyright (c) 2011 Sigma Informatique. All rights reserved.
+# Copyright © 2011 Sigma Informatique. All rights reserved.
+# Copyright © 2010 Thruk Developer Team.
+# Copyright © 2009 Nagios Core Development Team and Community Contributors.
+# Copyright © 1999-2009 Ethan Galstad.
 ################################################################
