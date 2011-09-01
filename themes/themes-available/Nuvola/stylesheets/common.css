@@ -126,6 +126,11 @@ vertical-align: top;
 width: 240px;
 }
 
+TD.filterDisplayTitle {
+  width: inherit;
+  text-align: left;
+}
+
 TABLE.data
 {
 margin: 2px;

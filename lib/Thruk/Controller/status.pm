@@ -36,10 +36,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                             'combined'   => 1,
                         };
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
-    if($style eq 'minemap' and exists $c->config->{'has_feature_minemap'} and $c->config->{'has_feature_minemap'} == 1) {
-        my $uri = $c->request->uri();
-        $uri    =~ s/status.cgi/minemap.cgi/gmx;
-        return $c->redirect($uri);
+
+    $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
+    if($style ne '' and ! defined $allowed_subpages->{$style}) {
+        return if Thruk::Utils::Status::redirect_view($c, $style);
     }
 
     if( $style eq '' ) {

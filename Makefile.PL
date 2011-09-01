@@ -137,6 +137,11 @@ for my $link (@cur_t_links) {
     }
 }
 
+# cleanup old links
+for my $rootlink (glob("./root/thruk/plugins/*")) {
+    unlink($rootlink) unless -e $rootlink;
+}
+
 # touch the Makefile, so Extutils skips its broken 'check_manifest()'
 `touch Makefile`;
 
