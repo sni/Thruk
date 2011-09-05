@@ -37,7 +37,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                         };
     my $style = $c->{'request'}->{'parameters'}->{'style'} || '';
 
-    $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
     if($style ne '' and ! defined $allowed_subpages->{$style}) {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
