@@ -250,6 +250,9 @@ sub begin : Private {
     $c->config->{'logo_path_prefix'} = exists $c->config->{'logo_path_prefix'} ? $c->config->{'logo_path_prefix'} : $c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/logos/';
     $c->stash->{'logo_path_prefix'}  = $c->config->{'logo_path_prefix'};
 
+    # additional views on status pages
+    $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
+
     return 1;
 }
 

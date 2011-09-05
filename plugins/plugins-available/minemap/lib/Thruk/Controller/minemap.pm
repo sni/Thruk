@@ -62,7 +62,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     Thruk::Utils::Status::set_default_stash($c);
 
     my $style = $c->{'request'}->{'parameters'}->{'style'} || 'minemap';
-    $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
     if($style ne 'minemap') {
         return if Thruk::Utils::Status::redirect_view($c, $style);
     }
