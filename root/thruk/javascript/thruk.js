@@ -1717,9 +1717,7 @@ function add_new_filter(search_prefix, table) {
                              'Execution Time',
                              '% State Change',
                              'Check Period',
-							 // START SIGMA
-							 'Downtime Duration',
-							 // END SIGMA
+                             'Downtime Duration',
                              'Notification Period'
                             );
   if(enable_shinken_features) {
@@ -2003,9 +2001,7 @@ function verify_op(event) {
          && selValue != 'latency'
          && selValue != 'execution time'
          && selValue != '% state change'
-		 // START SIGMA
-		 && selValue != 'downtime duration'
-		 // END SIGMA
+         && selValue != 'downtime duration'
          && selValue != 'priority') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
@@ -2212,6 +2208,7 @@ var ajax_search = {
                || search_type == 'latency'
                || search_type == 'execution time'
                || search_type == '% state change'
+               || search_type == 'downtime duration'
                || search_type == 'priority' ) {
                 ajax_search.search_type = 'none';
             }

@@ -754,14 +754,12 @@ sub single_search {
             push @hostfilter,    { check_period => { $op => $value } };
             push @servicefilter, { check_period => { $op => $value } };
         }
-		# START SIGMA
-		# Filter on the downtime duration
-		elsif ( $filter->{'type'} eq 'downtime duration' ) {
+        # Filter on the downtime duration
+        elsif ( $filter->{'type'} eq 'downtime duration' ) {
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_downtimes_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
         }
-		# END SIGMA
         elsif ( $filter->{'type'} eq 'notification period' ) {
             push @hostfilter,    { notification_period => { $op => $value } };
             push @servicefilter, { notification_period => { $op => $value } };
@@ -1440,7 +1438,6 @@ sub redirect_view {
 }
 
 
-# --- START SIGMA
 # It's the method "get_comments_filter" adaptated
 =head2 get_downtimes_filter
 
@@ -1451,72 +1448,71 @@ returns filter for downtime duration
 =cut
 
 sub get_downtimes_filter {
-	my($c, $op, $value) = @_;
-	my(@hostfilter, @servicefilter);
+    my($c, $op, $value) = @_;
+    my(@hostfilter, @servicefilter);
 
-	return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
+    return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
 
-	if($value eq '') {
-		push @hostfilter,          { -or => [ downtimes => { $op => { '!=' => undef }} ]};
-		push @servicefilter,       { -or => [ downtimes => { $op => { '!=' => undef }} ]};
-	}
-	else {
-		# The value is on hours, convert to seconds
-		$value = $value * 3600;
-		
-		# Get all the downtimes
-		my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
-		my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
-		
-		# If no downtimes returned
-		if(scalar @downtime_ids == 0) {
-			@downtime_ids = (-1);
-		}
-		else {
-			# Filter on the downtime duration
-			foreach my $downtime (@{$downtimes}) {
-				my $downtime_duration = $downtime->{end_time} - $downtime->{start_time};
-				  
-				if ( $op eq '=' ) {
-					if ( not $downtime_duration == $value) {
-						$downtime = undef;
-					}
-				} elsif ( $op eq '>=' ) {
-					if ( not $downtime_duration >= $value) {
-						$downtime = undef;
-					}
-				} elsif ( $op eq '<=' ) {
-					if ( not $downtime_duration <= $value ) {
-						$downtime = undef;
-					} 
-				} elsif ( $op eq '!=' ) {
-					if ( not $downtime_duration != $value ) {
-						$downtime = undef;
-					}
-				}
-			}
-			@downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
-		}
-		
-		# Supress undef value if is present and not the only result, or replace undef by -1 if no results
-		if (scalar(@downtime_ids) == 1 and $downtime_ids[0] == undef) {
-			$downtime_ids[0] = -1;
-		} elsif ($downtime_ids[0] == undef or scalar(@downtime_ids) == 0) {
-			splice (@downtime_ids, 0, 1);
-		}
+    if($value eq '') {
+        push @hostfilter,          { -or => [ downtimes => { $op => { '!=' => undef }} ]};
+        push @servicefilter,       { -or => [ downtimes => { $op => { '!=' => undef }} ]};
+    }
+    else {
+        # The value is on hours, convert to seconds
+        $value = $value * 3600;
 
-		my $downtime_op = '>=';
-		my $downtime_count = scalar(@downtime_ids);
-		
-		$c->stash->{downtime_filter_count} = $downtime_count;
-			
-		push @hostfilter,          { -or => [ downtimes => { $downtime_op => \@downtime_ids } ]};
-		push @servicefilter,       { -or => [ host_downtimes => { $downtime_op => \@downtime_ids }, downtimes => { $downtime_op => \@downtime_ids } ]};
-	}
+        # Get all the downtimes
+        my $downtimes    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ) ] );
+        my @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
 
-	return(\@hostfilter, \@servicefilter);
+        # If no downtimes returned
+        if(scalar @downtime_ids == 0) {
+            @downtime_ids = (-1);
+        }
+        else {
+            # Filter on the downtime duration
+            foreach my $downtime (@{$downtimes}) {
+                my $downtime_duration = $downtime->{end_time} - $downtime->{start_time};
+
+                if ( $op eq '=' ) {
+                    if ( not $downtime_duration == $value) {
+                    $downtime = undef;
+                    }
+                } elsif ( $op eq '>=' ) {
+                    if ( not $downtime_duration >= $value) {
+                        $downtime = undef;
+                    }
+                } elsif ( $op eq '<=' ) {
+                    if ( not $downtime_duration <= $value ) {
+                        $downtime = undef;
+                    } 
+                } elsif ( $op eq '!=' ) {
+                    if ( not $downtime_duration != $value ) {
+                        $downtime = undef;
+                    }
+                }
+            }
+            @downtime_ids = sort keys %{ Thruk::Utils::array2hash([@{$downtimes}], 'id') };
+        }
+
+        # Supress undef value if is present and not the only result, or replace undef by -1 if no results
+        if (scalar(@downtime_ids) == 1 and $downtime_ids[0] == undef) {
+            $downtime_ids[0] = -1;
+        } elsif ($downtime_ids[0] == undef or scalar(@downtime_ids) == 0) {
+            splice (@downtime_ids, 0, 1);
+        }
+
+        my $downtime_op = '>=';
+        my $downtime_count = scalar(@downtime_ids);
+
+        $c->stash->{downtime_filter_count} = $downtime_count;
+
+        push @hostfilter,          { -or => [ downtimes => { $downtime_op => \@downtime_ids } ]};
+        push @servicefilter,       { -or => [ host_downtimes => { $downtime_op => \@downtime_ids }, downtimes => { $downtime_op => \@downtime_ids } ]};
+    }
+
+    return(\@hostfilter, \@servicefilter);
 }
-# --- END SIGMA
 
 
 =head1 AUTHOR
