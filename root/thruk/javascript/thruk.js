@@ -1717,6 +1717,9 @@ function add_new_filter(search_prefix, table) {
                              'Execution Time',
                              '% State Change',
                              'Check Period',
+							 // START SIGMA
+							 'Downtime Duration',
+							 // END SIGMA
                              'Notification Period'
                             );
   if(enable_shinken_features) {
@@ -2000,6 +2003,9 @@ function verify_op(event) {
          && selValue != 'latency'
          && selValue != 'execution time'
          && selValue != '% state change'
+		 // START SIGMA
+		 && selValue != 'downtime duration'
+		 // END SIGMA
          && selValue != 'priority') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
