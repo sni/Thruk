@@ -62,7 +62,10 @@ Catalyst Controller.
 sub index : Path : Args(0) : MyAction('AddDefaults') : Regex('thruk\/cgi\-bin\/dashboard\.cgi') {
 my( $self, $c ) = @_;
 
-    my $style = 'overview';
+    my $style = $c->{'request'}->{'parameters'}->{'style'} || 'dashboard';
+    if($style ne 'dashboard') {
+        return if Thruk::Utils::Status::redirect_view($c, $style);
+    }
 
     my $action = $c->{'request'}->{'parameters'}->{'action'} || '';
     if(defined $c->{'request'}->{'parameters'}->{'addb'} or defined $c->{'request'}->{'parameters'}->{'saveb'}) {
