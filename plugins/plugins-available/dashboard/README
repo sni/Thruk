@@ -3,17 +3,17 @@
 ################################################################
 
 
-OBJECT  :	Dashboard Plugin
+OBJECT :   Dashboard Plugin
 
-DESC   :	New view for get stats on hostgroups and servicegroups. tested with Thruk 1.0.8.
+DESC   :    New view for get stats on hostgroups and servicegroups. tested with Thruk 1.0.8.
 
 PREREQUISITE : List::Compare
 
 LINKS : Exemple links to add on menu :
 
 add_section('name' => 'Dashboard', 'icon' => '/thruk/plugins/dashboard/thruk/images/dashboard.png');
-  add_link('icon'	=> '/thruk/plugins/dashboard/thruk/images/servicegroup_16.png', 'href'  => '/thruk/cgi-bin/dashboard.cgi?servicegroup=all&style=overview', 'name'  => 'DB Servicegroups', 'roles' => [qw/authorized_for_system_information/]);
-  add_link('icon'	=> '/thruk/plugins/dashboard/thruk/images/hostgroup_16.png', 'href'  => '/thruk/cgi-bin/dashboard.cgi?hostgroup=all&style=overview','name'  => 'DB Hostgroups','roles' => [qw/authorized_for_system_information/]);
+  add_link('icon'  => '/thruk/plugins/dashboard/thruk/images/servicegroup_16.png', 'href'  => '/thruk/cgi-bin/dashboard.cgi?servicegroup=all&style=overview', 'name'  => 'DB Servicegroups', 'roles' => [qw/authorized_for_system_information/]);
+  add_link('icon'  => '/thruk/plugins/dashboard/thruk/images/hostgroup_16.png', 'href'  => '/thruk/cgi-bin/dashboard.cgi?hostgroup=all&style=overview','name'  => 'DB Hostgroups','roles' => [qw/authorized_for_system_information/]);
 
 
 ################################################################

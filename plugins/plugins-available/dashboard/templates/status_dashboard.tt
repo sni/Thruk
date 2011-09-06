@@ -3,11 +3,11 @@
 #                     SIGMA Informatique
 ################################################################
 #
-# AUTEUR :	SIGMA INFORMATIQUE
+# AUTEUR :    SIGMA INFORMATIQUE
 #
-# OBJET  :	Dashboard plugin
+# OBJET  :    Dashboard plugin
 #
-# DESC   :	Template for dashboard plugin, inspired by overview template
+# DESC   :    Template for dashboard plugin, inspired by overview template
 #
 #
 ################################################################
@@ -98,80 +98,80 @@
     <div align="center">[% PROCESS _pager.tt %]</div>
 
     <div align="center">
-	  <input type=hidden name=substyle id=substyle value=[% substyle %] />
+      <input type=hidden name=substyle id=substyle value=[% substyle %] />
       <table border="0" cellpadding="10">
         <tr>
           [% FOR group IN data %]
-			[% SET stats_services = group.services %]
-			[% SET stats_hosts = group.hosts %]
+            [% SET stats_services = group.services %]
+            [% SET stats_hosts = group.hosts %]
           <td valign="top" align="center">
             [% IF substyle == 'host' %]
-				[% IF stats_services.total == (stats_services.ok_scheduled + stats_services.warning_scheduled + stats_services.critical_scheduled + stats_services.unknown_scheduled) || stats_hosts.total == stats_hosts.scheduled %]
-					[% SET color_table = 'group_downtime' %]
-				[% ELSIF stats_hosts.down_no_ack_and_no_scheduled != 0 || ((stats_hosts.up_and_scheduled == stats_hosts.up) && (stats_hosts.down_and_no_scheduled != 0)) %]
-					[% SET color_table = 'group_critical' %]
-				[% ELSIF stats_hosts.unreachable_no_ack_and_no_scheduled != 0 || ((stats_hosts.up_and_scheduled  == stats_hosts.up) && (stats_hosts.unreachable_and_no_scheduled != 0)) %]
-					[% SET color_table = 'group_unknown' %]
-				[% ELSE %]
-					[% SET color_table = 'group_ok' %]
-				[% END %]
-			[% ELSIF substyle == 'service' %]
-				[% IF stats_services.total == (stats_services.ok_scheduled + stats_services.warning_scheduled + stats_services.critical_scheduled + stats_services.unknown_scheduled) || stats_hosts.total == stats_hosts.scheduled %]
-					[% SET color_table = 'group_downtime' %]
-				[% ELSIF stats_services.c_no_ack_no_scheduled_and_host_no_scheduled != 0 || ((stats_services.ok_scheduled  == stats_services.ok) && (stats_services.c_ack_no_scheduled_and_host_no_scheduled != 0)) %]
-					[% SET color_table = 'group_critical' %]
-				[% ELSIF stats_services.w_no_ack_no_scheduled_and_host_no_scheduled != 0 || ((stats_services.ok_scheduled  == stats_services.ok) && (stats_services.w_ack_no_scheduled_and_host_no_scheduled != 0)) %]
-					[% SET color_table = 'group_warning' %]
-				[% ELSIF stats_services.u_no_ack_no_scheduled_and_host_no_scheduled != 0 || ((stats_services.ok_scheduled  == stats_services.ok) && (stats_services.u_ack_no_scheduled_and_host_no_scheduled != 0)) %]
-					[% SET color_table = 'group_unknown' %]
-				[% ELSE %]
-					[% SET color_table = 'group_ok' %]
-				[% END %]
-			[% END %]
-			
+                [% IF stats_services.total == (stats_services.ok_scheduled + stats_services.warning_scheduled + stats_services.critical_scheduled + stats_services.unknown_scheduled) || stats_hosts.total == stats_hosts.scheduled %]
+                    [% SET color_table = 'group_downtime' %]
+                [% ELSIF stats_hosts.down_no_ack_and_no_scheduled != 0 || ((stats_hosts.up_and_scheduled == stats_hosts.up) && (stats_hosts.down_and_no_scheduled != 0)) %]
+                    [% SET color_table = 'group_critical' %]
+                [% ELSIF stats_hosts.unreachable_no_ack_and_no_scheduled != 0 || ((stats_hosts.up_and_scheduled  == stats_hosts.up) && (stats_hosts.unreachable_and_no_scheduled != 0)) %]
+                    [% SET color_table = 'group_unknown' %]
+                [% ELSE %]
+                    [% SET color_table = 'group_ok' %]
+                [% END %]
+            [% ELSIF substyle == 'service' %]
+                [% IF stats_services.total == (stats_services.ok_scheduled + stats_services.warning_scheduled + stats_services.critical_scheduled + stats_services.unknown_scheduled) || stats_hosts.total == stats_hosts.scheduled %]
+                    [% SET color_table = 'group_downtime' %]
+                [% ELSIF stats_services.c_no_ack_no_scheduled_and_host_no_scheduled != 0 || ((stats_services.ok_scheduled  == stats_services.ok) && (stats_services.c_ack_no_scheduled_and_host_no_scheduled != 0)) %]
+                    [% SET color_table = 'group_critical' %]
+                [% ELSIF stats_services.w_no_ack_no_scheduled_and_host_no_scheduled != 0 || ((stats_services.ok_scheduled  == stats_services.ok) && (stats_services.w_ack_no_scheduled_and_host_no_scheduled != 0)) %]
+                    [% SET color_table = 'group_warning' %]
+                [% ELSIF stats_services.u_no_ack_no_scheduled_and_host_no_scheduled != 0 || ((stats_services.ok_scheduled  == stats_services.ok) && (stats_services.u_ack_no_scheduled_and_host_no_scheduled != 0)) %]
+                    [% SET color_table = 'group_unknown' %]
+                [% ELSE %]
+                    [% SET color_table = 'group_ok' %]
+                [% END %]
+            [% END %]
+            
             <div class='status'>
               <table border="1" class='dashboard_group [% color_table %]'>
-				<tr>
-					<td class='group_name'>[% IF substyle == 'host' %]<a href='extinfo.cgi?type=5&amp;hostgroup=[% group.name | uri %]'>[% ELSIF substyle == 'service' %]<a href='extinfo.cgi?type=8&amp;servicegroup=[% group.name | uri %]'>[% END %][% group.name %]</a></td>
-				</tr>
-				<tr>
-					<td class='dashboard_group'>
-						<table class='info_dashboard'>
-							<tr>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/recovery.png' border="0" width="20" height="20" alt='OK Services' title='OK Services'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/warning.png' border="0" width="20" height="20" alt='Warning Services' title='Warning Services'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/critical.png' border="0" width="20" height="20" alt='Critical Services' title='Critical Services'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/unknown.png' border="0" width="20" height="20" alt='Unknow Services' title='Unknow Services'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" width="20" height="20" alt='Acknowledged Services' title='Acknowledged Services'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" width="20" height="20" alt='Scheduled Services' title='Scheduled Services'></td>
-							</tr>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=2&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.ok %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=4&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.warning %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=16&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.critical %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=8&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.unknown %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=4&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.acknowledged %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=1&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.scheduled %]</a></td>
-							<tr>
-							</tr>
-							<tr>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_ok.png' border="0" width="20" height="20" alt='OK Hosts' title='OK Hosts'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_warning.png' border="0" width="20" height="20" alt='Warning Hosts' title='Warning Hosts'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_error.png' border="0" width="20" height="20" alt='Critical Hosts' title='Critical Hosts'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_unknown.png' border="0" width="20" height="20" alt='Unknow Hosts' title='Unknow Hosts'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_ack.png' border="0" width="20" height="20" alt='Acknowledged Hosts' title='Acknowledged Hosts'></td>
-								<td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_downtime.png' border="0" width="20" height="20" alt='Scheduled Hosts' title='Scheduled Hosts'></td>
-							</tr>
-							<tr>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=2&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.up %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=1024&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.flapping %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=4&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.down %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=8&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.unreachable %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=4&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.acknowledged %]</a></td>
-								<td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=1&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.scheduled %]</a></td>
-							</tr>
-						</table>
-					</td>
-				</tr>
+                <tr>
+                    <td class='group_name'>[% IF substyle == 'host' %]<a href='extinfo.cgi?type=5&amp;hostgroup=[% group.name | uri %]'>[% ELSIF substyle == 'service' %]<a href='extinfo.cgi?type=8&amp;servicegroup=[% group.name | uri %]'>[% END %][% group.name %]</a></td>
+                </tr>
+                <tr>
+                    <td class='dashboard_group'>
+                        <table class='info_dashboard'>
+                            <tr>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/recovery.png' border="0" width="20" height="20" alt='OK Services' title='OK Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/warning.png' border="0" width="20" height="20" alt='Warning Services' title='Warning Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/critical.png' border="0" width="20" height="20" alt='Critical Services' title='Critical Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/unknown.png' border="0" width="20" height="20" alt='Unknow Services' title='Unknow Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ack.gif' border="0" width="20" height="20" alt='Acknowledged Services' title='Acknowledged Services'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" width="20" height="20" alt='Scheduled Services' title='Scheduled Services'></td>
+                            </tr>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=2&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.ok %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=4&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.warning %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=16&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.critical %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=8&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.unknown %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=4&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.acknowledged %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=1&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_services.scheduled %]</a></td>
+                            <tr>
+                            </tr>
+                            <tr>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_ok.png' border="0" width="20" height="20" alt='OK Hosts' title='OK Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_warning.png' border="0" width="20" height="20" alt='Warning Hosts' title='Warning Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_error.png' border="0" width="20" height="20" alt='Critical Hosts' title='Critical Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_unknown.png' border="0" width="20" height="20" alt='Unknow Hosts' title='Unknow Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_ack.png' border="0" width="20" height="20" alt='Acknowledged Hosts' title='Acknowledged Hosts'></td>
+                                <td class='info_dashboard_icon'><img src='[% url_prefix %]thruk/plugins/dashboard/thruk/images/server_downtime.png' border="0" width="20" height="20" alt='Scheduled Hosts' title='Scheduled Hosts'></td>
+                            </tr>
+                            <tr>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=2&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.up %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=1024&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.flapping %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=4&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.down %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=8&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.unreachable %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=4&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.acknowledged %]</a></td>
+                                <td class='info_dashboard_data'><a href='status.cgi?nav=&hidesearch=2&hidetop=&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=1&dfl_s0_serviceprops=0&style=detail&update.x=8&update.y=8&dfl_s0_serviceprop=1&dfl_s0_type=[% IF substyle == "host" %]hostgroup[% ELSIF substyle == "service" %]servicegroup[% END %]&dfl_s0_op=%3D&dfl_s0_value=[% group.name %]&dfl_s0_value_sel=5'>[% stats_hosts.scheduled %]</a></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
               </table>
             </div>
           </td>
