@@ -32,6 +32,13 @@ use List::MoreUtils;
 use Data::Dumper;
 use Thruk::Backend::Provider::DashboardLivestatus;
 
+######################################
+# add new view item
+Thruk::Utils::Status::add_view({'group' => 'Dashboard',
+                                'name'  => 'Dashboard',
+                                'value' => 'dashboard',
+                                'url'   => 'dashboard.cgi'
+                            });
 
 =head1 NAME
 
