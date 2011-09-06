@@ -128,7 +128,7 @@
                     [% SET color_table = 'group_ok' %]
                 [% END %]
             [% END %]
-            
+
             <div class='status'>
               <table border="1" class='dashboard_group [% color_table %]'>
                 <tr>

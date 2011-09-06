@@ -1485,7 +1485,7 @@ sub get_downtimes_filter {
                 } elsif ( $op eq '<=' ) {
                     if ( not $downtime_duration <= $value ) {
                         $downtime = undef;
-                    } 
+                    }
                 } elsif ( $op eq '!=' ) {
                     if ( not $downtime_duration != $value ) {
                         $downtime = undef;

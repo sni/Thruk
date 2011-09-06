@@ -28,7 +28,7 @@ Authors : Erwan SEITE (SIGMA Informatique), George Boukeas, original Gorilla ico
 
 The following icons are under LGPL Licence
 
-- servicegroup.png 
+- servicegroup.png
 - dashboard.png
 
 AUTHOR:	Erwan SEITE (SIGMA Informatique), based on the work by Everaldo Coelho (Crystal Project Icons)
