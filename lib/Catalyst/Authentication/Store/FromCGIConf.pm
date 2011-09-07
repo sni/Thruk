@@ -35,20 +35,36 @@ sub find_user {
     # add roles from cgi_conf
     my $possible_roles = [
                       'authorized_for_all_host_commands',
+                      'authorized_for_all_host_actions',
                       'authorized_for_all_hosts',
+                      'authorized_for_all_service_actions',
                       'authorized_for_all_service_commands',
                       'authorized_for_all_services',
                       'authorized_for_configuration_information',
                       'authorized_for_system_commands',
-                      'authorized_for_system_information'
+                      'authorized_for_system_information',
+					  'authorized_for_host_commands',
+                      'authorized_for_service_commands',
+                      'authorized_for_host_actions',
+                      'authorized_for_service_actions'
                     ];
+
     for my $role (@{$possible_roles}) {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
             my %contacts = map { $_ => 1 } split/,/mx, $c->config->{'cgi_cfg'}->{$role};
+            foreach my $el (sort keys %contacts) {
+                my $contactgroup = $c->{'db'}->get_contactgroups(sort => 'name', remove_duplicates => 1, filter => [ name => $el]);
+                # if $role is a contactgroup
+                next if (!defined($contactgroup->[0]->{'members'}));
+                my $member = $contactgroup->[0]->{'members'};
+                foreach my $contac (@{$member}) {
+				    # Add role if username is a member of contactgroup
+                    push @{$user->{'roles'}}, $role if ( $user->{'username'} eq $contac);
+                }
+            }
             push @{$user->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'});
         }
     }
-
     return bless $user, "Catalyst::Authentication::User::Hash";
 }
 
