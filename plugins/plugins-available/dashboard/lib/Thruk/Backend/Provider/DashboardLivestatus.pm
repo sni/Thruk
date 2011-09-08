@@ -1,11 +1,11 @@
-package Thruk::Backend::Provider::DashboardLivestatus;
+package Thruk::Backend::Provider::Livestatus;
 
 use strict;
 use warnings;
 use Carp;
 use Monitoring::Livestatus::Class;
 use Thruk::Utils;
-use parent 'Thruk::Backend::Provider::Livestatus';
+use Thruk::Backend::Provider::Livestatus;
 
 =head1 NAME
 

@@ -8,6 +8,7 @@ use Thruk::Utils::Status;
 use List::Compare;
 use List::MoreUtils;
 use Thruk::Backend::Provider::DashboardLivestatus;
+use parent 'Catalyst::Controller';
 
 =head1 NAME
 
