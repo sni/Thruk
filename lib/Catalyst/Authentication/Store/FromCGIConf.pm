@@ -50,12 +50,17 @@ sub find_user {
                     ];
 
     for my $role (@{$possible_roles}) {
-		if ($role eq 'authorized_for_all_host_actions' or $role eq 'authorized_for_all_service_actions') {
-			if(! defined $c->config->{'cgi_cfg'}->{$role}) {
-				$c->config->{'cgi_cfg'}->{$role} = $c->config->{'cgi_cfg'}->{'authorized_for_all_host_commands'} if ($role eq 'authorized_for_all_host_actions');
-				$c->config->{'cgi_cfg'}->{$role} = $c->config->{'cgi_cfg'}->{'authorized_for_all_service_commands'} if ($role eq 'authorized_for_all_service_actions');
+		if ($role eq 'authorized_for_all_host_actions') {
+			if(! defined $c->config->{'cgi_cfg'}->{$role} and ! defined $c->config->{'cgi_cfg'}->{'authorized_for_host_actions'}) {
+				$c->config->{'cgi_cfg'}->{$role} = $c->config->{'cgi_cfg'}->{'authorized_for_all_host_commands'};
 			}
 		}
+		if ($role eq 'authorized_for_all_service_actions') {
+			if(! defined $c->config->{'cgi_cfg'}->{$role} and ! defined $c->config->{'cgi_cfg'}->{'authorized_for_service_actions'}) {
+				$c->config->{'cgi_cfg'}->{$role} = $c->config->{'cgi_cfg'}->{'authorized_for_all_host_commands'};
+			}
+		}
+		
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
             my %contacts = map { $_ => 1 } split/,/mx, $c->config->{'cgi_cfg'}->{$role};
             foreach my $el (sort keys %contacts) {
