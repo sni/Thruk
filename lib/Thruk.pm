@@ -23,6 +23,7 @@ binmode(STDERR, ":encoding(UTF-8)");
 # Set flags and add plugins for the application
 #
 #         -Debug: activates the debug mode for very useful log messages
+#         StackTrace
 
 use parent qw/Catalyst/;
 use Catalyst qw/
@@ -32,7 +33,6 @@ use Catalyst qw/
                 Authentication
                 Authorization::ThrukRoles
                 CustomErrorMessage
-                StackTrace
                 Static::Simple
                 Redirect
                 Cache
