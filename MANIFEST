@@ -34,7 +34,6 @@ lib/Catalyst/Model/Thruk/Class.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
 lib/Catalyst/Plugin/Thruk/ConfigLoader.pm
 lib/Catalyst/Plugin/Thruk/RemoveNastyCharsFromHttpParam.pm
-lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/View/GD.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Thruk.pm
@@ -190,6 +189,7 @@ t/92_todo.t
 t/93_manifest.t
 t/94_template_encoding.t
 t/95_doc_coverage.t
+t/96_makefile_requirements.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
 t/99-Perl-Critic.t
