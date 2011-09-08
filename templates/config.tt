@@ -40,7 +40,7 @@
           </tr>
           <tr>
             <td class='reportSelectItem'>
-              <input type='submit' value='Continue'>
+              <input type='submit' value='Continue'>&nbsp;&nbsp;&nbsp;<input type='submit' value='Export Excel' name='view_mode'>
             </td>
           </tr>
         </table>
