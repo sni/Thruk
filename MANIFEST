@@ -34,6 +34,7 @@ lib/Catalyst/Model/Thruk/Class.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
 lib/Catalyst/Plugin/Thruk/ConfigLoader.pm
 lib/Catalyst/Plugin/Thruk/RemoveNastyCharsFromHttpParam.pm
+lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/View/GD.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Thruk.pm
