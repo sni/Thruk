@@ -1437,8 +1437,8 @@ sub redirect_view {
     return $c->redirect($uri);
 }
 
+##############################################
 
-# It's the method "get_comments_filter" adaptated
 =head2 get_downtimes_filter
 
   get_downtimes_filter($c, $op, $value)
@@ -1446,7 +1446,6 @@ sub redirect_view {
 returns filter for downtime duration
 
 =cut
-
 sub get_downtimes_filter {
     my($c, $op, $value) = @_;
     my(@hostfilter, @servicefilter);

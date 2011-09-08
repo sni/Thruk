@@ -7,6 +7,7 @@ use warnings;
 use File::Spec;
 use Test::More;
 use English qw(-no_match_vars);
+use lib glob("plugins/plugins-available/*/lib");
 
 if ( not $ENV{TEST_AUTHOR} ) {
     my $msg = 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';

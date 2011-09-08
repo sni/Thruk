@@ -1,3 +1,24 @@
+package Thruk::Controller::dashboard;
+
+use strict;
+use warnings;
+use utf8;
+use Carp;
+use Thruk::Utils::Status;
+use List::Compare;
+use List::MoreUtils;
+use Thruk::Backend::Provider::DashboardLivestatus;
+
+=head1 NAME
+
+Thruk::Controller::dashboard - Catalyst Controller
+
+=head1 DESCRIPTION
+
+Catalyst Controller.
+
+=cut
+
 ################################################################
 #                     SIGMA Informatique
 ################################################################
@@ -10,29 +31,14 @@
 #
 #
 ################################################################
-# Copyright © 2011 Sigma Informatique. All rights reserved.
-# Copyright © 2010 Thruk Developer Team.
-# Copyright © 2009 Nagios Core Development Team and Community Contributors.
-# Copyright © 1999-2009 Ethan Galstad.
+# Copyright Â© 2011 Sigma Informatique. All rights reserved.
+# Copyright Â© 2010 Thruk Developer Team.
+# Copyright Â© 2009 Nagios Core Development Team and Community Contributors.
+# Copyright Â© 1999-2009 Ethan Galstad.
 ################################################################
 
-package Thruk::Controller::dashboard;
 
-use strict;
-use warnings;
-use utf8;
-use Carp;
-use parent 'Thruk::Controller::status';
-use Thruk::Utils::Status;
-use Thruk::Utils::Menu;
-
-
-use List::Compare;
-use List::MoreUtils;
-use Data::Dumper;
-use Thruk::Backend::Provider::DashboardLivestatus;
-
-######################################
+##########################################################
 # add new view item
 Thruk::Utils::Status::add_view({'group' => 'Dashboard',
                                 'name'  => 'Dashboard',
@@ -40,24 +46,15 @@ Thruk::Utils::Status::add_view({'group' => 'Dashboard',
                                 'url'   => 'dashboard.cgi'
                             });
 
-=head1 NAME
-
-Thruk::Controller::dashboard - Catalyst Controller
-
-=head1 DESCRIPTION
-
-Catalyst Controller.
+##########################################################
 
 =head1 METHODS
 
-=cut
-
 =head2 index
 
+page: /thruk/cgi-bin/dashboard.cgi
+
 =cut
-
-##########################################################
-
 
 sub index : Path : Args(0) : MyAction('AddDefaults') : Regex('thruk\/cgi\-bin\/dashboard\.cgi') {
 my( $self, $c ) = @_;
@@ -230,8 +227,6 @@ sub _process_dashboard_page {
 
     return 1;
 }
-
-
 
 =head1 AUTHOR
 

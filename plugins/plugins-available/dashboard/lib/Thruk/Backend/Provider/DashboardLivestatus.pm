@@ -1,3 +1,22 @@
+package Thruk::Backend::Provider::DashboardLivestatus;
+
+use strict;
+use warnings;
+use Carp;
+use Monitoring::Livestatus::Class;
+use Thruk::Utils;
+use parent 'Thruk::Backend::Provider::Livestatus';
+
+=head1 NAME
+
+Thruk::Backend::Provider::DashboardLivestatus - connection provider for livestatus connections
+
+=head1 DESCRIPTION
+
+connection provider for livestatus connections
+
+=cut
+
 ################################################################
 #                     SIGMA Informatique
 ################################################################
@@ -10,39 +29,13 @@
 #
 #
 ################################################################
-# Copyright © 2011 Sigma Informatique. All rights reserved.
-# Copyright © 2010 Thruk Developer Team.
-# Copyright © 2009 Nagios Core Development Team and Community Contributors.
-# Copyright © 1999-2009 Ethan Galstad.
+# Copyright Â© 2011 Sigma Informatique. All rights reserved.
+# Copyright Â© 2010 Thruk Developer Team.
+# Copyright Â© 2009 Nagios Core Development Team and Community Contributors.
+# Copyright Â© 1999-2009 Ethan Galstad.
 ################################################################
 
-package Thruk::Backend::Provider::Livestatus;
-
-use strict;
-use warnings;
-use Carp;
-use Data::Dumper;
-use Monitoring::Livestatus::Class;
-use Thruk::Utils;
-use Thruk::Backend::Provider::Livestatus;
-
-=head1 NAME
-
-Thruk::Backend::Provider::Livestatus - connection provider for livestatus connections
-
-=head1 DESCRIPTION
-
-connection provider for livestatus connections
-
 =head1 METHODS
-
-=cut
-##########################################################
-
-
-###############
-# START SIGMA #
-###############
 
 =head2 get_host_stats_dashboard
 
@@ -157,10 +150,12 @@ sub get_service_stats_dashboard {
     return(\%{$rows->[0]}, 'SUM');
 }
 
-#############
-# END SIGMA #
-#############
 ##########################################################
 
+=head1 AUTHOR
+
+Sigma Informatique, 2011
+
+=cut
 
 1;
