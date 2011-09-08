@@ -82,6 +82,11 @@ requires 'FCGI::ProcManager::MaxRequests'         => 0;
 requires 'Module::Find'                           => 0;
 requires 'Storable'                               => 0;
 
+feature     ('plugin_dashboard',
+  -default                                        => 0,
+  'List::Compare'                                 => 0,
+);
+
 # test requirements
 feature     ('authortests',
   -default                                                                  => 0,

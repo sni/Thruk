@@ -29,3 +29,5 @@ var
 log4perl.conf
 logs
 objectdefinitions.html
+plugins/plugins-available/conf/test.pl
+plugins/plugins-available/conf/tmon.out

@@ -1,7 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.1    Thu Aug 25 13:40:25 CEST 2011
-          - ...
+1.1.1    Thu Sep  8 14:30:01 CEST 2011
+          - added dashboard plugin (Thanks Sigma)
 
 1.1.0    Sun Aug 21 19:12:18 CEST 2011
           - availability / trends are now calculated in a background process
