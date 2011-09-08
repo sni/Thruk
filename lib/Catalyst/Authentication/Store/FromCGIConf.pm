@@ -50,6 +50,12 @@ sub find_user {
                     ];
 
     for my $role (@{$possible_roles}) {
+		if ($role eq 'authorized_for_all_host_actions' or $role eq 'authorized_for_all_service_actions') {
+			if(! defined $c->config->{'cgi_cfg'}->{$role}) {
+				$c->config->{'cgi_cfg'}->{$role} = $c->config->{'cgi_cfg'}->{'authorized_for_all_host_commands'} if ($role eq 'authorized_for_all_host_actions');
+				$c->config->{'cgi_cfg'}->{$role} = $c->config->{'cgi_cfg'}->{'authorized_for_all_service_commands'} if ($role eq 'authorized_for_all_service_actions');
+			}
+		}
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
             my %contacts = map { $_ => 1 } split/,/mx, $c->config->{'cgi_cfg'}->{$role};
             foreach my $el (sort keys %contacts) {
@@ -64,6 +70,7 @@ sub find_user {
             }
             push @{$user->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'});
         }
+		
     }
     return bless $user, "Catalyst::Authentication::User::Hash";
 }
