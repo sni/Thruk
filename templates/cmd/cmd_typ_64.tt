@@ -1,5 +1,5 @@
 ﻿[%# which one is authorized? #%]
-[% IF !c.check_cmd_permissions('hostgroup', c.request.parameters.hostgroup) %]
+[% IF !c.check_command_permissions('hostgroup', c.request.parameters.hostgroup) %]
   [% WRAPPER error.tt errorMessage = "you are not authorized for this command" errorDescription = "check your configuration if you believe this is an error" %][% END %]
 [% ELSE %]
 

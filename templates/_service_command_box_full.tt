@@ -5,7 +5,7 @@
       <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel">
         <tr>
           <td>
-            [% UNLESS c.check_cmd_permissions('service', service.description, service.host_name) %]
+            [% UNLESS c.check_command_permissions('service', service.description, service.host_name) %]
             <div align=center class='infoMessage'>Your account does not have permissions to execute commands.</div><br>
             [% ELSE %]
             <table border="0" cellspacing="0" cellpadding="0">

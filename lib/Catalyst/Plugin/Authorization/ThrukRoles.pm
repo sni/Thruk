@@ -132,4 +132,93 @@ sub check_cmd_permissions {
     return 0;
 }
 
+=head2 check_action_permissions
+
+ check_action_permissions('host', $hostname)
+ check_action_permissions('service', $servicename, $hostname)
+ check_action_permissions('hostgroup', $hostgroupname)
+ check_action_permissions('servicegroup', $servicegroupname)
+
+ for example:
+ $c->check_action_permissions('service', $service, $host)
+
+=cut
+
+sub check_action_permissions {
+    my($c, $type, $value, $value2) = @_;
+
+    $type   = '' unless defined $type;
+    $value  = '' unless defined $value;
+    $value2 = '' unless defined $value2;
+
+    return if $c->check_user_roles('is_authorized_for_read_only');
+
+    if($type eq 'host') {
+        return 1 if $c->check_user_roles('authorized_for_all_host_actions');
+        return 1 if $c->check_permissions('host', $value, 1) && $c->check_user_roles('authorized_for_host_actions');
+    }
+    elsif($type eq 'hostgroup') {
+        return 1 if $c->check_user_roles('authorized_for_all_host_actions');
+        return 1 if $c->check_permissions('hostgroup', $value, 1) && $c->check_user_roles('authorized_for_host_actions');
+    }
+    elsif($type eq 'service') {
+        return 1 if $c->check_user_roles('authorized_for_all_service_actions');
+        return 1 if $c->check_permissions('service', $value, $value2, 1) && $c->check_user_roles('authorized_for_service_actions');
+    }
+    elsif($type eq 'servicegroup') {
+        return 1 if $c->check_user_roles('authorized_for_all_service_actions');
+        return 1 if $c->check_permissions('servicegroup', $value, 1) && $c->check_user_roles('authorized_for_service_actions');
+    }
+    else {
+        $c->error("unknown action auth role check: ".$type);
+        return 0;
+    }
+    return 0;
+}
+
+=head2 check_command_permissions
+
+ check_command_permissions('host', $hostname)
+ check_command_permissions('service', $servicename, $hostname)
+ check_command_permissions('hostgroup', $hostgroupname)
+ check_command_permissions('servicegroup', $servicegroupname)
+
+ for example:
+ $c->check_command_permissions('service', $service, $host)
+
+=cut
+
+sub check_command_permissions {
+    my($c, $type, $value, $value2) = @_;
+
+    $type   = '' unless defined $type;
+    $value  = '' unless defined $value;
+    $value2 = '' unless defined $value2;
+
+    return if $c->check_user_roles('is_authorized_for_read_only');
+
+    if($type eq 'host') {
+        return 1 if $c->check_user_roles('authorized_for_all_host_commands');
+        return 1 if $c->check_permissions('host', $value, 1) && $c->check_user_roles('authorized_for_host_commands');
+    }
+    elsif($type eq 'hostgroup') {
+        return 1 if $c->check_user_roles('authorized_for_all_host_commands');
+        return 1 if $c->check_permissions('hostgroup', $value, 1) && $c->check_user_roles('authorized_for_host_commands');
+    }
+    elsif($type eq 'service') {
+        return 1 if $c->check_user_roles('authorized_for_all_service_commands');
+        return 1 if $c->check_permissions('service', $value, $value2, 1) && $c->check_user_roles('authorized_for_service_commands');
+    }
+    elsif($type eq 'servicegroup') {
+        return 1 if $c->check_user_roles('authorized_for_all_service_commands');
+        return 1 if $c->check_permissions('servicegroup', $value, 1) && $c->check_user_roles('authorized_for_service_commands');
+    }
+    else {
+        $c->error("unknown action auth role check: ".$type);
+        return 0;
+    }
+    return 0;
+}
+
+
 1;

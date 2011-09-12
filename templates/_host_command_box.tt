@@ -6,7 +6,7 @@
       <table border='1' cellpadding="0" cellspacing="0" class="command extCommandPanel">
         <tr>
           <td>
-            [% UNLESS c.check_cmd_permissions('host', host.name) %]
+            [% UNLESS c.check_action_permissions('host', host.name) %]
             <div align=center class='infoMessage'>Your account does not have permissions to execute commands.</div><br>
             [% ELSE %]
             <table border="0" cellspacing="0" cellpadding="0">
@@ -82,7 +82,7 @@
 </table>
 
 
-[% IF c.check_cmd_permissions('host', host.name) %]
+[% IF c.check_command_permissions('host', host.name) %]
 <br><br>
 <table border="0" cellpadding="0" cellspacing="0">
   <tr>

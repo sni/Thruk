@@ -355,7 +355,7 @@
 
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_cmd_permissions('host', host.name) %]
+          [% IF c.check_command_permissions('host', host.name) %]
             <a name="comments" id="comments"></a>
             <div class='commentTitle'>Host Comments</div>
             <table border="0">

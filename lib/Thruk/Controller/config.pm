@@ -37,63 +37,84 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $type = $c->{'request'}->{'parameters'}->{'type'};
     $c->stash->{type}             = $type;
     return unless defined $type;
+	my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'};
+	if ( $view_mode ) {
+		my $data;
 
-    # timeperiods
-    if($type eq 'timeperiods') {
-        $c->{'db'}->get_timeperiods(sort => 'name', remove_duplicates => 1, pager => $c);
-        $c->stash->{template} = 'config_timeperiods.tt';
-    }
+		if($type eq 'timeperiods' or $type eq 'commands' or $type eq 'contacts' or $type eq 'contactgroups' or $type eq 'hosts' or $type eq 'services' or $type eq 'hostgroups' or $type eq 'servicegroups') {
 
-    # commands
-    if($type eq 'commands') {
-        $c->{'db'}->get_commands(sort => 'name', remove_duplicates => 1, pager => $c);
-        $c->stash->{template} = 'config_commands.tt';
-    }
+			$data = '$c->{"db"}->get_'.$type.'(sort => "name", remove_duplicates => 1, pager => $c)';
+			$data = '$c->{"db"}->get_'.$type.'(sort => "name", remove_duplicates => 1, pager => $c, extra_columns => ["contacts"])' if ($type eq 'hosts');
+			$data = '$c->{"db"}->get_'.$type.'(sort => [ "host_name", "description" ], remove_duplicates => 1, pager => $c, extra_columns => ["contacts"])' if ($type eq 'services');
+			
 
-    # contacts
-    elsif($type eq 'contacts') {
-        $c->{'db'}->get_contacts(sort => 'name', remove_duplicates => 1, pager => $c);
-        $c->stash->{template} = 'config_contacts.tt';
-    }
+			$data = eval($data);
 
-    # contactgroups
-    elsif($type eq 'contactgroups') {
-        $c->{'db'}->get_contactgroups(sort => 'name', remove_duplicates => 1, pager => $c);
-        $c->stash->{template} = 'config_contactgroups.tt';
-    }
+			Thruk::Utils::Status::set_selected_columns($c);
+			my $filename = $type.'.xls';
+			$c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+			$c->stash->{'data'}     = $data;
+			$c->stash->{'template'} = 'excel/export_'.$type.'.tt';
+			return $c->detach('View::Excel');
+		}
+	}
+	else {
+		# timeperiods
+		if($type eq 'timeperiods') {
+			$c->{'db'}->get_timeperiods(sort => 'name', remove_duplicates => 1, pager => $c);
+			$c->stash->{template} = 'config_timeperiods.tt';
+		}
 
-    # hosts
-    elsif($type eq 'hosts') {
-        my $filter;
-        if(defined $c->{'request'}->{'parameters'}->{'jump2'}) {
-            $filter = [ { 'name' => $c->{'request'}->{'parameters'}->{'jump2'} } ];
-        }
-        $c->{'db'}->get_hosts(sort => 'name', remove_duplicates => 1, pager => $c, extra_columns => ['contacts'], filter => $filter );
-        $c->stash->{template} = 'config_hosts.tt';
-    }
+		# commands
+		if($type eq 'commands') {
+			$c->{'db'}->get_commands(sort => 'name', remove_duplicates => 1, pager => $c);
+			$c->stash->{template} = 'config_commands.tt';
+		}
 
-    # services
-    elsif($type eq 'services') {
-        my $filter;
-        if( defined $c->{'request'}->{'parameters'}->{'jump2'} and defined $c->{'request'}->{'parameters'}->{'jump3'} ) {
-            $filter = [ { 'host_name' => $c->{'request'}->{'parameters'}->{'jump2'}, 'description' => $c->{'request'}->{'parameters'}->{'jump3'} } ];
-        }
-        $c->{'db'}->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => $c, extra_columns => ['contacts'], filter => $filter);
-        $c->stash->{template} = 'config_services.tt';
-    }
+		# contacts
+		elsif($type eq 'contacts') {
+			$c->{'db'}->get_contacts(sort => 'name', remove_duplicates => 1, pager => $c);
+			$c->stash->{template} = 'config_contacts.tt';
+		}
 
-    # hostgroups
-    elsif($type eq 'hostgroups') {
-        $c->{'db'}->get_hostgroups(sort => 'name', pager => $c);
-        $c->stash->{template} = 'config_hostgroups.tt';
-    }
+		# contactgroups
+		elsif($type eq 'contactgroups') {
+			$c->{'db'}->get_contactgroups(sort => 'name', remove_duplicates => 1, pager => $c);
+			$c->stash->{template} = 'config_contactgroups.tt';
+		}
 
-    # servicegroups
-    elsif($type eq 'servicegroups') {
-        $c->{'db'}->get_servicegroups(sort => 'name', pager => $c);
-        $c->stash->{template} = 'config_servicegroups.tt';
-    }
+		# hosts
+		elsif($type eq 'hosts') {
+			my $filter;
+			if(defined $c->{'request'}->{'parameters'}->{'jump2'}) {
+				$filter = [ { 'name' => $c->{'request'}->{'parameters'}->{'jump2'} } ];
+			}
+			$c->{'db'}->get_hosts(sort => 'name', remove_duplicates => 1, pager => $c, extra_columns => ['contacts'], filter => $filter );
+			$c->stash->{template} = 'config_hosts.tt';
+		}
 
+		# services
+		elsif($type eq 'services') {
+			my $filter;
+			if( defined $c->{'request'}->{'parameters'}->{'jump2'} and defined $c->{'request'}->{'parameters'}->{'jump3'} ) {
+				$filter = [ { 'host_name' => $c->{'request'}->{'parameters'}->{'jump2'}, 'description' => $c->{'request'}->{'parameters'}->{'jump3'} } ];
+			}
+			$c->{'db'}->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => $c, extra_columns => ['contacts'], filter => $filter);
+			$c->stash->{template} = 'config_services.tt';
+		}
+
+		# hostgroups
+		elsif($type eq 'hostgroups') {
+			$c->{'db'}->get_hostgroups(sort => 'name', pager => $c);
+			$c->stash->{template} = 'config_hostgroups.tt';
+		}
+
+		# servicegroups
+		elsif($type eq 'servicegroups') {
+			$c->{'db'}->get_servicegroups(sort => 'name', pager => $c);
+			$c->stash->{template} = 'config_servicegroups.tt';
+		}
+	}
     $c->stash->{jump} = $c->{'request'}->{'parameters'}->{'jump'} || '';
 
     return 1;

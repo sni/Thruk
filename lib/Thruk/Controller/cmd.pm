@@ -208,13 +208,28 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                 $self->_remove_all_downtimes( $c, $host );
             }
             else {
-                if( $self->_do_send_command($c) ) {
-                    $c->log->debug("command for host $host succeeded");
+                my $auth = 0;
+                if($cmd_typ == 87 or $cmd_typ == 55 or $cmd_typ == 96 or $cmd_typ == 33 or $cmd_typ == 51) {
+                    $auth = $c->check_action_permissions('host', $host);
+                }
+                else {
+                    $auth = $c->check_command_permissions('host', $host);
+                }
+                if ($auth == 1) {
+                    if( $self->_do_send_command($c) ) {
+                        $c->log->debug("command for host $host succeeded");
+                    }
+                    else {
+                        $errors++;
+                        Thruk::Utils::set_message( $c, 'fail_message', "command for host $host failed" );
+                        $c->log->debug("command for host $host failed");
+                        $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
+                    }
                 }
                 else {
                     $errors++;
-                    Thruk::Utils::set_message( $c, 'fail_message', "command for host $host failed" );
-                    $c->log->debug("command for host $host failed");
+                    Thruk::Utils::set_message( $c, 'fail_message', "permission denied command for host $host" );
+                    $c->log->debug("permission denied command for host $host");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
             }
@@ -241,13 +256,28 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                 $self->_remove_all_downtimes( $c, $host, $service );
             }
             else {
-                if( $self->_do_send_command($c) ) {
-                    $c->log->debug("command for $service on host $host succeeded");
+                my $auth = 0;
+                if($cmd_typ == 7 or $cmd_typ == 56 or $cmd_typ == 30 or $cmd_typ == 79 or $cmd_typ == 34 or $cmd_typ == 52) {
+                    $auth = $c->check_action_permissions('service', $service, $host);
+                }
+                else {
+                    $auth = $c->check_command_permissions('service', $service, $host);
+                }
+                if ($auth == 1) {
+                    if( $self->_do_send_command($c) ) {
+                        $c->log->debug("command for $service on host $host succeeded");
+                    }
+                    else {
+                        $errors++;
+                        Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
+                        $c->log->debug("command for $service on host $host failed");
+                        $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
+                    }
                 }
                 else {
                     $errors++;
-                    Thruk::Utils::set_message( $c, 'fail_message', "command for $service on host $host failed" );
-                    $c->log->debug("command for $service on host $host failed");
+                    Thruk::Utils::set_message( $c, 'fail_message', "permission denied command for $service on host $host" );
+                    $c->log->debug("permission denied command for $service on host $host");
                     $c->log->debug( Dumper( $c->stash->{'form_errors'} ) );
                 }
             }
