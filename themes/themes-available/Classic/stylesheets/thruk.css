@@ -12,6 +12,7 @@
 html {
   overflow: -moz-scrollbars-vertical;
   overflow-y: scroll;
+  overflow-x: auto;
 }
 
 body {
