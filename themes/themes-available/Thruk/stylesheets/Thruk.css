@@ -1129,3 +1129,11 @@ TABLE.confdetails {
 td.attrValue:hover {
   background-color:#FFEB66;
 }
+
+/* nice result tables in availability */
+body.avail TD.hostUP, body.avail TD.hostDOWN, body.avail TD.hostUNREACHABLE, body.avail TD.serviceOK, body.avail TD.serviceWARNING, body.avail TD.serviceUNKNOWN, body.avail TD.serviceCRITICAL {
+    min-width: 150px;
+}
+body.avail TD.dataOdd, body.avail TD.dataEven {
+    min-width: 160px;
+}

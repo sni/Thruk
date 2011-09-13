@@ -97,6 +97,7 @@
           <tr>
             <td colspan="2"><br></td>
           </tr>
+<!--
           <tr>
             <td valign="top" class='reportSelectSubTitle'>Report time Period:</td>
             <td valign="top" align="left" class='optBoxItem'>
@@ -111,6 +112,7 @@
           <tr>
             <td colspan="2"><br></td>
           </tr>
+-->
           <tr>
             <td class='reportSelectSubTitle' align="right">Assume Initial States:</td>
             <td class='reportSelectItem'>

@@ -51,10 +51,9 @@
                   ** ALL SERVICEGROUPS **
                   [% END %]
                 </option>
-[% FOREACH opt = data %]
-<option>[% opt %]</option>
-
-[% END %]
+                [% FOREACH opt = data %]
+                <option>[% opt %]</option>
+                [% END %]
               </select>
             </td>
           </tr>

@@ -33,8 +33,8 @@
         [% SET servicecount = 0 %]
         [% FOR hostname IN services.keys.sort %]
         [% FOR servicename IN services.$hostname.keys.sort %]
-        [% SET class = 'dataEven' IF loop.odd  %]
-        [% SET class = 'dataOdd'  IF loop.even %]
+        [% SET class = 'dataEven' IF servicecount % 2 == 0 %]
+        [% SET class = 'dataOdd'  IF servicecount % 2 != 0 %]
         [% SET servicecount = servicecount + 1 %]
 
         [% SET
