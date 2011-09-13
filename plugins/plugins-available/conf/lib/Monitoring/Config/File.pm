@@ -44,14 +44,14 @@ sub new {
     bless $self, $class;
 
     # dont save relative paths
-    if($file =~ m/\.\./gmx or $file !~ m/\.cfg$/gmx) {
+    if($file =~ m/\.\./mx or $file !~ m/\.cfg$/mx) {
         return;
     }
 
     # readonly file?
     if(defined $readonlypattern) {
         for my $p ( ref $readonlypattern eq 'ARRAY' ? @{$readonlypattern} : ($readonlypattern) ) {
-            if($file =~ m|$p|gmx) {
+            if($file =~ m|$p|mx) {
                 $self->{'readonly'} = 1;
                 last;
             }
