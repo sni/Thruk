@@ -7678,56 +7678,89 @@ groups    if set, only contacts from these groups have access. You
 <p>
 options
 </p>
-</li>
+<div class="ulist"><ul>
 <li>
 <p>
-peer              address of this connection.
+peer            address of this connection.
 </p>
 </li>
 <li>
 <p>
-verbose           let this connection be verbose
+verbose         let this connection be verbose
 </p>
 </li>
 <li>
 <p>
-connect_timeout   connect timeout setting
+connect_timeout connect timeout setting
 </p>
 </li>
 <li>
 <p>
-query_timeout     query timeout setting
+query_timeout   query timeout setting
 </p>
 </li>
 <li>
 <p>
-resource_file     resource_file for this peer
+resource_file   resource_file for this peer
 </p>
-<div class="literalblock">
-<div class="content">
-<pre><tt>(config tool only)
-  - core_conf         Path to your nagios.cfg / icinga.cfg. Read all
-                      object directories and files from this config
-                      file.
-  - obj_check_cmd     Commandline to verify the config.
-  - obj_reload_cmd    Commandline to reload the config.</tt></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>            (advanced config tool options)
-            - obj_readonly      Filename pattern to define readonly objects.
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+configtool
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+core_conf       Path to your nagios.cfg / icinga.cfg. Read all
+                                object directories and files from this config
+                                file.
+</p>
+</li>
+<li>
+<p>
+obj_check_cmd   Commandline to verify the config.
+</p>
+</li>
+<li>
+<p>
+obj_reload_cmd  Commandline to reload the config.
+</p>
+</li>
+<li>
+<p>
+obj_readonly    Filename pattern to define readonly objects.
                                 For example for generated config files.
-            - obj_dir           Path to your objects. Enables the objects editor.
+</p>
+</li>
+<li>
+<p>
+obj_dir         Path to your objects. Enables the objects editor.
                                 Reads all *.cfg from this folder and all subfolders.
-                                (only needed when not using 'core_conf')
-            - obj_file          Path to a single objects file. Enables the objects
-                                editor. Both 'obj_dir' and 'obj_file' can be
+                                (only needed when not using <em>core_conf</em>)
+</p>
+</li>
+<li>
+<p>
+obj_file        Path to a single objects file. Enables the objects
+                                editor. Both <em>obj_dir</em> and <em>obj_file</em> can be
                                 specified more than once.
-                                (only needed when not using 'core_conf')
-            - obj_exclude       Specify some exection pattern for the obj_dir.
-                                (only needed when not using 'core_conf')
-ex.:</tt></pre>
-</div></div>
+                                (only needed when not using <em>core_conf</em>)
+</p>
+</li>
+<li>
+<p>
+obj_exclude     Specify some exection pattern for the obj_dir.
+                                (only needed when not using <em>core_conf</em>)
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+</li>
+</ul></div>
+<div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Backend&gt;
@@ -7739,10 +7772,12 @@ ex.:</tt></pre>
                              # admin and the locals contactgroup
       &lt;options&gt;
           peer       = /tmp/livestatus.socket
+      &lt;/options&gt;
+      &lt;configtool&gt;
           core_conf  = /etc/nagios/nagios.cfg
           obj_check  = /etc/init.d/nagios checkconfig
           obj_reload = /etc/init.d/nagios reload
-     &lt;/options&gt;
+      &lt;/configtool&gt;
   &lt;/peer&gt;
   &lt;peer&gt;
       name   = External Icinga
@@ -7760,10 +7795,6 @@ ex.:</tt></pre>
   &lt;/peer&gt;
 &lt;/Component&gt;</tt></pre>
 </div></div>
-</li>
-</ul></div>
-</li>
-</ul></div>
 <h4 id="_component_thruk_plugin_configtool">Component Thruk::Plugin::ConfigTool</h4>
 <div class="paragraph"><p>Enable config tool by setting path to different components config
 files. Users with the roles <em>authorized_for_configuration_information</em>
