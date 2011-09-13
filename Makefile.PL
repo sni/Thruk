@@ -62,7 +62,6 @@ requires 'Catalyst::Plugin::Compress'             => 0;     # required by Thruk
 requires 'Catalyst::Plugin::Cache'                => 0;     # required by Thruk
 requires 'Catalyst::Log::Log4perl'                => 0;     # required by Thruk
 requires 'Catalyst::Authentication::User::Hash'   => 0;     # required by Catalyst::Authentication::Store::FromCGIConf.pm
-requires 'Module::Find'                           => 0;     # required by Thruk::Backend::Manager
 requires 'Catalyst::Engine::FastCGI'              => 0;     # required by Thruk
 requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'FCGI::ProcManager'                      => 0;     # required by Thruk

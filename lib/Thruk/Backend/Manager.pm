@@ -3,7 +3,6 @@ package Thruk::Backend::Manager;
 use strict;
 use warnings;
 use Carp;
-use Module::Find;
 use Digest::MD5 qw(md5_hex);
 use Data::Page;
 use Data::Dumper;
@@ -24,6 +23,12 @@ Manager of backend connections
 =head1 METHODS
 
 =cut
+
+##########################################################
+# use static list instead of slow module find
+$Thruk::Backend::Manager::Provider = [
+          'Thruk::Backend::Provider::Livestatus'
+];
 
 ##########################################################
 
@@ -908,10 +913,6 @@ sub _initialise_backends {
 
     confess "no backend config" unless defined $config;
 
-    # get a list of our backend provider modules
-    my @provider = findsubmod("Thruk::Backend::Provider");
-    @provider = grep { $_ !~ m/::Base$/mx } @provider;
-
     # did we get a single peer or a list of peers?
     my @peer_configs;
     if( ref $config eq 'HASH' ) {
@@ -926,7 +927,7 @@ sub _initialise_backends {
 
     # initialize peers
     for my $peer_conf (@peer_configs) {
-        my $peer = $self->_initialise_peer( $peer_conf, \@provider );
+        my $peer = $self->_initialise_peer( $peer_conf, $Thruk::Backend::Manager::Provider );
         push @{ $self->{'backends'} }, $peer if defined $peer;
     }
 
