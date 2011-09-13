@@ -2,7 +2,7 @@ package Thruk::Controller::conf;
 
 use strict;
 use warnings;
-use Thruk 1.0.9;
+use Thruk 1.1.1;
 use Thruk::Utils::Menu;
 use Thruk::Utils::Conf;
 use Thruk::Utils::Conf::Defaults;
