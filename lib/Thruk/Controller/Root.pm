@@ -738,22 +738,24 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
         return Thruk::Utils::External::get_json_status($c, $job);
     }
 
-    my($is_running,$time,$percent) = Thruk::Utils::External::get_status($c, $job);
+    my($is_running,$time,$percent,$message,$forward) = Thruk::Utils::External::get_status($c, $job);
 
     # try to directly server the request if it takes less than 10seconds
     while($is_running and $time < 10) {
         sleep(1);
-        ($is_running,$time,$percent) = Thruk::Utils::External::get_status($c, $job);
+        ($is_running,$time,$percent,$message,$forward) = Thruk::Utils::External::get_status($c, $job);
     }
 
     # job still running?
     if($is_running) {
-        $c->stash->{title}          = $c->config->{'name'};
-        $c->stash->{job_id}         = $job;
-        $c->stash->{job_time}       = $time;
-        $c->stash->{job_percent}    = $percent || 0;
-        $c->stash->{infoBoxTitle}   = 'please stand by';
-        $c->stash->{template}       = 'waiting_for_job.tt';
+        $c->stash->{title}                 = $c->config->{'name'};
+        $c->stash->{job_id}                = $job;
+        $c->stash->{job_time}              = $time;
+        $c->stash->{job_percent}           = $percent || 0;
+        $c->stash->{job_message}           = $message || "";
+        $c->stash->{infoBoxTitle}          = 'please stand by';
+        $c->stash->{hide_backends_chooser} = 1;
+        $c->stash->{template}              = 'waiting_for_job.tt';
     } else {
         # job finished, display result
         my($out,$err,$time,$dir,$stash) = Thruk::Utils::External::get_result($c, $job);
@@ -777,6 +779,17 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
             # merge stash
             for my $key (keys %{$stash}) {
                 $c->stash->{$key} = $stash->{$key} unless defined $c->stash->{$key};
+            }
+
+            # model?
+            if(defined $c->stash->{model_type} and defined $c->stash->{model_init}) {
+                my $model  = $c->model($c->stash->{model_type});
+                my $obj_db = $model->init(@{$c->stash->{model_init}});
+            }
+
+            if(defined $forward) {
+                $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
+                return $c->redirect($forward);
             }
             return;
         }

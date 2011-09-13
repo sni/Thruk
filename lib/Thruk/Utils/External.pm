@@ -26,27 +26,34 @@ use POSIX ":sys_wait_h";
 
 =head2 cmd
 
-  cmd($c, $cmd)
+  cmd($c, {
+            cmd          => "command line to execute",
+            allow        => all|user,
+            wait_message => "display message while running the job"
+            forward      => "forward on success"
+        }
+    );
 
 run command in an external process
 
 =cut
 sub cmd {
     my $c         = shift;
-    my $cmd       = shift;
+    my $conf      = shift;
+
     my ($id,$dir) = _init_external($c);
     return unless $id;
     my $pid       = fork();
 
     if ($pid) {
-        return _do_parent_stuff($c, $dir, $pid, $id);
+        return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($dir);
 
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
 
-        exec("/bin/sh -c '".$cmd."'");
+        exec("/bin/sh -c '".$conf->{'cmd'}."'");
         exit; # just to be sure
     }
 }
@@ -56,20 +63,27 @@ sub cmd {
 
 =head2 perl
 
-  perl($c, $expr)
+  perl($c, {
+            expr         => "perl expression to execute",
+            allow        => all|user,
+            wait_message => "display message while running the job"
+            forward      => "forward on success"
+        }
+    )
 
 run perl expression in an external process
 
 =cut
 sub perl {
     my $c         = shift;
-    my $expr      = shift;
+    my $conf      = shift;
+
     my ($id,$dir) = _init_external($c);
     return unless $id;
     my $pid       = fork();
 
     if ($pid) {
-        return _do_parent_stuff($c, $dir, $pid, $id);
+        return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($dir);
 
@@ -79,7 +93,7 @@ sub perl {
             local *STDERR;
             open STDERR, '>', $dir."/stderr";
             open STDOUT, '>', $dir."/stdout";
-            eval($expr);
+            eval($conf->{'expr'});
             ## use critic
 
             if($@) {
@@ -113,10 +127,11 @@ sub is_running {
     my $id  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
-    return unless -f $dir."/user";
-    my $user = read_file($dir."/user");
-    chomp($user);
-    return unless $user eq $c->stash->{'remote_user'};
+    if( -f $dir."/user" ) {
+        my $user = read_file($dir."/user");
+        chomp($user);
+        return unless $user eq $c->stash->{'remote_user'};
+    }
 
     return _is_running($dir);
 }
@@ -139,10 +154,11 @@ sub get_status {
     # reap pending zombies
     waitpid(-1, WNOHANG);
 
-    return unless -f $dir."/user";
-    my $user = read_file($dir."/user");
-    chomp($user);
-    return unless $user eq $c->stash->{'remote_user'};
+    if( -f $dir."/user" ) {
+        my $user = read_file($dir."/user");
+        chomp($user);
+        return unless $user eq $c->stash->{'remote_user'};
+    }
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir."/pid");
@@ -156,10 +172,22 @@ sub get_status {
         my @end  = stat($dir."/stdout");
         $time    = $end[9] - $start[9];
     } elsif(-f $dir."/status") {
-        my $percent = read_file($dir."/status");
+        $percent = read_file($dir."/status");
+        chomp($percent);
     }
 
-    return($is_running,$time,$percent);
+    my $message;
+    if(-f $dir."/message") {
+        $message = read_file($dir."/message");
+        chomp($message);
+    }
+    my $forward;
+    if(-f $dir."/forward") {
+        $forward = read_file($dir."/forward");
+        chomp($forward);
+    }
+
+    return($is_running,$time,$percent,$message,$forward);
 }
 
 
@@ -176,13 +204,15 @@ sub get_json_status {
     my $c   = shift;
     my $id  = shift;
 
-    my($is_running,$time,$percent) = get_status($c, $id);
+    my($is_running,$time,$percent,$message,$forward) = get_status($c, $id);
     return unless defined $time;
 
     $c->stash->{'json'}   = {
             'is_running' => $is_running,
             'time'       => $time,
             'percent'    => $percent,
+            'message'    => $message,
+            'forward'    => $forward,
     };
 
     return $c->forward('Thruk::View::JSON');
@@ -242,10 +272,11 @@ sub _do_child_stuff {
 
 ##############################################
 sub _do_parent_stuff {
-    my $c   = shift;
-    my $dir = shift;
-    my $pid = shift;
-    my $id  = shift;
+    my $c    = shift;
+    my $dir  = shift;
+    my $pid  = shift;
+    my $id   = shift;
+    my $conf = shift;
 
     # write pid file
     open(my $fh, '>', $dir."/pid") or die("cannot write pid: $!");
@@ -254,10 +285,28 @@ sub _do_parent_stuff {
     close($fh);
 
     # write user file
-    open($fh, '>', $dir."/user") or die("cannot write pid: $!");
-    print $fh $c->stash->{'remote_user'};
-    print $fh "\n";
-    close($fh);
+    if(!defined $conf->{'allow'} or defined $conf->{'allow'} eq 'user') {
+        open($fh, '>', $dir."/user") or die("cannot write user: $!");
+        print $fh $c->stash->{'remote_user'};
+        print $fh "\n";
+        close($fh);
+    }
+
+    # write message file
+    if(defined $conf->{'message'}) {
+        open($fh, '>', $dir."/message") or die("cannot write message: $!");
+        print $fh $conf->{'message'};
+        print $fh "\n";
+        close($fh);
+    }
+
+    # write forward file
+    if(defined $conf->{'forward'}) {
+        open($fh, '>', $dir."/forward") or die("cannot write forward: $!");
+        print $fh $conf->{'forward'};
+        print $fh "\n";
+        close($fh);
+    }
 
     return $id;
 }

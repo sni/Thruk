@@ -87,7 +87,7 @@ is("$@", "", "no XML::Parser errors");
 
 #########################
 # external cmd
-my $id = Thruk::Utils::External::cmd($c, "sleep 1; echo 'test'; echo \"err\" >&2;");
+my $id = Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
 isnt($id, undef, "got an id");
 
 # wait for completion
@@ -106,7 +106,7 @@ isnt($dir, undef,   "got dir");
 
 #########################
 # external perl
-$id = Thruk::Utils::External::perl($c, "print STDERR 'blah'; print 'blub';");
+$id = Thruk::Utils::External::perl($c, { expr => "print STDERR 'blah'; print 'blub';" });
 isnt($id, undef, "got an id");
 
 # wait for completion

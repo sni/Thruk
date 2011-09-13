@@ -165,7 +165,7 @@ sub _show_step_3 {
 ##########################################################
 sub _create_report {
     my ( $self, $c ) = @_;
-    my $id = Thruk::Utils::External::perl($c, 'Thruk::Utils::Avail::calculate_availability($c)');
+    my $id = Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
     return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
 }
 

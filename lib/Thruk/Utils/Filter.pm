@@ -126,7 +126,7 @@ sub sprintf {
 
 =head2 date_format
 
-  my $string = date_format($seconds);
+  my $string = date_format($c, $seconds);
 
 formats a time definition into date format
 
@@ -134,6 +134,7 @@ formats a time definition into date format
 sub date_format {
     my $c         = shift;
     my $timestamp = shift;
+    return "" unless defined $timestamp;
 
     # get today
     my @today;

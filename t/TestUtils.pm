@@ -86,7 +86,7 @@ sub test_page {
         wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
         $request = request($location);
-        ok( $request->is_success, 'Request '.$location.' should succeed' ) or BAIL_OUT(Dumper($request));
+        ok( ! $request->is_error, 'Request '.$location.' should succeed' ) or BAIL_OUT(Dumper($request));
     }
     elsif(defined $opts{'fail'}) {
         ok( $request->is_error, 'Request '.$opts{'url'}.' should fail' );
@@ -164,10 +164,11 @@ sub test_page {
 
     # check for missing images / css or js
     if($content_type =~ 'text\/html') {
-        my @matches = $return->{'content'} =~ m/\s+(src|href)=['|"](.+?)['|"]/gi;
+        my @matches1 = $return->{'content'} =~ m/\s+(src|href)='(.+?)'/gi;
+        my @matches2 = $return->{'content'} =~ m/\s+(src|href)="(.+?)"/gi;
         my $links_to_check;
         my $x=0;
-        for my $match (@matches) {
+        for my $match (@matches1, @matches2) {
             $x++;
             next if $x%2==1;
             next if $match =~ m/^http/;
@@ -177,6 +178,8 @@ sub test_page {
             next if $match =~ m/^\/thruk\/cgi\-bin/;
             next if $match =~ m/^\w+\.cgi/;
             next if $match =~ m/^javascript:/;
+            $match =~ s/"\s*\+\s*url_prefix\s*\+\s*"/\//gmx;
+            $match =~ s/"\s*\+\s*theme\s*\+\s*"/Thruk/gmx;
             $links_to_check->{$match} = 1;
         }
         my $errors = 0;

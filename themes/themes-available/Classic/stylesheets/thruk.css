@@ -734,3 +734,27 @@ td.attrName {
 DIV#progressbar .ui-progressbar-value {
   background-image: url(../../../javascript/jquery-ui/css/smoothness/images/pbar-ani.gif);
 }
+
+SPAN.deleteicon {
+  position: relative;
+}
+SPAN.deleteicon SPAN {
+  position: absolute;
+  display: block;
+  top: -1px;
+  right: 3px;
+  width: 14px;
+  height: 14px;
+  background: url('../images/btn_close_small.png');
+  cursor: pointer;
+}
+SPAN.deleteicon INPUT {
+  padding-right: 16px;
+}
+
+.ui-add-button {
+  background-image: url(../images/add.png) !important;
+}
+.ui-ok-button {
+  background-image: url(../images/accept.png) !important;
+}

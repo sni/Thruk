@@ -446,94 +446,6 @@ function verify_time_do(id) {
     });
 }
 
-function set_sub(nr) {
-    for(x=1;x<=3;x++) {
-        /* reset table rows */
-        if(x != nr) {
-            $$('.sub_'+x).each(function(elem) {
-                elem.style.display = "none";
-            });
-        }
-        $$('.sub_'+nr).each(function(elem) {
-            elem.style.display = "";
-        });
-
-        /* reset buttons */
-        obj = document.getElementById("sub_"+x);
-        styleElements(obj, "data", 1);
-    }
-    obj = document.getElementById("sub_"+nr);
-    styleElements(obj, "data confSelected", 1);
-
-
-    return false;
-}
-
-var running_number = -1;
-function add_conf_attribute(table, key) {
-
-    if(key == 'customvariable' || key == 'exception') {
-        running_number--;
-    } else {
-        $('new_' + key + '_btn').style.display = "none";
-    }
-
-    // add new row
-    tbl = $(table);
-    var tblBody        = tbl.tBodies[0];
-    var currentLastRow = tblBody.rows.length - 3;
-
-    var newObj   = tblBody.rows[0].cloneNode(true);
-    newObj.id                 = "el_" + running_number;
-    newObj.style.display      = "";
-    newObj.cells[0].innerHTML = key;
-    newObj.cells[0].abbr      = key;
-    newObj.cells[1].abbr      = key;
-    newObj.cells[0].innerHTML = newObj.cells[0].innerHTML.replace(/del_0/g, 'del_'+running_number);
-    newObj.cells[1].innerHTML = newObj.cells[1].innerHTML.replace(/del_0/g, 'del_'+running_number);
-    newObj.cells[2].innerHTML = unescape(fields.get(key).input.unescapeHTML().replace(/&quot;/g, '"'));
-    newObj.cells[3].abbr      = unescape(fields.get(key).help.unescapeHTML().replace(/&quot;/g, '"'));
-
-    if(key == 'customvariable' || key == 'exception') {
-        var value = "";
-        if(key == 'customvariable') {
-            value = "_";
-        }
-        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"$('id_" + running_number + "').name='obj.'+this.value\">";
-        newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_'+running_number);
-    }
-
-    tblBody.insertBefore(newObj, tblBody.rows[tblBody.rows.length -2]);
-
-    reset_table_row_classes(table, 'dataEven', 'dataOdd');
-
-    /* effect works only on table cells */
-    jQuery(newObj.cells).effect('highlight', {}, 2000);
-
-    return false;
-}
-
-/* remove an table row from the attributes table */
-function remove_conf_attribute(key, nr) {
-
-    var btn = $('new_' + key + '_btn');
-    if(btn) {
-        btn.style.display = "";
-    }
-
-    row   = $(nr).parentNode.parentNode;
-    table = row.parentNode.parentNode;
-
-    var field = fields.get(key)
-    if(field) {
-        field.input = escape(row.cells[2].innerHTML);
-    }
-
-    row.remove();
-    reset_table_row_classes(table.id, 'dataEven', 'dataOdd');
-    return false;
-}
-
 /* reset table row classes */
 function reset_table_row_classes(table, c1, c2) {
     var x = 1;
@@ -2134,7 +2046,7 @@ var ajax_search = {
     templates       : 'no',
 
     /* initialize search */
-    init: function(elem, type, url, striped, autosubmit, list, templates) {
+    init: function(elem, type, url, striped, autosubmit, list, templates, data) {
         if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
@@ -2156,6 +2068,8 @@ var ajax_search = {
         }
         if(templates != undefined) {
             ajax_search.templates = templates;
+        } else {
+            ajax_search.templates = 'no';
         }
 
         var input = document.getElementById(ajax_search.input_field);
@@ -2166,6 +2080,7 @@ var ajax_search = {
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
         addEvent(input, 'keyup', ajax_search.suggest);
+        addEvent(input, 'blur',  ajax_search.hide_results);
 
         search_url = ajax_search.url;
         if(type != undefined) {
@@ -2242,20 +2157,26 @@ var ajax_search = {
             }
         }
 
-         // fill data store
-        new Ajax.Request(search_url, {
-            onSuccess: function(transport) {
-                if(transport.responseJSON != null) {
-                    ajax_search.base = transport.responseJSON;
-                } else {
-                    ajax_search.base = eval(transport.responseText);
+        if(data != undefined) {
+            ajax_search.base = data;
+            ajax_search.suggest();
+        } else {
+
+             // fill data store
+            new Ajax.Request(search_url, {
+                onSuccess: function(transport) {
+                    if(transport.responseJSON != null) {
+                        ajax_search.base = transport.responseJSON;
+                    } else {
+                        ajax_search.base = eval(transport.responseText);
+                    }
+                    ajax_search.suggest();
+                },
+                onFailure: function(transport) {
+                    ajax_search.initialized = false;
                 }
-                ajax_search.suggest();
-            },
-            onFailure: function(transport) {
-                ajax_search.initialized = false;
-            }
-        });
+            });
+        }
 
         addEvent(document, 'keydown', ajax_search.arrow_keys);
         addEvent(document, 'click', ajax_search.hide_results);
@@ -2272,7 +2193,7 @@ var ajax_search = {
         }
         try {
             // dont hide search result if clicked on the input field
-            if(event.target.tagName == 'INPUT') { return; }
+            if(event.type != "blur" && event.target.tagName == 'INPUT') { return; }
         }
         catch(e) {
             // doesnt matter
@@ -2280,7 +2201,11 @@ var ajax_search = {
 
         var panel = document.getElementById(ajax_search.result_pan);
         if(!panel) { return; }
-        hideElement(panel);
+        /* delay hiding a little moment, otherwise the click
+         * on the suggestion would be cancel as the panel does
+         * not exist anymore
+         */
+        window.setTimeout("jQuery('#"+ajax_search.result_pan+"').hide('fade', {}, 300)", 100);
     },
 
     /* wrapper around suggest_do() to avoid multiple running searches */
@@ -2334,6 +2259,7 @@ var ajax_search = {
                 var sub_results = new Array();
                 var top_hits = 0;
                 if(   (ajax_search.search_type == 'all' && search_type.name != 'timeperiods')
+                   || (ajax_search.search_type == 'full')
                    || (ajax_search.templates == "templates" && search_type.name == "templates")
                    || (ajax_search.templates != "templates" && ajax_search.search_type + 's' == search_type.name)
                   ) {
@@ -2406,7 +2332,7 @@ var ajax_search = {
                         classname = "item ajax_search_selected";
                     }
                     var prefix = '';
-                    if(ajax_search.search_type == "all") {
+                    if(ajax_search.search_type == "all" || ajax_search.search_type == "full") {
                         if(type.name == 'hosts')         { prefix = 'ho:'; }
                         if(type.name == 'hostgroups')    { prefix = 'hg:'; }
                         if(type.name == 'services')      { prefix = 'se:'; }

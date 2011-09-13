@@ -7,3 +7,8 @@ version:
 	@perl Makefile.PL > /dev/null
 	@git co docs/FAQ.html
 	@git status
+
+.PHONY: docs
+
+make docs:
+	script/thruk_update_docs.sh

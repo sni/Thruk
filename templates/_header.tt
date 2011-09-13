@@ -46,13 +46,19 @@
     [% FOREACH j = js.list %]
       <script type="text/javascript" src="[% url_prefix _ j %]"></script>
     [% END %]
-    [% IF author +%]
     <script type="text/javascript">
     <!--
+      [% IF author +%]
       var thruk_debug_js          = 1;
+      [% END +%]
+
+      jQuery(document).ready(function() {
+          jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
+              jQuery(this).prev('input').val('').focus();
+          }));
+      });
     -->
     </script>
-    [% END +%]
 
     <!-- stylesheets -->
     [% UNLESS all_in_one_css %]
