@@ -1,11 +1,13 @@
-[% PROCESS _header.tt %]
+[% PROCESS _header.tt overlib = 1 css = "thruk/plugins/conf/conf.css" js="thruk/plugins/conf/conf.js" %]
+[% PROCESS _message.tt %]
+[% PROCESS _overdiv.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
         <td align="left" valign="top" width="50%">
         [% PROCESS _infobox.tt %]
         </td>
-        <td align="right" valign="bottom" width="50%">
+        <td align="right" valign="top" width="50%">
           <form method="get" action="conf.cgi">
             <table border="0" class="optBox">
               <tr>
@@ -13,16 +15,19 @@
               </tr>
               <tr>
                 <td align="left" class='reportSelectItem'>
-                  <select name='type'>
-                    <option value='all'[%    IF type == 'all'   %] selected [% END %]>Overview</option>
+                  <select name='sub'>
+                    <option value='all'[%    IF sub == 'all'   %] selected [% END %]>Overview</option>
                     [% IF conf_config.exists('thruk') %]
-                    <option value='thruk'[%  IF type == 'thruk' %] selected [% END %]>Thruk</option>
+                    <option value='thruk'[%  IF sub == 'thruk' %] selected [% END %]>Thruk</option>
                     [% END %]
                     [% IF conf_config.exists('cgi.cfg') %]
-                    <option value='cgi'[%    IF type == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>
+                    <option value='cgi'[%    IF sub == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>
                     [% END %]
                     [% IF conf_config.exists('cgi.cfg') || conf_config.exists('htpasswd') %]
-                    <option value='users'[%  IF type == 'users' %] selected [% END %]>Users</option>
+                    <option value='users'[%  IF sub == 'users' %] selected [% END %]>Users</option>
+                    [% END %]
+                    [% IF has_obj_conf %]
+                    <option value='objects'[%  IF sub == 'objects' %] selected [% END %]>Objects</option>
                     [% END %]
                   </select>
                 </td>
@@ -39,13 +44,23 @@
         </td>
       </tr>
     </table>
-    [% PROCESS _message.tt %]
-    <br>
+
     <div align="center" class='dataTitle'>[% subtitle %]</div>
     <br>
 
     [% content %]
 
+[% IF action != "editor" %]
 <br><br>
+[% END %]
+
+
+<script type="text/javascript">
+<!--
+jQuery('INPUT.conf_button').button();
+jQuery('BUTTON.conf_button').button();
+-->
+</script>
+
 
 [% PROCESS _footer.tt %]

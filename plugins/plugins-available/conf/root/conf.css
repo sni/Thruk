@@ -1,0 +1,60 @@
+TD#filesystem {
+  text-align: left;
+}
+
+TD#filepath {
+  font-size: larger;
+  padding-top: 5px;
+  padding-left: 15px;
+}
+
+UL.obj_browse LI {
+  list-style: none;
+  text-align: left;
+  clear: both;
+  display: inline-block;
+}
+
+UL.obj_browse LI:hover {
+  background-color:#FFEB66;
+}
+
+UL.obj_browse LI IMG {
+  float: left;
+  margin-right: 5px;
+}
+
+DIV.obj_browse_name {
+  float: left;
+  width: 200px;
+}
+
+DIV.obj_browse_date {
+  float: left;
+  width: 120px;
+  text-align: right;
+}
+
+DIV#editor {
+  position: relative;
+}
+
+TD.dataVar DIV#editor {
+  font-weight: normal;
+  font-size: 11px;
+}
+.ace_comment {
+  color: #006600 !important;
+}
+/* define host */
+.ace_keyword, .ace_constant.ace_language {
+  color: #871F78 !important;
+}
+/* macros $USER1$ */
+.ace_keyword.ace_operator {
+  color: #8B0000 !important;
+}
+/* object attributes: host_name */
+.ace_support.ace_function {
+  color: #23238E !important;
+}

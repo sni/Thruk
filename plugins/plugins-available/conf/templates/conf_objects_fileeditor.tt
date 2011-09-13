@@ -1,0 +1,97 @@
+[% WRAPPER _conf_frame.tt %]
+<form action="conf.cgi" method="POST" id="saveform">
+<input type="hidden" name="sub" value="objects">
+<input type="hidden" name="action" value="savefile">
+<input type="hidden" name="file" value="[% file_link %]">
+<input type="hidden" name="content" value="" id='filecontent'>
+[% IF show_object && back == "edit" %]
+<input type="hidden" name="data.id" value="[% object.get_id() %]">
+[% END %]
+<input type="hidden" name="line" value="" id="fileline">
+<div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
+<table border="0" class='data conftoolobj' style="width: 100%; height: 100%;">
+  <tr>
+    <th class='data' style="width: 40px;"><a href='[% IF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+    <th class='data'><span  style="font-size: larger;">/[% file_name %]</span>[% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]</th>
+    <th class='data' style="width: 40px;">[% UNLESS file.readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
+  </tr>
+  <tr>
+    <td class="dataVar" colspan=3>
+        <div id="editor" style="visibility: hidden;">[% html_escape(file_content) %]</div>
+        <script src="[% url_prefix %]thruk/plugins/conf/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/monitoring.js" type="text/javascript" charset="utf-8"></script>
+        <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/monitoring_highlight_rules.js" type="text/javascript" charset="utf-8"></script>
+        <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/matching_brace_outdent.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript">
+        var editor;
+        var original_value;
+        window.onload = function() {
+            // save original value decoded
+            original_value = jQuery('#editor').text();
+
+            // editor needs fixed size
+            var edit_pane = document.getElementById('editor_pane');
+
+            var w = edit_pane.offsetWidth - 30, h = window.innerHeight - edit_pane.offsetTop - 40;
+            edit_pane.style.width = w + 'px';
+            edit_pane.style.height = h + 'px';
+
+            jQuery('#editor').css('width',  w + 'px')
+                             .css('height', h + 'px');
+
+            // start editor
+            editor = ace.edit("editor");
+
+            // enable highlighting
+            var MonitoringMode = require("ace/mode/monitoring").Mode;
+            editor.getSession().setMode(new MonitoringMode());
+
+            // some editor settings
+            editor.getSession().setTabSize(2);
+            editor.getSession().setUseSoftTabs(true);
+
+            [% IF file.readonly %]
+            // readonly
+            editor.setReadOnly(true);
+            [% END %]
+
+            // set line
+            editor.gotoLine([% line %]);
+
+            // make editor visible
+            jQuery("DIV.ace_scroller").css("overflow-x", "auto");
+            jQuery("#editor").css("visibility", "visible");
+        };
+
+        /* intercept when there are unsaved changes */
+        function confirm_discard_changes() {
+            if(has_changed()) {
+                return confirm("File has been changed. Really discard changes?");
+            }
+            return true;
+        };
+
+        function has_changed() {
+            if(editor.getSession().getValue() != original_value) {
+                return true;
+            }
+            return false;
+        }
+
+        function save_file() {
+            form = document.getElementById('saveform');
+            document.getElementById('filecontent').value = editor.getSession().getValue();
+            [%+ IF show_object && back == "edit" +%]
+            document.getElementById('fileline').value    = editor.getCursorPosition().row;
+            [%+ END +%]
+
+            form.submit();
+        }
+        </script>
+    </td>
+  </tr>
+</table>
+</div>
+</form>
+
+[% END %]

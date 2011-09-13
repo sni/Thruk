@@ -1,0 +1,83 @@
+[% IF !obj.default.exists(key) || obj.default.$key.type == 'STRING' || obj.default.$key.type == 'INT' %]
+  [% IF edit %]
+    <input type="text" name="obj.[% key %]" id="id_key[% nr %]" value="[% IF obj.conf.defined(key) %][% obj.conf.$key %][% END %]" [% IF use_ajax_search && obj.default.exists(key) && obj.default.$key.exists('link') %] onclick="ajax_search.init(this, '[% obj.default.$key.link %]', 'conf.cgi?action=json&amp;type=[% obj.default.$key.link %]', true, false)"[% END %]>
+  [% ELSE %]
+    [% IF obj.default.exists(key) && obj.default.$key.exists('link') %]
+        <a href="conf.cgi?sub=objects&amp;type=[% obj.default.$key.link %]&amp;data.name=[% obj.conf.$key | uri %]">[% obj.conf.$key %]</a>
+    [% ELSE %]
+        [% obj.conf.$key %]
+    [% END %]
+  [% END %]
+
+
+[% ELSIF obj.default.$key.type == 'COMMAND' %]
+  [% IF obj.conf.defined(key) %]
+      [% cmd = obj.conf.$key.split('!') %]
+  [% ELSE %]
+      [% cmd = ['',''] %]
+  [% END %]
+  [% IF edit %]
+    <table cellpadding=0 cellspacing=0 border=0><tr>
+    <td><input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && obj.default.$key.exists('link') %] onclick="ajax_search.init(this, '[% obj.default.$key.link %]', 'conf.cgi?action=json&amp;type=[% obj.default.$key.link %]', true, false)"[% END %]></td>
+    <td align="right">&nbsp;&nbsp;args:&nbsp;</td>
+    <td><input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; cmd.join('!') %]"></td>
+    </tr></table>
+  [% ELSE %]
+    [% IF obj.default.$key.exists('link') %]
+        <a href="conf.cgi?sub=objects&amp;type=[% obj.default.$key.link %]&amp;data.name=[% cmd.0 | uri %]">[% obj.conf.$key %]</a>
+    [% ELSE %]
+        [% obj.conf.$key %]
+    [% END %]
+  [% END %]
+
+
+[% ELSIF obj.default.$key.type == 'BOOL' %]
+  [% IF edit %]
+    <input type="radio" name="obj.[% key %]" value="0"[% IF obj.conf.defined(key) && obj.conf.$key == 0 %] checked[% END %]> No
+    <input type="radio" name="obj.[% key %]" value="1"[% IF obj.conf.defined(key) && obj.conf.$key == 1 %] checked[% END %]> Yes
+  [% ELSE %]
+    [% IF obj.conf.$key %]Yes[% ELSE %]No[% END %]
+  [% END %]
+
+
+[% ELSIF obj.default.$key.type == 'ENUM' %]
+  [% IF edit %]
+    <input type="checkbox" name="obj.[% key %]" value="noop" style="display:none" checked>
+    [% FOREACH v = obj.default.$key.values %]
+      [% ind = loop.index %]
+      <input type="checkbox" name="obj.[% key %]" value="[% v %]"[% IF obj.conf.defined(key) && obj.conf.$key.grep(v).size() > 0 %] checked[% END %]>[% obj.default.$key.keys.$ind %]&nbsp;
+    [% END %]
+  [% ELSE %]
+    [% first = 1 %]
+    [% FOREACH v = obj.default.$key.values %]
+      [% ind = loop.index %]
+      [% IF obj.conf.$key.grep(v).size() > 0 %][% UNLESS first %], [% END %][% obj.default.$key.keys.$ind %][% first = 0 %][% END %]
+    [% END %]
+  [% END %]
+
+[% ELSIF obj.default.$key.type == 'CHOOSE' %]
+  [% IF edit %]
+    [% FOREACH k = obj.default.$key.keys %]
+    [% SET x = loop.index %]
+    [% SET v = obj.default.$key.values.$x %]
+    <input type="radio" name="obj.[% key %]" value="[% v %]"[% IF obj.conf.defined(key) && obj.conf.$key == v %] checked[% END %]> [% k %]
+    [% END %]
+  [% ELSE %]
+    [% obj.conf.$key %]
+  [% END %]
+
+
+[% ELSIF obj.default.$key.type == 'LIST' %]
+  [% IF edit %]
+    <input type="text" name="obj.[% key %]" id="id_[% key %]" value="[% IF obj.conf.defined(key) %][% obj.conf.$key.join(', ') %][% END %]"[% IF use_ajax_search && obj.default.$key.exists('link') %] onclick="ajax_search.init(this, '[% obj.default.$key.link %]', 'conf.cgi?action=json&amp;type=[% obj.default.$key.link %]', true, false, true[% IF key == "use" %], 'templates'[% END %])"[% END %]>
+  [% ELSE %]
+    [% IF obj.default.$key.exists('link') %]
+        [% FOREACH o = obj.conf.$key %]
+        <a href="conf.cgi?sub=objects&amp;type=[% obj.default.$key.link %]&amp;data.name=[% o | uri %]">[% o %]</a>
+        [% UNLESS loop.last %], [% END %]
+        [% END %]
+    [% ELSE %]
+        [% obj.conf.$key.join(', ') %]
+    [% END %]
+  [% END %]
+[% END %]

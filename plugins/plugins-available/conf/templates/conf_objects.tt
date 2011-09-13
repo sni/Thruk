@@ -1,0 +1,132 @@
+[% WRAPPER _conf_objects_frame.tt %]
+
+[% IF show_object %]
+
+[% UNLESS object.defined('file') %]
+<script type="text/javascript">
+<!--
+    var data = [% filenames_json %];
+-->
+</script>
+[% END %]
+
+[% duplicate_keys = {} %]
+<form action="conf.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none">
+<input type="hidden" name="sub" value="objects">
+<input type="hidden" name="type" value="[% type %]">
+<input type="hidden" name="data.id" value="[% object.get_id() %]">
+<input type="hidden" name="action" value="store">
+  <table border="0" class='data conftoolobj'>
+    <tr>
+      <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' style="width:33%" id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
+      <th class='data[% IF subcat == 'templates' %] confSelected[% END %]' style="width:33%" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
+      <th class='data[% IF subcat == 'calc'      %] confSelected[% END %]' style="width:33%" id="sub_3" onclick="window.location.hash='#calc';set_sub(3)"><a href="#calc">Calculated</a></th>
+    </tr>
+    <tr>
+      <td colspan=3 class='dataVar dataUserVar'>
+          [% IF object.defined('file') %][% IF object.conf.defined('register') && object.conf.register == 0 %]Template: [% END %][% object.get_long_name() %][% ELSE %]new [% type %][% END %]
+          <span style="[% IF subcat != 'config' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1">
+            <br>
+            [% IF object.defined('file') %]
+              [% object.file.path %] [% IF object.line > 0 %] line [% object.line %][% END %][% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
+            [% ELSE %]
+              save to: <input type="text" class="deletable" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', undefined, false, false, false, false, data)">
+            [% END %]
+          </span>
+      </td>
+    </tr>
+
+    <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
+      <td class='dataVal' colspan=3 style="text-align: center;">
+        <div align="center">
+        [% IF object.defined('file') && object.file.readonly %]
+        [% PROCESS _conf_object.tt obj = object edit = 0 %]
+        [% ELSE %]
+        [% PROCESS _conf_object.tt obj = object edit = 1 %]
+        [% END %]
+        </div>
+      </td>
+    </tr>
+
+    [% IF used_templates.size > 0 %]
+    <tr style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2">
+      <td colspan=3>
+        <div align="center">
+        <table>
+          [% FOREACH key = used_templates %]
+          [% SET objs = c.obj_db.get_objects_by_name(type, key, 1) %]
+          [% SET obj_id = "new" %]
+          <tr>
+            <td class='dataVal' colspan=3 style="text-align:center">
+              <span style="font-weight:normal;">
+                [% IF objs.size > 0 %]
+                [% objs.0.file.path %] line [% objs.0.line %]
+                [% SET obj_id = objs.0.get_id() %]
+                [% ELSE %]
+                object does not exist
+                [% END %]
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class='dataVar' style="text-align: left; white-space: nowrap;">
+              <a href="conf.cgi?sub=objects&amp;type=[% type %]&amp;data.id=[% obj_id %]&amp;data.name=[% key | uri %]">
+                [% IF objs.0.file.readonly %]
+                <img src='[% url_prefix %]thruk/themes/[% theme %]/images/detail.gif' alt='View Template' title='View Template' width="16" height="16" style="vertical-align: middle">
+                [% ELSE %]
+                <img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' alt='Edit Template' title='Edit Template' width="16" height="16" style="vertical-align: middle">
+                [% END %]
+              </a>
+              &nbsp;[% key %]
+            </td>
+            <td class='dataVal' colspan=2>
+              [% IF objs.size > 0 %]
+                 [% PROCESS _conf_object.tt obj = objs.0 edit = 0 %]
+              [% ELSE %]
+                Template does not exist
+              [% END %]
+            </td>
+          </tr>
+          [% UNLESS loop.last %]
+          <tr style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2"><td colspan=3><hr></td></tr>
+          [% END %]
+          [% END %]
+        </table>
+        </div>
+      </td>
+    </tr>
+    [% ELSE %]
+    <tr style="[% IF subcat != 'templates' %]display:none[% END %]" class="sub_2">
+      <td class='dataVar' colspan=3 style="text-align:center">This object does not use templates</td>
+    </tr>
+    [% END %]
+
+    <tr style="[% IF subcat != 'calc' %]display:none[% END %]" class="sub_3">
+      <td></td>
+    </tr>
+
+    [% IF ! object.defined('file') || ! object.file.readonly %]
+    <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
+      <td colspan=3 class="data dataSubmit">
+        [% IF object.get_id() != 'new' %]
+        <input type="submit" name="send" value="raw edit" style="width:90px" class="conf_button">
+        [% END %]
+        <input type="submit" name="send" value="save" style="width:90px" class="conf_button">
+      </td>
+    </tr>
+    [% END %]
+  </table>
+</form>
+
+[% END %]
+
+<script type="text/javascript">
+<!--
+  if(window.location.hash == '#config')    { set_sub(1); }
+  if(window.location.hash == '#templates') { set_sub(2); }
+  if(window.location.hash == '#calc')      { set_sub(3); }
+-->
+</script>
+
+[% END %]

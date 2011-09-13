@@ -5,7 +5,7 @@ Thruk Users Guide
 
 Thruk is an multibackend monitoring web interface which currently
 supports Nagios and Icinga using the Livestatus NEB module. It is
-designed to be a "drop-in" replacement and targets covering 100% of
+designed to be a 'drop-in' replacement and targets covering 100% of
 the original features plus additional enhancements for large
 installations.
 
@@ -30,6 +30,7 @@ Main Features / Advantages
   * Adjustable side menu
   * Full expanded plugin commandline for easy testing
   * Save searches like bookmarks
+  * Config Tool included
 
 
 
@@ -166,7 +167,7 @@ For the FastCGI installation follow the steps at <<_fastcgi,fastcgi installation
 ----
 1.  install debian netinst
       - minimal inst, create user thruk
-2.  add "contrib non-free" to /etc/apt/sources.list
+2.  add 'contrib non-free' to /etc/apt/sources.list
 3.  #> apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl \
           make gcc git git-core libgd2-xpm-dev libexpat1-dev
 4.  #> su - thruk
@@ -255,7 +256,7 @@ logout and login again and verify that your perl env looks like this:
 
 ==== Install Module::Install
 -------
-  perl -MCPAN -e "install Module::Install::Catalyst"
+  perl -MCPAN -e 'install Module::Install::Catalyst'
 -------
 
 
@@ -315,7 +316,7 @@ Basically you have to build the NDO addon and add it to your nagios/icinga.cfg.
 
 ==== Configuration
 
-Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.
+Copy 'thruk.conf' to 'thruk_local.conf' and adjust the livestatus settings to your needs.
 -------
   %> cp thruk.conf thruk_local.conf
 -------
@@ -324,7 +325,7 @@ thruk_local.conf contains the local overrides and will never be
 overwritten.
 
 
-Edit "cgi.conf" and adjust settings to your needs.
+Edit 'cgi.conf' and adjust settings to your needs.
 
 See the <<Configuration>> section for detailed explaination of configuration options.
 
@@ -592,6 +593,18 @@ ex.:
   logo_path_prefix = /icons/
 
 
+==== physical_logo_path
+
+Location of your logos in your filesystem. This directory should be
+mapped to your 'logo_path_prefix' directory where 'logo_path_prefix' is
+the path relative to your webserver root directory and 'physical_logo_path' is
+the corresponding filesystem path.
+
+ex.:
+
+  physical_logo_path = /usr/share/icons/
+
+
 ==== use_strict_host_authorization
 
 When set to a true value, every contact will only see the hosts where
@@ -627,7 +640,7 @@ ex.:
 
 ==== all_problems_link
 
-Customizable link for the "problems" link in side menu. Can be useful
+Customizable link for the 'problems' link in side menu. Can be useful
 to reflect your companys process of error handling.
 
 ex.:
@@ -1234,7 +1247,7 @@ xinetd.conf. You can enter local unix sockets too.
 
   * peer
          - name      name for this connection
-         - type      type of this connection. Only "livestatus" possible at the
+         - type      type of this connection. Only 'livestatus' possible at the
                      moment
          - hidden    should this peer be hidden initially ( can be reenabled
                      via gui switch ) Only useful with more than one
@@ -1251,6 +1264,25 @@ xinetd.conf. You can enter local unix sockets too.
             - query_timeout     query timeout setting
             - resource_file     resource_file for this peer
 
+          (config tool only)
+            - core_conf         Path to your nagios.cfg / icinga.cfg. Read all
+                                object directories and files from this config
+                                file.
+            - obj_check_cmd     Commandline to verify the config.
+            - obj_reload_cmd    Commandline to reload the config.
+
+            (advanced config tool options)
+            - obj_readonly      Filename pattern to define readonly objects.
+                                For example for generated config files.
+            - obj_dir           Path to your objects. Enables the objects editor.
+                                Reads all *.cfg from this folder and all subfolders.
+                                (only needed when not using 'core_conf')
+            - obj_file          Path to a single objects file. Enables the objects
+                                editor. Both 'obj_dir' and 'obj_file' can be
+                                specified more than once.
+                                (only needed when not using 'core_conf')
+            - obj_exclude       Specify some exection pattern for the obj_dir.
+                                (only needed when not using 'core_conf')
 ex.:
 
   <Component Thruk::Backend>
@@ -1261,7 +1293,10 @@ ex.:
         groups = admins,locals # makes this backend only visible to the
                                # admin and the locals contactgroup
         <options>
-            peer   = /tmp/livestatus.socket
+            peer       = /tmp/livestatus.socket
+            core_conf  = /etc/nagios/nagios.cfg
+            obj_check  = /etc/init.d/nagios checkconfig
+            obj_reload = /etc/init.d/nagios reload
        </options>
     </peer>
     <peer>
@@ -1291,20 +1326,20 @@ config tool.
 You don't have to restart Thruk when changing the config with the
 config tool.
 
-  * you can manage 3 types of files with the config tool:
-      - thruk               path to your thruk_local.conf. Enables
-                            adjusting Thruks config.
-      - cgi.cfg             path to your cgi.cfg. Enables adjusting the
-                            cgi.cfg.
-      - htpasswd            path to your htpasswd. Enables user management
+  * you can manage different types of files with the config tool:
+      - thruk               Path to your thruk_local.conf. Enables
+                            adjusting Thruks config if set.
+      - cgi.cfg             Path to your cgi.cfg. Enables adjusting the
+                            cgi.cfg if set.
+      - htpasswd            Path to your htpasswd. Enables user management
                             based an apaches basic auth with htpasswd.
 
 ex.:
 
   <Component Thruk::Plugin::ConfigTool>
-    thruk    = ./thruk_local.conf
-    cgi.cfg  = ./cgi.cfg
-    htpasswd = ./htpasswd
+    thruk      = ./thruk_local.conf
+    cgi.cfg    = ./cgi.cfg
+    htpasswd   = ./htpasswd
   </Component>
 
 

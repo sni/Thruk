@@ -2,7 +2,7 @@
 
 <div align="center">
 <form action="conf.cgi" method="POST">
-<input type="hidden" name="type" value="users">
+<input type="hidden" name="sub" value="users">
 <input type="hidden" name="action" value="change">
   <table border="0" class='data conftoolusers'>
     <tr>
@@ -28,7 +28,7 @@
 [% IF show_user %]
 <form action="conf.cgi" method="POST">
 <input type="submit" name="send" value="save" style="display:none">
-<input type="hidden" name="type" value="users">
+<input type="hidden" name="sub" value="users">
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <input type="hidden" name="data.username" value="[% user_name %]">
@@ -67,7 +67,7 @@
     [% END %]
     <tr>
       <td colspan=2 class="data dataSubmit">
-        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi?type=users'">
+        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi?sub=users'">
         <input type="submit" name="send" value="save" style="width:80px">
       </td>
     </tr>

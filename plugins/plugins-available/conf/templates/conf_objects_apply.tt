@@ -1,0 +1,128 @@
+[% WRAPPER _conf_frame.tt %]
+
+<div align="center">
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="sub" value="objects">
+<input type="hidden" name="apply" value="commit">
+  <table border="0" class='data conftoolobj'>
+    [% PROCESS _conf_objects_menu.tt type="apply" %]
+    <tr><td colspan=10 align="center">
+
+    <table>
+
+    <tr>
+      <td class='dataVar' style="padding-top: 5px;">
+        1. Verify your changes
+      </td>
+      <td class='dataVar'>
+        [% IF needs_commit %]
+        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: text-top">
+        [% END %]
+      </td>
+      <td class='dataVal' style="padding-top: 5px; text-align: center;">
+        [% IF changed_files.size > 0 %]
+        <input type="submit" name="diff" value="view diff of changed files" style="width:250px" class="conf_button">
+        [% ELSE %]
+          There are no pending changes.
+        [% END %]
+      </td>
+    </tr>
+    <tr><td colspan=3><hr></td></tr>
+
+    <tr>
+      <td class='dataVar' style="padding-top: 5px;">
+        2. Save changes to disk:
+      </td>
+      <td class='dataVar'>
+        [% IF needs_commit %]
+        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Config changes needs to be saved' title='Config changes needs to be saved' width="16" height="16" style="vertical-align: bottom">
+        [% END %]
+      </td>
+      <td class='dataVal' style="text-align: center;">
+        [% IF changed_files.size > 0 %]
+        The following files have been changed:<br><br>
+        <div style="float: left; position: relative; left: 50%;"><div style="float: left; position: relative; left: -50%; text-align: left;">
+        [% FOREACH f = changed_files %]
+          [% f.path %]<br>
+        [% END %]
+        </div></div>
+        <br style="clear: both"><br>
+        <input type="submit" name="save" value="save your changes to disk" style="width:250px" class="conf_button">
+        [% ELSE %]
+          There are no pending changes to commit.
+        [% END %]
+      </td>
+    </tr>
+    <tr><td colspan=3><hr></td></tr>
+
+    <tr>
+      <td class='dataVar'>
+        3. Check your configuration changes
+      </td>
+      <td class='dataVar'>
+        [% IF needs_reload %]
+        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+        [% END %]
+      </td>
+      <td class='dataVal' style="text-align: center;">
+        [% IF peer_conftool.exists('obj_check_cmd') %]
+        <input type="submit" name="check" value="check your configuration changes" style="width:250px" class="conf_button">
+        [% ELSE %]
+        please set a <i>obj_check_cmd</i> option in your peer config in your thruk_local.conf.
+        [% END %]
+      </td>
+    </tr>
+    <tr><td colspan=3><hr></td></tr>
+
+    <tr>
+      <td class='dataVar'>
+        4. Reload your monitoring core
+      </td>
+      <td class='dataVar'>
+        [% IF needs_reload %]
+        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Core needs to be reloaded' title='Core needs to be reloaded' width="16" height="16" style="vertical-align: text-bottom">
+        [% END %]
+      </td>
+      <td class='dataVal' style="text-align: center;">
+        [% IF peer_conftool.exists('obj_reload_cmd') %]
+        <input type="submit" name="reload" value="reload your monitoring core" style="width:250px" class="conf_button">
+        [% ELSE %]
+        please set a <i>obj_reload_cmd</i> option in your peer config in your thruk_local.conf.
+        [% END %]
+      </td>
+    </tr>
+
+    [% IF changed_files.size > 0 %]
+    <tr><td colspan=3><br><br><hr></td></tr>
+    <tr>
+      <td class='dataVar'>
+        Discard changes
+      </td>
+      <td class='dataVar'></td>
+      <td class='dataVal' style="text-align: center;">
+        <input type="submit" name="refresh" value="discard all unsaved changes" style="width:250px" onclick="return confirm('really discard all unsaved changes?')" class="conf_button">
+      </td>
+    </tr>
+    [% END %]
+
+    </table>
+    </td></tr>
+  </table>
+</form>
+</div>
+
+[% IF output %]
+<div align="center" style="overflow: auto;">
+<br><br>
+<table>
+  <tr>
+    <td class='dataVar'>Command Output:</td>
+  </tr>
+  <tr>
+    <td class='dataVal'>[% output %]</td>
+  </tr>
+</table>
+</div>
+[% END %]
+
+[% END %]

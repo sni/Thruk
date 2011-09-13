@@ -1,0 +1,49 @@
+[% WRAPPER _conf_frame.tt %]
+
+<div align="center">
+<form action="conf.cgi" method="GET">
+<input type="hidden" name="sub" value="objects">
+  <table border="0" class='data conftoolobj'>
+    [% PROCESS _conf_objects_menu.tt %]
+    [% IF type %]
+    <tr>
+      <td class='dataVar' colspan=10 style="padding-top: 5px; text-align: center;">
+        <input type="hidden" name="type" value="[% type %]">
+        <input type="text" name="data.name" id="data.name" value="[% IF show_secondary_select %][% data_name %][% END %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, '[% type %]', 'conf.cgi?action=json&amp;type=[% type %]')"[% END %]>
+        <br>select [% type %] to change or enter name to create new [% type %]
+      </td>
+    </tr>
+    [% IF show_secondary_select %]
+    <tr>
+      <td class='dataVar' colspan=10 style="padding-top: 5px; text-align: center;">
+        <input type="text" name="data.name2" id="data.name2" value=""[% IF use_ajax_search %] onclick="ajax_search.init(this, 'full', 'conf.cgi?action=json&amp;type=[% type %]&amp;filter=[% data_name | uri %]', undefined, true)"[% END %]>
+        <br>This [% type %] is not unique, please select object to change
+      </td>
+    </tr>
+    [% END %]
+    <tr>
+      <td colspan=10 class="data dataSubmit">
+        <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi'" class="conf_button">
+        <input type="submit" name="send" value="show" style="width:80px" class="conf_button">
+      </td>
+    </tr>
+    [% END %]
+  </table>
+</form>
+
+<br><br>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
+<tr>
+<td align="center" valign="top" width="100%">
+  [% content %]
+</td>
+<td align="center" valign="top" style="width: 250px;">
+[% PROCESS _conf_action_menu.tt %]
+</td>
+</tr>
+</table>
+
+</div>
+
+[% END %]
