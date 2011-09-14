@@ -267,3 +267,7 @@ A {
 A:hover {
   color: #000099;
 }
+
+.tac A {
+  color: black;
+}
