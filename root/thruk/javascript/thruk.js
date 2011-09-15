@@ -2205,7 +2205,9 @@ var ajax_search = {
          * on the suggestion would be cancel as the panel does
          * not exist anymore
          */
-        window.setTimeout("jQuery('#"+ajax_search.result_pan+"').hide('fade', {}, 300)", 100);
+        if(ajax_search.cur_select == -1) {
+            window.setTimeout("jQuery('#"+ajax_search.result_pan+"').hide('fade', {}, 300)", 100);
+        }
     },
 
     /* wrapper around suggest_do() to avoid multiple running searches */
@@ -2423,6 +2425,7 @@ var ajax_search = {
         var keyCode      = evt.keyCode;
         var navigateUp   = keyCode == 38;
         var navigateDown = keyCode == 40;
+
         if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)) {
             if(navigateDown && ajax_search.cur_select == -1) {
                 ajax_search.cur_select = 0;
