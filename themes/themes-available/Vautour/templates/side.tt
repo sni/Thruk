@@ -8,7 +8,7 @@
     [% UNLESS all_in_one_css %]
     <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css" type="text/css" rel="stylesheet" />
     [% END %]
-    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk.css" type="text/css" rel="stylesheet" />
+    <link href="[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_global.css" type="text/css" rel="stylesheet" />
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.7.0.js"></script>
     <script type="text/javascript">
