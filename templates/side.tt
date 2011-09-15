@@ -11,8 +11,10 @@
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.7.0.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
     <script type="text/javascript">
     <!--
+    jQuery.noConflict();
     var theme      = '[% theme %]';
     var url_prefix = '[% url_prefix %]';
     -->
@@ -22,10 +24,11 @@
     <!--
     HTML {
         overflow: inherit;
-        overflow-y: inherit;
+        overflow-y: auto;
     }
     -->
     </style>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-ui/js/jquery-ui-1.8.14.custom.min.js"></script>
   </head>
   <body class='navbar'>
 [% END %]
