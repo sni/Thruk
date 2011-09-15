@@ -1,5 +1,8 @@
 [% WRAPPER _conf_objects_frame.tt %]
 
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="sub" value="objects">
+<input type="hidden" name="path" value="/" id="path">
 <table border="0" class='data conftoolobj' width="500">
   <tr>
     <th class='data'>Filesystem</th>
@@ -13,7 +16,19 @@
   <tr>
     <td id="filesystem"></td>
   </tr>
+  <tr>
+    <td align="left">
+      <hr>
+      select <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', true); return false;">all</a> <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', false); return false;">none</a>
+      <select name="action" onChange="jQuery('#path').attr('value', location.hash); this.form.submit()">
+        <option>--- please select action ---</option>
+        <option value="deletefiles">delete selected files</option>
+        <option value="undeletefiles">undelete selected files</option>
+      </select>
+    </td>
+  </tr>
 </table>
+</form>
 
 <script type="text/javascript">
 <!--
@@ -86,7 +101,7 @@
             var files = new Hash(dir.get('files'));
             files.keys().sort().each(function(name) {
                 f = files.get(name);
-                html += html_file(path, name, f.date);
+                html += html_file(path, name, f.date, f.deleted);
             });
 
             html += "<\/ul>";
@@ -98,6 +113,7 @@
     function html_dir(path, name, date) {
         var html = "";
         html += "<li>";
+        html += "<input type='checkbox' name='files' value='"+ path +"' class='obj_browse_box'>";
         html += "<a href='#"+ path +"' onclick='setdir(\""+ path +"\")'>";
         html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/folder.png' border='0' alt='folder' title='folder' width='16' height='16'> ";
         html += "<div class='obj_browse_name'>" + name + "<\/div> ";
@@ -108,13 +124,18 @@
     }
 
     /* return list element for file */
-    function html_file(path, name, date) {
+    function html_file(path, name, date, deleted) {
+        var css="";
+        if(deleted) {
+            css="deleted";
+        }
         var html = "";
         html += "<li>";
-        html += "<a href='conf.cgi?sub=objects&action=editor&file="+ path + name + "'>";
+        html += "<input type='checkbox' name='files' value='"+ path + name +"' class='obj_browse_box'>";
+        html += "<a href='conf.cgi?sub=objects&action=editor&file="+ path + name + "' class='" + css + "'>";
         html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/page_white_text.png' border='0' alt='cfg' title='cfg' width='16' height='16'> ";
-        html += "<div class='obj_browse_name'>" + name + "<\/div> ";
-        html += "<div class='obj_browse_date'>"+ date + "<\/div>";
+        html += "<div class='obj_browse_name "+ css +"'>" + name + "<\/div> ";
+        html += "<div class='obj_browse_date "+ css +"'>"+ date + "<\/div>";
         html += "<\/a>";
         html += "<\/li>";
         return html;
@@ -186,7 +207,7 @@
                     html += html_dir(o.get('path'), o.get('name'), o.get('date'));
                 }
                 if(o.get('type') == 'file') {
-                    html += html_file(o.get('path'), o.get('name'), o.get('date'));
+                    html += html_file(o.get('path'), o.get('name'), o.get('date'), o.get('deleted'));
                 }
             });
             html += "<\/ul>";
@@ -210,7 +231,7 @@
         });
         files.keys().each(function(name) {
             if(file_matches(pattern, path + name)) {
-                results.push(new Hash({ 'type':'file', 'name': path + name, 'path': root, 'date': f.date }));
+                results.push(new Hash({ 'type':'file', 'name': path + name, 'path': root, 'date': f.date, 'deleted': f.deleted }));
             }
         });
         return results;

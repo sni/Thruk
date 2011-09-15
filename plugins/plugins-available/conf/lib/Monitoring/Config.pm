@@ -92,6 +92,15 @@ sub commit {
     for my $file (@{$changed_files}) {
         $file->save();
     }
+
+    # remove deleted files from files
+    my @new_files;
+    for my $f (@{$self->{'files'}}) {
+        if(!$f->{'deleted'} or -f $f->{'path'}) {
+            push @new_files, $f;
+        }
+    }
+    $self->{'files'}        = \@new_files;
     $self->{'needs_commit'} = 0;
     $self->{'needs_reload'} = 1 if scalar @{$changed_files} > 0;
     return 1;
@@ -492,16 +501,65 @@ sub move_object {
 
     return 1;
 }
+
+
 ##########################################################
 
-=head2 add_file
+=head2 file_add
 
 add new file to config
 
 =cut
-sub add_file {
-    my ( $self, $file ) = @_;
+sub file_add {
+    my $self    = shift;
+    my $file    = shift;
+    my $rebuild = shift;
+    $rebuild    = 1 unless defined $rebuild;
     push @{$self->{'files'}}, $file;
+    $self->_rebuild_index() if $rebuild;
+    return;
+}
+
+
+##########################################################
+
+=head2 file_delete
+
+remove a file from the config
+
+=cut
+sub file_delete {
+    my $self    = shift;
+    my $file    = shift;
+    my $rebuild = shift;
+    $rebuild                = 1 unless defined $rebuild;
+    $file->{'deleted'}      = 1;
+    $file->{'changed'}      = 1;
+    $self->{'needs_commit'} = 1;
+
+    $self->_rebuild_index() if $rebuild;
+    return;
+}
+
+
+##########################################################
+
+=head2 file_undelete
+
+undelete a file marked for removal
+
+=cut
+sub file_undelete {
+    my $self    = shift;
+    my $file    = shift;
+    my $rebuild = shift;
+
+    $rebuild                = 1 unless defined $rebuild;
+    $file->{'deleted'}      = 0;
+    $file->{'changed'}      = 1;
+    $self->{'needs_commit'} = 1;
+
+    $self->_rebuild_index() if $rebuild;
     return;
 }
 
@@ -549,6 +607,7 @@ sub _set_objects_from_files {
     my $self  = shift;
 
     for my $file (@{$self->{'files'}}) {
+        next if $file->{'deleted'} == 1;
         $file->update_objects();
     }
 

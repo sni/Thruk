@@ -34,6 +34,15 @@ DIV.obj_browse_date {
   width: 120px;
   text-align: right;
 }
+INPUT.obj_browse_box {
+  float: left;
+  margin-right: 5px;
+}
+A.deleted, DIV.deleted {
+  text-decoration: line-through;
+  color: #999999;
+}
+
 
 DIV#editor {
   position: relative;

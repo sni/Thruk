@@ -535,6 +535,16 @@ sub _process_objects_page {
         return if $self->_file_save($c);
     }
 
+    # delete files/folders from browser
+    elsif($c->stash->{action} eq 'deletefiles') {
+        return if $self->_file_delete($c);
+    }
+
+    # undelete files/folders from browser
+    elsif($c->stash->{action} eq 'undeletefiles') {
+        return if $self->_file_undelete($c);
+    }
+
     # set type and name of object
     if(defined $obj) {
         $c->stash->{'show_object'}    = 1;
@@ -849,7 +859,7 @@ sub _get_context_object {
                 $file->{'is_new_file'} = 1;
                 $file->{'changed'}     = 1;
                 $obj->{'file'}         = $file;
-                $c->{'obj_db'}->add_file($file);
+                $c->{'obj_db'}->file_add($file);
             }
             else {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: invalid path' );
@@ -924,7 +934,8 @@ sub _files_to_path {
             $subdir = $subdir->{'dirs'}->{$dir};
         }
         $subdir->{'files'}->{$filename} = {
-                                           'date' => Thruk::Utils::Filter::date_format($c, $file->{'mtime'})
+                                           'date'    => Thruk::Utils::Filter::date_format($c, $file->{'mtime'}),
+                                           'deleted' => $file->{'deleted'},
                                         };
     }
 
@@ -1087,6 +1098,47 @@ sub _object_new {
     my $obj = Monitoring::Config::Object->new(type => $c->stash->{'type'}, name => $c->stash->{'data_name'});
     return $obj;
 }
+
+
+##########################################################
+sub _file_delete {
+    my $self = shift;
+    my $c    = shift;
+    my $path = $c->{'request'}->{'parameters'}->{'path'} || '';
+    $path    =~ s/^\#//gmx;
+
+    my $files = $c->{'request'}->{'parameters'}->{'files'};
+    for my $filename (ref $files eq 'ARRAY' ? @{$files} : ($files) ) {
+        my $file = $c->{'obj_db'}->get_file_by_path($filename);
+        if(defined $file) {
+            $c->{'obj_db'}->file_delete($file);
+        }
+    }
+
+    Thruk::Utils::set_message( $c, 'success_message', 'File(s) deleted successfully' );
+    return $c->redirect('conf.cgi?sub=objects&action=browser#'.$path);
+}
+
+
+##########################################################
+sub _file_undelete {
+    my $self = shift;
+    my $c    = shift;
+    my $path = $c->{'request'}->{'parameters'}->{'path'} || '';
+    $path    =~ s/^\#//gmx;
+
+    my $files = $c->{'request'}->{'parameters'}->{'files'};
+    for my $filename (ref $files eq 'ARRAY' ? @{$files} : ($files) ) {
+        my $file = $c->{'obj_db'}->get_file_by_path($filename);
+        if(defined $file) {
+            $c->{'obj_db'}->file_undelete($file);
+        }
+    }
+
+    Thruk::Utils::set_message( $c, 'success_message', 'File(s) recoverd successfully' );
+    return $c->redirect('conf.cgi?sub=objects&action=browser#'.$path);
+}
+
 
 ##########################################################
 sub _file_save {

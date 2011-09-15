@@ -38,6 +38,7 @@ sub new {
         'readonly'    => 0,
         'lines'       => 0,
         'is_new_file' => 0,
+        'deleted'     => 0,
         'objects'     => [],
         'errors'      => [],
     };
@@ -306,6 +307,11 @@ sub save {
         return;
     }
 
+    if($self->{'deleted'}) {
+        unlink($self->{'path'});
+        return;
+    }
+
     my $content = $self->_get_new_file_content();
     open(my $fh, '>', $self->{'path'}) or die("cannot write to file: $!");
     print $fh $content;
@@ -363,6 +369,8 @@ sub _get_new_file_content {
 
     my $new_content = "";
     my $linenr = 0;
+
+    return $new_content if $self->{'deleted'};
 
     # sort by line number, but put line 0 at the end
     for my $obj (sort { $b->{'line'} > 0 <=> $a->{'line'} > 0 || $a->{'line'} <=> $b->{'line'} } @{$self->{'objects'}}) {
