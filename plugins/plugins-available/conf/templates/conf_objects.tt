@@ -21,17 +21,19 @@
     <tr>
       <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' style="width:33%" id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
       <th class='data[% IF subcat == 'templates' %] confSelected[% END %]' style="width:33%" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
-      <th class='data[% IF subcat == 'calc'      %] confSelected[% END %]' style="width:33%" id="sub_3" onclick="window.location.hash='#calc';set_sub(3)"><a href="#calc">Calculated</a></th>
+      <th class='data[% IF subcat == 'comp'      %] confSelected[% END %]' style="width:33%" id="sub_3" onclick="window.location.hash='#comp';set_sub(3)"><a href="#comp">Computed</a></th>
     </tr>
     <tr>
       <td colspan=3 class='dataVar dataUserVar'>
           [% IF object.defined('file') %][% IF object.conf.defined('register') && object.conf.register == 0 %]Template: [% END %][% object.get_long_name() %][% ELSE %]new [% type %][% END %]
-          <span style="[% IF subcat != 'config' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1">
+          <span style="[% IF subcat != 'config' && subcat != 'comp' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1 sub_3">
             <br>
             [% IF object.defined('file') %]
               [% object.file.path %] [% IF object.line > 0 %] line [% object.line %][% END %][% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
             [% ELSE %]
+              [% IF subcat != 'config' %]
               save to: <input type="text" class="deletable" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', undefined, false, false, false, false, data)">
+              [% END %]
             [% END %]
           </span>
       </td>
@@ -41,9 +43,9 @@
       <td class='dataVal' colspan=3 style="text-align: center;">
         <div align="center">
         [% IF object.defined('file') && object.file.readonly %]
-        [% PROCESS _conf_object.tt obj = object edit = 0 %]
+        [% PROCESS _conf_object_view.tt obj = object %]
         [% ELSE %]
-        [% PROCESS _conf_object.tt obj = object edit = 1 %]
+        [% PROCESS _conf_object_edit.tt obj = object %]
         [% END %]
         </div>
       </td>
@@ -82,7 +84,7 @@
             </td>
             <td class='dataVal' colspan=2>
               [% IF objs.size > 0 %]
-                 [% PROCESS _conf_object.tt obj = objs.0 edit = 0 %]
+                 [% PROCESS _conf_object_view.tt obj = objs.0 %]
               [% ELSE %]
                 Template does not exist
               [% END %]
@@ -102,8 +104,13 @@
     </tr>
     [% END %]
 
-    <tr style="[% IF subcat != 'calc' %]display:none[% END %]" class="sub_3">
-      <td></td>
+    <tr style="[% IF subcat != 'comp' %]display:none[% END %]" class="sub_3">
+      <td class='dataVal' colspan=3 style="text-align: center;">
+        <div align="center">
+        [% SET duplicate_keys = {} %]
+        [% PROCESS _conf_object_view.tt obj = object %]
+        </div>
+      </td>
     </tr>
 
     [% IF ! object.defined('file') || ! object.file.readonly %]
@@ -125,7 +132,7 @@
 <!--
   if(window.location.hash == '#config')    { set_sub(1); }
   if(window.location.hash == '#templates') { set_sub(2); }
-  if(window.location.hash == '#calc')      { set_sub(3); }
+  if(window.location.hash == '#comp')      { set_sub(3); }
 -->
 </script>
 

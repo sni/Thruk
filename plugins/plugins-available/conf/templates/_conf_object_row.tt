@@ -5,7 +5,7 @@
     [% IF obj.default.exists(key) && obj.default.$key.exists('link') %]
         <a href="conf.cgi?sub=objects&amp;type=[% obj.default.$key.link %]&amp;data.name=[% obj.conf.$key | uri %]">[% obj.conf.$key %]</a>
     [% ELSE %]
-        [% obj.conf.$key %]
+        [% html_escape(obj.conf.$key) %]
     [% END %]
   [% END %]
 

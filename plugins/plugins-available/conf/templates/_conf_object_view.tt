@@ -1,0 +1,44 @@
+<table width="100%" cellspacing=0 cellpadding=0>
+
+  [% FOREACH key = obj.get_sorted_keys() %]
+    [% NEXT IF obj.default.exists(key) && obj.default.$key.type == "DEPRECATED" %]
+    [% IF duplicate_keys.exists(key) %]
+      [% class = "conf_attr_used" %]
+    [% ELSE %]
+      [% class = "conf_attr_unused" %]
+    [% END %]
+    [% IF loop.even %]
+        [% SET loopclass="dataEven" %]
+    [% ELSE %]
+        [% SET loopclass="dataOdd" %]
+    [% END %]
+    <tr class="[% loopclass %]">
+      <td class='dataVar [% loopclass +%] [%+ class %] conf_row' align="left" width="170">[% key %]</td>
+      <td class='dataVar [% loopclass +%] [%+ class %]'></td>
+      <td class='dataVal [% loopclass %] conf_row' colspan=2>
+        [% PROCESS _conf_object_row.tt nr = loop.count edit = 0 %]
+      </td>
+    </tr>
+    [% IF !obj.default.exists(key) || obj.default.$key.type != 'LIST' || obj.conf.$key.0.substr(0,1) != '+' %]
+      [% SET duplicate_keys.$key = 1 %]
+    [% END %]
+  [% END %]
+
+  [% IF obj.comments.size() > 0 %]
+    [% IF loopclass=="dataEven" %]
+        [% SET loopclass="dataOdd" %]
+    [% ELSE %]
+        [% SET loopclass="dataEven" %]
+    [% END %]
+    <tr>
+      <td class='dataVar [% loopclass %] conf_row' align="left" style="border-bottom: 0px;">comments</td>
+      <td class='dataVar [% loopclass %] conf_row' style="border-bottom: 0px;" colspan=4></td>
+    </tr>
+    <tr>
+      <td class='dataVal [% loopclass %] conf_row' colspan=5>
+      <pre style="max-width: 600px; overflow: visible;">[% html_escape(obj.comments.join("\n")) %]</pre>
+      </td>
+    </tr>
+  [% END %]
+
+</table>
