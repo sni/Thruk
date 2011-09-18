@@ -43,9 +43,9 @@
       <td class='dataVal' colspan=3 style="text-align: center;">
         <div align="center">
         [% IF object.defined('file') && object.file.readonly %]
-        [% PROCESS _conf_object_view.tt obj = object %]
+          [% PROCESS _conf_object_view.tt obj = object conf = "obj" %]
         [% ELSE %]
-        [% PROCESS _conf_object_edit.tt obj = object %]
+          [% PROCESS _conf_object_edit.tt obj = object %]
         [% END %]
         </div>
       </td>
@@ -84,7 +84,7 @@
             </td>
             <td class='dataVal' colspan=2>
               [% IF objs.size > 0 %]
-                 [% PROCESS _conf_object_view.tt obj = objs.0 %]
+                 [% PROCESS _conf_object_view.tt obj = objs.0 conf = "obj" %]
               [% ELSE %]
                 Template does not exist
               [% END %]
@@ -108,7 +108,7 @@
       <td class='dataVal' colspan=3 style="text-align: center;">
         <div align="center">
         [% SET duplicate_keys = {} %]
-        [% PROCESS _conf_object_view.tt obj = object %]
+        [% PROCESS _conf_object_view.tt obj = object conf = "computed" %]
         </div>
       </td>
     </tr>

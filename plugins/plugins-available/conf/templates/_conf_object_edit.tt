@@ -23,7 +23,7 @@
       <td class='dataVar [% loopclass +%] [%+ class %] conf_row' align="left" width="170" abbr="[% key %]" onmouseover="$('del_[% loop.count %]').src='[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif'" onmouseout="$('del_[% loop.count %]').src='[% url_prefix %]thruk/images/spacer.png'">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="$('id_key[% loop.count %]').name='obj.'+this.value">[% ELSE %][% key %][% END %]</td>
       <td class='dataVar [% loopclass +%] [%+ class %] conf_row clickable' align="left" abbr="[% key %]" onmouseover="$('del_[% loop.count %]').src='[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif'" onmouseout="$('del_[% loop.count %]').src='[% url_prefix %]thruk/images/spacer.png'"><input type="image" src="[% url_prefix %]thruk/images/spacer.png" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="height:16px; width: 16px;"></td>
       <td class='dataVal [% loopclass %] conf_row' colspan=2>
-        [% PROCESS _conf_object_row.tt nr = loop.count edit = 1 %]
+        [% PROCESS _conf_object_row.tt nr = loop.count edit = 1 defaults = obj.default key = key obj_conf = obj.conf %]
       </td>
       [% SET helpkey = key %]
       [% IF !obj.default.exists(key) %]
@@ -83,7 +83,7 @@
 
       var fields = new Hash({
         [% FOREACH key_cat = obj.get_default_keys() %]
-          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row.tt edit=1 | html_escape | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% html_escape(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
+          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row.tt edit=1 defaults = obj.default key = key obj_conf = obj.conf | html_escape | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% html_escape(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
             [% UNLESS loop.last %],[% END %]
           [% END %]
           [% UNLESS loop.last %],[% END %]

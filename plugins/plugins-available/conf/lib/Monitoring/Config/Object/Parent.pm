@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp;
 use Digest::MD5 qw(md5_hex);
+use Storable qw(dclone);
 use Monitoring::Config::Help;
 
 =head1 NAME
@@ -211,6 +212,45 @@ sub get_sorted_keys {
 
 ##########################################################
 
+=head2 get_computed_config
+
+return computed config for this object
+
+=cut
+sub get_computed_config {
+    my $self    = shift;
+    my $objects = shift;
+
+    my $conf = dclone($self->{'conf'});
+    my $templates = $self->get_used_templates($objects);
+    for my $tname (@{$templates}) {
+        my $t = $objects->get_template_by_name($self->{'type'}, $tname);
+        if(defined $t) {
+            for my $key (keys %{$t->{'conf'}}) {
+                if( !defined $conf->{$key} ) {
+                    $conf->{$key} = $t->{'conf'}->{$key};
+                }
+                elsif( defined $self->{'default'}->{$key}
+                      and $self->{'default'}->{$key}->{'type'} eq 'LIST'
+                      and substr($t->{'conf'}->{$key}->[0], 0, 1) eq '+'
+                ) {
+                        # merge uniq list elements together
+                        my $list         = dclone($t->{'conf'}->{$key});
+                        $list->[0]       = substr($list->[0], 1);
+                        $conf->{$key}    = [] unless defined $conf->{$key};
+                        @{$conf->{$key}} = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
+                }
+            }
+        }
+    }
+
+    my @keys = sort _sort_by_object_keys keys %{$conf};
+    return(\@keys, $conf);
+}
+
+
+##########################################################
+
 =head2 get_default_keys
 
 return the sorted default keys for this object
@@ -277,7 +317,7 @@ sub get_data_from_param {
 
         # remove whitespace
         $key   =~ s/^\s*(.*?)\s*$/$1/gmxo;
-        $value =~ s/^\s*(.*?)\s*$/$1/gmxo;
+        $value =~ s/^\s*(.*?)\s*$/$1/gmxo unless ref $value;
 
         push @param_keys, $key;
         $new_param->{$key} = $value;
