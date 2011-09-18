@@ -2245,6 +2245,12 @@ var ajax_search = {
             if(prefix == 'ho:' || prefix == 'hg:' || prefix == 'se:' || prefix == 'sg:') {
                 pattern = pattern.substr(3);
             }
+            if(ajax_search.list) {
+                prefix = pattern.substr(0,1);
+                if(prefix == '!' || prefix == '+') {
+                    pattern = pattern.substr(1);
+                }
+            }
 
             // remove empty strings from pattern array
             pattern = pattern.split(" ");
@@ -2381,10 +2387,13 @@ var ajax_search = {
         var input   = document.getElementById(ajax_search.input_field);
 
         if(ajax_search.list) {
-            var values = input.value.split(",");
-            values.pop();
+            var values  = input.value.split(",");
+            var current = values.pop();
+            if(current.substring(0,1) == '+' || current.substring(0,1) == '!') {
+                value = current.substring(0,1) + value;
+            }
             values.push(value);
-            value = values.join(",");
+            value       = values.join(",");
         }
 
         input.value = value;
