@@ -295,7 +295,7 @@ sub save {
 
     if($self->{'is_new_file'}) {
         my @dirs = ();
-        my @path = split /\//, $self->{'path'};
+        my @path = split /\//mx, $self->{'path'};
         pop @path; # remove file
         map { push @dirs, $_; mkdir join('/', @dirs) } @path;
         open(my $fh, '>', $self->{'path'}) or die("cannot write to file: $!");
