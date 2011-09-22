@@ -153,9 +153,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
   %> vers=$(perl -e 'use Config; print $Config{version}')
-  %> wget http://www.thruk.org/files/Thruk-1.1.1-$arch-$vers.tar.gz
-  %> tar zxf Thruk-1.1.1-$arch-$vers.tar.gz
-  %> cd Thruk-1.1.1
+  %> wget http://www.thruk.org/files/Thruk-1.1.2-$arch-$vers.tar.gz
+  %> tar zxf Thruk-1.1.2-$arch-$vers.tar.gz
+  %> cd Thruk-1.1.2
   %> ./script/thruk_server.pl
 ----
 
