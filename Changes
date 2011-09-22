@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.1.2    ...
+          - fixed commands using the hours parameter (fixes #50)
+
 1.1.1    Thu Sep 15 14:30:01 CEST 2011
           - added dashboard plugin (Thanks Sigma)
           - disabled not implemented config view (fixes #46)
