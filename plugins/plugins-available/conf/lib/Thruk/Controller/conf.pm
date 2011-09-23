@@ -511,7 +511,7 @@ sub _process_objects_page {
 
         # clone this object
         elsif($c->stash->{action} eq 'clone') {
-            $obj = $self->_object_clone($c);
+            $obj = $self->_object_clone($c, $obj);
         }
     }
 
@@ -715,9 +715,15 @@ sub _store_changes {
 sub _cmd {
     my ( $self, $c, $cmd ) = @_;
 
+    local $SIG{CHLD}='';
     $c->log->debug( "running cmd: ". $cmd );
-    my $output                = `sh -c '$cmd' 2>&1`;
-    my $rc                    = $?>>8;
+    my $rc = $?;
+    my $output = `$cmd 2>&1`;
+    if($? == -1) {
+        $output .= "[".$!."]";
+    } else {
+        $rc = $?>>8;
+    }
     $c->{'stash'}->{'output'} = $output;
     $c->log->debug( "rc:          ". $rc );
     $c->log->debug( "output:      ". $output );
@@ -843,7 +849,7 @@ sub _get_context_object {
     if($c->stash->{'data_id'} and $c->stash->{'data_id'} eq 'new') {
         $obj = Monitoring::Config::Object->new( type => $c->stash->{'type'} );
         my $files_root = $self->_set_files_stash($c);
-        my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'};
+        my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
         $new_file      =~ s/^\///gmx;
         my $file       = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
         if(defined $file) {
