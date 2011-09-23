@@ -1,8 +1,10 @@
 use strict;
 use warnings;
-use Test::More tests => 347;
+use Test::More tests => 350;
 use Data::Dumper;
 use File::Temp qw/ tempfile /;
+use File::Slurp;
+use Storable qw/ dclone /;
 
 BEGIN {
     use lib('t');
@@ -103,13 +105,13 @@ $objects->init();
 isa_ok( $objects, 'Monitoring::Config' );
 is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files");
 my $parsedfile = $objects->{'files'}->[0];
-is( $parsedfile->{'md5'}, '7b6bbc4f286d274cb2fc448e8efc28ca', 'files md5 sum' );
+is( $parsedfile->{'md5'}, 'bf6f91fcc7c569f4cc96bcdf8e926811', 'files md5 sum' );
 like( $parsedfile->{'errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );
 my $obj = $parsedfile->{'objects'}->[0];
 my $host = {
     '_CUST1'         => 'cust 1 val',
     '_CUST2'         => 'cust 2 val',
-    '_CUST3'         => 'cust 3 val',
+    '_CUST3'         => 'cust 3 val multiline',
     'use'            => [ 'generic-host' ],
     'hostgroups'     => [ 'hostgroup1', 'hostgroup2' ],
     'host_name'      => 'hostname1',
@@ -139,6 +141,16 @@ my $exp_keys = [
 ];
 
 is_deeply($keys, $exp_keys, 'sort keys') or diag("got:\n".Dumper($keys)."\nexpected:\n".Dumper($exp_keys));
+###########################################################
+# compare that with configs read from text blob
+my $cloneconf = dclone($obj->{'conf'});
+$parsedfile->update_objects_from_text('');
+is(scalar @{$parsedfile->{'objects'}}, 0, 'emptied objects');
+my $text      = read_file($parsedfile->{'path'});
+$parsedfile->update_objects_from_text($text);
+ok(scalar @{$parsedfile->{'objects'}} > 0, 'read objects from text');
+$obj          = $parsedfile->{'objects'}->[0];
+is_deeply($obj->{'conf'}, $cloneconf, 'parsed host from text');
 
 ###########################################################
 for my $type (@{$Monitoring::Config::Object::Types}) {

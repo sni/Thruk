@@ -86,6 +86,13 @@ sub update_objects {
 
     open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
+        chomp($line);
+        while(substr($line, -1) eq '\\') {
+            my $newline = <$fh>;
+            chomp($newline);
+            StripLSpace($newline);
+            $line = substr($line, 0, -1).$newline;
+        }
         ($current_object, $in_unknown_object, $comments)
             = $self->_parse_line($line, $current_object, $in_unknown_object, $comments);
     }
@@ -120,7 +127,21 @@ sub update_objects_from_text {
     $self->{'errors'}  = [];
 
     my $linenr = 1;
+    my $buffer = '';
     for my $line (split/\n/mx, $text) {
+        chomp($line);
+        if(substr($line, -1) eq '\\') {
+            StripLSpace($line);
+            $line    = substr($line, 0, -1);
+            $buffer .= $line;
+            $linenr++;
+            next;
+        }
+        if($buffer ne '') {
+            StripLSpace($line);
+            $line   = $buffer.$line;
+            $buffer = '';
+        }
         ($current_object, $in_unknown_object, $comments)
             = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $linenr);
         if(defined $lastline and $lastline ne '' and !defined $object_at_line) {
