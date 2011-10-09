@@ -50,6 +50,11 @@ our $VERSION = '1.1.2';
 # with a external configuration file acting as an override for
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
+if(-d $project_root."/.git") {
+    my $br     = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
+    $br       =~ s/^\*\s+//gmx;
+    $VERSION .= "~".$br;
+}
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'released'               => 'October 15, 2011',
