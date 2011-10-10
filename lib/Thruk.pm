@@ -51,9 +51,11 @@ our $VERSION = '1.1.2';
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
 if(-d $project_root."/.git") {
-    my $br     = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
-    $br       =~ s/^\*\s+//gmx;
-    $VERSION .= "~".$br;
+    my $br = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
+    $br    =~ s/^\*\s+//gmx;
+    if($br ne 'master') {
+        $VERSION .= "-".$br;
+    }
 }
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
