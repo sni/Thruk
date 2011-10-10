@@ -50,12 +50,12 @@ our $VERSION = '1.1.2';
 # with a external configuration file acting as an override for
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
+my $branch       = "";
 if(-d $project_root."/.git") {
-    my $br = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
-    $br    =~ s/^\*\s+//gmx;
-    if($br ne 'master') {
-        $VERSION .= "-".$br;
-    }
+    $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
+    chomp($branch);
+    $branch =~ s/^\*\s+//gmx;
+    $branch = '' if $branch eq 'master';
 }
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
@@ -94,6 +94,7 @@ my %config = ('name'                   => 'Thruk',
                                           'nl2br'          => \&Thruk::Utils::Filter::nl2br,
 
                                           'version'        => $VERSION,
+                                          'branch'         => $branch,
                                           'backends'       => [],
                                           'param_backend'  => '',
                                           'refresh_rate'   => '',

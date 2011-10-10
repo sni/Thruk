@@ -4,7 +4,7 @@
     </div>
     <div id="currentversioninfo">
       <div class="product">Thruk Monitoring Webinterface</div>
-      <div class="version">Version [% version %][% IF c.config.omd_version %]<br><font size="-3">OMD [% c.config.omd_version %]</font>[% END %]</div>
+      <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %]<br><font size="-3">OMD [% c.config.omd_version %]</font>[% END %]</div>
       <div class="releasedate">[% released %]</div>
       <div class="checkforupdates">
         <a href="http://www.thruk.org" target="_blank">Check for updates</a>
