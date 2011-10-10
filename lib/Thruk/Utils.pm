@@ -834,6 +834,32 @@ sub logs2xls {
     return 1;
 }
 
+########################################
+
+=head2 get_pnp_url
+
+  get_pnp_url($c, $object)
+
+return pnp url for object (host/service)
+
+=cut
+
+sub get_pnp_url {
+    my $c   = shift;
+    my $obj = shift;
+
+    return '' unless $c->config->{'shown_inline_pnp'};
+
+    for my $type (qw/action_url_expanded notes_url_expanded/) {
+        for my $regex (qw/pnp4nagios pnp/) {
+            if(defined $obj->{$type} and $obj->{$type} =~ m|(^.*?/$regex/)|mx) {
+                return($1.'index.php');
+            }
+        }
+    }
+
+    return '';
+}
 
 ########################################
 sub _initialassumedservicestate_to_state {

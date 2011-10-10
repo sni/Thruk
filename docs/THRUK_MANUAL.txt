@@ -1123,8 +1123,9 @@ ex.:
 
 ==== shown_inline_pnp
 Show inline pnp graph if available. If a service or host has a
-pnp4nagios action url set, Thruk will show a inline graph on the
+pnp4nagios action or notes url set. Thruk will show a inline graph on the
 extinfo page.
+This works for /pnp4nagios/ urls and /pnp/.
 
 ex.:
 

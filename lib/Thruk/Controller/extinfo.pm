@@ -169,10 +169,7 @@ sub _process_host_page {
     }
 
     # pnp graph?
-    $c->stash->{'pnp_url'} = '';
-    if($c->config->{'shown_inline_pnp'} and defined $host->{'action_url_expanded'} and $host->{'action_url_expanded'} =~ m|(^.*?/pnp4nagios/)|mx) {
-        $c->stash->{'pnp_url'} = $1.'index.php';
-    }
+    $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
 
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, $host);
@@ -282,10 +279,7 @@ sub _process_service_page {
     }
 
     # pnp graph?
-    $c->stash->{'pnp_url'} = '';
-    if($c->config->{'shown_inline_pnp'} and defined $service->{'action_url_expanded'} and $service->{'action_url_expanded'} =~ m|(^.*?/pnp4nagios/)|mx) {
-        $c->stash->{'pnp_url'} = $1.'index.php';
-    }
+    $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $service);
 
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, $service);
