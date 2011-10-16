@@ -425,7 +425,7 @@ sub _redirect_or_success {
             sleep(1);
         }
 
-        $c->redirect($referer);
+        $c->response->redirect($referer);
     }
     else {
         $c->stash->{template} = 'cmd_success.tt';

@@ -243,7 +243,7 @@ sub begin : Private {
             and $c->config->{'use_frames'} == 1 ) {
         my $path = $c->request->uri->path_query;
         $path =~ s/nav=1//gmx;
-        return $c->redirect($c->stash->{'url_prefix'}."thruk/frame.html?link=".uri_escape($path));
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/frame.html?link=".uri_escape($path));
     }
 
     # icon image path
@@ -278,7 +278,7 @@ sub auto : Private {
         and defined $c->{'request'}->{'action'}
         and $c->{'request'}->{'action'} =~ m/^(\/|thruk|)$/mx )
     {
-        return $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
     }
     return 1;
 }
@@ -310,7 +310,7 @@ sub index : Path('/') {
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
-    return $c->redirect($c->stash->{'url_prefix'}."thruk/");
+    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/");
 }
 
 ######################################
@@ -358,14 +358,13 @@ sub thruk_index : Regex('thruk$') {
         # external link, put in frames
         my $start_page = uri_escape( $c->stash->{'start_page'} );
         $c->log->debug( "redirecting to framed start page: '".$c->stash->{'url_prefix'}."thruk/frame.html?link=" . $start_page . "'" );
-        $c->log->debug( $c->redirect( $c->stash->{'url_prefix'}."thruk/frame.html?link=" . $start_page ) );
-        return $c->redirect( $c->stash->{'url_prefix'}."thruk/frame.html?link=" . $start_page );
+        return $c->response->redirect( $c->stash->{'url_prefix'}."thruk/frame.html?link=" . $start_page );
     }
     elsif ( $c->stash->{'start_page'} ne $c->stash->{'url_prefix'}.'thruk/main.html' ) {
 
         # internal link, no need to put in frames
         $c->log->debug( "redirecting to default start page: '" . $c->stash->{'start_page'} . "'" );
-        return $c->redirect( $c->stash->{'start_page'} );
+        return $c->response->redirect( $c->stash->{'start_page'} );
     }
 
     return $c->detach("thruk_main_html");
@@ -436,7 +435,7 @@ page: /thruk/frame.html
 
 =cut
 
-sub thruk_frame_html : Regex('thruk\/frame\.html$') {
+sub thruk_frame_html : Regex('thruk\/frame\.html') {
     my( $self, $c ) = @_;
 
     # allowed links to be framed
@@ -789,7 +788,7 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
 
             if(defined $forward) {
                 $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
-                return $c->redirect($forward);
+                return $c->response->redirect($forward);
             }
             return;
         }
@@ -837,6 +836,7 @@ sub end : ActionClass('RenderView') {
         }
         return $c->detach('/error/index/13');
     }
+
     return 1;
 }
 

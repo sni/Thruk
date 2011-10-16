@@ -1434,7 +1434,7 @@ sub redirect_view {
     return if $old eq $new;
 
     $uri    =~ s/$old/$new/gmx;
-    return $c->redirect($uri);
+    return $c->response->redirect($uri);
 }
 
 ##############################################
