@@ -88,7 +88,7 @@ sub update_objects {
     open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
         chomp($line);
-        while(substr($line, -1) eq '\\') {
+        while(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
             my $newline = <$fh>;
             chomp($newline);
             StripLSpace($newline);
@@ -136,7 +136,7 @@ sub update_objects_from_text {
     my $buffer = '';
     for my $line (split/\n/mx, $text) {
         chomp($line);
-        if(substr($line, -1) eq '\\') {
+        if(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
             StripLSpace($line);
             $line    = substr($line, 0, -1);
             $buffer .= $line;

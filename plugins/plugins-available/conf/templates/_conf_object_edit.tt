@@ -51,7 +51,7 @@
   [% END %]
   <tr>
     <td class='dataVar [% loopclass %] conf_row' align="left" style="border-bottom: 0px;">comments</td>
-    <td class='dataVar [% loopclass %] conf_row' style="text-align: center; border-bottom: 0px;" colspan=4>
+    <td class='dataVar [% loopclass %] conf_row' style="text-align: center; border-bottom: 0px; white-space: inherit;" colspan=4>
       <button id="attr_opener" class="conf_button">add new attribute</button>
 
       <script type="text/javascript">
@@ -112,9 +112,7 @@
     </td>
   </tr>
   <tr>
-    <td class='dataVal [% loopclass %] conf_row' colspan=5>
-      <textarea rows=8 name="conf_comment" style='white-space: nowrap; word-wrap: normal; width: 100%'>[% obj.comments.join("\n") %]</textarea>
-    </td>
+    <td class='dataVal [% loopclass %] conf_row' colspan=5><textarea rows=8 name="conf_comment" style='white-space: nowrap; word-wrap: normal; width: 100%'>[% obj.comments.join("\n") %]</textarea></td>
   </tr>
 
 </table>

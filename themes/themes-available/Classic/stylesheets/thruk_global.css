@@ -601,41 +601,6 @@ body.config TD.dataSubmit {
     padding: 4px;
 }
 
-body.config TABLE.conftoolobj {
-    min-width: 600px;
-}
-body.config TABLE.conftoolobj INPUT[type=text] {
-    width: 400px;
-}
-body.config TABLE.conftoolobj TEXTAREA {
-    white-space: nowrap;
-    word-wrap: normal;
-    width: 100%;
-}
-body.config TABLE.conftoolobj INPUT#id_check_command_1 {
-    width: 160px;
-}
-body.config TABLE.conftoolobj INPUT#id_check_command_2 {
-    width: 200px;
-}
-body.config TABLE.conftoolobj INPUT[type=text].attrkey {
-    width: 170px;
-}
-
-.conf_attr_used {
-  text-decoration: line-through;
-  color: #999999;
-}
-.conf_attr_unused {
-}
-body.config TD.conf_row {
-    border-right: 0px;
-    border-left: 0px;
-    padding-top: 3px;
-    padding-bottom: 3px;
-    border-bottom: 3px solid white;
-}
-
 TABLE.cmd_pane tbody > tr > th > A > IMG {
   vertical-align: text-bottom;
 }
