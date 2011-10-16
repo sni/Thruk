@@ -102,6 +102,11 @@ sub update_objects {
         push @{$self->{'errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
     }
 
+    # add trailing comments to last object
+    if(defined $comments and scalar @{$comments} > 0) {
+        push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
+    }
+
     close($fh);
 
     $self->{'parsed'}  = 1;
@@ -155,6 +160,11 @@ sub update_objects_from_text {
 
     if(defined $current_object or $in_unknown_object) {
         push @{$self->{'errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
+    }
+
+    # add trailing comments to last object
+    if(defined $comments and scalar @{$comments} > 0) {
+        push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
     }
 
     $self->{'parsed'}  = 1;
