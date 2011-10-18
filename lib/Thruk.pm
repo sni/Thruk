@@ -6,7 +6,7 @@ use warnings;
 
 use utf8;
 use Carp;
-use Catalyst::Log::Log4perl;
+use Log::Log4perl::Catalyst;
 use Thruk::Backend::Manager;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
@@ -241,7 +241,7 @@ if(defined __PACKAGE__->config->{'log4perl_conf'} and ! -s __PACKAGE__->config->
 }
 my $log4perl_conf = __PACKAGE__->config->{'log4perl_conf'} || $project_root.'/log4perl.conf';
 if(-s $log4perl_conf) {
-    __PACKAGE__->log(Catalyst::Log::Log4perl->new($log4perl_conf));
+    __PACKAGE__->log(Log::Log4perl::Catalyst->new($log4perl_conf));
 }
 elsif(!__PACKAGE__->debug) {
     # check if logdir exists
