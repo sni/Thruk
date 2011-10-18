@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.2    ...
+1.1.2    Tue Oct 18 17:57:53 CEST 2011
           - added /pnp/ to possible pnp4nagios urls
           - search in notes_url for pnp4nagios urls too
           - replaced deprecated Catalyst::Log::Log4perl
