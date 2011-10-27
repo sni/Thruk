@@ -6,10 +6,10 @@
 .warningMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 10pt; }
 .infoMessage { font-family: arial,serif;  text-align: center;  font-size: 10pt; }
 
-.infoBox { 
+.infoBox {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -38,7 +38,7 @@ TABLE.data {
     border-collapse: collapse;
     empty-cells: show;
 } /* font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 0; }*/
-TH.data { 
+TH.data {
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     background-color: #abb;
@@ -50,15 +50,15 @@ TH.data {
 .dataOdd {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
 } /* font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }*/
-.dataEven { 
+.dataEven {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
