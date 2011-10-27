@@ -25,7 +25,7 @@
   >  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   >  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
  (function(){window.$jit=function(a){var a=a||window,c;for(c in $jit)$jit[c].$extend&&(a[c]=$jit[c])};$jit.version="2.0.0b";var g=function(a){return document.getElementById(a)};g.empty=function(){};g.extend=function(a,c){for(var b in c||{})a[b]=c[b];return a};g.lambda=function(a){return typeof a=="function"?a:function(){return a}};g.time=Date.now||function(){return+new Date};g.splat=function(a){var c=g.type(a);return c?c!="array"?[a]:a:[]};g.type=function(a){var c=g.type.s.call(a).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
 if(c!="object")return c;if(a&&a.$$family)return a.$$family;return a&&a.nodeName&&a.nodeType==1?"element":c};g.type.s=Object.prototype.toString;g.each=function(a,c){if(g.type(a)=="object")for(var b in a)c(a[b],b);else{b=0;for(var d=a.length;b<d;b++)c(a[b],b)}};g.indexOf=function(a,c){if(Array.indexOf)return a.indexOf(c);for(var b=0,d=a.length;b<d;b++)if(a[b]===c)return b;return-1};g.map=function(a,c){var b=[];g.each(a,function(a,e){b.push(c(a,e))});return b};g.reduce=function(a,c,b){var d=a.length;
 if(d==0)return b;for(var e=arguments.length==3?b:a[--d];d--;)e=c(e,a[d]);return e};g.merge=function(){for(var a={},c=0,b=arguments.length;c<b;c++){var d=arguments[c];if(g.type(d)=="object")for(var e in d){var f=d[e],h=a[e];a[e]=h&&g.type(f)=="object"&&g.type(h)=="object"?g.merge(h,f):g.unlink(f)}}return a};g.unlink=function(a){var c;switch(g.type(a)){case "object":c={};for(var b in a)c[b]=g.unlink(a[b]);break;case "array":c=[];b=0;for(var d=a.length;b<d;b++)c[b]=g.unlink(a[b]);break;default:return a}return c};
