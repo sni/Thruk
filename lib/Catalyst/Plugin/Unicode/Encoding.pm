@@ -23,12 +23,12 @@ sub encoding {
               or Carp::croak( qq/Unknown encoding '$wanted'/ );
         }
 
-        $encoding = ref $c 
+        $encoding = ref $c
                   ? $c->{encoding} = $encoding
                   : $c->_encoding($encoding);
     } else {
-      $encoding = ref $c && exists $c->{encoding} 
-                ? $c->{encoding} 
+      $encoding = ref $c && exists $c->{encoding}
+                ? $c->{encoding}
                 : $c->_encoding;
     }
 
@@ -45,7 +45,7 @@ sub finalize {
 
     my $enc = $c->encoding;
 
-    return $c->next::method(@_) 
+    return $c->next::method(@_)
       unless $enc;
 
     my ($ct, $ct_enc) = $c->response->content_type;
