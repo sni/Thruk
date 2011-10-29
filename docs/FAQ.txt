@@ -54,7 +54,7 @@ avoid conflicts on updating Thruk.
 
 Open your menu_local.cfg (create one if it does not exists) with your
 preferred text editor and check the config. You can add new sections
-with: 
+with:
 
 ....
 add_section('name' => 'General');
@@ -72,10 +72,10 @@ add_link('name' => 'Home', 'href' => '/thruk/main.html');
 * target: If Link shall open in a new window.
 * icon: Used for themes which support icons.
 
-Then the config looks like this: 
+Then the config looks like this:
 
 ....
-add_link('name' => 'Nagios, 'href' => '/nagios', 'target' => '_new'); 
+add_link('name' => 'Nagios, 'href' => '/nagios', 'target' => '_new');
 ....
 
 
@@ -183,7 +183,7 @@ should look like this:
   our $VERSION = '0.60';
 ------------------
 
-Then make sure you have a log4perl.conf with DEBUG threshold configured. 
+Then make sure you have a log4perl.conf with DEBUG threshold configured.
 Finally restart your fastcgi server.
 
 

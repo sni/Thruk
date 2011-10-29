@@ -11,7 +11,7 @@ while(<$ph>) {
     my $line = $_;
     chomp($line);
 
-    if(   $line =~ m/\/bin\/perl/ 
+    if(   $line =~ m/\/bin\/perl/
        or $line =~ m/: Entering directory/
        or $line =~ m/: Leaving directory/
     ) {

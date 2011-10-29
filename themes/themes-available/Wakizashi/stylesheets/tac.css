@@ -1,7 +1,7 @@
 
 .tac {
     background-attachment: fixed;
-    background-image: url("../images/background.jpg"); 
+    background-image: url("../images/background.jpg");
     background-repeat: repeat;
     font-family: arial, helvetica, sans-serif;
     font-size: 9pt;
@@ -13,7 +13,7 @@
 table.tac {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
@@ -36,7 +36,7 @@ A { font-family: arial,serif;  color: black; }
 .healthBox {
     border-collapse: collapse;
     empty-cells: show;
-    background-image: url("../images/form_background.png"); 
+    background-image: url("../images/form_background.png");
     background-repeat: repeat;
     border-spacing: 0px;
     margin: 10px;
