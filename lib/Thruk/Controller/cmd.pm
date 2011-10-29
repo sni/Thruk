@@ -308,7 +308,10 @@ sub _check_for_commands {
     my $cmd_typ = $c->{'request'}->{'parameters'}->{'cmd_typ'};
     my $cmd_mod = $c->{'request'}->{'parameters'}->{'cmd_mod'};
     return $c->detach('/error/index/6') unless defined $cmd_typ;
-    $self->_cmd_is_disabled( $c, $cmd_typ );
+
+    if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
+        return $c->detach('/error/index/12');
+    }
 
     # command commited?
     if( defined $cmd_mod and $self->_do_send_command($c) ) {
@@ -336,30 +339,6 @@ sub _check_for_commands {
         $referer =~ s/&amp;/&/gmx;
         $referer =~ s/&/&amp;/gmx;
         $c->stash->{referer} = $referer;
-    }
-
-    return 1;
-}
-
-######################################
-# command disabled by config?
-sub _cmd_is_disabled {
-    my( $self, $c, $cmd_typ ) = @_;
-
-    my $not_allowed = Thruk->config->{'command_disabled'};
-    if( defined $not_allowed ) {
-        my %command_disabled;
-        if( ref $not_allowed eq 'ARRAY' ) {
-            for my $num ( @{$not_allowed} ) {
-                $command_disabled{$num} = 1;
-            }
-        }
-        else {
-            $command_disabled{$not_allowed} = 1;
-        }
-        if( defined $command_disabled{$cmd_typ} ) {
-            return $c->detach('/error/index/12');
-        }
     }
 
     return 1;

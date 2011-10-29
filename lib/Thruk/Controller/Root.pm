@@ -102,7 +102,7 @@ sub begin : Private {
                     persistent_ack         => 0,
                     ptc                    => 0,
         },
-        command_disabled                    => [],
+        command_disabled                    => {},
         show_custom_vars                    => [],
         var_path                            => './var',
         priorities                      => {
@@ -133,6 +133,11 @@ sub begin : Private {
                   priorities show_modified_attributes
                 /) {
         $c->stash->{$key} = $c->config->{$key};
+    }
+
+    # command disabled should be a hash
+    if(ref $c->config->{'command_disabled'} ne 'HASH') {
+        $c->config->{'command_disabled'} = Thruk::Utils::array2hash(ref $c->config->{'command_disabled'} eq 'ARRAY' ? $c->config->{'command_disabled'} : [$c->config->{'command_disabled'}]);
     }
 
     # username?
