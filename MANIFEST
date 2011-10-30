@@ -187,6 +187,7 @@ ssi/status-header.ssi-pnp
 t/01app.t
 t/10-Thruk-Utils.t
 t/11-Thruk-Backend.t
+t/20-Log-Log4perl.t
 t/92_todo.t
 t/93_manifest.t
 t/94_template_encoding.t
@@ -210,6 +211,7 @@ t/controller_status.t
 t/controller_summary.t
 t/controller_tac.t
 t/controller_trends.t
+t/data/log4perl.conf
 t/data/resource.cfg
 t/data/resource2.cfg
 t/model_Thruk.t

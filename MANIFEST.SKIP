@@ -32,7 +32,7 @@ cgi\.cfg\-.*
 # does not work for centos without F::C::R installed
 inc/File/Copy/Recursive.pm
 var
-log4perl.conf$
+^log4perl.conf$
 TODO
 docs/development
 plugins/plugins-available/conf/test.pl
