@@ -281,6 +281,48 @@ sub get_cgi_user_list {
     return $all_contacts;
 }
 
+
+##########################################################
+
+=head2 get_cgi_group_list
+
+get list of cgi groups from cgi.cfg and contactgroups table
+
+=cut
+
+sub get_cgi_group_list {
+    my ( $c ) = @_;
+
+    # get users from core contacts
+    my $groups = $c->{'db'}->get_contactgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ) ],
+                                                remove_duplicates => 1);
+    my $all_groups = {};
+    for my $group (@{$groups}) {
+        $all_groups->{$group->{'name'}} = $group->{'name'}." - ".$group->{'alias'};
+    }
+
+    # add users from cgi.cfg
+    if(defined $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'}) {
+        my $file                  = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
+        my $defaults              = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
+        my $extra_group = [];
+        for my $key (keys %{$data}) {
+            next unless $key =~ m/^authorized_contactgroup_for_/mx;
+            push @{$extra_group}, @{$data->{$key}->[1]};
+        }
+        for my $group (@{$extra_group}) {
+            $all_groups->{$group} = $group unless defined $all_groups->{$group};
+        }
+    }
+
+    # add special users
+    $all_groups->{'*'} = '*';
+
+    return $all_groups;
+}
+
+
 ##########################################################
 
 =head2 read_htpasswd

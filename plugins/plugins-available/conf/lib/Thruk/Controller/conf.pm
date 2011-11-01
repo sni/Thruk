@@ -152,6 +152,13 @@ sub _process_cgi_page {
         $data->{$key}->[2] = $cgi_contacts;
     }
 
+    # get list of cgi users
+    my $cgi_groups = Thruk::Utils::Conf::get_cgi_group_list($c);
+    for my $key (keys %{$data}) {
+        next unless $key =~ m/^authorized_contactgroup_for_/mx;
+        $data->{$key}->[2] = $cgi_groups;
+    }
+
     my $keys = [
         [ 'CGI Settings', [qw/
                         show_context_help
@@ -174,6 +181,18 @@ sub _process_cgi_page {
                         authorized_for_system_information
                         authorized_for_system_commands
                         authorized_for_configuration_information
+                        authorized_for_read_only
+                    /]
+        ],
+        [ 'Authorization Groups', [qw/
+                      authorized_contactgroup_for_all_services
+                      authorized_contactgroup_for_all_hosts
+                      authorized_contactgroup_for_all_service_commands
+                      authorized_contactgroup_for_all_host_commands
+                      authorized_contactgroup_for_system_information
+                      authorized_contactgroup_for_system_commands
+                      authorized_contactgroup_for_configuration_information
+                      authorized_contactgroup_for_read_only
                     /]
         ],
     ];

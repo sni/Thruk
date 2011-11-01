@@ -85,6 +85,11 @@ sub get_auth_filter {
         return();
     }
 
+    # contactgroups authorization
+    elsif($type eq 'contactgroups') {
+        return();
+    }
+
     # comments / downtimes authorization
     elsif($type eq 'comments' or $type eq 'downtimes') {
         my @filter;
