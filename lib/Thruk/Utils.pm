@@ -360,17 +360,17 @@ sub get_start_end_for_timeperiod_from_param {
 
 ########################################
 
-=head2 set_can_submit_commands
+=head2 set_dynamic_roles
 
-  set_can_submit_commands($c)
+  set_dynamic_roles($c)
 
-sets the is_authorized_for_read_only role
+sets the authorized_for_read_only role and group based roles
 
 =cut
-sub set_can_submit_commands {
+sub set_dynamic_roles {
     my $c = shift;
 
-    $c->stats->profile(begin => "Thruk::Utils::set_can_submit_commands");
+    $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
     my $username = $c->request->{'user'}->{'username'};
 
     # is the contact allowed to send commands?
@@ -385,6 +385,7 @@ sub set_can_submit_commands {
         $data = $c->{'db'}->get_can_submit_commands($username);
         $cached_data->{'can_submit_commands'} = $data;
         $cache->set($username, $cached_data);
+        $data = $c->{'db'}->get_can_submit_commands($username);
     }
 
     if(defined $data) {
@@ -414,10 +415,34 @@ sub set_can_submit_commands {
 
     $c->log->debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
-        push @{$c->request->{'user'}->{'roles'}}, 'is_authorized_for_read_only';
+        push @{$c->request->{'user'}->{'roles'}}, 'authorized_for_read_only';
     }
 
-    $c->stats->profile(end => "Thruk::Utils::set_can_submit_commands");
+    my $groups = $cached_data->{'contactgroups'};
+
+    # add roles from groups in cgi.cfg
+    my $possible_roles = {
+                      'authorized_contactgroup_for_all_host_commands'         => 'authorized_for_all_host_commands',
+                      'authorized_contactgroup_for_all_hosts'                 => 'authorized_for_all_hosts',
+                      'authorized_contactgroup_for_all_service_commands'      => 'authorized_for_all_service_commands',
+                      'authorized_contactgroup_for_all_services'              => 'authorized_for_all_services',
+                      'authorized_contactgroup_for_configuration_information' => 'authorized_for_configuration_information',
+                      'authorized_contactgroup_for_system_commands'           => 'authorized_for_system_commands',
+                      'authorized_contactgroup_for_system_information'        => 'authorized_for_system_information',
+                      'authorized_contactgroup_for_read_only'                 => 'authorized_for_read_only',
+                    };
+    for my $key (keys %{$possible_roles}) {
+        my $role = $possible_roles->{$key};
+        if(defined $c->config->{'cgi_cfg'}->{$key}) {
+            my %contactgroups = map { $_ => 1 } split/\+*,\*s/mx, $c->config->{'cgi_cfg'}->{$key};
+            for my $contactgroup (keys %{contactgroups}) {
+                push @{$c->request->{'user'}->{'roles'}}, $role if ( defined $groups->{$contactgroup} or $contactgroup eq '*' );
+            }
+        }
+    }
+
+
+    $c->stats->profile(end => "Thruk::Utils::set_dynamic_roles");
     return 1;
 }
 

@@ -71,8 +71,6 @@ before 'execute' => sub {
     # read cached data
     my $cache = $c->cache;
     my $cached_data = $cache->get($c->stash->{'remote_user'});
-    $c->log->debug("cached data:");
-    $c->log->debug(Dumper($cached_data));
 
     ###############################
     # first all backends are enabled
@@ -138,9 +136,15 @@ before 'execute' => sub {
     }
 
     ###############################
+    # read cached data again, groups could have changed
+    $cached_data = $cache->get($c->stash->{'remote_user'});
+    $c->log->debug("cached data:");
+    $c->log->debug(Dumper($cached_data));
+
+    ###############################
     # disable backends by groups
     if($has_groups and defined $c->{'db'}) {
-        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends);
+        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends, $cached_data);
     }
     $self->_set_possible_backends($c, $disabled_backends);
 
@@ -165,7 +169,7 @@ before 'execute' => sub {
 
     ###############################
     # set some more roles
-    Thruk::Utils::set_can_submit_commands($c);
+    Thruk::Utils::set_dynamic_roles($c);
 
     ###############################
     # do we have only shinken backends?
@@ -263,10 +267,9 @@ sub _set_possible_backends {
 
 ########################################
 sub _disable_backends_by_group {
-    my ($self,$c,$disabled_backends) = @_;
+    my ($self,$c,$disabled_backends, $cached_data) = @_;
 
-    $c->{'db'}->enable_backends();
-    my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+    my $contactgroups = $cached_data->{'contactgroups'};
     for my $peer (@{$c->{'db'}->get_peers()}) {
         if(defined $peer->{'groups'}) {
             for my $group (split/\s*,\s*/mx, $peer->{'groups'}) {
@@ -288,7 +291,6 @@ sub _disable_backends_by_group {
             }
         }
     }
-    $c->{'db'}->disable_backends($disabled_backends);
 
     return $disabled_backends;
 }
@@ -325,10 +327,15 @@ sub _set_processinfo {
        or !defined $cached_data->{'prev_last_program_restart'}
        or $cached_data->{'prev_last_program_restart'} < $last_program_restart
       ) {
+        $c->{'db'}->enable_backends();
+        my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+
         $cached_data = {
             'prev_last_program_restart' => $last_program_restart,
+            'contactgroups'             => $contactgroups,
         };
         $cache->set($c->stash->{'remote_user'}, $cached_data);
+        $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
     }
 
     # check our backends uptime

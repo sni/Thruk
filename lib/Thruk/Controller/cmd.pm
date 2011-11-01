@@ -54,7 +54,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
 
     # read only user?
-    return $c->detach('/error/index/11') if $c->check_user_roles('is_authorized_for_read_only');
+    return $c->detach('/error/index/11') if $c->check_user_roles('authorized_for_read_only');
 
     # set authorization information
     my $query_options = { Slice => 1 };

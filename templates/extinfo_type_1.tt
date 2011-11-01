@@ -413,7 +413,7 @@
         </tr>
         <tr>
           <td colspan="2" align="center" valign="top" class='commentPanel'>
-          [% IF c.check_user_roles_wrapper('is_authorized_for_read_only') %]
+          [% IF c.check_user_roles_wrapper('authorized_for_read_only') %]
           [% ELSE %]
             <br>
             <a name="downtimes" id="downtimes"></a>

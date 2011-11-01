@@ -40,12 +40,13 @@ sub find_user {
                       'authorized_for_all_services',
                       'authorized_for_configuration_information',
                       'authorized_for_system_commands',
-                      'authorized_for_system_information'
+                      'authorized_for_system_information',
+                      'authorized_for_read_only'
                     ];
     for my $role (@{$possible_roles}) {
         if(defined $c->config->{'cgi_cfg'}->{$role}) {
-            my %contacts = map { $_ => 1 } split/,/mx, $c->config->{'cgi_cfg'}->{$role};
-            push @{$user->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'});
+            my %contacts = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$role};
+            push @{$user->{'roles'}}, $role if ( defined $contacts{$username} or defined $contacts{'*'} );
         }
     }
 
