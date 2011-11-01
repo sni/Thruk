@@ -7324,12 +7324,15 @@ a can_submit_commands setting in your monitoring configuration.</p></div>
 </div></div>
 <h4 id="_command_disabled">command_disabled</h4>
 <div class="paragraph"><p>Use this to disabled specific commands. Can be use multiple times to disabled
-multiple commands. Use the number from the cmd_typ cgi parameter.</p></div>
+multiple commands. The number can be found in the <em>cmd_typ</em> cgi parameter from
+links to the command page.
+You may use ranges here.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>command_disabled = 14
-command_disabled = 35</tt></pre>
+command_disabled = 35
+command_disabled = 17-34,50-65</tt></pre>
 </div></div>
 <h4 id="_cmd_defaults">cmd_defaults</h4>
 <div class="paragraph"><p>Set the default checked state for command options.</p></div>
@@ -8252,7 +8255,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-10-29 23:33:15 CEST
+Last updated 2011-11-01 14:33:48 CEST
 </div>
 </div>
 </body>

@@ -137,7 +137,7 @@ sub begin : Private {
 
     # command disabled should be a hash
     if(ref $c->config->{'command_disabled'} ne 'HASH') {
-        $c->config->{'command_disabled'} = Thruk::Utils::array2hash(ref $c->config->{'command_disabled'} eq 'ARRAY' ? $c->config->{'command_disabled'} : [$c->config->{'command_disabled'}]);
+        $c->config->{'command_disabled'} = Thruk::Utils::array2hash(Thruk::Utils::expand_numeric_list($c, $c->config->{'command_disabled'}));
     }
 
     # username?

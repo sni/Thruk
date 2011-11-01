@@ -930,12 +930,15 @@ ex.:
 
 ==== command_disabled
 Use this to disabled specific commands. Can be use multiple times to disabled
-multiple commands. Use the number from the cmd_typ cgi parameter.
+multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
+links to the command page.
+You may use ranges here.
 
 ex.:
 
   command_disabled = 14
   command_disabled = 35
+  command_disabled = 17-34,50-65
 
 
 ==== cmd_defaults

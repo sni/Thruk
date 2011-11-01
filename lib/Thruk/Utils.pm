@@ -582,7 +582,7 @@ create a hash by key
 =cut
 sub array2hash {
     my $data = shift;
-    my $key   = shift;
+    my $key  = shift;
 
     return {} unless defined $data;
     confess("not an array") unless ref $data eq 'ARRAY';
@@ -859,6 +859,41 @@ sub get_pnp_url {
     }
 
     return '';
+}
+
+########################################
+
+=head2 expand_numeric_list
+
+  expand_numeric_list($c, $txt)
+
+return expanded list.
+ex.: converts '3,7-9,15' -> [3,7,8,9,15]
+
+=cut
+
+sub expand_numeric_list {
+    my $c    = shift;
+    my $txt  = shift;
+    my $list = {};
+    return [] unless defined $txt;
+
+    for my $item (ref $txt eq 'ARRAY' ? @{$txt} : $txt) {
+        for my $block (split/\s*,\s*/mx, $item) {
+            if($block =~ m/(\d+)\-(\d+)/gmx) {
+                for my $nr ($1..$2) {
+                    $list->{$nr} = 1;
+                }
+            } elsif($block =~ m/^(\d+)$/gmx) {
+                    $list->{$1} = 1;
+            } else {
+                $c->log->error("'$block' is not a valid number or range");
+            }
+        }
+    }
+
+    my @arr = sort keys %{$list};
+    return \@arr;
 }
 
 ########################################
