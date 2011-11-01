@@ -880,7 +880,7 @@ sub expand_numeric_list {
 
     for my $item (ref $txt eq 'ARRAY' ? @{$txt} : $txt) {
         for my $block (split/\s*,\s*/mx, $item) {
-            if($block =~ m/(\d+)\-(\d+)/gmx) {
+            if($block =~ m/(\d+)\s*\-\s*(\d+)/gmx) {
                 for my $nr ($1..$2) {
                     $list->{$nr} = 1;
                 }
