@@ -23,7 +23,9 @@
     <a name="HOSTCOMMENTS" id="HOSTCOMMENTS"></a>
     <div class='commentTitle'>Host Comments</div>
     <div class='comment'>
+      [% UNLESS c.config.command_disabled.exists('1') %]
       <img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a>
+      [% END %]
     </div><br>
     <div class="hint">mark host / services comments with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
@@ -54,7 +56,9 @@
           <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF com.expires %][% date_format(c, com.expires_time) %][% ELSE %]N/A[% END %]</td>
+          [% UNLESS c.config.command_disabled.exists('2') %]
           <td class='[% class %]'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          [% END %]
         </tr>
         [% END %]
         [% IF hostcommentscount == 0 %]
@@ -69,7 +73,9 @@
     <br>
     <a name="SERVICECOMMENTS" id="SERVICECOMMENTS"></a>
     <div class='commentTitle'>Service Comments</div>
+    [% UNLESS c.config.command_disabled.exists('3') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div><br>
+    [% END %]
     <div class="hint">mark host / services comments with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
       <table border="0" class='comment'>
@@ -100,7 +106,9 @@
           <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
           <td class='[% class %]'>[% IF com.expires %][% date_format(c, com.expires_time) %][% ELSE %]N/A[% END %]</td>
+          [% UNLESS c.config.command_disabled.exists('4') %]
           <td class='[% class %]'><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% com.id %]&amp;backend=[% com.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+          [% END %]
         </tr>
         [% END %]
         [% IF servicecommentscount == 0 %]

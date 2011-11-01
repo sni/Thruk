@@ -360,11 +360,15 @@
             <div class='commentTitle'>Service Comments</div>
             <table border="0">
               <tr>
+                [% UNLESS c.config.command_disabled.exists('3') %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=3&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new comment</a></td>
+                [% END %]
                 [% IF comments %]
+                [% UNLESS c.config.command_disabled.exists('21') %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=21&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Delete all comments</a></td>
+                [% END %]
                 [% END %]
               </tr>
             </table>
@@ -393,7 +397,9 @@
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
                     <td class='[% class %]'>[% IF comment.expires %][% date_format(c, comment.expires_time) %][% ELSE %]N/A[% END %]</td>
+                    [% UNLESS c.config.command_disabled.exists('4') %]
                     <td class='[% class %]'><a href='cmd.cgi?cmd_typ=4&amp;com_id=[% comment.id %]&amp;backend=[% service.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
+                    [% END %]
                   </tr>
                   [% END %]
                 [% ELSE %]
@@ -416,11 +422,15 @@
             <div class='commentTitle'>Service Downtimes</div>
             <table border="0">
               <tr>
+                [% UNLESS c.config.command_disabled.exists('56') %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a></td>
+                [% END %]
                 [% IF downtimes %]
+                [% UNLESS c.config.command_disabled.exists('5') %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt="#########" width="20" height="20"></td>
                 <td class='comment'><a href='cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]&amp;referer=[% full_uri(c) | uri %]' class='comment'>Delete all downtimes</a></td>
+                [% END %]
                 [% END %]
               </tr>
             </table>
@@ -449,7 +459,9 @@
                     <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
                     <td class='[% class %]'>[% downtime.id %]</td>
                     <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
+                    [% UNLESS c.config.command_disabled.exists('79') %]
                     <td class='[% class %]'><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% downtime.id %]&amp;backend=[% service.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>
+                    [% END %]
                   </tr>
                   [% END %]
                 [% ELSE %]

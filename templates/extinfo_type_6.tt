@@ -20,7 +20,9 @@
 
     <a name="HOSTDOWNTIME" id="HOSTDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Host Downtime</div>
+    [% UNLESS c.config.command_disabled.exists('55') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
+    [% END %]
     <div class="hint">mark host / services downtimes with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
       <table border="0" class='downtime'>
@@ -51,7 +53,9 @@
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
+          [% UNLESS c.config.command_disabled.exists('78') %]
           <td class='[% class %]'><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+          [% END %]
         </tr>
         [% END %]
         [% IF !hostdowntimes || hostdowntimes.size == 0 %]
@@ -65,7 +69,9 @@
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtime</div>
+    [% UNLESS c.config.command_disabled.exists('56') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
+    [% END %]
     <div class="hint">mark host / services downtimes with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
       <table border="0" class='downtime'>
@@ -98,7 +104,9 @@
           <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
           <td class='[% class %]'>[% d.id %]</td>
           <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
+          [% UNLESS c.config.command_disabled.exists('79') %]
           <td class='[% class %]'><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+          [% END %]
         </tr>
         [% END %]
         [% IF !servicedowntimes || servicedowntimes.size == 0 %]

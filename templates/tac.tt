@@ -377,11 +377,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.keys.size == 0 || pi.enable_flap_detection == 1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('62') %]<a href='cmd.cgi?cmd_typ=62'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Flap Detection Enabled' title='Flap Detection Enabled' width="20" height="76">[% UNLESS c.config.command_disabled.exists('62') %]</a>[% END %]</td>
               [% ELSIF pi.enable_flap_detection == -1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=62'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Flap Detection Ambiguous' title='Flap Detection Ambiguous' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('62') %]<a href='cmd.cgi?cmd_typ=62'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Flap Detection Ambiguous' title='Flap Detection Ambiguous' width="20" height="76">[% UNLESS c.config.command_disabled.exists('62') %]</a>[% END %]</td>
               [% ELSE %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=61'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdisabled.png' border="0" alt='Flap Detection Disabled' title='Flap Detection Disabled' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('61') %]<a href='cmd.cgi?cmd_typ=61'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdisabled.png' border="0" alt='Flap Detection Disabled' title='Flap Detection Disabled' width="20" height="76">[% UNLESS c.config.command_disabled.exists('61') %]</a>[% END %]</td>
               [% END %]
               <td width="10">&nbsp;</td>
 
@@ -428,11 +428,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.keys.size == 0 || pi.enable_notifications == 1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('11') %]<a href='cmd.cgi?cmd_typ=11'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Notifications Enabled' title='Notifications Enabled' width="20" height="76">[% UNLESS c.config.command_disabled.exists('11') %]</a>[% END %]</td>
               [% ELSIF pi.enable_notifications == -1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=11'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Notifications Ambiguous' title='Notifications Ambiguous' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('11') %]<a href='cmd.cgi?cmd_typ=11'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Notifications Ambiguous' title='Notifications Ambiguous' width="20" height="76">[% UNLESS c.config.command_disabled.exists('11') %]</a>[% END %]</td>
               [% ELSE %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=12'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdisabled.png' border="0" alt='Notifications Disabled' title='Notifications Disabled' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('12') %]<a href='cmd.cgi?cmd_typ=12'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdisabled.png' border="0" alt='Notifications Disabled' title='Notifications Disabled' width="20" height="76">[% UNLESS c.config.command_disabled.exists('12') %]</a>[% END %]</td>
               [% END %]
               <td width="10">&nbsp;</td>
               [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]
@@ -464,11 +464,11 @@
           <table border="0" width="135" cellspacing="0" cellpadding="0">
             <tr>
               [% IF pi.keys.size == 0 || pi.enable_event_handlers == 1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('42') %]<a href='cmd.cgi?cmd_typ=42'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacenabled.png' border="0" alt='Event Handlers Enabled' title='Event Handlers Enabled' width="20" height="76">[% UNLESS c.config.command_disabled.exists('42') %]</a>[% END %]</td>
               [% ELSIF pi.enable_event_handlers == -1 %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=42'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Event Handlers Ambiguous' title='Event Handlers Ambiguous' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('42') %]<a href='cmd.cgi?cmd_typ=42'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdiverse.png' border="0" alt='Event Handlers Ambiguous' title='Event Handlers Ambiguous' width="20" height="76">[% UNLESS c.config.command_disabled.exists('42') %]</a>[% END %]</td>
               [% ELSE %]
-              <td valign="top"><a href='cmd.cgi?cmd_typ=41'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdisabled.png' border="0" alt='Event Handlers Disabled' title='Event Handlers Disabled' width="20" height="76"></a></td>
+              <td valign="top">[% UNLESS c.config.command_disabled.exists('41') %]<a href='cmd.cgi?cmd_typ=41'>[% END %]<img src='[% url_prefix %]thruk/themes/[% theme %]/images/tacdisabled.png' border="0" alt='Event Handlers Disabled' title='Event Handlers Disabled' width="20" height="76">[% UNLESS c.config.command_disabled.exists('41') %]</a>[% END %]</td>
               [% END %]
               <td width="10">&nbsp;</td>
 
