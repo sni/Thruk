@@ -457,6 +457,10 @@ sub _do_send_command {
 
     return 1 if $self->_check_reschedule_alias($c);
 
+    if( defined $c->config->{'command_disabled'}->{$cmd_typ} ) {
+        return $c->detach('/error/index/12');
+    }
+
     my $tt  = Template->new( $c->{'View::TT'} );
     my $cmd = '';
     eval {
