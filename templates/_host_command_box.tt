@@ -202,8 +202,8 @@
                   <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Flap Detection For This Host' title='Enable Flap Detection For This Host' width="20" height="20"></td>
                   <td class='command'><a href='cmd.cgi?cmd_typ=57&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Enable flap detection for this host</a></td>
                 [% END %]
-              [% END %]
               </tr>
+              [% END %]
             </table>
           </td>
         </tr>
