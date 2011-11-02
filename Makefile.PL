@@ -67,6 +67,13 @@ requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
 requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 
+# conf tool plugin
+feature     ('plugin_conf',
+  -default                                        => 0,
+  'Storable'                                      => 0,
+  'String::Strip'                                 => 0,
+);
+
 # dashboard plugin
 feature     ('plugin_dashboard',
   -default                                        => 0,

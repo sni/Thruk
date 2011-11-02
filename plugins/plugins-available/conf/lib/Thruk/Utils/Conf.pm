@@ -17,6 +17,25 @@ Helper Functios for the Config Tool
 
 =cut
 
+
+######################################
+
+=head2 read_objects
+
+read objects and store them as storable
+
+=cut
+sub read_objects {
+    my $c             = shift;
+    my $model         = $c->model('Objects');
+    my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
+    my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool);
+    $c->stash->{model_type} = 'Objects';
+    $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool, $obj_db ];
+    return;
+}
+
+
 ######################################
 
 =head2 update_conf

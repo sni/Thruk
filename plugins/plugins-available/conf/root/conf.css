@@ -1,0 +1,106 @@
+body.config TABLE.conftoolobj {
+  min-width: 600px;
+}
+body.config TABLE.conftoolobj INPUT[type=text] {
+  width: 400px;
+}
+body.config TABLE.conftoolobj TEXTAREA {
+  white-space: nowrap;
+  word-wrap: normal;
+  width: 100%;
+}
+body.config TABLE.conftoolobj INPUT#id_check_command_1 {
+  width: 160px;
+}
+body.config TABLE.conftoolobj INPUT#id_check_command_2 {
+  width: 200px;
+}
+body.config TABLE.conftoolobj INPUT[type=text].attrkey {
+  width: 170px;
+}
+
+.conf_attr_used {
+  text-decoration: line-through;
+  color: #999999;
+}
+.conf_attr_unused {
+}
+body.config TD.conf_row {
+  border-right: 0px;
+  border-left: 0px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  border-bottom: 3px solid white;
+  white-space: pre-wrap;
+  margin: 0px;
+}
+
+TD#filesystem {
+  text-align: left;
+}
+
+TD#filepath {
+  font-size: larger;
+  padding-top: 5px;
+  padding-left: 15px;
+}
+
+UL.obj_browse LI {
+  list-style: none;
+  text-align: left;
+  clear: both;
+  display: inline-block;
+}
+
+UL.obj_browse LI:hover {
+  background-color:#FFEB66;
+}
+
+UL.obj_browse LI IMG {
+  float: left;
+  margin-right: 5px;
+}
+
+DIV.obj_browse_name {
+  float: left;
+  width: 200px;
+}
+
+DIV.obj_browse_date {
+  float: left;
+  width: 120px;
+  text-align: right;
+}
+INPUT.obj_browse_box {
+  float: left;
+  margin-right: 5px;
+}
+A.deleted, DIV.deleted {
+  text-decoration: line-through;
+  color: #999999;
+}
+
+
+DIV#editor {
+  position: relative;
+}
+
+TD.dataVar DIV#editor {
+  font-weight: normal;
+  font-size: 11px;
+}
+.ace_comment {
+  color: #006600 !important;
+}
+/* define host */
+.ace_keyword, .ace_constant.ace_language {
+  color: #871F78 !important;
+}
+/* macros $USER1$ */
+.ace_keyword.ace_operator {
+  color: #8B0000 !important;
+}
+/* object attributes: host_name */
+.ace_support.ace_function {
+  color: #23238E !important;
+}

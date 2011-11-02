@@ -562,7 +562,7 @@ footnotes: function () {
 <div class="sectionbody">
 <div class="paragraph"><p>Thruk is an multibackend monitoring web interface which currently
 supports Nagios and Icinga using the Livestatus NEB module. It is
-designed to be a "drop-in" replacement and targets covering 100% of
+designed to be a <em>drop-in</em> replacement and targets covering 100% of
 the original features plus additional enhancements for large
 installations.</p></div>
 <div class="paragraph"><p>Main Features / Advantages</p></div>
@@ -660,6 +660,11 @@ Full expanded plugin commandline for easy testing
 <li>
 <p>
 Save searches like bookmarks
+</p>
+</li>
+<li>
+<p>
+Config Tool included
 </p>
 </li>
 </ul></div>
@@ -6326,7 +6331,7 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <div class="content">
 <pre><tt>1.  install debian netinst
       - minimal inst, create user thruk
-2.  add "contrib non-free" to /etc/apt/sources.list
+2.  add 'contrib non-free' to /etc/apt/sources.list
 3.  #&gt; apt-get install libapache2-mod-fastcgi libfile-copy-recursive-perl libmodule-install-perl \
           make gcc git git-core libgd2-xpm-dev libexpat1-dev
 4.  #&gt; su - thruk
@@ -6533,7 +6538,7 @@ configuration.</p></div>
 <h4 id="_install_module_install">Install Module::Install</h4>
 <div class="listingblock">
 <div class="content">
-<pre><tt>  perl -MCPAN -e "install Module::Install::Catalyst"</tt></pre>
+<pre><tt>  perl -MCPAN -e 'install Module::Install::Catalyst'</tt></pre>
 </div></div>
 <h4 id="_git_clone_thruk">Git Clone Thruk</h4>
 <div class="listingblock">
@@ -6633,7 +6638,7 @@ on how to install livestatus onto your monitoring box.</p></div>
 <pre><tt> broker_module=/opt/local/livestatus/livestatus.o /tmp/live.sock</tt></pre>
 </div></div>
 <h4 id="_configuration">Configuration</h4>
-<div class="paragraph"><p>Copy "thruk.conf" to "thruk_local.conf" and adjust the livestatus settings to your needs.</p></div>
+<div class="paragraph"><p>Copy <em>thruk.conf</em> to <em>thruk_local.conf</em> and adjust the livestatus settings to your needs.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  %&gt; cp thruk.conf thruk_local.conf</tt></pre>
@@ -6641,7 +6646,7 @@ on how to install livestatus onto your monitoring box.</p></div>
 <div class="paragraph"><p>The thruk.conf will be overwritten with new defaults on updates. The
 thruk_local.conf contains the local overrides and will never be
 overwritten.</p></div>
-<div class="paragraph"><p>Edit "cgi.conf" and adjust settings to your needs.</p></div>
+<div class="paragraph"><p>Edit <em>cgi.conf</em> and adjust settings to your needs.</p></div>
 <div class="paragraph"><p>See the <a href="#Configuration">[Configuration]</a> section for detailed explaination of configuration options.</p></div>
 <h4 id="_start_server">Start Server</h4>
 <div class="paragraph"><p>After running these steps successfully, you should be able to test your
@@ -7031,6 +7036,16 @@ to the cgi directory.</p></div>
 <div class="content">
 <pre><tt>logo_path_prefix = /icons/</tt></pre>
 </div></div>
+<h4 id="_physical_logo_path">physical_logo_path</h4>
+<div class="paragraph"><p>Location of your logos in your filesystem. This directory should be
+mapped to your <em>logo_path_prefix</em> directory where <em>logo_path_prefix</em> is
+the path relative to your webserver root directory and <em>physical_logo_path</em> is
+the corresponding filesystem path.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>physical_logo_path = /usr/share/icons/</tt></pre>
+</div></div>
 <h4 id="_use_strict_host_authorization">use_strict_host_authorization</h4>
 <div class="paragraph"><p>When set to a true value, every contact will only see the hosts where
 he is contact for plus the services where he is contact for. When
@@ -7059,7 +7074,7 @@ if you don&#8217;t want a documentation link in the menu at all.</p></div>
 <pre><tt>documentation_link = /thruk/docs/</tt></pre>
 </div></div>
 <h4 id="_all_problems_link">all_problems_link</h4>
-<div class="paragraph"><p>Customizable link for the "problems" link in side menu. Can be useful
+<div class="paragraph"><p>Customizable link for the <em>problems</em> link in side menu. Can be useful
 to reflect your companys process of error handling.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
@@ -7639,7 +7654,7 @@ name      name for this connection
 </li>
 <li>
 <p>
-type      type of this connection. Only "livestatus" possible at the
+type      type of this connection. Only <em>livestatus</em> possible at the
                      moment
 </p>
 </li>
@@ -7663,31 +7678,84 @@ groups    if set, only contacts from these groups have access. You
 <p>
 options
 </p>
-</li>
+<div class="ulist"><ul>
 <li>
 <p>
-peer              address of this connection.
+peer            address of this connection.
 </p>
 </li>
 <li>
 <p>
-verbose           let this connection be verbose
+verbose         let this connection be verbose
 </p>
 </li>
 <li>
 <p>
-connect_timeout   connect timeout setting
+connect_timeout connect timeout setting
 </p>
 </li>
 <li>
 <p>
-query_timeout     query timeout setting
+query_timeout   query timeout setting
 </p>
 </li>
 <li>
 <p>
-resource_file     resource_file for this peer
+resource_file   resource_file for this peer
 </p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+configtool
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+core_conf       Path to your nagios.cfg / icinga.cfg. Read all
+                                object directories and files from this config
+                                file.
+</p>
+</li>
+<li>
+<p>
+obj_check_cmd   Commandline to verify the config.
+</p>
+</li>
+<li>
+<p>
+obj_reload_cmd  Commandline to reload the config.
+</p>
+</li>
+<li>
+<p>
+obj_readonly    Filename pattern to define readonly objects.
+                                For example for generated config files.
+</p>
+</li>
+<li>
+<p>
+obj_dir         Path to your objects. Enables the objects editor.
+                                Reads all *.cfg from this folder and all subfolders.
+                                (only needed when not using <em>core_conf</em>)
+</p>
+</li>
+<li>
+<p>
+obj_file        Path to a single objects file. Enables the objects
+                                editor. Both <em>obj_dir</em> and <em>obj_file</em> can be
+                                specified more than once.
+                                (only needed when not using <em>core_conf</em>)
+</p>
+</li>
+<li>
+<p>
+obj_exclude     Specify some exection pattern for the obj_dir.
+                                (only needed when not using <em>core_conf</em>)
+</p>
+</li>
+</ul></div>
 </li>
 </ul></div>
 </li>
@@ -7703,8 +7771,13 @@ resource_file     resource_file for this peer
       groups = admins,locals # makes this backend only visible to the
                              # admin and the locals contactgroup
       &lt;options&gt;
-          peer   = /tmp/livestatus.socket
-     &lt;/options&gt;
+          peer       = /tmp/livestatus.socket
+      &lt;/options&gt;
+      &lt;configtool&gt;
+          core_conf  = /etc/nagios/nagios.cfg
+          obj_check  = /etc/init.d/nagios checkconfig
+          obj_reload = /etc/init.d/nagios reload
+      &lt;/configtool&gt;
   &lt;/peer&gt;
   &lt;peer&gt;
       name   = External Icinga
@@ -7732,24 +7805,24 @@ config tool.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-you can manage 3 types of files with the config tool:
+you can manage different types of files with the config tool:
 </p>
 <div class="ulist"><ul>
 <li>
 <p>
-thruk               path to your thruk_local.conf. Enables
-                            adjusting Thruks config.
+thruk               Path to your thruk_local.conf. Enables
+                            adjusting Thruks config if set.
 </p>
 </li>
 <li>
 <p>
-cgi.cfg             path to your cgi.cfg. Enables adjusting the
-                            cgi.cfg.
+cgi.cfg             Path to your cgi.cfg. Enables adjusting the
+                            cgi.cfg if set.
 </p>
 </li>
 <li>
 <p>
-htpasswd            path to your htpasswd. Enables user management
+htpasswd            Path to your htpasswd. Enables user management
                             based an apaches basic auth with htpasswd.
 </p>
 </li>
@@ -7760,9 +7833,9 @@ htpasswd            path to your htpasswd. Enables user management
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::ConfigTool&gt;
-  thruk    = ./thruk_local.conf
-  cgi.cfg  = ./cgi.cfg
-  htpasswd = ./htpasswd
+  thruk      = ./thruk_local.conf
+  cgi.cfg    = ./cgi.cfg
+  htpasswd   = ./htpasswd
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>

@@ -1,0 +1,255 @@
+[% WRAPPER _conf_objects_frame.tt %]
+
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="sub" value="objects">
+<input type="hidden" name="path" value="/" id="path">
+<table border="0" class='data conftoolobj' width="500">
+  <tr>
+    <th class='data'>Filesystem</th>
+  </tr>
+  <tr>
+    <td class="dataVar" style="text-align: center"><input type="text" class="deletable" style="width:95%; margin-top: 5px;" onchange="set_browser_filter(this.value)" onkeyup="set_browser_filter(this.value)" onfocus="set_browser_filter(this.value)"></td>
+  </tr>
+  <tr>
+    <td class="dataVar" id="filepath"></td>
+  </tr>
+  <tr>
+    <td id="filesystem"></td>
+  </tr>
+  <tr>
+    <td align="left">
+      <hr>
+      select <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', true); return false;">all</a> <a href="#" onclick="jQuery('INPUT[name=files]').attr('checked', false); return false;">none</a>
+      <select name="action" onChange="jQuery('#path').attr('value', location.hash); this.form.submit()">
+        <option>--- please select action ---</option>
+        <option value="deletefiles">delete selected files</option>
+        <option value="undeletefiles">undelete selected files</option>
+      </select>
+    </td>
+  </tr>
+</table>
+</form>
+
+<script type="text/javascript">
+<!--
+
+    var all_files = [% files_json %];
+    var root      = all_files.path;
+
+    /* init first view */
+    if(window.location.hash != '') {
+        setdir(window.location.hash.replace(/^#/, '').replace(/\/[^\/]*\.cfg$/,'/'));
+    } else {
+        setdir(root);
+    }
+
+    /* get directory object for path */
+    function get_dir_for_path(files, path) {
+        var f = new Hash(files);
+        if(f.get('path') == path) {
+            return f;
+        }
+
+        var dirs = new Hash(f.get('dirs'));
+        var ret;
+        dirs.keys().each(function(name) {
+            d = dirs.get(name);
+            if(d.path == path) {
+                ret = new Hash(d);
+                return;
+            }
+            var r = get_dir_for_path(d, path);
+            if(r != undefined) {
+                ret = r;
+                return;
+            }
+        });
+        if(ret != undefined) {
+            return ret;
+        }
+        return;
+    }
+
+    /* set files & folders for path */
+    function setdir(path) {
+        var dir = get_dir_for_path(all_files, path);
+        if(dir == undefined) {
+            if(thruk_debug_js) { alert("ERROR: got no dir for path in setdir("+path+")"); }
+        return;
+        }
+
+        set_directory_path(dir);
+
+        /* set files and folders */
+        jQuery('#filesystem').html(function() {
+            var html = "";
+            html += "<ul class='obj_browse'>";
+
+            if(path != root) {
+                var top_dir = path.replace(/[^\/]+\/$/, '');
+                html += html_dir(top_dir, "..", "");
+            }
+
+            /* set dirs for folder */
+            var dirs = new Hash(dir.get('dirs'));
+            dirs.keys().sort().each(function(name) {
+                d = dirs.get(name);
+                html += html_dir(d.path, name, d.date);
+            });
+
+            /* set files for folder */
+            var files = new Hash(dir.get('files'));
+            files.keys().sort().each(function(name) {
+                f = files.get(name);
+                html += html_file(path, name, f.date, f.deleted);
+            });
+
+            html += "<\/ul>";
+            return html;
+        }).hide().show("fade", { direction: "left" }, 500);
+    }
+
+    /* return list element for folder */
+    function html_dir(path, name, date) {
+        var html = "";
+        html += "<li>";
+        html += "<input type='checkbox' name='files' value='"+ path +"' class='obj_browse_box'>";
+        html += "<a href='#"+ path +"' onclick='setdir(\""+ path +"\")'>";
+        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/folder.png' border='0' alt='folder' title='folder' width='16' height='16'> ";
+        html += "<div class='obj_browse_name'>" + name + "<\/div> ";
+        html += "<div class='obj_browse_date'>"+ date + "<\/div>";
+        html += "<\/a>";
+        html += "<\/li>";
+        return html;
+    }
+
+    /* return list element for file */
+    function html_file(path, name, date, deleted) {
+        var css="";
+        if(deleted) {
+            css="deleted";
+        }
+        var html = "";
+        html += "<li>";
+        html += "<input type='checkbox' name='files' value='"+ path + name +"' class='obj_browse_box'>";
+        html += "<a href='conf.cgi?sub=objects&action=editor&file="+ path + name + "' class='" + css + "'>";
+        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/page_white_text.png' border='0' alt='cfg' title='cfg' width='16' height='16'> ";
+        html += "<div class='obj_browse_name "+ css +"'>" + name + "<\/div> ";
+        html += "<div class='obj_browse_date "+ css +"'>"+ date + "<\/div>";
+        html += "<\/a>";
+        html += "<\/li>";
+        return html;
+    }
+
+    /* set directory path */
+    function set_directory_path(dir) {
+        jQuery('#filepath').html(function() {
+            var html     = "";
+            var rootpath = root;
+            html += "<a href='#"+ rootpath +"' onclick='setdir(\""+ rootpath +"\")'>" + rootpath + "<\/a>";
+            var dirs     = dir.get('path');
+            dirs         = dirs.replace(rootpath, '');
+            var paths    = dirs.split("/");
+            dirs         = rootpath;
+            paths.each(function(dir) {
+                if(dir != '') {
+                    dirs += dir + "\/";
+                    html += " <a href='#"+ dirs +"' onclick='setdir(\""+ dirs +"\")'>" + dir + "\/ <\/a>";
+                }
+            });
+            return html;
+        });
+    }
+
+    /* set files & folders from text filter */
+    var lastvalue;
+    function set_browser_filter(value) {
+        if(value.length == 0 &&  lastvalue != undefined && value != lastvalue) {
+            setdir(root);
+            lastvalue = value;
+            return;
+        }
+        if(value.length == 0 || value == lastvalue) {
+            lastvalue = value;
+            return;
+        }
+        lastvalue = value;
+
+        var rootdir = get_dir_for_path(all_files, root);
+        set_directory_path(rootdir);
+
+        // remove empty strings from pattern array
+        pattern = value.split(" ");
+        var trimmed_pattern = new Array();
+        pattern.each(function(sub_pattern) {
+            if(sub_pattern != '') {
+                trimmed_pattern.push(sub_pattern);
+            }
+        });
+        pattern = trimmed_pattern;
+
+        var f     = new Hash(all_files);
+        var dirs  = new Hash(f.get('dirs'));
+        var files = new Hash(f.get('files'));
+        var results = get_matching_files(pattern, dirs, files, f.get('path'));
+
+        jQuery('#filesystem').html(function() {
+            var html = "";
+            html += "<ul class='obj_browse'>";
+            // sort by name
+            var sorted = new Hash();
+            results.each(function(o) {
+                sorted.set(o.get('name'), o);
+            });
+            sorted.keys().sort().each(function(name) {
+                o = sorted.get(name);
+                if(o.get('type') == 'dir') {
+                    html += html_dir(o.get('path'), o.get('name'), o.get('date'));
+                }
+                if(o.get('type') == 'file') {
+                    html += html_file(o.get('path'), o.get('name'), o.get('date'), o.get('deleted'));
+                }
+            });
+            html += "<\/ul>";
+            return html;
+        });
+    }
+
+    function get_matching_files(pattern, dirs, files, path) {
+        path = path.replace(root, '');
+        var results = new Array();
+        dirs.keys().each(function(name) {
+            d = dirs.get(name);
+            if(file_matches(pattern, path + name)) {
+                results.push(new Hash({ 'type':'dir', 'name': path + name, 'path': d.path, 'date': d.date }));
+            }
+            var f     = new Hash(d);
+            var dir   = new Hash(f.get('dirs'));
+            var file  = new Hash(f.get('files'));
+            var res   = get_matching_files(pattern, dir, file, d.path);
+            res.each(function(a) { results.push(a) });
+        });
+        files.keys().each(function(name) {
+            if(file_matches(pattern, path + name)) {
+                results.push(new Hash({ 'type':'file', 'name': path + name, 'path': root, 'date': f.date, 'deleted': f.deleted }));
+            }
+        });
+        return results;
+    }
+    function file_matches(pattern, name) {
+        var missed = 0;
+        pattern.each(function(p) {
+            var index = name.toLowerCase().indexOf(p.toLowerCase());
+            if(index == -1) {
+                missed++;
+            }
+        });
+        if(missed == 0) {
+            return true;
+        }
+        return false;
+    }
+-->
+</script>
+
+[% END %]

@@ -1,0 +1,88 @@
+[% SET value = "" %]
+[% IF obj_conf.defined(key) %]
+  [% SET value = obj_conf.$key %]
+[% END %]
+
+[% IF !defaults.exists(key) || defaults.$key.type == 'STRING' || defaults.$key.type == 'INT' %]
+  [% IF edit %]
+    <input type="text" name="obj.[% key %]" id="id_key[% nr %]" value="[% IF obj_conf.defined(key) %][% value %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]>
+  [% ELSE %]
+    [% IF defaults.exists(key) && defaults.$key.exists('link') %]
+        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value %]</a>
+    [% ELSE %]
+        [% html_escape(value) %]
+    [% END %]
+  [% END %]
+
+
+[% ELSIF defaults.$key.type == 'COMMAND' %]
+  [% IF obj_conf.defined(key) %]
+      [% cmd = value.split('!') %]
+  [% ELSE %]
+      [% cmd = ['',''] %]
+  [% END %]
+  [% IF edit %]
+    <table cellpadding=0 cellspacing=0 border=0><tr>
+    <td><input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]></td>
+    <td align="right">&nbsp;&nbsp;args:&nbsp;</td>
+    <td><input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; cmd.join('!') %]"></td>
+    </tr></table>
+  [% ELSE %]
+    [% IF defaults.$key.exists('link') %]
+        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% cmd.0 | uri %]">[% value %]</a>
+    [% ELSE %]
+        [% value %]
+    [% END %]
+  [% END %]
+
+
+[% ELSIF defaults.$key.type == 'BOOL' %]
+  [% IF edit %]
+    <input type="radio" name="obj.[% key %]" value="0"[% IF obj_conf.defined(key) && value == 0 %] checked[% END %]> No
+    <input type="radio" name="obj.[% key %]" value="1"[% IF obj_conf.defined(key) && value == 1 %] checked[% END %]> Yes
+  [% ELSE %]
+    [% IF value %]Yes[% ELSE %]No[% END %]
+  [% END %]
+
+
+[% ELSIF defaults.$key.type == 'ENUM' %]
+  [% IF edit %]
+    <input type="checkbox" name="obj.[% key %]" value="noop" style="display:none" checked>
+    [% FOREACH v = defaults.$key.values %]
+      [% ind = loop.index %]
+      <input type="checkbox" name="obj.[% key %]" value="[% v %]"[% IF obj_conf.defined(key) && value.grep(v).size() > 0 %] checked[% END %]>[% defaults.$key.keys.$ind %]&nbsp;
+    [% END %]
+  [% ELSE %]
+    [% first = 1 %]
+    [% FOREACH v = defaults.$key.values %]
+      [% ind = loop.index %]
+      [% IF value.grep(v).size() > 0 %][% UNLESS first %], [% END %][% defaults.$key.keys.$ind %][% first = 0 %][% END %]
+    [% END %]
+  [% END %]
+
+[% ELSIF defaults.$key.type == 'CHOOSE' %]
+  [% IF edit %]
+    [% FOREACH k = defaults.$key.keys %]
+    [% SET x = loop.index %]
+    [% SET v = defaults.$key.values.$x %]
+    <input type="radio" name="obj.[% key %]" value="[% v %]"[% IF obj_conf.defined(key) && value == v %] checked[% END %]> [% k %]
+    [% END %]
+  [% ELSE %]
+    [% value %]
+  [% END %]
+
+
+[% ELSIF defaults.$key.type == 'LIST' %]
+  [% IF edit %]
+    <input type="text" name="obj.[% key %]" id="id_[% key %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false, true[% IF key == "use" %], 'templates'[% END %])"[% END %]>
+  [% ELSE %]
+    [% IF defaults.$key.exists('link') %]
+        [% FOREACH o = value %]
+        <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% o | uri %]">[% o %]</a>
+        [% UNLESS loop.last %], [% END %]
+        [% END %]
+    [% ELSE %]
+        [% value.join(', ') %]
+    [% END %]
+  [% END %]
+[% END %]

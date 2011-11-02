@@ -1,0 +1,34 @@
+[% WRAPPER _conf_objects_frame.tt %]
+<script type="text/javascript">
+<!--
+    var data = [% filenames_json %];
+-->
+</script>
+
+<form action="conf.cgi" method="POST">
+<input type="submit" name="move" value="move" style="display:none">
+<input type="hidden" name="sub" value="objects">
+<input type="hidden" name="data.id" value="[% object.get_id() %]">
+<input type="hidden" name="action" value="movefile">
+  <table border="0" class='data conftoolobj'>
+    <tr>
+      <th class='data' style="width: 40px;"><a href='conf.cgi?sub=objects&amp;type=[% object.get_type() %]&amp;data.id=[% object.get_id %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+      <th class='data'>Relocate Object</th>
+      <th class='data' style="width: 40px;"></th>
+    </tr>
+    <tr>
+      <td colspan=3 class="dataVar" style="text-align:center">
+        Move [% object.get_type() %] '[% object.get_name() %]' to<br>
+        <input type="text" class="deletable" name="newfile" id="fileselect" onclick="ajax_search.init(this, 'file', undefined, false, false, false, false, data)">
+        <br><br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=3 class="data dataSubmit">
+        <input type="submit" name="move" value="move" style="width:90px" class="conf_button">
+      </td>
+    </tr>
+  </table>
+</form>
+
+[% END %]

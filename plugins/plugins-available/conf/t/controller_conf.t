@@ -1,7 +1,7 @@
 use strict;
 use warnings;
-use Test::More tests => 76;
-use File::Temp qw/ tempfile /;
+use Test::More tests => 559;
+use JSON::XS;
 
 BEGIN {
     use lib('t');
@@ -13,73 +13,38 @@ BEGIN {
 ###########################################################
 # test modules
 use_ok 'Thruk::Controller::conf';
-use_ok 'Thruk::Utils::Conf::Defaults';
-use_ok 'Thruk::Utils::Conf';
+use_ok 'Monitoring::Config::Object';
 
 ###########################################################
-# test some functions
-my $conf_in = "# blah comment
-# blah comment 2
-
-test = 1
-# more comments
-blub = 2
-foo = 2
-
-
-";
-my $conf_exp = "# blah comment
-# blah comment 2
-
-test=10,1,5
-# more comments
-blub=5
-foo = 2
-
-
-";
-my $data = { test => ["10","1","5"], blub => "5" };
-my $got  = Thruk::Utils::Conf::merge_conf($conf_in, $data);
-is($got, $conf_exp, "merge config");
+my($host,$service) = TestUtils::get_test_service();
 
 ###########################################################
-# test some functions
-$conf_in = "
-test = 1
-test = 2
-test = 3
-";
-$conf_exp = "
-test=1,4,5
-blub=5
-";
-$data = { test => ["1","4","5"], blub => "5" };
-$got  = Thruk::Utils::Conf::merge_conf($conf_in, $data);
-is($got, $conf_exp, "merge config II");
-
-###########################################################
-# test reading htpasswd
-my $expected = { "testuser" => "zTOzpj/AEVckE" };
-my($fh, $filename) = tempfile();
-print $fh <<EOF;
-# test htpasswd
-testuser:zTOzpj/AEVckE
-EOF
-close($fh);
-my $htpasswd = Thruk::Utils::Conf::read_htpasswd($filename);
-is_deeply($htpasswd, $expected, 'reading htpasswd: '.$filename);
-unlink($filename);
+# initialize object config
+TestUtils::test_page(
+    'url'      => '/thruk/cgi-bin/conf.cgi?sub=objects',
+    'redirect' => 1,
+    'unlike'   => [ 'internal server error', 'HASH', 'ARRAY' ],
+);
 
 ###########################################################
 # test some pages
 my $pages = [
     '/conf',
     '/thruk/cgi-bin/conf.cgi',
-    '/thruk/cgi-bin/conf.cgi?type=cgi',
-    '/thruk/cgi-bin/conf.cgi?type=thruk',
-    '/thruk/cgi-bin/conf.cgi?type=users',
-    '/thruk/cgi-bin/conf.cgi?type=users&action=change&data.username=testuser',
+    '/thruk/cgi-bin/conf.cgi?sub=cgi',
+    '/thruk/cgi-bin/conf.cgi?sub=thruk',
+    '/thruk/cgi-bin/conf.cgi?sub=users',
+    '/thruk/cgi-bin/conf.cgi?sub=users&action=change&data.username=testuser',
+    '/thruk/cgi-bin/conf.cgi?sub=objects',
+    '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes',
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=browser',
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=move&type=host&data.name='.$host,
 ];
+
+for my $type (@{$Monitoring::Config::Object::Types}) {
+    push @{$pages}, '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type,
+}
+
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
@@ -89,13 +54,47 @@ for my $url (@{$pages}) {
 }
 
 my $redirects = [
-    '/thruk/cgi-bin/conf.cgi?type=cgi&action=store',
-    '/thruk/cgi-bin/conf.cgi?type=thruk&action=store',
-    '/thruk/cgi-bin/conf.cgi?type=users&action=store&data.username=testuser',
+    '/thruk/cgi-bin/conf.cgi?sub=cgi&action=store',
+    '/thruk/cgi-bin/conf.cgi?sub=thruk&action=store',
+    '/thruk/cgi-bin/conf.cgi?sub=users&action=store&data.username=testuser',
 ];
 for my $url (@{$redirects}) {
     TestUtils::test_page(
         'url'      => $url,
         'redirect' => 1,
+        'unlike'   => [ 'internal server error', 'HASH', 'ARRAY' ],
+    );
+}
+
+# json export
+for my $type (@{$Monitoring::Config::Object::Types}, 'icon') {
+    my $page = TestUtils::test_page(
+        'url'          => '/thruk/cgi-bin/conf.cgi?action=json&type='.$type,
+        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
+        'content_type' => 'application/json; charset=utf-8',
+    );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'ARRAY', "json result is an array") or diag("got: ".Dumper($data));
+    if($type eq 'icon') {
+        ok(scalar @{$data} == 1, "json result size is: ".(scalar @{$data}));
+    } else {
+        ok(scalar @{$data} == 2, "json result size is: ".(scalar @{$data}));
+    }
+
+    is($data->[0]->{'name'}, $type."s", "json result has correct type");
+    my $min = 1;
+    if($type eq 'hostextinfo' or $type eq 'hostextinfo' or $type eq 'hostdependency' or $type eq 'hostescalation' or $type eq 'serviceextinfo' or $type eq 'servicedependency' or $type eq 'serviceescalation') {
+        $min = 0;
+    }
+    ok(scalar @{$data->[0]->{'data'}} >= $min, "json result for ".$type." has data ( >= $min )");
+
+    next if $type eq 'icon';
+
+    $data->[0]->{'data'}->[0] = "none" unless defined $data->[0]->{'data'}->[0];
+
+    TestUtils::test_page(
+        'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'data.name='.$data->[0]->{'data'}->[0],
+        'like'    => [ 'Config Tool', $type, $data->[0]->{'data'}->[0]],
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

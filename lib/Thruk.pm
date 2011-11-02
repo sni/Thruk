@@ -181,7 +181,7 @@ my %config = ('name'                   => 'Thruk',
 if(-f $project_root."/.author") {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0;
-    $config{'View::TT'}->{'STAT_TTL'}   = 3600;
+    $config{'View::TT'}->{'STAT_TTL'}   = 5;
     $config{'View::TT'}->{'PRE_DEFINE'}->{'author'} = 1;
 }
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
