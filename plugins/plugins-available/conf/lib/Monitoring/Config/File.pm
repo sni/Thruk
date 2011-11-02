@@ -103,7 +103,7 @@ sub update_objects {
     }
 
     # add trailing comments to last object
-    if(defined $comments and scalar @{$comments} > 0) {
+    if(defined $comments and scalar @{$comments} > 0 and scalar @{$self->{'objects'}} > 0) {
         push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
     }
 
