@@ -48,9 +48,13 @@ format: 0d 0h 29m 43s
 sub duration {
     my $duration = shift;
     my $withdays = shift;
+    my $minus    = '';
 
     croak("undef duration in duration(): ".$duration) unless defined $duration;
-    $duration = $duration * -1 if $duration < 0;
+    if($duration < 0) {
+        $duration = $duration * -1;
+        $minus    = '-';
+    }
 
     $withdays = 1 unless defined $withdays;
 
@@ -79,12 +83,12 @@ sub duration {
     $seconds = $duration;
 
     if($withdays == 1) {
-        return($days."d ".$hours."h ".$minutes."m ".$seconds."s");
+        return($minus.$days."d ".$hours."h ".$minutes."m ".$seconds."s");
     }
     if($withdays == 2) {
-        return($minutes."min ".$seconds."sec");
+        return($minus.$minutes."min ".$seconds."sec");
     }
-    return($hours."h ".$minutes."m ".$seconds."s");
+    return($minus.$hours."h ".$minutes."m ".$seconds."s");
 }
 
 
