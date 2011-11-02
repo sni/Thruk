@@ -218,7 +218,7 @@ sub _process_cgi_page {
             $data->{$key} = [] unless defined $data->{$key};
         }
         $self->_store_changes($c, $file, $data, $defaults);
-        return $c->redirect('conf.cgi?sub=cgi');
+        return $c->response->redirect('conf.cgi?sub=cgi');
     }
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
@@ -298,7 +298,7 @@ sub _process_thruk_page {
     if($c->stash->{action} eq 'store') {
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         $self->_store_changes($c, $file, $data, $defaults, $c);
-        return $c->redirect('conf.cgi?sub=thruk');
+        return $c->response->redirect('conf.cgi?sub=thruk');
     }
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
@@ -395,7 +395,7 @@ sub _process_users_page {
         my $msg      = $self->_update_password($c);
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );
-            return $c->redirect($redirect);
+            return $c->response->redirect($redirect);
         }
 
         # save changes to cgi.cfg
@@ -418,7 +418,7 @@ sub _process_users_page {
         $self->_store_changes($c, $file, $new_data, $defaults);
 
         Thruk::Utils::set_message( $c, 'success_message', 'User saved successfully' );
-        return $c->redirect($redirect);
+        return $c->response->redirect($redirect);
     }
 
     $c->stash->{'show_user'}  = 0;
@@ -614,7 +614,7 @@ sub _apply_config_changes {
     elsif(defined $c->{'request'}->{'parameters'}->{'save'}) {
         $c->{'obj_db'}->commit();
         Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
-        return $c->redirect('conf.cgi?sub=objects&apply=yes');
+        return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
     }
 
     # make nicer output
@@ -748,13 +748,18 @@ sub _update_objects_config {
     $c->stash->{'peer_conftool'} = $peer_conftool;
 
     # already parsed?
+use Data::Dumper; print STDERR Dumper($c->stash->{'param_backend'});
     if($model->cache_exists($c->stash->{'param_backend'})) {
         $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
     } else {
         # need to parse complete objects
         if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
-            my $id = Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Conf::read_objects($c)', message => 'please stand by while reading the configuration files...', forward => $c->request->uri() });
-            $c->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
+            my $id = Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
+                                                        message => 'please stand by while reading the configuration files...',
+                                                        forward => $c->request->uri()
+                                                       }
+                                                );
+            $c->response->redirect("job.cgi?job=".$id);
         }
         return 0;
     }
@@ -997,7 +1002,7 @@ sub _object_revert {
         }
     }
 
-    return $c->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
+    return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }
 
 ##########################################################
@@ -1008,7 +1013,7 @@ sub _object_delete {
 
     $c->{'obj_db'}->delete_object($obj);
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' removed successfully' );
-    return $c->redirect('conf.cgi?sub=objects&type='.$c->stash->{'type'});
+    return $c->response->redirect('conf.cgi?sub=objects&type='.$c->stash->{'type'});
 }
 
 ##########################################################
@@ -1038,14 +1043,14 @@ sub _object_save {
 
     # only save or continue to raw edit?
     if(defined $c->{'request'}->{'parameters'}->{'send'} and $c->{'request'}->{'parameters'}->{'send'} eq 'raw edit') {
-        return $c->redirect('conf.cgi?sub=objects&action=editor&file='.$obj->{'file'}->{'path'}.'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
+        return $c->response->redirect('conf.cgi?sub=objects&action=editor&file='.$obj->{'file'}->{'path'}.'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
     } else {
         if($has_changed or $new_comment ne $old_comment) {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully' );
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' did not change' );
         }
-        return $c->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
+        return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }
 
     return;
@@ -1069,7 +1074,7 @@ sub _object_move {
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', "Failed to move ".ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\'' );
         }
-        return $c->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
+        return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }
     elsif($c->stash->{action} eq 'move') {
         $c->stash->{'template'}  = 'conf_objects_move.tt';
@@ -1122,7 +1127,7 @@ sub _file_delete {
     }
 
     Thruk::Utils::set_message( $c, 'success_message', 'File(s) deleted successfully' );
-    return $c->redirect('conf.cgi?sub=objects&action=browser#'.$path);
+    return $c->response->redirect('conf.cgi?sub=objects&action=browser#'.$path);
 }
 
 
@@ -1142,7 +1147,7 @@ sub _file_undelete {
     }
 
     Thruk::Utils::set_message( $c, 'success_message', 'File(s) recoverd successfully' );
-    return $c->redirect('conf.cgi?sub=objects&action=browser#'.$path);
+    return $c->response->redirect('conf.cgi?sub=objects&action=browser#'.$path);
 }
 
 
@@ -1176,9 +1181,9 @@ sub _file_save {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
     }
     if(defined $lastobj) {
-        return $c->redirect('conf.cgi?sub=objects&data.id='.$lastobj->get_id());
+        return $c->response->redirect('conf.cgi?sub=objects&data.id='.$lastobj->get_id());
     }
-    return $c->redirect('conf.cgi?sub=objects&action=browser#'.$file->{'path'});
+    return $c->response->redirect('conf.cgi?sub=objects&action=browser#'.$file->{'path'});
 }
 
 ##########################################################
