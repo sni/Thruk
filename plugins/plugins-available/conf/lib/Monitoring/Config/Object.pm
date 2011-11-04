@@ -69,7 +69,11 @@ sub new {
     $current_object->{'id'}       = 'new';
 
     if(defined $conf->{'name'}) {
-        $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf->{'name'};
+        if(ref $current_object->{'primary_key'} eq 'ARRAY') {
+            $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = $conf->{'name'};
+        } else {
+            $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf->{'name'};
+        }
     }
 
     return $current_object;

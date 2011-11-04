@@ -748,7 +748,6 @@ sub _update_objects_config {
     $c->stash->{'peer_conftool'} = $peer_conftool;
 
     # already parsed?
-use Data::Dumper; print STDERR Dumper($c->stash->{'param_backend'});
     if($model->cache_exists($c->stash->{'param_backend'})) {
         $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
     } else {
