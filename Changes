@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added support for groups in the cgi.cfg config tool
           - command_disabled supports ranges
           - hide links to cmd.cgi which are disabled by the command_disabled option
+          - backends can only be hidden by config if there are more than one
 
 1.1.2    Tue Oct 18 17:57:53 CEST 2011
           - added /pnp/ to possible pnp4nagios urls
