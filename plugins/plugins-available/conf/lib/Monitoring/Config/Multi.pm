@@ -29,6 +29,7 @@ sub new {
 
     my $self = {
         'configs' => {},
+        'parsing' => {},
     };
 
     bless $self, $class;
@@ -84,6 +85,24 @@ sub cache_exists {
     }
 
     return;
+}
+
+
+##########################################################
+
+=head2 currently_parsing
+
+returns job id if config is currently beeing parsed
+
+=cut
+sub currently_parsing {
+    my $self   = shift;
+    my $key    = shift;
+    my $id     = shift;
+
+    $self->{'parsing'}->{$key} = $id if defined $id;
+
+    return $self->{'parsing'}->{$key};
 }
 
 

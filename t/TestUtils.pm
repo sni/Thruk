@@ -81,6 +81,18 @@ sub test_page {
     my $return = {};
 
     my $request = request($opts{'url'});
+
+    if(defined $opts{'follow'}) {
+        my $redirects = 0;
+        while(my $location = $request->{'_headers'}->{'location'}) {
+            if($location !~ m/^(http|\/)/gmx) { $location = _relative_url($location, $request->base()->as_string()); }
+            $request = request($location);
+            $redirects++;
+            last if $redirects > 10;
+        }
+        ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or BAIL_OUT(Dumper($request));
+    }
+
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job.cgi\?job=(.*)$/) {
         # is it a background job page?
         wait_for_job($1);
@@ -228,6 +240,16 @@ sub wait_for_job {
     is(Thruk::Utils::External::_is_running('./var/jobs/'.$job), 0, 'job is finished');
     alarm(0);
     return;
+}
+
+#########################
+sub _relative_url {
+    my $location = shift;
+    my $url      = shift;
+    my $newloc = $url;
+    $newloc    =~ s/^(.*\/).*$/$1/gmx;
+    $newloc    .= $location;
+    return $newloc;
 }
 
 #########################

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 559;
+use Test::More tests => 560;
 use JSON::XS;
 
 BEGIN {
@@ -22,8 +22,9 @@ my($host,$service) = TestUtils::get_test_service();
 # initialize object config
 TestUtils::test_page(
     'url'      => '/thruk/cgi-bin/conf.cgi?sub=objects',
-    'redirect' => 1,
+    'follow'   => 1,
     'unlike'   => [ 'internal server error', 'HASH', 'ARRAY' ],
+    'like'     => 'Config Tool',
 );
 
 ###########################################################

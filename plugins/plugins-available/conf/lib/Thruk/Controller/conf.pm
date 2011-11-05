@@ -750,6 +750,11 @@ sub _update_objects_config {
     # already parsed?
     if($model->cache_exists($c->stash->{'param_backend'})) {
         $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
+    }
+    # currently parsing
+    elsif(my $id = $model->currently_parsing($c->stash->{'param_backend'})) {
+        $c->response->redirect("job.cgi?job=".$id);
+        return 0;
     } else {
         # need to parse complete objects
         if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
@@ -758,6 +763,7 @@ sub _update_objects_config {
                                                         forward => $c->request->uri()
                                                        }
                                                 );
+            $model->currently_parsing($c->stash->{'param_backend'}, $id);
             $c->response->redirect("job.cgi?job=".$id);
         }
         return 0;
