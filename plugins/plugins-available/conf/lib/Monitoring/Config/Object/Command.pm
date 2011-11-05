@@ -41,6 +41,7 @@ sub new {
         'type'        => 'command',
         'primary_key' => 'command_name',
         'default'     => $Monitoring::Config::Object::Command::Defaults,
+        'standard'    => [ 'command_name', 'command_line' ],
     };
     bless $self, $class;
     return $self;

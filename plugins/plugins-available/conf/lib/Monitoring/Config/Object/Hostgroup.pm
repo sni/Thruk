@@ -46,6 +46,7 @@ sub new {
         'type'        => 'hostgroup',
         'primary_key' => 'hostgroup_name',
         'default'     => $Monitoring::Config::Object::Hostgroup::Defaults,
+        'standard'    => [ 'hostgroup_name', 'alias', 'members' ],
     };
     bless $self, $class;
     return $self;

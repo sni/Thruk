@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 560;
+use Test::More tests => 700;
 use JSON::XS;
 
 BEGIN {
@@ -96,6 +96,13 @@ for my $type (@{$Monitoring::Config::Object::Types}, 'icon') {
     TestUtils::test_page(
         'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'data.name='.$data->[0]->{'data'}->[0],
         'like'    => [ 'Config Tool', $type, $data->[0]->{'data'}->[0]],
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+    );
+
+    # new object
+    TestUtils::test_page(
+        'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&action=new&type=service',
+        'like'    => [ 'Config Tool', "new $type"],
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

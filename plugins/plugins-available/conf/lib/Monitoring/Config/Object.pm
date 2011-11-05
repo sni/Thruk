@@ -74,6 +74,16 @@ sub new {
         } else {
             $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf->{'name'};
         }
+        if(defined $current_object->{'standard'}) {
+            for my $key (@{$current_object->{'standard'}}) {
+                next if defined $current_object->{'conf'}->{$key};
+                if($current_object->{'default'}->{$key}->{'type'} eq 'LIST') {
+                    $current_object->{'conf'}->{$key} = [];
+                } else {
+                    $current_object->{'conf'}->{$key} = '';
+                }
+            }
+        }
     }
 
     return $current_object;

@@ -50,6 +50,7 @@ sub new {
         'type'        => 'timeperiod',
         'primary_key' => 'timeperiod_name',
         'default'     => $Monitoring::Config::Object::Timeperiod::Defaults,
+        'standard'    => [ 'timeperiod_name', 'alias', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ],
     };
     bless $self, $class;
     return $self;

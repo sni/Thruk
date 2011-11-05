@@ -16,7 +16,7 @@
     [% ELSE %]
       [% class = "conf_attr_unused" %]
     [% END %]
-    [% IF obj.default.exists(key) && obj.default.$key.type == 'LIST' && obj_conf.$key.0.substr(0,1) == '+' %]
+    [% IF obj.default.exists(key) && obj.default.$key.type == 'LIST' && obj_conf.$key.size > 0 && obj_conf.$key.0.substr(0,1) == '+' %]
       [% class = "conf_attr_unused" %]
     [% END %]
     [% IF loop.even %]

@@ -62,6 +62,7 @@ sub new {
         'type'        => 'contact',
         'primary_key' => 'contact_name',
         'default'     => $Monitoring::Config::Object::Contact::Defaults,
+        'standard'    => [ 'contact_name', 'use', 'alias', 'email', 'can_submit_commands' ],
     };
     bless $self, $class;
     return $self;

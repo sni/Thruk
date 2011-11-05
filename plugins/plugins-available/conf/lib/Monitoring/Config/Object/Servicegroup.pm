@@ -46,6 +46,7 @@ sub new {
         'type'        => 'servicegroup',
         'primary_key' => 'servicegroup_name',
         'default'     => $Monitoring::Config::Object::Servicegroup::Defaults,
+        'standard'    => [ 'servicegroup_name', 'alias', 'members' ],
     };
     bless $self, $class;
     return $self;

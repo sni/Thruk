@@ -24,7 +24,7 @@ $Monitoring::Config::Object::Contactgroup::Defaults = {
 
     'contactgroup_name'    => { type => 'STRING', cat => 'Basic' },
     'alias'                => { type => 'STRING', cat => 'Basic' },
-    'members'              => { type => 'LIST', 'link' => 'contacts', cat => 'Basic' },
+    'members'              => { type => 'LIST', 'link' => 'contact', cat => 'Basic' },
     'contactgroup_members' => { type => 'LIST', 'link' => 'contactgroup', cat => 'Basic' },
 };
 
@@ -43,6 +43,7 @@ sub new {
         'type'        => 'contactgroup',
         'primary_key' => 'contactgroup_name',
         'default'     => $Monitoring::Config::Object::Contactgroup::Defaults,
+        'standard'    => [ 'contactgroup_name', 'alias', 'members' ],
     };
     bless $self, $class;
     return $self;

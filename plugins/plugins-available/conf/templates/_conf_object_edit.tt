@@ -38,7 +38,7 @@
       <td class='dataVal [% loopclass %] clickable conf_row' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr='&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% html_escape(obj.get_help(helpkey)) | nl2br %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
     </tr>
 
-    [% IF !obj.default.exists(key) || obj.default.$key.type != 'LIST' || obj.conf.$key.0.substr(0,1) != '+' %]
+    [% IF !obj.default.exists(key) || obj.default.$key.type != 'LIST' || (obj_conf.$key.size > 0 && obj.conf.$key.0.substr(0,1) != '+') %]
       [% SET duplicate_keys.$key = 1 %]
     [% END %]
 
