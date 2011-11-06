@@ -348,6 +348,43 @@ sub get_object_by_id {
     return $self->{'objects'}->{'byid'}->{$id};
 }
 
+
+##########################################################
+
+=head2 get_services_for_host
+
+returns services
+
+=cut
+sub get_services_for_host {
+    my $self    = shift;
+    my $host    = shift;
+    my $objects = shift;
+
+    my($host_conf_keys, $host_config) = $host->get_computed_config($objects);
+
+    my $services  = { 'host' => {}, 'group' => {}};
+    my $host_name = $host->get_name();
+
+    for my $svc (@{$self->get_objects_by_type('service')}) {
+        my($svc_conf_keys, $svc_config) = $svc->get_computed_config($objects);
+        if(defined $svc_config->{'host_name'} and grep(/^$host_name$/, @{$svc_config->{'host_name'}})) {
+            $services->{'host'}->{$svc->get_name()} = $svc;
+        }
+        if(defined $svc_config->{'hostgroup_name'} and defined $host_config->{'hostgroups'}) {
+            for my $group (@{$host_config->{'hostgroups'}}) {
+                if(grep(/^$group/, @{$svc_config->{'hostgroup_name'}})) {
+                    $services->{'group'}->{$svc->get_name()} = $svc;
+                    last;
+                }
+            }
+        }
+    }
+
+    return $services;
+}
+
+
 ##########################################################
 
 =head2 update

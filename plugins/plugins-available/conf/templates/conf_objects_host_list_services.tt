@@ -1,0 +1,34 @@
+[% WRAPPER _conf_objects_frame.tt %]
+
+<table border="0" class='data conftoolobj'>
+  <tr>
+    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Services for host [% object.get_name() %]</a></th>
+  </tr>
+  <tr>
+    <td class='dataVar'>By Host</td>
+    <td class='dataVar'>
+      <ul>
+      [% FOREACH svc_name = services.host.keys.sort %]
+        [% svc = services.host.$svc_name %]
+        <li><a href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() %]</a></li>
+      [% END %]
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td class='dataVar' colspan=2><hr></td>
+  </tr>
+  <tr>
+    <td class='dataVar'>By Hostgroup</td>
+    <td class='dataVar'>
+      <ul>
+      [% FOREACH svc_name = services.group.keys.sort %]
+        [% svc = services.group.$svc_name %]
+        <li><a href="conf.cgi?sub=objects&amp;data.id=[% svc.get_id() %]">[% svc.get_name() %]</a></li>
+      [% END %]
+      </ul>
+    </td>
+  </tr>
+</table>
+
+[% END %]

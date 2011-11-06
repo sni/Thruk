@@ -513,6 +513,12 @@ sub _process_objects_page {
         elsif($c->stash->{action} eq 'clone') {
             $obj = $self->_object_clone($c, $obj);
         }
+
+        # list services for host
+        elsif($c->stash->{action} eq 'listservices' and $obj->get_type() eq 'host') {
+            $self->_host_list_services($c, $obj);
+        }
+
     }
 
     # create new object
@@ -1223,6 +1229,17 @@ sub _file_browser {
     $c->stash->{'template'} = 'conf_objects_filebrowser.tt';
     return;
 }
+##########################################################
+sub _host_list_services {
+    my($self, $c, $obj) = @_;
+
+    my $services = $c->{'obj_db'}->get_services_for_host($obj, $c->{'obj_db'});
+    $c->stash->{'services'} = $services ;
+
+    $c->stash->{'template'} = 'conf_objects_host_list_services.tt';
+    return;
+}
+
 ##########################################################
 
 =head1 AUTHOR

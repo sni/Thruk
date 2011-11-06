@@ -38,7 +38,7 @@
 <td align="center" valign="top" width="100%">
   [% content %]
 </td>
-<td align="center" valign="top" style="width: 250px;">
+<td align="center" valign="top" style="width: 250px; padding-left: 20px;">
 [% PROCESS _conf_action_menu.tt %]
 </td>
 </tr>
