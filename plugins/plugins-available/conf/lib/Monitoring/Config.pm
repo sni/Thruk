@@ -368,12 +368,12 @@ sub get_services_for_host {
 
     for my $svc (@{$self->get_objects_by_type('service')}) {
         my($svc_conf_keys, $svc_config) = $svc->get_computed_config($objects);
-        if(defined $svc_config->{'host_name'} and grep(/^$host_name$/, @{$svc_config->{'host_name'}})) {
+        if(defined $svc_config->{'host_name'} and grep { $_ eq $host_name } @{$svc_config->{'host_name'}}) {
             $services->{'host'}->{$svc->get_name()} = $svc;
         }
         if(defined $svc_config->{'hostgroup_name'} and defined $host_config->{'hostgroups'}) {
             for my $group (@{$host_config->{'hostgroups'}}) {
-                if(grep(/^$group/, @{$svc_config->{'hostgroup_name'}})) {
+                if(grep { $_ eq $group} @{$svc_config->{'hostgroup_name'}}) {
                     $services->{'group'}->{$svc->get_name()} = $svc;
                     last;
                 }
@@ -610,7 +610,7 @@ sub _set_config {
         $self->{'config'}->{'obj_dir'}  = [];
 
         my $core_conf = $self->{'config'}->{'core_conf'};
-        if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|) {
+        if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
         }
 
