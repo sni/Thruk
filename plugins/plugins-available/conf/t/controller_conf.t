@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 700;
+use Test::More tests => 726;
 use JSON::XS;
 
 BEGIN {
@@ -40,6 +40,8 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=browser',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=move&type=host&data.name='.$host,
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=clone&type=host&data.name='.$host,
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=listservices&data.name='.$host,
 ];
 
 for my $type (@{$Monitoring::Config::Object::Types}) {
@@ -58,6 +60,7 @@ my $redirects = [
     '/thruk/cgi-bin/conf.cgi?sub=cgi&action=store',
     '/thruk/cgi-bin/conf.cgi?sub=thruk&action=store',
     '/thruk/cgi-bin/conf.cgi?sub=users&action=store&data.username=testuser',
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=revert&type=host&data.name='.$host,
 ];
 for my $url (@{$redirects}) {
     TestUtils::test_page(
@@ -101,7 +104,7 @@ for my $type (@{$Monitoring::Config::Object::Types}, 'icon') {
 
     # new object
     TestUtils::test_page(
-        'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&action=new&type=service',
+        'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&action=new&type='.$type,
         'like'    => [ 'Config Tool', "new $type"],
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );

@@ -7,6 +7,7 @@
     <td class='dataVal dataOdd clickable conf_row' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr=''><img src='[% url_prefix %]thruk/themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
   </tr>
 
+  [% SET loopclass="dataEven" %]
   [% FOREACH key = obj.get_sorted_keys() %]
     [% NEXT IF obj.default.exists(key) && obj.default.$key.type == "DEPRECATED" %]
     [% IF duplicate_keys.exists(key) %]
@@ -83,7 +84,7 @@
 
       var fields = new Hash({
         [% FOREACH key_cat = obj.get_default_keys() %]
-          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row.tt edit=1 defaults = obj.default key = key obj_conf = obj.conf | html_escape | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% html_escape(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
+          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row.tt nr=0 edit=1 defaults = obj.default key = key obj_conf = obj.conf | html_escape | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% html_escape(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
             [% UNLESS loop.last %],[% END %]
           [% END %]
           [% UNLESS loop.last %],[% END %]

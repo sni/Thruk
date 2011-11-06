@@ -133,6 +133,7 @@ plugins/plugins-available/conf/templates/conf_objects.tt
 plugins/plugins-available/conf/templates/conf_objects_apply.tt
 plugins/plugins-available/conf/templates/conf_objects_filebrowser.tt
 plugins/plugins-available/conf/templates/conf_objects_fileeditor.tt
+plugins/plugins-available/conf/templates/conf_objects_host_list_services.tt
 plugins/plugins-available/conf/templates/conf_objects_move.tt
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardLivestatus.pm
 plugins/plugins-available/dashboard/lib/Thruk/Controller/dashboard.pm
@@ -553,6 +554,7 @@ themes/themes-available/Classic/images/resultset_last.png
 themes/themes-available/Classic/images/resultset_next.png
 themes/themes-available/Classic/images/resultset_previous.png
 themes/themes-available/Classic/images/right.gif
+themes/themes-available/Classic/images/server_edit.png
 themes/themes-available/Classic/images/serviceevent.gif
 themes/themes-available/Classic/images/start.gif
 themes/themes-available/Classic/images/status2.gif
@@ -675,6 +677,7 @@ themes/themes-available/Exfoliation/images/resultset_next.png
 themes/themes-available/Exfoliation/images/resultset_previous.png
 themes/themes-available/Exfoliation/images/right.gif
 themes/themes-available/Exfoliation/images/sblogo.png
+themes/themes-available/Exfoliation/images/server_edit.png
 themes/themes-available/Exfoliation/images/serviceevent.gif
 themes/themes-available/Exfoliation/images/sflogo.png
 themes/themes-available/Exfoliation/images/splunk1.gif
@@ -855,6 +858,7 @@ themes/themes-available/Nuvola/images/resultset_next.png
 themes/themes-available/Nuvola/images/resultset_previous.png
 themes/themes-available/Nuvola/images/right.gif
 themes/themes-available/Nuvola/images/sblogo.jpg
+themes/themes-available/Nuvola/images/server_edit.png
 themes/themes-available/Nuvola/images/serviceevent.gif
 themes/themes-available/Nuvola/images/start.gif
 themes/themes-available/Nuvola/images/status2.gif
@@ -1027,6 +1031,7 @@ themes/themes-available/Thruk/images/resultset_last.png
 themes/themes-available/Thruk/images/resultset_next.png
 themes/themes-available/Thruk/images/resultset_previous.png
 themes/themes-available/Thruk/images/right.gif
+themes/themes-available/Thruk/images/server_edit.png
 themes/themes-available/Thruk/images/serviceevent.gif
 themes/themes-available/Thruk/images/start.gif
 themes/themes-available/Thruk/images/status2.gif
@@ -1136,6 +1141,7 @@ themes/themes-available/Vautour/images/resultset_last.png
 themes/themes-available/Vautour/images/resultset_next.png
 themes/themes-available/Vautour/images/resultset_previous.png
 themes/themes-available/Vautour/images/right.gif
+themes/themes-available/Vautour/images/server_edit.png
 themes/themes-available/Vautour/images/serviceevent.gif
 themes/themes-available/Vautour/images/start.gif
 themes/themes-available/Vautour/images/status2.gif
@@ -1351,6 +1357,7 @@ themes/themes-available/Wakizashi/images/resultset_last.png
 themes/themes-available/Wakizashi/images/resultset_next.png
 themes/themes-available/Wakizashi/images/resultset_previous.png
 themes/themes-available/Wakizashi/images/right.gif
+themes/themes-available/Wakizashi/images/server_edit.png
 themes/themes-available/Wakizashi/images/serviceevent.gif
 themes/themes-available/Wakizashi/images/someproblem.png
 themes/themes-available/Wakizashi/images/start.gif

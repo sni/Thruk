@@ -70,9 +70,17 @@ sub new {
 
     if(defined $conf->{'name'}) {
         if(ref $current_object->{'primary_key'} eq 'ARRAY') {
-            $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = $conf->{'name'};
+            if($current_object->{'default'}->{$current_object->{'primary_key'}->[0]}->{'type'} eq 'LIST') {
+                $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = [ $conf->{'name'} ];
+            } else {
+                $current_object->{'conf'}->{$current_object->{'primary_key'}->[0]} = $conf->{'name'};
+            }
         } else {
-            $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf->{'name'};
+            if($current_object->{'default'}->{$current_object->{'primary_key'}}->{'type'} eq 'LIST') {
+                $current_object->{'conf'}->{$current_object->{'primary_key'}} = [ $conf->{'name'} ];
+            } else {
+                $current_object->{'conf'}->{$current_object->{'primary_key'}} = $conf->{'name'};
+            }
         }
         if(defined $current_object->{'standard'}) {
             for my $key (@{$current_object->{'standard'}}) {
