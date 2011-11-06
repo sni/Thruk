@@ -770,7 +770,6 @@ sub _update_objects_config {
     }
     $c->stats->profile(end => "objects init");
 
-
     if($c->{'obj_db'}->{'cached'}) {
         $c->stats->profile(begin => "checking objects");
         $c->{'obj_db'}->check_files_changed($refresh);

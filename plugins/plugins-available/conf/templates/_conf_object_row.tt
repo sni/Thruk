@@ -5,7 +5,7 @@
 
 [% IF !defaults.exists(key) || defaults.$key.type == 'STRING' || defaults.$key.type == 'INT' %]
   [% IF edit %]
-    <input type="text" name="obj.[% key %]" id="id_key[% nr %]" value="[% IF obj_conf.defined(key) %][% value %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]>
+    <input type="text" name="obj.[% key %]" id="id_key[% nr %]" value="[% IF obj_conf.defined(key) %][% escape_quotes(value) %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]>
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') %]
         <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value %]</a>

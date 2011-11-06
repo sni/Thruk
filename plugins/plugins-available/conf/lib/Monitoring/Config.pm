@@ -572,7 +572,12 @@ sub _set_config {
         $self->{'config'}->{'obj_file'} = [];
         $self->{'config'}->{'obj_dir'}  = [];
 
-        open(my $fh, '<', $self->{'config'}->{'core_conf'});
+        my $core_conf = $self->{'config'}->{'core_conf'};
+        if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|) {
+            $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
+        }
+
+        open(my $fh, '<', $core_conf);
         while(my $line = <$fh>) {
             chomp($line);
             my($key,$value) = split/\s*=\s*/mx, $line, 2;
