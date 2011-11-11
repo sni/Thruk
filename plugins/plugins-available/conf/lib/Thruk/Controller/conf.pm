@@ -860,6 +860,9 @@ sub _get_context_object {
     $c->stash->{'show_object'}   = 0;
     $c->stash->{'show_secondary_select'} = 0;
 
+    # remove leading plus signs (used to append to lists) and leading ! (used to negate in lists)
+    $c->stash->{'data_name'} =~ s/^(\+|\!)//mx;
+
     # new object
     if($c->stash->{'data_id'} and $c->stash->{'data_id'} eq 'new') {
         $obj = Monitoring::Config::Object->new( type => $c->stash->{'type'} );
