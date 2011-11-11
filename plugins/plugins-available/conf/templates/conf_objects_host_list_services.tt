@@ -4,8 +4,9 @@
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">Services for host [% object.get_name() %]</a></th>
   </tr>
+  [% IF services.host.size > 0 %]
   <tr>
-    <td class='dataVar'>By Host</td>
+    <td class='dataVar'>From host config</td>
     <td class='dataVar'>
       <ul>
       [% FOREACH svc_name = services.host.keys.sort %]
@@ -15,11 +16,17 @@
       </ul>
     </td>
   </tr>
+  [% END %]
+
+  [% IF services.group.size > 0 && services.host.size > 0%]
   <tr>
     <td class='dataVar' colspan=2><hr></td>
   </tr>
+  [% END %]
+
+  [% IF services.group.size > 0 %]
   <tr>
-    <td class='dataVar'>By Hostgroup</td>
+    <td class='dataVar'>From Hostgroups</td>
     <td class='dataVar'>
       <ul>
       [% FOREACH svc_name = services.group.keys.sort %]
@@ -29,6 +36,7 @@
       </ul>
     </td>
   </tr>
+  [% END %]
 </table>
 
 [% END %]

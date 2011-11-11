@@ -189,20 +189,13 @@ sub get_objects_by_type {
         return;
     }
 
-    my $sample = Monitoring::Config::Object->new(type => $type);
-
     my $objs = [];
-    if(ref $sample->{'primary_key'} eq 'ARRAY') {
-        for my $obj (@{$self->get_objects()}) {
-            next unless $obj->get_type() eq $type;
-            push @{$objs}, $obj;
-        }
-    } else {
-        my $ids = [ values %{$self->{'objects'}->{'byname'}->{$type}} ];
-        for my $id (@{$ids}) {
-            push @{$objs}, $self->get_object_by_id($id);
-        }
+    for my $id (@{$self->{'objects'}->{'bytype'}->{$type}}) {
+        my $obj = $self->get_object_by_id($id);
+        die($id) unless defined $obj;
+        push @{$objs}, $obj;
     }
+
     return $objs;
 }
 
@@ -368,6 +361,7 @@ sub get_services_for_host {
 
     for my $svc (@{$self->get_objects_by_type('service')}) {
         my($svc_conf_keys, $svc_config) = $svc->get_computed_config($objects);
+
         if(defined $svc_config->{'host_name'} and grep { $_ eq $host_name } @{$svc_config->{'host_name'}}) {
             $services->{'host'}->{$svc->get_name()} = $svc;
         }
@@ -923,9 +917,14 @@ sub _update_obj_in_index {
         $found++;
     }
 
-    # by id
-    if($found > 0) {
+    if($found or defined $primary) {
+        # by id
         $objects->{'byid'}->{$obj->{'id'}} = $obj;
+
+        # by type
+        if(!defined $tname) {
+            push @{$objects->{'bytype'}->{$obj->{'type'}}}, $obj->{'id'};
+        }
     }
 
     return $found;
