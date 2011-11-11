@@ -31,7 +31,6 @@ body.config TD.conf_row {
   padding-top: 3px;
   padding-bottom: 3px;
   border-bottom: 3px solid white;
-  white-space: pre-wrap;
   margin: 0px;
 }
 
