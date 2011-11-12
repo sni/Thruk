@@ -35,6 +35,9 @@ Thruk::Utils::Menu::insert_item('System', {
                                                    authorized_for_system_commands/],
                          });
 
+# enable config features if this plugin is loaded
+Thruk->config->{'use_feature_configtool'} = 1;
+
 ######################################
 
 =head2 conf_cgi
@@ -83,6 +86,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     my $subcat                = $c->{'request'}->{'parameters'}->{'sub'} || '';
     my $action                = $c->{'request'}->{'parameters'}->{'action'}  || 'show';
+
+    if(exists $c->{'request'}->{'parameters'}->{'edit'} and defined $c->{'request'}->{'parameters'}->{'host'}) {
+        $subcat = 'objects';
+    }
+
     $c->stash->{sub}          = $subcat;
     $c->stash->{action}       = $action;
     $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
@@ -817,6 +825,8 @@ sub _get_backends_with_obj_config {
     my $backends = {};
     my $firstpeer;
     $c->stash->{'param_backend'} = '';
+
+    # first peer with object config enabled
     for my $peer (@{$c->{'db'}->get_peers()}) {
         $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
@@ -826,12 +836,27 @@ sub _get_backends_with_obj_config {
             $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5;
         }
     }
+
+    # from cookie setting?
     if(defined $c->request->cookie('thruk_conf')) {
         for my $val (@{$c->request->cookie('thruk_conf')->{'value'}}) {
             next unless defined $c->stash->{'backend_detail'}->{$val};
             $c->stash->{'param_backend'} = $val;
         }
     }
+
+    # from url parameter
+    if(defined $c->{'request'}->{'parameters'}->{'backend'}) {
+        my $val = $c->{'request'}->{'parameters'}->{'backend'};
+        if(defined $c->stash->{'backend_detail'}->{$val}) {
+            $c->stash->{'param_backend'} = $val;
+            # save value in the cookie
+            $c->res->cookies->{'thruk_conf'} = {
+                value => $val,
+            };
+        }
+    }
+
     if($c->stash->{'param_backend'} eq '' and defined $firstpeer) {
         $c->stash->{'param_backend'} = $firstpeer;
     }
@@ -859,6 +884,25 @@ sub _get_context_object {
     $c->stash->{'data_name'}     =~ s/^(.*)\ \-\ .*$/$1/gmx;
     $c->stash->{'show_object'}   = 0;
     $c->stash->{'show_secondary_select'} = 0;
+
+    if(defined $c->{'request'}->{'parameters'}->{'service'} and defined $c->{'request'}->{'parameters'}->{'host'}) {
+        $c->stash->{'type'}       = 'service';
+        my $objs = $c->{'obj_db'}->get_objects_by_name('host', $c->{'request'}->{'parameters'}->{'host'}, 0);
+        if(defined $objs->[0]) {
+            my $services = $c->{'obj_db'}->get_services_for_host($objs->[0], $c->{'obj_db'});
+            for my $type (keys %{$services}) {
+                for my $name (keys %{$services->{$type}}) {
+                    if($name eq $c->{'request'}->{'parameters'}->{'service'}) {
+                        $c->stash->{'data_id'} = $services->{$type}->{$name}->get_id();
+                    }
+                }
+            }
+        }
+    }
+    elsif(defined $c->{'request'}->{'parameters'}->{'host'}) {
+        $c->stash->{'type'} = 'host';
+        $c->stash->{'data_name'}  = $c->{'request'}->{'parameters'}->{'host'};
+    }
 
     # remove leading plus signs (used to append to lists) and leading ! (used to negate in lists)
     $c->stash->{'data_name'} =~ s/^(\+|\!)//mx;

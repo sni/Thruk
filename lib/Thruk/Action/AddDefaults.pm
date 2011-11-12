@@ -194,6 +194,15 @@ before 'execute' => sub {
         Thruk::Utils::Menu::read_navigation($c);
     }
 
+    # config edit buttons?
+    $c->stash->{'show_config_edit_buttons'} = 0;
+    if(    $c->config->{'use_feature_configtool'}
+       and $c->check_user_roles("authorized_for_configuration_information")
+       and $c->check_user_roles("authorized_for_system_commands")
+      ) {
+        $c->stash->{'show_config_edit_buttons'} = $c->config->{'show_config_edit_buttons'};
+    }
+
     ###############################
     $c->stats->profile(end => "AddDefaults::before");
 };

@@ -483,7 +483,11 @@
             <table border="0">
               <tr>
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt="show config" width="16" height="16"></td>
+                [% IF use_feature_configtool && c.check_user_roles_wrapper('authorized_for_system_commands') %]
+                <td valign="middle"><a href='conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]'>Configure This Host</a></td>
+                [% ELSE %]
                 <td valign="middle"><a href='config.cgi?type=hosts&amp;jump2=[% host.name | uri %]'>View Configuration For This Host</a></td>
+                [% END %]
               </tr>
             </table>
             <table border="0" class="commandPanel">
