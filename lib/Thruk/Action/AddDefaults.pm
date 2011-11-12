@@ -336,7 +336,6 @@ sub _set_processinfo {
        or !defined $cached_data->{'prev_last_program_restart'}
        or $cached_data->{'prev_last_program_restart'} < $last_program_restart
       ) {
-        $c->{'db'}->enable_backends();
         my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
 
         $cached_data = {
