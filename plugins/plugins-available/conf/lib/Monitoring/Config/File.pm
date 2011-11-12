@@ -60,6 +60,12 @@ sub new {
         }
     }
 
+    # new file?
+    unless(-f $self->{'path'}) {
+        $self->{'is_new_file'} = 1;
+        $self->{'changed'}     = 1;
+    }
+
     # refresh meta data
     $self->_update_meta_data();
 
@@ -288,6 +294,9 @@ sub get_meta_data {
         'inode' => undef,
         'md5'   => undef,
     };
+    if($self->{'is_new_file'}) {
+        return $meta;
+    }
     if(!-f $self->{'path'} or !-r $self->{'path'}) {
         push @{$self->{'errors'}}, "cannot read file: ".$self->{'path'}.": ".$!;
         return $meta;
@@ -330,8 +339,12 @@ sub save {
         my @path = split /\//mx, $self->{'path'};
         pop @path; # remove file
         map { push @dirs, $_; mkdir join('/', @dirs) } @path;
-        open(my $fh, '>', $self->{'path'}) or die("cannot write to file: $!");
-        close($fh);
+        if(open(my $fh, '>', $self->{'path'})) {
+            close($fh);
+        } else {
+            push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
+            return;
+        }
     }
 
     unless(-w $self->{'path'}) {
@@ -353,7 +366,7 @@ sub save {
     $self->{'is_new_file'} = 0;
     $self->_update_meta_data();
 
-    return;
+    return 1;
 }
 
 

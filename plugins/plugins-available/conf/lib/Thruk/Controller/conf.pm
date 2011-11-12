@@ -626,8 +626,9 @@ sub _apply_config_changes {
 
     # save changes to file
     elsif(defined $c->{'request'}->{'parameters'}->{'save'}) {
-        $c->{'obj_db'}->commit();
-        Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
+        if($c->{'obj_db'}->commit()) {
+            Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
+        }
         return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
     }
 
@@ -924,8 +925,6 @@ sub _get_context_object {
                 return $obj;
             }
             elsif(defined $file) {
-                $file->{'is_new_file'} = 1;
-                $file->{'changed'}     = 1;
                 $obj->{'file'}         = $file;
                 $c->{'obj_db'}->file_add($file);
             }

@@ -88,9 +88,12 @@ commit changes to disk
 =cut
 sub commit {
     my $self = shift;
+    my $rc   = 1;
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
-        $file->save();
+        unless($file->save()) {
+            $rc = 0;
+        }
     }
 
     # remove deleted files from files
@@ -103,7 +106,10 @@ sub commit {
     $self->{'files'}        = \@new_files;
     $self->{'needs_commit'} = 0;
     $self->{'needs_reload'} = 1 if scalar @{$changed_files} > 0;
-    return 1;
+
+    $self->_collect_errors();
+
+    return $rc;
 }
 
 
@@ -362,6 +368,9 @@ sub get_services_for_host {
     for my $svc (@{$self->get_objects_by_type('service')}) {
         my($svc_conf_keys, $svc_config) = $svc->get_computed_config($objects);
 
+        if(defined $svc_config->{'host_name'} and grep { $_ eq '!'.$host_name } @{$svc_config->{'host_name'}}) {
+            next;
+        }
         if(defined $svc_config->{'host_name'} and grep { $_ eq $host_name } @{$svc_config->{'host_name'}}) {
             $services->{'host'}->{$svc->get_name()} = $svc;
         }
@@ -817,15 +826,28 @@ sub _check_files_changed {
 
 
 ##########################################################
+# collect errors from all files
+sub _collect_errors {
+    my ( $self ) = @_;
+    for my $file ( @{$self->{'files'}} ) {
+        push @{$self->{'errors'}}, @{$file->{'errors'}};
+    }
+    return scalar @{$self->{'errors'}};
+}
+
+
+##########################################################
 sub _rebuild_index {
     my ( $self ) = @_;
 
     my $objects_without_primary = [];
 
+    # collect errors from all files
+    $self->_collect_errors();
+
     # sort objects into hash
     my $objects = {};
     for my $file ( @{$self->{'files'}} ) {
-        push @{$self->{'errors'}}, @{$file->{'errors'}};
         for my $obj ( @{$file->{'objects'}} ) {
             my $found = $self->_update_obj_in_index($objects, $obj);
             push @{$objects_without_primary}, $obj if $found == 0;
