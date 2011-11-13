@@ -35,10 +35,10 @@ sub parse {
 
     for my $attr (keys %{$self->{'conf'}}) {
         my $value = $self->{'conf'}->{$attr};
-        if(!defined $value) {
-            push @{$errors}, "empty attribute: $attr in ".$self->{'file'}->{'path'}.":".$self->{'line'};
-            next;
-        }
+
+        # empty values are valid
+        $value = '' unless defined $value;
+
         if(defined $fields->{$attr}) {
             my $field = $fields->{$attr};
 
