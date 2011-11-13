@@ -3,7 +3,7 @@
 #########################
 
 use strict;
-use Test::More tests => 25;
+use Test::More tests => 29;
 use Data::Dumper;
 
 use_ok('Thruk::Utils');
@@ -122,3 +122,9 @@ is($out,   "blub",  "got result");
 is($err,   "blah",  "got error");
 is($time,  0,       "got time");
 isnt($dir, undef,   "got dir");
+
+
+is(Thruk::Utils::version_compare('1.0.0',   '1.0.1'),   1, 'version_compare: 1.0.0 vs. 1.0.1');
+is(Thruk::Utils::version_compare('1.0.1',   '1.0.0'),   0, 'version_compare: 1.0.1 vs. 1.0.0');
+is(Thruk::Utils::version_compare('1.0.0',   '1.0.1b1'), 1, 'version_compare: 1.0.0 vs. 1.0.1b1');
+is(Thruk::Utils::version_compare('1.0.1b1', '1.0.1b2'), 1, 'version_compare: 1.0.1b1 vs. 1.0.1b2');

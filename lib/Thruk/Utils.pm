@@ -547,6 +547,10 @@ sub version_compare {
     my($v1,$v2) = @_;
     confess("version_compare() needs two params, got: ".Dumper(\@_)) unless defined $v2;
 
+    # replace non-numerical characters
+    $v1 =~ s/[^\d\.]/./gmx;
+    $v2 =~ s/[^\d\.]/./gmx;
+
     my @v1 = split/\./mx,$v1;
     my @v2 = split/\./mx,$v2;
 
