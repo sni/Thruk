@@ -256,11 +256,19 @@ sub _parse_line {
            and $key ne 'alias'
            and $key ne 'exclude'
         ) {
-            my($timedef, $timeranges) = $line =~ /^(.*?)\s+(\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}[\d,:\-\s]*)/gmxo;
-            if(defined $current_object->{'conf'}->{$timedef}) {
-                push @{$self->{'errors'}}, "duplicate attribute $timedef in '".$line."' in ".$self->{'path'}.":".$linenr;
+            my($timedef, $timeranges);
+            if($line =~ /^(.*?)\s+(\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}[\d,:\-\s]*)/gmxo) {
+                $timedef    = $1;
+                $timeranges = $2;
             }
-            $current_object->{'conf'}->{$timedef} = $timeranges;
+            if(defined $timedef) {
+                if(defined $current_object->{'conf'}->{$timedef}) {
+                    push @{$self->{'errors'}}, "duplicate attribute $timedef in '".$line."' in ".$self->{'path'}.":".$linenr;
+                }
+                $current_object->{'conf'}->{$timedef} = $timeranges;
+            } else {
+                push @{$self->{'errors'}}, "unknown time definition '".$line."' in ".$self->{'path'}.":".$linenr;
+            }
         }
         else {
             if(defined $current_object->{'conf'}->{$key}) {
