@@ -336,7 +336,7 @@
             </table>
 
           </td>
-          <td align="center" valign="top">
+          <td align="center" valign="top" class="action_menu">
             [% IF c.config.use_new_command_box %]
               [% PROCESS _host_command_box.tt %]
             [% ELSE %]

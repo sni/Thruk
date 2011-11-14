@@ -723,3 +723,8 @@ SPAN.deleteicon INPUT {
 .ui-ok-button {
   background-image: url(../images/accept.png) !important;
 }
+
+TD.action_menu {
+  width: 250px;
+  padding-left: 20px;
+}
