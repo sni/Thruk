@@ -5,7 +5,7 @@
 
 [% IF !defaults.exists(key) || defaults.$key.type == 'STRING' || defaults.$key.type == 'INT' %]
   [% IF edit %]
-    <input type="text" name="obj.[% key %]" id="id_key[% nr %]" value="[% IF obj_conf.defined(key) %][% escape_quotes(value) %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]>
+    <input type="text" name="obj.[% key %]" id="id_key[% nr %]" value="[% IF obj_conf.defined(key) %][% escape_quotes(value) %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]>
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') %]
         <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value %]</a>
@@ -24,7 +24,7 @@
   [% IF cmd.size == 0 %][% cmd = ['',''] %][% END %]
   [% IF edit %]
     <table cellpadding=0 cellspacing=0 border=0><tr>
-    <td><input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]></td>
+    <td><input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false)"[% END %]></td>
     <td align="right">&nbsp;&nbsp;args:&nbsp;</td>
     <td><input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; cmd.join('!') %]"></td>
     </tr></table>
@@ -75,7 +75,7 @@
 
 [% ELSIF defaults.$key.type == 'LIST' %]
   [% IF edit %]
-    <input type="text" name="obj.[% key %]" id="id_[% key %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false, true[% IF key == "use" %], 'templates'[% END %])"[% END %]>
+    <input type="text" name="obj.[% key %]" id="id_[% key %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', 'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', true, false, true[% IF key == "use" %], 'templates'[% END %])"[% END %]>
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
         [% FOREACH o = value %]

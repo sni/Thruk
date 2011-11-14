@@ -2081,6 +2081,7 @@ var ajax_search = {
         ajax_search.search_type = 'all';
         addEvent(input, 'keyup', ajax_search.suggest);
         addEvent(input, 'blur',  ajax_search.hide_results);
+        input.onfocus = null;
 
         search_url = ajax_search.url;
         if(type != undefined) {
