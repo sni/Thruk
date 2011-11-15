@@ -468,6 +468,18 @@ sub _replace_macros {
         $string = $self->_replace_service_macros($string, $service);
     }
 
+    # date macros
+    my $now           = time();
+    my $time          = Thruk::Utils::format_date($now, '%H:%M:%S' );
+    my $date          = Thruk::Utils::format_date($now, '%H:%M:%S' );
+    my $longdatetime  = Thruk::Utils::format_date($now, '%a %b %e %H:%M:%S %Z %Y' );
+    my $shortdatetime = $date." ".$time;
+    $string =~ s/\$SHORTDATETIME\$/$shortdatetime/gmx;
+    $string =~ s/\$LONGDATETIME\$/$longdatetime/gmx;
+    $string =~ s/\$DATE\$/$date/gmx;
+    $string =~ s/\$TIME\$/$time/gmx;
+    $string =~ s/\$TIMET\$/$now/gmx;
+
     return($string);
 }
 
