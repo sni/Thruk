@@ -770,13 +770,13 @@ sub _update_objects_config {
     } else {
         # need to parse complete objects
         if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
-            my $id = Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
+            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
                                                         message => 'please stand by while reading the configuration files...',
                                                         forward => $c->request->uri()
                                                        }
                                                 );
-            $model->currently_parsing($c->stash->{'param_backend'}, $id);
-            $c->response->redirect("job.cgi?job=".$id);
+            $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
+            return;
         }
         return 0;
     }

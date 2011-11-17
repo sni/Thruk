@@ -401,6 +401,7 @@ sub _do_parent_stuff {
         close($fh);
     }
 
+    $c->stash->{'job_id'} = $id;
     return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
 }
 
@@ -453,6 +454,8 @@ return true if process is still running
 =cut
 sub _is_running {
     my $dir = shift;
+
+    return 0 unless -s $dir."/pid";
 
     my $pid = read_file($dir."/pid");
     if(kill(0, $pid) > 0) {
