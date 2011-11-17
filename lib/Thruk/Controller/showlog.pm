@@ -96,8 +96,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{'log_filter'} = { filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')],
                                       sort => {$order => 'time'},
                                     };
-        my $id = Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
+        return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "showlog::fetch");
         $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);

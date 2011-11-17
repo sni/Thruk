@@ -111,8 +111,7 @@ sub _show_report {
 
     return unless $host or $service;
 
-    my $id = Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Trends::_do_report($c)', message => 'please stand by while your report is being generated...' });
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
+    return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Trends::_do_report($c)', message => 'please stand by while your report is being generated...' });
 }
 
 

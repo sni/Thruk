@@ -253,6 +253,87 @@ sub get_result {
     return($out,$err,$time, $dir,$stash);
 }
 
+##############################################
+
+=head2 job_page
+
+  job_page($c)
+
+process job result page
+
+=cut
+sub job_page {
+    my($c) = @_;
+
+    my $job  = $c->{'request'}->{'parameters'}->{'job'};
+    my $json = $c->{'request'}->{'parameters'}->{'json'} || 0;
+    $c->stash->{no_auto_reload} = 1;
+    return $c->detach('/error/index/22') unless defined $job;
+    if($json) {
+        return get_json_status($c, $job);
+    }
+
+    my($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
+
+    # try to directly server the request if it takes less than 10seconds
+    while($is_running and $time < 10) {
+        sleep(1);
+        ($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
+    }
+
+    # job still running?
+    if($is_running) {
+        $c->stash->{title}                 = $c->config->{'name'};
+        $c->stash->{job_id}                = $job;
+        $c->stash->{job_time}              = $time;
+        $c->stash->{job_percent}           = $percent || 0;
+        $c->stash->{job_message}           = $message || "";
+        $c->stash->{infoBoxTitle}          = 'please stand by';
+        $c->stash->{hide_backends_chooser} = 1;
+        $c->stash->{template}              = 'waiting_for_job.tt';
+    } else {
+        # job finished, display result
+        my($out,$err,$time,$dir,$stash) = get_result($c, $job);
+        return $c->detach('/error/index/22') unless defined $dir;
+        if(defined $err and $err ne '') {
+            $c->log->error($err);
+            return $c->detach('/error/index/23')
+        }
+        if(defined $stash) {
+            if(defined $stash->{'file_name'}) {
+                $c->res->headers->header( @{$stash->{'res_header'}} )    if defined $stash->{'res_header'};
+                $c->res->content_type($stash->{'res_ctype'}) if defined $stash->{'res_ctype'};
+                my $file = $stash->{job_dir}."/".$stash->{'file_name'};
+                open(my $fh, '<', $file) or die("cannot open: $!");
+                binmode $fh;
+                local $/ = undef;
+                $c->res->body(<$fh>);
+                return;
+            }
+            delete($stash->{'all_in_one_css'});
+            # merge stash
+            for my $key (keys %{$stash}) {
+                $c->stash->{$key} = $stash->{$key} unless defined $c->stash->{$key};
+            }
+
+            # model?
+            if(defined $c->stash->{model_type} and defined $c->stash->{model_init}) {
+                my $model  = $c->model($c->stash->{model_type});
+                my $obj_db = $model->init(@{$c->stash->{model_init}});
+            }
+
+            if(defined $forward) {
+                $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
+                return $c->response->redirect($forward);
+            }
+            return;
+        }
+        $c->stash->{text}     = $out;
+        $c->stash->{template} = 'passthrough.tt';
+    }
+
+    return;
+}
 
 ##############################################
 sub _do_child_stuff {
@@ -308,7 +389,7 @@ sub _do_parent_stuff {
         close($fh);
     }
 
-    return $id;
+    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
 }
 
 
