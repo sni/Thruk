@@ -146,7 +146,7 @@
           </li>
 
           <li class="arrow">
-            <a href="#host">Services
+            <a href="#services">Services
             [% IF services.pending  > 0 %]<small class="counter servicePENDING" style="margin: 0">[% services.pending %]</small>[% END %]
             [% IF services.critical > 0 %]<small class="counter serviceCRITICAL" style="margin: 0">[% services.critical %]</small>[% END %]
             [% IF services.unknown  > 0 %]<small class="counter serviceUNKNOWN" style="margin: 0">[% services.unknown %]</small>[% END %]
@@ -206,6 +206,21 @@
         [% IF hosts.down        > 0 %]<li class="arrow"><a href="#hosts">Down<small class="counter hostDOWN" style="margin: 0 50px 0 0">[% hosts.down %]</small></a></li>[% END %]
         [% IF hosts.unreachable > 0 %]<li class="arrow"><a href="#hosts">Unreachable<small class="counter hostUNREACHABLE" style="margin: 0 50px 0 0">[% hosts.unreachable %]</small></a></li>[% END %]
         [% IF hosts.pending     > 0 %]<li class="arrow"><a href="#hosts">Pending<small class="counter hostPENDING" style="margin: 0 50px 0 0">[% hosts.pending %]</small></a></li>[% END %]
+      </ul>
+    </div>
+
+<!-- Services -->
+    <div id="services" class="selectable">
+      <div class="toolbar">
+        <a href="#" class="button back">Back</a>
+        <h1>Services</h1>
+      </div>
+      <ul class="rounded" id="services_list">
+        [% IF services.ok          > 0 %]<li class="arrow"><a href="#services">Ok<small class="counter serviceOK" style="margin: 0 50px 0 0">[% services.ok %]</small></a></li>[% END %]
+        [% IF services.warning     > 0 %]<li class="arrow"><a href="#services">Warning<small class="counter serviceWARNING" style="margin: 0 50px 0 0">[% services.warning %]</small></a></li>[% END %]
+        [% IF services.critical    > 0 %]<li class="arrow"><a href="#services">Critical<small class="counter serviceCRITICAL" style="margin: 0 50px 0 0">[% services.critical %]</small></a></li>[% END %]
+        [% IF services.unknown     > 0 %]<li class="arrow"><a href="#services">Unknown<small class="counter serviceUNKNOWN" style="margin: 0 50px 0 0">[% services.unknown %]</small></a></li>[% END %]
+        [% IF services.pending     > 0 %]<li class="arrow"><a href="#services">Pending<small class="counter servicePENDING" style="margin: 0 50px 0 0">[% services.pending %]</small></a></li>[% END %]
       </ul>
     </div>
 
