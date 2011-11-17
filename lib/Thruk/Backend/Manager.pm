@@ -346,18 +346,12 @@ sub expand_command {
         $expanded = $commands->[0]->{'line'};
     }
 
-    # arguments
-    my $x = 1;
-    for my $arg (@com_args) {
-        $expanded =~ s/\$ARG$x\$/$arg/gmx;
-        $x++;
-    }
-
-    $expanded = $self->_replace_macros({string => $expanded, host => $host, service => $service});
+    my $rc;
+    ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args });
 
     # does it still contain macros?
     my $note = "";
-    if($expanded =~ m/\$[\w:]+\$/mx) {
+    unless($rc) {
         $note = "could not expand all macros!";
     }
 
@@ -452,111 +446,143 @@ sub _replace_macros {
     my $host    = $args->{'host'};
     my $service = $args->{'service'};
 
-    # user macros...
-    my $user_macros = $self->_get_user_macros($host->{'peer_key'});
-    if(defined $user_macros) {
-        for my $x (1..32) {
-            $string =~ s/\$USER$x\$/$user_macros->{'$USER'.$x.'$'}/gmx if defined $user_macros->{'$USER'.$x.'$'};
-        }
+    my $macros  = {};
+
+    # arguments
+    my $x = 1;
+    for my $arg (@{$args->{'args'}}) {
+        $macros->{'$ARG'.$x.'$'} = $arg;
+        $x++;
     }
 
+    # user macros...
+    $self->_set_user_macros($host->{'peer_key'}, $macros);
+
     # host macros
-    $string = $self->_replace_host_macros($string, $host);
+    $self->_set_host_macros($host, $macros);
 
     # service macros
     if(defined $service) {
-        $string = $self->_replace_service_macros($string, $service);
+        $self->_set_service_macros($service, $macros);
     }
 
     # date macros
     my $now           = time();
     my $time          = Thruk::Utils::format_date($now, '%H:%M:%S' );
-    my $date          = Thruk::Utils::format_date($now, '%H:%M:%S' );
+    my $date          = Thruk::Utils::format_date($now, '%Y-%m-%d' );
     my $longdatetime  = Thruk::Utils::format_date($now, '%a %b %e %H:%M:%S %Z %Y' );
     my $shortdatetime = $date." ".$time;
-    $string =~ s/\$SHORTDATETIME\$/$shortdatetime/gmx;
-    $string =~ s/\$LONGDATETIME\$/$longdatetime/gmx;
-    $string =~ s/\$DATE\$/$date/gmx;
-    $string =~ s/\$TIME\$/$time/gmx;
-    $string =~ s/\$TIMET\$/$now/gmx;
+    $macros->{'$SHORTDATETIME$'} = $shortdatetime;
+    $macros->{'$LONGDATETIME$'}  = $longdatetime;
+    $macros->{'$DATE$'}          = $date;
+    $macros->{'$TIME$'}          = $time;
+    $macros->{'$TIMET$'}         = $now;
 
-    return($string);
+    return $self->_get_replaced_string($string, $macros);
 }
 
 ########################################
 
-=head2 _replace_host_macros
+=head2 _get_replaced_string
 
-  _replace_host_macros
+  _get_replaced_string
 
-returns a string with replaced host macros
+returns replaced string
 
 =cut
 
-sub _replace_host_macros {
-    my( $self, $string, $host ) = @_;
+sub _get_replaced_string {
+    my( $self, $string, $macros, $skip_args ) = @_;
+
+    my $rc  = 1;
+    my $res = "";
+    for my $block (split/(\$[\w\d_:]+\$)/mx, $string) {
+        next if $block eq '';
+        if(substr($block,0,1) eq '$' and substr($block, -1) eq '$') {
+            if(defined $macros->{$block}) {
+                my $replacement = $macros->{$block};
+                if(!$skip_args and $block =~ m/\$ARG\d+\$$/mx) {
+                    my $sub_rc;
+                    ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
+                    $rc = 0 unless $sub_rc;
+                }
+                $block = $replacement;
+            } else {
+                $rc = 0;
+            }
+        }
+        $res .= $block;
+    }
+
+    return($res, $rc);
+}
+
+########################################
+
+=head2 _set_host_macros
+
+  _set_host_macros
+
+set host macros
+
+=cut
+
+sub _set_host_macros {
+    my( $self, $host, $macros ) = @_;
 
     # normal host macros
-    my $hostmacros = {
-        'HOSTADDRESS'   => $host->{'address'},
-        'HOSTNAME'      => $host->{'name'},
-        'HOSTALIAS'     => $host->{'alias'},
-        'HOSTSTATEID'   => $host->{'state'},
-        'HOSTSTATE'     => $self->{'config'}->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}},
-        'HOSTLATENCY'   => $host->{'latency'},
-        'HOSTOUTPUT'    => $host->{'plugin_output'},
-        'HOSTPERFDATA'  => $host->{'perf_data'},
-        'HOSTATTEMPT'   => $host->{'current_attempt'},
-    };
-    for my $key (keys %{$hostmacros}) {
-        $string =~ s/\$$key\$/$hostmacros->{$key}/gmx;
-    }
+    $macros->{'$HOSTADDRESS$'}       = $host->{'address'};
+    $macros->{'$HOSTNAME$'}          = $host->{'name'};
+    $macros->{'$HOSTALIAS$'}         = $host->{'alias'};
+    $macros->{'$HOSTSTATEID$'}       = $host->{'state'};
+    $macros->{'$HOSTSTATE$'}         = $self->{'config'}->{'nagios'}->{'host_state_by_number'}->{$host->{'state'}};
+    $macros->{'$HOSTLATENCY$'}       = $host->{'latency'};
+    $macros->{'$HOSTOUTPUT$'}        = $host->{'plugin_output'};
+    $macros->{'$HOSTPERFDATA$'}      = $host->{'perf_data'};
+    $macros->{'$HOSTATTEMPT$'}       = $host->{'current_attempt'};
+    $macros->{'$HOSTCHECKCOMMAND$'}  = $host->{'check_command'};
 
     # host user macros
     my $x = 0;
     for my $key (@{$host->{'custom_variable_names'}}) {
-        $string =~ s/\$_HOST$key\$/$host->{'custom_variable_values'}->[$x]/gmx;
+        $macros->{'$_HOST'.$key.'$'}  = $host->{'custom_variable_values'}->[$x];
         $x++;
     }
 
-    return $string;
+    return $macros;
 }
 
 ########################################
 
-=head2 _replace_service_macros
+=head2 _set_service_macros
 
-  _replace_service_macros
+  _set_service_macros
 
-returns a string with replaced service macros
+sets service macros
 
 =cut
 
-sub _replace_service_macros {
-    my( $self, $string, $service ) = @_;
+sub _set_service_macros {
+    my( $self, $service, $macros ) = @_;
 
     # normal host macros
-    my $servicemacros = {
-        'SERVICEDESC'      => $service->{'description'},
-        'SERVICESTATEID'   => $service->{'state'},
-        'SERVICESTATE'     => $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}},
-        'SERVICELATENCY'   => $service->{'latency'},
-        'SERVICEOUTPUT'    => $service->{'plugin_output'},
-        'SERVICEPERFDATA'  => $service->{'perf_data'},
-        'SERVICEATTEMPT'   => $service->{'current_attempt'},
-    };
-    for my $key (keys %{$servicemacros}) {
-        $string =~ s/\$$key\$/$servicemacros->{$key}/gmx;
-    }
+    $macros->{'$SERVICEDESC$'}         = $service->{'description'};
+    $macros->{'$SERVICESTATEID$'}      = $service->{'state'};
+    $macros->{'$SERVICESTATE$'}        = $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
+    $macros->{'$SERVICELATENCY$'}      = $service->{'latency'};
+    $macros->{'$SERVICEOUTPUT$'}       = $service->{'plugin_output'};
+    $macros->{'$SERVICEPERFDATA$'}     = $service->{'perf_data'};
+    $macros->{'$SERVICEATTEMPT$'}      = $service->{'current_attempt'};
+    $macros->{'$SERVICECHECKCOMMAND$'} = $service->{'check_command'};
 
     # service user macros...
     my $x = 0;
     for my $key (@{$service->{'custom_variable_names'}}) {
-        $string =~ s/\$_SERVICE$key\$/$service->{'custom_variable_values'}->[$x]/gmx;
+        $macros->{'$_SERVICE'.$key.'$'} = $service->{'custom_variable_values'}->[$x];
         $x++;
     }
 
-    return $string;
+    return $macros;
 }
 ########################################
 
@@ -1343,24 +1369,37 @@ sub _limit {
 
 ########################################
 
-=head2 _get_user_macros
+=head2 _set_user_macros
 
-  _get_user_macros($peer_key)
+  _set_user_macros($peer_key)
 
-returns the USER1-32 macros from a resource file
+sets the USER1-256 macros from a resource file
 
 =cut
 
-sub _get_user_macros {
+sub _set_user_macros {
     my $self     = shift;
     my $peer_key = shift;
+    my $macros   = shift;
+
+    my $res;
     if(defined $peer_key) {
         my $backend = $self->get_peer_by_key($peer_key);
         if(defined $backend->{'resource_file'}) {
-            return $self->_read_resource_file($backend->{'resource_file'});
+            $res = $self->_read_resource_file($backend->{'resource_file'});
         }
     }
-    return $self->_read_resource_file($self->{'config'}->{'resource_file'});
+    unless(defined $res) {
+        $res = $self->_read_resource_file($self->{'config'}->{'resource_file'});
+    }
+
+    if(defined $res) {
+        for my $x (1..256) {
+            $macros->{'$USER'.$x.'$'} = $res->{'$USER'.$x.'$'} if defined $res->{'$USER'.$x.'$'};
+        }
+    }
+
+    return $macros;
 }
 
 
