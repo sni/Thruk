@@ -70,7 +70,7 @@ requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 
 # conf tool plugin
 feature     ('plugin_conf',
-  -default                                        => 0,
+  -default                                        => 1,
   'Storable'                                      => 0,
   'String::Strip'                                 => 0,
 );
