@@ -103,7 +103,7 @@
         [% lasthost = hostname %]
         [% END %]
         [% END %]
-        [% SET avgClass = 'dataEven' IF class == 'dataOdd' %]
+        [% SET avgClass = 'dataEven' %]
         [% SET avgClass = 'dataOdd'  IF class == 'dataEven' %]
         <tr class='[% avgClass %]'>
           <td class='[% avgClass %]'[% UNLESS host %] colspan=2[% END %]>Average</td>
