@@ -692,6 +692,9 @@ sub _do_on_peers {
                         critical_and_disabled critical_and_scheduled critical_and_ack critical_on_down_host critical_and_unhandled
                         unknown unknown_and_disabled unknown_and_scheduled unknown_and_ack unknown_on_down_host unknown_and_unhandled
                         flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled
+                        critical_and_disabled_active critical_and_disabled_passive warning_and_disabled_active warning_and_disabled_passive
+                        unknown_and_disabled_active unknown_and_disabled_passive ok_and_disabled_active ok_and_disabled_passive
+                        active_checks_disabled_active active_checks_disabled_passive
                      }) {
             $data->{$key} = 0;
         }
@@ -702,6 +705,8 @@ sub _do_on_peers {
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
                         down down_and_ack down_and_scheduled down_and_disabled down_and_unhandled unreachable unreachable_and_ack unreachable_and_scheduled
                         unreachable_and_disabled unreachable_and_unhandled flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled outages
+                        down_and_disabled_active down_and_disabled_passive unreachable_and_disabled_active unreachable_and_disabled_passive up_and_disabled_active
+                        up_and_disabled_passive active_checks_disabled_active active_checks_disabled_passive
                      }) {
             $data->{$key} = 0;
         }
