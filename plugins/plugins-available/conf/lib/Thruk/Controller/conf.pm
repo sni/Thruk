@@ -60,9 +60,6 @@ sub conf_cgi : Regex('thruk\/cgi\-bin\/conf\.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    # make private _ hash keys available
-    $Template::Stash::PRIVATE = undef;
-
     $c->stash->{'no_auto_reload'}      = 1;
     $c->stash->{title}                 = 'Config Tool';
     $c->stash->{page}                  = 'config';

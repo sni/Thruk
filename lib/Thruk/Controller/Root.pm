@@ -260,6 +260,9 @@ sub begin : Private {
     # additional views on status pages
     $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
 
+    # make private _ hash keys available
+    $Template::Stash::PRIVATE = undef;
+
     return 1;
 }
 
