@@ -200,8 +200,12 @@ before 'execute' => sub {
        and $c->check_user_roles("authorized_for_configuration_information")
        and $c->check_user_roles("authorized_for_system_commands")
       ) {
-        if(scalar keys %{Thruk::Controller::conf::_get_backends_with_obj_config($c)} > 0) {
-            $c->stash->{'show_config_edit_buttons'} = $c->config->{'show_config_edit_buttons'};
+        # get backends with object config
+        for my $peer (@{$c->{'db'}->get_peers()}) {
+            if(scalar keys %{$peer->{'configtool'}} > 0) {
+                $c->stash->{'show_config_edit_buttons'} = $c->config->{'show_config_edit_buttons'};
+                last;
+            }
         }
     }
 
