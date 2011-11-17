@@ -276,9 +276,12 @@ sub _process_details_page {
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
+    # reverse order for duration
+    my $backend_order = $order;
+    if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+
     # get all services
-    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c );
-    if( $sortoption == 6 and defined $services ) { @{ $c->stash->{'data'} } = reverse @{ $c->stash->{'data'} }; }
+    my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => $c );
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( defined $view_mode and $view_mode eq 'xls' ) {
@@ -321,9 +324,12 @@ sub _process_hostdetails_page {
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
+    # reverse order for duration
+    my $backend_order = $order;
+    if( $sortoption == 6 ) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+
     # get hosts
-    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $order => $sortoptions->{$sortoption}->[0] }, pager => $c );
-    if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'data'} } = reverse @{ $c->stash->{'data'} }; }
+    my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => $c );
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( defined $view_mode and $view_mode eq 'xls' ) {
