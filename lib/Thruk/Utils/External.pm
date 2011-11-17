@@ -41,6 +41,11 @@ sub cmd {
     my $c         = shift;
     my $conf      = shift;
 
+    if($c->config->{'no_external_job_forks'}) {
+        print `/bin/sh -c '".$conf->{'cmd'}."'"`;
+        return 1;
+    }
+
     my ($id,$dir) = _init_external($c);
     return unless $id;
     my $pid       = fork();
@@ -77,6 +82,13 @@ run perl expression in an external process
 sub perl {
     my $c         = shift;
     my $conf      = shift;
+
+    if($c->config->{'no_external_job_forks'}) {
+        ## no critic
+        eval($conf->{'expr'});
+        ## use critic
+        return 1;
+    }
 
     my ($id,$dir) = _init_external($c);
     return unless $id;
