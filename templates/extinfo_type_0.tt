@@ -231,9 +231,11 @@
                     <tr>
                       <td class='dataVar' nowrap>Data Source Version:</td>
                       [% FOREACH pd IN backends %]
-                      <td class='dataVal'>
+                      <td class='dataVal dataValBackendVersion'>
                         [% IF backend_detail.$pd.running %]
                           [% pi_detail.$pd.data_source_version %]
+                        [% ELSE %]
+                          [% backend_detail.$pd.last_error %]
                         [% END %]
                       </td>
                       [% END %]

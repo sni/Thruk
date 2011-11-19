@@ -30,7 +30,8 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         confess("undefined c in error/index");
     }
 
-    $c->{'canceled'} = 1;
+    $c->{'canceled'}          = 1;
+    $c->stash->{errorDetails} = '';
 
     # status code must be != 200, otherwise compressed output will fail
     my $code = 500; # internal server error
@@ -96,9 +97,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'code' => 403, # forbidden
         },
         '9'  => {
-            'mess' => 'No Backend available',
-            'dscr' => 'None of the configured Backends could be reached, please have a look at the logfile for more information.',
-            'code' => 500, # internal server error
+            'mess'    => 'No Backend available',
+            'dscr'    => 'None of the configured Backends could be reached, please have a look at the logfile for detailed information.',
+            'details' => _get_connection_details($c),
+            'code'    => 500, # internal server error
         },
         '10' => {
             'mess' => 'You are not authorized.',
@@ -171,6 +173,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     if($arg1 != 99) {
         $c->stash->{errorMessage}       = $errors->{$arg1}->{'mess'};
         $c->stash->{errorDescription}   = $errors->{$arg1}->{'dscr'};
+        $c->stash->{errorDetails}       = $errors->{$arg1}->{'details'} if defined $errors->{$arg1}->{'details'};
         $code = $errors->{$arg1}->{'code'} if defined $errors->{$arg1}->{'code'};
     }
 
@@ -222,6 +225,14 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     return 1;
 }
 
+sub _get_connection_details {
+    my $c      = shift;
+    my $detail = '';
+    for my $pd (keys %{$c->stash->{'backend_detail'}}) {
+        $detail .= $c->stash->{'backend_detail'}->{$pd}->{'last_error'}.'<br>';
+    };
+    return $detail;
+}
 
 =head1 AUTHOR
 

@@ -18,4 +18,12 @@
   <div class='errorDescription'>internal server error occured, please look at your catalyst logfile</div>
   [% END %]
 
+  [% IF errorDetails %]
+  <br>
+  <div class='errorDescription' style="text-align: left">
+  Details:<br>
+  [% errorDetails %]
+  </div>
+  [% END %]
+
 [% PROCESS _footer.tt %]

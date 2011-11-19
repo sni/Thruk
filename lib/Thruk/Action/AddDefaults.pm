@@ -261,11 +261,12 @@ sub _set_possible_backends {
         if(!defined $disabled_backends->{$back} or $disabled_backends->{$back} != 4) {
             my $peer = $c->{'db'}->get_peer_by_key($back);
             $backend_detail{$back} = {
-                "name"     => $peer->{'name'},
-                "addr"     => $peer->{'addr'},
-                "type"     => $peer->{'type'},
-                "disabled" => $disabled_backends->{$back} || 0,
-                "running"  => 0,
+                'name'       => $peer->{'name'},
+                'addr'       => $peer->{'addr'},
+                'type'       => $peer->{'type'},
+                'disabled'   => $disabled_backends->{$back} || 0,
+                'running'    => 0,
+                'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
             };
             if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
                 $backend_detail{$back}->{'running'} = 1

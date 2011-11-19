@@ -623,6 +623,7 @@ sub _do_on_peers {
     my $selected_backends = 0;
     for my $peer ( @{ $self->get_peers() } )
     {
+        $peer->{'last_error'} = undef;
         if(defined $backends) {
             next unless defined $backends->{$peer->{'key'}};
         }
@@ -645,6 +646,11 @@ sub _do_on_peers {
             $totalsize += $size;
             $result->{ $peer->{'key'} } = $data;
         };
+        if($@) {
+            $peer->{'last_error'} = $@;
+            $peer->{'last_error'} =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
+            $peer->{'last_error'} = "ERROR: ".$peer->{'last_error'};
+        }
         $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
     }
     if(!defined $result and $selected_backends != 0) {
@@ -1017,6 +1023,7 @@ sub _initialise_peer {
                                         $self->{'backend_debug'} ? $self->{'log'} : undef
                                     ),
         'configtool'    => $config->{'configtool'} || {},
+        'last_error'    => undef,
     };
     # shorten backend id
     $peer->{'key'} = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
