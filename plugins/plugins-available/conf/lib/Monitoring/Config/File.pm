@@ -338,8 +338,10 @@ save changes to disk
 sub save {
     my ( $self ) = @_;
 
+    $self->{'errors'} = [];
     if($self->{'readonly'}) {
-        confess('write denied for readonly file: '.$self->{'path'});
+        push @{$self->{'errors'}}, 'write denied for readonly file: '.$self->{'path'};
+        return;
     }
 
     if($self->{'is_new_file'}) {

@@ -788,16 +788,20 @@ sub _update_objects_config {
         $c->stats->profile(end => "checking objects");
     }
 
-    if(scalar @{$c->{'obj_db'}->{'errors'}} > 0) {
+    my $errnum = scalar @{$c->{'obj_db'}->{'errors'}};
+    if($errnum > 0) {
         $c->{'obj_db'}->{'errors_displayed'} = 1;
-        my $error = 'found '.(scalar @{$c->{'obj_db'}->{'errors'}}).' errors in object configuration!';
+        my $error = $c->{'obj_db'}->{'errors'}->[0];
+        if($errnum > 1) {
+            $error = 'Got multiple errors!';
+        }
         if($c->{'obj_db'}->{'needs_update'}) {
             $error = 'Config has been changed externally. Need to <a href="'.Thruk::Utils::Filter::uri_with($c, { 'refresh' => 1 }).'">refresh</a> objects.';
         }
         Thruk::Utils::set_message( $c,
                                   'fail_message',
                                   $error,
-                                  $c->{'obj_db'}->{'errors'}
+                                  ($errnum == 1) ? undef : $c->{'obj_db'}->{'errors'},
                                 );
     } elsif($refresh) {
         Thruk::Utils::set_message( $c, 'success_message', 'refresh successful');
@@ -913,12 +917,18 @@ sub _get_context_object {
         $new_file      =~ s/^\///gmx;
         my $file       = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
         if(defined $file) {
+            if(defined $file and $file->{'readonly'}) {
+                Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
+                $c->stash->{'new_file'} = '/'.$new_file;
+                return $obj;
+            }
             $obj->{'file'} = $file;
         } else {
             # new file
             my $file = Monitoring::Config::File->new($files_root.$new_file, $c->{'obj_db'}->{'config'}->{'obj_readonly'});
             if(defined $file and $file->{'readonly'}) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
+                $c->stash->{'new_file'} = '/'.$new_file;
                 return $obj;
             }
             elsif(defined $file) {
@@ -1089,7 +1099,6 @@ sub _object_save {
 
     # just display the normal edit page if save failed
     if($obj->get_id() eq 'new') {
-        $c->stash->{'new_file'} = '';
         $c->stash->{action}     = '';
         return;
     }

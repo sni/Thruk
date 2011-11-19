@@ -104,8 +104,10 @@ sub commit {
         }
     }
     $self->{'files'}        = \@new_files;
-    $self->{'needs_commit'} = 0;
-    $self->{'needs_reload'} = 1 if scalar @{$changed_files} > 0;
+    if($rc == 1) {
+        $self->{'needs_commit'} = 0;
+        $self->{'needs_reload'} = 1 if scalar @{$changed_files} > 0;
+    }
 
     $self->_collect_errors();
 
