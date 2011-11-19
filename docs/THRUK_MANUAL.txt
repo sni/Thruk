@@ -1110,6 +1110,16 @@ ex.:
   show_notification_number = 0
 
 
+==== show_config_edit_buttons
+Show links to config tool for each host / service.
+You need to have the config tool plugin enabled
+and you need proper permissions for the link to appear.
+
+ex.:
+
+  show_config_edit_buttons = 1
+
+
 ==== show_full_commandline
 Display the full command line for host / service checks .
 Be warned, the command line could contain passwords and other confidential data.
