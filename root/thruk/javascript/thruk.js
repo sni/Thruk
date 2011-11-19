@@ -140,10 +140,10 @@ function setRefreshRate(rate) {
   curRefreshVal = rate;
   var obj = document.getElementById('refresh_rate');
   if(refreshPage == 0) {
-    obj.innerHTML = "<span id='refresh_rate'>This page will not refresh automatically <input type='button' value='refresh now' onClick='reloadPage()'></span>";
+    obj.innerHTML = "This page will not refresh automatically <input type='button' value='refresh now' onClick='reloadPage()'>";
   }
   else {
-    obj.innerHTML = "<span id='refresh_rate'>Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'></span>";
+    obj.innerHTML = "Update in "+rate+" seconds <input type='button' value='stop' onClick='stopRefresh()'>";
     if(rate == 0) {
       reloadPage();
     }
