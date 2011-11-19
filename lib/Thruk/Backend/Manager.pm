@@ -417,7 +417,8 @@ sub set_backend_state_from_local_connections {
             } else {
                 $self->{'log'}->debug($key." -> disabled by local state check");
                 $self->disable_backend($key);
-                $peer->{'runnning'} = 0;
+                $peer->{'runnning'}   = 0;
+                $peer->{'last_error'} = 'ERROR: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
             }
         }
     };
@@ -623,12 +624,12 @@ sub _do_on_peers {
     my $selected_backends = 0;
     for my $peer ( @{ $self->get_peers() } )
     {
-        $peer->{'last_error'} = undef;
         if(defined $backends) {
             next unless defined $backends->{$peer->{'key'}};
         }
         next unless $peer->{'enabled'} == 1;
 
+        $peer->{'last_error'} = undef;
         $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
         $selected_backends++;
         eval {

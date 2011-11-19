@@ -926,6 +926,24 @@ sub expand_numeric_list {
 }
 
 ########################################
+
+=head2 translate_host_status
+
+  translate_host_status($status)
+
+return name for status
+
+=cut
+
+sub translate_host_status {
+    my $status = shift;
+    return 'UP'          if $status == 0;
+    return 'DOWN'        if $status == 1;
+    return 'UNREACHABLE' if $status == 2;
+    return 'UNKNOWN';
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 
