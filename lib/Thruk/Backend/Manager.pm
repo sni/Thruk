@@ -48,6 +48,7 @@ sub new {
         'state_hosts'         => {},
         'local_hosts'         => {},
         'backends'            => [],
+        'backend_debug'       => 0,
     };
     bless $self, $class;
     return $self;
@@ -1011,14 +1012,17 @@ sub _initialise_peer {
         'groups'        => $config->{'groups'},
         'resource_file' => $config->{'options'}->{'resource_file'},
         'enabled'       => 1,
-        'class'         => $class->new( $config->{'options'}, $self->{'config'}, $self->{'log'} ),
+        'class'         => $class->new( $config->{'options'},
+                                        $self->{'config'},
+                                        $self->{'backend_debug'} ? $self->{'log'} : undef
+                                    ),
         'configtool'    => $config->{'configtool'} || {},
     };
     # shorten backend id
     $peer->{'key'} = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
     $peer->{'class'}->{'live'}->{'backend_obj'}->{'key'} = $peer->{'key'};
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
-    if(Thruk->debug) {
+    if($self->{'backend_debug'} and Thruk->debug) {
         $peer->{'class'}->set_verbose(1);
     }
 

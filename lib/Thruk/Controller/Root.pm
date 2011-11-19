@@ -41,6 +41,7 @@ sub begin : Private {
     # defaults
     $c->config->{'url_prefix'} = exists $c->config->{'url_prefix'} ? $c->config->{'url_prefix'} : '/';
     my $defaults = {
+        backend_debug                   => 0,
         use_ajax_search                 => 1,
         ajax_search_hosts               => 1,
         ajax_search_hostgroups          => 1,
@@ -209,6 +210,7 @@ sub begin : Private {
                 'stats'               => $c->stats,
                 'log'                 => $c->log,
                 'config'              => $c->config,
+                'backend_debug'       => $c->config->{'backend_debug'},
             );
         }
     }

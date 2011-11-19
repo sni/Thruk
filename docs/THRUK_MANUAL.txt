@@ -1239,6 +1239,14 @@ ex.:
   check_local_states = 1
 
 
+==== backend_debug
+Set logging of backend in verbose mode. This only
+makes sens when debug logging is activated.
+
+ex.:
+
+  backend_debug = 1
+
 
 ==== Component Thruk::Backend
 Enter your backend connection settings here. At the moment only
@@ -1259,10 +1267,7 @@ xinetd.conf. You can enter local unix sockets too.
                      one extra backend request per page.
          ** options
             *** peer            address of this connection.
-            *** verbose         let this connection be verbose
-            *** connect_timeout connect timeout setting
-            *** query_timeout   query timeout setting
-            *** resource_file   resource_file for this peer
+            *** resource_file   resource_file for this peer (used for macro replacement)
          ** configtool
             *** core_conf       Path to your nagios.cfg / icinga.cfg. Read all
                                 object directories and files from this config
