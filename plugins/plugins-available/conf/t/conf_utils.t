@@ -123,7 +123,7 @@ my $host = {
     'parents'        => [ 'parent_host' ],
 };
 is_deeply($obj->{'conf'}, $host, 'parsed host');
-is( scalar @{ $obj->{'comments'} }, 4, 'number of comments' );
+is( scalar @{ $obj->{'comments'} }, 3, 'number of comments' );
 my $keys = $obj->get_sorted_keys();
 my $exp_keys = [
            'host_name',

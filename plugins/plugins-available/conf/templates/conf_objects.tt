@@ -24,23 +24,33 @@
       <th class='data[% IF subcat == 'comp'      %] confSelected[% END %]' style="width:33%" id="sub_3" onclick="window.location.hash='#comp';set_sub(3)"><a href="#comp">Computed</a></th>
     </tr>
     <tr>
-      <td colspan=3 class='dataVar dataUserVar'>
-          [% IF object.defined('file') %]
-            [% IF object.conf.defined('register') && object.conf.register == 0 %]Template: [% END %]
-            [% object.get_long_name() %]
-          [% ELSE %]
-            new [% type %]
-          [% END %]
-          <span style="[% IF subcat != 'config' && subcat != 'comp' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1 sub_3">
-            <br>
-            [% IF object.defined('file') %]
-              [% object.file.path %] [% IF object.line > 0 %] line [% object.line %][% END %][% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
-            [% ELSE %]
-              <span style="[% IF subcat != 'config' %]display:none;[% END %]" class="sub_1">
-              save to: <input type="text" class="deletable" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', undefined, false, false, false, false, data)">
+      <td colspan=3>
+        <table style="width:100%">
+          <tr>
+            <td style="width: 50px;" class="sub_1"></td>
+            <td class='dataVar dataUserVar'>
+              [% IF object.defined('file') %]
+                [% IF object.conf.defined('register') && object.conf.register == 0 %]Template: [% END %]
+                [% object.get_long_name() %]
+              [% ELSE %]
+                new [% type %]
+              [% END %]
+              <span style="[% IF subcat != 'config' && subcat != 'comp' %]display:none;[% END %] font-weight:normal; font-size:smaller;" class="sub_1 sub_3">
+                <br>
+                [% IF object.defined('file') %]
+                  [% object.file.path %] [% IF object.line > 0 %] line [% object.line %][% END %][% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
+                [% ELSE %]
+                  <span style="[% IF subcat != 'config' %]display:none;[% END %]" class="sub_1">
+                  save to: <input type="text" class="deletable" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', undefined, false, false, false, false, data)">
+                  </span>
+                [% END %]
               </span>
-            [% END %]
-          </span>
+            </td>
+            <td style="width: 50px;" class="data dataSubmit sub_1">
+              <button class="conf_save_button conf_button">save</button>
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>
 
@@ -124,7 +134,7 @@
         [% IF object.get_id() != 'new' %]
         <input type="submit" name="send" value="raw edit" style="width:90px" class="conf_button">
         [% END %]
-        <input type="submit" name="send" value="save" style="width:90px" class="conf_button">
+        <button class="conf_save_button conf_button" style="width:90px">save</button>
       </td>
     </tr>
     [% END %]
@@ -138,6 +148,11 @@
   if(window.location.hash == '#config')    { set_sub(1); }
   if(window.location.hash == '#templates') { set_sub(2); }
   if(window.location.hash == '#comp')      { set_sub(3); }
+
+  jQuery('.conf_save_button').button({
+    icons: {primary: 'ui-save-button'}
+  });
+
 -->
 </script>
 
