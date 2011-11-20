@@ -207,7 +207,8 @@ sub _parse_line {
 
     # inline comments only with ; not with #
     if($line =~ s/^(.*?)\s*([\;].*)$//gmxo) {
-        push @{$comments}, $2;
+        # remove inline comments
+        #push @{$comments}, $2;
         $line = $1;
     }
 
@@ -459,7 +460,8 @@ sub _get_new_file_content {
             } else {
                 $value = $obj->{'conf'}->{$key};
             }
-            next if !defined $value or $value eq '';
+            # empty values are valid syntax
+            $value = '' unless defined $value;
             $new_content .= sprintf "  %-30s %s\n", $key, $value;
             $linenr++
         }
