@@ -11,7 +11,7 @@ use Carp;
 use File::Copy;
 use JSON::XS;
 use parent 'Catalyst::Controller';
-use Storable qw/dclone/;
+use Storable qw/dclone store retrieve/;
 
 =head1 NAME
 
@@ -111,7 +111,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $self->_process_users_page($c);
     }
     elsif($subcat eq 'objects') {
+        $c->stash->{'obj_model_changed'} = 1;
         $self->_process_objects_page($c);
+        $self->_store_model_retention($c) if $c->stash->{'obj_model_changed'};
     }
 
     return 1;
@@ -571,8 +573,9 @@ sub _process_objects_page {
         $c->stash->{type} = 'host';
     }
 
-    $c->stash->{'needs_commit'}    = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'needs_reload'}    = $c->{'obj_db'}->{'needs_reload'};
+    $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
+    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
+    $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
     return 1;
 }
 
@@ -648,11 +651,15 @@ sub _apply_config_changes {
         $c->{'stash'}->{'output'} =~ s/^\+(.*)$/<font color="green">+$1<\/font>/gmx;
     }
 
-    $c->stash->{'needs_commit'}    = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'needs_reload'}    = $c->{'obj_db'}->{'needs_reload'};
-    $c->stash->{'files'}           = $c->{'obj_db'}->get_files();
-    $c->stash->{'subtitle'}        = "Apply Config Changes";
-    $c->stash->{'template'}        = 'conf_objects_apply.tt';
+    if($c->{'request'}->{'parameters'}->{'refresh'}) {
+        return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
+    }
+    $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
+    $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
+    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
+    $c->stash->{'files'}             = $c->{'obj_db'}->get_files();
+    $c->stash->{'subtitle'}          = "Apply Config Changes";
+    $c->stash->{'template'}          = 'conf_objects_apply.tt';
     return;
 }
 
@@ -760,21 +767,22 @@ sub _update_objects_config {
     $c->stash->{'peer_conftool'} = $peer_conftool;
 
     # already parsed?
-    if($model->cache_exists($c->stash->{'param_backend'})) {
+    if($model->cache_exists($c->stash->{'param_backend'}) or $self->_get_model_retention($c)) {
         $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
     }
     # currently parsing
     elsif(my $id = $model->currently_parsing($c->stash->{'param_backend'})) {
         $c->response->redirect("job.cgi?job=".$id);
         return 0;
-    } else {
+    }
+    else {
         # need to parse complete objects
         if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
-                                                        message => 'please stand by while reading the configuration files...',
-                                                        forward => $c->request->uri()
-                                                       }
-                                                );
+                                               message => 'please stand by while reading the configuration files...',
+                                               forward => $c->request->uri()
+                                              }
+                                        );
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
             return;
         }
@@ -1094,12 +1102,12 @@ sub _object_save {
     if($has_changed or $new_comment ne $old_comment) {
         # save object
         $c->{'obj_db'}->update_object($obj, $data, $new_comment);
-        $c->stash->{'data_name'}   = $obj->get_name();
+        $c->stash->{'data_name'} = $obj->get_name();
     }
 
     # just display the normal edit page if save failed
     if($obj->get_id() eq 'new') {
-        $c->stash->{action}     = '';
+        $c->stash->{action} = '';
         return;
     }
 
@@ -1242,6 +1250,7 @@ sub _file_save {
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
     }
+
     if(defined $lastobj) {
         return $c->response->redirect('conf.cgi?sub=objects&data.id='.$lastobj->get_id());
     }
@@ -1292,6 +1301,57 @@ sub _host_list_services {
     return;
 }
 
+##########################################################
+sub _store_model_retention {
+    my($self, $c) = @_;
+    $c->stats->profile(begin => "store object retention");
+
+    my $model = $c->model('Objects');
+    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
+
+    # try to save retention data
+    eval {
+        store($model->{'configs'}, $file);
+        $c->stash->{'obj_model_changed'} = 0;
+        $c->log->debug('saved object retention data');
+    };
+    if($@) {
+        $c->log->error($@);
+        return;
+    }
+
+    $c->stats->profile(end => "store object retention");
+    return;
+}
+
+##########################################################
+sub _get_model_retention {
+    my($self, $c) = @_;
+    $c->stats->profile(begin => "retrieve object retention");
+
+    my $model = $c->model('Objects');
+    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
+
+    return unless -f $file;
+
+    # try to retrieve retention data
+    eval {
+        my $model_configs = retrieve($file);
+        for my $backend (keys %{$model_configs}) {
+            if(defined $c->stash->{'backend_detail'}->{$backend}) {
+                $model->init($backend, undef, $model_configs->{$backend});
+                $c->log->debug('restored object retention data for '.$backend);
+            }
+        }
+    };
+    if($@) {
+        $c->log->error($@);
+        return;
+    }
+
+    $c->stats->profile(end => "retrieve object retention");
+    return 1;
+}
 ##########################################################
 
 =head1 AUTHOR

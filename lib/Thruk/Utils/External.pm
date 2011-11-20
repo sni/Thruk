@@ -331,7 +331,7 @@ sub job_page {
             # model?
             if(defined $c->stash->{model_type} and defined $c->stash->{model_init}) {
                 my $model  = $c->model($c->stash->{model_type});
-                my $obj_db = $model->init(@{$c->stash->{model_init}});
+                $model->init(@{$c->stash->{model_init}});
             }
 
             if(defined $forward) {
