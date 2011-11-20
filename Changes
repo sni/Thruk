@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added support for objects in config editor
           - added support for contactgroups in the cgi.cfg
           - added support for groups in the cgi.cfg config tool
+          - added refresh button on top of each page
           - command_disabled supports ranges
           - hide links to cmd.cgi which are disabled by the command_disabled option
           - backends can only be hidden by config if there are more than one

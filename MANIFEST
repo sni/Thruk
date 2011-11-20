@@ -480,6 +480,7 @@ themes/themes-available/Classic/images/ack.gif
 themes/themes-available/Classic/images/action.gif
 themes/themes-available/Classic/images/add.png
 themes/themes-available/Classic/images/arrow_left.png
+themes/themes-available/Classic/images/arrow_refresh.png
 themes/themes-available/Classic/images/book_add.png
 themes/themes-available/Classic/images/btn_close.png
 themes/themes-available/Classic/images/btn_close_small.png
@@ -601,6 +602,7 @@ themes/themes-available/Exfoliation/images/action-orig.gif
 themes/themes-available/Exfoliation/images/action.gif
 themes/themes-available/Exfoliation/images/add.png
 themes/themes-available/Exfoliation/images/arrow_left.png
+themes/themes-available/Exfoliation/images/arrow_refresh.png
 themes/themes-available/Exfoliation/images/book_add.png
 themes/themes-available/Exfoliation/images/btn_close.png
 themes/themes-available/Exfoliation/images/btn_close_small.png
@@ -776,6 +778,7 @@ themes/themes-available/Nuvola/images/ack.gif
 themes/themes-available/Nuvola/images/action.gif
 themes/themes-available/Nuvola/images/add.png
 themes/themes-available/Nuvola/images/arrow_left.png
+themes/themes-available/Nuvola/images/arrow_refresh.png
 themes/themes-available/Nuvola/images/blue.gif
 themes/themes-available/Nuvola/images/book_add.png
 themes/themes-available/Nuvola/images/border_big.gif
@@ -946,6 +949,7 @@ themes/themes-available/Thruk/images/ack.gif
 themes/themes-available/Thruk/images/action.gif
 themes/themes-available/Thruk/images/add.png
 themes/themes-available/Thruk/images/arrow_left.png
+themes/themes-available/Thruk/images/arrow_refresh.png
 themes/themes-available/Thruk/images/bg.png
 themes/themes-available/Thruk/images/blue.gif
 themes/themes-available/Thruk/images/book_add.png
@@ -1059,6 +1063,7 @@ themes/themes-available/Vautour/images/ack.gif
 themes/themes-available/Vautour/images/action.gif
 themes/themes-available/Vautour/images/add.png
 themes/themes-available/Vautour/images/arrow_left.png
+themes/themes-available/Vautour/images/arrow_refresh.png
 themes/themes-available/Vautour/images/book_add.png
 themes/themes-available/Vautour/images/btn_close.png
 themes/themes-available/Vautour/images/btn_close_small.png
@@ -1212,6 +1217,7 @@ themes/themes-available/Wakizashi/images/alpha_green.png
 themes/themes-available/Wakizashi/images/alpha_orange.png
 themes/themes-available/Wakizashi/images/alpha_red.png
 themes/themes-available/Wakizashi/images/arrow_left.png
+themes/themes-available/Wakizashi/images/arrow_refresh.png
 themes/themes-available/Wakizashi/images/background-side.jpg
 themes/themes-available/Wakizashi/images/background.jpg
 themes/themes-available/Wakizashi/images/book_add.png

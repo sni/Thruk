@@ -1,6 +1,27 @@
 Todo & Wish List:
 =========================================================
 
+Bugs:
+    - none
+
+general:
+    - webservice api, passthrough querys to livestatus and return json
+      result
+    - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
+    - show host/service dependencies
+    - add multiple notes url or action urls, maybe add an "_html" cust var
+    - uc,lc option for auth user -> monitoring
+    - add context sensitive help
+    - page by attribute a,b,c,d,e...z
+    - add extra grapher url
+    - graph about how checks are scheduled in the next minutes
+    - add output filter plugins (ex.: check_multi, disk checks)
+    - add backend name to logs
+    - add go back button on error page
+    - support more macros
+    - multiple lines for comment/downtime input
+    - include comments in export
+
 services:
     - add possibility for flexible downtimes
 
@@ -15,10 +36,6 @@ avail:
     - check availability calculation on multibackend (restarts)
     - add switch to exclude downtimes for example hostgroup
       availability calculations
-
-mobile:
-    - change auto to return 0, so other auto subs will be executed too
-      http://dev.catalystframework.org/attachment/wiki/WikiStart/catalyst-flow.png
 
 livestatus:
     - Contacts: Service Notification Options, Host Notification Options,
@@ -39,29 +56,6 @@ livestatus:
                 Service Dependencies
                 Service Escalations
 
-=========================================================
-ideas for after 1.0
-
-general:
-    - webservice api, passthrough querys to livestatus and return json
-      result
-    - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
-    - show host/service dependencies
-    - add multiple notes url or action urls, maybe add an "_html" cust var
-    - uc,lc option for auth user -> monitoring
-    - add context sensitive help
-    - page by attribute a,b,c,d,e...z
-    - add extra grapher url
-    - graph about how checks are scheduled in the next minutes
-    - add output filter plugins (ex.: check_multi, disk checks)
-    - add backend name to logs
-    - add go back button on error page
-    - support more macros
-    - multiple lines for comment/downtime input
-    - include comments in export
-
-
-
 reports:
     - generate long running reports in an extra process
     - flexible report output
@@ -69,6 +63,7 @@ reports:
         CSV output for single hosts/services,hostgroups/servicegroups
     - cache results from Thruk::Utils::calculate_availability, no need
       to parse logfiles twice
+    - support timeperiods
 
 status:
     - add flexible selector, ex.: select multiple hostgroups by comma
@@ -79,3 +74,24 @@ histogram:
 
 summary:
     - preset selections when generating new report
+
+
+addons:
+  mobile:
+    - change auto to return 0, so other auto subs will be executed too
+      http://dev.catalystframework.org/attachment/wiki/WikiStart/catalyst-flow.png
+
+  config tool:
+    - propagate settings
+    - split services by hosts, groups
+    - reload / check times out in large configs -> background job
+    - rename host should affect all services
+    - templates: list of affected objects
+    - add tabs with contacts (notification contacts, readonly contacts,
+      contacts)
+    - nagios.cfg editor (with omd support)
+    - resource.cfg editor
+    - template usage with +object ( in resolve and template tt view)
+    - wizards: new host, scan services, host/service: change command wizard
+      - offer macros for command editing
+

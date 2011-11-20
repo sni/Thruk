@@ -731,3 +731,13 @@ TD.action_menu {
   width: 250px;
   padding-left: 20px;
 }
+
+input.top_refresh_button {
+  margin-top: 2px;
+  margin-right: 4px;
+  width: 16px;
+  height: 16px;
+}
+body.splashpage input.top_refresh_button {
+  display: none;
+}

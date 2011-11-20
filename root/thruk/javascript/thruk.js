@@ -486,6 +486,10 @@ function from_location_hash() {
     return data;
 }
 
+function refresh_button(btn) {
+    btn.src = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+    window.setTimeout("reloadPage()", 100);
+}
 
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
