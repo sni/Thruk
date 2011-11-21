@@ -84,7 +84,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         2  => 55,    # schedule downtime
         3  => 1,     # add comment
         4  => 33,    # add acknowledgement
-        5  => 78,    # remove all downtimes
+        5  => 78,    # remove active downtimes
         6  => 20,    # remove all comments
         7  => 51,    # remove acknowledgement
         8  => 47,    # enable active checks
@@ -94,13 +94,14 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         12 => 87,    # submit passive check result
         13 => 2,     # delete single comment
         14 => 154,   # reset modified attributes
+        15 => 78,    # remove future downtimes
     };
     my $service_quick_commands = {
         1  => 7,     # reschedule service check
         2  => 56,    # schedule downtime
         3  => 3,     # add comment
         4  => 34,    # acknowledge
-        5  => 79,    # remove all downtimes
+        5  => 79,    # remove active downtimes
         6  => 21,    # remove all comments
         7  => 52,    # remove acknowledgement
         8  => 5,     # enable active checks
@@ -110,6 +111,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         12 => 30,    # submit passive check result
         13 => 4,     # delete single comment
         14 => 155,   # reset modified attributes
+        15 => 79,    # remove future downtimes
     };
 
     # did we receive a quick command from the status page?
@@ -205,7 +207,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
-                $self->_remove_all_downtimes( $c, $host );
+                $self->_remove_all_downtimes( $c, $host, undef, 'active' );
+            }
+            elsif( $quick_command == 15 ) {
+                $self->_remove_all_downtimes( $c, $host, undef, 'future' );
             }
             else {
                 if( $self->_do_send_command($c) ) {
@@ -238,7 +243,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             $c->{'request'}->{'parameters'}->{'service'} = $service;
             $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
-                $self->_remove_all_downtimes( $c, $host, $service );
+                $self->_remove_all_downtimes( $c, $host, $service, 'active' );
+            }
+            elsif( $quick_command == 15 ) {
+                $self->_remove_all_downtimes( $c, $host, $service, 'future' );
             }
             else {
                 if( $self->_do_send_command($c) ) {
@@ -269,7 +277,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 ######################################
 # remove downtimes
 sub _remove_all_downtimes {
-    my( $self, $c, $host, $service ) = @_;
+    my( $self, $c, $host, $service, $type ) = @_;
 
     my $backends = $c->{'request'}->{'parameters'}->{'backend'};
 
@@ -280,6 +288,15 @@ sub _remove_all_downtimes {
         $options->{backend} = $backends;
     }
     $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $host, service_description => $service ];
+
+    # active downtimes
+    my $now = time();
+    if($type eq 'active') {
+        push @{$options->{'filter'}}, start_time => { '<=' => $now };
+    }
+    elsif($type eq 'future') {
+        push @{$options->{'filter'}}, start_time => { '>=' => $now };
+    }
 
     # get list of all downtimes
     my $data = $c->{'db'}->get_downtimes(%{$options});

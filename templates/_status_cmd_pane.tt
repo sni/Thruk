@@ -40,7 +40,8 @@
           [% END %]
           [% IF c.config.cmd_quick_status.downtime %]
           <option value="2" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif); }">add downtime</option>
-          <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove downtimes</option>
+          <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove active downtimes</option>
+          <option value="15" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove future downtimes</option>
           <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.comment %]
