@@ -385,7 +385,6 @@ sub set_dynamic_roles {
         $data = $c->{'db'}->get_can_submit_commands($username);
         $cached_data->{'can_submit_commands'} = $data;
         $cache->set($username, $cached_data);
-        $data = $c->{'db'}->get_can_submit_commands($username);
     }
 
     if(defined $data) {

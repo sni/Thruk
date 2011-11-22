@@ -29,6 +29,7 @@ Manager of backend connections
 $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::Livestatus'
 ];
+$Thruk::Backend::Manager::stats = undef;
 
 ##########################################################
 
@@ -599,6 +600,8 @@ returns a result for a sub called on all peers
 sub _do_on_peers {
     my( $self, $function, $arg ) = @_;
 
+    $Thruk::Backend::Manager::stats->profile( begin => '_do_on_peers('.$function.')') if defined $Thruk::Backend::Manager::stats;
+
     # do we have to send the query to all backends or just a few?
     my(%arg, $backends);
     if(     ( $function =~ m/^get_/mx or $function eq 'send_command')
@@ -630,7 +633,7 @@ sub _do_on_peers {
         next unless $peer->{'enabled'} == 1;
 
         $peer->{'last_error'} = undef;
-        $self->{'stats'}->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
+        $Thruk::Backend::Manager::stats->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
         $selected_backends++;
         eval {
             my( $data, $typ, $size ) = $peer->{'class'}->$function( @{$arg} );
@@ -652,7 +655,7 @@ sub _do_on_peers {
             $peer->{'last_error'} =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
             $peer->{'last_error'} = "ERROR: ".$peer->{'last_error'};
         }
-        $self->{'stats'}->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $self->{'stats'};
+        $Thruk::Backend::Manager::stats->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
     }
     if(!defined $result and $selected_backends != 0) {
         #confess("Error in _do_on_peers: ".$@."called as ".Dumper($function)."with args: ".Dumper($arg));
@@ -745,6 +748,8 @@ sub _do_on_peers {
             $data->{$key} = 0;
         }
     }
+
+    $Thruk::Backend::Manager::stats->profile( end => '_do_on_peers('.$function.')') if defined $Thruk::Backend::Manager::stats;
 
     return $data;
 }
@@ -931,6 +936,7 @@ sub _page_data {
 
     return $data;
 }
+
 ##########################################################
 
 =head2 AUTOLOAD

@@ -214,6 +214,8 @@ sub begin : Private {
             );
         }
     }
+    # needed for the autoload methods
+    $Thruk::Backend::Manager::stats = $c->stats;
 
     my $target = $c->{'request'}->{'parameters'}->{'target'};
     if( !$c->stash->{'use_frames'} and defined $target and $target eq '_parent' ) {
