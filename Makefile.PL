@@ -72,7 +72,6 @@ requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 feature     ('plugin_conf',
   -default                                        => 1,
   'Storable'                                      => 0,
-  'String::Strip'                                 => 0,
 );
 
 # dashboard plugin

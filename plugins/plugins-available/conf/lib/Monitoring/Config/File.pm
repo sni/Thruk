@@ -5,7 +5,6 @@ use warnings;
 use Carp;
 use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object;
-use String::Strip;
 use File::Slurp;
 
 =head1 NAME
@@ -472,6 +471,23 @@ sub _get_new_file_content {
     return $new_content;
 }
 
+##########################################################
+# replacement for string::strip, which is broken on 64 bit
+# https://rt.cpan.org/Ticket/Display.html?id=70028
+sub StripTSpace {
+    $_[0] =~ s/\s+$//;
+}
+
+##########################################################
+sub StripLSpace {
+    $_[0] =~ s/^\s+//;
+}
+
+##########################################################
+sub StripLTSpace {
+    $_[0] =~ s/^\s+//;
+    $_[0] =~ s/\s+$//;
+}
 
 ##########################################################
 
