@@ -18,11 +18,15 @@ inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
 inc/Module/Install/Catalyst.pm
+inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
 lib/Catalyst/Authentication/Credential/Thruk.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
 lib/Catalyst/Helper/Model/Thruk/Class.pm

@@ -472,21 +472,43 @@ sub _get_new_file_content {
 }
 
 ##########################################################
-# replacement for string::strip, which is broken on 64 bit
-# https://rt.cpan.org/Ticket/Display.html?id=70028
+
+=head2 StripTSpace
+
+strip trailing whitespace
+
+replacement for string::strip, which is broken on 64 bit
+https://rt.cpan.org/Ticket/Display.html?id=70028
+
+=cut
 sub StripTSpace {
     $_[0] =~ s/\s+$//mx;
+    return;
 }
 
 ##########################################################
+
+=head2 StripLSpace
+
+strip leading whitespace
+
+=cut
 sub StripLSpace {
     $_[0] =~ s/^\s+//mx;
+    return;
 }
 
 ##########################################################
+
+=head2 StripLTSpace
+
+strip leading and trailing whitespace
+
+=cut
 sub StripLTSpace {
     $_[0] =~ s/^\s+//mx;
     $_[0] =~ s/\s+$//mx;
+    return;
 }
 
 ##########################################################
