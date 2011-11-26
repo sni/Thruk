@@ -475,18 +475,18 @@ sub _get_new_file_content {
 # replacement for string::strip, which is broken on 64 bit
 # https://rt.cpan.org/Ticket/Display.html?id=70028
 sub StripTSpace {
-    $_[0] =~ s/\s+$//;
+    $_[0] =~ s/\s+$//mx;
 }
 
 ##########################################################
 sub StripLSpace {
-    $_[0] =~ s/^\s+//;
+    $_[0] =~ s/^\s+//mx;
 }
 
 ##########################################################
 sub StripLTSpace {
-    $_[0] =~ s/^\s+//;
-    $_[0] =~ s/\s+$//;
+    $_[0] =~ s/^\s+//mx;
+    $_[0] =~ s/\s+$//mx;
 }
 
 ##########################################################
