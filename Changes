@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 1.1.4    ...
           - remove downtimes quick command now only removes active downtimes
           - added quick command to remove future downtimes
+          - removed string::strip dependency
 
 1.1.3    Sat Nov 12 23:03:12 CET 2011
           - added support for objects in config editor

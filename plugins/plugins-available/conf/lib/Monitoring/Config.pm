@@ -362,22 +362,39 @@ sub get_services_for_host {
     my $host    = shift;
     my $objects = shift;
 
+    $self->{'stats'}->profile(begin => "M::C::get_services_for_host()");
+
     my($host_conf_keys, $host_config) = $host->get_computed_config($objects);
 
     my $services  = { 'host' => {}, 'group' => {}};
     my $host_name = $host->get_name();
+    my $groups    = $host->get_groups($self, $objects);
 
     for my $svc (@{$self->get_objects_by_type('service')}) {
         my($svc_conf_keys, $svc_config) = $svc->get_computed_config($objects);
 
+        # exclude hosts by !host_name
         if(defined $svc_config->{'host_name'} and grep { $_ eq '!'.$host_name } @{$svc_config->{'host_name'}}) {
             next;
         }
+
+        # exclude hostgroup by !group
+        if(defined $svc_config->{'hostgroup_name'}) {
+            my $found = 0;
+            for my $group (@{$groups}) {
+                if(grep { $_ eq '!'.$group } @{$svc_config->{'hostgroup_name'}}) {
+                    $found++;
+                    last;
+                }
+            }
+            next if $found;
+        }
+
         if(defined $svc_config->{'host_name'} and grep { $_ eq $host_name } @{$svc_config->{'host_name'}}) {
             $services->{'host'}->{$svc->get_name()} = $svc;
         }
-        if(defined $svc_config->{'hostgroup_name'} and defined $host_config->{'hostgroups'}) {
-            for my $group (@{$host_config->{'hostgroups'}}) {
+        if(defined $svc_config->{'hostgroup_name'}) {
+            for my $group (@{$groups}) {
                 if(grep { $_ eq $group} @{$svc_config->{'hostgroup_name'}}) {
                     $services->{'group'}->{$svc->get_name()} = $svc;
                     last;
@@ -385,6 +402,8 @@ sub get_services_for_host {
             }
         }
     }
+
+    $self->{'stats'}->profile(end => "M::C::get_services_for_host()");
 
     return $services;
 }

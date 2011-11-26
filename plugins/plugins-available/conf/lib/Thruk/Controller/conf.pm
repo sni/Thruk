@@ -789,6 +789,7 @@ sub _update_objects_config {
         return 0;
     }
     $c->stats->profile(end => "objects init");
+    $c->{'obj_db'}->{'stats'} = $c->{'stats'};
 
     if($c->{'obj_db'}->{'cached'}) {
         $c->stats->profile(begin => "checking objects");
