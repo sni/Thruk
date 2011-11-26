@@ -2269,15 +2269,19 @@ var ajax_search = {
                 }
             });
             pattern = trimmed_pattern;
-
+debug(ajax_search.templates);
             var results = new Array();
             ajax_search.base.each(function(search_type) {
                 var sub_results = new Array();
                 var top_hits = 0;
+debug(search_type.name);
+debug(ajax_search.initialized_t + " templates");
+debug(ajax_search.search_type + 's');
                 if(   (ajax_search.search_type == 'all' && search_type.name != 'timeperiods')
                    || (ajax_search.search_type == 'full')
-                   || (ajax_search.templates == "templates" && search_type.name == "templates")
+                   || (ajax_search.templates == "templates" && search_type.name == ajax_search.initialized_t + " templates")
                    || (ajax_search.templates != "templates" && ajax_search.search_type + 's' == search_type.name)
+                   || (ajax_search.templates == "both" && ( search_type.name == ajax_search.initialized_t + " templates" || ajax_search.search_type + 's' == search_type.name ))
                   ) {
                   search_type.data.each(function(data) {
                       result_obj = new Object({ 'name': data, 'relevance': 0 });

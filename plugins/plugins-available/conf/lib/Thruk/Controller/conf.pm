@@ -175,7 +175,7 @@ sub _process_json_page {
         $json = [ { 'name' => $type.'s',
                     'data' => [ sort @{Thruk::Utils::array_uniq($objects)} ],
                   },
-                  { 'name' => 'templates',
+                  { 'name' => $type.' templates',
                     'data' => [ sort @{Thruk::Utils::array_uniq($templates)} ],
                   }
                 ];

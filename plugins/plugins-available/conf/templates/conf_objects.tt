@@ -89,7 +89,7 @@
           <tr>
             <td class='dataVar' style="text-align: left; white-space: nowrap;">
               <a href="conf.cgi?sub=objects&amp;type=[% type %]&amp;data.id=[% obj_id %]&amp;data.name=[% key | uri %]">
-                [% IF objs.0.file.readonly %]
+                [% IF objs.size > 0 && objs.0.file.readonly %]
                 <img src='[% url_prefix %]thruk/themes/[% theme %]/images/detail.gif' alt='View Template' title='View Template' width="16" height="16" style="vertical-align: middle">
                 [% ELSE %]
                 <img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' alt='Edit Template' title='Edit Template' width="16" height="16" style="vertical-align: middle">

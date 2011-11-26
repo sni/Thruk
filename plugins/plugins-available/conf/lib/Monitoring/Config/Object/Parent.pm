@@ -90,7 +90,7 @@ return the objects template name
 =cut
 sub get_template_name {
     my $self = shift;
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0) {
+    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and defined $self->{'conf'}->{'name'}) {
         return $self->{'conf'}->{'name'};
     }
     return;
@@ -106,7 +106,7 @@ return the objects name
 =cut
 sub get_name {
     my $self = shift;
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0) {
+    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and defined $self->{'conf'}->{'name'}) {
         return $self->get_template_name();
     }
     return $self->get_primary_name();
@@ -150,7 +150,7 @@ sub get_primary_name {
     my $self = shift;
     my $full = shift || 0;
 
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0) {
+    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and defined $self->{'conf'}->{'name'}) {
         return;
     }
 
