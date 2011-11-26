@@ -9,7 +9,6 @@
 88          88      `8b 88888888888 88
 *******************************************************************************/
 
-var thruk_debug_js   = 0;  // enable debugging messages in javascript
 var refreshPage      = 1;
 var cmdPaneState     = 0;
 var curRefreshVal    = 0;
@@ -189,6 +188,10 @@ function reloadPage() {
       urlArgs.set(pair.key, pair.value);
     }
   });
+  // make url uniq, otherwise we would to do a reload
+  // which reloads all images / css / js too
+  urlArgs.set('_', (new Date()).getTime());
+
   var newParams = Object.toQueryString(urlArgs);
 
   if(newParams != '') {
