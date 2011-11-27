@@ -811,7 +811,7 @@ sub _update_objects_config {
         Thruk::Utils::set_message( $c,
                                   'fail_message',
                                   $error,
-                                  ($errnum == 1) ? undef : $c->{'obj_db'}->{'errors'},
+                                  ($errnum == 1 && !$c->{'obj_db'}->{'needs_update'}) ? undef : $c->{'obj_db'}->{'errors'},
                                 );
     } elsif($refresh) {
         Thruk::Utils::set_message( $c, 'success_message', 'refresh successful');
