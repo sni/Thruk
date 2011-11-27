@@ -340,7 +340,7 @@ sub get_data_from_param {
             $value =~ s/\-(\d):/-0$1:/gmx;
             $value =~ s/:(\d)\-/:0$1-/gmx;
             $value =~ s/:(\d)$/:0$1/gmx;
-            $value =~ s/,\s*/, /gmx;
+            $value =~ s/,\s*/,/gmx;
         }
 
         if(!defined $defaults->{$key}) {
