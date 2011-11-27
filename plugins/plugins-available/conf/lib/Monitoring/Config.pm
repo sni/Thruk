@@ -66,12 +66,14 @@ sub init {
     $self->{'initialized'} = 1;
     $self->{'cached'}      = 0;
 
-    if(!defined $self->{'config'}->{'obj_exclude'}) {
+    # set default excludes when defined manual paths
+    if(!defined $self->{'config'}->{'obj_exclude'}
+       and !defined $self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_exclude'} = [
-                    'cgi.cfg',
-                    'resource.cfg',
-                    'nagios.cfg',
-                    'icinga.cfg'
+                    '^cgi.cfg$',
+                    '^resource.cfg$',
+                    '^nagios.cfg$',
+                    '^icinga.cfg$'
         ];
     }
 
@@ -636,6 +638,9 @@ sub _set_config {
         my $core_conf = $self->{'config'}->{'core_conf'};
         if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
+        }
+        if($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
+            $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
         }
 
         open(my $fh, '<', $core_conf);
