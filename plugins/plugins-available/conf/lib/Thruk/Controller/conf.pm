@@ -946,6 +946,7 @@ sub _get_context_object {
                 $c->{'obj_db'}->file_add($file);
             }
             else {
+                $c->stash->{'new_file'} = '';
                 Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: invalid path' );
                 return $obj;
             }
