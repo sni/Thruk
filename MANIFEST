@@ -126,6 +126,7 @@ plugins/plugins-available/conf/templates/_conf_object_row.tt
 plugins/plugins-available/conf/templates/_conf_object_view.tt
 plugins/plugins-available/conf/templates/_conf_objects_frame.tt
 plugins/plugins-available/conf/templates/_conf_objects_menu.tt
+plugins/plugins-available/conf/templates/_conf_wizard_command.tt
 plugins/plugins-available/conf/templates/conf.tt
 plugins/plugins-available/conf/templates/conf_data.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt
@@ -573,6 +574,7 @@ themes/themes-available/Classic/images/trends.gif
 themes/themes-available/Classic/images/unknown.png
 themes/themes-available/Classic/images/up.gif
 themes/themes-available/Classic/images/waiting.gif
+themes/themes-available/Classic/images/wand.png
 themes/themes-available/Classic/images/warning.png
 themes/themes-available/Classic/stylesheets/avail.css
 themes/themes-available/Classic/stylesheets/checksanity.css
@@ -702,6 +704,7 @@ themes/themes-available/Exfoliation/images/trendssvc.png
 themes/themes-available/Exfoliation/images/unknown.png
 themes/themes-available/Exfoliation/images/up.gif
 themes/themes-available/Exfoliation/images/waiting.gif
+themes/themes-available/Exfoliation/images/wand.png
 themes/themes-available/Exfoliation/images/warning.png
 themes/themes-available/Exfoliation/images/weblogo1.png
 themes/themes-available/Exfoliation/readme.txt
@@ -881,6 +884,7 @@ themes/themes-available/Nuvola/images/trendssvc.png
 themes/themes-available/Nuvola/images/unknown.png
 themes/themes-available/Nuvola/images/up.gif
 themes/themes-available/Nuvola/images/waiting.gif
+themes/themes-available/Nuvola/images/wand.png
 themes/themes-available/Nuvola/images/warning.png
 themes/themes-available/Nuvola/images/weblogo1.png
 themes/themes-available/Nuvola/images/yellow.gif
@@ -1053,6 +1057,7 @@ themes/themes-available/Thruk/images/trends.gif
 themes/themes-available/Thruk/images/unknown.png
 themes/themes-available/Thruk/images/up.gif
 themes/themes-available/Thruk/images/waiting.gif
+themes/themes-available/Thruk/images/wand.png
 themes/themes-available/Thruk/images/warning.png
 themes/themes-available/Thruk/images/yellow.gif
 themes/themes-available/Thruk/stylesheets/all_in_one.css
@@ -1167,6 +1172,7 @@ themes/themes-available/Vautour/images/trends.gif
 themes/themes-available/Vautour/images/unknown.png
 themes/themes-available/Vautour/images/up.gif
 themes/themes-available/Vautour/images/waiting.gif
+themes/themes-available/Vautour/images/wand.png
 themes/themes-available/Vautour/images/warning.png
 themes/themes-available/Vautour/js/menu.js
 themes/themes-available/Vautour/js/mootools.js
@@ -1386,6 +1392,7 @@ themes/themes-available/Wakizashi/images/trends.gif
 themes/themes-available/Wakizashi/images/unknown.png
 themes/themes-available/Wakizashi/images/up.gif
 themes/themes-available/Wakizashi/images/waiting.gif
+themes/themes-available/Wakizashi/images/wand.png
 themes/themes-available/Wakizashi/images/warning.png
 themes/themes-available/Wakizashi/images/whiteglass.png
 themes/themes-available/Wakizashi/images/whiteline_dot.gif

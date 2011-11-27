@@ -2,7 +2,9 @@ Todo & Wish List:
 =========================================================
 
 Bugs:
-    - none
+    - drop down: add "..." with scrollbars
+    - when there is a service and a template with the same name, the
+      template is picked from drop down
 
 general:
     - webservice api, passthrough querys to livestatus and return json
@@ -92,6 +94,6 @@ addons:
     - nagios.cfg editor (with omd support)
     - resource.cfg editor
     - template usage with +object ( in resolve and template tt view)
-    - wizards: new host, scan services, host/service: change command wizard
+    - wizards: new host, scan services
       - offer macros for command editing
 

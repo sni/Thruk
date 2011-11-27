@@ -147,6 +147,34 @@ sub _process_json_page {
         return;
     }
 
+    # macros
+    if($type eq 'macro') {
+        # common macros
+        my $objects = [
+            '$HOSTADDRESS$',
+            '$HOSTALIAS$',
+            '$HOSTNAME$',
+            '$SERVICEDESC$',
+        ];
+        my $json            = [ { 'name' => 'macros', 'data' => $objects } ];
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
+    # command line
+    if($type eq 'commanddetail') {
+        my $name    = $c->{'request'}->{'parameters'}->{'command'};
+        my $objects = $c->{'obj_db'}->get_objects_by_name('command', $name);
+        my $json = [ { 'cmd_line' => '' } ];
+        if(defined $objects->[0]) {
+            $json = [ { 'cmd_line' => $objects->[0]->{'conf'}->{'command_line'} } ];
+        }
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
     my $json;
     my $objects   = [];
     my $templates = [];

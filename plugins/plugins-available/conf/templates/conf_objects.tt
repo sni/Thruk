@@ -149,8 +149,13 @@
   if(window.location.hash == '#templates') { set_sub(2); }
   if(window.location.hash == '#comp')      { set_sub(3); }
 
-  jQuery('.conf_save_button').button({
-    icons: {primary: 'ui-save-button'}
+  init_conf_tool_buttons();
+
+  jQuery('input,select').each(function() {
+    var $input = jQuery(this);
+    if($input.attr("tabindex") == 13 ) {
+      $input.attr("tabindex", -1);
+    }
   });
 
 -->

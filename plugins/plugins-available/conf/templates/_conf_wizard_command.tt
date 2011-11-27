@@ -1,0 +1,30 @@
+<button class="conf_button cmd_wzd_button" id="[% id %]_btn">&nbsp;</button>
+<input type="hidden" id="[% id %]_orig_inp1" value="[% inp1 %]">
+<input type="hidden" id="[% id %]_orig_inp2" value="[% inp2 %]">
+
+<div id="[% id %]_dialog" title="Command Wizzard" style="display: none;">
+<table><tr><td class="filter">
+  <table style="width:100%;">
+    <tr>
+      <td class="attrName"><b>Choose Command</b></td>
+      <td>
+        <input type="text" id="[% id %]_inp_command" value="" onkeyup="update_command_line('[% id %]_')" onchange="update_command_line('[% id %]_')"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', 'conf.cgi?action=json&amp;type=command', true, false)"[% END %]>
+        <input type="hidden" id="[% id %]_inp_args" value="">
+      </td>
+    </tr>
+    <tr>
+      <td class="attrName"><b>Command Line</b></td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td colspan=2>
+        <span id="[% id %]_command_line" style="text-align: left;"></span>
+        <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the command line is loaded" title="please wait till the command line is loaded" border="0" height="20" width="20"></div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=2 align="center"><button id="[% id %]_accept">accept</button></td>
+    </tr>
+  </table>
+</td></tr></table>
+</div>

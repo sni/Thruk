@@ -13,7 +13,7 @@ body.config TABLE.conftoolobj INPUT#id_check_command_1 {
   width: 160px;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_2 {
-  width: 200px;
+  width: 170px;
 }
 body.config TABLE.conftoolobj INPUT[type=text].attrkey {
   width: 170px;
