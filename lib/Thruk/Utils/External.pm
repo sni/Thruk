@@ -42,6 +42,7 @@ sub cmd {
     my $conf      = shift;
 
     if($c->config->{'no_external_job_forks'}) {
+        local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
         print `/bin/sh -c '".$conf->{'cmd'}."'"`;
         return 1;
     }
@@ -54,6 +55,7 @@ sub cmd {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($dir);
+        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
@@ -98,6 +100,7 @@ sub perl {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($dir);
+        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
         do {
             ## no critic

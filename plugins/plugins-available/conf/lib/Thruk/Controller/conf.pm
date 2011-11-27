@@ -735,6 +735,7 @@ sub _cmd {
     my ( $self, $c, $cmd ) = @_;
 
     local $SIG{CHLD}='';
+    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
     $c->log->debug( "running cmd: ". $cmd );
     my $rc = $?;
     my $output = `$cmd 2>&1`;
