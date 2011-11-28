@@ -9,14 +9,14 @@
     <tr>
       <td class='dataVar' colspan=10 style="padding-top: 5px; text-align: center;">
         <input type="hidden" name="type" value="[% type %]">
-        <input type="text" name="data.name" id="data.name" value="[% IF show_secondary_select %][% data_name %][% END %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, '[% type %]', 'conf.cgi?action=json&amp;type=[% type %]', undefined, undefined, undefined, 'both')"[% END %]>
+        <input type="text" name="data.name" id="data.name" value="[% IF show_secondary_select %][% data_name %][% END %]"[% IF use_ajax_search %] onclick="ajax_search.init(this, '[% type %]', {url:'conf.cgi?action=json&amp;type=[% type %]', templates:'both'})"[% END %]>
         <br>select [% type %] to change.
       </td>
     </tr>
     [% IF show_secondary_select %]
     <tr>
       <td class='dataVar' colspan=10 style="padding-top: 5px; text-align: center;">
-        <input type="text" name="data.name2" id="data.name2" value=""[% IF use_ajax_search %] onclick="ajax_search.init(this, 'full', 'conf.cgi?action=json&amp;type=[% type %]&amp;filter=[% data_name | uri %]', undefined, true)"[% END %]>
+        <input type="text" name="data.name2" id="data.name2" value=""[% IF use_ajax_search %] onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=[% type %]&amp;filter=[% data_name | uri %]', autosubmit:true})"[% END %]>
         <br>This [% type %] is not unique, please select object to change
       </td>
     </tr>

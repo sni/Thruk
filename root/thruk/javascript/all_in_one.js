@@ -8151,8 +8151,19 @@ var ajax_search = {
     list            : false,
     templates       : 'no',
 
-    /* initialize search */
-    init: function(elem, type, url, striped, autosubmit, list, templates, data) {
+    /* initialize search
+     *
+     * options are {
+     *   url:        url to fetch data
+     *   striped:    true/false, everything after " - " is trimmed
+     *   autosubmit: true/false
+     *   list:       true/false, string is split by , and suggested by last chunk
+     *   templates:  no/templates/both, suggest templates
+     *   data:       search base data
+     * }
+     */
+    //init: function(elem, type, url, striped, autosubmit, list, templates, data) {
+    init: function(elem, type, options) {
         if(elem && elem.id) {
         } else if(this.id) {
           elem = this;
@@ -8163,17 +8174,17 @@ var ajax_search = {
 
         ajax_search.input_field = elem.id;
 
-        if(striped != undefined) {
-            ajax_search.striped = striped;
+        if(options.striped != undefined) {
+            ajax_search.striped = options.striped;
         }
-        if(autosubmit != undefined) {
-            ajax_search.autosubmit = autosubmit;
+        if(options.autosubmit != undefined) {
+            ajax_search.autosubmit = options.autosubmit;
         }
-        if(list != undefined) {
-            ajax_search.list = list;
+        if(options.list != undefined) {
+            ajax_search.list = options.list;
         }
-        if(templates != undefined) {
-            ajax_search.templates = templates;
+        if(options.templates != undefined) {
+            ajax_search.templates = options.templates;
         } else {
             ajax_search.templates = 'no';
         }
@@ -8196,8 +8207,8 @@ var ajax_search = {
         } else {
             type                    = 'all';
         }
-        if(url != undefined) {
-            search_url              = url;
+        if(options.url != undefined) {
+            search_url              = options.url;
         }
 
         input.setAttribute("autocomplete", "off");
@@ -8264,8 +8275,8 @@ var ajax_search = {
             }
         }
 
-        if(data != undefined) {
-            ajax_search.base = data;
+        if(options.data != undefined) {
+            ajax_search.base = options.data;
             ajax_search.suggest();
         } else {
 

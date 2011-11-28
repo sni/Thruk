@@ -549,7 +549,7 @@ td.stateInfoTable1 .dataVal {
   font-family: arial,serif;
   white-space: nowrap;
   overflow: hidden;
-  z-index: 1000;
+  z-index: 2000;
   text-align: left;
 }
 
@@ -726,6 +726,20 @@ SPAN.deleteicon INPUT {
 .ui-save-button {
   background-image: url(../images/disk.png) !important;
 }
+.ui-wzd-button {
+  background-image: url(../images/wand.png) !important;
+}
+button.ui-button span.ui-button-text {
+  line-height: 1.0 !important;
+}
+button.ui-button-icon-only {
+  width: 2em !important;
+}
+input.ui-button {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
 
 TD.action_menu {
   width: 250px;

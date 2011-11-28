@@ -199,7 +199,7 @@ function do_update_command_line(id) {
             for(var nr=1;nr<=100;nr++) {
                 var regex = new RegExp('\\$ARG'+nr+'\\$');
                 if(args[nr-1] == undefined) { args[nr-1] = ''; }
-                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' size=15 value='"+args[nr-1]+"' onclick=\"ajax_search.init(this, 'macro', 'conf.cgi?action=json&amp;type=macro')\">");
+                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' size=15 value='"+args[nr-1]+"' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro'})\">");
             }
 
             cmd_line = cmd_line.replace(/\ \-/g, "<br>&nbsp;&nbsp;&nbsp;&nbsp;-");
