@@ -2073,6 +2073,8 @@ var ajax_search = {
           return false;
         }
 
+        if(options == undefined) { options = {}; };
+
         ajax_search.input_field = elem.id;
 
         if(options.striped != undefined) {
