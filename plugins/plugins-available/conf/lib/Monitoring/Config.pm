@@ -364,7 +364,7 @@ sub get_services_for_host {
     my $host    = shift;
     my $objects = shift;
 
-    $self->{'stats'}->profile(begin => "M::C::get_services_for_host()");
+    $self->{'stats'}->profile(begin => "M::C::get_services_for_host()") if defined $self->{'stats'};;
 
     my($host_conf_keys, $host_config) = $host->get_computed_config($objects);
 
@@ -405,7 +405,7 @@ sub get_services_for_host {
         }
     }
 
-    $self->{'stats'}->profile(end => "M::C::get_services_for_host()");
+    $self->{'stats'}->profile(end => "M::C::get_services_for_host()") if defined $self->{'stats'};;
 
     return $services;
 }
@@ -866,7 +866,13 @@ sub _collect_errors {
 sub _rebuild_index {
     my ( $self ) = @_;
 
+    $self->{'stats'}->profile(begin => "M::C::_rebuild_index()") if defined $self->{'stats'};
+
     my $objects_without_primary = [];
+    my $macros = {
+        'host'    => {},
+        'service' => {},
+    };
 
     # collect errors from all files
     $self->_collect_errors();
@@ -877,6 +883,11 @@ sub _rebuild_index {
         for my $obj ( @{$file->{'objects'}} ) {
             my $found = $self->_update_obj_in_index($objects, $obj);
             push @{$objects_without_primary}, $obj if $found == 0;
+        }
+        for my $type (qw/host service/) {
+            for my $macro (keys %{$file->{'macros'}->{$type}}) {
+                $macros->{$type}->{$macro} = 1;
+            }
         }
     }
 
@@ -894,6 +905,9 @@ sub _rebuild_index {
     }
 
     $self->{'objects'} = $objects;
+    $self->{'macros'}  = $macros;
+
+    $self->{'stats'}->profile(end => "M::C::_rebuild_index()") if defined $self->{'stats'};;
     return;
 }
 

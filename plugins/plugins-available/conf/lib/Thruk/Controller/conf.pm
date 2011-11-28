@@ -154,8 +154,27 @@ sub _process_json_page {
             '$HOSTADDRESS$',
             '$HOSTALIAS$',
             '$HOSTNAME$',
+            '$HOSTSTATE$',
+            '$HOSTSTATEID$',
+            '$HOSTATTEMPT$',
+            '$HOSTOUTPUT$',
+            '$LONGHOSTOUTPUT$',
+            '$HOSTPERFDATA$',
             '$SERVICEDESC$',
+            '$SERVICESTATE$',
+            '$SERVICESTATEID$',
+            '$SERVICESTATETYPE$',
+            '$SERVICEATTEMPT$',
+            '$SERVICEOUTPUT$',
+            '$LONGSERVICEOUTPUT$',
+            '$SERVICEPERFDATA$',
         ];
+        for my $type (qw/host service/) {
+            for my $macro (keys %{$c->{'obj_db'}->{'macros'}->{$type}}) {
+                push @{$objects}, '$_'.uc($type).uc(substr($macro, 1)).'$';
+            }
+        }
+        @{$objects} = sort @{$objects};
         my $json            = [ { 'name' => 'macros', 'data' => $objects } ];
         $c->stash->{'json'} = $json;
         $c->forward('Thruk::View::JSON');
@@ -184,7 +203,7 @@ sub _process_json_page {
         my $objects = $c->{'obj_db'}->get_objects_by_type($type,$filter);
         for my $subtype (keys %{$objects}) {
             for my $name (keys %{$objects->{$subtype}}) {
-                $types->{$subtype}->{$name} = 1;
+                $types->{$subtype}->{$name} = 1 unless substr($name,0,1) eq '!';
             }
         }
         for my $typ (sort keys %{$types}) {

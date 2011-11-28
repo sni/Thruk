@@ -275,6 +275,9 @@ sub _parse_line {
                 push @{$self->{'errors'}}, "duplicate attribute $key in '".$line."' in ".$self->{'path'}.":".$linenr;
             }
             $current_object->{'conf'}->{$key} = $value;
+
+            # save index of custom macros
+            $self->{'macros'}->{$current_object->{'type'}}->{$key} = 1 if substr($key, 0, 1) eq '_';
         }
     }
 
