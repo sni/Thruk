@@ -2211,7 +2211,7 @@ var ajax_search = {
     },
 
     /* hide the search results */
-    hide_results: function(event) {
+    hide_results: function(event, immediately) {
         if(event && event.target) {
         }
         else {
@@ -2231,7 +2231,10 @@ var ajax_search = {
          * on the suggestion would be cancel as the panel does
          * not exist anymore
          */
-        if(ajax_search.cur_select == -1) {
+        if(immediately != undefined) {
+            hideElement(ajax_search.result_pan);
+        }
+        else if(ajax_search.cur_select == -1) {
             window.setTimeout("jQuery('#"+ajax_search.result_pan+"').hide('fade', {}, 300)", 100);
         }
     },

@@ -143,11 +143,13 @@ function init_conf_tool_command_wizard(id) {
       .dialog({
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
-        width:      'auto'
+        width:       'auto',
+        close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
     });
     jQuery('#' + id + 'accept').button({
         icons: {primary: 'ui-ok-button'}
     }).click(function() {
+        ajax_search.hide_results(undefined, 1);
         $d.dialog('close');
         // set values in original inputs
         args = collect_args(id);
