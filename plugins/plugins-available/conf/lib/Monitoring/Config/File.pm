@@ -41,6 +41,7 @@ sub new {
         'deleted'     => 0,
         'objects'     => [],
         'errors'      => [],
+        'macros'      => { 'host' => {}, 'service' => {}},
     };
     bless $self, $class;
 
@@ -83,6 +84,9 @@ sub update_objects {
 
     return unless $self->{'parsed'} == 0;
     return unless defined $self->{'md5'};
+
+    # reset macro index
+    $self->{'macros'} = { 'host' => {}, 'service' => {}};
 
     my $current_object;
     my $in_unknown_object;
@@ -129,6 +133,9 @@ update all objects from this file by text
 =cut
 sub update_objects_from_text {
     my ( $self, $text, $lastline ) = @_;
+
+    # reset macro index
+    $self->{'macros'} = { 'host' => {}, 'service' => {}};
 
     my $current_object;
     my $object_at_line;

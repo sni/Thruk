@@ -2052,6 +2052,7 @@ var ajax_search = {
     list            : false,
     templates       : 'no',
     hideempty       : false,
+    show_all        : false,
 
     /* initialize search
      *
@@ -2099,6 +2100,8 @@ var ajax_search = {
 
         var input = document.getElementById(ajax_search.input_field);
         ajax_search.size = input.getWidth();
+
+        ajax_search.show_all = false;
 
         // set type from select
         var type_selector_id = elem.id.replace('_value', '_ts');
@@ -2352,14 +2355,16 @@ var ajax_search = {
         var resultHTML = '<ul>';
         var x = 0;
         var results_per_type = Math.ceil(ajax_search.max_results / results.size());
-        ajax_search.res = new Array();
+        ajax_search.res   = new Array();
+        var total_results = 0;
         results.each(function(type) {
             var cur_count = 0;
             var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
             if(type.results.size() == 1) { name = name.substring(0, name.length -1); }
             resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + name + '<\/i><\/b><\/li>';
+            total_results += type.results.size();
             type.results.each(function(data) {
-                if(cur_count <= results_per_type) {
+                if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display;
                     pattern.each(function(sub_pattern) {
                         name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
@@ -2380,13 +2385,22 @@ var ajax_search = {
                         file = data.display.split(" - ");
                         name = "<img src='" + file[1] + "' style='vertical-align: text-bottom'> " + file[0];
                     }
-                    resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="return ajax_search.set_result(this.rev)"> ' + name +'<\/a><\/li>';
+                    resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="' + prefix+data.display +'" onclick="ajax_search.set_result(this.rev); return false;"> ' + name +'<\/a><\/li>';
                     ajax_search.res[x] = prefix+data.display;
                     x++;
                     cur_count++;
                 }
             });
         });
+        if(total_results > ajax_search.max_results && ajax_search.show_all == false) {
+            var id = "suggest_item_"+x
+            var classname = "item";
+            if(selected != -1 && selected == x) {
+                classname = "item ajax_search_selected";
+            }
+            resultHTML += '<li> <a href="" class="' + classname + '" style="width:'+ajax_search.size+'px;" id="'+id+'" rev="more" onclick="ajax_search.set_result(this.rev); return false;">more...<\/a><\/li>';
+            x++;
+        }
         ajax_search.result_size = x;
         resultHTML += '<\/ul>';
         if(results.size() == 0) {
@@ -2411,6 +2425,12 @@ var ajax_search = {
 
     /* set the value into the input field */
     set_result: function(value) {
+
+        if(value == 'more') {
+            ajax_search.show_all = true;
+            ajax_search.show_results(ajax_search.cur_results, ajax_search.cur_pattern, ajax_search.cur_select);
+            return true;
+        }
 
         if(ajax_search.striped) {
             var values = value.split(" - ", 2);
@@ -2510,7 +2530,9 @@ var ajax_search = {
             if(ajax_search.cur_select == -1) {
                 return true
             }
-            ajax_search.set_result(ajax_search.res[ajax_search.cur_select]);
+            if(ajax_search.set_result(ajax_search.res[ajax_search.cur_select])) {
+                return false;
+            }
             Event.stop(evt);
             return false
         }
