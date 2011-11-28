@@ -8150,6 +8150,7 @@ var ajax_search = {
     autosubmit      : undefined,
     list            : false,
     templates       : 'no',
+    hideempty       : false,
 
     /* initialize search
      *
@@ -8160,6 +8161,7 @@ var ajax_search = {
      *   list:       true/false, string is split by , and suggested by last chunk
      *   templates:  no/templates/both, suggest templates
      *   data:       search base data
+     *   hideempty:  true/false, hide results when there are no hits
      * }
      */
     //init: function(elem, type, url, striped, autosubmit, list, templates, data) {
@@ -8171,6 +8173,8 @@ var ajax_search = {
           if(thruk_debug_js) { alert("ERROR: got no element id in ajax_search.init(): " + elem); }
           return false;
         }
+
+        if(options == undefined) { options = {}; };
 
         ajax_search.input_field = elem.id;
 
@@ -8187,6 +8191,9 @@ var ajax_search = {
             ajax_search.templates = options.templates;
         } else {
             ajax_search.templates = 'no';
+        }
+        if(options.hideempty != undefined) {
+            ajax_search.hideempty = options.hideempty;
         }
 
         var input = document.getElementById(ajax_search.input_field);
@@ -8480,6 +8487,10 @@ var ajax_search = {
         resultHTML += '<\/ul>';
         if(results.size() == 0) {
             resultHTML += '<a href="#">no results found</a>';
+            if(ajax_search.hideempty) {
+                ajax_search.hide_results();
+                return;
+            }
         }
 
         panel.innerHTML = resultHTML;
