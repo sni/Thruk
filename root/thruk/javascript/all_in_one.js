@@ -8350,7 +8350,6 @@ var ajax_search = {
         }
         else if(ajax_search.cur_select == -1) {
             window.clearTimeout(ajax_search.hideTimer);
-//debug('hide_results: ' + event.type + ' ' + event.target.tagName);
             ajax_search.hideTimer = window.setTimeout("if(ajax_search.dont_hide==false){jQuery('#"+ajax_search.result_pan+"').hide('fade', {}, 300)}", 100);
         }
     },
