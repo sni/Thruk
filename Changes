@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.4    Sun Nov 27 16:21:21 CET 2011
+1.1.4    Sun Nov 29 16:21:21 CET 2011
+          - added more button for search suggestions
           - remove downtimes quick command now only removes active downtimes
           - added quick command to remove future downtimes
           - removed string::strip dependency
