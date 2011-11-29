@@ -1,10 +1,7 @@
 Todo & Wish List:
 =========================================================
 
-Bugs:
-    - drop down: add "..." with scrollbars
-    - when there is a service and a template with the same name, the
-      template is picked from drop down
+Bugs: none
 
 general:
     - webservice api, passthrough querys to livestatus and return json
