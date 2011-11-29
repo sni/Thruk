@@ -1018,7 +1018,27 @@ sub _get_context_object {
     # object by name
     my @objs;
     if(!defined $obj && $c->stash->{'data_name'} ) {
+        my $templates;
+        if($c->stash->{'data_name'} =~ m/^ht:/ or $c->stash->{'data_name'} =~ m/^st:/) {
+            $templates=1; # only templates
+        }
+        if($c->stash->{'data_name'} =~ m/^ho:/ or $c->stash->{'data_name'} =~ m/^se:/) {
+            $templates=2; # no templates
+        }
+        $c->stash->{'data_name'} =~ s/^\w{2}://gmx;
         my $objs = $c->{'obj_db'}->get_objects_by_name($c->stash->{'type'}, $c->stash->{'data_name'}, 0, $c->stash->{'data_name2'});
+        if(defined $templates) {
+            my @newobjs;
+            for my $o (@{$objs}) {
+                if($templates == 1) {
+                    push @newobjs, $o if defined $o->{'conf'}->{'register'} and $o->{'conf'}->{'register'} == 0;
+                }
+                if($templates == 2) {
+                    push @newobjs, $o if !defined $o->{'conf'}->{'register'} or $o->{'conf'}->{'register'} == 1;
+                }
+            }
+            @{$objs} = @newobjs;
+        }
         if(defined $objs->[1]) {
             @objs = @{$objs};
             $c->stash->{'show_secondary_select'} = 1;

@@ -34,7 +34,7 @@
     </tr>
     <tr>
       <td class='dataVar' nowrap><a href="conf.cgi?sub=objects">Object settings</a></td>
-      <td class='dataVal'>Host, service, timeperiods and notification settings.<br><b>Experimental:</b> Object configuration is currently experimental.<br>Use with care.</td>
+      <td class='dataVal'>Host, service, timeperiods and notification settings.</td>
     </tr>
   </table>
 [% END %]
