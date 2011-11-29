@@ -1019,10 +1019,10 @@ sub _get_context_object {
     my @objs;
     if(!defined $obj && $c->stash->{'data_name'} ) {
         my $templates;
-        if($c->stash->{'data_name'} =~ m/^ht:/ or $c->stash->{'data_name'} =~ m/^st:/) {
+        if($c->stash->{'data_name'} =~ m/^ht:/mx or $c->stash->{'data_name'} =~ m/^st:/mx) {
             $templates=1; # only templates
         }
-        if($c->stash->{'data_name'} =~ m/^ho:/ or $c->stash->{'data_name'} =~ m/^se:/) {
+        if($c->stash->{'data_name'} =~ m/^ho:/mx or $c->stash->{'data_name'} =~ m/^se:/mx) {
             $templates=2; # no templates
         }
         $c->stash->{'data_name'} =~ s/^\w{2}://gmx;
