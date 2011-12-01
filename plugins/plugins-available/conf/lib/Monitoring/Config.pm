@@ -825,7 +825,7 @@ sub _check_files_changed {
                 if($meta->{'md5'} ne $file->{'md5'}) {
                     if($reload) {
                         $file->{'parsed'} = 0;
-                        $file->_update_objects();
+                        $file->update_objects();
                         $file->_update_meta_data();
                     } else {
                         push @{$self->{'errors'}}, "file ".$file->{'path'}." has been changed since reading it.";
