@@ -144,6 +144,7 @@ function init_conf_tool_command_wizard(id) {
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
         width:       'auto',
+        maxWidth:    800,
         close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
     });
     jQuery('#' + id + 'accept').button({
@@ -161,6 +162,7 @@ function init_conf_tool_command_wizard(id) {
     $d.dialog('open');
     document.getElementById(cmd_arg_id).focus();
 
+    last_cmd_name_value = '';
     do_update_command_line(id, cmd_name);
 
     return;
@@ -199,13 +201,17 @@ function do_update_command_line(id) {
             var cmd_line = result[0].cmd_line;
 
             for(var nr=1;nr<=100;nr++) {
-                var regex = new RegExp('\\$ARG'+nr+'\\$');
-                if(args[nr-1] == undefined) { args[nr-1] = ''; }
-                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' size=15 value='"+args[nr-1]+"' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro', hideempty:true})\">");
+                var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
+                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' class='"+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro', hideempty:true})\" onkeyup='update_other_inputs(this)'>");
             }
 
             cmd_line = cmd_line.replace(/\ \-/g, "<br>&nbsp;&nbsp;&nbsp;&nbsp;-");
             document.getElementById(id + 'command_line').innerHTML = cmd_line;
+
+            // now set the values to avoid escaping
+            for(var nr=1;nr<=100;nr++) {
+                jQuery('.'+id+'arg'+nr).val(args[nr-1]);
+            }
         },
         onFailure: function(transport) {
             hideElement(id + 'wait');
@@ -234,4 +240,10 @@ function collect_args(id) {
     }
 
     return args.join('!');
+}
+
+/* updates all inputs with the same class */
+function update_other_inputs(elem) {
+    var val = elem.value;
+    jQuery('.'+elem.id).val(val);
 }
