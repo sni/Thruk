@@ -154,7 +154,8 @@ function init_conf_tool_command_wizard(id) {
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
         width:       'auto',
-        maxWidth:    800,
+        maxWidth:    1024,
+        position:   'top',
         close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
     });
     jQuery('#' + id + 'accept').button({
@@ -168,6 +169,8 @@ function init_conf_tool_command_wizard(id) {
         document.getElementById(cmd_inp_id).value = document.getElementById(id + "inp_command").value;
         return false;
     });
+
+    init_plugin_help_accordion(id);
 
     $d.dialog('open');
     document.getElementById(cmd_arg_id).focus();
@@ -221,6 +224,10 @@ function do_update_command_line(id) {
             // now set the values to avoid escaping
             for(var nr=1;nr<=100;nr++) {
                 jQuery('.'+id+'arg'+nr).val(args[nr-1]);
+            }
+
+            if($accordion) {
+                $accordion.accordion("activate", -1);
             }
         },
         onFailure: function(transport) {
@@ -281,6 +288,7 @@ function init_conf_tool_plugin_wizard(id) {
         autoOpen:    false,
         width:       'auto',
         maxWidth:    1024,
+        position:    'top',
         close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
     });
     jQuery('#' + id + 'accept').button({
@@ -297,22 +305,47 @@ function init_conf_tool_plugin_wizard(id) {
         return false;
     });
 
-    jQuery("#"+id+"help_accordion").accordion({
-        collapsible: true,
-        active:      'none',
-        clearStyle:  true,
-        changestart: function(event, ui) {
-            var current = document.getElementById(id+'inp_plugin').value;
-            if(current != last_plugin_help) {
-                last_plugin_help = current;
-                load_plugin_help(id, current);
-            }
-        }
-    });
+    init_plugin_help_accordion(id);
 
     $d.dialog('open');
 
     return;
+}
+
+var $accordion;
+function init_plugin_help_accordion(id) {
+    $accordion = jQuery("#"+id+"help_accordion").accordion({
+        collapsible: true,
+        active:      'none',
+        clearStyle:  true,
+        autoHeight: false,
+        changestart: function(event, ui) {
+            var current;
+            var input = document.getElementById(id+'inp_plugin');
+            if(input) {
+                current = input.value;
+            } else {
+                input = document.getElementById(id+'command_line');
+                if(input) {
+                    current = input.innerHTML;
+                    var index1 = input.innerHTML.indexOf(" ");
+                    var index2 = input.innerHTML.indexOf("<br>");
+                    if(index1 != -1) {
+                        current = current.substr(0, index1);
+                    };
+                    if(index2 != -1) {
+                        current = current.substr(0, index2);
+                    };
+                }
+            }
+            if(current) {
+                if(current != last_plugin_help) {
+                    last_plugin_help = current;
+                    load_plugin_help(id, current);
+                }
+            }
+        }
+    });
 }
 
 function load_plugin_help(id, plugin) {
@@ -320,7 +353,7 @@ function load_plugin_help(id, plugin) {
     if(plugin == '') {
         return;
     }
-    showElement(id + 'wait');
+    showElement(id + 'wait_help');
     new Ajax.Request('conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin, {
         onSuccess: function(transport) {
             var result;
@@ -329,7 +362,7 @@ function load_plugin_help(id, plugin) {
             } else {
                 result = eval(transport.responseText);
             }
-            hideElement(id + 'wait');
+            hideElement(id + 'wait_help');
             var plugin_help = result[0].plugin_help;
             document.getElementById(id + 'plugin_help').innerHTML = '<pre style="white-space: pre-wrap;" id="'+id+'plugin_help_pre"><\/pre>';
             jQuery('#' + id + 'plugin_help_pre').text(plugin_help);
@@ -340,7 +373,7 @@ function load_plugin_help(id, plugin) {
             }
         },
         onFailure: function(transport) {
-            hideElement(id + 'wait');
+            hideElement(id + 'wait_help');
             document.getElementById(id + 'plugin_help').innerHTML = 'error';
         }
     });

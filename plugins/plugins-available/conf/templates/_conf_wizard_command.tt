@@ -6,7 +6,7 @@
 <table><tr><td class="filter">
   <table style="width:100%;">
     <tr>
-      <td class="attrName"><b>Choose Command</b></td>
+      <td class="attrName" width="10%"><b>Choose Command</b></td>
       <td>
         <input type="text" id="[% id %]_inp_command" value="" onkeyup="update_command_line('[% id %]_')" onchange="update_command_line('[% id %]_')"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:true, autosubmit:false})"[% END %]>
         <input type="hidden" id="[% id %]_inp_args" value="">
@@ -20,6 +20,17 @@
       <td colspan=2>
         <span id="[% id %]_command_line" style="text-align: left;"></span>
         <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the command line is loaded" title="please wait till the command line is loaded" border="0" height="20" width="20"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="attrName" colspan=2>
+        <div id="[% id %]_help_accordion" style="width: 600px;">
+            <h3><a href="#">Plugin Help</a></h3>
+            <div style="max-height: 300px; max-width:1000px;">
+                <span id="[% id %]_plugin_help" style="text-align: left;"></span>
+                <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
+            </div>
+        </div>
       </td>
     </tr>
     <tr>
