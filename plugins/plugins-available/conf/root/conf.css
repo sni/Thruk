@@ -19,6 +19,10 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
   width: 170px;
 }
 
+INPUT.obj_command_line {
+  width: 375px !important;
+}
+
 .conf_attr_used {
   text-decoration: line-through;
   color: #999999;

@@ -1399,9 +1399,13 @@ sub _set_user_macros {
     my $self     = shift;
     my $peer_key = shift;
     my $macros   = shift;
+    my $file     = shift;
 
     my $res;
-    if(defined $peer_key) {
+    if(defined $file) {
+        $res = $self->_read_resource_file($file);
+    }
+    if(!defined $res and defined $peer_key) {
         my $backend = $self->get_peer_by_key($peer_key);
         if(defined $backend->{'resource_file'}) {
             $res = $self->_read_resource_file($backend->{'resource_file'});

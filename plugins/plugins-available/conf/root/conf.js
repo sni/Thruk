@@ -123,6 +123,16 @@ function init_conf_tool_buttons() {
         return false;
     });
 
+    /* command line wizard / plugins */
+    jQuery('button.plugin_wzd_button').button({
+        icons: {primary: 'ui-wzd-button'},
+        text: false,
+        label: 'open command line wizard'
+    }).click(function() {
+        init_conf_tool_plugin_wizard(this.id);
+        return false;
+    });
+
     jQuery('TD.attrValue').button();
     return;
 }
@@ -246,4 +256,92 @@ function collect_args(id) {
 function update_other_inputs(elem) {
     var val = elem.value;
     jQuery('.'+elem.id).val(val);
+}
+
+/* handle command line wizard dialog */
+var last_plugin_help = '';
+function init_conf_tool_plugin_wizard(id) {
+    id = id.substr(0, id.length -3);
+
+    // set initial values
+    var cmd_inp_id = document.getElementById(id + "orig_inp").value;
+    var cmd_line   = document.getElementById(cmd_inp_id).value;
+    document.getElementById(id + "inp_args").value = '';
+    var index = cmd_line.indexOf(" ");
+    if(index != -1) {
+        var args = cmd_line.substr(index + 1);
+        document.getElementById(id + "inp_args").value = args;
+        cmd_line = cmd_line.substr(0, index);
+    };
+    document.getElementById(id + "inp_plugin").value = cmd_line;
+
+    var $d = jQuery('#' + id + 'dialog')
+      .dialog({
+        dialogClass: 'dialogWithDropShadow',
+        autoOpen:    false,
+        width:       'auto',
+        maxWidth:    1024,
+        close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
+    });
+    jQuery('#' + id + 'accept').button({
+        icons: {primary: 'ui-ok-button'}
+    }).click(function() {
+        ajax_search.hide_results(undefined, 1);
+        $d.dialog('close');
+        // set values in original inputs
+        var newcmd = document.getElementById(id+'inp_plugin').value;
+        if(document.getElementById(id+'inp_args').value != '') {
+            newcmd = newcmd + " " + document.getElementById(id+'inp_args').value
+        }
+        document.getElementById(cmd_inp_id).value = newcmd;
+        return false;
+    });
+
+    jQuery("#"+id+"help_accordion").accordion({
+        collapsible: true,
+        active:      'none',
+        clearStyle:  true,
+        changestart: function(event, ui) {
+            var current = document.getElementById(id+'inp_plugin').value;
+            if(current != last_plugin_help) {
+                last_plugin_help = current;
+                load_plugin_help(id, current);
+            }
+        }
+    });
+
+    $d.dialog('open');
+
+    return;
+}
+
+function load_plugin_help(id, plugin) {
+    document.getElementById(id + 'plugin_help').innerHTML = "";
+    if(plugin == '') {
+        return;
+    }
+    showElement(id + 'wait');
+    new Ajax.Request('conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin, {
+        onSuccess: function(transport) {
+            var result;
+            if(transport.responseJSON != null) {
+                result = transport.responseJSON;
+            } else {
+                result = eval(transport.responseText);
+            }
+            hideElement(id + 'wait');
+            var plugin_help = result[0].plugin_help;
+            document.getElementById(id + 'plugin_help').innerHTML = '<pre style="white-space: pre-wrap;" id="'+id+'plugin_help_pre"><\/pre>';
+            jQuery('#' + id + 'plugin_help_pre').text(plugin_help);
+
+            // now set the values to avoid escaping
+            for(var nr=1;nr<=100;nr++) {
+                jQuery('.'+id+'arg'+nr).val(args[nr-1]);
+            }
+        },
+        onFailure: function(transport) {
+            hideElement(id + 'wait');
+            document.getElementById(id + 'plugin_help').innerHTML = 'error';
+        }
+    });
 }

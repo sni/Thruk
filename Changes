@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.1.5    Thu Dec  2 21:04:17 CET 2011
+          - config tool: added wizard to create/change command
+          - config tool: fixed reloading config
+                         fixed command line wizard
+
 1.1.4    Sun Nov 29 16:21:21 CET 2011
           - added more button for search suggestions
           - remove downtimes quick command now only removes active downtimes

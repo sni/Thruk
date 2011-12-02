@@ -632,8 +632,9 @@ sub _set_config {
     my $self  = shift;
 
     if(defined $self->{'config'}->{'core_conf'}) {
-        $self->{'config'}->{'obj_file'} = [];
-        $self->{'config'}->{'obj_dir'}  = [];
+        $self->{'config'}->{'obj_file'}          = [];
+        $self->{'config'}->{'obj_dir'}           = [];
+        $self->{'config'}->{'obj_resource_file'} = undef;
 
         my $core_conf = $self->{'config'}->{'core_conf'};
         if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
@@ -655,6 +656,9 @@ sub _set_config {
             }
             if($key eq 'cfg_dir') {
                 push @{$self->{'config'}->{'obj_dir'}}, $value;
+            }
+            if($key eq 'resource_file') {
+                $self->{'config'}->{'obj_resource_file'} = $value;
             }
         }
         close($fh);

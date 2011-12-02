@@ -1,0 +1,35 @@
+<button class="conf_button plugin_wzd_button" id="[% id %]_btn">&nbsp;</button>
+<input type="hidden" id="[% id %]_orig_inp" value="[% inp %]">
+
+<div id="[% id %]_dialog" title="Command Line Wizzard" style="display: none;">
+<table><tr><td class="filter">
+  <table style="width:100%;">
+    <tr>
+      <td class="attrName"><b>Choose Plugin</b></td>
+      <td>
+        <input type="text" id="[% id %]_inp_plugin" value="" onChange=""[% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:true, autosubmit:false})"[% END %] style="width:650px">
+      </td>
+    </tr>
+    <tr>
+      <td class="attrName"><b>Plugin Arguments</b></td>
+      <td>
+        <input type="text" id="[% id %]_inp_args" value="" style="width:650px">
+      </td>
+    </tr>
+    <tr>
+      <td class="attrName" colspan=2>
+        <div id="[% id %]_help_accordion">
+            <h3><a href="#">Plugin Help</a></h3>
+            <div style="max-height: 400px; max-width:1000px;">
+                <span id="[% id %]_plugin_help" style="text-align: left;"></span>
+                <div align="center"><img id="[% id %]_wait" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
+            </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=2 align="center"><br><button id="[% id %]_accept">accept</button></td>
+    </tr>
+  </table>
+</td></tr></table>
+</div>

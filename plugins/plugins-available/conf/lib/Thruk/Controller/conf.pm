@@ -181,6 +181,30 @@ sub _process_json_page {
         return;
     }
 
+    # plugins
+    if($type eq 'plugin') {
+        my $plugins         = $self->_get_plugins($c);
+        my $json            = [ { 'name' => 'plugins', 'data' => [ sort keys %{$plugins} ] } ];
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
+    # plugin help
+    if($type eq 'pluginhelp') {
+        my $plugins         = $self->_get_plugins($c);
+        my $name            = $c->{'request'}->{'parameters'}->{'plugin'};
+        my $help            = 'invalid command!';
+        if(defined $plugins->{$name}) {
+            my $cmd = $plugins->{$name}." -h 2>&1";
+            $help = `$cmd`;
+        }
+        my $json            = [ { 'plugin_help' => $help } ];
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
     # command line
     if($type eq 'commanddetail') {
         my $name    = $c->{'request'}->{'parameters'}->{'command'};
@@ -1422,6 +1446,39 @@ sub _get_model_retention {
     $c->stats->profile(end => "retrieve object retention");
     return 1;
 }
+
+##########################################################
+sub _get_plugins {
+    my($self, $c) = @_;
+
+    my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
+    my $objects         = {};
+    for my $macro (keys %{$user_macros}) {
+        my $dir = $user_macros->{$macro};
+        next unless -d $dir.'/.';
+        if($dir =~ m/plugins/mx or $dir =~ m/libexec/mx) {
+            $self->_set_plugins_for_directory($c, $dir, $macro, $objects);
+        }
+    }
+    return $objects;
+}
+
+##########################################################
+sub _set_plugins_for_directory {
+    my($self, $c, $dir, $macro, $objects) = @_;
+    my $files = $c->{'obj_db'}->_get_files_for_folder($dir);
+    for my $file (@{$files}) {
+        next if $file =~ m/\/utils\.pm/mx;
+        next if $file =~ m/\/utils\.sh/mx;
+        if(-x $file) {
+            my $shortfile = $file;
+            $shortfile =~ s/$dir/$macro/gmx;
+            $objects->{$shortfile} = $file;
+        }
+    }
+    return $objects;
+}
+
 ##########################################################
 
 =head1 AUTHOR
