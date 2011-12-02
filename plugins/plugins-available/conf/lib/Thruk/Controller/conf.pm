@@ -1470,6 +1470,7 @@ sub _set_plugins_for_directory {
     for my $file (@{$files}) {
         next if $file =~ m/\/utils\.pm/mx;
         next if $file =~ m/\/utils\.sh/mx;
+        next if $file =~ m/\/p1\.pl/mx;
         if(-x $file) {
             my $shortfile = $file;
             $shortfile =~ s/$dir/$macro/gmx;
