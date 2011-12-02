@@ -7807,6 +7807,21 @@ config tool.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
+general options for the config tool
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+show_plugin_syntax_helper    Enable/Disable the plugin syntax
+                                     helper. When enabled, Thruk will
+                                     run the plugins with "plugin -h"
+                                     to get the help information.
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
 you can manage different types of files with the config tool:
 </p>
 <div class="ulist"><ul>
@@ -7835,9 +7850,10 @@ htpasswd            Path to your htpasswd. Enables user management
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::ConfigTool&gt;
-  thruk      = ./thruk_local.conf
-  cgi.cfg    = ./cgi.cfg
-  htpasswd   = ./htpasswd
+  show_plugin_syntax_helper = 1
+  thruk                     = .../thruk_local.conf
+  cgi.cfg                   = .../cgi.cfg
+  htpasswd                  = .../htpasswd
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>
@@ -8330,7 +8346,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-12-01 17:33:00 CEST
+Last updated 2011-12-03 00:29:57 CEST
 </div>
 </div>
 </body>

@@ -1341,6 +1341,12 @@ config tool.
 You don't have to restart Thruk when changing the config with the
 config tool.
 
+  * general options for the config tool
+      - show_plugin_syntax_helper    Enable/Disable the plugin syntax
+                                     helper. When enabled, Thruk will
+                                     run the plugins with "plugin -h"
+                                     to get the help information.
+
   * you can manage different types of files with the config tool:
       - thruk               Path to your thruk_local.conf. Enables
                             adjusting Thruks config if set.
@@ -1352,9 +1358,10 @@ config tool.
 ex.:
 
   <Component Thruk::Plugin::ConfigTool>
-    thruk      = ./thruk_local.conf
-    cgi.cfg    = ./cgi.cfg
-    htpasswd   = ./htpasswd
+    show_plugin_syntax_helper = 1
+    thruk                     = .../thruk_local.conf
+    cgi.cfg                   = .../cgi.cfg
+    htpasswd                  = .../htpasswd
   </Component>
 
 

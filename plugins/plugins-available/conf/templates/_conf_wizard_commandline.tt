@@ -16,6 +16,7 @@
         <input type="text" id="[% id %]_inp_args" value="" style="width:650px">
       </td>
     </tr>
+    [% IF conf_config.show_plugin_syntax_helper %]
     <tr>
       <td class="attrName" colspan=2>
         <div id="[% id %]_help_accordion" style="width: 780px;">
@@ -27,6 +28,7 @@
         </div>
       </td>
     </tr>
+    [% END %]
     <tr>
       <td colspan=2 align="center"><br><button id="[% id %]_accept">accept</button></td>
     </tr>

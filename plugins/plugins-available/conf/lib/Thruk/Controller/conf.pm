@@ -93,6 +93,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
     $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
 
+    # set default
+    $c->stash->{conf_config}->{'show_plugin_syntax_helper'} = 1 unless defined $c->stash->{conf_config}->{'show_plugin_syntax_helper'};
+
     if($action eq 'cgi_contacts') {
         return $self->_process_cgiusers_page($c);
     }
@@ -191,7 +194,7 @@ sub _process_json_page {
     }
 
     # plugin help
-    if($type eq 'pluginhelp') {
+    if($type eq 'pluginhelp' and $c->stash->{conf_config}->{'show_plugin_syntax_helper'}) {
         my $plugins         = $self->_get_plugins($c);
         my $name            = $c->{'request'}->{'parameters'}->{'plugin'};
         my $help            = 'invalid command!';
