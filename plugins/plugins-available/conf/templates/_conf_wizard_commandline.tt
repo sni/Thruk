@@ -7,7 +7,7 @@
     <tr>
       <td class="attrName"><b>Choose Plugin</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_plugin" value="" onChange=""[% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:true, autosubmit:false})"[% END %] style="width:650px">
+        <input type="text" id="[% id %]_inp_plugin" value="" onfocus="this.click()"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'plugin', {url:'conf.cgi?action=json&amp;type=plugin', striped:true, autosubmit:false})"[% END %] style="width:650px">
       </td>
     </tr>
     <tr>
@@ -21,7 +21,7 @@
       <td class="attrName" colspan=2>
         <div id="[% id %]_help_accordion" style="width: 780px;">
             <h3><a href="#">Plugin Help</a></h3>
-            <div style="height: 300px; max-width:1000px;">
+            <div style="max-width:1000px;">
                 <span id="[% id %]_plugin_help" style="text-align: left;"></span>
                 <div align="center"><img id="[% id %]_wait_help" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="please wait till the plugin help is loaded" title="please wait till the plugin help is loaded" border="0" height="20" width="20"></div>
             </div>

@@ -59,6 +59,9 @@ function add_conf_attribute(table, key) {
 
     reset_table_row_classes(table, 'dataEven', 'dataOdd');
 
+    // otherwise button icons are missing
+    init_conf_tool_buttons();
+
     /* effect works only on table cells */
     jQuery(newObj.cells).effect('highlight', {}, 2000);
 
@@ -97,7 +100,8 @@ function init_conf_tool_buttons() {
         dialogClass: 'dialogWithDropShadow',
         autoOpen:    false,
         title:      'Select New Attributes',
-        width:      'auto'
+        width:      'auto',
+        position:   'top'
     });
     jQuery('#attr_opener').button({
         icons: {primary: 'ui-add-button'}
@@ -226,6 +230,7 @@ function do_update_command_line(id) {
                 jQuery('.'+id+'arg'+nr).val(args[nr-1]);
             }
 
+            // close the helper accordion
             if($accordion) {
                 $accordion.accordion("activate", -1);
             }
@@ -318,7 +323,8 @@ function init_plugin_help_accordion(id) {
         collapsible: true,
         active:      'none',
         clearStyle:  true,
-        autoHeight: false,
+        autoHeight:  false,
+        fillSpace:   true,
         changestart: function(event, ui) {
             var current;
             var input = document.getElementById(id+'inp_plugin');
@@ -364,7 +370,7 @@ function load_plugin_help(id, plugin) {
             }
             hideElement(id + 'wait_help');
             var plugin_help = result[0].plugin_help;
-            document.getElementById(id + 'plugin_help').innerHTML = '<pre style="white-space: pre-wrap;" id="'+id+'plugin_help_pre"><\/pre>';
+            document.getElementById(id + 'plugin_help').innerHTML = '<pre style="white-space: pre-wrap; height:400px; overflow: scoll;" id="'+id+'plugin_help_pre"><\/pre>';
             jQuery('#' + id + 'plugin_help_pre').text(plugin_help);
 
             // now set the values to avoid escaping
