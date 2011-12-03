@@ -8,7 +8,7 @@
     <tr>
       <td class="attrName" width="10%"><b>Choose Command</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_command" value="" onfocus="this.click()" onkeyup="update_command_line('[% id %]_')" onchange="update_command_line('[% id %]_')"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:true, autosubmit:false})"[% END %]>
+        <input type="text" id="[% id %]_inp_command" value="" onfocus="this.click(); ajax_search.autoopen=false;" onkeyup="update_command_line('[% id %]_')" onchange="update_command_line('[% id %]_')"[% IF use_ajax_search %] onclick="ajax_search.init(this, 'command', {url:'conf.cgi?action=json&amp;type=command', striped:true, autosubmit:false})"[% END %]>
         <input type="hidden" id="[% id %]_inp_args" value="">
       </td>
     </tr>

@@ -8154,6 +8154,7 @@ var ajax_search = {
     hideempty       : false,
     show_all        : false,
     dont_hide       : false,
+    autoopen        : true,
 
     /* initialize search
      *
@@ -8309,7 +8310,10 @@ var ajax_search = {
                     } else {
                         ajax_search.base = eval(transport.responseText);
                     }
-                    ajax_search.suggest();
+                    if(ajax_search.autoopen == true) {
+                        ajax_search.suggest();
+                    }
+                    ajax_search.autoopen = true;
                 },
                 onFailure: function(transport) {
                     ajax_search.initialized = false;

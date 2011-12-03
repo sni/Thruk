@@ -177,7 +177,6 @@ function init_conf_tool_command_wizard(id) {
     init_plugin_help_accordion(id);
 
     $d.dialog('open');
-    document.getElementById(cmd_arg_id).focus();
 
     last_cmd_name_value = '';
     do_update_command_line(id, cmd_name);
@@ -201,7 +200,10 @@ function do_update_command_line(id) {
     var cmd_arg  = document.getElementById(id + "inp_args").value;
     var args     = cmd_arg.split('!');
 
-    if(last_cmd_name_value == cmd_name) { return; }
+    if(last_cmd_name_value == cmd_name) {
+        hideElement(id + 'wait');
+        return;
+    }
     last_cmd_name_value = cmd_name;
 
     showElement(id + 'wait');
