@@ -93,7 +93,7 @@ sub new {
         'type'        => 'host',
         'primary_key' => 'host_name',
         'default'     => $Monitoring::Config::Object::Host::Defaults,
-        'standard'    => [ 'host_name', 'use', 'alias', 'address' ],
+        'standard'    => [ 'host_name', 'use', 'alias', 'address', 'contact_groups' ],
     };
     bless $self, $class;
     return $self;
