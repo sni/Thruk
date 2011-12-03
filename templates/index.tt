@@ -6,6 +6,26 @@
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <title>[% title_prefix %][% title %]</title>
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+    <script type="text/javascript">
+    <!--
+      var url_prefix              = '[% url_prefix %]';
+    -->
+    </script>
+    [%+ UNLESS author %]
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/all_in_one.js"></script>
+    [% ELSE %]
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.7.0.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
+    [% END +%]
+    <script type="text/javascript">
+    <!--
+    jQuery.noConflict();
+    jQuery(document).ready(function() {
+      load_url_from_parents_hash();
+    });
+    -->
+    </script>
   </head>
   <frameset cols="172,*" frameborder="0" framespacing="0" border="0">
     <frame src="[% url_prefix %]thruk/side.html[% IF target %]?target=[% target %][% END %]" name="side" frameborder="0" id="side" style="overflow-x: hidden;" />

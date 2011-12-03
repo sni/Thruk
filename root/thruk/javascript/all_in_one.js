@@ -6588,9 +6588,39 @@ function from_location_hash() {
     return data;
 }
 
+/* set icon src and refresh page */
 function refresh_button(btn) {
     btn.src = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
     window.setTimeout("reloadPage()", 100);
+}
+
+/* save url part in parents hash */
+function save_url_in_parents_hash() {
+    if(parent.frames[0]) {
+        var oldloc = new String(parent.location);
+        oldloc     = oldloc.replace(/#.*$/, '');
+        var newloc = new String(window.location);
+        newloc     = newloc.replace(oldloc, '');
+        newloc     = newloc.replace(/\?_=\d+$/, '');
+        parent.location.hash = '#'+newloc;
+    }
+}
+
+/* when framed, and there is a valid url in our
+ * hash, load it instead of the main frame
+ */
+function load_url_from_parents_hash() {
+    var newurl = new String(window.location.hash);
+    newurl     = newurl.replace(/^#/, '');
+    var oldurl = new String(window.location);
+    oldurl     = oldurl.replace(/#.*$/, '');
+    var values = window.location.pathname.split("/");
+    values.pop();
+    var last   = values.pop();
+    if(last == 'thruk' && newurl != 'main.html') {
+        debug('go -> '+ newurl);
+        window.frames[1].location = oldurl + newurl;
+    }
 }
 
 /*******************************************************************************
