@@ -1471,7 +1471,8 @@ sub _get_plugins {
     my $objects         = {};
     for my $macro (keys %{$user_macros}) {
         my $dir = $user_macros->{$macro};
-        next unless -d $dir.'/.';
+        $dir = $dir.'/.';
+        next unless -d $dir;
         if($dir =~ m|/plugins/|mx or $dir =~ m|/libexec/|mx) {
             $self->_set_plugins_for_directory($c, $dir, $macro, $objects);
         }
