@@ -195,11 +195,24 @@ sub _process_json_page {
 
     # plugin help
     if($type eq 'pluginhelp' and $c->stash->{conf_config}->{'show_plugin_syntax_helper'}) {
+        my $cmd;
         my $plugins         = $self->_get_plugins($c);
         my $name            = $c->{'request'}->{'parameters'}->{'plugin'};
-        my $help            = 'invalid command!';
+        my $objects         = $c->{'obj_db'}->get_objects_by_name('command', $name);
+        if(defined $objects->[0]) {
+            my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+            my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
+            ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
+            if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
+                $cmd = $file;
+            }
+        }
         if(defined $plugins->{$name}) {
-            my $cmd = $plugins->{$name}." -h 2>&1";
+            $cmd = $plugins->{$name};
+        }
+        my $help = 'help is only available for plugins!';
+        if(defined $cmd) {
+            $cmd = $cmd." -h 2>&1";
             $help = `$cmd`;
         }
         my $json            = [ { 'plugin_help' => $help } ];
@@ -1459,7 +1472,7 @@ sub _get_plugins {
     for my $macro (keys %{$user_macros}) {
         my $dir = $user_macros->{$macro};
         next unless -d $dir.'/.';
-        if($dir =~ m/plugins/mx or $dir =~ m/libexec/mx) {
+        if($dir =~ m|/plugins/|mx or $dir =~ m|/libexec/|mx) {
             $self->_set_plugins_for_directory($c, $dir, $macro, $objects);
         }
     }

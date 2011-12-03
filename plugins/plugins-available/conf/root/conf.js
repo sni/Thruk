@@ -206,6 +206,20 @@ function do_update_command_line(id) {
     }
     last_cmd_name_value = cmd_name;
 
+    // check if its a direct hit from search
+    // otherwise an update is useless as it is
+    // not a full command
+    if(ajax_search && ajax_search.base && ajax_search.base[0] && ajax_search.base[0].data) {
+        var found = 0;
+        ajax_search.base[0].data.each(function(elem) {
+            if(elem == cmd_name) { found++; }
+        });
+        if(found == 0) {
+            return;
+        }
+    }
+
+
     showElement(id + 'wait');
     document.getElementById(id + 'command_line').innerHTML = "";
     new Ajax.Request('conf.cgi?action=json&amp;type=commanddetails&command='+cmd_name, {
@@ -233,8 +247,8 @@ function do_update_command_line(id) {
             }
 
             // close the helper accordion
-            if($accordion) {
-                $accordion.accordion("activate", -1);
+            if($accordion && $accordion.children('h3').hasClass('ui-state-active')) {
+                $accordion.accordion("activate", false);
             }
         },
         onFailure: function(transport) {
@@ -327,23 +341,15 @@ function init_plugin_help_accordion(id) {
         clearStyle:  true,
         autoHeight:  false,
         fillSpace:   true,
-        changestart: function(event, ui) {
+        change:      function(event, ui) {
             var current;
             var input = document.getElementById(id+'inp_plugin');
             if(input) {
                 current = input.value;
             } else {
-                input = document.getElementById(id+'command_line');
+                input = document.getElementById(id+'inp_command');
                 if(input) {
-                    current = input.innerHTML;
-                    var index1 = input.innerHTML.indexOf(" ");
-                    var index2 = input.innerHTML.indexOf("<br>");
-                    if(index1 != -1) {
-                        current = current.substr(0, index1);
-                    };
-                    if(index2 != -1) {
-                        current = current.substr(0, index2);
-                    };
+                    current = input.value;
                 }
             }
             if(current) {
@@ -351,6 +357,8 @@ function init_plugin_help_accordion(id) {
                     last_plugin_help = current;
                     load_plugin_help(id, current);
                 }
+            } else {
+                hideElement(id + 'wait_help');
             }
         }
     });
@@ -359,8 +367,16 @@ function init_plugin_help_accordion(id) {
 function load_plugin_help(id, plugin) {
     document.getElementById(id + 'plugin_help').innerHTML = "";
     if(plugin == '') {
+        hideElement(id + 'wait_help');
         return;
     }
+
+    // verify accordion is really open
+    if(!$accordion || $accordion.children('h3').hasClass('ui-state-active') == false) {
+        hideElement(id + 'wait_help');
+        return;
+    }
+
     showElement(id + 'wait_help');
     new Ajax.Request('conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin, {
         onSuccess: function(transport) {

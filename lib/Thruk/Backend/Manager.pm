@@ -462,7 +462,9 @@ sub _replace_macros {
     $self->_set_user_macros($host->{'peer_key'}, $macros);
 
     # host macros
-    $self->_set_host_macros($host, $macros);
+    if(defined $host) {
+        $self->_set_host_macros($host, $macros);
+    }
 
     # service macros
     if(defined $service) {
