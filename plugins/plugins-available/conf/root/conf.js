@@ -246,10 +246,7 @@ function do_update_command_line(id) {
                 jQuery('.'+id+'arg'+nr).val(args[nr-1]);
             }
 
-            // close the helper accordion
-            if($accordion && $accordion.children('h3').hasClass('ui-state-active')) {
-                $accordion.accordion("activate", false);
-            }
+            close_accordion();
         },
         onFailure: function(transport) {
             hideElement(id + 'wait');
@@ -287,7 +284,7 @@ function update_other_inputs(elem) {
 }
 
 /* handle command line wizard dialog */
-var last_plugin_help = '';
+var last_plugin_help = undefined;
 function init_conf_tool_plugin_wizard(id) {
     id = id.substr(0, id.length -3);
 
@@ -354,10 +351,10 @@ function init_plugin_help_accordion(id) {
             }
             if(current) {
                 if(current != last_plugin_help) {
-                    last_plugin_help = current;
                     load_plugin_help(id, current);
                 }
             } else {
+                document.getElementById(id + 'plugin_help').innerHTML = 'please select a plugin first';
                 hideElement(id + 'wait_help');
             }
         }
@@ -378,6 +375,7 @@ function load_plugin_help(id, plugin) {
     }
 
     showElement(id + 'wait_help');
+    last_plugin_help = plugin;
     new Ajax.Request('conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin, {
         onSuccess: function(transport) {
             var result;
@@ -401,4 +399,11 @@ function load_plugin_help(id, plugin) {
             document.getElementById(id + 'plugin_help').innerHTML = 'error';
         }
     });
+}
+
+function close_accordion() {
+    // close the helper accordion
+    if($accordion && $accordion.children('h3').hasClass('ui-state-active')) {
+        $accordion.accordion("activate", false);
+    }
 }
