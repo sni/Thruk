@@ -12,6 +12,7 @@ use File::Copy;
 use JSON::XS;
 use parent 'Catalyst::Controller';
 use Storable qw/dclone store retrieve/;
+use Data::Dumper;
 
 =head1 NAME
 
@@ -1466,7 +1467,7 @@ sub _get_model_retention {
             }
         } else {
             # old or unknown file
-            $c->log->debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.$data->{'release_date'});
+            $c->log->debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.Dumper($data->{'release_date'}));
             unlink($file);
         }
     };
