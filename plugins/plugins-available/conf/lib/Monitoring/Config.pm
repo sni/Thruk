@@ -644,7 +644,10 @@ sub _set_config {
             $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
         }
 
-        open(my $fh, '<', $core_conf);
+        open(my $fh, '<', $core_conf) or do {
+            push @{$self->{'errors'}}, "cannot read $core_conf: $!";
+            return;
+        };
         while(my $line = <$fh>) {
             chomp($line);
             my($key,$value) = split/\s*=\s*/mx, $line, 2;
