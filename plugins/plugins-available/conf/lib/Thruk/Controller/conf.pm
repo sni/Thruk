@@ -1421,7 +1421,12 @@ sub _store_model_retention {
 
     # try to save retention data
     eval {
-        store($model->{'configs'}, $file);
+        my $data = {
+            'configs'      => $model->{'configs'},
+            'release_date' => $c->config->{'released'},
+            'version'      => $c->config->{'version'},
+        };
+        store($data, $file);
         $c->stash->{'obj_model_changed'} = 0;
         $c->log->debug('saved object retention data');
     };
@@ -1446,15 +1451,27 @@ sub _get_model_retention {
 
     # try to retrieve retention data
     eval {
-        my $model_configs = retrieve($file);
-        for my $backend (keys %{$model_configs}) {
-            if(defined $c->stash->{'backend_detail'}->{$backend}) {
-                $model->init($backend, undef, $model_configs->{$backend});
-                $c->log->debug('restored object retention data for '.$backend);
+        my $data = retrieve($file);
+        if(defined $data->{'release_date'}
+           and $data->{'release_date'} eq $c->config->{'released'}
+           and defined $data->{'version'}
+           and $data->{'version'} eq $c->config->{'version'}
+        ) {
+            my $model_configs = $data->{'configs'};
+            for my $backend (keys %{$model_configs}) {
+                if(defined $c->stash->{'backend_detail'}->{$backend}) {
+                    $model->init($backend, undef, $model_configs->{$backend});
+                    $c->log->debug('restored object retention data for '.$backend);
+                }
             }
+        } else {
+            # old or unknown file
+            $c->log->debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.$data->{'release_date'});
+            unlink($file);
         }
     };
     if($@) {
+        unlink($file);
         $c->log->error($@);
         return;
     }
