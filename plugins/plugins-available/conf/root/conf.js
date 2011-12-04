@@ -160,11 +160,12 @@ function init_conf_tool_command_wizard(id) {
         width:       'auto',
         maxWidth:    1024,
         position:   'top',
-        close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
+        close:       function(event, ui) { do_command_line_updates=0; ajax_search.hide_results(undefined, 1); return true; }
     });
     jQuery('#' + id + 'accept').button({
         icons: {primary: 'ui-ok-button'}
     }).click(function() {
+        do_command_line_updates=0;
         ajax_search.hide_results(undefined, 1);
         $d.dialog('close');
         // set values in original inputs
@@ -179,21 +180,20 @@ function init_conf_tool_command_wizard(id) {
     $d.dialog('open');
 
     last_cmd_name_value = '';
-    do_update_command_line(id, cmd_name);
+    do_command_line_updates=1;
+    update_command_line(id, cmd_name);
 
     return;
 }
 
-/* delay update a few millis */
-var cmdUpdateTimer;
-function update_command_line(id) {
-    window.clearTimeout(cmdUpdateTimer);
-    cmdUpdateTimer = window.setTimeout("do_update_command_line('"+id+"')", 300);
-}
-
 /* update command line */
 var last_cmd_name_value = '';
-function do_update_command_line(id) {
+var do_command_line_updates = 0;
+function update_command_line(id) {
+
+    if(do_command_line_updates == 0) {
+        return;
+    }
 
     // set rest based on detailed command info
     var cmd_name = document.getElementById(id + "inp_command").value;
@@ -201,6 +201,7 @@ function do_update_command_line(id) {
     var args     = cmd_arg.split('!');
 
     if(last_cmd_name_value == cmd_name) {
+        window.setTimeout("update_command_line('"+id+"')", 300);
         hideElement(id + 'wait');
         return;
     }
@@ -215,6 +216,7 @@ function do_update_command_line(id) {
             if(elem == cmd_name) { found++; }
         });
         if(found == 0) {
+            window.setTimeout("update_command_line('"+id+"')", 300);
             return;
         }
     }
@@ -253,6 +255,8 @@ function do_update_command_line(id) {
             document.getElementById(id + 'command_line').innerHTML = 'error';
         }
     });
+
+    window.setTimeout("update_command_line('"+id+"')", 300);
 }
 
 function collect_args(id) {

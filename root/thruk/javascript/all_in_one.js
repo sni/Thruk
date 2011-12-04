@@ -6602,6 +6602,7 @@ function save_url_in_parents_hash() {
         var newloc = new String(window.location);
         newloc     = newloc.replace(oldloc, '');
         newloc     = newloc.replace(/\?_=\d+$/, '');
+        newloc     = newloc.replace(/\&_=\d+$/, '');
         parent.location.hash = '#'+newloc;
     }
 }
