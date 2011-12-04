@@ -6617,7 +6617,7 @@ function load_url_from_parents_hash() {
     var values = window.location.pathname.split("/");
     values.pop();
     var last   = values.pop();
-    if(last == 'thruk' && newurl != 'main.html') {
+    if(last == 'thruk' && newurl != 'main.html' && newurl != '') {
         debug('go -> '+ newurl);
         window.frames[1].location = oldurl + newurl;
     }

@@ -451,7 +451,6 @@ page: /thruk/frame.html
 
 sub thruk_frame_html : Regex('thruk\/frame\.html') {
     my( $self, $c ) = @_;
-
     # allowed links to be framed
     my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."thruk/cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
     my $additional_links = $c->config->{'allowed_frame_links'};
@@ -469,6 +468,9 @@ sub thruk_frame_html : Regex('thruk\/frame\.html') {
     if( defined $link ) {
         for my $pattern ( @{$valid_links} ) {
             if( $link =~ m/$pattern/mx ) {
+                if($c->stash->{'use_frames'}) {
+                    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/#".$link);
+                }
                 $c->stash->{'target'}   = '_parent';
                 $c->stash->{'main'}     = $link;
                 $c->stash->{'title'}    = $c->config->{'name'};
