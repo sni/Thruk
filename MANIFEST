@@ -279,6 +279,7 @@ t/view_JSON.t
 t/view_TT.t
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
+templates/_common_js.tt
 templates/_excel_export.tt
 templates/_extinfo_cmd_pane.tt
 templates/_footer.tt

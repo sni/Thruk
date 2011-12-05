@@ -196,6 +196,10 @@ print "patched Makefile\n";
 print "finished\n";
 
 # create combined javascript/css files
-`cd root/thruk/javascript && cat prototype-1.7.0.js jquery-1.6.2.min.js thruk.js cal/jscal2.js overlib.js jquery-fieldselection.js jquery-ui/js/jquery-ui-1.8.16.custom.min.js > all_in_one.js`;
-`cd themes/themes-available/Thruk/stylesheets/ && cat thruk_global.css thruk_noframes.css Thruk.css > all_in_one_noframes.css`;
-`cd themes/themes-available/Thruk/stylesheets/ && cat thruk_global.css Thruk.css > all_in_one.css`;
+eval {
+    require Thruk; Thruk->import();
+    system('cd root/thruk/javascript && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one.js');
+    system('cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes.css');
+    system('cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css'}}).' > all_in_one.css');
+};
+print $@ if $@;

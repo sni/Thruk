@@ -1,0 +1,18 @@
+﻿<script type="text/javascript">
+<!--
+  var url_prefix = '[% url_prefix %]';
+  var theme      = '[% theme %]';
+-->
+</script>
+[%+ UNLESS author %]
+<script type="text/javascript" src="[% url_prefix %]thruk/javascript/all_in_one.js"></script>
+[% ELSE %]
+  [% FOREACH jsfiles = all_in_one_javascript %]
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/[% jsfiles %]"></script>
+  [% END %]
+[% END +%]
+<script type="text/javascript">
+<!--
+    jQuery.noConflict();
+-->
+</script>
