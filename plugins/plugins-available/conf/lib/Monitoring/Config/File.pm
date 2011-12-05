@@ -27,7 +27,7 @@ return new host
 
 =cut
 sub new {
-    my ( $class, $file, $readonlypattern ) = @_;
+    my ( $class, $file, $readonlypattern, $coretype ) = @_;
     my $self = {
         'path'        => $file,
         'mtime'       => undef,
@@ -42,8 +42,11 @@ sub new {
         'objects'     => [],
         'errors'      => [],
         'macros'      => { 'host' => {}, 'service' => {}},
+        'coretype'    => $coretype,
     };
     bless $self, $class;
+
+    confess('no core type!') unless defined $coretype;
 
     # dont save relative paths
     if($file =~ m/\.\./mx or $file !~ m/\.cfg$/mx) {
@@ -223,7 +226,7 @@ sub _parse_line {
 
     # new object starts
     if(substr($line, 0, 7) eq 'define ' and $line =~ m/^define\s+(.*?)\s*{/gmxo) {
-        $current_object = Monitoring::Config::Object->new(type => $1, file => $self, line => $linenr);
+        $current_object = Monitoring::Config::Object->new(type => $1, file => $self, line => $linenr, 'coretype' => $self->{'coretype'});
         unless(defined $current_object) {
             push @{$self->{'errors'}}, "unknown object type '".$1."' in ".$self->{'path'}.":".$linenr;
             $in_unknown_object = 1;

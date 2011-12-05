@@ -2,6 +2,7 @@ package Monitoring::Config::Object;
 
 use strict;
 use warnings;
+use Carp;
 use Storable qw(dclone);
 use Monitoring::Config::Object::Host;
 use Monitoring::Config::Object::Hostgroup;
@@ -57,10 +58,12 @@ return a new object of given type
 sub new {
     my $class = shift;
     my $conf  = {@_};
+    confess('no core type!') unless defined $conf->{'coretype'};
 
-    my $obj = \&{"Monitoring::Config::Object::".ucfirst($conf->{'type'})."::new"};
+    my $objclass = 'Monitoring::Config::Object::'.ucfirst($conf->{'type'});
+    my $obj = \&{$objclass."::new"};
     return unless defined &$obj;
-    my $current_object = &$obj();
+    my $current_object = &$obj($objclass, $conf->{'coretype'});
 
     $current_object->{'conf'}     = dclone( $conf->{'conf'} || {} );
     $current_object->{'line'}     = $conf->{'line'} || 0;

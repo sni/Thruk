@@ -69,10 +69,20 @@
 
 [% ELSIF defaults.$key.type == 'CHOOSE' %]
   [% IF edit %]
-    [% FOREACH k = defaults.$key.keys %]
-    [% SET x = loop.index %]
-    [% SET v = defaults.$key.values.$x %]
-    <input type="radio" name="obj.[% key %]" value="[% v %]"[% IF obj_conf.defined(key) && value == v %] checked[% END %]> [% k %]
+    [% IF defaults.$key.keys.size > 2 %]
+        <select name="obj.[% key %]">
+        [% FOREACH k = defaults.$key.keys %]
+        [% SET x = loop.index %]
+        [% SET v = defaults.$key.values.$x %]
+        <option value="[% v %]"[% IF obj_conf.defined(key) && value == v %] selected[% END %]> [% k %]</option>
+        [% END %]
+        </select>
+    [% ELSE %]
+        [% FOREACH k = defaults.$key.keys %]
+        [% SET x = loop.index %]
+        [% SET v = defaults.$key.values.$x %]
+        <input type="radio" name="obj.[% key %]" value="[% v %]"[% IF obj_conf.defined(key) && value == v %] checked[% END %]> [% k %]
+        [% END %]
     [% END %]
   [% ELSE %]
     [% value %]

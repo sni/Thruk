@@ -1004,7 +1004,7 @@ sub _get_context_object {
 
     # new object
     if($c->stash->{'data_id'} and $c->stash->{'data_id'} eq 'new') {
-        $obj = Monitoring::Config::Object->new( type => $c->stash->{'type'} );
+        $obj = Monitoring::Config::Object->new( type => $c->stash->{'type'}, 'coretype' => $c->{'obj_db'}->{'coretype'} );
         my $files_root = $self->_set_files_stash($c);
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
         $new_file      =~ s/^\///gmx;
@@ -1018,7 +1018,7 @@ sub _get_context_object {
             $obj->{'file'} = $file;
         } else {
             # new file
-            my $file = Monitoring::Config::File->new($files_root.$new_file, $c->{'obj_db'}->{'config'}->{'obj_readonly'});
+            my $file = Monitoring::Config::File->new($files_root.$new_file, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
             if(defined $file and $file->{'readonly'}) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
                 $c->stash->{'new_file'} = '/'.$new_file;
@@ -1165,7 +1165,7 @@ sub _object_revert {
     my $id = $obj->get_id();
     if(-e $obj->{'file'}->{'path'}) {
         my $oldobj;
-        my $tmpfile = Monitoring::Config::File->new($obj->{'file'}->{'path'});
+        my $tmpfile = Monitoring::Config::File->new($obj->{'file'}->{'path'}, undef, $c->{'obj_db'}->{'coretype'});
         $tmpfile->update_objects();
         for my $o (@{$tmpfile->{'objects'}}) {
             if($id eq $o->get_id()) {
@@ -1267,10 +1267,9 @@ sub _object_clone {
     my $files_root          = $self->_set_files_stash($c);
     $c->stash->{'new_file'} = $obj->{'file'}->{'path'};
     $c->stash->{'new_file'} =~ s/^$files_root/\//gmx;
-    $obj = Monitoring::Config::Object->new(
-                                        type => $obj->get_type(),
-                                        conf => $obj->{'conf'},
-                                       );
+    $obj = Monitoring::Config::Object->new(type     => $obj->get_type(),
+                                           conf     => $obj->{'conf'},
+                                           coretype => $c->{'obj_db'}->{'coretype'});
     return $obj;
 }
 
@@ -1282,7 +1281,9 @@ sub _object_new {
 
     $self->_set_files_stash($c);
     $c->stash->{'new_file'} = '';
-    my $obj = Monitoring::Config::Object->new(type => $c->stash->{'type'}, name => $c->stash->{'data_name'});
+    my $obj = Monitoring::Config::Object->new(type     => $c->stash->{'type'},
+                                              name     => $c->stash->{'data_name'},
+                                              coretype => $c->{'obj_db'}->{'coretype'});
     return $obj;
 }
 

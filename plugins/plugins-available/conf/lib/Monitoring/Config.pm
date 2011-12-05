@@ -38,6 +38,7 @@ sub new {
         'needs_update'     => 0,
         'needs_commit'     => 0,
         'needs_reload'     => 0,
+        'coretype'         => 'nagios',
     };
 
     bless $self, $class;
@@ -648,12 +649,15 @@ sub _set_config {
 
         if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
+            $self->{'coretype'} = 'nagios';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
+            $self->{'coretype'} = 'icinga';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/shinken/shinken.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/shinken/shinken.cfg';
+            $self->{'coretype'} = 'shinken';
         }
 
         open(my $fh, '<', $core_conf) or do {
@@ -675,6 +679,17 @@ sub _set_config {
             }
             if($key eq 'resource_file') {
                 $self->{'config'}->{'obj_resource_file'} = $value;
+            }
+
+            # try to autodetect config type
+            if($key eq 'nagios_user') {
+                $self->{'coretype'} = 'nagios';
+            }
+            if($key eq 'icinga_user') {
+                $self->{'coretype'} = 'icinga';
+            }
+            if($key eq 'shinken_user') {
+                $self->{'coretype'} = 'shinken';
             }
         }
         close($fh);
@@ -755,7 +770,7 @@ sub _get_files {
     my @files;
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
-        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'});
+        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
         push @files, $file;
     }
 
@@ -860,7 +875,7 @@ sub _check_files_changed {
     for my $file (@{$self->_get_files_names()}) {
         if(!defined $oldfiles->{$file}) {
             if($reload) {
-                push @{$self->{'files'}}, Monitoring::Config::File->new($file, $self->{'config'}->{'obj_readonly'});
+                push @{$self->{'files'}}, Monitoring::Config::File->new($file, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
             } else {
                 push @{$self->{'errors'}}, "file ".$file." has been added.";
             }

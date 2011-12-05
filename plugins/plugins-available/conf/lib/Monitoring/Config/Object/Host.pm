@@ -88,7 +88,15 @@ return new object
 
 =cut
 sub new {
-    my $class = shift || __PACKAGE__;
+    my $class    = shift || __PACKAGE__;
+    my $coretype = shift;
+
+    if($coretype eq 'shinken') {
+       $Monitoring::Config::Object::Host::Defaults->{'criticity'} = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
+    } else {
+        delete $Monitoring::Config::Object::Host::Defaults->{'criticity'};
+    }
+
     my $self = {
         'type'        => 'host',
         'primary_key' => 'host_name',
