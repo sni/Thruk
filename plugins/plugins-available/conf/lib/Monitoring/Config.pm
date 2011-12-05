@@ -948,9 +948,14 @@ sub _update_obj_in_index {
 
     # by template name
     if(defined $tname) {
-        if(defined $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname}) {
-            my $orig = $self->get_object_by_id($objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname});
-            push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'}."\n -> already defined in ".$orig->{'file'}->{'path'}.":".$orig->{'line'};
+        my $existing_id = $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname};
+        if(defined $existing_id) {
+            my $orig = $self->get_object_by_id($existing_id);
+            if(defined $orig) {
+                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'}."\n  -> already defined in ".$orig->{'file'}->{'path'}.":".$orig->{'line'};
+            } else {
+                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'};
+            }
         }
         $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname} = $obj->{'id'};
         $found++;
@@ -992,7 +997,7 @@ sub _update_obj_in_index {
                     "duplicate ".$obj->{'type'}." definition $pname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'};
             } else {
                 push @{$self->{'errors'}},
-                    "duplicate ".$obj->{'type'}." definition $pname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'}."\n -> already defined in ".$orig->{'file'}->{'path'}.":".$orig->{'line'};
+                    "duplicate ".$obj->{'type'}." definition $pname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'}."\n  -> already defined in ".$orig->{'file'}->{'path'}.":".$orig->{'line'};
             }
         }
         $objects->{'byname'}->{$obj->{'type'}}->{$pname} = $obj->{'id'};
