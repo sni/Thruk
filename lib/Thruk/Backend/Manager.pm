@@ -335,6 +335,7 @@ sub expand_command {
         my $return = {
             'line'          => 'no command defined',
             'line_expanded' => '',
+            'note'          => '',
         };
         return $return;
     }

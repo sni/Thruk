@@ -142,7 +142,7 @@ sub _process_json_page {
             my @addresses = gethostbyname($c->{'request'}->{'parameters'}->{'host'});
             @addresses = map { inet_ntoa($_) } @addresses[4 .. $#addresses];
             if(scalar @addresses > 0) {
-                $resolved = shift @addresses;
+                $resolved = join(' ', @addresses);
             }
         }
         my $json            = { 'address' => $resolved };
