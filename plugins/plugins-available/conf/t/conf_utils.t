@@ -78,7 +78,7 @@ unlink($filename);
 # check object definitions
 for my $type (@{$Monitoring::Config::Object::Types}) {
     use_ok 'Monitoring::Config::Object::'.ucfirst($type);
-    my $obj = Monitoring::Config::Object->new(type => $type);
+    my $obj = Monitoring::Config::Object->new(type => $type, coretype => 'nagios');
     isa_ok( $obj, 'Monitoring::Config::Object::'.ucfirst($type) );
     for my $attr ( keys %{$obj->{'default'}}) {
         my $field = $obj->{'default'}->{$attr};

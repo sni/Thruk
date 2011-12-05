@@ -929,7 +929,7 @@ sub _rebuild_index {
     if(scalar @{$objects_without_primary} > 0) {
         for my $obj (@{$objects_without_primary}) {
             my $conf = $obj->get_resolved_config($objects);
-            my $tmp_obj = Monitoring::Config::Object->new(type => $obj->get_type(), conf => $conf);
+            my $tmp_obj = Monitoring::Config::Object->new(type => $obj->get_type(), conf => $conf, coretype => $self->{'coretype'});
             my $primary = $tmp_obj->get_primary_name();
             if(defined $primary) {
                 $self->_update_obj_in_index($objects, $obj, $primary);

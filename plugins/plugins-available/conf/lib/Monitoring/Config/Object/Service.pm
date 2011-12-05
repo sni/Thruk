@@ -90,7 +90,7 @@ sub new {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
     if($coretype eq 'shinken') {
-       $Monitoring::Config::Object::Service::Defaults->{'criticity'} = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
+        $Monitoring::Config::Object::Service::Defaults->{'criticity'} = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
     } else {
         delete $Monitoring::Config::Object::Service::Defaults->{'criticity'};
     }
