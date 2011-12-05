@@ -173,6 +173,13 @@ sub _process_json_page {
             '$LONGSERVICEOUTPUT$',
             '$SERVICEPERFDATA$',
         ];
+        if(defined $c->{'request'}->{'parameters'}->{'withargs'}) {
+            push @{$objects}, ('$ARG1$', '$ARG2$', '$ARG3$', '$ARG4$', '$ARG5$');
+        }
+        if(defined $c->{'request'}->{'parameters'}->{'withuser'}) {
+            my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
+            push @{$objects}, keys %{$user_macros};
+        }
         for my $type (qw/host service/) {
             for my $macro (keys %{$c->{'obj_db'}->{'macros'}->{$type}}) {
                 push @{$objects}, '$_'.uc($type).uc(substr($macro, 1)).'$';
@@ -180,6 +187,13 @@ sub _process_json_page {
         }
         @{$objects} = sort @{$objects};
         my $json            = [ { 'name' => 'macros', 'data' => $objects } ];
+        if($c->stash->{conf_config}->{'show_plugin_syntax_helper'}) {
+            if(defined $c->{'request'}->{'parameters'}->{'plugin'} and $c->{'request'}->{'parameters'}->{'plugin'} ne '') {
+                my $help = $self->_get_plugin_help($c, $c->{'request'}->{'parameters'}->{'plugin'});
+                my @options = $help =~ m/(\-[\w\d]|\-\-[\d\w\-_]+)[=|,|\s|\$]/gmx;
+                push @{$json}, { 'name' => 'arguments', 'data' => Thruk::Utils::array_uniq(\@options) } if scalar @options > 0;
+            }
+        }
         $c->stash->{'json'} = $json;
         $c->forward('Thruk::View::JSON');
         return;
@@ -196,30 +210,7 @@ sub _process_json_page {
 
     # plugin help
     if($type eq 'pluginhelp' and $c->stash->{conf_config}->{'show_plugin_syntax_helper'}) {
-        my $cmd;
-        my $plugins         = $self->_get_plugins($c);
-        my $name            = $c->{'request'}->{'parameters'}->{'plugin'};
-        my $objects         = $c->{'obj_db'}->get_objects_by_name('command', $name);
-        if(defined $objects->[0]) {
-            my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-            my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
-            ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
-            if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
-                $cmd = $file;
-            }
-        }
-        if(defined $plugins->{$name}) {
-            $cmd = $plugins->{$name};
-        }
-        my $help = 'help is only available for plugins!';
-        if(defined $cmd) {
-            eval {
-                local $SIG{ALRM} = sub { die('alarm'); };
-                alarm(5);
-                $cmd = $cmd." -h 2>&1";
-                $help = `$cmd`;
-            }
-        }
+        my $help            = $self->_get_plugin_help($c, $c->{'request'}->{'parameters'}->{'plugin'});
         my $json            = [ { 'plugin_help' => $help } ];
         $c->stash->{'json'} = $json;
         $c->forward('Thruk::View::JSON');
@@ -1519,6 +1510,36 @@ sub _set_plugins_for_directory {
     return $objects;
 }
 
+##########################################################
+sub _get_plugin_help {
+    my($self, $c, $name) = @_;
+
+    my $cmd;
+    my $plugins         = $self->_get_plugins($c);
+    my $objects         = $c->{'obj_db'}->get_objects_by_name('command', $name);
+    if(defined $objects->[0]) {
+        my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+        my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
+        ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
+        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
+            $cmd = $file;
+        }
+    }
+    if(defined $plugins->{$name}) {
+        $cmd = $plugins->{$name};
+    }
+    my $help = 'help is only available for plugins!';
+    if(defined $cmd) {
+        eval {
+            local $SIG{ALRM} = sub { die('alarm'); };
+            alarm(5);
+            $cmd = $cmd." -h 2>/dev/null";
+            $help = `$cmd`;
+            alarm(0);
+        }
+    }
+    return $help;
+}
 ##########################################################
 
 =head1 AUTHOR

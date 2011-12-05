@@ -16,6 +16,7 @@
     [% ELSE %]
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/prototype-1.7.0.js"></script>
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-fieldselection.js"></script>
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk.js"></script>
     [% END +%]
     <script type="text/javascript">

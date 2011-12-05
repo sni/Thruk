@@ -19,7 +19,7 @@
     <tr>
       <td colspan=3 class="dataVar" style="text-align:center">
         Move [% object.get_type() %] '[% object.get_name() %]' to<br>
-        <input type="text" class="deletable" name="newfile" id="fileselect" onclick="ajax_search.init(this, 'file', {striped:false, autosubmit:false, list:false, templates:false, data:data})">
+        <input type="text" class="deletable" name="newfile" id="fileselect" onclick="ajax_search.init(this, 'file', {striped:false, autosubmit:false, templates:false, data:data})">
         <br><br>
       </td>
     </tr>

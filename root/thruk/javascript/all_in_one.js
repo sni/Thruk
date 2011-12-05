@@ -6624,6 +6624,29 @@ function load_url_from_parents_hash() {
     }
 }
 
+/* reverse a string */
+function reverse(s){
+    return s.split("").reverse().join("");
+}
+
+function setSelectionRange(input, selectionStart, selectionEnd) {
+  if (input.setSelectionRange) {
+    input.focus();
+    input.setSelectionRange(selectionStart, selectionEnd);
+  }
+  else if (input.createTextRange) {
+    var range = input.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', selectionEnd);
+    range.moveStart('character', selectionStart);
+    range.select();
+  }
+}
+
+function setCaretToPos(input, pos) {
+  setSelectionRange(input, pos, pos);
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -8173,6 +8196,7 @@ var ajax_search = {
     res             : new Array(),
     initialized     : false,
     initialized_t   : false,
+    initialized_a   : false,
     cur_select      : -1,
     result_size     : false,
     cur_results     : false,
@@ -8186,18 +8210,20 @@ var ajax_search = {
     show_all        : false,
     dont_hide       : false,
     autoopen        : true,
+    append_value_of : undefined,
 
     /* initialize search
      *
      * options are {
-     *   url:        url to fetch data
-     *   striped:    true/false, everything after " - " is trimmed
-     *   autosubmit: true/false
-     *   list:       true/false, string is split by , and suggested by last chunk
-     *   templates:  no/templates/both, suggest templates
-     *   data:       search base data
-     *   hideempty:  true/false, hide results when there are no hits
-     *   add_prefix: true/false, add ho:... prefix
+     *   url:               url to fetch data
+     *   striped:           true/false, everything after " - " is trimmed
+     *   autosubmit:        true/false
+     *   list:              true/false, string is split by , and suggested by last chunk
+     *   templates:         no/templates/both, suggest templates
+     *   data:              search base data
+     *   hideempty:         true/false, hide results when there are no hits
+     *   add_prefix:        true/false, add ho:... prefix
+     *   append_value_of:   id of input field to append to the original url
      * }
      */
     //init: function(elem, type, url, striped, autosubmit, list, templates, data) {
@@ -8235,6 +8261,12 @@ var ajax_search = {
             ajax_search.add_prefix = options.add_prefix;
         }
 
+        if(options.append_value_of != undefined) {
+            append_value_of = options.append_value_of;
+        } else {
+            append_value_of = ajax_search.append_value_of;
+        }
+
         var input = document.getElementById(ajax_search.input_field);
         ajax_search.size = input.getWidth();
 
@@ -8262,6 +8294,18 @@ var ajax_search = {
         }
         if(options.url != undefined) {
             search_url              = options.url;
+        }
+
+        var appended_value;
+        if(append_value_of) {
+            var el = document.getElementById(append_value_of);
+            if(el) {
+                search_url     = search_url + el.value;
+                appended_value = el.value;
+            } else {
+                search_url     = ajax_search.url;
+                appended_value = '';
+            }
         }
 
         input.setAttribute("autocomplete", "off");
@@ -8309,7 +8353,9 @@ var ajax_search = {
         // update every hour (frames searches wont update otherwise)
         if(   ajax_search.initialized
            && now > ajax_search.initialized - ajax_search.update_interval
-           && ajax_search.initialized_t == type
+           && (    append_value_of == undefined && ajax_search.initialized_t == type
+               || (append_value_of != undefined && ajax_search.initialized_a == appended_value )
+              )
         ) {
             ajax_search.suggest();
             return false;
@@ -8317,6 +8363,10 @@ var ajax_search = {
 
         ajax_search.initialized   = now;
         ajax_search.initialized_t = type;
+        ajax_search.initialized_a = undefined;
+        if(append_value_of) {
+            ajax_search.initialized_a = appended_value;
+        }
 
         // disable autocomplete
         var tmpElem = input;
@@ -8415,8 +8465,26 @@ var ajax_search = {
         pattern = input.value;
         if(ajax_search.list) {
             /* only use the last list element for search */
-            var values = pattern.split(",");
-            pattern = values.pop();
+            var regex  = new RegExp(ajax_search.list, 'g');
+            var range  = jQuery(input).getSelection();
+            var before = pattern.substr(0, range.start);
+            var after  = pattern.substr(range.start);
+            var rever  = reverse(before);
+            var index  = rever.search(regex);
+            if(index != -1) {
+                var index2  = after.search(regex);
+                if(index2 != -1) {
+                    pattern = reverse(rever.substr(0, index)) + after.substr(0, index2);
+                } else {
+                    pattern = reverse(rever.substr(0, index)) + after;
+                }
+            } else {
+                // possible on the first elem, then we search for the first delimiter after the cursor
+                var index  = pattern.search(regex);
+                if(index != -1) {
+                    pattern = pattern.substr(0, index);
+                }
+            }
         }
         if(pattern.length >= 1 || ajax_search.search_type != 'all') {
 
@@ -8591,27 +8659,43 @@ var ajax_search = {
             return true;
         }
 
-        if(ajax_search.striped) {
+        if(ajax_search.striped && value != undefined) {
             var values = value.split(" - ", 2);
             value = values[0];
         }
 
         var input   = document.getElementById(ajax_search.input_field);
 
+        var cursorpos = undefined;
         if(ajax_search.list) {
-            var values  = input.value.split(",");
-            var current = values.pop();
-            if(current.substring(0,1) == '+' || current.substring(0,1) == '!') {
-                value = current.substring(0,1) + value;
+            var pattern = input.value;
+            var regex   = new RegExp(ajax_search.list, 'g');
+            var range   = jQuery(input).getSelection();
+            var before  = pattern.substr(0, range.start);
+            var after   = pattern.substr(range.start);
+            var rever   = reverse(before);
+            var index   = rever.search(regex);
+            if(index != -1) {
+                before    = before.substr(0, before.length - index);
+                cursorpos = before.length + value.length;
+                value     = before + value + after;
+            } else {
+                // possible on the first elem, then we just add everything after the first delimiter
+                var index  = pattern.search(regex);
+                if(index != -1) {
+                    cursorpos = value.length;
+                    value     = value + pattern.substr(0, index);
+                }
             }
-            values.push(value);
-            value       = values.join(",");
         }
 
         input.value = value;
         ajax_search.cur_select = -1;
         ajax_search.hide_results();
         input.focus();
+        if(cursorpos) {
+            setCaretToPos(input, cursorpos);
+        }
 
         if(( ajax_search.autosubmit == undefined
              && (
@@ -10341,6 +10425,89 @@ if ((olNs4 || olNs6 || olIe4)) {
 	nd = no_overlib;
 	ver3fix = true;
 }
+/*
+ * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16
+ * (c) 2006 Alex Brem <alex@0xab.cd> - http://blog.0xab.cd
+ */
+
+(function() {
+
+	var fieldSelection = {
+
+		getSelection: function() {
+
+			var e = this.jquery ? this[0] : this;
+
+			return (
+
+				/* mozilla / dom 3.0 */
+				('selectionStart' in e && function() {
+					var l = e.selectionEnd - e.selectionStart;
+					return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr(e.selectionStart, l) };
+				}) ||
+
+				/* exploder */
+				(document.selection && function() {
+
+					e.focus();
+
+					var r = document.selection.createRange();
+					if (r == null) {
+						return { start: 0, end: e.value.length, length: 0 }
+					}
+
+					var re = e.createTextRange();
+					var rc = re.duplicate();
+					re.moveToBookmark(r.getBookmark());
+					rc.setEndPoint('EndToStart', re);
+
+					return { start: rc.text.length, end: rc.text.length + r.text.length, length: r.text.length, text: r.text };
+				}) ||
+
+				/* browser not supported */
+				function() {
+					return { start: 0, end: e.value.length, length: 0 };
+				}
+
+			)();
+
+		},
+
+		replaceSelection: function() {
+
+			var e = this.jquery ? this[0] : this;
+			var text = arguments[0] || '';
+
+			return (
+
+				/* mozilla / dom 3.0 */
+				('selectionStart' in e && function() {
+					e.value = e.value.substr(0, e.selectionStart) + text + e.value.substr(e.selectionEnd, e.value.length);
+					return this;
+				}) ||
+
+				/* exploder */
+				(document.selection && function() {
+					e.focus();
+					document.selection.createRange().text = text;
+					return this;
+				}) ||
+
+				/* browser not supported */
+				function() {
+					e.value += text;
+					return this;
+				}
+
+			)();
+
+		}
+
+	};
+
+	jQuery.each(fieldSelection, function(i) { jQuery.fn[i] = this; });
+
+})();
 /*!
  * jQuery UI 1.8.16
  *
