@@ -6138,7 +6138,7 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 /* send debug output to firebug console */
 function debug(str) {
     if (window.console != undefined) {
-        console.log("DEBUG: " + str);
+        console.debug(str);
     }
 }
 
@@ -8446,7 +8446,8 @@ var ajax_search = {
         evt = (evt) ? evt : ((window.event) ? event : null);
         if(evt) {
             var keyCode = evt.keyCode;
-            if(keyCode == 13 || keyCode == 108) {
+            // dont suggest on return, enter, and tab
+            if(keyCode == 13 || keyCode == 108 || keyCode == 9) {
                 return false;
             }
         }
