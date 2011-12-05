@@ -1054,7 +1054,6 @@ sub _newest_file {
         }
     }
     my @sorted = sort {$a <=> $b} keys %filelist;
-    use Data::Dumper; print STDERR Dumper(\@sorted);
     my $newest = shift @sorted;
     return $filelist{$newest} if defined $newest;
     return;
