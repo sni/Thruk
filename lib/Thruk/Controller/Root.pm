@@ -72,6 +72,7 @@ sub begin : Private {
         show_full_commandline           => 1,
         show_modified_attributes        => 1,
         show_config_edit_buttons        => 0,
+        backends_with_obj_config        => {},
         use_feature_statusmap           => 0,
         use_feature_statuswrl           => 0,
         use_feature_histogram           => 0,

@@ -204,7 +204,10 @@ before 'execute' => sub {
         for my $peer (@{$c->{'db'}->get_peers()}) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $c->stash->{'show_config_edit_buttons'} = $c->config->{'show_config_edit_buttons'};
-                last;
+                $c->stash->{'backends_with_obj_config'}->{$peer->{'key'}} = 1;
+            }
+            else {
+                $c->stash->{'backends_with_obj_config'}->{$peer->{'key'}} = 0;
             }
         }
     }
