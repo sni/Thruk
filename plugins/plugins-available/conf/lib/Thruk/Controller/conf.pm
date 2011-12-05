@@ -213,8 +213,12 @@ sub _process_json_page {
         }
         my $help = 'help is only available for plugins!';
         if(defined $cmd) {
-            $cmd = $cmd." -h 2>&1";
-            $help = `$cmd`;
+            eval {
+                local $SIG{ALRM} = sub { die('alarm'); };
+                alarm(5);
+                $cmd = $cmd." -h 2>&1";
+                $help = `$cmd`;
+            }
         }
         my $json            = [ { 'plugin_help' => $help } ];
         $c->stash->{'json'} = $json;
