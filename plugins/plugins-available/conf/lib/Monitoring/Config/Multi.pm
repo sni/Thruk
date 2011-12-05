@@ -59,6 +59,7 @@ sub init {
 
     if(defined $self->{'configs'}->{$key}) {
         $self->{'configs'}->{$key}->{'cached'} = 1;
+        $self->{'configs'}->{$key}->init($config) if defined $config;
         return $self->{'configs'}->{$key};
     }
 

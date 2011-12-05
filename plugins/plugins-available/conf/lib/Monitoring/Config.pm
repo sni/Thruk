@@ -57,13 +57,13 @@ sub init {
     my $self   = shift;
     my $config = shift;
 
-    return unless $self->{'initialized'} == 0;
+    return $self unless $self->{'initialized'} == 0;
+    $self->{'initialized'} = 1;
 
     for my $key (keys %{$config}) {
         $self->{'config'}->{$key} = $config->{$key};
     }
     $self->update();
-    $self->{'initialized'} = 1;
     $self->{'cached'}      = 0;
 
     # set default excludes when defined manual paths
@@ -646,6 +646,7 @@ sub _set_config {
 
         open(my $fh, '<', $core_conf) or do {
             push @{$self->{'errors'}}, "cannot read $core_conf: $!";
+            $self->{'initialized'} = 0;
             return;
         };
         while(my $line = <$fh>) {
