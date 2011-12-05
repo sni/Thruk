@@ -237,7 +237,7 @@ function update_command_line(id) {
 
             for(var nr=1;nr<=100;nr++) {
                 var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
-                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' class='"+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro', hideempty:true})\" onkeyup='update_other_inputs(this)'>");
+                cmd_line = cmd_line.replace(regex, "<input type='text' id='"+id+"arg"+nr+"' class='"+id+"arg"+nr+"' size=15 value='' onclick=\"ajax_search.init(this, 'macro', {url:'conf.cgi?action=json&amp;type=macro&amp;withuser=1', hideempty:true})\" onkeyup='update_other_inputs(this)'>");
             }
 
             cmd_line = cmd_line.replace(/\ \-/g, "<br>&nbsp;&nbsp;&nbsp;&nbsp;-");
