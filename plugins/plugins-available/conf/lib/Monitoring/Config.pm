@@ -637,11 +637,23 @@ sub _set_config {
         $self->{'config'}->{'obj_resource_file'} = undef;
 
         my $core_conf = $self->{'config'}->{'core_conf'};
+        if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
+            my $newest = $self->_newest_file(
+                                             $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
+                                             $ENV{'OMD_ROOT'}.'/tmp/icinga/icinga.cfg',
+                                             $ENV{'OMD_ROOT'}.'/tmp/shinken/shinken.cfg',
+                                            );
+            $core_conf = $newest if defined $newest;
+        }
+
         if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
         }
-        if($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
+        elsif($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
+        }
+        elsif($core_conf =~ m|/omd/sites/(.*?)/etc/shinken/shinken.cfg|mx) {
+            $core_conf = '/omd/sites/'.$1.'/tmp/shinken/shinken.cfg';
         }
 
         open(my $fh, '<', $core_conf) or do {
@@ -1011,6 +1023,22 @@ sub _reset_errors {
     return;
 }
 
+##########################################################
+sub _newest_file {
+    my($self, @files) = @_;
+    my %filelist;
+    for my $file (@files) {
+        my @stat = stat($file);
+        if(defined $stat[9]) {
+            $filelist{$stat[9]} = $file;
+        }
+    }
+    my @sorted = sort {$a <=> $b} keys %filelist;
+    use Data::Dumper; print STDERR Dumper(\@sorted);
+    my $newest = shift @sorted;
+    return $filelist{$newest} if defined $newest;
+    return;
+}
 
 ##########################################################
 
