@@ -197,6 +197,16 @@ sub test_page {
         for my $test_url (keys %{$links_to_check}) {
             next if $test_url =~ m/\/pnp4nagios\//mx;
             my $request = request($test_url);
+
+            if($request->is_redirect) {
+                my $redirects = 0;
+                while(my $location = $request->{'_headers'}->{'location'}) {
+                    if($location !~ m/^(http|\/)/gmx) { $location = _relative_url($location, $request->base()->as_string()); }
+                    $request = request($location);
+                    $redirects++;
+                    last if $redirects > 10;
+                }
+            }
             unless($request->is_success) {
                 $errors++;
                 diag("'$test_url' is missing");
