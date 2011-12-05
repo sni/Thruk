@@ -22,6 +22,9 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
 INPUT.obj_command_line {
   width: 375px !important;
 }
+INPUT.obj_address {
+  width: 375px !important;
+}
 
 .conf_attr_used {
   text-decoration: line-through;

@@ -97,6 +97,12 @@ sub new {
         delete $Monitoring::Config::Object::Host::Defaults->{'criticity'};
     }
 
+    if($coretype eq 'icinga') {
+        $Monitoring::Config::Object::Host::Defaults->{'address6'} = { type => 'STRING', cat => 'Basic' };
+    } else {
+        delete $Monitoring::Config::Object::Host::Defaults->{'address6'};
+    }
+
     my $self = {
         'type'        => 'host',
         'primary_key' => 'host_name',

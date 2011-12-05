@@ -2,7 +2,7 @@ package Thruk::Controller::conf;
 
 use strict;
 use warnings;
-use Thruk 1.1.1;
+use Thruk 1.1.5;
 use Thruk::Utils::Menu;
 use Thruk::Utils::Conf;
 use Thruk::Utils::Conf::Defaults;
@@ -13,6 +13,7 @@ use JSON::XS;
 use parent 'Catalyst::Controller';
 use Storable qw/dclone store retrieve/;
 use Data::Dumper;
+use Socket;
 
 =head1 NAME
 
@@ -133,6 +134,22 @@ sub _process_json_page {
 
     my $type = $c->{'request'}->{'parameters'}->{'type'} || 'hosts';
     $type    =~ s/s$//gmxo;
+
+    # name resolver
+    if($type eq 'dig') {
+        my $resolved = 'unknown';
+        if(defined $c->{'request'}->{'parameters'}->{'host'} and $c->{'request'}->{'parameters'}->{'host'} ne '') {
+            my @addresses = gethostbyname($c->{'request'}->{'parameters'}->{'host'});
+            @addresses = map { inet_ntoa($_) } @addresses[4 .. $#addresses];
+            if(scalar @addresses > 0) {
+                $resolved = shift @addresses;
+            }
+        }
+        my $json            = { 'address' => $resolved };
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
 
     # icons?
     if($type eq 'icon') {

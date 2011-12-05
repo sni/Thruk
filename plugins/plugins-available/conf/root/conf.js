@@ -137,6 +137,30 @@ function init_conf_tool_buttons() {
         return false;
     });
 
+    /* command line wizard / plugins */
+    jQuery('button.ip_wzd_button').button({
+        icons: {primary: 'ui-wzd-button'},
+        text: false,
+        label: 'set ip based on current hostname'
+    }).click(function() {
+        var host = jQuery('#attr_table').find('.obj_host_name').val();
+        if(host == undefined) {
+            return false;
+        }
+        new Ajax.Request('conf.cgi?action=json&amp;type=dig&host='+host, {
+            onSuccess: function(transport) {
+                var result;
+                if(transport.responseJSON != null) {
+                    result = transport.responseJSON;
+                } else {
+                    result = eval(transport.responseText);
+                }
+                jQuery('#attr_table').find('.obj_address').val(result.address).effect('highlight', {}, 1000);
+            }
+        });
+        return false;
+    });
+
     jQuery('TD.attrValue').button();
     return;
 }
