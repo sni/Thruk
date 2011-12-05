@@ -46,7 +46,7 @@ is($rc2, 0, 'creating tmp css noframes file');
 is(`diff -u /tmp/all_in_one_noframes.css themes/themes-available/Thruk/stylesheets/all_in_one_noframes.css`, '', 'all_in_one_noframes.css differs');
 is(unlink('/tmp/all_in_one_noframes.css'), 1, 'remove tmp file');
 
-my $rc3 = system('cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css'}}).' > /tmp/all_in_one.css');
+my $rc3 = system('cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > /tmp/all_in_one.css');
 is($rc3, 0, 'creating tmp css file');
 is(`diff -u /tmp/all_in_one.css themes/themes-available/Thruk/stylesheets/all_in_one.css`, '', 'all_in_one.css differs');
 is(unlink('/tmp/all_in_one.css'), 1, 'remove tmp file');

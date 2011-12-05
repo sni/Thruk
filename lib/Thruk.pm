@@ -136,7 +136,7 @@ my %config = ('name'                   => 'Thruk',
                                               'jquery-fieldselection.js',
                                               'jquery-ui/js/jquery-ui-1.8.16.custom.min.js',
                                           ],
-                                          'all_in_one_css' => [
+                                          'all_in_one_css_frames' => [
                                                'thruk_global.css',
                                                'Thruk.css'
                                           ],

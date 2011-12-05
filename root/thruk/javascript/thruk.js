@@ -500,10 +500,15 @@ function save_url_in_parents_hash() {
     if(parent.frames[0]) {
         var oldloc = new String(parent.location);
         oldloc     = oldloc.replace(/#.*$/, '');
+        oldloc     = oldloc.replace(/\?.*$/, '');
         var newloc = new String(window.location);
         newloc     = newloc.replace(oldloc, '');
         newloc     = newloc.replace(/\?_=\d+$/, '');
         newloc     = newloc.replace(/\&_=\d+$/, '');
+        newloc     = newloc.replace(/\&reload_nav=\d+/, '');
+        newloc     = newloc.replace(/\?reload_nav=\d+/, '');
+        newloc     = newloc.replace(/\&theme=\w*/, '');
+        newloc     = newloc.replace(/\?theme=\w*/, '');
         parent.location.hash = '#'+newloc;
     }
 }
