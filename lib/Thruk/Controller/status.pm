@@ -292,6 +292,10 @@ sub _process_details_page {
         $c->stash->{'template'} = 'excel/status_detail.tt';
         return $c->detach('View::Excel');
     }
+    if ( defined $view_mode and $view_mode eq 'json' ) {
+        $c->stash->{'json'} = $services;
+        return $c->detach('View::JSON');
+    }
 
     $c->stash->{'orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'} = $order;
@@ -339,6 +343,10 @@ sub _process_hostdetails_page {
         $c->stash->{'data'}     = $hosts;
         $c->stash->{'template'} = 'excel/status_hostdetail.tt';
         return $c->detach('View::Excel');
+    }
+    if ( defined $view_mode and $view_mode eq 'json' ) {
+        $c->stash->{'json'} = $hosts;
+        return $c->detach('View::JSON');
     }
 
     $c->stash->{'orderby'}            = $sortoptions->{$sortoption}->[1];

@@ -93,6 +93,7 @@
         <td valign="bottom" align="right" width="10%" nowrap>
           [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
+          [% PROCESS _json_export.tt %]
           [% PROCESS _excel_export.tt columns=[ 'Hostname', 'IP', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information' ] %]
         </td>
       </tr>
