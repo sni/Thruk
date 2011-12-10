@@ -11,7 +11,7 @@ use Carp;
 use File::Copy;
 use JSON::XS;
 use parent 'Catalyst::Controller';
-use Storable qw/dclone store retrieve/;
+use Storable qw/dclone/;
 use Data::Dumper;
 use Socket;
 
@@ -118,7 +118,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     elsif($subcat eq 'objects') {
         $c->stash->{'obj_model_changed'} = 1;
         $self->_process_objects_page($c);
-        $self->_store_model_retention($c) if $c->stash->{'obj_model_changed'};
+        Thruk::Utils::Conf::store_model_retention($c) if $c->stash->{'obj_model_changed'};
     }
 
     return 1;
@@ -883,8 +883,9 @@ sub _update_objects_config {
     $c->stash->{'peer_conftool'} = $peer_conftool;
 
     # already parsed?
-    if($model->cache_exists($c->stash->{'param_backend'}) or $self->_get_model_retention($c)) {
+    if($model->cache_exists($c->stash->{'param_backend'}) or Thruk::Utils::Conf::get_model_retention($c)) {
         $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
+        $c->{'obj_db'}->{'cached'} = 1;
     }
     # currently parsing
     elsif(my $id = $model->currently_parsing($c->stash->{'param_backend'})) {
@@ -900,6 +901,7 @@ sub _update_objects_config {
                                               }
                                         );
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
+            $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
             return;
         }
         return 0;
@@ -1441,75 +1443,6 @@ sub _host_list_services {
 }
 
 ##########################################################
-sub _store_model_retention {
-    my($self, $c) = @_;
-    $c->stats->profile(begin => "store object retention");
-
-    my $model = $c->model('Objects');
-    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
-
-    # try to save retention data
-    eval {
-        my $data = {
-            'configs'      => $model->{'configs'},
-            'release_date' => $c->config->{'released'},
-            'version'      => $c->config->{'version'},
-        };
-        store($data, $file);
-        $c->stash->{'obj_model_changed'} = 0;
-        $c->log->debug('saved object retention data');
-    };
-    if($@) {
-        $c->log->error($@);
-        return;
-    }
-
-    $c->stats->profile(end => "store object retention");
-    return;
-}
-
-##########################################################
-sub _get_model_retention {
-    my($self, $c) = @_;
-    $c->stats->profile(begin => "retrieve object retention");
-
-    my $model = $c->model('Objects');
-    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
-
-    return unless -f $file;
-
-    # try to retrieve retention data
-    eval {
-        my $data = retrieve($file);
-        if(defined $data->{'release_date'}
-           and $data->{'release_date'} eq $c->config->{'released'}
-           and defined $data->{'version'}
-           and $data->{'version'} eq $c->config->{'version'}
-        ) {
-            my $model_configs = $data->{'configs'};
-            for my $backend (keys %{$model_configs}) {
-                if(defined $c->stash->{'backend_detail'}->{$backend}) {
-                    $model->init($backend, undef, $model_configs->{$backend});
-                    $c->log->debug('restored object retention data for '.$backend);
-                }
-            }
-        } else {
-            # old or unknown file
-            $c->log->debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.Dumper($data->{'release_date'}));
-            unlink($file);
-        }
-    };
-    if($@) {
-        unlink($file);
-        $c->log->error($@);
-        return;
-    }
-
-    $c->stats->profile(end => "retrieve object retention");
-    return 1;
-}
-
-##########################################################
 sub _get_plugins {
     my($self, $c) = @_;
 
@@ -1578,7 +1511,7 @@ sub _get_plugin_help {
 sub _get_plugin_preview {
     my($self,$c,$command,$args,$host,$service) = @_;
 
-    my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/, $args]});
+    my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
     $macros    = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'}, $macros);
 
     if(defined $host and $host ne '') {

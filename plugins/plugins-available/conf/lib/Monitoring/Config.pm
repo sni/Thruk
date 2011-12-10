@@ -451,6 +451,12 @@ sub check_files_changed {
 
     $self->{'needs_update'} = 0;
     $self->{'needs_reload'} = 0 if $reload;
+
+    if(defined $self->{'_corefile'} and $self->_check_file_changed($self->{'_corefile'})) {
+        # maybe core type has changed
+        $self->_set_coretype();
+    }
+
     $self->_check_files_changed($reload);
     my $errors2 = scalar @{$self->{'errors'}};
 
@@ -649,55 +655,83 @@ sub _set_config {
 
         if($core_conf =~ m|/omd/sites/(.*?)/etc/nagios/nagios.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
-            $self->{'coretype'} = 'nagios';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
-            $self->{'coretype'} = 'icinga';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/shinken/shinken.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/shinken/shinken.cfg';
-            $self->{'coretype'} = 'shinken';
         }
 
-        open(my $fh, '<', $core_conf) or do {
-            push @{$self->{'errors'}}, "cannot read $core_conf: $!";
-            $self->{'initialized'} = 0;
-            return;
-        };
-        while(my $line = <$fh>) {
-            chomp($line);
-            my($key,$value) = split/\s*=\s*/mx, $line, 2;
-            next unless defined $value;
-            $key   =~ s/^\s*(.*?)\s*$/$1/mx;
-            $value =~ s/^\s*(.*?)\s*$/$1/mx;
-            if($key eq 'cfg_file') {
-                push @{$self->{'config'}->{'obj_file'}}, $value;
-            }
-            if($key eq 'cfg_dir') {
-                push @{$self->{'config'}->{'obj_dir'}}, $value;
-            }
-            if($key eq 'resource_file') {
-                $self->{'config'}->{'obj_resource_file'} = $value;
-            }
-
-            # try to autodetect config type
-            if($key eq 'nagios_user') {
-                $self->{'coretype'} = 'nagios';
-            }
-            if($key eq 'icinga_user') {
-                $self->{'coretype'} = 'icinga';
-            }
-            if($key eq 'shinken_user') {
-                $self->{'coretype'} = 'shinken';
-            }
+        if( !defined $self->{'_coreconf'} or $self->{'_coreconf'} ne $core_conf) {
+            $self->_update_core_conf($core_conf);
         }
-        close($fh);
+        elsif($self->_check_file_changed($self->{'_corefile'})) {
+            $self->_update_core_conf($core_conf);
+        }
+
     }
+
+    $self->_set_coretype();
 
     return;
 }
 
+##########################################################
+sub _update_core_conf {
+    my $self      = shift;
+    my $core_conf = shift;
+
+    if(!defined $self->{'_coreconf'} or $self->{'_coreconf'} ne $core_conf) {
+        $self->{'_corefile'} = Monitoring::Config::File->new($core_conf, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
+    }
+    $self->{'_coreconf'} = $core_conf;
+
+    open(my $fh, '<', $core_conf) or do {
+        push @{$self->{'errors'}}, "cannot read $self->{'_coreconf'}: $!";
+        $self->{'initialized'} = 0;
+        return;
+    };
+    while(my $line = <$fh>) {
+        chomp($line);
+        my($key,$value) = split/\s*=\s*/mx, $line, 2;
+        next unless defined $value;
+        $key   =~ s/^\s*(.*?)\s*$/$1/mx;
+        $value =~ s/^\s*(.*?)\s*$/$1/mx;
+        if($key eq 'cfg_file') {
+            push @{$self->{'config'}->{'obj_file'}}, $value;
+        }
+        if($key eq 'cfg_dir') {
+            push @{$self->{'config'}->{'obj_dir'}}, $value;
+        }
+        if($key eq 'resource_file') {
+            $self->{'config'}->{'obj_resource_file'} = $value;
+        }
+    }
+    close($fh);
+
+    return;
+}
+
+##########################################################
+sub _set_coretype {
+    my $self = shift;
+
+    # fixed value from config
+    if(defined $self->{'config'}->{'core_type'} and $self->{'config'}->{'core_type'} ne 'auto') {
+        $self->{'coretype'} = $self->{'config'}->{'core_type'};
+        return;
+    }
+
+    # get core from init script link (omd)
+    my $init = glob('~/etc/init.d/core');
+    if(defined $init and -e $init) {
+        $self->{'coretype'} = readlink(glob('~/etc/init.d/core'));
+        return;
+    }
+
+    return;
+}
 
 ##########################################################
 sub _read_objects {
@@ -838,35 +872,26 @@ sub _check_files_changed {
         }
 
         $oldfiles->{$file->{'path'}} = 1;
+        my $check = $self->_check_file_changed($file);
 
-        # mtime & inode
-        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-           $atime,$mtime,$ctime,$blksize,$blocks)
-           = stat($file->{'path'});
-
-        if(!defined $ino) {
+        if($check == 1) {
             unless($reload) {
                 push @newfiles, $file;
                 push @{$self->{'errors'}}, "file ".$file->{'path'}." has been deleted.";
             }
         }
-        else {
-            # inode or mtime changed?
-            if($file->{'inode'} ne $ino or $file->{'mtime'} ne $mtime) {
-                $file->{'inode'} = $ino;
-                $file->{'mtime'} = $mtime;
-                # get md5
-                my $meta = $file->get_meta_data();
-                if($meta->{'md5'} ne $file->{'md5'}) {
-                    if($reload) {
-                        $file->{'parsed'} = 0;
-                        $file->update_objects();
-                        $file->_update_meta_data();
-                    } else {
-                        push @{$self->{'errors'}}, "file ".$file->{'path'}." has been changed since reading it.";
-                    }
-                }
+        elsif($check == 2) {
+            if($reload) {
+                $file->{'parsed'} = 0;
+                $file->update_objects();
+                $file->_update_meta_data();
+            } else {
+                push @{$self->{'errors'}}, "file ".$file->{'path'}." has been changed since reading it.";
             }
+        }
+
+        # changed or new files still exist
+        if($check == 0 or $check == 2) {
             push @newfiles, $file;
         }
     }
@@ -885,6 +910,34 @@ sub _check_files_changed {
     return;
 }
 
+##########################################################
+# check if file has changed
+sub _check_file_changed {
+    my $self = shift;
+    my $file = shift;
+
+    # mtime & inode
+    my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+       $atime,$mtime,$ctime,$blksize,$blocks)
+       = stat($file->{'path'});
+
+    if(!defined $ino) {
+        return 1;
+    }
+    else {
+        # inode or mtime changed?
+        if($file->{'inode'} ne $ino or $file->{'mtime'} ne $mtime) {
+            $file->{'inode'} = $ino;
+            $file->{'mtime'} = $mtime;
+            # get md5
+            my $meta = $file->get_meta_data();
+            if($meta->{'md5'} ne $file->{'md5'}) {
+                return 2;
+            }
+        }
+    }
+    return 0;
+}
 
 ##########################################################
 # collect errors from all files

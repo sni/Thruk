@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 350;
+use Test::More tests => 362;
 use Data::Dumper;
 use File::Temp qw/ tempfile /;
 use File::Slurp;
@@ -78,7 +78,7 @@ unlink($filename);
 # check object definitions
 for my $type (@{$Monitoring::Config::Object::Types}) {
     use_ok 'Monitoring::Config::Object::'.ucfirst($type);
-    my $obj = Monitoring::Config::Object->new(type => $type, coretype => 'nagios');
+    my $obj = Monitoring::Config::Object->new(type => $type, coretype => 'icinga');
     isa_ok( $obj, 'Monitoring::Config::Object::'.ucfirst($type) );
     for my $attr ( keys %{$obj->{'default'}}) {
         my $field = $obj->{'default'}->{$attr};

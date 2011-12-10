@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use File::Slurp;
 use Digest::MD5 qw(md5_hex);
+use Storable qw/store retrieve/;
 
 =head1 NAME
 
@@ -30,6 +31,7 @@ sub read_objects {
     my $model         = $c->model('Objects');
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
     my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool);
+    store_model_retention($c);
     $c->stash->{model_type} = 'Objects';
     $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool, $obj_db ];
     return;
@@ -349,7 +351,6 @@ sub get_cgi_group_list {
 read htpasswd file
 
 =cut
-
 sub read_htpasswd {
     my ( $file ) = @_;
     my $htpasswd = {};
@@ -363,6 +364,86 @@ sub read_htpasswd {
     return($htpasswd);
 }
 
+##########################################################
+
+=head2 store_model_retention
+
+store object model in storable
+
+=cut
+sub store_model_retention {
+    my($c) = @_;
+    $c->stats->profile(begin => "store object retention");
+
+    my $model = $c->model('Objects');
+    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
+
+    # try to save retention data
+    eval {
+        my $data = {
+            'configs'      => $model->{'configs'},
+            'release_date' => $c->config->{'released'},
+            'version'      => $c->config->{'version'},
+        };
+        store($data, $file);
+        $c->stash->{'obj_model_changed'} = 0;
+        $c->log->debug('saved object retention data');
+    };
+    if($@) {
+        $c->log->error($@);
+        return;
+    }
+
+    $c->stats->profile(end => "store object retention");
+    return;
+}
+
+##########################################################
+
+=head2 get_model_retention
+
+restore object model from storable
+
+=cut
+sub get_model_retention {
+    my($c) = @_;
+    $c->stats->profile(begin => "retrieve object retention");
+
+    my $model = $c->model('Objects');
+    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
+
+    return unless -f $file;
+
+    # try to retrieve retention data
+    eval {
+        my $data = retrieve($file);
+        if(defined $data->{'release_date'}
+           and $data->{'release_date'} eq $c->config->{'released'}
+           and defined $data->{'version'}
+           and $data->{'version'} eq $c->config->{'version'}
+        ) {
+            my $model_configs = $data->{'configs'};
+            for my $backend (keys %{$model_configs}) {
+                if(defined $c->stash->{'backend_detail'}->{$backend}) {
+                    $model->init($backend, undef, $model_configs->{$backend});
+                    $c->log->debug('restored object retention data for '.$backend);
+                }
+            }
+        } else {
+            # old or unknown file
+            $c->log->debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.Dumper($data->{'release_date'}));
+            unlink($file);
+        }
+    };
+    if($@) {
+        unlink($file);
+        $c->log->error($@);
+        return;
+    }
+
+    $c->stats->profile(end => "retrieve object retention");
+    return 1;
+}
 
 ##########################################################
 

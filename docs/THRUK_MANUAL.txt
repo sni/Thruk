@@ -1279,6 +1279,9 @@ xinetd.conf. You can enter local unix sockets too.
             *** peer            address of this connection.
             *** resource_file   resource_file for this peer (used for macro replacement)
          ** configtool
+            *** core_type       Give the config parser a hint about
+                                your config. Can be 'nagios', 'icinga'
+                                or 'shinken'.
             *** core_conf       Path to your nagios.cfg / icinga.cfg. Read all
                                 object directories and files from this config
                                 file.

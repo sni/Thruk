@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 726;
+use Test::More tests => 742;
 use JSON::XS;
 
 BEGIN {
@@ -79,6 +79,7 @@ for my $type (@{$Monitoring::Config::Object::Types}, 'icon') {
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array") or diag("got: ".Dumper($data));
+    next if $type eq 'module';
     if($type eq 'icon') {
         ok(scalar @{$data} == 1, "json result size is: ".(scalar @{$data}));
     } else {
