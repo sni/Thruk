@@ -234,6 +234,20 @@ sub _process_json_page {
         return;
     }
 
+    # plugin preview
+    if($type eq 'pluginpreview' and $c->stash->{conf_config}->{'show_plugin_syntax_helper'}) {
+        my $output          = $self->_get_plugin_preview($c,
+                                                         $c->{'request'}->{'parameters'}->{'command'},
+                                                         $c->{'request'}->{'parameters'}->{'args'},
+                                                         $c->{'request'}->{'parameters'}->{'host'},
+                                                         $c->{'request'}->{'parameters'}->{'service'},
+                                                        );
+        my $json            = [ { 'plugin_output' => $output } ];
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
     # command line
     if($type eq 'commanddetail') {
         my $name    = $c->{'request'}->{'parameters'}->{'command'};
@@ -1558,6 +1572,50 @@ sub _get_plugin_help {
     }
     return $help;
 }
+
+##########################################################
+sub _get_plugin_preview {
+    my($self,$c,$command,$args,$host,$service) = @_;
+
+    my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/, $args]});
+    $macros    = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'}, $macros);
+
+    if(defined $host and $host ne '') {
+        my $objects = $c->{'obj_db'}->get_objects_by_name('host', $host);
+        if(defined $objects->[0]) {
+            $macros = $objects->[0]->get_macros($c->{'obj_db'}, $macros);
+        }
+    }
+
+    if(defined $service and $service ne '') {
+        my $objects = $c->{'obj_db'}->get_objects_by_name('service', $service, 0, 'ho:'.$host);
+        if(defined $objects->[0]) {
+            $macros = $objects->[0]->get_macros($c->{'obj_db'}, $macros);
+        }
+    }
+
+    my $cmd;
+    my $objects         = $c->{'obj_db'}->get_objects_by_name('command', $command);
+    if(defined $objects->[0]) {
+        my($file,$cmd_args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
+        ($file)    = $c->{'db'}->_get_replaced_string($file, $macros);
+        if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
+            ($cmd) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
+        }
+    }
+    my $output = 'plugin preview is only available for plugins!';
+    if(defined $cmd) {
+        eval {
+            local $SIG{ALRM} = sub { die('alarm'); };
+            alarm(45);
+            $cmd = $cmd." 2>/dev/null";
+            $output = `$cmd`;
+            alarm(0);
+        }
+    }
+    return $output;
+}
+
 ##########################################################
 
 =head1 AUTHOR

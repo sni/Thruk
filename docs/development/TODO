@@ -2,6 +2,9 @@ Todo & Wish List:
 =========================================================
 
 Bugs: none
+      - computed tab should display inherited contacts from host
+        unless overwritten
+      - "define module" in icinga (conf tool)
 
 general:
     - webservice api, passthrough querys to livestatus and return json

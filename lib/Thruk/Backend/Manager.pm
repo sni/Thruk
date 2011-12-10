@@ -435,22 +435,22 @@ sub set_backend_state_from_local_connections {
 
 ########################################
 
-=head2 _replace_macros
+=head2 _get_macros
 
-  _replace_macros
+  _get_macros
 
-returns a result for a sub called on all peers
+returns a hash of macros
 
 =cut
 
-sub _replace_macros {
-    my( $self, $args ) = @_;
+sub _get_macros {
+    my $self    = shift;
+    my $args    = shift;
+    my $macros  = shift || {};
 
     my $string  = $args->{'string'};
     my $host    = $args->{'host'};
     my $service = $args->{'service'};
-
-    my $macros  = {};
 
     # arguments
     my $x = 1;
@@ -460,7 +460,9 @@ sub _replace_macros {
     }
 
     # user macros...
-    $self->_set_user_macros($host->{'peer_key'}, $macros);
+    unless(defined $args->{'skip_user'}) {
+        $self->_set_user_macros($host->{'peer_key'}, $macros);
+    }
 
     # host macros
     if(defined $host) {
@@ -483,6 +485,25 @@ sub _replace_macros {
     $macros->{'$DATE$'}          = $date;
     $macros->{'$TIME$'}          = $time;
     $macros->{'$TIMET$'}         = $now;
+
+    return $macros;
+}
+
+########################################
+
+=head2 _replace_macros
+
+  _replace_macros
+
+returns a result for a sub called on all peers
+
+=cut
+
+sub _replace_macros {
+    my( $self, $args ) = @_;
+
+    my $string  = $args->{'string'};
+    my $macros  = $self->_get_macros($args);
 
     return $self->_get_replaced_string($string, $macros);
 }
@@ -571,7 +592,7 @@ sets service macros
 sub _set_service_macros {
     my( $self, $service, $macros ) = @_;
 
-    # normal host macros
+    # normal service macros
     $macros->{'$SERVICEDESC$'}         = $service->{'description'};
     $macros->{'$SERVICESTATEID$'}      = $service->{'state'};
     $macros->{'$SERVICESTATE$'}        = $self->{'config'}->{'nagios'}->{'service_state_by_number'}->{$service->{'state'}};
@@ -1441,15 +1462,18 @@ returns a hash with all USER1-32 macros
 sub _read_resource_file {
     my $self   = shift;
     my $file   = shift;
+    my $macros = shift || {};
     return unless defined $file;
     return unless -f $file;
     my %macros = Config::General::ParseConfig($file);
     for my $key (keys %macros) {
         if(ref $macros{$key} eq 'ARRAY') {
-            $macros{$key} = $macros{$key}[$#{$macros{$key}}];
+            $macros->{$key} = $macros{$key}[$#{$macros{$key}}];
+        } else {
+            $macros->{$key} = $macros{$key};
         }
     }
-    return \%macros;
+    return $macros;
 }
 
 

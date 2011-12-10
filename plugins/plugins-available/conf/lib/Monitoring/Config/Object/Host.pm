@@ -158,6 +158,40 @@ sub get_groups {
     return \@groups;
 }
 
+##########################################################
+
+=head2 get_macros
+
+return all macros for this host
+
+=cut
+sub get_macros {
+    my $self    = shift;
+    my $objects = shift;
+    my $macros  = shift || {};
+    my($hst_conf_keys, $hst_config) = $self->get_computed_config($objects);
+
+    # normal host macros
+    $macros->{'$HOSTADDRESS$'}               = $hst_config->{'address'};
+    $macros->{'$HOSTNAME$'}                  = $hst_config->{'host_name'};
+    $macros->{'$HOSTALIAS$'}                 = $hst_config->{'alias'};
+    $macros->{'$HOSTCHECKCOMMAND$'}          = $hst_config->{'check_command'};
+    $macros->{'$HOSTSTATE$'}                 = 0;
+    $macros->{'$TOTALHOSTSERVICESCRITICAL$'} = 0;
+    $macros->{'$TOTALHOSTSERVICESWARNING$'}  = 0;
+
+    # host user macros
+    for my $key (@{$hst_conf_keys}) {
+        next unless substr($key,0,1) eq '_';
+        $key = substr($key, 1);
+        $macros->{'$_HOST'.$key.'$'}  = $hst_config->{'_'.$key};
+    }
+
+    return $macros;
+}
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2011, <nierlein@cpan.org>

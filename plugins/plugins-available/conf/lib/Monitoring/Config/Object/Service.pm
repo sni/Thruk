@@ -117,7 +117,36 @@ sub parse {
     return $self->SUPER::parse($self->{'default'});
 }
 
+##########################################################
 
+=head2 get_macros
+
+return all macros for this service
+
+=cut
+sub get_macros {
+    my $self    = shift;
+    my $objects = shift;
+    my $macros  = shift || {};
+    my($svc_conf_keys, $svc_config) = $self->get_computed_config($objects);
+
+    # normal service macros
+    $macros->{'$SERVICEDESC$'}         = $svc_config->{'service_description'};
+    $macros->{'$SERVICECHECKCOMMAND$'} = $svc_config->{'check_command'};
+    $macros->{'$SERVICESTATE$'}        = 0;
+    $macros->{'$SERVICEDURATIONSEC$'}  = 0;
+
+    # service user macros
+    for my $key (@{$svc_conf_keys}) {
+        next unless substr($key,0,1) eq '_';
+        $key = substr($key, 1);
+        $macros->{'$_SERVICE'.$key.'$'}  = $svc_config->{'_'.$key};
+    }
+
+    return $macros;
+}
+
+##########################################################
 
 
 =head1 AUTHOR

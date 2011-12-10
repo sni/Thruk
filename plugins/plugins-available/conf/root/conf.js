@@ -95,6 +95,13 @@ function init_conf_tool_buttons() {
         icons: {primary: 'ui-save-button'}
     });
 
+    jQuery('.conf_preview_button').button({
+        icons: {primary: 'ui-preview-button'}
+    }).click(function() {
+        check_plugin_exec(this.id);
+        return false;
+    });
+
     var $dialog = jQuery('#new_attribute_pane')
       .dialog({
         dialogClass: 'dialogWithDropShadow',
@@ -193,7 +200,7 @@ function init_conf_tool_command_wizard(id) {
         ajax_search.hide_results(undefined, 1);
         $d.dialog('close');
         // set values in original inputs
-        args = collect_args(id);
+        var args = collect_args(id);
         document.getElementById(cmd_arg_id).value = args;
         document.getElementById(cmd_inp_id).value = document.getElementById(id + "inp_command").value;
         return false;
@@ -276,7 +283,7 @@ function update_command_line(id) {
         },
         onFailure: function(transport) {
             hideElement(id + 'wait');
-            document.getElementById(id + 'command_line').innerHTML = 'error';
+            document.getElementById(id + 'command_line').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
     });
 
@@ -367,26 +374,40 @@ function init_plugin_help_accordion(id) {
         autoHeight:  false,
         fillSpace:   true,
         change:      function(event, ui) {
-            var current;
-            var input = document.getElementById(id+'inp_plugin');
-            if(input) {
-                current = input.value;
-            } else {
-                input = document.getElementById(id+'inp_command');
-                if(input) {
-                    current = input.value;
-                }
+            if(ui.newHeader.size() == 0) {
+                // accordion is closing
+                return;
             }
-            if(current) {
-                if(current != last_plugin_help) {
-                    load_plugin_help(id, current);
-                }
-            } else {
-                document.getElementById(id + 'plugin_help').innerHTML = 'please select a plugin first';
-                hideElement(id + 'wait_help');
+            if(ui.newHeader[0].innerHTML.indexOf('Preview') != -1) {
+                init_plugin_exec(id);
             }
+            if(ui.newHeader[0].innerHTML.indexOf('Plugin Help') != -1) {
+                check_plugin_help(id);
+            }
+            return;
         }
     });
+}
+
+function check_plugin_help(id) {
+    var current;
+    var input = document.getElementById(id+'inp_plugin');
+    if(input) {
+        current = input.value;
+    } else {
+        input = document.getElementById(id+'inp_command');
+        if(input) {
+            current = input.value;
+        }
+    }
+    if(current) {
+        if(current != last_plugin_help) {
+            load_plugin_help(id, current);
+        }
+    } else {
+        document.getElementById(id + 'plugin_help').innerHTML = 'please select a plugin first';
+        hideElement(id + 'wait_help');
+    }
 }
 
 function load_plugin_help(id, plugin) {
@@ -416,22 +437,52 @@ function load_plugin_help(id, plugin) {
             var plugin_help = result[0].plugin_help;
             document.getElementById(id + 'plugin_help').innerHTML = '<pre style="white-space: pre-wrap; height:400px; overflow: scoll;" id="'+id+'plugin_help_pre"><\/pre>';
             jQuery('#' + id + 'plugin_help_pre').text(plugin_help);
-
-            // now set the values to avoid escaping
-            for(var nr=1;nr<=100;nr++) {
-                jQuery('.'+id+'arg'+nr).val(args[nr-1]);
-            }
         },
         onFailure: function(transport) {
             hideElement(id + 'wait_help');
-            document.getElementById(id + 'plugin_help').innerHTML = 'error';
+            document.getElementById(id + 'plugin_help').innerHTML = '<font color="red"><b>error<\/b><\/font>';
+        }
+    });
+}
+
+function init_plugin_exec(id) {
+    var host = jQuery('.obj_host_name').val();
+    host = host.replace(/\s*,.*$/, '');
+    jQuery('#'+id+'inp_preview_host').val(host);
+    jQuery('#'+id+'inp_preview_service').val(jQuery('.obj_service_description').val());
+}
+
+function check_plugin_exec(id) {
+    id          = id.replace(/preview$/, '');
+    args        = collect_args(id);
+    var host    = jQuery('#'+id+'inp_preview_host').val();
+    var service = jQuery('#'+id+'inp_preview_service').val();
+    var command = jQuery('#'+id + "inp_command").val();
+    jQuery('#'+id + 'plugin_exec_output').text('');
+    showElement(id + 'wait_run');
+    new Ajax.Request('conf.cgi?action=json&amp;type=pluginpreview&command='+command+'&host='+host+'&service='+service+'&args='+args, {
+        onSuccess: function(transport) {
+            var result;
+            if(transport.responseJSON != null) {
+                result = transport.responseJSON;
+            } else {
+                result = eval(transport.responseText);
+            }
+            hideElement(id + 'wait_run');
+            var plugin_output = result[0].plugin_output;
+            document.getElementById(id + 'plugin_exec_output').innerHTML = '<pre style="white-space: pre-wrap; max-height:300px; overflow: scoll;" id="'+id+'plugin_output_pre"><\/pre>';
+            jQuery('#' + id + 'plugin_output_pre').text(plugin_output);
+        },
+        onFailure: function(transport) {
+            hideElement(id + 'wait_run');
+            document.getElementById(id + 'plugin_exec_output').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
     });
 }
 
 function close_accordion() {
     // close the helper accordion
-    if($accordion && $accordion.children('h3').hasClass('ui-state-active')) {
+    if($accordion) {
         $accordion.accordion("activate", false);
     }
 }
