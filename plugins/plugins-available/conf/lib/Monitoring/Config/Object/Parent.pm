@@ -247,6 +247,7 @@ sub get_computed_config {
             }
         }
     }
+    delete $conf->{'use'};
 
     my @keys = sort _sort_by_object_keys keys %{$conf};
     return(\@keys, $conf);
