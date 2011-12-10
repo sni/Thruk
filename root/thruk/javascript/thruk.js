@@ -1659,7 +1659,8 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
 function add_new_filter(search_prefix, table) {
   pane_prefix   = search_prefix.substring(0,4);
   search_prefix = search_prefix.substring(4);
-  search_prefix = search_prefix.substring(0,3);
+  var index     = search_prefix.indexOf('_');
+  search_prefix = search_prefix.substring(0,index+1);
   table         = table.substring(4);
   tbl           = document.getElementById(pane_prefix+search_prefix+table);
   if(!tbl) {
@@ -1808,7 +1809,8 @@ function add_options(select, options, numbered) {
 function new_filter(cloneObj, parentObj, btnId) {
   pane_prefix       = btnId.substring(0,4);
   btnId             = btnId.substring(4);
-  var search_prefix = btnId.substring(0, 3);
+  var index         = btnId.indexOf('_');
+  var search_prefix = btnId.substring(0, index+1);
   cloneObj          = cloneObj.substring(4);
   var origObj       = document.getElementById(pane_prefix+search_prefix+cloneObj);
   if(!origObj) {
@@ -1875,7 +1877,8 @@ function replaceIdAndNames(elems, new_prefix) {
 function deleteSearchPane(id) {
   pane_prefix   = id.substring(0,4);
   id            = id.substring(4);
-  search_prefix = id.substring(0,3);
+  var index     = id.indexOf('_');
+  search_prefix = id.substring(0,index+1);
 
   var pane = document.getElementById(pane_prefix + search_prefix + 'filter_pane');
   var cell = pane.parentNode;
