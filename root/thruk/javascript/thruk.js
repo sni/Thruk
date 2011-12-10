@@ -2116,6 +2116,7 @@ var ajax_search = {
     list            : false,
     templates       : 'no',
     hideempty       : false,
+    emptymsg        : undefined,
     show_all        : false,
     dont_hide       : false,
     autoopen        : true,
@@ -2168,6 +2169,10 @@ var ajax_search = {
         }
         if(options.add_prefix != undefined) {
             ajax_search.add_prefix = options.add_prefix;
+        }
+        ajax_search.emptymsg = 'no results found';
+        if(options.emptymsg != undefined) {
+            ajax_search.emptymsg = options.emptymsg;
         }
 
         if(options.append_value_of != undefined) {
@@ -2531,7 +2536,7 @@ var ajax_search = {
         ajax_search.result_size = x;
         resultHTML += '<\/ul>';
         if(results.size() == 0) {
-            resultHTML += '<a href="#">no results found</a>';
+            resultHTML += '<a href="#">'+ ajax_search.emptymsg +'</a>';
             if(ajax_search.hideempty) {
                 ajax_search.hide_results();
                 return;
