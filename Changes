@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 1.1.6    Thu Dec 30 19:09:17 CET 2011
           - added json export on status page (thanks Justin Burnham)
           - fixed display of acknowledgements with expire date
+          - themes: fixed minor design flaws in Nuvola theme
 
 1.1.5    Thu Dec  5 21:04:17 CET 2011
           - reloading pages by pressing f5 works now even with frames

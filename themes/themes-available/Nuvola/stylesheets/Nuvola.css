@@ -170,3 +170,8 @@ input#NavBarSearchItem {
 div.dTreeNode {
     white-space: nowrap;
 }
+
+TABLE.optBoxInnerTable TD {
+  text-align: left;
+  white-space: nowrap;
+}
