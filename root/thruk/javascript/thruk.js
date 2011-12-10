@@ -2407,12 +2407,6 @@ var ajax_search = {
             if(prefix == 'ho:' || prefix == 'hg:' || prefix == 'se:' || prefix == 'sg:') {
                 pattern = pattern.substr(3);
             }
-            if(ajax_search.list) {
-                prefix = pattern.substr(0,1);
-                if(prefix == '!' || prefix == '+') {
-                    pattern = pattern.substr(1);
-                }
-            }
 
             // remove empty strings from pattern array
             pattern = pattern.split(" ");
@@ -2599,7 +2593,7 @@ var ajax_search = {
                 var index  = pattern.search(regex);
                 if(index != -1) {
                     cursorpos = value.length;
-                    value     = value + pattern.substr(0, index);
+                    value     = value + pattern.substr(index);
                 }
             }
         }
