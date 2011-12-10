@@ -175,3 +175,27 @@ TABLE.optBoxInnerTable TD {
   text-align: left;
   white-space: nowrap;
 }
+
+body.config TABLE.data {
+  width: inherit;
+}
+
+TD.action_menu {
+  white-space: nowrap;
+  padding-right: 20px;
+}
+TD.confPanel {
+  background-color: #F0F1F5;
+  padding: 5px;
+  border: 1px #E2DECD outset;
+  background-image: url(../images/border_big.gif);
+  background-repeat: repeat-x;
+}
+DIV.dataTitle {
+  padding: 0px;
+  height: 20px;
+  font-weight: bold;
+  vertical-align: middle;
+  text-align: center;
+  margin: -2px;
+}
