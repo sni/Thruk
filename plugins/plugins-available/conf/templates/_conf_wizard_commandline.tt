@@ -13,7 +13,7 @@
     <tr>
       <td class="attrName"><b>Plugin Arguments</b></td>
       <td>
-        <input type="text" id="[% id %]_inp_args" value="" style="width:650px"[% IF use_ajax_search %] onfocus="this.click();" onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:' ', hideempty:true, append_value_of:'[% id %]_inp_plugin'})"[% END %]>
+        <input type="text" id="[% id %]_inp_args" value="" style="width:650px"[% IF use_ajax_search %] onfocus="this.click();" onclick="ajax_search.init(this, 'full', {url:'conf.cgi?action=json&amp;type=macro&amp;withargs=1&amp;withuser=1&amp;plugin=', autosubmit:false, list:'[ =\'&quot;]', hideempty:true, append_value_of:'[% id %]_inp_plugin'})"[% END %]>
       </td>
     </tr>
     [% IF conf_config.show_plugin_syntax_helper %]
