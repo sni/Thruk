@@ -599,6 +599,7 @@ sub _process_objects_page {
     $c->stash->{'subtitle'}        = "Object Configuration";
     $c->stash->{'template'}        = 'conf_objects.tt';
     $c->stash->{'file_link'}       = "";
+    $c->stash->{'coretype'}        = $c->{'obj_db'}->{'coretype'};
 
     # apply changes?
     if(defined $c->{'request'}->{'parameters'}->{'apply'}) {

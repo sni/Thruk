@@ -524,7 +524,7 @@ sort function for object keys
 =cut
 sub _sort_by_object_keys {
 
-    my $num = 20;
+    my $num = 30;
     my $order = [
         "name",
         "service_description",
@@ -544,6 +544,10 @@ sub _sort_by_object_keys {
         "friday",
         "saturday",
         "sunday",
+        "module_name",
+        "module_type",
+        "path",
+        "args",
     ];
     for my $ord (@{$order}) {
         if($a eq $ord) { return -$num; }

@@ -90,6 +90,7 @@ plugins/plugins-available/conf/lib/Monitoring/Config/Object/Hostdependency.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Hostescalation.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Hostextinfo.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Hostgroup.pm
+plugins/plugins-available/conf/lib/Monitoring/Config/Object/Module.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Parent.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Service.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/Object/Servicedependency.pm

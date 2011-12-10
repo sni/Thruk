@@ -18,6 +18,7 @@ use Monitoring::Config::Object::Command;
 use Monitoring::Config::Object::Timeperiod;
 use Monitoring::Config::Object::Contact;
 use Monitoring::Config::Object::Contactgroup;
+use Monitoring::Config::Object::Module;
 
 =head1 NAME
 
@@ -46,6 +47,7 @@ $Monitoring::Config::Object::Types = [
     'timeperiod',
     'contact',
     'contactgroup',
+    'module',
 ];
 
 ##########################################################

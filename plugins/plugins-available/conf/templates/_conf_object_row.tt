@@ -80,7 +80,7 @@
         [% FOREACH k = defaults.$key.keys %]
         [% SET x = loop.index %]
         [% SET v = defaults.$key.values.$x %]
-        <input type="radio" name="obj.[% key %]" value="[% v %]"[% IF obj_conf.defined(key) && value == v %] checked[% END %]> [% k %]
+        <input type="radio" name="obj.[% key %]" value="[% v %]"[% IF defaults.$key.keys.size == 1 || obj_conf.defined(key) && value == v %] checked[% END %]> [% k %]
         [% END %]
     [% END %]
   [% ELSE %]
