@@ -90,7 +90,8 @@
 
 [% ELSIF defaults.$key.type == 'LIST' %]
   [% IF edit %]
-    <input type="text" class="obj_[% key %]" name="obj.[% key %]" id="id_[% key %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false, list:'[ ,!\+]'[% IF key == "use" %], templates:'templates'[% END %]})"[% END %]>
+    <input type="text" class="obj_[% key %] obj_[% type %]_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% value.join(', ') %][% END %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false, list:'[ ,!\+]'[% IF key == "use" %], templates:'templates'[% END %]})"[% END %]>
+    [% IF type == 'servicegroup' && key == 'members' %][% PROCESS _conf_wizard_svcgroup_members.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
         [% FOREACH o = value %]

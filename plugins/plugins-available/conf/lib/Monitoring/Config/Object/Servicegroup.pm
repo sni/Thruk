@@ -24,7 +24,7 @@ $Monitoring::Config::Object::Servicegroup::Defaults = {
 
     'servicegroup_name'     => { type => 'STRING', cat => 'Basic' },
     'alias'                 => { type => 'STRING', cat => 'Basic' },
-    'members'               => { type => 'LIST', 'link' => 'service', cat => 'Basic' },
+    'members'               => { type => 'LIST', 'link' => 'servicemembers', cat => 'Basic' },
     'servicegroup_members'  => { type => 'LIST', 'link' => 'servicegroup', cat => 'Basic' },
     'notes'                 => { type => 'STRING', cat => 'Ext Info' },
     'notes_url'             => { type => 'STRING', cat => 'Ext Info' },

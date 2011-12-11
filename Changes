@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - config tool:
             - added command preview
             - added module support (icinga only)
+            - added wizard for servicegroup members
           - fixed display of acknowledgements with expire date
           - fixed js error when adding more than 10 filter
           - themes: fixed minor design flaws in Nuvola theme

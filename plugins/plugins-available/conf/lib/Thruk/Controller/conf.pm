@@ -261,6 +261,23 @@ sub _process_json_page {
         return;
     }
 
+    # servicemembers
+    if($type eq 'servicemember') {
+        my $json = [];
+        my $objects = $c->{'obj_db'}->get_objects_by_type('host');
+        for my $host (@{$objects}) {
+            my $hostname = $host->get_name();
+            my $services = $c->{'obj_db'}->get_services_for_host($host, $c->{'obj_db'});
+            for my $svc (keys %{$services->{'group'}}, keys %{$services->{'host'}}) {
+                push @{$json}, $hostname.';'.$svc;
+            }
+        }
+        $c->stash->{'json'} = [ sort @{Thruk::Utils::array_uniq($json)} ];
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
+    # objects
     my $json;
     my $objects   = [];
     my $templates = [];

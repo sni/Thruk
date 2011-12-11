@@ -168,6 +168,16 @@ function init_conf_tool_buttons() {
         return false;
     });
 
+    /* servicegroup members wizard */
+    jQuery('button.members_wzd_button').button({
+        icons: {primary: 'ui-wzd-button'},
+        text: false,
+        label: 'open service group members wizard'
+    }).click(function() {
+        init_conf_tool_servicegroup_members_wizard(this.id);
+        return false;
+    });
+
     jQuery('TD.attrValue').button();
     return;
 }
@@ -485,4 +495,82 @@ function close_accordion() {
     if($accordion) {
         $accordion.accordion("activate", false);
     }
+}
+
+/* handle command line wizard dialog */
+var available_members = new Array();
+var selected_members  = new Array();
+function init_conf_tool_servicegroup_members_wizard(id) {
+    id = id.substr(0, id.length -3);
+
+    var $d = jQuery('#' + id + 'dialog')
+      .dialog({
+        dialogClass: 'dialogWithDropShadow',
+        autoOpen:    false,
+        width:       'auto',
+        maxWidth:    1024,
+        position:    'top',
+        close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
+    });
+    jQuery('#' + id + 'accept').button({
+        icons: {primary: 'ui-ok-button'}
+    }).click(function() {
+        var newval = '';
+        var lb = document.getElementById(id+"selected_members");
+        for(i=0; i<lb.length; i++)  {
+            newval += lb.options[i].value;
+            if(i < lb.length-1) {
+                newval += ';';
+            }
+        }
+        jQuery('.obj_servicegroup_members').val(newval);
+        ajax_search.hide_results(undefined, 1);
+        $d.dialog('close');
+        return false;
+    });
+
+    // initialize selected members
+    selected_members   = new Array();
+    selected_members_h = new Hash();
+    var options = '';
+    var list = jQuery('.obj_servicegroup_members').val().split(/;/);
+    for(var x=0; x<list.size();x+=2) {
+        var val = list[x]+';'+list[x+1]
+        selected_members.push(val);
+        selected_members_h.set(val, 1);
+        options += '<option value="'+val+'">'+val+'<\/option>';
+    }
+    jQuery("select#"+id+"selected_members").html(options);
+    sortlist(id+"selected_members");
+
+    // initialize available members
+    available_members = new Array();
+    jQuery("select#"+id+"available_members").html('<option disabled>loading...<\/option>');
+    new Ajax.Request('conf.cgi?action=json&amp;type=servicemembers', {
+        onSuccess: function(transport) {
+            var result;
+            if(transport.responseJSON != null) {
+                result = transport.responseJSON;
+            } else {
+                result = eval(transport.responseText);
+            }
+            options = '';
+            var size = result.size();
+            for(var x=0; x<size;x++) {
+                if(!selected_members_h.get(result[x])) {
+                    available_members.push(result[x]);
+                    options += '<option value="'+result[x]+'">'+result[x]+'<\/option>\n';
+                }
+            }
+            jQuery("select#"+id+"available_members").html(options);
+            sortlist(id+"available_members");
+        },
+        onFailure: function(transport) {
+            jQuery("select#"+id+"available_members").html('<option disabled>error<\/option>');
+        }
+    });
+
+
+    $d.dialog('open');
+    return;
 }

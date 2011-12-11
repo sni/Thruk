@@ -19,10 +19,8 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
   width: 170px;
 }
 
-INPUT.obj_command_line {
-  width: 375px !important;
-}
-INPUT.obj_address {
+/* input fields with wizards */
+INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members {
   width: 375px !important;
 }
 
