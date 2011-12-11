@@ -535,10 +535,12 @@ function init_conf_tool_servicegroup_members_wizard(id) {
     var options = '';
     var list = jQuery('.obj_servicegroup_members').val().split(/;/);
     for(var x=0; x<list.size();x+=2) {
-        var val = list[x]+';'+list[x+1]
-        selected_members.push(val);
-        selected_members_h.set(val, 1);
-        options += '<option value="'+val+'">'+val+'<\/option>';
+        if(list[x] != '') {
+            var val = list[x]+';'+list[x+1]
+            selected_members.push(val);
+            selected_members_h.set(val, 1);
+            options += '<option value="'+val+'">'+val+'<\/option>';
+        }
     }
     jQuery("select#"+id+"selected_members").html(options);
     sortlist(id+"selected_members");

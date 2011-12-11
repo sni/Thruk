@@ -225,6 +225,9 @@ sub get_computed_config {
     my $self    = shift;
     my $objects = shift;
 
+    my $cache = $self->{'cache'}->{'computed'}->{$self->{'id'}};
+    return(@{$cache}) if defined $cache;
+
     my $conf = dclone($self->{'conf'});
     my $templates = $self->get_used_templates($objects);
     for my $tname (@{$templates}) {
@@ -250,6 +253,7 @@ sub get_computed_config {
     delete $conf->{'use'};
 
     my @keys = sort _sort_by_object_keys keys %{$conf};
+    $self->{'cache'}->{'computed'}->{$self->{'id'}} = [\@keys, $conf];
     return(\@keys, $conf);
 }
 

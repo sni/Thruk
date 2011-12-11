@@ -39,6 +39,7 @@ sub new {
         'needs_commit'     => 0,
         'needs_reload'     => 0,
         'coretype'         => 'nagios',
+        'cache'            => {},
     };
 
     bless $self, $class;
@@ -961,6 +962,7 @@ sub _rebuild_index {
         'host'    => {},
         'service' => {},
     };
+    $self->{'cache'} = {};
 
     # collect errors from all files
     $self->_collect_errors();
