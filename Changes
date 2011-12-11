@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.6    Thu Dec 30 19:09:17 CET 2011
+1.1.6    Thu Dec 11 19:09:17 CET 2011
           - added json export on status page (thanks Justin Burnham)
           - config tool:
             - added command preview

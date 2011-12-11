@@ -59,7 +59,7 @@ if(-d $project_root."/.git") {
 }
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
-              'released'               => 'December 30, 2011',
+              'released'               => 'December 11, 2011',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
