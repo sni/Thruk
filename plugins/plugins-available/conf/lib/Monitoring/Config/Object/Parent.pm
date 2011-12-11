@@ -313,8 +313,8 @@ get data hash from post parameter
 sub get_data_from_param {
     my $self     = shift;
     my $param    = shift;
+    my $data     = shift || {};
     my $defaults = $self->{'default'};
-    my $data     = {};
 
     my @param_keys;
     my $new_param = {};

@@ -1,11 +1,13 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.1.6    Thu Dec 11 19:09:17 CET 2011
+          - added acknowledgments with expire date (icinga only)
           - added json export on status page (thanks Justin Burnham)
           - config tool:
             - added command preview
             - added module support (icinga only)
             - added wizard for servicegroup members
+            - added links to create/edit cgi permissions
           - fixed display of acknowledgements with expire date
           - fixed js error when adding more than 10 filter
           - themes: fixed minor design flaws in Nuvola theme

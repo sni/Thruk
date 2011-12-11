@@ -1056,7 +1056,9 @@ sub _get_context_object {
 
     # new object
     if($c->stash->{'data_id'} and $c->stash->{'data_id'} eq 'new') {
-        $obj = Monitoring::Config::Object->new( type => $c->stash->{'type'}, 'coretype' => $c->{'obj_db'}->{'coretype'} );
+        $obj = Monitoring::Config::Object->new( type     => $c->stash->{'type'},
+                                                coretype => $c->{'obj_db'}->{'coretype'},
+                                              );
         my $files_root = $self->_set_files_stash($c);
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
         $new_file      =~ s/^\///gmx;
@@ -1336,6 +1338,13 @@ sub _object_new {
     my $obj = Monitoring::Config::Object->new(type     => $c->stash->{'type'},
                                               name     => $c->stash->{'data_name'},
                                               coretype => $c->{'obj_db'}->{'coretype'});
+
+    # set initial config from cgi parameters
+    my $initial_conf = $obj->get_data_from_param($c->{'request'}->{'parameters'}, $obj->{'conf'});
+    if($obj->has_object_changed($initial_conf)) {
+        $c->{'obj_db'}->update_object($obj, $initial_conf );
+    }
+
     return $obj;
 }
 

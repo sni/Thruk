@@ -42,8 +42,14 @@
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/package_go.png' border="0" alt='Move this [% type %]' title='Move this [% type %]' width="16" height="16"></td>
                 <td class='command'><a href='conf.cgi?sub=objects&amp;action=move&amp;data.id=[% object.get_id() %]'>Move [% type %] to file</a></td>
               </tr>
+              [% IF type == 'contact' %]
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit CGI Permissions' title='Edit CGI Permissions' width="16" height="16"></td>
+                <td class='command'><a href='conf.cgi?sub=users&action=change&data.username=[% object.get_name() %]'>Edit CGI Permissions</a></td>
+              </tr>
+              [% END %]
             [% END %]
-              [% IF type  || show_object %]
+              [% IF type || show_object %]
               <tr class='data'>
                 <td colspan=2><hr></td>
               </tr>

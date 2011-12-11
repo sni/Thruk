@@ -48,6 +48,12 @@ before 'execute' => sub {
     }
 
     ###############################
+    $c->stash->{'enable_icinga_features'} = 0;
+    if(exists $c->config->{'enable_icinga_features'}) {
+        $c->stash->{'enable_icinga_features'} = $c->config->{'enable_icinga_features'};
+    }
+
+    ###############################
     # Authentication
     $c->log->debug("checking auth");
     unless ($c->user_exists) {
@@ -186,6 +192,18 @@ before 'execute' => sub {
             }
         }
     }
+
+    ###############################
+    # do we have only icinga backends?
+    if(!exists $c->config->{'enable_icinga_features'} and defined $ENV{'OMD_ROOT'}) {
+        # get core from init script link (omd)
+        my $init = $ENV{'OMD_ROOT'}.'/etc/init.d/core';
+        if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
+            my $core = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
+            $c->stash->{'enable_icinga_features'} = 1 if $core eq 'icinga';
+        }
+    }
+
     # make stash available for our backends
     $c->{'db'}->set_stash($c->stash);
 

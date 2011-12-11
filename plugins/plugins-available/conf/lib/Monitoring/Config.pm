@@ -719,10 +719,11 @@ sub _set_coretype {
     }
 
     # get core from init script link (omd)
-    my $init = glob('~/etc/init.d/core');
-    if(defined $init and -e $init) {
-        $self->{'coretype'} = readlink(glob('~/etc/init.d/core'));
-        return;
+    if(defined $ENV{'OMD_ROOT'}) {
+        if(-e $ENV{'OMD_ROOT'}.'/etc/init.d/core') {
+            $self->{'coretype'} = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
+            return;
+        }
     }
 
     return;

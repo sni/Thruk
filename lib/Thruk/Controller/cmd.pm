@@ -483,16 +483,17 @@ sub _do_send_command {
     eval {
         $tt->process(
             'cmd/cmd_typ_' . $cmd_typ . '.tt',
-            {   c                => $c,
-                cmd_tt           => 'cmd_line.tt',
-                start_time_unix  => $start_time_unix,
-                end_time_unix    => $end_time_unix,
-                die_on_errors    => 1,
-                theme            => $c->stash->{'theme'},
-                url_prefix       => $c->stash->{'url_prefix'},
-                comment_author   => '',
-                hostdowntimes    => '',
-                servicedowntimes => '',
+            {   c                      => $c,
+                cmd_tt                 => 'cmd_line.tt',
+                start_time_unix        => $start_time_unix,
+                end_time_unix          => $end_time_unix,
+                die_on_errors          => 1,
+                theme                  => $c->stash->{'theme'},
+                url_prefix             => $c->stash->{'url_prefix'},
+                enable_icinga_features => $c->stash->{'enable_icinga_features'},
+                comment_author         => '',
+                hostdowntimes          => '',
+                servicedowntimes       => '',
             },
             \$cmd
         ) || die $tt->error();
@@ -512,15 +513,16 @@ sub _do_send_command {
     eval {
         $tt->process(
             'cmd/cmd_typ_' . $cmd_typ . '.tt',
-            {   c               => $c,
-                cmd_tt          => '_get_content.tt',
-                start_time_unix => $start_time_unix,
-                end_time_unix   => $end_time_unix,
-                theme           => $c->stash->{'theme'},
-                url_prefix       => $c->stash->{'url_prefix'},
-                comment_author   => '',
-                hostdowntimes    => '',
-                servicedowntimes => '',
+            {   c                      => $c,
+                cmd_tt                 => '_get_content.tt',
+                start_time_unix        => $start_time_unix,
+                end_time_unix          => $end_time_unix,
+                theme                  => $c->stash->{'theme'},
+                url_prefix             => $c->stash->{'url_prefix'},
+                comment_author         => '',
+                hostdowntimes          => '',
+                servicedowntimes       => '',
+                enable_icinga_features => $c->stash->{'enable_icinga_features'},
             },
             \$form
         ) || die $tt->error();

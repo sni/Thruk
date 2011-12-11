@@ -38,7 +38,16 @@
     </tr>
     <tr>
       <td class='dataVar' align="left">Contact Exists</td>
-      <td class='dataVal'>[% IF has_contact %]Yes[% ELSE %]No[% END %]</td>
+      <td class='dataVal'>
+        [% IF has_contact %]Yes[% ELSE %]No[% END %]
+        [% IF backends_with_obj_config.keys.size > 0 %]
+          [% IF has_contact %]
+            - <a href="conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% user_name %]">edit</a>
+          [% ELSE %]
+            - <a href="conf.cgi?sub=objects&amp;action=new&amp;type=contact&amp;obj.contact_name=[% user_name %]">create</a>
+          [% END %]
+        [% END %]
+      </td>
     </tr>
     [% IF conf_config.exists('htpasswd') %]
     <tr>
