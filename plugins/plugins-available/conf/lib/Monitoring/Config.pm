@@ -664,13 +664,7 @@ sub _set_config {
             $core_conf = '/omd/sites/'.$1.'/tmp/shinken/shinken.cfg';
         }
 
-        if( !defined $self->{'_coreconf'} or $self->{'_coreconf'} ne $core_conf) {
-            $self->_update_core_conf($core_conf);
-        }
-        elsif($self->_check_file_changed($self->{'_corefile'})) {
-            $self->_update_core_conf($core_conf);
-        }
-
+        $self->_update_core_conf($core_conf);
     }
 
     $self->_set_coretype();

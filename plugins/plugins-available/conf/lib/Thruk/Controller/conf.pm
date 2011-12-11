@@ -784,6 +784,7 @@ sub _apply_config_changes {
     }
 
     if($c->{'request'}->{'parameters'}->{'refresh'}) {
+        Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
         return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
     }
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
