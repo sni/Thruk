@@ -5,6 +5,7 @@ use warnings;
 use File::Slurp;
 use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
+use Data::Dumper;
 
 =head1 NAME
 
