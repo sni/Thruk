@@ -67,6 +67,8 @@ sub new {
     return unless defined &$obj;
     my $current_object = &$obj($objclass, $conf->{'coretype'});
 
+    return unless defined $current_object;
+
     $current_object->{'conf'}     = dclone( $conf->{'conf'} || {} );
     $current_object->{'line'}     = $conf->{'line'} || 0;
     $current_object->{'file'}     = $conf->{'file'} if defined $conf->{'file'};
