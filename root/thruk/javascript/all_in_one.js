@@ -7366,7 +7366,7 @@ function check_selected_command() {
         enableFormElement('row_comment');
         enableFormElement('row_ack_options');
         document.getElementById('opt_persistent').value = 'ack';
-        if(enable_icinga_features) {
+        if(has_expire_acks) {
             enableFormElement('opt_expire');
             if(document.getElementById('opt5').checked == true) {
                 enableFormElement('row_expire');
