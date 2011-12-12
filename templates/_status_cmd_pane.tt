@@ -109,8 +109,13 @@
           <tr><td onclick="toggleCheckBox('opt2')">Sticky Acknowledgement:</td><td><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack %] checked[% END %]></td></tr>
           <tr><td onclick="toggleCheckBox('opt3')">Send Notification:</td><td><input type='checkbox' id="opt3" name='send_notification'[% IF c.config.cmd_defaults.send_notification %] checked[% END %]></td></tr>
           <tr><td onclick="toggleCheckBox('opt4')">Persistent Comment:</td><td><input type='checkbox' id="opt4" name='persistent_ack'[% IF c.config.cmd_defaults.persistent_ack %] checked[% END %]></td></tr>
+          <tr id="opt_expire"><td onclick="toggleCheckBox('opt5')">Use Expire Time:</td><td><input type='checkbox' id="opt5" name='use_expire'[% IF c.config.cmd_defaults.use_expire %] checked[% END %] onchange="if(this.checked == true) {showElement('row_expire')} else { hideElement('row_expire')};"></td></tr>
         </table>
       </td>
+    </tr>
+    <tr id="row_expire">
+      <td class="statusOdd">Expire:</td>
+      <td class="statusOdd"><a href="#" onclick="show_cal('expire_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+86400, '%Y-%m-%d %H:%M:%S') %]" id="expire_time" name="expire_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_comment_options">
       <td class="statusOdd" valign="top">Options:</td>

@@ -7366,6 +7366,12 @@ function check_selected_command() {
         enableFormElement('row_comment');
         enableFormElement('row_ack_options');
         document.getElementById('opt_persistent').value = 'ack';
+        if(enable_icinga_features) {
+            enableFormElement('opt_expire');
+            if(document.getElementById('opt5').checked == true) {
+                enableFormElement('row_expire');
+            }
+        }
     }
     if(value == 5) { /* remove downtimes */
     }
@@ -7388,7 +7394,7 @@ function check_selected_command() {
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options');
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire');
     elems.each(function(id) {
         obj = document.getElementById(id);
         obj.style.display = "none";

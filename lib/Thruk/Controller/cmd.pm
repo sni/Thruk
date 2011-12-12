@@ -37,10 +37,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{'commands2send'} = [];
 
     # fill in some defaults
-    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc servicegroup backend/) {
+    for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup backend/) {
         $c->request->parameters->{$param} = '' unless defined $c->request->parameters->{$param};
     }
-    for my $param (qw/com_id down_id hours minutes start_time end_time plugin_state trigger not_dly/) {
+    for my $param (qw/com_id down_id hours minutes start_time end_time expire_time plugin_state trigger not_dly/) {
         $c->request->parameters->{$param} = 0 unless defined $c->request->parameters->{$param};
     }
 
@@ -470,6 +470,20 @@ sub _do_send_command {
             $c->request->parameters->{'end_time'} = $new_date;
         }
         $end_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'end_time'} );
+    }
+    if( $c->request->parameters->{'use_expire'} ) {
+        if($c->request->parameters->{'expire_time'}) {
+            if( $c->request->parameters->{'expire_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
+                my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->request->parameters->{'expire_time'} ), '%Y-%m-%d %H:%M:%S' );
+                $c->log->debug( "setting expire date to: " . $new_date );
+                $c->request->parameters->{'expire_time'} = $new_date;
+            }
+            if($c->request->parameters->{'expire_time'}) {
+                $end_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'expire_time'} );
+            }
+            $c->request->parameters->{'end_time'} = $c->request->parameters->{'expire_time'};
+        }
+        $c->request->parameters->{'com_data'} .= ' - The acknowledgement expires at: '.$c->request->parameters->{'end_time'}.'.';
     }
 
     return 1 if $self->_check_reschedule_alias($c);

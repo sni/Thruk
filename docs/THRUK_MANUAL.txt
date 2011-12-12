@@ -969,6 +969,7 @@ ex.:
     persistent_comments    = 1  # Persistent Comments
     persistent_ack         = 0  # Persistent Acknowledgement Comments
     ptc                    = 0  # For Child Hosts Too
+    use_expire             = 0  # Use expire time ( for cores which support it)
   </cmd_defaults>
 
 

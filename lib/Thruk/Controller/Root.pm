@@ -105,6 +105,7 @@ sub begin : Private {
                     persistent_comments    => 1,
                     persistent_ack         => 0,
                     ptc                    => 0,
+                    use_expire             => 0,
         },
         command_disabled                    => {},
         show_custom_vars                    => [],

@@ -1,7 +1,8 @@
 ﻿<script type="text/javascript">
 <!--
-  var url_prefix = '[% url_prefix %]';
-  var theme      = '[% theme %]';
+  var url_prefix             = '[% url_prefix %]';
+  var theme                  = '[% theme %]';
+  var enable_icinga_features = [% IF enable_icinga_features %]true[% ELSE %]false[% END %];
 -->
 </script>
 [%+ UNLESS author %]
