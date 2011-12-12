@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.6    Thu Dec 11 19:09:17 CET 2011
+1.1.6    Thu Dec 13 19:09:17 CET 2011
           - added acknowledgments with expire date (shinken/icinga only)
           - added json export on status page (thanks Justin Burnham)
           - config tool:
