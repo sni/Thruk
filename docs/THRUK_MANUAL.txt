@@ -1237,6 +1237,17 @@ ex.:
   </priorities>
 
 
+==== enable_icinga_features
+This one activates all icinga specific features.
+If not set, Thruk will try to auto-detect your backends.
+Currently autodetection will only work within OMD. Dont enable it
+unless all your backends are icinga.
+
+ex.:
+
+  enable_icinga_features = 1
+
+
 ==== check_local_states
 Get the status for remote backends from local instances. This can
 increase performance when using multiple remote sites. It is enabled

@@ -7635,6 +7635,16 @@ will only work with shinken backends.</p></div>
   0   = Development
 &lt;/priorities&gt;</tt></pre>
 </div></div>
+<h4 id="_enable_icinga_features">enable_icinga_features</h4>
+<div class="paragraph"><p>This one activates all icinga specific features.
+If not set, Thruk will try to auto-detect your backends.
+Currently autodetection will only work within OMD. Dont enable it
+unless all your backends are icinga.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>enable_icinga_features = 1</tt></pre>
+</div></div>
 <h4 id="_check_local_states">check_local_states</h4>
 <div class="paragraph"><p>Get the status for remote backends from local instances. This can
 increase performance when using multiple remote sites. It is enabled
@@ -8353,7 +8363,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-12-10 22:20:03 CEST
+Last updated 2011-12-12 10:31:36 CEST
 </div>
 </div>
 </body>
