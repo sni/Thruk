@@ -25,16 +25,6 @@ return help for config directive
 sub get_config_help {
     my ( $type, $key ) = @_;
 
-    our $helpdata;
-    my $helpsource;
-    if(!defined $helpdata) {
-       while(my $line = <DATA>) { $helpsource .= $line; }
-        my $VAR1;
-        ## no critic
-        eval( $helpsource );
-        ## use critic
-        $helpdata = $VAR1;
-    }
     if($key eq 'use') {
         return "This directive specifies the name of the template object that you want to inherit properties/variables from. The name you specify for this variable must be defined as another object's template named (using the <i>name</i> variable).";
     }
@@ -48,10 +38,10 @@ sub get_config_help {
         return "Custom variables allow users to define additional properties in their host, service, and contact definitions, and use their values in notifications, event handlers, and host and service checks.<br><ul><li>Custom variable names must begin with an underscore (_) to prevent name collision with standard variables</li><li>Custom variable names are converted to all uppercase before use</li><li>Custom variables are inherited from object templates like normal variables</li><li>Scripts can reference custom variable values with macros and environment variables</li></ul>";
     }
 
-    unless(defined $helpdata->{$type}->{$key}) {
+    unless(defined $Monitoring::Config::Help::helpdata->{$type}->{$key}) {
         return "topic does not exist!";
     }
-    return $helpdata->{$type}->{$key};
+    return $Monitoring::Config::Help::helpdata->{$type}->{$key};
 }
 
 ##########################################################
@@ -68,10 +58,7 @@ it under the same terms as Perl itself.
 
 =cut
 
-1;
-
-__DATA__
-$VAR1 = {
+$Monitoring::Config::Help::helpdata = {
           'command' => {
                          'command_line' => '<p>This directive is used to define what is actually executed by Nagios when the command is used for service or host checks, notifications, or event handlers. Before the command line is executed, all valid macros are replaced with their respective values.  See the documentation on macros for determining when you can use different macros.  Note that the command line is <i>not</i> surrounded in quotes.  Also, if you want to pass a dollar sign ($) on the command line, you have to escape it with another dollar sign.</p><p><strong>NOTE</strong>: You may not include a <b>semicolon</b> (;) in the <i>command_line</i> directive, because everything after it will be ignored as a config file comment.  You can work around this limitation by setting one of the <b>$USER$</b> macros in your resource file to a semicolon and then referencing the appropriate $USER$ macro in the <i>command_line</i> directive in place of the semicolon.</p><p>If you want to pass arguments to commands during runtime, you can use <b>$ARGn$</b> macros in the <i>command_line</i> directive of the command definition and then separate individual arguments from the command name (and from each other) using bang (!) characters in the object definition directive (host check command, service event handler command, etc) that references the command.  More information on how arguments in command definitions are processed during runtime can be found in the documentation on macros.</p>',
                          'command_name' => 'This directive is the short name used to identify the command.  It is referenced in contact, host, and service definitions (in notification, check, and event handler directives), among other places.'
@@ -288,4 +275,6 @@ $VAR1 = {
                             'args' => 'This directive defines optional arguments passed to the module. idomod needs config_file=.../idomod.cfg while other modules have their own syntax. This directive is passed as argument string to the event broker module loader if used as neb module.'
                           }
 
-        };
+};
+
+1;

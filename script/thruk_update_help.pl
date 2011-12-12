@@ -5,6 +5,9 @@ use strict;
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
 
+print "don't use\n";
+exit 1;
+
 unless(-f "objectdefinitions.html") {
     `wget "http://nagios.sourceforge.net/docs/3_0/objectdefinitions.html"`;
 }
