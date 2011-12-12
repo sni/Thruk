@@ -92,9 +92,11 @@ sub new {
     my $coretype = shift;
 
     if($coretype eq 'shinken') {
-        $Monitoring::Config::Object::Host::Defaults->{'criticity'} = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'criticity'}          = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'} = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };
     } else {
         delete $Monitoring::Config::Object::Host::Defaults->{'criticity'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'};
     }
 
     if($coretype eq 'icinga') {
