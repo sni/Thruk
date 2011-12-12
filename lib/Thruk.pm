@@ -103,6 +103,7 @@ my %config = ('name'                   => 'Thruk',
                                           'remote_user'    => '?',
                                           'infoBoxTitle'   => '',
                                           'has_proc_info'  => 0,
+                                          'has_expire_acks'=> 0,
                                           'no_auto_reload' => 0,
                                           'die_on_errors'  => 0,        # used in cmd.cgi
                                           'errorMessage'   => 0,        # used in errors

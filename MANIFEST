@@ -253,6 +253,8 @@ t/96_makefile_requirements.t
 t/97-Pod.t
 t/98-Pod-Coverage.t
 t/99-Perl-Critic.t
+t/backend_icinga.t
+t/backend_shinken.t
 t/controller_avail.t
 t/controller_cmd.t
 t/controller_config.t
