@@ -204,6 +204,12 @@ before 'execute' => sub {
         }
     }
 
+    ###############################
+    # expire acks?
+    $c->stash->{'has_expire_acks'} = 0;
+    $c->stash->{'has_expire_acks'} = 1 if $c->stash->{'enable_icinga_features'}
+                                       or $c->stash->{'enable_shinken_features'};
+
     # make stash available for our backends
     $c->{'db'}->set_stash($c->stash);
 

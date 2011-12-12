@@ -504,7 +504,7 @@ sub _do_send_command {
                 die_on_errors          => 1,
                 theme                  => $c->stash->{'theme'},
                 url_prefix             => $c->stash->{'url_prefix'},
-                enable_icinga_features => $c->stash->{'enable_icinga_features'},
+                has_expire_acks        => $c->stash->{'has_expire_acks'},
                 comment_author         => '',
                 hostdowntimes          => '',
                 servicedowntimes       => '',
@@ -536,7 +536,7 @@ sub _do_send_command {
                 comment_author         => '',
                 hostdowntimes          => '',
                 servicedowntimes       => '',
-                enable_icinga_features => $c->stash->{'enable_icinga_features'},
+                has_expire_acks        => $c->stash->{'has_expire_acks'},
             },
             \$form
         ) || die $tt->error();

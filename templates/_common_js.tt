@@ -2,7 +2,7 @@
 <!--
   var url_prefix             = '[% url_prefix %]';
   var theme                  = '[% theme %]';
-  var enable_icinga_features = [% IF enable_icinga_features %]true[% ELSE %]false[% END %];
+  var has_expire_acks        = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
 -->
 </script>
 [%+ UNLESS author %]

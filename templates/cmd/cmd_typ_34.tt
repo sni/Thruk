@@ -21,7 +21,7 @@
     [% comment_author       = c.request.parameters.com_author %]
     [% IF c.request.parameters.sticky_ack %][% options = 2 %][% ELSE %][% options = 1 %][% END %]
 
-    [% IF enable_icinga_features && end_time_unix > 0 && c.request.parameters.use_expire %]
+    [% IF has_expire_acks && end_time_unix > 0 && c.request.parameters.use_expire %]
     ACKNOWLEDGE_SVC_PROBLEM_EXPIRE;[% sprintf("%s;%s;%d;%d;%d;%d;%s;%s",host_name,service_desc,options,send_notification,persistent_comment,end_time_unix,comment_author,comment_data) %]
     [% ELSE %]
     ACKNOWLEDGE_SVC_PROBLEM;[% sprintf("%s;%s;%d;%d;%d;%s;%s",host_name,service_desc,options,send_notification,persistent_comment,comment_author,comment_data) %]
@@ -36,7 +36,7 @@
 <tr><td class='optBoxItem'>Sticky Acknowledgement:</td><td><b><input type='checkbox' name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack %] checked[% END %]></b></td></tr>
 <tr><td class='optBoxItem'>Send Notification:</td><td><b><input type='checkbox' name='send_notification'[% IF c.config.cmd_defaults.send_notification %] checked[% END %]></b></td></tr>
 <tr><td class='optBoxItem'>Persistent Comment:</td><td><b><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_ack %] checked[% END %]></b></td></tr>
-[% IF enable_icinga_features %]
+[% IF has_expire_acks %]
 <tr><td class='optBoxItem'>Use Expire Time:</td><td><b><input type='checkbox' name='use_expire' onchange="if(this.checked == true) {showElement('expire_row')} else { hideElement('expire_row')};"[% IF c.config.cmd_defaults.use_expire %] checked[% END %]></b></td></tr>
 <tr id="expire_row"[% IF !c.config.cmd_defaults.use_expire %] style="display:none"[% END %]><td class='optBoxItem'>Expire Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]'> <a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
 [% END %]
