@@ -470,7 +470,7 @@ sub thruk_frame_html : Regex('thruk\/frame\.html') {
     if( defined $link ) {
         for my $pattern ( @{$valid_links} ) {
             if( $link =~ m/$pattern/mx ) {
-                if($c->stash->{'use_frames'}) {
+                if($c->stash->{'use_frames'} and substr($link,0,1) ne '/' and $link !~ m/^\w+:\/\//gmx) {
                     return $c->response->redirect($c->stash->{'url_prefix'}."thruk/#".$link);
                 }
                 $c->stash->{'target'}   = '_parent';
