@@ -1,7 +1,12 @@
 Todo & Wish List:
 =========================================================
 
-Bugs: none
+Bugs: conf tool: icon_image wird verlinkt
+      service select:  [{"name":"services","data":[null,"ADF -> js
+      fehler in all_in_one.js (line 8539) var index = ...).indexOf(sub_pattern.toLowerCase());
+
+Features:
+      sync multiple backend with config tool
 
 general:
     - webservice api, passthrough querys to livestatus and return json
