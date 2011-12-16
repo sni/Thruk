@@ -9,7 +9,9 @@
     [% IF key == 'command_line' %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
     [% IF key == 'address' %]<button class="conf_button ip_wzd_button" id="[% key %]_btn[% nr %]">&nbsp;</button>[% END %]
   [% ELSE %]
-    [% IF defaults.exists(key) && defaults.$key.exists('link') %]
+    [% IF defaults.exists(key) && defaults.$key.exists('link') && defaults.$key.link == 'icon' %]
+        [% html_escape(value) %] <img class="notclickable" src='[% logo_path_prefix %][% value %]' border="0" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
+    [% ELSIF defaults.exists(key) && defaults.$key.exists('link') %]
         <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value %]</a>
     [% ELSE %]
         [% html_escape(value) %]

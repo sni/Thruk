@@ -37,6 +37,7 @@ body.config TD.conf_row {
   padding-bottom: 3px;
   border-bottom: 3px solid white;
   margin: 0px;
+  vertical-align: middle;
 }
 
 TD#filesystem {
