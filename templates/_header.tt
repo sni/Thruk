@@ -45,10 +45,6 @@
               jQuery(this).prev('input').val('').focus();
           }));
       });
-
-      [% IF use_frames %]
-      save_url_in_parents_hash();
-      [% END +%]
     -->
     </script>
 

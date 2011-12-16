@@ -496,12 +496,15 @@ function refresh_button(btn) {
 }
 
 /* save url part in parents hash */
-function save_url_in_parents_hash() {
-    if(parent.frames[0]) {
-        var oldloc = new String(parent.location);
+function save_url_in_parents_hash(name) {
+    jQuery(document).ready(function() {
+        var oldloc = new String(document.location);
         oldloc     = oldloc.replace(/#.*$/, '');
         oldloc     = oldloc.replace(/\?.*$/, '');
-        var newloc = new String(window.location);
+        if(!oldloc.match(/\/thruk\/$/)) {
+            return;
+        }
+        var newloc = new String(window.frames['main'].location);
         newloc     = newloc.replace(oldloc, '');
         newloc     = newloc.replace(/\?_=\d+/, '');
         newloc     = newloc.replace(/\&_=\d+/, '');
@@ -509,8 +512,9 @@ function save_url_in_parents_hash() {
         newloc     = newloc.replace(/\?reload_nav=\d+/, '');
         newloc     = newloc.replace(/\&theme=\w*/, '');
         newloc     = newloc.replace(/\?theme=\w*/, '');
-        parent.location.hash = '#'+newloc;
-    }
+        location.hash = '#'+newloc;
+    });
+    return;
 }
 
 /* when framed, and there is a valid url in our
@@ -526,7 +530,14 @@ function load_url_from_parents_hash() {
     var last   = values.pop();
     if(last == 'thruk' && newurl != 'main.html' && newurl != '') {
         debug('go -> '+ newurl);
-        window.frames[1].location = oldurl + newurl;
+        if(newurl.match(/^\d+:\/\//)) {
+            window.frames[1].location = newurl;
+        }
+        else if(newurl.match(/^\//)) {
+            window.frames[1].location = window.location.protocol + '//' + window.location.host + newurl;
+        } else {
+            window.frames[1].location = oldurl + newurl;
+        }
     }
 }
 
@@ -535,6 +546,7 @@ function reverse(s){
     return s.split("").reverse().join("");
 }
 
+/* set selection in text input */
 function setSelectionRange(input, selectionStart, selectionEnd) {
   if (input.setSelectionRange) {
     input.focus();
@@ -549,6 +561,7 @@ function setSelectionRange(input, selectionStart, selectionEnd) {
   }
 }
 
+/* set cursor position in text input */
 function setCaretToPos(input, pos) {
   setSelectionRange(input, pos, pos);
 }

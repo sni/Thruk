@@ -1,8 +1,7 @@
 Todo & Wish List:
 =========================================================
 
-Bugs: service select:  [{"name":"services","data":[null,"ADF -> js
-      fehler in all_in_one.js (line 8539) var index = ...).indexOf(sub_pattern.toLowerCase());
+Bugs: none
 
 Features:
       sync multiple backend with config tool
