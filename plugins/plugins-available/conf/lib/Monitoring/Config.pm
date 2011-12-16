@@ -394,14 +394,17 @@ sub get_services_for_host {
             next if $found;
         }
 
-        if(defined $svc_config->{'host_name'} and grep { $_ eq $host_name } @{$svc_config->{'host_name'}}) {
-            $services->{'host'}->{$svc->get_name()} = $svc;
-        }
-        if(defined $svc_config->{'hostgroup_name'}) {
-            for my $group (@{$groups}) {
-                if(grep { $_ eq $group} @{$svc_config->{'hostgroup_name'}}) {
-                    $services->{'group'}->{$svc->get_name()} = $svc;
-                    last;
+        my $name = $svc->get_name();
+        if(defined $name) {
+            if(defined $svc_config->{'host_name'} and grep { $_ eq $host_name } @{$svc_config->{'host_name'}}) {
+                $services->{'host'}->{$name} = $svc;
+            }
+            if(defined $svc_config->{'hostgroup_name'}) {
+                for my $group (@{$groups}) {
+                    if(grep { $_ eq $group} @{$svc_config->{'hostgroup_name'}}) {
+                        $services->{'group'}->{$name} = $svc;
+                        last;
+                    }
                 }
             }
         }

@@ -298,10 +298,14 @@ sub _process_json_page {
         }
     } else {
         for my $dat (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
-            push @{$objects}, $dat->get_long_name();
+            my $name = $dat->get_long_name();
+            push @{$objects}, $name if defined $name;
+            use Data::Dumper; print STDERR Dumper($dat) unless defined $name;
         }
         for my $dat (@{$c->{'obj_db'}->get_templates_by_type($type)}) {
-            push @{$templates}, $dat->get_template_name();
+            my $name = $dat->get_template_name();
+            push @{$templates}, $name if defined $name;
+            use Data::Dumper; print STDERR Dumper($dat) unless defined $name;
         }
         $json = [ { 'name' => $type.'s',
                     'data' => [ sort @{Thruk::Utils::array_uniq($objects)} ],
