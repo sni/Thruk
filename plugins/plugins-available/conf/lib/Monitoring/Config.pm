@@ -987,7 +987,10 @@ sub _rebuild_index {
             if(defined $primary) {
                 $self->_update_obj_in_index($objects, $obj, $primary);
             } else {
-                push @{$self->{'errors'}}, "object has no name in ".$obj->{'file'}->{'path'}.":".$obj->{'line'};
+                my $type = $obj->get_type();
+                if($type ne 'hostescalation' and $type ne 'serviceescalation') {
+                    push @{$self->{'errors'}}, $obj->get_type()." object has no name in ".$obj->{'file'}->{'path'}.":".$obj->{'line'};
+                }
             }
         }
     }
