@@ -7801,8 +7801,9 @@ function add_new_filter(search_prefix, table) {
                              'Execution Time',
                              '% State Change',
                              'Check Period',
-                             'Downtime Duration',
-                             'Notification Period'
+                             'Notification Period',
+                             'Duration',
+                             'Downtime Duration'
                             );
   if(enable_shinken_features) {
     options.push('Priority');
@@ -8087,6 +8088,7 @@ function verify_op(event) {
          && selValue != 'latency'
          && selValue != 'execution time'
          && selValue != '% state change'
+         && selValue != 'duration'
          && selValue != 'downtime duration'
          && selValue != 'priority') {
         // is this currently selected?
@@ -8357,6 +8359,7 @@ var ajax_search = {
                || search_type == 'latency'
                || search_type == 'execution time'
                || search_type == '% state change'
+               || search_type == 'duration'
                || search_type == 'downtime duration'
                || search_type == 'priority' ) {
                 ajax_search.search_type = 'none';

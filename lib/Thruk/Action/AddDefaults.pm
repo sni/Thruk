@@ -140,6 +140,7 @@ before 'execute' => sub {
         $c->log->error("data source error: $@");
         return $c->detach('/error/index/9');
     }
+    $c->stash->{'last_program_restart'} = $last_program_restart;
 
     ###############################
     # read cached data again, groups could have changed

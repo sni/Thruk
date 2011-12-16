@@ -568,14 +568,15 @@ sub single_search {
         }
 
         my $op     = '=';
+        my $rop    = '=';
         my $listop = '>=';
         my $dateop = '=';
         my $joinop = "-or";
         if( $filter->{'op'} eq '!~' ) { $op = '!~~'; $joinop = "-and"; $listop = '!>='; }
         if( $filter->{'op'} eq '~'  ) { $op = '~~'; }
         if( $filter->{'op'} eq '!=' ) { $op = '!='; $joinop = "-and"; $listop = '!>='; $dateop = '!='; }
-        if( $filter->{'op'} eq '>=' ) { $op = '>='; $dateop = '>='; }
-        if( $filter->{'op'} eq '<=' ) { $op = '<='; $dateop = '<='; }
+        if( $filter->{'op'} eq '>=' ) { $op = '>='; $rop = '<='; $dateop = '>='; }
+        if( $filter->{'op'} eq '<=' ) { $op = '<='; $rop = '>='; $dateop = '<='; }
 
         if( $op eq '!~~' or $op eq '~~' ) {
             $errors++ unless Thruk::Utils::is_valid_regular_expression( $c, $value );
@@ -756,9 +757,43 @@ sub single_search {
         }
         # Filter on the downtime duration
         elsif ( $filter->{'type'} eq 'downtime duration' ) {
+            $value                 = Thruk::Utils::Status::convert_time_amount($value);
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_downtimes_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
             push @servicefilter,       $sfilter;
+        }
+        elsif ( $filter->{'type'} eq 'duration' ) {
+            my $now = time();
+            $value = Thruk::Utils::Status::convert_time_amount($value);
+            if(    ($op eq '>=' and ($now - $c->stash->{'last_program_restart'}) >= $value)
+                or ($op eq '<=' and ($now - $c->stash->{'last_program_restart'}) <= $value)
+                or ($op eq '!=' and ($now - $c->stash->{'last_program_restart'}) != $value)
+                or ($op eq '='  and ($now - $c->stash->{'last_program_restart'}) == $value)
+               ) {
+                push @hostfilter,    { -or => [{ -and => [ last_state_change => { '!=' => 0 },
+                                                          last_state_change => { $rop => $now - $value }
+                                                        ]
+                                              },
+                                              { last_state_change => { '=' => 0 } }
+                                              ],
+                                     };
+                push @servicefilter, { -or => [{ -and => [ last_state_change => { '!=' => 0 },
+                                                          last_state_change => { $rop => $now - $value }
+                                                        ]
+                                              },
+                                              { last_state_change => { '=' => 0 } },
+                                              ],
+                                     };
+            } else {
+                push @hostfilter,    { -and => [ last_state_change => { '!=' => 0 },
+                                                 last_state_change => { $rop => $now - $value }
+                                               ]
+                                     };
+                push @servicefilter, { -and => [ last_state_change => { '!=' => 0 },
+                                                 last_state_change => { $rop => $now - $value }
+                                               ]
+                                     };
+            }
         }
         elsif ( $filter->{'type'} eq 'notification period' ) {
             push @hostfilter,    { notification_period => { $op => $value } };
@@ -1513,6 +1548,31 @@ sub get_downtimes_filter {
     return(\@hostfilter, \@servicefilter);
 }
 
+##############################################
+
+=head2 convert_time_amount
+
+  convert_time_amount($value)
+
+returns converted amount of time
+
+possible conversions are
+1w => 604800
+1d => 86400
+1h => 3600
+1m => 60
+
+=cut
+sub convert_time_amount {
+    my $value = shift;
+    if($value =~ m/^(\d+)(w|d|h|m)/gmx) {
+        if($2 eq 'w') { return $1 * 604800; }
+        if($2 eq 'd') { return $1 * 86400; }
+        if($2 eq 'h') { return $1 * 3600; }
+        if($2 eq 'm') { return $1 * 60; }
+    }
+    return $value;
+}
 
 =head1 AUTHOR
 
