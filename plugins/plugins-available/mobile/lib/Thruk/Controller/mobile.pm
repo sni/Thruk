@@ -46,26 +46,29 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
         my $type  = $c->{'request'}->{'parameters'}->{'data'};
         my $limit = $c->{'request'}->{'parameters'}->{'limit'} || 10;
+        my $data;
         if($type eq 'notifications') {
-            my $data = $c->{'db'}->get_logs(filter => [ class => 3, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => $limit, sort => {'DESC' => 'time'});
+            $data = $c->{'db'}->get_logs(filter => [ class => 3, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => $limit, sort => {'DESC' => 'time'});
             for my $entry (@{$data}) {
                 $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
             }
+        }
+        elsif($type eq 'host_stats') {
+            $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+        }
+        elsif($type eq 'service_stats') {
+            $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+        }
+        if(defined $data) {
             $c->stash->{'json'} = $data;
             $c->forward('Thruk::View::JSON');
             return;
-        }
-        else {
+        } else {
             $c->log->error("unknown type: ".$type);
             return;
         }
     }
 
-    my $host_stats    = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
-    my $service_stats = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
-
-    $c->stash->{hosts}     = $host_stats;
-    $c->stash->{services}  = $service_stats;
     $c->stash->{template}  = 'mobile.tt';
 
     return 1;

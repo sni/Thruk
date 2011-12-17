@@ -3,120 +3,22 @@
   <head>
     <title>Mobile Thruk</title>
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/Classic/stylesheets/Classic.css' />
-    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.min.css";</style>
-    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/theme.min.css";</style>
-    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jquery.1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.min.js" type="application/x-javascript" charset="utf-8"></script>
-    <script type="text/javascript" charset="utf-8">
-      function get_host_class_for_state(state) {
-        if(state == 0) { return("hostUP"); }
-        if(state == 1) { return("hostDOWN"); }
-        if(state == 2) { return("hostUNREACHABLE"); }
-        if(state == 3) { return("hostPENDING"); }
-        alert('unknown state' +  state);
-      }
-      function get_service_class_for_state(state) {
-        if(state == 0) { return("serviceOK"); }
-        if(state == 1) { return("serviceWARNING"); }
-        if(state == 2) { return("serviceCRITICAL"); }
-        if(state == 3) { return("serviceUNKNOWN"); }
-        if(state == 4) { return("servicePENDING"); }
-        alert('unknown state' +  state);
-      }
-
-      var jQT = new jQuery.jQTouch({
-            icon: '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/thruk.png',
-            addGlossToIcon: false,
-            startupScreen: '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/startup.png',
-            statusBar: 'black',
-            initializeTouch: 'a, .touch',
-            preloadImages: [
-                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/whiteButton.png',
-                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/toolButton.png',
-                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif',
-                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/02-redo.png',
-                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/thruk.png',
-                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/startup.png',
-                '[% url_prefix %]thruk/plugins/mobile/jqtouch/img/06-search.png',
-                '[% url_prefix %]thruk/themes/Classic/images/logo_thruk_small.png'
-              ]
-      });
-
-      jQuery(document).ready(function(e){
-        /*
-        jQuery('#hosts').bind('pageAnimationEnd', function(event, info){
-          if (info.direction == 'in') {
-          } else {
-          }
-        });
-        */
-        jQuery('#last_notification').bind('pageAnimationEnd', function(event, info){
-          if(info.direction == 'in') {
-            jQuery.get('[% url_prefix %]thruk/cgi-bin/mobile.cgi',
-                  {
-                    data: 'notifications',
-                    limit:10
-                  },
-                  function(data, textStatus, XMLHttpRequest) {
-                    // empty list
-                    jQuery('#notification_list').children().remove();
-                    jQuery.each(data, function(index, entry) {
-                      if(entry.service_description) {
-                        jQuery('#notification_list').append('<li class="arrow '+get_service_class_for_state(entry.state)+'"><a href="#"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+' - '+ entry.service_description +'</a></li>');
-                      } else {
-                        jQuery('#notification_list').append('<li class="arrow '+get_host_class_for_state(entry.state)+'"><a href="#"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+'</a></li>');
-                      }
-                    });
-                    // add a more button
-                    jQuery('#notification_list').append('<li class="more"><a href="#more">load 10 more</a></li>');
-                  },
-                  'json');
-          } else {
-            // empty list
-            jQuery('#notification_list').children().remove();
-            jQuery('#notification_list').append('<li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>');
-          }
-        });
-      });
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/mobile/mobile.css' />
+    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jquery-1.4.2.min.js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.js" type="application/x-javascript" charset="utf-8"></script>
+    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.css";</style>
+    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/theme.css";</style>
+    <script type="application/x-javascript">
+      var url_prefix = '[% url_prefix %]';
     </script>
-    <style type="text/css" media="screen">
-      body.fullscreen #home .info {
-        display: none;
-      }
-      #about {
-        padding: 100px 10px 40px;
-        text-shadow: rgba(255, 255, 255, 0.3) 0px -1px 0;
-        font-size: 13px;
-        text-align: center;
-        background: #161618;
-        color: #fff;
-      }
-      #about p {
-        margin-bottom: 8px;
-      }
-      #about a {
-        color: #fff;
-        font-weight: bold;
-        text-decoration: none;
-      }
-      .hidden {
-        display: none;
-      }
-      .more {
-        text-align: center;
-      }
-      .date {
-        font-size: 14px;
-      }
-    </style>
+    <script src="[% url_prefix %]thruk/plugins/mobile/mobile.js" type="application/x-javascript" charset="utf-8"></script>
   </head>
-  <body>
-
+  <body id="jqt">
 
 <!-- Home -->
     <div id="home" class="current">
       <div class="toolbar">
-        <a href="#reload" onClick="window.location.reload(true);" class="button slideup cancel"><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/02-redo.png" alt="reload"></a>
+        <a id="reload" class="button cancel"><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/02-redo.png" alt="reload"></a>
         <h1>Mobile Thruk</h1>
         <a class="button slideup" href="#about">About</a>
       </div>
@@ -124,20 +26,23 @@
         <ul class="rounded">
           <li class="arrow">
             <a href="#hosts">Hosts
-            [% IF hosts.pending     > 0 %]<small class="counter hostPENDING" style="margin: 0">[% hosts.pending %]</small>[% END %]
-            [% IF hosts.unreachable > 0 %]<small class="counter hostUNREACHABLE" style="margin: 0">[% hosts.unreachable %]</small>[% END %]
-            [% IF hosts.down        > 0 %]<small class="counter hostDOWN" style="margin: 0">[% hosts.down %]</small>[% END %]
-            [% IF hosts.up          > 0 %]<small class="counter hostUP" style="margin: 0">[% hosts.up %]</small>[% END %]
+              <small class="counter counter_placeholder">&nbsp;</small>
+              <span class="hidden hosts_pending_panel"><small class="counter hostPENDING hosts_pending" style="margin: 0"></small></span>
+              <span class="hidden hosts_unreachable_panel"><small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0"></small></span>
+              <span class="hidden hosts_down_panel"><small class="counter hostDOWN hosts_down" style="margin: 0"></small></span>
+              <span class="hidden hosts_up_panel"><small class="counter hostUP hosts_up" style="margin: 0"></small></span>
+
             </a>
           </li>
 
           <li class="arrow">
             <a href="#services">Services
-            [% IF services.pending  > 0 %]<small class="counter servicePENDING" style="margin: 0">[% services.pending %]</small>[% END %]
-            [% IF services.critical > 0 %]<small class="counter serviceCRITICAL" style="margin: 0">[% services.critical %]</small>[% END %]
-            [% IF services.unknown  > 0 %]<small class="counter serviceUNKNOWN" style="margin: 0">[% services.unknown %]</small>[% END %]
-            [% IF services.warning  > 0 %]<small class="counter serviceWARNING" style="margin: 0">[% services.warning %]</small>[% END %]
-            [% IF services.ok       > 0 %]<small class="counter serviceOK" style="margin: 0">[% services.ok %]</small>[% END %]
+              <small class="counter counter_placeholder">&nbsp;</small>
+              <span class="hidden services_pending_panel"><small class="counter servicePENDING services_pending" style="margin: 0"></small></span>
+              <span class="hidden services_critical_panel"><small class="counter serviceCRITICAL services_critical" style="margin: 0"></small></span>
+              <span class="hidden services_unknown_panel"><small class="counter serviceUNKNOWN services_unknown" style="margin: 0"></small></span>
+              <span class="hidden services_warning_panel"><small class="counter serviceWARNING services_warning" style="margin: 0"></small></span>
+              <span class="hidden services_ok_panel"><small class="counter serviceOK services_ok" style="margin: 0"></small></span>
             </a>
           </li>
         </ul>
@@ -170,7 +75,7 @@
 
 <!-- About -->
     <div id="about" class="selectable">
-      <p><img src="[% url_prefix %]thruk/themes/Classic/images/logo_thruk_small.png" /></p>
+      <p><img src="[% url_prefix %]thruk/themes/Classic/images/logo_thruk_small.png" alt="thruk mobile" /></p>
       <p>
         <strong>Thruk Monitoring Webinterface</strong><br />
         Version [% version %]<br />
@@ -188,10 +93,10 @@
         <h1>Hosts</h1>
       </div>
       <ul class="rounded" id="hosts_list">
-        [% IF hosts.up          > 0 %]<li class="arrow"><a href="#hosts">Up<small class="counter hostUP" style="margin: 0 50px 0 0">[% hosts.up %]</small></a></li>[% END %]
-        [% IF hosts.down        > 0 %]<li class="arrow"><a href="#hosts">Down<small class="counter hostDOWN" style="margin: 0 50px 0 0">[% hosts.down %]</small></a></li>[% END %]
-        [% IF hosts.unreachable > 0 %]<li class="arrow"><a href="#hosts">Unreachable<small class="counter hostUNREACHABLE" style="margin: 0 50px 0 0">[% hosts.unreachable %]</small></a></li>[% END %]
-        [% IF hosts.pending     > 0 %]<li class="arrow"><a href="#hosts">Pending<small class="counter hostPENDING" style="margin: 0 50px 0 0">[% hosts.pending %]</small></a></li>[% END %]
+        <li class="arrow hidden"><a href="#hosts">Up<small class="counter hostUP hosts_up" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden"><a href="#hosts">Down<small class="counter hostDOWN hosts_down" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden"><a href="#hosts">Unreachable<small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden"><a href="#hosts">Pending<small class="counter hostPENDING hosts_pending" style="margin: 0 50px 0 0"></small></a></li>
       </ul>
     </div>
 
@@ -202,11 +107,11 @@
         <h1>Services</h1>
       </div>
       <ul class="rounded" id="services_list">
-        [% IF services.ok          > 0 %]<li class="arrow"><a href="#services">Ok<small class="counter serviceOK" style="margin: 0 50px 0 0">[% services.ok %]</small></a></li>[% END %]
-        [% IF services.warning     > 0 %]<li class="arrow"><a href="#services">Warning<small class="counter serviceWARNING" style="margin: 0 50px 0 0">[% services.warning %]</small></a></li>[% END %]
-        [% IF services.critical    > 0 %]<li class="arrow"><a href="#services">Critical<small class="counter serviceCRITICAL" style="margin: 0 50px 0 0">[% services.critical %]</small></a></li>[% END %]
-        [% IF services.unknown     > 0 %]<li class="arrow"><a href="#services">Unknown<small class="counter serviceUNKNOWN" style="margin: 0 50px 0 0">[% services.unknown %]</small></a></li>[% END %]
-        [% IF services.pending     > 0 %]<li class="arrow"><a href="#services">Pending<small class="counter servicePENDING" style="margin: 0 50px 0 0">[% services.pending %]</small></a></li>[% END %]
+        <li class="arrow hidden"><a href="#services">Ok<small class="counter serviceOK services_ok" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden"><a href="#services">Warning<small class="counter serviceWARNING services_warning" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden"><a href="#services">Critical<small class="counter serviceCRITICAL services_critical" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden"><a href="#services">Unknown<small class="counter serviceUNKNOWN services_unknown" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden"><a href="#services">Pending<small class="counter servicePENDING services_pending" style="margin: 0 50px 0 0"></small></a></li>
       </ul>
     </div>
 

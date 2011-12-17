@@ -1,0 +1,48 @@
+body.fullscreen #home .info {
+  display: none;
+}
+#about {
+  padding: 100px 10px 40px;
+  text-shadow: rgba(255, 255, 255, 0.3) 0px -1px 0;
+  font-size: 13px;
+  text-align: center;
+  background: #161618;
+  color: #fff;
+}
+#about p {
+  margin-bottom: 8px;
+}
+#about a {
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+}
+.hidden {
+  display: none;
+}
+.more {
+  text-align: center;
+}
+.date {
+  font-size: 14px;
+}
+
+.counter_placeholder {
+  margin:0px !important;
+  background: transparent !important;
+  padding: 0 !important;
+  width: 10px !important;
+}
+
+.hosts_pending_panel,
+.hosts_unreachable_panel,
+.hosts_down_panel,
+.hosts_up_panel,
+.services_pending_panel,
+.services_critical_panel,
+.services_unknown_panel,
+.services_warning_panel,
+.services_ok_panel
+{
+  display: inline;
+}
