@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - config tool:
               - removed link from icons
               - fixed services without description
+          - fixed setting multiple acks with expire
 
 1.1.6    Tue Dec 13 19:09:17 CET 2011
           - added acknowledgments with expire date (shinken/icinga only)

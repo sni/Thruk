@@ -483,7 +483,10 @@ sub _do_send_command {
             }
             $c->request->parameters->{'end_time'} = $c->request->parameters->{'expire_time'};
         }
-        $c->request->parameters->{'com_data'} .= ' - The acknowledgement expires at: '.$c->request->parameters->{'end_time'}.'.';
+        unless(defined $c->stash->{'com_data_adjusted'}) {
+            $c->request->parameters->{'com_data'} .= ' - The acknowledgement expires at: '.$c->request->parameters->{'end_time'}.'.';
+            $c->stash->{'com_data_adjusted'}       = 1;
+        }
     }
 
     return 1 if $self->_check_reschedule_alias($c);
