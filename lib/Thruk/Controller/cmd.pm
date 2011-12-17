@@ -471,7 +471,9 @@ sub _do_send_command {
         }
         $end_time_unix = Thruk::Utils::parse_date( $c, $c->request->parameters->{'end_time'} );
     }
-    if( $c->request->parameters->{'use_expire'} ) {
+    if( $c->request->parameters->{'use_expire'}
+       and ($cmd_typ == 33 or $cmd_typ == 34)
+      ) {
         if($c->request->parameters->{'expire_time'}) {
             if( $c->request->parameters->{'expire_time'} !~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx ) {
                 my $new_date = Thruk::Utils::format_date( Thruk::Utils::parse_date( $c, $c->request->parameters->{'expire_time'} ), '%Y-%m-%d %H:%M:%S' );
