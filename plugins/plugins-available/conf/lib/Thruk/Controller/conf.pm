@@ -299,13 +299,19 @@ sub _process_json_page {
     } else {
         for my $dat (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
             my $name = $dat->get_long_name();
-            push @{$objects}, $name if defined $name;
-            use Data::Dumper; print STDERR Dumper($dat) unless defined $name;
+            if(defined $name) {
+                push @{$objects}, $name
+            } else {
+                $c->log->warn("object without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
+            }
         }
         for my $dat (@{$c->{'obj_db'}->get_templates_by_type($type)}) {
             my $name = $dat->get_template_name();
-            push @{$templates}, $name if defined $name;
-            use Data::Dumper; print STDERR Dumper($dat) unless defined $name;
+            if(defined $name) {
+                push @{$templates}, $name;
+            } else {
+                $c->log->warn("template without a name in ".$dat->{'file'}->{'path'}.":".$dat->{'line'}." -> ".Dumper($dat->{'conf'}));
+            }
         }
         $json = [ { 'name' => $type.'s',
                     'data' => [ sort @{Thruk::Utils::array_uniq($objects)} ],
