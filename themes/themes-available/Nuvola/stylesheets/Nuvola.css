@@ -199,3 +199,8 @@ DIV.dataTitle {
   text-align: center;
   margin: -2px;
 }
+
+/* extinfo head (hostgroups, etc...) needs more than 20px */
+body.extinfo TD.ext_head_attributes DIV.dataTitle {
+  height: inherit;
+}

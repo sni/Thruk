@@ -109,3 +109,7 @@ TD.dataVar DIV#editor {
 .ace_support.ace_function {
   color: #23238E !important;
 }
+
+body.config TABLE.filter {
+  text-align: left;
+}

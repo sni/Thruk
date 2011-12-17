@@ -28,7 +28,7 @@
             </tr>
           </table>
         </td>
-        <td align="center" valign="middle" width="33%">
+        <td align="center" valign="middle" width="33%" class="ext_head_attributes">
           <div class='data'>Host</div>
           <div class='dataTitle'>[% host.alias %]</div>
           <div class='dataTitle'>([% host.name %])</div><br>

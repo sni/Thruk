@@ -27,7 +27,7 @@
             </tr>
           </table>
         </td>
-        <td align="center" width="33%">
+        <td align="center" width="33%" class="ext_head_attributes">
           <div class='data'>Service</div>
           <div class='dataTitle'>[% service.description %]</div>
           <div class='data'>On Host</div>
