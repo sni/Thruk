@@ -46,8 +46,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
         my $type  = $c->{'request'}->{'parameters'}->{'data'};
         my $limit = $c->{'request'}->{'parameters'}->{'limit'} || 10;
-        if($type eq 'host_notifications') {
-            $c->stash->{'json'} = $c->{'db'}->get_logs(filter => [ class => 3, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => $limit, sort => {'DESC' => 'time'});
+        if($type eq 'notifications') {
+            my $data = $c->{'db'}->get_logs(filter => [ class => 3, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => $limit, sort => {'DESC' => 'time'});
+            for my $entry (@{$data}) {
+                $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
+            }
+            $c->stash->{'json'} = $data;
             $c->forward('Thruk::View::JSON');
             return;
         }
