@@ -59,6 +59,8 @@ jQuery(document).ready(function(e){
 
   jQuery('#services_list').bind('pageAnimationEnd', function(event, info){
     if(info.direction == 'in') {
+      // empty list
+      jQuery('#services_list_data').children().remove();
       jQuery.get('mobile.cgi', {
               data: 'services',
               filter: filter,
@@ -66,8 +68,6 @@ jQuery(document).ready(function(e){
               _:unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
-              // empty list
-              jQuery('#services_list_data').children().remove();
               jQuery.each(data, function(index, entry) {
                   jQuery('#services_list_data').append('<li class="arrow '+get_service_class(entry)+'"><a href="#service" onclick="current_host=\'' + entry.host_name+'\';current_service=\'' + entry.description+'\'">' + entry.host_name+' - '+ entry.description +'</a></li>');
               });
@@ -85,6 +85,8 @@ jQuery(document).ready(function(e){
 
   jQuery('#hosts_list').bind('pageAnimationEnd', function(event, info){
     if(info.direction == 'in') {
+      // empty list
+      jQuery('#hosts_list_data').children().remove();
       jQuery.get('mobile.cgi', {
               data: 'hosts',
               filter: filter,
@@ -92,8 +94,6 @@ jQuery(document).ready(function(e){
               _:unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
-              // empty list
-              jQuery('#hosts_list_data').children().remove();
               jQuery.each(data, function(index, entry) {
                   jQuery('#hosts_list_data').append('<li class="arrow '+get_host_class(entry)+'"><a href="#service" onclick="current_host=\'' + entry.name+'\';">' + entry.name +'</a></li>');
               });
