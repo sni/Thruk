@@ -42,3 +42,7 @@ A.ui-link-inherit SPAN.services_ok_panel
   white-space: nowrap;
   font-size: smaller;
 }
+
+TH {
+  text-align: left;
+}

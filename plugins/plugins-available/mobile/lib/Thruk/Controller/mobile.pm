@@ -47,7 +47,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $type   = $c->{'request'}->{'parameters'}->{'data'};
         my $limit  = $c->{'request'}->{'parameters'}->{'limit'} || 25;
         my $status = $c->{'request'}->{'parameters'}->{'status'} || 0;
-        my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c->{'request'}->{'parameters'});
         my $data;
         if($type eq 'notifications') {
             my $filter = {
@@ -88,10 +87,41 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
         }
         elsif($type eq 'hosts') {
+            my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c->{'request'}->{'parameters'});
+            if(defined $c->{'request'}->{'parameters'}->{'host'}) {
+                $hostfilter = { 'name' => $c->{'request'}->{'parameters'}->{'host'} };
+            }
             $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], limit => $limit);
+            for my $entry (@{$data}) {
+                my $duration ;
+                if($entry->{'last_state_change'} > 0) {
+                    $duration = time() - $entry->{'last_state_change'};
+                } else {
+                    $duration = time() - $c->stash->{'pi_detail'}->{$entry->{'peer_key'}}->{'program_start'};
+                }
+                $entry->{'duration'} = Thruk::Utils::Filter::duration($duration);
+                $entry->{'format_last_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'last_check'});
+                $entry->{'format_next_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'next_check'});
+            }
         }
         elsif($type eq 'services') {
+            my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c->{'request'}->{'parameters'});
+            if(defined $c->{'request'}->{'parameters'}->{'host'}) {
+                $servicefilter = { 'description' => $c->{'request'}->{'parameters'}->{'service'},
+                                   'host_name'   => $c->{'request'}->{'parameters'}->{'host'} };
+            }
             $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], limit => $limit);
+            for my $entry (@{$data}) {
+                my $duration ;
+                if($entry->{'last_state_change'} > 0) {
+                    $duration = time() - $entry->{'last_state_change'};
+                } else {
+                    $duration = time() - $c->stash->{'pi_detail'}->{$entry->{'peer_key'}}->{'program_start'};
+                }
+                $entry->{'duration'} = Thruk::Utils::Filter::duration($duration);
+                $entry->{'format_last_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'last_check'});
+                $entry->{'format_next_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'next_check'});
+            }
         }
         if(defined $data) {
             $c->stash->{'json'} = $data;

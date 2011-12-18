@@ -1,5 +1,7 @@
 /* create the jquery mobile object */
-var filter = undefined;
+var filter          = undefined;
+var current_host    = undefined;
+var current_service = undefined;
 
 jQuery(document).bind("mobileinit", function(){
     jQuery.mobile.page.prototype.options.backBtnText      = "back";
@@ -77,9 +79,9 @@ jQuery(document).ready(function(e){
                 jQuery('#notification_list').children().remove();
                 jQuery.each(data, function(index, entry) {
                     if(entry.service_description) {
-                        jQuery('#notification_list').append('<li class="'+get_service_class_for_state(entry.state)+'"><a href="#"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+' - '+ entry.service_description +'</a></li>');
+                        jQuery('#notification_list').append('<li class="'+get_service_class_for_state(entry.state)+'"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+' - '+ entry.service_description +'</li>');
                     } else {
-                        jQuery('#notification_list').append('<li class="'+get_host_class_for_state(entry.state)+'"><a href="#"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+'</a></li>');
+                        jQuery('#notification_list').append('<li class="'+get_host_class_for_state(entry.state)+'"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+'</li>');
                     }
                 });
                 jQuery('#notification_list').listview('refresh');
@@ -99,9 +101,10 @@ jQuery(document).ready(function(e){
             function(data, textStatus, XMLHttpRequest) {
                 jQuery('#services_list_data').children().remove();
                 jQuery.each(data, function(index, entry) {
-                    jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service">' + entry.host_name+' - '+ entry.description +'</a></li>');
+                    jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service" class="service_link" data-host="' + entry.host_name +'" data-service="'+entry.description+'">' + entry.host_name+' - '+ entry.description +'</a></li>');
                 });
                 jQuery('#services_list_data').listview('refresh');
+                jQuery("A.service_link").bind( "vclick", function(event, ui) { current_host=event.target.dataset.host; current_service=event.target.dataset.service; });
             },
             'json');
     });
@@ -118,9 +121,89 @@ jQuery(document).ready(function(e){
             function(data, textStatus, XMLHttpRequest) {
                 jQuery('#hosts_list_data').children().remove();
                 jQuery.each(data, function(index, entry) {
-                    jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host">' + entry.name +'</a></li>');
+                    jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host" class="host_link" data-host="'+entry.name +'">' + entry.name +'</a></li>');
                 });
                 jQuery('#hosts_list_data').listview('refresh');
+                jQuery("A.host_link").bind( "vclick", function(event, ui) { current_host=event.target.dataset.host; });
+            },
+            'json');
+    });
+
+    /* Host */
+    jQuery('#host').bind('pageshow', function(event, data){
+        jQuery.get('mobile.cgi', {
+                data: 'hosts',
+                host: current_host,
+                _:    unixtime()
+            },
+            function(data, textStatus, XMLHttpRequest) {
+                var host = data[0];
+                if(host != undefined) {
+                    var state_type = "SOFT";
+                    if(host.state_type == 1) { state_type = "HARD"; }
+                    jQuery('#host_attempt').text(host.current_attempt + '/' + host.max_check_attempts + '  (' + state_type + ' state)');
+                    jQuery('#host_name').text(host.name);
+                    jQuery('#host_state').removeClass().text(get_host_status(host)).addClass(get_host_class(host));
+                    jQuery('#host_duration').text(host.duration);
+                    jQuery('#host_latency').text(Math.round(host.latency*1000)/1000 + 's');
+                    jQuery('#host_exec_time').text(Math.round(host.execution_time*1000)/1000 + 's');
+                    if(host.last_check > 0) {
+                        jQuery('#host_last_check').text(host.format_last_check);
+                    } else {
+                        jQuery('#host_last_check').text('never');
+                    }
+                    if(host.next_check > 0) {
+                        jQuery('#host_next_check').text(host.format_next_check);
+                    } else {
+                        jQuery('#host_last_check').text('N/A');
+                    }
+                    if(host.check_type == 0) {
+                        jQuery('#host_check_type').text('ACTIVE');
+                    } else {
+                        jQuery('#host_check_type').text('PASSIVE');
+                    }
+                    jQuery('#host_plugin_output').text(host.plugin_output);
+                }
+            },
+            'json');
+    });
+
+    /* Service */
+    jQuery('#service').bind('pageshow', function(event, data){
+        jQuery.get('mobile.cgi', {
+                data: 'services',
+                host: current_host,
+                service: current_service,
+                _:unixtime()
+            },
+            function(data, textStatus, XMLHttpRequest) {
+                var service = data[0];
+                if(service != undefined) {
+                    var state_type = "SOFT";
+                    if(service.state_type == 1) { state_type = "HARD"; }
+                    jQuery('#service_attempt').text(service.current_attempt + '/' + service.max_check_attempts + '  (' + state_type + ' state)');
+                    jQuery('#service_name').text(service.name);
+                    jQuery('#service_state').removeClass().text(get_service_status(service)).addClass(get_service_class(service));
+                    jQuery('#service_duration').text(service.duration);
+                    jQuery('#service_latency').text(Math.round(service.latency*1000)/1000 + 's');
+                    jQuery('#service_exec_time').text(Math.round(service.execution_time*1000)/1000 + 's');
+                    if(service.last_check > 0) {
+                        jQuery('#service_last_check').text(service.format_last_check);
+                    } else {
+                        jQuery('#service_last_check').text('never');
+                    }
+                    if(service.next_check > 0) {
+                        jQuery('#service_next_check').text(service.format_next_check);
+                    } else {
+                        jQuery('#service_last_check').text('N/A');
+                    }
+                    if(service.check_type == 0) {
+                        jQuery('#service_check_type').text('ACTIVE');
+                    } else {
+                        jQuery('#service_check_type').text('PASSIVE');
+                    }
+                    jQuery('#service_plugin_output').text(service.plugin_output);
+                }
             },
             'json');
     });
@@ -147,6 +230,14 @@ function debug(str) {
     }
 }
 
+/* return host status text */
+function get_host_status(host) {
+    if(host.has_been_checked == 0) { return("PENDING"); }
+    if(host.state == 0) { return("UP"); }
+    if(host.state == 1) { return("DOWN"); }
+    if(host.state == 2) { return("UNREACHABLE"); }
+}
+
 /* return host status class */
 function get_host_class(host) {
     if(host.has_been_checked == 0) { return("hostPENDING"); }
@@ -154,7 +245,6 @@ function get_host_class(host) {
     if(host.state == 1) { return("hostDOWN"); }
     if(host.state == 2) { return("hostUNREACHABLE"); }
     if(host.state == 3) { return("hostPENDING"); }
-    alert('unknown state' +  state);
 }
 
 /* return host status class */
@@ -163,7 +253,15 @@ function get_host_class_for_state(state) {
     if(state == 1) { return("hostDOWN"); }
     if(state == 2) { return("hostUNREACHABLE"); }
     if(state == 3) { return("hostPENDING"); }
-    alert('unknown state' +  state);
+}
+
+/* return service status text */
+function get_service_status(service) {
+    if(service.has_been_checked == 0) { return("PENDING"); }
+    if(service.state == 0) { return("OK"); }
+    if(service.state == 1) { return("WARNING"); }
+    if(service.state == 2) { return("CRITICAL"); }
+    if(service.state == 3) { return("UNKNOWN"); }
 }
 
 /* return service status class */
@@ -174,7 +272,6 @@ function get_service_class(service) {
     if(service.state == 2) { return("serviceCRITICAL"); }
     if(service.state == 3) { return("serviceUNKNOWN"); }
     if(service.state == 4) { return("servicePENDING"); }
-    alert('unknown state' +  state);
 }
 
 /* return service status class */
