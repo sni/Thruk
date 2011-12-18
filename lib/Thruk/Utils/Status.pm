@@ -239,9 +239,9 @@ sub classic_filter {
     my $hostgroup    = $c->{'request'}->{'parameters'}->{'hostgroup'}    || '';
     my $servicegroup = $c->{'request'}->{'parameters'}->{'servicegroup'} || '';
 
-    $c->stash->{'host'}         = $host;
-    $c->stash->{'hostgroup'}    = $hostgroup;
-    $c->stash->{'servicegroup'} = $servicegroup;
+    $c->stash->{'host'}         = $host         if defined $c->{'stash'};
+    $c->stash->{'hostgroup'}    = $hostgroup    if defined $c->{'stash'};
+    $c->stash->{'servicegroup'} = $servicegroup if defined $c->{'stash'};
 
     my @hostfilter;
     my @hostgroupfilter;
@@ -279,7 +279,7 @@ sub classic_filter {
 
     # fill the host/service totals box
     unless($errors) {
-        Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, $servicefilter );
+        Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, $servicefilter ) if defined $c->{'stash'};
     }
 
     # then add some more filter based on get parameter
@@ -332,7 +332,7 @@ sub classic_filter {
     }
 
     if($errors) {
-        $c->stash->{'has_error'} = 1;
+        $c->stash->{'has_error'} = 1 if defined $c->{'stash'};
     }
 
     return ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter );
@@ -471,7 +471,7 @@ sub extend_filter {
     push @hostfilter,    $hostfilter    if defined $hostfilter;
     push @servicefilter, $servicefilter if defined $servicefilter;
 
-    $c->stash->{'show_filter_table'} = 0;
+    $c->stash->{'show_filter_table'} = 0 if defined $c->{'stash'};
 
     # host statustype filter (up,down,...)
     my( $host_statustype_filtername, $host_statustype_filter, $host_statustype_filter_service );
@@ -480,7 +480,7 @@ sub extend_filter {
     push @hostfilter,    $host_statustype_filter         if defined $host_statustype_filter;
     push @servicefilter, $host_statustype_filter_service if defined $host_statustype_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $host_statustype_filter;
+    $c->stash->{'show_filter_table'} = 1 if defined $host_statustype_filter and  defined $c->{'stash'};
 
     # host props filter (downtime, acknowledged...)
     my( $host_prop_filtername, $host_prop_filter, $host_prop_filter_service );
@@ -489,7 +489,7 @@ sub extend_filter {
     push @hostfilter,    $host_prop_filter         if defined $host_prop_filter;
     push @servicefilter, $host_prop_filter_service if defined $host_prop_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $host_prop_filter;
+    $c->stash->{'show_filter_table'} = 1 if defined $host_prop_filter and  defined $c->{'stash'};
 
     # service statustype filter (ok,warning,...)
     my( $service_statustype_filtername, $service_statustype_filter_service );
@@ -497,7 +497,7 @@ sub extend_filter {
         = Thruk::Utils::Status::get_service_statustype_filter($servicestatustypes);
     push @servicefilter, $service_statustype_filter_service if defined $service_statustype_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $service_statustype_filter_service;
+    $c->stash->{'show_filter_table'} = 1 if defined $service_statustype_filter_service and  defined $c->{'stash'};
 
     # service props filter (downtime, acknowledged...)
     my( $service_prop_filtername, $service_prop_filter_service );
@@ -505,7 +505,7 @@ sub extend_filter {
         = Thruk::Utils::Status::get_service_prop_filter($serviceprops);
     push @servicefilter, $service_prop_filter_service if defined $service_prop_filter_service;
 
-    $c->stash->{'show_filter_table'} = 1 if defined $service_prop_filter_service;
+    $c->stash->{'show_filter_table'} = 1 if defined $service_prop_filter_service and  defined $c->{'stash'};
 
     $hostfilter    = Thruk::Utils::combine_filter( '-and', \@hostfilter );
     $servicefilter = Thruk::Utils::combine_filter( '-and', \@servicefilter );

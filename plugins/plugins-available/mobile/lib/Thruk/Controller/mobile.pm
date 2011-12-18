@@ -44,8 +44,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
-        my $type  = $c->{'request'}->{'parameters'}->{'data'};
-        my $limit = $c->{'request'}->{'parameters'}->{'limit'} || 10;
+        my $type   = $c->{'request'}->{'parameters'}->{'data'};
+        my $limit  = $c->{'request'}->{'parameters'}->{'limit'} || 25;
+        my $status = $c->{'request'}->{'parameters'}->{'status'} || 0;
+        my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c->{'request'}->{'parameters'});
         my $data;
         if($type eq 'notifications') {
             $data = $c->{'db'}->get_logs(filter => [ class => 3, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => $limit, sort => {'DESC' => 'time'});
@@ -58,6 +60,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($type eq 'service_stats') {
             $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+        }
+        elsif($type eq 'hosts') {
+            $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], limit => $limit);
+        }
+        elsif($type eq 'services') {
+            $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], limit => $limit);
         }
         if(defined $data) {
             $c->stash->{'json'} = $data;
@@ -74,6 +82,18 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     return 1;
 }
 
+##########################################################
+sub _extract_filter_from_param {
+    my($self,$params) = @_;
+    my $fake_c = {'request' => {'parameters' => {}}};
+    for my $key (keys %{$params}) {
+        if($key =~ m/^filter\[(.*)\]$/) {
+            $fake_c->{'request'}->{'parameters'}->{$1} = $params->{$key};
+        }
+    }
+    my( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($fake_c);
+    return($hostfilter, $servicefilter);
+}
 
 =head1 AUTHOR
 

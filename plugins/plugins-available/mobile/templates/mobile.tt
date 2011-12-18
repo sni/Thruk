@@ -86,36 +86,58 @@
       <p><a href="#" class="whiteButton goback">Close</a></p>
     </div>
 
-<!-- Hosts -->
+<!-- Hosts by Status-->
     <div id="hosts" class="selectable">
       <div class="toolbar">
         <a href="#" class="button back">Back</a>
         <h1>Hosts</h1>
       </div>
-      <ul class="rounded" id="hosts_list">
-        <li class="arrow hidden"><a href="#hosts">Up<small class="counter hostUP hosts_up" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden"><a href="#hosts">Down<small class="counter hostDOWN hosts_down" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden"><a href="#hosts">Unreachable<small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden"><a href="#hosts">Pending<small class="counter hostPENDING hosts_pending" style="margin: 0 50px 0 0"></small></a></li>
+      <ul class="rounded">
+        <li class="arrow hidden hosts_up_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:2}">Up<small class="counter hostUP hosts_up" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden hosts_down_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:4}">Down<small class="counter hostDOWN hosts_down" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden hosts_unreachable_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:8}">Unreachable<small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden hosts_pending_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:1}">Pending<small class="counter hostPENDING hosts_pending" style="margin: 0 50px 0 0"></small></a></li>
       </ul>
     </div>
 
-<!-- Services -->
+<!-- Services by Status-->
     <div id="services" class="selectable">
       <div class="toolbar">
         <a href="#" class="button back">Back</a>
         <h1>Services</h1>
       </div>
-      <ul class="rounded" id="services_list">
-        <li class="arrow hidden"><a href="#services">Ok<small class="counter serviceOK services_ok" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden"><a href="#services">Warning<small class="counter serviceWARNING services_warning" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden"><a href="#services">Critical<small class="counter serviceCRITICAL services_critical" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden"><a href="#services">Unknown<small class="counter serviceUNKNOWN services_unknown" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden"><a href="#services">Pending<small class="counter servicePENDING services_pending" style="margin: 0 50px 0 0"></small></a></li>
+      <ul class="rounded">
+        <li class="arrow hidden services_ok_panel"><a href="#services_list" onclick="filter={servicestatustypes:2}">Ok<small class="counter serviceOK services_ok" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_warning_panel"><a href="#services_list" onclick="filter={servicestatustypes:4}">Warning<small class="counter serviceWARNING services_warning" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_critical_panel"><a href="#services_list" onclick="filter={servicestatustypes:16}">Critical<small class="counter serviceCRITICAL services_critical" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_unknown_panel"><a href="#services_list" onclick="filter={servicestatustypes:8}">Unknown<small class="counter serviceUNKNOWN services_unknown" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_pending_panel"><a href="#services_list" onclick="filter={servicestatustypes:1}">Pending<small class="counter servicePENDING services_pending" style="margin: 0 50px 0 0"></small></a></li>
       </ul>
     </div>
 
-<!-- Last Notification -->
+<!-- Hosts List -->
+    <div id="hosts_list" class="selectable">
+      <div class="toolbar">
+        <a href="#" class="button back">Back</a>
+        <h1>Hosts</h1>
+      </div>
+      <ul class="rounded" id='hosts_list_data'>
+        <li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
+      </ul>
+    </div>
+
+<!-- Services List -->
+    <div id="services_list" class="selectable">
+      <div class="toolbar">
+        <a href="#" class="button back">Back</a>
+        <h1>Services</h1>
+      </div>
+      <ul class="rounded" id='services_list_data'>
+        <li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
+      </ul>
+    </div>
+
+<!-- Last Notification List -->
     <div id="last_notification" class="selectable">
       <div class="toolbar">
         <a href="#" class="button back">Back</a>

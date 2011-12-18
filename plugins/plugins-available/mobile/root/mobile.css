@@ -34,15 +34,15 @@ body.fullscreen #home .info {
   width: 10px !important;
 }
 
-.hosts_pending_panel,
-.hosts_unreachable_panel,
-.hosts_down_panel,
-.hosts_up_panel,
-.services_pending_panel,
-.services_critical_panel,
-.services_unknown_panel,
-.services_warning_panel,
-.services_ok_panel
+SPAN.hosts_pending_panel,
+SPAN.hosts_unreachable_panel,
+SPAN.hosts_down_panel,
+SPAN.hosts_up_panel,
+SPAN.services_pending_panel,
+SPAN.services_critical_panel,
+SPAN.services_unknown_panel,
+SPAN.services_warning_panel,
+SPAN.services_ok_panel
 {
   display: inline;
 }
