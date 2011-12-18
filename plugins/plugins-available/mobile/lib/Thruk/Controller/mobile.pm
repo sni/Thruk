@@ -143,7 +143,7 @@ sub _extract_filter_from_param {
     my($self,$params) = @_;
     my $fake_c = {'request' => {'parameters' => {}}};
     for my $key (keys %{$params}) {
-        if($key =~ m/^filter\[(.*)\]$/) {
+        if($key =~ m/^filter\[(.*)\]$/mx) {
             $fake_c->{'request'}->{'parameters'}->{$1} = $params->{$key};
         }
     }

@@ -21,6 +21,7 @@ for my $cmd (@{$cmds}) {
        or $line =~ m|readme\.txt|mx
        or $line =~ m|Unicode/Encoding\.pm|mx
        or $line =~ m|/excanvas.js|mx
+       or $line =~ m|jquery\.mobile\-.*.js|mx
        or $line =~ m|:\d+:\#|mx
     ) {
       next;
