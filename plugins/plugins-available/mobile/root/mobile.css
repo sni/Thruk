@@ -1,48 +1,30 @@
-body.fullscreen #home .info {
-  display: none;
-}
-#about {
-  padding: 100px 10px 40px;
-  text-shadow: rgba(255, 255, 255, 0.3) 0px -1px 0;
-  font-size: 13px;
-  text-align: center;
-  background: #161618;
-  color: #fff;
-}
-#about p {
-  margin-bottom: 8px;
-}
-#about a {
-  color: #fff;
-  font-weight: bold;
-  text-decoration: none;
-}
+.servicePENDING  { background: #ACACAC !important; }
+.serviceOK       { background: #33FF00 !important; }
+.serviceUNKNOWN  { background: #FF9900 !important; }
+.serviceWARNING  { background: #FFFF00 !important; }
+.serviceCRITICAL { background: #F83838 !important; }
+
+.hostUP          { background: #33FF00 !important; }
+.hostDOWN        { background: #F83838 !important; }
+.hostUNREACHABLE { background: #F83838 !important; }
+.hostPENDING     { background: #ACACAC !important; }
+
+
 .hidden {
   display: none;
 }
-.more {
-  text-align: center;
-}
-.date {
-  font-size: 14px;
-}
-
-.counter_placeholder {
-  margin:0px !important;
-  background: transparent !important;
-  padding: 0 !important;
-  width: 10px !important;
-}
-
-SPAN.hosts_pending_panel,
-SPAN.hosts_unreachable_panel,
-SPAN.hosts_down_panel,
-SPAN.hosts_up_panel,
-SPAN.services_pending_panel,
-SPAN.services_critical_panel,
-SPAN.services_unknown_panel,
-SPAN.services_warning_panel,
-SPAN.services_ok_panel
+A.ui-link-inherit SPAN.hosts_pending_panel,
+A.ui-link-inherit SPAN.hosts_unreachable_panel,
+A.ui-link-inherit SPAN.hosts_down_panel,
+A.ui-link-inherit SPAN.hosts_up_panel,
+A.ui-link-inherit SPAN.services_pending_panel,
+A.ui-link-inherit SPAN.services_critical_panel,
+A.ui-link-inherit SPAN.services_unknown_panel,
+A.ui-link-inherit SPAN.services_warning_panel,
+A.ui-link-inherit SPAN.services_ok_panel
 {
-  display: inline;
+  position: inherit;
+  float: right;
+  margin-top: 0px;
+  font-weight: bold;
 }

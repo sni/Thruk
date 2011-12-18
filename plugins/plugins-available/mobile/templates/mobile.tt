@@ -1,151 +1,157 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>Mobile Thruk</title>
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/Classic/stylesheets/Classic.css' />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/mobile/mobile.css' />
-    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jquery-1.4.2.min.js" type="application/x-javascript" charset="utf-8"></script>
-    <script src="[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.js" type="application/x-javascript" charset="utf-8"></script>
-    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/jqtouch.css";</style>
-    <style type="text/css" media="screen">@import "[% url_prefix %]thruk/plugins/mobile/jqtouch/theme.css";</style>
+    <link rel="stylesheet" href="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.css" />
+    <script src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
     <script type="application/x-javascript">
       var url_prefix = '[% url_prefix %]';
     </script>
     <script src="[% url_prefix %]thruk/plugins/mobile/mobile.js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.js"></script>
   </head>
-  <body id="jqt">
+  <body>
 
 <!-- Home -->
-    <div id="home" class="current">
-      <div class="toolbar">
-        <a id="reload" class="button cancel"><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/02-redo.png" alt="reload"></a>
+    <div id="home" data-role="page">
+      <div data-role="header" data-position="inline">
+        <a href="#refresh" id="refresh" data-icon="refresh" class="ui-btn-left" data-iconpos="notext">Refresh</a>
         <h1>Mobile Thruk</h1>
-        <a class="button slideup" href="#about">About</a>
+        <a href="#options" data-icon="gear" class="ui-btn-right">Options</a>
       </div>
-      <h2>Status</h2>
-        <ul class="rounded">
-          <li class="arrow">
-            <a href="#hosts">Hosts
-              <small class="counter counter_placeholder">&nbsp;</small>
-              <span class="hidden hosts_pending_panel"><small class="counter hostPENDING hosts_pending" style="margin: 0"></small></span>
-              <span class="hidden hosts_unreachable_panel"><small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0"></small></span>
-              <span class="hidden hosts_down_panel"><small class="counter hostDOWN hosts_down" style="margin: 0"></small></span>
-              <span class="hidden hosts_up_panel"><small class="counter hostUP hosts_up" style="margin: 0"></small></span>
+      <div data-role="content">
+        <h4>Status</h4>
+          <ul data-role="listview" data-inset="true">
+            <li>
+              <a href="#hosts">Hosts
+              <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_pending_panel hostPENDING hosts_pending"></span>
+              <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_unreachable_panel hostUNREACHABLE hosts_unreachable"></span>
+              <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_down_panel hostDOWN hosts_down"></span>
+              <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_up_panel hostUP hosts_up"></span>
+              </a>
+            </li>
 
-            </a>
-          </li>
+            <li>
+              <a href="#services">Services
+                <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_pending_panel servicePENDING services_pending"></span>
+                <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_critical_panel serviceCRITICAL services_critical"></span>
+                <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_unknown_panel serviceUNKNOWN services_unknown"></span>
+                <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_warning_panel serviceWARNING services_warning"></span>
+                <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_ok_panel serviceOK services_ok"></span>
+              </a>
+            </li>
+          </ul>
 
-          <li class="arrow">
-            <a href="#services">Services
-              <small class="counter counter_placeholder">&nbsp;</small>
-              <span class="hidden services_pending_panel"><small class="counter servicePENDING services_pending" style="margin: 0"></small></span>
-              <span class="hidden services_critical_panel"><small class="counter serviceCRITICAL services_critical" style="margin: 0"></small></span>
-              <span class="hidden services_unknown_panel"><small class="counter serviceUNKNOWN services_unknown" style="margin: 0"></small></span>
-              <span class="hidden services_warning_panel"><small class="counter serviceWARNING services_warning" style="margin: 0"></small></span>
-              <span class="hidden services_ok_panel"><small class="counter serviceOK services_ok" style="margin: 0"></small></span>
-            </a>
-          </li>
-        </ul>
+          <!--
+          TODO:
+          <h4>Search</h4>
+          <form method="post">
+          <div style="position:relative">
+          <input type="text" name="name" id="search" value=""  />
+          <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="[% url_prefix %]thruk/plugins/mobile/img/06-search.png" alt="search"></a>
+          </div>
+          -->
 
-        <h2>Search</h2>
-        <form method="post">
-        <ul class="rounded">
-          <li class="" style="position:relative">
-            <input type="text" placeholder="search" name="search" id="search" autocapitalize="off" autocorrect="off" autocomplete="off" />
-            <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/06-search.png" alt="search"></a>
-          </li>
-        </ul>
+          </form>
+          <h4>History</h4>
+          <ul data-role="listview" data-inset="true">
+            <li><a href="#last_alerts">Last Alerts</a></li>
+            <li><a href="#last_notification">Last Notifications</a></li>
+          </ul>
 
-        </form>
-        <h2>History</h2>
-        <ul class="rounded">
-          <li class="arrow"><a href="#last_alerts">Last Alerts</a></li>
-          <li class="arrow"><a href="#last_notification">Last Notifications</a></li>
-        </ul>
-
-        <h2>Links</h2>
-        <ul class="rounded">
-          <li class=""><a href="[% url_prefix %]thruk/index.html" ontab="this.click" onclick="window.location.href='[% url_prefix %]thruk/index.html'">Access as Full Client</a></li>
-        </ul>
-        <div class="info">
-        <p>Add this page to your home screen to get full screen mode.</p>
+          <h4>Links</h4>
+          <ul data-role="listview" data-inset="true">
+            <li><a href="[% url_prefix %]thruk/index.html" onclick="window.location.href='[% url_prefix %]thruk/index.html'">Access as Full Client</a></li>
+          </ul>
+        </div>
+        <div data-role="footer" align="center">
+          Add this page to your home screen to get full screen mode.
       </div>
     </div>
 
 
-<!-- About -->
-    <div id="about" class="selectable">
-      <p><img src="[% url_prefix %]thruk/themes/Classic/images/logo_thruk_small.png" alt="thruk mobile" /></p>
-      <p>
-        <strong>Thruk Monitoring Webinterface</strong><br />
-        Version [% version %]<br />
-        <a href="http://www.thruk.org">www.thruk.org</a><br />
-        [% released %]
-      </p>
-      <br /><br />
-      <p><a href="#" class="whiteButton goback">Close</a></p>
+<!-- Options -->
+    <div id="options" data-role="page">
+      <div data-role="header">
+        <a href="#" data-rel="back">Back</a>
+        <h1>Options</h1>
+      </div>
+      <div data-role="content">
+      </div>
     </div>
 
 <!-- Hosts by Status-->
-    <div id="hosts" class="selectable">
-      <div class="toolbar">
-        <a href="#" class="button back">Back</a>
+    <div id="hosts" data-role="page">
+      <div data-role="header">
+        <a href="#" data-rel="back">Back</a>
         <h1>Hosts</h1>
       </div>
-      <ul class="rounded">
-        <li class="arrow hidden hosts_up_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:2};">Up<small class="counter hostUP hosts_up" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden hosts_down_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:4};">Down<small class="counter hostDOWN hosts_down" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden hosts_unreachable_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:8};">Unreachable<small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden hosts_pending_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:1};">Pending<small class="counter hostPENDING hosts_pending" style="margin: 0 50px 0 0"></small></a></li>
-      </ul>
+      <div data-role="content">
+        <ul data-role="listview" data-inset="true" id="hosts_by_status_list">
+          <li class="hidden hosts_up_panel"><a href="#hosts_list" class="hosts_list">Up<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostUP hosts_up"></span></a></li>
+          <li class="hidden hosts_down_panel"><a href="#hosts_list" class="hosts_list">Down<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostDOWN hosts_down"></span></a></li>
+          <li class="hidden hosts_unreachable_panel"><a href="#hosts_list" class="hosts_list">Unreachable<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostUNREACHABLE hosts_unreachable"></span></a></li>
+          <li class="hidden hosts_pending_panel"><a href="#hosts_list" class="hosts_list">Pending<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostPENDING hosts_pending"></span></a></li>
+        </ul>
+      </div>
     </div>
 
 <!-- Services by Status-->
-    <div id="services" class="selectable">
-      <div class="toolbar">
-        <a href="#" class="button back">Back</a>
+    <div id="services" data-role="page">
+      <div data-role="header">
+        <a href="#" data-rel="back">Back</a>
         <h1>Services</h1>
       </div>
-      <ul class="rounded">
-        <li class="arrow hidden services_ok_panel"><a href="#services_list" ontab="alert('tabbed'); this.click" onclick="filter={servicestatustypes:2};">Ok<small class="counter serviceOK services_ok" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_warning_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:4};">Warning<small class="counter serviceWARNING services_warning" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_critical_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:16};">Critical<small class="counter serviceCRITICAL services_critical" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_unknown_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:8};">Unknown<small class="counter serviceUNKNOWN services_unknown" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_pending_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:1};">Pending<small class="counter servicePENDING services_pending" style="margin: 0 50px 0 0"></small></a></li>
-      </ul>
+      <div data-role="content">
+        <ul data-role="listview" data-inset="true" id="services_by_status_list">
+          <li class="hidden services_ok_panel"><a href="#services_list" onclick="filter={servicestatustypes:2};">Ok<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceOK services_ok"></span></a></li>
+          <li class="hidden services_warning_panel"><a href="#services_list" onclick="filter={servicestatustypes:4};">Ok<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceWARNING services_warning"></span></a></li>
+          <li class="hidden services_critical_panel"><a href="#services_list" onclick="filter={servicestatustypes:16};">Ok<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceCRITICAL services_critical"></span></a></li>
+          <li class="hidden services_unknown_panel"><a href="#services_list" onclick="filter={servicestatustypes:8};">Ok<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceUNKNOWN services_unknown"></span></a></li>
+          <li class="hidden services_pending_panel"><a href="#services_list" onclick="filter={servicestatustypes:1};">Ok<span class="ui-li-count ui-btn-up-c ui-btn-corner-all servicePENDING services_pending"></span></a></li>
+        </ul>
+      </div>
     </div>
 
 <!-- Hosts List -->
-    <div id="hosts_list" class="selectable">
-      <div class="toolbar">
-        <a href="#" class="button back">Back</a>
+    <div id="hosts_list" data-role="page">
+      <div data-role="header">
+        <a href="#" data-rel="back">Back</a>
         <h1>Hosts</h1>
       </div>
-      <ul class="rounded" id='hosts_list_data'>
-        <li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
-      </ul>
+      <div data-role="content">
+        <ul data-role="listview" id="hosts_list_data" data-filter="true">
+          <li><img src="[% url_prefix %]thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>
+        </ul>
+      </div>
     </div>
 
 <!-- Services List -->
-    <div id="services_list" class="selectable">
-      <div class="toolbar">
-        <a href="#" class="button back">Back</a>
+    <div id="services_list" data-role="page">
+      <div data-role="header">
+        <a href="#" data-rel="back">Back</a>
         <h1>Services</h1>
       </div>
-      <ul class="rounded" id='services_list_data'>
-        <li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
-      </ul>
+      <div data-role="content">
+        <ul data-role="listview" id="services_list_data" data-filter="true">
+          <li><img src="[% url_prefix %]thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>
+        </ul>
+      </div>
     </div>
 
 <!-- Last Notification List -->
-    <div id="last_notification" class="selectable">
-      <div class="toolbar">
-        <a href="#" class="button back">Back</a>
+    <div id="last_notification" data-role="page">
+      <div data-role="header">
+        <a href="#" data-rel="back">Back</a>
         <h1>Notifications</h1>
       </div>
-      <ul class="rounded notifications" id='notification_list'>
-        <li><img src="[% url_prefix %]thruk/plugins/mobile/jqtouch/img/loading.gif" alt="loading"> loading</li>
-      </ul>
+      <div data-role="content">
+        <ul data-role="listview" id="notification_list" data-filter="true">
+          <li><img src="[% url_prefix %]thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>
+        </ul>
+      </div>
     </div>
   </body>
 </html>
