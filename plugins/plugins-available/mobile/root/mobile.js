@@ -33,7 +33,40 @@ jQuery(document).ready(function(e){
     jQuery("LI.hosts_down_panel A.hosts_list").bind(        "vclick", function(event, ui) { filter={ hoststatustypes:4 }; });
     jQuery("LI.hosts_unreachable_panel A.hosts_list").bind( "vclick", function(event, ui) { filter={ hoststatustypes:8 }; });
 
-    jQuery('#last_notification').bind('pageinit', function(event, info){
+    /* Last Alerts */
+    jQuery('#last_alerts').bind('pageshow', function(event, info){
+        jQuery('#alerts_list').children().remove();
+        jQuery('#alerts_list').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
+        jQuery.get('mobile.cgi', {
+                data: 'alerts',
+                limit:25
+            },
+            function(data, textStatus, XMLHttpRequest) {
+                jQuery('#alerts_list').children().remove();
+                jQuery.each(data, function(index, entry) {
+                    var listitem = '';
+                    if(entry.service_description) {
+                        listitem = '<li class="'+get_service_class_for_state(entry.state)+'">';
+                    } else {
+                        listitem = '<li class="'+get_host_class_for_state(entry.state)+'">';
+                    }
+                    var message = entry.message.substr(13);
+                    message = message.replace(entry.type+':', '');
+                    if(message.length > 60) {
+                        message = message.substr(0,60) + '...';
+                    }
+                    listitem += '<span class="logdate">' + entry.formated_time + '<\/span>';
+                    listitem += '<span class="logtype">' + entry.type + '<\/span>';
+                    listitem += '<br><span class="logmsg">' + message + '<\/span><\/li>';
+                    jQuery('#alerts_list').append(listitem);
+                });
+                jQuery('#alerts_list').listview('refresh');
+            },
+            'json');
+    });
+
+    /* Last Notifications */
+    jQuery('#last_notification').bind('pageshow', function(event, info){
         jQuery('#notification_list').children().remove();
         jQuery('#notification_list').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
         jQuery.get('mobile.cgi', {
@@ -41,7 +74,6 @@ jQuery(document).ready(function(e){
                 limit:25
             },
             function(data, textStatus, XMLHttpRequest) {
-                // empty list
                 jQuery('#notification_list').children().remove();
                 jQuery.each(data, function(index, entry) {
                     if(entry.service_description) {
@@ -51,21 +83,17 @@ jQuery(document).ready(function(e){
                     }
                 });
                 jQuery('#notification_list').listview('refresh');
-                // add a more button
-                // TODO:
-                //jQuery('#notification_list').append('<li class="more"><a href="#more">load 25 more</a></li>');
             },
             'json');
     });
 
+    /* Services List */
     jQuery('#services_list').bind('pageshow', function(event, info){
-        // empty list
         jQuery('#services_list_data').children().remove();
         jQuery('#services_list_data').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
         jQuery.get('mobile.cgi', {
                 data: 'services',
                 filter: filter,
-                // limit:25,
                 _:unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
@@ -74,21 +102,17 @@ jQuery(document).ready(function(e){
                     jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service">' + entry.host_name+' - '+ entry.description +'</a></li>');
                 });
                 jQuery('#services_list_data').listview('refresh');
-                // add a more button
-                // TODO:
-                //jQuery('#services_list').append('<li class="more"><a href="#more">load 25 more</a></li>');
             },
             'json');
     });
 
+    /* Hosts List */
     jQuery('#hosts_list').bind('pageshow', function(event, data){
-        // empty list
         jQuery('#hosts_list_data').children().remove();
         jQuery('#hosts_list_data').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
         jQuery.get('mobile.cgi', {
                 data: 'hosts',
                 filter: filter,
-                // limit:25,
                 _:unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
@@ -97,9 +121,6 @@ jQuery(document).ready(function(e){
                     jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host">' + entry.name +'</a></li>');
                 });
                 jQuery('#hosts_list_data').listview('refresh');
-                // add a more button
-                // TODO:
-                //jQuery('#services_list').append('<li class="more"><a href="#more">load 25 more</a></li>');
             },
             'json');
     });

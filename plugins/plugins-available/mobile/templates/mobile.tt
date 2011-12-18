@@ -63,7 +63,7 @@
 
           <h4>Links</h4>
           <ul data-role="listview" data-inset="true">
-            <li><a href="[% url_prefix %]thruk/index.html" onclick="window.location.href='[% url_prefix %]thruk/index.html'">Access as Full Client</a></li>
+            <li><a href="[% url_prefix %]thruk/index.html" rel="external">Access as Full Client</a></li>
           </ul>
         </div>
         <div data-role="footer" align="center">
@@ -141,6 +141,19 @@
       </div>
     </div>
 
+<!-- Last Alerts List -->
+    <div id="last_alerts" data-role="page">
+      <div data-role="header">
+        <a href="#" data-rel="back">Back</a>
+        <h1>Alerts</h1>
+      </div>
+      <div data-role="content">
+        <ul data-role="listview" id="alerts_list" data-filter="true">
+          <li><img src="[% url_prefix %]thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>
+        </ul>
+      </div>
+    </div>
+
 <!-- Last Notification List -->
     <div id="last_notification" data-role="page">
       <div data-role="header">
@@ -153,5 +166,7 @@
         </ul>
       </div>
     </div>
+
+
   </body>
 </html>

@@ -50,7 +50,33 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c->{'request'}->{'parameters'});
         my $data;
         if($type eq 'notifications') {
-            $data = $c->{'db'}->get_logs(filter => [ class => 3, Thruk::Utils::Auth::get_auth_filter($c, 'log')], limit => $limit, sort => {'DESC' => 'time'});
+            my $filter = {
+                    '-and' => [
+                                { 'time' => { '>=' => time() - 86400*3 } },
+                                { 'time' => { '<=' => time() } },
+                                { 'class' => 3 },
+                            ]
+            };
+
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], limit => $limit, sort => {'DESC' => 'time'});
+            for my $entry (@{$data}) {
+                $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
+            }
+        }
+        elsif($type eq 'alerts') {
+            my $filter = {
+                    '-and' => [
+                                { 'time' => { '>=' => time() - 86400*3 } },
+                                { 'time' => { '<=' => time() } },
+                                { '-or' => [
+                                    { '-and' => [ { 'options' => { '~' => ';HARD;' }, 'type' => 'SERVICE ALERT' } ] },
+                                    { '-and' => [ { 'options' => { '~' => ';HARD;' }, 'type' => 'HOST ALERT' } ] },
+                                    { 'type' => 'SERVICE FLAPPING ALERT' },
+                                    { 'type' => 'HOST FLAPPING ALERT' },
+                                ]
+                            }]
+            };
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], limit => $limit, sort => {'DESC' => 'time'});
             for my $entry (@{$data}) {
                 $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
             }

@@ -2,10 +2,10 @@
 .serviceOK       { background: #33FF00 !important; }
 .serviceUNKNOWN  { background: #FF9900 !important; }
 .serviceWARNING  { background: #FFFF00 !important; }
-.serviceCRITICAL { background: #F83838 !important; }
+.serviceCRITICAL { background: #F83838 !important; text-shadow: none !important; }
 
 .hostUP          { background: #33FF00 !important; }
-.hostDOWN        { background: #F83838 !important; }
+.hostDOWN        { background: #F83838 !important; text-shadow: none !important; }
 .hostUNREACHABLE { background: #F83838 !important; }
 .hostPENDING     { background: #ACACAC !important; }
 
@@ -27,4 +27,18 @@ A.ui-link-inherit SPAN.services_ok_panel
   float: right;
   margin-top: 0px;
   font-weight: bold;
+}
+
+.logdate {
+  float: left;
+  font-size: smaller;
+}
+.logtype {
+  float: right;
+  font-size: smaller;
+}
+.logmsg {
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: smaller;
 }
