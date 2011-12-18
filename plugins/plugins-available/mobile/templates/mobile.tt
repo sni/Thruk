@@ -65,7 +65,7 @@
 
         <h2>Links</h2>
         <ul class="rounded">
-          <li class=""><a href="[% url_prefix %]thruk/index.html" onclick="window.location.assign(this.href)">Access as Full Client</a></li>
+          <li class=""><a href="[% url_prefix %]thruk/index.html" ontab="this.click" onclick="window.location.href='[% url_prefix %]thruk/index.html'">Access as Full Client</a></li>
         </ul>
         <div class="info">
         <p>Add this page to your home screen to get full screen mode.</p>
@@ -93,10 +93,10 @@
         <h1>Hosts</h1>
       </div>
       <ul class="rounded">
-        <li class="arrow hidden hosts_up_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:2}">Up<small class="counter hostUP hosts_up" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden hosts_down_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:4}">Down<small class="counter hostDOWN hosts_down" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden hosts_unreachable_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:8}">Unreachable<small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden hosts_pending_panel"><a href="#hosts_list" onclick="filter={hoststatustypes:1}">Pending<small class="counter hostPENDING hosts_pending" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden hosts_up_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:2};">Up<small class="counter hostUP hosts_up" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden hosts_down_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:4};">Down<small class="counter hostDOWN hosts_down" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden hosts_unreachable_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:8};">Unreachable<small class="counter hostUNREACHABLE hosts_unreachable" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden hosts_pending_panel"><a href="#hosts_list" ontab="this.click" onclick="filter={hoststatustypes:1};">Pending<small class="counter hostPENDING hosts_pending" style="margin: 0 50px 0 0"></small></a></li>
       </ul>
     </div>
 
@@ -107,11 +107,11 @@
         <h1>Services</h1>
       </div>
       <ul class="rounded">
-        <li class="arrow hidden services_ok_panel"><a href="#services_list" onclick="filter={servicestatustypes:2}">Ok<small class="counter serviceOK services_ok" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_warning_panel"><a href="#services_list" onclick="filter={servicestatustypes:4}">Warning<small class="counter serviceWARNING services_warning" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_critical_panel"><a href="#services_list" onclick="filter={servicestatustypes:16}">Critical<small class="counter serviceCRITICAL services_critical" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_unknown_panel"><a href="#services_list" onclick="filter={servicestatustypes:8}">Unknown<small class="counter serviceUNKNOWN services_unknown" style="margin: 0 50px 0 0"></small></a></li>
-        <li class="arrow hidden services_pending_panel"><a href="#services_list" onclick="filter={servicestatustypes:1}">Pending<small class="counter servicePENDING services_pending" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_ok_panel"><a href="#services_list" ontab="alert('tabbed'); this.click" onclick="filter={servicestatustypes:2};">Ok<small class="counter serviceOK services_ok" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_warning_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:4};">Warning<small class="counter serviceWARNING services_warning" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_critical_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:16};">Critical<small class="counter serviceCRITICAL services_critical" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_unknown_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:8};">Unknown<small class="counter serviceUNKNOWN services_unknown" style="margin: 0 50px 0 0"></small></a></li>
+        <li class="arrow hidden services_pending_panel"><a href="#services_list" ontab="this.click" onclick="filter={servicestatustypes:1};">Pending<small class="counter servicePENDING services_pending" style="margin: 0 50px 0 0"></small></a></li>
       </ul>
     </div>
 

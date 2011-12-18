@@ -18,7 +18,7 @@ Catalyst Controller.
 
 =cut
 
-# enable statusmap if this plugin is loaded
+# enable mobile features if this plugin is loaded
 Thruk->config->{'use_feature_mobile'} = 1;
 
 ######################################

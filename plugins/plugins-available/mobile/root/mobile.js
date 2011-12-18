@@ -61,6 +61,7 @@ jQuery(document).ready(function(e){
     if(info.direction == 'in') {
       // empty list
       jQuery('#services_list_data').children().remove();
+alert("2: " + filter);
       jQuery.get('mobile.cgi', {
               data: 'services',
               filter: filter,

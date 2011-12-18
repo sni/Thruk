@@ -292,7 +292,7 @@ sub auto : Private {
     if(     defined $c->{'request'}->{'headers'}->{'user-agent'}
         and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/iPhone/mx
         and defined $c->{'request'}->{'action'}
-        and $c->{'request'}->{'action'} =~ m/^(\/|thruk|)$/mx )
+        and $c->{'request'}->{'action'} =~ m%^(/|thruk||thruk/|thruk\$)$%mx )
     {
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
     }
@@ -341,6 +341,7 @@ beacuse we dont want index.html in the url
 
 sub index_html : Path('/index.html') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
     if( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_index_html");
     }
@@ -360,6 +361,7 @@ but if used not via fastcgi/apache, there is no way around
 
 sub thruk_index : Regex('thruk$') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
@@ -396,6 +398,7 @@ page: /thruk/index.html
 
 sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
     unless ( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_main_html");
     }
@@ -431,6 +434,7 @@ page: /thruk/side.html
 
 sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
 
     Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
 
@@ -453,6 +457,7 @@ page: /thruk/frame.html
 
 sub thruk_frame_html : Regex('thruk\/frame\.html') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
     # allowed links to be framed
     my $valid_links = [ quotemeta( $c->stash->{'url_prefix'}."thruk/cgi-bin" ), quotemeta( $c->stash->{'documentation_link'} ), quotemeta( $c->stash->{'start_page'} ), ];
     my $additional_links = $c->config->{'allowed_frame_links'};
@@ -501,6 +506,7 @@ page: /thruk/main.html
 
 sub thruk_main_html : Regex('thruk\/main\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
     $c->stash->{'title'}                 = 'Thruk Monitoring Webinterface';
     $c->stash->{'page'}                  = 'splashpage';
     $c->stash->{'template'}              = 'main.tt';
@@ -520,6 +526,7 @@ page: /thruk/changes.html
 
 sub thruk_changes_html : Regex('thruk\/changes\.html') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
     $c->stash->{infoBoxTitle}            = 'Change Log';
     $c->stash->{'title'}                 = 'Change Log';
     $c->stash->{'no_auto_reload'}        = 1;
@@ -540,6 +547,7 @@ page: /thruk/docs/
 
 sub thruk_docs : Regex('thruk\/docs\/') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
