@@ -220,6 +220,9 @@ jQuery(document).ready(function(e){
 
     refresh_host_status();
     refresh_service_status();
+    if(window.navigator.standalone == true) {
+        jQuery('#fullscreenteaser').hide();
+    }
 });
 
 
@@ -334,4 +337,3 @@ function refresh_service_status() {
         },
     'json');
 }
-

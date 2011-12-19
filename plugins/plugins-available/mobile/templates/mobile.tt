@@ -3,14 +3,19 @@
   <head>
     <title>Mobile Thruk</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/mobile/mobile.css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/mobile/mobile-1.1.7.css' />
     <link rel="stylesheet" href="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.css" />
     <script src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
     <script type="application/x-javascript">
       var url_prefix = '[% url_prefix %]';
     </script>
-    <script src="[% url_prefix %]thruk/plugins/mobile/mobile.js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]thruk/plugins/mobile/mobile-1.1.7.js" type="application/x-javascript" charset="utf-8"></script>
     <script src="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.js"></script>
+    <link rel="apple-touch-icon" href="[% url_prefix %]thruk/plugins/mobile/img/thruk.png" />
+    <link rel="apple-touch-startup-image" href="[% url_prefix %]thruk/plugins/mobile/img/startup.png" />
+    <meta name="viewport" content="user-scalable=no, width=device-width" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   </head>
   <body>
 
@@ -65,7 +70,7 @@
             <li><a href="[% url_prefix %]thruk/index.html" rel="external">Access as Full Client</a></li>
           </ul>
         </div>
-        <div data-role="footer" style="text-align:center">
+        <div data-role="footer" style="text-align:center" id="fullscreenteaser">
           Add this page to your home screen to get full screen mode.
       </div>
     </div>

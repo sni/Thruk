@@ -164,6 +164,8 @@ plugins/plugins-available/minemap/templates/minemap.tt
 plugins/plugins-available/mobile/lib/Thruk/Controller/mobile.pm
 plugins/plugins-available/mobile/root/img/06-search.png
 plugins/plugins-available/mobile/root/img/loading.gif
+plugins/plugins-available/mobile/root/img/startup.png
+plugins/plugins-available/mobile/root/img/thruk.png
 plugins/plugins-available/mobile/root/jqm/images/ajax-loader.png
 plugins/plugins-available/mobile/root/jqm/images/icons-18-black.png
 plugins/plugins-available/mobile/root/jqm/images/icons-18-white.png
@@ -175,8 +177,8 @@ plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.0.min.css
 plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.0.min.js
 plugins/plugins-available/mobile/root/jqm/jquery.mobile.structure-1.0.css
 plugins/plugins-available/mobile/root/jqm/jquery.mobile.structure-1.0.min.css
-plugins/plugins-available/mobile/root/mobile.css
-plugins/plugins-available/mobile/root/mobile.js
+plugins/plugins-available/mobile/root/mobile-1.1.7.css
+plugins/plugins-available/mobile/root/mobile-1.1.7.js
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
@@ -198,6 +200,7 @@ plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
 plugins/plugins-enabled/conf
 plugins/plugins-enabled/minemap
+plugins/plugins-enabled/mobile
 plugins/plugins-enabled/shinken_features
 plugins/plugins-enabled/statusmap
 README
