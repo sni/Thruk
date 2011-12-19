@@ -346,6 +346,10 @@ sub _get_hosts_by_parents {
         },
         'children' => $subtree,
     };
+    # if one parentless child, no root is required
+    if (scalar(keys %{$subtree}) == 1) {
+        $host_tree = $subtree;
+    }
 
     my $array = $self->_hash_tree_to_array($host_tree);
     return($array->[0]);
@@ -369,7 +373,12 @@ sub _fill_subtree {
     # find direct childs
     for my $host (@{$hosts}) {
         if(scalar @{$host->{'parents'}} == 0) {
-            $host->{'parents'} = [qw/rootid/];
+            # check if parentless host has a backend peer configured
+            if (defined $host->{'peer_key'} && defined $c->{'db'}->{'state_hosts'}->{$host->{'peer_key'}}) {
+                $host->{'parents'} = [ $c->{'db'}->{'state_hosts'}->{$host->{'peer_key'}} ];
+            } else {
+                $host->{'parents'} = [qw/rootid/];
+            }
         }
         my $found_parent = 0;
         for my $par (@{$host->{'parents'}}) {
