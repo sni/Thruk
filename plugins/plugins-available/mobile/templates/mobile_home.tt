@@ -1,0 +1,62 @@
+<!-- Home -->
+<div id="home" data-role="page">
+  <div data-role="header" data-position="inline">
+    <a href="#refresh" id="refresh" data-icon="refresh" class="ui-btn-left" data-iconpos="notext">Refresh</a>
+    <h1>Mobile Thruk</h1>
+    <a href="#options" data-icon="gear" class="ui-btn-right">Options</a>
+  </div>
+  <div data-role="content">
+    <h4>Status</h4>
+      <ul data-role="listview" data-inset="true">
+        <li>
+          <a href="#problems">Problems
+          <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_unhandled_panel hostTotalsPROBLEMS hosts_unhandled"></span>
+          <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_unhandled_panel serviceTotalsPROBLEMS services_unhandled"></span>
+          </a>
+        </li>
+
+        <li>
+          <a href="#hosts">Hosts
+          <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_pending_panel hostPENDING hosts_pending"></span>
+          <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_unreachable_panel hostUNREACHABLE hosts_unreachable"></span>
+          <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_down_panel hostDOWN hosts_down"></span>
+          <span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_up_panel hostUP hosts_up"></span>
+          </a>
+        </li>
+
+        <li>
+          <a href="#services">Services
+            <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_pending_panel servicePENDING services_pending"></span>
+            <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_critical_panel serviceCRITICAL services_critical"></span>
+            <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_unknown_panel serviceUNKNOWN services_unknown"></span>
+            <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_warning_panel serviceWARNING services_warning"></span>
+            <span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_ok_panel serviceOK services_ok"></span>
+          </a>
+        </li>
+      </ul>
+
+      <!--
+      <h4>Search</h4>
+      <form method="post">
+      <div style="position:relative">
+      <input type="text" name="name" id="search" value=""  />
+      <a href="#search" class="" style="position: absolute; top: 5px; right:8px;"><img src="[% url_prefix %]thruk/plugins/mobile/img/06-search.png" alt="search"></a>
+      </div>
+      </form>
+      -->
+
+      <h4>History</h4>
+      <ul data-role="listview" data-inset="true">
+        <li><a href="#last_alerts">Last Alerts</a></li>
+        <li><a href="#last_notification">Last Notifications</a></li>
+      </ul>
+
+      <h4>Links</h4>
+      <ul data-role="listview" data-inset="true">
+        <li><a href="[% url_prefix %]thruk/index.html" rel="external">Access as Full Client</a></li>
+      </ul>
+    </div>
+    <div data-role="footer" style="text-align:center" id="fullscreenteaser">
+      Add this page to your home screen to get full screen mode.
+  </div>
+</div>

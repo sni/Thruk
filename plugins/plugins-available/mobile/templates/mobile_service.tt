@@ -1,0 +1,22 @@
+<!-- Service -->
+<div id="service" data-role="page">
+  <div data-role="header">
+    <a href="#" data-icon="back" data-rel="back">Back</a>
+    <h1 id="service_name"></h1>
+    <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
+  </div>
+  <div data-role="content">
+    <table>
+      <tr><th>Status</th><td><span id="service_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
+      <tr><th>Duration</th><td id="service_duration"></td></tr>
+      <tr><th>Attempt</th><td id="service_attempt"></td></tr>
+      <tr><th>Last Check Time</th><td id="service_last_check"></td></tr>
+      <tr><th>Next Check Time</th><td id="service_next_check"></td></tr>
+      <tr><th>Check Type</th><td id="service_check_type"></td></tr>
+      <tr><th>Latency</th><td id="service_latency"></td></tr>
+      <tr><th>Execution Time</th><td id="service_exec_time"></td></tr>
+      <tr><th colspan=2>Output</th></tr>
+      <tr><td colspan=2 id="service_plugin_output"></td></tr>
+    </table>
+  </div>
+</div>

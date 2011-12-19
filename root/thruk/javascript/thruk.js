@@ -2288,7 +2288,7 @@ var ajax_search = {
         var now  = parseInt(date.getTime() / 1000);
         // update every hour (frames searches wont update otherwise)
         if(   ajax_search.initialized
-           && now > ajax_search.initialized + ajax_search.update_interval
+           && now < ajax_search.initialized + ajax_search.update_interval
            && (    append_value_of == undefined && ajax_search.initialized_t == type
                || (append_value_of != undefined && ajax_search.initialized_a == appended_value )
               )

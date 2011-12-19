@@ -1,13 +1,15 @@
-.servicePENDING  { background: #ACACAC !important; }
-.serviceOK       { background: #33FF00 !important; }
-.serviceUNKNOWN  { background: #FF9900 !important; }
-.serviceWARNING  { background: #FFFF00 !important; }
-.serviceCRITICAL { background: #F83838 !important; text-shadow: none !important; }
+.servicePENDING        { background: #ACACAC !important; }
+.serviceOK             { background: #33FF00 !important; }
+.serviceUNKNOWN        { background: #FF9900 !important; }
+.serviceWARNING        { background: #FFFF00 !important; }
+.serviceCRITICAL       { background: #F83838 !important; text-shadow: none !important; }
 
-.hostUP          { background: #33FF00 !important; }
-.hostDOWN        { background: #F83838 !important; text-shadow: none !important; }
-.hostUNREACHABLE { background: #F83838 !important; }
-.hostPENDING     { background: #ACACAC !important; }
+.hostUP                { background: #33FF00 !important; }
+.hostDOWN              { background: #F83838 !important; text-shadow: none !important; }
+.hostUNREACHABLE       { background: #F83838 !important; }
+.hostPENDING           { background: #ACACAC !important; }
+.hostTotalsPROBLEMS    { background: orange  !important; }
+.serviceTotalsPROBLEMS { background: orange  !important; }
 
 
 .hidden {
@@ -17,11 +19,13 @@ A.ui-link-inherit SPAN.hosts_pending_panel,
 A.ui-link-inherit SPAN.hosts_unreachable_panel,
 A.ui-link-inherit SPAN.hosts_down_panel,
 A.ui-link-inherit SPAN.hosts_up_panel,
+A.ui-link-inherit SPAN.hosts_unhandled_panel,
 A.ui-link-inherit SPAN.services_pending_panel,
 A.ui-link-inherit SPAN.services_critical_panel,
 A.ui-link-inherit SPAN.services_unknown_panel,
 A.ui-link-inherit SPAN.services_warning_panel,
-A.ui-link-inherit SPAN.services_ok_panel
+A.ui-link-inherit SPAN.services_ok_panel,
+A.ui-link-inherit SPAN.services_unhandled_panel
 {
   position: inherit;
   float: right;

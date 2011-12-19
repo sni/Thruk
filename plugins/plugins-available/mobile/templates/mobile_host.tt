@@ -1,0 +1,22 @@
+<!-- Host -->
+<div id="host" data-role="page">
+  <div data-role="header">
+    <a href="#" data-icon="back" data-rel="back">Back</a>
+    <h1 id="host_name"></h1>
+    <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
+  </div>
+  <div data-role="content">
+    <table>
+      <tr><th>Status</th><td><span id="host_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
+      <tr><th>Duration</th><td id="host_duration"></td></tr>
+      <tr><th>Attempt</th><td id="host_attempt"></td></tr>
+      <tr><th>Last Check Time</th><td id="host_last_check"></td></tr>
+      <tr><th>Next Check Time</th><td id="host_next_check"></td></tr>
+      <tr><th>Check Type</th><td id="host_check_type"></td></tr>
+      <tr><th>Latency</th><td id="host_latency"></td></tr>
+      <tr><th>Execution Time</th><td id="host_exec_time"></td></tr>
+      <tr><th colspan=2>Output</th></tr>
+      <tr><td colspan=2 id="host_plugin_output"></td></tr>
+    </table>
+  </div>
+</div>

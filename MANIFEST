@@ -182,6 +182,17 @@ plugins/plugins-available/mobile/root/mobile-1.1.7.js
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
+plugins/plugins-available/mobile/templates/mobile_alerts.tt
+plugins/plugins-available/mobile/templates/mobile_home.tt
+plugins/plugins-available/mobile/templates/mobile_host.tt
+plugins/plugins-available/mobile/templates/mobile_hosts.tt
+plugins/plugins-available/mobile/templates/mobile_hosts_list.tt
+plugins/plugins-available/mobile/templates/mobile_notifications.tt
+plugins/plugins-available/mobile/templates/mobile_options.tt
+plugins/plugins-available/mobile/templates/mobile_problems.tt
+plugins/plugins-available/mobile/templates/mobile_service.tt
+plugins/plugins-available/mobile/templates/mobile_services.tt
+plugins/plugins-available/mobile/templates/mobile_services_list.tt
 plugins/plugins-available/shinken_features/lib/Thruk/Controller/shinken_features.pm
 plugins/plugins-available/shinken_features/root/businessview.css
 plugins/plugins-available/shinken_features/root/businessview.js

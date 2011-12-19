@@ -1,0 +1,21 @@
+<!-- Problems-->
+<div id="problems" data-role="page">
+  <div data-role="header">
+    <a href="#" data-icon="back" data-rel="back">Back</a>
+    <h1>Problems</h1>
+    <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
+  </div>
+  <div data-role="content">
+    <h4>Host Problems</h4>
+    <ul data-role="listview" data-inset="true" class="hosts_by_status_list">
+      <li class="hidden hosts_down_panel"><a href="#hosts_list" class="hosts_list">Down<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostDOWN hosts_down"></span></a></li>
+      <li class="hidden hosts_unreachable_panel"><a href="#hosts_list" class="hosts_list">Unreachable<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostUNREACHABLE hosts_unreachable"></span></a></li>
+    </ul>
+
+    <h4>Service Problems</h4>
+    <ul data-role="listview" data-inset="true" class="services_by_status_list">
+      <li class="hidden services_critical_panel"><a href="#services_list" class="services_list">Critical<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceCRITICAL services_critical"></span></a></li>
+      <li class="hidden services_unknown_panel"><a href="#services_list" class="services_list">Unknown<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceUNKNOWN services_unknown"></span></a></li>
+    </ul>
+  </div>
+</div>

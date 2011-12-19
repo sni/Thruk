@@ -1,0 +1,14 @@
+<!-- Services List -->
+<div id="services_list" data-role="page">
+  <div data-role="header">
+    <a href="#" data-icon="back" data-rel="back">Back</a>
+    <h1>Services</h1>
+    <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
+  </div>
+  <div data-role="content">
+    <ul data-role="listview" id="services_list_data" data-filter="true">
+      <li><img src="[% url_prefix %]thruk/plugins/mobile/img/loading.gif" alt="loading" width=25 height=20> loading</li>
+    </ul>
+  </div>
+</div>
+

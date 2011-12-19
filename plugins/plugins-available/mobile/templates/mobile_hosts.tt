@@ -1,0 +1,17 @@
+<!-- Hosts by Status-->
+<div id="hosts" data-role="page">
+  <div data-role="header">
+    <a href="#" data-icon="back" data-rel="back">Back</a>
+    <h1>Hosts</h1>
+    <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
+  </div>
+  <div data-role="content">
+    <ul data-role="listview" data-inset="true" class="hosts_by_status_list">
+      <li class="hidden hosts_total_panel"><a href="#hosts_list" class="hosts_list">All<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hosts_total"></span></a></li>
+      <li class="hidden hosts_up_panel"><a href="#hosts_list" class="hosts_list">Up<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostUP hosts_up"></span></a></li>
+      <li class="hidden hosts_down_panel"><a href="#hosts_list" class="hosts_list">Down<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostDOWN hosts_down"></span></a></li>
+      <li class="hidden hosts_unreachable_panel"><a href="#hosts_list" class="hosts_list">Unreachable<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostUNREACHABLE hosts_unreachable"></span></a></li>
+      <li class="hidden hosts_pending_panel"><a href="#hosts_list" class="hosts_list">Pending<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostPENDING hosts_pending"></span></a></li>
+    </ul>
+  </div>
+</div>

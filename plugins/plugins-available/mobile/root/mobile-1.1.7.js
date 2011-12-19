@@ -24,16 +24,24 @@ jQuery(document).bind("mobileinit", function(){
 jQuery(document).ready(function(e){
     /* refresh button on start page */
     jQuery("#refresh").bind( "vclick", function(event, ui) {
-        refresh_host_status();
-        refresh_service_status();
+        refresh_host_status(true);
+        refresh_service_status(true);
         return false;
     });
 
     /* bind filter settings to links */
+    jQuery("LI.hosts_total_panel A.hosts_list").bind(       "vclick", function(event, ui) { filter={}; });
     jQuery("LI.hosts_pending_panel A.hosts_list").bind(     "vclick", function(event, ui) { filter={ hoststatustypes:1 }; });
     jQuery("LI.hosts_up_panel A.hosts_list").bind(          "vclick", function(event, ui) { filter={ hoststatustypes:2 }; });
     jQuery("LI.hosts_down_panel A.hosts_list").bind(        "vclick", function(event, ui) { filter={ hoststatustypes:4 }; });
     jQuery("LI.hosts_unreachable_panel A.hosts_list").bind( "vclick", function(event, ui) { filter={ hoststatustypes:8 }; });
+
+    jQuery("LI.services_total_panel A.services_list").bind(   "vclick", function(event, ui) { filter={}; });
+    jQuery("LI.services_pending_panel A.services_list").bind( "vclick", function(event, ui) { filter={ servicestatustypes:1 }; });
+    jQuery("LI.services_ok_panel A.services_list").bind(      "vclick", function(event, ui) { filter={ servicestatustypes:2 }; });
+    jQuery("LI.services_warning_panel A.services_list").bind( "vclick", function(event, ui) { filter={ servicestatustypes:4 }; });
+    jQuery("LI.services_unknown_panel A.services_list").bind( "vclick", function(event, ui) { filter={ servicestatustypes:8 }; });
+    jQuery("LI.services_critical_panel A.services_list").bind("vclick", function(event, ui) { filter={ servicestatustypes:16 }; });
 
     /* Last Alerts */
     jQuery('#last_alerts').bind('pageshow', function(event, info){
@@ -214,14 +222,20 @@ jQuery(document).ready(function(e){
         refresh_service_status();
     });
 
+    /* refresh problems */
+    jQuery('#problems').bind('pageshow', function(event, data){
+        jQuery('DIV#problems UL.hosts_by_status_list').listview('refresh');
+        jQuery('DIV#problems UL.services_by_status_list').listview('refresh');
+    });
+
     /* refresh list of hosts */
     jQuery('#hosts').bind('pageshow', function(event, data){
-        jQuery('#hosts_by_status_list').listview('refresh');
+        jQuery('DIV#hosts .hosts_by_status_list').listview('refresh');
     });
 
     /* refresh list of services */
     jQuery('#services').bind('pageshow', function(event, data){
-        jQuery('#services_by_status_list').listview('refresh');
+        jQuery('DIV#services .services_by_status_list').listview('refresh');
     });
 
     refresh_host_status();
@@ -301,56 +315,56 @@ function unixtime() {
 }
 
 /* set hosts status */
-last_host_refresh = undefined;
-function refresh_host_status() {
-
-
+var last_host_refresh = 0;
+function refresh_host_status(force) {
+    if(force == undefined) { force = false; }
     var date = new Date;
     var now  = parseInt(date.getTime() / 1000);
-    if(now > last_host_refresh + 2) {
+    if(force == false && now < last_host_refresh + 2) {
         return false;
     }
+    last_host_refresh = now;
 
-    jQuery('.hosts_pending_panel').hide();
-    jQuery('.hosts_unreachable_panel').hide();
-    jQuery('.hosts_down_panel').hide();
-    jQuery('.hosts_up_panel').hide();
+    ['up', 'down', 'unreachable', 'pending', 'unhandled' ].forEach(function(el){
+        jQuery('.hosts_'+el+'_panel').hide();
+    });
 
     jQuery.get('mobile.cgi', { data: 'host_stats', _:unixtime() },
         function(data, textStatus, XMLHttpRequest) {
-            jQuery('.hosts_pending').text(data.pending)
-            jQuery('.hosts_unreachable').text(data.unreachable)
-            jQuery('.hosts_down').text(data.down)
-            jQuery('.hosts_up').text(data.up);
-
-            if(data.pending     > 0) { jQuery('.hosts_pending_panel').show(); }
-            if(data.unreachable > 0) { jQuery('.hosts_unreachable_panel').show(); }
-            if(data.down        > 0) { jQuery('.hosts_down_panel').show(); }
-            if(data.up          > 0) { jQuery('.hosts_up_panel').show(); }
+            ['up', 'down', 'unreachable', 'pending', 'total'].forEach(function(el){
+                var val = eval("data."+el);
+                jQuery('.hosts_'+el).text(val)
+                if(val > 0) { jQuery('.hosts_'+el+'_panel').show(); }
+            });
+            jQuery('.hosts_unhandled').text('Host: ' + (data.down_and_unhandled + data.unreachable_and_unhandled));
+            if(data.down_and_unhandled + data.unreachable_and_unhandled > 0) { jQuery('.hosts_unhandled_panel').show(); }
         },
     'json');
 }
 
 /* set service status */
-function refresh_service_status() {
-    jQuery('.services_ok_panel').hide();
-    jQuery('.services_warning_panel').hide();
-    jQuery('.services_critical_panel').hide();
-    jQuery('.services_unknown_panel').hide();
-    jQuery('.services_pending_panel').hide();
+var last_service_refresh = 0;
+function refresh_service_status(force) {
+    if(force == undefined) { force = false; }
+    var date = new Date;
+    var now  = parseInt(date.getTime() / 1000);
+    if(force == false && now < last_service_refresh + 2) {
+        return false;
+    }
+    last_service_refresh = now;
+
+    ['ok', 'warning', 'critical', 'unknown', 'pending', 'unhandled'].forEach(function(el){
+        jQuery('.services_'+el+'_panel').hide();
+    });
     jQuery.get('mobile.cgi', { data: 'service_stats', _:unixtime() },
         function(data, textStatus, XMLHttpRequest) {
-            jQuery('.services_ok').text(data.ok)
-            jQuery('.services_warning').text(data.warning)
-            jQuery('.services_critical').text(data.critical)
-            jQuery('.services_unknown').text(data.unknown)
-            jQuery('.services_pending').text(data.pending)
-
-            if(data.ok       > 0) { jQuery('.services_ok_panel').show(); }
-            if(data.warning  > 0) { jQuery('.services_warning_panel').show(); }
-            if(data.critical > 0) { jQuery('.services_critical_panel').show(); }
-            if(data.unknown  > 0) { jQuery('.services_unknown_panel').show(); }
-            if(data.pending  > 0) { jQuery('.services_pending_panel').show(); }
+            ['ok', 'warning', 'critical', 'unknown', 'pending', 'total'].forEach(function(el){
+                var val = eval("data."+el);
+                jQuery('.services_'+el).text(val)
+                if(val > 0) { jQuery('.services_'+el+'_panel').show(); }
+            });
+            jQuery('.services_unhandled').text('Service: ' + (data.critical_and_unhandled + data.unknown_and_unhandled));
+            if(data.critical_and_unhandled + data.unknown_and_unhandled > 0) { jQuery('.services_unhandled_panel').show(); }
         },
     'json');
 }
