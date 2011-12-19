@@ -1,4 +1,4 @@
-﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page'></a>&nbsp;
+﻿<a href="#" onclick="resetRefresh(); toggleElement('add_bookmark'); document.getElementById('url_input').focus(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/book_add.png' border="0" alt='Add bookmark to this page' title='Add bookmark to this page' width=16 height=16></a>&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:60px;z-index:100" id="add_bookmark">
   <div class="shadow"><div class="shadowcontent">
 

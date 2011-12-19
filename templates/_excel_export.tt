@@ -1,4 +1,4 @@
-﻿<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns'); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel'></a>&nbsp;&nbsp;&nbsp;
+﻿<a href='[% uri_with(c, 'view_mode' => 'xls') %]' onclick="toggleElement('excel_export_columns'); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_excel.png' border="0" alt='Export to Excel' title='Export to Excel' width=16 height=16></a>&nbsp;&nbsp;&nbsp;
 <div class="filter_pane" style="visibility:hidden;position:absolute;right:15px;z-index:100" id="excel_export_columns">
 <div class="shadow"><div class="shadowcontent">
 <form action='[% uri_with(c, 'view_mode' => 'xls') %]' method="POST" id="excel_form">

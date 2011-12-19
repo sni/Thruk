@@ -208,6 +208,12 @@ jQuery(document).ready(function(e){
             'json');
     });
 
+    /* Home */
+    jQuery('#home').bind('pageshow', function(event, data){
+        refresh_host_status();
+        refresh_service_status();
+    });
+
     /* refresh list of hosts */
     jQuery('#hosts').bind('pageshow', function(event, data){
         jQuery('#hosts_by_status_list').listview('refresh');
@@ -220,6 +226,8 @@ jQuery(document).ready(function(e){
 
     refresh_host_status();
     refresh_service_status();
+
+    /* hide notice about fullscreen mode */
     if(window.navigator.standalone == true) {
         jQuery('#fullscreenteaser').hide();
     }
@@ -293,7 +301,16 @@ function unixtime() {
 }
 
 /* set hosts status */
+last_host_refresh = undefined;
 function refresh_host_status() {
+
+
+    var date = new Date;
+    var now  = parseInt(date.getTime() / 1000);
+    if(now > last_host_refresh + 2) {
+        return false;
+    }
+
     jQuery('.hosts_pending_panel').hide();
     jQuery('.hosts_unreachable_panel').hide();
     jQuery('.hosts_down_panel').hide();

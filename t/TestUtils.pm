@@ -224,7 +224,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
     my @return;
     for my $error ( $lint->errors ) {
         my $err_str = $error->as_string;
-        next if $err_str =~ m/<IMG SRC="\/thruk\/.*?">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes\./mx;
+        next if $err_str =~ m/<IMG\ SRC="\/thruk\/.*?">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes\./mx;
         next if $err_str =~ m/Unknown\ attribute\ "data\-\w+"\ for\ tag/mx;
         diag($error->as_string."\n");
         push @return, $error;
