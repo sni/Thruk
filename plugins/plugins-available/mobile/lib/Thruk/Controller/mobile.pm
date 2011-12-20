@@ -45,7 +45,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
         my $type   = $c->{'request'}->{'parameters'}->{'data'};
-        my $limit  = $c->{'request'}->{'parameters'}->{'limit'} || 25;
+        my $limit  = $c->{'request'}->{'parameters'}->{'limit'}  || 50;
         my $status = $c->{'request'}->{'parameters'}->{'status'} || 0;
 
         # gather connection status
