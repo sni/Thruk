@@ -6,6 +6,10 @@
     <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
   </div>
   <div data-role="content">
+    <form action="mobile.cgi" method="post">
+    <input type="hidden" name="cmd">
+    <button type="submit" data-icon="check">Acknowledge</button>
+    </form>
     <table>
       <tr><th>Status</th><td><span id="host_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
       <tr><th>Duration</th><td id="host_duration"></td></tr>
