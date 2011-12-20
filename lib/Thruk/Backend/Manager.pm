@@ -237,7 +237,7 @@ sub disable_backends {
 
     if( defined $keys ) {
         for my $key ( keys %{$keys} ) {
-            if( $keys->{$key} == 2 or $keys->{$key} == 3 ) {
+            if( $keys->{$key} !~ m/^\d+$/mx or $keys->{$key} == 2 or $keys->{$key} == 3 ) {
                 $self->disable_backend($key);
             }
         }

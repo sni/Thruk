@@ -47,6 +47,19 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         my $type   = $c->{'request'}->{'parameters'}->{'data'};
         my $limit  = $c->{'request'}->{'parameters'}->{'limit'} || 25;
         my $status = $c->{'request'}->{'parameters'}->{'status'} || 0;
+
+        # gather connection status
+        my $connection_status = {};
+        for my $pd (@{$c->stash->{'backends'}}) {
+            my $name  = $c->stash->{'backend_detail'}->{$pd}->{'name'} || 'unknown';
+            my $state = 1;
+            $state    = 0 if $c->stash->{'backend_detail'}->{$pd}->{'running'};
+            $state    = 2 if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2;
+            $connection_status->{$pd} = { name  => $name,
+                                          state => $state
+                                        };
+        }
+
         my $data;
         if($type eq 'notifications') {
             my $filter = {
@@ -124,7 +137,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
         }
         if(defined $data) {
-            $c->stash->{'json'} = $data;
+            $c->stash->{'json'} = { connection_status => $connection_status, data => $data };
             $c->forward('Thruk::View::JSON');
             return;
         } else {

@@ -43,6 +43,17 @@ jQuery(document).ready(function(e){
     jQuery("LI.services_unknown_panel A.services_list").bind( "vclick", function(event, ui) { filter={ servicestatustypes:8 }; });
     jQuery("LI.services_critical_panel A.services_list").bind("vclick", function(event, ui) { filter={ servicestatustypes:16 }; });
 
+    /* Options */
+    jQuery('#options').bind('pageshow', function(event, info){
+        jQuery('.waiting').show();
+        if(current_backend_states == undefined) {
+            refresh_host_status(true, true);
+        } else {
+            refresh_backends();
+        }
+        jQuery('.waiting').hide();
+    });
+
     /* Last Alerts */
     jQuery('#last_alerts').bind('pageshow', function(event, info){
         jQuery('#alerts_list').children().remove();
@@ -52,6 +63,7 @@ jQuery(document).ready(function(e){
                 limit:25
             },
             function(data, textStatus, XMLHttpRequest) {
+                data = extract_data(data);
                 jQuery('#alerts_list').children().remove();
                 jQuery.each(data, function(index, entry) {
                     var listitem = '';
@@ -84,6 +96,7 @@ jQuery(document).ready(function(e){
                 limit:25
             },
             function(data, textStatus, XMLHttpRequest) {
+                data = extract_data(data);
                 jQuery('#notification_list').children().remove();
                 jQuery.each(data, function(index, entry) {
                     if(entry.service_description) {
@@ -107,6 +120,7 @@ jQuery(document).ready(function(e){
                 _:unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
+                data = extract_data(data);
                 jQuery('#services_list_data').children().remove();
                 jQuery.each(data, function(index, entry) {
                     jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service" class="service_link" data-host="' + entry.host_name +'" data-service="'+entry.description+'">' + entry.host_name+' - '+ entry.description +'</a></li>');
@@ -127,6 +141,7 @@ jQuery(document).ready(function(e){
                 _:unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
+                data = extract_data(data);
                 jQuery('#hosts_list_data').children().remove();
                 jQuery.each(data, function(index, entry) {
                     jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host" class="host_link" data-host="'+entry.name +'">' + entry.name +'</a></li>');
@@ -145,6 +160,7 @@ jQuery(document).ready(function(e){
                 _:    unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
+                data = extract_data(data);
                 var host = data[0];
                 if(host != undefined) {
                     var state_type = "SOFT";
@@ -185,6 +201,7 @@ jQuery(document).ready(function(e){
                 _:unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
+                data = extract_data(data);
                 var service = data[0];
                 if(service != undefined) {
                     var state_type = "SOFT";
@@ -226,15 +243,19 @@ jQuery(document).ready(function(e){
     jQuery('.backend_checkbox').bind('change', function(event){
         var backend = event.target.name;
         if(event.target.checked) {
-            eval('current_backend_states.b' + backend + '="0";');
+            current_backend_states[backend] = 0;
         } else {
-            eval('current_backend_states.b' + backend + '="2";');
+            current_backend_states[backend] = 2;
         }
     });
     jQuery('#options_save').bind('vclick', function(event){
         var serialized = "";
         for(var key in current_backend_states){
-            serialized += '&'+key.substring(1)+'='+eval('current_backend_states.'+key);
+            state = 2;
+            if(jQuery("#backend_"+key).attr("checked")) {
+                state = 0;
+            }
+            serialized += '&'+key+'='+state;
         };
         serialized = serialized.substring(1);
         document.cookie = "thruk_backends="+serialized+ "; path=/;";
@@ -334,8 +355,9 @@ function unixtime() {
 
 /* set hosts status */
 var last_host_refresh = 0;
-function refresh_host_status(force) {
-    if(force == undefined) { force = false; }
+function refresh_host_status(force, update_backends) {
+    if(force           == undefined) { force           = false; }
+    if(update_backends == undefined) { update_backends = false; }
     var date = new Date;
     var now  = parseInt(date.getTime() / 1000);
     if(force == false && now < last_host_refresh + 2) {
@@ -349,6 +371,7 @@ function refresh_host_status(force) {
 
     jQuery.get('mobile.cgi', { data: 'host_stats', _:unixtime() },
         function(data, textStatus, XMLHttpRequest) {
+            data = extract_data(data);
             ['up', 'down', 'unreachable', 'pending', 'total'].forEach(function(el){
                 var val = eval("data."+el);
                 jQuery('.hosts_'+el).text(val)
@@ -356,6 +379,9 @@ function refresh_host_status(force) {
             });
             jQuery('.hosts_unhandled').text('Host:' + (data.down_and_unhandled + data.unreachable_and_unhandled));
             if(data.down_and_unhandled + data.unreachable_and_unhandled > 0) { jQuery('.hosts_unhandled_panel').show(); }
+            if(update_backends) {
+                refresh_backends();
+            }
         },
     'json');
 }
@@ -376,6 +402,7 @@ function refresh_service_status(force) {
     });
     jQuery.get('mobile.cgi', { data: 'service_stats', _:unixtime() },
         function(data, textStatus, XMLHttpRequest) {
+            data = extract_data(data);
             ['ok', 'warning', 'critical', 'unknown', 'pending', 'total'].forEach(function(el){
                 var val = eval("data."+el);
                 jQuery('.services_'+el).text(val)
@@ -385,4 +412,31 @@ function refresh_service_status(force) {
             if(data.critical_and_unhandled + data.unknown_and_unhandled > 0) { jQuery('.services_unhandled_panel').show(); }
         },
     'json');
+}
+
+function refresh_backends() {
+    if(current_backend_states != undefined) {
+        number=0;
+        for(var key in current_backend_states){
+            number++;
+            if(current_backend_states[key].state == 0 || current_backend_states[key].state == 1) {
+                jQuery("#backend_"+key).attr("checked",true).checkboxradio("refresh");
+            }
+            if(current_backend_states[key].state == 1) {
+                jQuery("#b_lab_"+key).addClass('hostDOWN');
+            }
+        };
+        if(number > 1) {
+            jQuery('#backend_chooser').show();
+        }
+    } else {
+        jQuery('#backend_chooser').hide();
+    }
+}
+
+
+/* set concetion status from data connection */
+function extract_data(data) {
+    current_backend_states = data.connection_status;
+    return data.data;
 }
