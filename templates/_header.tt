@@ -170,8 +170,8 @@
 
             [% SET class = 'button_peerDOWN'                                    %]
             [% SET class = 'button_peerUP'  IF backend_detail.$pd.running       %]
-            [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %]
-            [% SET class = 'button_peerHID' IF backend_detail.$pd.disabled == 3 %]
+            [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %][%# hidden by user #%]
+            [% SET class = 'button_peerHID' IF backend_detail.$pd.disabled == 3 %][%# hidden by backend param #%]
             [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
             [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 6 %]
             [% SET class = 'button_peerUP'  IF backend_detail.$pd.disabled == 7 %]

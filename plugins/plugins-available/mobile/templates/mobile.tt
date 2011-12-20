@@ -8,6 +8,14 @@
     <script src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
     <script type="application/x-javascript">
       var url_prefix = '[% url_prefix %]';
+      var current_backend_states = new Object({
+        [% FOREACH pd IN backends %]
+          [% SET val = '1'                                     %]
+          [% SET val = '0' IF backend_detail.$pd.running       %]
+          [% SET val = '2' IF backend_detail.$pd.disabled == 2 %]
+          'b[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
+        [% END %]
+      });
     </script>
     <script src="[% url_prefix %]thruk/plugins/mobile/mobile-1.1.7.js" type="application/x-javascript" charset="utf-8"></script>
     <script src="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.js"></script>

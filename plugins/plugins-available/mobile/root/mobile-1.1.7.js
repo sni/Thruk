@@ -60,10 +60,10 @@ jQuery(document).ready(function(e){
                     } else {
                         listitem = '<li class="'+get_host_class_for_state(entry.state)+'">';
                     }
-                    var message = entry.message.substr(13);
+                    var message = entry.message.substring(13);
                     message = message.replace(entry.type+':', '');
                     if(message.length > 60) {
-                        message = message.substr(0,60) + '...';
+                        message = message.substring(0,60) + '...';
                     }
                     listitem += '<span class="logdate">' + entry.formated_time + '<\/span>';
                     listitem += '<span class="logtype">' + entry.type + '<\/span>';
@@ -222,6 +222,24 @@ jQuery(document).ready(function(e){
         refresh_service_status();
     });
 
+    /* set selected backends */
+    jQuery('.backend_checkbox').bind('change', function(event){
+        var backend = event.target.name;
+        if(event.target.checked) {
+            eval('current_backend_states.b' + backend + '="0";');
+        } else {
+            eval('current_backend_states.b' + backend + '="2";');
+        }
+    });
+    jQuery('#options_save').bind('vclick', function(event){
+        var serialized = "";
+        for(var key in current_backend_states){
+            serialized += '&'+key.substring(1)+'='+eval('current_backend_states.'+key);
+        };
+        serialized = serialized.substring(1);
+        document.cookie = "thruk_backends="+serialized+ "; path=/;";
+    });
+
     /* refresh problems */
     jQuery('#problems').bind('pageshow', function(event, data){
         jQuery('DIV#problems UL.hosts_by_status_list').listview('refresh');
@@ -336,7 +354,7 @@ function refresh_host_status(force) {
                 jQuery('.hosts_'+el).text(val)
                 if(val > 0) { jQuery('.hosts_'+el+'_panel').show(); }
             });
-            jQuery('.hosts_unhandled').text('Host: ' + (data.down_and_unhandled + data.unreachable_and_unhandled));
+            jQuery('.hosts_unhandled').text('Host:' + (data.down_and_unhandled + data.unreachable_and_unhandled));
             if(data.down_and_unhandled + data.unreachable_and_unhandled > 0) { jQuery('.hosts_unhandled_panel').show(); }
         },
     'json');
@@ -363,7 +381,7 @@ function refresh_service_status(force) {
                 jQuery('.services_'+el).text(val)
                 if(val > 0) { jQuery('.services_'+el+'_panel').show(); }
             });
-            jQuery('.services_unhandled').text('Service: ' + (data.critical_and_unhandled + data.unknown_and_unhandled));
+            jQuery('.services_unhandled').text('Service:' + (data.critical_and_unhandled + data.unknown_and_unhandled));
             if(data.critical_and_unhandled + data.unknown_and_unhandled > 0) { jQuery('.services_unhandled_panel').show(); }
         },
     'json');

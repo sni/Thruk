@@ -2,8 +2,24 @@
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>
     <h1>Options</h1>
-    <a href="#home" data-icon="check" class="ui-btn-right">Save</a>
+    <a href="#home" data-icon="check" class="ui-btn-right" id="options_save">Save</a>
   </div>
   <div data-role="content">
+    [% IF backends && backends.size > 1 %]
+    <div data-role="fieldcontain">
+      <h4>Choose Backends</h4>
+      <fieldset data-role="controlgroup" id="backends">
+      [% FOREACH pd IN backends %]
+        [% SET name  = 'unknown' %]
+        [% SET name  = backend_detail.$pd.name IF backend_detail.$pd.name %]
+        [% SET state = 'off' %]
+        [% SET state = 'on'  IF backend_detail.$pd.running %]
+        [% SET state = 'off' IF backend_detail.$pd.disabled == 2 %][%# hidden by user #%]
+        <input type="checkbox" name="[% pd %]" id="[% 'backend_' _ pd %]" class="backend_checkbox" [% IF state == 'on'%]checked[% END %] />
+        <label for="[% 'backend_' _ pd %]">[% name %]</label>
+      [% END %]
+      </fieldset>
+    </div>
+    [% END %]
   </div>
 </div>
