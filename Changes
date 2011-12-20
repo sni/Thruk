@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.7    Fri Dec 16 17:00:44 CET 2011
+1.1.7    Tue Dec 20 18:02:13 CET 2011
           - added duration filter
           - config tool:
               - removed link from icons
