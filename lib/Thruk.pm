@@ -38,7 +38,7 @@ use Catalyst qw/
                 Cache
                 Thruk::RemoveNastyCharsFromHttpParam
                 /;
-our $VERSION = '1.1.7';
+our $VERSION = '1.1.8';
 
 ###################################################
 # Configure the application.
