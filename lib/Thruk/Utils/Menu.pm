@@ -241,7 +241,7 @@ sub _renew_navigation {
     }
 
     # add some more items
-    if(defined $Thruk::Utils::Menu::additional_items) {
+    if(defined $Thruk::Utils::Menu::additional_items or defined $user_items) {
         for my $to_add (@{$Thruk::Utils::Menu::additional_items}, @{$user_items}) {
             my $section       = _get_section_by_name($to_add->[0], 1);
             my $link          = $to_add->[1];
@@ -264,7 +264,7 @@ sub _renew_navigation {
     }
 
     # add some more sub items
-    if(defined $Thruk::Utils::Menu::additional_subitems) {
+    if(defined $Thruk::Utils::Menu::additional_subitems or defined $user_items) {
         for my $to_add (@{$Thruk::Utils::Menu::additional_subitems}, @{$user_items}) {
             my $section       = _get_section_by_name($to_add->[0], 1);
             next unless defined $section;
