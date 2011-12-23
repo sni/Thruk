@@ -285,7 +285,7 @@ sub get_templates_by_type {
     my $self   = shift;
     my $type   = shift;
 
-    return [] unless defined $self->{'objects'}->{'byname'}->{$type};
+    return [] unless defined $self->{'objects'}->{'byname'}->{'templates'}->{$type};
 
     my $objs = [];
     my $ids  = [ values %{$self->{'objects'}->{'byname'}->{'templates'}->{$type}} ];
