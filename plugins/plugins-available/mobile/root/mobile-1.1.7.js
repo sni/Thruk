@@ -6,7 +6,14 @@ var current_service = undefined;
 jQuery(document).bind("mobileinit", function(){
     jQuery.mobile.page.prototype.options.backBtnText      = "back";
     jQuery.mobile.page.prototype.options.addBackBtn       = true;
-    set_theme('d');
+
+    // theme?
+    var theme = readCookie('thruk_mtheme');
+    if(theme != undefined) {
+        set_theme(theme);
+    } else {
+        set_theme('d');
+    }
 
 });
 
@@ -32,6 +39,14 @@ jQuery(document).ready(function(e){
     jQuery("LI.services_warning_panel A.services_list").bind( "vclick", function(event, ui) { filter={ servicestatustypes:4 }; });
     jQuery("LI.services_unknown_panel A.services_list").bind( "vclick", function(event, ui) { filter={ servicestatustypes:8 }; });
     jQuery("LI.services_critical_panel A.services_list").bind("vclick", function(event, ui) { filter={ servicestatustypes:16 }; });
+
+    /* bind option theme button */
+    jQuery("A.theme_button").bind("vclick", function(event, ui) {
+        var now         = new Date();
+        var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
+        document.cookie = "thruk_mtheme=" + this.dataset.theme + "; path=/; expires=" + expires.toGMTString() + ";";
+        window.location.reload();
+    });
 
     /* Options */
     jQuery('#options').bind('pageshow', function(event, info){
@@ -507,4 +522,15 @@ function page_hosts() {
 /* Services Page */
 function page_services() {
     jQuery('DIV#services .services_by_status_list').listview('refresh');
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
 }

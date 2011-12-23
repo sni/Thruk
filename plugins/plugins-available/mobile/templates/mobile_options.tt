@@ -5,7 +5,17 @@
     <a href="#home" data-icon="check" class="ui-btn-right" id="options_save">Save</a>
   </div>
   <div data-role="content">
-    <span class="waiting"><img src="[% url_prefix %]thruk/plugins/mobile/img/loading.gif" alt="loading" width=25 height=20> loading</span>
+    <div data-role="fieldcontain" id="backend_chooser">
+      <h4>Choose Theme</h4>
+      <div data-role="controlgroup" data-type="horizontal">
+        <a href="#" data-role="button" data-theme="a" class="theme_button">A</a>
+        <a href="#" data-role="button" data-theme="b" class="theme_button">B</a>
+        <a href="#" data-role="button" data-theme="c" class="theme_button">C</a>
+        <a href="#" data-role="button" data-theme="d" class="theme_button">D</a>
+        <a href="#" data-role="button" data-theme="e" class="theme_button">E</a>
+      </div>
+    </div>
+
     <div data-role="fieldcontain" id="backend_chooser">
       <h4>Choose Backends</h4>
       <fieldset data-role="controlgroup" id="backends">
