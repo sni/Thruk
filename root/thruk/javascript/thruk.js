@@ -499,7 +499,7 @@ function refresh_button(btn) {
 function save_url_in_parents_hash(name) {
     jQuery(document).ready(function() {
         var oldloc = new String(document.location);
-        oldloc     = oldloc.replace(/#.*$/, '');
+        oldloc     = oldloc.replace(/#*.*$/, '');
         oldloc     = oldloc.replace(/\?.*$/, '');
         if(!oldloc.match(/\/thruk\/$/)) {
             return;
