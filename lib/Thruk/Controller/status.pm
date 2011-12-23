@@ -817,18 +817,13 @@ sub _process_bookmarks {
     my $save      = $c->{'request'}->{'parameters'}->{'saveb'};
 
     my $data = Thruk::Utils::get_user_data($c);
+    my $done = 0;
 
-    if(defined $newname and defined $bookmark and defined $section and defined $button and $button eq 'add bookmark') {
-        $data->{'bookmarks'}->{$section} = [] unless defined $data->{'bookmarks'}->{$section};
-        push @{$data->{'bookmarks'}->{$section}}, [ $newname, $bookmark ];
-        if(Thruk::Utils::store_user_data($c, $data)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
-        }
-    }
-
-    elsif(defined $save and $save eq 'save changes') {
-    $bookmarks = ref $bookmarks eq 'ARRAY' ? $bookmarks : [$bookmarks];
-        my $keep = {};
+    # remove existing bookmarks
+    if(    ( defined $button and $button eq 'add bookmark' )
+        or ( defined $save   and $save   eq 'save changes' )) {
+        $bookmarks = ref $bookmarks eq 'ARRAY' ? $bookmarks : [$bookmarks];
+        my $keep   = {};
         for my $bookmark (@{$bookmarks}) {
             next unless defined $bookmark;
             my($section, $name) = split(/::/mx, $bookmark ,2);
@@ -847,8 +842,26 @@ sub _process_bookmarks {
         if(Thruk::Utils::store_user_data($c, $data)) {
             Thruk::Utils::set_message( $c, 'success_message', 'Bookmarks updated' );
         }
+        $done++;
     }
-    else {
+
+    # add new bookmark
+    if(    defined $newname   and $newname  ne ''
+       and defined $bookmark  and $bookmark ne ''
+       and defined $section   and $section  ne ''
+       and (    ( defined $button and $button eq 'add bookmark' )
+             or ( defined $save   and $save   eq 'save changes' )
+           )
+    ) {
+        $data->{'bookmarks'}->{$section} = [] unless defined $data->{'bookmarks'}->{$section};
+        push @{$data->{'bookmarks'}->{$section}}, [ $newname, $bookmark ];
+        if(Thruk::Utils::store_user_data($c, $data)) {
+            Thruk::Utils::set_message( $c, 'success_message', 'Bookmark added' );
+        }
+        $done++;
+    }
+
+    unless($done) {
         Thruk::Utils::set_message( $c, 'fail_message', 'nothing to do!' );
     }
 
