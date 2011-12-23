@@ -6,9 +6,15 @@
     <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
   </div>
   <div data-role="content">
-    <form action="mobile.cgi" method="post">
-    <input type="hidden" name="cmd">
-    <button type="submit" data-icon="check">Acknowledge</button>
+    <form action="cmd.cgi" method="POST" id="service_ack_form" style="display:none" data-ajax=false>
+      <input type="hidden" name="referer" value="" id="service_referer">
+      <input type="hidden" name="quick_command" value="4">
+      <input type="hidden" name="selected_services" id="selected_services" value="">
+      <input type="hidden" name="com_data" value="Acknowledged by my mobile">
+      <input type='hidden' name='sticky_ack' value="[% IF c.config.cmd_defaults.sticky_ack %]1[% ELSE %]0[% END %]">
+      <input type='hidden' name='send_notification' value="[% IF c.config.cmd_defaults.send_notification %]1[% ELSE %]0[% END %]">
+      <input type='hidden' name='persistent_ack' value="[% IF c.config.cmd_defaults.persistent_ack %]1[% ELSE %]0[% END %]">
+      <button type="submit" data-icon="check">Acknowledge</button>
     </form>
     <table>
       <tr><th>Status</th><td><span id="service_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
@@ -19,6 +25,7 @@
       <tr><th>Check Type</th><td id="service_check_type"></td></tr>
       <tr><th>Latency</th><td id="service_latency"></td></tr>
       <tr><th>Execution Time</th><td id="service_exec_time"></td></tr>
+      <tr><th>Notifications Sent</th><td id="service_current_notification_number"></td></tr>
       <tr><th colspan=2>Output</th></tr>
       <tr><td colspan=2 id="service_plugin_output"></td></tr>
     </table>

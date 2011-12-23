@@ -100,7 +100,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
         }
         elsif($type eq 'hosts') {
-            my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c->{'request'}->{'parameters'});
+            my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c);
             if(defined $c->{'request'}->{'parameters'}->{'host'}) {
                 $hostfilter = { 'name' => $c->{'request'}->{'parameters'}->{'host'} };
             }
@@ -118,7 +118,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
         }
         elsif($type eq 'services') {
-            my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c->{'request'}->{'parameters'});
+            my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c);
             if(defined $c->{'request'}->{'parameters'}->{'host'}) {
                 $servicefilter = { 'description' => $c->{'request'}->{'parameters'}->{'service'},
                                    'host_name'   => $c->{'request'}->{'parameters'}->{'host'} };
@@ -153,14 +153,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
 ##########################################################
 sub _extract_filter_from_param {
-    my($self,$params) = @_;
-    my $fake_c = {'request' => {'parameters' => {}}};
-    for my $key (keys %{$params}) {
-        if($key =~ m/^filter\[(.*)\]$/mx) {
-            $fake_c->{'request'}->{'parameters'}->{$1} = $params->{$key};
-        }
-    }
-    my( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($fake_c);
+    my($self,$c) = @_;
+    my( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($c);
     return($hostfilter, $servicefilter);
 }
 

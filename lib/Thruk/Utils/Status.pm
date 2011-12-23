@@ -413,7 +413,7 @@ sub fill_totals_box {
 
     # host status box
     my $host_stats = {};
-    if(   $c->stash->{style} eq 'detail'
+    if(   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
        or ( $c->stash->{'servicegroup'}
             and ( $c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' )
           )
