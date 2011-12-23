@@ -6598,7 +6598,7 @@ function refresh_button(btn) {
 function save_url_in_parents_hash(name) {
     jQuery(document).ready(function() {
         var oldloc = new String(document.location);
-        oldloc     = oldloc.replace(/#*.*$/, '');
+        oldloc     = oldloc.replace(/#+.*$/, '');
         oldloc     = oldloc.replace(/\?.*$/, '');
         if(!oldloc.match(/\/thruk\/$/)) {
             return;
@@ -8481,8 +8481,8 @@ var ajax_search = {
         evt = (evt) ? evt : ((window.event) ? event : null);
         if(evt) {
             var keyCode = evt.keyCode;
-            // dont suggest on return, enter, and tab
-            if(keyCode == 13 || keyCode == 108 || keyCode == 9) {
+            // dont suggest on return, enter, tab or escape
+            if(keyCode == 13 || keyCode == 108 || keyCode == 9 || keyCode == 27) {
                 return false;
             }
         }
@@ -8672,8 +8672,7 @@ var ajax_search = {
 
     /* set the value into the input field */
     set_result: function(value) {
-
-        if(value == 'more') {
+        if(value == 'more' || (value == undefined && ajax_search.res.size() == ajax_search.cur_select)) {
             window.clearTimeout(ajax_search.hideTimer);
             ajax_search.dont_hide=true;
             window.setTimeout("ajax_search.dont_hide=false", 500);
@@ -8761,6 +8760,7 @@ var ajax_search = {
         var navigateUp   = keyCode == 38;
         var navigateDown = keyCode == 40;
 
+        // arrow keys
         if((!evt.ctrlKey && !evt.metaKey) && panel.style.display != 'none' && (navigateUp || navigateDown)) {
             if(navigateDown && ajax_search.cur_select == -1) {
                 ajax_search.cur_select = 0;
@@ -8799,6 +8799,7 @@ var ajax_search = {
             Event.stop(evt);
             return false;
         }
+        // return or enter
         if(keyCode == 13 || keyCode == 108) {
             if(ajax_search.cur_select == -1) {
                 return true
@@ -8808,6 +8809,12 @@ var ajax_search = {
             }
             Event.stop(evt);
             return false
+        }
+        // hit escape
+        if(keyCode == 27) {
+            ajax_search.hide_results(undefined, true);
+            Event.stop(evt);
+            return false;
         }
         return true;
     },
