@@ -201,7 +201,7 @@ function refresh_host_status(force, update_backends) {
     if(update_backends == undefined) { update_backends = false; }
     var date = new Date;
     var now  = parseInt(date.getTime() / 1000);
-    if(force == false && now < last_host_refresh + 2) {
+    if(force == false && now < last_host_refresh + 15) {
         return false;
     }
     last_host_refresh = now;
@@ -244,7 +244,7 @@ function refresh_service_status(force) {
     if(force == undefined) { force = false; }
     var date = new Date;
     var now  = parseInt(date.getTime() / 1000);
-    if(force == false && now < last_service_refresh + 2) {
+    if(force == false && now < last_service_refresh + 15) {
         return false;
     }
     last_service_refresh = now;
@@ -584,7 +584,7 @@ function list_pager_init(page, list) {
     } else {
         jQuery('.more').remove();
     }
-    jQuery('#'+list).append('<li class="loading"><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
+    jQuery.mobile.showPageLoadingMsg();
     jQuery('#'+list).listview('refresh');
     return page;
 }
@@ -596,13 +596,13 @@ function list_pager_data(page, data, list, more_callback, row_callback) {
         jQuery('#'+list).children().remove();
     } else {
         jQuery('.more').remove();
-        jQuery('.loading').remove();
     }
+    jQuery.mobile.hidePageLoadingMsg();
     jQuery.each(data.data, function(index, entry) {
         row_callback(entry);
     });
     if(data.more != undefined) {
-        jQuery('#'+list).append('<li data-icon="plus" class="more"><a href="#">more...</a></li>');
+        jQuery('#'+list).append('<li data-icon="false" class="more"><a href="#">more...</a></li>');
         jQuery('.more').bind('vclick', more_callback);
     }
     jQuery('#'+list).listview('refresh');

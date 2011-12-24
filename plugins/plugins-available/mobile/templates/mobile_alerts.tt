@@ -7,7 +7,6 @@
   </div>
   <div data-role="content">
     <ul data-role="listview" id="alerts_list" data-filter="true">
-      <li><img src="[% url_prefix %]thruk/plugins/mobile/img/loading.gif" alt="loading" width=25 height=20> loading</li>
     </ul>
   </div>
 </div>
