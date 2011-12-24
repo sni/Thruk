@@ -3,7 +3,9 @@ version:
 	if [ -n "$$newversion" ] && [ "$$newversion" != "$(VERSION)" ]; then \
 		sed -ri "s/$(VERSION)/$$newversion/" lib/Thruk.pm docs/THRUK_MANUAL.txt; \
 	fi ; \
-	cd plugins/plugins-available/mobile/root/ && git mv mobile-$(VERSION).css mobile-$$newversion.css && git mv mobile-$(VERSION).js mobile-$$newversion.js
+	git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).css plugins/plugins-available/mobile/root/mobile-$$newversion.css && \
+	git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).js plugins/plugins-available/mobile/root/mobile-$$newversion.js && \
+	git mv root/thruk/javascript/thruk-$(VERSION).js root/thruk/javascript/thruk-$$newversion.js
 	@./script/thruk_update_docs.sh > /dev/null
 	@perl Makefile.PL > /dev/null
 	@git co docs/FAQ.html

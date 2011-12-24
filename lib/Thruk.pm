@@ -131,7 +131,7 @@ my %config = ('name'                   => 'Thruk',
                                           'all_in_one_javascript' => [
                                               'prototype-1.7.0.js',
                                               'jquery-1.6.2.min.js',
-                                              'thruk.js',
+                                              'thruk-'.$VERSION.'.js',
                                               'cal/jscal2.js',
                                               'overlib.js',
                                               'jquery-fieldselection.js',
