@@ -18,6 +18,7 @@
     </form>
     <table>
       <tr><th>Status</th><td><span id="host_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
+      <tr class="host_acknowledged"><th colspan=2 id="host_ack"></th></tr>
       <tr><th>Duration</th><td id="host_duration"></td></tr>
       <tr><th>Attempt</th><td id="host_attempt"></td></tr>
       <tr><th>Last Check Time</th><td id="host_last_check"></td></tr>

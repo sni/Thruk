@@ -219,7 +219,8 @@ function refresh_host_status(force, update_backends) {
 
     jQuery.get('mobile.cgi', { data: 'host_stats', _:unixtime() },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
+            extract_data(data);
+            data = data.data;
             ['up', 'down', 'unreachable', 'pending', 'total', 'down_and_unhandled', 'unreachable_and_unhandled'].forEach(function(el){
                 var val = eval("data."+el);
                 jQuery('.hosts_'+el).text(val)
@@ -260,7 +261,8 @@ function refresh_service_status(force) {
     });
     jQuery.get('mobile.cgi', { data: 'service_stats', _:unixtime() },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
+            extract_data(data);
+            data = data.data;
             ['ok', 'warning', 'critical', 'unknown', 'pending', 'total', 'critical_and_unhandled', 'unknown_and_unhandled'].forEach(function(el){
                 var val = eval("data."+el);
                 jQuery('.services_'+el).text(val)
@@ -305,7 +307,7 @@ function refresh_backends() {
 /* set concetion status from data connection */
 function extract_data(data) {
     current_backend_states = data.connection_status;
-    return data.data;
+    return;
 }
 
 /* Options Page */
@@ -328,9 +330,9 @@ function page_alerts() {
             limit:25
         },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
+            extract_data(data);
             jQuery('#alerts_list').children().remove();
-            jQuery.each(data, function(index, entry) {
+            jQuery.each(data.data, function(index, entry) {
                 var listitem = '';
                 if(entry.service_description) {
                     listitem = '<li class="'+get_service_class_for_state(entry.state)+'">';
@@ -362,9 +364,9 @@ function page_notifications() {
             limit:25
         },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
+            extract_data(data);
             jQuery('#notification_list').children().remove();
-            jQuery.each(data, function(index, entry) {
+            jQuery.each(data.data, function(index, entry) {
                 if(entry.service_description) {
                     jQuery('#notification_list').append('<li class="'+get_service_class_for_state(entry.state)+'"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+' - '+ entry.service_description +'</li>');
                 } else {
@@ -390,9 +392,9 @@ function page_services_list() {
             _:unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
+            extract_data(data);
             jQuery('#services_list_data').children().remove();
-            jQuery.each(data, function(index, entry) {
+            jQuery.each(data.data, function(index, entry) {
                 jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+entry.host_name+'&service='+entry.description+'">' + entry.host_name+' - '+ entry.description +'</a></li>');
             });
             jQuery('#services_list_data').listview('refresh');
@@ -413,9 +415,9 @@ function page_hosts_list() {
             _:unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
+            extract_data(data);
             jQuery('#hosts_list_data').children().remove();
-            jQuery.each(data, function(index, entry) {
+            jQuery.each(data.data, function(index, entry) {
                 jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+entry.name+'">' + entry.name +'</a></li>');
             });
             jQuery('#hosts_list_data').listview('refresh');
@@ -433,8 +435,8 @@ function page_host() {
             _:    unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
-            var host = data[0];
+            extract_data(data);
+            var host = data.data[0];
             if(host != undefined) {
                 var state_type = "SOFT";
                 if(host.state_type == 1) { state_type = "HARD"; }
@@ -466,6 +468,17 @@ function page_host() {
                 if(host.acknowledged == 0 && host.state > 0) {
                     jQuery('#host_ack_form').show();
                 }
+                jQuery('.host_acknowledged').hide();
+                if(host.acknowledged == 1) {
+                    var txt = '';
+                    jQuery('.host_acknowledged').show();
+                    jQuery(data.comments_by_host[host.name]).each(function(nr, com) {
+                        if(com.entry_type == 4) {
+                            txt = com.author + ': ' + com.comment;
+                        }
+                    });
+                    jQuery('#host_ack').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif" alt="acknowledged"> ' + txt);
+                }
                 jQuery('#host_referer').val('mobile.cgi#host?host='+host.name);
                 jQuery('#selected_hosts').val(host.name);
             }
@@ -484,8 +497,8 @@ function page_service() {
             _:unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
-            data = extract_data(data);
-            var service = data[0];
+            extract_data(data);
+            var service = data.data[0];
             if(service != undefined) {
                 var state_type = "SOFT";
                 if(service.state_type == 1) { state_type = "HARD"; }
@@ -516,6 +529,17 @@ function page_service() {
                 jQuery('#service_ack_form').hide();
                 if(service.acknowledged == 0 && service.state > 0) {
                     jQuery('#service_ack_form').show();
+                }
+                jQuery('.service_acknowledged').hide();
+                if(service.acknowledged == 1) {
+                    var txt = '';
+                    jQuery('.service_acknowledged').show();
+                    jQuery(data.comments_by_host_service[service.host_name][service.description]).each(function(nr, com) {
+                        if(com.entry_type == 4) {
+                            txt = com.author + ': ' + com.comment;
+                        }
+                    });
+                    jQuery('#service_ack').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif" alt="acknowledged"> ' + txt);
                 }
                 jQuery('#service_referer').val('mobile.cgi#service?host='+service.host_name+'&service='+service.description);
                 jQuery('#selected_services').val(service.host_name+';'+service.description);

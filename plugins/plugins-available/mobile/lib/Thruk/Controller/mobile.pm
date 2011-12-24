@@ -112,10 +112,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 } else {
                     $duration = time() - $c->stash->{'pi_detail'}->{$entry->{'peer_key'}}->{'program_start'};
                 }
-                $entry->{'duration'} = Thruk::Utils::Filter::duration($duration);
+                $entry->{'duration'}          = Thruk::Utils::Filter::duration($duration);
                 $entry->{'format_last_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'last_check'});
                 $entry->{'format_next_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'next_check'});
             }
+            Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
         elsif($type eq 'services') {
             my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c);
@@ -131,13 +132,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 } else {
                     $duration = time() - $c->stash->{'pi_detail'}->{$entry->{'peer_key'}}->{'program_start'};
                 }
-                $entry->{'duration'} = Thruk::Utils::Filter::duration($duration);
+                $entry->{'duration'}          = Thruk::Utils::Filter::duration($duration);
                 $entry->{'format_last_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'last_check'});
                 $entry->{'format_next_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'next_check'});
             }
+            Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
         if(defined $data) {
             $c->stash->{'json'} = { connection_status => $connection_status, data => $data };
+            $c->stash->{'json'}->{'comments_by_host'} = $c->stash->{'comments_by_host'} if defined $c->stash->{'comments_by_host'};
+            $c->stash->{'json'}->{'comments_by_host_service'} = $c->stash->{'comments_by_host_service'} if defined $c->stash->{'comments_by_host_service'};
             $c->forward('Thruk::View::JSON');
             return;
         } else {
