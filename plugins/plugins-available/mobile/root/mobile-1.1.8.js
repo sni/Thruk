@@ -326,8 +326,7 @@ function page_alerts() {
     jQuery('#alerts_list').children().remove();
     jQuery('#alerts_list').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
     jQuery.get('mobile.cgi', {
-            data: 'alerts',
-            limit:25
+            data: 'alerts'
         },
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
@@ -360,8 +359,7 @@ function page_notifications() {
     jQuery('#notification_list').children().remove();
     jQuery('#notification_list').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
     jQuery.get('mobile.cgi', {
-            data: 'notifications',
-            limit:25
+            data: 'notifications'
         },
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);

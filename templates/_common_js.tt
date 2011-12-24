@@ -6,7 +6,7 @@
 -->
 </script>
 [%+ UNLESS author %]
-<script type="text/javascript" src="[% url_prefix %]thruk/javascript/all_in_one.js"></script>
+<script type="text/javascript" src="[% url_prefix %]thruk/javascript/all_in_one-[% version %].js"></script>
 [% ELSE %]
   [% FOREACH jsfiles = all_in_one_javascript %]
     <script type="text/javascript" src="[% url_prefix %]thruk/javascript/[% jsfiles %]"></script>

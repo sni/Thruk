@@ -45,7 +45,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
         my $type   = $c->{'request'}->{'parameters'}->{'data'};
-        my $limit  = $c->{'request'}->{'parameters'}->{'limit'}  || 50;
+        my $limit  = $c->{'request'}->{'parameters'}->{'limit'}  || 25;
         my $status = $c->{'request'}->{'parameters'}->{'status'} || 0;
 
         # gather connection status
@@ -142,6 +142,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{'json'} = { connection_status => $connection_status, data => $data };
             $c->stash->{'json'}->{'comments_by_host'} = $c->stash->{'comments_by_host'} if defined $c->stash->{'comments_by_host'};
             $c->stash->{'json'}->{'comments_by_host_service'} = $c->stash->{'comments_by_host_service'} if defined $c->stash->{'comments_by_host_service'};
+            $c->stash->{'json'}->{'more'} = 1 if ref $data eq 'ARRAY' and scalar @{$data} == $limit;
             $c->forward('Thruk::View::JSON');
             return;
         } else {

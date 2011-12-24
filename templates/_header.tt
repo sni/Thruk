@@ -72,9 +72,9 @@
     [% END %]
     [% IF theme == 'Thruk' && !author %]
       [% IF use_frames %]
-      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one.css' />
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one-[% version %].css' />
       [% ELSE %]
-      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one_noframes.css' />
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one_noframes-[% version %].css' />
       [% END %]
     [% END %]
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
