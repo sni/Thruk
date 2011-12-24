@@ -45,8 +45,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
         my $type   = $c->{'request'}->{'parameters'}->{'data'};
-        my $limit  = $c->{'request'}->{'parameters'}->{'limit'}  || 25;
         my $status = $c->{'request'}->{'parameters'}->{'status'} || 0;
+        my $page   = $c->{'request'}->{'parameters'}->{'page'}   || 1;
+        $c->stash->{'default_page_size'} = 25;
 
         # gather connection status
         my $connection_status = {};
@@ -70,7 +71,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                             ]
             };
 
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], limit => $limit, sort => {'DESC' => 'time'});
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => $c, sort => {'DESC' => 'time'});
             for my $entry (@{$data}) {
                 $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
             }
@@ -88,7 +89,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                 ]
                             }]
             };
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], limit => $limit, sort => {'DESC' => 'time'});
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => $c, sort => {'DESC' => 'time'});
             for my $entry (@{$data}) {
                 $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
             }
@@ -104,7 +105,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             if(defined $c->{'request'}->{'parameters'}->{'host'}) {
                 $hostfilter = { 'name' => $c->{'request'}->{'parameters'}->{'host'} };
             }
-            $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], limit => $limit);
+            $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => $c);
             for my $entry (@{$data}) {
                 my $duration ;
                 if($entry->{'last_state_change'} > 0) {
@@ -124,7 +125,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $servicefilter = { 'description' => $c->{'request'}->{'parameters'}->{'service'},
                                    'host_name'   => $c->{'request'}->{'parameters'}->{'host'} };
             }
-            $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], limit => $limit);
+            $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => $c);
             for my $entry (@{$data}) {
                 my $duration ;
                 if($entry->{'last_state_change'} > 0) {
@@ -139,10 +140,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
         if(defined $data) {
+            my $more;
+            if(ref $data eq 'ARRAY') {
+                $data = $c->stash->{'data'} if defined $c->stash->{'data'};
+                $more = 1 if $page < $c->stash->{'pages'};
+            }
             $c->stash->{'json'} = { connection_status => $connection_status, data => $data };
-            $c->stash->{'json'}->{'comments_by_host'} = $c->stash->{'comments_by_host'} if defined $c->stash->{'comments_by_host'};
+            $c->stash->{'json'}->{'comments_by_host'}         = $c->stash->{'comments_by_host'} if defined $c->stash->{'comments_by_host'};
             $c->stash->{'json'}->{'comments_by_host_service'} = $c->stash->{'comments_by_host_service'} if defined $c->stash->{'comments_by_host_service'};
-            $c->stash->{'json'}->{'more'} = 1 if ref $data eq 'ARRAY' and scalar @{$data} >= $limit;
+            $c->stash->{'json'}->{'more'}                     = $more if defined $more;
             $c->forward('Thruk::View::JSON');
             return;
         } else {

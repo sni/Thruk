@@ -322,15 +322,19 @@ function page_options() {
 }
 
 /* Alert List Page */
-function page_alerts() {
-    jQuery('#alerts_list').children().remove();
-    jQuery('#alerts_list').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
+function page_alerts(page) {
+    page = list_pager_init(page, '#alerts_list', '.alerts_more');
     jQuery.get('mobile.cgi', {
             data: 'alerts'
         },
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
-            jQuery('#alerts_list').children().remove();
+            if(page == 1) {
+                jQuery('#alerts_list').children().remove();
+            } else {
+                jQuery('.alerts_more').remove();
+                jQuery('.loading').remove();
+            }
             jQuery.each(data.data, function(index, entry) {
                 var listitem = '';
                 if(entry.service_description) {
@@ -349,7 +353,8 @@ function page_alerts() {
                 jQuery('#alerts_list').append(listitem);
             });
             if(data.more != undefined) {
-                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+                jQuery('#alerts_list').append('<li data-icon="plus" class="alerts_more"><a href="#">more...</a></li>');
+                jQuery('.alerts_more').bind('vclick', function() { page_alerts(++page) });
             }
             jQuery('#alerts_list').listview('refresh');
         },
@@ -358,15 +363,19 @@ function page_alerts() {
 }
 
 /* Notifications Page */
-function page_notifications() {
-    jQuery('#notification_list').children().remove();
-    jQuery('#notification_list').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
+function page_notifications(page) {
+    page = list_pager_init(page, '#notification_list', '.notifications_more');
     jQuery.get('mobile.cgi', {
             data: 'notifications'
         },
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
-            jQuery('#notification_list').children().remove();
+            if(page == 1) {
+                jQuery('#notification_list').children().remove();
+            } else {
+                jQuery('.notifications_more').remove();
+                jQuery('.loading').remove();
+            }
             jQuery.each(data.data, function(index, entry) {
                 if(entry.service_description) {
                     jQuery('#notification_list').append('<li class="'+get_service_class_for_state(entry.state)+'"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+' - '+ entry.service_description +'</li>');
@@ -375,7 +384,8 @@ function page_notifications() {
                 }
             });
             if(data.more != undefined) {
-                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+                jQuery('#notification_list').append('<li data-icon="plus" class="alerts_more"><a href="#">more...</a></li>');
+                jQuery('.notifications_more').bind('vclick', function() { page_alerts(++page) });
             }
             jQuery('#notification_list').listview('refresh');
         },
@@ -384,25 +394,31 @@ function page_notifications() {
 }
 
 /* Services List Page */
-function page_services_list() {
+function page_services_list(page) {
+    page       = list_pager_init(page, '#services_list_data', '.services_more');
     var params = get_params();
-    jQuery('#services_list_data').children().remove();
-    jQuery('#services_list_data').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
     jQuery.get('mobile.cgi', {
-            data: 'services',
+            data:               'services',
             servicestatustypes: params['servicestatustypes'],
             serviceprops:       params['serviceprops'],
             hoststatustypes:    params['hoststatustypes'],
-            _:unixtime()
+            page:               page,
+            _:                  unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
-            jQuery('#services_list_data').children().remove();
+            if(page == 1) {
+                jQuery('#services_list_data').children().remove();
+            } else {
+                jQuery('.services_more').remove();
+                jQuery('.loading').remove();
+            }
             jQuery.each(data.data, function(index, entry) {
                 jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+entry.host_name+'&service='+entry.description+'">' + entry.host_name+' - '+ entry.description +'</a></li>');
             });
             if(data.more != undefined) {
-                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+                jQuery('#services_list_data').append('<li data-icon="plus" class="services_more"><a href="#">more...</a></li>');
+                jQuery('.services_more').bind('vclick', function() { page_services_list(++page) });
             }
             jQuery('#services_list_data').listview('refresh');
         },
@@ -411,24 +427,30 @@ function page_services_list() {
 }
 
 /* Hosts List Page */
-function page_hosts_list() {
+function page_hosts_list(page) {
+    page       = list_pager_init(page, '#hosts_list_data', '.hosts_more');
     var params = get_params();
-    jQuery('#hosts_list_data').children().remove();
-    jQuery('#hosts_list_data').append('<li><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
     jQuery.get('mobile.cgi', {
-            data: 'hosts',
+            data:           'hosts',
             hoststatustypes: params['hoststatustypes'],
             hostprops:       params['hostprops'],
-            _:unixtime()
+            page:            page,
+            _:               unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
-            jQuery('#hosts_list_data').children().remove();
+            if(page == 1) {
+                jQuery('#hosts_list_data').children().remove();
+            } else {
+                jQuery('.hosts_more').remove();
+                jQuery('.loading').remove();
+            }
             jQuery.each(data.data, function(index, entry) {
                 jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+entry.name+'">' + entry.name +'</a></li>');
             });
             if(data.more != undefined) {
-                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+                jQuery('#hosts_list_data').append('<li data-icon="plus" class="hosts_more"><a href="#">more...</a></li>');
+                jQuery('.hosts_more').bind('vclick', function() { page_hosts_list(++page) });
             }
             jQuery('#hosts_list_data').listview('refresh');
         },
@@ -513,7 +535,7 @@ function page_service() {
                 var state_type = "SOFT";
                 if(service.state_type == 1) { state_type = "HARD"; }
                 jQuery('#service_attempt').text(service.current_attempt + '/' + service.max_check_attempts + '  (' + state_type + ' state)');
-                jQuery('#service_name').text(service.host_name + ' - ' + service.description);
+                jQuery('#service_name').html(service.host_name + '<br>' + service.description);
                 jQuery('#service_state').removeClass().text(get_service_status(service)).addClass(get_service_class(service));
                 jQuery('#service_duration').text(service.duration);
                 jQuery('#service_latency').text(Math.round(service.latency*1000)/1000 + 's');
@@ -607,4 +629,17 @@ function get_params() {
         params[p[0]] = p[1];
     });
     return(params);
+}
+
+/* initialize list */
+function list_pager_init(page, list, more) {
+    if(page == undefined) { page = 1; }
+    if(page == 1) {
+        jQuery(list).children().remove();
+    } else {
+        jQuery(more).remove();
+    }
+    jQuery(list).append('<li class="loading"><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
+    jQuery(list).listview('refresh');
+    return page;
 }
