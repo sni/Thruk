@@ -136,10 +136,7 @@ function get_host_status(host) {
 /* return host status class */
 function get_host_class(host) {
     if(host.has_been_checked == 0) { return("hostPENDING"); }
-    if(host.state == 0) { return("hostUP"); }
-    if(host.state == 1) { return("hostDOWN"); }
-    if(host.state == 2) { return("hostUNREACHABLE"); }
-    if(host.state == 3) { return("hostPENDING"); }
+    return(get_host_class_for_state(host.state));
 }
 
 /* return host status class */
@@ -162,11 +159,7 @@ function get_service_status(service) {
 /* return service status class */
 function get_service_class(service) {
     if(service.has_been_checked == 0) { return("servicePENDING"); }
-    if(service.state == 0) { return("serviceOK"); }
-    if(service.state == 1) { return("serviceWARNING"); }
-    if(service.state == 2) { return("serviceCRITICAL"); }
-    if(service.state == 3) { return("serviceUNKNOWN"); }
-    if(service.state == 4) { return("servicePENDING"); }
+    return(get_service_class_for_state(service.state));
 }
 
 /* return service status class */
@@ -323,19 +316,12 @@ function page_options() {
 
 /* Alert List Page */
 function page_alerts(page) {
-    page = list_pager_init(page, '#alerts_list', '.alerts_more');
+    page = list_pager_init(page, 'alerts_list');
     jQuery.get('mobile.cgi', {
             data: 'alerts'
         },
         function(data, textStatus, XMLHttpRequest) {
-            extract_data(data);
-            if(page == 1) {
-                jQuery('#alerts_list').children().remove();
-            } else {
-                jQuery('.alerts_more').remove();
-                jQuery('.loading').remove();
-            }
-            jQuery.each(data.data, function(index, entry) {
+            list_pager_data(page, data, 'alerts_list', function() { page_alerts(++page); }, function(entry) {
                 var listitem = '';
                 if(entry.service_description) {
                     listitem = '<li class="'+get_service_class_for_state(entry.state)+'">';
@@ -352,11 +338,6 @@ function page_alerts(page) {
                 listitem += '<br><span class="logmsg">' + message + '<\/span><\/li>';
                 jQuery('#alerts_list').append(listitem);
             });
-            if(data.more != undefined) {
-                jQuery('#alerts_list').append('<li data-icon="plus" class="alerts_more"><a href="#">more...</a></li>');
-                jQuery('.alerts_more').bind('vclick', function() { page_alerts(++page) });
-            }
-            jQuery('#alerts_list').listview('refresh');
         },
         'json'
     );
@@ -364,30 +345,18 @@ function page_alerts(page) {
 
 /* Notifications Page */
 function page_notifications(page) {
-    page = list_pager_init(page, '#notification_list', '.notifications_more');
+    page = list_pager_init(page, 'notification_list');
     jQuery.get('mobile.cgi', {
             data: 'notifications'
         },
         function(data, textStatus, XMLHttpRequest) {
-            extract_data(data);
-            if(page == 1) {
-                jQuery('#notification_list').children().remove();
-            } else {
-                jQuery('.notifications_more').remove();
-                jQuery('.loading').remove();
-            }
-            jQuery.each(data.data, function(index, entry) {
+            list_pager_data(page, data, 'notification_list', function() { page_notifications(++page); }, function(entry) {
                 if(entry.service_description) {
                     jQuery('#notification_list').append('<li class="'+get_service_class_for_state(entry.state)+'"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+' - '+ entry.service_description +'</li>');
                 } else {
                     jQuery('#notification_list').append('<li class="'+get_host_class_for_state(entry.state)+'"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+'</li>');
                 }
             });
-            if(data.more != undefined) {
-                jQuery('#notification_list').append('<li data-icon="plus" class="alerts_more"><a href="#">more...</a></li>');
-                jQuery('.notifications_more').bind('vclick', function() { page_alerts(++page) });
-            }
-            jQuery('#notification_list').listview('refresh');
         },
         'json'
     );
@@ -395,7 +364,7 @@ function page_notifications(page) {
 
 /* Services List Page */
 function page_services_list(page) {
-    page       = list_pager_init(page, '#services_list_data', '.services_more');
+    page       = list_pager_init(page, 'services_list_data');
     var params = get_params();
     jQuery.get('mobile.cgi', {
             data:               'services',
@@ -406,21 +375,9 @@ function page_services_list(page) {
             _:                  unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
-            extract_data(data);
-            if(page == 1) {
-                jQuery('#services_list_data').children().remove();
-            } else {
-                jQuery('.services_more').remove();
-                jQuery('.loading').remove();
-            }
-            jQuery.each(data.data, function(index, entry) {
+            list_pager_data(page, data, 'services_list_data', function() { page_services_list(++page); }, function(entry) {
                 jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+entry.host_name+'&service='+entry.description+'">' + entry.host_name+' - '+ entry.description +'</a></li>');
             });
-            if(data.more != undefined) {
-                jQuery('#services_list_data').append('<li data-icon="plus" class="services_more"><a href="#">more...</a></li>');
-                jQuery('.services_more').bind('vclick', function() { page_services_list(++page) });
-            }
-            jQuery('#services_list_data').listview('refresh');
         },
         'json'
     );
@@ -428,7 +385,7 @@ function page_services_list(page) {
 
 /* Hosts List Page */
 function page_hosts_list(page) {
-    page       = list_pager_init(page, '#hosts_list_data', '.hosts_more');
+    page       = list_pager_init(page, 'hosts_list_data');
     var params = get_params();
     jQuery.get('mobile.cgi', {
             data:           'hosts',
@@ -438,21 +395,9 @@ function page_hosts_list(page) {
             _:               unixtime()
         },
         function(data, textStatus, XMLHttpRequest) {
-            extract_data(data);
-            if(page == 1) {
-                jQuery('#hosts_list_data').children().remove();
-            } else {
-                jQuery('.hosts_more').remove();
-                jQuery('.loading').remove();
-            }
-            jQuery.each(data.data, function(index, entry) {
+            list_pager_data(page, data, 'hosts_list_data', function() { page_hosts_list(++page); }, function(entry) {
                 jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+entry.name+'">' + entry.name +'</a></li>');
             });
-            if(data.more != undefined) {
-                jQuery('#hosts_list_data').append('<li data-icon="plus" class="hosts_more"><a href="#">more...</a></li>');
-                jQuery('.hosts_more').bind('vclick', function() { page_hosts_list(++page) });
-            }
-            jQuery('#hosts_list_data').listview('refresh');
         },
         'json'
     );
@@ -632,14 +577,33 @@ function get_params() {
 }
 
 /* initialize list */
-function list_pager_init(page, list, more) {
+function list_pager_init(page, list) {
     if(page == undefined) { page = 1; }
     if(page == 1) {
-        jQuery(list).children().remove();
+        jQuery('#'+list).children().remove();
     } else {
-        jQuery(more).remove();
+        jQuery('.more').remove();
     }
-    jQuery(list).append('<li class="loading"><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
-    jQuery(list).listview('refresh');
+    jQuery('#'+list).append('<li class="loading"><img src="' + url_prefix + 'thruk/plugins/mobile/img/loading.gif" alt="loading"> loading</li>');
+    jQuery('#'+list).listview('refresh');
     return page;
+}
+
+/* paged list items */
+function list_pager_data(page, data, list, more_callback, row_callback) {
+    extract_data(data);
+    if(page == 1) {
+        jQuery('#'+list).children().remove();
+    } else {
+        jQuery('.more').remove();
+        jQuery('.loading').remove();
+    }
+    jQuery.each(data.data, function(index, entry) {
+        row_callback(entry);
+    });
+    if(data.more != undefined) {
+        jQuery('#'+list).append('<li data-icon="plus" class="more"><a href="#">more...</a></li>');
+        jQuery('.more').bind('vclick', more_callback);
+    }
+    jQuery('#'+list).listview('refresh');
 }
