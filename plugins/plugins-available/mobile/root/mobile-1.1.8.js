@@ -348,6 +348,9 @@ function page_alerts() {
                 listitem += '<br><span class="logmsg">' + message + '<\/span><\/li>';
                 jQuery('#alerts_list').append(listitem);
             });
+            if(data.more != undefined) {
+                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+            }
             jQuery('#alerts_list').listview('refresh');
         },
         'json'
@@ -371,6 +374,9 @@ function page_notifications() {
                     jQuery('#notification_list').append('<li class="'+get_host_class_for_state(entry.state)+'"><span class="date">' + entry.formated_time + '</span><br>' + entry.host_name+'</li>');
                 }
             });
+            if(data.more != undefined) {
+                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+            }
             jQuery('#notification_list').listview('refresh');
         },
         'json'
@@ -395,6 +401,9 @@ function page_services_list() {
             jQuery.each(data.data, function(index, entry) {
                 jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+entry.host_name+'&service='+entry.description+'">' + entry.host_name+' - '+ entry.description +'</a></li>');
             });
+            if(data.more != undefined) {
+                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+            }
             jQuery('#services_list_data').listview('refresh');
         },
         'json'
@@ -418,6 +427,9 @@ function page_hosts_list() {
             jQuery.each(data.data, function(index, entry) {
                 jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+entry.name+'">' + entry.name +'</a></li>');
             });
+            if(data.more != undefined) {
+                jQuery('#services_list_data').append('<li data-icon="plus"><a href="#">more...</a></li>');
+            }
             jQuery('#hosts_list_data').listview('refresh');
         },
         'json'
