@@ -7,7 +7,7 @@
   <div data-role="content">
     <div data-role="fieldcontain" id="backend_chooser">
       <h4>Choose Theme</h4>
-      <div data-role="controlgroup" data-type="horizontal">
+      <div data-role="controlgroup" data-type="horizontal" class="theme_buttons">
         <a href="#" data-role="button" data-theme="a" class="theme_button">A</a>
         <a href="#" data-role="button" data-theme="b" class="theme_button">B</a>
         <a href="#" data-role="button" data-theme="c" class="theme_button">C</a>

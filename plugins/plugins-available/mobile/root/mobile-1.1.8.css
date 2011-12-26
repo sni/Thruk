@@ -50,3 +50,7 @@ A.ui-link-inherit SPAN.services_unhandled_panel
 TH {
   text-align: left;
 }
+
+div.theme_buttons .ui-btn-inner {
+  padding: 0.6em 21px;
+}
