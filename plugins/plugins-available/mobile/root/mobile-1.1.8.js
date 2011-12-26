@@ -214,6 +214,7 @@ function format_duration(seconds, peer_key) {
     return('');
 }
 
+/* return human readable duration */
 function filter_duration(duration) {
     var minus = '';
     if(duration < 0) {
@@ -347,6 +348,7 @@ function refresh_service_status(force) {
     'json');
 }
 
+/* refresh backends from global variable */
 function refresh_backends() {
     if(current_backend_states != undefined) {
         number=0;
@@ -449,7 +451,7 @@ function page_services_list(page) {
         function(data, textStatus, XMLHttpRequest) {
             list_pager_data(page, data, 'services_list_data', function() { page_services_list(++page); }, function(entry) {
                 var icons = get_list_icons(entry);
-                jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+entry.host_name+'&service='+entry.description+'" data-ajax="false">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
+                jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+escape(entry.host_name)+'&service='+escape(entry.description)+'" data-ajax="false">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
             });
         },
         'json'
@@ -470,7 +472,7 @@ function page_hosts_list(page) {
         function(data, textStatus, XMLHttpRequest) {
             list_pager_data(page, data, 'hosts_list_data', function() { page_hosts_list(++page); }, function(entry) {
                 var icons = get_list_icons(entry);
-                jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+entry.name+'" data-ajax="false">' + entry.name +icons+'</a></li>');
+                jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+escape(entry.name)+'" data-ajax="false">' + entry.name +icons+'</a></li>');
             });
         },
         'json'
@@ -491,7 +493,7 @@ function page_host() {
             if(host != undefined) {
                 jQuery('#host_name').text(host.name);
                 jQuery('#host_state').removeClass().text(get_host_status(host)).addClass(get_host_class(host));
-                jQuery('#host_referer').val('mobile.cgi#host?host='+host.name);
+                jQuery('#host_referer').val('mobile.cgi#host?host='+escape(host.name));
                 show_common_acks_n_downtimes('host', host, data.comments, data.downtimes);
             }
         },
@@ -514,7 +516,7 @@ function page_service() {
             if(service != undefined) {
                 jQuery('#service_name').html(service.host_name + '<br>' + service.description);
                 jQuery('#service_state').removeClass().text(get_service_status(service)).addClass(get_service_class(service));
-                jQuery('#service_referer').val('mobile.cgi#service?host='+service.host_name+'&service='+service.description);
+                jQuery('#service_referer').val('mobile.cgi#service?host='+escape(service.host_name)+'&service='+escape(service.description));
                 show_common_acks_n_downtimes('service', service, data.comments, data.downtimes);
             }
         },
@@ -567,7 +569,7 @@ function get_params() {
     var params = {};
     jQuery(str.split('&')).each(function(x, s) {
         p = s.split('=');
-        params[p[0]] = p[1];
+        params[p[0]] = unescape(p[1]);
     });
     return(params);
 }
