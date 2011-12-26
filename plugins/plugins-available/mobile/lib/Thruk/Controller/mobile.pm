@@ -62,6 +62,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
 
         my $data;
+        my $set_downtimes = 0;
         if($type eq 'notifications') {
             my $filter = {
                     '-and' => [
@@ -100,7 +101,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $hostfilter = { 'name' => $c->{'request'}->{'parameters'}->{'host'} };
             }
             $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => $c);
-            Thruk::Utils::Status::set_comments_and_downtimes($c);
+            $set_downtimes = 1;
         }
         elsif($type eq 'services') {
             my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c);
@@ -109,25 +110,26 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                    'host_name'   => $c->{'request'}->{'parameters'}->{'host'} };
             }
             $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => $c);
-            Thruk::Utils::Status::set_comments_and_downtimes($c);
+            $set_downtimes = 1;
         }
         if(defined $data) {
-            my $more;
+            $c->stash->{'json'} = {};
             if(ref $data eq 'ARRAY') {
                 $data = $c->stash->{'data'} if defined $c->stash->{'data'};
-                $more = 1 if $page < $c->stash->{'pages'};
+                $c->stash->{'json'}->{'more'} = 1 if $page < $c->stash->{'pages'};
             }
+            $c->stash->{'json'}->{'data'} = $data;
             my $program_starts = {};
             for my $key (keys %{$c->stash->{'pi_detail'}}) {
                 $program_starts->{$key} = $c->stash->{'pi_detail'}->{$key}->{'program_start'};
             }
-            $c->stash->{'json'} = { connection_status => $connection_status,
-                                    program_starts    => $program_starts,
-                                    data              => $data,
-                                };
-            $c->stash->{'json'}->{'comments_by_host'}         = $c->stash->{'comments_by_host'} if defined $c->stash->{'comments_by_host'};
-            $c->stash->{'json'}->{'comments_by_host_service'} = $c->stash->{'comments_by_host_service'} if defined $c->stash->{'comments_by_host_service'};
-            $c->stash->{'json'}->{'more'}                     = $more if defined $more;
+            $c->stash->{'json'}->{'program_starts'}   = $program_starts;
+            $c->stash->{'json'}->{ connection_status} = $connection_status;
+            if($set_downtimes) {
+                Thruk::Utils::Status::set_comments_and_downtimes($c);
+                $c->stash->{'json'}->{'comments_by_host'}         = $c->stash->{'comments_by_host'};
+                $c->stash->{'json'}->{'comments_by_host_service'} = $c->stash->{'comments_by_host_service'};
+            }
             $c->forward('Thruk::View::JSON');
             return;
         } else {
