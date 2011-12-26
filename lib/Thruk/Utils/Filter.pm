@@ -60,8 +60,6 @@ sub duration {
 
     croak("unknown withdays in duration(): ".$withdays) if($withdays != 0 and $withdays != 1 and $withdays != 2);
 
-    if($duration < 0) { $duration = time() + $duration; }
-
     my $days    = 0;
     my $hours   = 0;
     my $minutes = 0;

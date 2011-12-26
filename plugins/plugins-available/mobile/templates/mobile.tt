@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.css" />
     <script src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
     <script type="application/x-javascript">
-      var url_prefix = '[% url_prefix %]';
+      var url_prefix             = '[% url_prefix %]';
       var current_backend_states = undefined;
-      document.cookie = "thruk_mobile=1; path=/;";
+      var program_starts         = undefined;
+      document.cookie            = "thruk_mobile=1; path=/;";
     </script>
     <script src="[% url_prefix %]thruk/plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
     <script src="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.js"></script>

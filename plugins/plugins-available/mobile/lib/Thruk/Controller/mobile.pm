@@ -72,9 +72,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             };
 
             $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => $c, sort => {'DESC' => 'time'});
-            for my $entry (@{$data}) {
-                $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
-            }
         }
         elsif($type eq 'alerts') {
             my $filter = {
@@ -90,9 +87,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                             }]
             };
             $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => $c, sort => {'DESC' => 'time'});
-            for my $entry (@{$data}) {
-                $entry->{'formated_time'} = Thruk::Utils::Filter::date_format($c, $entry->{'time'});
-            }
         }
         elsif($type eq 'host_stats') {
             $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
@@ -106,17 +100,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $hostfilter = { 'name' => $c->{'request'}->{'parameters'}->{'host'} };
             }
             $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => $c);
-            for my $entry (@{$data}) {
-                my $duration ;
-                if($entry->{'last_state_change'} > 0) {
-                    $duration = time() - $entry->{'last_state_change'};
-                } else {
-                    $duration = time() - $c->stash->{'pi_detail'}->{$entry->{'peer_key'}}->{'program_start'};
-                }
-                $entry->{'duration'}          = Thruk::Utils::Filter::duration($duration);
-                $entry->{'format_last_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'last_check'});
-                $entry->{'format_next_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'next_check'});
-            }
             Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
         elsif($type eq 'services') {
@@ -126,17 +109,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                    'host_name'   => $c->{'request'}->{'parameters'}->{'host'} };
             }
             $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => $c);
-            for my $entry (@{$data}) {
-                my $duration ;
-                if($entry->{'last_state_change'} > 0) {
-                    $duration = time() - $entry->{'last_state_change'};
-                } else {
-                    $duration = time() - $c->stash->{'pi_detail'}->{$entry->{'peer_key'}}->{'program_start'};
-                }
-                $entry->{'duration'}          = Thruk::Utils::Filter::duration($duration);
-                $entry->{'format_last_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'last_check'});
-                $entry->{'format_next_check'} = Thruk::Utils::Filter::date_format($c, $entry->{'next_check'});
-            }
             Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
         if(defined $data) {
@@ -145,7 +117,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                 $data = $c->stash->{'data'} if defined $c->stash->{'data'};
                 $more = 1 if $page < $c->stash->{'pages'};
             }
-            $c->stash->{'json'} = { connection_status => $connection_status, data => $data };
+            my $program_starts = {};
+            for my $key (keys %{$c->stash->{'pi_detail'}}) {
+                $program_starts->{$key} = $c->stash->{'pi_detail'}->{$key}->{'program_start'};
+            }
+            $c->stash->{'json'} = { connection_status => $connection_status,
+                                    program_starts    => $program_starts,
+                                    data              => $data,
+                                };
             $c->stash->{'json'}->{'comments_by_host'}         = $c->stash->{'comments_by_host'} if defined $c->stash->{'comments_by_host'};
             $c->stash->{'json'}->{'comments_by_host_service'} = $c->stash->{'comments_by_host_service'} if defined $c->stash->{'comments_by_host_service'};
             $c->stash->{'json'}->{'more'}                     = $more if defined $more;
