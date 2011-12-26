@@ -644,7 +644,11 @@ function show_common_extinfo(typ, data, comments) {
             jQuery('#'+typ+'_check_type').text('PASSIVE');
         }
         jQuery('#'+typ+'_plugin_output').text(obj.plugin_output);
-        jQuery('#'+typ+'_current_notification_number').text(obj.current_notification_number);
+        if(obj.current_notification_number > 0) {
+            jQuery('#'+typ+'_current_notification_number').text(obj.current_notification_number);
+        } else {
+            jQuery('#'+typ+'_current_notification_number').text('none');
+        }
         if(obj.acknowledged == 0 && obj.state > 0) {
             jQuery('.'+typ+'_ack_form').show();
         }
@@ -666,7 +670,7 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
                 txt = com.author + ': ' + com.comment + '<br>';
             }
         });
-        jQuery('#'+typ+'_ack').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif" alt="acknowledged"> ' + txt);
+        jQuery('#'+typ+'_ack').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif" alt="acknowledged"> ' + txt+'<hr>');
     }
     if(typ == 'host') {
         jQuery('#selected_hosts').val(obj.name);
@@ -684,7 +688,7 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
                 txt = com.author + ': ('+format_time(com.start_time)+' - '+format_time(com.end_time)+')<br>' + com.comment;
             }
         });
-        jQuery('#'+typ+'_downtime').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/downtime.gif" alt="acknowledged"> ' + txt);
+        jQuery('#'+typ+'_downtime').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/downtime.gif" alt="acknowledged"> ' + txt+'<hr>');
     }
 }
 

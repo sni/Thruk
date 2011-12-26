@@ -17,9 +17,9 @@
       <button type="submit" data-icon="check">Acknowledge</button>
     </form>
     <table>
-      <tr><th>Status</th><td><span id="service_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
       <tr class="service_acknowledged"><th colspan=2 id="service_ack"></th></tr>
       <tr class="service_downtime"><th colspan=2 id="service_downtime"></th></tr>
+      <tr><th>Status</th><td><span id="service_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
       <tr><th>Duration</th><td id="service_duration"></td></tr>
       <tr><th>Attempt</th><td id="service_attempt"></td></tr>
       <tr><th>Last Check Time</th><td id="service_last_check"></td></tr>
