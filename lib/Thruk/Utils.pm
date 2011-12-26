@@ -943,6 +943,41 @@ sub translate_host_status {
     return 'UNKNOWN';
 }
 
+
+##############################################
+
+=head2 choose_mobile
+
+  choose_mobile($c, $url)
+
+let the user choose a mobile page or not
+
+=cut
+
+sub choose_mobile {
+    my($c,$url) = @_;
+
+    return unless defined $c->{'request'}->{'headers'}->{'user-agent'};
+    return unless $c->{'request'}->{'headers'}->{'user-agent'} =~ m/(iPhone|Android|)/mx;
+
+    my $choose_mobile;
+    if(defined $c->request->cookie('thruk_mobile')) {
+        my $cookie = $c->request->cookie('thruk_mobile');
+        $choose_mobile = $cookie->value;
+        return if $choose_mobile == 0;
+    }
+
+    $c->{'canceled'}        = 1;
+    $c->stash->{'title'}    = $c->config->{'name'};
+    $c->stash->{'template'} = 'mobile_choose.tt';
+    $c->stash->{'redirect'} = $url;
+    if(defined $choose_mobile and $choose_mobile == 1) {
+        return $c->response->redirect($c->stash->{'redirect'});
+    }
+    return 1;
+}
+
+
 ########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;

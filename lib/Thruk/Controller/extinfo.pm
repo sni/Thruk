@@ -35,11 +35,11 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     }
     if( $type == 1 ) {
         $infoBoxTitle = 'Host Information';
-        $self->_process_host_page($c);
+        return unless $self->_process_host_page($c);
     }
     if( $type == 2 ) {
         $infoBoxTitle = 'Service Information';
-        $self->_process_service_page($c);
+        return unless $self->_process_service_page($c);
     }
     if( $type == 3 ) {
         $infoBoxTitle = 'All Host and Service Comments';
@@ -107,6 +107,7 @@ sub _process_host_page {
     my $backend = $c->{'request'}->{'parameters'}->{'backend'} || '';
     my $hostname = $c->{'request'}->{'parameters'}->{'host'};
     return $c->detach('/error/index/5') unless defined $hostname;
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi#host?host=".$hostname);
     my $hosts = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), { 'name' => $hostname } ] );
 
     return $c->detach('/error/index/5') unless defined $hosts;
@@ -205,6 +206,8 @@ sub _process_service_page {
 
     my $servicename = $c->{'request'}->{'parameters'}->{'service'};
     return $c->detach('/error/index/15') unless defined $servicename;
+
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi#service?host=".$hostname."&service=".$servicename);
 
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'host_name' => $hostname }, { 'description' => $servicename }, ] );
 

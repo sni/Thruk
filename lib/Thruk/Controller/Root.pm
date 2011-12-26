@@ -274,46 +274,6 @@ sub begin : Private {
 
 ######################################
 
-=head2 auto
-
-auto, runs on every request
-
-redirects mobile browser to mobile cgis if enabled
-
-=cut
-
-sub auto : Private {
-    my( $self, $c ) = @_;
-
-    if( !defined $c->config->{'use_feature_mobile'} or $c->config->{'use_feature_mobile'} != 1 ) {
-        return 1;
-    }
-    my $choose_mobile;
-    if(defined $c->request->cookie('thruk_mobile')) {
-        my $cookie = $c->request->cookie('thruk_mobile');
-        $choose_mobile = $cookie->value;
-        return 1 if $choose_mobile == 0;
-    }
-
-    if(     defined $c->{'request'}->{'headers'}->{'user-agent'}
-        and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/(iPhone|Android)/mx
-        and defined $c->{'request'}->{'action'}
-        and $c->{'request'}->{'action'} =~ m%^(/|thruk||thruk/|thruk\$|thruk/index.html)$%mx )
-    {
-        $c->{'canceled'}        = 1;
-        $c->stash->{'title'}    = $c->config->{'name'};
-        $c->stash->{'template'} = 'mobile_choose.tt';
-        $c->stash->{'redirect'} = $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi";
-        if($choose_mobile == 1) {
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
-        }
-        return;
-    }
-    return 1;
-}
-
-######################################
-
 =head2 default
 
 show our 404 error page
@@ -355,6 +315,7 @@ beacuse we dont want index.html in the url
 sub index_html : Path('/index.html') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
     if( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_index_html");
     }
@@ -375,6 +336,7 @@ but if used not via fastcgi/apache, there is no way around
 sub thruk_index : Regex('thruk$') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
     if( scalar @{ $c->request->args } > 0 and $c->request->args->[0] ne 'index.html' ) {
         return $c->detach("default");
     }
@@ -412,6 +374,7 @@ page: /thruk/index.html
 sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+    return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
     unless ( $c->stash->{'use_frames'} ) {
         return $c->detach("thruk_main_html");
     }

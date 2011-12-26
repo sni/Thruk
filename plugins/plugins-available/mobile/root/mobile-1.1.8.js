@@ -604,7 +604,7 @@ function list_pager_data(page, data, list, more_callback, row_callback) {
     jQuery('#'+list).listview('refresh');
 }
 
-// hide elements from extinfo pages
+/* hide elements from extinfo pages */
 function hide_common_extinfo(typ) {
     jQuery.mobile.showPageLoadingMsg();
     ['attempt', 'name', 'state', 'duration', 'exec_time', 'last_check', 'next_check', 'check_type', 'plugin_output', 'current_notification_number'].forEach(function(el){
@@ -615,7 +615,7 @@ function hide_common_extinfo(typ) {
     });
 }
 
-// show common elements from extinfo pages
+/* show common elements from extinfo pages */
 function show_common_extinfo(typ, data, comments) {
     extract_data(data);
     jQuery.mobile.hidePageLoadingMsg();
@@ -648,9 +648,12 @@ function show_common_extinfo(typ, data, comments) {
         }
         return obj;
     }
+    jQuery('#'+typ+'_name').text('does not exist');
+    jQuery('#'+typ+'_state').text('does not exist');
     return undefined;
 }
 
+/* show common acknowledgements and downtimes */
 function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
     // Acknowledgements
     if(obj.acknowledged == 1) {
@@ -826,4 +829,3 @@ dateFormat.i18n = {
 Date.prototype.format = function (mask, utc) {
     return dateFormat(this, mask, utc);
 };
-
