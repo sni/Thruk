@@ -490,7 +490,7 @@ function page_host() {
                 jQuery('#host_name').text(host.name);
                 jQuery('#host_state').removeClass().text(get_host_status(host)).addClass(get_host_class(host));
                 jQuery('#host_referer').val('mobile.cgi#host?host='+host.name);
-                show_common_acks_n_downtimes('host', host, data.comments_by_host[host.name]);
+                show_common_acks_n_downtimes('host', host, data.comments, data.downtimes);
             }
         },
         'json'
@@ -513,7 +513,7 @@ function page_service() {
                 jQuery('#service_name').html(service.host_name + '<br>' + service.description);
                 jQuery('#service_state').removeClass().text(get_service_status(service)).addClass(get_service_class(service));
                 jQuery('#service_referer').val('mobile.cgi#service?host='+service.host_name+'&service='+service.description);
-                show_common_acks_n_downtimes('service', service, data.comments_by_host_service[service.host_name][service.description]);
+                show_common_acks_n_downtimes('service', service, data.comments, data.downtimes);
             }
         },
         'json'
@@ -649,7 +649,7 @@ function show_common_extinfo(typ, data, comments) {
     return undefined;
 }
 
-function show_common_acks_n_downtimes(typ, obj, comments) {
+function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
     // Acknowledgements
     if(obj.acknowledged == 1) {
         var txt = '';
@@ -669,11 +669,12 @@ function show_common_acks_n_downtimes(typ, obj, comments) {
     }
     // Downtimes
     if(obj.scheduled_downtime_depth > 0) {
+        var now = unixtime();
         jQuery('.'+typ+'_downtime').show();
         var txt = '';
-        jQuery(comments).each(function(nr, com) {
-            if(com.entry_type == 2) {
-                txt = com.author + ': ' + com.comment + '<br>';
+        jQuery(downtimes).each(function(nr, com) {
+            if(com.start_time <= now) {
+                txt = com.author + ': ('+format_time(com.start_time)+' - '+format_time(com.end_time)+')<br>' + com.comment;
             }
         });
         jQuery('#'+typ+'_downtime').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/downtime.gif" alt="acknowledged"> ' + txt);

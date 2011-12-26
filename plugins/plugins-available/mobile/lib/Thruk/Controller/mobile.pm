@@ -61,8 +61,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                         };
         }
 
-        my $data;
-        my $set_downtimes = 0;
+        my($data,$comments,$downtimes);
         if($type eq 'notifications') {
             my $filter = {
                     '-and' => [
@@ -99,18 +98,28 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c);
             if(defined $c->{'request'}->{'parameters'}->{'host'}) {
                 $hostfilter = { 'name' => $c->{'request'}->{'parameters'}->{'host'} };
+                $comments   = $c->{'db'}->get_comments(
+                                filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $c->{'request'}->{'parameters'}->{'host'} }, { 'service_description' => undef } ],
+                                sort => { 'DESC' => 'id' } );
+                $downtimes  = $c->{'db'}->get_downtimes(
+                                filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $c->{'request'}->{'parameters'}->{'host'} }, { 'service_description' => undef } ],
+                                sort => { 'DESC' => 'id' } );
             }
             $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => $c);
-            $set_downtimes = 1;
         }
         elsif($type eq 'services') {
             my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c);
             if(defined $c->{'request'}->{'parameters'}->{'host'}) {
                 $servicefilter = { 'description' => $c->{'request'}->{'parameters'}->{'service'},
                                    'host_name'   => $c->{'request'}->{'parameters'}->{'host'} };
+                $comments      = $c->{'db'}->get_comments(
+                                    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'host_name' => $c->{'request'}->{'parameters'}->{'host'} }, { 'service_description' => $c->{'request'}->{'parameters'}->{'service'} } ],
+                                    sort => { 'DESC' => 'id' } );
+                $downtimes     = $c->{'db'}->get_downtimes(
+                                    filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $c->{'request'}->{'parameters'}->{'host'} }, { 'service_description' => $c->{'request'}->{'parameters'}->{'service'} } ],
+                                    sort => { 'DESC' => 'id' } );
             }
             $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => $c);
-            $set_downtimes = 1;
         }
         if(defined $data) {
             $c->stash->{'json'} = {};
@@ -123,13 +132,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             for my $key (keys %{$c->stash->{'pi_detail'}}) {
                 $program_starts->{$key} = $c->stash->{'pi_detail'}->{$key}->{'program_start'};
             }
-            $c->stash->{'json'}->{'program_starts'}   = $program_starts;
-            $c->stash->{'json'}->{ connection_status} = $connection_status;
-            if($set_downtimes) {
-                Thruk::Utils::Status::set_comments_and_downtimes($c);
-                $c->stash->{'json'}->{'comments_by_host'}         = $c->stash->{'comments_by_host'};
-                $c->stash->{'json'}->{'comments_by_host_service'} = $c->stash->{'comments_by_host_service'};
-            }
+            $c->stash->{'json'}->{program_starts}    = $program_starts;
+            $c->stash->{'json'}->{connection_status} = $connection_status;
+            $c->stash->{'json'}->{downtimes}         = $downtimes if defined $downtimes;
+            $c->stash->{'json'}->{comments}          = $comments  if defined $comments;
             $c->forward('Thruk::View::JSON');
             return;
         } else {
