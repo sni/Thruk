@@ -448,7 +448,8 @@ function page_services_list(page) {
         },
         function(data, textStatus, XMLHttpRequest) {
             list_pager_data(page, data, 'services_list_data', function() { page_services_list(++page); }, function(entry) {
-                jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+entry.host_name+'&service='+entry.description+'" data-ajax="false">' + entry.host_name+' - '+ entry.description +'</a></li>');
+                var icons = get_list_icons(entry);
+                jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+entry.host_name+'&service='+entry.description+'" data-ajax="false">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
             });
         },
         'json'
@@ -468,7 +469,8 @@ function page_hosts_list(page) {
         },
         function(data, textStatus, XMLHttpRequest) {
             list_pager_data(page, data, 'hosts_list_data', function() { page_hosts_list(++page); }, function(entry) {
-                jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+entry.name+'" data-ajax="false">' + entry.name +'</a></li>');
+                var icons = get_list_icons(entry);
+                jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+entry.name+'" data-ajax="false">' + entry.name +icons+'</a></li>');
             });
         },
         'json'
@@ -681,6 +683,20 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
     }
 }
 
+/* set list icons for downtimes & acknowledements */
+function get_list_icons(obj) {
+    var icons = '';
+    if(obj.acknowledged == 1) {
+        icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif"> ';
+    }
+    if(obj.scheduled_downtime_depth > 0) {
+        icons += ' <img src="' + url_prefix + 'thruk/plugins/mobile/img/downtime.gif"> ';
+    }
+    if(icons != '') {
+        icons = '<span class="ui-li-count ui-btn-up-c ui-btn-corner-all"> '+icons+' </span>';
+    }
+    return(icons);
+}
 
 
 
