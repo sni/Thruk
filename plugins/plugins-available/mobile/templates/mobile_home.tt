@@ -53,7 +53,7 @@
 
       <h4>Links</h4>
       <ul data-role="listview" data-inset="true">
-        <li><a href="[% url_prefix %]thruk/index.html" rel="external">Access as Full Client</a></li>
+        <li><a href="[% url_prefix %]thruk/index.html" rel="external" id="full_client_link">Access as Full Client</a></li>
       </ul>
     </div>
     <div data-role="footer" style="text-align:center" id="fullscreenteaser">

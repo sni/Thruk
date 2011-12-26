@@ -6,7 +6,7 @@
     <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
   </div>
   <div data-role="content">
-    <form action="cmd.cgi" method="POST" id="host_ack_form" style="display:none" data-ajax=false>
+    <form action="cmd.cgi" method="POST" class="host_ack_form" style="display:none" data-ajax=false>
       <input type="hidden" name="referer" value="" id="host_referer">
       <input type="hidden" name="quick_command" value="4">
       <input type="hidden" name="selected_hosts" id="selected_hosts" value="">
@@ -19,12 +19,12 @@
     <table>
       <tr><th>Status</th><td><span id="host_state" style="width:100px; display: block; text-align: center;"></span></td></tr>
       <tr class="host_acknowledged"><th colspan=2 id="host_ack"></th></tr>
+      <tr class="host_downtime"><th colspan=2 id="host_downtime"></th></tr>
       <tr><th>Duration</th><td id="host_duration"></td></tr>
       <tr><th>Attempt</th><td id="host_attempt"></td></tr>
       <tr><th>Last Check Time</th><td id="host_last_check"></td></tr>
       <tr><th>Next Check Time</th><td id="host_next_check"></td></tr>
       <tr><th>Check Type</th><td id="host_check_type"></td></tr>
-      <tr><th>Latency</th><td id="host_latency"></td></tr>
       <tr><th>Execution Time</th><td id="host_exec_time"></td></tr>
       <tr><th>Notifications Sent</th><td id="host_current_notification_number"></td></tr>
       <tr><th colspan=2>Output</th></tr>

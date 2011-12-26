@@ -288,13 +288,26 @@ sub auto : Private {
     if( !defined $c->config->{'use_feature_mobile'} or $c->config->{'use_feature_mobile'} != 1 ) {
         return 1;
     }
+    my $choose_mobile;
+    if(defined $c->request->cookie('thruk_mobile')) {
+        my $cookie = $c->request->cookie('thruk_mobile');
+        $choose_mobile = $cookie->value;
+        return 1 if $choose_mobile == 0;
+    }
 
     if(     defined $c->{'request'}->{'headers'}->{'user-agent'}
-        and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/iPhone/mx
+        and $c->{'request'}->{'headers'}->{'user-agent'} =~ m/(iPhone|Android)/mx
         and defined $c->{'request'}->{'action'}
-        and $c->{'request'}->{'action'} =~ m%^(/|thruk||thruk/|thruk\$)$%mx )
+        and $c->{'request'}->{'action'} =~ m%^(/|thruk||thruk/|thruk\$|thruk/index.html)$%mx )
     {
-        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
+        $c->{'canceled'}        = 1;
+        $c->stash->{'title'}    = $c->config->{'name'};
+        $c->stash->{'template'} = 'mobile_choose.tt';
+        $c->stash->{'redirect'} = $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi";
+        if($choose_mobile == 1) {
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
+        }
+        return;
     }
     return 1;
 }
@@ -403,18 +416,6 @@ sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
         return $c->detach("thruk_main_html");
     }
 
-    if(-f "templates/index.tt") {
-        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat("templates/index.tt");
-        if(defined $c->{'request'}->{'headers'}->{'if-modified-since'}
-           and $c->req->headers->if_modified_since == $mtime) {
-            # set not modified status
-            $c->response->status(304);
-            return 1;
-        }
-        $c->response->headers->last_modified($mtime);
-    }
-
-    $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
     $c->stash->{'title'}          = $c->config->{'name'};
     $c->stash->{'main'}           = '';
     $c->stash->{'target'}         = '';
@@ -482,8 +483,6 @@ sub thruk_frame_html : Regex('thruk\/frame\.html') {
                 $c->stash->{'main'}     = $link;
                 $c->stash->{'title'}    = $c->config->{'name'};
                 $c->stash->{'template'} = 'index.tt';
-
-                $c->response->header( 'Cache-Control' => 'max-age=7200, public' );
 
                 return 1;
             }
