@@ -108,6 +108,8 @@ sub begin : Private {
                     use_expire             => 0,
         },
         command_disabled                    => {},
+        downtime_duration                   => 7200,
+        expire_ack_duration                 => 86400,
         show_custom_vars                    => [],
         var_path                            => './var',
         priorities                      => {
@@ -135,7 +137,7 @@ sub begin : Private {
                   datetime_format datetime_format_today datetime_format_long datetime_format_log
                   use_new_search ajax_search show_notification_number strict_passive_mode
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
-                  priorities show_modified_attributes
+                  priorities show_modified_attributes downtime_duration expire_ack_duration
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

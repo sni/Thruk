@@ -973,6 +973,24 @@ ex.:
   </cmd_defaults>
 
 
+==== downtime_duration
+Default duration of new downtimes in seconds. Default is 2 hours.
+
+ex.:
+
+  downtime_duration = 7200
+
+
+==== expire_ack_duration
+Default duration of acknowledgements with expire date. Default is one
+day.
+
+ex.:
+
+  expire_ack_duration = 86400
+
+
+
 ==== cmd_quick_status
 Configure which commands should be available as quick status commands.
 

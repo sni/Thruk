@@ -26,8 +26,8 @@
     SCHEDULE_SERVICEGROUP_SVC_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;0;%lu;%s;%s",servicegroup_name,start_time_unix,end_time_unix,fixed,duration,comment_author,comment_data) %]
 [% END %]
 
-[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,      '%Y-%m-%d %H:%M:%S'); END %]
-[% IF c.request.parameters.end_time;   SET end_time   = c.request.parameters.end_time;   ELSE; SET end_time   = format_date(date.now+7200, '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,                   '%Y-%m-%d %H:%M:%S'); END %]
+[% IF c.request.parameters.end_time;   SET end_time   = c.request.parameters.end_time;   ELSE; SET end_time   = format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:%S'); END %]
 
 [%# definition of the html form data #%]
 <tr><td class='optBoxRequiredItem'>Servicegroup Name:</td><td><b><input type='text' name='servicegroup' value='[% c.request.parameters.servicegroup %]'></b></td></tr>
