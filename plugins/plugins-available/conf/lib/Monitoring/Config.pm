@@ -985,7 +985,10 @@ sub _rebuild_index {
             my $tmp_obj = Monitoring::Config::Object->new(type => $obj->get_type(), conf => $conf, coretype => $self->{'coretype'});
             my $primary = $tmp_obj->get_primary_name();
             if(defined $primary) {
-                $self->_update_obj_in_index($objects, $obj, $primary);
+                my $found = $self->_update_obj_in_index($objects, $obj, $primary, $conf);
+                if($found == 0) {
+                    $objects->{'byname'}->{$obj->{'type'}}->{$primary} = $obj->{'id'};
+                }
             } else {
                 my $type = $obj->get_type();
                 if($type ne 'hostescalation' and $type ne 'serviceescalation') {
@@ -1009,8 +1012,9 @@ sub _update_obj_in_index {
     my $objects = shift;
     my $obj     = shift;
     my $primary = shift;
+    my $tmpconf = shift;
 
-    my $pname  = $obj->get_primary_name(1);
+    my $pname  = $obj->get_primary_name(1, $tmpconf);
     my $tname  = $obj->get_template_name();
     my $found  = 0;
 

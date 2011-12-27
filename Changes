@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - finished mobile plugin
           - config tool:
               - fixed selecting templates when no hosts exist
+              - fixed selecting services without hosts/groups
 
 1.1.7    Tue Dec 20 18:02:13 CET 2011
           - added duration filter

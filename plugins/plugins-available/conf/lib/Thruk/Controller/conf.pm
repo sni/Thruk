@@ -1146,6 +1146,9 @@ sub _get_context_object {
         elsif(defined $objs->[0]) {
             $obj = $objs->[0];
         }
+        elsif(!defined $obj) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'No such object. <a href="conf.cgi?sub=objects&action=new&amp;type='.$c->stash->{'type'}.'&amp;data.name='.$c->stash->{'data_name'}.'">Create it.</a>' );
+        }
     }
 
     return $obj;
@@ -1348,6 +1351,11 @@ sub _object_new {
     my $obj = Monitoring::Config::Object->new(type     => $c->stash->{'type'},
                                               name     => $c->stash->{'data_name'},
                                               coretype => $c->{'obj_db'}->{'coretype'});
+
+    if(!defined $obj) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create object' );
+        return;
+    }
 
     # set initial config from cgi parameters
     my $initial_conf = $obj->get_data_from_param($c->{'request'}->{'parameters'}, $obj->{'conf'});

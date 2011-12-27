@@ -149,12 +149,13 @@ return the primary objects name
 sub get_primary_name {
     my $self = shift;
     my $full = shift || 0;
+    my $conf = shift || $self->{'conf'};
 
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and defined $self->{'conf'}->{'name'}) {
+    if(defined $conf->{'register'} and $conf->{'register'} == 0 and defined $conf->{'name'}) {
         return;
     }
 
-    return $self->{'conf'}->{$self->{'primary_key'}} unless ref $self->{'primary_key'};
+    return $conf->{$self->{'primary_key'}} unless ref $self->{'primary_key'};
 
     unless($full) {
         return $self->{'name'} if defined $self->{'name'};
@@ -164,20 +165,20 @@ sub get_primary_name {
     if(ref $self->{'primary_key'}->[1] eq '') {
         my @keys;
         for my $key (@{$self->{'primary_key'}}) {
-            push @keys, $self->{'conf'}->{$key} if defined $self->{'conf'}->{$key};
+            push @keys, $conf->{$key} if defined $conf->{$key};
         }
         push @keys, $self->{'name'} if defined $self->{'name'};
         return \@keys;
     }
 
     # secondary keys
-    my $primary = $self->{'name'} || $self->{'conf'}->{$self->{'primary_key'}->[0]};
+    my $primary = $self->{'name'} || $conf->{$self->{'primary_key'}->[0]};
 
     return $primary unless $full;
     my $secondary = [];
     for my $key (@{$self->{'primary_key'}->[1]}) {
-        next unless defined $self->{'conf'}->{$key};
-        push @{$secondary}, [ $key, $self->{'conf'}->{$key} ];
+        next unless defined $conf->{$key};
+        push @{$secondary}, [ $key, $conf->{$key} ];
     }
     return([$primary, $secondary]);
 }
