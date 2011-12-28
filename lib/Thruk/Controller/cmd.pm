@@ -510,6 +510,8 @@ sub _do_send_command {
                 theme                  => $c->stash->{'theme'},
                 url_prefix             => $c->stash->{'url_prefix'},
                 has_expire_acks        => $c->stash->{'has_expire_acks'},
+                downtime_duration      => $c->stash->{'downtime_duration'},
+                expire_ack_duration    => $c->stash->{'expire_ack_duration'},
                 comment_author         => '',
                 hostdowntimes          => '',
                 servicedowntimes       => '',
@@ -538,10 +540,12 @@ sub _do_send_command {
                 end_time_unix          => $end_time_unix,
                 theme                  => $c->stash->{'theme'},
                 url_prefix             => $c->stash->{'url_prefix'},
+                has_expire_acks        => $c->stash->{'has_expire_acks'},
+                downtime_duration      => $c->stash->{'downtime_duration'},
+                expire_ack_duration    => $c->stash->{'expire_ack_duration'},
                 comment_author         => '',
                 hostdowntimes          => '',
                 servicedowntimes       => '',
-                has_expire_acks        => $c->stash->{'has_expire_acks'},
             },
             \$form
         ) || die $tt->error();
