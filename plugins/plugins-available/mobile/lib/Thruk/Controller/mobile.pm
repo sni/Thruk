@@ -30,7 +30,7 @@ page: /thruk/cgi-bin/mobile.cgi
 =cut
 sub mobile_cgi : Regex('thruk\/cgi\-bin\/mobile\.cgi') {
     my ( $self, $c ) = @_;
-    return if defined $c->{'cancled'};
+    return if defined $c->{'canceled'};
     return $c->detach('/mobile/index');
 }
 
