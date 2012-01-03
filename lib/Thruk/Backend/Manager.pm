@@ -112,7 +112,7 @@ returns list of hidden backends
 sub disable_hidden_backends {
     my $self               = shift;
     my $disabled_backends  = shift || {};
-    my $peers = $self->get_peers();
+    my $peers              = $self->get_peers();
 
     # only hide them, if we have more than one
     return $disabled_backends if scalar @{$peers} <= 1;
@@ -377,7 +377,7 @@ enables/disables remote backends based on a state from local instances
 =cut
 
 sub set_backend_state_from_local_connections {
-    my( $self, $disabled ) = @_;
+    my( $self, $cache, $disabled ) = @_;
 
     $self->{'stats'}->profile( begin => "set_backend_state_from_local_connections() " ) if defined $self->{'stats'};
 
