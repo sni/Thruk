@@ -321,19 +321,19 @@ function refresh_service_status(force) {
     }
     last_service_refresh = now;
 
-    ['ok', 'warning', 'critical', 'unknown', 'pending', 'unhandled', 'critical_and_unhandled', 'unknown_and_unhandled'].forEach(function(el){
+    ['ok', 'warning', 'critical', 'unknown', 'pending', 'unhandled', 'warning_and_unhandled', 'critical_and_unhandled', 'unknown_and_unhandled'].forEach(function(el){
         jQuery('.services_'+el+'_panel').hide();
     });
     jQuery.get('mobile.cgi', { data: 'service_stats', _:unixtime() },
         function(data, textStatus, XMLHttpRequest) {
             extract_data(data);
             data = data.data;
-            ['ok', 'warning', 'critical', 'unknown', 'pending', 'total', 'critical_and_unhandled', 'unknown_and_unhandled'].forEach(function(el){
+            ['ok', 'warning', 'critical', 'unknown', 'pending', 'total', 'warning_and_unhandled', 'critical_and_unhandled', 'unknown_and_unhandled'].forEach(function(el){
                 var val = eval("data."+el);
                 jQuery('.services_'+el).text(val)
                 if(val > 0) { jQuery('.services_'+el+'_panel').show(); }
             });
-            unhandled_service_problems = data.critical_and_unhandled + data.unknown_and_unhandled;
+            unhandled_service_problems = data.warning_and_unhandled + data.critical_and_unhandled + data.unknown_and_unhandled;
             jQuery('.services_unhandled').text('Service:' + unhandled_service_problems);
             jQuery('.services_unhandled_panel').hide();
             if(unhandled_service_problems > 0) {
