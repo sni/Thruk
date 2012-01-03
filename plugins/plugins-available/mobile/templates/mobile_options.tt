@@ -2,7 +2,7 @@
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>
     <h1>[% title_prefix %]Options</h1>
-    <a href="#home" data-icon="check" class="ui-btn-right" id="options_save">Save</a>
+    <a href="#home" data-icon="check" class="ui-btn-right" id="options_save" data-direction="reverse">Save</a>
   </div>
   <div data-role="content">
     <div data-role="fieldcontain" id="backend_chooser">

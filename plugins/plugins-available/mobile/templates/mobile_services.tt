@@ -7,12 +7,12 @@
   </div>
   <div data-role="content">
     <ul data-role="listview" data-inset="true" class="services_by_status_list">
-      <li class="hidden services_total_panel"><a href="#services_list?servicestatustypes=" data-ajax="false" class="services_list">All<span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_total"></span></a></li>
-      <li class="hidden services_ok_panel"><a href="#services_list?servicestatustypes=2" data-ajax="false" class="services_list">Ok<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceOK services_ok"></span></a></li>
-      <li class="hidden services_warning_panel"><a href="#services_list?servicestatustypes=4" data-ajax="false" class="services_list">Warning<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceWARNING services_warning"></span></a></li>
-      <li class="hidden services_critical_panel"><a href="#services_list?servicestatustypes=16" data-ajax="false" class="services_list">Critical<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceCRITICAL services_critical"></span></a></li>
-      <li class="hidden services_unknown_panel"><a href="#services_list?servicestatustypes=8" data-ajax="false" class="services_list">Unknown<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceUNKNOWN services_unknown"></span></a></li>
-      <li class="hidden services_pending_panel"><a href="#services_list?servicestatustypes=1" data-ajax="false" class="services_list">Pending<span class="ui-li-count ui-btn-up-c ui-btn-corner-all servicePENDING services_pending"></span></a></li>
+      <li class="hidden services_total_panel"><a href="#services_list?servicestatustypes=" class="services_list">All<span class="ui-li-count ui-btn-up-c ui-btn-corner-all services_total"></span></a></li>
+      <li class="hidden services_ok_panel"><a href="#services_list?servicestatustypes=2" class="services_list">Ok<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceOK services_ok"></span></a></li>
+      <li class="hidden services_warning_panel"><a href="#services_list?servicestatustypes=4" class="services_list">Warning<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceWARNING services_warning"></span></a></li>
+      <li class="hidden services_critical_panel"><a href="#services_list?servicestatustypes=16" class="services_list">Critical<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceCRITICAL services_critical"></span></a></li>
+      <li class="hidden services_unknown_panel"><a href="#services_list?servicestatustypes=8" class="services_list">Unknown<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceUNKNOWN services_unknown"></span></a></li>
+      <li class="hidden services_pending_panel"><a href="#services_list?servicestatustypes=1" class="services_list">Pending<span class="ui-li-count ui-btn-up-c ui-btn-corner-all servicePENDING services_pending"></span></a></li>
     </ul>
   </div>
 </div>

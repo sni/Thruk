@@ -8,15 +8,15 @@
   <div data-role="content">
     <h4 class="hosts_unhandled_panel">Host Problems</h4>
     <ul data-role="listview" data-inset="true" class="hosts_by_status_list hosts_unhandled_panel">
-      <li class="hidden hosts_down_and_unhandled_panel"><a href="#hosts_list?hoststatustypes=4&hostprops=42" data-ajax="false" class="hosts_list">Down<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostDOWN hosts_down_and_unhandled"></span></a></li>
-      <li class="hidden hosts_unreachable_and_unhandled_panel"><a href="#hosts_list?hoststatustypes=8&hostprops=42" data-ajax="false" class="hosts_list">Unreachable<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostUNREACHABLE hosts_unreachable_and_unhandled"></span></a></li>
+      <li class="hidden hosts_down_and_unhandled_panel"><a href="#hosts_list?hoststatustypes=4&hostprops=42" class="hosts_list">Down<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostDOWN hosts_down_and_unhandled"></span></a></li>
+      <li class="hidden hosts_unreachable_and_unhandled_panel"><a href="#hosts_list?hoststatustypes=8&hostprops=42" class="hosts_list">Unreachable<span class="ui-li-count ui-btn-up-c ui-btn-corner-all hostUNREACHABLE hosts_unreachable_and_unhandled"></span></a></li>
     </ul>
 
     <h4 class="services_unhandled_panel">Service Problems</h4>
     <ul data-role="listview" data-inset="true" class="services_by_status_list services_unhandled_panel">
-      <li class="hidden services_warning_and_unhandled_panel"><a href="#services_list?&servicestatustypes=4&hoststatustypes=3&serviceprops=42" data-ajax="false" class="services_list">Warning<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceWARNING services_warning_and_unhandled"></span></a></li>
-      <li class="hidden services_critical_and_unhandled_panel"><a href="#services_list?&servicestatustypes=16&hoststatustypes=3&serviceprops=42" data-ajax="false" class="services_list">Critical<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceCRITICAL services_critical_and_unhandled"></span></a></li>
-      <li class="hidden services_unknown_and_unhandled_panel"><a href="#services_list?&servicestatustypes=8&hoststatustypes=3&serviceprops=42" data-ajax="false" class="services_list">Unknown<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceUNKNOWN services_unknown_and_unhandled"></span></a></li>
+      <li class="hidden services_warning_and_unhandled_panel"><a href="#services_list?&servicestatustypes=4&hoststatustypes=3&serviceprops=42" class="services_list">Warning<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceWARNING services_warning_and_unhandled"></span></a></li>
+      <li class="hidden services_critical_and_unhandled_panel"><a href="#services_list?&servicestatustypes=16&hoststatustypes=3&serviceprops=42" class="services_list">Critical<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceCRITICAL services_critical_and_unhandled"></span></a></li>
+      <li class="hidden services_unknown_and_unhandled_panel"><a href="#services_list?&servicestatustypes=8&hoststatustypes=3&serviceprops=42" class="services_list">Unknown<span class="ui-li-count ui-btn-up-c ui-btn-corner-all serviceUNKNOWN services_unknown_and_unhandled"></span></a></li>
     </ul>
 
     <h4 class="no_problems">No unhandled Problems :-)</h4>

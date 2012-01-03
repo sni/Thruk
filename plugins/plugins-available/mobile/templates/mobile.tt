@@ -13,12 +13,28 @@
       document.cookie            = "thruk_mobile=1; path=/;";
     </script>
     <script src="[% url_prefix %]thruk/plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="[% url_prefix %]thruk/plugins/mobile/jquery.mobile.router-0.6.js"></script>
     <script src="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.js"></script>
     <link rel="apple-touch-icon" href="[% url_prefix %]thruk/plugins/mobile/img/thruk.png" />
     <link rel="apple-touch-startup-image" href="[% url_prefix %]thruk/plugins/mobile/img/startup.png" />
     <meta name="viewport" content="user-scalable=no, width=device-width" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script type="application/x-javascript">
+        var router=new jQuery.mobile.Router([
+            { "#home":          { handler: 'page_home',           events: 'bs' } },
+            { "#host":          { handler: 'page_host',           events: 'bs' } },
+            { "#hosts":         { handler: 'page_hosts',          events: 'bs' } },
+            { "#hosts_list":    { handler: 'page_hosts_list',     events: 'bs' } },
+            { "#service":       { handler: 'page_service',        events: 'bs' } },
+            { "#services":      { handler: 'page_services',       events: 'bs' } },
+            { "#services_list": { handler: 'page_services_list',  events: 'bs' } },
+            { "#problems":      { handler: 'page_problems',       events: 'bs' } },
+            { "#options":       { handler: 'page_options',        events: 'bs' } },
+            { "#alerts":        { handler: 'page_alerts',         events: 'bs' } },
+            { "#notifications": { handler: 'page_notifications',  events: 'bs' } },
+    ], ThrukMobile, { ajaxApp: true} );
+    </script>
   </head>
   <body>
 
