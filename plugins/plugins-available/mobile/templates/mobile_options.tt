@@ -1,7 +1,7 @@
 <div id="options" data-role="page">
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>
-    <h1>Options</h1>
+    <h1>[% title_prefix %]Options</h1>
     <a href="#home" data-icon="check" class="ui-btn-right" id="options_save">Save</a>
   </div>
   <div data-role="content">

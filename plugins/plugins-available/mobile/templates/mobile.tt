@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Mobile Thruk</title>
+    <title>[% title_prefix %]Mobile Thruk</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/mobile/mobile-[% version %].css' />
     <link rel="stylesheet" href="[% url_prefix %]thruk/plugins/mobile/jqm/jquery.mobile-1.0.min.css" />

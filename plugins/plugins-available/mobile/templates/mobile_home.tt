@@ -2,7 +2,7 @@
 <div id="home" data-role="page">
   <div data-role="header" data-position="inline">
     <a href="#refresh" id="refresh" data-icon="refresh" class="ui-btn-left" data-iconpos="notext">Refresh</a>
-    <h1>Mobile Thruk</h1>
+    <h1>[% title_prefix %]Mobile Thruk</h1>
     <a href="#options" data-icon="gear" class="ui-btn-right">Options</a>
   </div>
   <div data-role="content">

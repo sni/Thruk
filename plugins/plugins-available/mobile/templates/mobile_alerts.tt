@@ -2,7 +2,7 @@
 <div id="last_alerts" data-role="page">
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>
-    <h1>Alerts</h1>
+    <h1>[% title_prefix %]Alerts</h1>
     <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
   </div>
   <div data-role="content">

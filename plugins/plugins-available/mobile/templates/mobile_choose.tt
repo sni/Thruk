@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Mobile Thruk</title>
+    <title>[% title_prefix %]Mobile Thruk</title>
     <script type="application/x-javascript">
       if(confirm("Do you want to use the mobile version of Thruk? (You will only be asked once per session)")) {
         document.cookie = "thruk_mobile=1; path=/;";
