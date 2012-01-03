@@ -29,17 +29,18 @@ sub new {
     my $config = shift;
 
     my $self = {
-        'config'           => $config,
-        'errors'           => [],
-        'errors_displayed' => 0,
-        'files'            => [],
-        'initialized'      => 0,
-        'cached'           => 0,
-        'needs_update'     => 0,
-        'needs_commit'     => 0,
-        'needs_reload'     => 0,
-        'coretype'         => 'nagios',
-        'cache'            => {},
+        'config'             => $config,
+        'errors'             => [],
+        'errors_displayed'   => 0,
+        'files'              => [],
+        'initialized'        => 0,
+        'cached'             => 0,
+        'needs_update'       => 0,
+        'needs_commit'       => 0,
+        'needs_reload'       => 0,
+        'needs_index_update' => 0,
+        'coretype'           => 'nagios',
+        'cache'              => {},
     };
 
     bless $self, $class;
@@ -467,7 +468,8 @@ sub check_files_changed {
     if($errors2 > $errors1) {
         $self->{'needs_update'} = 1;
     }
-    if($reload) {
+    if($reload or $self->{'needs_index_update'}) {
+        $self->{'needs_update'} = 0;
         $self->update();
     }
     return 1;
@@ -874,18 +876,20 @@ sub _check_files_changed {
         my $check = $self->_check_file_changed($file);
 
         if($check == 1) {
-            unless($reload) {
+            if(!$reload or $file->{'changed'}) {
                 push @newfiles, $file;
                 push @{$self->{'errors'}}, "file ".$file->{'path'}." has been deleted.";
+                $self->{'needs_index_update'} = 1;
             }
         }
         elsif($check == 2) {
-            if($reload) {
+            if($reload or !$file->{'changed'}) {
                 $file->{'parsed'} = 0;
                 $file->update_objects();
                 $file->_update_meta_data();
+                $self->{'needs_index_update'} = 1;
             } else {
-                push @{$self->{'errors'}}, "file ".$file->{'path'}." has been changed since reading it.";
+                push @{$self->{'errors'}}, "Conflict in file ".$file->{'path'}.". File has been changed on disk and via config tool.";
             }
         }
 
@@ -898,11 +902,8 @@ sub _check_files_changed {
 
     for my $file (@{$self->_get_files_names()}) {
         if(!defined $oldfiles->{$file}) {
-            if($reload) {
-                push @{$self->{'files'}}, Monitoring::Config::File->new($file, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
-            } else {
-                push @{$self->{'errors'}}, "file ".$file." has been added.";
-            }
+            push @{$self->{'files'}}, Monitoring::Config::File->new($file, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
+            $self->{'needs_index_update'} = 1;
         }
     }
 
@@ -998,8 +999,9 @@ sub _rebuild_index {
         }
     }
 
-    $self->{'objects'} = $objects;
-    $self->{'macros'}  = $macros;
+    $self->{'objects'}            = $objects;
+    $self->{'macros'}             = $macros;
+    $self->{'needs_index_update'} = 0;
 
     $self->{'stats'}->profile(end => "M::C::_rebuild_index()") if defined $self->{'stats'};;
     return;
