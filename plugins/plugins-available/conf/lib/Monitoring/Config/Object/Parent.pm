@@ -381,7 +381,14 @@ sub get_data_from_param {
             }
         }
         elsif( $defaults->{$key}->{'type'} eq 'COMMAND' ) {
-            $data->{$key} = $param->{'obj.'.$key.'.1'}.'!'.$param->{'obj.'.$key.'.2'};
+            # when there are arguments, join them with a !
+            if($param->{'obj.'.$key.'.2'} !~ m/^\s*$/) {
+                $data->{$key} = $param->{'obj.'.$key.'.1'}.'!'.$param->{'obj.'.$key.'.2'};
+            }
+            # just use the command else
+            else {
+                $data->{$key} = $param->{'obj.'.$key.'.1'};
+            }
             delete $param->{$key.'.2'};
         }
         else {
