@@ -40,8 +40,7 @@
           [% END %]
           [% IF c.config.cmd_quick_status.downtime %]
           <option value="2" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif); }">add downtime</option>
-          <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove active downtimes</option>
-          <option value="15" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove future downtimes</option>
+          <option value="5" style="background-image:url([% url_prefix %]thruk/themes/[% theme %]/images/delete.gif); }">remove downtimes</option>
           <option value="" disabled class="disable">-------------------------</option>
           [% END %]
           [% IF c.config.cmd_quick_status.comment %]
@@ -122,6 +121,15 @@
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
           <tr><td onclick="toggleCheckBox('opt5')">Persistent :</td><td><input type='checkbox' id="opt5" name='persistent_comments'[% IF c.config.cmd_defaults.persistent_comments %] checked[% END %]></td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr id="row_down_options">
+      <td class="statusOdd" valign="top">Options:</td>
+      <td class="statusOdd">
+        <table border=0 cellpadding=0 cellspacing=0>
+          <tr><td onclick="toggleCheckBox('opt5')">Active Downtimes:</td><td><input type='checkbox' id="opt5" name='active_downtimes' checked></td></tr>
+          <tr><td onclick="toggleCheckBox('opt6')">Future Downtimes:</td><td><input type='checkbox' id="opt6" name='future_downtimes'></td></tr>
         </table>
       </td>
     </tr>

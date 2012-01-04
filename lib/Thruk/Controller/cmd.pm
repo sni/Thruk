@@ -94,7 +94,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         12 => 87,    # submit passive check result
         13 => 2,     # delete single comment
         14 => 154,   # reset modified attributes
-        15 => 78,    # remove future downtimes
     };
     my $service_quick_commands = {
         1  => 7,     # reschedule service check
@@ -111,7 +110,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         12 => 30,    # submit passive check result
         13 => 4,     # delete single comment
         14 => 155,   # reset modified attributes
-        15 => 79,    # remove future downtimes
     };
 
     # did we receive a quick command from the status page?
@@ -207,10 +205,12 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             $c->{'request'}->{'parameters'}->{'host'}    = $host;
             $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
-                $self->_remove_all_downtimes( $c, $host, undef, 'active' );
-            }
-            elsif( $quick_command == 15 ) {
-                $self->_remove_all_downtimes( $c, $host, undef, 'future' );
+                if($c->{'request'}->{'parameters'}->{'active_downtimes'}) {
+                    $self->_remove_all_downtimes( $c, $host, undef, 'active' );
+                }
+                if($c->{'request'}->{'parameters'}->{'future_downtimes'}) {
+                    $self->_remove_all_downtimes( $c, $host, undef, 'future' );
+                }
             }
             else {
                 if( $self->_do_send_command($c) ) {
@@ -243,10 +243,12 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
             $c->{'request'}->{'parameters'}->{'service'} = $service;
             $c->{'request'}->{'parameters'}->{'backend'} = \@backends;
             if( $quick_command == 5 ) {
-                $self->_remove_all_downtimes( $c, $host, $service, 'active' );
-            }
-            elsif( $quick_command == 15 ) {
-                $self->_remove_all_downtimes( $c, $host, $service, 'future' );
+                if($c->{'request'}->{'parameters'}->{'active_downtimes'}) {
+                    $self->_remove_all_downtimes( $c, $host, $service, 'active' );
+                }
+                if($c->{'request'}->{'parameters'}->{'future_downtimes'}) {
+                    $self->_remove_all_downtimes( $c, $host, $service, 'future' );
+                }
             }
             else {
                 if( $self->_do_send_command($c) ) {

@@ -1288,6 +1288,7 @@ function check_selected_command() {
         }
     }
     if(value == 5) { /* remove downtimes */
+        enableFormElement('row_down_options');
     }
     if(value == 6) { /* remove comments */
     }
@@ -1308,7 +1309,7 @@ function check_selected_command() {
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire');
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
     elems.each(function(id) {
         obj = document.getElementById(id);
         obj.style.display = "none";
