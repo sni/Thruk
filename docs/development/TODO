@@ -13,12 +13,8 @@ general:
       result
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
     - show host/service dependencies
-    - add multiple notes url or action urls, maybe add an "_html" cust var
-    - uc,lc option for auth user -> monitoring
     - add context sensitive help
     - page by attribute a,b,c,d,e...z
-    - add extra grapher url
-    - graph about how checks are scheduled in the next minutes
     - add output filter plugins (ex.: check_multi, disk checks)
     - add backend name to logs
     - add go back button on error page
@@ -88,7 +84,6 @@ addons:
   config tool:
     - propagate settings
     - split services by hosts, groups
-    - reload / check times out in large configs -> background job
     - rename host should affect all services
     - templates: list of affected objects
     - add tabs with contacts (notification contacts, readonly contacts,
@@ -97,5 +92,4 @@ addons:
     - resource.cfg editor
     - template usage with +object ( in resolve and template tt view)
     - wizards: new host, scan services
-      - offer macros for command editing
 

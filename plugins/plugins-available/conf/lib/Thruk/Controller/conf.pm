@@ -727,6 +727,8 @@ sub _process_objects_page {
 sub _apply_config_changes {
     my ( $self, $c ) = @_;
 
+    $c->stash->{'subtitle'}      = "Apply Config Changes";
+    $c->stash->{'template'}      = 'conf_objects_apply.tt';
     $c->stash->{'output'}        = '';
     $c->stash->{'changed_files'} = $c->{'obj_db'}->get_changed_files();
 
@@ -742,11 +744,11 @@ sub _apply_config_changes {
     # config check
     elsif(defined $c->{'request'}->{'parameters'}->{'check'}) {
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
-            if($self->_cmd($c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
-                Thruk::Utils::set_message( $c, 'success_message', "config check successfully" );
-            } else {
-                Thruk::Utils::set_message( $c, 'fail_message', "config check failed!" );
-            }
+            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_check($c)',
+                                               message => 'please stand by while configuration is beeing checked...'
+                                              }
+                                        );
+            return;
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', "please set 'obj_check_cmd' in your thruk_local.conf" );
         }
@@ -755,12 +757,11 @@ sub _apply_config_changes {
     # config reload
     elsif(defined $c->{'request'}->{'parameters'}->{'reload'}) {
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
-            if($self->_cmd($c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
-                $c->{'obj_db'}->{'needs_reload'} = 0;
-                Thruk::Utils::set_message( $c, 'success_message', "reload successfully" );
-            } else {
-                Thruk::Utils::set_message( $c, 'fail_message', "reload failed!" );
-            }
+            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
+                                               message => 'please stand by while configuration is beeing reloaded...'
+                                              }
+                                        );
+            return;
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', "please set 'obj_reload_cmd' in your thruk_local.conf" );
         }
@@ -775,17 +776,7 @@ sub _apply_config_changes {
     }
 
     # make nicer output
-    if(   defined $c->{'request'}->{'parameters'}->{'check'}
-       or defined $c->{'request'}->{'parameters'}->{'reload'}) {
-        $c->{'stash'}->{'output'} =~ s/(Error:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-        $c->{'stash'}->{'output'} =~ s/(Warning:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
-        $c->{'stash'}->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-        $c->{'stash'}->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
-        $c->{'stash'}->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
-        $c->{'stash'}->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
-        $c->{'stash'}->{'output'} = "<pre>".$c->{'stash'}->{'output'}."</pre>";
-    }
-    elsif(defined $c->{'request'}->{'parameters'}->{'diff'}) {
+    if(defined $c->{'request'}->{'parameters'}->{'diff'}) {
         $c->{'stash'}->{'output'} =~ s/^\-\-\-(.*)$/<font color="#0776E8"><b>---$1<\/b><\/font>/gmx;
         $c->{'stash'}->{'output'} =~ s/^\+\+\+(.*)$//gmx;
         $c->{'stash'}->{'output'} =~ s/^\@\@(.*)$/<font color="#0776E8"><b>\@\@$1<\/b><\/font>/gmx;
@@ -801,8 +792,6 @@ sub _apply_config_changes {
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
     $c->stash->{'files'}             = $c->{'obj_db'}->get_files();
-    $c->stash->{'subtitle'}          = "Apply Config Changes";
-    $c->stash->{'template'}          = 'conf_objects_apply.tt';
     return;
 }
 
@@ -1593,6 +1582,60 @@ sub _get_plugin_preview {
         }
     }
     return $output;
+}
+
+##########################################################
+sub _config_check {
+    my($c) = @_;
+    if(_cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
+        Thruk::Utils::set_message( $c, 'success_message', 'config check successfully' );
+    } else {
+        Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
+    }
+    _nice_check_output($c);
+
+    $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
+    $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
+    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
+    return;
+}
+
+##########################################################
+sub _config_reload {
+    my($c) = @_;
+    if(_cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
+        Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
+    } else {
+        Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
+    }
+    _nice_check_output($c);
+
+    # wait until core responds
+    for(1..10) {
+        sleep(1);
+        eval {
+            $c->{'db'}->get_processinfo();
+        };
+        last unless $@;
+    }
+
+    $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
+    $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
+    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
+    return;
+}
+
+##########################################################
+sub _nice_check_output {
+    my($c) = @_;
+    $c->{'stash'}->{'output'} =~ s/(Error:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
+    $c->{'stash'}->{'output'} =~ s/(Warning:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
+    $c->{'stash'}->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
+    $c->{'stash'}->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
+    $c->{'stash'}->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
+    $c->{'stash'}->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
+    $c->{'stash'}->{'output'} = "<pre>".$c->{'stash'}->{'output'}."</pre>";
+    return;
 }
 
 ##########################################################
