@@ -18,7 +18,7 @@ sub finalize_config {
     for my $addon (glob($plugin_dir)) {
 
         my $addon_name = $addon;
-        $addon_name =~ s/\/$//gmx;
+        $addon_name =~ s/\/+$//gmx;
         $addon_name =~ s/^.*\///gmx;
 
         # does the plugin directory exist?
@@ -29,9 +29,9 @@ sub finalize_config {
         print STDERR "loading plugin: ".$addon_name."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
 
         # lib directory included?
-        if(-d $addon.'/lib') {
+        if(-d $addon.'lib') {
             print STDERR " -> lib\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
-            unshift(@INC, $addon.'/lib');
+            unshift(@INC, $addon.'lib');
         }
 
         # template directory included?

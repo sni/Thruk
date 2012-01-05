@@ -6111,7 +6111,7 @@ shift(),i.sort());if(!!e&&!f.event.customEvent[h]||!!f.event.global[h]){c=typeof
 var refreshPage      = 1;
 var cmdPaneState     = 0;
 var curRefreshVal    = 0;
-var additionalParams = new Hash({});
+var additionalParams = undefined;
 var refreshTimer;
 var backendSelTimer;
 var lastRowSelected;
@@ -6224,6 +6224,7 @@ function prefSubmit(url, current_theme) {
   var sel         = document.getElementById('pref_theme')
   var now         = new Date();
   var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
+  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   if(current_theme != sel.value) {
     additionalParams.set('theme', '');
     additionalParams.set('reload_nav', 1);
@@ -6281,6 +6282,7 @@ function reloadPage() {
     urlArgs = new Hash(origUrl.parseQuery());
   }
 
+  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   additionalParams.each(function(pair) {
     // check for valid options to set here
     if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' || pair.key == 'host' || pair.key == 'reload_nav' || pair.key == 'theme' || pair.key == 'states') {
@@ -6330,6 +6332,7 @@ function toggleBackend(backend) {
     return;
   }
 
+  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   initial_state = initial_backend_states.get(backend);
   if(button.className == "button_peerDIS") {
     if(initial_state == 1) {
@@ -6519,7 +6522,7 @@ function hide_activity_icons() {
 
 /* verify time */
 var verify_id;
-var verification_errors = new Hash;
+var verification_errors = undefined;
 function verify_time(id) {
     verify_id = id;
     window.clearTimeout(verifyTimer);
@@ -6529,6 +6532,7 @@ function verify_time_do(id) {
     var obj = document.getElementById(id);
     debug(obj.value);
 
+    if(verification_errors == undefined) { verification_errors = new Hash };
     new Ajax.Request(url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value, {
         onSuccess: function(transport) {
             if(transport.responseJSON != null) {
@@ -6679,9 +6683,9 @@ Y8,           88   `8b d8'   88 88         8P
  to select hosts / services
  for sending quick commands
 *******************************************************************************/
-var selectedServices = new Hash;
-var selectedHosts    = new Hash;
-var noEventsForId    = new Hash;
+var selectedServices = undefined;
+var selectedHosts    = undefined;
+var noEventsForId    = undefined;
 var submit_form_id;
 
 /* add mouseover eventhandler for all cells and execute it once */
@@ -6690,6 +6694,7 @@ function addRowSelector(id) {
     var cells = row.cells;
 
     // remove this eventhandler, it has to fire only once
+    if(noEventsForId == undefined) { noEventsForId = new Hash; }
     if(noEventsForId.get(id)) {
         return false;
     }
@@ -6980,7 +6985,7 @@ function selectServiceByIdEvent(row_id, state, event)
 
       // all selected should get the same state
       state = false;
-      if(selectedServices.get(lastRowSelected)) {
+      if(selectedServices != undefined && selectedServices.get(lastRowSelected)) {
         state = true;
       }
 
@@ -7008,6 +7013,7 @@ function selectServiceByIdEvent(row_id, state, event)
 
 /* select service row by id */
 function selectServiceById(row_id, state) {
+    if(selectedServices == undefined) { selectedServices = new Hash; }
     var targetState;
     if(!Object.isUndefined(state)) {
         targetState = state;
@@ -7084,7 +7090,7 @@ function selectHostByIdEvent(row_id, state, event) {
 
       // all selected should get the same state
       state = false;
-      if(selectedHosts.get(lastRowSelected)) {
+      if(selectedHosts != undefined && selectedHosts.get(lastRowSelected)) {
         state = true;
       }
 
@@ -7112,6 +7118,7 @@ function selectHostByIdEvent(row_id, state, event) {
 /* set host row selected */
 function selectHostById(row_id, state) {
     var targetState;
+    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     if(!Object.isUndefined(state)) {
         targetState = state;
     }
@@ -7246,6 +7253,8 @@ function toggleCmdPane(state) {
 
 /* show command panel if there are services or hosts selected otherwise hide the panel */
 function checkCmdPaneVisibility() {
+    if(selectedServices == undefined) { selectedServices = new Hash; }
+    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     var size = selectedServices.size() + selectedHosts.size();
     if(size == 0) {
         /* hide command panel */
@@ -7282,7 +7291,7 @@ function checkCmdPaneVisibility() {
 /* collect selected hosts and services and pack them into nice form data */
 function collectFormData(form_id) {
 
-    if(verification_errors.keys().size() > 0) {
+    if(verification_errors != undefined && verification_errors.keys().size() > 0) {
         alert('please enter valid data');
         return(false);
     }
@@ -7307,6 +7316,7 @@ function collectFormData(form_id) {
         }
     }
 
+    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     ids_form = document.getElementById('selected_ids');
     if(ids_form) {
         // comments / downtime commands
@@ -7315,6 +7325,7 @@ function collectFormData(form_id) {
     else {
         // regular services commands
         var services = new Array();
+        if(selectedServices == undefined) { selectedServices = new Hash; }
         selectedServices.keys().each(function(row_id) {
             if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
             if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
@@ -7432,6 +7443,7 @@ function check_quick_command() {
     window.clearTimeout(hide_activity_icons_timer);
 
     if(value == 1 ) { // reschedule
+        if(selectedServices == undefined) { selectedServices = new Hash; }
         selectedServices.keys().each(function(row_id) {
             cell           = document.getElementById(row_id + "_s_exec");
             cell.innerHTML = '';
@@ -7443,6 +7455,7 @@ function check_quick_command() {
             img.alt        = "This service is currently executing its servicecheck";
             cell.appendChild(img);
         });
+        if(selectedHosts == undefined) { selectedHosts = new Hash; }
         selectedHosts.keys().each(function(row_id) {
             cell           = document.getElementById(row_id + "_h_exec");
             cell.innerHTML = '';
@@ -7486,6 +7499,7 @@ function toggle_comment(event) {
     }
 
     var state = true;
+    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     if(selectedHosts.get(row_id) != undefined) {
         state = false;
     }
@@ -7549,6 +7563,7 @@ function selectCommentById(row_id, state) {
     }
     var elems = row.getElementsByTagName('TD');
 
+    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     if(state == false) {
         selectedHosts.unset(row_id);
         styleElements(elems, "original", 1);
@@ -7561,6 +7576,7 @@ function selectCommentById(row_id, state) {
 
 /* unselect all selections on downtimes/comments page */
 function unset_comments() {
+    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     selectedHosts.keys().each(function(nr) {
         var row_id = selectedHosts.get(nr);
         var row    = document.getElementById(row_id);
@@ -7590,6 +7606,7 @@ function toggleFilterPane(prefix) {
   debug("toggleFilterPane(): " + toggleFilterPane.caller);
   var pane = document.getElementById(prefix+'all_filter_table');
   var img  = document.getElementById(prefix+'filter_button');
+  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   if(pane.style.display == 'none') {
     pane.style.display    = '';
     pane.style.visibility = 'visible';
@@ -8134,6 +8151,7 @@ function selectByValue(select, val) {
 /* toggle visibility of top status informations */
 function toggleTopPane() {
   var formInput = document.getElementById('hidetop');
+  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   if(toggleElement('top_pane')) {
     additionalParams.set('hidetop', 0);
     formInput.value = 0;
