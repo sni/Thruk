@@ -499,52 +499,6 @@ function refresh_button(btn) {
     window.setTimeout("reloadPage()", 100);
 }
 
-/* save url part in parents hash */
-function save_url_in_parents_hash(name) {
-    jQuery(document).ready(function() {
-        var oldloc = new String(document.location);
-        oldloc     = oldloc.replace(/#+.*$/, '');
-        oldloc     = oldloc.replace(/\?.*$/, '');
-        if(!oldloc.match(/\/thruk\/$/)) {
-            return;
-        }
-        var newloc = new String(window.frames['main'].location);
-        newloc     = newloc.replace(oldloc, '');
-        newloc     = newloc.replace(/\?_=\d+/, '');
-        newloc     = newloc.replace(/\&_=\d+/, '');
-        newloc     = newloc.replace(/\&reload_nav=\d+/, '');
-        newloc     = newloc.replace(/\?reload_nav=\d+/, '');
-        newloc     = newloc.replace(/\&theme=\w*/, '');
-        newloc     = newloc.replace(/\?theme=\w*/, '');
-        location.hash = '#'+newloc;
-    });
-    return;
-}
-
-/* when framed, and there is a valid url in our
- * hash, load it instead of the main frame
- */
-function load_url_from_parents_hash() {
-    var newurl = new String(window.location.hash);
-    newurl     = newurl.replace(/^#/, '');
-    var oldurl = new String(window.location);
-    oldurl     = oldurl.replace(/#.*$/, '');
-    var values = window.location.pathname.split("/");
-    values.pop();
-    var last   = values.pop();
-    if(last == 'thruk' && newurl != 'main.html' && newurl != '') {
-        debug('go -> '+ newurl);
-        if(newurl.match(/^\d+:\/\//)) {
-            window.frames[1].location = newurl;
-        }
-        else if(newurl.match(/^\//)) {
-            window.frames[1].location = window.location.protocol + '//' + window.location.host + newurl;
-        } else {
-            window.frames[1].location = oldurl + newurl;
-        }
-    }
-}
-
 /* reverse a string */
 function reverse(s){
     return s.split("").reverse().join("");

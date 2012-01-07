@@ -468,14 +468,15 @@ page: /thruk/main.html
 
 =cut
 
-sub thruk_main_html : Regex('thruk\/main\.html$') :MyAction('AddDefaults') {
+sub thruk_main_html : Regex('thruk\/main\.html$') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
-    $c->stash->{'title'}                 = 'Thruk Monitoring Webinterface';
-    $c->stash->{'page'}                  = 'splashpage';
-    $c->stash->{'template'}              = 'main.tt';
-    $c->stash->{'hide_backends_chooser'} = 1;
-    $c->stash->{'no_auto_reload'}        = 1;
+    $c->stash->{'title'}                   = 'Thruk Monitoring Webinterface';
+    $c->stash->{'page'}                    = 'splashpage';
+    $c->stash->{'template'}                = 'main.tt';
+    $c->stash->{'hide_backends_chooser'}   = 1;
+    $c->stash->{'no_auto_reload'}          = 1;
+    $c->stash->{'enable_shinken_features'} = 0;
 
     return 1;
 }
