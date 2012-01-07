@@ -5,6 +5,7 @@ use warnings;
 use Thruk 1.1.1;
 use Carp;
 use Data::Dumper;
+use Thruk::Utils::Status;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
