@@ -71,7 +71,7 @@ my $sorted_by_abc = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => ['a
 is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
 
 #########################
-my($res, $c) = ctx_request('/thruk/main.html');
+my($res, $c) = ctx_request('/thruk/side.html');
 my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
 is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(thrukadmin)');
 

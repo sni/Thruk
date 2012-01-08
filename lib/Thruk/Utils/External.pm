@@ -145,6 +145,7 @@ sub is_running {
     if( -f $dir."/user" ) {
         my $user = read_file($dir."/user");
         chomp($user);
+        carp('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
     }
 
@@ -248,10 +249,12 @@ sub get_result {
     my $id  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
-    return unless -f $dir."/user";
-    my $user = read_file($dir."/user");
-    chomp($user);
-    return unless $user eq $c->stash->{'remote_user'};
+    if(-f $dir."/user") {
+        my $user = read_file($dir."/user");
+        chomp($user);
+        carp('no remote_user') unless defined $c->stash->{'remote_user'};
+        return unless $user eq $c->stash->{'remote_user'};
+    }
 
     my $out    = read_file($dir."/stdout");
     my $err    = read_file($dir."/stderr");
@@ -382,6 +385,7 @@ sub _do_parent_stuff {
 
     # write user file
     if(!defined $conf->{'allow'} or defined $conf->{'allow'} eq 'user') {
+        carp("no remote_user") unless defined $c->stash->{'remote_user'};
         open($fh, '>', $dir."/user") or die("cannot write user: $!");
         print $fh $c->stash->{'remote_user'};
         print $fh "\n";
