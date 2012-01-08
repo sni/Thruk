@@ -8,9 +8,20 @@
     <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <script type="text/javascript">
     <!--
+    /* send debug output to firebug console */
+    function debug(str) {
+        if (window.console != undefined) {
+            console.debug(str);
+        }
+    }
 
     /* save url part in parents hash */
-    function save_url_in_parents_hash(name) {
+    var nohashchange = 0;
+    function save_url_in_parents_hash(e) {
+        if(nohashchange == 1) {
+          nohashchange = 0;
+          return;
+        }
         var oldloc = new String(document.location);
         oldloc     = oldloc.replace(/#+.*$/, '');
         oldloc     = oldloc.replace(/\?.*$/, '');
@@ -25,7 +36,11 @@
         newloc     = newloc.replace(/\?reload_nav=\d+/, '');
         newloc     = newloc.replace(/\&theme=\w*/, '');
         newloc     = newloc.replace(/\?theme=\w*/, '');
-        location.hash = '#'+newloc;
+        if('#'+newloc != location.hash) {
+            debug('saved -> #'+newloc);
+            nohashchange = 1;
+            location.replace('#'+newloc);
+        }
         return;
     }
 
@@ -41,6 +56,7 @@
     values.pop();
     var last   = values.pop();
     if(last == 'thruk' && newurl != 'main.html' && newurl != '') {
+        debug('go -> '+ newurl);
         if(newurl.match(/^\d+:\/\//)) {
             framesrc = newurl;
         }
@@ -50,8 +66,25 @@
             framesrc = oldurl + newurl;
         }
     }
+
+    /* we have to change frame location on hash changes caused by history changes */
+    window.onhashchange = function(e) {
+      if(nohashchange == 0) {
+        nohashchange = 1;
+        var newurl = e.newURL;
+        newurl     = newurl.replace(/^.*#/, '');
+        debug('hashchange -> ' + newurl);
+        window.frames[1].location.replace(newurl);
+      }
+      nohashchange = 0;
+    };
+
     [%+ index_content = BLOCK %]
       <noframes>
+        <!--
+          This page requires a web browser which supports frames.
+          No-Frames mode can be enabled in your thruk_local.conf.
+        -->
         <body>
           <h2>Thruk</h2>
           <p align="center">
