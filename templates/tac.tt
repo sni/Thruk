@@ -408,12 +408,12 @@
                     [% IF empty || host_stats.flapping_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostFlapDetection'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledHostFlapDetection'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=256'>[% host_stats.flapping_disabled %] Host Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledHostFlapDetection'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=256'>[% host_stats.flapping_disabled %] Host Disabled</a></td>
                     [% END %]
                   </tr>
                   <tr>
                     [% IF host_stats.flapping %]
-                    <td width="100%" class='featureItemHostsFlapping'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=1024'>[% host_stats.flapping %] Hosts Flapping</a></td>
+                    <td width="100%" class='featureItemHostsFlapping'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=1024'>[% host_stats.flapping %] Hosts Flapping</a></td>
                     [% ELSE %]
                     <td width="100%" class='featureItemHostsNotFlapping'>No Hosts Flapping</td>
                     [% END %]
@@ -451,7 +451,7 @@
                     [% IF empty || host_stats.notifications_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostNotifications'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledHostNotifications'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=4096'>[% host_stats.notifications_disabled %] Host Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledHostNotifications'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=4096'>[% host_stats.notifications_disabled %] Host Disabled</a></td>
                     [% END %]
                   </tr>
                 </table>
@@ -488,7 +488,7 @@
                     [% IF empty || host_stats.eventhandler_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledHostHandlers'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledHostHandlers'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=64'>[% host_stats.eventhandler_disabled %] Hosts Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledHostHandlers'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=64'>[% host_stats.eventhandler_disabled %] Hosts Disabled</a></td>
                     [% END %]
                   </tr>
                 </table>
@@ -528,10 +528,10 @@
                   <tr><td width="100%" class='featureItemEnabledActiveHostChecks'>All Hosts Enabled</td></tr>
                   [% ELSE %]
                     [% IF strict_passive_mode %]
-                      [% IF host_stats.active_checks_disabled_active > 0 %]<tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=131088'>[% host_stats.active_checks_disabled_active %] Hosts Disabled</a></td></tr>[% END %]
-                      [% IF host_stats.active_checks_disabled_passive > 0 %]<tr><td width="100%" class='featureItemEnabledActiveHostChecks'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=65552'>[% host_stats.active_checks_disabled_passive %] Hosts Passive</a></td></tr>[% END %]
+                      [% IF host_stats.active_checks_disabled_active > 0 %]<tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=131088'>[% host_stats.active_checks_disabled_active %] Hosts Disabled</a></td></tr>[% END %]
+                      [% IF host_stats.active_checks_disabled_passive > 0 %]<tr><td width="100%" class='featureItemEnabledActiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=65552'>[% host_stats.active_checks_disabled_passive %] Hosts Passive</a></td></tr>[% END %]
                     [% ELSE %]
-                      <tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=16'>[% host_stats.active_checks_disabled_active + host_stats.active_checks_disabled_passive %] Hosts Disabled</a></td></tr>
+                      <tr><td width="100%" class='featureItemDisabledActiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=16'>[% host_stats.active_checks_disabled_active + host_stats.active_checks_disabled_passive %] Hosts Disabled</a></td></tr>
                     [% END %]
                   [% END %]
                 </table>
@@ -567,7 +567,7 @@
                     [% IF empty || host_stats.passive_checks_disabled == 0 %]
                     <td width="100%" class='featureItemEnabledPassiveHostChecks'>All Hosts Enabled</td>
                     [% ELSE %]
-                    <td width="100%" class='featureItemDisabledPassiveHostChecks'><a href='status.cgi?host=all&amp;type=detail&amp;hostprops=16384'>[% host_stats.passive_checks_disabled %] Host Disabled</a></td>
+                    <td width="100%" class='featureItemDisabledPassiveHostChecks'><a href='status.cgi?host=all&amp;style=hostdetail&amp;hostprops=16384'>[% host_stats.passive_checks_disabled %] Host Disabled</a></td>
                     [% END %]
                   </tr>
                 </table>
