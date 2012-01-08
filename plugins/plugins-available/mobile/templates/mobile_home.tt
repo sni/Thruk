@@ -47,8 +47,8 @@
 
       <h4>History</h4>
       <ul data-role="listview" data-inset="true">
-        <li><a href="#last_alerts">Last Alerts</a></li>
-        <li><a href="#last_notification">Last Notifications</a></li>
+        <li><a href="#alerts">Last Alerts</a></li>
+        <li><a href="#notifications">Last Notifications</a></li>
       </ul>
 
       <h4>Links</h4>

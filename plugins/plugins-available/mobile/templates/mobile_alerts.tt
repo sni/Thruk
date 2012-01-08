@@ -1,5 +1,5 @@
 <!-- Last Alerts List -->
-<div id="last_alerts" data-role="page">
+<div id="alerts" data-role="page">
   <div data-role="header">
     <a href="#" data-icon="back" data-rel="back">Back</a>
     <h1>[% title_prefix %]Alerts</h1>
