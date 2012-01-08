@@ -15,6 +15,9 @@
 .hidden {
   display: none;
 }
+A {
+  text-decoration: none;
+}
 A.ui-link-inherit SPAN.hosts_pending_panel,
 A.ui-link-inherit SPAN.hosts_unreachable_panel,
 A.ui-link-inherit SPAN.hosts_down_panel,

@@ -76,6 +76,8 @@ Makefile.PL
 MANIFEST
 menu.conf
 META.yml
+MYMETA.json
+MYMETA.yml
 plugins/plugins-available/conf/lib/Catalyst/Model/Objects/Class.pm
 plugins/plugins-available/conf/lib/Monitoring/Config.pm
 plugins/plugins-available/conf/lib/Monitoring/Config/File.pm
@@ -188,6 +190,7 @@ plugins/plugins-available/mobile/templates/mobile_alerts.tt
 plugins/plugins-available/mobile/templates/mobile_choose.tt
 plugins/plugins-available/mobile/templates/mobile_home.tt
 plugins/plugins-available/mobile/templates/mobile_host.tt
+plugins/plugins-available/mobile/templates/mobile_host_cmd.tt
 plugins/plugins-available/mobile/templates/mobile_hosts.tt
 plugins/plugins-available/mobile/templates/mobile_hosts_list.tt
 plugins/plugins-available/mobile/templates/mobile_notifications.tt

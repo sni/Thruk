@@ -439,9 +439,8 @@ ThrukMobile = {
             function(data, textStatus, XMLHttpRequest) {
                 var host = show_common_extinfo('host', data);
                 if(host != undefined) {
-                    jQuery('#host_name').text(host.name);
+                    jQuery('.host_name').text(host.name);
                     jQuery('#host_state').removeClass().text(get_host_status(host)).addClass(get_host_class(host));
-                    jQuery('#host_referer').val('mobile.cgi#host?host='+encoder(host.name));
                     show_common_acks_n_downtimes('host', host, data.comments, data.downtimes);
                 }
             },
@@ -462,9 +461,8 @@ ThrukMobile = {
             function(data, textStatus, XMLHttpRequest) {
                 var service = show_common_extinfo('service', data);
                 if(service != undefined) {
-                    jQuery('#service_name').html(service.host_name + '<br>' + service.description);
+                    jQuery('.service_name').html(service.host_name + '<br>' + service.description);
                     jQuery('#service_state').removeClass().text(get_service_status(service)).addClass(get_service_class(service));
-                    jQuery('#service_referer').val('mobile.cgi#service?host='+encoder(service.host_name)+'&service='+encoder(service.description));
                     show_common_acks_n_downtimes('service', service, data.comments, data.downtimes);
                 }
             },
@@ -496,6 +494,20 @@ ThrukMobile = {
     page_services: function(eventType, matchObj, ui, page, evt) {
         refresh_service_status();
         jQuery('DIV#services .services_by_status_list').listview('refresh');
+    },
+
+    /* Host Cmd Page */
+    page_host_cmd: function(eventType, matchObj, ui, page, evt) {
+        var params = get_params();
+        jQuery('.host_name').text(params['host']);
+        jQuery('#host_referer').val('mobile.cgi#host?host='+encoder(params['host']));
+    },
+
+    /* Service Cmd Page */
+    page_service_cmd: function(eventType, matchObj, ui, page, evt) {
+        var params = get_params();
+        jQuery('.service_name').html(params['host'] + '<br>' + params['service']);
+        jQuery('#service_referer').val('mobile.cgi#service?host='+encoder(params['host'])+'&service='+encoder(params['service']));
     }
 };
 
@@ -610,6 +622,12 @@ function show_common_extinfo(typ, data, comments) {
         }
         if(obj.acknowledged == 0 && obj.state > 0) {
             jQuery('.'+typ+'_ack_form').show();
+            if(typ == 'host') {
+                jQuery('A.'+typ+'_ack_form').attr('href', '#host_cmd?host='+encoder(obj.name)+'&q=4');
+            }
+            if(typ == 'service') {
+                jQuery('A.'+typ+'_ack_form').attr('href', '#service_cmd?host='+encoder(obj.host_name)+'&service='+encoder(obj.description)+'&q=4');
+            }
         }
         return obj;
     }
@@ -626,10 +644,22 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
         jQuery('.'+typ+'_acknowledged').show();
         jQuery(comments).each(function(nr, com) {
             if(com.entry_type == 4) {
-                txt = com.author + ': ' + com.comment + '<br>';
+                txt += '<li>';
+                txt += '<a href="#" onclick="alert(&quot;'+ format_time(com.entry_time) + '\\n' + com.author + '\\n' + com.comment+'&quot;);"><img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif" class="ui-li-icon">';
+                txt += '' + com.author + ': ' + com.comment + '<\/a>';
+                txt += '<a href="cmd.cgi?cmd_mod=2';
+                if(typ == 'host') {
+                    txt += '&cmd_typ=51&host='+encoder(obj.name)+'&referer='+encoder('mobile.cgi#host?host='+obj.name);
+                }
+                if(typ == 'service') {
+                    txt += '&cmd_typ=52&host='+encoder(obj.host_name)+'&service='+encoder(obj.description)+'&referer='+encoder('mobile.cgi#service?host='+obj.host_name+'&service='+obj.description);
+                }
+                txt += '" data-icon="delete" data-iconpos="notext" data-inline="true" data-ajax=false>remove</a>';
+                txt += '<\/li>';
             }
         });
-        jQuery('#'+typ+'_ack').html('<img src="' + url_prefix + 'thruk/plugins/mobile/img/ack.gif" alt="acknowledged"> ' + txt+'<hr>');
+        jQuery('#'+typ+'_ack').html('<ul data-role="listview" id="'+typ+'_ack_list" data-inset="true"> ' + txt+'</ul>');
+        jQuery('#'+typ+'_ack_list').listview();
     }
     if(typ == 'host') {
         jQuery('#selected_hosts').val(obj.name);

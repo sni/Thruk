@@ -199,7 +199,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
                 return $c->detach('/error/index/7');
             }
             my( $host, $service, $backend ) = split /;/mx, $hostdata;
-            my @backends                    = split /\|/mx, $backend;
+            my @backends                    = split /\|/mx, defined $backend ? $backend : '';
             $c->stash->{'lasthost'}         = $host;
             $c->{'request'}->{'parameters'}->{'cmd_typ'} = $cmd_typ;
             $c->{'request'}->{'parameters'}->{'host'}    = $host;

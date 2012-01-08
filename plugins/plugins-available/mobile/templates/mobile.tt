@@ -26,9 +26,11 @@
             { "#host":          { handler: 'page_host',           events: 'bs' } },
             { "#hosts":         { handler: 'page_hosts',          events: 'bs' } },
             { "#hosts_list":    { handler: 'page_hosts_list',     events: 'bs' } },
+            { "#host_cmd":      { handler: 'page_host_cmd',       events: 'bs' } },
             { "#service":       { handler: 'page_service',        events: 'bs' } },
             { "#services":      { handler: 'page_services',       events: 'bs' } },
             { "#services_list": { handler: 'page_services_list',  events: 'bs' } },
+            { "#service_cmd":   { handler: 'page_service_cmd',    events: 'bs' } },
             { "#problems":      { handler: 'page_problems',       events: 'bs' } },
             { "#options":       { handler: 'page_options',        events: 'bs' } },
             { "#alerts":        { handler: 'page_alerts',         events: 'bs' } },
@@ -41,12 +43,14 @@
 [% PROCESS mobile_home.tt %]
 [% PROCESS mobile_problems.tt %]
 [% PROCESS mobile_options.tt %]
+[% PROCESS mobile_extinfo.tt type="host" %]
 [% PROCESS mobile_hosts.tt %]
-[% PROCESS mobile_services.tt %]
 [% PROCESS mobile_hosts_list.tt %]
+[% PROCESS mobile_cmd.tt type="host" %]
+[% PROCESS mobile_extinfo.tt type="service" %]
+[% PROCESS mobile_services.tt %]
 [% PROCESS mobile_services_list.tt %]
-[% PROCESS mobile_host.tt %]
-[% PROCESS mobile_service.tt %]
+[% PROCESS mobile_cmd.tt type="service" %]
 [% PROCESS mobile_alerts.tt %]
 [% PROCESS mobile_notifications.tt %]
 
