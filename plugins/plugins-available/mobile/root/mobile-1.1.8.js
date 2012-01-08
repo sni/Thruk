@@ -399,7 +399,7 @@ ThrukMobile = {
             function(data, textStatus, XMLHttpRequest) {
                 list_pager_data(pagenr, data, 'services_list_data', function() { ThrukMobile.page_services_list(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
                     var icons = get_list_icons(entry);
-                    jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+encoder(entry.host_name)+'&service='+encoder(entry.description)+'">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
+                    jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+encoder(entry.host_name)+'&amp;service='+encoder(entry.description)+'">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
                 });
             },
             'json'
@@ -441,6 +441,8 @@ ThrukMobile = {
                 if(host != undefined) {
                     jQuery('.host_name').text(host.name);
                     jQuery('#host_state').removeClass().text(get_host_status(host)).addClass(get_host_class(host));
+                    jQuery('.host_referer').val('mobile.cgi#host?host='+encoder(params['host']));
+                    jQuery('.selected_hosts').val(params['host']);
                     show_common_acks_n_downtimes('host', host, data.comments, data.downtimes);
                 }
             },
@@ -463,6 +465,8 @@ ThrukMobile = {
                 if(service != undefined) {
                     jQuery('.service_name').html(service.host_name + '<br>' + service.description);
                     jQuery('#service_state').removeClass().text(get_service_status(service)).addClass(get_service_class(service));
+                    jQuery('.service_referer').val('mobile.cgi#service?host='+encoder(params['host'])+'&amp;service='+encoder(params['service']));
+                    jQuery('.selected_services').val(params['host']+';'+params['service']);
                     show_common_acks_n_downtimes('service', service, data.comments, data.downtimes);
                 }
             },
@@ -500,14 +504,14 @@ ThrukMobile = {
     page_host_cmd: function(eventType, matchObj, ui, page, evt) {
         var params = get_params();
         jQuery('.host_name').text(params['host']);
-        jQuery('#host_referer').val('mobile.cgi#host?host='+encoder(params['host']));
+        jQuery('.host_referer').val('mobile.cgi#host?host='+encoder(params['host']));
     },
 
     /* Service Cmd Page */
     page_service_cmd: function(eventType, matchObj, ui, page, evt) {
         var params = get_params();
         jQuery('.service_name').html(params['host'] + '<br>' + params['service']);
-        jQuery('#service_referer').val('mobile.cgi#service?host='+encoder(params['host'])+'&service='+encoder(params['service']));
+        jQuery('.service_referer').val('mobile.cgi#service?host='+encoder(params['host'])+'&amp;service='+encoder(params['service']));
     }
 };
 
@@ -623,10 +627,10 @@ function show_common_extinfo(typ, data, comments) {
         if(obj.acknowledged == 0 && obj.state > 0) {
             jQuery('.'+typ+'_ack_form').show();
             if(typ == 'host') {
-                jQuery('A.'+typ+'_ack_form').attr('href', '#host_cmd?host='+encoder(obj.name)+'&q=4');
+                jQuery('A.'+typ+'_ack_form').attr('href', '#host_cmd?host='+encoder(obj.name)+'&amp;q=4');
             }
             if(typ == 'service') {
-                jQuery('A.'+typ+'_ack_form').attr('href', '#service_cmd?host='+encoder(obj.host_name)+'&service='+encoder(obj.description)+'&q=4');
+                jQuery('A.'+typ+'_ack_form').attr('href', '#service_cmd?host='+encoder(obj.host_name)+'&amp;service='+encoder(obj.description)+'&amp;q=4');
             }
         }
         return obj;
@@ -649,10 +653,10 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
                 txt += '' + com.author + ': ' + com.comment + '<\/a>';
                 txt += '<a href="cmd.cgi?cmd_mod=2';
                 if(typ == 'host') {
-                    txt += '&cmd_typ=51&host='+encoder(obj.name)+'&referer='+encoder('mobile.cgi#host?host='+obj.name);
+                    txt += '&amp;cmd_typ=51&amp;host='+encoder(obj.name)+'&amp;referer='+encoder('mobile.cgi#host?host='+obj.name);
                 }
                 if(typ == 'service') {
-                    txt += '&cmd_typ=52&host='+encoder(obj.host_name)+'&service='+encoder(obj.description)+'&referer='+encoder('mobile.cgi#service?host='+obj.host_name+'&service='+obj.description);
+                    txt += '&amp;cmd_typ=52&amp;host='+encoder(obj.host_name)+'&amp;service='+encoder(obj.description)+'&amp;referer='+encoder('mobile.cgi#service?host='+obj.host_name+'&amp;service='+obj.description);
                 }
                 txt += '" data-icon="delete" data-iconpos="notext" data-inline="true" data-ajax=false>remove</a>';
                 txt += '<\/li>';
@@ -662,10 +666,10 @@ function show_common_acks_n_downtimes(typ, obj, comments, downtimes) {
         jQuery('#'+typ+'_ack_list').listview();
     }
     if(typ == 'host') {
-        jQuery('#selected_hosts').val(obj.name);
+        jQuery('.selected_hosts').val(obj.name);
     }
     if(typ == 'service') {
-        jQuery('#selected_services').val(obj.host_name+';'+obj.description);
+        jQuery('.selected_services').val(obj.host_name+';'+obj.description);
     }
     // Downtimes
     if(obj.scheduled_downtime_depth > 0) {

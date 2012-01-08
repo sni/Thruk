@@ -7,9 +7,9 @@
   </div>
   <div data-role="content">
     <form action="cmd.cgi" method="POST" class="[% type %]_ack_form" data-ajax=false>
-      <input type="hidden" name="referer" value="" id="[% type %]_referer">
+      <input type="hidden" name="referer" value="" class="[% type %]_referer">
       <input type="hidden" name="quick_command" value="4">
-      <input type="hidden" name="selected_[% type %]s" id="selected_[% type %]s" value="">
+      <input type="hidden" name="selected_[% type %]s" class="selected_[% type %]s" value="">
       <label for="[% type %]_com_data">Comment:</label>
       <input type="text" name="com_data" id="[% type %]_com_data" value="Acknowledged by my mobile"  />
       <div data-role="fieldcontain">

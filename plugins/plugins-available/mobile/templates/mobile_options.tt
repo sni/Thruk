@@ -5,7 +5,7 @@
     <a href="#home" data-icon="check" class="ui-btn-right" id="options_save" data-direction="reverse">Save</a>
   </div>
   <div data-role="content">
-    <div data-role="fieldcontain" id="backend_chooser">
+    <div data-role="fieldcontain" id="theme_chooser">
       <h4>Choose Theme</h4>
       <div data-role="controlgroup" data-type="horizontal" class="theme_buttons">
         <a href="#" data-role="button" data-theme="a" class="theme_button">A</a>

@@ -6,6 +6,13 @@
     <a href="#home" data-icon="home" class="ui-btn-right">Home</a>
   </div>
   <div data-role="content">
+    <form action="cmd.cgi" method="POST" data-ajax=false onsubmit="jQuery.mobile.loadingMessage='running check'; jQuery.mobile.showPageLoadingMsg(); return true;">
+      <input type="hidden" name="referer" value="" class="[% type %]_referer">
+      <input type="hidden" name="quick_command" value="1">
+      <input type="hidden" name="selected_[% type %]s" class="selected_[% type %]s" value="">
+      <input type="hidden" name="force_check" value="1">
+      <button type="submit" data-icon="refresh">Reschedule Now</button>
+    </form>
     <a href="#" class="[% type %]_ack_form"><button>Acknowledge</button></a>
     <div class="[% type %]_acknowledged"><span id="[% type %]_ack"></span></div>
     <table>
