@@ -342,10 +342,18 @@ installation:
 Open your browser and open http://<your_host>:3000
 
 
-== FastCGI
+== Apache Configuration
 
-There are two fast cgi modules for apache at the moment. Choose the
-one which fits best into your environment.
+Integration in the Apache webserver is done by fastcgi.  There are two
+fastcgi modules for apache at the moment. Choose the one which fits
+best into your environment. If unsure, use <<_mod_fcgid,mod_fcgid>>.
+The main difference is, that mod_fcgid starts the fastcgi process upon
+the first request whereas in mod_fastcgi you have to start the fastcgi
+process by yourself.
+
+Do not use the port 3000 thruk server in production, it's only for
+testing and development. It cannot handle authentication and is slower
+than the fastcgi variants.
 
 [TIP]
 .lighthttpd
@@ -481,7 +489,7 @@ use this apache example configuration:
 === mod_fcgid
 
 IMPORTANT: Thruk runs with the webserver user in this scenario, make
-sure the webserver user has access to all files and perl modules.
+sure the webserver user has access to all Thruk files and perl modules.
 
 .Apache configuration with mod_fcgid
 -------

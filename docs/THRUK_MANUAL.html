@@ -6657,10 +6657,17 @@ installation:</p></div>
 </div></div>
 <div class="paragraph"><p>Open your browser and open <a href="http://&lt;your_host&gt;:3000">http://&lt;your_host&gt;:3000</a></p></div>
 </div>
-<h2 id="_fastcgi">FastCGI</h2>
+<h2 id="_apache_configuration">Apache Configuration</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>There are two fast cgi modules for apache at the moment. Choose the
-one which fits best into your environment.</p></div>
+<div class="paragraph"><p>Integration in the Apache webserver is done by fastcgi.  There are two
+fastcgi modules for apache at the moment. Choose the one which fits
+best into your environment. If unsure, use <a href="#_mod_fcgid">mod_fcgid</a>.
+The main difference is, that mod_fcgid starts the fastcgi process upon
+the first request whereas in mod_fastcgi you have to start the fastcgi
+process by yourself.</p></div>
+<div class="paragraph"><p>Do not use the port 3000 thruk server in production, it&#8217;s only for
+testing and development. It cannot handle authentication and is slower
+than the fastcgi variants.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -6741,7 +6748,7 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 <div class="content">
 <pre><tt>    %&gt; ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid</tt></pre>
 </div></div>
-<h4 id="_apache_configuration">Apache Configuration</h4>
+<h4 id="_apache_configuration_2">Apache Configuration</h4>
 <div class="paragraph"><p>use this apache example configuration:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -6914,7 +6921,7 @@ JpL5tYCZpEyw2f/nWt1ag2UtM0x3Mq1iAp1j+bH0M7KFCGWDnfmbd8AMnuxfUzL/C0rp/wFnFd4n
 EQn3XQAAAABJRU5ErkJggg==" />
 </td>
 <td class="content">Thruk runs with the webserver user in this scenario, make
-sure the webserver user has access to all files and perl modules.</td>
+sure the webserver user has access to all Thruk files and perl modules.</td>
 </tr></table>
 </div>
 <div class="listingblock">
@@ -8379,7 +8386,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-12-27 11:36:31 CEST
+Last updated 2012-01-12 21:53:12 CEST
 </div>
 </div>
 </body>
