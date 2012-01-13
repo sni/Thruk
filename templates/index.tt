@@ -22,7 +22,7 @@
           nohashchange = 0;
           return;
         }
-        var oldloc = new String(document.location);
+        var oldloc = new String(window.document.location);
         oldloc     = oldloc.replace(/#+.*$/, '');
         oldloc     = oldloc.replace(/\?.*$/, '');
         if(!oldloc.match(/\/thruk\/$/)) {
@@ -36,10 +36,15 @@
         newloc     = newloc.replace(/\?reload_nav=\d+/, '');
         newloc     = newloc.replace(/\&theme=\w*/, '');
         newloc     = newloc.replace(/\?theme=\w*/, '');
-        if('#'+newloc != location.hash) {
+        if('#'+newloc != window.location.hash) {
             debug('saved -> #'+newloc);
-            nohashchange = 1;
-            location.replace('#'+newloc);
+            if (history.replaceState) {
+                history.replaceState({}, "", '#'+newloc);
+            } else {
+                nohashchange = 1;
+                window.location.replace('#'+newloc);
+            }
+            window.setTimeout("nohashchange=0", 100);
         }
         return;
     }
