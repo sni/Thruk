@@ -14,6 +14,7 @@ use parent 'Catalyst::Controller';
 use Storable qw/dclone/;
 use Data::Dumper;
 use Socket;
+use Encode qw(decode_utf8);
 
 =head1 NAME
 
@@ -876,9 +877,10 @@ sub _cmd {
     } else {
         $rc = $?>>8;
     }
-    $c->{'stash'}->{'output'} = $output;
-    $c->log->debug( "rc:          ". $rc );
-    $c->log->debug( "output:      ". $output );
+
+    $c->{'stash'}->{'output'} = decode_utf8($output);
+    $c->log->debug( "rc:     ". $rc );
+    $c->log->debug( "output: ". $output );
     if($rc != 0) {
         return 0;
     }
@@ -1028,6 +1030,7 @@ sub _get_context_object {
     $c->stash->{'file_name'}     = $c->{'request'}->{'parameters'}->{'file'};
     $c->stash->{'file_line'}     = $c->{'request'}->{'parameters'}->{'line'};
     $c->stash->{'data_name'}     =~ s/^(.*)\ \-\ .*$/$1/gmx;
+    $c->stash->{'type'}          = lc $c->stash->{'type'};
     $c->stash->{'show_object'}   = 0;
     $c->stash->{'show_secondary_select'} = 0;
 
@@ -1634,6 +1637,8 @@ sub _nice_check_output {
     $c->{'stash'}->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
     $c->{'stash'}->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
     $c->{'stash'}->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
+    $c->{'stash'}->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->{'stash'}->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
     $c->{'stash'}->{'output'} = "<pre>".$c->{'stash'}->{'output'}."</pre>";
     return;
 }

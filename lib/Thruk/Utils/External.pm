@@ -331,7 +331,8 @@ sub job_page {
             delete($stash->{'all_in_one_css'});
             # merge stash
             for my $key (keys %{$stash}) {
-                $c->stash->{$key} = $stash->{$key} unless defined $c->stash->{$key};
+                next if $key eq 'theme';
+                $c->stash->{$key} = $stash->{$key};
             }
 
             # model?

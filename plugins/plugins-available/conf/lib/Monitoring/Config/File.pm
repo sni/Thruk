@@ -6,6 +6,7 @@ use Carp;
 use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object;
 use File::Slurp;
+use Encode qw(encode_utf8);
 
 =head1 NAME
 
@@ -382,7 +383,7 @@ sub save {
 
     my $content = $self->_get_new_file_content();
     open(my $fh, '>', $self->{'path'}) or die("cannot write to file: $!");
-    print $fh $content;
+    print $fh encode_utf8($content);
     close($fh);
 
     $self->{'changed'}     = 0;
