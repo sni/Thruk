@@ -6272,10 +6272,11 @@ function reloadPage() {
   var obj = document.getElementById('refresh_rate');
   obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
 
-  var origUrl = new String(window.location);
-  var newUrl  = origUrl;
-  var index   = newUrl.indexOf('?');
-  var urlArgs = new Hash();
+  var origHash = window.location.hash;
+  var origUrl  = new String(window.location);
+  var newUrl   = origUrl;
+  var index    = newUrl.indexOf('?');
+  var urlArgs  = new Hash();
   if(index != -1) {
     newUrl  = newUrl.substring(0, index);
     origUrl  = origUrl.replace(/\+/g, " ");
@@ -6297,6 +6298,10 @@ function reloadPage() {
 
   if(newParams != '') {
     newUrl = newUrl + '?' + newParams;
+  }
+
+  if(origHash != '#' && origHash != '') {
+    newUrl = newUrl + origHash;
   }
 
   if(newUrl == origUrl) {

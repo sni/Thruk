@@ -46,9 +46,11 @@
                 [% END %]
               </span>
             </td>
+            [% IF ! object.defined('file') || ! object.file.readonly %]
             <td style="width: 50px;" class="data dataSubmit sub_1">
               <button class="conf_save_button conf_button">save</button>
             </td>
+            [% END %]
           </tr>
         </table>
       </td>
