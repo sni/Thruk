@@ -1,14 +1,14 @@
 /* create the jquery mobile object */
 jQuery(document).bind("mobileinit", function(){
-    jQuery.mobile.page.prototype.options.backBtnText      = "back";
-    jQuery.mobile.page.prototype.options.addBackBtn       = true;
+    jQuery.mobile.page.prototype.options.backBtnText = "back";
+    jQuery.mobile.page.prototype.options.addBackBtn  = true;
 
     // theme?
     var theme = readCookie('thruk_mtheme');
     if(theme != undefined) {
         set_theme(theme);
     } else {
-        set_theme('d');
+        set_theme('e');
     }
 
 });
