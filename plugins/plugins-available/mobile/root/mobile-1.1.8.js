@@ -399,7 +399,7 @@ ThrukMobile = {
             function(data, textStatus, XMLHttpRequest) {
                 list_pager_data(pagenr, data, 'services_list_data', function() { ThrukMobile.page_services_list(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
                     var icons = get_list_icons(entry);
-                    jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+encoder(entry.host_name)+'&service='+encoder(entry.description)+'">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
+                    jQuery('#services_list_data').append('<li class="'+get_service_class(entry)+'"><a href="#service?host='+encoder(entry.host_name)+'&service='+encoder(entry.description)+'&backend=' + entry.peer_key + '">' + entry.host_name+' - '+ entry.description +icons+'</a></li>');
                 });
             },
             'json'
@@ -420,7 +420,7 @@ ThrukMobile = {
             function(data, textStatus, XMLHttpRequest) {
                 list_pager_data(pagenr, data, 'hosts_list_data', function() { ThrukMobile.page_hosts_list(eventType, matchObj, ui, page, evt, ++pagenr); }, function(entry) {
                     var icons = get_list_icons(entry);
-                    jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+encoder(entry.name)+'">' + entry.name +icons+'</a></li>');
+                    jQuery('#hosts_list_data').append('<li class="'+get_host_class(entry)+'"><a href="#host?host='+encoder(entry.name)+'&backend=' + entry.peer_key + '">' + entry.name +icons+'</a></li>');
                 });
             },
             'json'
@@ -432,9 +432,10 @@ ThrukMobile = {
         var params = get_params();
         hide_common_extinfo('host');
         jQuery.get('mobile.cgi', {
-                data: 'hosts',
-                host: params['host'],
-                _:    unixtime()
+                data:    'hosts',
+                host:    params['host'],
+                backend: params['backend'],
+                _:       unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
                 var host = show_common_extinfo('host', data);
@@ -458,6 +459,7 @@ ThrukMobile = {
                 data:    'services',
                 host:    params['host'],
                 service: params['service'],
+                backend: params['backend'],
                 _:       unixtime()
             },
             function(data, textStatus, XMLHttpRequest) {
