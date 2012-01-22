@@ -11,6 +11,7 @@
       var current_backend_states = undefined;
       var program_starts         = undefined;
       document.cookie            = "thruk_mobile=1; path=/;";
+      var strict_passive_mode    = [% strict_passive_mode %];
     </script>
     <script src="[% url_prefix %]thruk/plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
     <script src="[% url_prefix %]thruk/plugins/mobile/jquery.mobile.router-0.6.js"></script>

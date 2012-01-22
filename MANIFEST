@@ -166,7 +166,10 @@ plugins/plugins-available/minemap/templates/minemap.tt
 plugins/plugins-available/mobile/lib/Thruk/Controller/mobile.pm
 plugins/plugins-available/mobile/root/img/06-search.png
 plugins/plugins-available/mobile/root/img/ack.gif
+plugins/plugins-available/mobile/root/img/disabled.gif
 plugins/plugins-available/mobile/root/img/downtime.gif
+plugins/plugins-available/mobile/root/img/ndisabled.gif
+plugins/plugins-available/mobile/root/img/passiveonly.gif
 plugins/plugins-available/mobile/root/img/startup.png
 plugins/plugins-available/mobile/root/img/thruk.png
 plugins/plugins-available/mobile/root/jqm/images/ajax-loader.png
