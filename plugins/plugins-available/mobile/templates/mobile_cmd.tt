@@ -1,3 +1,4 @@
+[% USE date %]
 <!-- Cmd -->
 <div id="[% type %]_cmd" data-role="page">
   <div data-role="header">
@@ -21,9 +22,43 @@
             <label for="[% type %]_send_notification">Send Notification</label>
             <input type="checkbox" name="persistent_ack" id="[% type %]_persistent_ack" class="custom"[% IF c.config.cmd_defaults.persistent_ack %]checked[% END %] />
             <label for="[% type %]_persistent_ack">Persistent Comment</label>
+            [% IF has_expire_acks %]
+            <label for="[% type %]_use_expire">Use Expire Time</label>
+            <input type="checkbox" name="use_expire" id="[% type %]_use_expire" class="custom" onchange="if(this.checked == true) { jQuery('.use_expire').show(); } else { jQuery('.use_expire').hide(); };"[% IF c.config.cmd_defaults.use_expire %]checked[% END %] />
+            [% END %]
           </fieldset>
-          <button type="submit" data-icon="check">Acknowledge</button>
+          [% IF has_expire_acks %]
+          [% hour   = format_date(date.now, '%H') + 0 %]
+          [% minute = format_date(date.now, '%M') + 0 %]
+          <center>
+          <fieldset data-role="controlgroup" data-type="horizontal" class="use_expire"[% IF !c.config.cmd_defaults.use_expire %]style="display:none"[% END %]>
+            <input type="hidden" name="end_time" value="" id="end_time">
+            <select name="expire_date" id="expire_date">
+              [% days = 0 %]
+              [% WHILE days < 30 %]
+                <option value="[% format_date(date.now + days * 86400, '%Y-%m-%d') %]"[% IF hour == 23 && minute >= 30 && days == 2 || minute <= 30 && days == 1 %] selected[% END %]>[% format_date(date.now + days * 86400, '%d %b, %a') %]</option>
+                [% days = days + 1 %]
+              [% END %]
+            </select>
+            [% hours   = 0 %]
+            <select name="expire_time" id="expire_time">
+              [% WHILE hours < 24 %]
+                <option value="[% hours %]:00"[% IF hours == (hour + 1) && minute >= 30 %] selected[% END %]>[% hours %]:00</option>
+                <option value="[% hours %]:30"[% IF hours == hour && minute <= 30 %] selected[% END %]>[% hours %]:30</option>
+                [% hours = hours + 1 %]
+              [% END %]
+            </select>
+          </fieldset>
+          </center>
+          [% END %]
+          <button type="submit" data-icon="check" onclick="set_end_time();">Acknowledge</button>
       </div>
     </form>
   </div>
 </div>
+
+<script type="application/x-javascript">
+function set_end_time() {
+    jQuery('#end_time').val(jQuery('#expire_date').val() + " " + jQuery('#expire_time').val());
+}
+</script>

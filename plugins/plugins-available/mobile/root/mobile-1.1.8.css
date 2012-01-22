@@ -1,6 +1,6 @@
 .servicePENDING        { background: #ACACAC !important; }
 .serviceOK             { background: #33FF00 !important; }
-.serviceUNKNOWN        { background: #FF9900 !important; }
+.serviceUNKNOWN        { background: #FF9900 !important; text-shadow: none !important; }
 .serviceWARNING        { background: #FFFF00 !important; }
 .serviceCRITICAL       { background: #F83838 !important; text-shadow: none !important; }
 
