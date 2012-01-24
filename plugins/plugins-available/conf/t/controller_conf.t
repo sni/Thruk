@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More tests => 742;
 use JSON::XS;
+use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     use lib('t');
@@ -96,9 +97,10 @@ for my $type (@{$Monitoring::Config::Object::Types}, 'icon') {
     next if $type eq 'icon';
 
     $data->[0]->{'data'}->[0] = "none" unless defined $data->[0]->{'data'}->[0];
+    $data->[0]->{'data'}->[0] = encode_utf8($data->[0]->{'data'}->[0]);
 
     TestUtils::test_page(
-        'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'data.name='.$data->[0]->{'data'}->[0],
+        'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
         'like'    => [ 'Config Tool', $type, $data->[0]->{'data'}->[0]],
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
