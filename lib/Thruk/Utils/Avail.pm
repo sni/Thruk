@@ -77,7 +77,8 @@ sub calculate_availability {
     }
 
     if($csvoutput) {
-        $c->response->header('Content-Type' => 'text/plain');
+        $c->stash->{'res_ctype'}  = 'text/csv';
+        $c->stash->{'res_header'} = [ 'Content-Disposition', 'attachment; filename="availability.csv"' ];
         delete $c->{'request'}->{'parameters'}->{'show_log_entries'};
         delete $c->{'request'}->{'parameters'}->{'full_log_entries'};
     }
