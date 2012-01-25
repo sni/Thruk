@@ -98,8 +98,7 @@ sub update_objects {
     $self->{'objects'} = [];
     $self->{'errors'}  = [];
 
-    open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
-    binmode $fh, ":utf8";
+    open(my $fh, '<:encoding(UTF-8)', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
         chomp($line);
         while(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
