@@ -41,6 +41,7 @@
             total_time_unknown =
                   avail_data.services.$hostname.$servicename.time_indeterminate_nodata
                 + avail_data.services.$hostname.$servicename.time_indeterminate_notrunning
+                + avail_data.services.$hostname.$servicename.time_indeterminate_outside_timeperiod
         %]
         [% SET
             total_time =
@@ -50,6 +51,7 @@
                 + avail_data.services.$hostname.$servicename.time_critical
                 + avail_data.services.$hostname.$servicename.time_indeterminate_nodata
                 + avail_data.services.$hostname.$servicename.time_indeterminate_notrunning
+                + avail_data.services.$hostname.$servicename.time_indeterminate_outside_timeperiod
         %]
         [% SET
             total_time_known = total_time - total_time_unknown
@@ -91,9 +93,9 @@
 
         <tr class='[% class %]'>
           [% UNLESS host %]
-          <td class='[% class %]'>[% IF lasthost != hostname %]<a href='avail.cgi?host=[% hostname | uri %][% IF show_log_entries %]&amp;show_log_entries[% ELSIF full_log_entries %]&amp;full_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% hostname %]</a>[% END %]</td>
+          <td class='[% class %]'>[% IF lasthost != hostname %]<a href='avail.cgi?host=[% hostname | uri %][% IF show_log_entries %]&amp;show_log_entries[% ELSIF full_log_entries %]&amp;full_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;showscheduleddowntime=[% showscheduleddowntime %]&amp;rpttimeperiod=[% rpttimeperiod %]'>[% hostname %]</a>[% END %]</td>
           [% END %]
-          <td class='[% class %]'><a href='avail.cgi?host=[% hostname | uri %]&amp;service=[% servicename | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %][% IF show_log_entries %]&amp;show_log_entries[% ELSIF full_log_entries %]&amp;full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[% servicename %]</a></td>
+          <td class='[% class %]'><a href='avail.cgi?host=[% hostname | uri %]&amp;service=[% servicename | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %][% IF show_log_entries %]&amp;show_log_entries[% ELSIF full_log_entries %]&amp;full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]&amp;rpttimeperiod=[% rpttimeperiod %]'>[% servicename %]</a></td>
           <td class='serviceOK'>[% sprintf('%2.3f', perc_ok) %]% ([% sprintf('%2.3f', perc_ok_known ) %]%)</td>
           <td class='serviceWARNING'>[% sprintf('%2.3f', perc_warning) %]% ([% sprintf('%2.3f', perc_warning_known ) %]%)</td>
           <td class='serviceUNKNOWN'>[% sprintf('%2.3f', perc_unknown) %]% ([% sprintf('%2.3f', perc_unknown_known ) %]%)</td>

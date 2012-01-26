@@ -96,13 +96,13 @@
         <tr>
           <td class='linkBox'>
             [% IF service %]
-            <a href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %][% IF nomap %]&amp;nomap=[% nomap %][% END %]">View Trends For This Host</a><br>
-            <a href="avail.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]&amp;show_log_entries">View Availability Report For This Service</a><br>
+            <a href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]&amp;rpttimeperiod=[% rpttimeperiod %][% IF nomap %]&amp;nomap=[% nomap %][% END %]">View Trends For This Host</a><br>
+            <a href="avail.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;backtrack=[% backtrack %]&amp;rpttimeperiod=[% rpttimeperiod %]&amp;show_log_entries">View Availability Report For This Service</a><br>
             [% IF use_feature_histogram %]<a href="histogram.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention %]">View Alert Histogram For This Service</a><br>[% END %]
             <a href="history.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Alert History For This Service</a><br>
             <a href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a><br>
             [% ELSE %]
-            <a href='avail.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]&amp;show_log_entries'>View Availability Report For This Host</a><br>
+            <a href='avail.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;includesoftstates=[% includesoftstates %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;backtrack=[% backtrack %]&amp;show_log_entries&amp;rpttimeperiod=[% rpttimeperiod %]'>View Availability Report For This Host</a><br>
             <a href='status.cgi?host=[% host | uri %]'>View Status Detail For This Host</a><br>
             <a href='history.cgi?host=[% host | uri %]'>View Alert History For This Host</a><br>
             <a href='notifications.cgi?host=[% host | uri %]'>View Notifications For This Host</a><br>
@@ -137,6 +137,7 @@
         <input type='hidden' name='assumestateretention' value='[% assumestateretention %]'>
         <input type='hidden' name='assumestatesduringnotrunning' value='[% assumestatesduringnotrunning %]'>
         <input type='hidden' name='includesoftstates' value='[% includesoftstates %]'>
+        <input type='hidden' name='rpttimeperiod' value='[% rpttimeperiod %]'>
         [% IF nomap %]<input type='hidden' name='nomap' value='[% nomap %]'>[% END %]
         <table border="0" class='optBox'>
           <tr>
@@ -228,7 +229,7 @@
 
   [% SET x = 0 %]
   [% FOR a = image_map %]
-  <area shape='rect' coords='[% a.x1 %],[% a.y1 %],[% a.x2 %],[% a.y2 %]' href='trends.cgi?t1=[% a.t1 %]&amp;t2=[% a.t2 %]&amp;host=[% host | uri %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]' onmouseover='showDetail([% x %])' onmouseout='hideDetail()'>
+  <area shape='rect' coords='[% a.x1 %],[% a.y1 %],[% a.x2 %],[% a.y2 %]' href='trends.cgi?t1=[% a.t1 %]&amp;t2=[% a.t2 %]&amp;host=[% host | uri %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]&amp;rpttimeperiod=[% rpttimeperiod %]' onmouseover='showDetail([% x %])' onmouseout='hideDetail()'>
 
   [% SET x = x+1 %]
   [% END %]
@@ -236,7 +237,7 @@
 [% END %]
 <br><br>
 <div align="center">
-  <img src='trends.cgi?createimage&amp;host=[% host | uri %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]&amp;job_id=[% job_id %]' border="0" name='trendsimage' usemap='#trendsmap' width="[% image_width %]" height="[% image_height %]" alt="#########" id="trendsimage">
+  <img src='trends.cgi?createimage&amp;host=[% host | uri %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]&amp;rpttimeperiod=[% rpttimeperiod %]&amp;job_id=[% job_id %]' border="0" name='trendsimage' usemap='#trendsmap' width="[% image_width %]" height="[% image_height %]" alt="#########" id="trendsimage">
 </div>
 
 [% PROCESS _footer.tt %]

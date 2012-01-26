@@ -409,6 +409,7 @@ sub calculate_availability {
         }
     }
     push @typefilter, { class => 2 }; # programm messages
+    push @typefilter, { type => { '~~' => 'TIMEPERIOD TRANSITION' }};
 
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
 
@@ -426,8 +427,8 @@ sub calculate_availability {
         'initialassumedhoststate'      => Thruk::Utils::_initialassumedhoststate_to_state($initialassumedhoststate),
         'initialassumedservicestate'   => Thruk::Utils::_initialassumedservicestate_to_state($initialassumedservicestate),
         'backtrack'                    => $backtrack,
-#        'verbose'                      => 1,
-#        'logger'                       => $c->log,
+        'verbose'                      => 1,
+        'logger'                       => $c->log,
     );
     $c->stash->{avail_data} = $ma->calculate(
         'start'                        => $start,

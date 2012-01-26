@@ -95,6 +95,20 @@
         <td colspan="2"><br></td>
       </tr>
       <tr>
+        <td valign="top" class='reportSelectSubTitle'>Report time Period:</td>
+        <td valign="top" align="left" class='optBoxItem'>
+          <select name='rpttimeperiod'>
+            <option value="">None</option>
+            [% FOREACH t = timeperiods %]
+            <option value="[% t.name %]">[% t.name %]</option>
+            [% END %]
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2"><br></td>
+      </tr>
+      <tr>
         <td class='reportSelectSubTitle' align="right">Assume Initial States:</td>
         <td class='reportSelectItem'>
           <select name='assumeinitialstates'>

@@ -313,6 +313,7 @@ sub job_page {
         # job finished, display result
         my($out,$err,$time,$dir,$stash) = get_result($c, $job);
         return $c->detach('/error/index/22') unless defined $dir;
+        if(defined $stash and defined $stash->{'original_url'}) { $c->stash->{'original_url'} = $stash->{'original_url'} };
         if(defined $err and $err ne '') {
             $c->log->error($err);
             return $c->detach('/error/index/23')

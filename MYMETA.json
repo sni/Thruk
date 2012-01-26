@@ -78,7 +78,7 @@
             "Log::Dispatch::File" : 0,
             "Log::Log4perl::Catalyst" : "1.34",
             "MRO::Compat" : 0,
-            "Monitoring::Availability" : "0.2",
+            "Monitoring::Availability" : "0.24",
             "Monitoring::Livestatus" : "0.74",
             "Monitoring::Livestatus::Class" : "0.03",
             "Moose" : 0,

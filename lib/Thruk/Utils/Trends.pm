@@ -90,8 +90,9 @@ sub _show_step_3 {
         ($host,$service) = split/;/mx, $service;
     }
 
-    $c->stash->{host}    = $host    || '';
-    $c->stash->{service} = $service || '';
+    $c->stash->{host}        = $host    || '';
+    $c->stash->{service}     = $service || '';
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')]);
 
     $c->stash->{template}    = 'trends_step_3.tt';
 
@@ -246,6 +247,13 @@ sub _create_image {
             'darkgreen' => $im->colorAllocate(0,128,0),
             'yellow'    => $im->colorAllocate(176,178,20),
             'orange'    => $im->colorAllocate(255,100,25),
+
+            'red_b'       => $im->colorAllocate(255,179,179),
+            'darkred_b'   => $im->colorAllocate(128,89,89),
+            'green_b'     => $im->colorAllocate(147,210,147),
+            'darkgreen_b' => $im->colorAllocate(89,128,89),
+            'yellow_b'    => $im->colorAllocate(228,228,160),
+            'orange_b'    => $im->colorAllocate(255,154,105),
         };
 
         # set transparency index
@@ -355,6 +363,7 @@ sub _draw_states {
 
     my $report_duration = $end - $start;
 
+    my $in_timeperiod = 1;
     my($last_color, $last_hight, $last_state, $last_plugin_output, $image_map);
     for my $log ( @{$logs} ) {
         next unless defined $log->{'class'};
@@ -371,6 +380,28 @@ sub _draw_states {
         elsif($log->{'class'} eq 'UNKNOWN')       { $color = $colors->{'orange'};   $height = 40; }
         elsif($log->{'class'} eq 'CRITICAL')      { $color = $colors->{'red'};      $height = 20; }
         elsif($log->{'class'} eq 'INDETERMINATE') { $color = $last_color;           $height = $last_hight; $state = $last_state; $plugin_output = $last_plugin_output; }
+
+        # set color according to timeperiods
+        if($log->{'type'} eq 'TIMEPERIOD START') {
+            $in_timeperiod = 1;
+        }
+        elsif($log->{'type'} eq 'TIMEPERIOD STOP') {
+            $in_timeperiod = 0;
+        }
+        if($in_timeperiod == 0 and defined $color) {
+            if(    $color == $colors->{'green'})   { $color = $colors->{'green_b'}; }
+            elsif( $color == $colors->{'red'})     { $color = $colors->{'red_b'}; }
+            elsif( $color == $colors->{'darkred'}) { $color = $colors->{'darkred_b'}; }
+            elsif( $color == $colors->{'yellow'})  { $color = $colors->{'yellow_b'}; }
+            elsif( $color == $colors->{'orange'})  { $color = $colors->{'orange_b'}; }
+        }
+        if($in_timeperiod == 1 and defined $color) {
+            if(    $color == $colors->{'green_b'})   { $color = $colors->{'green'}; }
+            elsif( $color == $colors->{'red_b'})     { $color = $colors->{'red'}; }
+            elsif( $color == $colors->{'darkred_b'}) { $color = $colors->{'darkred'}; }
+            elsif( $color == $colors->{'yellow_b'})  { $color = $colors->{'yellow'}; }
+            elsif( $color == $colors->{'orange_b'})  { $color = $colors->{'orange'}; }
+        }
 
         next unless defined $height;
         $last_color         = $color;

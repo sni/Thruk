@@ -3,7 +3,7 @@
 [% IF show_log_entries or full_log_entries %]
     <div align="center" class='dataTitle'>[% IF service %]Service[% ELSE %]Host[% END %] Log Entries:</div><br>
     <div align="center" class='infoMessage'>
-      <a href='avail.cgi?t1=[% start %]&amp;t2=[% end %][% IF host %]&amp;host=[% host | uri %][% END %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF full_log_entries %]show_log_entries[% ELSE %]full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]'>[ View [% IF full_log_entries %]condensed[% ELSE %]full[% END %] log entries ]</a>
+      <a href='avail.cgi?t1=[% start %]&amp;t2=[% end %][% IF host %]&amp;host=[% host | uri %][% END %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;backtrack=[% backtrack %]&amp;assumestateretention=[% assumestateretention %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;[% IF full_log_entries %]show_log_entries[% ELSE %]full_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime %]&amp;rpttimeperiod=[% rpttimeperiod %]'>[ View [% IF full_log_entries %]condensed[% ELSE %]full[% END %] log entries ]</a>
     </div>
     <div align="center">
       <table border="1" class='logEntries'>
