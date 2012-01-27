@@ -248,12 +248,12 @@ sub _create_image {
             'yellow'    => $im->colorAllocate(176,178,20),
             'orange'    => $im->colorAllocate(255,100,25),
 
-            'red_b'       => $im->colorAllocate(255,179,179),
-            'darkred_b'   => $im->colorAllocate(128,89,89),
-            'green_b'     => $im->colorAllocate(147,210,147),
-            'darkgreen_b' => $im->colorAllocate(89,128,89),
-            'yellow_b'    => $im->colorAllocate(228,228,160),
-            'orange_b'    => $im->colorAllocate(255,154,105),
+            'red_t'       => $im->colorAllocateAlpha(255,0,0,115),
+            'darkred_t'   => $im->colorAllocateAlpha(128,0,0,115),
+            'green_t'     => $im->colorAllocateAlpha(0,210,0,115),
+            'darkgreen_t' => $im->colorAllocateAlpha(0,128,0,115),
+            'yellow_t'    => $im->colorAllocateAlpha(176,178,20,115),
+            'orange_t'    => $im->colorAllocateAlpha(255,100,25,115),
         };
 
         # set transparency index
@@ -389,18 +389,18 @@ sub _draw_states {
             $in_timeperiod = 0;
         }
         if($in_timeperiod == 0 and defined $color) {
-            if(    $color == $colors->{'green'})   { $color = $colors->{'green_b'}; }
-            elsif( $color == $colors->{'red'})     { $color = $colors->{'red_b'}; }
-            elsif( $color == $colors->{'darkred'}) { $color = $colors->{'darkred_b'}; }
-            elsif( $color == $colors->{'yellow'})  { $color = $colors->{'yellow_b'}; }
-            elsif( $color == $colors->{'orange'})  { $color = $colors->{'orange_b'}; }
+            if(    $color == $colors->{'green'})   { $color = $colors->{'green_t'}; }
+            elsif( $color == $colors->{'red'})     { $color = $colors->{'red_t'}; }
+            elsif( $color == $colors->{'darkred'}) { $color = $colors->{'darkred_t'}; }
+            elsif( $color == $colors->{'yellow'})  { $color = $colors->{'yellow_t'}; }
+            elsif( $color == $colors->{'orange'})  { $color = $colors->{'orange_t'}; }
         }
         if($in_timeperiod == 1 and defined $color) {
-            if(    $color == $colors->{'green_b'})   { $color = $colors->{'green'}; }
-            elsif( $color == $colors->{'red_b'})     { $color = $colors->{'red'}; }
-            elsif( $color == $colors->{'darkred_b'}) { $color = $colors->{'darkred'}; }
-            elsif( $color == $colors->{'yellow_b'})  { $color = $colors->{'yellow'}; }
-            elsif( $color == $colors->{'orange_b'})  { $color = $colors->{'orange'}; }
+            if(    $color == $colors->{'green_t'})   { $color = $colors->{'green'}; }
+            elsif( $color == $colors->{'red_t'})     { $color = $colors->{'red'}; }
+            elsif( $color == $colors->{'darkred_t'}) { $color = $colors->{'darkred'}; }
+            elsif( $color == $colors->{'yellow_t'})  { $color = $colors->{'yellow'}; }
+            elsif( $color == $colors->{'orange_t'})  { $color = $colors->{'orange'}; }
         }
 
         next unless defined $height;
