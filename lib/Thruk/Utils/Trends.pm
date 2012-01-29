@@ -92,7 +92,7 @@ sub _show_step_3 {
 
     $c->stash->{host}        = $host    || '';
     $c->stash->{service}     = $service || '';
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')]);
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1);
 
     $c->stash->{template}    = 'trends_step_3.tt';
 

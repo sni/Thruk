@@ -145,7 +145,7 @@ sub _show_step_3 {
 
     $c->stats->profile(begin => "_show_step_3()");
 
-    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')]);
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1);
     $c->stash->{template}    = 'avail_step_3.tt';
 
     my($host,$service);
