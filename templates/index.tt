@@ -36,6 +36,9 @@
         newloc     = newloc.replace(/\?reload_nav=\d+/, '');
         newloc     = newloc.replace(/\&theme=\w*/, '');
         newloc     = newloc.replace(/\?theme=\w*/, '');
+        var host   = window.location.protocol + '//' + window.location.host;
+        var patt   = new RegExp('^' + host, 'gi');
+        newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
             debug('saved -> #'+newloc);
             if (history.replaceState) {
@@ -62,7 +65,7 @@
     var last   = values.pop();
     if(last == 'thruk' && newurl != 'main.html' && newurl != '') {
         debug('go -> '+ newurl);
-        if(newurl.match(/^\d+:\/\//)) {
+        if(newurl.match(/^\w+:\/\//)) {
             framesrc = newurl;
         }
         else if(newurl.match(/^\//)) {
