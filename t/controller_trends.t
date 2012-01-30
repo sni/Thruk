@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 58;
+use Test::More tests => 66;
 
 BEGIN {
     use lib('t');
@@ -11,6 +11,7 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::trends' }
 
 my($host,$service) = TestUtils::get_test_service();
+my $timeperiod     = TestUtils::get_test_timeperiod();
 
 my $pages = [
 # Step 1
@@ -27,6 +28,9 @@ my $pictures = [
     # service last 7 days
     '/thruk/cgi-bin/trends.cgi?createimage&smallimage&host='.$host.'&service='.$service.'&t1=1264820912&t2=1265425712&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedservicestate=0&backtrack=4',
     '/thruk/cgi-bin/trends.cgi?createimage&host='.$host.'&service='.$service.'&t1=1264820912&t2=1265425712&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedservicestate=0&backtrack=4',
+
+    # with timeperiod
+    '/thruk/cgi-bin/trends.cgi?createimage&host='.$host.'&t1=1264820912&t2=1265425712&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&backtrack=4&rpttimeperiod='.$timeperiod,
 ];
 
 for my $url (@{$pages}) {

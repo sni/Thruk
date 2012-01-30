@@ -76,6 +76,19 @@ sub get_test_service {
 }
 
 #########################
+sub get_test_timeperiod {
+    my $request = request('/thruk/cgi-bin/config.cgi?type=timeperiods');
+    ok( $request->is_success, 'get_test_timeperiod() needs a proper config page' ) or diag(Dumper($request));
+    my $page = $request->content;
+    my $timeperiod;
+    if($page =~ m/id="timeperiod_.*?">\s*<td\ class='dataOdd'>([^<]+)<\/td>/gmx) {
+        $timeperiod = $1;
+    }
+    isnt($timeperiod, undef, "got a timeperiod from config.cgi") or BAIL_OUT('got no test config, cannot test.'.diag(Dumper($request)));
+    return($timeperiod);
+}
+
+#########################
 sub test_page {
     my(%opts) = @_;
     my $return = {};

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 240;
+use Test::More tests => 252;
 
 BEGIN {
     use lib('t');
@@ -11,6 +11,7 @@ BEGIN {
 BEGIN { use_ok 'Thruk::Controller::avail' }
 
 my($host,$service) = TestUtils::get_test_service();
+my $timeperiod     = TestUtils::get_test_timeperiod();
 
 my $pages = [
 # Step 1
@@ -44,6 +45,8 @@ my $pages = [
     '/thruk/cgi-bin/avail.cgi?service=all&timeperiod=last7days&smon=1&sday=13&syear=2010&shour=0&smin=0&ssec=0&emon=1&eday=14&eyear=2010&ehour=24&emin=0&esec=0&rpttimeperiod=&assumeinitialstates=yes&assumestateretention=yes&assumestatesduringnotrunning=yes&includesoftstates=no&initialassumedservicestate=-1&initialassumedhoststate=-1&backtrack=4',
     '/thruk/cgi-bin/avail.cgi?show_log_entries=&host='.$host.'&timeperiod=custom&smon=1&sday=07&syear=2011&shour=0&smin=0&ssec=0&emon=1&eday=10&eyear=2011&ehour=24&emin=0&esec=0&assumeinitialstates=yes&assumestateretention=yes&assumestatesduringnotrunning=yes&includesoftstates=no&initialassumedhoststate=0&initialassumedservicestate=0&backtrack=4',
     '/thruk/cgi-bin/avail.cgi?show_log_entries=&hostgroup=random&timeperiod=custom&smon=1&sday=07&syear=2011&shour=0&smin=0&ssec=0&emon=1&eday=31&eyear=2011&ehour=24&emin=0&esec=0&assumeinitialstates=yes&assumestateretention=yes&assumestatesduringnotrunning=yes&includesoftstates=no&initialassumedhoststate=0&initialassumedservicestate=0&backtrack=4',
+
+    '/thruk/cgi-bin/avail.cgi?host='.$host.'&timeperiod=last7days&smon=1&sday=13&syear=2010&shour=0&smin=0&ssec=0&emon=1&eday=14&eyear=2010&ehour=24&emin=0&esec=0&rpttimeperiod='.$timeperiod.'&assumeinitialstates=yes&assumestateretention=yes&assumestatesduringnotrunning=yes&includesoftstates=no&initialassumedservicestate=0&backtrack=4',
 ];
 
 for my $url (@{$pages}) {
