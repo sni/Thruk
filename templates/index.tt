@@ -15,6 +15,15 @@
         }
     }
 
+    /* return absolute host part of current url */
+    function get_host() {
+        var host = window.location.protocol + '//' + window.location.host;
+        if(window.location.port != "") {
+            host += ':' + window.location.port;
+        }
+        return(host);
+    }
+
     /* save url part in parents hash */
     var nohashchange = 0;
     function save_url_in_parents_hash(e) {
@@ -36,8 +45,7 @@
         newloc     = newloc.replace(/\?reload_nav=\d+/, '');
         newloc     = newloc.replace(/\&theme=\w*/, '');
         newloc     = newloc.replace(/\?theme=\w*/, '');
-        var host   = window.location.protocol + '//' + window.location.host;
-        var patt   = new RegExp('^' + host, 'gi');
+        var patt   = new RegExp('^' + get_host(), 'gi');
         newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
             debug('saved -> #'+newloc);
@@ -69,7 +77,7 @@
             framesrc = newurl;
         }
         else if(newurl.match(/^\//)) {
-            framesrc = window.location.protocol + '//' + window.location.host + newurl;
+            framesrc = get_host() + newurl;
         } else {
             framesrc = oldurl + newurl;
         }
