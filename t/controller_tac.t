@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 11;
+use Test::More tests => 13;
 
 BEGIN {
     use lib('t');

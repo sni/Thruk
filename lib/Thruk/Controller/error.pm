@@ -5,6 +5,7 @@ use warnings;
 use utf8;
 use Data::Dumper;
 use Carp;
+
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -29,6 +30,8 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     if(!defined $c) {
         confess("undefined c in error/index");
     }
+
+    Thruk::Action::AddDefaults::add_defaults(undef, $self, $c) unless defined $c->stash->{'defaults_added'};
 
     $c->{'canceled'}          = 1;
     $c->stash->{errorDetails} = '';

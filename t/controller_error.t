@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 107;
+use Test::More tests => 218;
 
 BEGIN {
     use lib('t');
@@ -10,11 +10,8 @@ BEGIN {
 }
 BEGIN { use_ok 'Thruk::Controller::error' }
 
-my $pages = [
-    '/error',
-];
-
-for(1..14) {
+my $pages = [];
+for(0..23) {
     push @{$pages}, '/error/'.$_;
 }
 

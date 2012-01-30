@@ -726,24 +726,6 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
 
 ######################################
 
-=head2 error
-
-page: /error/
-
-internal use only
-
-=cut
-
-sub error : Regex('error/') {
-    my( $self, $c ) = @_;
-    if( scalar @{ $c->request->args } < 1 ) {
-        return $c->detach("default");
-    }
-    return $c->detach( '/error/' . join( '/', @{ $c->request->args } ) );
-}
-
-######################################
-
 =head2 end
 
 check and display errors (if any)

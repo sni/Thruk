@@ -170,6 +170,11 @@ sub test_page {
     }
 
     # html valitidy
+    if($content_type =~ 'text\/html' and !$request->is_redirect) {
+        like($return->{'content'}, '/<html[^>]*>/i', 'html page has html section');
+        like($return->{'content'}, '/<!doctype/i',   'html page has doctype');
+    }
+
     SKIP: {
         if($content_type =~ 'text\/html') {
             if($use_html_lint == 0) {

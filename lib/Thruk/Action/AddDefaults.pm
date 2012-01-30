@@ -14,9 +14,6 @@ creates backend manager
 
 =cut
 
-=head2 index
-
-=cut
 
 use strict;
 use warnings;
@@ -28,9 +25,24 @@ extends 'Catalyst::Action';
 
 ########################################
 before 'execute' => sub {
+    add_defaults(@_);
+};
+
+
+########################################
+
+=head2 add_defaults
+
+    add default values and create backend connections
+
+=cut
+
+sub add_defaults {
     my ( $self, $controller, $c, $test ) = @_;
 
-    $c->stats->profile(begin => "AddDefaults::before");
+    $c->stats->profile(begin => "AddDefaults::add_defaults");
+
+    $c->stash->{'defaults_added'} = 1;
 
     ###############################
     # parse cgi.cfg
@@ -128,7 +140,7 @@ before 'execute' => sub {
 
     for my $x (1..$retrys) {
         eval {
-            $last_program_restart = $self->_set_processinfo($c, $cache, $cached_data);
+            $last_program_restart = _set_processinfo($c, $cache, $cached_data);
         };
         last unless $@;
         last if $x == $retrys;
@@ -136,7 +148,7 @@ before 'execute' => sub {
     }
     if($@) {
         return if $c->request->uri->path_query =~ m/\/side\.html$/mx;
-        $self->_set_possible_backends($c, $disabled_backends);
+        _set_possible_backends($c, $disabled_backends);
         $c->log->error("data source error: $@");
         return $c->detach('/error/index/9');
     }
@@ -151,9 +163,9 @@ before 'execute' => sub {
     ###############################
     # disable backends by groups
     if($has_groups and defined $c->{'db'}) {
-        $disabled_backends = $self->_disable_backends_by_group($c, $disabled_backends, $cached_data);
+        $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_data);
     }
-    $self->_set_possible_backends($c, $disabled_backends);
+    _set_possible_backends($c, $disabled_backends);
 
     ###############################
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
@@ -168,7 +180,7 @@ before 'execute' => sub {
         $c->{'db'}->enable_backends($backends);
     }
 
-    if(!defined $c->stash->{'pi_detail'} and $self->_any_backend_enabled($c)) {
+    if(!defined $c->stash->{'pi_detail'} and _any_backend_enabled($c)) {
         $c->log->error("got no result from any backend, please check backend connection and logfiles");
         return $c->detach('/error/index/9');
     }
@@ -238,8 +250,9 @@ before 'execute' => sub {
     }
 
     ###############################
-    $c->stats->profile(end => "AddDefaults::before");
-};
+    $c->stats->profile(end => "AddDefaults::add_defaults");
+    return;
+}
 
 ########################################
 after 'execute' => sub {
@@ -276,7 +289,7 @@ after 'execute' => sub {
 
 =cut
 sub _set_possible_backends {
-    my ($self,$c,$disabled_backends) = @_;
+    my ($c,$disabled_backends) = @_;
 
     my @possible_backends = @{$c->{'db'}->peer_key()};
     my %backend_detail;
@@ -311,7 +324,7 @@ sub _set_possible_backends {
 
 ########################################
 sub _disable_backends_by_group {
-    my ($self,$c,$disabled_backends, $cached_data) = @_;
+    my ($c,$disabled_backends, $cached_data) = @_;
 
     my $contactgroups = $cached_data->{'contactgroups'};
     for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -341,7 +354,7 @@ sub _disable_backends_by_group {
 
 ########################################
 sub _any_backend_enabled {
-    my ($self,$c) = @_;
+    my ($c) = @_;
     for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
         return 1 if $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0;
     }
@@ -350,7 +363,7 @@ sub _any_backend_enabled {
 
 ########################################
 sub _set_processinfo {
-    my($self, $c, $cache, $cached_data) = @_;
+    my($c, $cache, $cached_data) = @_;
     my $last_program_restart     = 0;
     my $processinfo              = $c->{'db'}->get_processinfo($cache);
     return unless defined $processinfo;
