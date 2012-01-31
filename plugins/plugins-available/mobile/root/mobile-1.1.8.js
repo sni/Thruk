@@ -11,6 +11,9 @@ jQuery(document).bind("mobileinit", function(){
         set_theme('e');
     }
 
+    jQuery(document).ajaxError(function() {
+        fail_all_backends();
+    });
 });
 
 /* initialize all events */
@@ -56,6 +59,8 @@ jQuery(document).ready(function(e){
         };
         serialized = serialized.substring(1);
         document.cookie = "thruk_backends="+serialized+ "; path=/;";
+        refresh_host_status(true, true);
+        refresh_service_status(true, true);
     });
 
     /* initialize numbers */
@@ -330,11 +335,20 @@ function extract_data(data) {
         }
     }
     jQuery('#button_options').removeClass('hostDOWN');
+
     if(failed_backends > 0) {
         jQuery('#button_options').addClass('hostDOWN');
     }
 
     return;
+}
+
+/* set all backends in fail state */
+function fail_all_backends() {
+    jQuery('#button_options').addClass('hostDOWN');
+    for(var key in current_backend_states) {
+        jQuery("#b_lab_"+key).addClass('hostDOWN');
+    }
 }
 
 ThrukMobile = {
