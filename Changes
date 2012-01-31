@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.8    ...
+1.1.8    Tue Jan 31 22:27:48 CET 2012
           - finished mobile plugin
           - support timeperiods in trends/availability reports
           - made duration of downtimes and acknowledgement configurable
