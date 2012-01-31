@@ -8219,6 +8219,7 @@ var ajax_search = {
     dont_hide       : false,
     autoopen        : true,
     append_value_of : undefined,
+    stop_events     : false,
 
     /* initialize search
      *
@@ -8247,6 +8248,10 @@ var ajax_search = {
         if(options == undefined) { options = {}; };
 
         ajax_search.input_field = elem.id;
+
+        if(ajax_search.stop_events == true) {
+            return false;
+        }
 
         if(options.striped != undefined) {
             ajax_search.striped = options.striped;
@@ -8295,7 +8300,6 @@ var ajax_search = {
         ajax_search.search_type = 'all';
         addEvent(input, 'keyup', ajax_search.suggest);
         addEvent(input, 'blur',  ajax_search.hide_results);
-        input.onfocus = null;
 
         search_url = ajax_search.url;
         if(type != undefined) {
@@ -8459,8 +8463,26 @@ var ajax_search = {
         evt = (evt) ? evt : ((window.event) ? event : null);
         if(evt) {
             var keyCode = evt.keyCode;
-            // dont suggest on return, enter, tab or escape
-            if(keyCode == 13 || keyCode == 108 || keyCode == 9 || keyCode == 27) {
+            // dont suggest on
+            if(   keyCode == 13     // enter
+               || keyCode == 108    // KP enter
+               || keyCode == 27     // escape
+               || keyCode == 16     // shift
+               || keyCode == 20     // capslock
+               || keyCode == 17     // ctrl
+               || keyCode == 18     // alt
+               || keyCode == 0      // windows key
+               || keyCode == 33     // page up
+               || keyCode == 34     // page down
+               || evt.altKey == true
+               || evt.ctrlKey == true
+               || evt.metaKey == true
+               || evt.shiftKey == true
+            ) {
+                return false;
+            }
+            // tab on keyup opens suggestions for wrong input
+            if(keyCode == 9 && evt.type == "keyup") {
                 return false;
             }
         }
@@ -8646,6 +8668,9 @@ var ajax_search = {
         style.width   = ( ajax_search.size -2 ) + "px";
 
         showElement(panel);
+        ajax_search.stop_events = true;
+        window.setTimeout("ajax_search.stop_events=false;", 200);
+        input.focus();
     },
 
     /* set the value into the input field */
