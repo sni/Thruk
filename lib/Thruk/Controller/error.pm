@@ -232,7 +232,7 @@ sub _get_connection_details {
     my $c      = shift;
     my $detail = '';
     for my $pd (keys %{$c->stash->{'backend_detail'}}) {
-        $detail .= $c->stash->{'backend_detail'}->{$pd}->{'last_error'}.'<br>';
+        $detail .= $c->stash->{'backend_detail'}->{$pd}->{'last_error'}.' ('.$c->stash->{'backend_detail'}->{$pd}->{'addr'}.')<br>';
     };
     return $detail;
 }
