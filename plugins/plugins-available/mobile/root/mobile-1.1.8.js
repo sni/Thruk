@@ -297,7 +297,7 @@ function refresh_service_status(force) {
 function refresh_backends() {
     if(current_backend_states != undefined) {
         number=0;
-        for(var key in current_backend_states){
+        for(var key in current_backend_states) {
             number++;
             if(current_backend_states[key].state == 0 || current_backend_states[key].state == 1) {
                 jQuery("#backend_"+key).attr("checked",true).checkboxradio("refresh");
@@ -305,7 +305,8 @@ function refresh_backends() {
             if(current_backend_states[key].state == 1) {
                 jQuery("#b_lab_"+key).addClass('hostDOWN');
             }
-        };
+        }
+        jQuery('#backend_chooser').hide();
         if(number > 1) {
             jQuery('#backend_chooser').show();
         }
@@ -319,6 +320,20 @@ function refresh_backends() {
 function extract_data(data) {
     current_backend_states = data.connection_status;
     program_starts         = data.program_starts;
+
+    if(current_backend_states != undefined) {
+        failed_backends=0;
+        for(var key in current_backend_states) {
+            if(current_backend_states[key].state == 1) {
+                failed_backends++;
+            }
+        }
+    }
+    jQuery('#button_options').removeClass('hostDOWN');
+    if(failed_backends > 0) {
+        jQuery('#button_options').addClass('hostDOWN');
+    }
+
     return;
 }
 

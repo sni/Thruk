@@ -9,6 +9,7 @@
     <script type="application/x-javascript">
       var url_prefix             = '[% url_prefix %]';
       var current_backend_states = undefined;
+      var failed_backends        = 0;
       var program_starts         = undefined;
       document.cookie            = "thruk_mobile=1; path=/;";
       var strict_passive_mode    = [% strict_passive_mode %];
