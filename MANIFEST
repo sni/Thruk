@@ -15,6 +15,7 @@ docs/source/PNP4nagios.png
 docs/source/Reschedule.png
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
+get_version
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -283,6 +284,10 @@ script/thruk_update.sh
 script/thruk_update_help.pl
 ssi/README
 ssi/status-header.ssi-pnp
+support/apache_fcgid.conf
+support/fcgid_env.sh
+support/menu_local.conf
+support/thruk.spec
 t/01app.t
 t/10-Thruk-Utils.t
 t/11-Thruk-Backend.t
