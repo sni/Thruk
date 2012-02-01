@@ -7,7 +7,7 @@ $Data::Dumper::Sortkeys = 1;
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
-    plan tests => 41;
+    plan tests => 49;
 } else {
     plan skip_all => 'pure shinken backend required'
 }
