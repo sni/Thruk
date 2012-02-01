@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ ! -d .git ]; then
+  echo "not in an development environment, no .git directory found" >&2
+  exit 1
+fi
+
+# find an exact match, if found use it as version as we are currently
+# exactly on one tag
+version=`git describe --tag --exact-match 2>/dev/null`
+if [ $? -eq 0 ]; then
+  echo $version | tr -d 'v'
+  exit 0
+fi
+
+# if we are not on a exact tag, use the last tag and add the date
+version=`git tag -l | sed -e 's/^v//g' | sort -n | tail -n 1`
+if [ $? -eq 0 ]; then
+  date=`date +%Y%m%d`
+  major=` echo $version | cut -d . -f 1`
+  minor1=`echo $version | cut -d . -f 2`
+  minor2=`echo $version | cut -d . -f 3`
+
+  # do we have a even minor version?
+  let mod=$minor2%2
+  if [ $mod -eq 0 ]; then
+    minor2=$((minor2+1))
+  fi
+  version="$major.$minor1.$minor2"
+
+  echo ${version}_${date} | tr -d 'v'
+  exit 0
+fi
+
+echo "unknown"
+exit 1
