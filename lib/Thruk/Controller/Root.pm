@@ -471,6 +471,12 @@ page: /thruk/main.html
 sub thruk_main_html : Regex('thruk\/main\.html$') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+
+    # add defaults when not using frames, otherwise the menu would be incomplete
+    if(!defined $c->stash->{'defaults_added'} and !$c->stash->{'use_frames'}) {
+        Thruk::Action::AddDefaults::add_defaults(undef, $self, $c);
+    }
+
     $c->stash->{'title'}                   = 'Thruk Monitoring Webinterface';
     $c->stash->{'page'}                    = 'splashpage';
     $c->stash->{'template'}                = 'main.tt';
