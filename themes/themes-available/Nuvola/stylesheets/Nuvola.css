@@ -204,3 +204,7 @@ DIV.dataTitle {
 body.extinfo TD.ext_head_attributes DIV.dataTitle {
   height: inherit;
 }
+
+.infoBoxBadProcStatus {
+  color:red;
+}
