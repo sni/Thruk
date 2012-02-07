@@ -27,7 +27,7 @@ root/shinken
 .author
 ssi_local
 cgi_local.cfg
-htpasswd
+^htpasswd
 .*\.gz
 cgi\.cfg\-.*
 # does not work for centos without F::C::R installed

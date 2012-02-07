@@ -75,6 +75,7 @@ done
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/plugins/plugins-enabled
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/themes/themes-enabled
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/t
+%{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/themes
 mv %{buildroot}%{_datadir}/thruk/thruk.conf %{buildroot}%{_sysconfdir}/thruk/thruk.conf
 mv %{buildroot}%{_datadir}/thruk/log4perl.conf.example %{buildroot}%{_sysconfdir}/thruk/log4perl.conf
 mv %{buildroot}%{_datadir}/thruk/cgi.cfg %{buildroot}%{_sysconfdir}/thruk/cgi.cfg
@@ -100,7 +101,8 @@ sed -i %{buildroot}%{_sysconfdir}/thruk/thruk.conf \
     -e 's|#log4perl_conf\s*=\s*./log4perl.conf|log4perl_conf = /etc/thruk/log4perl.conf|' \
     -e 's|thruk\s*=\s*./thruk_local.conf|thruk    = /etc/thruk/thruk_local.conf|' \
     -e 's|cgi.cfg\s*=\s*\s*/cgi.cfg|cgi.cfg  = /etc/thruk/cgi.cfg|' \
-    -e 's|#    htpasswd = ./htpasswd|    htpasswd = /etc/thruk/htpasswd|'
+    -e 's|#    htpasswd = ./htpasswd|    htpasswd = /etc/thruk/htpasswd|' \
+    -e 's|<Component Thruk::Backend>|<Component Thruk::Backend>\n    <peer>\n        name   = Core\n        type   = livestatus\n        <options>\n            peer          = /tmp/livestatus.socket\n            resource_file = /etc/nagios/private/resource.cfg\n       </options>\n       <configtool>\n            core_conf      = /etc/nagios/nagios.cfg\n            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg\n            obj_reload_cmd = /etc/init.d/nagios reload\n       </configtool>\n    </peer>\n|'
 
 sed -i %{buildroot}%{_sysconfdir}/thruk/log4perl.conf \
     -e 's|logs/error.log|/var/log/thruk/error.log|'

@@ -286,6 +286,7 @@ ssi/README
 ssi/status-header.ssi-pnp
 support/apache_fcgid.conf
 support/fcgid_env.sh
+support/htpasswd
 support/menu_local.conf
 support/thruk.spec
 t/01app.t
