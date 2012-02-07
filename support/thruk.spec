@@ -85,6 +85,7 @@ touch %{buildroot}%{_sysconfdir}/thruk/thruk_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/thruk/fcgid_env.sh
 mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/httpd/conf.d/thruk.conf
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
+mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/local-lib/perl5
 ln -s . %{buildroot}%{_datadir}/thruk/local-lib/perl5
@@ -98,7 +99,8 @@ sed -i %{buildroot}%{_sysconfdir}/thruk/thruk.conf \
     -e 's|#themes_path\s*=\s*themes/|themes_path = /etc/thruk/themes/|' \
     -e 's|#log4perl_conf\s*=\s*./log4perl.conf|log4perl_conf = /etc/thruk/log4perl.conf|' \
     -e 's|thruk\s*=\s*./thruk_local.conf|thruk    = /etc/thruk/thruk_local.conf|' \
-    -e 's|cgi.cfg\s*=\s*\s*/cgi.cfg|cgi.cfg  = /etc/thruk/cgi.cfg|'
+    -e 's|cgi.cfg\s*=\s*\s*/cgi.cfg|cgi.cfg  = /etc/thruk/cgi.cfg|' \
+    -e 's|#    htpasswd = ./htpasswd|    htpasswd = /etc/thruk/htpasswd|'
 
 sed -i %{buildroot}%{_sysconfdir}/thruk/log4perl.conf \
     -e 's|logs/error.log|/var/log/thruk/error.log|'
@@ -125,6 +127,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
 %config(noreplace) %{_sysconfdir}/thruk/cgi.cfg
+%config(noreplace) %{_sysconfdir}/thruk/htpasswd
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/thruk.conf
 %{_sysconfdir}/thruk/thruk.conf
 %{_sysconfdir}/thruk/themes/
