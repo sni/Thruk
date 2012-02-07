@@ -1,7 +1,7 @@
 version:
-	@newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)") ; \
-	if [ -n "$$newversion" ] && [ "$$newversion" != "$(VERSION)" ]; then \
-		sed -r "s/$(VERSION)/$$newversion/" -i lib/Thruk.pm -i docs/THRUK_MANUAL.txt; -i MANIFEST -i support/thruk.spec \
+	@if [ "$$NEWVERSION" = "" ]; then newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)"); else newversion=$$NEWVERSION; fi; \
+	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
+		sed -r "s/$(VERSION)/$$newversion/" -i lib/Thruk.pm -i docs/THRUK_MANUAL.txt -i MANIFEST -i support/thruk.spec; \
 	fi ; \
 	git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).css plugins/plugins-available/mobile/root/mobile-$$newversion.css && \
 	git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).js plugins/plugins-available/mobile/root/mobile-$$newversion.js && \
