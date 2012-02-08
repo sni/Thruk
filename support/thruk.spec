@@ -10,10 +10,18 @@ Group:         Applications/Monitoring
 BuildRoot:     %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 BuildRequires: autoconf, automake, perl
 Summary:       Thruk Monitoring Webinterface
-Requires(pre): shadow-utils
-Requires:      perl httpd mod_fcgid
 Provides:      thruk
 AutoReqProv:   no
+Patch0:        ./support/0001-thruk.conf.patch
+Patch1:        ./support/0002-log4perl.conf.patch
+Patch2:        ./support/0003-thruk.pm.patch
+Requires(pre): shadow-utils
+Requires:      perl
+%if %{defined suse_version}
+Requires: apache2 apache2-mod_fcgid
+%else
+Requires: httpd mod_fcgid
+%endif
 
 %description
 Thruk is a multibackend monitoring webinterface which currently
@@ -25,6 +33,9 @@ large installations.
 %prep
 rm -rf %{buildroot}
 %setup -q
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
 
 %build
 yes n | perl Makefile.PL
@@ -33,7 +44,11 @@ yes n | perl Makefile.PL
 %install
 %{__mkdir} -p %{buildroot}%{_localstatedir}/thruk
 %{__mkdir} -p %{buildroot}%{_localstatedir}/log/thruk
+%if %{defined suse_version}
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/apache2/conf.d
+%else
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/httpd/conf.d
+%endif
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/themes/themes-available
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/themes/themes-enabled
@@ -84,31 +99,16 @@ mv %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi-pnp %{buildroot}%{_sys
 cp %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi     %{buildroot}%{_sysconfdir}/thruk/ssi/extinfo-header.ssi
 touch %{buildroot}%{_sysconfdir}/thruk/thruk_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/thruk/fcgid_env.sh
+%if %{defined suse_version}
+mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/thruk.conf
+%else
 mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/httpd/conf.d/thruk.conf
+%endif
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/local-lib/perl5
 ln -s . %{buildroot}%{_datadir}/thruk/local-lib/perl5
-
-sed -i %{buildroot}%{_sysconfdir}/thruk/thruk.conf \
-    -e 's|cgi.cfg\s*=\s*cgi.cfg|cgi.cfg             = /etc/thruk/cgi.cfg|' \
-    -e 's/use_frames\s*=\s*0/use_frames          = 1/' \
-    -e 's|\#var_path\s*=\s*./var|var_path = /var/thruk|' \
-    -e 's|#ssi_path\s*=\s*ssi/|ssi_path = /etc/thruk/ssi/|' \
-    -e 's|#plugin_path\s*=\s*plugins/|plugin_path = /etc/thruk/plugins/|' \
-    -e 's|#themes_path\s*=\s*themes/|themes_path = /etc/thruk/themes/|' \
-    -e 's|#log4perl_conf\s*=\s*./log4perl.conf|log4perl_conf = /etc/thruk/log4perl.conf|' \
-    -e 's|thruk\s*=\s*./thruk_local.conf|thruk    = /etc/thruk/thruk_local.conf|' \
-    -e 's|cgi.cfg\s*=\s*\s*/cgi.cfg|cgi.cfg  = /etc/thruk/cgi.cfg|' \
-    -e 's|#    htpasswd = ./htpasswd|    htpasswd = /etc/thruk/htpasswd|' \
-    -e 's|<Component Thruk::Backend>|<Component Thruk::Backend>\n    <peer>\n        name   = Core\n        type   = livestatus\n        <options>\n            peer          = /tmp/livestatus.socket\n            resource_file = /etc/nagios/private/resource.cfg\n       </options>\n       <configtool>\n            core_conf      = /etc/nagios/nagios.cfg\n            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg\n            obj_reload_cmd = /etc/init.d/nagios reload\n       </configtool>\n    </peer>\n|'
-
-sed -i %{buildroot}%{_sysconfdir}/thruk/log4perl.conf \
-    -e 's|logs/error.log|/var/log/thruk/error.log|'
-
-sed -i %{buildroot}%{_datadir}/thruk/lib/Thruk.pm \
-    -e 's|# local deployment.|# local deployment.\n__PACKAGE__->config->{home} = "/usr/share/thruk";|'
 
 %pre
 getent group nagios >/dev/null || groupadd -r nagios
@@ -118,7 +118,12 @@ getent passwd nagios >/dev/null || \
 exit 0
 
 %post
-/etc/init.d/httpd reload
+%if %{defined suse_version}
+a2enmod mod_fcgid
+/etc/init.d/apache2 restart || /etc/init.d/apache2 start
+%else
+/etc/init.d/httpd restart || /etc/init.d/httpd start
+%endif
 exit 0
 
 %clean
@@ -130,7 +135,11 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
 %config(noreplace) %{_sysconfdir}/thruk/cgi.cfg
 %config(noreplace) %{_sysconfdir}/thruk/htpasswd
+%if %{defined suse_version}
+%config(noreplace) %{_sysconfdir}/apache2/conf.d/thruk.conf
+%else
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/thruk.conf
+%endif
 %{_sysconfdir}/thruk/thruk.conf
 %{_sysconfdir}/thruk/themes/
 %{_sysconfdir}/thruk/plugins/
@@ -138,8 +147,12 @@ exit 0
 %{_datadir}/thruk/
 
 %attr(755,nagios,root) %{_localstatedir}/thruk
-%attr(755,apache,root) %{_localstatedir}/log/thruk
 %attr(755,nagios,root) %{_datadir}/thruk/fcgid_env.sh
+%if %{defined suse_version}
+%attr(755,apache,root) %{_localstatedir}/log/thruk
+%else
+%attr(755,wwwrun,root) %{_localstatedir}/log/thruk
+%endif
 
 %defattr(-,root,root)
 %docdir %{_defaultdocdir}

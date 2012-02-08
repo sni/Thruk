@@ -1,0 +1,84 @@
+--- a/thruk.conf	2012-02-08 14:07:36.885230965 +0100
++++ b/thruk.conf	2012-02-08 14:48:34.614779980 +0100
+@@ -47,11 +47,11 @@
+ 
+ ######################################
+ # location of your cgi.cfg
+-cgi.cfg             = cgi.cfg
++cgi.cfg             = /etc/thruk/cgi.cfg
+ 
+ ######################################
+ # use frames, can be useful for addons
+-use_frames          = 0
++use_frames          = 1
+ 
+ ######################################
+ # normally passive checks would be marked as disabled.
+@@ -117,23 +117,23 @@
+ 
+ ######################################
+ # var directory, used to store user settings
+-#var_path = ./var
++var_path = /var/thruk
+ 
+ ######################################
+ # server side includes
+-#ssi_path = ssi/
++ssi_path = /etc/thruk/ssi/
+ 
+ ######################################
+ # path to your plugins
+ # see documentation for further steps if
+ # you change the plugin path
+-#plugin_path = plugins/
++plugin_path = /etc/thruk/plugins/
+ 
+ ######################################
+ # path to your themes
+ # see documentation for further steps if
+ # you change the themes path
+-#themes_path = themes/
++themes_path = /etc/thruk/themes/
+ 
+ ######################################
+ # custom templates
+@@ -141,7 +141,7 @@
+ 
+ ######################################
+ # log4perl config
+-#log4perl_conf = ./log4perl.conf
++log4perl_conf = /etc/thruk/log4perl.conf
+ 
+ ######################################
+ # use paged data instead of all data in one huge page
+@@ -340,6 +340,20 @@
+ ######################################
+ # Backend Configuration, enter your backends here
+ <Component Thruk::Backend>
++    <peer>
++        name   = Core
++        type   = livestatus
++        <options>
++            peer          = /tmp/livestatus.socket
++            resource_file = /etc/nagios/private/resource.cfg
++       </options>
++       <configtool>
++            core_conf      = /etc/nagios/nagios.cfg
++            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg
++            obj_reload_cmd = /etc/init.d/nagios reload
++       </configtool>
++    </peer>
++
+ #    <peer>
+ #        name   = Local Nagios
+ #        type   = livestatus
+@@ -389,7 +403,7 @@
+ <Component Thruk::Plugin::ConfigTool>
+     show_plugin_syntax_helper = 1
+ 
+-    thruk    = ./thruk_local.conf
++    thruk    = /etc/thruk/thruk_local.conf
+     cgi.cfg  = ./cgi.cfg
+-#    htpasswd = ./htpasswd
++    htpasswd = /etc/thruk/htpasswd
+ </Component>

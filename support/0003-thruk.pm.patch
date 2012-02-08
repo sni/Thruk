@@ -1,0 +1,10 @@
+--- a/lib/Thruk.pm	2012-02-08 14:07:36.785219995 +0100
++++ b/lib/Thruk.pm	2012-02-08 14:56:25.616507674 +0100
+@@ -49,6 +49,7 @@
+ # details given here can function as a default configuration,
+ # with a external configuration file acting as an override for
+ # local deployment.
++__PACKAGE__->config->{home} = "/usr/share/thruk";
+ my $project_root = __PACKAGE__->config->{home};
+ my $branch       = "";
+ if(-d $project_root."/.git") {
