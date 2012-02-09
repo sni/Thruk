@@ -1,6 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.1.8    Tue Jan 31 22:27:48 CET 2012
+1.2      Thu Feb  9 22:48:41 CET 2012
+          - changed version numbers to real numbers
+              - from now on, even numbers will be stable releases
+              - odd numbered releases will be test releases
+              - this also fixes the Argument "1.1.7" isn't numeric in subroutine entry at... error
           - finished mobile plugin
           - support timeperiods in trends/availability reports
           - made duration of downtimes and acknowledgement configurable

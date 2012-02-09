@@ -18,15 +18,14 @@ version=`git tag -l | sed -e 's/^v//g' | sort -n | tail -n 1`
 if [ $? -eq 0 ]; then
   date=`date +%Y%m%d`
   major=` echo $version | cut -d . -f 1`
-  minor1=`echo $version | cut -d . -f 2`
-  minor2=`echo $version | cut -d . -f 3`
+  minor=`echo $version | cut -d . -f 2`
 
   # do we have a even minor version?
-  let mod=$minor2%2
+  let mod=$minor%2
   if [ $mod -eq 0 ]; then
-    minor2=$((minor2+1))
+    minor=$((minor+1))
   fi
-  version="$major.$minor1.$minor2"
+  version="$major.$minor"
 
   echo ${version}_${date} | tr -d 'v'
   exit 0

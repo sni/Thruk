@@ -163,9 +163,9 @@ IMPORTANT: you may need to install libgd and libxpm.
 ----
   %> arch=$(perl -e 'use Config; print $Config{archname}')
   %> vers=$(perl -e 'use Config; print $Config{version}')
-  %> wget http://www.thruk.org/files/Thruk-1.1.8-$arch-$vers.tar.gz
-  %> tar zxf Thruk-1.1.8-$arch-$vers.tar.gz
-  %> cd Thruk-1.1.8
+  %> wget http://www.thruk.org/files/Thruk-1.2-$arch-$vers.tar.gz
+  %> tar zxf Thruk-1.2-$arch-$vers.tar.gz
+  %> cd Thruk-1.2
   %> ./script/thruk_server.pl
 ----
 
@@ -783,7 +783,7 @@ amount of seconds. Displaying pages soon after backend restarts
 may display wrong results and all services are pending. Enable this if
 you experience problems with pending services after reloading your
 backend.
-Should be obsolete with Livestatus versions greater than 1.1.8
+Should be obsolete with Livestatus versions greater than 1.2
 ex.: setting this to 10 would start serving pages 10 seconds
 after the backend reload
 
