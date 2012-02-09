@@ -59,8 +59,8 @@
 +        name   = Core
 +        type   = livestatus
 +        <options>
-+            peer          = /tmp/livestatus.socket
-+            resource_file = /etc/nagios/private/resource.cfg
++            peer          = /var/nagios/rw/live
++            resource_file = /etc/nagios/resource.cfg
 +       </options>
 +       <configtool>
 +            core_conf      = /etc/nagios/nagios.cfg

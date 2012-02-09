@@ -1,11 +1,9 @@
-use inc::Module::Install;
+use lib 'local-lib';
 use lib 'lib';
+use inc::Module::Install;
+use strict;
+use warnings;
 
-use FindBin;
-if(-e "$FindBin::Bin/local-lib") {
-    use lib "$FindBin::Bin/local-lib/lib/perl5";
-    require local::lib; local::lib->import("$FindBin::Bin/local-lib/perl5/");
-}
 
 name 'Thruk';
 all_from 'lib/Thruk.pm';
@@ -187,7 +185,7 @@ EOT
     $new_makefile .= $line;
 }
 close($fh);
-open(my $fh, '>', 'Makefile') or die("cannot open Makefile for writing");
+open($fh, '>', 'Makefile') or die("cannot open Makefile for writing");
 print $fh $new_makefile;
 close($fh);
 `cat script/append.make >> Makefile`;

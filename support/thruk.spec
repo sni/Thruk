@@ -12,9 +12,10 @@ BuildRequires: autoconf, automake, perl
 Summary:       Thruk Monitoring Webinterface
 Provides:      thruk
 AutoReqProv:   no
-Patch0:        ./support/0001-thruk.conf.patch
-Patch1:        ./support/0002-log4perl.conf.patch
-Patch2:        ./support/0003-thruk.pm.patch
+Patch0:        0001-thruk.conf.patch
+Patch1:        0002-log4perl.conf.patch
+Patch2:        0003-thruk.pm.patch
+Patch3:        0004-thruk_fastcgi.pl.patch
 Requires(pre): shadow-utils
 Requires:      perl
 %if %{defined suse_version}
@@ -36,6 +37,7 @@ rm -rf %{buildroot}
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 yes n | perl Makefile.PL
@@ -107,8 +109,6 @@ mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_syscon
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
-%{__rm} -rf %{buildroot}%{_datadir}/thruk/local-lib/perl5
-ln -s . %{buildroot}%{_datadir}/thruk/local-lib/perl5
 
 %pre
 getent group nagios >/dev/null || groupadd -r nagios
@@ -146,17 +146,19 @@ exit 0
 %{_sysconfdir}/thruk/ssi/
 %{_datadir}/thruk/
 
-%attr(755,nagios,root) %{_localstatedir}/thruk
-%attr(755,nagios,root) %{_datadir}/thruk/fcgid_env.sh
 %if %{defined suse_version}
-%attr(755,apache,root) %{_localstatedir}/log/thruk
-%else
+%attr(755,wwwrun,root) %{_localstatedir}/thruk
+%attr(755,wwwrun,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,wwwrun,root) %{_localstatedir}/log/thruk
+%else
+%attr(755,apache,root) %{_localstatedir}/thruk
+%attr(755,apache,root) %{_datadir}/thruk/fcgid_env.sh
+%attr(755,apache,root) %{_localstatedir}/log/thruk
 %endif
 
 %defattr(-,root,root)
 %docdir %{_defaultdocdir}
 
 %changelog
-* Wed Feb 01 2012 Sven Nierlein <sven@consol.de>
+* Fri Feb 10 2012 Sven Nierlein <sven@consol.de>
 - First build
