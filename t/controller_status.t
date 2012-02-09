@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 923;
+use Test::More tests => 922;
 use JSON::XS;
 
 BEGIN {

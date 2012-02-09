@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 27;
+use Test::More tests => 26;
 use Data::Dumper;
 use Log::Log4perl qw(:easy);
 

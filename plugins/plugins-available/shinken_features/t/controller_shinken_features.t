@@ -2,8 +2,14 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Test::More;
-use Catalyst::Test 'Thruk';
 $Data::Dumper::Sortkeys = 1;
+
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+use Catalyst::Test 'Thruk';
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
@@ -11,10 +17,6 @@ if($c->stash->{'enable_shinken_features'}) {
 } else {
     plan skip_all => 'pure shinken backend required'
 }
-
-use lib('t');
-require TestUtils;
-import TestUtils;
 
 use_ok 'Thruk::Controller::shinken_features';
 

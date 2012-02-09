@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 854;
+use Test::More tests => 853;
 use JSON::XS;
 use Encode qw(encode_utf8 decode_utf8);
 

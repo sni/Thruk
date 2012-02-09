@@ -1,9 +1,7 @@
 use strict;
 use warnings;
-use Test::More tests => 362;
+use Test::More tests => 361;
 use Data::Dumper;
-use File::Temp qw/ tempfile /;
-use File::Slurp;
 use Storable qw/ dclone /;
 
 BEGIN {
@@ -63,7 +61,7 @@ is($got, $conf_exp, "merge config II");
 ###########################################################
 # test reading htpasswd
 my $expected = { "testuser" => "zTOzpj/AEVckE" };
-my($fh, $filename) = tempfile();
+my($fh, $filename) = File::Temp::tempfile();
 print $fh <<EOF;
 # test htpasswd
 testuser:zTOzpj/AEVckE
@@ -261,5 +259,12 @@ is(scalar @{$objs}, 1, "number of hosts by name");
 #    my @keys   = keys %{$hash};
 #    return [ sort @keys ];
 #}
+
+sub read_file {
+    my $file = shift;
+    local $/ = undef;
+    open my $fh, "<", $file or die "could not open $file: $!";
+    return <$fh>;
+}
 
 1;

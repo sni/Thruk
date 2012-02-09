@@ -1,15 +1,20 @@
 #!/usr/bin/env perl
 
-#########################
-
 use strict;
-use Test::More tests => 29;
+use Test::More tests => 28;
 use Data::Dumper;
+
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
+use Catalyst::Test 'Thruk';
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
 
 #########################
 # sort

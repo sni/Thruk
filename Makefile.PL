@@ -15,6 +15,7 @@ resources(
     'repository', => 'http://github.com/sni/Thruk',
 );
 
+requires 'parent'                                 => 0;     # required by Thruk
 requires 'JSON'                                   => 0;     # required by Thruk::View::JSON
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'Path::Class'                            => 0;     # required by Catalyst::Runtime

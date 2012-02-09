@@ -11,7 +11,7 @@ use Data::Dumper;
 use Test::More;
 use Thruk::Utils::External;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+use Catalyst::Test 'Thruk';
 
 my $use_html_lint = 0;
 eval {

@@ -1,7 +1,13 @@
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 1;
 
-BEGIN { use_ok 'Catalyst::Test', 'Thruk' }
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
+use Catalyst::Test 'Thruk';
 
 ok( request('/')->is_redirect, 'Request should redirect' );
