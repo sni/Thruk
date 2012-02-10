@@ -287,6 +287,7 @@ ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
 support/0003-thruk.pm.patch
+support/0004-thruk_fastcgi.pl.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd
