@@ -41,3 +41,11 @@ docs/development
 plugins/plugins-available/conf/test.pl
 plugins/plugins-available/conf/tmon.out
 script/thruk$
+thruk_.*.changes
+thruk_.*.deb
+thruk_.*.dsc
+debian/thruk/.*
+build-stamp
+configure-stamp
+debian/files
+debian/thruk.debhelper.log

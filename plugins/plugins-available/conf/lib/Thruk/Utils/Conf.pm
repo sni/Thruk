@@ -377,7 +377,7 @@ sub store_model_retention {
     $c->stats->profile(begin => "store object retention");
 
     my $model = $c->model('Objects');
-    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
+    my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
 
     # try to save retention data
     eval {
@@ -411,7 +411,7 @@ sub get_model_retention {
     $c->stats->profile(begin => "retrieve object retention");
 
     my $model = $c->model('Objects');
-    my $file  = $c->config->{'var_path'}."/obj_retention.dat";
+    my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
 
     return unless -f $file;
 

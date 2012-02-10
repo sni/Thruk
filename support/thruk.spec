@@ -1,15 +1,15 @@
-Name:          Thruk
+Name:          thruk
 Version:       1.2
 Release:       1%{?dist}
 License:       GNU Public License version 2
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
 URL:           http://thruk.org
-Source0:       Thruk-%{version}.tar.gz
+Source0:       thruk-%{version}.tar.gz
 Group:         Applications/Monitoring
 BuildRoot:     %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 BuildRequires: autoconf, automake, perl
-Summary:       Thruk Monitoring Webinterface
+Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 Provides:      thruk
 AutoReqProv:   no
 Patch0:        0001-thruk.conf.patch
@@ -44,7 +44,8 @@ yes n | perl Makefile.PL
 %{__make} %{_smp_mflags}
 
 %install
-%{__mkdir} -p %{buildroot}%{_localstatedir}/thruk
+%{__mkdir} -p %{buildroot}%{_localstatedir}/lib/thruk
+%{__mkdir} -p %{buildroot}%{_localstatedir}/cache/thruk
 %{__mkdir} -p %{buildroot}%{_localstatedir}/log/thruk
 %if %{defined suse_version}
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/apache2/conf.d
@@ -57,6 +58,7 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-available
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
+%{__mkdir} -p %{buildroot}/usr/lib/thruk
 
 cp -rp . %{buildroot}%{_datadir}/thruk/
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/var
@@ -94,6 +96,7 @@ done
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/themes/themes-enabled
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/t
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/themes
+mv %{buildroot}%{_datadir}/thruk/local-lib %{buildroot}/usr/lib/thruk/perl5
 mv %{buildroot}%{_datadir}/thruk/thruk.conf %{buildroot}%{_sysconfdir}/thruk/thruk.conf
 mv %{buildroot}%{_datadir}/thruk/log4perl.conf.example %{buildroot}%{_sysconfdir}/thruk/log4perl.conf
 mv %{buildroot}%{_datadir}/thruk/cgi.cfg %{buildroot}%{_sysconfdir}/thruk/cgi.cfg
@@ -112,10 +115,6 @@ mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thr
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 
 %pre
-getent group nagios >/dev/null || groupadd -r nagios
-getent passwd nagios >/dev/null || \
-    useradd -r -g nagios -d %{_localstatedir}/thruk -s /sbin/nologin \
-    -c "nagios user" nagios
 exit 0
 
 %post
@@ -128,7 +127,8 @@ a2enmod mod_fcgid
 exit 0
 
 %postun
-rm -rf /var/thruk
+rm -rf %{_localstatedir}/lib/thruk
+rm -rf %{_localstatedir}/cache/thruk
 exit 0
 
 %clean
@@ -150,13 +150,16 @@ exit 0
 %{_sysconfdir}/thruk/plugins/
 %{_sysconfdir}/thruk/ssi/
 %{_datadir}/thruk/
+/usr/lib/thruk/perl5
 
 %if %{defined suse_version}
-%attr(755,wwwrun,root) %{_localstatedir}/thruk
+%attr(755,wwwrun,root) %{_localstatedir}/lib/thruk
+%attr(755,wwwrun,root) %{_localstatedir}/cache/thruk
 %attr(755,wwwrun,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,wwwrun,root) %{_localstatedir}/log/thruk
 %else
-%attr(755,apache,root) %{_localstatedir}/thruk
+%attr(755,apache,root) %{_localstatedir}/lib/thruk
+%attr(755,apache,root) %{_localstatedir}/cache/thruk
 %attr(755,apache,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,apache,root) %{_localstatedir}/log/thruk
 %endif

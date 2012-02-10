@@ -50,8 +50,8 @@ our $VERSION = '1.2';
 # with a external configuration file acting as an override for
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
-my $branch       = "";
-if(-d $project_root."/.git") {
+my $branch       = '';
+if(-d $project_root.'/.git') {
     $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
     chomp($branch);
     $branch =~ s/^\*\s+//gmx;
@@ -234,13 +234,17 @@ if(defined $timezone) {
 # set installed server side includes
 my $ssi_dir = __PACKAGE__->config->{'ssi_path'} || $project_root."/ssi/";
 my (%ssi, $dh);
-opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
-for my $entry (readdir($dh)) {
-    next if $entry eq '.' or $entry eq '..';
-    next if $entry !~ /\.ssi$/mx;
-    $ssi{$entry} = { name => $entry }
+if(!-e $ssi_dir) {
+    warn("cannot access ssi_path $ssi_dir: $!");
+} else {
+    opendir( $dh, $ssi_dir) or die "can't opendir '$ssi_dir': $!";
+    for my $entry (readdir($dh)) {
+        next if $entry eq '.' or $entry eq '..';
+        next if $entry !~ /\.ssi$/mx;
+        $ssi{$entry} = { name => $entry }
+    }
+    closedir $dh;
 }
-closedir $dh;
 __PACKAGE__->config->{'ssi_includes'} = \%ssi;
 __PACKAGE__->config->{'ssi_path'}     = $ssi_dir;
 

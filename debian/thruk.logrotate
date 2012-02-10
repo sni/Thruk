@@ -1,0 +1,8 @@
+/var/log/thruk/*.log {
+    weekly
+    missingok
+    rotate 10
+    compress
+    delaycompress
+    notifempty
+}

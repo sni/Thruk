@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-02-10 11:21:47.049473953 +0100
-+++ b/thruk.conf	2012-02-10 11:22:21.343274403 +0100
+--- a/thruk.conf	2012-02-11 23:10:59.735010971 +0100
++++ b/thruk.conf	2012-02-11 23:13:32.992044583 +0100
 @@ -47,11 +47,11 @@
  
  ######################################
@@ -14,12 +14,17 @@
  
  ######################################
  # normally passive checks would be marked as disabled.
-@@ -117,23 +117,23 @@
+@@ -113,27 +113,27 @@
+ 
+ ######################################
+ # temporary directory, used for template cache...
+-#tmp_path = /tmp
++tmp_path = /var/cache/thruk
  
  ######################################
  # var directory, used to store user settings
 -#var_path = ./var
-+var_path = /var/thruk
++var_path = /var/lib/thruk
  
  ######################################
  # server side includes

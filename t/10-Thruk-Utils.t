@@ -95,7 +95,7 @@ SKIP: {
 
     #########################
     # external cmd
-    Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
+    Thruk::Utils::External::cmd($c, { cmd => "sleep 2; echo 'test'; echo \"err\" >&2;" });
     my $id = $c->stash->{'job_id'};
     isnt($id, undef, "got an id");
 

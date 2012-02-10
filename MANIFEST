@@ -1,5 +1,13 @@
 cgi.cfg
 Changes
+debian/changelog
+debian/compat
+debian/control
+debian/copyright
+debian/postinst
+debian/rules
+debian/thruk.lintian-overrides
+debian/thruk.logrotate
 docs/FAQ.html
 docs/FAQ.txt
 docs/source/arch.graffle

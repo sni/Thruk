@@ -4,7 +4,7 @@
  #!/usr/bin/env perl
  
 +use lib '/usr/share/thruk/lib';
-+use lib '/usr/share/thruk/local-lib';
++use lib '/usr/lib/thruk/perl5';
  use strict;
  use warnings;
  
