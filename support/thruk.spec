@@ -72,6 +72,7 @@ cp -rp . %{buildroot}%{_datadir}/thruk/
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/Makefile
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/Makefile.PL
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/docs/source
+%{__rm} -rf %{buildroot}%{_datadir}/thruk/00*.patch
 for file in %{buildroot}%{_datadir}/thruk/plugins/plugins-available/*; do
     file=`basename $file`
     ln -s %{_datadir}/thruk/plugins/plugins-available/$file %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-available/$file
@@ -124,6 +125,10 @@ a2enmod mod_fcgid
 %else
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 %endif
+exit 0
+
+%postun
+rm -rf /var/thruk
 exit 0
 
 %clean

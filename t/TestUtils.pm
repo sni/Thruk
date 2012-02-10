@@ -122,7 +122,7 @@ sub test_page {
             like($request->{'_headers'}->{'location'}, qr/$opts{'location'}/, "Content should redirect: ".$opts{'location'});
         }
     } else {
-        ok( $request->is_success, 'Request '.$opts{'url'}.' should succeed' );
+        ok( $request->is_success, 'Request '.$opts{'url'}.' should succeed' ) or BAIL_OUT(Dumper($request));
     }
     $return->{'content'} = $request->content;
 
@@ -207,6 +207,8 @@ sub test_page {
             next if $match =~ m/^\/thruk\/cgi\-bin/;
             next if $match =~ m/^\w+\.cgi/;
             next if $match =~ m/^javascript:/;
+            next if $match =~ m/^'\+\w+\+'$/          and defined $ENV{'CATALYST_SERVER'};
+            next if $match =~ m|^/thruk/frame\.html| and defined $ENV{'CATALYST_SERVER'};
             $match =~ s/"\s*\+\s*url_prefix\s*\+\s*"/\//gmx;
             $match =~ s/"\s*\+\s*theme\s*\+\s*"/Thruk/gmx;
             $links_to_check->{$match} = 1;

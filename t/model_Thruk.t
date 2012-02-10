@@ -1,17 +1,20 @@
 use strict;
 use warnings;
-use Test::More tests => 26;
+use Test::More;
 use Data::Dumper;
 use Log::Log4perl qw(:easy);
 
 $Data::Dumper::Sortkeys = 1;
+
+plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+plan tests => 26;
 
 BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
-BEGIN { use_ok 'Thruk::Model::Thruk' }
+use_ok 'Thruk::Model::Thruk';
 use Catalyst::Test 'Thruk';
 
 ################################################################################

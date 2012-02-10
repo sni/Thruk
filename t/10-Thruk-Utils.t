@@ -76,59 +76,63 @@ my $sorted_by_abc = Thruk::Backend::Manager::_sort(undef, $befor, { 'ASC' => ['a
 is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
 
 #########################
-my($res, $c) = ctx_request('/thruk/side.html');
-my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
-is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(thrukadmin)');
+SKIP: {
+    skip 'external tests', 15 if defined $ENV{'CATALYST_SERVER'};
 
-#########################
-use_ok('XML::Parser');
+    my($res, $c) = ctx_request('/thruk/side.html');
+    my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
+    is_deeply($contactgroups, {}, 'get_contactgroups_by_contact(thrukadmin)');
 
-my $escaped = Thruk::Utils::Filter::xml_escape("& <br> üöä?");
-my $p1 = XML::Parser->new();
-eval {
-    $p1->parse('<data>'.$escaped.'</data>');
+    #########################
+    use_ok('XML::Parser');
+
+    my $escaped = Thruk::Utils::Filter::xml_escape("& <br> üöä?");
+    my $p1 = XML::Parser->new();
+    eval {
+        $p1->parse('<data>'.$escaped.'</data>');
+    };
+    is("$@", "", "no XML::Parser errors");
+
+    #########################
+    # external cmd
+    Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
+    my $id = $c->stash->{'job_id'};
+    isnt($id, undef, "got an id");
+
+    # wait for completion
+    for(1..5) {
+        last unless Thruk::Utils::External::is_running($c, $id);
+        sleep(1);
+    }
+
+    is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
+    my($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
+
+    is($out,  "test\n", "got result");
+    is($err,  "err\n",  "got error");
+    ok($time >=1,       "got time (".$time."s)");
+    isnt($dir, undef,   "got dir");
+
+    #########################
+    # external perl
+    Thruk::Utils::External::perl($c, { expr => "print STDERR 'blah'; print 'blub';" });
+    $id = $c->stash->{'job_id'};
+    isnt($id, undef, "got an id");
+
+    # wait for completion
+    for(1..5) {
+        last unless Thruk::Utils::External::is_running($c, $id);
+        sleep(1);
+    }
+
+    is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
+    ($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
+
+    is($out,   "blub",  "got result");
+    is($err,   "blah",  "got error");
+    is($time,  0,       "got time");
+    isnt($dir, undef,   "got dir");
 };
-is("$@", "", "no XML::Parser errors");
-
-#########################
-# external cmd
-Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
-my $id = $c->stash->{'job_id'};
-isnt($id, undef, "got an id");
-
-# wait for completion
-for(1..5) {
-    last unless Thruk::Utils::External::is_running($c, $id);
-    sleep(1);
-}
-
-is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
-my($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
-
-is($out,  "test\n", "got result");
-is($err,  "err\n",  "got error");
-ok($time >=1,       "got time (".$time."s)");
-isnt($dir, undef,   "got dir");
-
-#########################
-# external perl
-Thruk::Utils::External::perl($c, { expr => "print STDERR 'blah'; print 'blub';" });
-$id = $c->stash->{'job_id'};
-isnt($id, undef, "got an id");
-
-# wait for completion
-for(1..5) {
-    last unless Thruk::Utils::External::is_running($c, $id);
-    sleep(1);
-}
-
-is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
-($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
-
-is($out,   "blub",  "got result");
-is($err,   "blah",  "got error");
-is($time,  0,       "got time");
-isnt($dir, undef,   "got dir");
 
 
 is(Thruk::Utils::version_compare('1.0.0',   '1.0.1'),   1, 'version_compare: 1.0.0 vs. 1.0.1');

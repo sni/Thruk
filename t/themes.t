@@ -2,6 +2,8 @@ use strict;
 use warnings;
 use Test::More;
 
+plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+
 BEGIN {
     use lib('t');
     require TestUtils;

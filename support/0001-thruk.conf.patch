@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-02-08 14:07:36.885230965 +0100
-+++ b/thruk.conf	2012-02-08 14:48:34.614779980 +0100
+--- a/thruk.conf	2012-02-10 11:21:47.049473953 +0100
++++ b/thruk.conf	2012-02-10 11:22:21.343274403 +0100
 @@ -47,11 +47,11 @@
  
  ######################################
@@ -77,8 +77,9 @@
      show_plugin_syntax_helper = 1
  
 -    thruk    = ./thruk_local.conf
-+    thruk    = /etc/thruk/thruk_local.conf
-     cgi.cfg  = ./cgi.cfg
+-    cgi.cfg  = ./cgi.cfg
 -#    htpasswd = ./htpasswd
++    thruk    = /etc/thruk/thruk_local.conf
++    cgi.cfg  = /etc/thruk/cgi.cfg
 +    htpasswd = /etc/thruk/htpasswd
  </Component>

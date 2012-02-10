@@ -18,7 +18,7 @@
     /* return absolute host part of current url */
     function get_host() {
         var host = window.location.protocol + '//' + window.location.host;
-        if(window.location.port != "") {
+        if(window.location.port != "" && host.indexOf(':' + window.location.port) == -1) {
             host += ':' + window.location.port;
         }
         return(host);

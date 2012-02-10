@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 157;
+use Test::More tests => 148;
 
 BEGIN {
     use lib('t');
@@ -8,12 +8,15 @@ BEGIN {
     import TestUtils;
 }
 
-BEGIN { use_ok 'Thruk::Controller::statusmap' }
+SKIP: {
+    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+
+    use_ok 'Thruk::Controller::statusmap';
+};
 
 my($host,$service) = TestUtils::get_test_service();
 
 my $pages = [
-    '/statusmap',
     '/thruk/cgi-bin/statusmap.cgi',
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=parent&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=parent&host='.$host,
@@ -34,8 +37,6 @@ my $pages = [
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=servicegroup&hidetop=',
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=servicegroup&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=servicegroup&host='.$host,
-
-# bugs
 ];
 
 

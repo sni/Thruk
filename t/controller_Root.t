@@ -22,16 +22,25 @@ my $pages = [
     '/thruk/side.html',
 ];
 
-for my $url (@{$redirects}) {
-    TestUtils::test_page(
-        'url'      => $url,
-        'redirect' => 1,
-    );
-}
+SKIP: {
+    skip 'external tests', 3 if defined $ENV{'CATALYST_SERVER'};
+
+    for my $url (@{$redirects}) {
+        TestUtils::test_page(
+            'url'      => $url,
+            'redirect' => 1,
+        );
+    }
+};
 
 for my $url (@{$pages}) {
-    TestUtils::test_page(
-        'url'     => $url,
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
-    );
+    SKIP: {
+        skip 'external tests', 11 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk';
+        skip 'external tests', 11 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk/';
+
+        TestUtils::test_page(
+            'url'     => $url,
+            'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+        );
+    };
 }

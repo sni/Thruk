@@ -8,7 +8,11 @@ BEGIN {
     import TestUtils;
 }
 
-BEGIN { use_ok 'Thruk::Controller::statusmap' }
+SKIP: {
+    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+
+    use_ok 'Thruk::Controller::statusmap';
+};
 
 my $pages = [
     '/thruk/cgi-bin/mobile.cgi',

@@ -12,6 +12,9 @@ BEGIN {
 
 ###########################################################
 # load modules
+if(defined $ENV{'CATALYST_SERVER'}) {
+    unshift @INC, 'plugins/plugins-available/conf/lib';
+}
 use_ok 'Monitoring::Config';
 use_ok 'Monitoring::Config::Help';
 use_ok 'Thruk::Utils::Conf::Defaults';

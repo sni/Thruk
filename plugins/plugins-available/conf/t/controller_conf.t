@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 853;
+use Test::More tests => 842;
 use JSON::XS;
 use Encode qw(encode_utf8 decode_utf8);
 
@@ -13,6 +13,10 @@ BEGIN {
 
 ###########################################################
 # test modules
+if(defined $ENV{'CATALYST_SERVER'}) {
+    unshift @INC, 'plugins/plugins-available/conf/lib';
+}
+
 use_ok 'Thruk::Controller::conf';
 use_ok 'Monitoring::Config::Object';
 
@@ -31,7 +35,6 @@ TestUtils::test_page(
 ###########################################################
 # test some pages
 my $pages = [
-    '/conf',
     '/thruk/cgi-bin/conf.cgi',
     '/thruk/cgi-bin/conf.cgi?sub=cgi',
     '/thruk/cgi-bin/conf.cgi?sub=thruk',

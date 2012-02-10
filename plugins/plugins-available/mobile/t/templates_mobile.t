@@ -12,7 +12,11 @@ BEGIN {
 
 ###########################################################
 # check module
-use_ok 'Thruk::Controller::mobile';
+SKIP: {
+    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+
+    use_ok 'Thruk::Controller::mobile';
+};
 
 ###########################################################
 # initialize object config

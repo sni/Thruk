@@ -8,7 +8,11 @@ BEGIN {
     import TestUtils;
 }
 
-BEGIN { use_ok 'Thruk::Controller::minemap' }
+SKIP: {
+    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+
+    use_ok 'Thruk::Controller::minemap';
+};
 
 my($host,$service) = TestUtils::get_test_service();
 my $hostgroup      = TestUtils::get_test_hostgroup();

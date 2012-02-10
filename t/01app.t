@@ -10,4 +10,8 @@ BEGIN {
 
 use Catalyst::Test 'Thruk';
 
-ok( request('/')->is_redirect, 'Request should redirect' );
+SKIP: {
+    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+
+    ok( request('/')->is_redirect, 'Request should redirect' );
+};

@@ -3,6 +3,8 @@ use warnings;
 use Test::More;
 use Data::Dumper;
 
+plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+
 $Data::Dumper::Sortkeys = 1;
 
 BEGIN {
@@ -11,7 +13,7 @@ BEGIN {
     import TestUtils;
 }
 
-BEGIN { use_ok 'Thruk::Model::Objects' }
+use_ok 'Thruk::Model::Objects';
 
 use Catalyst::Test 'Thruk';
 
