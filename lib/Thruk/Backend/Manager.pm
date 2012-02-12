@@ -872,7 +872,7 @@ sub _page_data {
     return $data unless $view_mode eq 'html';
 
     # we dont use paging at all?
-    return 1 unless $c->stash->{'use_pager'};
+    return $data unless $c->stash->{'use_pager'};
 
     my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
     return 1 unless defined $entries;

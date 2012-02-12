@@ -120,7 +120,7 @@
       <td class="statusOdd" valign="top">Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
-          <tr><td onclick="toggleCheckBox('opt5')">Persistent :</td><td><input type='checkbox' id="opt5" name='persistent_comments'[% IF c.config.cmd_defaults.persistent_comments %] checked[% END %]></td></tr>
+          <tr><td onclick="toggleCheckBox('opt6')">Persistent :</td><td><input type='checkbox' id="opt6" name='persistent_comments'[% IF c.config.cmd_defaults.persistent_comments %] checked[% END %]></td></tr>
         </table>
       </td>
     </tr>
@@ -128,8 +128,8 @@
       <td class="statusOdd" valign="top">Options:</td>
       <td class="statusOdd">
         <table border=0 cellpadding=0 cellspacing=0>
-          <tr><td onclick="toggleCheckBox('opt5')">Active Downtimes:</td><td><input type='checkbox' id="opt5" name='active_downtimes' checked></td></tr>
-          <tr><td onclick="toggleCheckBox('opt6')">Future Downtimes:</td><td><input type='checkbox' id="opt6" name='future_downtimes'></td></tr>
+          <tr><td onclick="toggleCheckBox('opt7')">Active Downtimes:</td><td><input type='checkbox' id="opt7" name='active_downtimes' checked></td></tr>
+          <tr><td onclick="toggleCheckBox('opt8')">Future Downtimes:</td><td><input type='checkbox' id="opt8" name='future_downtimes'></td></tr>
         </table>
       </td>
     </tr>
