@@ -167,6 +167,8 @@ exit 0
 %defattr(-,root,root)
 %docdir %{_defaultdocdir}
 
+%doc docs/thruk.8
+
 %changelog
 * Fri Feb 10 2012 Sven Nierlein <sven@consol.de>
 - First build

@@ -22,3 +22,10 @@ if [ $(git status | grep FAQ.txt | wc -l) -gt 0 ]; then
     $DOS2UNIX FAQ.html
 fi
 
+
+if [ $(git status | grep thruk8.txt | wc -l) -gt 0 ]; then
+    a2x -d manpage -f manpage thruk8.txt
+    chmod 644 thruk.8
+    $DOS2UNIX thruk.8
+fi
+

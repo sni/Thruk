@@ -1,0 +1,57 @@
+'\" t
+.\"     Title: thruk
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: 02/13/2012
+.\"    Manual: \ \&
+.\"    Source: \ \&
+.\"  Language: English
+.\"
+.TH "THRUK" "8" "02/13/2012" "\ \&" "\ \&"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+thruk \- monitoring webinterface for nagios, icinga and shinken
+.SH "DESCRIPTION"
+.sp
+Thruk is a multibackend monitoring webinterface which currently supports Nagios, Icinga and Shinken as backend using the Livestatus API\&. It is designed to be a \fIdropin\fR replacement and covers almost all of the original features plus adds additional enhancements for large installations\&.
+.sp
+You can access Thruk on http://host/thruk/\&. There is a default user \fIthrukadmin\fR with password \fIthrukadmin\fR configured\&.
+.sp
+You probably have to change the backend configuration in /etc/thruk/thruk_local\&.conf\&.
+.SH "NOTES"
+.sp
+Complete documentation is online at http://www\&.thruk\&.org/documentation\&.html
+.sp
+And in /usr/share/thruk/docs/THRUK_MANUAL\&.txt
+.SH "BUGS"
+.sp
+Please report bugs to https://github\&.com/sni/Thruk/issues
+.SH "AUTHOR"
+.sp
+Written by Sven Nierlein, <sven\&.nierlein@consol\&.de>
+.SH "RESOURCES"
+.sp
+GitHub: https://github\&.com/sni/Thruk/
+.sp
+Main web site: http://www\&.thruk\&.org
+.SH "COPYING"
+.sp
+Copyright (C) 2009\-2012 Sven Nierlein\&. Free use of this software is granted under the terms of the GNU General Public License (GPL)\&.
