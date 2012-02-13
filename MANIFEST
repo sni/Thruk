@@ -5,6 +5,7 @@ debian/compat
 debian/control
 debian/copyright
 debian/postinst
+debian/postrm
 debian/rules
 debian/thruk.lintian-overrides
 debian/thruk.logrotate
