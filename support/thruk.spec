@@ -10,7 +10,6 @@ Group:         Applications/Monitoring
 BuildRoot:     %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 BuildRequires: autoconf, automake, perl
 Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
-Provides:      thruk
 AutoReqProv:   no
 Patch0:        0001-thruk.conf.patch
 Patch1:        0002-log4perl.conf.patch
@@ -59,6 +58,7 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
 %{__mkdir} -p %{buildroot}/usr/lib/thruk
+%{__mkdir} -p %{buildroot}%{_mandir}/man8
 
 cp -rp . %{buildroot}%{_datadir}/thruk/
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/var
@@ -113,6 +113,7 @@ mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_syscon
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
+mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
 
 %pre
 exit 0
@@ -151,6 +152,7 @@ exit 0
 %{_sysconfdir}/thruk/ssi/
 %{_datadir}/thruk/
 /usr/lib/thruk/perl5
+%doc %{_mandir}/man8/thruk.*
 
 %if %{defined suse_version}
 %attr(755,wwwrun,root) %{_localstatedir}/lib/thruk
@@ -167,7 +169,6 @@ exit 0
 %defattr(-,root,root)
 %docdir %{_defaultdocdir}
 
-%doc docs/thruk.8
 
 %changelog
 * Fri Feb 10 2012 Sven Nierlein <sven@consol.de>
