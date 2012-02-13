@@ -870,13 +870,15 @@ sub _page_data {
     # page only in html mode
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     return $data unless $view_mode eq 'html';
+    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
+    return $data unless defined $entries;
+    $c->stash->{'entries_per_page'} = $entries;
 
     # we dont use paging at all?
-    return $data unless $c->stash->{'use_pager'};
-
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $default_result_size;
-    return 1 unless defined $entries;
-    $c->stash->{'entries_per_page'} = $entries;
+    unless($c->stash->{'use_pager'}) {
+        $c->stash->{'pager'} = { 'total_entries' => ($totalsize || scalar @{$data}) };
+        return $data;
+    }
 
     my $pager = new Data::Page;
     if(defined $totalsize) {

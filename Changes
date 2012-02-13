@@ -13,6 +13,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
               - fixed selecting templates when no hosts exist
               - fixed selecting services without hosts/groups
           - fixed issue with pressing history twice when using frames
+          - fixed display issues when not using pager
 
 1.1.7    Tue Dec 20 18:02:13 CET 2011
           - added duration filter
