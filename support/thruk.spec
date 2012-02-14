@@ -103,7 +103,7 @@ mv %{buildroot}%{_datadir}/thruk/cgi.cfg %{buildroot}%{_sysconfdir}/thruk/cgi.cf
 mv %{buildroot}%{_datadir}/thruk/ssi %{buildroot}%{_sysconfdir}/thruk/
 mv %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi-pnp %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi
 cp %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi     %{buildroot}%{_sysconfdir}/thruk/ssi/extinfo-header.ssi
-touch %{buildroot}%{_sysconfdir}/thruk/thruk_local.conf
+mv %{buildroot}%{_datadir}/thruk/support/thruk_local.conf.example %{buildroot}%{_sysconfdir}/thruk/thruk_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/thruk/fcgid_env.sh
 %if %{defined suse_version}
 mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/thruk.conf

@@ -303,6 +303,7 @@ support/fcgid_env.sh
 support/htpasswd
 support/menu_local.conf
 support/thruk.spec
+support/thruk_local.conf.example
 t/01app.t
 t/10-Thruk-Utils.t
 t/11-Thruk-Backend.t

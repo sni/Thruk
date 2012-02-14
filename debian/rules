@@ -109,8 +109,8 @@ install: build
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/cgi.cfg $(CURDIR)/debian/thruk/etc/thruk/cgi.cfg
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/ssi $(CURDIR)/debian/thruk/etc/thruk/
 	mv $(CURDIR)/debian/thruk/etc/thruk/ssi/status-header.ssi-pnp $(CURDIR)/debian/thruk/etc/thruk/ssi/status-header.ssi
-	cp $(CURDIR)/debian/thruk/etc/thruk/ssi/status-header.ssi     $(CURDIR)/debian/thruk/etc/thruk//ssi/extinfo-header.ssi
-	touch $(CURDIR)/debian/thruk/etc/thruk/thruk_local.conf
+	cp $(CURDIR)/debian/thruk/etc/thruk/ssi/status-header.ssi     $(CURDIR)/debian/thruk/etc/thruk/ssi/extinfo-header.ssi
+	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk_local.conf.example $(CURDIR)/debian/thruk/etc/thruk/thruk_local.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/fcgid_env.sh $(CURDIR)/debian/thruk/usr/share/thruk/fcgid_env.sh
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/apache_fcgid.conf $(CURDIR)/debian/thruk/etc/apache2/conf.d/thruk.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/menu_local.conf $(CURDIR)/debian/thruk/etc/thruk/menu_local.conf
