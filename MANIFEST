@@ -196,8 +196,8 @@ plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.0.min.js
 plugins/plugins-available/mobile/root/jqm/jquery.mobile.structure-1.0.css
 plugins/plugins-available/mobile/root/jqm/jquery.mobile.structure-1.0.min.css
 plugins/plugins-available/mobile/root/jquery.mobile.router-0.6.js
-plugins/plugins-available/mobile/root/mobile-1.2.css
-plugins/plugins-available/mobile/root/mobile-1.2.js
+plugins/plugins-available/mobile/root/mobile-1.18.css
+plugins/plugins-available/mobile/root/mobile-1.18.js
 plugins/plugins-available/mobile/t/controller_mobile.t
 plugins/plugins-available/mobile/t/templates_mobile.t
 plugins/plugins-available/mobile/templates/mobile.tt
@@ -243,7 +243,7 @@ root/thruk/faq.html
 root/thruk/images/spacer.png
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/all_in_one-1.2.js
+root/thruk/javascript/all_in_one-1.18.js
 root/thruk/javascript/cal/img/cool-bg-hard-inv.png
 root/thruk/javascript/cal/img/cool-bg-hard.png
 root/thruk/javascript/cal/img/cool-bg-inv.png
@@ -278,7 +278,7 @@ root/thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.8.16.custom.css
 root/thruk/javascript/jquery-ui/js/jquery-ui-1.8.16.custom.min.js
 root/thruk/javascript/overlib.js
 root/thruk/javascript/prototype-1.7.0.js
-root/thruk/javascript/thruk-1.2.js
+root/thruk/javascript/thruk-1.18.js
 root/thruk/themes
 script/append.make
 script/thruk_cgi.pl
@@ -1139,8 +1139,8 @@ themes/themes-available/Thruk/images/waiting.gif
 themes/themes-available/Thruk/images/wand.png
 themes/themes-available/Thruk/images/warning.png
 themes/themes-available/Thruk/images/yellow.gif
-themes/themes-available/Thruk/stylesheets/all_in_one-1.2.css
-themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.2.css
+themes/themes-available/Thruk/stylesheets/all_in_one-1.18.css
+themes/themes-available/Thruk/stylesheets/all_in_one_noframes-1.18.css
 themes/themes-available/Thruk/stylesheets/Thruk.css
 themes/themes-available/Thruk/stylesheets/thruk_global.css
 themes/themes-available/Thruk/stylesheets/thruk_noframes.css
