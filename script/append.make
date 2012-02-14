@@ -7,10 +7,13 @@ version:
 	which dch
 	@if [ "$$NEWVERSION" = "" ]; then newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)"); else newversion="$$NEWVERSION"; fi; \
 	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
+		date=`date "+%B %d, %Y"`; \
 		branch=`echo "$$newversion" | awk '{ print $$2 }'`; \
 		newversion=`echo "$$newversion" | awk '{ print $$1 }'`; \
-		sed -r "s/$(VERSION)/$$newversion/" -i lib/Thruk.pm -i docs/THRUK_MANUAL.txt -i support/thruk.spec && \
-		sed -r "s/\-$(VERSION)/\-$$newversion/" -i MANIFEST && \
+		sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk.pm && \
+		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i support/thruk.spec && \
+		sed -r "s/_$(VERSION)_/_$$newversion_/" -i docs/THRUK_MANUAL.txt && \
+		sed -r "s/\-$(VERSION)\./\-$$newversion/" -i MANIFEST -i docs/THRUK_MANUAL.txt && \
 		debversion="$$newversion" && \
 		if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk.pm; debversion="$$newversion~$$branch"; fi && \
 		if [ -e ".git" ]; then git="git"; else git=""; fi && \
