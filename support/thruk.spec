@@ -114,6 +114,8 @@ mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfd
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
+%{__rm} -rf %{buildroot}%{_datadir}/thruk/debian
+%{__rm} -rf %{buildroot}%{_sysconfdir}/thruk/ssi/README
 
 %pre
 exit 0
@@ -136,6 +138,7 @@ exit 0
 %{__rm} -rf %{buildroot}
 
 %files
+%config %{_sysconfdir}/thruk/thruk.conf
 %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
@@ -146,10 +149,9 @@ exit 0
 %else
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/thruk.conf
 %endif
-%{_sysconfdir}/thruk/thruk.conf
-%{_sysconfdir}/thruk/themes/
-%{_sysconfdir}/thruk/plugins/
-%{_sysconfdir}/thruk/ssi/
+%config(noreplace) %{_sysconfdir}/thruk/themes/
+%config(noreplace) %{_sysconfdir}/thruk/plugins/
+%config(noreplace) %{_sysconfdir}/thruk/ssi/
 %{_datadir}/thruk/
 /usr/lib/thruk/perl5
 %doc %{_mandir}/man8/thruk.*
@@ -171,5 +173,5 @@ exit 0
 
 
 %changelog
-* Fri Feb 10 2012 Sven Nierlein <sven@consol.de>
+* Fri Feb 10 2012 Sven Nierlein <sven@consol.de> - 1.2
 - First build

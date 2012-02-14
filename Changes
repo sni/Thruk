@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.2      Thu Feb  9 22:48:41 CET 2012
+1.2      Tue Feb 14 17:17:38 CET 2012
           - changed version numbers to real numbers
               - from now on, even numbers will be stable releases
               - odd numbered releases will be test releases
