@@ -24,6 +24,7 @@ case "$1" in
         a2enmod alias
         a2enmod fcgid
         a2enmod auth_basic
+        a2enmod rewrite
 
         # set permissions
         chown www-data: /var/lib/thruk

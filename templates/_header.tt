@@ -166,7 +166,7 @@
     [% END %]
   [% END %]
 
-<!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
+<!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010-2012 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
 <table border="0" cellpadding=0 cellspacing=0 class="top_nav">
   <tr>
     <td width="100%">

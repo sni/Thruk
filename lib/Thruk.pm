@@ -224,6 +224,20 @@ __PACKAGE__->config(%config);
 __PACKAGE__->setup();
 
 ###################################################
+# save pid
+my $pidfile = __PACKAGE__->config->{'var_path'}.'/pid';
+open(my $fh, '>', $pidfile);
+if($fh) {
+    print $fh $$;
+    close($fh);
+}
+$SIG{INT}  = sub { unlink($pidfile); };
+$SIG{TERM} = sub { unlink($pidfile); };
+END {
+    unlink($pidfile);
+};
+
+###################################################
 # set timezone
 my $timezone = __PACKAGE__->config->{'use_timezone'};
 if(defined $timezone) {
