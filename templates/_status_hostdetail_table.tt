@@ -70,13 +70,13 @@
             [% IF h.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(html_escape(nl2br(h.long_plugin_output))) %]'><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
+                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(h.plugin_output)) %]<br>[% html_escape(nl2br(html_escape(h.long_plugin_output))) %]'><span class="has_long_plugin_output">[% html_escape(h.plugin_output) %]</span></td>
                 [% ELSE %]
-                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(h.plugin_output) %]<br>[% html_escape(nl2br(h.long_plugin_output)) %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
+                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(h.plugin_output) %]<br>[% nl2br(html_escape(h.long_plugin_output)) %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
                 [% END %]
               [% ELSIF show_long_plugin_output == 'inline' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% class %]'>[% html_escape(h.plugin_output) %]<br>[% html_escape(nl2br(h.long_plugin_output)) %]</td>
+                  <td align="left" class='[% class %]'>[% html_escape(h.plugin_output) %]<br>[% nl2br(html_escape(h.long_plugin_output)) %]</td>
                 [% ELSE %]
                   <td align="left" class='[% class %]'>[% h.plugin_output %]<br>[% nl2br(h.long_plugin_output) %]</td>
                 [% END %]
