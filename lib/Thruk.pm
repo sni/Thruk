@@ -225,7 +225,7 @@ __PACKAGE__->setup();
 
 ###################################################
 # save pid
-my $pidfile = __PACKAGE__->config->{'var_path'}.'/pid';
+my $pidfile = (__PACKAGE__->config->{'var_path'} || './var').'/pid';
 open(my $fh, '>', $pidfile);
 if($fh) {
     print $fh $$;
