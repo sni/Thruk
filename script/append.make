@@ -5,6 +5,7 @@ newversion:
 version:
 	test -d .git
 	which dch
+	@if [ ! -e "root/thruk/javascript/thruk-$(VERSION).js" ]; then echo "Makefile is out of date, please run 'perl Makefile.PL'"; exit 1; fi
 	@if [ "$$NEWVERSION" = "" ]; then newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)"); else newversion="$$NEWVERSION"; fi; \
 	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
 		date=`date "+%B %d, %Y"`; \
