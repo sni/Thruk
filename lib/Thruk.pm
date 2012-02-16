@@ -231,8 +231,8 @@ if($fh) {
     print $fh $$;
     close($fh);
 }
-$SIG{INT}  = sub { unlink($pidfile); };
-$SIG{TERM} = sub { unlink($pidfile); };
+$SIG{INT}  = sub { unlink($pidfile); exit; };
+$SIG{TERM} = sub { unlink($pidfile); exit; };
 END {
     unlink($pidfile);
 };
