@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.20     not released...
+          - fixed statusmap table layout
           - fixed escaping newlines when escape_html is off
           - fixed tests
 

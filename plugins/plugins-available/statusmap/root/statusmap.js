@@ -102,6 +102,7 @@ function show_tree_map(id_to_show) {
 
     // reset page refresh
     setRefreshRate(refresh_rate);
+    if(additionalParams == undefined) { additionalParams = new Hash({}) };
     additionalParams.set('host', id_to_show);
 
     var tm = new $jit.TM.Squarified({
@@ -274,6 +275,7 @@ function show_circle_map(id_to_show, w, h) {
         onBeforeCompute: function(node) {
             // reset page refresh
             setRefreshRate(refresh_rate);
+            if(additionalParams == undefined) { additionalParams = new Hash({}) };
             additionalParams.set('host', node.id);
         },
 
