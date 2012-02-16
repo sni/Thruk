@@ -127,6 +127,7 @@ a2enmod mod_fcgid
 %else
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 %endif
+echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
 
 %postun
