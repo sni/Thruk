@@ -7,10 +7,12 @@ version:
 	which dch
 	@if [ ! -e "root/thruk/javascript/thruk-$(VERSION).js" ]; then echo "Makefile is out of date, please run 'perl Makefile.PL'"; exit 1; fi
 	@if [ "$$NEWVERSION" = "" ]; then newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)"); else newversion="$$NEWVERSION"; fi; \
-	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
-		date=`date "+%B %d, %Y"`; \
+	if [ -n "$$newversion" ]; then \
 		branch=`echo "$$newversion" | awk '{ print $$2 }'`; \
 		newversion=`echo "$$newversion" | awk '{ print $$1 }'`; \
+	fi; \
+	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
+		date=`date "+%B %d, %Y"`; \
 		sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk.pm && \
 		sed -r "s/Version:\s*$(VERSION)/Version:       $$newversion/" -i support/thruk.spec && \
 		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i support/thruk.spec && \
