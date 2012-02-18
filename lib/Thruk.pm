@@ -227,9 +227,7 @@ __PACKAGE__->setup();
 # save pid
 my $pidfile  = (__PACKAGE__->config->{'var_path'} || './var').'/pid';
 sub _remove_pid {
-    my $why = shift;
     if(defined $ENV{'CATALYST_ENGINE'} and $ENV{'CATALYST_ENGINE'} eq 'FastCGI') {
-        warn("unlinked pidfile $$ - $why");
         unlink($pidfile);
     }
     return;
@@ -238,12 +236,11 @@ if(defined $ENV{'CATALYST_ENGINE'} and $ENV{'CATALYST_ENGINE'} eq 'FastCGI') {
     open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
     print $fh $$."\n";
     close($fh);
-    warn("pidfile $$ $pidfile written: $0");
-    $SIG{INT}  = sub { _remove_pid("INT");  exit; };
-    $SIG{TERM} = sub { _remove_pid("TERM"); exit; };
+    $SIG{INT}  = sub { _remove_pid();  exit; };
+    $SIG{TERM} = sub { _remove_pid(); exit; };
 }
 END {
-    _remove_pid("END");
+    _remove_pid();
 };
 
 ###################################################
