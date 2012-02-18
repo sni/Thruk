@@ -21,7 +21,7 @@ eval {
 
 #########################
 sub get_test_servicegroup {
-    my $request = request('/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview');
+    my $request = _request('/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview');
     ok( $request->is_success, 'get_test_servicegroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
@@ -34,7 +34,7 @@ sub get_test_servicegroup {
 
 #########################
 sub get_test_hostgroup {
-    my $request = request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=overview');
+    my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=overview');
     ok( $request->is_success, 'get_test_hostgroup() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $group;
@@ -47,7 +47,7 @@ sub get_test_hostgroup {
 
 #########################
 sub get_test_user {
-    my $request = request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
+    my $request = _request('/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail');
     ok( $request->is_success, 'get_test_user() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $user;
@@ -60,7 +60,7 @@ sub get_test_user {
 
 #########################
 sub get_test_service {
-    my $request = request('/thruk/cgi-bin/status.cgi?host=all');
+    my $request = _request('/thruk/cgi-bin/status.cgi?host=all');
     ok( $request->is_success, 'get_test_service() needs a proper status page' ) or diag(Dumper($request));
     my $page = $request->content;
     my($host,$service);
@@ -77,7 +77,7 @@ sub get_test_service {
 
 #########################
 sub get_test_timeperiod {
-    my $request = request('/thruk/cgi-bin/config.cgi?type=timeperiods');
+    my $request = _request('/thruk/cgi-bin/config.cgi?type=timeperiods');
     ok( $request->is_success, 'get_test_timeperiod() needs a proper config page' ) or diag(Dumper($request));
     my $page = $request->content;
     my $timeperiod;
@@ -93,13 +93,21 @@ sub test_page {
     my(%opts) = @_;
     my $return = {};
 
-    my $request = request($opts{'url'});
+    my $request = _request($opts{'url'});
+
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
+        diag("got startup link: ".$1);
+        # startup fcgid
+        fail("startup url does not match") if $1 ne $opts{'url'};
+        _request('/thruk/side.html');
+        $request = _request($opts{'url'});
+    }
 
     if(defined $opts{'follow'}) {
         my $redirects = 0;
         while(my $location = $request->{'_headers'}->{'location'}) {
             if($location !~ m/^(http|\/)/gmx) { $location = _relative_url($location, $request->base()->as_string()); }
-            $request = request($location);
+            $request = _request($location);
             $redirects++;
             last if $redirects > 10;
         }
@@ -110,7 +118,7 @@ sub test_page {
         # is it a background job page?
         wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
-        $request = request($location);
+        $request = _request($location);
         ok( ! $request->is_error, 'Request '.$location.' should succeed' ) or BAIL_OUT(Dumper($request));
     }
     elsif(defined $opts{'fail'}) {
@@ -216,13 +224,13 @@ sub test_page {
         my $errors = 0;
         for my $test_url (keys %{$links_to_check}) {
             next if $test_url =~ m/\/pnp4nagios\//mx;
-            my $request = request($test_url);
+            my $request = _request($test_url);
 
             if($request->is_redirect) {
                 my $redirects = 0;
                 while(my $location = $request->{'_headers'}->{'location'}) {
                     if($location !~ m/^(http|\/)/gmx) { $location = _relative_url($location, $request->base()->as_string()); }
-                    $request = request($location);
+                    $request = _request($location);
                     $redirects++;
                     last if $redirects > 10;
                 }
@@ -278,6 +286,22 @@ sub _relative_url {
     $newloc    =~ s/^(.*\/).*$/$1/gmx;
     $newloc    .= $location;
     return $newloc;
+}
+
+#########################
+sub _request {
+    my $url     = shift;
+    my $request = request($url);
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
+        diag("starting up... $1");
+        # startup fcgid
+        #fail("startup url does not match: '$1' != '$url'") if $1 ne $url;
+        my $r = request('/thruk/side.html');
+        fail("startup failed: ".Dumper($r)) unless $r->is_success;
+        fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/lib/thruk/pid';
+        $request = request($url);
+    }
+    return $request;
 }
 
 #########################
