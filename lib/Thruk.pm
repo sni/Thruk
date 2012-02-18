@@ -226,11 +226,11 @@ __PACKAGE__->setup();
 ###################################################
 # save pid
 my $pidfile = (__PACKAGE__->config->{'var_path'} || './var').'/pid';
-open(my $fh, '>', $pidfile);
-if($fh) {
+my $fh;
+open($fh, '>', $pidfile) && do {
     print $fh $$;
     close($fh);
-}
+};
 $SIG{INT}  = sub { unlink($pidfile); exit; };
 $SIG{TERM} = sub { unlink($pidfile); exit; };
 END {
