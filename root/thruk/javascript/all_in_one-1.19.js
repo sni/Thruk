@@ -6304,12 +6304,12 @@ function reloadPage() {
     newUrl = newUrl + origHash;
   }
 
-  if(newUrl == origUrl) {
-    window.location.reload(true);
-  }
-  else {
-    window.location = newUrl;
-  }
+  /*
+   * reload new url and replace history
+   * otherwise history will contain every
+   * single reload
+   */
+  window.location.replace(newUrl);
 }
 
 /* set border color as mouse over for top row buttons*/
