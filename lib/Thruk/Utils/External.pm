@@ -361,6 +361,8 @@ sub _do_child_stuff {
 
     POSIX::setsid() or die "Can't start a new session: $!";
 
+    delete $ENV{'CATALYST_ENGINE'};
+
     # close open filehandles
     for my $fd (0..1024) {
         POSIX::close($fd);

@@ -17,7 +17,11 @@ if(defined $ENV{'CATALYST_SERVER'}) {
     unshift @INC, 'plugins/plugins-available/conf/lib';
 }
 
-use_ok 'Thruk::Controller::conf';
+SKIP: {
+    skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
+
+    use_ok 'Thruk::Controller::conf';
+};
 use_ok 'Monitoring::Config::Object';
 
 ###########################################################
