@@ -6228,7 +6228,7 @@ function prefSubmit(url, current_theme) {
   if(current_theme != sel.value) {
     additionalParams.set('theme', '');
     additionalParams.set('reload_nav', 1);
-    document.cookie = "thruk_theme="+sel.value + "; path=/; expires=" + expires.toGMTString() + ";";
+    document.cookie = "thruk_theme="+sel.value + "; path="+url_prefix+"thruk; expires=" + expires.toGMTString() + ";";
     window.status   = "thruk preferences saved";
     reloadPage();
   }
@@ -6332,7 +6332,7 @@ function toggleBackend(backend) {
         e.className = 'button_peerDIS';
     });
     button.className = 'button_peerUP';
-    document.cookie = "thruk_conf="+backend+ "; path=/;";
+    document.cookie = "thruk_conf="+backend+ "; path="+url_prefix+"thruk;";
     reloadPage();
     return;
   }
@@ -6362,7 +6362,7 @@ function toggleBackend(backend) {
   additionalParams.set('reload_nav', 1);
 
   /* save current selected backends in session cookie */
-  document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path=/;";
+  document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path="+url_prefix+"thruk;";
   window.clearTimeout(backendSelTimer);
   backendSelTimer  = window.setTimeout('reloadPage()', 1000);
   return;
