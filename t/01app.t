@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 BEGIN {
     use lib('t');
@@ -9,6 +9,9 @@ BEGIN {
 }
 
 use Catalyst::Test 'Thruk';
+
+my $request = request('/thruk/');
+ok( $request->is_success, 'Request /thruk/ should succeed' ) or BAIL_OUT(Dumper($request));
 
 SKIP: {
     skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};

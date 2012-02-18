@@ -228,7 +228,7 @@ __PACKAGE__->setup();
 my $pidfile = (__PACKAGE__->config->{'var_path'} || './var').'/pid';
 my $fh;
 open($fh, '>', $pidfile) && do {
-    print $fh $$;
+    print $fh $$."\n";
     close($fh);
 };
 $SIG{INT}  = sub { unlink($pidfile); exit; };
