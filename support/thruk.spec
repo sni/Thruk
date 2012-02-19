@@ -122,7 +122,10 @@ exit 0
 
 %post
 %if %{defined suse_version}
-a2enmod mod_fcgid
+a2enmod alias
+a2enmod fcgid
+a2enmod auth_basic
+a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
 /etc/init.d/httpd restart || /etc/init.d/httpd start
