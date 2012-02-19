@@ -21,6 +21,7 @@ use File::Slurp;
 use Encode qw/decode/;
 use Template::Plugin::Date;
 use File::Copy;
+use File::Temp qw/tempfile/;
 use Excel::Template::Plus;
 
 ##############################################
@@ -859,8 +860,14 @@ sub logs2xls {
         params   => {},
     );
     $template->param(%{ $c->stash });
-    $template->write_file($c->stash->{job_dir}."/".$c->stash->{'file_name'});
-    return 1;
+    if($c->config->{'no_external_job_forks'}) {
+        my($fh, $filename) = tempfile();
+        $c->stash->{'file_name'} = $filename;
+        $c->stash->{job_dir}     = '';
+        $c->stash->{cleanfile}   = 1;
+    }
+    $template->write_file($c->stash->{job_dir}.$c->stash->{'file_name'});
+    return;
 }
 
 ########################################

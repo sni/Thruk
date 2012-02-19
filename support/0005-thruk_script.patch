@@ -1,10 +1,6 @@
---- a/script/thruk_fastcgi.pl	2012-02-09 02:00:15.888835121 +0100
-+++ b/script/thruk_fastcgi.pl	2012-02-09 20:49:33.725412141 +0100
-@@ -1,21 +1,10 @@
- #!/usr/bin/perl
- 
-+use lib '/usr/share/thruk/lib';
-+use lib '/usr/lib/thruk/perl5';
+--- a/script/thruk	2012-02-19 19:43:14.636750876 +0100
++++ b/script/thruk	2012-02-19 19:44:57.731751222 +0100
+@@ -3,18 +3,8 @@
  use strict;
  use warnings;
  
@@ -20,7 +16,8 @@
 -        require local::lib; local::lib->import($FindBin::Bin."/../local-lib/perl5/");
 -    }
 -}
--
- use Catalyst::ScriptRunner;
- Catalyst::ScriptRunner->run('Thruk', 'FastCGI');
++use lib '/usr/share/thruk/lib';
++use lib '/usr/lib/thruk/perl5';
  
+ # set necessary env values
+ if(defined $ARGV[0]) {

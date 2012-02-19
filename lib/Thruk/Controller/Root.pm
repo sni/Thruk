@@ -398,6 +398,21 @@ sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
 
 ######################################
 
+=head2 thruk_dummy_page
+
+page: /thruk/dummy
+
+=cut
+
+sub thruk_dummy_page : Regex('thruk\/dummy$') :MyAction('AddDefaults') {
+    my( $self, $c ) = @_;
+    $c->stash->{'text'}     = '';
+    $c->stash->{'template'} = 'passthrough.tt';
+    return;
+}
+
+######################################
+
 =head2 thruk_side_html
 
 page: /thruk/side.html

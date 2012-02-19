@@ -15,6 +15,7 @@ Patch0:        0001-thruk.conf.patch
 Patch1:        0002-log4perl.conf.patch
 Patch2:        0003-thruk.pm.patch
 Patch3:        0004-thruk_fastcgi.pl.patch
+Patch4:        0005-thruk_script.patch
 Requires(pre): shadow-utils
 Requires:      perl
 %if %{defined suse_version}
@@ -37,6 +38,7 @@ rm -rf %{buildroot}
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 yes n | perl Makefile.PL
@@ -105,6 +107,7 @@ mv %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi-pnp %{buildroot}%{_sys
 cp %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi     %{buildroot}%{_sysconfdir}/thruk/ssi/extinfo-header.ssi
 mv %{buildroot}%{_datadir}/thruk/support/thruk_local.conf.example %{buildroot}%{_sysconfdir}/thruk/thruk_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/thruk/fcgid_env.sh
+mv %{buildroot}%{_datadir}/thruk/script/thruk %{buildroot}%{_bindir}/thruk
 %if %{defined suse_version}
 mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/thruk.conf
 %else
@@ -142,6 +145,7 @@ exit 0
 %{__rm} -rf %{buildroot}
 
 %files
+%attr(755,root,root) %{_bindir}/thruk
 %config %{_sysconfdir}/thruk/thruk.conf
 %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf

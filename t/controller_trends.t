@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 69;
+use Test::More tests => 71;
 
 BEGIN {
     use lib('t');
@@ -16,6 +16,9 @@ my $timeperiod     = TestUtils::get_test_timeperiod();
 my $pages = [
 # Step 1
     '/thruk/cgi-bin/trends.cgi',
+];
+
+my $reports = [
     '/thruk/cgi-bin/trends.cgi?host='.$host.'&t1=1264820912&t2=1265425712&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedhoststate=0&backtrack=4',
     '/thruk/cgi-bin/trends.cgi?host='.$host.'&service='.$service.'&t1=1264820912&t2=1265425712&includesoftstates=no&assumestateretention=yes&assumeinitialstates=yes&assumestatesduringnotrunning=yes&initialassumedservicestate=0&backtrack=4',
 ];
@@ -37,6 +40,14 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Host and Service State Trends',
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+    );
+}
+
+for my $url (@{$reports}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => [ 'Host and Service State Trends', 'Duration: ' ],
         'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

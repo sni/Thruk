@@ -1,0 +1,77 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use IO::String;
+
+BEGIN {
+    use FindBin;
+    use Config;
+    if(-e $FindBin::Bin."/../local-lib") {
+        ### use 5.10.0; # only required for packages ###
+        unshift @INC, $FindBin::Bin."/../local-lib/lib/perl5";
+        if(! -e $FindBin::Bin."/../local-lib/lib/perl5/".$Config{archname}) {
+            die("\nERROR: this is the wrong precompiled version, your archname is: ".$Config{archname}."\n\n");
+        }
+        require local::lib; local::lib->import($FindBin::Bin."/../local-lib/perl5/");
+    }
+}
+
+# set necessary env values
+print_help() unless defined $ARGV[0];
+
+if($ARGV[0] eq '-l' or $ARGV[0] eq '--list-backends') {
+    use Catalyst::Test 'Thruk';
+    my($res, $c) = ctx_request('/thruk/dummy');
+    printf("%-10s %s\n", "Key", "Name");
+    printf("-----------------------\n");
+    for my $key (keys %{$c->stash->{'backend_detail'}}) {
+        printf("%-10s %s\n", $key, $c->stash->{'backend_detail'}->{$key}->{'name'});
+    }
+    exit;
+}
+
+$ENV{'REQUEST_URI'}      = $ARGV[0];
+$ENV{'SCRIPT_NAME'}      = $ARGV[0];
+$ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
+$ENV{'QUERY_STRING'}     = $1 if defined $1;
+$ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
+$ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
+$ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
+$ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
+$ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
+$ENV{'NO_EXTERNAL_JOBS'} = 1;
+
+use Catalyst::ScriptRunner;
+Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
+
+exit;
+
+#########################
+
+sub print_help {
+    print <<EOT;
+When running CGIs from command line, you will have to set at least QUERY_STRING which is read
+from the command args. When using authentication, you will also have to set a REMOTE_USER.
+Currently only GET requests are supported.
+
+Synopsis:
+
+$0 [ -b backend1,backend2,... ] <URL>
+
+get list of backends:
+$0 [ -l | --list-backends ]
+
+Examples:
+export the event log as excel file
+REMOTE_USER=thrukadmin $0 '/thruk/cgi-bin/showlog.cgi?view_mode=xls' > eventlog.xls
+
+export all services into an excel file
+REMOTE_USER=thrukadmin $0 '/thruk/cgi-bin/status.cgi?view_mode=xls&host=all' > allservices.xls
+
+export all services into an excel file
+REMOTE_USER=thrukadmin $0 '/thruk/cgi-bin/avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
+
+EOT
+    exit;
+}

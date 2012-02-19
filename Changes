@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.20     not released...
+          - added cli tool
           - write pid file when running as fastcgi
           - show startpage when fcgid process is starting
           - added path to cookies, makes multiple instances possible on one host

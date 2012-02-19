@@ -43,7 +43,6 @@ TODO
 docs/development
 plugins/plugins-available/conf/test.pl
 plugins/plugins-available/conf/tmon.out
-script/thruk$
 thruk_.*.changes
 thruk_.*.deb
 thruk_.*.dsc

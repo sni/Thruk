@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 282;
+use Test::More tests => 297;
 
 BEGIN {
     use lib('t');
@@ -28,7 +28,9 @@ my $pages = [
     '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=hosts&host='.$host,
     '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=services&service='.$host.'%3B'.$service,
     '/thruk/cgi-bin/avail.cgi?get_date_parts=&report_type=servicegroups&servicegroup=critical',
+];
 
+my $reports = [
 # Report
     '/thruk/cgi-bin/avail.cgi?host='.$host.'&timeperiod=last7days&smon=1&sday=13&syear=2010&shour=0&smin=0&ssec=0&emon=1&eday=14&eyear=2010&ehour=24&emin=0&esec=0&rpttimeperiod=&assumeinitialstates=yes&assumestateretention=yes&assumestatesduringnotrunning=yes&includesoftstates=no&initialassumedservicestate=0&backtrack=4',
     '/thruk/cgi-bin/avail.cgi?host=all&timeperiod=last7days&smon=1&sday=13&syear=2010&shour=0&smin=0&ssec=0&emon=1&eday=14&eyear=2010&ehour=24&emin=0&esec=0&rpttimeperiod=&assumeinitialstates=yes&assumestateretention=yes&assumestatesduringnotrunning=yes&includesoftstates=no&initialassumedservicestate=0&backtrack=4',
@@ -57,6 +59,13 @@ for my $url (@{$pages}) {
     );
 }
 
+for my $url (@{$reports}) {
+    TestUtils::test_page(
+        'url'     => $url,
+        'like'    => [ 'Availability Report', 'Availability report completed in' ],
+        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
+    );
+}
 
 my $csv_pages = [
     # CSV

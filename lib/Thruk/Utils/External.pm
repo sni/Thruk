@@ -43,8 +43,8 @@ sub cmd {
 
     if($c->config->{'no_external_job_forks'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        print `/bin/sh -c '".$conf->{'cmd'}."'"`;
-        return 1;
+        my $out = `/bin/sh -c '".$conf->{'cmd'}."'"`;
+        return _finished_job_page($c, $c->stash, undef, $out);
     }
 
     my ($id,$dir) = _init_external($c);
@@ -87,9 +87,10 @@ sub perl {
 
     if($c->config->{'no_external_job_forks'}) {
         ## no critic
-        eval($conf->{'expr'});
+        my $rc = eval($conf->{'expr'});
         ## use critic
-        return 1;
+        _finished_job_page($c, $c->stash);
+        return $rc;
     }
 
     my ($id,$dir) = _init_external($c);
@@ -318,38 +319,8 @@ sub job_page {
             $c->log->error($err);
             return $c->detach('/error/index/23')
         }
-        if(defined $stash) {
-            $c->res->headers->header( @{$stash->{'res_header'}} )   if defined $stash->{'res_header'};
-            $c->res->content_type($stash->{'res_ctype'})            if defined $stash->{'res_ctype'};
-            if(defined $stash->{'file_name'}) {
-                my $file = $stash->{job_dir}."/".$stash->{'file_name'};
-                open(my $fh, '<', $file) or die("cannot open: $!");
-                binmode $fh;
-                local $/ = undef;
-                $c->res->body(<$fh>);
-                return;
-            }
-            delete($stash->{'all_in_one_css'});
-            # merge stash
-            for my $key (keys %{$stash}) {
-                next if $key eq 'theme';
-                $c->stash->{$key} = $stash->{$key};
-            }
-
-            # model?
-            if(defined $c->stash->{model_type} and defined $c->stash->{model_init}) {
-                my $model  = $c->model($c->stash->{model_type});
-                $model->init(@{$c->stash->{model_init}});
-            }
-
-            if(defined $forward) {
-                $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
-                return $c->response->redirect($forward);
-            }
-            return;
-        }
-        $c->stash->{text}     = $out;
-        $c->stash->{template} = 'passthrough.tt';
+        delete($stash->{'all_in_one_css'});
+        return _finished_job_page($c, $stash, $forward, $out);
     }
 
     return;
@@ -447,7 +418,7 @@ sub _init_external {
     $SIG{CHLD} = 'IGNORE';
 
     $c->stash->{job_id}       = $id;
-    $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id;
+    $c->stash->{job_dir}      = $c->config->{'var_path'}."/jobs/".$id."/";
     $c->stash->{original_url} = Thruk::Utils::Filter::full_uri($c, 1);
 
     return($id, $dir);
@@ -476,6 +447,52 @@ sub _is_running {
     return 0;
 }
 
+##############################################
+
+=head2 _is_running
+
+  _is_running($dir)
+
+return true if process is still running
+
+=cut
+sub _finished_job_page {
+    my($c, $stash, $forward, $out) = @_;
+    if(defined $stash) {
+        $c->res->headers->header( @{$stash->{'res_header'}} ) if defined $stash->{'res_header'};
+        $c->res->content_type($stash->{'res_ctype'})          if defined $stash->{'res_ctype'};
+        if(defined $stash->{'file_name'}) {
+            my $file = $stash->{job_dir}.$stash->{'file_name'};
+            open(my $fh, '<', $file) or die("cannot open $file: $!");
+            binmode $fh;
+            local $/ = undef;
+            $c->res->body(<$fh>);
+            close($fh);
+            unlink($file) if defined $c->stash->{cleanfile};
+            return;
+        }
+        # merge stash
+            for my $key (keys %{$stash}) {
+            next if $key eq 'theme';
+            $c->stash->{$key} = $stash->{$key};
+        }
+
+        # model?
+        if(defined $c->stash->{model_type} and defined $c->stash->{model_init}) {
+            my $model  = $c->model($c->stash->{model_type});
+            $model->init(@{$c->stash->{model_init}});
+        }
+
+        if(defined $forward) {
+            $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
+            return $c->response->redirect($forward);
+        }
+        return;
+    }
+    $c->stash->{text}     = $out;
+    $c->stash->{template} = 'passthrough.tt';
+    return;
+}
 
 ##############################################
 

@@ -43,12 +43,14 @@ inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Catalyst/Authentication/Credential/Thruk.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
+lib/Catalyst/Engine/Thrukembedded.pm
 lib/Catalyst/Helper/Model/Thruk/Class.pm
 lib/Catalyst/Model/Thruk/Class.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
 lib/Catalyst/Plugin/Thruk/ConfigLoader.pm
 lib/Catalyst/Plugin/Thruk/RemoveNastyCharsFromHttpParam.pm
 lib/Catalyst/Plugin/Unicode/Encoding.pm
+lib/Catalyst/Script/Thrukembedded.pm
 lib/Catalyst/View/GD.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Thruk.pm
@@ -282,6 +284,7 @@ root/thruk/javascript/thruk-1.19.js
 root/thruk/startup.html
 root/thruk/themes
 script/append.make
+script/thruk
 script/thruk_cgi.pl
 script/thruk_create.pl
 script/thruk_create_package.pl
@@ -299,6 +302,7 @@ support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
 support/0003-thruk.pm.patch
 support/0004-thruk_fastcgi.pl.patch
+support/0005-thruk_script.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd

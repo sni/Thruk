@@ -31,6 +31,7 @@ case "$1" in
         chown www-data: /var/cache/thruk
         chown www-data: /var/log/thruk
         chown 755 /usr/share/thruk/fcgid_env.sh
+        chown 755 /usr/bin/thruk
 
         # reload new apache config
         if which invoke-rc.d >/dev/null 2>&1; then

@@ -77,7 +77,7 @@ is_deeply($sorted_by_abc, $sorted_by_abc_exp, 'sort by colum a,b,c');
 
 #########################
 SKIP: {
-    skip 'external tests', 15 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 15 if defined $ENV{'CATALYST_SERVER'} or Thruk->config->{'no_external_job_forks'};
 
     my($res, $c) = ctx_request('/thruk/side.html');
     my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, 'thrukadmin');
