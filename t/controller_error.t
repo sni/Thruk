@@ -11,7 +11,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-BEGIN { use_ok 'Thruk::Controller::error' }
+use_ok 'Thruk::Controller::error';
 
 my $pages = [];
 for(0..23) {
