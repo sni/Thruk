@@ -22,6 +22,7 @@ logs/thruk.log
 ^menu_local.conf
 docs/development/git.txt
 docs/images
+script/thruk.lib
 script/thruk_update_docs.sh
 script/thruk_update_table_docs.pl
 script/thruk_extract_cmd_templates.pl

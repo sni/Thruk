@@ -119,7 +119,10 @@ sub test_page {
         wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
         $request = _request($location);
-        ok( ! $request->is_error, 'Request '.$location.' should succeed' ) or BAIL_OUT(Dumper($request));
+        if($request->is_error) {
+            fail('Request '.$location.' should succeed');
+            BAIL_OUT(Dumper($request));
+        }
     }
     elsif(defined $opts{'fail'}) {
         ok( $request->is_error, 'Request '.$opts{'url'}.' should fail' );

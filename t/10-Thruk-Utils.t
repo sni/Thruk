@@ -110,8 +110,8 @@ SKIP: {
 
     is($out,  "test\n", "got result");
     is($err,  "err\n",  "got error");
-    ok($time >=1,       "got time (".$time."s)");
     isnt($dir, undef,   "got dir");
+    ok($time >=1,       "got time (".$time."s)") or diag(`ls -la $dir && cat $dir/*`);
 
     #########################
     # external perl

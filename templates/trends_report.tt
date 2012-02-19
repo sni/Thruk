@@ -237,7 +237,7 @@
 [% END %]
 <br><br>
 <div align="center">
-  <img src='trends.cgi?createimage&amp;host=[% host | uri %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]&amp;rpttimeperiod=[% rpttimeperiod %]&amp;job_id=[% job_id %]' border="0" name='trendsimage' usemap='#trendsmap' width="[% image_width %]" height="[% image_height %]" alt="#########" id="trendsimage">
+  <img src='trends.cgi?createimage&amp;host=[% host | uri %][% IF service %]&amp;service=[% service | uri %][% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumeinitialstates=[% assumeinitialstates %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning %]&amp;initialassumedhoststate=[% initialassumedhoststate %]&amp;initialassumedservicestate=[% initialassumedservicestate %]&amp;assumestateretention=[% assumestateretention %]&amp;includesoftstates=[% includesoftstates %]&amp;backtrack=[% backtrack %]&amp;zoom=[% zoom %]&amp;rpttimeperiod=[% rpttimeperiod %][% IF ! c.config.no_external_job_forks %]&amp;job_id=[% job_id %][% END %]' border="0" name='trendsimage' usemap='#trendsmap' width="[% image_width %]" height="[% image_height %]" alt="#########" id="trendsimage">
 </div>
 
 [% PROCESS _footer.tt %]

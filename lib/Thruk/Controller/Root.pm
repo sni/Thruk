@@ -119,6 +119,7 @@ sub begin : Private {
                     2                       => 'Standard',
                     1                       => 'Testing',
                     0                       => 'Development',
+        no_external_job_forks               => 0,
         },
     };
     for my $key (keys %{$defaults}) {
@@ -145,6 +146,11 @@ sub begin : Private {
     # command disabled should be a hash
     if(ref $c->config->{'command_disabled'} ne 'HASH') {
         $c->config->{'command_disabled'} = Thruk::Utils::array2hash(Thruk::Utils::expand_numeric_list($c, $c->config->{'command_disabled'}));
+    }
+
+    # external jobs can be disabled by env
+    if(defined $ENV{'NO_EXTERNAL_JOBS'}) {
+        $c->config->{'no_external_job_forks'} = 1;
     }
 
     # username?
