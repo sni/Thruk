@@ -15,6 +15,8 @@ BEGIN {
     }
 }
 
+plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+
 # copy our test log4perl config
 ok(copy('t/data/log4perl.conf', 'log4perl.conf'), 'copy test config') or BAIL_OUT("copy failed: $!");
 
