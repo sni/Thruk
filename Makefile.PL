@@ -65,6 +65,8 @@ requires 'Log::Dispatch::File'                    => 0;     # required by Thruk 
 requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
 requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
+requires 'Catalyst::Engine::CGI'                  => 0;     # required by Catalyst::Engine::Thrukembedded
+requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
 
 # conf tool plugin
 feature     ('plugin_conf',

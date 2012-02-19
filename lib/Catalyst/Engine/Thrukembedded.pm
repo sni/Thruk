@@ -23,6 +23,16 @@ Catalyst::Engine::Embed - use app embedded in scripts
 Use this engine to embed the application in a script. We
 just use the CGI engine and remove the http header.
 
+=head1 OVERLOADED METHODS
+
+=over
+
+=item finalize_headers
+
+remove headers
+
+=back
+
 =head1 SEE ALSO
 
 L<Catalyst>.

@@ -119,8 +119,8 @@ sub begin : Private {
                     2                       => 'Standard',
                     1                       => 'Testing',
                     0                       => 'Development',
-        no_external_job_forks               => 0,
         },
+        no_external_job_forks               => 0,
     };
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
