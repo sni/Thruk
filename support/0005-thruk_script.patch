@@ -1,10 +1,12 @@
---- a/script/thruk	2012-02-19 19:43:14.636750876 +0100
-+++ b/script/thruk	2012-02-19 19:44:57.731751222 +0100
-@@ -3,18 +3,8 @@
+--- a/script/thruk	2012-02-20 11:29:59.379045022 +0100
++++ b/script/thruk	2012-02-20 11:30:10.610289013 +0100
+@@ -3,18 +3,11 @@
  use strict;
  use warnings;
  
--BEGIN {
++use lib '/usr/share/thruk/lib';
++use lib '/usr/lib/thruk/perl5';
+ BEGIN {
 -    use FindBin;
 -    use Config;
 -    if(-e $FindBin::Bin."/../local-lib") {
@@ -16,8 +18,8 @@
 -        require local::lib; local::lib->import($FindBin::Bin."/../local-lib/perl5/");
 -    }
 -}
-+use lib '/usr/share/thruk/lib';
-+use lib '/usr/lib/thruk/perl5';
++    $ENV{'CATALYST_CONFIG'} = '/etc/thruk' unless defined $ENV{'CATALYST_CONFIG'};
++};
  
  # set necessary env values
- if(defined $ARGV[0]) {
+ print_help() unless defined $ARGV[0];
