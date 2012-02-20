@@ -3,8 +3,8 @@
 @@ -1,21 +1,10 @@
  #!/usr/bin/perl
  
-+use lib '/usr/share/thruk/lib';
 +use lib '/usr/lib/thruk/perl5';
++use lib '/usr/share/thruk/lib';
  use strict;
  use warnings;
  

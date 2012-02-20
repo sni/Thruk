@@ -5,7 +5,7 @@ use base 'Catalyst::Engine::CGI';
 
 sub finalize_headers {
     my ( $self, $c ) = @_;
-    $c->response->headers->clear();
+    $c->response->headers->clear() if $c->response->status == 200;
     return;
 }
 
@@ -15,8 +15,7 @@ __END__
 
 =head1 NAME
 
-Catalyst::Engine::Embed - use app embedded in scripts
-
+Catalyst::Engine::Thrukembedded - use app embedded in scripts
 
 =head1 DESCRIPTION
 

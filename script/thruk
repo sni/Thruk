@@ -16,61 +16,232 @@ BEGIN {
     }
 }
 
-# set necessary env values
-print_help() unless defined $ARGV[0];
+##############################################
 
-if($ARGV[0] eq '-l' or $ARGV[0] eq '--list-backends') {
-    use Catalyst::Test 'Thruk';
-    my($res, $c) = ctx_request('/thruk/dummy');
-    printf("%-10s %s\n", "Key", "Name");
-    printf("-----------------------\n");
-    for my $key (keys %{$c->stash->{'backend_detail'}}) {
-        printf("%-10s %s\n", $key, $c->stash->{'backend_detail'}->{$key}->{'name'});
-    }
-    exit;
-}
+=head1 NAME
 
-$ENV{'REQUEST_URI'}      = $ARGV[0];
-$ENV{'SCRIPT_NAME'}      = $ARGV[0];
-$ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-$ENV{'QUERY_STRING'}     = $1 if defined $1;
-$ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
-$ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
-$ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
-$ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
-$ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
-$ENV{'NO_EXTERNAL_JOBS'} = 1;
+thruk - Command Line Utility for Thruk Monitoring Gui
 
+=head1 SYNOPSIS
+
+thruk [ -h |--help ]
+      [ -v | --verbose ]
+      [ -a | --auth=<auth> ]
+      [ -b | --backend=<backend> ]
+      [ -l | --list-backends ]
+      [ -u | --url=<url> ]
+
+=head1 DESCRIPTION
+
+This script gives access to various parts of the Thruk gui and allows to generate
+excel reports, csv exports or any other url by using command line and bypassing the
+webserver.
+
+=head1 ARGUMENTS
+
+script has the following arguments
+
+=over 4
+
+=item help
+
+  -h | --help            print help and exit
+
+=item verbose
+
+  -v | --verbose         print verbose output too
+
+=item backend
+
+  -b | --backend         specify backend(s), otherwise the default backends will be used
+
+=item list backends
+
+  -l | --list-backends   get list of available backends
+
+=item auth
+
+  -a | --auth            use this user for authentication
+
+=item url
+
+  -u | --url             request this url
+
+=back
+
+=head1 EXAMPLES
+
+export the event log as excel file:
+
+  %> thruk -a thrukadmin -u '/thruk/cgi-bin/showlog.cgi?view_mode=xls' > eventlog.xls
+
+export all services into an excel file:
+
+  %> thruk -a thrukadmin -u '/thruk/cgi-bin/status.cgi?view_mode=xls&host=all' > allservices.xls
+
+export all services into an excel file:
+
+  %> thruk -a thrukadmin -u '/thruk/cgi-bin/avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
+
+=head1 AUTHOR
+
+2012, Sven Nierlein, <sven@nierlein.de>
+
+=cut
+
+##############################################
+
+my $thruk = thruk_runner->new();
+exit $thruk->run();
+
+##############################################
+package thruk_runner;
+
+use Carp;
+use Getopt::Long;
+use Pod::Usage;
+use Data::Dumper;
 use Catalyst::ScriptRunner;
-Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
 
-exit;
+=head1 CONSTRUCTOR
 
-#########################
+  my $thruk = thruk_runner->new();
 
-sub print_help {
-    print <<EOT;
-When running CGIs from command line, you will have to set at least QUERY_STRING which is read
-from the command args. When using authentication, you will also have to set a REMOTE_USER.
-Currently only GET requests are supported.
+return thruk runner object
 
-Synopsis:
-
-$0 [ -b backend1,backend2,... ] <URL>
-
-get list of backends:
-$0 [ -l | --list-backends ]
-
-Examples:
-export the event log as excel file
-REMOTE_USER=thrukadmin $0 '/thruk/cgi-bin/showlog.cgi?view_mode=xls' > eventlog.xls
-
-export all services into an excel file
-REMOTE_USER=thrukadmin $0 '/thruk/cgi-bin/status.cgi?view_mode=xls&host=all' > allservices.xls
-
-export all services into an excel file
-REMOTE_USER=thrukadmin $0 '/thruk/cgi-bin/avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
-
-EOT
-    exit;
+=cut
+sub new {
+    my $class = shift;
+    my $self  = {};
+    bless $self, $class;
+    return $self;
 }
+
+##############################################
+
+=head1 METHODS
+
+=over 4
+
+=head2 run
+
+  run()
+
+start running and return exit code
+
+=cut
+sub run {
+    my($self) = @_;
+
+    $self->get_options();
+
+    if(defined $self->{'opt'}->{'listbackends'}) {
+        return $self->listbackends();
+    }
+
+    if(defined $self->{'opt'}->{'url'}) {
+        return $self->request_url($self->{'opt'}->{'url'})
+    }
+
+    pod2usage( { -verbose => 2 } );
+    return 0;
+}
+
+##############################################
+
+=head2 listbackends
+
+  $self->listbackends
+
+print list of backends
+
+=cut
+sub listbackends {
+    my($self) = @_;
+    my $c = $self->_dummy_c();
+    printf("%-4s %-10s %s\n", 'Def', 'Key', 'Name');
+    printf("-------------------------\n");
+    for my $key (keys %{$c->stash->{'backend_detail'}}) {
+        printf("%-4s %-10s %s\n",
+                $c->stash->{'backend_detail'}->{$key}->{'disabled'} == 0 ? ' * ' : '',
+                $key,
+                $c->stash->{'backend_detail'}->{$key}->{'name'}
+        );
+    }
+    printf("-------------------------\n");
+    return 0;
+}
+
+##############################################
+
+=head2 request_url
+
+  $self->request_url($url)
+
+print response for given url
+
+=cut
+sub request_url {
+    my($self,$url) = @_;
+
+    $ENV{'REQUEST_URI'}      = $url;
+    $ENV{'SCRIPT_NAME'}      = $url;
+    $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
+    $ENV{'QUERY_STRING'}     = $1 if defined $1;
+    $ENV{'REMOTE_USER'}      = $self->{'opt'}->{'auth'} if defined $self->{'opt'}->{'auth'};
+    $ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
+    $ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
+    $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
+    $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
+    $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
+    $ENV{'NO_EXTERNAL_JOBS'} = 1;
+
+    Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
+
+    return 0;
+}
+
+##############################################
+
+=head2 get_options
+
+  $self->get_options
+
+populate $self->{'opt'}
+
+=cut
+sub get_options {
+    my($self) = @_;
+
+    $self->{'opt'} = {
+        'verbose'  => 0,
+        'backends' => [],
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    GetOptions (
+       "h|help"             => \$self->{'opt'}->{'help'},
+       "v|verbose"          => \$self->{'opt'}->{'verbose'},
+       "l|list-backends"    => \$self->{'opt'}->{'listbackends'},
+       "b|backend=s"        => \$self->{'opt'}->{'backends'},
+       "u|url=s"            => \$self->{'opt'}->{'url'},
+       "a|auth=s"           => \$self->{'opt'}->{'auth'},
+    ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
+    return;
+}
+
+##############################################
+
+=back
+
+=cut
+
+##############################################
+sub _dummy_c {
+    my($self) = @_;
+    require Catalyst::Test;
+    Catalyst::Test->import('Thruk');
+    my($res, $c) = ctx_request('/thruk/dummy');
+    return $c;
+}
+
+1;

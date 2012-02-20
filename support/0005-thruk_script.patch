@@ -1,11 +1,11 @@
---- a/script/thruk	2012-02-20 11:29:59.379045022 +0100
-+++ b/script/thruk	2012-02-20 11:30:10.610289013 +0100
+--- a/script/thruk	2012-02-20 12:57:03.364764756 +0100
++++ b/script/thruk	2012-02-20 12:58:45.526016418 +0100
 @@ -3,18 +3,11 @@
  use strict;
  use warnings;
  
-+use lib '/usr/share/thruk/lib';
 +use lib '/usr/lib/thruk/perl5';
++use lib '/usr/share/thruk/lib';
  BEGIN {
 -    use FindBin;
 -    use Config;
@@ -21,5 +21,5 @@
 +    $ENV{'CATALYST_CONFIG'} = '/etc/thruk' unless defined $ENV{'CATALYST_CONFIG'};
 +};
  
- # set necessary env values
- print_help() unless defined $ARGV[0];
+ ##############################################
+ 
