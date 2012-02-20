@@ -57,6 +57,7 @@ install: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
+	mkdir -p $(CURDIR)/debian/thruk/usr/bin
 	mkdir -p $(CURDIR)/debian/thruk/usr/lib/thruk
 	mkdir -p $(CURDIR)/debian/thruk/usr/share/thruk/
 	mkdir -p $(CURDIR)/debian/thruk/var/lib/thruk/

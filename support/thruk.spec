@@ -45,6 +45,7 @@ yes n | perl Makefile.PL
 %{__make} %{_smp_mflags}
 
 %install
+%{__mkdir} -p %{buildroot}%{_bindir}
 %{__mkdir} -p %{buildroot}%{_localstatedir}/lib/thruk
 %{__mkdir} -p %{buildroot}%{_localstatedir}/cache/thruk
 %{__mkdir} -p %{buildroot}%{_localstatedir}/log/thruk
