@@ -61,6 +61,7 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
 %{__mkdir} -p %{buildroot}/usr/lib/thruk
+%{__mkdir} -p %{buildroot}%{_mandir}/man3
 %{__mkdir} -p %{buildroot}%{_mandir}/man8
 
 cp -rp . %{buildroot}%{_datadir}/thruk/

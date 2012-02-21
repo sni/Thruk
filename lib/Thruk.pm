@@ -225,7 +225,7 @@ __PACKAGE__->setup();
 
 ###################################################
 # save pid
-my $pidfile  = (__PACKAGE__->config->{'var_path'} || './var').'/pid';
+my $pidfile  = (__PACKAGE__->config->{'tmp_path'} || '/tmp').'/thruk.pid';
 sub _remove_pid {
     if(defined $ENV{'CATALYST_ENGINE'} and $ENV{'CATALYST_ENGINE'} eq 'FastCGI') {
         unlink($pidfile);
