@@ -82,12 +82,12 @@ $Monitoring::Config::Object::Host::Defaults = {
 
 =head1 METHODS
 
-=head2 new
+=head2 BUILD
 
 return new object
 
 =cut
-sub new {
+sub BUILD {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
 
@@ -204,5 +204,7 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
+__PACKAGE__->meta->make_immutable;
 
 1;

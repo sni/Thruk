@@ -44,12 +44,12 @@ $Monitoring::Config::Object::Serviceescalation::Defaults = {
 
 =head1 METHODS
 
-=head2 new
+=head2 BUILD
 
 return new object
 
 =cut
-sub new {
+sub BUILD {
     my $class = shift || __PACKAGE__;
     my $self = {
         'type'        => 'serviceescalation',
@@ -86,5 +86,7 @@ This library is free software, you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
+__PACKAGE__->meta->make_immutable;
 
 1;

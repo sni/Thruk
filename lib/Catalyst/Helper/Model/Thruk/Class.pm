@@ -42,6 +42,8 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
+__PACKAGE__->meta->make_immutable;
+
 1;
 __DATA__
 =begin pod_to_ignore

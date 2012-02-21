@@ -314,6 +314,7 @@ t/01app.t
 t/10-Thruk-Utils.t
 t/11-Thruk-Backend.t
 t/20-Log-Log4perl.t
+t/91_moose.t
 t/92_todo.t
 t/93_manifest.t
 t/94_template_encoding.t

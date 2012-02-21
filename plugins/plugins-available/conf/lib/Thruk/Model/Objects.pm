@@ -28,4 +28,6 @@ the same terms as Perl itself. See L<perlartistic>.
 
 =cut
 
+__PACKAGE__->meta->make_immutable;
+
 1;

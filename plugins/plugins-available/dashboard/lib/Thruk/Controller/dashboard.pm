@@ -235,4 +235,6 @@ Sigma Informatique, 2011
 
 =cut
 
+__PACKAGE__->meta->make_immutable;
+
 1;

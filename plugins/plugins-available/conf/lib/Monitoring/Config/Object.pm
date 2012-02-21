@@ -63,7 +63,7 @@ sub new {
     confess('no core type!') unless defined $conf->{'coretype'};
 
     my $objclass = 'Monitoring::Config::Object::'.ucfirst($conf->{'type'});
-    my $obj = \&{$objclass."::new"};
+    my $obj = \&{$objclass."::BUILD"};
     return unless defined &$obj;
     my $current_object = &$obj($objclass, $conf->{'coretype'});
 
