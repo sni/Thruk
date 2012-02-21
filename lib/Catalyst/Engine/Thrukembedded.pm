@@ -6,6 +6,7 @@ use base 'Catalyst::Engine::CGI';
 sub finalize_headers {
     my ( $self, $c ) = @_;
     $c->response->headers->clear() if $c->response->status == 200;
+    $ENV{'HTTP_CODE'} = $c->response->status;
     return;
 }
 

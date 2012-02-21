@@ -29,3 +29,4 @@ if [ $(git status | grep thruk8.txt | wc -l) -gt 0 ]; then
     $DOS2UNIX thruk.8
 fi
 
+pod2man -s 3 -n thruk ../script/thruk > thruk.3

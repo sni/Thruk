@@ -37,51 +37,56 @@ This script gives access to various parts of the Thruk gui and allows to generat
 excel reports, csv exports or any other url by using command line and bypassing the
 webserver.
 
-=head1 ARGUMENTS
+=head1 OPTIONS
 
 script has the following arguments
 
 =over 4
 
-=item help
+=item B<-h> , B<--help>
 
-  -h | --help            print help and exit
+    print help and exit
 
-=item verbose
+=item B<-v> , B<--verbose>
 
-  -v | --verbose         print verbose output too
+    print verbose output too
 
-=item backend
+=item B<-b> I<backend>, B<--backend>=I<backend>
 
-  -b | --backend         specify backend(s), otherwise the default backends will be used
+    specify backend(s), otherwise the default backends will be used
 
-=item list backends
+=item B<-l> , B<--list-backends>
 
-  -l | --list-backends   get list of available backends
+    get list of available backends
 
-=item auth
+=item B<-a> I<authname>, B<--auth>=I<authname>
 
-  -a | --auth            use this user for authentication
+    use this username for authentication
 
-=item url
+=item B<-u> I<url>, B<--url>=I<url>
 
-  -u | --url             request this url
+    request this url. Url can be shortened and the
+    leading /thruk/cgi-bin/ can be stripped.
 
 =back
+
+=head1 RETURN VALUE
+
+thruk returns 0 on success or 1 otherwise
 
 =head1 EXAMPLES
 
 export the event log as excel file:
 
-  %> thruk -a thrukadmin -u '/thruk/cgi-bin/showlog.cgi?view_mode=xls' > eventlog.xls
+  %> thruk -a thrukadmin -u 'showlog.cgi?view_mode=xls' > eventlog.xls
 
 export all services into an excel file:
 
-  %> thruk -a thrukadmin -u '/thruk/cgi-bin/status.cgi?view_mode=xls&host=all' > allservices.xls
+  %> thruk -a thrukadmin -u 'status.cgi?view_mode=xls&host=all' > allservices.xls
 
 export all services into an excel file:
 
-  %> thruk -a thrukadmin -u '/thruk/cgi-bin/avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
+  %> thruk -a thrukadmin -u 'avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
 
 =head1 AUTHOR
 
@@ -92,7 +97,7 @@ export all services into an excel file:
 ##############################################
 
 my $thruk = thruk_runner->new();
-exit $thruk->run();
+exit $thruk->_run();
 
 ##############################################
 package thruk_runner;
@@ -103,13 +108,7 @@ use Pod::Usage;
 use Data::Dumper;
 use Catalyst::ScriptRunner;
 
-=head1 CONSTRUCTOR
-
-  my $thruk = thruk_runner->new();
-
-return thruk runner object
-
-=cut
+##############################################
 sub new {
     my $class = shift;
     my $self  = {};
@@ -118,29 +117,20 @@ sub new {
 }
 
 ##############################################
-
-=head1 METHODS
-
-=over 4
-
-=head2 run
-
-  run()
-
-start running and return exit code
-
-=cut
-sub run {
+sub _run {
     my($self) = @_;
 
-    $self->get_options();
+    $self->_get_options();
 
     if(defined $self->{'opt'}->{'listbackends'}) {
-        return $self->listbackends();
+        return $self->_listbackends();
     }
 
     if(defined $self->{'opt'}->{'url'}) {
-        return $self->request_url($self->{'opt'}->{'url'})
+        if($self->{'opt'}->{'url'} =~ m|^\w+\.cgi|gmx) {
+            $self->{'opt'}->{'url'} = '/thruk/cgi-bin/'.$self->{'opt'}->{'url'};
+        }
+        return $self->_request_url($self->{'opt'}->{'url'})
     }
 
     pod2usage( { -verbose => 2 } );
@@ -148,15 +138,7 @@ sub run {
 }
 
 ##############################################
-
-=head2 listbackends
-
-  $self->listbackends
-
-print list of backends
-
-=cut
-sub listbackends {
+sub _listbackends {
     my($self) = @_;
     my $c = $self->_dummy_c();
     printf("%-4s %-10s %s\n", 'Def', 'Key', 'Name');
@@ -173,15 +155,7 @@ sub listbackends {
 }
 
 ##############################################
-
-=head2 request_url
-
-  $self->request_url($url)
-
-print response for given url
-
-=cut
-sub request_url {
+sub _request_url {
     my($self,$url) = @_;
 
     $ENV{'REQUEST_URI'}      = $url;
@@ -198,19 +172,15 @@ sub request_url {
 
     Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
 
+    if($ENV{'HTTP_CODE'} != 200) {
+        print "\n";
+        return 1;
+    }
     return 0;
 }
 
 ##############################################
-
-=head2 get_options
-
-  $self->get_options
-
-populate $self->{'opt'}
-
-=cut
-sub get_options {
+sub _get_options {
     my($self) = @_;
 
     $self->{'opt'} = {
@@ -228,12 +198,6 @@ sub get_options {
     ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
     return;
 }
-
-##############################################
-
-=back
-
-=cut
 
 ##############################################
 sub _dummy_c {

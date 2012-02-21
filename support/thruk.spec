@@ -117,6 +117,7 @@ mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_syscon
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
+mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/debian
 %{__rm} -rf %{buildroot}%{_sysconfdir}/thruk/ssi/README
@@ -164,6 +165,7 @@ exit 0
 %{_datadir}/thruk/
 /usr/lib/thruk/perl5
 %doc %{_mandir}/man8/thruk.*
+%doc %{_mandir}/man3/thruk.*
 
 %if %{defined suse_version}
 %attr(755,wwwrun,root) %{_localstatedir}/lib/thruk
