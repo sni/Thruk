@@ -16,17 +16,13 @@ resources(
 );
 
 requires 'parent'                                 => 0;     # required by Thruk
-requires 'JSON'                                   => 0;     # required by Thruk::View::JSON
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
-requires 'Path::Class'                            => 0;     # required by Catalyst::Runtime
-requires 'Params::Validate'                       => 0;     # required by Moose
 requires 'Config::General'                        => 0;     # required by Thruk::Utils
 requires 'Class::Data::Inheritable'               => 0;     # required by Catalyst::Plugin::Thruk::RemoveNastyCharsFromHttpParam
 requires 'MRO::Compat'                            => 0;     # required by Catalyst::Plugin::Unicode::Encoding
-requires 'File::Copy::Recursive'                  => 0.38;
-requires 'Scalar::Util'                           => 1.21;
-requires 'List::Util::XS'                         => 0;
+#requires 'List::Util::XS'                         => 0;
 requires 'Class::C3::Adopt::NEXT'                 => 0;     # required by Catalyst::View::GD
+requires 'Class::C3::XS'                          => 0;     # speed up class things
 requires 'URI::Escape'                            => 0;     # required by Thruk::Controller::Root
 requires 'Moose'                                  => 0;     # required by Thruk::Action::AddDefaults
 requires 'Monitoring::Livestatus'                 => 0.74;
@@ -46,7 +42,6 @@ requires 'Catalyst'                               => 5.80020;
 requires 'Catalyst::Runtime'                      => 0;     # required by Thruk
 requires 'Catalyst::Controller'                   => 0;     # required by Thruk::Controller::*
 requires 'Catalyst::Exception'                    => 0;     # required by Catalyst::View::GD
-requires 'Catalyst::Action::RenderView'           => 0;     # required by Thruk
 requires 'Catalyst::Authentication::User::Hash'   => 0;     # required by Catalyst::Authentication::Store::FromCGIConf.pm
 requires 'Catalyst::View'                         => 0;     # required by Catalyst::View::GD
 requires 'Catalyst::View::TT'                     => 0;     # required by Thruk
@@ -65,7 +60,6 @@ requires 'Log::Dispatch::File'                    => 0;     # required by Thruk 
 requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
 requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
-requires 'Catalyst::Engine::CGI'                  => 0;     # required by Catalyst::Engine::Thrukembedded
 requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
 
 # conf tool plugin
