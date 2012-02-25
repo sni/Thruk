@@ -301,7 +301,7 @@ sub _request {
         #fail("startup url does not match: '$1' != '$url'") if $1 ne $url;
         my $r = request('/thruk/side.html');
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
-        fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/lib/thruk/pid';
+        fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
         $request = request($url);
     }
     return $request;

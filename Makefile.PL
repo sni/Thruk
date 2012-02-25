@@ -38,7 +38,7 @@ requires 'File::Slurp'                            => 0;     # required by Thruk:
 requires 'Date::Manip'                            => 0;     # required by Thruk::Utils
 requires 'Excel::Template::Plus'                  => 0;     # required by Thruk::Utils
 requires 'Class::Accessor::Fast'                  => 0;     # required by Catalyst::Authentication::Credential::Thruk
-requires 'Catalyst'                               => 5.80020;
+requires 'Catalyst'                               => 5.90010;
 requires 'Catalyst::Runtime'                      => 0;     # required by Thruk
 requires 'Catalyst::Controller'                   => 0;     # required by Thruk::Controller::*
 requires 'Catalyst::Exception'                    => 0;     # required by Catalyst::View::GD
@@ -61,6 +61,7 @@ requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
 requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
+requires 'Plack::Handler::CGI'                    => 0;     # required by script/thruk
 
 # conf tool plugin
 feature     ('plugin_conf',

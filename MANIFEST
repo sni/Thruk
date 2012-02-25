@@ -44,7 +44,6 @@ inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Catalyst/Authentication/Credential/Thruk.pm
 lib/Catalyst/Authentication/Store/FromCGIConf.pm
-lib/Catalyst/Engine/Thrukembedded.pm
 lib/Catalyst/Helper/Model/Thruk/Class.pm
 lib/Catalyst/Model/Thruk/Class.pm
 lib/Catalyst/Plugin/Authorization/ThrukRoles.pm
@@ -54,6 +53,7 @@ lib/Catalyst/Plugin/Unicode/Encoding.pm
 lib/Catalyst/Script/Thrukembedded.pm
 lib/Catalyst/View/GD.pm
 lib/FCGI/ProcManager/MaxRequestsThruk.pm
+lib/Plack/Handler/Thrukembedded.pm
 lib/Thruk.pm
 lib/Thruk/Action/AddDefaults.pm
 lib/Thruk/Backend/Manager.pm

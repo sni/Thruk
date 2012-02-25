@@ -1,7 +1,8 @@
 package Catalyst::Script::Thrukembedded;
 use Moose;
-BEGIN { $ENV{CATALYST_ENGINE} ||= 'Thrukembedded' }
 use namespace::autoclean;
+
+sub _plack_engine_name { return 'Thrukembedded'; }
 
 with 'Catalyst::ScriptRole';
 
