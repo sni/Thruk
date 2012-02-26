@@ -287,6 +287,22 @@ sub escape_quotes {
 
 ########################################
 
+=head2 escape_slash
+
+  escape_slash($text)
+
+used to escape slashes
+
+=cut
+sub escape_slash {
+    my $text = shift;
+    $text =~ s/\\/\\\\/gmx;
+    return $text;
+}
+
+
+########################################
+
 =head2 xml_escape
 
   xml_escape($text)

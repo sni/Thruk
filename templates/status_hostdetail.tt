@@ -4,7 +4,7 @@
 
 <script type="text/javascript">
 <!--
-  var dfl_Hash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% h.name %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+  var dfl_Hash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% escape_slash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
   hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
 -->
 </script>
