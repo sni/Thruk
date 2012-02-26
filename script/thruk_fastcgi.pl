@@ -17,6 +17,7 @@ BEGIN {
 }
 
 use Catalyst::ScriptRunner;
+$ENV{'THRUK_SRC'} = 'FastCGI';
 Catalyst::ScriptRunner->run('Thruk', 'FastCGI');
 
 1;

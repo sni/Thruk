@@ -228,12 +228,12 @@ __PACKAGE__->setup();
 # save pid
 my $pidfile  = (__PACKAGE__->config->{'tmp_path'} || '/tmp').'/thruk.pid';
 sub _remove_pid {
-    if(defined $ENV{'CATALYST_ENGINE'} and $ENV{'CATALYST_ENGINE'} eq 'FastCGI') {
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         unlink($pidfile);
     }
     return;
 }
-if(defined $ENV{'CATALYST_ENGINE'} and $ENV{'CATALYST_ENGINE'} eq 'FastCGI') {
+if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
     open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
     print $fh $$."\n";
     close($fh);

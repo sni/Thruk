@@ -113,6 +113,7 @@ sub new {
     my $class = shift;
     my $self  = {};
     bless $self, $class;
+    $ENV{'THRUK_SRC'} = 'CLI';
     return $self;
 }
 

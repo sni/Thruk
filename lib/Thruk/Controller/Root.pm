@@ -423,7 +423,7 @@ sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     my $pidfile  = ($c->config->{'tmp_path'} || '/tmp').'/thruk.pid';
-    if(defined $ENV{'CATALYST_ENGINE'} and $ENV{'CATALYST_ENGINE'} eq 'FastCGI' and ! -f $pidfile) {
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI' and ! -f $pidfile) {
         open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
         print $fh $$."\n";
         close($fh);

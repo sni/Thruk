@@ -1,5 +1,5 @@
---- a/script/thruk_fastcgi.pl	2012-02-09 02:00:15.888835121 +0100
-+++ b/script/thruk_fastcgi.pl	2012-02-09 20:49:33.725412141 +0100
+--- a/script/thruk_fastcgi.pl	2012-02-26 17:26:38.798120736 +0100
++++ b/script/thruk_fastcgi.pl	2012-02-26 17:26:52.109739015 +0100
 @@ -1,21 +1,10 @@
  #!/usr/bin/perl
  
@@ -22,5 +22,5 @@
 -}
 -
  use Catalyst::ScriptRunner;
+ $ENV{'THRUK_SRC'} = 'FastCGI';
  Catalyst::ScriptRunner->run('Thruk', 'FastCGI');
- 
