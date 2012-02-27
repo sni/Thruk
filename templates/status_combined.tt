@@ -4,7 +4,7 @@
 
 <script type="text/javascript">
 <!--
-  var hst_Hash = new Hash({[% FOREACH h = hosts %]r[% loop.index %]: "[% escape_slash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+  var hst_Hash = new Hash({[% FOREACH h = hosts %]r[% loop.index %]: "[% escape_bslash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
   hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
 -->
 </script>
@@ -85,7 +85,7 @@
 
 <script type="text/javascript">
 <!--
-  var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% escape_slash(s.host_name %];[% escape_slash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+  var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% escape_bslash(s.host_name %];[% escape_bslash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
 -->
 </script>
 

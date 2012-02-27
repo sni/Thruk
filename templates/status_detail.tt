@@ -3,7 +3,7 @@
 [% PROCESS _message.tt %]
 
 <script type="text/javascript">
-  var dfl_Hash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% escape_slash(s.host_name) %];[% escape_slash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+  var dfl_Hash = new Hash({[% FOREACH s = data %]r[% loop.index %]: "[% escape_bslash(s.host_name) %];[% escape_bslash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
   hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
 </script>
 

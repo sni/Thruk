@@ -8,7 +8,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fixed adding page reloads to browser history, now reloads don't show up in history
           - fixed statusmap table layout
           - fixed escaping newlines when escape_html is off
-          - fixed sending commands to hosts/services with slashes
+          - fixed sending commands to hosts/services with backslashes
           - fixed tests
 
 1.18     Tue Feb 14 17:17:38 CET 2012

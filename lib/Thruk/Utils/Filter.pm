@@ -287,14 +287,14 @@ sub escape_quotes {
 
 ########################################
 
-=head2 escape_slash
+=head2 escape_bslash
 
-  escape_slash($text)
+  escape_bslash($text)
 
-used to escape slashes
+used to escape backslashes
 
 =cut
-sub escape_slash {
+sub escape_bslash {
     my $text = shift;
     $text =~ s/\\/\\\\/gmx;
     return $text;
