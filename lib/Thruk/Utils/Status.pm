@@ -706,6 +706,10 @@ sub single_search {
             push @hostfilter,    { percent_state_change => { $op => $value } };
             push @servicefilter, { percent_state_change => { $op => $value } };
         }
+        elsif ( $filter->{'type'} eq 'current attempt' ) {
+            push @hostfilter,    { current_attempt => { $op => $value } };
+            push @servicefilter, { current_attempt => { $op => $value } };
+        }
         elsif ( $filter->{'type'} eq 'last check' ) {
             my $date;
             if($value eq "N/A" or $value eq "") {

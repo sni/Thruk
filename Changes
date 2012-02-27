@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - write pid file when running as fastcgi
           - show startpage when fcgid process is starting
           - added path to cookies, makes multiple instances possible on one host
+          - added current attempt filter (Jordi van Scheijen)
           - fixed adding page reloads to browser history, now reloads don't show up in history
           - fixed statusmap table layout
           - fixed escaping newlines when escape_html is off

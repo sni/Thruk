@@ -368,6 +368,7 @@
               <option value="last check"[% IF s.type == 'last check' %] selected[% END %]>Last Check</option>
               <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
               <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
+              <option value="current attempt"[% IF s.type == 'current attempt' %] selected[% END %]>Current Attempt</option>
               <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
               <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
               <option value="check period"[% IF s.type == 'check period' %] selected[% END %]>Check Period</option>
