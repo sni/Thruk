@@ -51,8 +51,9 @@ function add_conf_attribute(table, key) {
         if(key == 'customvariable') {
             value = "_";
         }
-        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"$('id_key" + running_number + "').name='obj.'+this.value\">";
+        newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"jQuery('.obj_" + running_number + "').attr('name', 'obj.'+this.value)\">";
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_'+running_number);
+        newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/class="obj_customvariable"/g, 'class="obj_customvariable obj_'+running_number+'"');
     }
 
     tblBody.insertBefore(newObj, tblBody.rows[tblBody.rows.length -2]);

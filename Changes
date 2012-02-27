@@ -10,6 +10,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fixed escaping newlines when escape_html is off
           - fixed sending commands to hosts/services with backslashes
           - fixed tests
+          - Config Tool:
+              - fixed adding custom variables
 
 1.18     Tue Feb 14 17:17:38 CET 2012
           - changed version numbers to real numbers
