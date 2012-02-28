@@ -51,7 +51,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]'>[% com.host_name %]</a></td>
           <td class='[% class %]'>[% date_format(c, com.entry_time) %]</td>
           <td class='[% class %]'>[% com.author %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
           <td class='[% class %]'>[% com.id %]</td>
           <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
@@ -101,7 +101,7 @@
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% com.host_name | uri %]&amp;service=[% com.service_description | uri %]'>[% com.service_description %]</a></td>
           <td class='[% class %]'>[% date_format(c, com.entry_time) %]</td>
           <td class='[% class %]'>[% com.author %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(com.comment) %][% ELSE %][% com.comment %][% END %]</td>
           <td class='[% class %]'>[% com.id %]</td>
           <td class='[% class %]'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %]'>[% IF com.entry_type == 1 %]User[% ELSIF com.entry_type == 2 %]Scheduled Downtime[% ELSIF com.entry_type == 3 %]Flap Detection[% ELSIF com.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>

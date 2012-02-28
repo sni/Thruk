@@ -17,13 +17,13 @@
     [% FOREACH n = data %]
     [% PROCESS _notifications_log_line.tt %]
     <row>
-        [% IF columns.1  %]<cell>[% xml_escape(n.host_name) %]</cell>[% END %]
-        [% IF columns.2  %]<cell>[% xml_escape(n.service_description) %]</cell>[% END %]
+        [% IF columns.1  %]<cell>[% escape_xml(n.host_name) %]</cell>[% END %]
+        [% IF columns.2  %]<cell>[% escape_xml(n.service_description) %]</cell>[% END %]
         [% IF columns.3  %]<format bg_color='[% state_color %]'><cell>[% level %]</cell></format>[% END %]
         [% IF columns.4  %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(n.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>[% END %]
-        [% IF columns.5  %]<cell>[% xml_escape(n.contact_name) %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% xml_escape(n.command_name) %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% xml_escape(n.plugin_output) %]</cell>[% END %]
+        [% IF columns.5  %]<cell>[% escape_xml(n.contact_name) %]</cell>[% END %]
+        [% IF columns.6  %]<cell>[% escape_xml(n.command_name) %]</cell>[% END %]
+        [% IF columns.6  %]<cell>[% escape_xml(n.plugin_output) %]</cell>[% END %]
     </row>
     [% END %]
   </worksheet>

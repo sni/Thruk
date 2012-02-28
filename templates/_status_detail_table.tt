@@ -88,20 +88,20 @@
             [% IF s.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(html_escape(s.plugin_output)) %]<br>[% html_escape(nl2br(html_escape(s.long_plugin_output))) %]'><span class="has_long_plugin_output">[% html_escape(s.plugin_output) %]</span></td>
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(s.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(s.long_plugin_output))) %]'><span class="has_long_plugin_output">[% escape_html(s.plugin_output) %]</span></td>
                 [% ELSE %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% html_escape(s.plugin_output) %]<br>[% nl2br(html_escape(s.long_plugin_output)) %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
                 [% END %]
               [% ELSIF show_long_plugin_output == 'inline' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% serviceclass %]'>[% html_escape(s.plugin_output) %]<br>[% nl2br(html_escape(s.long_plugin_output)) %]</td>
+                  <td align="left" class='[% serviceclass %]'>[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]</td>
                 [% ELSE %]
                   <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]<br>[% nl2br(s.long_plugin_output) %]</td>
                 [% END %]
               [% END %]
             [% ELSE %]
               [% IF escape_html_tags %]
-                <td align="left" class='[% serviceclass %]'>[% html_escape(s.plugin_output) %]</td>
+                <td align="left" class='[% serviceclass %]'>[% escape_html(s.plugin_output) %]</td>
               [% ELSE %]
                 <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]</td>
               [% END %]

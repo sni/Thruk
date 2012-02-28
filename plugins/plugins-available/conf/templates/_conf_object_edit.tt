@@ -36,7 +36,7 @@
       [% ELSIF obj.default.$key.exists('help') %]
         [% SET helpkey = obj.default.$key.help %]
       [% END %]
-      <td class='dataVal [% loopclass %] clickable conf_row' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr='&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% html_escape(obj.get_help(helpkey)) | nl2br %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
+      <td class='dataVal [% loopclass %] clickable conf_row' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'Help',WIDTH,600,[% c.config.info_popup_options %]);" abbr='&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/help.png' alt='help' title='help' width="16" height="16"></td>
     </tr>
 
     [% IF !obj.default.exists(key) || obj.default.$key.type != 'LIST' || (obj_conf.$key.size > 0 && obj.conf.$key.0.substr(0,1) != '+') %]
@@ -59,7 +59,7 @@
       <!--
       var fields = new Hash({
         [% FOREACH key_cat = obj.get_default_keys() %]
-          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row.tt nr=0 edit=1 defaults = obj.default key = key obj_conf = obj.conf | html_escape | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% html_escape(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
+          [% FOREACH key = key_cat.keys %]'[% key %]': { 'input': '[% PROCESS _conf_object_row.tt nr=0 edit=1 defaults = obj.default key = key obj_conf = obj.conf | escape_html | replace("'", "\\'") | replace("\n", "") %]', 'help': '[% SET helpkey = key %][% IF !obj.default.exists(key) %][% SET helpkey = "customvar" %][% ELSIF obj.default.$key.exists('help') %][% SET helpkey = obj.default.$key.help %][% END %]&lt;b&gt;[% helpkey %]&lt;/b&gt;&lt;br&gt;[% escape_html(obj.get_help(helpkey)) | nl2br | replace("'", "\\'") | replace("\n", "") %]' }
             [% UNLESS loop.last %],[% END %]
           [% END %]
           [% UNLESS loop.last %],[% END %]

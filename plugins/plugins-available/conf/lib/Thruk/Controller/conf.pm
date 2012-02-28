@@ -737,7 +737,7 @@ sub _apply_config_changes {
     if(defined $c->{'request'}->{'parameters'}->{'diff'}) {
         for my $file (@{$c->stash->{'changed_files'}}) {
             $c->stash->{'output'} .= "<hr><pre>\n";
-            $c->stash->{'output'} .= Thruk::Utils::Filter::html_escape($file->diff());
+            $c->stash->{'output'} .= Thruk::Utils::Filter::escape_html($file->diff());
             $c->stash->{'output'} .= "</pre><br>\n";
         }
     }

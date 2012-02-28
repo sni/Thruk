@@ -24,7 +24,7 @@
             <input type="radio" name="data.[% key %]" value="0"[% IF d.1 == 0 %] checked[% END %]> No
             <input type="radio" name="data.[% key %]" value="1"[% IF d.1 == 1 %] checked[% END %]> Yes
           [% ELSIF d.0 == 'STRING' %]
-            <input type="text" name="data.[% key %]" value="[% escape_quotes(d.1) %]" size=65>
+            <input type="text" name="data.[% key %]" value="[% escape_js(d.1) %]" size=65>
           [% ELSIF d.0 == 'INT' %]
             <input type="text" name="data.[% key %]" value="[% d.1 %]" size=65>
           [% ELSIF d.0 == 'ARRAY' %]

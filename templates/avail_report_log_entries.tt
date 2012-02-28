@@ -22,7 +22,7 @@
           <td class='[% class %]'>[% format_date(log.end, datetime_format) %]</td>
           <td class='[% class %]'>[% log.duration %]</td>
           <td class='logEntries[% log.class %]'>[% log.type %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(log.plugin_output) %][% ELSE %][% log.plugin_output %][% END %]</td>
+          <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(log.plugin_output) %][% ELSE %][% log.plugin_output %][% END %]</td>
         </tr>
         [% END %]
       </table>

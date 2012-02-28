@@ -252,34 +252,17 @@ sub uri_with {
 
 ########################################
 
-=head2 html_escape
+=head2 escape_html
 
-  html_escape($text)
+  escape_html($text)
 
 returns an escaped string
 
 =cut
-sub html_escape {
+sub escape_html {
     my $text = shift;
 
     return HTML::Entities::encode($text);
-}
-
-
-########################################
-
-=head2 quotes_escape
-
-  quotes_escape($text)
-
-returns a string with only the single- or double-quotes escaped
-
-=cut
-sub quotes_escape {
-    my $string = shift;
-    $string =~ s/'/\\'/gmx;
-    $string =~ s/"/\\'/gmx;
-    return $string;
 }
 
 
@@ -289,10 +272,27 @@ sub quotes_escape {
 
   escape_quotes($text)
 
-used to escape html tags so it can be used as javascript string
+returns a string with only the single- or double-quotes escaped
 
 =cut
 sub escape_quotes {
+    my $string = shift;
+    $string =~ s/'/\\'/gmx;
+    $string =~ s/"/\\'/gmx;
+    return $string;
+}
+
+
+########################################
+
+=head2 escape_js
+
+  escape_js($text)
+
+used to escape html tags so it can be used as javascript string
+
+=cut
+sub escape_js {
     my $text = shift;
     $text = HTML::Entities::encode($text);
     $text =~ s/&amp;quot;/&quot;/gmx;
@@ -320,14 +320,14 @@ sub escape_bslash {
 
 ########################################
 
-=head2 xml_escape
+=head2 escape_xml
 
-  xml_escape($text)
+  escape_xml($text)
 
 returns an escaped string for xml output
 
 =cut
-sub xml_escape {
+sub escape_xml {
     my $text = shift;
 
     return HTML::Entities::encode($text, '<>&');

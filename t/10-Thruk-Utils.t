@@ -86,7 +86,7 @@ SKIP: {
     #########################
     use_ok('XML::Parser');
 
-    my $escaped = Thruk::Utils::Filter::xml_escape("& <br> üöä?");
+    my $escaped = Thruk::Utils::Filter::escape_xml("& <br> üöä?");
     my $p1 = XML::Parser->new();
     eval {
         $p1->parse('<data>'.$escaped.'</data>');

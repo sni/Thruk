@@ -154,9 +154,9 @@
                             <td class='dataVar' valign='top'> Status Information: </td>
                             <td class='dataVal detail_plugin_output'>
                               [% IF service.has_been_checked == 0 %]service has not been checked yet[% END %]
-                              [% IF escape_html_tags %][% html_escape(service.plugin_output) %][% ELSE %][% service.plugin_output %][% END %]
+                              [% IF escape_html_tags %][% escape_html(service.plugin_output) %][% ELSE %][% service.plugin_output %][% END %]
                               [% IF service.long_plugin_output %]
-                              <br>[% IF escape_html_tags %][% nl2br(html_escape(service.long_plugin_output)) %][% ELSE %][% nl2br(service.long_plugin_output) %][% END %]
+                              <br>[% IF escape_html_tags %][% nl2br(escape_html(service.long_plugin_output)) %][% ELSE %][% nl2br(service.long_plugin_output) %][% END %]
                               [% END %]
                             </td>
                           </tr>
@@ -392,7 +392,7 @@
                   <tr class='[% class %]'>
                     <td class='[% class %]' nowrap>[% date_format(c, comment.entry_time) %]</td>
                     <td class='[% class %]'>[% comment.author %]</td>
-                    <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(comment.comment) %][% ELSE %][% comment.comment %][% END %]</td>
+                    <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(comment.comment) %][% ELSE %][% comment.comment %][% END %]</td>
                     <td class='[% class %]'>[% comment.id %]</td>
                     <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
                     <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
@@ -456,7 +456,7 @@
                     <td class='[% class %]' nowrap>[% date_format(c, downtime.start_time) %]</td>
                     <td class='[% class %]' nowrap>[% date_format(c, downtime.end_time) %]</td>
                     <td class='[% class %]'>[% downtime.author %]</td>
-                    <td class='[% class %]'>[% IF escape_html_tags %][% html_escape(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
+                    <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
                     <td class='[% class %]'>[% downtime.id %]</td>
                     <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
                     [% UNLESS c.config.command_disabled.exists('79') %]

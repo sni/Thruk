@@ -17,7 +17,7 @@
   </tr>
   <tr>
     <td class="dataVar" colspan=3>
-        <div id="editor" style="visibility: hidden;">[% html_escape(file_content) %]</div>
+        <div id="editor" style="visibility: hidden;">[% escape_html(file_content) %]</div>
         <script src="[% url_prefix %]thruk/plugins/conf/ace/ace.js" type="text/javascript" charset="utf-8"></script>
         <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/monitoring.js" type="text/javascript" charset="utf-8"></script>
         <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/monitoring_highlight_rules.js" type="text/javascript" charset="utf-8"></script>

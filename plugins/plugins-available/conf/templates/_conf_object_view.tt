@@ -44,7 +44,7 @@
       <td class='dataVar [% loopclass %] conf_row' style="border-bottom: 0px;"></td>
     </tr>
     <tr>
-      <td class='dataVal [% loopclass %] conf_row' colspan=2><pre style="max-width: 600px; overflow: visible;">[% html_escape(obj.comments.join("\n")) %]</pre></td>
+      <td class='dataVal [% loopclass %] conf_row' colspan=2><pre style="max-width: 600px; overflow: visible;">[% escape_html(obj.comments.join("\n")) %]</pre></td>
     </tr>
   [% END %]
 

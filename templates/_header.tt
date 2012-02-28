@@ -124,7 +124,7 @@
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
                   [% END %]
                 </select>
-                <input type="button" name="submit" value="change" onClick="prefSubmit('[% html_escape(c.request.uri) %]', '[% theme %]')">
+                <input type="button" name="submit" value="change" onClick="prefSubmit('[% escape_html(c.request.uri) %]', '[% theme %]')">
               </td>
             </tr>
             <tr>
@@ -186,7 +186,7 @@
             [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
             [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 6 %]
             [% SET class = 'button_peerUP'  IF backend_detail.$pd.disabled == 7 %]
-            <input type="button" id='button_[% pd %]' class="[% class %]" value="[% name %]" title="[% IF backend_detail.$pd.last_error %][% escape_quotes(backend_detail.$pd.last_error) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleBackend('[% pd %]')"[% IF backend_detail.$pd.disabled == 5 %] disabled[% END %]>
+            <input type="button" id='button_[% pd %]' class="[% class %]" value="[% name %]" title="[% IF backend_detail.$pd.last_error %][% escape_js(backend_detail.$pd.last_error) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleBackend('[% pd %]')"[% IF backend_detail.$pd.disabled == 5 %] disabled[% END %]>
           </div>
           [% END %]
           [% END %]

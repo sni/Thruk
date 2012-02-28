@@ -5,16 +5,16 @@
 
 [% IF !defaults.exists(key) || defaults.$key.type == 'STRING' || defaults.$key.type == 'INT' %]
   [% IF edit %]
-    <input type="text" class="obj_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% escape_quotes(value) %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]>
+    <input type="text" class="obj_[% key %]" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% IF obj_conf.defined(key) %][% escape_js(value) %][% END %]" [% IF use_ajax_search && defaults.exists(key) && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]>
     [% IF key == 'command_line' %][% PROCESS _conf_wizard_commandline.tt id="id_" _ key _ "_wzd" _ nr inp="id_" _ key _ nr %][% END %]
     [% IF key == 'address' %]<button class="conf_button ip_wzd_button" id="[% key %]_btn[% nr %]">&nbsp;</button>[% END %]
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') && defaults.$key.link == 'icon' %]
-        [% html_escape(value) %] <img class="notclickable" src='[% logo_path_prefix %][% value %]' border="0" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
+        [% escape_html(value) %] <img class="notclickable" src='[% logo_path_prefix %][% value %]' border="0" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
     [% ELSIF defaults.exists(key) && defaults.$key.exists('link') %]
         <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value %]</a>
     [% ELSE %]
-        [% html_escape(value) %]
+        [% escape_html(value) %]
     [% END %]
   [% END %]
 
