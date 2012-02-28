@@ -268,6 +268,23 @@ sub html_escape {
 
 ########################################
 
+=head2 quotes_escape
+
+  quotes_escape($text)
+
+returns a string with only the single- or double-quotes escaped
+
+=cut
+sub quotes_escape {
+    my $string = shift;
+    $string =~ s/'/\\'/gmx;
+    $string =~ s/"/\\'/gmx;
+    return $string;
+}
+
+
+########################################
+
 =head2 escape_quotes
 
   escape_quotes($text)
