@@ -140,8 +140,18 @@ echo "Thruk has been configured for http://$(hostname)/thruk/. User and password
 exit 0
 
 %postun
-rm -rf %{_localstatedir}/lib/thruk
-rm -rf %{_localstatedir}/cache/thruk
+case "$*" in
+  0)
+    # POSTUN
+    #rm -rf %{_localstatedir}/lib/thruk
+    rm -rf %{_localstatedir}/cache/thruk/*
+    ;;
+  1)
+    # POSTUPDATE
+    rm -rf %{_localstatedir}/cache/thruk/*
+    ;;
+  *) echo case "$*" not handled in preun
+esac
 exit 0
 
 %clean
