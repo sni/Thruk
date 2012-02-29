@@ -53,7 +53,9 @@ script has the following arguments
 
 =item B<-b> I<backend>, B<--backend>=I<backend>
 
-    specify backend(s), otherwise the default backends will be used
+    specify backend(s), otherwise the default backends will be
+    used. Specify the key of the backend. Use <-l> to get a list
+    of backends.
 
 =item B<-l> , B<--list-backends>
 
@@ -96,117 +98,7 @@ export all services into an excel file:
 
 ##############################################
 
-my $thruk = thruk_runner->new();
-exit $thruk->_run();
+use Thruk::Utils::CLI;
 
-##############################################
-package thruk_runner;
-
-use Carp;
-use Getopt::Long;
-use Pod::Usage;
-use Data::Dumper;
-use Catalyst::ScriptRunner;
-
-##############################################
-sub new {
-    my $class = shift;
-    my $self  = {};
-    bless $self, $class;
-    $ENV{'THRUK_SRC'} = 'CLI';
-    return $self;
-}
-
-##############################################
-sub _run {
-    my($self) = @_;
-
-    $self->_get_options();
-
-    if(defined $self->{'opt'}->{'listbackends'}) {
-        return $self->_listbackends();
-    }
-
-    if(defined $self->{'opt'}->{'url'}) {
-        if($self->{'opt'}->{'url'} =~ m|^\w+\.cgi|gmx) {
-            $self->{'opt'}->{'url'} = '/thruk/cgi-bin/'.$self->{'opt'}->{'url'};
-        }
-        return $self->_request_url($self->{'opt'}->{'url'})
-    }
-
-    pod2usage( { -verbose => 2 } );
-    return 0;
-}
-
-##############################################
-sub _listbackends {
-    my($self) = @_;
-    my $c = $self->_dummy_c();
-    printf("%-4s %-10s %s\n", 'Def', 'Key', 'Name');
-    printf("-------------------------\n");
-    for my $key (keys %{$c->stash->{'backend_detail'}}) {
-        printf("%-4s %-10s %s\n",
-                $c->stash->{'backend_detail'}->{$key}->{'disabled'} == 0 ? ' * ' : '',
-                $key,
-                $c->stash->{'backend_detail'}->{$key}->{'name'}
-        );
-    }
-    printf("-------------------------\n");
-    return 0;
-}
-
-##############################################
-sub _request_url {
-    my($self,$url) = @_;
-
-    $ENV{'REQUEST_URI'}      = $url;
-    $ENV{'SCRIPT_NAME'}      = $url;
-    $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-    $ENV{'QUERY_STRING'}     = $1 if defined $1;
-    $ENV{'REMOTE_USER'}      = $self->{'opt'}->{'auth'} if defined $self->{'opt'}->{'auth'};
-    $ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
-    $ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
-    $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
-    $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
-    $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
-    $ENV{'NO_EXTERNAL_JOBS'} = 1;
-
-    Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
-
-    if($ENV{'HTTP_CODE'} != 200) {
-        print "\n";
-        return 1;
-    }
-    return 0;
-}
-
-##############################################
-sub _get_options {
-    my($self) = @_;
-
-    $self->{'opt'} = {
-        'verbose'  => 0,
-        'backends' => [],
-    };
-    Getopt::Long::Configure('no_ignore_case');
-    GetOptions (
-       "h|help"             => \$self->{'opt'}->{'help'},
-       "v|verbose"          => \$self->{'opt'}->{'verbose'},
-       "l|list-backends"    => \$self->{'opt'}->{'listbackends'},
-       "b|backend=s"        => \$self->{'opt'}->{'backends'},
-       "u|url=s"            => \$self->{'opt'}->{'url'},
-       "a|auth=s"           => \$self->{'opt'}->{'auth'},
-    ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
-    return;
-}
-
-##############################################
-sub _dummy_c {
-    my($self) = @_;
-    require Catalyst::Test;
-    Catalyst::Test->import('Thruk');
-    my($res, $c) = ctx_request('/thruk/dummy');
-    return $c;
-}
-
-1;
+my $cli = Thruk::Utils::CLI->new();
+exit $cli->_run();

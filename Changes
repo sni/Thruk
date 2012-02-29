@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.22     not yet released...
+          - cli tool:
+              - implemented setting backends with '-b'
+
 1.20     Tue Feb 28 22:38:23 CET 2012
           - added cli tool
           - write pid file when running as fastcgi
@@ -11,7 +15,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fixed escaping newlines when escape_html is off
           - fixed sending commands to hosts/services with backslashes
           - fixed tests
-          - Config Tool:
+          - config tool:
               - fixed adding custom variables
 
 1.18     Tue Feb 14 17:17:38 CET 2012
