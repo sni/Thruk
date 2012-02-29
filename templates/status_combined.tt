@@ -85,7 +85,7 @@
 
 <script type="text/javascript">
 <!--
-  var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% escape_bslash(s.host_name %];[% escape_bslash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+  var svc_Hash = new Hash({[% FOREACH s = services %]r[% loop.index %]: "[% escape_bslash(s.host_name) %];[% escape_bslash(s.description) %];[% s.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
 -->
 </script>
 
