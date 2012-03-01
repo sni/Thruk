@@ -3,6 +3,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 1.22     not yet released...
           - cli tool:
               - implemented setting backends with '-b'
+          - fixed packages apache config
+          - fixed missing bracket on problems page
 
 1.20     Tue Feb 28 22:38:23 CET 2012
           - added cli tool

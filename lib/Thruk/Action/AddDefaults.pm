@@ -91,7 +91,7 @@ sub add_defaults {
     my $cached_data = $cache->get($c->stash->{'remote_user'});
 
     ###############################
-    my($disabled_backends,$has_groups) = $self->_set_enabled_backends($c, $cache);
+    my($disabled_backends,$has_groups) = _set_enabled_backends($c, $cache);
 
     ###############################
     # add program status
@@ -113,7 +113,7 @@ sub add_defaults {
     }
     if($@) {
         return if $c->request->uri->path_query =~ m/\/side\.html$/mx;
-        $self->_set_possible_backends($c, $disabled_backends);
+        _set_possible_backends($c, $disabled_backends);
         $c->log->error("data source error: $@");
         return $c->detach('/error/index/9');
     }
@@ -130,7 +130,7 @@ sub add_defaults {
     if(!defined $ENV{'THRUK_BACKENDS'} and $has_groups and defined $c->{'db'}) {
         $disabled_backends = _disable_backends_by_group($c, $disabled_backends, $cached_data);
     }
-    $self->_set_possible_backends($c, $disabled_backends);
+    _set_possible_backends($c, $disabled_backends);
 
     ###############################
     my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
@@ -146,7 +146,7 @@ sub add_defaults {
     }
 
     # override with env backends (if set)
-    $self->_set_env_backends($c);
+    _set_env_backends($c);
 
     if(!defined $c->stash->{'pi_detail'} and _any_backend_enabled($c)) {
         $c->log->error("got no result from any backend, please check backend connection and logfiles");
@@ -257,7 +257,7 @@ after 'execute' => sub {
 
 =cut
 sub _set_possible_backends {
-    my ($self,$c,$disabled_backends) = @_;
+    my ($c,$disabled_backends) = @_;
 
     my @possible_backends = @{$c->{'db'}->peer_key()};
     my %backend_detail;
@@ -378,7 +378,7 @@ sub _set_processinfo {
 
 ########################################
 sub _set_enabled_backends {
-    my($self, $c, $cache) = @_;
+    my($c, $cache) = @_;
 
     # first all backends are enabled
     if(defined $c->{'db'}) {
@@ -422,7 +422,7 @@ sub _set_enabled_backends {
 
 ########################################
 sub _set_env_backends {
-    my($self, $c) = @_;
+    my($c) = @_;
     if(defined $ENV{'THRUK_BACKENDS'}) {
         my $backends = {};
         for my $b (split/,/mx, $ENV{'THRUK_BACKENDS'}) {

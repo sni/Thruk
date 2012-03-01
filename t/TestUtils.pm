@@ -240,7 +240,7 @@ sub test_page {
             }
             unless($request->is_success) {
                 $errors++;
-                diag("'$test_url' is missing");
+                diag("'$test_url' is missing, status: ".$request->code);
             }
         }
         is( $errors, 0, 'All stylesheets, images and javascript exist' );
