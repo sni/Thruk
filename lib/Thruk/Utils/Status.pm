@@ -273,9 +273,9 @@ sub classic_filter {
     }
 
     my $hostfilter         = Thruk::Utils::combine_filter( '-and', \@hostfilter );
-    my $hostgroupfilter    = Thruk::Utils::combine_filter( '-and', \@hostgroupfilter );
+    my $hostgroupfilter    = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
     my $servicefilter      = Thruk::Utils::combine_filter( '-and', \@servicefilter );
-    my $servicegroupfilter = Thruk::Utils::combine_filter( '-and', \@servicegroupfilter );
+    my $servicegroupfilter = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
 
     # fill the host/service totals box
     unless($errors) {
@@ -811,8 +811,8 @@ sub single_search {
     # combine the array of filters by AND
     my $hostfilter          = Thruk::Utils::combine_filter( '-and', \@hostfilter );
     my $servicefilter       = Thruk::Utils::combine_filter( '-and', \@servicefilter );
-    my $hostgroupfilter     = Thruk::Utils::combine_filter( '-and', \@hostgroupfilter );
-    my $servicegroupfilter  = Thruk::Utils::combine_filter( '-and', \@servicegroupfilter );
+    my $hostgroupfilter     = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
+    my $servicegroupfilter  = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
     my $hosttotalsfilter    = Thruk::Utils::combine_filter( '-and', \@hosttotalsfilter );
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-and', \@servicetotalsfilter );
 
