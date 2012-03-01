@@ -2075,6 +2075,10 @@ function show_cal(id) {
         } else {
             document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
         }
+      },
+      onTimeChange: function(c, time) {
+        time = time - time%5;
+        c.setTime(time, true);
       }
   });
   cal.selection.set(Calendar.dateToInt(dateObj));
