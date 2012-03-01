@@ -42,6 +42,7 @@ requires 'Catalyst'                               => 5.90010;
 requires 'Catalyst::Runtime'                      => 0;     # required by Thruk
 requires 'Catalyst::Controller'                   => 0;     # required by Thruk::Controller::*
 requires 'Catalyst::Exception'                    => 0;     # required by Catalyst::View::GD
+requires 'Catalyst::ScriptRunner'                 => 0;     # required by Thruk::Utils::CLI
 requires 'Catalyst::Authentication::User::Hash'   => 0;     # required by Catalyst::Authentication::Store::FromCGIConf.pm
 requires 'Catalyst::View'                         => 0;     # required by Catalyst::View::GD
 requires 'Catalyst::View::TT'                     => 0;     # required by Thruk

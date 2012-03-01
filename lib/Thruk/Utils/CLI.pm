@@ -1,5 +1,17 @@
 package Thruk::Utils::CLI;
 
+=head1 NAME
+
+Thruk::Utils::CLI - Utilities Collection for CLI Tool
+
+=head1 DESCRIPTION
+
+Utilities Collection for CLI Tool
+
+=cut
+
+use warnings;
+use strict;
 use Carp;
 use Getopt::Long;
 use Pod::Usage;
@@ -7,6 +19,16 @@ use Data::Dumper;
 use Catalyst::ScriptRunner;
 
 ##############################################
+
+=head1 METHODS
+
+=head2 new
+
+  new()
+
+create CLI Tool object
+
+=cut
 sub new {
     my $class = shift;
     my $self  = {};

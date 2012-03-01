@@ -78,6 +78,7 @@ lib/Thruk/Model/Thruk.pm
 lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Avail.pm
+lib/Thruk/Utils/CLI.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/Menu.pm
