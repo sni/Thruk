@@ -122,6 +122,7 @@ mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/debian
 %{__rm} -rf %{buildroot}%{_sysconfdir}/thruk/ssi/README
+%{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/plugins
 
 %pre
 exit 0

@@ -105,6 +105,7 @@ install: build
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/support
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/debian
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/LICENSE
+	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/root/thruk/plugins
 
 
 # Build architecture-independent files here.

@@ -200,10 +200,10 @@ sub begin : Private {
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme;
     if( defined $c->config->{templates_paths} ) {
-        $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
+        $c->stash->{additional_template_paths} = [ @{ $c->config->{templates_paths} }, $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates' ];
     }
     else {
-        $c->stash->{additional_template_paths} = [ $c->config->{root} . '/thruk/themes/' . $theme . '/templates' ];
+        $c->stash->{additional_template_paths} = [ $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates' ];
     }
     $c->stash->{all_in_one_css} = 1 if $theme eq 'Thruk';
 
