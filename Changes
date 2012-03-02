@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 1.22     not yet released...
           - cli tool:
               - implemented setting backends with '-b'
+          - use 127.0.0.1 and locahost tcp connections for local states too
           - fixed packages apache config
           - fixed missing bracket on problems page
           - fixed problem with missing templates in packages
