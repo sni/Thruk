@@ -9,14 +9,21 @@
     <!--
       jQuery.noConflict();
       jQuery(document).ready(function() {
-        jQuery.get('side.html', function() {
+        jQuery.ajax({
+          url: 'side.html',
+          success: function() {
+            jQuery('#msg').html('<font color="green"><b>done.<\/b><\/font>');
             var ref = window.location.search;
             ref = ref.replace(/^\?/, '');
             if(ref != '') {
               window.location = ref;
             }
-          });
+          },
+          error: function() {
+            jQuery('#msg').html('<font color="red"><b>failed.<\/b><\/font><br>please have a look at the apache error log and the thruk error log.');
+          }
         });
+      });
     -->
     </script>
   </head>
@@ -32,7 +39,7 @@
 
       <div class="whatsnew warmup">
         Please stand by, Thruks FastCGI Daemon is warming up.<br>
-        You will be redirected in a few seconds...<br>
+        You will be redirected in a few seconds...<span id="msg"></span><br>
       </div>
     </div>
   </body>
