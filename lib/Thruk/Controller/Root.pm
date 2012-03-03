@@ -112,6 +112,7 @@ sub begin : Private {
         expire_ack_duration                 => 86400,
         show_custom_vars                    => [],
         var_path                            => './var',
+        themes_path                         => './themes',
         priorities                      => {
                     5                       => 'Business Critical',
                     4                       => 'Top Production',
