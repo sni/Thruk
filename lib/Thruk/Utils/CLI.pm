@@ -126,9 +126,13 @@ sub _get_options {
 ##############################################
 sub _dummy_c {
     my($self) = @_;
+    my $olduser = $ENV{'REMOTE_USER'};
+    $ENV{'REMOTE_USER'} = 'dummy';
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
     my($res, $c) = ctx_request('/thruk/dummy');
+    $ENV{'REMOTE_USER'} = $olduser;
+    die('dummy request failed with status: '.$res->code) unless $res->code == 200;
     return $c;
 }
 
