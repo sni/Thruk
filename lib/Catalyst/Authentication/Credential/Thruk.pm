@@ -107,6 +107,9 @@ sub authenticate {
         if(defined $c->engine->env->{'REMOTE_USER'}) {
             $username = $c->engine->env->{'REMOTE_USER'};
         }
+        elsif(defined $ENV{'REMOTE_USER'}) {
+            $username = $ENV{'REMOTE_USER'};
+        }
     }
 
     # default_user_name?

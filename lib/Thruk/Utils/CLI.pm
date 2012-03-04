@@ -131,9 +131,10 @@ sub _dummy_c {
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
     my($res, $c) = ctx_request('/thruk/dummy');
-    $ENV{'REMOTE_USER'} = $olduser;
-    die('dummy request failed with status: '.$res->code) unless $res->code == 200;
-    return $c;
+    defined $olduser ? $ENV{'REMOTE_USER'} = $olduser : delete $ENV{'REMOTE_USER'};
+    my $failed = 0;
+    $failed = 1 unless $res->code == 200;
+    return($c, $failed);
 }
 
 1;
