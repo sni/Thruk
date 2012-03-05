@@ -34,7 +34,7 @@ version:
 		$$git mv themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$(VERSION).css themes/themes-available/Thruk/stylesheets/all_in_one_noframes-$$newversion.css; \
 	fi;
 	@./script/thruk_update_docs.sh > /dev/null
-	@perl Makefile.PL > /dev/null
+	@yes n | perl Makefile.PL > /dev/null
 	@git add MANIFEST support/thruk.spec docs/THRUK_MANUAL.txt docs/THRUK_MANUAL.html lib/Thruk.pm debian/changelog
 	@git co docs/FAQ.html
 	@git status
