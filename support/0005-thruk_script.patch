@@ -1,25 +1,15 @@
---- a/script/thruk	2012-02-20 12:57:03.364764756 +0100
-+++ b/script/thruk	2012-02-20 12:58:45.526016418 +0100
-@@ -3,18 +3,11 @@
+--- a/script/thruk	2012-03-05 11:24:15.175553640 +0100
++++ b/script/thruk	2012-03-05 11:44:27.186134321 +0100
+@@ -3,6 +3,12 @@
  use strict;
  use warnings;
  
-+use lib '/usr/lib/thruk/perl5';
-+use lib '/usr/share/thruk/lib';
- BEGIN {
--    use FindBin;
--    use Config;
--    if(-e $FindBin::Bin."/../local-lib") {
--        ### use 5.10.0; # only required for packages ###
--        unshift @INC, $FindBin::Bin."/../local-lib/lib/perl5";
--        if(! -e $FindBin::Bin."/../local-lib/lib/perl5/".$Config{archname}) {
--            die("\nERROR: this is the wrong precompiled version, your archname is: ".$Config{archname}."\n\n");
--        }
--        require local::lib; local::lib->import($FindBin::Bin."/../local-lib/perl5/");
--    }
--}
++BEGIN {
++    use lib '/usr/lib/thruk/perl5';
++    use lib '/usr/share/thruk/lib';
 +    $ENV{'CATALYST_CONFIG'} = '/etc/thruk' unless defined $ENV{'CATALYST_CONFIG'};
 +};
- 
- ##############################################
- 
++
+ use Thruk::Utils::CLI;
+ my $cli = Thruk::Utils::CLI->new();
+ exit $cli->_run();

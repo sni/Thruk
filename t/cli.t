@@ -14,6 +14,9 @@ BEGIN {
 
 my $BIN = defined $ENV{'CATALYST_SERVER'} ? '/usr/bin/thruk' : './script/thruk';
 
+my $oldextsrv = $ENV{'CATALYST_SERVER'};
+delete $ENV{'CATALYST_SERVER'};
+
 TestUtils::test_command({
     cmd  => $BIN.' -l',
     like => ['/\s+\*\s*\w{5}\s*\w+/',
@@ -32,4 +35,6 @@ TestUtils::test_command({
 });
 unlink('/tmp/allservices.xls');
 
+# restore env
+defined $oldextsrv ? $ENV{'CATALYST_SERVER'} = $oldextsrv : delete $ENV{'CATALYST_SERVER'};
 done_testing();
