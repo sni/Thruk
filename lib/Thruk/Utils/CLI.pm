@@ -61,7 +61,7 @@ sub _run {
 ##############################################
 sub _listbackends {
     my($self) = @_;
-    my $c = $self->_dummy_c();
+    my($c,$failed) = $self->_dummy_c();
     printf("%-4s %-10s %s\n", 'Def', 'Key', 'Name');
     printf("-------------------------\n");
     for my $key (keys %{$c->stash->{'backend_detail'}}) {
