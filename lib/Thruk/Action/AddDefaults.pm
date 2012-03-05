@@ -414,7 +414,7 @@ sub _set_enabled_backends {
 
     # renew state of connections
     if($c->config->{'check_local_states'}) {
-        $c->{'db'}->set_backend_state_from_local_connections($cache, $disabled_backends);
+        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($cache, $disabled_backends);
     }
 
     return($disabled_backends, $has_groups);

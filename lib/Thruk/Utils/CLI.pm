@@ -62,16 +62,17 @@ sub _run {
 sub _listbackends {
     my($self) = @_;
     my($c,$failed) = $self->_dummy_c();
-    printf("%-4s %-10s %s\n", 'Def', 'Key', 'Name');
-    printf("-------------------------\n");
+    printf("%-4s  %-7s  %-9s   %s\n", 'Def', 'Key', 'Name', 'Address');
+    printf("---------------------------------------\n");
     for my $key (keys %{$c->stash->{'backend_detail'}}) {
-        printf("%-4s %-10s %s\n",
+        printf("%-4s %-8s %-10s %s\n",
                 $c->stash->{'backend_detail'}->{$key}->{'disabled'} == 0 ? ' * ' : '',
                 $key,
-                $c->stash->{'backend_detail'}->{$key}->{'name'}
+                $c->stash->{'backend_detail'}->{$key}->{'name'},
+                $c->stash->{'backend_detail'}->{$key}->{'addr'},
         );
     }
-    printf("-------------------------\n");
+    printf("---------------------------------------\n");
     return 0;
 }
 
