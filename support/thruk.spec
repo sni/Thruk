@@ -125,16 +125,39 @@ mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/plugins
 
 %pre
+# save themes and plugins so we don't reenable them on every update
+rm -rf /tmp/thruk_update
+if [ -d /etc/thruk/themes/themes-enabled/. ]; then
+  mkdir -p /tmp/thruk_update/themes
+  cp -rp /etc/thruk/themes/themes-enabled/* /tmp/thruk_update/themes/
+fi
+if [ -d /etc/thruk/plugins/plugins-enabled/. ]; then
+  mkdir -p /tmp/thruk_update/plugins
+  cp -rp /etc/thruk/plugins/plugins-enabled/* /tmp/thruk_update/plugins/
+fi
 exit 0
 
 %post
+# restore themes and plugins
+if [ -d /tmp/thruk_update/themes/. ]; then
+  rm -f /etc/thruk/themes/themes-enabled/*
+  cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
+fi
+if [ -d /tmp/thruk_update/plugins/. ]; then
+  rm -f /etc/thruk/plugins/plugins-enabled/*
+  cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
+fi
+rm -rf /tmp/thruk_update
+mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
 %if %{defined suse_version}
+chown wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk
 a2enmod alias
 a2enmod fcgid
 a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
+chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 %endif
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."

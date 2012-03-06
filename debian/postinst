@@ -20,6 +20,17 @@ set -e
 
 case "$1" in
     configure)
+        # restore themes and plugins
+        if [ -d /tmp/thruk_update/themes/. ]; then
+          rm -f /etc/thruk/themes/themes-enabled/*
+          cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
+        fi
+        if [ -d /tmp/thruk_update/plugins/. ]; then
+          rm -f /etc/thruk/plugins/plugins-enabled/*
+          cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
+        fi
+        rm -rf /tmp/thruk_update
+
         # enable modules we need
         a2enmod alias
         a2enmod fcgid
@@ -27,9 +38,8 @@ case "$1" in
         a2enmod rewrite
 
         # set permissions
-        chown www-data: /var/lib/thruk
-        chown www-data: /var/cache/thruk
-        chown www-data: /var/log/thruk
+        mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
+        chown www-data: /var/lib/thruk /var/cache/thruk /var/log/thruk
         chown 755 /usr/share/thruk/fcgid_env.sh
         chown 755 /usr/bin/thruk
 
