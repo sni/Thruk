@@ -95,7 +95,7 @@ SKIP: {
 
     #########################
     # external cmd
-    Thruk::Utils::External::cmd($c, { cmd => "sleep 2; echo 'test'; echo \"err\" >&2;" });
+    Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
     my $id = $c->stash->{'job_id'};
     isnt($id, undef, "got an id");
 
@@ -111,7 +111,7 @@ SKIP: {
     is($out,  "test\n", "got result");
     is($err,  "err\n",  "got error");
     isnt($dir, undef,   "got dir");
-    ok($time >=1,       "got time (".$time."s)") or diag(`ls -la $dir && cat $dir/*`);
+    ok($time >=1,       "runtime >= 1 (".$time."s)") or diag(`ls -la $dir && cat $dir/*`);
 
     #########################
     # external perl
@@ -128,10 +128,10 @@ SKIP: {
     is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
     ($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
 
-    is($out,   "blub",  "got result");
-    is($err,   "blah",  "got error");
-    is($time,  0,       "got time");
-    isnt($dir, undef,   "got dir");
+    is($out,     "blub",  "got result");
+    is($err,     "blah",  "got error");
+    ok($time <=3,         "runtime <= 3seconds, (".$time.")");
+    isnt($dir,   undef,   "got dir");
 };
 
 
