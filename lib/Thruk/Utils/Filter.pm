@@ -252,6 +252,20 @@ sub uri_with {
 
 ########################################
 
+=head2 html_escape
+
+  html_escape($text)
+
+wrapper for escape_html for compatibility reasons
+
+=cut
+sub html_escape {
+    return escape_html(@_);
+}
+
+
+########################################
+
 =head2 escape_html
 
   escape_html($text)
