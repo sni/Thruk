@@ -410,7 +410,7 @@ sub set_backend_state_from_local_connections {
                     $key = $state_key if $host->{'alias'}   eq $name;
 
                     next unless defined $key;
-                    next if $disabled->{$key} == 2;
+                    next if defined $disabled->{$key} and $disabled->{$key} == 2;
 
                     my $peer = $self->get_peer_by_key($key);
 
