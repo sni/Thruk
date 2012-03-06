@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.22     not yet released...
+1.22     Tue Mar  6 17:20:18 CET 2012
           - cli tool:
               - implemented setting backends with '-b'
           - use 127.0.0.1 and locahost tcp connections for local states too
