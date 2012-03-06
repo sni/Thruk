@@ -15,7 +15,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use File::Slurp;
-
+use Storable qw/dclone/;
 
 ##############################################
 =head1 METHODS
@@ -216,6 +216,12 @@ sub _renew_navigation {
     $Thruk::Utils::Menu::c          = $c;
     $Thruk::Utils::Menu::navigation = [];
 
+    # make a copy of additional menuitems
+    # otherwise, items added from a menu_local.conf would be added once
+    # per loading a page
+    my $additional_items    = dclone($Thruk::Utils::Menu::additional_items);
+    my $additional_subitems = dclone($Thruk::Utils::Menu::additional_subitems);
+
     ## no critic
     eval(read_file($file));
     ## use critic
@@ -314,6 +320,10 @@ sub _renew_navigation {
     }
 
     $c->stash->{'navigation'}  = $new_nav;
+
+    # restore additional menuitems
+    $Thruk::Utils::Menu::additional_items    = dclone($additional_items);
+    $Thruk::Utils::Menu::additional_subitems = dclone($additional_subitems);
 
     return;
 }

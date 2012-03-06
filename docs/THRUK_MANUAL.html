@@ -10182,12 +10182,15 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 </div>
 <h3 id="_menu_conf">menu.conf</h3><div style="clear:left"></div>
 <div class="paragraph"><p>This file contains the default side menu configuration. Do not change
-it. If you want to change the configuration copy this file to
-menu_local.conf and change that file.</p></div>
+it as this file will be overwritten with every update. If you want to
+create a complete custom navigation, just copy this file to
+menu_local.conf and adjust it to your needs. See <em>menu_local.conf</em> on
+how to add just add a few links without having to copy the complete
+file.</p></div>
 <h3 id="_menu_local_conf">menu_local.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>This file contains the user configuration for the side menu. The file
-is not shipped with the Thruk package. Just copy the menu.conf to
-menu_local.conf to create it.</p></div>
+<div class="paragraph"><p>This file contains the user configuration for the side menu. See the
+<a href="http://www.thruk.org/faq.html#_how_to_change_the_side_menu">FAQ</a> for
+some examples.</p></div>
 <div class="paragraph"><p>The file itself is perl syntax, so you can do whatever perl can do.
 Make sure you verify the syntax after changing the file. The changes
 will be used immediately. So maybe you want to test your changes
@@ -10255,6 +10258,13 @@ menu_local.conf syntax OK</tt></pre>
 </td>
 </tr></table>
 </div>
+<div class="paragraph"><p>If you just want to add a few entrys, create a empty menu_local.conf
+and put these lines into it:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>do '/usr/share/thruk/menu.conf';
+insert_item('General', { 'href' =&gt; 'http://labs.consol.de', 'name' =&gt; 'Labs', target =&gt; '_blank' });</tt></pre>
+</div></div>
 <h3 id="_server_side_includes">Server Side Includes</h3><div style="clear:left"></div>
 <div class="paragraph"><p>You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
@@ -10461,7 +10471,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-02-28 22:35:58 CEST
+Last updated 2012-03-06 11:49:23 CEST
 </div>
 </div>
 </body>

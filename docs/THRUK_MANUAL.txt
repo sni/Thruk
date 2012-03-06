@@ -1619,17 +1619,19 @@ ex.: log4perl.appender.ErrorLog.Threshold=INFO
 === menu.conf
 
 This file contains the default side menu configuration. Do not change
-it. If you want to change the configuration copy this file to
-menu_local.conf and change that file.
-
+it as this file will be overwritten with every update. If you want to
+create a complete custom navigation, just copy this file to
+menu_local.conf and adjust it to your needs. See 'menu_local.conf' on
+how to add just add a few links without having to copy the complete
+file.
 
 
 
 === menu_local.conf
 
-This file contains the user configuration for the side menu. The file
-is not shipped with the Thruk package. Just copy the menu.conf to
-menu_local.conf to create it.
+This file contains the user configuration for the side menu. See the
+http://www.thruk.org/faq.html#_how_to_change_the_side_menu[FAQ] for
+some examples.
 
 The file itself is perl syntax, so you can do whatever perl can do.
 Make sure you verify the syntax after changing the file. The changes
@@ -1644,6 +1646,13 @@ on a test instance first.
 =======
 
 
+If you just want to add a few entrys, create a empty menu_local.conf
+and put these lines into it:
+
+-------
+do '/usr/share/thruk/menu.conf';
+insert_item('General', { 'href' => 'http://labs.consol.de', 'name' => 'Labs', target => '_blank' });
+-------
 
 
 
