@@ -18,12 +18,11 @@
     [% comment_data         = c.request.parameters.com_data %]
     [% host_name            = c.request.parameters.host %]
     [% comment_author       = c.request.parameters.com_author %]
-    [% IF c.request.parameters.sticky_ack %][% options = 2 %][% ELSE %][% options = 1 %][% END %]
 
     [% IF has_expire_acks && end_time_unix > 0 && c.request.parameters.use_expire %]
-    ACKNOWLEDGE_HOST_PROBLEM_EXPIRE;[% sprintf("%s;%d;%d;%d;%d;%s;%s",host_name,options,send_notification,persistent_comment,end_time_unix,comment_author,comment_data) %]
+    ACKNOWLEDGE_HOST_PROBLEM_EXPIRE;[% sprintf("%s;%d;%d;%d;%d;%s;%s",host_name,sticky_ack,send_notification,persistent_comment,end_time_unix,comment_author,comment_data) %]
     [% ELSE %]
-    ACKNOWLEDGE_HOST_PROBLEM;[% sprintf("%s;%d;%d;%d;%s;%s",host_name,options,send_notification,persistent_comment,comment_author,comment_data) %]
+    ACKNOWLEDGE_HOST_PROBLEM;[% sprintf("%s;%d;%d;%d;%s;%s",host_name,sticky_ack,send_notification,persistent_comment,comment_author,comment_data) %]
     [% END %]
 [% END %]
 
