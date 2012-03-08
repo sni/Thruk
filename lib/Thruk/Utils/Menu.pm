@@ -219,8 +219,8 @@ sub _renew_navigation {
     # make a copy of additional menuitems
     # otherwise, items added from a menu_local.conf would be added once
     # per loading a page
-    my $additional_items    = defined $additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
-    my $additional_subitems = defined $additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
+    my $additional_items    = defined $Thruk::Utils::Menu::additional_items    ? dclone($Thruk::Utils::Menu::additional_items)    : [];
+    my $additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
 
     ## no critic
     eval(read_file($file));
