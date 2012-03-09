@@ -541,7 +541,7 @@ sub read_ssi {
 
   version_compare($version1, $version2)
 
-compare too version strings
+compare too version strings and return 1 if v1 >= v2
 
 =cut
 sub version_compare {
@@ -556,12 +556,14 @@ sub version_compare {
     my @v2 = split/\./mx,$v2;
 
     for(my $x = 0; $x < scalar @v1; $x++) {
-        next if !defined $v2[$x];
-        my $cmp = 0;
-        if($v2[$x] =~ m/^(\d+)/gmx) { $cmp = $1; }
-        if ($v1[$x] <= $cmp) {
+        my $cmp1 = 0;
+        my $cmp2 = 0;
+        if(defined $v1[$x] and $v1[$x] =~ m/^(\d+)/gmx) { $cmp1 = $1; }
+        if(defined $v2[$x] and $v2[$x] =~ m/^(\d+)/gmx) { $cmp2 = $1; }
+        if ($cmp1 > $cmp2) {
             return 1;
-        } else {
+        }
+        if ($cmp1 < $cmp2) {
             return 0;
         }
     }

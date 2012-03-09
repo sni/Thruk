@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use strict;
-use Test::More tests => 28;
+use Test::More tests => 32;
 use Data::Dumper;
 
 BEGIN {
@@ -135,7 +135,11 @@ SKIP: {
 };
 
 
-is(Thruk::Utils::version_compare('1.0.0',   '1.0.1'),   1, 'version_compare: 1.0.0 vs. 1.0.1');
-is(Thruk::Utils::version_compare('1.0.1',   '1.0.0'),   0, 'version_compare: 1.0.1 vs. 1.0.0');
-is(Thruk::Utils::version_compare('1.0.0',   '1.0.1b1'), 1, 'version_compare: 1.0.0 vs. 1.0.1b1');
-is(Thruk::Utils::version_compare('1.0.1b1', '1.0.1b2'), 1, 'version_compare: 1.0.1b1 vs. 1.0.1b2');
+is(Thruk::Utils::version_compare('1.0',         '1.0'),     1, 'version_compare: 1.0 vs. 1.0');
+is(Thruk::Utils::version_compare('1.0.0',       '1.0'),     1, 'version_compare: 1.0.0 vs. 1.0');
+is(Thruk::Utils::version_compare('1.0',         '1.0.0'),   1, 'version_compare: 1.0 vs. 1.0.0');
+is(Thruk::Utils::version_compare('1.0.0',       '1.0.1'),   0, 'version_compare: 1.0.0 vs. 1.0.1');
+is(Thruk::Utils::version_compare('1.0.1',       '1.0.0'),   1, 'version_compare: 1.0.1 vs. 1.0.0');
+is(Thruk::Utils::version_compare('1.0.0',       '1.0.1b1'), 0, 'version_compare: 1.0.0 vs. 1.0.1b1');
+is(Thruk::Utils::version_compare('1.0.1b1',     '1.0.1b2'), 0, 'version_compare: 1.0.1b1 vs. 1.0.1b2');
+is(Thruk::Utils::version_compare('2.0-shinken', '1.1.3'),   1, 'version_compare: 2.0-shinken vs. 1.1.3');

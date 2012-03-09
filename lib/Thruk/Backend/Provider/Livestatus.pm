@@ -120,7 +120,7 @@ sub get_processinfo {
     if(defined $cache) {
         my $cached_already_warned_about_livestatus_version = $cache->get('already_warned_about_livestatus_version');
         if(!defined $cached_already_warned_about_livestatus_version and defined $self->{'config'}->{'min_livestatus_version'}) {
-            unless(Thruk::Utils::version_compare($self->{'config'}->{'min_livestatus_version'}, $data->{$self->peer_key()}->{'data_source_version'})) {
+            unless(Thruk::Utils::version_compare($data->{$self->peer_key()}->{'data_source_version'}, $self->{'config'}->{'min_livestatus_version'})) {
                 $cache->set('already_warned_about_livestatus_version', 1);
                 $self->{'log'}->warn("backend '".$self->peer_name()."' uses too old livestatus version: '".$data->{$self->peer_key()}->{'data_source_version'}."', minimum requirement is at least '".$self->{'config'}->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
             }
