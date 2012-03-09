@@ -559,7 +559,11 @@ sub version_compare {
         next if !defined $v2[$x];
         my $cmp = 0;
         if($v2[$x] =~ m/^(\d+)/gmx) { $cmp = $1; }
-        return 0 unless $v1[$x] <= $cmp;
+        if ($v1[$x] <= $cmp) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
     return 1;
 }
