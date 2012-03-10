@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.24     not released yet
+          - conf tool:
+              - reset reload flag on external reloads too
           - fixed shinken livestatus version warning
 
 1.22     Tue Mar  6 17:20:18 CET 2012

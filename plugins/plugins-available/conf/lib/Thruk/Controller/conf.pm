@@ -624,6 +624,8 @@ sub _process_objects_page {
 
     return unless $self->_update_objects_config($c);
 
+    _check_external_reload($c);
+
     $c->stash->{'subtitle'}        = "Object Configuration";
     $c->stash->{'template'}        = 'conf_objects.tt';
     $c->stash->{'file_link'}       = "";
@@ -717,7 +719,7 @@ sub _process_objects_page {
     }
 
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
+    $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
     return 1;
 }
@@ -791,7 +793,7 @@ sub _apply_config_changes {
     }
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
+    $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'files'}             = $c->{'obj_db'}->get_files();
     return;
 }
@@ -1599,7 +1601,7 @@ sub _config_check {
 
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
+    $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     return;
 }
 
@@ -1608,6 +1610,8 @@ sub _config_reload {
     my($c) = @_;
     if(_cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
         Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
+        $c->stash->{'last_changed'} = 0;
+        $c->stash->{'needs_commit'} = 0;
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
     }
@@ -1623,8 +1627,6 @@ sub _config_reload {
     }
 
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
-    $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'needs_reload'}      = $c->{'obj_db'}->{'needs_reload'};
     return;
 }
 
@@ -1640,6 +1642,23 @@ sub _nice_check_output {
     $c->{'stash'}->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
     $c->{'stash'}->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
     $c->{'stash'}->{'output'} = "<pre>".$c->{'stash'}->{'output'}."</pre>";
+    return;
+}
+
+##########################################################
+# check for external reloads
+sub _check_external_reload {
+    my($c) = @_;
+
+    return unless defined $c->{'obj_db'}->{'last_changed'};
+
+    if($c->{'obj_db'}->{'last_changed'} > 0) {
+        my $last_reloaded = $c->stash->{'pi_detail'}->{$c->stash->{'param_backend'}}->{'program_start'};
+        if($last_reloaded > $c->{'obj_db'}->{'last_changed'}) {
+            $c->{'obj_db'}->{'last_changed'} = 0;
+            $c->stash->{'last_changed'}      = 0;
+        }
+    }
     return;
 }
 

@@ -37,7 +37,7 @@ sub new {
         'cached'             => 0,
         'needs_update'       => 0,
         'needs_commit'       => 0,
-        'needs_reload'       => 0,
+        'last_changed'       => 0,
         'needs_index_update' => 0,
         'coretype'           => 'nagios',
         'cache'              => {},
@@ -111,7 +111,7 @@ sub commit {
     $self->{'files'}        = \@new_files;
     if($rc == 1) {
         $self->{'needs_commit'} = 0;
-        $self->{'needs_reload'} = 1 if scalar @{$changed_files} > 0;
+        $self->{'last_changed'} = time() if scalar @{$changed_files} > 0;
     }
 
     $self->_collect_errors();
@@ -429,7 +429,7 @@ sub update {
 
     $self->{'needs_commit'} = 0;
     $self->{'needs_update'} = 0;
-    $self->{'needs_reload'} = 0;
+    $self->{'last_changed'} = 0;
 
     $self->_reset_errors();
     $self->_set_config();
@@ -455,7 +455,7 @@ sub check_files_changed {
     my $errors1 = scalar @{$self->{'errors'}};
 
     $self->{'needs_update'} = 0;
-    $self->{'needs_reload'} = 0 if $reload;
+    $self->{'last_changed'} = 0 if $reload;
 
     if(defined $self->{'_corefile'} and $self->_check_file_changed($self->{'_corefile'})) {
         # maybe core type has changed
