@@ -1287,7 +1287,12 @@ sub _object_save {
         return $c->response->redirect('conf.cgi?sub=objects&action=editor&file='.$obj->{'file'}->{'path'}.'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
     } else {
         if($has_changed or $new_comment ne $old_comment) {
-            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully' );
+            if(scalar @{$c->{'obj_db'}->{'errors'}} > 0) {
+                Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' saved with errors', $c->{'obj_db'}->{'errors'} );
+                return; # return, otherwise details would not be displayed
+            } else {
+                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully' );
+            }
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' did not change' );
         }

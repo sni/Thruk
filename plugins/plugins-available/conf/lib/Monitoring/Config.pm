@@ -2,6 +2,7 @@ package Monitoring::Config;
 
 use strict;
 use warnings;
+use Carp;
 use Monitoring::Config::File;
 
 =head1 NAME
@@ -489,9 +490,13 @@ sub update_object {
     my $data    = shift;
     my $comment = shift || '';
     my $rebuild = shift;
+    my $follow  = shift;
     $rebuild = 1 unless defined $rebuild;
+    $follow  = 1 unless defined $follow;
 
     return unless defined $obj;
+
+    my $oldname = $obj->get_name();
 
     # reset errors
     $self->_reset_errors();
@@ -508,6 +513,12 @@ sub update_object {
     $self->{'needs_commit'} = 1;
 
     push @{$file->{'objects'}}, $obj;
+
+    my $newname = $obj->get_name();
+
+    if($oldname ne $newname) {
+        $self->rename_dependencies($obj->get_type(), $oldname, $newname);
+    }
 
     $self->_rebuild_index() if $rebuild;
 
@@ -636,6 +647,79 @@ sub file_undelete {
     $self->{'needs_commit'} = 1;
 
     $self->_rebuild_index() if $rebuild;
+    return;
+}
+
+
+##########################################################
+
+=head2 rename_dependencies
+
+rename dependencies
+
+=cut
+sub rename_dependencies {
+    my($self, $type, $old, $new) = @_;
+
+    # create list of types with that dependency
+    my $replace = {};
+    for my $t (@{$Monitoring::Config::Object::Types}) {
+        my $obj = Monitoring::Config::Object->new(type => $t, coretype => $self->{'coretype'});
+        for my $key (keys %{$obj->{'default'}}) {
+            next unless defined $obj->{'default'}->{$key}->{'link'};
+            next unless $obj->{'default'}->{$key}->{'link'} eq $type;
+            $replace->{$t}->{$key} = 1;
+        }
+    }
+
+    # replace references in other objects
+    for my $obj (@{$self->get_objects()}) {
+        my $t = $obj->get_type();
+        next unless defined $replace->{$t};
+        for my $key (keys %{$replace->{$t}}) {
+            next unless defined $obj->{'conf'}->{$key};
+            if($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
+                next unless $obj->{'conf'}->{$key} eq $old;
+                if($obj->{'file'}->{'readonly'}) {
+                    push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
+                    next;
+                }
+                $obj->{'conf'}->{$key} = $new;
+                $obj->{'file'}->{'changed'} = 1;
+            }
+            elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
+                my $x = 0;
+                for my $m (@{$obj->{'conf'}->{$key}}) {
+                    $x++;
+                    next unless $m eq $old;
+                    if($obj->{'file'}->{'readonly'}) {
+                        push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
+                        next;
+                    }
+                    $obj->{'conf'}->{$key}->[$x-1] = $new;
+                    $obj->{'file'}->{'changed'} = 1;
+                }
+            }
+            elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
+                my($cmd,$arg) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
+                next if $cmd ne $old;
+                if($obj->{'file'}->{'readonly'}) {
+                    push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
+                    next;
+                }
+                if(!defined $arg or $arg eq '') {
+                    $obj->{'conf'}->{$key} = $new;
+                } else {
+                    $obj->{'conf'}->{$key} = $new.'!'.$arg;
+                }
+                $obj->{'file'}->{'changed'} = 1;
+            }
+            else {
+                confess("replace for ".$obj->{'default'}->{$key}->{'type'}." not implemented");
+            }
+        }
+    }
+
     return;
 }
 

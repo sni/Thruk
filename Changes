@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.24     not released yet
           - conf tool:
+              - rename dependencies on object updates
               - reset reload flag on external reloads too
               - remove cached data when core config changes
           - fixed shinken livestatus version warning
