@@ -431,7 +431,7 @@ sub update {
     $self->{'needs_update'} = 0;
     $self->{'last_changed'} = 0;
 
-    $self->_reset_errors();
+    $self->_reset_errors(1);
     $self->_set_config();
     $self->_set_files();
     $self->_read_objects();
@@ -1097,8 +1097,8 @@ sub _update_obj_in_index {
 
 ##########################################################
 sub _reset_errors {
-    my $self = shift;
-    if($self->{'errors_displayed'}) {
+    my($self,$force) = @_;
+    if($self->{'errors_displayed'} || $force) {
         $self->{'errors'}           = [];
         $self->{'errors_displayed'} = 0;
     }

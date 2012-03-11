@@ -898,15 +898,19 @@ sub _update_objects_config {
 
     my $refresh = $c->{'request'}->{'parameters'}->{'refresh'} || 0;
 
-    $c->stats->profile(begin => "objects init");
+    $c->stats->profile(begin => "_update_objects_config()");
     my $model                    = $c->model('Objects');
     my $peer_conftool            = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
+    $peer_conftool               = Thruk::Utils::Conf::get_default_peer_config($peer_conftool);
     $c->stash->{'peer_conftool'} = $peer_conftool;
 
     # already parsed?
-    if($model->cache_exists($c->stash->{'param_backend'}) or Thruk::Utils::Conf::get_model_retention($c)) {
-        $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
-        $c->{'obj_db'}->{'cached'} = 1;
+    if((   $model->cache_exists($c->stash->{'param_backend'})
+        or Thruk::Utils::Conf::get_model_retention($c)
+       )
+       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool, $model)
+    ) {
+        # objects initialized
     }
     # currently parsing
     elsif(my $id = $model->currently_parsing($c->stash->{'param_backend'})) {
@@ -927,7 +931,6 @@ sub _update_objects_config {
         }
         return 0;
     }
-    $c->stats->profile(end => "objects init");
     $c->{'obj_db'}->{'stats'} = $c->{'stats'};
 
     if($c->{'obj_db'}->{'cached'}) {
@@ -955,6 +958,7 @@ sub _update_objects_config {
         Thruk::Utils::set_message( $c, 'success_message', 'refresh successful');
     }
 
+    $c->stats->profile(end => "_update_objects_config()");
     return 1;
 }
 

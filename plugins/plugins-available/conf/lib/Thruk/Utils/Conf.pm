@@ -29,12 +29,14 @@ read objects and store them as storable
 =cut
 sub read_objects {
     my $c             = shift;
+    $c->stats->profile(begin => "read_objects()");
     my $model         = $c->model('Objects');
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
     my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool);
     store_model_retention($c);
     $c->stash->{model_type} = 'Objects';
     $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool, $obj_db ];
+    $c->stats->profile(end => "read_objects()");
     return;
 }
 
@@ -374,7 +376,7 @@ store object model in storable
 =cut
 sub store_model_retention {
     my($c) = @_;
-    $c->stats->profile(begin => "store object retention");
+    $c->stats->profile(begin => "store_model_retention()");
 
     my $model = $c->model('Objects');
     my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
@@ -392,10 +394,11 @@ sub store_model_retention {
     };
     if($@) {
         $c->log->error($@);
+        $c->stats->profile(end => "store_model_retention()");
         return;
     }
 
-    $c->stats->profile(end => "store object retention");
+    $c->stats->profile(end => "store_model_retention()");
     return;
 }
 
@@ -408,7 +411,7 @@ restore object model from storable
 =cut
 sub get_model_retention {
     my($c) = @_;
-    $c->stats->profile(begin => "retrieve object retention");
+    $c->stats->profile(begin => "get_model_retention()");
 
     my $model = $c->model('Objects');
     my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
@@ -442,7 +445,70 @@ sub get_model_retention {
         return;
     }
 
-    $c->stats->profile(end => "retrieve object retention");
+    $c->log->debug('model retention file '.$file.' loaded.');
+
+    $c->stats->profile(end => "get_model_retention()");
+    return 1;
+}
+
+##########################################################
+
+=head2 init_cached_config
+
+set current obj_db from cached config
+
+=cut
+sub init_cached_config {
+    my($c, $peer_conftool, $model) = @_;
+
+    $c->stats->profile(begin => "init_cached_config()");
+
+    $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
+    $c->{'obj_db'}->{'cached'} = 1;
+
+    unless(_compare_configs($peer_conftool, $c->{'obj_db'}->{'config'})) {
+        $c->log->debug("config object base files have changed, reloading complete obj db");
+        $c->{'obj_db'}->{'initialized'} = 0;
+        undef $c->{'obj_db'};
+        $c->stash->{'obj_model_changed'} = 0;
+        $c->stats->profile(end => "init_cached_config()");
+        return 0;
+    }
+
+    $c->log->debug("cached config object loaded");
+    $c->stats->profile(end => "init_cached_config()");
+    return 1;
+}
+
+##########################################################
+
+=head2 get_default_peer_config
+
+return empty / default peer objects config
+
+=cut
+sub get_default_peer_config {
+    my($config) = @_;
+    $config = {} unless defined $config;
+    $config->{'obj_check_cmd'}  = undef unless defined $config->{'obj_check_cmd'};
+    $config->{'obj_reload_cmd'} = undef unless defined $config->{'obj_reload_cmd'};
+    $config->{'core_conf'}      = undef unless defined $config->{'core_conf'};
+    $config->{'obj_dir'}        = [] unless defined $config->{'obj_dir'};
+    $config->{'obj_file'}       = [] unless defined $config->{'obj_file'};
+    return $config;
+}
+
+##########################################################
+sub _compare_configs {
+    my($c1, $c2) = @_;
+
+    for my $key (qw/core_conf/) {
+        return 0 if !defined $c1->{$key} and  defined $c2->{$key};
+        return 0 if  defined $c1->{$key} and !defined $c2->{$key};
+        next if !defined $c1->{$key} and !defined $c2->{$key};
+        return 0 if $c1->{$key} ne $c2->{$key};
+    }
+
     return 1;
 }
 
