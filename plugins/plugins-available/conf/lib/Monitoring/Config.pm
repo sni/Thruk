@@ -61,6 +61,9 @@ sub init {
     my $self   = shift;
     my $config = shift;
 
+    # update readonly config
+    $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
+
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
 
