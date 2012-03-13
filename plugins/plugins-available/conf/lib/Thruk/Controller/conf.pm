@@ -1187,8 +1187,9 @@ sub _files_to_path {
             $subdir = $subdir->{'dirs'}->{$dir};
         }
         $subdir->{'files'}->{$filename} = {
-                                           'date'    => Thruk::Utils::Filter::date_format($c, $file->{'mtime'}),
-                                           'deleted' => $file->{'deleted'},
+                                           'date'     => Thruk::Utils::Filter::date_format($c, $file->{'mtime'}),
+                                           'deleted'  => $file->{'deleted'},
+                                           'readonly' => $file->{'readonly'},
                                         };
     }
 

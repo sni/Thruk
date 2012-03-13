@@ -101,7 +101,7 @@
             var files = new Hash(dir.get('files'));
             files.keys().sort().each(function(name) {
                 f = files.get(name);
-                html += html_file(path, name, f.date, f.deleted);
+                html += html_file(path, name, f.date, f.deleted, f.readonly);
             });
 
             html += "<\/ul>";
@@ -124,16 +124,20 @@
     }
 
     /* return list element for file */
-    function html_file(path, name, date, deleted) {
+    function html_file(path, name, date, deleted, readonly) {
         var css="";
         if(deleted) {
             css="deleted";
+        }
+        var icon = "page_white_text.png";
+        if(readonly) {
+            icon = "page_white_key.png";
         }
         var html = "";
         html += "<li>";
         html += "<input type='checkbox' name='files' value='"+ path + name +"' class='obj_browse_box'>";
         html += "<a href='conf.cgi?sub=objects&action=editor&file="+ path + name + "' class='" + css + "'>";
-        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/page_white_text.png' border='0' alt='cfg' title='cfg' width='16' height='16'> ";
+        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/" + icon + "' border='0' alt='cfg' title='cfg' width='16' height='16'> ";
         html += "<div class='obj_browse_name "+ css +"'>" + name + "<\/div> ";
         html += "<div class='obj_browse_date "+ css +"'>"+ date + "<\/div>";
         html += "<\/a>";
@@ -207,7 +211,7 @@
                     html += html_dir(o.get('path'), o.get('name'), o.get('date'));
                 }
                 if(o.get('type') == 'file') {
-                    html += html_file(o.get('path'), o.get('name'), o.get('date'), o.get('deleted'));
+                    html += html_file(o.get('path'), o.get('name'), o.get('date'), o.get('deleted'), o.get('readonly'));
                 }
             });
             html += "<\/ul>";
@@ -231,7 +235,7 @@
         });
         files.keys().each(function(name) {
             if(file_matches(pattern, path + name)) {
-                results.push(new Hash({ 'type':'file', 'name': path + name, 'path': root, 'date': f.date, 'deleted': f.deleted }));
+                results.push(new Hash({ 'type':'file', 'name': path + name, 'path': root, 'date': f.date, 'deleted': f.deleted, 'readonly': f.readonly }));
             }
         });
         return results;
