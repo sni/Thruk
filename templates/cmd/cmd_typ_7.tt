@@ -14,6 +14,8 @@
 [% BLOCK action%]
     [% service_desc         = c.request.parameters.service %]
     [% host_name            = c.request.parameters.host %]
+    [%# rescheduling with date in the past breaks latency #%]
+    [% IF start_time_unix < date.now %][% start_time_unix = date.now %][% END %]
 
     [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_SVC_CHECK[% ELSE %]SCHEDULE_SVC_CHECK[% END %];[% sprintf("%s;%s;%lu",host_name,service_desc,start_time_unix) %]
 [% END %]
