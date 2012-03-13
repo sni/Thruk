@@ -94,9 +94,11 @@ sub BUILD {
     if($coretype eq 'shinken') {
         $Monitoring::Config::Object::Host::Defaults->{'criticity'}          = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
         $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'} = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };
+        $Monitoring::Config::Object::Host::Defaults->{'realm'}              = { type => 'STRING', cat => 'Extended' };
     } else {
         delete $Monitoring::Config::Object::Host::Defaults->{'criticity'};
         delete $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'realm'};
     }
 
     if($coretype eq 'icinga') {

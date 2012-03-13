@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
               - rename dependencies on object updates
               - reset reload flag on external reloads too
               - remove cached data when core config changes
+              - add realm for shinken backends
           - use current time when rescheduling checks with
             timestamp in the past to prevent breaking the latency calculation
           - fixed shinken livestatus version warning
