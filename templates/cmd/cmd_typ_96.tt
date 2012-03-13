@@ -13,6 +13,8 @@
 [%# definition of the command send to your backend #%]
 [% BLOCK action%]
     [% host_name            = c.request.parameters.host %]
+    [%# rescheduling with date in the past breaks latency #%]
+    [% IF start_time_unix < date.now %][% start_time_unix = date.now %][% END %]
 
     [% IF c.request.parameters.force_check %]SCHEDULE_FORCED_HOST_CHECK[% ELSE %]SCHEDULE_HOST_CHECK[% END %];[% sprintf("%s;%lu",host_name,start_time_unix) %]
 [% END %]
