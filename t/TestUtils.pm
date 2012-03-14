@@ -218,8 +218,9 @@ sub test_page {
             next if $match =~ m/^\/thruk\/cgi\-bin/;
             next if $match =~ m/^\w+\.cgi/;
             next if $match =~ m/^javascript:/;
-            next if $match =~ m/^'\+\w+\+'$/          and defined $ENV{'CATALYST_SERVER'};
+            next if $match =~ m/^'\+\w+\+'$/         and defined $ENV{'CATALYST_SERVER'};
             next if $match =~ m|^/thruk/frame\.html| and defined $ENV{'CATALYST_SERVER'};
+            next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/;
             $match =~ s/"\s*\+\s*url_prefix\s*\+\s*"/\//gmx;
             $match =~ s/"\s*\+\s*theme\s*\+\s*"/Thruk/gmx;
             $links_to_check->{$match} = 1;
