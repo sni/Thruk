@@ -381,8 +381,8 @@ sub set_backend_state_from_local_connections {
 
     $self->{'stats'}->profile( begin => "set_backend_state_from_local_connections() " ) if defined $self->{'stats'};
 
-    return unless scalar keys %{$self->{'local_hosts'}} >= 1;
-    return unless scalar keys %{$self->{'state_hosts'}} >= 1;
+    return $disabled unless scalar keys %{$self->{'local_hosts'}} >= 1;
+    return $disabled unless scalar keys %{$self->{'state_hosts'}} >= 1;
 
     my $options = [
         'backend', [ keys %{$self->{'local_hosts'}} ],
