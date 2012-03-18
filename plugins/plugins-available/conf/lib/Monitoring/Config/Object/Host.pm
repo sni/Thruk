@@ -92,13 +92,25 @@ sub BUILD {
     my $coretype = shift;
 
     if($coretype eq 'shinken') {
-        $Monitoring::Config::Object::Host::Defaults->{'criticity'}          = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'} = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };
-        $Monitoring::Config::Object::Host::Defaults->{'realm'}              = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'business_impact'}             = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'criticity'}                   = { type => 'DEPRECATED' };
+        $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'}          = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };
+        $Monitoring::Config::Object::Host::Defaults->{'realm'}                       = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'poller_tag'}                  = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'reactionner_tag'}             = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'resultmodulations'}           = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'business_impact_modulations'} = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'escalations'}                 = { type => 'STRING', cat => 'Extended' };
     } else {
+        delete $Monitoring::Config::Object::Host::Defaults->{'business_impact'};
         delete $Monitoring::Config::Object::Host::Defaults->{'criticity'};
         delete $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'};
         delete $Monitoring::Config::Object::Host::Defaults->{'realm'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'poller_tag'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'reactionner_tag'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'resultmodulations'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'business_impact_modulations'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'escalations'};
     }
 
     if($coretype eq 'icinga') {
