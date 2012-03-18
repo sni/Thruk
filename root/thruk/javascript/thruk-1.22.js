@@ -2210,6 +2210,7 @@ var ajax_search = {
         if(options.emptyclass != undefined) {
             ajax_search.emptyclass = options.emptyclass;
         }
+        ajax_search.onselect = undefined;
         if(options.onselect != undefined) {
             ajax_search.onselect = options.onselect;
         }

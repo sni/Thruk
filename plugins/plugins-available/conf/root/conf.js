@@ -26,7 +26,10 @@ function add_conf_attribute(table, key, rt) {
 
     running_number--;
     if(key != 'customvariable' && key != 'exception') {
-        $('new_' + key + '_btn').style.display = "none";
+        var btn = $('new_' + key + '_btn');
+        if(btn) {
+            btn.style.display = "none";
+        }
     }
 
     // add new row
