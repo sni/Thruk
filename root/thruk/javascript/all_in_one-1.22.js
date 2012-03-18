@@ -8229,6 +8229,7 @@ var ajax_search = {
     emptytxt        : '',
     emptyclass      : '',
     onselect        : undefined,
+    filter          : undefined,
 
     /* initialize search
      *
@@ -8246,6 +8247,7 @@ var ajax_search = {
      *   emptytxt:          text when empty
      *   emptyclass:        class when empty
      *   onselect:          run this function after selecting something
+     *   filter:            run this function as additional filter
      * }
      */
     //init: function(elem, type, url, striped, autosubmit, list, templates, data) {
@@ -8297,6 +8299,7 @@ var ajax_search = {
             append_value_of = ajax_search.append_value_of;
         }
 
+        ajax_search.empty = false;
         if(options.empty != undefined) {
             ajax_search.empty = options.empty;
         }
@@ -8308,6 +8311,10 @@ var ajax_search = {
         }
         if(options.onselect != undefined) {
             ajax_search.onselect = options.onselect;
+        }
+        ajax_search.filter = undefined;
+        if(options.filter != undefined) {
+            ajax_search.filter = options.filter;
         }
 
         var input = document.getElementById(ajax_search.input_field);
@@ -8596,8 +8603,13 @@ var ajax_search = {
                               }
                           }
                       });
+                      // additional filter?
+                      var rt = true;
+                      if(ajax_search.filter != undefined) {
+                          rt = ajax_search.filter(data, search_type);
+                      }
                       // only if all pattern were found
-                      if(found == pattern.size()) {
+                      if(rt && found == pattern.size()) {
                           result_obj.display = data;
                           sub_results.push(result_obj);
                           if(result_obj.relevance >= 100) { top_hits++; }

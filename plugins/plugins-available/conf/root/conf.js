@@ -586,3 +586,11 @@ function init_conf_tool_servicegroup_members_wizard(id) {
     $d.dialog('open');
     return;
 }
+
+/* filter already displayed attributes */
+function new_attr_filter(str) {
+    if(jQuery('#new_'+str+'_btn').css('display') == 'none') {
+        return false;
+    }
+    return true;
+}
