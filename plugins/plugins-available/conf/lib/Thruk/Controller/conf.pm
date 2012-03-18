@@ -270,7 +270,7 @@ sub _process_json_page {
             my $hostname = $host->get_name();
             my $services = $c->{'obj_db'}->get_services_for_host($host, $c->{'obj_db'});
             for my $svc (keys %{$services->{'group'}}, keys %{$services->{'host'}}) {
-                push @{$members}, $hostname.';'.$svc;
+                push @{$members}, $hostname.','.$svc;
             }
         }
         my $json = [{ 'name' => $type.'s',
