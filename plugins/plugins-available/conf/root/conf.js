@@ -532,7 +532,7 @@ function init_conf_tool_servicegroup_members_wizard(id) {
         for(i=0; i<lb.length; i++)  {
             newval += lb.options[i].value;
             if(i < lb.length-1) {
-                newval += ';';
+                newval += ',';
             }
         }
         jQuery('.obj_servicegroup_members').val(newval);
@@ -545,10 +545,10 @@ function init_conf_tool_servicegroup_members_wizard(id) {
     selected_members   = new Array();
     selected_members_h = new Hash();
     var options = '';
-    var list = jQuery('.obj_servicegroup_members').val().split(/;/);
+    var list = jQuery('.obj_servicegroup_members').val().split(/,/);
     for(var x=0; x<list.size();x+=2) {
         if(list[x] != '') {
-            var val = list[x]+';'+list[x+1]
+            var val = list[x]+','+list[x+1]
             selected_members.push(val);
             selected_members_h.set(val, 1);
             options += '<option value="'+val+'">'+val+'<\/option>';
