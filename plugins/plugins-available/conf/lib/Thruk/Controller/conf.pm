@@ -264,16 +264,19 @@ sub _process_json_page {
 
     # servicemembers
     if($type eq 'servicemember') {
-        my $json = [];
+        my $members = [];
         my $objects = $c->{'obj_db'}->get_objects_by_type('host');
         for my $host (@{$objects}) {
             my $hostname = $host->get_name();
             my $services = $c->{'obj_db'}->get_services_for_host($host, $c->{'obj_db'});
             for my $svc (keys %{$services->{'group'}}, keys %{$services->{'host'}}) {
-                push @{$json}, $hostname.';'.$svc;
+                push @{$members}, $hostname.';'.$svc;
             }
         }
-        $c->stash->{'json'} = [ sort @{Thruk::Utils::array_uniq($json)} ];
+        my $json = [{ 'name' => $type.'s',
+                      'data' => [ sort @{Thruk::Utils::array_uniq($members)} ],
+                   }];
+        $c->stash->{'json'} = $json;
         $c->forward('Thruk::View::JSON');
         return;
     }

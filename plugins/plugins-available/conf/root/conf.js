@@ -557,6 +557,7 @@ function init_conf_tool_servicegroup_members_wizard(id) {
             } else {
                 result = eval(transport.responseText);
             }
+            result = result[0]['data'];
             options = '';
             var size = result.size();
             for(var x=0; x<size;x++) {
