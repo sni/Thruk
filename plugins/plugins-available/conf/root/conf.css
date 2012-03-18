@@ -23,6 +23,9 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
 INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members {
   width: 375px !important;
 }
+INPUT.obj_servicegroup_servicegroup_members {
+  width: 400px !important;
+}
 
 .conf_attr_used {
   text-decoration: line-through;
@@ -112,4 +115,8 @@ TD.dataVar DIV#editor {
 
 body.config TABLE.filter {
   text-align: left;
+}
+
+.new_attr {
+  color: #AAAAAA;
 }

@@ -726,6 +726,24 @@ sub rename_dependencies {
     return;
 }
 
+##########################################################
+
+=head2 get_default_keys
+
+return the sorted default config keys for a type of object
+
+=cut
+sub get_default_keys {
+    my($self,$type) = @_;
+    my $obj = Monitoring::Config::Object->new(type     => $type,
+                                              coretype => $self->{'coretype'});
+    my @keys;
+    for my $key (keys %{$obj->{'default'}}) {
+        push @keys, $key unless $obj->{'default'}->{$key}->{'type'} eq 'DEPRECATED';
+    }
+    return \@keys;
+}
+
 
 ##########################################################
 sub _set_config {

@@ -2126,19 +2126,27 @@ var ajax_search = {
     autoopen        : true,
     append_value_of : undefined,
     stop_events     : false,
+    empty           : false,
+    emptytxt        : '',
+    emptyclass      : '',
+    onselect        : undefined,
 
     /* initialize search
      *
      * options are {
      *   url:               url to fetch data
      *   striped:           true/false, everything after " - " is trimmed
-     *   autosubmit:        true/false
+     *   autosubmit:        true/false, submit form on select
      *   list:              true/false, string is split by , and suggested by last chunk
      *   templates:         no/templates/both, suggest templates
      *   data:              search base data
      *   hideempty:         true/false, hide results when there are no hits
      *   add_prefix:        true/false, add ho:... prefix
      *   append_value_of:   id of input field to append to the original url
+     *   empty:             remove text on first access
+     *   emptytxt:          text when empty
+     *   emptyclass:        class when empty
+     *   onselect:          run this function after selecting something
      * }
      */
     //init: function(elem, type, url, striped, autosubmit, list, templates, data) {
@@ -2190,8 +2198,28 @@ var ajax_search = {
             append_value_of = ajax_search.append_value_of;
         }
 
+        if(options.empty != undefined) {
+            ajax_search.empty = options.empty;
+        }
+        if(options.emptytxt != undefined) {
+            ajax_search.emptytxt = options.emptytxt;
+        }
+        if(options.emptyclass != undefined) {
+            ajax_search.emptyclass = options.emptyclass;
+        }
+        if(options.onselect != undefined) {
+            ajax_search.onselect = options.onselect;
+        }
+
         var input = document.getElementById(ajax_search.input_field);
         ajax_search.size = input.getWidth();
+
+        if(ajax_search.empty == true) {
+            if(input.value == ajax_search.emptytxt) {
+                jQuery(input).removeClass(ajax_search.emptyclass);
+                input.value = "";
+            }
+        }
 
         ajax_search.show_all = false;
         var panel = document.getElementById(ajax_search.result_pan);
@@ -2636,6 +2664,10 @@ var ajax_search = {
             setCaretToPos(input, cursorpos);
         }
 
+        if(ajax_search.onselect != undefined) {
+            return ajax_search.onselect();
+        }
+
         if(( ajax_search.autosubmit == undefined
              && (
                     ajax_search.input_field == "NavBarSearchItem"
@@ -2742,6 +2774,14 @@ var ajax_search = {
             element = element.offsetParent;
         }
         return [offsetLeft, offsetTop];
+    },
+
+    reset: function() {
+        if(ajax_search.empty) {
+            var input = document.getElementById(ajax_search.input_field);
+            jQuery(input).addClass(ajax_search.emptyclass);
+            jQuery(input).val(ajax_search.emptytxt);
+        }
     }
 }
 

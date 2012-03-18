@@ -22,7 +22,7 @@ function set_sub(nr) {
 }
 
 var running_number = 0;
-function add_conf_attribute(table, key) {
+function add_conf_attribute(table, key, rt) {
 
     running_number--;
     if(key != 'customvariable' && key != 'exception') {
@@ -32,7 +32,6 @@ function add_conf_attribute(table, key) {
     // add new row
     tbl = $(table);
     var tblBody        = tbl.tBodies[0];
-    var currentLastRow = tblBody.rows.length - 3;
 
     var newObj   = tblBody.rows[0].cloneNode(true);
     newObj.id                 = "el_" + running_number;
@@ -56,7 +55,8 @@ function add_conf_attribute(table, key) {
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/class="obj_customvariable"/g, 'class="obj_customvariable obj_'+running_number+'"');
     }
 
-    tblBody.insertBefore(newObj, tblBody.rows[tblBody.rows.length -2]);
+    // insert row at 3rd last position
+    tblBody.insertBefore(newObj, tblBody.rows[tblBody.rows.length -3]);
 
     reset_table_row_classes(table, 'dataEven', 'dataOdd');
 
@@ -66,6 +66,14 @@ function add_conf_attribute(table, key) {
     /* effect works only on table cells */
     jQuery(newObj.cells).effect('highlight', {}, 2000);
 
+    // return id of new added input
+    if(rt != undefined && rt == true) {
+        var inp     = newObj.cells[2].innerHTML;
+        var matches = inp.match(/id="(.*?)"/);
+        if(matches != null) {
+            return matches[1];
+        }
+    }
     return false;
 }
 

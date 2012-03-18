@@ -46,7 +46,7 @@
 
 [% ELSIF defaults.$key.type == 'BOOL' %]
   [% IF edit %]
-    <input type="radio" name="obj.[% key %]" value="0"[% IF obj_conf.defined(key) && value == 0 %] checked[% END %]> No
+    <input type="radio" name="obj.[% key %]" id="id_[% key %][% nr %]" value="0"[% IF obj_conf.defined(key) && value == 0 %] checked[% END %]> No
     <input type="radio" name="obj.[% key %]" value="1"[% IF obj_conf.defined(key) && value == 1 %] checked[% END %]> Yes
   [% ELSE %]
     [% IF value %]Yes[% ELSE %]No[% END %]
@@ -58,7 +58,7 @@
     <input type="checkbox" name="obj.[% key %]" value="noop" style="display:none" checked>
     [% FOREACH v = defaults.$key.values %]
       [% ind = loop.index %]
-      <input type="checkbox" name="obj.[% key %]" value="[% v %]"[% IF obj_conf.defined(key) && value.grep(v).size() > 0 %] checked[% END %]>[% defaults.$key.keys.$ind %]&nbsp;
+      <input type="checkbox" name="obj.[% key %]" [% IF loop.first %]id="id_[% key %][% nr %]"[% END %]value="[% v %]"[% IF obj_conf.defined(key) && value.grep(v).size() > 0 %] checked[% END %]>[% defaults.$key.keys.$ind %]&nbsp;
     [% END %]
   [% ELSE %]
     [% first = 1 %]
@@ -71,7 +71,7 @@
 [% ELSIF defaults.$key.type == 'CHOOSE' %]
   [% IF edit %]
     [% IF defaults.$key.keys.size > 2 %]
-        <select name="obj.[% key %]">
+        <select name="obj.[% key %]" id="id_[% key %][% nr %]">
         [% FOREACH k = defaults.$key.keys %]
         [% SET x = loop.index %]
         [% SET v = defaults.$key.values.$x %]
@@ -82,7 +82,7 @@
         [% FOREACH k = defaults.$key.keys %]
         [% SET x = loop.index %]
         [% SET v = defaults.$key.values.$x %]
-        <input type="radio" name="obj.[% key %]" value="[% v %]"[% IF defaults.$key.keys.size == 1 || obj_conf.defined(key) && value == v %] checked[% END %]> [% k %]
+        <input type="radio" name="obj.[% key %]" id="id_[% key %][% nr %]" value="[% v %]"[% IF defaults.$key.keys.size == 1 || obj_conf.defined(key) && value == v %] checked[% END %]> [% k %]
         [% END %]
     [% END %]
   [% ELSE %]

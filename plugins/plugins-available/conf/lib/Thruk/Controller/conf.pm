@@ -281,6 +281,18 @@ sub _process_json_page {
         return;
     }
 
+    # objects attributes
+    if($type eq 'attribute') {
+        my $for  = $c->{'request'}->{'parameters'}->{'obj'};
+        my $attr = $c->{'obj_db'}->get_default_keys($for);
+        my $json = [{ 'name' => $type.'s',
+                      'data' => [ sort @{Thruk::Utils::array_uniq($attr)} ],
+                   }];
+        $c->stash->{'json'} = $json;
+        $c->forward('Thruk::View::JSON');
+        return;
+    }
+
     # objects
     my $json;
     my $objects   = [];
