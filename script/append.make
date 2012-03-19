@@ -35,7 +35,7 @@ version:
 	fi;
 	@./script/thruk_update_docs.sh > /dev/null
 	@yes n | perl Makefile.PL > /dev/null
-	@git add MANIFEST support/thruk.spec docs/THRUK_MANUAL.txt docs/THRUK_MANUAL.html lib/Thruk.pm debian/changelog
+	@git add MANIFEST support/thruk.spec docs/THRUK_MANUAL.txt docs/THRUK_MANUAL.html lib/Thruk.pm debian/changelog docs/thruk.3 root/thruk/startup.html
 	@git co docs/FAQ.html
 	@git status
 
