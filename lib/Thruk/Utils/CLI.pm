@@ -44,7 +44,7 @@ sub new {
         print("Broken installation, could not stat ".$var_path." \n");
         exit 1;
     }
-    if($< != $uid) {
+    if($> != $uid) {
         print("Wrong user! Please run as user: ".getpwuid($uid)."\n");
         exit 1;
     }

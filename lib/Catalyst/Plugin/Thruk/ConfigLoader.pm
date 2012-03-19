@@ -9,6 +9,14 @@ sub finalize_config {
     my $project_root = $c->config->{home};
 
     ###################################################
+    # switch user when running as root
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+        my $var_path = $c->config->{'var_path'} || './var';
+        my $uid = (stat $var_path)[4];
+        $> = $uid if $> == 0 and defined $uid;
+    }
+
+    ###################################################
     # get installed plugins
     my $plugin_dir = $c->config->{'plugin_path'} || $project_root."/plugins";
     $plugin_dir = $plugin_dir.'/plugins-enabled/*/';

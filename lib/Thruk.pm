@@ -284,16 +284,17 @@ unless(Thruk::Utils::read_cgi_cfg(undef, __PACKAGE__->config, __PACKAGE__->log))
 
 ###################################################
 # Logging
-if(defined __PACKAGE__->config->{'log4perl_conf'} and ! -s __PACKAGE__->config->{'log4perl_conf'} ) {
-    die("\n\n*****\nfailed to load log4perl config: ".__PACKAGE__->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
+my $log4perl_conf;
+if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'CLI') {
+    if(defined __PACKAGE__->config->{'log4perl_conf'} and ! -s __PACKAGE__->config->{'log4perl_conf'} ) {
+        die("\n\n*****\nfailed to load log4perl config: ".__PACKAGE__->config->{'log4perl_conf'}.": ".$!."\n*****\n\n");
+    }
+    $log4perl_conf = __PACKAGE__->config->{'log4perl_conf'} || $project_root.'/log4perl.conf';
 }
-my $log4perl_conf = __PACKAGE__->config->{'log4perl_conf'} || $project_root.'/log4perl.conf';
-if(-s $log4perl_conf) {
+if(defined $log4perl_conf and -s $log4perl_conf) {
     __PACKAGE__->log(Log::Log4perl::Catalyst->new($log4perl_conf));
 }
 elsif(!__PACKAGE__->debug) {
-    # check if logdir exists
-    if(!-d $project_root.'/logs') { mkdir($project_root.'/logs') or die("failed to create logs directory: $!"); }
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );
 }
 
