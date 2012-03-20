@@ -137,6 +137,9 @@ $Monitoring::Config::Help::helpdata = {
                       'realm' => 'This variable is used to define the realm where the host will be put. By putting the host in a realm, it will be manage by one of the scheduler of this realm.',
                       'poller_tag' => 'This variable is used to define the poller_tag of the host. All checks of this hosts will only take by pollers that have this value in their poller_tags parameter. By default there is no poller_tag, so all untagged pollers can take it.',
                       'business_impact' => 'This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it\'s in error) to the maximum (5 = you lost your job if it fail). The default value is 2.',
+                      'resultmodulations' => 'This variable is used to link with resultmodulations objects. It will allow such modulation to apply, like change a warning in critical for this host.',
+                      'escalations' => 'This variable is used to link with escalations objects. It will allow such escalations rules to appy. Look at escalations objects for more details.',
+                      'business_impact_modulations' => 'This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a payd server, it will be important only in a specific timeperiod: near the payd day). Look at business_impact_modulations objects for more details.',
                     },
           'hostdependency' => {
                                 'dependency_period' => 'This directive is used to specify the short name of the time period during which this dependency is valid.  If this directive is not specified, the dependency is considered to be valid during all times.',
@@ -224,6 +227,10 @@ $Monitoring::Config::Help::helpdata = {
                          'realm' => 'This variable is used to define the realm where the host will be put. By putting the host in a realm, it will be manage by one of the scheduler of this realm.',
                          'poller_tag' => 'This variable is used to define the poller_tag of the host. All checks of this hosts will only take by pollers that have this value in their poller_tags parameter. By default there is no poller_tag, so all untagged pollers can take it.',
                          'business_impact' => 'This variable is used to set the importance we gave to this host for the business from the less important (0 = nearly nobody will see if it\'s in error) to the maximum (5 = you lost your job if it fail). The default value is 2.',
+                         'resultmodulations' => 'This variable is used to link with resultmodulations objects. It will allow such modulation to apply, like change a warning in critical for this host.',
+                         'escalations' => 'This variable is used to link with escalations objects. It will allow such escalations rules to appy. Look at escalations objects for more details.',
+                         'business_impact_modulations' => 'This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a payd server, it will be important only in a specific timeperiod: near the payd day). Look at business_impact_modulations objects for more details.',
+                         'service_dependencies' => 'This variable is used to define services that this serice is dependent of for notifications. It\'s a comma separated list of service like host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as \'u,c,w\' and no dependency_period). By default this value is void so there is no linked dependencies.',
                        },
           'servicedependency' => {
                                    'dependency_period' => 'This directive is used to specify the short name of the time period during which this dependency is valid.  If this directive is not specified, the dependency is considered to be valid during all times.',
