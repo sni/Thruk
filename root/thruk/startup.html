@@ -16,6 +16,8 @@
             var ref = window.location.search;
             ref = ref.replace(/^\?/, '');
             if(ref != '') {
+              ref = unescape(ref);
+              ref = ref.replace(/&/, '?');
               window.location = ref;
             }
           },
