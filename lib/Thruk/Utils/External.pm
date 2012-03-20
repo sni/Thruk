@@ -353,7 +353,8 @@ sub _do_parent_stuff {
     my $conf = shift;
 
     # write pid file
-    open(my $fh, '>', $dir."/pid") or die("cannot write pid: $!");
+    my $pidfile = $dir."/pid";
+    open(my $fh, '>', $pidfile) or die("cannot write pid $pidfile: $!");
     print $fh $pid;
     print $fh "\n";
     close($fh);
