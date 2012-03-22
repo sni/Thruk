@@ -499,7 +499,7 @@ sub _do_send_command {
         return $c->detach('/error/index/12');
     }
 
-    my $tt  = Template->new( $c->{'View::TT'} );
+    my $tt  = Template->new( $c->config->{'View::TT'} );
     my $cmd = '';
     eval {
         $tt->process(
