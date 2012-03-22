@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 # create combined javascript/css files
+use lib 'lib';
 use Thruk;
 
 my $cmds = [
