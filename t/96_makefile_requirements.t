@@ -5,6 +5,10 @@ use Data::Dumper;
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
+my $replace = {
+    'Log::Log4perl::Catalyst' => 'Log::Log4perl',
+};
+
 # first get all we have already
 my $reqs = _get_reqs();
 
@@ -14,6 +18,7 @@ my $packages = _get_packages($files);
 for my $file (@{$files}) {
   my $modules = _get_modules($file);
   for my $mod (@{$modules}) {
+    $mod = $replace->{$mod} if defined $replace->{$mod};
     if(defined $reqs->{$mod}) {
       pass("$mod required by $file exists in Makefile.PL");
     }
