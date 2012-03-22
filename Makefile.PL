@@ -1,9 +1,6 @@
-use lib 'local-lib';
-use lib 'lib';
-use inc::Module::Install;
 use strict;
 use warnings;
-
+use inc::Module::Install;
 
 name 'Thruk';
 all_from 'lib/Thruk.pm';
@@ -56,7 +53,7 @@ requires 'Catalyst::Plugin::CustomErrorMessage'   => 0;     # required by Thruk
 requires 'Catalyst::Plugin::Redirect'             => 0;     # required by Thruk
 requires 'Catalyst::Plugin::Compress'             => 0;     # required by Thruk
 requires 'Catalyst::Plugin::Cache'                => 0;     # required by Thruk
-requires 'Log::Log4perl::Catalyst'                => 1.34;  # required by Thruk
+requires 'Log::Log4perl'                          => 1.34;  # required by Thruk
 requires 'Log::Dispatch::File'                    => 0;     # required by Thruk / Log4perl example config
 requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
@@ -190,13 +187,8 @@ print $fh $new_makefile;
 close($fh);
 `cat script/append.make >> Makefile`;
 print "patched Makefile\n";
-print "finished\n";
 
 # create combined javascript/css files
-eval {
-    require Thruk; Thruk->import();
-    system('cd root/thruk/javascript && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_javascript'}}).' > all_in_one-'.$Thruk::VERSION.'.js');
-    system('cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_noframes'}}).' > all_in_one_noframes-'.$Thruk::VERSION.'.css');
-    system('cd themes/themes-available/Thruk/stylesheets/ && cat '.join(' ', @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'all_in_one_css_frames'}}).' > all_in_one-'.$Thruk::VERSION.'.css');
-};
-print $@ if $@;
+print `./script/thruk_create_combined_static_content.pl`;
+
+print "finished\n";

@@ -290,6 +290,7 @@ script/append.make
 script/thruk
 script/thruk_cgi.pl
 script/thruk_create.pl
+script/thruk_create_combined_static_content.pl
 script/thruk_create_package.pl
 script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
