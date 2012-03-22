@@ -431,6 +431,47 @@ sub strip_command_args {
     return($text);
 }
 
+########################################
+
+=head2 calculate_first_notification_delay_remaining
+
+  my $remaining = calculate_first_notification_delay_remaining($obj)
+
+returns remaining minutes for first_notification_delay
+
+=cut
+sub calculate_first_notification_delay_remaining {
+    my $obj = shift;
+    return -1 unless $obj->{'state'} > 0;
+
+    my $first_problem_time = -1;
+    if(defined $obj->{'last_time_ok'}) {
+        $first_problem_time = $obj->{'last_time_ok'};
+        if(($obj->{'last_time_warning'} < $first_problem_time) && ($obj->{'last_time_warning'} > $obj->{'last_time_ok'})) {
+            $first_problem_time = $obj->{'last_time_warning'};
+        }
+        if(($obj->{'last_time_unknown'} < $first_problem_time) && ($obj->{'last_time_unknown'} > $obj->{'last_time_ok'})) {
+            $first_problem_time = $obj->{'last_time_unknown'};
+        }
+        if(($obj->{'last_time_critical'} < $first_problem_time) && ($obj->{'last_time_critical'} > $obj->{'last_time_ok'})) {
+            $first_problem_time = $obj->{'last_time_critical'};
+        }
+    }
+    elsif(defined $obj->{'last_time_up'}) {
+        $first_problem_time = $obj->{'last_time_up'};
+        if(($obj->{'last_time_down'} < $first_problem_time) && ($obj->{'last_time_down'} > $obj->{'last_time_up'})) {
+            $first_problem_time = $obj->{'last_time_down'};
+        }
+        if(($obj->{'last_time_unreachable'} < $first_problem_time) && ($obj->{'last_time_unreachable'} > $obj->{'last_time_up'})) {
+            $first_problem_time = $obj->{'last_time_unreachable'};
+        }
+    }
+    return -1 if $first_problem_time == 0;
+    my $remaining_min = int((time() - $first_problem_time) / 60);
+    return -1 if $remaining_min > $obj->{'first_notification_delay'};
+
+    return($obj->{'first_notification_delay'} - $remaining_min);
+}
 
 1;
 
