@@ -1,13 +1,16 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
+[% authorized_for_read_only = 0 %][% IF c.check_user_roles_wrapper('authorized_for_read_only') %][% authorized_for_read_only = 1 %][% END %]
 
+[% UNLESS authorized_for_read_only %]
 <script type="text/javascript">
 <!--
   var hst_Hash = new Hash({[% FOREACH h = hosts %]r[% loop.index %]: "[% escape_bslash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
   hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
 -->
 </script>
+[% END %]
 
 [% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
@@ -54,12 +57,14 @@
       [% IF sortoption_hst %]
       <div class="statusSort" align="CENTER">Hosts sorted by <b>[% hst_orderby %]</b> ([% IF hst_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
       [% END %]
+      [% UNLESS authorized_for_read_only %]
       <div class="hint">
           <a href="#" onclick="selectAllHosts(true,'hst_');">select all</a>
         - <a href="#" onclick="selectAllHosts(false,'hst_');">unselect all</a>
         - <a href="#" onclick="selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
         - <a href="#" onclick="selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
       </div>
+      [% END %]
     </td>
     <td valign="bottom" align="right" width="33%">
       [% PROCESS _add_bookmark.tt style='combined' %]
@@ -92,12 +97,14 @@
 [% IF sortoption_svc %]
 <div class="statusSort" align="CENTER">Services sorted by <b>[% svc_orderby %]</b> ([% IF svc_orderdir == 'DESC' %]descending[% ELSE %]ascending[% END %])</div>
 [% END %]
+[% UNLESS authorized_for_read_only %]
 <div class="hint">
     <a href="#" onclick="selectAllServices(true,'svc_');">select all</a> (<a href="#" onclick="selectAllHosts(true,'svc_');">hosts</a>)
   - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');">unselect all</a>
   - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
   - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
 </div>
+[% END %]
 [% PROCESS _status_detail_table.tt  data=services paneprefix='svc_' sortprefix='_svc' %]
 <div class='itemTotalsTitle'>[% services.size %] of [% services.size %] Matching Service Entries Displayed</div>
 

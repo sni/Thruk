@@ -45,7 +45,7 @@
       <tr><td colspan="6"></td></tr>
       [% END %]
 
-      <tr id="[% paneprefix %]r[% loop.index %]" onmouseover="addRowSelector(this.id)">
+      <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id)"[% END %]>
         [% IF lasthost == s.host_name %]
         <td></td>
         [% ELSE %]

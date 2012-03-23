@@ -103,7 +103,7 @@ sub check_cmd_permissions {
     $value  = '' unless defined $value;
     $value2 = '' unless defined $value2;
 
-    return if $c->check_user_roles('authorized_for_read_only');
+    return 0 if $c->check_user_roles('authorized_for_read_only');
 
     if($type eq 'system') {
         return 1 if $c->check_user_roles('authorized_for_system_commands');
