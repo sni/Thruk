@@ -72,6 +72,7 @@ sub begin : Private {
         show_full_commandline           => 1,
         show_modified_attributes        => 1,
         show_config_edit_buttons        => 0,
+        show_backends_in_table          => 0,
         backends_with_obj_config        => {},
         use_feature_statusmap           => 0,
         use_feature_statuswrl           => 0,
@@ -140,6 +141,7 @@ sub begin : Private {
                   use_new_search ajax_search show_notification_number strict_passive_mode
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
                   priorities show_modified_attributes downtime_duration expire_ack_duration
+                  show_backends_in_table
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

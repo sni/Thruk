@@ -500,6 +500,7 @@ sub _process_thruk_page {
                         default_theme
                         strict_passive_mode
                         show_notification_number
+                        show_backends_in_table
                         show_full_commandline
                         shown_inline_pnp
                         show_modified_attributes

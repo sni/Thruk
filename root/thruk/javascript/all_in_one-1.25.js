@@ -6648,7 +6648,7 @@ var noEventsForId    = undefined;
 var submit_form_id;
 
 /* add mouseover eventhandler for all cells and execute it once */
-function addRowSelector(id) {
+function addRowSelector(id, type) {
     var row   = document.getElementById(id);
     var cells = row.cells;
 
@@ -6669,13 +6669,13 @@ function addRowSelector(id) {
         resetServiceRow(e);
     });
 
-    if(cells.length == 5 || cells.length == 6) {
+    if(type == 'host') {
       pagetype = 'hostdetail'
     }
-    else if(cells.length == 7) {
+    else if(type == 'service') {
       pagetype = 'servicedetail'
     } else {
-      if(thruk_debug_js) { alert("ERROR: unknown table addRowSelector(): " + cells.length); }
+      if(thruk_debug_js) { alert("ERROR: unknown table addRowSelector(): " + typ); }
     }
 
     // for each cell in a row
@@ -6771,10 +6771,10 @@ function setRowStyle(row_id, style, type, force ) {
     if(!cells) {
         return false;
     }
-    if(cells.length == 5 || cells.length == 6) {
+    if(type == 'host') {
       pagetype = 'hostdetail'
     }
-    else if(cells.length == 7) {
+    else if(type == 'service') {
       pagetype = 'servicedetail'
     } else {
       if(thruk_debug_js) { alert("ERROR: unknown table setRowStyle(): " + cells.length); }

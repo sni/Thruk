@@ -60,6 +60,7 @@ sub get_thruk_cfg {
                 info_popup_event_type                   => ['LIST', 'onclick', Thruk::Utils::array2hash([qw/onclick onmouseover/]) ],
                 info_popup_options                      => ['STRING', ''],
                 show_notification_number                => ['BOOL',   '1'],
+                show_backends_in_table                  => ['BOOL',   '0'],
                 show_full_commandline                   => ['LIST',   '', { '0' => 'off', '1' => 'authorized_for_configuration_information only', '2' => 'everyone' } ],
                 resource_file                           => ['STRING', ''],
                 shown_inline_pnp                        => ['BOOL',   '1'],
