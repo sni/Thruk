@@ -158,7 +158,6 @@ sub _process_outagespbimp {
 
     # Then for services
     if(defined $srv_pbs and scalar @{$srv_pbs} > 0) {
-        my $srvcomments = {};
         for my $srv (@{$srv_pbs}) {
 
             # get number of comments
@@ -353,7 +352,6 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
 
     # Then for services
     if(defined $srv_pbs and scalar @{$srv_pbs} > 0) {
-        my $srvcomments = {};
         for my $srv (@{$srv_pbs}) {
 
             # get number of comments
@@ -392,14 +390,14 @@ sub businessview_index :Path :Args(0) :MyAction('AddDefaults') {
 sub _link_parent_hosts_and_services {
     my($self, $c,  $elt, $level ) = @_;
 
-    $level               = 0 unless defined $level;
-    my @host_parents     = ();
-    my @services_parents = ();
+    $level                     = 0 unless defined $level;
+    $elt->{'host_parents'}     = [];
+    $elt->{'services_parents'} = [];
 
     return 0 if !defined $elt;
 
-    # avoid deep recursion
-    return 0 if $level > 10;
+    # avoid deep recursion, more than 3 levels isn't displayed anyway
+    return -1 if $level > 3;
 
     if(defined $elt->{'parent_dependencies'} and $elt->{'parent_dependencies'} ne '') {
         for my $parent (@{$elt->{'parent_dependencies'}}) {
@@ -417,9 +415,9 @@ sub _link_parent_hosts_and_services {
 
                 my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
                 my $srv = $tmp_services->[0];
-                push(@services_parents, $srv);
+                push(@{$elt->{'services_parents'}}, $srv);
                 # And call this on this parent too to build a tree
-                $self->_link_parent_hosts_and_services($c, $srv, ($level + 1));
+                return -1 if $self->_link_parent_hosts_and_services($c, $srv, ++$level) == -1;
             }else{
                 my $host_search_filter = [ { name               => { '='     => $parent } },
                                          ];
@@ -428,15 +426,12 @@ sub _link_parent_hosts_and_services {
                 # we only got one host
                 my $hst = $tmp_hosts->[0];
 
-                push(@host_parents, $hst);
+                push(@{$elt->{'host_parents'}}, $hst);
                 # And call this on this parent too to build a tree
-                $self->_link_parent_hosts_and_services($c, $hst, ($level+1));
+                return -1 if $self->_link_parent_hosts_and_services($c, $hst, ++$level) == -1;
             }
         }
     }
-
-    $elt->{'host_parents'}     = \@host_parents;
-    $elt->{'services_parents'} = \@services_parents;
 
     return 0;
 }

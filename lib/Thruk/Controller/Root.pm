@@ -503,7 +503,7 @@ sub thruk_main_html : Regex('thruk\/main\.html$') {
 
     # add defaults when not using frames, otherwise the menu would be incomplete
     if(!defined $c->stash->{'defaults_added'} and !$c->stash->{'use_frames'}) {
-        Thruk::Action::AddDefaults::add_defaults(undef, $self, $c);
+        Thruk::Action::AddDefaults::add_defaults(0, undef, $self, $c);
     }
 
     $c->stash->{'title'}                   = 'Thruk Monitoring Webinterface';

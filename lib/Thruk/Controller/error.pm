@@ -31,7 +31,7 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         confess("undefined c in error/index");
     }
 
-    Thruk::Action::AddDefaults::add_defaults(undef, $self, $c) unless defined $c->stash->{'defaults_added'};
+    Thruk::Action::AddDefaults::add_defaults(1, undef, $self, $c) unless defined $c->stash->{'defaults_added'};
 
     $c->{'canceled'}          = 1;
     $c->stash->{errorDetails} = '';
