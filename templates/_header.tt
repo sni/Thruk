@@ -51,8 +51,6 @@
       original_url     = original_url.replace(/&amp;/g, '&');
       if (history.replaceState) {
         history.replaceState({}, "", original_url);
-      } else {
-        window.location.replace(original_url);
       }
       [% END %]
 
