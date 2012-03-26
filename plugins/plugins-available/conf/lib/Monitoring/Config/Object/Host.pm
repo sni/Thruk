@@ -93,7 +93,7 @@ sub BUILD {
 
     if($coretype eq 'shinken') {
         $Monitoring::Config::Object::Host::Defaults->{'business_impact'}             = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
-        $Monitoring::Config::Object::Host::Defaults->{'criticity'}                   = { type => 'DEPRECATED' };
+        $Monitoring::Config::Object::Host::Defaults->{'criticity'}                   = { type => 'ALIAS', 'name' => 'business_impact' };
         $Monitoring::Config::Object::Host::Defaults->{'maintenance_period'}          = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };
         $Monitoring::Config::Object::Host::Defaults->{'realm'}                       = { type => 'STRING', cat => 'Extended' };
         $Monitoring::Config::Object::Host::Defaults->{'poller_tag'}                  = { type => 'STRING', cat => 'Extended' };

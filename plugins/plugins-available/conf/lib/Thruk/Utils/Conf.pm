@@ -502,7 +502,7 @@ sub get_default_peer_config {
 sub _compare_configs {
     my($c1, $c2) = @_;
 
-    for my $key (qw/core_conf/) {
+    for my $key (qw/core_conf core_type/) {
         return 0 if !defined $c1->{$key} and  defined $c2->{$key};
         return 0 if  defined $c1->{$key} and !defined $c2->{$key};
         next if !defined $c1->{$key} and !defined $c2->{$key};

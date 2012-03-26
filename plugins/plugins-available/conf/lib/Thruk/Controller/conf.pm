@@ -60,7 +60,7 @@ sub conf_cgi : Regex('thruk\/cgi\-bin\/conf\.cgi') {
 =head2 index
 
 =cut
-sub index :Path :Args(0) :MyAction('AddDefaults') {
+sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     my ( $self, $c ) = @_;
 
     $c->stash->{'no_auto_reload'}      = 1;
@@ -637,6 +637,9 @@ sub _process_users_page {
 # create the objects config page
 sub _process_objects_page {
     my( $self, $c ) = @_;
+
+    $c->stash->{'last_changed'} = 0;
+    $c->stash->{'needs_commit'} = 0;
 
     return unless $self->_update_objects_config($c);
 
@@ -1659,14 +1662,15 @@ sub _config_reload {
 ##########################################################
 sub _nice_check_output {
     my($c) = @_;
-    $c->{'stash'}->{'output'} =~ s/(Error:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
-    $c->{'stash'}->{'output'} =~ s/(Warning:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
+    $c->{'stash'}->{'output'} =~ s/(Error\s*:.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
+    $c->{'stash'}->{'output'} =~ s/(Warning\s*:.*)$/<b><font color="#FFA500">$1<\/font><\/b>/gmx;
     $c->{'stash'}->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<b><font color="red">$1<\/font><\/b>/gmx;
     $c->{'stash'}->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+on\s+line\s+(\d+)\))/<a href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
     $c->{'stash'}->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
     $c->{'stash'}->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
     $c->{'stash'}->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
     $c->{'stash'}->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
+    $c->{'stash'}->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
     $c->{'stash'}->{'output'} = "<pre>".$c->{'stash'}->{'output'}."</pre>";
     return;
 }
@@ -1679,7 +1683,7 @@ sub _check_external_reload {
     return unless defined $c->{'obj_db'}->{'last_changed'};
 
     if($c->{'obj_db'}->{'last_changed'} > 0) {
-        my $last_reloaded = $c->stash->{'pi_detail'}->{$c->stash->{'param_backend'}}->{'program_start'};
+        my $last_reloaded = $c->stash->{'pi_detail'}->{$c->stash->{'param_backend'}}->{'program_start'} || 0;
         if($last_reloaded > $c->{'obj_db'}->{'last_changed'}) {
             $c->{'obj_db'}->{'last_changed'} = 0;
             $c->stash->{'last_changed'}      = 0;

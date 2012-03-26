@@ -366,23 +366,23 @@ sub save {
         if(open(my $fh, '>', $self->{'path'})) {
             close($fh);
         } else {
-            push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
+            push @{$self->{'errors'}}, "cannot create ".$self->{'path'}.": ".$!;
             return;
         }
     }
 
-    unless(-w $self->{'path'}) {
-        push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
-        return;
-    }
-
     if($self->{'deleted'}) {
-        unlink($self->{'path'});
+        unlink($self->{'path'}) or do {
+            push @{$self->{'errors'}}, "cannot delete ".$self->{'path'}.": ".$!;
+        };
         return;
     }
 
     my $content = $self->_get_new_file_content();
-    open(my $fh, '>', $self->{'path'}) or die("cannot write to file: $!");
+    open(my $fh, '>', $self->{'path'}) or do {
+        push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
+        return;
+    };
     print $fh encode_utf8($content);
     close($fh);
 
