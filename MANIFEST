@@ -57,6 +57,7 @@ lib/FCGI/ProcManager/MaxRequestsThruk.pm
 lib/Plack/Handler/Thrukembedded.pm
 lib/Thruk.pm
 lib/Thruk/Action/AddDefaults.pm
+lib/Thruk/Action/AddSafeDefaults.pm
 lib/Thruk/Backend/Manager.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/Livestatus.pm

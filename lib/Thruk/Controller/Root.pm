@@ -382,7 +382,7 @@ page: /thruk/index.html
 
 =cut
 
-sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddDefaults') {
+sub thruk_index_html : Regex('thruk\/index\.html$') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     return if Thruk::Utils::choose_mobile($c, $c->stash->{'url_prefix'}."thruk/cgi-bin/mobile.cgi");
@@ -422,7 +422,7 @@ page: /thruk/side.html
 
 =cut
 
-sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddDefaults') {
+sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
     my $pidfile  = ($c->config->{'tmp_path'} || '/tmp').'/thruk.pid';
@@ -752,7 +752,7 @@ page: /thruk/cgi-bin/job.cgi
 
 =cut
 
-sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddDefaults') {
+sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
 

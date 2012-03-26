@@ -25,7 +25,7 @@ extends 'Catalyst::Action';
 
 ########################################
 before 'execute' => sub {
-    add_defaults(@_);
+    add_defaults(0, @_);
 };
 
 
@@ -38,7 +38,8 @@ before 'execute' => sub {
 =cut
 
 sub add_defaults {
-    my ( $self, $controller, $c, $test ) = @_;
+    my ( $safe, $self, $controller, $c, $test ) = @_;
+    $safe = 0 unless defined $safe;
 
     $c->stats->profile(begin => "AddDefaults::add_defaults");
 
@@ -112,7 +113,8 @@ sub add_defaults {
         sleep 1;
     }
     if($@) {
-        return if $c->request->uri->path_query =~ m/\/side\.html$/mx;
+        # side.html and some other pages should not be redirect to the error page on backend errors
+        return if $safe;
         _set_possible_backends($c, $disabled_backends);
         $c->log->error("data source error: $@");
         return $c->detach('/error/index/9');
