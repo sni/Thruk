@@ -9707,6 +9707,16 @@ will wait this amount and display the result immediately.</p></div>
 <div class="content">
 <pre><tt>wait_timeout = 10</tt></pre>
 </div></div>
+<h4 id="_no_external_job_forks">no_external_job_forks</h4>
+<div class="paragraph"><p>Normally reports will be generated in an external process to avoid
+timeouts on long running reports. Use this switch to turn external
+jobs off and generate reports directly. Make sure they are finished
+within 40seconds which is the default fcgi timeout.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>no_external_job_forks = 1</tt></pre>
+</div></div>
 <h4 id="_enable_shinken_features">enable_shinken_features</h4>
 <div class="paragraph"><p>This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
@@ -10471,7 +10481,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-03-22 20:06:23 CEST
+Last updated 2012-03-26 13:38:34 CEST
 </div>
 </div>
 </body>

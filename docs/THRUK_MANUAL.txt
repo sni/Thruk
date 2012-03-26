@@ -1264,6 +1264,17 @@ ex.:
   wait_timeout = 10
 
 
+==== no_external_job_forks
+Normally reports will be generated in an external process to avoid
+timeouts on long running reports. Use this switch to turn external
+jobs off and generate reports directly. Make sure they are finished
+within 40seconds which is the default fcgi timeout.
+
+ex.:
+
+  no_external_job_forks = 1
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
