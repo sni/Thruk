@@ -547,6 +547,7 @@ var selectedServices = undefined;
 var selectedHosts    = undefined;
 var noEventsForId    = undefined;
 var submit_form_id;
+var pagetype         = undefined;
 
 /* add mouseover eventhandler for all cells and execute it once */
 function addRowSelector(id, type) {
@@ -671,14 +672,6 @@ function setRowStyle(row_id, style, type, force ) {
     var cells = row.cells;
     if(!cells) {
         return false;
-    }
-    if(type == 'host') {
-      pagetype = 'hostdetail'
-    }
-    else if(type == 'service') {
-      pagetype = 'servicedetail'
-    } else {
-      if(thruk_debug_js) { alert("ERROR: unknown table setRowStyle(): " + cells.length); }
     }
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         // only the first cell for hosts
