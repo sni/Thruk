@@ -7853,11 +7853,11 @@ function add_new_filter(search_prefix, table) {
   // add third cell
   var img            = document.createElement('input');
   img.type           = 'image';
-  img.src            = url_prefix + "thruk/themes/"+theme+"/images/minus.gif";
+  img.src            = url_prefix + "thruk/themes/"+theme+"/images/remove.png";
   img.className      = 'filter_button';
-  img.onclick        = delete_filter_row;
   var newCell2       = newRow.insertCell(2);
-  newCell2.className = "filterValueNoHighlight";
+  newCell2.onclick   = delete_filter_row;
+  newCell2.className = "newfilter";
   newCell2.appendChild(img);
 }
 
@@ -7865,12 +7865,14 @@ function add_new_filter(search_prefix, table) {
 function delete_filter_row(event) {
   var row;
   if(event && event.target) {
-    row = event.target.parentNode.parentNode;
+    row = event.target;
   } else if(event) {
-    row = event.parentNode.parentNode;
+    row = event;
   } else {
-    row = this.parentNode.parentNode;
+    row = this;
   }
+  /* find first table row */
+  while(row.parentNode != undefined && row.tagName != 'TR') { row = row.parentNode; }
   row.parentNode.deleteRow(row.rowIndex);
   return false;
 }

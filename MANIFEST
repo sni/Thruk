@@ -638,6 +638,7 @@ themes/themes-available/Classic/images/passiveonly.gif
 themes/themes-available/Classic/images/plus.gif
 themes/themes-available/Classic/images/problem.png
 themes/themes-available/Classic/images/recovery.png
+themes/themes-available/Classic/images/remove.png
 themes/themes-available/Classic/images/restart.gif
 themes/themes-available/Classic/images/resultset_first.png
 themes/themes-available/Classic/images/resultset_last.png
@@ -767,6 +768,7 @@ themes/themes-available/Exfoliation/images/passiveonly.gif
 themes/themes-available/Exfoliation/images/plus.gif
 themes/themes-available/Exfoliation/images/problem.png
 themes/themes-available/Exfoliation/images/recovery.png
+themes/themes-available/Exfoliation/images/remove.png
 themes/themes-available/Exfoliation/images/restart.gif
 themes/themes-available/Exfoliation/images/resultset_first.png
 themes/themes-available/Exfoliation/images/resultset_last.png
@@ -955,6 +957,7 @@ themes/themes-available/Nuvola/images/plus.gif
 themes/themes-available/Nuvola/images/problem.png
 themes/themes-available/Nuvola/images/recovery.png
 themes/themes-available/Nuvola/images/red.gif
+themes/themes-available/Nuvola/images/remove.png
 themes/themes-available/Nuvola/images/restart.gif
 themes/themes-available/Nuvola/images/resultset_first.png
 themes/themes-available/Nuvola/images/resultset_last.png
@@ -1136,6 +1139,7 @@ themes/themes-available/Thruk/images/plus.gif
 themes/themes-available/Thruk/images/problem.png
 themes/themes-available/Thruk/images/recovery.png
 themes/themes-available/Thruk/images/red.gif
+themes/themes-available/Thruk/images/remove.png
 themes/themes-available/Thruk/images/restart.gif
 themes/themes-available/Thruk/images/resultset_first.png
 themes/themes-available/Thruk/images/resultset_last.png
@@ -1255,6 +1259,7 @@ themes/themes-available/Vautour/images/passiveonly.gif
 themes/themes-available/Vautour/images/plus.gif
 themes/themes-available/Vautour/images/problem.png
 themes/themes-available/Vautour/images/recovery.png
+themes/themes-available/Vautour/images/remove.png
 themes/themes-available/Vautour/images/restart.gif
 themes/themes-available/Vautour/images/resultset_first.png
 themes/themes-available/Vautour/images/resultset_last.png
@@ -1478,6 +1483,7 @@ themes/themes-available/Wakizashi/images/passiveonly.gif
 themes/themes-available/Wakizashi/images/plus.gif
 themes/themes-available/Wakizashi/images/problem.png
 themes/themes-available/Wakizashi/images/recovery.png
+themes/themes-available/Wakizashi/images/remove.png
 themes/themes-available/Wakizashi/images/restart.gif
 themes/themes-available/Wakizashi/images/resultset_first.png
 themes/themes-available/Wakizashi/images/resultset_last.png

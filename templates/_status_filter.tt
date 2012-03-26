@@ -400,7 +400,7 @@
           </td>
 
 
-          <td align="right" class='filterValueNoHighlight'><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" name="delete Filter" onclick="delete_filter_row(this)">
+          <td class='newfilter' onclick="delete_filter_row(this); return false;"><input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete Filter">
             <script type="text/javascript">
             <!--
               verify_op("[% paneprefix %][% prefix %]_[% loop.index %]_ts");
