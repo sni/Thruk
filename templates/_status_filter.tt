@@ -60,7 +60,7 @@
             <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/minus.gif" style="display:[% IF loop.first %]none[% ELSE %][% END %];" name="delete" id="[% paneprefix %][% prefix %]_btn_del_search" onClick="deleteSearchPane(this.id)">
           </td>
           <td rowspan=99 align="center" class='newfilter' style="display:[% IF loop.last %][% ELSE %]none[% END %]; visibility:[% IF loop.last %]visible[% ELSE %]hidden[% END %]" onClick="new_filter('[% paneprefix %]filter_pane', '[% paneprefix %]all_filter_table', this.id)" id="[% paneprefix %][% prefix %]_new_filter">
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter"><br>
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/right.png" alt="add new filter"><br>
             or
           </td>
         </tr>
@@ -412,7 +412,7 @@
 <!-- NEW FILTER -->
         <tr>
           <td colspan=3 class='newfilter' align="center" id="[% paneprefix %][% prefix %]_add_new_filter_button" onClick="add_new_filter(this.id, '[% paneprefix %]filterTable')">
-            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/plus.gif" alt="add new filter" style="vertical-align: middle"> and
+            <img src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" alt="add new filter" style="vertical-align: middle"> and
           </td>
         </tr>
       </table>

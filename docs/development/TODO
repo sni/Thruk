@@ -4,11 +4,12 @@ Todo & Wish List:
 Bugs: none
 
 Features:
+  config tool:
       sync multiple backend with config tool
       show references on delete
-      comments als textbox statt input
 
 general:
+    - comments als textbox statt input
     - webservice api, passthrough querys to livestatus and return json
       result
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
