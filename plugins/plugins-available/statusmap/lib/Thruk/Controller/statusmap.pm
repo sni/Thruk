@@ -374,8 +374,11 @@ sub _fill_subtree {
     for my $host (@{$hosts}) {
         if(scalar @{$host->{'parents'}} == 0) {
             # check if parentless host has a backend peer configured
-            if (defined $host->{'peer_key'} && defined $c->{'db'}->{'state_hosts'}->{$host->{'peer_key'}}) {
-                $host->{'parents'} = [ $c->{'db'}->{'state_hosts'}->{$host->{'peer_key'}} ];
+            if (defined $host->{'peer_key'}
+                and defined $c->{'db'}->{'state_hosts'}->{$host->{'peer_key'}}
+                and defined $c->{'db'}->{'state_hosts'}->{$host->{'peer_key'}}->{'name'}
+                ) {
+                $host->{'parents'} = [ $c->{'db'}->{'state_hosts'}->{$host->{'peer_key'}}->{'name'} ];
             } else {
                 $host->{'parents'} = [qw/rootid/];
             }

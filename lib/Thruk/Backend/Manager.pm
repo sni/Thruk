@@ -88,7 +88,7 @@ sub init {
     for my $peer (@{$self->get_peers()}) {
         $peer->{'local'} = 1;
         if($peer->{'addr'} =~ m/^(.*):/mx and $1 ne 'localhost' and $1 ne '127.0.0.1') {
-            $self->{'state_hosts'}->{$peer->{'key'}} = $1;
+            $self->{'state_hosts'}->{$peer->{'key'}} = { source => $1 };
         } else {
             $self->{'local_hosts'}->{$peer->{'key'}} = 1;
         }
@@ -391,9 +391,9 @@ sub set_backend_state_from_local_connections {
 
     my @filter;
     for my $host (values %{$self->{'state_hosts'}}) {
-        push @filter, { '-or' => [ { name    => { '=' => $host } },
-                                   { alias   => { '=' => $host } },
-                                   { address => { '=' => $host } },
+        push @filter, { '-or' => [ { name    => { '=' => $host->{'source'} } },
+                                   { alias   => { '=' => $host->{'source'} } },
+                                   { address => { '=' => $host->{'source'} } },
                       ]};
     }
     push @{$options}, 'filter', [ Thruk::Utils::combine_filter( '-or', \@filter ) ];
@@ -411,6 +411,8 @@ sub set_backend_state_from_local_connections {
 
                     next unless defined $key;
                     next if defined $disabled->{$key} and $disabled->{$key} == 2;
+
+                    $self->{'state_hosts'}->{$key}->{'name'} = $host->{'name'};
 
                     my $peer = $self->get_peer_by_key($key);
 
