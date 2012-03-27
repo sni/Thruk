@@ -418,8 +418,9 @@ sub set_backend_state_from_local_connections {
 
                     if($host->{'state'} == 0) {
                         $self->{'log'}->debug($key." -> enabled by local state check (".$host->{'name'}.")");
-                        $peer->{'enabled'}  = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
-                        $peer->{'runnning'} = 1;
+                        $peer->{'enabled'}    = 1 unless $peer->{'enabled'} == 2; # not for hidden ones
+                        $peer->{'runnning'}   = 1;
+                        $peer->{'last_error'} = 'UP: peer check via local instance(s) returned state: '.Thruk::Utils::translate_host_status($host->{'state'});
                     } else {
                         $self->{'log'}->debug($key." -> disabled by local state check (".$host->{'name'}.")");
                         $self->disable_backend($key);
