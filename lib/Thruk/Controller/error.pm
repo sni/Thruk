@@ -232,6 +232,7 @@ sub _get_connection_details {
     my $c      = shift;
     my $detail = '';
     for my $pd (keys %{$c->stash->{'backend_detail'}}) {
+        next if $c->stash->{'backend_detail'}->{$pd}->{'disabled'} == 2; # hide hidden backends
         $detail .= $c->stash->{'backend_detail'}->{$pd}->{'last_error'}.' ('.$c->stash->{'backend_detail'}->{$pd}->{'addr'}.')<br>';
     };
     return $detail;
