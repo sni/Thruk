@@ -60,7 +60,8 @@ sub get_test_user {
 
 #########################
 sub get_test_service {
-    my $request = _request('/thruk/cgi-bin/status.cgi?host=all');
+    my $backend = shift;
+    my $request = _request('/thruk/cgi-bin/status.cgi?host=all'.(defined $backend ? '&backend='.$backend : ''));
     ok( $request->is_success, 'get_test_service() needs a proper status page' ) or diag(Dumper($request));
     my $page = $request->content;
     my($host,$service);
@@ -128,7 +129,7 @@ sub test_page {
         ok( $request->is_error, 'Request '.$opts{'url'}.' should fail' );
     }
     elsif(defined $opts{'redirect'}) {
-        ok( $request->is_redirect, 'Request '.$opts{'url'}.' should redirect' );
+        ok( $request->is_redirect, 'Request '.$opts{'url'}.' should redirect' ) or diag(Dumper($request));
         if(defined $opts{'location'}) {
             like($request->{'_headers'}->{'location'}, qr/$opts{'location'}/, "Content should redirect: ".$opts{'location'});
         }
