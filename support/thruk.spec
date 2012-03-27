@@ -39,6 +39,7 @@ rm -rf %{buildroot}
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+find . -name \*.orig -delete
 
 %build
 yes n | perl Makefile.PL
