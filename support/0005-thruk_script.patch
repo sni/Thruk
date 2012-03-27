@@ -1,8 +1,7 @@
---- a/script/thruk	2012-03-05 11:24:15.175553640 +0100
-+++ b/script/thruk	2012-03-05 11:44:27.186134321 +0100
-@@ -3,6 +3,12 @@
- use strict;
- use warnings;
+--- a/script/thruk	2012-03-27 21:49:50.633465493 +0200
++++ b/script/thruk	2012-03-27 21:52:59.500340186 +0200
+@@ -1,5 +1,11 @@
+ #!/usr/bin/perl
  
 +BEGIN {
 +    use lib '/usr/lib/thruk/perl5';
@@ -10,6 +9,6 @@
 +    $ENV{'CATALYST_CONFIG'} = '/etc/thruk' unless defined $ENV{'CATALYST_CONFIG'};
 +};
 +
- use Thruk::Utils::CLI;
- my $cli = Thruk::Utils::CLI->new();
- exit $cli->_run();
+ use strict;
+ use warnings;
+ use Getopt::Long;

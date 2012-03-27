@@ -13,8 +13,6 @@ Utilities Collection for CLI Tool
 use warnings;
 use strict;
 use Carp;
-use Getopt::Long;
-use Pod::Usage;
 use Data::Dumper;
 use Catalyst::ScriptRunner;
 
@@ -30,14 +28,16 @@ create CLI Tool object
 
 =cut
 sub new {
-    my $class = shift;
-    my $self  = {};
+    my($class, $options) = @_;
+    my $self  = {
+        'opt' => $options,
+    };
     bless $self, $class;
     $ENV{'THRUK_SRC'} = 'CLI';
 
     # verify that we are running with the right user
     require Thruk;
-    Thruk->import;
+    Thruk->import();
     my $var_path = Thruk->config->{'var_path'} || './var';
     my $uid = (stat $var_path)[4];
     if(!defined $uid) {
@@ -55,8 +55,6 @@ sub new {
 ##############################################
 sub _run {
     my($self) = @_;
-
-    $self->_get_options();
 
     if(defined $self->{'opt'}->{'listbackends'}) {
         return $self->_listbackends();
@@ -113,30 +111,6 @@ sub _request_url {
         return 1;
     }
     return 0;
-}
-
-##############################################
-sub _get_options {
-    my($self) = @_;
-
-    $self->{'opt'} = {
-        'verbose'  => 0,
-        'backends' => [],
-    };
-    Getopt::Long::Configure('no_ignore_case');
-    GetOptions (
-       "h|help"             => \$self->{'opt'}->{'help'},
-       "v|verbose"          => \$self->{'opt'}->{'verbose'},
-       "l|list-backends"    => \$self->{'opt'}->{'listbackends'},
-       "b|backend=s"        =>  $self->{'opt'}->{'backends'},
-       "u|url=s"            => \$self->{'opt'}->{'url'},
-       "a|auth=s"           => \$self->{'opt'}->{'auth'},
-    ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
-
-    $ENV{'REMOTE_USER'}    = $self->{'opt'}->{'auth'} if defined $self->{'opt'}->{'auth'};
-    $ENV{'THRUK_BACKENDS'} = join(',', @{$self->{'opt'}->{'backends'}}) if scalar @{$self->{'opt'}->{'backends'}} > 0;
-
-    return;
 }
 
 ##############################################

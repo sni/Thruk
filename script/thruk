@@ -2,9 +2,32 @@
 
 use strict;
 use warnings;
+use Getopt::Long;
+use Pod::Usage;
 
-use Thruk::Utils::CLI;
-my $cli = Thruk::Utils::CLI->new();
+my $options = {
+    'verbose'  => 0,
+    'backends' => [],
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+GetOptions (
+   "h|help"             => \$options->{'help'},
+   "v|verbose"          => \$options->{'verbose'},
+   "l|list-backends"    => \$options->{'listbackends'},
+   "b|backend=s"        =>  $options->{'backends'},
+   "u|url=s"            => \$options->{'url'},
+   "a|auth=s"           => \$options->{'auth'},
+) or pod2usage( { -verbose => 2, -message => 'error in options' } );
+
+$ENV{'REMOTE_USER'}    = $options->{'auth'} if defined $options->{'auth'};
+$ENV{'THRUK_BACKENDS'} = join(',', @{$options->{'backends'}}) if scalar @{$options->{'backends'}} > 0;
+$ENV{'THRUK_VERBOSE'}  = $options->{'verbose'} if $options->{'verbose'};
+$ENV{'THRUK_DEBUG'}    = $options->{'verbose'} if $options->{'verbose'};
+
+require Thruk::Utils::CLI;
+Thruk::Utils::CLI->import();
+my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
 
 1;
@@ -88,5 +111,3 @@ export all services into an excel file:
 2012, Sven Nierlein, <sven@nierlein.de>
 
 =cut
-
-
