@@ -32,10 +32,10 @@ sub read_objects {
     $c->stats->profile(begin => "read_objects()");
     my $model         = $c->model('Objects');
     my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
-    my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool);
+    my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool, undef, $c->{'stats'});
     store_model_retention($c);
     $c->stash->{model_type} = 'Objects';
-    $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool, $obj_db ];
+    $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool, $obj_db, $c->{'stats'} ];
     $c->stats->profile(end => "read_objects()");
     return;
 }
@@ -429,7 +429,7 @@ sub get_model_retention {
             my $model_configs = $data->{'configs'};
             for my $backend (keys %{$model_configs}) {
                 if(defined $c->stash->{'backend_detail'}->{$backend}) {
-                    $model->init($backend, undef, $model_configs->{$backend});
+                    $model->init($backend, undef, $model_configs->{$backend}, $c->stats);
                     $c->log->debug('restored object retention data for '.$backend);
                 }
             }
@@ -463,7 +463,7 @@ sub init_cached_config {
 
     $c->stats->profile(begin => "init_cached_config()");
 
-    $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool);
+    $c->{'obj_db'} = $model->init($c->stash->{'param_backend'}, $peer_conftool, undef, $c->{'stats'});
     $c->{'obj_db'}->{'cached'} = 1;
 
     unless(_compare_configs($peer_conftool, $c->{'obj_db'}->{'config'})) {
@@ -510,6 +510,19 @@ sub _compare_configs {
     }
 
     return 1;
+}
+
+##########################################################
+sub _link_obj {
+    my($obj,$line) = @_;
+    my $path;
+    if(defined $line) {
+        $path = $obj;
+    } else {
+        $line = $obj->{'line'};
+        $path = $obj->{'file'}->{'path'};
+    }
+    return('<a href="conf.cgi?sub=objects&amp;file='.$path.'&amp;line='.$line.'">'.$path.':'.$line.'</a>');
 }
 
 ##########################################################

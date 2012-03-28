@@ -67,14 +67,14 @@ sub parse {
             if($self->{'type'} eq 'timeperiod' and $value =~ m/^\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}/gmx) {
                 $self->{'conf'}->{$attr} = $value;
             } else {
-                push @{$errors}, "unknown attribute: $attr in ".$self->{'file'}->{'path'}.":".$self->{'line'};
+                push @{$errors}, "unknown attribute: $attr in ".Thruk::Utils::Conf::_link_obj($self);
             }
         }
     }
 
     # some sanity checks
     if(defined $self->{'conf'}->{'name'} and (!defined $self->{'conf'}->{'register'} or $self->{'conf'}->{'register'} != 0)) {
-        push @{$errors}, "name attribute used for non template in ".$self->{'file'}->{'path'}.":".$self->{'line'};
+        push @{$errors}, "name attribute used for non template in ".Thruk::Utils::Conf::_link_obj($self);
     }
 
     return $errors;

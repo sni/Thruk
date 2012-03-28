@@ -60,6 +60,9 @@ initialize configs
 sub init {
     my $self   = shift;
     my $config = shift;
+    my $stats  = shift;
+
+    $self->{'stats'} = $stats if defined $stats;
 
     # update readonly config
     $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
@@ -371,7 +374,7 @@ sub get_services_for_host {
     my $host    = shift;
     my $objects = shift;
 
-    $self->{'stats'}->profile(begin => "M::C::get_services_for_host()") if defined $self->{'stats'};;
+    $self->{'stats'}->profile(begin => "M::C::get_services_for_host()") if defined $self->{'stats'};
 
     my($host_conf_keys, $host_config) = $host->get_computed_config($objects);
 
@@ -415,7 +418,7 @@ sub get_services_for_host {
         }
     }
 
-    $self->{'stats'}->profile(end => "M::C::get_services_for_host()") if defined $self->{'stats'};;
+    $self->{'stats'}->profile(end => "M::C::get_services_for_host()") if defined $self->{'stats'};
 
     return $services;
 }
@@ -1098,7 +1101,7 @@ sub _rebuild_index {
             } else {
                 my $type = $obj->get_type();
                 if($type ne 'hostescalation' and $type ne 'serviceescalation') {
-                    push @{$self->{'errors'}}, $obj->get_type()." object has no name in ".$obj->{'file'}->{'path'}.":".$obj->{'line'};
+                    push @{$self->{'errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::_link_obj($obj);
                 }
             }
         }
@@ -1108,7 +1111,9 @@ sub _rebuild_index {
     $self->{'macros'}             = $macros;
     $self->{'needs_index_update'} = 0;
 
-    $self->{'stats'}->profile(end => "M::C::_rebuild_index()") if defined $self->{'stats'};;
+    $self->_check_references();
+
+    $self->{'stats'}->profile(end => "M::C::_rebuild_index()") if defined $self->{'stats'};
     return;
 }
 
@@ -1134,9 +1139,9 @@ sub _update_obj_in_index {
         if(defined $existing_id) {
             my $orig = $self->get_object_by_id($existing_id);
             if(defined $orig) {
-                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'}."\n  -> already defined in ".$orig->{'file'}->{'path'}.":".$orig->{'line'};
+                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
             } else {
-                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'};
+                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj);
             }
         }
         $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname} = $obj->{'id'};
@@ -1176,10 +1181,10 @@ sub _update_obj_in_index {
             my $orig = $self->get_object_by_id($existing_id);
             if(!defined $orig) {
                 push @{$self->{'errors'}},
-                    "duplicate ".$obj->{'type'}." definition $pname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'};
+                    "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::_link_obj($obj);
             } else {
                 push @{$self->{'errors'}},
-                    "duplicate ".$obj->{'type'}." definition $pname in ".$obj->{'file'}->{'path'}.":".$obj->{'line'}."\n  -> already defined in ".$orig->{'file'}->{'path'}.":".$orig->{'line'};
+                    "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
             }
         }
         $objects->{'byname'}->{$obj->{'type'}}->{$pname} = $obj->{'id'};
@@ -1223,6 +1228,50 @@ sub _newest_file {
     my @sorted = sort {$a <=> $b} keys %filelist;
     my $newest = shift @sorted;
     return $filelist{$newest} if defined $newest;
+    return;
+}
+
+##########################################################
+sub _check_references {
+    my($self) = @_;
+    $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
+
+    for my $file ( @{$self->{'files'}} ) {
+        for my $obj ( @{$file->{'objects'}} ) {
+            for my $key (keys %{$obj->{'conf'}}) {
+                next unless defined $obj->{'default'}->{$key};
+                next unless defined $obj->{'default'}->{$key}->{'link'};
+                my $link = $obj->{'default'}->{$key}->{'link'};
+                next if $link eq 'servicemember';
+                next if $link eq 'icon';
+                if($key eq 'use') {
+                    for my $ref (@{$obj->{'conf'}->{$key}}) {
+                        if(substr($ref, 0, 1) eq '!' or substr($ref, 0, 1) eq '+') { $ref = substr($ref, 1); }
+                        next if index($ref, '*') != -1;
+                        if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$ref}) {
+                            push @{$self->{'errors'}}, "referenced template '$ref' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                        }
+                    }
+                }
+                elsif($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
+                    if(!defined $self->{'objects'}->{'byname'}->{$link}->{$obj->{'conf'}->{$key}}) {
+                        push @{$self->{'errors'}}, 'referenced '.$link." '".$obj->{'conf'}->{$key}."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                    }
+                }
+                elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
+                    for my $ref (@{$obj->{'conf'}->{$key}}) {
+                        if(substr($ref, 0, 1) eq '!' or substr($ref, 0, 1) eq '+') { $ref = substr($ref, 1); }
+                        next if index($ref, '*') != -1;
+                        if(!defined $self->{'objects'}->{'byname'}->{$link}->{$ref}) {
+                            push @{$self->{'errors'}}, 'referenced '.$link." '".$ref."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $self->{'stats'}->profile(end => "M::C::_check_references()") if defined $self->{'stats'};
     return;
 }
 

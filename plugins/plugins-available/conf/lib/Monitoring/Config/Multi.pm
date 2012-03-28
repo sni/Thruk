@@ -50,6 +50,9 @@ sub init {
     my $key    = shift;
     my $config = shift;
     my $data   = shift;
+    my $stats  = shift;
+
+    $stats->profile(begin => "M::C::M::init()") if defined $stats;
 
     if(defined $data) {
         $self->{'configs'}->{$key} = $data;
@@ -59,13 +62,15 @@ sub init {
 
     if(defined $self->{'configs'}->{$key}) {
         $self->{'configs'}->{$key}->{'cached'} = 1;
-        $self->{'configs'}->{$key}->init($config) if defined $config;
+        $self->{'configs'}->{$key}->init($config, $stats) if defined $config;
+        $stats->profile(end => "M::C::M::init()") if defined $stats;
         return $self->{'configs'}->{$key};
     }
 
     $self->{'configs'}->{$key} = Monitoring::Config->new(@_);
-    $self->{'configs'}->{$key}->init($config);
+    $self->{'configs'}->{$key}->init($config, $stats);
 
+    $stats->profile(end => "M::C::M::init()") if defined $stats;
     return $self->{'configs'}->{$key};
 }
 

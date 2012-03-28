@@ -2,6 +2,7 @@ notes.txt
 .DS_Store
 \.swp
 blib
+tmp
 \.git
 ^Makefile$
 Makefile.old

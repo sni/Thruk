@@ -229,7 +229,7 @@ sub _parse_line {
     if(substr($line, 0, 7) eq 'define ' and $line =~ m/^define\s+(.*?)\s*{/gmxo) {
         $current_object = Monitoring::Config::Object->new(type => $1, file => $self, line => $linenr, 'coretype' => $self->{'coretype'});
         unless(defined $current_object) {
-            push @{$self->{'errors'}}, "unknown object type '".$1."' in ".$self->{'path'}.":".$linenr;
+            push @{$self->{'errors'}}, "unknown object type '".$1."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             $in_unknown_object = 1;
             return($current_object, $in_unknown_object, $comments);
         }
@@ -238,7 +238,7 @@ sub _parse_line {
     # old object finished
     elsif($line eq '}') {
         unless(defined $current_object) {
-            push @{$self->{'errors'}}, "unexpected end of object in ".$self->{'path'}.":".$linenr;
+            push @{$self->{'errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             return($current_object, $in_unknown_object, $comments);
         }
         $current_object->{'comments'} = $comments;
@@ -274,16 +274,16 @@ sub _parse_line {
             }
             if(defined $timedef) {
                 if(defined $current_object->{'conf'}->{$timedef}) {
-                    push @{$self->{'errors'}}, "duplicate attribute $timedef in '".$line."' in ".$self->{'path'}.":".$linenr;
+                    push @{$self->{'errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
                 }
                 $current_object->{'conf'}->{$timedef} = $timeranges;
             } else {
-                push @{$self->{'errors'}}, "unknown time definition '".$line."' in ".$self->{'path'}.":".$linenr;
+                push @{$self->{'errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
         }
         else {
             if(defined $current_object->{'conf'}->{$key}) {
-                push @{$self->{'errors'}}, "duplicate attribute $key in '".$line."' in ".$self->{'path'}.":".$linenr;
+                push @{$self->{'errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
             $current_object->{'conf'}->{$key} = $value;
 
@@ -294,7 +294,7 @@ sub _parse_line {
 
     # something totally unknown
     else {
-        push @{$self->{'errors'}}, "syntax invalid: '".$line."' in ".$self->{'path'}.":".$linenr;
+        push @{$self->{'errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
     }
 
     return($current_object, $in_unknown_object, $comments);
