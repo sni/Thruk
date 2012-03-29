@@ -655,6 +655,11 @@ sub _process_objects_page {
         return $self->_apply_config_changes($c);
     }
 
+    # tools menu
+    if(defined $c->{'request'}->{'parameters'}->{'tools'}) {
+        return $self->_process_tools_page($c);
+    }
+
     # get object from params
     my $obj = $self->_get_context_object($c);
     if(defined $obj) {
@@ -814,6 +819,27 @@ sub _apply_config_changes {
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'files'}             = $c->{'obj_db'}->get_files();
+    return;
+}
+
+##########################################################
+# show tools page
+sub _process_tools_page {
+    my ( $self, $c ) = @_;
+
+    $c->stash->{'subtitle'}      = 'Config Tools';
+    $c->stash->{'template'}      = 'conf_objects_tools.tt';
+    $c->stash->{'output'}        = '';
+    $c->stash->{'action'}        = 'tools';
+    $c->stash->{'warnings'}      = [];
+
+    my $tool   = $c->{'request'}->{'parameters'}->{'tools'} || 'start';
+
+    if($tool eq 'check_object_references') {
+        $c->stash->{'warnings'} = [ @{$c->{'obj_db'}->_check_references()}, @{$c->{'obj_db'}->_check_orphaned_objects()} ];
+    }
+
+    $c->stash->{'tool'} = $tool;
     return;
 }
 

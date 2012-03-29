@@ -351,12 +351,12 @@ sub get_object_by_location {
 
 =head2 get_object_by_id
 
-get object by location
+get object by id
 
 =cut
 sub get_object_by_id {
     my $self = shift;
-    my $id   = shift;
+    my $id   = shift || confess("no id");
 
     return $self->{'objects'}->{'byid'}->{$id};
 }
@@ -1111,7 +1111,8 @@ sub _rebuild_index {
     $self->{'macros'}             = $macros;
     $self->{'needs_index_update'} = 0;
 
-    $self->_check_references();
+    my $errors = $self->_check_references();
+    push @{$self->{'errors'}}, @{$errors} if scalar @{$errors} > 0;
 
     $self->{'stats'}->profile(end => "M::C::_rebuild_index()") if defined $self->{'stats'};
     return;
@@ -1235,6 +1236,72 @@ sub _newest_file {
 sub _check_references {
     my($self) = @_;
     $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
+    my @errors;
+    $self->_all_object_links_callback(sub {
+        my($file, $obj, $attr, $link, $val) = @_;
+        if($attr eq 'use') {
+            if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
+                push @errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+            }
+        }
+        elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
+            push @errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+        }
+    });
+
+    $self->{'stats'}->profile(end => "M::C::_check_references()") if defined $self->{'stats'};
+    return \@errors;
+}
+
+##########################################################
+sub _check_orphaned_objects {
+    my($self) = @_;
+    $self->{'stats'}->profile(begin => "M::C::_check_orphaned_objects()") if defined $self->{'stats'};
+    my @errors;
+
+    # get build list of objects
+    my $all_templates = {};
+    my $all_objects   = {};
+    for my $type (keys %{$self->{'objects'}->{'byname'}}) {
+        next if $type eq 'templates';
+        my @values = keys %{$self->{'objects'}->{'byname'}->{$type}};
+        for my $v (@values) { $all_objects->{$type}->{$v} = 1; }
+    }
+    for my $type (keys %{$self->{'objects'}->{'byname'}->{'templates'}}) {
+        my @values = keys %{$self->{'objects'}->{'byname'}->{'templates'}->{$type}};
+        for my $v (@values) { $all_templates->{$type}->{$v} = 1; }
+    }
+
+    $self->_all_object_links_callback(sub {
+        my($file, $obj, $attr, $link, $val) = @_;
+        if($attr eq 'use') {
+            delete $all_templates->{$link}->{$val};
+        }
+        else {
+            delete $all_objects->{$link}->{$val};
+        }
+    });
+    for my $type (keys %{$all_templates}) {
+        for my $name (keys %{$all_templates->{$type}}) {
+            push @errors, $type." template '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name}));
+        }
+    }
+    for my $type (keys %{$all_objects}) {
+        next if $type eq 'service';
+        next if $type eq 'servicedependency';
+        for my $name (keys %{$all_objects->{$type}}) {
+            push @errors, $type." object '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name}));
+        }
+    }
+
+    $self->{'stats'}->profile(end => "M::C::_check_orphaned_objects()") if defined $self->{'stats'};
+    return \@errors;
+}
+
+##########################################################
+# run callback function for every link
+sub _all_object_links_callback {
+    my($self, $cb) = @_;
 
     for my $file ( @{$self->{'files'}} ) {
         for my $obj ( @{$file->{'objects'}} ) {
@@ -1248,30 +1315,22 @@ sub _check_references {
                     for my $ref (@{$obj->{'conf'}->{$key}}) {
                         if(substr($ref, 0, 1) eq '!' or substr($ref, 0, 1) eq '+') { $ref = substr($ref, 1); }
                         next if index($ref, '*') != -1;
-                        if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$ref}) {
-                            push @{$self->{'errors'}}, "referenced template '$ref' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
-                        }
+                        &$cb($file, $obj, $key, $link, $ref);
                     }
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
-                    if(!defined $self->{'objects'}->{'byname'}->{$link}->{$obj->{'conf'}->{$key}}) {
-                        push @{$self->{'errors'}}, 'referenced '.$link." '".$obj->{'conf'}->{$key}."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
-                    }
+                    &$cb($file, $obj, $key, $link, $obj->{'conf'}->{$key});
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
                     for my $ref (@{$obj->{'conf'}->{$key}}) {
                         if(substr($ref, 0, 1) eq '!' or substr($ref, 0, 1) eq '+') { $ref = substr($ref, 1); }
                         next if index($ref, '*') != -1;
-                        if(!defined $self->{'objects'}->{'byname'}->{$link}->{$ref}) {
-                            push @{$self->{'errors'}}, 'referenced '.$link." '".$ref."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
-                        }
+                        &$cb($file, $obj, $key, $link, $ref);
                     }
                 }
             }
         }
     }
-
-    $self->{'stats'}->profile(end => "M::C::_check_references()") if defined $self->{'stats'};
     return;
 }
 

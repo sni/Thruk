@@ -522,7 +522,9 @@ sub _link_obj {
         $line = $obj->{'line'};
         $path = $obj->{'file'}->{'path'};
     }
-    return('<a href="conf.cgi?sub=objects&amp;file='.$path.'&amp;line='.$line.'">'.$path.':'.$line.'</a>');
+    my $shortpath = $path;
+    $shortpath =~ s/.*\///gmx;
+    return('<a href="conf.cgi?sub=objects&amp;file='.$path.'&amp;line='.$line.'">'.$shortpath.':'.$line.'</a>');
 }
 
 ##########################################################

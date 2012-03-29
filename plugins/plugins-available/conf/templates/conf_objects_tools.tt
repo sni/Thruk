@@ -1,0 +1,33 @@
+[% WRAPPER _conf_frame.tt %]
+
+<div align="center">
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="sub" value="objects">
+  <table border="0" class='data conftoolobj'>
+    [% PROCESS _conf_objects_menu.tt type="tools" %]
+  </table>
+</form>
+</div>
+<br><br>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" class="confdetails">
+<tr>
+<td align="left" valign="top" width="100%" style="padding-left: 20px">
+  [% IF tool != 'start' %]
+  [% IF warnings.size > 0 %]
+  <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='Warnings' title='Warnings' width="16" height="16" style="vertical-align: text-bottom"> found some issues:
+  <ul>
+  [% FOREACH w = warnings %]
+    <li>[% w %]</li>
+  [% END %]
+  </ul>
+  [% ELSE %]
+  <img src='[% url_prefix %]thruk/themes/[% theme %]/images/accept.png' alt='OK' title='OK' width="16" height="16" style="vertical-align: text-bottom"> everything ok
+  [% END %]
+  [% END %]
+</td>
+<td align="center" valign="top" class="action_menu">
+[% PROCESS _conf_tools_menu.tt %]
+</td>
+</tr>
+</table>
+[% END %]
