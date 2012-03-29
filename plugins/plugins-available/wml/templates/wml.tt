@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>[% title_prefix %]WML Thruk</title>
+</head>
+<body>
+
+<b>Host Problems: </b>
+<table columns='2'>
+
+  [% IF hosts.size == 0 %]
+<tr><td>No problems</td></tr>
+
+  [% ELSE %]
+     [% FOREACH host = hosts %]
+        [% IF host.state == 0 %]
+            [% state = 'OK' %]
+        [% ELSIF host.state == 1 %]
+            [% state = 'DWN' %]
+        [% ELSIF host.state == 2 %]
+            [% state = 'UNR' %]
+        [% END %]
+<tr><td>[% state %]</td><td>[% host.name %]</td></tr>
+
+     [% END %]
+  [% END %]
+</table>
+
+<b>Svc Problems:</b>
+<table columns='2'>
+
+  [% IF services.size == 0 %]
+<tr><td>No problems</td></tr>
+
+  [% ELSE %]
+     [% FOREACH svc = services %]
+        [% IF svc.state == 0 %]
+            [% state = 'OK' %]
+        [% ELSIF svc.state == 1 %]
+            [% state = 'WRN' %]
+        [% ELSIF svc.state == 2 %]
+            [% state = 'CRI' %]
+        [% ELSIF svc.state == 3 %]
+            [% state = 'UNK' %]
+        [% END %]
+<tr><td>[% state %]</td><td>[% svc.host_name %]/[% svc.description %]</td></tr>
+
+     [% END %]
+  [% END %]
+</table>
+
+</body>
+</html>

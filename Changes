@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - show remaining minutes when using first_notification_delay
           - hide host/service selection for read-only users
           - added new config option show_backends_in_table to display site name in status table
+          - added wml plugin to support ntray (and maybe other tools based on the statuswml page)
           - cli tool:
               - implemented verbose mode with -v
           - fixed redirect in old browsers
