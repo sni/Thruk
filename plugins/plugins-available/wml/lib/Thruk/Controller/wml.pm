@@ -63,14 +63,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     return 1;
 }
 
-##########################################################
-sub _extract_filter_from_param {
-    my($self,$c) = @_;
-    my( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::classic_filter($c);
-    return($hostfilter, $servicefilter);
-}
-
 =head1 AUTHOR
+
+Franky Van Liedekerke, 2012
 
 Sven Nierlein, 2010, <nierlein@cpan.org>
 

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 28;
+use Test::More tests => 34;
 
 BEGIN {
     use lib('t');
@@ -25,7 +25,6 @@ for my $url (@{$pages}) {
         'url'            => $url,
         'like'           => [ 'WML Thruk' ],
         'unlike'         => [ 'internal server error', 'HASH', 'ARRAY' ],
-        'skip_html_lint' => 1,
     );
 }
 
