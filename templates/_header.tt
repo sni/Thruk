@@ -19,7 +19,7 @@
       [% IF refresh_rate +%]
       var refresh_rate            = [% refresh_rate %];
       [% END %]
-      var initial_backend_states = new Hash({
+      var initial_backend_states = new Object({
           [% FOREACH pd IN backends %]
             [% SET val = '1'                                     %][%# down #%]
             [% SET val = '0' IF backend_detail.$pd.running       %][%# up #%]
@@ -29,7 +29,8 @@
             '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
           [% END %]
       });
-      var current_backend_states  = initial_backend_states.clone();
+      /* create clone */
+      var current_backend_states  = jQuery.extend(true, {}, initial_backend_states);
       var enable_shinken_features = [% enable_shinken_features %];
       [% IF enable_shinken_features +%]
       var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');

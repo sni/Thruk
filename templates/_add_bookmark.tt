@@ -48,12 +48,12 @@
       <b>Remove Existing Bookmarks:</b><br>
 
       <script type="text/javascript"><!--
-        bookmarks = new Hash();
+        bookmarks = new Object();
         [% nr = 0 %]
         [% IF user_data.exists('bookmarks') %]
           [% FOREACH section = user_data.bookmarks.keys.sort %]
               [% FOREACH link = user_data.bookmarks.$section %]
-                bookmarks.set("bm[% nr %]", "[% section %]::[% link.0 %]");
+                bookmarks["bm[% nr %]"] = "[% section %]::[% link.0 %]";
               [% nr = nr + 1 %]
               [% END %]
           [% END %]

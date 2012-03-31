@@ -2,13 +2,9 @@ function set_sub(nr) {
     for(x=1;x<=3;x++) {
         /* reset table rows */
         if(x != nr) {
-            $$('.sub_'+x).each(function(elem) {
-                elem.style.display = "none";
-            });
+            jQuery('.sub_'+x).css('display', 'none');
         }
-        $$('.sub_'+nr).each(function(elem) {
-            elem.style.display = "";
-        });
+        jQuery('.sub_'+nr).css('display', '');
 
         /* reset buttons */
         obj = document.getElementById("sub_"+x);
@@ -26,14 +22,11 @@ function add_conf_attribute(table, key, rt) {
 
     running_number--;
     if(key != 'customvariable' && key != 'exception') {
-        var btn = $('new_' + key + '_btn');
-        if(btn) {
-            btn.style.display = "none";
-        }
+        jQuery('#new_' + key + '_btn').css('display', 'none');
     }
 
     // add new row
-    tbl = $(table);
+    tbl = document.getElementById(table);
     var tblBody        = tbl.tBodies[0];
 
     var newObj   = tblBody.rows[0].cloneNode(true);
@@ -44,9 +37,9 @@ function add_conf_attribute(table, key, rt) {
     newObj.cells[1].abbr      = key;
     newObj.cells[0].innerHTML = newObj.cells[0].innerHTML.replace(/del_0/g, 'del_'+running_number);
     newObj.cells[1].innerHTML = newObj.cells[1].innerHTML.replace(/del_0/g, 'del_'+running_number);
-    newObj.cells[2].innerHTML = unescape(fields.get(key).input.unescapeHTML().replace(/&quot;/g, '"'));
+    newObj.cells[2].innerHTML = unescape(unescapeHTML(fields[key].input).replace(/&quot;/g, '"'));
     newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_key'+running_number);
-    newObj.cells[3].abbr      = unescape(fields.get(key).help.unescapeHTML().replace(/&quot;/g, '"'));
+    newObj.cells[3].abbr      = unescape(unescapeHTML(fields[key].help).replace(/&quot;/g, '"'));
 
     if(key == 'customvariable' || key == 'exception') {
         var value = "";
@@ -83,20 +76,18 @@ function add_conf_attribute(table, key, rt) {
 /* remove an table row from the attributes table */
 function remove_conf_attribute(key, nr) {
 
-    var btn = $('new_' + key + '_btn');
-    if(btn) {
-        btn.style.display = "";
-    }
+    jQuery('#new_' + key + '_btn').css('display', '');
 
-    row   = $(nr).parentNode.parentNode;
+    row   = document.getElementById(nr).parentNode.parentNode;
     table = row.parentNode.parentNode;
 
-    var field = fields.get(key)
+    var field = fields[key];
     if(field) {
         field.input = escape(row.cells[2].innerHTML);
     }
 
-    row.remove();
+    var p = row.parentNode;
+    p.removeChild(row);
     reset_table_row_classes(table.id, 'dataEven', 'dataOdd');
     return false;
 }

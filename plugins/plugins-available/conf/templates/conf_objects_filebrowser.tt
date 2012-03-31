@@ -45,17 +45,15 @@
 
     /* get directory object for path */
     function get_dir_for_path(files, path) {
-        var f = new Hash(files);
-        if(f.get('path') == path) {
-            return f;
+        if(files['path'] == path) {
+            return files;
         }
 
-        var dirs = new Hash(f.get('dirs'));
+        var dirs = files['dirs'];
         var ret;
-        dirs.keys().each(function(name) {
-            d = dirs.get(name);
+        jQuery.each(dirs, function(name, d) {
             if(d.path == path) {
-                ret = new Hash(d);
+                ret = d;
                 return;
             }
             var r = get_dir_for_path(d, path);
@@ -75,7 +73,7 @@
         var dir = get_dir_for_path(all_files, path);
         if(dir == undefined) {
             if(thruk_debug_js) { alert("ERROR: got no dir for path in setdir("+path+")"); }
-        return;
+            return;
         }
 
         set_directory_path(dir);
@@ -91,16 +89,16 @@
             }
 
             /* set dirs for folder */
-            var dirs = new Hash(dir.get('dirs'));
-            dirs.keys().sort().each(function(name) {
-                d = dirs.get(name);
+            var dirs = dir['dirs'];
+            jQuery.each(keys(dirs).sort(), function(index, name) {
+                d = dirs[name];
                 html += html_dir(d.path, name, d.date);
             });
 
             /* set files for folder */
-            var files = new Hash(dir.get('files'));
-            files.keys().sort().each(function(name) {
-                f = files.get(name);
+            var files = dir['files'];
+            jQuery.each(keys(files).sort(), function(index, name) {
+                f = files[name];
                 html += html_file(path, name, f.date, f.deleted, f.readonly);
             });
 
@@ -151,11 +149,11 @@
             var html     = "";
             var rootpath = root;
             html += "<a href='#"+ rootpath +"' onclick='setdir(\""+ rootpath +"\")'>" + rootpath + "<\/a>";
-            var dirs     = dir.get('path');
+            var dirs     = dir['path'];
             dirs         = dirs.replace(rootpath, '');
             var paths    = dirs.split("/");
             dirs         = rootpath;
-            paths.each(function(dir) {
+            jQuery.each(paths, function(index, dir) {
                 if(dir != '') {
                     dirs += dir + "\/";
                     html += " <a href='#"+ dirs +"' onclick='setdir(\""+ dirs +"\")'>" + dir + "\/ <\/a>";
@@ -185,33 +183,33 @@
         // remove empty strings from pattern array
         pattern = value.split(" ");
         var trimmed_pattern = new Array();
-        pattern.each(function(sub_pattern) {
+        jQuery.each(pattern, function(index, sub_pattern) {
             if(sub_pattern != '') {
                 trimmed_pattern.push(sub_pattern);
             }
         });
         pattern = trimmed_pattern;
 
-        var f     = new Hash(all_files);
-        var dirs  = new Hash(f.get('dirs'));
-        var files = new Hash(f.get('files'));
-        var results = get_matching_files(pattern, dirs, files, f.get('path'));
+        var f     = all_files;
+        var dirs  = f['dirs'];
+        var files = f['files'];
+        var results = get_matching_files(pattern, dirs, files, f['path']);
 
         jQuery('#filesystem').html(function() {
             var html = "";
             html += "<ul class='obj_browse'>";
             // sort by name
-            var sorted = new Hash();
-            results.each(function(o) {
-                sorted.set(o.get('name'), o);
+            var sorted = new Object();
+            jQuery.each(results, function(i, o) {
+                sorted[o['name']] = o;
             });
-            sorted.keys().sort().each(function(name) {
-                o = sorted.get(name);
-                if(o.get('type') == 'dir') {
-                    html += html_dir(o.get('path'), o.get('name'), o.get('date'));
+            jQuery.each(keys(sorted).sort(), function(index, name) {
+                o = sorted[name];
+                if(o['type'] == 'dir') {
+                    html += html_dir(o['path'], o['name'], o['date']);
                 }
-                if(o.get('type') == 'file') {
-                    html += html_file(o.get('path'), o.get('name'), o.get('date'), o.get('deleted'), o.get('readonly'));
+                if(o['type'] == 'file') {
+                    html += html_file(o['path'], o['name'], o['date'], o['deleted'], o['readonly']);
                 }
             });
             html += "<\/ul>";
@@ -222,27 +220,26 @@
     function get_matching_files(pattern, dirs, files, path) {
         path = path.replace(root, '');
         var results = new Array();
-        dirs.keys().each(function(name) {
-            d = dirs.get(name);
+        jQuery.each(dirs, function(name, d) {
             if(file_matches(pattern, path + name)) {
-                results.push(new Hash({ 'type':'dir', 'name': path + name, 'path': d.path, 'date': d.date }));
+                results.push(new Object({ 'type':'dir', 'name': path + name, 'path': d.path, 'date': d.date }));
             }
-            var f     = new Hash(d);
-            var dir   = new Hash(f.get('dirs'));
-            var file  = new Hash(f.get('files'));
+            var f     = d;
+            var dir   = f.dirs;
+            var file  = f.files;
             var res   = get_matching_files(pattern, dir, file, d.path);
-            res.each(function(a) { results.push(a) });
+            jQuery.each(res, function(i, a) { results.push(a) });
         });
-        files.keys().each(function(name) {
+        jQuery.each(files, function(name, f) {
             if(file_matches(pattern, path + name)) {
-                results.push(new Hash({ 'type':'file', 'name': path + name, 'path': root, 'date': f.date, 'deleted': f.deleted, 'readonly': f.readonly }));
+                results.push(new Object({ 'type':'file', 'name': path + name, 'path': root, 'date': f.date, 'deleted': f.deleted, 'readonly': f.readonly }));
             }
         });
         return results;
     }
     function file_matches(pattern, name) {
         var missed = 0;
-        pattern.each(function(p) {
+        jQuery.each(pattern, function(i, p) {
             var index = name.toLowerCase().indexOf(p.toLowerCase());
             if(index == -1) {
                 missed++;

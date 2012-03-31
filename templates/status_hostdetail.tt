@@ -6,7 +6,7 @@
 [% UNLESS authorized_for_read_only %]
 <script type="text/javascript">
 <!--
-  var dfl_Hash = new Hash({[% FOREACH h = data %]r[% loop.index %]: "[% escape_bslash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
+  var dfl_Hash = new Object({[% FOREACH h = data %]r[% loop.index %]: "[% escape_bslash(h.name) %];;[% h.peer_key %]"[% UNLESS loop.last %],[% END %][% END %]});
   hide_activity_icons_timer = window.setTimeout("hide_activity_icons()", 5000);
 -->
 </script>

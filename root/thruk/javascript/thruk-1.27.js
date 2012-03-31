@@ -12,7 +12,7 @@
 var refreshPage      = 1;
 var cmdPaneState     = 0;
 var curRefreshVal    = 0;
-var additionalParams = undefined;
+var additionalParams = new Object();
 var refreshTimer;
 var backendSelTimer;
 var lastRowSelected;
@@ -125,10 +125,9 @@ function prefSubmit(url, current_theme) {
   var sel         = document.getElementById('pref_theme')
   var now         = new Date();
   var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
-  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   if(current_theme != sel.value) {
-    additionalParams.set('theme', '');
-    additionalParams.set('reload_nav', 1);
+    additionalParams['theme']      = '';
+    additionalParams['reload_nav'] = 1;
     document.cookie = "thruk_theme="+sel.value + "; path="+url_prefix+"thruk; expires=" + expires.toGMTString() + ";";
     window.status   = "thruk preferences saved";
     reloadPage();
@@ -168,49 +167,68 @@ function stopRefresh() {
   setRefreshRate(0);
 }
 
+/* return url variables as hash */
+function toQueryParams(str) {
+    var vars   = [], hash;
+    if(str == undefined) { str = window.location.href.slice(window.location.href.indexOf('?') + 1); }
+    var hashes = str.split('&');
+    for(var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
+
+/* create query string from object */
+function toQueryString(obj) {
+    var str = '';
+    for(key in obj) {
+        if(str != '') { str = str + '&'; }
+        str = str + key + '=' + obj[key];
+    }
+    return str;
+}
+
 /* reloads the current page and adds some parameter from a hash */
 function reloadPage() {
-  var obj = document.getElementById('refresh_rate');
-  obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
+    var obj = document.getElementById('refresh_rate');
+    obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
 
-  var origHash = window.location.hash;
-  var origUrl  = new String(window.location);
-  var newUrl   = origUrl;
-  var index    = newUrl.indexOf('?');
-  var urlArgs  = new Hash();
-  if(index != -1) {
-    newUrl  = newUrl.substring(0, index);
-    origUrl  = origUrl.replace(/\+/g, " ");
-    urlArgs = new Hash(origUrl.parseQuery());
-  }
-
-  if(additionalParams == undefined) { additionalParams = new Hash({}) };
-  additionalParams.each(function(pair) {
-    // check for valid options to set here
-    if(pair.key == 'hidesearch' || pair.key == 'hidetop' || pair.key == 'backend' || pair.key == 'host' || pair.key == 'reload_nav' || pair.key == 'theme' || pair.key == 'states') {
-      urlArgs.set(pair.key, pair.value);
+    var origHash = window.location.hash;
+    var origUrl  = new String(window.location);
+    var newUrl   = origUrl;
+    var index    = newUrl.indexOf('?');
+    var urlArgs  = new Object();
+    if(index != -1) {
+        newUrl  = newUrl.substring(0, index);
+        origUrl  = origUrl.replace(/\+/g, " ");
+        urlArgs  = toQueryParams();
     }
-  });
-  // make url uniq, otherwise we would to do a reload
-  // which reloads all images / css / js too
-  urlArgs.set('_', (new Date()).getTime());
 
-  var newParams = Object.toQueryString(urlArgs);
+    for(key in additionalParams) {
+        urlArgs[key] = additionalParams[key];
+    }
+    // make url uniq, otherwise we would to do a reload
+    // which reloads all images / css / js too
+    urlArgs['_'] = (new Date()).getTime();
 
-  if(newParams != '') {
-    newUrl = newUrl + '?' + newParams;
-  }
+    var newParams = toQueryString(urlArgs);
 
-  if(origHash != '#' && origHash != '') {
-    newUrl = newUrl + origHash;
-  }
+    if(newParams != '') {
+        newUrl = newUrl + '?' + newParams;
+    }
 
-  /*
-   * reload new url and replace history
-   * otherwise history will contain every
-   * single reload
-   */
-  window.location.replace(newUrl);
+    if(origHash != '#' && origHash != '') {
+        newUrl = newUrl + origHash;
+    }
+
+    /*
+     * reload new url and replace history
+     * otherwise history will contain every
+     * single reload
+     */
+    window.location.replace(newUrl);
 }
 
 /* set border color as mouse over for top row buttons*/
@@ -229,17 +247,14 @@ function toggleBackend(backend) {
   var button        = document.getElementById('button_' + backend);
 
   if(backend_chooser == 'switch') {
-    $$('.button_peerUP').each(function(e) {
-        e.className = 'button_peerDIS';
-    });
+    jQuery('.button_peerUP').removeAttr('class').addClass('button_peerDIS');
     button.className = 'button_peerUP';
     document.cookie = "thruk_conf="+backend+ "; path="+url_prefix+"thruk;";
     reloadPage();
     return;
   }
 
-  if(additionalParams == undefined) { additionalParams = new Hash({}) };
-  initial_state = initial_backend_states.get(backend);
+  initial_state = initial_backend_states[backend];
   if(button.className == "button_peerDIS") {
     if(initial_state == 1) {
       button.className = 'button_peerDOWN';
@@ -250,20 +265,20 @@ function toggleBackend(backend) {
     else {
         button.className = 'button_peerUP';
     }
-    current_backend_states.set(backend, 0);
+    current_backend_states[backend] = 0;
   } else if(button.className == "button_peerHID") {
     button.className = 'button_peerUP';
-    current_backend_states.set(backend, 0);
-    additionalParams.set('backend', undefined);
+    current_backend_states[backend] = 0;
+    delete additionalParams['backend'];
   } else {
     button.className = "button_peerDIS";
-    current_backend_states.set(backend, 2);
+    current_backend_states[backend] = 2;
   }
 
-  additionalParams.set('reload_nav', 1);
+  additionalParams['reload_nav'] = 1;
 
   /* save current selected backends in session cookie */
-  document.cookie = "thruk_backends="+current_backend_states.toQueryString()+ "; path="+url_prefix+"thruk;";
+  document.cookie = "thruk_backends="+toQueryString(current_backend_states)+ "; path="+url_prefix+"thruk;";
   window.clearTimeout(backendSelTimer);
   backendSelTimer  = window.setTimeout('reloadPage()', 1000);
   return;
@@ -280,8 +295,7 @@ function toggleCheckBox(id) {
 }
 
 // unselect current text seletion
-function unselectCurrentSelection(obj)
-{
+function unselectCurrentSelection(obj) {
     if (document.selection && document.selection.empty)
     {
         document.selection.empty();
@@ -363,6 +377,15 @@ function data_select_move(from, to) {
     sortlist(to_sel.id);
 }
 
+/* return keys as array */
+function keys(obj) {
+    var k = [];
+    for(key in obj) {
+        k.push(key);
+    }
+    return k;
+}
+
 /* sort select by value */
 function sortlist(id) {
     var lb = document.getElementById(id);
@@ -371,17 +394,17 @@ function sortlist(id) {
         if(thruk_debug_js) { alert("ERROR: no element in sortlist() for: " + id ); }
     }
 
-    opts  = new Hash;
+    opts  = new Object();
 
     for(i=0; i<lb.length; i++)  {
-        opts.set(lb.options[i].text, lb.options[i].value)
+        opts[lb.options[i].text] = lb.options[i].value;
     }
 
-    var sortedkeys = opts.keys().sort();
+    var sortedkeys = keys(opts).sort();
 
     for(i=0; i<lb.length; i++)  {
       lb.options[i].text  = sortedkeys[i];
-      lb.options[i].value = opts.get(sortedkeys[i]);
+      lb.options[i].value = opts[sortedkeys[i]];
     }
 }
 
@@ -403,7 +426,7 @@ function removeBookmark(nr) {
     var pan  = document.getElementById("bm" + nr);
     var panP = pan.parentNode;
     panP.removeChild(pan);
-    bookmarks.unset("bm" + nr);
+    delete bookmarks["bm" + nr];
 }
 
 /* check if element is not emty */
@@ -419,7 +442,7 @@ function checknonempty(id, name) {
 /* hide all waiting icons */
 var hide_activity_icons_timer;
 function hide_activity_icons() {
-    $$('img').each(function(e) {
+    jQuery('img').each(function(i, e) {
         if(e.src.indexOf("/images/waiting.gif") > 0) {
             e.style.display = "none";
         }
@@ -428,7 +451,7 @@ function hide_activity_icons() {
 
 /* verify time */
 var verify_id;
-var verification_errors = undefined;
+var verification_errors = new Object();
 function verify_time(id) {
     verify_id = id;
     window.clearTimeout(verifyTimer);
@@ -438,7 +461,6 @@ function verify_time_do(id) {
     var obj = document.getElementById(id);
     debug(obj.value);
 
-    if(verification_errors == undefined) { verification_errors = new Hash };
     new Ajax.Request(url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value, {
         onSuccess: function(transport) {
             if(transport.responseJSON != null) {
@@ -448,54 +470,43 @@ function verify_time_do(id) {
             }
             if(data.verified == "false") {
                 debug(data.error)
-                verification_errors.set(id, 1);
+                verification_errors[id] = 1;
                 obj.style.background = "#f8c4c4";
             } else {
                 obj.style.background = "";
-                verification_errors.unset(id);
+                delete verification_errors[id];
             }
         }
     });
+}
+
+/* return unescaped html string */
+function unescapeHTML(html) {
+    return jQuery("<div />").html(html).text();
 }
 
 /* reset table row classes */
 function reset_table_row_classes(table, c1, c2) {
     var x = 1;
-    $$('TABLE#'+table+' TR').each(function(row) {
-        row.removeClassName(c1);
-        row.removeClassName(c2);
+    jQuery('TABLE#'+table+' TR').each(function(i, row) {
+        jQuery(row).removeClass(c1);
+        jQuery(row).removeClass(c2);
         x++;
         var newclass = c2;
         if(x%2 == 0) {
             newclass = c1;
         }
-        row.addClassName(newclass);
-        row.childElements().each(function(elem) {
+        jQuery(row).addClass(newclass);
+        jQuery(row).children().each(function(i, elem) {
             if(elem.tagName == 'TD') {
-                if(elem.hasClassName(c1) || elem.hasClassName(c2)) {
-                    elem.removeClassName(c1);
-                    elem.removeClassName(c2);
-                    elem.addClassName(newclass);
+                if(jQuery(elem).hasClass(c1) || jQuery(elem).hasClass(c2)) {
+                    jQuery(elem).removeClass(c1);
+                    jQuery(elem).removeClass(c2);
+                    jQuery(elem).addClass(newclass);
                 }
             }
         });
     });
-}
-
-/* save variable decoded into location hash */
-function to_location_hash(data) {
-    window.location.hash = '#'+data.toQueryString();
-}
-
-/* create variable from a decoded location hash */
-function from_location_hash() {
-    var data = new Hash;
-    if(window.location.hash != '#') {
-        var hash = new String(window.location.hash);
-        hash = hash.replace(/^#/, '');
-        data = new Hash(hash.toQueryParams());
-    }
-    return data;
 }
 
 /* set icon src and refresh page */
@@ -543,9 +554,9 @@ Y8,           88   `8b d8'   88 88         8P
  to select hosts / services
  for sending quick commands
 *******************************************************************************/
-var selectedServices = undefined;
-var selectedHosts    = undefined;
-var noEventsForId    = undefined;
+var selectedServices = new Object();
+var selectedHosts    = new Object();
+var noEventsForId    = new Object();
 var submit_form_id;
 var pagetype         = undefined;
 
@@ -555,18 +566,17 @@ function addRowSelector(id, type) {
     var cells = row.cells;
 
     // remove this eventhandler, it has to fire only once
-    if(noEventsForId == undefined) { noEventsForId = new Hash; }
-    if(noEventsForId.get(id)) {
+    if(noEventsForId[id]) {
         return false;
     }
     if( row.detachEvent ) {
-        noEventsForId.set(id, 1);
+        noEventsForId[id] = 1;
     } else {
         row.onmouseover = undefined;
     }
 
     // reset all current highlighted rows
-    $$('td.tableRowHover').each(function(e) {
+    jQuery('td.tableRowHover').each(function(i, e) {
         resetHostRow(e);
         resetServiceRow(e);
     });
@@ -600,7 +610,7 @@ function addRowSelector(id, type) {
 
     // initial mouseover highlights host&service, reset class here
     if(pagetype == "servicedetail") {
-        $$('td.tableRowHover').each(function(e) {
+        jQuery('td.tableRowHover').each(function(i, e) {
             resetHostRow(e);
         });
     }
@@ -773,7 +783,7 @@ function styleElementsFF(elems, style, force) {
 function highlightServiceRow()
 {
     // reset all current highlighted rows
-    $$('td.tableRowHover').each(function(e) {
+    jQuery('td.tableRowHover').each(function(i, e) {
         resetHostRow(e);
         resetServiceRow(e);
     });
@@ -791,7 +801,7 @@ function highlightServiceRow()
 function highlightHostRow()
 {
     // reset all current highlighted rows
-    $$('td.tableRowHover').each(function(e) {
+    jQuery('td.tableRowHover').each(function(i, e) {
         resetHostRow(e);
         resetServiceRow(e);
     });
@@ -852,7 +862,7 @@ function selectServiceByIdEvent(row_id, state, event)
 
       // all selected should get the same state
       state = false;
-      if(selectedServices != undefined && selectedServices.get(lastRowSelected)) {
+      if(selectedServices[lastRowSelected]) {
         state = true;
       }
 
@@ -880,12 +890,11 @@ function selectServiceByIdEvent(row_id, state, event)
 
 /* select service row by id */
 function selectServiceById(row_id, state) {
-    if(selectedServices == undefined) { selectedServices = new Hash; }
     var targetState;
-    if(!Object.isUndefined(state)) {
+    if(state != undefined) {
         targetState = state;
     }
-    else if(selectedServices.get(row_id)) {
+    else if(selectedServices[row_id]) {
         targetState = false;
     }
     else {
@@ -900,10 +909,10 @@ function selectServiceById(row_id, state) {
 
     if(targetState) {
         setRowStyle(row_id, 'tableRowSelected', 'service', true);
-        selectedServices.set(row_id, 1);
+        selectedServices[row_id] = 1;
     } else {
         setRowStyle(row_id, 'original', 'service', true);
-        selectedServices.unset(row_id);
+        delete selectedServices[row_id];
     }
     return true;
 }
@@ -957,7 +966,7 @@ function selectHostByIdEvent(row_id, state, event) {
 
       // all selected should get the same state
       state = false;
-      if(selectedHosts != undefined && selectedHosts.get(lastRowSelected)) {
+      if(selectedHosts[lastRowSelected]) {
         state = true;
       }
 
@@ -985,11 +994,10 @@ function selectHostByIdEvent(row_id, state, event) {
 /* set host row selected */
 function selectHostById(row_id, state) {
     var targetState;
-    if(selectedHosts == undefined) { selectedHosts = new Hash; }
-    if(!Object.isUndefined(state)) {
+    if(state != undefined) {
         targetState = state;
     }
-    else if(selectedHosts.get(row_id)) {
+    else if(selectedHosts[row_id]) {
         targetState = false;
     }
     else {
@@ -1007,10 +1015,10 @@ function selectHostById(row_id, state) {
 
     if(targetState) {
         setRowStyle(row_id, 'tableRowSelected', 'host', true);
-        selectedHosts.set(row_id, 1);
+        selectedHosts[row_id] = 1;
     } else {
         setRowStyle(row_id, 'original', 'host', true);
-        selectedHosts.unset(row_id);
+        delete selectedHosts[row_id];
     }
     return true;
 }
@@ -1077,8 +1085,8 @@ function selectAllServices(state, pane_prefix) {
 }
 /* select services by class name */
 function selectServicesByClass(classes) {
-    classes.each(function(classname) {
-        $$(classname).each(function(obj) {
+    jQuery.each(classes, function(i, classname) {
+        jQuery(classname).each(function(i, obj) {
             selectService(obj, true);
         })
     });
@@ -1087,8 +1095,8 @@ function selectServicesByClass(classes) {
 
 /* select hosts by class name */
 function selectHostsByClass(classes) {
-    classes.each(function(classname) {
-        $$(classname).each(function(obj) {
+    jQuery.each(classes, function(i, classname) {
+        jQuery(classname).each(function(i, obj) {
             selectHost(obj, true);
         })
     });
@@ -1120,9 +1128,9 @@ function toggleCmdPane(state) {
 
 /* show command panel if there are services or hosts selected otherwise hide the panel */
 function checkCmdPaneVisibility() {
-    if(selectedServices == undefined) { selectedServices = new Hash; }
-    if(selectedHosts == undefined) { selectedHosts = new Hash; }
-    var size = selectedServices.size() + selectedHosts.size();
+    var ssize = keys(selectedServices).length;
+    var hsize = keys(selectedHosts).length;
+    var size  = ssize + hsize;
     if(size == 0) {
         /* hide command panel */
         toggleCmdPane(0);
@@ -1131,8 +1139,6 @@ function checkCmdPaneVisibility() {
 
         /* set submit button text */
         var btn = document.getElementById('multi_cmd_submit_button');
-        var ssize = selectedServices.size();
-        var hsize = selectedHosts.size();
         var serviceName = "services";
         if(ssize == 1) { serviceName = "service";  }
         var hostName = "hosts";
@@ -1158,7 +1164,7 @@ function checkCmdPaneVisibility() {
 /* collect selected hosts and services and pack them into nice form data */
 function collectFormData(form_id) {
 
-    if(verification_errors != undefined && verification_errors.keys().size() > 0) {
+    if(verification_errors != undefined && keys(verification_errors).length > 0) {
         alert('please enter valid data');
         return(false);
     }
@@ -1183,33 +1189,31 @@ function collectFormData(form_id) {
         }
     }
 
-    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     ids_form = document.getElementById('selected_ids');
     if(ids_form) {
         // comments / downtime commands
-        ids_form.value = selectedHosts.keys().join(',');
+        ids_form.value = keys(selectedHosts).join(',');
     }
     else {
         // regular services commands
         var services = new Array();
-        if(selectedServices == undefined) { selectedServices = new Hash; }
-        selectedServices.keys().each(function(row_id) {
+        jQuery.each(selectedServices, function(row_id, blah) {
             if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
             if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
             if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
             row_id = row_id.substr(4);
-            services.push(obj_hash.get(row_id));
+            services.push(obj_hash[row_id]);
         });
         service_form = document.getElementById('selected_services');
         service_form.value = services.join(',');
 
         var hosts = new Array();
-        selectedHosts.keys().each(function(row_id) {
+        jQuery.each(selectedHosts, function(row_id, blah) {
             if(row_id.substr(0,4) == "hst_") { obj_hash = hst_Hash; }
             if(row_id.substr(0,4) == "svc_") { obj_hash = svc_Hash; }
             if(row_id.substr(0,4) == "dfl_") { obj_hash = dfl_Hash; }
             row_id = row_id.substr(4);
-            hosts.push(obj_hash.get(row_id));
+            hosts.push(obj_hash[row_id]);
         });
         host_form = document.getElementById('selected_hosts');
         host_form.value = hosts.join(',');
@@ -1287,7 +1291,7 @@ function check_selected_command() {
 /* hide all form element rows */
 function disableAllFormElement() {
     var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
-    elems.each(function(id) {
+    jQuery.each(elems, function(index, id) {
         obj = document.getElementById(id);
         obj.style.display = "none";
     });
@@ -1310,8 +1314,7 @@ function check_quick_command() {
     window.clearTimeout(hide_activity_icons_timer);
 
     if(value == 1 ) { // reschedule
-        if(selectedServices == undefined) { selectedServices = new Hash; }
-        selectedServices.keys().each(function(row_id) {
+        jQuery.each(selectedServices, function(row_id, blah) {
             cell           = document.getElementById(row_id + "_s_exec");
             cell.innerHTML = '';
             img            = document.createElement('img');
@@ -1322,8 +1325,7 @@ function check_quick_command() {
             img.alt        = "This service is currently executing its servicecheck";
             cell.appendChild(img);
         });
-        if(selectedHosts == undefined) { selectedHosts = new Hash; }
-        selectedHosts.keys().each(function(row_id) {
+        jQuery.each(selectedHosts, function(row_id, blah) {
             cell           = document.getElementById(row_id + "_h_exec");
             cell.innerHTML = '';
             img            = document.createElement('img');
@@ -1336,7 +1338,6 @@ function check_quick_command() {
         });
         var btn = document.getElementById('multi_cmd_submit_button');
         btn.value = "processing commands...";
-        btn.disable();
     }
 
     return true;
@@ -1366,8 +1367,7 @@ function toggle_comment(event) {
     }
 
     var state = true;
-    if(selectedHosts == undefined) { selectedHosts = new Hash; }
-    if(selectedHosts.get(row_id) != undefined) {
+    if(selectedHosts[row_id]) {
         state = false;
     }
 
@@ -1379,7 +1379,7 @@ function toggle_comment(event) {
 
         // all selected should get the same state
         state = false;
-        if(selectedHosts.get(lastRowSelected) != undefined) {
+        if(selectedHosts[lastRowSelected]) {
             state = true;
         }
 
@@ -1404,13 +1404,13 @@ function toggle_comment(event) {
     selectCommentById(row_id, state);
 
     // check visibility of command pane
-    var number = selectedHosts.keys().size();
+    var number = keys(selectedHosts).length;
     var text = "remove " + number + " " + type;
     if(number != 1) {
         text = text + "s";
     }
-    $('quick_command').options[0].text = text;
-    if(selectedHosts.keys().size() > 0) {
+    jQuery('#quick_command')[0].options[0].text = text;
+    if(number > 0) {
         showElement('cmd_pane');
     } else {
         hideElement('cmd_pane');
@@ -1430,12 +1430,11 @@ function selectCommentById(row_id, state) {
     }
     var elems = row.getElementsByTagName('TD');
 
-    if(selectedHosts == undefined) { selectedHosts = new Hash; }
     if(state == false) {
-        selectedHosts.unset(row_id);
+        delete selectedHosts[row_id];
         styleElements(elems, "original", 1);
     } else {
-        selectedHosts.set(row_id, row_id);
+        selectedHosts[row_id] = row_id;
         styleElements(elems, 'tableRowSelected', 1)
     }
     return false;
@@ -1443,13 +1442,12 @@ function selectCommentById(row_id, state) {
 
 /* unselect all selections on downtimes/comments page */
 function unset_comments() {
-    if(selectedHosts == undefined) { selectedHosts = new Hash; }
-    selectedHosts.keys().each(function(nr) {
-        var row_id = selectedHosts.get(nr);
+    jQuery.each(selectedHosts, function(nr, blah) {
+        var row_id = selectedHosts[nr];
         var row    = document.getElementById(row_id);
         var elems  = row.getElementsByTagName('TD');
         styleElements(elems, "original", 1);
-        selectedHosts.unset(nr);
+        delete selectedHosts[nr];
     });
     hideElement('cmd_pane');
 }
@@ -1473,14 +1471,13 @@ function toggleFilterPane(prefix) {
   debug("toggleFilterPane(): " + toggleFilterPane.caller);
   var pane = document.getElementById(prefix+'all_filter_table');
   var img  = document.getElementById(prefix+'filter_button');
-  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   if(pane.style.display == 'none') {
     pane.style.display    = '';
     pane.style.visibility = 'visible';
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
     img.disable();
-    additionalParams.set('hidesearch', 2);
+    additionalParams['hidesearch'] = 2;
     document.getElementById('hidesearch').value = 2;
   }
   else {
@@ -1489,7 +1486,7 @@ function toggleFilterPane(prefix) {
     img.style.display     = '';
     img.style.visibility  = 'visible';
     img.enable();
-    additionalParams.set('hidesearch', 1);
+    additionalParams['hidesearch'] = 1;
     document.getElementById('hidesearch').value = 1;
   }
 }
@@ -1549,7 +1546,7 @@ function accept_filter_types(search_prefix, checkbox_names, result_name, checkbo
     var orig = inp[0].value;
     var sum = 0;
     var elems = Array.from(document.getElementsByName(search_prefix + checkbox_names));
-    elems.each(function(elem) {
+    jQuery.each(elems, function(index, elem) {
         if(elem.checked) {
             sum += parseInt(elem.value);
         }
@@ -1605,7 +1602,7 @@ function set_filter_name(search_prefix, checkbox_names, checkbox_prefix, filterv
   }
 
   var checked_ones = new Array();
-  order.each(function(bit) {
+  jQuery.each(order, function(index, bit) {
     checkbox = document.getElementById(search_prefix + checkbox_prefix + bit);
     if(!checkbox) {
         if(thruk_debug_js) { alert('ERROR: got no checkbox in set_filter_name(): ' + search_prefix + checkbox_prefix + bit); }
@@ -1794,7 +1791,7 @@ function delete_filter_row(event) {
 function add_options(select, options, numbered) {
     var x = 0;
     if(numbered == 2) { x = options.size(); }
-    options.each(function(text) {
+    jQuery.each(options, function(index, text) {
         var opt  = document.createElement('option');
         opt.text = text;
         if(numbered) {
@@ -1828,7 +1825,7 @@ function new_filter(cloneObj, parentObj, btnId) {
 
   // replace ids and names
   var tags = new Array('A', 'INPUT', 'TABLE', 'TR', 'TD', 'SELECT', 'INPUT', 'DIV', 'IMG');
-  tags.each(function(tag) {
+  jQuery.each(tags, function(i, tag) {
       var elems = newObj.getElementsByTagName(tag);
       replaceIdAndNames(elems, pane_prefix+new_prefix);
   });
@@ -2021,13 +2018,12 @@ function selectByValue(select, val) {
 /* toggle visibility of top status informations */
 function toggleTopPane() {
   var formInput = document.getElementById('hidetop');
-  if(additionalParams == undefined) { additionalParams = new Hash({}) };
   if(toggleElement('top_pane')) {
-    additionalParams.set('hidetop', 0);
+    additionalParams['hidetop'] = 0;
     formInput.value = 0;
     document.getElementById('btn_toggle_top_pane').src = url_prefix + "thruk/themes/" + theme + "/images/icon_minimize.gif";
   } else {
-    additionalParams.set('hidetop', 1);
+    additionalParams['hidetop'] = 1;
     formInput.value = 1;
     document.getElementById('btn_toggle_top_pane').src = url_prefix + "thruk/themes/" + theme + "/images/icon_maximize.gif";
   }
@@ -2229,7 +2225,7 @@ var ajax_search = {
         }
 
         var input = document.getElementById(ajax_search.input_field);
-        ajax_search.size = input.getWidth();
+        ajax_search.size = jQuery(input).width();
 
         if(ajax_search.empty == true) {
             if(input.value == ajax_search.emptytxt) {
@@ -2353,19 +2349,16 @@ var ajax_search = {
         } else {
 
              // fill data store
-            new Ajax.Request(search_url, {
-                onSuccess: function(transport) {
-                    if(transport.responseJSON != null) {
-                        ajax_search.base = transport.responseJSON;
-                    } else {
-                        ajax_search.base = eval(transport.responseText);
-                    }
+            jQuery.ajax({
+                url: search_url,
+                success: function(data) {
+                    ajax_search.base = data;
                     if(ajax_search.autoopen == true) {
                         ajax_search.suggest();
                     }
                     ajax_search.autoopen = true;
                 },
-                onFailure: function(transport) {
+                error: function() {
                     ajax_search.initialized = false;
                 }
             });
@@ -2448,7 +2441,7 @@ var ajax_search = {
         var input;
         var input = document.getElementById(ajax_search.input_field);
         if(!input) { return; }
-        if(ajax_search.base == undefined || ajax_search.base.size() == 0) { return; }
+        if(ajax_search.base == undefined || ajax_search.base.length == 0) { return; }
 
         pattern = input.value;
         if(ajax_search.list) {
@@ -2484,14 +2477,14 @@ var ajax_search = {
             // remove empty strings from pattern array
             pattern = pattern.split(" ");
             var trimmed_pattern = new Array();
-            pattern.each(function(sub_pattern) {
+            jQuery.each(pattern, function(index, sub_pattern) {
                 if(sub_pattern != '') {
                     trimmed_pattern.push(sub_pattern);
                 }
             });
             pattern = trimmed_pattern;
             var results = new Array();
-            ajax_search.base.each(function(search_type) {
+            jQuery.each(ajax_search.base, function(index, search_type) {
                 var sub_results = new Array();
                 var top_hits = 0;
                 if(   (ajax_search.search_type == 'all' && search_type.name != 'timeperiods')
@@ -2500,10 +2493,10 @@ var ajax_search = {
                    || (ajax_search.templates != "templates" && ajax_search.search_type + 's' == search_type.name)
                    || (ajax_search.templates == "both" && ( search_type.name == ajax_search.initialized_t + " templates" || ajax_search.search_type + 's' == search_type.name ))
                   ) {
-                  search_type.data.each(function(data) {
+                  jQuery.each(search_type.data, function(index, data) {
                       result_obj = new Object({ 'name': data, 'relevance': 0 });
                       var found = 0;
-                      pattern.each(function(sub_pattern) {
+                      jQuery.each(pattern, function(index, sub_pattern) {
                           var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
                           if(index != -1) {
                               found++;
@@ -2520,17 +2513,19 @@ var ajax_search = {
                           rt = ajax_search.filter(data, search_type);
                       }
                       // only if all pattern were found
-                      if(rt && found == pattern.size()) {
+                      if(rt && found == pattern.length) {
                           result_obj.display = data;
                           sub_results.push(result_obj);
                           if(result_obj.relevance >= 100) { top_hits++; }
                       }
                   });
                 }
-                if(sub_results.size() > 0) {
+                if(sub_results.length > 0) {
+                    /*
                     sub_results = sub_results.sortBy(function(s) {
                         return((-1 * s.relevance) + s.name);
                     });
+                    */
                     results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
                 }
             });
@@ -2550,25 +2545,27 @@ var ajax_search = {
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
 
+        /*
         results = results.sortBy(function(s) {
             return(-1 * s.top_hits);
         });
+        */
 
         var resultHTML = '<ul>';
         var x = 0;
-        var results_per_type = Math.ceil(ajax_search.max_results / results.size());
+        var results_per_type = Math.ceil(ajax_search.max_results / results.length);
         ajax_search.res   = new Array();
         var total_results = 0;
-        results.each(function(type) {
+        jQuery.each(results, function(index, type) {
             var cur_count = 0;
             var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
-            if(type.results.size() == 1) { name = name.substring(0, name.length -1); }
-            resultHTML += '<li><b><i>' + ( type.results.size() ) + ' ' + name + '<\/i><\/b><\/li>';
-            total_results += type.results.size();
-            type.results.each(function(data) {
+            if(type.results.length == 1) { name = name.substring(0, name.length -1); }
+            resultHTML += '<li><b><i>' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
+            total_results += type.results.length;
+            jQuery.each(type.results, function(index, data) {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display;
-                    pattern.each(function(sub_pattern) {
+                    jQuery.each(pattern, function(index, sub_pattern) {
                         name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
                     });
                     var classname = "item";
@@ -2607,7 +2604,7 @@ var ajax_search = {
         }
         ajax_search.result_size = x;
         resultHTML += '<\/ul>';
-        if(results.size() == 0) {
+        if(results.length == 0) {
             resultHTML += '<a href="#">'+ ajax_search.emptymsg +'</a>';
             if(ajax_search.hideempty) {
                 ajax_search.hide_results();
@@ -2632,15 +2629,14 @@ var ajax_search = {
 
     /* set the value into the input field */
     set_result: function(value) {
-        if(value == 'more' || (value == undefined && ajax_search.res.size() == ajax_search.cur_select)) {
+        if(value == 'more' || (value == undefined && ajax_search.res.length == ajax_search.cur_select)) {
             window.clearTimeout(ajax_search.hideTimer);
             ajax_search.dont_hide=true;
             window.setTimeout("ajax_search.dont_hide=false", 500);
             var panel = document.getElementById(ajax_search.result_pan);
             if(panel) {
                 panel.style.overflowY="scroll";
-                var dim = panel.getDimensions();
-                panel.style.height=dim.height+"px";
+                panel.style.height=jQuery(panel).height()+"px";
             }
             ajax_search.show_all = true;
             ajax_search.show_results(ajax_search.cur_results, ajax_search.cur_pattern, ajax_search.cur_select);
@@ -2760,7 +2756,7 @@ var ajax_search = {
                     el.focus();
                 }
             }
-            Event.stop(evt);
+            evt.preventDefault();
             return false;
         }
         // return or enter
@@ -2771,13 +2767,13 @@ var ajax_search = {
             if(ajax_search.set_result(ajax_search.res[ajax_search.cur_select])) {
                 return false;
             }
-            Event.stop(evt);
+            evt.preventDefault();
             return false
         }
         // hit escape
         if(keyCode == 27) {
             ajax_search.hide_results(undefined, true);
-            Event.stop(evt);
+            evt.preventDefault();
             return false;
         }
         return true;
@@ -2822,14 +2818,13 @@ function set_png_img(start, end, id) {
     var newUrl = pnp_url + "&start=" + start + "&end=" + end;
     debug(newUrl);
 
-    $('pnpwaitimg').style.display = "block";
+    jQuery('#pnpwaitimg').css('display', 'block');
+    jQuery('#pnpimg').attr('src', newUrl);
 
-    $('pnpimg').src = newUrl;
-
-    $('pnpimg').onload = function() {
-      $('pnpimg').style.display = "block";
-      $('pnpwaitimg').style.display = "none";
-    }
+    jQuery('#pnpimg').load(function() {
+      jQuery('#pnpimg').css('display' , 'block');
+      jQuery('#pnpwaitimg').css('display', 'none');
+    });
 
     // set style of buttons
     if(id) {
@@ -2860,10 +2855,10 @@ function set_png_img(start, end, id) {
 }
 
 function move_png_img(factor) {
-    var urlArgs = new Hash($('pnpimg').src.parseQuery());
+    var urlArgs = new Object(toQueryParams(jQuery('#pnpimg').attr('src')));
 
-    start = urlArgs.get("start");
-    end   = urlArgs.get("end");
+    start = urlArgs["start"];
+    end   = urlArgs["end"];
     diff  = end - start;
 
     start = parseInt(diff * factor) + parseInt(start);
