@@ -59,10 +59,10 @@
       [% END %]
       [% UNLESS authorized_for_read_only %]
       <div class="hint">
-          <a href="#" onclick="selectAllHosts(true,'hst_');">select all</a>
-        - <a href="#" onclick="selectAllHosts(false,'hst_');">unselect all</a>
-        - <a href="#" onclick="selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
-        - <a href="#" onclick="selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
+          <a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'hst_');">select all</a>
+        - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');">unselect all</a>
+        - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));">all problems</a>
+        - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'hst_');selectHostsByClass(Array('.has_downtime'));">all with downtime</a>
       </div>
       [% END %]
     </td>
@@ -99,10 +99,10 @@
 [% END %]
 [% UNLESS authorized_for_read_only %]
 <div class="hint">
-    <a href="#" onclick="selectAllServices(true,'svc_');">select all</a> (<a href="#" onclick="selectAllHosts(true,'svc_');">hosts</a>)
-  - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');">unselect all</a>
-  - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
-  - <a href="#" onclick="selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
+    <a href="#" onclick="pagetype='servicedetail';selectAllServices(true,'svc_');">select all</a> (<a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'svc_');">hosts</a>)
+  - <a href="#" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');">unselect all</a>
+  - <a href="#" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
+  - <a href="#" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
 </div>
 [% END %]
 [% PROCESS _status_detail_table.tt  data=services paneprefix='svc_' sortprefix='_svc' %]

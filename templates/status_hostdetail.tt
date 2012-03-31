@@ -79,10 +79,10 @@
           [% UNLESS authorized_for_read_only %]
           <div class="hint">select host with leftclick to send multiple commands. Select multiple with shift + mouse.</div>
           <div class="hint">
-              <a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">select all</a>
-            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');return false;">unselect all</a>
-            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));return false;">all problems</a>
-            - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
+              <a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'[% paneprefix %]');return false;">select all</a>
+            - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');return false;">unselect all</a>
+            - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));return false;">all problems</a>
+            - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
           </div>
           [% END %]
         </td>
@@ -99,10 +99,10 @@
 
     [% UNLESS authorized_for_read_only %]
     <div class="hint">
-        <a href="#" onclick="selectAllHosts(true,'[% paneprefix %]');return false;">select all</a>
-      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');return false;">unselect all</a>
-      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));return false;">all problems</a>
-      - <a href="#" onclick="selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
+        <a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'[% paneprefix %]');return false;">select all</a>
+      - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');return false;">unselect all</a>
+      - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));return false;">all problems</a>
+      - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
     </div>
     [% END %]
 
