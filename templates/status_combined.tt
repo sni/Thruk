@@ -99,7 +99,7 @@
 [% END %]
 [% UNLESS authorized_for_read_only %]
 <div class="hint">
-    <a href="#" onclick="pagetype='servicedetail';selectAllServices(true,'svc_');">select all</a> (<a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'svc_');">hosts</a>)
+    <a href="#" onclick="pagetype='servicedetail';selectAllServices(true,'svc_');">select all</a> (<a href="#" onclick="pagetype='servicedetail';selectAllHosts(true,'svc_');">hosts</a>)
   - <a href="#" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');">unselect all</a>
   - <a href="#" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.statusCRITICAL','.statusWARNING','.statusUNKNOWN'));">all problems</a>
   - <a href="#" onclick="pagetype='servicedetail';selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectServicesByClass(Array('.has_downtime'));">all with downtime</a>
