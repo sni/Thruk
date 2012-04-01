@@ -6683,9 +6683,15 @@ function addRowSelector(id, type) {
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         if(pagetype == "hostdetail" || (cell_nr == 0 && cells[0].innerHTML != '')) {
             setRowStyle(id, 'tableRowHover', 'host');
+            if(pagetype == 'hostdetail') {
+                addEvent(cells[cell_nr], 'mouseover', set_pagetype_hostdetail);
+            } else {
+                addEvent(cells[cell_nr], 'mouseover', set_pagetype_servicedetail);
+            }
             addEventHandler(cells[cell_nr], 'host');
         }
         else if(cell_nr >= 1) {
+            addEvent(cells[cell_nr], 'mouseover', set_pagetype_servicedetail);
             setRowStyle(id, 'tableRowHover', 'service');
             addEventHandler(cells[cell_nr], 'service');
         }
@@ -6698,6 +6704,14 @@ function addRowSelector(id, type) {
         });
     }
     return true;
+}
+
+/* set right pagetype */
+function set_pagetype_hostdetail() {
+    pagetype = "hostdetail";
+}
+function set_pagetype_servicedetail() {
+    pagetype = "servicedetail";
 }
 
 /* add the event handler */
