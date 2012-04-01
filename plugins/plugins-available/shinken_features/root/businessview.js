@@ -18,7 +18,7 @@ function from_location_hash() {
 }
 
 function toggleToc(e) {
-    var toc = document.getElementById(e);
+    var toc     = document.getElementById(e);
     var imgLink = document.getElementById('img-'+e);
 
     if (toc && toc.style.display == 'none') {
@@ -35,7 +35,7 @@ function toggleToc(e) {
 
 function set_initial_toc_states() {
     for(key in toc_states) {
-        var elem = jQuery('#'+key);
+        var elem = jQuery('#'+key)[0];
         if(elem) {
             elem.style.display = toc_states[key];
             if(toc_states[key] == '') {
@@ -43,5 +43,5 @@ function set_initial_toc_states() {
                 imgLink.src = img_src+'go-up.png';
             }
         }
-    });
+    };
 }

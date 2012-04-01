@@ -157,15 +157,11 @@ function init_conf_tool_buttons() {
         if(host == undefined) {
             return false;
         }
-        new Ajax.Request('conf.cgi?action=json&amp;type=dig&host='+host, {
-            onSuccess: function(transport) {
-                var result;
-                if(transport.responseJSON != null) {
-                    result = transport.responseJSON;
-                } else {
-                    result = eval(transport.responseText);
-                }
-                jQuery('#attr_table').find('.obj_address').val(result.address).effect('highlight', {}, 1000);
+
+        jQuery.ajax({
+            url: 'conf.cgi?action=json&amp;type=dig&host='+host,
+            success: function(data) {
+                jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
             }
         });
         return false;
@@ -268,16 +264,12 @@ function update_command_line(id) {
 
     showElement(id + 'wait');
     document.getElementById(id + 'command_line').innerHTML = "";
-    new Ajax.Request('conf.cgi?action=json&amp;type=commanddetails&command='+cmd_name, {
-        onSuccess: function(transport) {
-            var result;
-            if(transport.responseJSON != null) {
-                result = transport.responseJSON;
-            } else {
-                result = eval(transport.responseText);
-            }
+
+    jQuery.ajax({
+        url: 'conf.cgi?action=json&amp;type=commanddetails&command='+cmd_name,
+        success: function(data) {
             hideElement(id + 'wait');
-            var cmd_line = result[0].cmd_line;
+            var cmd_line = data[0].cmd_line;
 
             for(var nr=1;nr<=100;nr++) {
                 var regex = new RegExp('\\$ARG'+nr+'\\$', 'g');
@@ -294,7 +286,7 @@ function update_command_line(id) {
 
             close_accordion();
         },
-        onFailure: function(transport) {
+        error: function() {
             hideElement(id + 'wait');
             document.getElementById(id + 'command_line').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
@@ -438,20 +430,16 @@ function load_plugin_help(id, plugin) {
 
     showElement(id + 'wait_help');
     last_plugin_help = plugin;
-    new Ajax.Request('conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin, {
-        onSuccess: function(transport) {
-            var result;
-            if(transport.responseJSON != null) {
-                result = transport.responseJSON;
-            } else {
-                result = eval(transport.responseText);
-            }
+
+    jQuery.ajax({
+        url: 'conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin,
+        success: function(data) {
             hideElement(id + 'wait_help');
-            var plugin_help = result[0].plugin_help;
+            var plugin_help = data[0].plugin_help;
             document.getElementById(id + 'plugin_help').innerHTML = '<pre style="white-space: pre-wrap; height:400px; overflow: scoll;" id="'+id+'plugin_help_pre"><\/pre>';
             jQuery('#' + id + 'plugin_help_pre').text(plugin_help);
         },
-        onFailure: function(transport) {
+        error: function() {
             hideElement(id + 'wait_help');
             document.getElementById(id + 'plugin_help').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
@@ -473,20 +461,16 @@ function check_plugin_exec(id) {
     var command = jQuery('#'+id + "inp_command").val();
     jQuery('#'+id + 'plugin_exec_output').text('');
     showElement(id + 'wait_run');
-    new Ajax.Request('conf.cgi?action=json&amp;type=pluginpreview&command='+command+'&host='+host+'&service='+service+'&args='+args, {
-        onSuccess: function(transport) {
-            var result;
-            if(transport.responseJSON != null) {
-                result = transport.responseJSON;
-            } else {
-                result = eval(transport.responseText);
-            }
+
+    jQuery.ajax({
+        url: 'conf.cgi?action=json&amp;type=pluginpreview&command='+command+'&host='+host+'&service='+service+'&args='+args,
+        success: function(data) {
             hideElement(id + 'wait_run');
-            var plugin_output = result[0].plugin_output;
+            var plugin_output = data[0].plugin_output;
             document.getElementById(id + 'plugin_exec_output').innerHTML = '<pre style="white-space: pre-wrap; max-height:300px; overflow: scoll;" id="'+id+'plugin_output_pre"><\/pre>';
             jQuery('#' + id + 'plugin_output_pre').text(plugin_output);
         },
-        onFailure: function(transport) {
+        error: function(transport) {
             hideElement(id + 'wait_run');
             document.getElementById(id + 'plugin_exec_output').innerHTML = '<font color="red"><b>error<\/b><\/font>';
         }
@@ -534,14 +518,14 @@ function init_conf_tool_servicegroup_members_wizard(id) {
 
     // initialize selected members
     selected_members   = new Array();
-    selected_members_h = new Hash();
+    selected_members_h = new Object();
     var options = '';
     var list = jQuery('.obj_servicegroup_members').val().split(/,/);
-    for(var x=0; x<list.size();x+=2) {
+    for(var x=0; x<list.length;x+=2) {
         if(list[x] != '') {
             var val = list[x]+','+list[x+1]
             selected_members.push(val);
-            selected_members_h.set(val, 1);
+            selected_members_h[val] = 1;
             options += '<option value="'+val+'">'+val+'<\/option>';
         }
     }
@@ -551,19 +535,14 @@ function init_conf_tool_servicegroup_members_wizard(id) {
     // initialize available members
     available_members = new Array();
     jQuery("select#"+id+"available_members").html('<option disabled>loading...<\/option>');
-    new Ajax.Request('conf.cgi?action=json&amp;type=servicemembers', {
-        onSuccess: function(transport) {
-            var result;
-            if(transport.responseJSON != null) {
-                result = transport.responseJSON;
-            } else {
-                result = eval(transport.responseText);
-            }
-            result = result[0]['data'];
+    jQuery.ajax({
+        url: 'conf.cgi?action=json&amp;type=servicemembers',
+        success: function(data) {
+            var result = data[0]['data'];
             options = '';
-            var size = result.size();
+            var size = result.length;
             for(var x=0; x<size;x++) {
-                if(!selected_members_h.get(result[x])) {
+                if(!selected_members_h[result[x]]) {
                     available_members.push(result[x]);
                     options += '<option value="'+result[x]+'">'+result[x]+'<\/option>\n';
                 }
@@ -571,7 +550,7 @@ function init_conf_tool_servicegroup_members_wizard(id) {
             jQuery("select#"+id+"available_members").html(options);
             sortlist(id+"available_members");
         },
-        onFailure: function(transport) {
+        error: function() {
             jQuery("select#"+id+"available_members").html('<option disabled>error<\/option>');
         }
     });

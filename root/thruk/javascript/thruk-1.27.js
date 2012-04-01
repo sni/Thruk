@@ -169,13 +169,15 @@ function stopRefresh() {
 
 /* return url variables as hash */
 function toQueryParams(str) {
-    var vars   = [], hash;
+    var vars = {};
     if(str == undefined) { str = window.location.href.slice(window.location.href.indexOf('?') + 1); }
-    var hashes = str.split('&');
-    for(var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
+    if (str == "") { return vars; };
+    str = str.replace(/#.*$/g, '');
+    str = str.split('&');
+    for (var i = 0; i < str.length; ++i) {
+        var p=str[i].split('=');
+        if (p.length != 2) continue;
+        vars[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
     }
     return vars;
 }
@@ -183,10 +185,10 @@ function toQueryParams(str) {
 /* create query string from object */
 function toQueryString(obj) {
     var str = '';
-    for(key in obj) {
+    jQuery.each(obj, function(key, value) {
         if(str != '') { str = str + '&'; }
-        str = str + key + '=' + obj[key];
-    }
+        str = str + key + '=' + value;
+    });
     return str;
 }
 
@@ -196,25 +198,21 @@ function reloadPage() {
     obj.innerHTML = "<span id='refresh_rate'>page will be refreshed...</span>";
 
     var origHash = window.location.hash;
-    var origUrl  = new String(window.location);
-    var newUrl   = origUrl;
-    var index    = newUrl.indexOf('?');
-    var urlArgs  = new Object();
-    if(index != -1) {
-        newUrl  = newUrl.substring(0, index);
-        origUrl  = origUrl.replace(/\+/g, " ");
-        urlArgs  = toQueryParams();
-    }
+    var newUrl   = window.location.href;
+    newUrl       = newUrl.replace(/#.*$/g, '');
 
+    var urlArgs  = toQueryParams();
     for(key in additionalParams) {
         urlArgs[key] = additionalParams[key];
     }
+
     // make url uniq, otherwise we would to do a reload
     // which reloads all images / css / js too
     urlArgs['_'] = (new Date()).getTime();
 
     var newParams = toQueryString(urlArgs);
 
+    newUrl = newUrl.replace(/\?.*$/g, '');
     if(newParams != '') {
         newUrl = newUrl + '?' + newParams;
     }
@@ -1476,7 +1474,6 @@ function toggleFilterPane(prefix) {
     pane.style.visibility = 'visible';
     img.style.display     = 'none';
     img.style.visibility  = 'hidden';
-    img.disable();
     additionalParams['hidesearch'] = 2;
     document.getElementById('hidesearch').value = 2;
   }
@@ -1545,8 +1542,7 @@ function accept_filter_types(search_prefix, checkbox_names, result_name, checkbo
     }
     var orig = inp[0].value;
     var sum = 0;
-    var elems = Array.from(document.getElementsByName(search_prefix + checkbox_names));
-    jQuery.each(elems, function(index, elem) {
+    jQuery("input[name="+search_prefix + checkbox_names+"]").each(function(index, elem) {
         if(elem.checked) {
             sum += parseInt(elem.value);
         }
@@ -1790,7 +1786,7 @@ function delete_filter_row(event) {
  */
 function add_options(select, options, numbered) {
     var x = 0;
-    if(numbered == 2) { x = options.size(); }
+    if(numbered == 2) { x = options.length; }
     jQuery.each(options, function(index, text) {
         var opt  = document.createElement('option');
         opt.text = text;
@@ -2496,7 +2492,7 @@ var ajax_search = {
                   jQuery.each(search_type.data, function(index, data) {
                       result_obj = new Object({ 'name': data, 'relevance': 0 });
                       var found = 0;
-                      jQuery.each(pattern, function(index, sub_pattern) {
+                      jQuery.each(pattern, function(i, sub_pattern) {
                           var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
                           if(index != -1) {
                               found++;
@@ -2522,6 +2518,7 @@ var ajax_search = {
                 }
                 if(sub_results.length > 0) {
                     /*
+                    TODO: implement
                     sub_results = sub_results.sortBy(function(s) {
                         return((-1 * s.relevance) + s.name);
                     });
@@ -2546,6 +2543,7 @@ var ajax_search = {
         if(!panel) { return; }
 
         /*
+        TODO: implement
         results = results.sortBy(function(s) {
             return(-1 * s.top_hits);
         });
