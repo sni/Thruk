@@ -16,7 +16,7 @@
 <div class="cmd_pane" id="cmd_pane">
 <div class="shadow"><div class="shadowcontent">
 <form action="cmd.cgi" method="POST" id="quick_cmd_form">
-  <input type="hidden" name="referer" value="[% full_uri(c, 1) %]">
+  <input type="hidden" name="referer" value="[% short_uri(c) %]">
   <input type="hidden" name="selected_ids" id="selected_ids" value="">
   <table class="cmd_pane" border=1 style="width: 400px">
     <tr>

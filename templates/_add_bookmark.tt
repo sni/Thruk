@@ -13,7 +13,7 @@
 [% IF style != 'combined' %]
 <form action='status.cgi' method="GET" id="bookmark_form">
 [% END %]
-<input type="hidden" name="referer" value="[% full_uri(c, 1) %]">
+<input type="hidden" name="referer" value="[% short_uri(c) %]">
 
 <table cellpadding=2 cellspacing=2 border=0>
   <tr>
