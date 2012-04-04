@@ -538,6 +538,18 @@ function setCaretToPos(input, pos) {
   setSelectionRange(input, pos, pos);
 }
 
+/* generic sort function */
+var sort_by = function(field, reverse, primer) {
+
+   var key = function (x) {return primer ? primer(x[field]) : x[field]};
+
+   return function (a,b) {
+       var A = key(a), B = key(b);
+       return (A < B ? -1 : (A > B ? 1 : 0)) * [1,-1][+!!reverse];
+   }
+}
+
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
@@ -2511,18 +2523,14 @@ var ajax_search = {
                       // only if all pattern were found
                       if(rt && found == pattern.length) {
                           result_obj.display = data;
+                          result_obj.sorter = (result_obj.relevance) + result_obj.name;
                           sub_results.push(result_obj);
                           if(result_obj.relevance >= 100) { top_hits++; }
                       }
                   });
                 }
                 if(sub_results.length > 0) {
-                    /*
-                    TODO: implement
-                    sub_results = sub_results.sortBy(function(s) {
-                        return((-1 * s.relevance) + s.name);
-                    });
-                    */
+                    sub_results.sort(sort_by('sorter', false));
                     results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
                 }
             });
@@ -2542,12 +2550,7 @@ var ajax_search = {
         var input = document.getElementById(ajax_search.input_field);
         if(!panel) { return; }
 
-        /*
-        TODO: implement
-        results = results.sortBy(function(s) {
-            return(-1 * s.top_hits);
-        });
-        */
+        results.sort(sort_by('top_hits', false));
 
         var resultHTML = '<ul>';
         var x = 0;
