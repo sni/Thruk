@@ -2573,13 +2573,12 @@ var ajax_search = {
         var x = 0;
         var results_per_type = Math.ceil(ajax_search.max_results / results.length);
         ajax_search.res   = new Array();
-        var total_results = 0;
+        var has_more = 0;
         jQuery.each(results, function(index, type) {
             var cur_count = 0;
             var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
             if(type.results.length == 1) { name = name.substring(0, name.length -1); }
             resultHTML += '<li><b><i>' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
-            total_results += type.results.length;
             jQuery.each(type.results, function(index, data) {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display;
@@ -2608,10 +2607,12 @@ var ajax_search = {
                     ajax_search.res[x] = prefix+data.display;
                     x++;
                     cur_count++;
+                } else {
+                    has_more = 1;
                 }
             });
         });
-        if(total_results > ajax_search.max_results && ajax_search.show_all == false) {
+        if(has_more == 1) {
             var id = "suggest_item_"+x
             var classname = "item";
             if(selected != -1 && selected == x) {
