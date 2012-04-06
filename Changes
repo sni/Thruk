@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.28     not yet released
+          - show host/servicegroups only if contact has permission for at least on host/service
           - internal changes ( removed prototype library )
 
 1.26     Mon Mar 26 13:40:33 CEST 2012

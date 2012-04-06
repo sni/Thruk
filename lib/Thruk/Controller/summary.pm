@@ -86,8 +86,8 @@ sub _show_step_1 {
     $c->stats->profile(begin => "_show_step_1()");
 
     $c->stash->{hosts}         = $c->{'db'}->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
-    $c->stash->{hostgroups}    = $c->{'db'}->get_hostgroup_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups') ]);
-    $c->stash->{servicegroups} = $c->{'db'}->get_servicegroup_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups') ]);
+    $c->stash->{hostgroups}    = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+    $c->stash->{servicegroups} = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
     $c->stash->{template}      = 'summary_step_1.tt';
 
     $c->stats->profile(end => "_show_step_1()");

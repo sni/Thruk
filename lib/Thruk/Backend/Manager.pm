@@ -309,6 +309,56 @@ sub get_contactgroups_by_contact {
 
 ########################################
 
+=head2 get_hostgroup_names_from_hosts
+
+  get_hostgroup_names_from_hosts
+
+returns a list of hostgroups but get list from hosts in order to
+respect permissions
+
+=cut
+
+sub get_hostgroup_names_from_hosts {
+    my $self  = shift;
+    if(scalar @_ == 0) { return $self->get_hostgroup_names(); }
+    my $hosts = $self->get_hosts( @_, 'columns', ['groups'] );
+    my $groups = {};
+    for my $host (@{$hosts}) {
+        for my $group (@{$host->{'groups'}}) {
+            $groups->{$group} = 1;
+        }
+    }
+    my @sorted = sort keys %{$groups};
+    return \@sorted;
+}
+
+########################################
+
+=head2 get_servicegroup_names_from_services
+
+  get_servicegroup_names_from_services
+
+returns a list of servicegroups but get list from services in order to
+respect permissions
+
+=cut
+
+sub get_servicegroup_names_from_services {
+    my $self     = shift;
+    if(scalar @_ == 0) { return $self->get_servicegroup_names(); }
+    my $services = $self->get_services( @_, 'columns', ['groups'] );
+    my $groups = {};
+    for my $service (@{$services}) {
+        for my $group (@{$service->{'groups'}}) {
+            $groups->{$group} = 1;
+        }
+    }
+    my @sorted = sort keys %{$groups};
+    return \@sorted;
+}
+
+########################################
+
 =head2 expand_command
 
   expand_command

@@ -155,10 +155,10 @@ sub _process_raw_request {
 
         my( $hostgroups, $servicegroups, $hosts, $services, $timeperiods );
         if( $c->config->{ajax_search_hostgroups} ) {
-            $hostgroups = $c->{'db'}->get_hostgroup_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) ] );
+            $hostgroups = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
         }
         if( $c->config->{ajax_search_servicegroups} ) {
-            $servicegroups = $c->{'db'}->get_servicegroup_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ) ] );
+            $servicegroups = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
         }
         if( $c->config->{ajax_search_hosts} ) {
             $hosts = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
