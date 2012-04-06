@@ -744,6 +744,9 @@ sub _process_combined_page {
     $c->stash->{hidetop}    = 1 unless $c->stash->{hidetop} ne '';
     $c->stash->{hidesearch} = 1;
 
+    # minimal monitor screen interface
+    #$c->stash->{minimal}    = 1 unless $c->stash->{minimal} ne '';
+
     # which host to display?
     my( $hostfilter)           = Thruk::Utils::Status::do_filter($c, 'hst_');
     my( undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');

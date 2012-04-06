@@ -2,13 +2,14 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.28     not yet released
           - show host/servicegroups only if contact has permission for at least on host/service
+          - add new url parameter 'minimal' for hiding everything except the data (Pierre Mavro)
           - internal changes ( removed prototype library )
 
 1.26     Mon Mar 26 13:40:33 CEST 2012
           - show remaining minutes when using first_notification_delay
           - hide host/service selection for read-only users
           - added new config option show_backends_in_table to display site name in status table
-          - added wml plugin to support ntray (and maybe other tools based on the statuswml page)
+          - added wml plugin to support ntray (and maybe other tools based on the statuswml page) (Franky Van Liedekerke)
           - cli tool:
               - implemented verbose mode with -v
           - fixed redirect in old browsers

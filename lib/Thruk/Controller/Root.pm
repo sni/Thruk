@@ -215,6 +215,9 @@ sub begin : Private {
     }
     $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
 
+    # minmal custom monitor screen
+    $c->stash->{minimal} = $c->{'request'}->{'parameters'}->{'minimal'} || '';
+
     # initialize our backends
     unless ( defined $c->{'db'} ) {
         $c->{'db'} = $c->model('Thruk');

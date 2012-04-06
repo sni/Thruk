@@ -14,6 +14,7 @@
 
 [% PROCESS _overdiv.tt %]
 [% PROCESS _status_cmd_pane.tt %]
+[% UNLESS minimal %]
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
       <tr>
         <td align="left" valign="top" width="33%">
@@ -94,16 +95,19 @@
         </td>
       </tr>
     </table>
+[% END %]
 
     [% PROCESS _status_hostdetail_table.tt %]
 
     [% UNLESS authorized_for_read_only %]
+    [% UNLESS minimal %]
     <div class="hint">
         <a href="#" onclick="pagetype='hostdetail';selectAllHosts(true,'[% paneprefix %]');return false;">select all</a>
       - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');return false;">unselect all</a>
       - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.statusHOSTDOWN','.statusHOSTUNREACHABLE'));return false;">all problems</a>
       - <a href="#" onclick="pagetype='hostdetail';selectAllHosts(false,'[% paneprefix %]');selectHostsByClass(Array('.has_downtime'));return false;">all with downtime</a>
     </div>
+    [% END %]
     [% END %]
 
     <div align="center">[% PROCESS _pager.tt %]</div>

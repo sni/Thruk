@@ -193,14 +193,18 @@
         </tr>
       </table>
     </td>
+    [% UNLESS minimal %]
     <td>
       <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
     </td>
     <td class="top_nav_pref">
       <input type="button" class="top_nav_pref_button" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('pref_pane'); return false;">
     </td>
+    [% END %]
   </tr>
 </table>
+[% UNLESS minimal %]
 [% IF page == 'status' || page == 'statusmap' %]
 <a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
+[% END %]
 [% END %]
