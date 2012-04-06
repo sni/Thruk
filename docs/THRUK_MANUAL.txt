@@ -1709,6 +1709,49 @@ as content.
 
 Here is a list of common tasks and configurations.
 
+=== CGI Parameters
+
+Most of the CGI Parameters can be changed with buttons, but there are
+some which are only accessible by adding them directly to the url.
+
+
+==== hidetop
+
+Pages: status pages
+
+Description: Show/Hide the status totals header.
+
+Example: /thruk/cgi-bin/status.cgi?hidetop=1
+
+
+==== nav
+
+Pages: all pages
+
+Description: Show/Hide the navigation. Only usefull in non-frames mode.
+
+Example: /thruk/cgi-bin/tac.cgi?nav=0
+
+
+==== noheader
+
+Pages: status pages
+
+Description: Show/Hide the status totals header.
+
+Example: /thruk/cgi-bin/status.cgi?noheader
+
+
+==== minimal
+
+Pages: status page
+
+Description: Hides almost any user interface buttons. Usefull for
+monitor screens where only the current problems should be displayed.
+
+Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1
+
+
 === Remote Livestatus with SSL
 
 IMPORTANT: unfortunately this does not work with latest Thruk

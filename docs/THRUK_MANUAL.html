@@ -10385,6 +10385,26 @@ as content.</p></div>
 <h2 id="_examples">Examples</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Here is a list of common tasks and configurations.</p></div>
+<h3 id="_cgi_parameters">CGI Parameters</h3><div style="clear:left"></div>
+<div class="paragraph"><p>Most of the CGI Parameters can be changed with buttons, but there are
+some which are only accessible by adding them directly to the url.</p></div>
+<h4 id="_hidetop">hidetop</h4>
+<div class="paragraph"><p>Pages: status pages</p></div>
+<div class="paragraph"><p>Description: Show/Hide the status totals header.</p></div>
+<div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?hidetop=1</p></div>
+<h4 id="_nav">nav</h4>
+<div class="paragraph"><p>Pages: all pages</p></div>
+<div class="paragraph"><p>Description: Show/Hide the navigation. Only usefull in non-frames mode.</p></div>
+<div class="paragraph"><p>Example: /thruk/cgi-bin/tac.cgi?nav=0</p></div>
+<h4 id="_noheader">noheader</h4>
+<div class="paragraph"><p>Pages: status pages</p></div>
+<div class="paragraph"><p>Description: Show/Hide the status totals header.</p></div>
+<div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?noheader</p></div>
+<h4 id="_minimal">minimal</h4>
+<div class="paragraph"><p>Pages: status page</p></div>
+<div class="paragraph"><p>Description: Hides almost any user interface buttons. Usefull for
+monitor screens where only the current problems should be displayed.</p></div>
+<div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28&amp;minimal=1</p></div>
 <h3 id="_remote_livestatus_with_ssl">Remote Livestatus with SSL</h3><div style="clear:left"></div>
 <div class="admonitionblock">
 <table><tr>
@@ -10490,7 +10510,7 @@ You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></d
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-03-31 16:53:33 CEST
+Last updated 2012-04-06 14:50:52 CEST
 </div>
 </div>
 </body>
