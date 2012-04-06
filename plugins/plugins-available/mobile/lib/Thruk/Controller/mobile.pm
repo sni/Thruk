@@ -61,7 +61,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                         };
         }
 
-        my($data,$comments,$downtimes);
+        my($data,$comments,$downtimes,$pnp_url);
         if($type eq 'notifications') {
             my $filter = {
                     '-and' => [
@@ -106,6 +106,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                 sort => { 'DESC' => 'id' } );
             }
             $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => $c);
+            if(defined $c->{'request'}->{'parameters'}->{'host'} and defined $data->[0]) {
+                $pnp_url = Thruk::Utils::get_pnp_url($c, $data->[0]);
+            }
         }
         elsif($type eq 'services') {
             my ($hostfilter, $servicefilter) = $self->_extract_filter_from_param($c);
@@ -120,6 +123,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                     sort => { 'DESC' => 'id' } );
             }
             $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => $c);
+            if(defined $c->{'request'}->{'parameters'}->{'host'} and defined $data->[0]) {
+                $pnp_url = Thruk::Utils::get_pnp_url($c, $data->[0]);
+            }
         }
         if(defined $data) {
             $c->stash->{'json'} = {};
@@ -136,6 +142,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $c->stash->{'json'}->{connection_status} = $connection_status;
             $c->stash->{'json'}->{downtimes}         = $downtimes if defined $downtimes;
             $c->stash->{'json'}->{comments}          = $comments  if defined $comments;
+            $c->stash->{'json'}->{pnp_url}           = $pnp_url   if defined $pnp_url;
             $c->forward('Thruk::View::JSON');
             return;
         } else {

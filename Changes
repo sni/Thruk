@@ -5,6 +5,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - add new url parameter 'minimal' for hiding everything except the data (Pierre Mavro)
           - added documentation about common CGI parameters
           - internal changes ( removed prototype library )
+          - mobile:
+              - added performance graph to mobile interface
 
 1.26     Mon Mar 26 13:40:33 CEST 2012
           - show remaining minutes when using first_notification_delay

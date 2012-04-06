@@ -618,7 +618,7 @@ function hide_common_extinfo(typ) {
     ['attempt', 'name', 'state', 'duration', 'exec_time', 'last_check', 'next_check', 'check_type', 'plugin_output', 'current_notification_number'].forEach(function(el){
         jQuery('#'+typ+'_'+el).text('');
     });
-    ['ack_form', 'acknowledged', 'downtime'].forEach(function(el){
+    ['ack_form', 'acknowledged', 'downtime', 'pnp_url'].forEach(function(el){
         jQuery('.'+typ+'_'+el).hide();
     });
 }
@@ -664,6 +664,19 @@ function show_common_extinfo(typ, data, comments) {
                 jQuery('A.'+typ+'_ack_form').attr('href', '#service_cmd?host='+encoder(obj.host_name)+'&service='+encoder(obj.description)+'&q=4');
             }
         }
+        /* pnp */
+        if(data.pnp_url != undefined && data.pnp_url != '') {
+            var hostname    = obj.name;
+            var description = '_HOST_';
+            if(obj.host_name != undefined) {
+                hostname    = obj.host_name;
+                description = obj.description;
+            }
+            jQuery('.'+typ+'_pnp_url').show();
+            jQuery('#'+typ+'_pnp_img').attr('src', data.pnp_url + '/image?host='+hostname+'&srv='+description+'&view=1&source=0');
+            jQuery('#'+typ+'_pnp_lnk').attr('href', data.pnp_url + '/mobile/graph/'+hostname+'/'+description);
+        }
+
         return obj;
     }
     jQuery('#'+typ+'_name').text('does not exist');
