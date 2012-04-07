@@ -13,11 +13,10 @@
           url: 'side.html',
           success: function() {
             jQuery('#msg').html('<font color="green"><b>done.<\/b><\/font>');
-            var ref = window.location.search;
+            var ref = window.location.search + window.location.hash;
             ref = ref.replace(/^\?/, '');
             if(ref != '') {
               ref = unescape(ref);
-              ref = ref.replace(/&/, '?');
               window.location = ref;
             }
           },
