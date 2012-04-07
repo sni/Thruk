@@ -11,7 +11,7 @@
 
   [% FOREACH key = keys %]
     [% NEXT IF obj.default.exists(key) && obj.default.$key.type == "DEPRECATED" %]
-    [% IF duplicate_keys.exists(key) %]
+    [% IF duplicate_keys.exists(key) && key != 'use' && key != 'register' && key != 'name' %]
       [% class = "conf_attr_used" %]
     [% ELSE %]
       [% class = "conf_attr_unused" %]

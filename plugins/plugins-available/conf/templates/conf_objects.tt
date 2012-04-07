@@ -81,6 +81,7 @@
               <span style="font-weight:normal;">
                 [% IF objs.size > 0 %]
                 [% objs.0.file.path %] line [% objs.0.line %]
+                [% IF objs.0.file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]
                 [% SET obj_id = objs.0.get_id() %]
                 [% ELSE %]
                 object does not exist
