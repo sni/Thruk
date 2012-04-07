@@ -15,6 +15,7 @@
             jQuery('#msg').html('<font color="green"><b>done.<\/b><\/font>');
             var ref = window.location.search + window.location.hash;
             ref = ref.replace(/^\?/, '');
+            ref = ref.replace(/\.cgi&/, '.cgi?');
             if(ref != '') {
               ref = unescape(ref);
               window.location = ref;
