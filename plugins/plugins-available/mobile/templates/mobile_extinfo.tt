@@ -26,7 +26,7 @@
       <tr><th>Execution Time</th><td id="[% type %]_exec_time"></td></tr>
       <tr><th>Notifications Sent</th><td id="[% type %]_current_notification_number"></td></tr>
       <tr><th colspan=2 class="[% type %]_pnp_url">Performance Graph</th></tr>
-      <tr><td colspan=2 class="[% type %]_pnp_url"><a href="" id="[% type %]_pnp_lnk" rel="external"><img src="" id="[% type %]_pnp_img" width="100%" alt="performance graph"></a></td></tr>
+      <tr><td colspan=2 class="[% type %]_pnp_url"><a href="" id="[% type %]_pnp_lnk" rel="external"><img src="" id="[% type %]_pnp_img" width="100%" height="60%" alt="performance graph"></a></td></tr>
       <tr><th colspan=2>Output</th></tr>
       <tr><td colspan=2 id="[% type %]_plugin_output"></td></tr>
     </table>
