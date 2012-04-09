@@ -268,7 +268,7 @@ sub _process_json_page {
         my $objects = $c->{'obj_db'}->get_objects_by_type('host');
         for my $host (@{$objects}) {
             my $hostname = $host->get_name();
-            my $services = $c->{'obj_db'}->get_services_for_host($host, $c->{'obj_db'});
+            my $services = $c->{'obj_db'}->get_services_for_host($host);
             for my $svc (keys %{$services->{'group'}}, keys %{$services->{'host'}}) {
                 push @{$members}, $hostname.','.$svc;
             }
@@ -695,6 +695,10 @@ sub _process_objects_page {
             $self->_host_list_services($c, $obj);
         }
 
+        # list references
+        elsif($c->stash->{action} eq 'listref') {
+            $self->_list_references($c, $obj);
+        }
     }
 
     # create new object
@@ -1103,7 +1107,7 @@ sub _get_context_object {
         $c->stash->{'type'}       = 'service';
         my $objs = $c->{'obj_db'}->get_objects_by_name('host', $c->{'request'}->{'parameters'}->{'host'}, 0);
         if(defined $objs->[0]) {
-            my $services = $c->{'obj_db'}->get_services_for_host($objs->[0], $c->{'obj_db'});
+            my $services = $c->{'obj_db'}->get_services_for_host($objs->[0]);
             for my $type (keys %{$services}) {
                 for my $name (keys %{$services->{$type}}) {
                     if($name eq $c->{'request'}->{'parameters'}->{'service'}) {
@@ -1539,14 +1543,32 @@ sub _file_browser {
     $c->stash->{'template'} = 'conf_objects_filebrowser.tt';
     return;
 }
+
 ##########################################################
 sub _host_list_services {
     my($self, $c, $obj) = @_;
 
-    my $services = $c->{'obj_db'}->get_services_for_host($obj, $c->{'obj_db'});
+    my $services = $c->{'obj_db'}->get_services_for_host($obj);
     $c->stash->{'services'} = $services ;
 
     $c->stash->{'template'} = 'conf_objects_host_list_services.tt';
+    return;
+}
+
+##########################################################
+sub _list_references {
+    my($self, $c, $obj) = @_;
+    my $refs = $c->{'obj_db'}->get_references($obj);
+    my $data = {};
+    for my $type (keys %{$refs}) {
+        $data->{$type} = {};
+        for my $id (keys %{$refs->{$type}}) {
+            my $obj = $c->{'obj_db'}->get_object_by_id($id);
+            $data->{$type}->{$obj->get_name()} = $id;
+        }
+    }
+    $c->stash->{'data'}     = $data;
+    $c->stash->{'template'} = 'conf_objects_listref.tt';
     return;
 }
 

@@ -150,21 +150,21 @@ return all groups this host belongs too
 
 =cut
 sub get_groups {
-    my($self, $config, $objects) = @_;
+    my($self, $config) = @_;
     my @groups;
 
     my $host_name = $self->get_name();
 
     # groups by member
     for my $group (@{$config->get_objects_by_type('hostgroup')}) {
-        my($grp_conf_keys, $grp_config) = $group->get_computed_config($objects);
+        my($grp_conf_keys, $grp_config) = $group->get_computed_config($config);
         if(defined $grp_config->{'members'} and grep { $_ eq $host_name} @{$grp_config->{'members'}}) {
             push @groups, $group->get_name();
         }
     }
 
     # assigned by host
-    my($hst_conf_keys, $hst_config) = $self->get_computed_config($objects);
+    my($hst_conf_keys, $hst_config) = $self->get_computed_config($config);
     if(defined $hst_config->{'hostgroups'}) {
         for my $group (@{$hst_config->{'hostgroups'}}) {
             push @groups, $group;

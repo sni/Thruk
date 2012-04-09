@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 864;
+use Test::More tests => 875;
 use JSON::XS;
 use Encode qw(encode_utf8 decode_utf8);
 
@@ -50,6 +50,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=move&type=host&data.name='.$host,
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=clone&type=host&data.name='.$host,
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=listservices&data.name='.$host,
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=listref&data.name='.$host,
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=start',
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=check_object_references',
 ];

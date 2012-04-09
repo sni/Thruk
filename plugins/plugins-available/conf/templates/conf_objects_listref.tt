@@ -1,0 +1,22 @@
+[% WRAPPER _conf_objects_frame.tt %]
+
+<table border="0" class='data conftoolobj'>
+  <tr>
+    <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">References of [% object.get_type() +%] [%+ object.get_name() %]</a></th>
+  </tr>
+  [% FOREACH type = data.keys.sort %]
+  <tr>
+    <td class='dataVar'>[% type | ucfirst %]</td>
+    <td class='dataVar'>
+      <ul>
+      [% FOREACH name = data.$type.keys.sort %]
+        [% oid = data.$type.$name %]
+        <li><a href="conf.cgi?sub=objects&amp;data.id=[% oid %]">[% name %]</a></li>
+      [% END %]
+      </ul>
+    </td>
+  </tr>
+  [% END %]
+</table>
+
+[% END %]

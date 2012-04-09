@@ -80,6 +80,18 @@ sub parse {
     return $errors;
 }
 
+##########################################################
+
+=head2 is_template
+
+returns 1 if this is a template
+
+=cut
+sub is_template {
+    my($self) = @_;
+    return 1 if $self->get_template_name();
+    return 0;
+}
 
 ##########################################################
 

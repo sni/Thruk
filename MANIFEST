@@ -578,6 +578,7 @@ themes/themes-available/Classic/images/btn_close.png
 themes/themes-available/Classic/images/btn_close_small.png
 themes/themes-available/Classic/images/calendar.png
 themes/themes-available/Classic/images/catalyst_170pix.png
+themes/themes-available/Classic/images/chart_organisation.png
 themes/themes-available/Classic/images/command.png
 themes/themes-available/Classic/images/comment.gif
 themes/themes-available/Classic/images/config.png
@@ -707,6 +708,7 @@ themes/themes-available/Exfoliation/images/btn_close.png
 themes/themes-available/Exfoliation/images/btn_close_small.png
 themes/themes-available/Exfoliation/images/calendar.png
 themes/themes-available/Exfoliation/images/catalyst_170pix.png
+themes/themes-available/Exfoliation/images/chart_organisation.png
 themes/themes-available/Exfoliation/images/command.png
 themes/themes-available/Exfoliation/images/comment.gif
 themes/themes-available/Exfoliation/images/config.png
@@ -893,6 +895,7 @@ themes/themes-available/Nuvola/images/btn_close.png
 themes/themes-available/Nuvola/images/btn_close_small.png
 themes/themes-available/Nuvola/images/calendar.png
 themes/themes-available/Nuvola/images/catalyst_170pix.png
+themes/themes-available/Nuvola/images/chart_organisation.png
 themes/themes-available/Nuvola/images/command.png
 themes/themes-available/Nuvola/images/comment.gif
 themes/themes-available/Nuvola/images/config.png
@@ -1072,6 +1075,7 @@ themes/themes-available/Thruk/images/btn_close.png
 themes/themes-available/Thruk/images/btn_close_small.png
 themes/themes-available/Thruk/images/calendar.png
 themes/themes-available/Thruk/images/catalyst_170pix.png
+themes/themes-available/Thruk/images/chart_organisation.png
 themes/themes-available/Thruk/images/command.png
 themes/themes-available/Thruk/images/comment.gif
 themes/themes-available/Thruk/images/config.png
@@ -1191,6 +1195,7 @@ themes/themes-available/Vautour/images/btn_close.png
 themes/themes-available/Vautour/images/btn_close_small.png
 themes/themes-available/Vautour/images/calendar.png
 themes/themes-available/Vautour/images/catalyst_170pix.png
+themes/themes-available/Vautour/images/chart_organisation.png
 themes/themes-available/Vautour/images/command.png
 themes/themes-available/Vautour/images/comment.gif
 themes/themes-available/Vautour/images/config.png
@@ -1362,6 +1367,7 @@ themes/themes-available/Wakizashi/images/button_edit_hi.png
 themes/themes-available/Wakizashi/images/button_edit_lo.png
 themes/themes-available/Wakizashi/images/calendar.png
 themes/themes-available/Wakizashi/images/catalyst_170pix.png
+themes/themes-available/Wakizashi/images/chart_organisation.png
 themes/themes-available/Wakizashi/images/closed.gif
 themes/themes-available/Wakizashi/images/command.png
 themes/themes-available/Wakizashi/images/comment.gif

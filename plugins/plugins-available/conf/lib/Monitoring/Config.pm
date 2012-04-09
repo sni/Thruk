@@ -372,18 +372,17 @@ returns services
 sub get_services_for_host {
     my $self    = shift;
     my $host    = shift;
-    my $objects = shift;
 
     $self->{'stats'}->profile(begin => "M::C::get_services_for_host()") if defined $self->{'stats'};
 
-    my($host_conf_keys, $host_config) = $host->get_computed_config($objects);
+    my($host_conf_keys, $host_config) = $host->get_computed_config($self);
 
     my $services  = { 'host' => {}, 'group' => {}};
     my $host_name = $host->get_name();
-    my $groups    = $host->get_groups($self, $objects);
+    my $groups    = $host->get_groups($self);
 
     for my $svc (@{$self->get_objects_by_type('service')}) {
-        my($svc_conf_keys, $svc_config) = $svc->get_computed_config($objects);
+        my($svc_conf_keys, $svc_config) = $svc->get_computed_config($self);
 
         # exclude hosts by !host_name
         if(defined $svc_config->{'host_name'} and grep { $_ eq '!'.$host_name } @{$svc_config->{'host_name'}}) {
@@ -523,7 +522,7 @@ sub update_object {
     my $newname = $obj->get_name();
 
     if($oldname ne $newname) {
-        $self->rename_dependencies($obj->get_type(), $oldname, $newname);
+        $self->rename_dependencies($obj, $oldname, $newname);
     }
 
     $self->_rebuild_index() if $rebuild;
@@ -665,68 +664,113 @@ rename dependencies
 
 =cut
 sub rename_dependencies {
-    my($self, $type, $old, $new) = @_;
+    my($self, $object, $old, $new) = @_;
+    my $refs = $self->get_references($object, $old);
 
-    # create list of types with that dependency
-    my $replace = {};
+    # replace references in other objects
+    for my $t (keys %{$refs}) {
+        for my $oid (keys %{$refs->{$t}}) {
+            my $obj = $self->get_object_by_id($oid);
+            if($obj->{'file'}->{'readonly'}) {
+                push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
+                next;
+            }
+            for my $key (keys %{$refs->{$t}->{$oid}}) {
+                if($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
+                    my $m2 = "$obj->{'conf'}->{$key}";
+                    my $pre = substr($m2, 0, 1);
+                    if($pre eq '!' or $pre eq '+') { $m2 = substr($m2, 1); } else { $pre = ''; }
+                    $obj->{'conf'}->{$key} = $pre.$new;
+                }
+                elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
+                    my $x = 0;
+                    for my $m (@{$obj->{'conf'}->{$key}}) {
+                        my $m2 = "$m";
+                        $x++;
+                        my $pre = substr($m2, 0, 1);
+                        if($pre eq '!' or $pre eq '+') { $m2 = substr($m2, 1); } else { $pre = ''; }
+                        next unless $m2 eq $old;
+                        $obj->{'conf'}->{$key}->[$x-1] = $pre.$new;
+                    }
+                }
+                elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
+                    my($cmd,$arg) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
+                    if(!defined $arg or $arg eq '') {
+                        $obj->{'conf'}->{$key} = $new;
+                    } else {
+                        $obj->{'conf'}->{$key} = $new.'!'.$arg;
+                    }
+                }
+                else {
+                    confess("replace for ".$obj->{'default'}->{$key}->{'type'}." not implemented");
+                }
+            }
+            $obj->{'file'}->{'changed'} = 1;
+        }
+    }
+
+    return;
+}
+
+##########################################################
+
+=head2 get_references
+
+return all references for this object
+
+=cut
+sub get_references {
+    my($self, $obj, $name) = @_;
+    $name = $obj->get_name() unless defined $name;
+
+    my $type = $obj->get_type();
+    my $list = {};
+
+    # create list of types with that reference
+    my $refs = {};
     for my $t (@{$Monitoring::Config::Object::Types}) {
         my $obj = Monitoring::Config::Object->new(type => $t, coretype => $self->{'coretype'});
         for my $key (keys %{$obj->{'default'}}) {
             next unless defined $obj->{'default'}->{$key}->{'link'};
             next unless $obj->{'default'}->{$key}->{'link'} eq $type;
-            $replace->{$t}->{$key} = 1;
+            $refs->{$t}->{$key} = 0;
         }
     }
 
-    # replace references in other objects
+    # gather references in all objects
     for my $obj (@{$self->get_objects()}) {
         my $t = $obj->get_type();
-        next unless defined $replace->{$t};
-        for my $key (keys %{$replace->{$t}}) {
+        next unless defined $refs->{$t};
+        for my $key (keys %{$refs->{$t}}) {
             next unless defined $obj->{'conf'}->{$key};
             if($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
-                next unless $obj->{'conf'}->{$key} eq $old;
-                if($obj->{'file'}->{'readonly'}) {
-                    push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
-                    next;
-                }
-                $obj->{'conf'}->{$key} = $new;
-                $obj->{'file'}->{'changed'} = 1;
+                next unless $obj->{'conf'}->{$key} eq $name;
+                $list->{$t}->{$obj->get_id()}->{$key} = 1;
             }
             elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
                 my $x = 0;
                 for my $m (@{$obj->{'conf'}->{$key}}) {
+                    my $m2  = "$m";
+                    my $pre = substr($m2, 0, 1);
+                    if($pre eq '!' or $pre eq '+') { $m2 = substr($m2, 1); }
+                    next unless $m2 eq $name;
+                    $list->{$t}->{$obj->get_id()}->{$key} = $x;
                     $x++;
-                    next unless $m eq $old;
-                    if($obj->{'file'}->{'readonly'}) {
-                        push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
-                        next;
-                    }
-                    $obj->{'conf'}->{$key}->[$x-1] = $new;
-                    $obj->{'file'}->{'changed'} = 1;
                 }
             }
             elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
                 my($cmd,$arg) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
-                next if $cmd ne $old;
-                if($obj->{'file'}->{'readonly'}) {
-                    push @{$self->{'errors'}}, "could not update dependency in read-only file: ".$obj->{'file'}->{'path'};
-                    next;
-                }
-                if(!defined $arg or $arg eq '') {
-                    $obj->{'conf'}->{$key} = $new;
-                } else {
-                    $obj->{'conf'}->{$key} = $new.'!'.$arg;
-                }
-                $obj->{'file'}->{'changed'} = 1;
+                next if $cmd ne $name;
+                $list->{$t}->{$obj->get_id()}->{$key} = 0;
             }
             else {
-                confess("replace for ".$obj->{'default'}->{$key}->{'type'}." not implemented");
+                confess("reference for ".$obj->{'default'}->{$key}->{'type'}." not implemented");
             }
         }
     }
 
-    return;
+
+    return $list;
 }
 
 ##########################################################
@@ -1313,9 +1357,10 @@ sub _all_object_links_callback {
                 next if $link eq 'icon';
                 if($key eq 'use') {
                     for my $ref (@{$obj->{'conf'}->{$key}}) {
-                        if(substr($ref, 0, 1) eq '!' or substr($ref, 0, 1) eq '+') { $ref = substr($ref, 1); }
-                        next if index($ref, '*') != -1;
-                        &$cb($file, $obj, $key, $link, $ref);
+                        my $ref2 = "$ref";
+                        if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
+                        next if index($ref2, '*') != -1;
+                        &$cb($file, $obj, $key, $link, $ref2);
                     }
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'STRING') {
@@ -1323,9 +1368,10 @@ sub _all_object_links_callback {
                 }
                 elsif($obj->{'default'}->{$key}->{'type'} eq 'LIST') {
                     for my $ref (@{$obj->{'conf'}->{$key}}) {
-                        if(substr($ref, 0, 1) eq '!' or substr($ref, 0, 1) eq '+') { $ref = substr($ref, 1); }
-                        next if index($ref, '*') != -1;
-                        &$cb($file, $obj, $key, $link, $ref);
+                        my $ref2 = "$ref";
+                        if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
+                        next if index($ref2, '*') != -1;
+                        &$cb($file, $obj, $key, $link, $ref2);
                     }
                 }
             }

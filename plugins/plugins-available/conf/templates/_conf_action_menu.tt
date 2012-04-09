@@ -14,15 +14,19 @@
               </tr>
               [% END %]
               [% IF show_object && object.get_id() != "new" %]
-                [% IF type == 'host' %]
                 <tr class='data'>
                   <td colspan=2><hr></td>
                 </tr>
+                [% IF type == 'host' && !object.is_template() %]
                 <tr class='data'>
-                  <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/server_edit.png' border="0" alt='Create a new [% type %]' title='Create a new [% type %]' width="16" height="16"></td>
+                  <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/server_edit.png' border="0" alt='Show services for this host' title='Show services for this host' width="16" height="16"></td>
                   <td class='command'><a href='conf.cgi?sub=objects&amp;action=listservices&amp;data.id=[% object.get_id() %]'>Show services for this host</a></td>
                 </tr>
                 [% END %]
+                <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/chart_organisation.png' border="0" alt='Show references' title='Show references' width="16" height="16"></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;action=listref&amp;data.id=[% object.get_id() %]'>Show references</a></td>
+                </tr>
               <tr class='data'>
                 <td colspan=2><hr></td>
               </tr>
