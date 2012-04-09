@@ -160,6 +160,7 @@ plugins/plugins-available/conf/templates/conf_objects_apply.tt
 plugins/plugins-available/conf/templates/conf_objects_filebrowser.tt
 plugins/plugins-available/conf/templates/conf_objects_fileeditor.tt
 plugins/plugins-available/conf/templates/conf_objects_host_list_services.tt
+plugins/plugins-available/conf/templates/conf_objects_listref.tt
 plugins/plugins-available/conf/templates/conf_objects_move.tt
 plugins/plugins-available/conf/templates/conf_objects_tools.tt
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardLivestatus.pm
