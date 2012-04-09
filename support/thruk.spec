@@ -60,6 +60,7 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/themes/themes-enabled
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-available
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
+%{__mkdir} -p %{buildroot}%{_initrddir}
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
 %{__mkdir} -p %{buildroot}/usr/lib/thruk
 %{__mkdir} -p %{buildroot}%{_mandir}/man3
@@ -118,7 +119,7 @@ mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_syscon
 %endif
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
-mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initddir}/thruk
+mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initrddir}/thruk
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
@@ -140,6 +141,7 @@ fi
 exit 0
 
 %post
+chkconfig --add thruk
 # restore themes and plugins
 if [ -d /tmp/thruk_update/themes/. ]; then
   rm -f /etc/thruk/themes/themes-enabled/*
@@ -165,6 +167,10 @@ chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
 
+%preun
+chkconfig --del thruk
+exit 0
+
 %postun
 case "$*" in
   0)
@@ -185,8 +191,8 @@ exit 0
 
 %files
 %attr(755,root,root) %{_bindir}/thruk
-%attr(755,root,root) %{_initddir}/thruk
-%config %{_sysconfdir}/thruk/thruk.conf
+%attr(755,root,root) %{_initrddir}/thruk
+%config(replace) %{_sysconfdir}/thruk/thruk.conf
 %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
@@ -222,5 +228,8 @@ exit 0
 
 
 %changelog
+* Mon Apr 09 2012 Sven Nierlein <sven@consol.de> - 1.28
+- added init script
+
 * Fri Feb 10 2012 Sven Nierlein <sven@consol.de> - 1.2
 - First build

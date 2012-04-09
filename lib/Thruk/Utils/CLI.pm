@@ -156,7 +156,7 @@ sub _request_url {
     if($result->{'code'} == 302
        and defined $result->{'headers'}
        and defined $result->{'headers'}->{'Location'}
-       and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|) {
+       and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
         my $jobid = $1;
     }
     elsif($result->{'code'} != 200) {

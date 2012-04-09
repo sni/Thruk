@@ -47,6 +47,7 @@ install: build
 	mkdir -p $(CURDIR)/debian/thruk/var/log/thruk/
 	mkdir -p $(CURDIR)/debian/thruk/etc/apache2/conf.d/
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk
+	mkdir -p $(CURDIR)/debian/thruk/etc/init.d
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/themes/themes-available
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/themes/themes-enabled
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-available

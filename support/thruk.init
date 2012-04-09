@@ -5,8 +5,8 @@
 
 ### BEGIN INIT INFO
 # Provides:          thruk
-# Required-Start:    $local_fs
-# Required-Stop:     $local_fs
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
 # Should-Start:
 # Should-Stop:
 # Default-Start:     2 3 4 5
@@ -35,6 +35,9 @@ case "$1" in
         if [ "$STARTCMD" = "" ]; then
             echo "$NAME starts up on the first request"
         else
+            if [ -d "/var/lock/subsys" ]; then
+              touch /var/lock/subsys/thruk
+            fi
             echo -n "Starting $NAME..."
             $STARTCMD > /dev/null 2>&1 &
             for x in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
@@ -55,6 +58,7 @@ case "$1" in
     ;;
     stop)
         echo -n "Stopping $NAME..."
+        rm -f /var/lock/subsys/thruk >/dev/null 2>&1
         pid=`cat $PIDFILE 2>/dev/null`
         if [ -z $pid ]; then
             echo ". Not running."
@@ -87,12 +91,12 @@ case "$1" in
         echo "$NAME is not running"
         exit 1;
     ;;
-    restart)
-        $0 stop && sleep 1 && $0 start
+    reload|force-reload|restart)
+        $0 stop && $0 start
         exit $?
         ;;
     *)
-        echo "Usage: $NAME {start|stop|status|restart}"
+        echo "Usage: $NAME {start|stop|status|reload|restart|force-reload}"
         exit 1
         ;;
 esac
