@@ -7,6 +7,8 @@ use warnings;
 use utf8;
 use Carp;
 use Log::Log4perl::Catalyst;
+use Digest::MD5 qw(md5_hex);
+use File::Slurp qw(read_file);
 use Thruk::Backend::Manager;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
@@ -244,6 +246,22 @@ if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
 END {
     _remove_pid();
 };
+
+###################################################
+# create secret file
+my $secretfile = (__PACKAGE__->config->{'var_path'} || './var').'/secret.key';
+unless(-s $secretfile) {
+    my $digest = md5_hex(rand(1000).time());
+    chomp($digest);
+    open(my $fh, ">$secretfile");
+    print $fh $digest;
+    close($fh);
+    __PACKAGE__->config->{'secret_key'} = $digest;
+} else {
+    my $secret_key = read_file($secretfile);
+    chomp($secret_key);
+    __PACKAGE__->config->{'secret_key'} = $secret_key;
+}
 
 ###################################################
 # set timezone

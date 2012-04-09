@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2012-03-31" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH thruk 3 "2012-04-09" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -136,6 +136,8 @@ thruk \- Command Line Utility for Thruk Monitoring Gui
 thruk [ \-h |\-\-help ]
       [ \-v | \-\-verbose ]
       [ \-a | \-\-auth=<auth> ]
+      [ \-c | \-\-credential=<credential> ]
+      [ \-r | \-\-remote\-url=<remote\-url> ]
       [ \-b | \-\-backend=<backend> ]
       [ \-l | \-\-list\-backends ]
       [ \-u | \-\-url=<url> ]
@@ -164,6 +166,12 @@ script has the following arguments
 \&    used. Specify the key of the backend. Use <\-l> to get a list
 \&    of backends.
 .Ve
+.IP "\fB\-r\fR \fIremote-url\fR, \fB\-\-remote\-url\fR=\fIremote-url\fR" 4
+.IX Item "-r remote-url, --remote-url=remote-url"
+.Vb 2
+\&    Connect to this remote instance instead of the local one.
+\&    Defaults to http://localhost/thruk/cgi\-bin/remote.cgi.
+.Ve
 .IP "\fB\-l\fR , \fB\-\-list\-backends\fR" 4
 .IX Item "-l , --list-backends"
 .Vb 1
@@ -173,6 +181,11 @@ script has the following arguments
 .IX Item "-a authname, --auth=authname"
 .Vb 1
 \&    use this username for authentication
+.Ve
+.IP "\fB\-c\fR \fIcredential\fR, \fB\-\-credential\fR=\fIcredential\fR" 4
+.IX Item "-c credential, --credential=credential"
+.Vb 1
+\&    use this key for authentication when using remoteurl
 .Ve
 .IP "\fB\-u\fR \fIurl\fR, \fB\-\-url\fR=\fIurl\fR" 4
 .IX Item "-u url, --url=url"

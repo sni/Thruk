@@ -16,6 +16,7 @@ use Carp;
 use Data::Dumper;
 use LWP::UserAgent;
 use JSON::XS;
+use File::Slurp;
 
 ##############################################
 
@@ -36,14 +37,42 @@ sub new {
     bless $self, $class;
     $ENV{'THRUK_SRC'} = 'CLI';
 
+    # try to read secret file
+    $self->{'opt'}->{'credential'} = $self->_read_secret() unless defined $self->{'opt'}->{'credential'};
+
     return $self;
+}
+
+##############################################
+sub _read_secret {
+    my($self) = @_;
+    my $files = [];
+    push @{$files}, 'thruk.conf';
+    push @{$files}, $ENV{'CATALYST_CONFIG'}.'thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, 'thruk_local.conf';
+    push @{$files}, $ENV{'CATALYST_CONFIG'}.'thruk_local.conf' if defined $ENV{'CATALYST_CONFIG'};
+    my $var_path = './var';
+    for my $file (@{$files}) {
+        next unless -f $file;
+        open(my $fh, $file);
+        while(my $line = <$fh>) {
+            next unless $line =~ m/^\s*var_path\s+=\s*(.*)$/mx;
+            $var_path = $1;
+        }
+        close($fh);
+    }
+    my $secret;
+    if(-e $var_path.'/secret.key') {
+        $secret = read_file($var_path.'/secret.key');
+        chomp($secret);
+    }
+    return $secret;
 }
 
 ##############################################
 sub _run {
     my($self) = @_;
-    my $credential = '';
-    my $result = $self->_request($credential, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+    my $result = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
     unless(defined $result) {
         my($c, $failed) = $self->_dummy_c();
         if($failed) {
@@ -78,10 +107,24 @@ sub _request {
 ##############################################
 sub _from_fcgi {
     my($c, $data_str) = @_;
+    confess('no data?') unless defined $data_str;
     my $data = decode_json($data_str);
+    confess('corrupt data?') unless ref $data eq 'HASH';
 
-    # TODO: check credentials
-    return encode_json(_run_commands($c, $data->{'options'}));
+    # check credentials
+    my $res = {};
+    if(   !defined $c->config->{'secret_key'}
+       or !defined $data->{'credential'}
+       or $c->config->{'secret_key'} ne $data->{'credential'}) {
+        $res = {
+            'output' => 'authorization failed',
+            'rc'     => 1,
+        };
+    } else {
+        $res = _run_commands($c, $data->{'options'});
+    }
+
+    return encode_json($res);
 }
 
 ##############################################
@@ -145,8 +188,6 @@ sub _listbackends {
 ##############################################
 sub _request_url {
     my($c, $url) = @_;
-
-    # TODO: use $c->visit() instead
 
     $ENV{'REQUEST_URI'}      = $url;
     $ENV{'SCRIPT_NAME'}      = $url;

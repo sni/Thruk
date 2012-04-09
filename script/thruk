@@ -15,6 +15,7 @@ GetOptions (
    "h|help"             => \$options->{'help'},
    "v|verbose"          => \$options->{'verbose'},
    "r|remote-url=s"     => \$options->{'remoteurl'},
+   "c|credential=s"     => \$options->{'credential'},
    "l|list-backends"    => \$options->{'listbackends'},
    "b|backend=s"        =>  $options->{'backends'},
    "u|url=s"            => \$options->{'url'},
@@ -48,6 +49,8 @@ thruk - Command Line Utility for Thruk Monitoring Gui
 thruk [ -h |--help ]
       [ -v | --verbose ]
       [ -a | --auth=<auth> ]
+      [ -c | --credential=<credential> ]
+      [ -r | --remote-url=<remote-url> ]
       [ -b | --backend=<backend> ]
       [ -l | --list-backends ]
       [ -u | --url=<url> ]
@@ -78,6 +81,11 @@ script has the following arguments
     used. Specify the key of the backend. Use <-l> to get a list
     of backends.
 
+=item B<-r> I<remote-url>, B<--remote-url>=I<remote-url>
+
+    Connect to this remote instance instead of the local one.
+    Defaults to http://localhost/thruk/cgi-bin/remote.cgi.
+
 =item B<-l> , B<--list-backends>
 
     get list of available backends
@@ -85,6 +93,10 @@ script has the following arguments
 =item B<-a> I<authname>, B<--auth>=I<authname>
 
     use this username for authentication
+
+=item B<-c> I<credential>, B<--credential>=I<credential>
+
+    use this key for authentication when using remoteurl
 
 =item B<-u> I<url>, B<--url>=I<url>
 
