@@ -16,7 +16,6 @@ use Carp;
 use Data::Dumper;
 use LWP::UserAgent;
 use JSON::XS;
-#use Catalyst::ScriptRunner;
 
 ##############################################
 
@@ -46,15 +45,15 @@ sub _run {
     my $credential = '';
     my $result = $self->_request($credential, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
     unless(defined $result) {
-        my($c, $failed) = _dummy_c();
+        my($c, $failed) = $self->_dummy_c();
         if($failed) {
             print "command failed";
             return 1;
         }
         $result = _from_local($c, $self->{'opt'})
     }
-    print $result;
-    return 0;
+    print $result->{'output'};
+    return $result->{'rc'};
 }
 
 ##############################################
@@ -67,7 +66,11 @@ sub _request {
             options    => $options,
         })
     });
-    return $response->decoded_content if $response->is_success;
+    if($response->is_success) {
+        my $data_str = $response->decoded_content;
+        my $data     = decode_json($data_str);
+        return $data;
+    }
     return;
 }
 
@@ -77,7 +80,7 @@ sub _from_fcgi {
     my $data = decode_json($data_str);
 
     # TODO: check credentials
-    return _run_commands($c, $data->{'options'});
+    return encode_json(_run_commands($c, $data->{'options'}));
 }
 
 ##############################################
@@ -103,17 +106,21 @@ sub _from_local {
 ##############################################
 sub _run_commands {
     my($c, $opt) = @_;
+    my $data = {
+        'output' => '',
+        'rc'     => 0,
+    };
     if(defined $opt->{'listbackends'}) {
-        return _listbackends($c);
+        $data->{'output'} = _listbackends($c);
     }
 
     if(defined $opt->{'url'}) {
         if($opt->{'url'} =~ m|^\w+\.cgi|gmx) {
             $opt->{'url'} = '/thruk/cgi-bin/'.$opt->{'url'};
         }
-        return _request_url($opt->{'url'})
+        $data->{'output'} = _request_url($c, $opt->{'url'})
     }
-    return "";
+    return $data;
 }
 
 ##############################################
@@ -136,7 +143,9 @@ sub _listbackends {
 
 ##############################################
 sub _request_url {
-    my($url) = @_;
+    my($c, $url) = @_;
+
+    # TODO: use $c->visit() instead
 
     $ENV{'REQUEST_URI'}      = $url;
     $ENV{'SCRIPT_NAME'}      = $url;
@@ -147,6 +156,8 @@ sub _request_url {
     $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
     $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
     $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
+    # reset args, otherwise they will be interpreted as args for the script runner
+    @ARGV = ();
 
     require Catalyst::ScriptRunner;
     Catalyst::ScriptRunner->import();
@@ -172,7 +183,7 @@ sub _dummy_c {
     $ENV{'REMOTE_USER'} = 'dummy';
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
-    my($res, $c) = ctx_request('/thruk/dummy');
+    my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
     defined $olduser ? $ENV{'REMOTE_USER'} = $olduser : delete $ENV{'REMOTE_USER'};
     my $failed = 0;
     $failed = 1 unless $res->code == 200;
