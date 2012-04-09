@@ -18,7 +18,12 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=thruk
 PIDFILE=/var/cache/thruk/thruk.pid
-#STARTCMD="/usr/bin/wget --http-user=... --http-password=... -q -O /dev/null http://localhost/thruk/side.html"
+STARTURL="http://localhost/thruk/cgi-bin/remote.cgi"
+if [ ! -z $OMD_SITE ]; then
+    STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi"
+    PIDFILE=$OMD_ROOT/tmp/thruk/thruk.pid
+fi
+STARTCMD="/usr/bin/wget --post-data='' -q -O /dev/null $STARTURL"
 
 # load extra environment variables
 if [ -f /etc/sysconfig/thruk ]; then
@@ -31,13 +36,14 @@ case "$1" in
             echo "$NAME starts up on the first request"
         else
             echo -n "Starting $NAME..."
-            $STARTCMD
+            $STARTCMD > /dev/null 2>&1 &
             for x in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
                 echo -n "."
-                test -f $PIDFILE || sleep 1;
+                test -f $PIDFILE && break;
+                sleep 1
             done
-            test -f $PIDFILE || sleep 1;
-            if [ $? -ne 0 ]; then
+            test -f $PIDFILE
+            if [ $? -eq 0 ]; then
                 pid=`cat $PIDFILE 2>/dev/null`
                 echo "($pid) OK"
                 exit 0;
@@ -56,7 +62,8 @@ case "$1" in
             kill $pid
             for x in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
                 echo -n "."
-                ps -p $pid > /dev/null 2>&1 && sleep 1;
+                ps -p $pid > /dev/null 2>&1 || break;
+                sleep 1
             done
             ps -p $pid > /dev/null 2>&1;
             if [ $? -ne 0 ]; then

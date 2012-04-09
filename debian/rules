@@ -99,6 +99,7 @@ install: build
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/apache_fcgid.conf $(CURDIR)/debian/thruk/etc/apache2/conf.d/thruk.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/menu_local.conf $(CURDIR)/debian/thruk/etc/thruk/menu_local.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/htpasswd $(CURDIR)/debian/thruk/etc/thruk/htpasswd
+	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk.init $(CURDIR)/debian/thruk/etc/init.d/thruk
 	mkdir -p $(CURDIR)/debian/thruk/usr/share/doc/thruk
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/debian/copyright $(CURDIR)/debian/thruk/usr/share/doc/thruk/copyright
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/local-lib $(CURDIR)/debian/thruk/usr/lib/thruk/perl5

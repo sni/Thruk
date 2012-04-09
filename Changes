@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - show host/servicegroups only if contact has permission for at least on host/service
           - add new url parameter 'minimal' for hiding everything except the data (Pierre Mavro)
           - added documentation about common CGI parameters
+          - added init script
           - internal changes ( removed prototype library )
           - mobile:
               - added performance graph to mobile interface

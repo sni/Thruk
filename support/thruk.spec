@@ -118,6 +118,7 @@ mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_syscon
 %endif
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
+mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initddir}/thruk
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
@@ -184,6 +185,7 @@ exit 0
 
 %files
 %attr(755,root,root) %{_bindir}/thruk
+%attr(755,root,root) %{_initddir}/thruk
 %config %{_sysconfdir}/thruk/thruk.conf
 %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
