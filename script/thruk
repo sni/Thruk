@@ -14,19 +14,24 @@ Getopt::Long::Configure('bundling');
 GetOptions (
    "h|help"             => \$options->{'help'},
    "v|verbose"          => \$options->{'verbose'},
+   "r|remote-url=s"     => \$options->{'remoteurl'},
    "l|list-backends"    => \$options->{'listbackends'},
    "b|backend=s"        =>  $options->{'backends'},
    "u|url=s"            => \$options->{'url'},
    "a|auth=s"           => \$options->{'auth'},
 ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
 
-$ENV{'REMOTE_USER'}    = $options->{'auth'} if defined $options->{'auth'};
-$ENV{'THRUK_BACKENDS'} = join(',', @{$options->{'backends'}}) if scalar @{$options->{'backends'}} > 0;
-$ENV{'THRUK_VERBOSE'}  = $options->{'verbose'} if $options->{'verbose'};
-$ENV{'THRUK_DEBUG'}    = $options->{'verbose'} if $options->{'verbose'};
+pod2usage( { -verbose => 2, -exit => 1 } ) if $options->{'help'};
 
-require Thruk::Utils::CLI;
-Thruk::Utils::CLI->import();
+$ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
+$ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if scalar @{$options->{'backends'}} > 0;
+$ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};
+$ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
+$options->{'remoteurl'} = defined $ENV{'OMD_SITE'} ? 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi'
+                                                   : 'http://localhost/thruk/cgi-bin/remote.cgi'
+                          unless defined $options->{'remoteurl'};
+
+use Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
 

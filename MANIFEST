@@ -70,6 +70,7 @@ lib/Thruk/Controller/histogram.pm
 lib/Thruk/Controller/history.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
+lib/Thruk/Controller/remote.pm
 lib/Thruk/Controller/Root.pm
 lib/Thruk/Controller/showlog.pm
 lib/Thruk/Controller/status.pm

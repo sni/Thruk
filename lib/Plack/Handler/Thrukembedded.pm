@@ -5,15 +5,15 @@ use base 'Plack::Handler::CGI';
 
 sub _handle_response {
     my ($self, $res) = @_;
-
-    $ENV{'HTTP_CODE'} = $res->[0];
-
-    *STDOUT->autoflush(1);
-    binmode STDOUT;
-
+    my %headers = @{$res->[1]};
+    $ENV{'HTTP_RESULT'} = {
+        headers => \%headers,
+        code    => $res->[0],
+    };
+    my $result = '';
 
     my $body = $res->[2];
-    my $cb = sub { print STDOUT $_[0]; };
+    my $cb = sub { $result .= $_[0]; };
 
     # inline Plack::Util::foreach here
     if (ref $body eq 'ARRAY') {
@@ -31,12 +31,13 @@ sub _handle_response {
     else {
         return Plack::Handler::Thrukembedded::Writer->new;
     }
+    $ENV{'HTTP_RESULT'}->{'result'} = $result;
     return;
 }
 
 package Plack::Handler::Thrukembedded::Writer;
-sub new   { return bless \do { my $x }, $_[0] };
-sub write { return print STDOUT $_[1] };
+sub new   { $ENV{'HTTP_RESULT'}->{'result'} = ''; return bless \do { my $x }, $_[0] };
+sub write { return $ENV{'HTTP_RESULT'}->{'result'} .= $_[1] };
 sub close { return; };
 
 1;
@@ -55,5 +56,3 @@ This is a handler module to run the Thruk application as Plack handler.
 L<Plack>
 
 =cut
-
-

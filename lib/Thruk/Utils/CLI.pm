@@ -14,7 +14,9 @@ use warnings;
 use strict;
 use Carp;
 use Data::Dumper;
-use Catalyst::ScriptRunner;
+use LWP::UserAgent;
+use JSON::XS;
+#use Catalyst::ScriptRunner;
 
 ##############################################
 
@@ -35,6 +37,52 @@ sub new {
     bless $self, $class;
     $ENV{'THRUK_SRC'} = 'CLI';
 
+    return $self;
+}
+
+##############################################
+sub _run {
+    my($self) = @_;
+    my $credential = '';
+    my $result = $self->_request($credential, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+    unless(defined $result) {
+        my($c, $failed) = _dummy_c();
+        if($failed) {
+            print "command failed";
+            return 1;
+        }
+        $result = _from_local($c, $self->{'opt'})
+    }
+    print $result;
+    return 0;
+}
+
+##############################################
+sub _request {
+    my($self, $credential, $url, $options) = @_;
+    my $ua       = LWP::UserAgent->new;
+    my $response = $ua->post($url, {
+        data => encode_json({
+            credential => $credential,
+            options    => $options,
+        })
+    });
+    return $response->decoded_content if $response->is_success;
+    return;
+}
+
+##############################################
+sub _from_fcgi {
+    my($c, $data_str) = @_;
+    my $data = decode_json($data_str);
+
+    # TODO: check credentials
+    return _run_commands($c, $data->{'options'});
+}
+
+##############################################
+sub _from_local {
+    my($c, $options) = @_;
     # verify that we are running with the right user
     require Thruk;
     Thruk->import();
@@ -48,50 +96,47 @@ sub new {
         print("Wrong user! Please run as user: ".getpwuid($uid)."\n");
         exit 1;
     }
-
-    return $self;
+    $ENV{'NO_EXTERNAL_JOBS'} = 1;
+    return _run_commands($c, $options);
 }
 
 ##############################################
-sub _run {
-    my($self) = @_;
-
-    if(defined $self->{'opt'}->{'listbackends'}) {
-        return $self->_listbackends();
+sub _run_commands {
+    my($c, $opt) = @_;
+    if(defined $opt->{'listbackends'}) {
+        return _listbackends($c);
     }
 
-    if(defined $self->{'opt'}->{'url'}) {
-        if($self->{'opt'}->{'url'} =~ m|^\w+\.cgi|gmx) {
-            $self->{'opt'}->{'url'} = '/thruk/cgi-bin/'.$self->{'opt'}->{'url'};
+    if(defined $opt->{'url'}) {
+        if($opt->{'url'} =~ m|^\w+\.cgi|gmx) {
+            $opt->{'url'} = '/thruk/cgi-bin/'.$opt->{'url'};
         }
-        return $self->_request_url($self->{'opt'}->{'url'})
+        return _request_url($opt->{'url'})
     }
-
-    pod2usage( { -verbose => 2 } );
-    return 0;
+    return "";
 }
 
 ##############################################
 sub _listbackends {
-    my($self) = @_;
-    my($c,$failed) = $self->_dummy_c();
-    printf("%-4s  %-7s  %-9s   %s\n", 'Def', 'Key', 'Name', 'Address');
-    printf("---------------------------------------\n");
+    my($c) = @_;
+    my $output = '';
+    $output .= sprintf("%-4s  %-7s  %-9s   %s\n", 'Def', 'Key', 'Name', 'Address');
+    $output .= sprintf("---------------------------------------\n");
     for my $key (keys %{$c->stash->{'backend_detail'}}) {
-        printf("%-4s %-8s %-10s %s\n",
+        $output .= sprintf("%-4s %-8s %-10s %s\n",
                 $c->stash->{'backend_detail'}->{$key}->{'disabled'} == 0 ? ' * ' : '',
                 $key,
                 $c->stash->{'backend_detail'}->{$key}->{'name'},
                 $c->stash->{'backend_detail'}->{$key}->{'addr'},
         );
     }
-    printf("---------------------------------------\n");
-    return 0;
+    $output .= sprintf("---------------------------------------\n");
+    return $output;
 }
 
 ##############################################
 sub _request_url {
-    my($self,$url) = @_;
+    my($url) = @_;
 
     $ENV{'REQUEST_URI'}      = $url;
     $ENV{'SCRIPT_NAME'}      = $url;
@@ -102,15 +147,22 @@ sub _request_url {
     $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
     $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
     $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
-    $ENV{'NO_EXTERNAL_JOBS'} = 1;
 
+    require Catalyst::ScriptRunner;
+    Catalyst::ScriptRunner->import();
     Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
+    my $result = $ENV{'HTTP_RESULT'};
 
-    if($ENV{'HTTP_CODE'} != 200) {
-        print "\n";
-        return 1;
+    if($result->{'code'} == 302
+       and defined $result->{'headers'}
+       and defined $result->{'headers'}->{'Location'}
+       and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|) {
+        my $jobid = $1;
     }
-    return 0;
+    elsif($result->{'code'} != 200) {
+        return 'request failed: '.$result->{'code'}."\n".Dumper($result);
+    }
+    return $result->{'result'};
 }
 
 ##############################################
