@@ -170,6 +170,20 @@ sub _request_url {
        and defined $result->{'headers'}->{'Location'}
        and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
         my $jobid = $1;
+        my $x = 0;
+        while($result->{'code'} == 302) {
+            my $sleep = 0.1 * $x;
+            $sleep = 1 if $x > 10;
+            sleep($sleep);
+            $url = $result->{'headers'}->{'Location'};
+            $ENV{'REQUEST_URI'}      = $url;
+            $ENV{'SCRIPT_NAME'}      = $url;
+            $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
+            $ENV{'QUERY_STRING'}     = $1 if defined $1;
+            Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
+            $result = $ENV{'HTTP_RESULT'};
+            $x++;
+        }
     }
     elsif($result->{'code'} != 200) {
         return 'request failed: '.$result->{'code'}."\n".Dumper($result);
