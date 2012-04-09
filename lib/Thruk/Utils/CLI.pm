@@ -52,7 +52,8 @@ sub _run {
         }
         $result = _from_local($c, $self->{'opt'})
     }
-    print $result->{'output'};
+    binmode STDOUT;
+    print STDOUT $result->{'output'};
     return $result->{'rc'};
 }
 
