@@ -192,7 +192,7 @@ function toQueryParams(str) {
     str = str.replace(/#.*$/g, '');
     str = str.split('&');
     for (var i = 0; i < str.length; ++i) {
-        var p=str[i].split('=');
+        var p=str[i].split('=', 2);
         if (p.length != 2) continue;
         vars[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
     }
