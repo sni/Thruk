@@ -18,6 +18,8 @@ use LWP::UserAgent;
 use JSON::XS;
 use File::Slurp;
 
+$Thruk::Utils::CLI::verbose = 0;
+
 ##############################################
 
 =head1 METHODS
@@ -31,6 +33,7 @@ create CLI Tool object
 =cut
 sub new {
     my($class, $options) = @_;
+    $Thruk::Utils::CLI::verbose = $options->{'verbose'} if defined $options->{'verbose'};
     my $self  = {
         'opt' => $options,
     };
@@ -62,9 +65,13 @@ sub _read_secret {
         close($fh);
     }
     my $secret;
-    if(-e $var_path.'/secret.key') {
+    my $secretfile = $var_path.'/secret.key';
+    if(-e $secretfile) {
+        _debug("reading secret file: ".$secretfile);
         $secret = read_file($var_path.'/secret.key');
         chomp($secret);
+    } else {
+        _debug("reading secret file ".$secretfile." failed: ".$!);
     }
     return $secret;
 }
@@ -72,14 +79,18 @@ sub _read_secret {
 ##############################################
 sub _run {
     my($self) = @_;
-    my $result = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+    my $result;
+    _debug("_run(): ".Dumper($self->{'opt'}));
+    unless($self->{'opt'}->{'local'}) {
+        $result = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+    }
     unless(defined $result) {
         my($c, $failed) = $self->_dummy_c();
         if($failed) {
             print "command failed";
             return 1;
         }
-        $result = _from_local($c, $self->{'opt'})
+        $result = $self->_from_local($c, $self->{'opt'})
     }
     binmode STDOUT;
     print STDOUT $result->{'output'};
@@ -89,6 +100,7 @@ sub _run {
 ##############################################
 sub _request {
     my($self, $credential, $url, $options) = @_;
+    _debug("_request(".$url.")");
     my $ua       = LWP::UserAgent->new;
     my $response = $ua->post($url, {
         data => encode_json({
@@ -97,43 +109,41 @@ sub _request {
         })
     });
     if($response->is_success) {
+        _debug(" -> success");
         my $data_str = $response->decoded_content;
         my $data     = decode_json($data_str);
         return $data;
+    } else {
+        _debug(" -> failed: ".Dumper($response));
     }
     return;
 }
 
 ##############################################
-sub _from_fcgi {
-    my($c, $data_str) = @_;
-    confess('no data?') unless defined $data_str;
-    my $data = decode_json($data_str);
-    confess('corrupt data?') unless ref $data eq 'HASH';
-
-    # check credentials
-    my $res = {};
-    if(   !defined $c->config->{'secret_key'}
-       or !defined $data->{'credential'}
-       or $c->config->{'secret_key'} ne $data->{'credential'}) {
-        $res = {
-            'output' => "authorization failed\n",
-            'rc'     => 1,
-        };
-    } else {
-        $res = _run_commands($c, $data->{'options'});
-    }
-
-    return encode_json($res);
+sub _dummy_c {
+    my($self) = @_;
+    _debug("_dummy_c()");
+    my $olduser = $ENV{'REMOTE_USER'};
+    $ENV{'REMOTE_USER'} = 'dummy';
+    require Catalyst::Test;
+    Catalyst::Test->import('Thruk');
+    my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
+    defined $olduser ? $ENV{'REMOTE_USER'} = $olduser : delete $ENV{'REMOTE_USER'};
+    my $failed = 0;
+    $failed = 1 unless $res->code == 200;
+    return($c, $failed);
 }
 
 ##############################################
 sub _from_local {
-    my($c, $options) = @_;
+    my($self, $c, $options) = @_;
+    _debug("_from_local()");
+
     # verify that we are running with the right user
     require Thruk;
     Thruk->import();
     my $var_path = Thruk->config->{'var_path'} || './var';
+    _debug("var_path: ".$var_path);
     my $uid = (stat $var_path)[4];
     if(!defined $uid) {
         print("Broken installation, could not stat ".$var_path." \n");
@@ -148,11 +158,37 @@ sub _from_local {
 }
 
 ##############################################
+sub _from_fcgi {
+    my($c, $data_str) = @_;
+    confess('no data?') unless defined $data_str;
+    my $data = decode_json($data_str);
+    confess('corrupt data?') unless ref $data eq 'HASH';
+    $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
+
+    # check credentials
+    my $res = {};
+    if(   !defined $c->config->{'secret_key'}
+       or !defined $data->{'credential'}
+       or $c->config->{'secret_key'} ne $data->{'credential'}) {
+        $res = {
+            'version' => $c->config->{'version'},
+            'output'  => "authorization failed\n",
+            'rc'      => 1,
+        };
+    } else {
+        $res = _run_commands($c, $data->{'options'});
+    }
+
+    return encode_json($res);
+}
+
+##############################################
 sub _run_commands {
     my($c, $opt) = @_;
     my $data = {
-        'output' => '',
-        'rc'     => 0,
+        'version' => $c->config->{'version'},
+        'output'  => '',
+        'rc'      => 0,
     };
     if(defined $opt->{'listbackends'}) {
         $data->{'output'} = _listbackends($c);
@@ -170,16 +206,24 @@ sub _run_commands {
 ##############################################
 sub _listbackends {
     my($c) = @_;
+    $c->{'db'}->enable_backends();
+    $c->{'db'}->get_processinfo();
+    Thruk::Action::AddDefaults::_set_possible_backends($c, {});
     my $output = '';
     $output .= sprintf("%-4s  %-7s  %-9s   %s\n", 'Def', 'Key', 'Name', 'Address');
     $output .= sprintf("---------------------------------------\n");
-    for my $key (keys %{$c->stash->{'backend_detail'}}) {
-        $output .= sprintf("%-4s %-8s %-10s %s\n",
-                $c->stash->{'backend_detail'}->{$key}->{'disabled'} == 0 ? ' * ' : '',
+    for my $key (@{$c->stash->{'backends'}}) {
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        $output .= sprintf("%-4s %-8s %-10s %s",
+                (!defined $peer->{'hidden'} or $peer->{'hidden'} == 0) ? ' * ' : '',
                 $key,
                 $c->stash->{'backend_detail'}->{$key}->{'name'},
                 $c->stash->{'backend_detail'}->{$key}->{'addr'},
         );
+        my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
+        chomp($error);
+        $output .= " (".$error.")" if $error;
+        $output .= "\n";
     }
     $output .= sprintf("---------------------------------------\n");
     return $output;
@@ -233,17 +277,17 @@ sub _request_url {
 }
 
 ##############################################
-sub _dummy_c {
-    my($self) = @_;
-    my $olduser = $ENV{'REMOTE_USER'};
-    $ENV{'REMOTE_USER'} = 'dummy';
-    require Catalyst::Test;
-    Catalyst::Test->import('Thruk');
-    my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
-    defined $olduser ? $ENV{'REMOTE_USER'} = $olduser : delete $ENV{'REMOTE_USER'};
-    my $failed = 0;
-    $failed = 1 unless $res->code == 200;
-    return($c, $failed);
+sub _debug {
+    my($data) = @_;
+    return unless $Thruk::Utils::CLI::verbose > 0;
+    if(ref $data) {
+        return debug(Dumper($data));
+    }
+    my $time = scalar localtime();
+    for my $line (split/\n/mx, $data) {
+        print "[".$time."][DEBUG] ".$line."\n";
+    }
+    return;
 }
 
 1;

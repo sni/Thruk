@@ -15,6 +15,7 @@ GetOptions (
    "h|help"             => \$options->{'help'},
    "v|verbose"          => \$options->{'verbose'},
    "r|remote-url=s"     => \$options->{'remoteurl'},
+     "local"            => \$options->{'local'},
    "c|credential=s"     => \$options->{'credential'},
    "l|list-backends"    => \$options->{'listbackends'},
    "b|backend=s"        =>  $options->{'backends'},
@@ -51,6 +52,7 @@ thruk [ -h |--help ]
       [ -a | --auth=<auth> ]
       [ -c | --credential=<credential> ]
       [ -r | --remote-url=<remote-url> ]
+      [      --local ]
       [ -b | --backend=<backend> ]
       [ -l | --list-backends ]
       [ -u | --url=<url> ]
@@ -85,6 +87,13 @@ script has the following arguments
 
     Connect to this remote instance instead of the local one.
     Defaults to http://localhost/thruk/cgi-bin/remote.cgi.
+    Retrieving information from the fcgi daemon saves time to
+    startup and allows to connect to remote located sites.
+
+=item B<--local>
+
+    Don't contact remote server. Normally remote-url is tried first for
+    faster access.
 
 =item B<-l> , B<--list-backends>
 
