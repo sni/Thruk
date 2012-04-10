@@ -25,7 +25,7 @@ isa_ok($m, 'Thruk::Model::Thruk');
 my $b = $m->{'obj'};
 isa_ok($b, 'Thruk::Backend::Manager');
 
-Log::Log4perl->easy_init($TRACE);
+Log::Log4perl->easy_init($INFO);
 my $logger = Log::Log4perl->get_logger();
 $b->init(
   'config'  => Thruk->config,
