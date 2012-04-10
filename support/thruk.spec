@@ -168,6 +168,7 @@ echo "Thruk has been configured for http://$(hostname)/thruk/. User and password
 exit 0
 
 %preun
+/etc/init.d/thruk stop
 chkconfig --del thruk
 exit 0
 
@@ -177,6 +178,7 @@ case "$*" in
     # POSTUN
     #rm -rf %{_localstatedir}/lib/thruk
     rm -rf %{_localstatedir}/cache/thruk/*
+    %{insserv_cleanup}
     ;;
   1)
     # POSTUPDATE

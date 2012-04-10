@@ -250,7 +250,8 @@ END {
 ###################################################
 # create secret file
 if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
-    my $secretfile = (__PACKAGE__->config->{'var_path'} || './var').'/secret.key';
+    my $var_path   = __PACKAGE__->config->{'var_path'} || './var';
+    my $secretfile = $var_path.'/secret.key';
     unless(-s $secretfile) {
         my $digest = md5_hex(rand(1000).time());
         chomp($digest);
@@ -258,6 +259,10 @@ if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
         print $fh $digest;
         close($fh);
         chmod(0600, $secretfile);
+        if($> == 0) {
+            my @stat = stat($var_path);
+            chown($stat[4], $stat[5], $secretfile);
+        }
         __PACKAGE__->config->{'secret_key'} = $digest;
     } else {
         my $secret_key = read_file($secretfile);
