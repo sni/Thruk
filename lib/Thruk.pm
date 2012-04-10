@@ -256,6 +256,7 @@ unless(-s $secretfile) {
     open(my $fh, ">$secretfile");
     print $fh $digest;
     close($fh);
+    chmod(0600, $secretfile);
     __PACKAGE__->config->{'secret_key'} = $digest;
 } else {
     my $secret_key = read_file($secretfile);

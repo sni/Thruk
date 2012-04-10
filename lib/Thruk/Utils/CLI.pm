@@ -117,7 +117,7 @@ sub _from_fcgi {
        or !defined $data->{'credential'}
        or $c->config->{'secret_key'} ne $data->{'credential'}) {
         $res = {
-            'output' => 'authorization failed',
+            'output' => "authorization failed\n",
             'rc'     => 1,
         };
     } else {
