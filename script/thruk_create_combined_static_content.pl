@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
 # create combined javascript/css files
+BEGIN {
+    $ENV{'THRUK_SRC'} = 'SCRIPTS';
+};
 use lib 'lib';
 use Thruk;
 

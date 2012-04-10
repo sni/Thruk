@@ -249,19 +249,21 @@ END {
 
 ###################################################
 # create secret file
-my $secretfile = (__PACKAGE__->config->{'var_path'} || './var').'/secret.key';
-unless(-s $secretfile) {
-    my $digest = md5_hex(rand(1000).time());
-    chomp($digest);
-    open(my $fh, ">$secretfile");
-    print $fh $digest;
-    close($fh);
-    chmod(0600, $secretfile);
-    __PACKAGE__->config->{'secret_key'} = $digest;
-} else {
-    my $secret_key = read_file($secretfile);
-    chomp($secret_key);
-    __PACKAGE__->config->{'secret_key'} = $secret_key;
+if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
+    my $secretfile = (__PACKAGE__->config->{'var_path'} || './var').'/secret.key';
+    unless(-s $secretfile) {
+        my $digest = md5_hex(rand(1000).time());
+        chomp($digest);
+        open(my $fh, ">$secretfile");
+        print $fh $digest;
+        close($fh);
+        chmod(0600, $secretfile);
+        __PACKAGE__->config->{'secret_key'} = $digest;
+    } else {
+        my $secret_key = read_file($secretfile);
+        chomp($secret_key);
+        __PACKAGE__->config->{'secret_key'} = $secret_key;
+    }
 }
 
 ###################################################
