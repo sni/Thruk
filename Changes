@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.28     not yet released
+          - added filter for custom variables
           - show host/servicegroups only if contact has permission for at least on host/service
           - add new url parameter 'minimal' for hiding everything except the data (Pierre Mavro)
           - added documentation about common CGI parameters

@@ -1718,12 +1718,14 @@ function add_new_filter(search_prefix, table) {
                              'Last Check',
                              'Next Check',
                              'Latency',
+                             'Current Attempt',
                              'Execution Time',
                              '% State Change',
                              'Check Period',
                              'Notification Period',
                              'Duration',
-                             'Downtime Duration'
+                             'Downtime Duration',
+                             'Custom Variable'
                             );
   if(enable_shinken_features) {
     options.push('Priority');
@@ -1741,11 +1743,28 @@ function add_new_filter(search_prefix, table) {
 
   var newCell0 = newRow.insertCell(0);
   newCell0.nowrap    = "true";
-  newCell0.className = "filterName";
+  newCell0.className = "filterValueInput";
+  newCell0.colSpan   = 2;
   newCell0.appendChild(typeselect);
+
+  var newInputPre    = document.createElement('input');
+  newInputPre.type      = 'text';
+  newInputPre.value     = '';
+  newInputPre.className = 'filter_pre_value';
+  newInputPre.setAttribute('name', pane_prefix + search_prefix + 'val_pre');
+  newInputPre.setAttribute('id',   pane_prefix + search_prefix + nr + '_val_pre');
+  newInputPre.style.display    = "none";
+  newInputPre.style.visibility = "hidden";
+  /*
+   * not possible right now
+  if(ajax_search_enabled) {
+    newInputPre.onclick = function() { ajax_search.init(this, 'custom variable') };
+  }
+  */
+  newCell0.appendChild(newInputPre);
+
   newCell0.appendChild(opselect);
 
-  // add second cell
   var newInput       = document.createElement('input');
   newInput.type      = 'text';
   newInput.value     = '';
@@ -1754,9 +1773,7 @@ function add_new_filter(search_prefix, table) {
   if(ajax_search_enabled) {
     newInput.onclick = ajax_search.init;
   }
-  var newCell1       = newRow.insertCell(1);
-  newCell1.className = "filterValueInput";
-  newCell1.appendChild(newInput);
+  newCell0.appendChild(newInput);
 
   if(enable_shinken_features) {
     var newSelect      = document.createElement('select');
@@ -1765,7 +1782,7 @@ function add_new_filter(search_prefix, table) {
     add_options(newSelect, priorities, 2);
     newSelect.style.display    = "none";
     newSelect.style.visibility = "hidden";
-    newCell1.appendChild(newSelect);
+    newCell0.appendChild(newSelect);
   }
 
   var calImg = document.createElement('img');
@@ -1778,17 +1795,17 @@ function add_new_filter(search_prefix, table) {
   link.style.display    = "none";
   link.style.visibility = "hidden";
   link.appendChild(calImg);
-  newCell1.appendChild(link);
+  newCell0.appendChild(link);
 
-  // add third cell
+  // add second cell
   var img            = document.createElement('input');
   img.type           = 'image';
   img.src            = url_prefix + "thruk/themes/"+theme+"/images/remove.png";
   img.className      = 'filter_button';
-  var newCell2       = newRow.insertCell(2);
-  newCell2.onclick   = delete_filter_row;
-  newCell2.className = "newfilter";
-  newCell2.appendChild(img);
+  var newCell1       = newRow.insertCell(1);
+  newCell1.onclick   = delete_filter_row;
+  newCell1.className = "newfilter";
+  newCell1.appendChild(img);
 }
 
 /* remove a row */
@@ -1961,8 +1978,8 @@ function verify_op(event) {
     hideElement(calElem);
   }
 
+  var input  = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');
   if(enable_shinken_features) {
-    var input  = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');
     var select = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value_sel');
     if(selValue == 'priority' ) {
       showElement(select.id);
@@ -1971,6 +1988,14 @@ function verify_op(event) {
       hideElement(select.id);
       showElement(input.id);
     }
+  }
+  var pre_in = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'val_pre');
+  if(selValue == 'custom variable' ) {
+    showElement(pre_in.id);
+    jQuery(input).css('width', '80px');
+  } else {
+    hideElement(pre_in.id);
+    jQuery(input).css('width', '');
   }
 
   // check if the right operator are active
@@ -1984,6 +2009,7 @@ function verify_op(event) {
          && selValue != 'hostgroup'
          && selValue != 'servicegroup'
          && selValue != 'timeperiod'
+         && selValue != 'custom variable'
          && selValue != 'comment') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
@@ -2251,6 +2277,10 @@ var ajax_search = {
 
         var input = document.getElementById(ajax_search.input_field);
         ajax_search.size = jQuery(input).width();
+        if(ajax_search.size < 100) {
+            /* minimum is 100px */
+            ajax_search.size = 100;
+        }
 
         if(ajax_search.empty == true) {
             if(input.value == ajax_search.emptytxt) {
@@ -2329,6 +2359,7 @@ var ajax_search = {
                || search_type == '% state change'
                || search_type == 'duration'
                || search_type == 'downtime duration'
+               || search_type == 'custom variable'
                || search_type == 'priority' ) {
                 ajax_search.search_type = 'none';
             }

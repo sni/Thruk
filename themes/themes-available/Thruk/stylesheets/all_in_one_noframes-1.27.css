@@ -758,7 +758,10 @@ input.top_refresh_button {
 body.splashpage input.top_refresh_button {
   display: none;
 }
-/* navbar */
+
+td.filterValueInput input.filter_pre_value {
+    width: 80px;
+}/* navbar */
 div.navbar {
   background-color: black;
   color: white;

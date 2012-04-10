@@ -356,7 +356,7 @@
           [% NEXT %]
         [% END %]
         <tr>
-          <td class='filterName' nowrap style="vertical-align: inherit;">
+          <td class='filterValueInput' nowrap style="vertical-align: inherit;" colspan=2>
             <select name="[% paneprefix %][% prefix %]_type" id="[% paneprefix %][% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
               <option value="search">Search</option>
               <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
@@ -376,20 +376,21 @@
               <option value="notification period"[% IF s.type == 'notification period' %] selected[% END %]>Notification Period</option>
               <option value="duration"[% IF s.type == 'duration' %] selected[% END %]>Duration</option>
               <option value="downtime duration"[% IF s.type == 'downtime duration' %] selected[% END %]>Downtime Duration</option>
+              <option value="custom variable"[% IF s.type == 'custom variable' %] selected[% END %]>Custom Variable</option>
               [% IF enable_shinken_features %]
               <option value="priority"[% IF s.type == 'priority' %] selected[% END %]>Priority</option>
               [% END %]
-            </select><select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to">
+            </select>[%# we don't want whitespaces here in final html but keep the nice source layout
+            #%]<input type="text" name="[% paneprefix %][% prefix %]_val_pre" class="filter_pre_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_val_pre" value="[% s.val_pre %]"[% IF 0 && use_ajax_search %][%# disabled for now #%] onclick="ajax_search.init(this, 'custom variable')"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">[%#
+            #%]<select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to">
               <option value="~"[% IF  s.op == '~'  %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
               <option value="="[% IF  s.op == '='  %] selected[% END %]>=</option>
               <option value="!="[% IF s.op == '!=' %] selected[% END %]>!=</option>
               <option value="<="[% IF s.op == '<=' %] selected[% END %]>&lt;=</option>
               <option value=">="[% IF s.op == '>=' %] selected[% END %]>&gt;=</option>
-            </select>
-          </td>
-          <td align="left" nowrap class='filterValueInput' style="vertical-align: inherit;">
-            <input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this)"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
+            </select>[%#
+            #%]<input type="text" name="[% paneprefix %][% prefix %]_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_value" value="[% s.value %]"[% IF use_ajax_search %] onclick="ajax_search.init(this)"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">
             <a id="[% paneprefix %][% prefix %]_[% loop.index %]_cal"[% IF s.type != 'last check' && s.type != 'next check' %] style="display:none; visibility: hidden;"[% END %] href="#" onclick="show_cal('[% paneprefix %][% prefix %]_[% loop.index %]_value')">
             <img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" class="cal_icon"></a>
             <select name="[% paneprefix %][% prefix %]_value_sel" id="[% paneprefix %][% prefix %]_[% loop.index %]_value_sel" style="[% IF s.type == 'priority' %]visibility: visible;[% ELSE %]display: none; visibility: hidden;[% END %]">

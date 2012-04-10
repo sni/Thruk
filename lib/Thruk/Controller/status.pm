@@ -144,6 +144,9 @@ sub _process_raw_request {
                         push @{$data}, $contact->{'name'} . ' - '.$contact->{'alias'};
                     }
                 }
+            }
+            elsif($type eq 'custom variable') {
+                $data = [];
             } else {
                 die("unknown type: " . $type);
             }

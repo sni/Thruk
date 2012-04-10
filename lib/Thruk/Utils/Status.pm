@@ -126,9 +126,10 @@ sub get_search_from_param {
     if( ref $c->{'request'}->{'parameters'}->{ $prefix . '_type' } eq 'ARRAY' ) {
         for ( my $x = 0; $x < scalar @{ $c->{'request'}->{'parameters'}->{ $prefix . '_type' } }; $x++ ) {
             my $text_filter = {
-                type  => $c->{'request'}->{'parameters'}->{ $prefix . '_type' }->[$x],
-                value => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
-                op    => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
+                val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' }->[$x] || '',
+                type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' }->[$x],
+                value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
+                op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
             };
             if($text_filter->{'type'} eq 'priority' and defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x]) {
                 $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x];
@@ -139,9 +140,10 @@ sub get_search_from_param {
     }
     else {
         my $text_filter = {
-            type  => $c->{'request'}->{'parameters'}->{ $prefix . '_type' },
-            value => $c->{'request'}->{'parameters'}->{ $prefix . '_value' },
-            op    => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
+            val_pre => $c->{'request'}->{'parameters'}->{ $prefix . '_val_pre' } || '',
+            type    => $c->{'request'}->{'parameters'}->{ $prefix . '_type' },
+            value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' },
+            op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
         };
         if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'priority') {
             $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'};
@@ -153,9 +155,10 @@ sub get_search_from_param {
     for my $key (keys %{$globals}) {
         if(defined $globals->{$key} and $globals->{$key} ne '') {
             my $text_filter = {
-                type  => $key,
-                value => $globals->{$key},
-                op    => '=',
+                val_pre => '',
+                type    => $key,
+                value   => $globals->{$key},
+                op      => '=',
             };
             push @{ $search->{'text_filter'} }, $text_filter;
         }
@@ -309,25 +312,28 @@ sub classic_filter {
     if( $host ne '' ) {
         push @{ $search->{'text_filter'} },
             {
-            'type'  => 'host',
-            'value' => $host,
-            'op'    => '=',
+            'val_pre' => '',
+            'type'    => 'host',
+            'value'   => $host,
+            'op'      => '=',
             };
     }
     if ( $hostgroup ne '' ) {
         push @{ $search->{'text_filter'} },
             {
-            'type'  => 'hostgroup',
-            'value' => $hostgroup,
-            'op'    => '=',
+            'val_pre' => '',
+            'type'    => 'hostgroup',
+            'value'   => $hostgroup,
+            'op'      => '=',
             };
     }
     if ( $servicegroup ne '' ) {
         push @{ $search->{'text_filter'} },
             {
-            'type'  => 'servicegroup',
-            'value' => $servicegroup,
-            'op'    => '=',
+            'val_pre' => '',
+            'type'    => 'servicegroup',
+            'value'   => $servicegroup,
+            'op'      => '=',
             };
     }
 
@@ -546,7 +552,7 @@ sub single_search {
     push @servicefilter, $tmp_servicefilter if defined $tmp_servicefilter;
 
     # do the text filter
-    foreach my $filter ( @{ $search->{'text_filter'} } ) {
+    for my $filter ( @{ $search->{'text_filter'} } ) {
 
         # resolve search prefix
         if($filter->{'type'} eq 'search' and $filter->{'value'} =~ m/^(ho|hg|se|sg):/mx) {
@@ -583,22 +589,22 @@ sub single_search {
         }
 
         if( $op eq '=' and $value eq 'all' ) {
-
             # add a useless filter
             if( $filter->{'type'} eq 'host' ) {
                 push @hostfilter, { name => { '!=' => undef } };
+                next;
             }
             elsif ( $filter->{'type'} eq 'hostgroup' ) {
                 push @hostgroupfilter, { name => { '!=' => undef } };
+                next;
             }
-            elsif ( $filter->{'type'} ne 'servicegroup' ) {
+            elsif ( $filter->{'type'} eq 'servicegroup' ) {
                 push @servicegroupfilter, { name => { '!=' => undef } };
-            }
-            else {
                 next;
             }
         }
-        elsif ( $filter->{'type'} eq 'search' ) {
+
+        if ( $filter->{'type'} eq 'search' ) {
             my($hfilter, $sfilter) = Thruk::Utils::Status::get_comments_filter($c, $op, $value);
 
             my $host_search_filter = [ { name               => { $op     => $value } },
@@ -802,6 +808,18 @@ sub single_search {
         elsif ( $filter->{'type'} eq 'notification period' ) {
             push @hostfilter,    { notification_period => { $op => $value } };
             push @servicefilter, { notification_period => { $op => $value } };
+        }
+        elsif ( $filter->{'type'} eq 'custom variable' ) {
+            my $pre = uc($filter->{'val_pre'});
+            if(substr($pre, 0, 1) eq '_') { $pre = substr($pre, 1); }
+            push @hostfilter,    { custom_variables => { $op => $pre." ".$value } };
+            my $cop = '-or';
+            if($op eq '!=')  { $cop = '-and' }
+            if($op eq '!~~') { $cop = '-and' }
+            push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
+                                                  custom_variables => { $op => $pre." ".$value }
+                                          ]
+                                 };
         }
         else {
             confess( "unknown filter: " . $filter->{'type'} );

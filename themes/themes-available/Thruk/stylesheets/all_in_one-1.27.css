@@ -758,7 +758,10 @@ input.top_refresh_button {
 body.splashpage input.top_refresh_button {
   display: none;
 }
-#currentversioninfo {
+
+td.filterValueInput input.filter_pre_value {
+    width: 80px;
+}#currentversioninfo {
   font-size:14px;
 }
 
