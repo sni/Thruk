@@ -48,9 +48,9 @@ sub _read_secret {
     my($self) = @_;
     my $files = [];
     push @{$files}, 'thruk.conf';
-    push @{$files}, $ENV{'CATALYST_CONFIG'}.'thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk.conf'       if defined $ENV{'CATALYST_CONFIG'};
     push @{$files}, 'thruk_local.conf';
-    push @{$files}, $ENV{'CATALYST_CONFIG'}.'thruk_local.conf' if defined $ENV{'CATALYST_CONFIG'};
+    push @{$files}, $ENV{'CATALYST_CONFIG'}.'/thruk_local.conf' if defined $ENV{'CATALYST_CONFIG'};
     my $var_path = './var';
     for my $file (@{$files}) {
         next unless -f $file;
