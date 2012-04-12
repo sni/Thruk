@@ -761,6 +761,10 @@ body.splashpage input.top_refresh_button {
 
 td.filterValueInput input.filter_pre_value {
     width: 80px;
+}
+
+SELECT.filter_op_select {
+  width: 45px;
 }/* navbar */
 div.navbar {
   background-color: black;
