@@ -359,30 +359,30 @@
           <td class='filterValueInput' nowrap style="vertical-align: inherit;" colspan=2>
             <select name="[% paneprefix %][% prefix %]_type" id="[% paneprefix %][% prefix %]_[% loop.index %]_ts" onchange="verify_op(this.id)">
               <option value="search">Search</option>
-              <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
-              <option value="service"[% IF s.type == 'service' %] selected[% END %]>Service</option>
-              <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
-              <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
-              <option value="contact"[% IF s.type == 'contact' %] selected[% END %]>Contact</option>
-              <option value="parent"[% IF s.type == 'parent' %] selected[% END %]>Parent</option>
-              <option value="comment"[% IF s.type == 'comment' %] selected[% END %]>Comment</option>
-              <option value="last check"[% IF s.type == 'last check' %] selected[% END %]>Last Check</option>
-              <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
-              <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
-              <option value="current attempt"[% IF s.type == 'current attempt' %] selected[% END %]>Current Attempt</option>
-              <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
-              <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
-              <option value="check period"[% IF s.type == 'check period' %] selected[% END %]>Check Period</option>
-              <option value="notification period"[% IF s.type == 'notification period' %] selected[% END %]>Notification Period</option>
-              <option value="duration"[% IF s.type == 'duration' %] selected[% END %]>Duration</option>
-              <option value="downtime duration"[% IF s.type == 'downtime duration' %] selected[% END %]>Downtime Duration</option>
-              <option value="custom variable"[% IF s.type == 'custom variable' %] selected[% END %]>Custom Variable</option>
               [% IF enable_shinken_features %]
-              <option value="priority"[% IF s.type == 'priority' %] selected[% END %]>Priority</option>
+              <option value="priority"[% IF s.type == 'priority' %] selected[% END %]>Business Impact</option>
               [% END %]
+              <option value="check period"[% IF s.type == 'check period' %] selected[% END %]>Check Period</option>
+              <option value="comment"[% IF s.type == 'comment' %] selected[% END %]>Comment</option>
+              <option value="contact"[% IF s.type == 'contact' %] selected[% END %]>Contact</option>
+              <option value="current attempt"[% IF s.type == 'current attempt' %] selected[% END %]>Current Attempt</option>
+              <option value="custom variable"[% IF s.type == 'custom variable' %] selected[% END %]>Custom Variable</option>
+              <option value="downtime duration"[% IF s.type == 'downtime duration' %] selected[% END %]>Downtime Duration</option>
+              <option value="execution time"[% IF s.type == 'execution time' %] selected[% END %]>Execution Time</option>
+              <option value="duration"[% IF s.type == 'duration' %] selected[% END %]>Duration</option>
+              <option value="host"[% IF s.type == 'host' %] selected[% END %]>Host</option>
+              <option value="hostgroup"[% IF s.type == 'hostgroup' %] selected[% END %]>Hostgroup</option>
+              <option value="last check"[% IF s.type == 'last check' %] selected[% END %]>Last Check</option>
+              <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
+              <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
+              <option value="notification period"[% IF s.type == 'notification period' %] selected[% END %]>Notification Period</option>
+              <option value="parent"[% IF s.type == 'parent' %] selected[% END %]>Parent</option>
+              <option value="service"[% IF s.type == 'service' %] selected[% END %]>Service</option>
+              <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>
+              <option value="% state change"[% IF s.type == '% state change' %] selected[% END %]>% State Change</option>
             </select>[%# we don't want whitespaces here in final html but keep the nice source layout
             #%]<input type="text" name="[% paneprefix %][% prefix %]_val_pre" class="filter_pre_value" id="[% paneprefix %][% prefix %]_[% loop.index %]_val_pre" value="[% s.val_pre %]"[% IF 0 && use_ajax_search %][%# disabled for now #%] onclick="ajax_search.init(this, 'custom variable')"[% END %] style="[% IF s.type == 'priority' %]display: none; visibility: hidden;[% ELSE %]visibility: visible;[% END %]">[%#
-            #%]<select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to">
+            #%]<select name="[% paneprefix %][% prefix %]_op" id="[% paneprefix %][% prefix %]_[% loop.index %]_to" class="filter_op_select">
               <option value="~"[% IF  s.op == '~'  %] selected[% END %]>~</option>
               <option value="!~"[% IF s.op == '!~' %] selected[% END %]>!~</option>
               <option value="="[% IF  s.op == '='  %] selected[% END %]>=</option>

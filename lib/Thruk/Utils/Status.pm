@@ -131,7 +131,7 @@ sub get_search_from_param {
                 value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' }->[$x],
                 op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' }->[$x],
             };
-            if($text_filter->{'type'} eq 'priority' and defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x]) {
+            if($text_filter->{'type'} eq 'business impact' and defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x]) {
                 $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel' }->[$x];
             }
             push @{ $search->{'text_filter'} }, $text_filter;
@@ -145,7 +145,7 @@ sub get_search_from_param {
             value   => $c->{'request'}->{'parameters'}->{ $prefix . '_value' },
             op      => $c->{'request'}->{'parameters'}->{ $prefix . '_op' },
         };
-        if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'priority') {
+        if(defined $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'} and $text_filter->{'type'} eq 'business impact') {
             $text_filter->{'value'} = $c->{'request'}->{'parameters'}->{ $prefix . '_value_sel'};
         }
         push @{ $search->{'text_filter'} }, $text_filter;
@@ -750,8 +750,8 @@ sub single_search {
             push @servicefilter,       { impacts      => { $listop => $value } };
             push @servicetotalsfilter, { impacts      => { $listop => $value } };
         }
-        # Priority (criticity) is only available in Shinken
-        elsif ( $filter->{'type'} eq 'priority' ) {
+        # Business Impact (criticity) is only available in Shinken
+        elsif ( $filter->{'type'} eq 'business impact' ) {
             next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,    { criticity => { $op => $value } };
             push @servicefilter, { criticity => { $op => $value } };

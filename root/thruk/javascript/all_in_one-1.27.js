@@ -1707,29 +1707,30 @@ function add_new_filter(search_prefix, table) {
 
   // add first cell
   var typeselect = document.createElement('select');
-  var options    = new Array('Search',
-                             'Host',
-                             'Service',
-                             'Hostgroup',
-                             'Servicegroup',
-                             'Contact',
-                             'Parent',
+  var options    = new Array('Check Period',
                              'Comment',
-                             'Last Check',
-                             'Next Check',
-                             'Latency',
+                             'Contact',
                              'Current Attempt',
-                             'Execution Time',
-                             '% State Change',
-                             'Check Period',
-                             'Notification Period',
-                             'Duration',
+                             'Custom Variable',
                              'Downtime Duration',
-                             'Custom Variable'
+                             'Duration',
+                             'Execution Time',
+                             'Host',
+                             'Hostgroup',
+                             'Last Check',
+                             'Latency',
+                             'Next Check',
+                             'Notification Period',
+                             'Parent',
+                             'Service',
+                             'Servicegroup',
+                             '% State Change'
                             );
   if(enable_shinken_features) {
-    options.push('Priority');
+    options.unshift('Business Impact');
   }
+  options.unshift('Search');
+
   typeselect.onchange   = verify_op;
   typeselect.setAttribute('name', pane_prefix + search_prefix + 'type');
   typeselect.setAttribute('id', pane_prefix + search_prefix + nr + '_ts');
@@ -1739,6 +1740,7 @@ function add_new_filter(search_prefix, table) {
   var options           = new Array('~', '!~', '=', '!=', '<=', '>=');
   opselect.setAttribute('name', pane_prefix + search_prefix + 'op');
   opselect.setAttribute('id', pane_prefix + search_prefix + nr + '_to');
+  opselect.className='filter_op_select';
   add_options(opselect, options);
 
   var newCell0 = newRow.insertCell(0);
