@@ -1791,6 +1791,17 @@ function add_new_filter(search_prefix, table) {
   newCell1.onclick   = delete_filter_row;
   newCell1.className = "newfilter";
   newCell1.appendChild(img);
+
+  // fill in values from last row
+  lastnr=nr-1;
+  var lastops = jQuery('#'+pane_prefix + search_prefix + lastnr + '_to');
+  if(lastops.length > 0) {
+      jQuery('#'+pane_prefix + search_prefix + nr + '_to')[0].selectedIndex    = jQuery('#'+pane_prefix + search_prefix + lastnr + '_to')[0].selectedIndex;
+      jQuery('#'+pane_prefix + search_prefix + nr + '_ts')[0].selectedIndex    = jQuery('#'+pane_prefix + search_prefix + lastnr + '_ts')[0].selectedIndex;
+      jQuery('#'+pane_prefix + search_prefix + nr + '_value')[0].value         = jQuery('#'+pane_prefix + search_prefix + lastnr + '_value')[0].value;
+      jQuery('#'+pane_prefix + search_prefix + nr + '_val_pre')[0].value       = jQuery('#'+pane_prefix + search_prefix + lastnr + '_val_pre')[0].value;
+  }
+  verify_op(pane_prefix + search_prefix + nr + '_ts');
 }
 
 /* remove a row */
@@ -1966,7 +1977,7 @@ function verify_op(event) {
   var input  = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');
   if(enable_shinken_features) {
     var select = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value_sel');
-    if(selValue == 'priority' ) {
+    if(selValue == 'business impact' ) {
       showElement(select.id);
       hideElement(input.id);
     } else {
@@ -2024,7 +2035,7 @@ function verify_op(event) {
          && selValue != '% state change'
          && selValue != 'duration'
          && selValue != 'downtime duration'
-         && selValue != 'priority') {
+         && selValue != 'business impact') {
         // is this currently selected?
         if(x == opElem.selectedIndex) {
           // only <= and >= are allowed for list searches
@@ -2345,7 +2356,7 @@ var ajax_search = {
                || search_type == 'duration'
                || search_type == 'downtime duration'
                || search_type == 'custom variable'
-               || search_type == 'priority' ) {
+               || search_type == 'business impact' ) {
                 ajax_search.search_type = 'none';
             }
         }
