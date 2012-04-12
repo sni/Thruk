@@ -48,11 +48,11 @@ any passwords though the webinterface.
 == Customization
 
 === How to change the side menu
-The main left menu is highly editable through menu_local.cfg. It is
-recommended apply changes only to your menu_local.cfg in order to
+The main left menu is highly editable through menu_local.conf. It is
+recommended apply changes only to your menu_local.conf in order to
 avoid conflicts on updating Thruk.
 
-Open your menu_local.cfg (create one if it does not exists) with your
+Open your menu_local.conf (create one if it does not exists) with your
 preferred text editor and check the config. You can add new sections
 with:
 
