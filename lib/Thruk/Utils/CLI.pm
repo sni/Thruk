@@ -93,7 +93,7 @@ sub _run {
         $result = $self->_from_local($c, $self->{'opt'})
     }
     binmode STDOUT;
-    print STDOUT $result->{'output'};
+    print STDOUT $result->{'output'} if defined $result->{'output'};
     return $result->{'rc'};
 }
 

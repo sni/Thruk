@@ -36,8 +36,8 @@ sub _handle_response {
 }
 
 package Plack::Handler::Thrukembedded::Writer;
-sub new   { $ENV{'HTTP_RESULT'}->{'result'} = ''; return bless \do { my $x }, $_[0] };
-sub write { return $ENV{'HTTP_RESULT'}->{'result'} .= $_[1] };
+sub new   { return bless \do { my $x }, $_[0] };
+sub write { return $ENV{'HTTP_RESULT'}->{'result'} = $_[1] };
 sub close { return; };
 
 1;
