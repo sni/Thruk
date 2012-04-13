@@ -448,8 +448,10 @@ function load_plugin_help(id, plugin) {
 
 function init_plugin_exec(id) {
     var host = jQuery('.obj_host_name').val();
-    host = host.replace(/\s*,.*$/, '');
-    jQuery('#'+id+'inp_preview_host').val(host);
+    if(host != undefined) {
+        host = host.replace(/\s*,.*$/, '');
+        jQuery('#'+id+'inp_preview_host').val(host);
+    }
     jQuery('#'+id+'inp_preview_service').val(jQuery('.obj_service_description').val());
 }
 

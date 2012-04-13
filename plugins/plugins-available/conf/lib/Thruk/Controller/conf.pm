@@ -284,7 +284,7 @@ sub _process_json_page {
     # objects attributes
     if($type eq 'attribute') {
         my $for  = $c->{'request'}->{'parameters'}->{'obj'};
-        my $attr = $c->{'obj_db'}->get_default_keys($for);
+        my $attr = $c->{'obj_db'}->get_default_keys($for, { no_alias => 1 });
         my $json = [{ 'name' => $type.'s',
                       'data' => [ sort @{Thruk::Utils::array_uniq($attr)} ],
                    }];

@@ -779,14 +779,22 @@ sub get_references {
 
 return the sorted default config keys for a type of object
 
+    $options = {
+        no_alias => 0,   # skip alias definitions
+    }
+
 =cut
 sub get_default_keys {
-    my($self,$type) = @_;
+    my($self,$type, $options) = @_;
+    $options = {} unless defined $options;
+    $options->{'no_alias'} = 0 unless defined $options->{'no_alias'};
     my $obj = Monitoring::Config::Object->new(type     => $type,
                                               coretype => $self->{'coretype'});
     my @keys;
     for my $key (keys %{$obj->{'default'}}) {
-        push @keys, $key unless $obj->{'default'}->{$key}->{'type'} eq 'DEPRECATED';
+        next if $options->{'no_alias'} == 1 and $obj->{'default'}->{$key}->{'type'} eq 'ALIAS';
+        next if $obj->{'default'}->{$key}->{'type'} eq 'DEPRECATED';
+        push @keys, $key;
     }
     return \@keys;
 }
