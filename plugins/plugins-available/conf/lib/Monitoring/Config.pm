@@ -1226,7 +1226,7 @@ sub _update_obj_in_index {
         # single primary key
         $pname = $primary if defined $primary;
         my $existing_id = $objects->{'byname'}->{$obj->{'type'}}->{$pname};
-        if(defined $existing_id) {
+        if(defined $existing_id and $existing_id ne $obj->get_id()) {
             my $orig = $self->get_object_by_id($existing_id);
             if(!defined $orig) {
                 push @{$self->{'errors'}},

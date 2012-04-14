@@ -246,7 +246,7 @@ is(scalar @{$objs}, 3, "number of objects");
 $objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/5/' });
 $objects->init();
 $objs = $objects->get_objects();
-is(scalar @{$objects->{'errors'}}, 0, "number of errors");
+is(scalar @{$objects->{'errors'}}, 0, "number of errors") or diag(Dumper($objects->{'errors'}));
 is(scalar @{$objs}, 2, "number of objects");
 $objs = $objects->get_objects_by_type('host');
 is(scalar @{$objs}, 1, "number of hosts");

@@ -72,11 +72,6 @@ sub parse {
         }
     }
 
-    # some sanity checks
-    if(defined $self->{'conf'}->{'name'} and (!defined $self->{'conf'}->{'register'} or $self->{'conf'}->{'register'} != 0)) {
-        push @{$errors}, "name attribute used for non template in ".Thruk::Utils::Conf::_link_obj($self);
-    }
-
     return $errors;
 }
 
@@ -159,6 +154,8 @@ sub get_primary_name {
     my $self = shift;
     my $full = shift || 0;
     my $conf = shift || $self->{'conf'};
+
+    return if $self->is_template();
 
     return $conf->{$self->{'primary_key'}} unless ref $self->{'primary_key'};
 
