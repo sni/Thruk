@@ -234,8 +234,6 @@ sub get_objects_by_name {
     my $templates_only = shift || 0;
     my $name2          = shift;
 
-    my @objs;
-
     # object with secondary name
     if(defined $name2 and $name2 ne '') {
         my $subtype;
@@ -248,14 +246,16 @@ sub get_objects_by_name {
             $id = $objects->{'hostgroup_name'}->{$name2};
         }
         if(defined $id) {
-            push @objs, $self->get_object_by_id($id);
+            return [$self->get_object_by_id($id)];
         }
-        return \@objs;
+        return [];
     }
 
     # existing template
-    if(defined $self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name}) {
-        push @objs, $self->get_object_by_id($self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name});
+    my $objs = {};
+    my $tid  = $self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name};
+    if(defined $tid) {
+        $objs->{$tid} = $self->get_object_by_id($tid);
     }
 
     # existing object
@@ -263,22 +263,18 @@ sub get_objects_by_name {
         if(defined $self->{'objects'}->{'byname'}->{$type}->{$name}) {
             my $id = $self->{'objects'}->{'byname'}->{$type}->{$name};
             unless(ref $id) {
-                push @objs, $self->get_object_by_id($id);
+                $objs->{$id} = $self->get_object_by_id($id);
             } else {
-                my %ids;
                 for my $subtype (keys %{$id}) {
                     for my $subid (values %{$id->{$subtype}}) {
-                        $ids{$subid} = 1;
+                        $objs->{$subid} = $self->get_object_by_id($id);
                     }
-                }
-                for my $id (keys %ids) {
-                    push @objs, $self->get_object_by_id($id);
                 }
             }
         }
     }
 
-    return \@objs;
+    return [ values %{$objs} ];
 }
 
 
@@ -1249,7 +1245,7 @@ sub _update_obj_in_index {
         $objects->{'byid'}->{$obj->{'id'}} = $obj;
 
         # by type
-        if(!defined $tname) {
+        if(!defined $obj->{'conf'}->{'register'} or $obj->{'conf'}->{'register'} != 0) {
             push @{$objects->{'bytype'}->{$obj->{'type'}}}, $obj->{'id'};
         }
     }

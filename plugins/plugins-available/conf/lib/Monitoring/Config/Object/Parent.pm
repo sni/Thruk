@@ -97,15 +97,12 @@ sub is_template {
 
 =head2 get_template_name
 
-return the objects template name
+return the objects template name or undef
 
 =cut
 sub get_template_name {
     my $self = shift;
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and defined $self->{'conf'}->{'name'}) {
-        return $self->{'conf'}->{'name'};
-    }
-    return;
+    return $self->{'conf'}->{'name'};
 }
 
 
@@ -118,7 +115,7 @@ return the objects name
 =cut
 sub get_name {
     my $self = shift;
-    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and defined $self->{'conf'}->{'name'}) {
+    if($self->is_template()) {
         return $self->get_template_name();
     }
     return $self->get_primary_name();
@@ -162,10 +159,6 @@ sub get_primary_name {
     my $self = shift;
     my $full = shift || 0;
     my $conf = shift || $self->{'conf'};
-
-    if(defined $conf->{'register'} and $conf->{'register'} == 0 and defined $conf->{'name'}) {
-        return;
-    }
 
     return $conf->{$self->{'primary_key'}} unless ref $self->{'primary_key'};
 

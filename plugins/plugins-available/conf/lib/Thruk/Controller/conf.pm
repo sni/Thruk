@@ -1193,10 +1193,10 @@ sub _get_context_object {
             my @newobjs;
             for my $o (@{$objs}) {
                 if($templates == 1) {
-                    push @newobjs, $o if defined $o->{'conf'}->{'register'} and $o->{'conf'}->{'register'} == 0;
+                    push @newobjs, $o if $o->is_template();
                 }
                 if($templates == 2) {
-                    push @newobjs, $o if !defined $o->{'conf'}->{'register'} or $o->{'conf'}->{'register'} == 1;
+                    push @newobjs, $o if !defined $o->{'conf'}->{'register'} or $o->{'conf'}->{'register'} != 0;
                 }
             }
             @{$objs} = @newobjs;
