@@ -208,6 +208,12 @@
                               N/A
                               [% END %]
                               (notification [% service.current_notification_number %])
+                              [% IF service.current_notification_number == 0 && service.first_notification_delay > 0 %]
+                                [% first_remaining = calculate_first_notification_delay_remaining(service) %]
+                                [% IF first_remaining >= 0 %]
+                                  &nbsp;<span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
+                                [% END %]
+                              [% END %]
                             </td>
                           </tr>
                           <tr>

@@ -212,6 +212,12 @@
                               N/A
                               [% END %]
                               &nbsp;(notification [% host.current_notification_number %])
+                              [% IF host.current_notification_number == 0 && host.first_notification_delay > 0 %]
+                                [% first_remaining = calculate_first_notification_delay_remaining(host) %]
+                                [% IF first_remaining >= 0 %]
+                                  &nbsp;<span title="This host will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>
+                                [% END %]
+                              [% END %]
                             </td>
                           </tr>
                           <tr>
