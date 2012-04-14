@@ -515,16 +515,23 @@ sub _compare_configs {
 ##########################################################
 sub _link_obj {
     my($obj,$line) = @_;
-    my $path;
+    my($path, $link);
     if(defined $line) {
         $path = $obj;
+        $link = 'file='.$path.'&amp;line='.$line;
     } else {
         $line = $obj->{'line'};
         $path = $obj->{'file'}->{'path'};
+        $link = 'data.id='.$obj->get_id();
     }
     my $shortpath = $path;
     $shortpath =~ s/.*\///gmx;
-    return('<a href="conf.cgi?sub=objects&amp;file='.$path.'&amp;line='.$line.'">'.$shortpath.':'.$line.'</a>');
+    if($line == 0) {
+        $line = '';
+    } else {
+        $line = ':'.$line
+    }
+    return('<a href="conf.cgi?sub=objects&amp;'.$link.'">'.$shortpath.$line.'</a>');
 }
 
 ##########################################################

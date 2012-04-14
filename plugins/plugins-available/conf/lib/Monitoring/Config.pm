@@ -517,7 +517,7 @@ sub update_object {
 
     my $newname = $obj->get_name();
 
-    if($oldname ne $newname) {
+    if(defined $oldname and $oldname ne $newname) {
         $self->rename_dependencies($obj, $oldname, $newname);
     }
 
