@@ -405,7 +405,7 @@ sub _redirect_or_success {
                                     );
             }
             if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
-                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}." ".$c->stash->{'lastservice'};
+                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.";".$c->stash->{'lastservice'};
                 $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
                                                       { 'host_name'   => $c->stash->{'lasthost'} },
                                                       { 'description' => $c->stash->{'lastservice'} }
