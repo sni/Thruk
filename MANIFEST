@@ -320,6 +320,7 @@ support/fcgid_env.sh
 support/htpasswd
 support/menu_local.conf
 support/thruk.init
+support/thruk.logrotate
 support/thruk.spec
 support/thruk_local.conf.example
 t/01app.t

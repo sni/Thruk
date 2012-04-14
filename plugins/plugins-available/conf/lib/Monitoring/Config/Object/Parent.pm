@@ -155,7 +155,7 @@ sub get_primary_name {
     my $full = shift || 0;
     my $conf = shift || $self->{'conf'};
 
-    return if $self->is_template();
+    return if defined $conf->{'register'} and $conf->{'register'} == 0;
 
     return $conf->{$self->{'primary_key'}} unless ref $self->{'primary_key'};
 
