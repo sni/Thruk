@@ -4,13 +4,13 @@
   <tr>
     <th class='data' colspan=2><a href="conf.cgi?sub=objects&amp;data.id=[% object.get_id() %]">References of [% object.get_type() +%] [%+ object.get_name() %]</a></th>
   </tr>
-  [% FOREACH type = data.keys.sort %]
+  [% FOREACH t = data.keys.sort %]
   <tr>
-    <td class='dataVar'>[% type | ucfirst %]</td>
+    <td class='dataVar'>[% t | ucfirst %]</td>
     <td class='dataVar'>
       <ul>
-      [% FOREACH name = data.$type.keys.sort %]
-        [% oid = data.$type.$name %]
+      [% FOREACH name = data.$t.keys.sort %]
+        [% oid = data.$t.$name %]
         <li><a href="conf.cgi?sub=objects&amp;data.id=[% oid %]">[% name %]</a></li>
       [% END %]
       </ul>
