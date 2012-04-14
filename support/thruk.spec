@@ -50,6 +50,7 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_localstatedir}/lib/thruk
 %{__mkdir} -p %{buildroot}%{_localstatedir}/cache/thruk
 %{__mkdir} -p %{buildroot}%{_localstatedir}/log/thruk
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
 %if %{defined suse_version}
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/apache2/conf.d
 %else
@@ -120,6 +121,7 @@ mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_syscon
 mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfdir}/thruk/menu_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initrddir}/thruk
+mv %{buildroot}%{_datadir}/thruk/support/thruk.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/thruk
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
@@ -230,8 +232,9 @@ exit 0
 
 
 %changelog
-* Mon Apr 09 2012 Sven Nierlein <sven@consol.de> - 1.28
+* Sat Apr 14 2012 Sven Nierlein <sven@consol.de> - 1.28
 - added init script
+- added log rotation
 
 * Fri Feb 10 2012 Sven Nierlein <sven@consol.de> - 1.2
 - First build
