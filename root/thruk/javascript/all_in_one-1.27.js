@@ -2199,6 +2199,7 @@ var ajax_search = {
     emptytxt        : '',
     emptyclass      : '',
     onselect        : undefined,
+    onemptyclick    : undefined,
     filter          : undefined,
 
     /* initialize search
@@ -2217,6 +2218,7 @@ var ajax_search = {
      *   emptytxt:          text when empty
      *   emptyclass:        class when empty
      *   onselect:          run this function after selecting something
+     *   onemptyclick:      when clicking on the empty button
      *   filter:            run this function as additional filter
      * }
      */
@@ -2282,6 +2284,10 @@ var ajax_search = {
         ajax_search.onselect = undefined;
         if(options.onselect != undefined) {
             ajax_search.onselect = options.onselect;
+        }
+        ajax_search.onemptyclick = undefined;
+        if(options.onemptyclick != undefined) {
+            ajax_search.onemptyclick = options.onemptyclick;
         }
         ajax_search.filter = undefined;
         if(options.filter != undefined) {
@@ -2668,7 +2674,7 @@ var ajax_search = {
         ajax_search.result_size = x;
         resultHTML += '<\/ul>';
         if(results.length == 0) {
-            resultHTML += '<a href="#">'+ ajax_search.emptymsg +'</a>';
+            resultHTML += '<a href="#" onclick="ajax_search.onempty()">'+ ajax_search.emptymsg +'</a>';
             if(ajax_search.hideempty) {
                 ajax_search.hide_results();
                 return;
@@ -2688,6 +2694,12 @@ var ajax_search = {
         ajax_search.stop_events = true;
         window.setTimeout("ajax_search.stop_events=false;", 200);
         input.focus();
+    },
+
+    onempty: function() {
+        if(ajax_search.onemptyclick != undefined) {
+            ajax_search.onemptyclick();
+        }
     },
 
     /* set the value into the input field */

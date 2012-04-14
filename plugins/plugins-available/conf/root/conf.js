@@ -20,6 +20,10 @@ function set_sub(nr) {
 var running_number = 0;
 function add_conf_attribute(table, key, rt) {
 
+    if(fields[key] == undefined) {
+        key = 'customvariable';
+    }
+
     running_number--;
     if(key != 'customvariable' && key != 'exception') {
         jQuery('#new_' + key + '_btn').css('display', 'none');
@@ -49,6 +53,9 @@ function add_conf_attribute(table, key, rt) {
         newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"jQuery('.obj_" + running_number + "').attr('name', 'obj.'+this.value)\">";
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id_key\d+/g, 'id_'+running_number);
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/class="obj_customvariable"/g, 'class="obj_customvariable obj_'+running_number+'"');
+    }
+    if(key == 'customvariable') {
+        newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id="id_customvariable0"/g, 'id="id_customvariable'+running_number+'"');
     }
 
     // insert row at 3rd last position
@@ -568,4 +575,24 @@ function new_attr_filter(str) {
         return false;
     }
     return true;
+}
+
+/* new attribute onselect */
+var newid, inp;
+function on_attr_select() {
+    newid = add_conf_attribute('attr_table', jQuery('#newattr').val(),true);
+    ajax_search.reset();
+    window.setTimeout('jQuery(\'#\'+newid).focus()', 300);
+    return newid;
+}
+
+/* new attribute onselect */
+function on_empty_click(inp) {
+    var input = document.getElementById(ajax_search.input_field);
+    var v = input.value;
+    input.value = 'customvariable';
+    newid = on_attr_select();
+    var tr = document.getElementById(newid).parentNode.parentNode;
+    tr.cells[0].firstChild.value = '_'+v.toUpperCase();
+    return false;
 }
