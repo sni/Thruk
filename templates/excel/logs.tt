@@ -7,10 +7,11 @@
       <format bold='1' bg_color='silver' align='center'>
         [% IF columns.1  %]<cell width='18'>Timestamp</cell>[% END %]
         [% IF columns.2  %]<cell width='23'>Event</cell>[% END %]
-        [% IF columns.3  %]<cell width='25'>Host Name</cell>[% END %]
-        [% IF columns.4  %]<cell width='30'>Service</cell>[% END %]
-        [% IF columns.5  %]<cell width='10'>Info</cell>[% END %]
-        [% IF columns.6  %]<cell width='50'>Message</cell>[% END %]
+        [% IF columns.3  %]<cell width='23'>Event Detail</cell>[% END %]
+        [% IF columns.4  %]<cell width='25'>Host Name</cell>[% END %]
+        [% IF columns.5  %]<cell width='30'>Service</cell>[% END %]
+        [% IF columns.6  %]<cell width='10'>Info</cell>[% END %]
+        [% IF columns.7  %]<cell width='50'>Message</cell>[% END %]
       </format>
     </row>
     [% FOREACH l = data %]
@@ -32,10 +33,11 @@
     <row>
         [% IF columns.1  %]<format align="left" num_format="MM/DD/YYYY HH:MM:SS"><cell type="date_time">[% format_date(l.time, "%Y-%m-%dT%H:%M:%S.000") %]</cell></format>[% END %]
         [% IF columns.2  %]<cell>[% IF has_type == 1 %][% l.type %][% ELSE %][% type %][% END %]</cell>[% END %]
-        [% IF columns.3  %]<cell>[% escape_xml(l.host_name) %]</cell>[% END %]
-        [% IF columns.4  %]<cell>[% escape_xml(l.service_description) %]</cell>[% END %]
-        [% IF columns.5  %]<cell>[% escape_xml(info) %]</cell>[% END %]
-        [% IF columns.6  %]<cell>[% escape_xml(message) %]</cell>[% END %]
+        [% IF columns.3  %]<cell>[% desc %]</cell>[% END %]
+        [% IF columns.4  %]<cell>[% escape_xml(l.host_name) %]</cell>[% END %]
+        [% IF columns.5  %]<cell>[% escape_xml(l.service_description) %]</cell>[% END %]
+        [% IF columns.6  %]<cell>[% escape_xml(info) %]</cell>[% END %]
+        [% IF columns.7  %]<cell>[% escape_xml(message) %]</cell>[% END %]
     </row>
     [% END %]
   </worksheet>

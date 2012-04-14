@@ -8,7 +8,7 @@
 <td style="width:10%" align="right">
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
-  [% PROCESS _excel_export.tt columns=[ 'Time', 'Event', 'Hostname', 'Service Description', 'Info', 'Message' ] %]
+  [% PROCESS _excel_export.tt columns=[ 'Time', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] %]
 </td>
 </tr></table>
 
