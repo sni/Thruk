@@ -593,6 +593,10 @@ function on_empty_click(inp) {
     input.value = 'customvariable';
     newid = on_attr_select();
     var tr = document.getElementById(newid).parentNode.parentNode;
-    tr.cells[0].firstChild.value = '_'+v.toUpperCase();
+    var td = tr.cells[0].firstChild;
+    td.value = v.toUpperCase();
+    if(td.value.substr(0,1) != '_') {
+        td.value = '_' + td.value;
+    }
     return false;
 }
