@@ -29,10 +29,10 @@
         </td>
         <td align="center" width="33%" class="ext_head_attributes">
           <div class='data'>Service</div>
-          <div class='dataTitle'>[% service.description %]</div>
+          <div class='dataTitle'>[% service.display_name %]</div>
           <div class='data'>On Host</div>
           <div class='dataTitle'>[% service.host_alias %]</div>
-          <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>[% service.host_name %]</a>)</div><br>
+          <div class='dataTitle'>(<a href='extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]'>[% service.host_display_name %]</a>)</div><br>
           [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">

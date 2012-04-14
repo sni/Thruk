@@ -213,7 +213,7 @@ sub get_hosts {
             num_services_pending num_services_unknown num_services_warn num_services obsess_over_host
             parents percent_state_change perf_data plugin_output process_performance_data
             retry_interval scheduled_downtime_depth state state_type modified_attributes_list
-            last_time_down last_time_unreachable last_time_up
+            last_time_down last_time_unreachable last_time_up display_name
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
@@ -358,6 +358,7 @@ sub get_services {
             plugin_output process_performance_data retry_interval scheduled_downtime_depth
             state state_type modified_attributes_list
             last_time_critical last_time_ok last_time_unknown last_time_warning
+            display_name host_display_name
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {

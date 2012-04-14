@@ -51,7 +51,7 @@
                 <td align="left">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td align="left" valign="middle" class='[% statusClass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key %]' title='[% h.address %]'>[% h.name %]</a>&nbsp;</td>
+                      <td align="left" valign="middle" class='[% statusClass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key %]' title='[% h.address %]'>[% h.display_name %]</a>&nbsp;</td>
                     </tr>
                   </table>
                 </td>
@@ -82,9 +82,9 @@
             [% IF h.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(h.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(h.long_plugin_output))) %]'><span class="has_long_plugin_output">[% escape_html(h.plugin_output) %]</span></td>
+                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(h.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(h.long_plugin_output))) %]'><span class="has_long_plugin_output">[% escape_html(h.plugin_output) %]</span></td>
                 [% ELSE %]
-                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(h.plugin_output) %]<br>[% nl2br(escape_html(h.long_plugin_output)) %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
+                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(h.plugin_output) %]<br>[% nl2br(escape_html(h.long_plugin_output)) %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
                 [% END %]
               [% ELSIF show_long_plugin_output == 'inline' %]
                 [% IF escape_html_tags %]

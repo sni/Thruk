@@ -375,7 +375,7 @@ sub _process_overview_page {
     # we need the hostname, address etc...
     my $host_data;
     my $services_data;
-    my $tmp_host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address has_been_checked name state num_services_pending num_services_ok num_services_warn num_services_unknown num_services_crit/ ] );
+    my $tmp_host_data = $c->{'db'}->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address has_been_checked name state num_services_pending num_services_ok num_services_warn num_services_unknown num_services_crit display_name/ ] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;
@@ -384,7 +384,7 @@ sub _process_overview_page {
 
     if( $c->stash->{substyle} eq 'service' ) {
         # we have to sort in all services and states
-        my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description has_been_checked state host_name/ ] );
+        my $tmp_services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description has_been_checked state host_name display_name/ ] );
         if( defined $tmp_services ) {
             for my $service ( @{$tmp_services} ) {
                 next if $service->{'description'} eq '';

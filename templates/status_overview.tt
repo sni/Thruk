@@ -106,7 +106,7 @@
                   <td class='[% hostclass %]'>
                     <table border="0" width="100%" cellpadding="0" cellspacing="0">
                       <tr class='[% hostclass %]'>
-                        <td class='[% hostclass %]'><a href='status.cgi?host=[% host_name %]&amp;style=detail' title='[% h.address %]'>[% h.name %]</a></td>
+                        <td class='[% hostclass %]'><a href='status.cgi?host=[% host_name %]&amp;style=detail' title='[% h.address %]'>[% h.display_name %]</a></td>
 
                         [% IF h.icon_image_expanded %]
                         <td class='[% hostclass %]' width="5"></td>

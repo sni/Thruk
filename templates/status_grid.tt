@@ -103,7 +103,7 @@
                 <td align="left">
                   <table border="0" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td align="left" valign="middle" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'>[% h.name %]</a></td>
+                      <td align="left" valign="middle" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% h.name | uri %]'>[% h.display_name %]</a></td>
                     </tr>
                   </table>
                 </td>
@@ -135,7 +135,7 @@
             [% ELSIF s.state == 3 %]
               [% SET s_status = 'statusUNKNOWN' %]
             [% END %]
-            <a href='extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=[% s.description | uri %]' class='[% s_status %]'>[% s.description %]</a>
+            <a href='extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=[% s.description | uri %]' class='[% s_status %]'>[% s.display_name %]</a>
             [% IF loop.index > 0 && loop.index % 7 == 0 %]<br>[% END %]
             [% END %]
           </td>

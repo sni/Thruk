@@ -31,7 +31,7 @@
         <td align="center" valign="middle" width="33%" class="ext_head_attributes">
           <div class='data'>Host</div>
           <div class='dataTitle'>[% host.alias %]</div>
-          <div class='dataTitle'>([% host.name %])</div><br>
+          <div class='dataTitle'>([% host.display_name %])</div><br>
           [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">

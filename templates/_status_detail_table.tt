@@ -60,7 +60,7 @@
         <td class='[% hostclass %]'>
           <table border="0" width='100%' cellpadding="0" cellspacing="0">
             <tr>
-              <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_name %]</a></td>
+              <td align="left" class='[% hostclass %]'><a href='extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]' title='[% s.host_address %]'>[% s.host_display_name %]</a></td>
               <td align="right">
                 [% PROCESS _status_host_attributes.tt hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
               </td>
@@ -74,7 +74,7 @@
         <td class='[% serviceclass %]'>
           <table border="0" width='100%' cellspacing="0" cellpadding="0">
             <tr>
-              <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% s.description %]</a></td>
+              <td align="left" class='[% serviceclass %]'><a href='extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]'>[% s.display_name %]</a></td>
               <td align="right" class='[% serviceclass %]'>
               [% PROCESS _status_service_attributes.tt service=s service_comment_count=comment_count %]
               </td>
@@ -100,9 +100,9 @@
             [% IF s.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(s.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(s.long_plugin_output))) %]'><span class="has_long_plugin_output">[% escape_html(s.plugin_output) %]</span></td>
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(s.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(s.long_plugin_output))) %]'><span class="has_long_plugin_output">[% escape_html(s.plugin_output) %]</span></td>
                 [% ELSE %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_name %] - [% s.description %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
+                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
                 [% END %]
               [% ELSIF show_long_plugin_output == 'inline' %]
                 [% IF escape_html_tags %]
