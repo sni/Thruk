@@ -1169,6 +1169,10 @@ ex.:
 Display the backend/site name in the status table.
 This is useful if you have same hosts or services on different
 backends and need to know which one returns an error.
+Valid values are:
+
+ 1 - show site name at the end
+ 2 - put site name in front
 
 ex.:
 
