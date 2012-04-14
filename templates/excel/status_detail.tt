@@ -7,6 +7,9 @@
       <format bold='1' bg_color='silver' align='center'>
         [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
         [% IF columns.2  %]<cell width='10'>IP</cell>[% END %]
+        [% IF show_backends_in_table == 2 %]
+          [% IF columns.19 %]<cell width='15'>Site</cell>[% END %]
+        [% END %]
         [% IF columns.3  %]<cell width='16'>Host Acknowledged</cell>[% END %]
         [% IF columns.4  %]<cell width='14'>Host Downtime</cell>[% END %]
         [% IF columns.5  %]<cell width='14'>Host Notifications</cell>[% END %]
@@ -22,6 +25,9 @@
         [% IF columns.15 %]<cell width='12'>Notifications</cell>[% END %]
         [% IF columns.16 %]<cell width='14'>Active Checks</cell>[% END %]
         [% IF columns.17 %]<cell width='9'>Flapping</cell>[% END %]
+        [% IF show_backends_in_table == 1 %]
+          [% IF columns.19 %]<cell width='15'>Site</cell>[% END %]
+        [% END %]
         [% IF columns.18 %]<cell width='80'>Status Information</cell>[% END %]
       </format>
     </row>
@@ -48,6 +54,9 @@
       <row>
         [% IF columns.1  %]<cell>[% s.host_name %]</cell>[% END %]
         [% IF columns.2  %]<cell>[% s.host_address %]</cell>[% END %]
+        [% IF show_backends_in_table == 2 %]
+          [% IF columns.19 %]<cell>[% s.peer_name %]</cell>[% END %]
+        [% END %]
         [% IF columns.3  %]<cell>[% IF s.host_acknowledged             %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.4  %]<cell>[% IF s.host_scheduled_downtime_depth %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.5  %]<cell>[% IF s.host_notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
@@ -69,6 +78,9 @@
         [% IF columns.15 %]<cell>[% IF s.notifications_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.16 %]<cell>[% IF s.active_checks_enabled    %]Yes[% ELSE %]No[% END %]</cell>[% END %]
         [% IF columns.17 %]<cell>[% IF s.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>[% END %]
+        [% IF show_backends_in_table == 1 %]
+          [% IF columns.19 %]<cell>[% s.peer_name %]</cell>[% END %]
+        [% END %]
         [% IF columns.18 %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% format_date(s.next_check, datetime_format_long) %][% ELSE %][% escape_xml(s.plugin_output) %][% END %]</cell>[% END %]
       </row>
     [% END %]

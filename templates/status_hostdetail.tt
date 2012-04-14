@@ -91,7 +91,7 @@
           [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
           [% PROCESS _json_export.tt %]
-          [% PROCESS _excel_export.tt columns=[ 'Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information' ] %]
+          [% PROCESS _excel_export.tt columns=[ 'Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Site' ] %]
         </td>
       </tr>
     </table>

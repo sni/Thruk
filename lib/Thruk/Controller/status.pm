@@ -276,6 +276,7 @@ sub _process_details_page {
         '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
         '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
         '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+        '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
@@ -327,6 +328,7 @@ sub _process_hostdetails_page {
         '1' => [ 'name', 'host name' ],
         '4' => [ [ 'last_check',             'name' ], 'last check time' ],
         '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration' ],
+        '7' => [ [ 'peer_name', 'name' ], 'site' ],
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};

@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added documentation about common CGI parameters
           - added init script
           - added event details to logs excel export
+          - added site name to excel export (Mark Wilkinson)
           - internal changes ( removed prototype library )
           - mobile:
               - added performance graph to mobile interface

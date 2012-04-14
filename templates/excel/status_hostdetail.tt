@@ -5,6 +5,9 @@
   <worksheet name='Status' autofilter='A1:[% last_col %][% size %]'>
     <row>
       <format bold='1' bg_color='silver' align='center'>
+        [% IF show_backends_in_table %]
+          [% IF columns.12 %]<cell width='15'>Site</cell>[% END %]
+        [% END %]
         [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
         [% IF columns.2  %]<cell width='10'>IP</cell>[% END %]
         [% IF columns.3  %]<cell width='20'>Status</cell>[% END %]
@@ -36,6 +39,9 @@
         [% state_color = 'red' %]
       [% END %]
       <row>
+        [% IF show_backends_in_table %]
+          [% IF columns.12 %]<cell>[% h.peer_name %]</cell>[% END %]
+        [% END %]
         [% IF columns.1  %]<cell>[% h.name %]</cell>[% END %]
         [% IF columns.2  %]<cell>[% h.address %]</cell>[% END %]
         [% IF columns.3  %]<format bg_color='[% state_color %]'>
