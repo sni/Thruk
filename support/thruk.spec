@@ -202,6 +202,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/thruk/log4perl.conf
 %config(noreplace) %{_sysconfdir}/thruk/cgi.cfg
 %config(noreplace) %{_sysconfdir}/thruk/htpasswd
+%config(noreplace) %{_sysconfdir}/logrotate.d/thruk
 %if %{defined suse_version}
 %config(noreplace) %{_sysconfdir}/apache2/conf.d/thruk.conf
 %else
