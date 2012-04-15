@@ -60,6 +60,8 @@ requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
 requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
 requires 'Plack::Handler::CGI'                    => 0;     # required by script/thruk
+requires 'PDF::Reuse'                             => 0;     # required by Thruk::View::PDF::Reuse
+requires 'Catalyst::View::PDF::Reuse'             => 0;     # required by Thruk::View::PDF::Reuse
 
 # conf tool plugin
 feature     ('plugin_conf',
@@ -72,6 +74,17 @@ feature     ('plugin_dashboard',
   -default                                        => 0,
   'List::Compare'                                 => 0,
   'List::MoreUtils'                               => 0,
+);
+
+# reporting plugin
+feature     ('plugin_reports',
+  -default                                        => 0,
+  'Chart::Clicker'                                => 0,
+  'Chart::Clicker::Data::DataSet'                 => 0,
+  'Chart::Clicker::Data::Series'                  => 0,
+  'Chart::Clicker::Decoration::Legend::Tabular'   => 0,
+  'Chart::Clicker::Renderer::Pie'                 => 0,
+  'Graphics::Color::RGB'                          => 0,
 );
 
 # requirements test requirements
