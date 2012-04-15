@@ -7,7 +7,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 my $cmds = [
   "grep -nr 'TODO' lib/. templates/. plugins/plugins-available/. root/.",
-  "grep -nr Dumper lib/ plugins/plugins-available/ | grep STDERR",
+  "grep -nr Dumper lib/ plugins/plugins-available/ | grep STDERR | grep use",
 ];
 
 # find all TODOs

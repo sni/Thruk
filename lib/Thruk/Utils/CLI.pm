@@ -79,21 +79,38 @@ sub _read_secret {
 ##############################################
 sub _run {
     my($self) = @_;
-    my $result;
+    my($result, $response);
     _debug("_run(): ".Dumper($self->{'opt'}));
     unless($self->{'opt'}->{'local'}) {
-        $result = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
+        ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
     }
+    if(!defined $result and $self->{'opt'}->{'remoteurl'} !~ m|/localhost/|mx) {
+        print STDERR "remote command failed:\n".Dumper($response);
+        return 1;
+    }
+
     unless(defined $result) {
         my($c, $failed) = $self->_dummy_c();
         if($failed) {
-            print "command failed";
+            print STDERR "command failed";
             return 1;
         }
         $result = $self->_from_local($c, $self->{'opt'})
     }
-    binmode STDOUT;
-    print STDOUT $result->{'output'} if defined $result->{'output'};
+
+    # no output?
+    if(!defined $result->{'output'}) {
+        return $result->{'rc'};
+    }
+
+    # with output
+    if($result->{'rc'} == 0) {
+        binmode STDOUT;
+        print STDOUT $result->{'output'};
+    } else {
+        binmode STDERR;
+        print STDERR $result->{'output'};
+    }
     return $result->{'rc'};
 }
 
@@ -112,25 +129,21 @@ sub _request {
         _debug(" -> success");
         my $data_str = $response->decoded_content;
         my $data     = decode_json($data_str);
-        return $data;
+        return($data, $response);
     } else {
         _debug(" -> failed: ".Dumper($response));
     }
-    return;
+    return(undef, $response);
 }
 
 ##############################################
 sub _dummy_c {
     my($self) = @_;
     _debug("_dummy_c()");
-    my $olduser = $ENV{'REMOTE_USER'};
-    $ENV{'REMOTE_USER'} = 'dummy';
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
     my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
-    defined $olduser ? $ENV{'REMOTE_USER'} = $olduser : delete $ENV{'REMOTE_USER'};
-    my $failed = 0;
-    $failed = 1 unless $res->code == 200;
+    my $failed = ( $res->code == 200 ? 0 : 1 );
     return($c, $failed);
 }
 
@@ -190,16 +203,38 @@ sub _run_commands {
         'output'  => '',
         'rc'      => 0,
     };
+
+    # which command to run?
+    my $action = $opt->{'action'};
+    if(defined $opt->{'url'} and $opt->{'url'} ne '') {
+        $action = 'url='.$opt->{'url'};
+    }
     if(defined $opt->{'listbackends'}) {
-        $data->{'output'} = _listbackends($c);
+        $action = 'listbackends';
     }
 
-    if(defined $opt->{'url'}) {
-        if($opt->{'url'} =~ m|^\w+\.cgi|gmx) {
-            $opt->{'url'} = '/thruk/cgi-bin/'.$opt->{'url'};
-        }
-        $data->{'output'} = _request_url($c, $opt->{'url'})
+    # list backends
+    if($action eq 'listbackends') {
+        $data->{'output'} = _listbackends($c);
+        return $data;
     }
+
+    # request url
+    if($action =~ /^url=(.*)$/mx) {
+        my $url = $1;
+        if($url =~ m|^\w+\.cgi|gmx) {
+            $url = '/thruk/cgi-bin/'.$url;
+        }
+        $data->{'output'} = _request_url($c, $url)
+    }
+
+    # report
+    if($action =~ /^report=(.*)$/mx) {
+        my $nr = $1;
+        my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
+        $data->{'output'} = read_file($pdf_file);
+    }
+
     return $data;
 }
 

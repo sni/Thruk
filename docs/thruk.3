@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "thruk 3"
-.TH thruk 3 "2012-04-10" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH thruk 3 "2012-04-15" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -133,15 +133,28 @@
 thruk \- Command Line Utility for Thruk Monitoring Gui
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-thruk [ \-h |\-\-help ]
-      [ \-v | \-\-verbose ]
-      [ \-a | \-\-auth=<auth> ]
-      [ \-c | \-\-credential=<credential> ]
-      [ \-r | \-\-remote\-url=<remote\-url> ]
-      [      \-\-local ]
-      [ \-b | \-\-backend=<backend> ]
-      [ \-l | \-\-list\-backends ]
-      [ \-u | \-\-url=<url> ]
+Usage: thruk [options] |A\*^\ [url]
+.PP
+Options:
+  \-h, \-\-help                    Show this help message and exit
+  \-v, \-\-verbose                 Print verbose output
+.PP
+.Vb 6
+\&  \-b, \-\-backend=<backend>       Comma seperated list of backends/sites
+\&                                which should be used for querys.
+\&  \-l, \-\-list\-backends           List available backends/sites.
+\&  \-a, \-\-action=<action>         Perform this action:
+\&                                  \- url=<url>    output url result
+\&                                  \- report=<nr>  generate report
+\&
+\&  \-A, \-\-auth=<auth>             Set username for querys
+\&
+\&  \-c, \-\-credential=<pw>         Credential when connecting to remote
+\&                                Thruk installations specified by the
+\&                                remote\-url.
+\&  \-r, \-\-remote\-url=<url>        URL to remote installation.
+\&      \-\-local                   Don\*(Aqt try to connect fastcgi daemon first.
+.Ve
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 This script gives access to various parts of the Thruk gui and allows to generate
@@ -167,6 +180,31 @@ script has the following arguments
 \&    used. Specify the key of the backend. Use <\-l> to get a list
 \&    of backends.
 .Ve
+.IP "\fB\-l\fR , \fB\-\-list\-backends\fR" 4
+.IX Item "-l , --list-backends"
+.Vb 1
+\&    get list of available backends
+.Ve
+.IP "\fB\-a\fR \fIaction\fR, \fB\-\-action\fR=\fIaction\fR" 4
+.IX Item "-a action, --action=action"
+.Vb 1
+\&    perform selected action:
+\&
+\&    \- url=<url>     request this url. Url can be shortened and the
+\&                    leading /thruk/cgi\-bin/ can be stripped.
+\&
+\&    \- report=<nr>   generate report by specifying its id.
+.Ve
+.IP "\fB\-a\fR \fIauthname\fR, \fB\-\-auth\fR=\fIauthname\fR" 4
+.IX Item "-a authname, --auth=authname"
+.Vb 1
+\&    use this username for authentication
+.Ve
+.IP "\fB\-c\fR \fIcredential\fR, \fB\-\-credential\fR=\fIcredential\fR" 4
+.IX Item "-c credential, --credential=credential"
+.Vb 1
+\&    use this key for authentication when using remoteurl
+.Ve
 .IP "\fB\-r\fR \fIremote-url\fR, \fB\-\-remote\-url\fR=\fIremote-url\fR" 4
 .IX Item "-r remote-url, --remote-url=remote-url"
 .Vb 4
@@ -181,48 +219,33 @@ script has the following arguments
 \&    Don\*(Aqt contact remote server. Normally remote\-url is tried first for
 \&    faster access.
 .Ve
-.IP "\fB\-l\fR , \fB\-\-list\-backends\fR" 4
-.IX Item "-l , --list-backends"
-.Vb 1
-\&    get list of available backends
-.Ve
-.IP "\fB\-a\fR \fIauthname\fR, \fB\-\-auth\fR=\fIauthname\fR" 4
-.IX Item "-a authname, --auth=authname"
-.Vb 1
-\&    use this username for authentication
-.Ve
-.IP "\fB\-c\fR \fIcredential\fR, \fB\-\-credential\fR=\fIcredential\fR" 4
-.IX Item "-c credential, --credential=credential"
-.Vb 1
-\&    use this key for authentication when using remoteurl
-.Ve
-.IP "\fB\-u\fR \fIurl\fR, \fB\-\-url\fR=\fIurl\fR" 4
-.IX Item "-u url, --url=url"
-.Vb 2
-\&    request this url. Url can be shortened and the
-\&    leading /thruk/cgi\-bin/ can be stripped.
-.Ve
 .SH "RETURN VALUE"
 .IX Header "RETURN VALUE"
-thruk returns 0 on success or 1 otherwise
+thruk returns 0 on success and >= 1 otherwise
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-export the event log as excel file:
+List available backends
 .PP
 .Vb 1
-\&  %> thruk \-a thrukadmin \-u \*(Aqshowlog.cgi?view_mode=xls\*(Aq > eventlog.xls
+\&  %> thruk \-l
 .Ve
 .PP
-export all services into an excel file:
+Export the event log as excel file:
 .PP
 .Vb 1
-\&  %> thruk \-a thrukadmin \-u \*(Aqstatus.cgi?view_mode=xls&host=all\*(Aq > allservices.xls
+\&  %> thruk \-A thrukadmin \-a \*(Aqurl=/thruk/cgi\-bin/showlog.cgi?view_mode=xls\*(Aq > eventlog.xls
 .Ve
 .PP
-export all services into an excel file:
+Urls can be shortened. Export all services into an excel file:
 .PP
 .Vb 1
-\&  %> thruk \-a thrukadmin \-u \*(Aqavail.cgi?host=all&timeperiod=last7days&csvoutput=1\*(Aq > all_host_availability.csv
+\&  %> thruk \*(Aqstatus.cgi?view_mode=xls&host=all\*(Aq > allservices.xls
+.Ve
+.PP
+Export all services into an excel file:
+.PP
+.Vb 1
+\&  %> thruk \-A thrukadmin \-a \*(Aqurl=avail.cgi?host=all&timeperiod=last7days&csvoutput=1\*(Aq > all_host_availability.csv
 .Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"

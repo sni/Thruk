@@ -522,7 +522,7 @@ sub set_uniq_id {
 
     # make sure id is uniq
     my $nr = 5;
-    while(defined $objects->{'byid'}->{$self->{'id'}}) {
+    while(defined $objects->{'byid'}->{$self->{'id'}} and $objects->{'byid'}->{$self->{'id'}} != $self) {
         $self->{'id'} = $self->_make_id(++$nr);
     }
     return $self->{'id'};

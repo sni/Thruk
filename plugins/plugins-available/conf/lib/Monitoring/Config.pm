@@ -246,7 +246,9 @@ sub get_objects_by_name {
             $id = $objects->{'hostgroup_name'}->{$name2};
         }
         if(defined $id) {
-            return [$self->get_object_by_id($id)];
+            my $obj = $self->get_object_by_id($id);
+            confess("corrupt objects") unless defined $obj;
+            return [$obj];
         }
         return [];
     }
@@ -255,7 +257,9 @@ sub get_objects_by_name {
     my $objs = {};
     my $tid  = $self->{'objects'}->{'byname'}->{'templates'}->{$type}->{$name};
     if(defined $tid) {
-        $objs->{$tid} = $self->get_object_by_id($tid);
+        my $obj = $self->get_object_by_id($tid);
+        confess("corrupt objects") unless defined $obj;
+        $objs->{$tid} = $obj;
     }
 
     # existing object
@@ -263,18 +267,22 @@ sub get_objects_by_name {
         if(defined $self->{'objects'}->{'byname'}->{$type}->{$name}) {
             my $id = $self->{'objects'}->{'byname'}->{$type}->{$name};
             unless(ref $id) {
-                $objs->{$id} = $self->get_object_by_id($id);
+                my $obj = $self->get_object_by_id($id);
+                confess("corrupt objects") unless defined $obj;
+                $objs->{$id} = $obj;
             } else {
                 for my $subtype (keys %{$id}) {
                     for my $subid (values %{$id->{$subtype}}) {
-                        $objs->{$subid} = $self->get_object_by_id($id);
+                        my $obj = $self->get_object_by_id($subid);
+                        confess("corrupt objects") unless defined $obj;
+                        $objs->{$subid} = $obj;
                     }
                 }
             }
         }
     }
-
-    return [ values %{$objs} ];
+    my @objects = values %{$objs};
+    return \@objects;
 }
 
 
@@ -1182,10 +1190,13 @@ sub _update_obj_in_index {
     # set uniq id
     $obj->set_uniq_id($objects);
 
+    # by id
+    $objects->{'byid'}->{$obj->{'id'}} = $obj;
+
     # by template name
     if(defined $tname) {
         my $existing_id = $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname};
-        if(defined $existing_id) {
+        if(defined $existing_id and $existing_id eq $obj->{'id'}) {
             my $orig = $self->get_object_by_id($existing_id);
             if(defined $orig) {
                 push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
@@ -1226,7 +1237,7 @@ sub _update_obj_in_index {
         # single primary key
         $pname = $primary if defined $primary;
         my $existing_id = $objects->{'byname'}->{$obj->{'type'}}->{$pname};
-        if(defined $existing_id and $existing_id ne $obj->get_id()) {
+        if(defined $existing_id and $existing_id ne $obj->{'id'}) {
             my $orig = $self->get_object_by_id($existing_id);
             if(!defined $orig) {
                 push @{$self->{'errors'}},
@@ -1241,9 +1252,6 @@ sub _update_obj_in_index {
     }
 
     if($found or defined $primary) {
-        # by id
-        $objects->{'byid'}->{$obj->{'id'}} = $obj;
-
         # by type
         if(!defined $obj->{'conf'}->{'register'} or $obj->{'conf'}->{'register'} != 0) {
             push @{$objects->{'bytype'}->{$obj->{'type'}}}, $obj->{'id'};
