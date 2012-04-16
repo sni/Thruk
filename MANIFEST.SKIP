@@ -53,3 +53,4 @@ build-stamp
 configure-stamp
 debian/files
 debian/thruk.debhelper.log
+my_templates/

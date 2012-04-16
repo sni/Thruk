@@ -35,3 +35,4 @@ plugins/plugins-available/conf/tmon.out
 MYMETA.json
 MYMETA.yml
 menu_local.conf
+my_templates/
