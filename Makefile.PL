@@ -84,6 +84,7 @@ feature     ('plugin_reports',
   'Chart::Clicker::Data::Series'                  => 0,
   'Chart::Clicker::Decoration::Legend::Tabular'   => 0,
   'Chart::Clicker::Renderer::Pie'                 => 0,
+  'Chart::Clicker::Renderer::StackedBar'          => 0,
   'Graphics::Color::RGB'                          => 0,
 );
 

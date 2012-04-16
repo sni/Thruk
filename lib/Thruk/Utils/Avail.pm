@@ -452,7 +452,13 @@ sub calculate_availability {
     # finished
     $c->stash->{time_token} = time() - $start_time;
 
-    return 1;
+    my $return = {
+        'avail' => $c->stash->{'avail_data'},
+        'logs'  => $c->stash->{'logs'},
+        'start' => $c->stash->{'start'},
+        'end'   => $c->stash->{'end'},
+    };
+    return $return;
 }
 
 
