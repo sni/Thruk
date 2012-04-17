@@ -6,7 +6,8 @@ use Carp;
 use File::Temp qw/ tempfile /;
 use Monitoring::Config::Object;
 use File::Slurp;
-use Encode qw(encode_utf8);
+use utf8;
+use Encode qw(encode_utf8 decode);
 
 =head1 NAME
 
@@ -98,8 +99,12 @@ sub update_objects {
     $self->{'objects'} = [];
     $self->{'errors'}  = [];
 
-    open(my $fh, '<:encoding(UTF-8)', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
+    open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
+        eval { $line = decode( "utf8", $line, Encode::FB_CROAK ) };
+        if ( $@ ) { # input was not utf8
+            $line = decode( "iso-8859-1", $line, Encode::FB_WARN );
+        }
         chomp($line);
         while(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
             my $newline = <$fh>;

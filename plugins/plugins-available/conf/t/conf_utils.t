@@ -1,6 +1,7 @@
 use strict;
 use warnings;
-use Test::More tests => 361;
+use utf8;
+use Test::More tests => 365;
 use Data::Dumper;
 use Storable qw/ dclone /;
 
@@ -253,21 +254,36 @@ is(scalar @{$objs}, 1, "number of hosts");
 $objs = $objects->get_objects_by_name('host', 'name');
 is(scalar @{$objs}, 1, "number of hosts by name");
 
-#$Data::Dumper::Sortkeys = \&my_filter;
-#use Data::Dumper; print STDERR Dumper($objs);
-#use Data::Dumper; print STDERR Dumper($objects);
-#sub my_filter {
-#    my ($hash) = @_;
-#    delete $hash->{'default'};
-#    my @keys   = keys %{$hash};
-#    return [ sort @keys ];
-#}
+###########################################################
+$objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/6/' });
+$objects->init();
+$objs = $objects->get_objects();
+is(scalar @{$objects->{'errors'}}, 0, "number of errors") or diag(Dumper($objects->{'errors'}));
+is(scalar @{$objs}, 2, "number of objects");
+$parsedfile = $objects->{'files'}->[0];
+$obj = $parsedfile->{'objects'}->[0];
+my $g1 = {
+  'servicegroup_name' => 'project_12345',
+  'alias'             => 'Mandantenübergreifender Login',
+};
+is_deeply($obj->{'conf'}, $g1, 'parsed ISO-8859 group');
 
+my $g2 = {
+  'servicegroup_name' => 'project_utf8',
+  'alias'             => 'Mandantenübergreifender Login',
+};
+
+$parsedfile = $objects->{'files'}->[1];
+$obj = $parsedfile->{'objects'}->[0];
+is_deeply($obj->{'conf'}, $g2, 'parsed UTF-8 group');
+
+
+###########################################################
 sub read_file {
-    my $file = shift;
-    local $/ = undef;
-    open my $fh, "<", $file or die "could not open $file: $!";
-    return <$fh>;
+my $file = shift;
+local $/ = undef;
+open my $fh, "<", $file or die "could not open $file: $!";
+return <$fh>;
 }
 
 1;
