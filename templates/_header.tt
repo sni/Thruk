@@ -114,9 +114,9 @@
     <table class="pref_pane" border=1 width="450">
       <tr>
         <td>
-          <table>
+          <table width="430">
             <tr>
-              <th>Theme:</th>
+              <th width="100">Theme:</th>
               <td>
                 <select name="theme" id="pref_theme">
                   [% FOR t = themes %]
@@ -124,6 +124,12 @@
                   [% END %]
                 </select>
                 <input type="button" name="submit" value="change" onClick="prefSubmit('[% escape_html(c.request.uri) %]', '[% theme %]')">
+              </td>
+            </tr>
+            <tr>
+              <th>Sounds:</th>
+              <td>
+                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(c.request.uri) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
               </td>
             </tr>
             <tr>

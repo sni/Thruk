@@ -14,6 +14,7 @@ Getopt::Long::Configure('bundling');
 GetOptions (
    "h|help"             => \$options->{'help'},
    "v|verbose"          => \$options->{'verbose'},
+   "V|version"          => \$options->{'version'},
    "r|remote-url=s"     => \$options->{'remoteurl'},
      "local"            => \$options->{'local'},
    "c|credential=s"     => \$options->{'credential'},
@@ -24,6 +25,7 @@ GetOptions (
    "<>"                 => sub { $options->{'url'} = "".shift },
 ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
 
+if($options->{'version'}) { require Thruk; print "Thruk Version $Thruk::VERSION\n"; exit 0; }
 pod2usage( { -verbose => 2, -exit => 1 } ) if $options->{'help'};
 pod2usage( { -verbose => 2, -exit => 1 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
 

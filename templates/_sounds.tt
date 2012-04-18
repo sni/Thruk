@@ -1,0 +1,3 @@
+﻿[% IF audiofile %]
+<object height="0" width="0" data="[% audiofile %]" ></object>
+[% END %]

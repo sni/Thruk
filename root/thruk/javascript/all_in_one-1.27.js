@@ -151,6 +151,15 @@ function prefSubmit(url, current_theme) {
   }
 }
 
+/* save settings in a cookie */
+function prefSubmitSound(url, value) {
+  var now         = new Date();
+  var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
+  document.cookie = "thruk_sounds="+value+"; path="+url_prefix+"thruk; expires=" + expires.toGMTString() + ";";
+  window.status   = "thruk preferences saved";
+  reloadPage();
+}
+
 /* page refresh rate */
 function setRefreshRate(rate) {
   curRefreshVal = rate;

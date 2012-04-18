@@ -804,6 +804,9 @@ sub _process_combined_page {
     $c->stash->{'show_host_attempts'} = 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
+    # set audio file to play
+    Thruk::Utils::Status::set_audio_file($c);
+
     return 1;
 }
 

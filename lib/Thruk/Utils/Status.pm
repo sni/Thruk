@@ -43,12 +43,13 @@ sub set_default_stash {
     $c->stash->{'servicegroup'}         = $c->{'request'}->{'parameters'}->{'servicegroup'}       || '';
     $c->stash->{'host'}                 = $c->{'request'}->{'parameters'}->{'host'}               || '';
     $c->stash->{'service'}              = $c->{'request'}->{'parameters'}->{'service'}            || '';
-    $c->stash->{'data'}                 = "";
-    $c->stash->{'style'}                = "";
+    $c->stash->{'data'}                 = '';
+    $c->stash->{'style'}                = '';
     $c->stash->{'has_error'}            = 0;
-    $c->stash->{'pager'}                = "";
+    $c->stash->{'pager'}                = '';
     $c->stash->{show_substyle_selector} = 1;
     $c->stash->{imgsize}                = 20;
+    $c->stash->{'audiofile'}            = '';
 
     return;
 }
@@ -454,6 +455,9 @@ sub fill_totals_box {
     my $service_stats = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
 
     $c->stash->{'service_stats'} = $service_stats;
+
+    # set audio file to play
+    Thruk::Utils::Status::set_audio_file($c);
 
     return 1;
 }
@@ -1595,6 +1599,79 @@ sub convert_time_amount {
     }
     return $value;
 }
+
+##############################################
+
+=head2 set_audio_file
+
+  set_audio_file($c)
+
+set if browser should play a sound file
+
+=cut
+sub set_audio_file {
+    my( $c ) = @_;
+
+    return unless $c->stash->{'play_sounds'};
+
+    if(defined $c->stash->{'host_stats'} and defined $c->stash->{'service_stats'}) {
+        for my $s (qw/unreachable down/) {
+            if($c->stash->{'host_stats'}->{$s} > 0 and defined $c->config->{'cgi_cfg'}->{'host_'.$s.'_sound'}) {
+                $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_'.$s.'_sound'};
+                return;
+            }
+        }
+        for my $s (qw/critical warning unknown/) {
+            if($c->stash->{'service_stats'}->{$s} > 0 and defined $c->config->{'cgi_cfg'}->{'service_'.$s.'_sound'}) {
+                $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_'.$s.'_sound'};
+                return;
+            }
+        }
+    }
+
+    elsif(defined $c->stash->{'hosts'} and defined $c->stash->{'services'}) {
+        my $worst_host = 0;
+        for my $h (@{$c->stash->{'hosts'}}) {
+            $worst_host = $h->{'state'} if $worst_host < $h->{'state'};
+        }
+        if($worst_host == 2 and defined $c->config->{'cgi_cfg'}->{'host_unreachable_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_unreachable_sound'};
+            return;
+        }
+        if($worst_host == 1 and defined $c->config->{'cgi_cfg'}->{'host_down_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_down_sound'};
+            return;
+        }
+
+        my $worst_service = 0;
+        for my $s (@{$c->stash->{'services'}}) {
+            my $state = $s->{'state'} + 1;
+            $state = $state - 3 if $state == 4;
+            $worst_service = $state if $worst_host < $state;
+        }
+        if($worst_host == 3 and defined $c->config->{'cgi_cfg'}->{'service_critical_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_critical_sound'};
+            return;
+        }
+        if($worst_host == 2 and defined $c->config->{'cgi_cfg'}->{'service_warning_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_warning_sound'};
+            return;
+        }
+        if($worst_host == 1 and defined $c->config->{'cgi_cfg'}->{'service_unknown_sound'}) {
+            $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_unknown_sound'};
+            return;
+        }
+    }
+
+    if($c->stash->{'audiofile'} eq '' and defined $c->config->{'cgi_cfg'}->{'normal_sound'}) {
+        $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'normal_sound'};
+        return;
+    }
+
+    return;
+}
+
+##############################################
 
 =head1 AUTHOR
 

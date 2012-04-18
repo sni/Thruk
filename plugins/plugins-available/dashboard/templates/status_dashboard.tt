@@ -21,6 +21,8 @@
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/dashboard/thruk/stylesheets/dashboard.css' />
 [% END %]
 [% PROCESS _header.tt extra_header => dashboard_header %]
+[% PROCESS _message.tt %]
+[% PROCESS _sounds.tt %]
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
       <tr>

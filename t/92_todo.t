@@ -7,12 +7,13 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 my $cmds = [
   "grep -nr 'TODO' lib/. templates/. plugins/plugins-available/. root/.",
-  "grep -nr Dumper lib/ plugins/plugins-available/ | grep STDERR | grep use",
+  "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/",
 ];
 
 # find all TODOs
 for my $cmd (@{$cmds}) {
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
+  ok($ph, 'cmd started');
   while(<$ph>) {
     my $line = $_;
     chomp($line);
@@ -22,7 +23,6 @@ for my $cmd (@{$cmds}) {
        or $line =~ m|Unicode/Encoding\.pm|mx
        or $line =~ m|/excanvas.js|mx
        or $line =~ m|jquery\.mobile\-.*.js|mx
-       or $line =~ m|:\d+:\#|mx
     ) {
       next;
     }
@@ -30,7 +30,6 @@ for my $cmd (@{$cmds}) {
     fail($line);
   }
   close($ph);
-  ok($? == 0, 'cmd '.$cmd.' exited with: '.$?);
 }
 
 

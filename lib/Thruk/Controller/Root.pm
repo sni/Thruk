@@ -280,6 +280,18 @@ sub begin : Private {
     # additional views on status pages
     $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
 
+    # sound cookie set?
+    $c->stash->{'play_sounds'} = 0;
+    if(defined $c->request->cookie('thruk_sounds')) {
+        my $sound_cookie = $c->request->cookie('thruk_sounds');
+        if(defined $sound_cookie->value and $sound_cookie->value eq 'off') {
+            $c->stash->{'play_sounds'} = 0;
+        }
+        if(defined $sound_cookie->value and $sound_cookie->value eq 'on') {
+            $c->stash->{'play_sounds'} = 1;
+        }
+    }
+
     # make private _ hash keys available
     $Template::Stash::PRIVATE = undef;
 

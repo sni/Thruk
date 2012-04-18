@@ -140,6 +140,8 @@ plugins/plugins-available/conf/t/data/4/dir/file3.cfg
 plugins/plugins-available/conf/t/data/4/file1.cfg
 plugins/plugins-available/conf/t/data/4/file2.cfg
 plugins/plugins-available/conf/t/data/5/hosts.cfg
+plugins/plugins-available/conf/t/data/6/servicegroups_iso-8859.cfg
+plugins/plugins-available/conf/t/data/6/servicegroups_utf8.cfg
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
 plugins/plugins-available/conf/templates/_conf_frame.tt
@@ -292,6 +294,10 @@ root/thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.8.16.custom.css
 root/thruk/javascript/jquery-ui/js/jquery-ui-1.8.16.custom.min.js
 root/thruk/javascript/overlib.js
 root/thruk/javascript/thruk-1.27.js
+root/thruk/media/critical.wav
+root/thruk/media/ok.wav
+root/thruk/media/unknown.wav
+root/thruk/media/warning.wav
 root/thruk/startup.html
 root/thruk/themes
 script/append.make
@@ -391,6 +397,7 @@ templates/_service_command_box.tt
 templates/_service_command_box_full.tt
 templates/_service_status_details_box.tt
 templates/_show_link.tt
+templates/_sounds.tt
 templates/_status_cmd_pane.tt
 templates/_status_detail_table.tt
 templates/_status_filter.tt
