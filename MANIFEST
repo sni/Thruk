@@ -29,6 +29,7 @@ docs/thruk.8
 docs/thruk8.txt
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
+examples/list_hosts
 get_version
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm

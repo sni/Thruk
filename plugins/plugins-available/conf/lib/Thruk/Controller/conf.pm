@@ -94,7 +94,6 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     $c->stash->{sub}          = $subcat;
     $c->stash->{action}       = $action;
     $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
-    $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
 
     # set default
     $c->stash->{conf_config}->{'show_plugin_syntax_helper'} = 1 unless defined $c->stash->{conf_config}->{'show_plugin_syntax_helper'};
@@ -943,73 +942,7 @@ sub _cmd {
 ##########################################################
 sub _update_objects_config {
     my ( $self, $c ) = @_;
-
-    return unless $c->stash->{has_obj_conf};
-
-    my $refresh = $c->{'request'}->{'parameters'}->{'refresh'} || 0;
-
-    $c->stats->profile(begin => "_update_objects_config()");
-    my $model                    = $c->model('Objects');
-    my $peer_conftool            = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
-    $peer_conftool               = Thruk::Utils::Conf::get_default_peer_config($peer_conftool);
-    $c->stash->{'peer_conftool'} = $peer_conftool;
-
-    # already parsed?
-    if((   $model->cache_exists($c->stash->{'param_backend'})
-        or Thruk::Utils::Conf::get_model_retention($c)
-       )
-       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool, $model)
-    ) {
-        # objects initialized
-    }
-    # currently parsing
-    elsif(my $id = $model->currently_parsing($c->stash->{'param_backend'})) {
-        $c->response->redirect("job.cgi?job=".$id);
-        return 0;
-    }
-    else {
-        # need to parse complete objects
-        if(scalar keys %{$c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
-            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
-                                               message => 'please stand by while reading the configuration files...',
-                                               forward => $c->request->uri()
-                                              }
-                                        );
-            $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
-            $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
-            return;
-        }
-        return 0;
-    }
-    $c->{'obj_db'}->{'stats'} = $c->{'stats'};
-
-    if($c->{'obj_db'}->{'cached'}) {
-        $c->stats->profile(begin => "checking objects");
-        $c->{'obj_db'}->check_files_changed($refresh);
-        $c->stats->profile(end => "checking objects");
-    }
-
-    my $errnum = scalar @{$c->{'obj_db'}->{'errors'}};
-    if($errnum > 0) {
-        $c->{'obj_db'}->{'errors_displayed'} = 1;
-        my $error = $c->{'obj_db'}->{'errors'}->[0];
-        if($errnum > 1) {
-            $error = 'Got multiple errors!';
-        }
-        if($c->{'obj_db'}->{'needs_update'}) {
-            $error = 'Config has been changed externally. Need to <a href="'.Thruk::Utils::Filter::uri_with($c, { 'refresh' => 1 }).'">refresh</a> objects.';
-        }
-        Thruk::Utils::set_message( $c,
-                                  'fail_message',
-                                  $error,
-                                  ($errnum == 1 && !$c->{'obj_db'}->{'needs_update'}) ? undef : $c->{'obj_db'}->{'errors'},
-                                );
-    } elsif($refresh) {
-        Thruk::Utils::set_message( $c, 'success_message', 'refresh successful');
-    }
-
-    $c->stats->profile(end => "_update_objects_config()");
-    return 1;
+    return Thruk::Utils::Conf::set_object_model($c);
 }
 
 
@@ -1021,70 +954,6 @@ sub _find_files {
     my $files = $c->{'obj_db'}->_get_files_for_folder($dir, $types);
     return $files;
 }
-
-
-##########################################################
-sub _get_backends_with_obj_config {
-    my $c        = shift;
-    my $backends = {};
-    my $firstpeer;
-    $c->stash->{'param_backend'} = '';
-
-    # first non hidden peer with object config enabled
-    for my $peer (@{$c->{'db'}->get_peers()}) {
-        $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
-        next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
-        if(scalar keys %{$peer->{'configtool'}} > 0) {
-            $firstpeer = $peer->{'key'} unless defined $firstpeer;
-            $backends->{$peer->{'key'}} = $peer->{'configtool'}
-        } else {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5;
-        }
-    }
-
-    # first peer with object config enabled
-    if(!defined $firstpeer) {
-        for my $peer (@{$c->{'db'}->get_peers()}) {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
-            if(scalar keys %{$peer->{'configtool'}} > 0) {
-                $firstpeer = $peer->{'key'} unless defined $firstpeer;
-                $backends->{$peer->{'key'}} = $peer->{'configtool'}
-            } else {
-                $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5;
-            }
-        }
-    }
-
-    # from cookie setting?
-    if(defined $c->request->cookie('thruk_conf')) {
-        for my $val (@{$c->request->cookie('thruk_conf')->{'value'}}) {
-            next unless defined $c->stash->{'backend_detail'}->{$val};
-            $c->stash->{'param_backend'} = $val;
-        }
-    }
-
-    # from url parameter
-    if(defined $c->{'request'}->{'parameters'}->{'backend'}) {
-        my $val = $c->{'request'}->{'parameters'}->{'backend'};
-        if(defined $c->stash->{'backend_detail'}->{$val}) {
-            $c->stash->{'param_backend'} = $val;
-            # save value in the cookie
-            $c->res->cookies->{'thruk_conf'} = {
-                value => $val,
-            };
-        }
-    }
-
-    if($c->stash->{'param_backend'} eq '' and defined $firstpeer) {
-        $c->stash->{'param_backend'} = $firstpeer;
-    }
-    if($c->stash->{'param_backend'} and defined $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}) {
-        $c->stash->{'backend_detail'}->{$c->stash->{'param_backend'}}->{'disabled'} = 7;
-    }
-    $c->stash->{'backend_chooser'} = 'switch';
-    return $backends;
-}
-
 
 ##########################################################
 sub _get_context_object {

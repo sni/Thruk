@@ -26,7 +26,7 @@ $Thruk::Utils::CLI::verbose = 0;
 
 =head2 new
 
-  new()
+  new($options)
 
 create CLI Tool object
 
@@ -44,6 +44,21 @@ sub new {
     $self->{'opt'}->{'credential'} = $self->_read_secret() unless defined $self->{'opt'}->{'credential'};
 
     return $self;
+}
+
+##############################################
+
+=head2 get_c
+
+  get_c()
+
+return catalysts c object
+
+=cut
+sub get_c {
+    my($self) = @_;
+    my($c, $failed) = $self->_dummy_c();
+    return $c;
 }
 
 ##############################################

@@ -52,7 +52,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
 
 =head1 SYNOPSIS
 
-Usage: thruk [options] | [url]
+Usage: thruk [options] | url]
 
 Options:
   -h, --help                    Show this help message and exit
