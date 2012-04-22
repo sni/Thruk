@@ -149,19 +149,20 @@ sub date_format {
     my($t_year,$t_month,$t_day) = @today;
     $c->{'stash'}->{'today'} = \@today;
 
+    my($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst);
     eval {
-        my($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst) = Localtime($timestamp);
-
-        if($t_year == $year and $t_month == $month and $t_day == $day) {
-            return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format_today'}));
-        }
-
-        return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format'}));
+        ($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst) = Localtime($timestamp);
     };
     if($@) {
-        confess("date_format($timestamp) failed: $@");
+        $c->log->warn("date_format($timestamp) failed: $@");
+        return "err:$timestamp";
     }
-    return;
+
+    if($t_year == $year and $t_month == $month and $t_day == $day) {
+        return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format_today'}));
+    }
+
+    return(Thruk::Utils::format_date($timestamp, $c->{'stash'}->{'datetime_format'}));
 }
 
 
