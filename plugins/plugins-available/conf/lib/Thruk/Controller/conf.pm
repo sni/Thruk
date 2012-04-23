@@ -94,6 +94,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     $c->stash->{sub}          = $subcat;
     $c->stash->{action}       = $action;
     $c->stash->{conf_config}  = $c->config->{'Thruk::Plugin::ConfigTool'} || {};
+    $c->stash->{has_obj_conf} = scalar keys %{Thruk::Utils::Conf::_get_backends_with_obj_config($c)};
 
     # set default
     $c->stash->{conf_config}->{'show_plugin_syntax_helper'} = 1 unless defined $c->stash->{conf_config}->{'show_plugin_syntax_helper'};
