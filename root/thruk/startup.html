@@ -18,6 +18,8 @@
             ref = ref.replace(/\.cgi&/, '.cgi?');
             if(ref != '') {
               ref = unescape(ref);
+              // IE needs absolute URL
+              ref = window.location.protocol + '//' + window.location.host + ref;
               window.location = ref;
             }
           },
