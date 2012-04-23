@@ -180,6 +180,7 @@ sub begin : Private {
     $c->stash->{'use_frames'}         = $use_frames;
     $c->stash->{'show_nav_button'}    = $show_nav_button;
     $c->stash->{'reload_nav'}         = $c->{'request'}->{'parameters'}->{'reload_nav'} || '';
+    $c->stash->{'show_sounds'}        = 0;
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});

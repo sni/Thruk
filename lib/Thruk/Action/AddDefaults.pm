@@ -220,6 +220,17 @@ sub add_defaults {
     }
 
     ###############################
+    # show sound preferences?
+    $c->stash->{'has_cgi_sounds'} = 0;
+    $c->stash->{'show_sounds'}    = 1;
+    for my $key (qw/host_unreachable host_down service_critical service_warning service_unknown normal/) {
+        if(defined $c->config->{'cgi_cfg'}->{$key."_sound"}) {
+            $c->stash->{'has_cgi_sounds'} = 1;
+            last;
+        }
+    }
+
+    ###############################
     $c->stats->profile(end => "AddDefaults::add_defaults");
     return;
 }
