@@ -97,6 +97,7 @@ my %config = ('name'                   => 'Thruk',
                                           'date_format'    => \&Thruk::Utils::Filter::date_format,
                                           'format_date'    => \&Thruk::Utils::format_date,
                                           'nl2br'          => \&Thruk::Utils::Filter::nl2br,
+                                          'action_icon'    => \&Thruk::Utils::Filter::action_icon,
                                           'calculate_first_notification_delay_remaining' => \&Thruk::Utils::Filter::calculate_first_notification_delay_remaining,
 
                                           'version'        => $VERSION,

@@ -358,7 +358,7 @@ sub get_services {
             plugin_output process_performance_data retry_interval scheduled_downtime_depth
             state state_type modified_attributes_list
             last_time_critical last_time_ok last_time_unknown last_time_warning
-            display_name host_display_name
+            display_name host_display_name host_custom_variable_names host_custom_variable_values
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {

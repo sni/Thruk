@@ -646,6 +646,7 @@ ex.:
 Change path to your host action icons. You may use
 relative paths to specify completely different location.
 You also may want to use 'action_pnp.png' when using pnp.
+Icon can be overriden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
@@ -657,6 +658,7 @@ ex.:
 Change path to your service action icons. You may use
 relative paths to specify completely different location.
 You also may want to use 'action_pnp.png' when using pnp.
+Icon can be overriden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
