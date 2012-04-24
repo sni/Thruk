@@ -7,6 +7,11 @@
     <script type="text/javascript" src="javascript/jquery-1.6.2.min.js"></script>
     <script type="text/javascript">
     <!--
+      function debug(str) {
+        if (window.console != undefined) {
+          console.debug(str);
+        }
+      }
       jQuery.noConflict();
       jQuery(document).ready(function() {
         jQuery.ajax({
@@ -17,7 +22,8 @@
             ref = ref.replace(/^\?/, '');
             ref = ref.replace(/\.cgi&/, '.cgi?');
             if(ref != '') {
-              ref = unescape(ref);
+              // breaks status.cgi urls with referer
+              //ref = unescape(ref);
               // IE needs absolute URL
               ref = window.location.protocol + '//' + window.location.host + ref;
               window.location = ref;
