@@ -258,7 +258,7 @@ if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
         open(my $fh, ">$secretfile");
         print $fh $digest;
         close($fh);
-        chmod(0600, $secretfile);
+        chmod(0660, $secretfile);
         if($> == 0) {
             my @stat = stat($var_path);
             chown($stat[4], $stat[5], $secretfile);
