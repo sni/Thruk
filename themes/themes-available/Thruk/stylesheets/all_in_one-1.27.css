@@ -57,7 +57,7 @@ body.navbar {
 
 /* preferences pane */
 div.pref_pane {
-  width:450px;
+  width:470px;
   height:100px;
   position:absolute;
   top: 0px;
@@ -84,7 +84,9 @@ table.pref_pane > tbody > tr > td {
   border-color: #C4C2C2;
   background-color: #C4C2C2;
 }
-
+TABLE.pref_pane TD {
+    text-align: left;
+}
 img.pref_pane_button {
   position:absolute;
   top: 4px;
@@ -401,11 +403,11 @@ table.overDivTable > tbody > tr > td {
   color:#DCE5C1;
   font-size:10pt;
   text-align:left;
-  border: 0x none #000000;
+  border: 0px none #000000;
 }
 .overDivContent {
   background-color: #DBDBDB;
-  border: 0x none #000000;
+  border: 0px none #000000;
 }
 
 table.overDivTable a {
@@ -765,7 +767,8 @@ td.filterValueInput input.filter_pre_value {
 
 SELECT.filter_op_select {
   width: 45px;
-}#currentversioninfo {
+}
+#currentversioninfo {
   font-size:14px;
 }
 

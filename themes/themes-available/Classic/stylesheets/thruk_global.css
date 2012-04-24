@@ -403,11 +403,11 @@ table.overDivTable > tbody > tr > td {
   color:#DCE5C1;
   font-size:10pt;
   text-align:left;
-  border: 0x none #000000;
+  border: 0px none #000000;
 }
 .overDivContent {
   background-color: #DBDBDB;
-  border: 0x none #000000;
+  border: 0px none #000000;
 }
 
 table.overDivTable a {
@@ -768,4 +768,3 @@ td.filterValueInput input.filter_pre_value {
 SELECT.filter_op_select {
   width: 45px;
 }
-
