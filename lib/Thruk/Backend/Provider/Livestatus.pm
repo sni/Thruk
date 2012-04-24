@@ -373,7 +373,9 @@ sub get_services {
 
     $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
     # make it possible to order by state
-    $options{'options'}->{'callbacks'}->{'state_order'}            = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
+    if(grep {/^state$/mx} @{$options{'columns'}}) {
+        $options{'options'}->{'callbacks'}->{'state_order'}        = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
+    }
     my $data = $self->_get_table('services', \%options);
     unless(wantarray) {
         confess("get_services() should not be called in scalar context");
