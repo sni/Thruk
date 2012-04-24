@@ -125,6 +125,7 @@ sub begin : Private {
         no_external_job_forks               => 0,
         host_action_icon                    => 'action.gif',
         service_action_icon                 => 'action.gif',
+        cookie_path                         => $c->config->{'url_prefix'}.'thruk',
     };
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
@@ -143,7 +144,7 @@ sub begin : Private {
                   use_new_search ajax_search show_notification_number strict_passive_mode
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
                   priorities show_modified_attributes downtime_duration expire_ack_duration
-                  show_backends_in_table host_action_icon service_action_icon
+                  show_backends_in_table host_action_icon service_action_icon cookie_path
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

@@ -1,6 +1,7 @@
 ﻿<script type="text/javascript">
 <!--
   var url_prefix             = '[% url_prefix %]';
+  var cookie_path            = '[% cookie_path %]';
   var theme                  = '[% theme %]';
   var has_expire_acks        = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
 -->

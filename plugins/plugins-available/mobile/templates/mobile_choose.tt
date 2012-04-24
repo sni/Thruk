@@ -3,11 +3,12 @@
   <head>
     <title>[% title_prefix %]Mobile Thruk</title>
     <script type="application/x-javascript">
+      var cookie_path = '[% cookie_path %]';
       if(confirm("Do you want to use the mobile version of Thruk? (You will only be asked once per session)")) {
-        document.cookie = "thruk_mobile=1; path=/;";
+        document.cookie = "thruk_mobile=1; path="+cookie_path+";";
         window.location.assign('[% redirect %]');
       } else {
-        document.cookie = "thruk_mobile=0; path=/;";
+        document.cookie = "thruk_mobile=0; path="+cookie_path+";";
         window.location.reload();
       }
     </script>

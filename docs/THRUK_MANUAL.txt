@@ -941,7 +941,17 @@ the themes folder.
 
 ex.:
 
-  default_theme = Classic
+  default_theme = Thruk
+
+
+==== cookie_path
+
+Path used for cookies. Do not change unless you have weird url
+rewrites which breaks setting cookies.
+
+ex.:
+
+  cookie_path = /
 
 
 ==== use_pager

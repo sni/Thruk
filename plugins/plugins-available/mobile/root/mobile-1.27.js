@@ -29,13 +29,13 @@ jQuery(document).ready(function(e){
     jQuery("A.theme_button").bind("vclick", function(event, ui) {
         var now         = new Date();
         var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
-        document.cookie = "thruk_mtheme=" + this.dataset.theme + "; path=/; expires=" + expires.toGMTString() + ";";
+        document.cookie = "thruk_mtheme=" + this.dataset.theme + "; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
         window.location.reload();
     });
 
     /* bind full client button */
     jQuery("A#full_client_link").bind("vclick", function(event, ui) {
-        document.cookie = "thruk_mobile=0; path=/;";
+        document.cookie = "thruk_mobile=0; path="+cookie_path+";";
         window.location.assign(url_prefix + 'thruk/');
     });
 
@@ -58,7 +58,7 @@ jQuery(document).ready(function(e){
             serialized += '&'+key+'='+state;
         };
         serialized = serialized.substring(1);
-        document.cookie = "thruk_backends="+serialized+ "; path=/;";
+        document.cookie = "thruk_backends="+serialized+ "; path="+cookie_path+";";
         refresh_host_status(true, true);
         refresh_service_status(true, true);
     });

@@ -128,7 +128,7 @@ function prefSubmit(url, current_theme) {
   if(current_theme != sel.value) {
     additionalParams['theme']      = '';
     additionalParams['reload_nav'] = 1;
-    document.cookie = "thruk_theme="+sel.value + "; path="+url_prefix+"thruk; expires=" + expires.toGMTString() + ";";
+    document.cookie = "thruk_theme="+sel.value + "; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
     window.status   = "thruk preferences saved";
     reloadPage();
   }
@@ -138,7 +138,7 @@ function prefSubmit(url, current_theme) {
 function prefSubmitSound(url, value) {
   var now         = new Date();
   var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
-  document.cookie = "thruk_sounds="+value+"; path="+url_prefix+"thruk; expires=" + expires.toGMTString() + ";";
+  document.cookie = "thruk_sounds="+value+"; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
   window.status   = "thruk preferences saved";
   reloadPage();
 }
@@ -256,7 +256,7 @@ function toggleBackend(backend) {
   if(backend_chooser == 'switch') {
     jQuery('.button_peerUP').removeAttr('class').addClass('button_peerDIS');
     button.className = 'button_peerUP';
-    document.cookie = "thruk_conf="+backend+ "; path="+url_prefix+"thruk;";
+    document.cookie = "thruk_conf="+backend+ "; path="+cookie_path+";";
     reloadPage();
     return;
   }
@@ -285,7 +285,7 @@ function toggleBackend(backend) {
   additionalParams['reload_nav'] = 1;
 
   /* save current selected backends in session cookie */
-  document.cookie = "thruk_backends="+toQueryString(current_backend_states)+ "; path="+url_prefix+"thruk;";
+  document.cookie = "thruk_backends="+toQueryString(current_backend_states)+ "; path="+cookie_path+";";
   window.clearTimeout(backendSelTimer);
   backendSelTimer  = window.setTimeout('reloadPage()', 1000);
   return;

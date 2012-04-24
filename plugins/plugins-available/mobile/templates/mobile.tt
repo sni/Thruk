@@ -8,10 +8,11 @@
     <script src="[% url_prefix %]thruk/javascript/jquery-1.6.2.min.js"></script>
     <script type="application/x-javascript">
       var url_prefix             = '[% url_prefix %]';
+      var cookie_path            = '[% cookie_path %]';
       var current_backend_states = undefined;
       var failed_backends        = 0;
       var program_starts         = undefined;
-      document.cookie            = "thruk_mobile=1; path=/;";
+      document.cookie            = "thruk_mobile=1; path="+cookie_path+";";
       var strict_passive_mode    = [% strict_passive_mode %];
     </script>
     <script src="[% url_prefix %]thruk/plugins/mobile/mobile-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
