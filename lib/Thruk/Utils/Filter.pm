@@ -400,7 +400,6 @@ sub get_message {
         $c->res->cookies->{'thruk_message'} = {
             value   => '',
             expires => '-1M',
-            path    => $c->stash->{'cookie_path'},
         };
         # sometimes the cookie is empty, so delete it in every case
         # and show it if it contains data

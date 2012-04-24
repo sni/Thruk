@@ -225,7 +225,7 @@ sub get_hosts {
         }
     }
 
-    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
+    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
     my $data = $self->_get_table('hosts', \%options);
 
     unless(wantarray) {
@@ -371,11 +371,14 @@ sub get_services {
     }
 
 
-    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { my $row = shift; return $row->{'last_state_change'} || $self->{'last_program_start'}; };
+    $options{'options'}->{'callbacks'}->{'last_state_change_plus'} = sub { return $_[0]->{'last_state_change'} || $self->{'last_program_start'}; };
+    # make it possible to order by state
+    $options{'options'}->{'callbacks'}->{'state_order'}            = sub { return 4 if $_[0]->{'state'} == 2; return $_[0]->{'state'} };
     my $data = $self->_get_table('services', \%options);
     unless(wantarray) {
         confess("get_services() should not be called in scalar context");
     }
+
     return($data, undef, $size);
 }
 
@@ -526,14 +529,14 @@ sub get_timeperiods {
         /];
 
     # fill in values not provided by livestatus
-    $options{'options'}->{'callbacks'}->{'exclusion'} = sub { return ""; };
-    $options{'options'}->{'callbacks'}->{'sunday'}    = sub { return ""; };
-    $options{'options'}->{'callbacks'}->{'monday'}    = sub { return ""; };
-    $options{'options'}->{'callbacks'}->{'tuesday'}   = sub { return ""; };
-    $options{'options'}->{'callbacks'}->{'wednesday'} = sub { return ""; };
-    $options{'options'}->{'callbacks'}->{'thursday'}  = sub { return ""; };
-    $options{'options'}->{'callbacks'}->{'friday'}    = sub { return ""; };
-    $options{'options'}->{'callbacks'}->{'saturday'}  = sub { return ""; };
+    $options{'options'}->{'callbacks'}->{'exclusion'} = sub { return ''; };
+    $options{'options'}->{'callbacks'}->{'sunday'}    = sub { return ''; };
+    $options{'options'}->{'callbacks'}->{'monday'}    = sub { return ''; };
+    $options{'options'}->{'callbacks'}->{'tuesday'}   = sub { return ''; };
+    $options{'options'}->{'callbacks'}->{'wednesday'} = sub { return ''; };
+    $options{'options'}->{'callbacks'}->{'thursday'}  = sub { return ''; };
+    $options{'options'}->{'callbacks'}->{'friday'}    = sub { return ''; };
+    $options{'options'}->{'callbacks'}->{'saturday'}  = sub { return ''; };
 
     return $self->_get_table('timeperiods', \%options);
 }
@@ -635,7 +638,7 @@ sub get_scheduling_queue {
                                                          { 'check_options' => { '!=' => '0' }}]
                                               }
                                               ],
-                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => sub { return ""; } } }
+                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => sub { return ''; } } }
                                     );
 
     my $queue = [];

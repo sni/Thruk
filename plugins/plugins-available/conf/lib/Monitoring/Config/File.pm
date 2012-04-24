@@ -388,7 +388,7 @@ sub save {
         push @{$self->{'errors'}}, "cannot write to ".$self->{'path'}.": ".$!;
         return;
     };
-    print $fh encode_utf8($content);
+    print $fh $content;
     close($fh);
 
     $self->{'changed'}     = 0;
@@ -487,7 +487,7 @@ sub _get_new_file_content {
         $linenr += 2;
     }
 
-    return $new_content;
+    return encode_utf8($new_content);
 }
 
 ##########################################################

@@ -272,7 +272,7 @@ sub _process_details_page {
     my $sortoptions = {
         '1' => [ [ 'host_name',   'description' ], 'host name' ],
         '2' => [ [ 'description', 'host_name' ],   'service name' ],
-        '3' => [ [ 'has_been_checked', 'state', 'host_name', 'description' ], 'service status' ],
+        '3' => [ [ 'has_been_checked', 'state_order', 'host_name', 'description' ], 'service status' ],
         '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
         '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
         '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],

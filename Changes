@@ -15,6 +15,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - internal changes ( removed prototype library )
           - mobile:
               - added performance graph to mobile interface
+          - fixed sorting by status (critical > unknown)
 
 1.26     Mon Mar 26 13:40:33 CEST 2012
           - show remaining minutes when using first_notification_delay
