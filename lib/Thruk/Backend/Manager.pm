@@ -291,7 +291,8 @@ sub get_contactgroups_by_contact {
     my( $self, $c, $username ) = @_;
 
     my $cache       = $c->cache;
-    my $cached_data = $cache->get($username);
+    my $cached_data = {};
+    $cached_data    = $cache->get($username) if defined $username;
     if( defined $cached_data->{'contactgroups'} ) {
         return $cached_data->{'contactgroups'};
     }

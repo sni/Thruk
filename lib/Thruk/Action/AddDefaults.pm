@@ -93,7 +93,8 @@ sub add_defaults {
     ###############################
     # read cached data
     my $cache = $c->cache;
-    my $cached_data = $cache->get($c->stash->{'remote_user'});
+    my $cached_data = {};
+    $cached_data = $cache->get($c->stash->{'remote_user'}) if defined $c->stash->{'remote_user'};
 
     ###############################
     my($disabled_backends,$has_groups) = _set_enabled_backends($c, $cache);
@@ -127,7 +128,7 @@ sub add_defaults {
 
     ###############################
     # read cached data again, groups could have changed
-    $cached_data = $cache->get($c->stash->{'remote_user'});
+    $cached_data = $cache->get($c->stash->{'remote_user'}) if defined $c->stash->{'remote_user'};
     $c->log->debug("cached data:");
     $c->log->debug(Dumper($cached_data));
 
@@ -375,7 +376,7 @@ sub _set_processinfo {
             'prev_last_program_restart' => $last_program_restart,
             'contactgroups'             => $contactgroups,
         };
-        $cache->set($c->stash->{'remote_user'}, $cached_data);
+        $cache->set($c->stash->{'remote_user'}, $cached_data) if defined $c->stash->{'remote_user'};
         $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
     }
 
