@@ -69,17 +69,21 @@ sub add_defaults {
     ###############################
     # Authentication
     $c->log->debug("checking auth");
-    unless ($c->user_exists) {
-        $c->log->debug("user not authenticated yet");
-        unless ($c->authenticate( {} )) {
-            # return 403 forbidden or kick out the user in other way
-            $c->log->debug("user is not authenticated");
-            return $c->detach('/error/index/10');
-        };
-    }
-    $c->log->debug("user authenticated as: ".$c->user->get('username'));
-    if($c->user_exists) {
-        $c->stash->{'remote_user'}  = $c->user->get('username');
+    if($c->request->uri->path_query =~ m~^(/thruk|/\w+/thruk)/cgi-bin/remote\.cgi~mx) {
+        $c->log->debug("remote.cgi does not use authentication");
+    } else {
+        unless ($c->user_exists) {
+            $c->log->debug("user not authenticated yet");
+            unless ($c->authenticate( {} )) {
+                # return 403 forbidden or kick out the user in other way
+                $c->log->debug("user is not authenticated");
+                return $c->detach('/error/index/10');
+            };
+        }
+        $c->log->debug("user authenticated as: ".$c->user->get('username'));
+        if($c->user_exists) {
+            $c->stash->{'remote_user'}  = $c->user->get('username');
+        }
     }
 
     ###############################
