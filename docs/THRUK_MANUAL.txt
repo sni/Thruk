@@ -641,6 +641,26 @@ ex.:
   physical_logo_path = /usr/share/icons/
 
 
+==== host_action_icon
+
+Change path to your host action icons. You may use
+relative paths to specify completely different location.
+
+ex.:
+
+  host_action_icon = action.gif
+
+
+==== service_action_icon
+
+Change path to your service action icons. You may use
+relative paths to specify completely different location.
+
+ex.:
+
+  service_action_icon = action.gif
+
+
 ==== use_strict_host_authorization
 
 When set to a true value, every contact will only see the hosts where

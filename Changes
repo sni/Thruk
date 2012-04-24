@@ -10,6 +10,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added event details to logs excel export
           - added site name to excel export (Mark Wilkinson)
           - added sound alerts
+          - added config item for custom host/service action icons
           - internal changes ( removed prototype library )
           - mobile:
               - added performance graph to mobile interface

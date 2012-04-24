@@ -146,7 +146,7 @@
             <a href='[% h.notes_url_expanded %]' target='[% c.config.cgi_cfg.notes_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border="0" width="20" height="20" alt='View Extra Host Notes' title='View Extra Host Notes'></a>
             [% END %]
             [% IF h.action_url_expanded %]
-            <a href='[% h.action_url_expanded %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a>
+            <a href='[% h.action_url_expanded %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% host_action_icon %]' border="0" width="20" height="20" alt='Perform Extra Host Actions' title='Perform Extra Host Actions'></a>
             [% END %]
             <a href='status.cgi?host=[% h.name | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/status2.gif' border="0" alt='View Service Details For This Host' title='View Service Details For This Host' width="20" height="20"></a>
             [% IF use_feature_statusmap %]
