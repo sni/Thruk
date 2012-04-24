@@ -851,6 +851,9 @@ sub _update_core_conf {
     }
     $self->{'_coreconf'} = $core_conf;
 
+    my $basedir = $core_conf;
+    $basedir =~ s/\/[^\/]*?$//mx;
+
     open(my $fh, '<', $core_conf) or do {
         push @{$self->{'errors'}}, "cannot read $self->{'_coreconf'}: $!";
         $self->{'initialized'} = 0;
@@ -862,14 +865,15 @@ sub _update_core_conf {
         next unless defined $value;
         $key   =~ s/^\s*(.*?)\s*$/$1/mx;
         $value =~ s/^\s*(.*?)\s*$/$1/mx;
+
         if($key eq 'cfg_file') {
-            push @{$self->{'config'}->{'obj_file'}}, $value;
+            push @{$self->{'config'}->{'obj_file'}}, $self->_resolve_relative_path($value, $basedir);
         }
         if($key eq 'cfg_dir') {
-            push @{$self->{'config'}->{'obj_dir'}}, $value;
+            push @{$self->{'config'}->{'obj_dir'}}, $self->_resolve_relative_path($value, $basedir);
         }
         if($key eq 'resource_file') {
-            $self->{'config'}->{'obj_resource_file'} = $value;
+            $self->{'config'}->{'obj_resource_file'} = $self->_resolve_relative_path($value, $basedir);
         }
     }
     close($fh);
@@ -909,7 +913,7 @@ sub _read_objects {
 
 ##########################################################
 sub _set_objects_from_files {
-    my $self  = shift;
+    my ( $self ) = @_;
 
     for my $file (@{$self->{'files'}}) {
         next if $file->{'deleted'} == 1;
@@ -970,7 +974,11 @@ sub _get_files {
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
         my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
-        push @files, $file;
+        if(defined $file) {
+            push @files, $file;
+        } else {
+            warn('got no valid file for: '.$filename);
+        }
     }
 
     return \@files;
@@ -1390,6 +1398,18 @@ sub _all_object_links_callback {
         }
     }
     return;
+}
+
+##########################################################
+sub _resolve_relative_path {
+    my ($self, $file, $basedir) = @_;
+    if($file !~ m|^/|mx) {
+        $file = $basedir.'/'.$file;
+        $file =~ s|//|/|gmx;
+        my $x = 0;
+        while( $x < 10 && $file =~ s|/[^/]+/\.\./|/|gmx) { $x++ };
+    }
+    return $file;
 }
 
 ##########################################################

@@ -15,6 +15,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - internal changes ( removed prototype library )
           - mobile:
               - added performance graph to mobile interface
+          - conf tool:
+              - support relative paths in nagios.cfg
           - fixed sorting by status (critical > unknown)
 
 1.26     Mon Mar 26 13:40:33 CEST 2012
