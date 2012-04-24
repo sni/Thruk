@@ -6,6 +6,7 @@ use warnings;
 
 use utf8;
 use Carp;
+use POSIX qw(tzset);
 use Log::Log4perl::Catalyst;
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
@@ -276,6 +277,7 @@ if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
 my $timezone = __PACKAGE__->config->{'use_timezone'};
 if(defined $timezone) {
     $ENV{'TZ'} = $timezone;
+    POSIX::tzset();
 }
 
 ###################################################

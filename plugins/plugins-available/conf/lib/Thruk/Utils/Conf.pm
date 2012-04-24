@@ -2,6 +2,7 @@ package Thruk::Utils::Conf;
 
 use strict;
 use warnings;
+use POSIX qw(tzset);
 use File::Slurp;
 use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
@@ -170,6 +171,7 @@ sub update_conf {
                 } else {
                     delete $ENV{'TZ'};
                 }
+                POSIX::tzset();
             }
         }
     }
