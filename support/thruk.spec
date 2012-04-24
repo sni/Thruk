@@ -17,7 +17,7 @@ Patch2:        0003-thruk.pm.patch
 Patch3:        0004-thruk_fastcgi.pl.patch
 Patch4:        0005-thruk_script.patch
 Requires(pre): shadow-utils
-Requires:      perl
+Requires:      perl logrotate
 %if %{defined suse_version}
 Requires: apache2 apache2-mod_fcgid
 %else
