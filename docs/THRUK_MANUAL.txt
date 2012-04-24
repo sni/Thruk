@@ -645,7 +645,7 @@ ex.:
 
 Change path to your host action icons. You may use
 relative paths to specify completely different location.
-You also may want to use 'action_pnp.gif' when using pnp.
+You also may want to use 'action_pnp.png' when using pnp.
 
 ex.:
 
@@ -656,7 +656,7 @@ ex.:
 
 Change path to your service action icons. You may use
 relative paths to specify completely different location.
-You also may want to use 'action_pnp.gif' when using pnp.
+You also may want to use 'action_pnp.png' when using pnp.
 
 ex.:
 

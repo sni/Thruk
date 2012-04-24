@@ -580,7 +580,7 @@ THANKS
 themes/themes-available/Classic/images/accept.png
 themes/themes-available/Classic/images/ack.gif
 themes/themes-available/Classic/images/action.gif
-themes/themes-available/Classic/images/action_pnp.gif
+themes/themes-available/Classic/images/action_pnp.png
 themes/themes-available/Classic/images/add.png
 themes/themes-available/Classic/images/arrow_left.png
 themes/themes-available/Classic/images/arrow_refresh.png
@@ -711,7 +711,7 @@ themes/themes-available/Exfoliation/images/ack.gif
 themes/themes-available/Exfoliation/images/action-graph.gif
 themes/themes-available/Exfoliation/images/action-orig.gif
 themes/themes-available/Exfoliation/images/action.gif
-themes/themes-available/Exfoliation/images/action_pnp.gif
+themes/themes-available/Exfoliation/images/action_pnp.png
 themes/themes-available/Exfoliation/images/add.png
 themes/themes-available/Exfoliation/images/arrow_left.png
 themes/themes-available/Exfoliation/images/arrow_refresh.png
@@ -896,7 +896,7 @@ themes/themes-available/Nuvola/changelog.txt
 themes/themes-available/Nuvola/images/accept.png
 themes/themes-available/Nuvola/images/ack.gif
 themes/themes-available/Nuvola/images/action.gif
-themes/themes-available/Nuvola/images/action_pnp.gif
+themes/themes-available/Nuvola/images/action_pnp.png
 themes/themes-available/Nuvola/images/add.png
 themes/themes-available/Nuvola/images/arrow_left.png
 themes/themes-available/Nuvola/images/arrow_refresh.png
@@ -1076,7 +1076,7 @@ themes/themes-available/Nuvola/templates/side.tt
 themes/themes-available/Thruk/images/accept.png
 themes/themes-available/Thruk/images/ack.gif
 themes/themes-available/Thruk/images/action.gif
-themes/themes-available/Thruk/images/action_pnp.gif
+themes/themes-available/Thruk/images/action_pnp.png
 themes/themes-available/Thruk/images/add.png
 themes/themes-available/Thruk/images/arrow_left.png
 themes/themes-available/Thruk/images/arrow_refresh.png
@@ -1201,7 +1201,7 @@ themes/themes-available/Thruk/stylesheets/thruk_noframes_ie_fix.css
 themes/themes-available/Vautour/images/accept.png
 themes/themes-available/Vautour/images/ack.gif
 themes/themes-available/Vautour/images/action.gif
-themes/themes-available/Vautour/images/action_pnp.gif
+themes/themes-available/Vautour/images/action_pnp.png
 themes/themes-available/Vautour/images/add.png
 themes/themes-available/Vautour/images/arrow_left.png
 themes/themes-available/Vautour/images/arrow_refresh.png
@@ -1347,7 +1347,7 @@ themes/themes-available/Vautour/templates/side.tt
 themes/themes-available/Wakizashi/images/accept.png
 themes/themes-available/Wakizashi/images/ack.gif
 themes/themes-available/Wakizashi/images/action.gif
-themes/themes-available/Wakizashi/images/action_pnp.gif
+themes/themes-available/Wakizashi/images/action_pnp.png
 themes/themes-available/Wakizashi/images/add.png
 themes/themes-available/Wakizashi/images/alert_command.png
 themes/themes-available/Wakizashi/images/alert_crit.png
