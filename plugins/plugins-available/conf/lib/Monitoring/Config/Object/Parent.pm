@@ -56,6 +56,8 @@ sub parse {
             if($field->{'type'} eq 'LIST' or $field->{'type'} eq 'ENUM') {
                 if(defined $value) {
                     my @list = split/\s*,\s*/mx, $value;
+                    # remove empty elements
+                    @list = grep {!/^\s*$/mx} @list;
                     $self->{'conf'}->{$attr} = \@list;
                 } else {
                     $self->{'conf'}->{$attr} = [];
@@ -367,7 +369,10 @@ sub get_data_from_param {
             if(ref $value eq 'ARRAY') {
                 $data->{$key} = $value;
             } else {
-                $data->{$key} = [ split(/\s*,\s*/mx, $value) ];
+                my @list = split(/\s*,\s*/mx, $value);
+                # remove empty elements
+                @list = grep {!/^\s*$/mx} @list;
+                $data->{$key} = \@list;
             }
         }
         elsif( $defaults->{$key}->{'type'} eq 'ENUM' ) {
@@ -379,7 +384,9 @@ sub get_data_from_param {
             }
             $data->{$key} = [];
             for my $v (@values) {
-                push @{$data->{$key}}, $v unless $v eq 'noop';
+                next if $v eq 'noop';
+                next if $v =~ m/^\s*$/mx;
+                push @{$data->{$key}}, $v;
             }
         }
         elsif( $defaults->{$key}->{'type'} eq 'COMMAND' ) {
