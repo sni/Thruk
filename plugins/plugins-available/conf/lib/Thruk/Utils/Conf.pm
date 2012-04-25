@@ -43,9 +43,7 @@ sub set_object_model {
     $c->stash->{'peer_conftool'} = $peer_conftool;
 
     # already parsed?
-    if((   $model->cache_exists($c->stash->{'param_backend'})
-        or Thruk::Utils::Conf::get_model_retention($c)
-       )
+    if(    Thruk::Utils::Conf::get_model_retention($c)
        and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool, $model)
     ) {
         # objects initialized
@@ -470,6 +468,7 @@ sub store_model_retention {
             'version'      => $c->config->{'version'},
         };
         store($data, $file);
+        $c->config->{'conf_retention'} = [stat($file)];
         $c->stash->{'obj_model_changed'} = 0;
         $c->log->debug('saved object retention data');
     };
@@ -497,7 +496,20 @@ sub get_model_retention {
     my $model = $c->model('Objects');
     my $file  = $c->config->{'tmp_path'}."/obj_retention.dat";
 
-    return unless -f $file;
+    if(! -f $file) {
+        return 1 if $model->cache_exists($c->stash->{'param_backend'});
+        return;
+    }
+
+    # don't read retention file when current data is newer
+    my @stat = stat($file);
+    if( $model->cache_exists($c->stash->{'param_backend'}) and
+        defined $c->config->{'conf_retention'}
+        and $stat[9] <= $c->config->{'conf_retention'}->[9]
+    ) {
+       return 1;
+    }
+    $c->config->{'conf_retention'} = \@stat;
 
     # try to retrieve retention data
     eval {
