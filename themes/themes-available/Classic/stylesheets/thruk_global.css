@@ -768,3 +768,8 @@ td.filterValueInput input.filter_pre_value {
 SELECT.filter_op_select {
   width: 45px;
 }
+
+body.cmd textarea {
+  width: 250px;
+  height: 80px;
+}
