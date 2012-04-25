@@ -23,7 +23,8 @@ if [ ! -z $OMD_SITE ]; then
     STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi"
     PIDFILE=$OMD_ROOT/tmp/thruk/thruk.pid
 fi
-STARTCMD="/usr/bin/wget --post-data='' -q -O /dev/null $STARTURL"
+WGET="/usr/bin/wget"
+STARTCMD="$WGET --post-data='' -q -O /dev/null $STARTURL"
 
 # load extra environment variables
 if [ -f /etc/sysconfig/thruk ]; then
@@ -34,6 +35,8 @@ case "$1" in
     start)
         if [ "$STARTCMD" = "" ]; then
             echo "$NAME starts up on the first request"
+        elif [ ! -f $WGET ]; then
+            echo "wget not found, cannot send initial request"
         else
             if [ -d "/var/lock/subsys" ]; then
               touch /var/lock/subsys/thruk
