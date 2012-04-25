@@ -63,11 +63,11 @@ sub get_c {
 
 ##############################################
 
-=head2 get_c
+=head2 get_object_db
 
-  get_c()
+  get_object_db()
 
-return catalysts c object
+return config database object
 
 =cut
 sub get_object_db {

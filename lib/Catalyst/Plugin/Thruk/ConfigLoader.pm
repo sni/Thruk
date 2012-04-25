@@ -17,7 +17,7 @@ sub finalize_config {
             my($name,$gid) = (getpwuid($uid))[0, 3];
             my @groups = ( $gid );
             while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
-                $users =~ /\b$name\b/ and push @groups, $gid;
+                $users =~ /\b$name\b/mx and push @groups, $gid;
             }
             $) = join(" ", @groups);
             $> = $uid;
