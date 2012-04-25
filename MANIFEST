@@ -143,6 +143,7 @@ plugins/plugins-available/conf/t/data/4/file2.cfg
 plugins/plugins-available/conf/t/data/5/hosts.cfg
 plugins/plugins-available/conf/t/data/6/servicegroups_iso-8859.cfg
 plugins/plugins-available/conf/t/data/6/servicegroups_utf8.cfg
+plugins/plugins-available/conf/t/data/7/parser.cfg
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
 plugins/plugins-available/conf/templates/_conf_frame.tt

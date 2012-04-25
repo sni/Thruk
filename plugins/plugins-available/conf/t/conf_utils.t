@@ -1,9 +1,10 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 365;
+use Test::More tests => 367;
 use Data::Dumper;
 use Storable qw/ dclone /;
+use File::Slurp;
 
 BEGIN {
     use lib('t');
@@ -277,13 +278,10 @@ $parsedfile = $objects->{'files'}->[1];
 $obj = $parsedfile->{'objects'}->[0];
 is_deeply($obj->{'conf'}, $g2, 'parsed UTF-8 group');
 
-
 ###########################################################
-sub read_file {
-my $file = shift;
-local $/ = undef;
-open my $fh, "<", $file or die "could not open $file: $!";
-return <$fh>;
-}
+$objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/7/' });
+$objects->init();
+$objs = $objects->get_objects();
+is(scalar @{$objects->{'errors'}}, 0, "number of errors") or diag(Dumper($objects->{'errors'}));
+is(scalar @{$objs}, 2, "number of objects");
 
-1;

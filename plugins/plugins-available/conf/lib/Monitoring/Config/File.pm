@@ -231,7 +231,7 @@ sub _parse_line {
     $self->{'lines'} = $linenr;
 
     # new object starts
-    if(substr($line, 0, 7) eq 'define ' and $line =~ m/^define\s+(.*?)\s*{/gmxo) {
+    if(substr($line, 0, 7) eq 'define ' and $line =~ m/^define\s+(\w+)(\s|{|$)/gmxo) {
         $current_object = Monitoring::Config::Object->new(type => $1, file => $self, line => $linenr, 'coretype' => $self->{'coretype'});
         unless(defined $current_object) {
             push @{$self->{'errors'}}, "unknown object type '".$1."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
