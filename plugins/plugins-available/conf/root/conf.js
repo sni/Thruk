@@ -592,11 +592,13 @@ function on_empty_click(inp) {
     var v = input.value;
     input.value = 'customvariable';
     newid = on_attr_select();
-    var tr = document.getElementById(newid).parentNode.parentNode;
+    var newin = document.getElementById(newid);
+    var tr = newin.parentNode.parentNode;
     var td = tr.cells[0].firstChild;
     td.value = v.toUpperCase();
     if(td.value.substr(0,1) != '_') {
         td.value = '_' + td.value;
     }
+    newin.name = 'obj.'+td.value;
     return false;
 }

@@ -70,10 +70,6 @@ summary:
 
 
 addons:
-  mobile:
-    - change auto to return 0, so other auto subs will be executed too
-      http://dev.catalystframework.org/attachment/wiki/WikiStart/catalyst-flow.png
-
   config tool:
     - propagate settings
     - add tabs with contacts (notification contacts, readonly contacts,
