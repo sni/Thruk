@@ -11,6 +11,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added site name to excel export (Mark Wilkinson)
           - added sound alerts
           - added config item for custom host/service action icons
+          - added config item to convert usernames to upper/lowercase
           - set custom host/service action icons by custom variable
           - added config item for cookie_path
           - internal changes ( removed prototype library )

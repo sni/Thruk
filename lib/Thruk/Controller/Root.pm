@@ -53,6 +53,8 @@ sub begin : Private {
         wait_timeout                    => 10,
         use_frames                      => 1,
         use_strict_host_authorization   => 0,
+        make_auth_user_lowercase        => 0,
+        make_auth_user_uppercase        => 0,
         can_submit_commands             => 1,
         group_paging_overview           => '*3, 10, 100, all',
         group_paging_grid               => '*5, 10, 50, all',

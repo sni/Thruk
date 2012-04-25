@@ -677,6 +677,24 @@ ex.:
   use_strict_host_authorization = 1
 
 
+==== make_auth_user_lowercase
+
+Convert authenticated username to lowercase.
+
+ex.:
+
+  make_auth_user_lowercase = 1
+
+
+==== make_auth_user_uppercase
+
+Convert authenticated username to uppercase.
+
+ex.:
+
+  make_auth_user_uppercase = 1
+
+
 ==== start_page
 
 This link is used as startpage and points usually to the main.html

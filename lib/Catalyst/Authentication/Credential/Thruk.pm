@@ -103,13 +103,11 @@ sub authenticate {
     }
 
     # basic authentication
-    else {
-        if(defined $c->engine->env->{'REMOTE_USER'}) {
-            $username = $c->engine->env->{'REMOTE_USER'};
-        }
-        elsif(defined $ENV{'REMOTE_USER'}) {
-            $username = $ENV{'REMOTE_USER'};
-        }
+    if(defined $c->engine->env->{'REMOTE_USER'}) {
+        $username = $c->engine->env->{'REMOTE_USER'};
+    }
+    elsif(defined $ENV{'REMOTE_USER'}) {
+        $username = $ENV{'REMOTE_USER'};
     }
 
     # default_user_name?
@@ -121,15 +119,18 @@ sub authenticate {
         return;
     }
 
+    # change case?
+    $username = lc($username) if $c->config->{'make_auth_user_lowercase'};
+    $username = uc($username) if $c->config->{'make_auth_user_uppercase'};
+
     $authinfo->{ username } = $username;
     my $user_obj = $realm->find_user( $authinfo, $c );
 
     if ( ref $user_obj ) {
         return $user_obj;
-    } else {
-        $c->log->debug("authentication failed to load with find_user; bad user_class? Try 'Null.'") if $self->debug;
-        return;
     }
+    $c->log->debug("authentication failed to load with find_user; bad user_class? Try 'Null.'") if $self->debug;
+    return;
 }
 
 1;
