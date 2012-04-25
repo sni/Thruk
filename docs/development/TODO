@@ -83,5 +83,4 @@ addons:
     - template usage with +object ( in resolve and template tt view)
     - wizards: new host, scan services
     - sync multiple backend with config tool
-    - show references on delete
 

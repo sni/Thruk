@@ -1188,6 +1188,11 @@ sub _object_delete {
     my $c    = shift;
     my $obj  = shift;
 
+    my $refs = $c->{'obj_db'}->get_references($obj);
+    if(scalar keys %{$refs}) {
+        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' has remaining references' );
+        return $c->response->redirect('conf.cgi?sub=objects&action=listref&data.id='.$obj->get_id());
+    }
     $c->{'obj_db'}->delete_object($obj);
     Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' removed successfully' );
     return $c->response->redirect('conf.cgi?sub=objects&type='.$c->stash->{'type'});
