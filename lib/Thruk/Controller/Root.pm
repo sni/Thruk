@@ -285,7 +285,6 @@ sub begin : Private {
     $c->stash->{'additional_views'} = $Thruk::Utils::Status::additional_views || {};
 
     # sound cookie set?
-    $c->stash->{'play_sounds'} = 0;
     if(defined $c->request->cookie('thruk_sounds')) {
         my $sound_cookie = $c->request->cookie('thruk_sounds');
         if(defined $sound_cookie->value and $sound_cookie->value eq 'off') {

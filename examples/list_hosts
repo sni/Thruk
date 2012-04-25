@@ -4,9 +4,8 @@ use strict;
 use warnings;
 use Thruk::Utils::CLI;
 my $cli   = Thruk::Utils::CLI->new;
-my $c     = $cli->get_c();
-Thruk::Utils::Conf::set_object_model($c) or die("failed to set objects model");
-my $hosts = $c->{'obj_db'}->get_objects_by_type('host');
+my $odb   = $cli->get_object_db();
+my $hosts = $odb->get_objects_by_type('host');
 printf("%-20s   %s\n", "Host", "File");
 print("===========================================================\n");
 for my $h (@{$hosts}) {

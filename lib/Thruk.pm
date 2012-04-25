@@ -128,6 +128,7 @@ my %config = ('name'                   => 'Thruk',
                                           'all_in_one_css' => 0,
                                           'hide_backends_chooser' => 0,
                                           'backend_chooser'       => 'select',
+                                          'play_sounds'    => 0,
                                           'uri_filter'     => {
                                                 'bookmark'      => undef,
                                                 'referer'       => undef,
