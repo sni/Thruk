@@ -13,7 +13,15 @@ sub finalize_config {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         my $var_path = $c->config->{'var_path'} || './var';
         my $uid = (stat $var_path)[4];
-        $> = $uid if $> == 0 and defined $uid;
+        if(defined $uid and $> == 0) {
+            my($name,$gid) = (getpwuid($uid))[0, 3];
+            my @groups = ( $gid );
+            while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
+                $users =~ /\b$name\b/ and push @groups, $gid;
+            }
+            $) = join(" ", @groups);
+            $> = $uid;
+        }
     }
 
     ###################################################
