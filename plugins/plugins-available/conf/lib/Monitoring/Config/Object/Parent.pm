@@ -434,10 +434,10 @@ sub has_object_changed {
         return 1 if !defined $self->{'conf'}->{$key};
 
         my $test1 = $data->{$key};
-        if(ref $$test1 eq 'ARRAY') { $test1 = join(',', @{$test1}) }
+        if(ref $test1 eq 'ARRAY') { $test1 = join(',', @{$test1}) }
 
         my $test2 = $self->{'conf'}->{$key};
-        if(ref $$test2 eq 'ARRAY') { $test2 = join(',', @{$test2}) }
+        if(ref $test2 eq 'ARRAY') { $test2 = join(',', @{$test2}) }
 
         return 1 if $test1 ne $test2;
     }
