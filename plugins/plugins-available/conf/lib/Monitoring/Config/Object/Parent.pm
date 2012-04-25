@@ -214,7 +214,14 @@ return the sorted config keys for this object
 =cut
 sub get_sorted_keys {
     my $self = shift;
-    my @keys = sort _sort_by_object_keys keys %{$self->{'conf'}};
+    my $conf = shift || $self->{'conf'};
+    my @keys;
+    if(ref $conf eq 'HASH') {
+        @keys = keys %{$conf};
+    } else {
+        @keys = @{$conf};
+    }
+    @keys = sort _sort_by_object_keys @keys;
     return \@keys;
 }
 
@@ -427,10 +434,10 @@ sub has_object_changed {
         return 1 if !defined $self->{'conf'}->{$key};
 
         my $test1 = $data->{$key};
-        if(ref $data->{$key} eq 'ARRAY') { $test1 = join(',', @{$data->{$key}}) }
+        if(ref $$test1 eq 'ARRAY') { $test1 = join(',', @{$test1}) }
 
         my $test2 = $self->{'conf'}->{$key};
-        if(ref $self->{'conf'}->{$key} eq 'ARRAY') { $test2 = join(',', @{$self->{'conf'}->{$key}}) }
+        if(ref $$test2 eq 'ARRAY') { $test2 = join(',', @{$test2}) }
 
         return 1 if $test1 ne $test2;
     }
