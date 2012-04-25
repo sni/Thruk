@@ -247,6 +247,7 @@ sub _parse_line {
             return($current_object, $in_unknown_object, $comments);
         }
         $current_object->{'comments'} = $comments;
+        $current_object->{'line2'}    = $linenr;
         my $errors = $current_object->parse();
         if(scalar @{$errors} > 0) { push @{$self->{'errors'}}, @{$errors} }
         $current_object->{'id'} = $current_object->_make_id();

@@ -4,12 +4,8 @@ Todo & Wish List:
 Bugs: none
 
 Features:
-  config tool:
-      sync multiple backend with config tool
-      show references on delete
 
 general:
-    - comments als textbox statt input
     - webservice api, passthrough querys to livestatus and return json
       result
     - show parent tree to backend, ex.: host1 -> host2 -> parent -> monitor
@@ -58,13 +54,9 @@ livestatus:
                 Service Escalations
 
 reports:
-    - generate long running reports in an extra process
     - flexible report output
         HTML, Text, CVS, XML, PDF
         CSV output for single hosts/services,hostgroups/servicegroups
-    - cache results from Thruk::Utils::calculate_availability, no need
-      to parse logfiles twice
-    - support timeperiods
 
 status:
     - add flexible selector, ex.: select multiple hostgroups by comma
@@ -84,13 +76,12 @@ addons:
 
   config tool:
     - propagate settings
-    - split services by hosts, groups
-    - rename host should affect all services
-    - templates: list of affected objects
     - add tabs with contacts (notification contacts, readonly contacts,
       contacts)
     - nagios.cfg editor (with omd support)
     - resource.cfg editor
     - template usage with +object ( in resolve and template tt view)
     - wizards: new host, scan services
+    - sync multiple backend with config tool
+    - show references on delete
 
