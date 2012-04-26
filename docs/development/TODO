@@ -16,7 +16,6 @@ general:
     - add backend name to logs
     - add go back button on error page
     - support more macros
-    - multiple lines for comment/downtime input
     - include comments in export
 
 services:
