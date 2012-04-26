@@ -196,7 +196,7 @@ function toQueryString(obj) {
     var str = '';
     jQuery.each(obj, function(key, value) {
         if(str != '') { str = str + '&'; }
-        str = str + key + '=' + value;
+        str = str + key + '=' + encodeURIComponent(value);
     });
     return str;
 }
