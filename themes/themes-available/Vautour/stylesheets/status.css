@@ -115,3 +115,7 @@ a.hostTotals:hover { color: #000; }
 
 .serviceImportantProblem { background-color: #ff3300; color: #000; }
 .serviceUnimportantProblem { background-color: #ffcccc; color: #000; }
+
+TABLE#statusTable tbody > tr > TD {
+    padding-left: 2px;
+}
