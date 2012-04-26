@@ -2483,7 +2483,8 @@ var ajax_search = {
                || keyCode == 20     // capslock
                || keyCode == 17     // ctrl
                || keyCode == 18     // alt
-               || keyCode == 0      // windows key
+               || keyCode == 91     // left windows key
+               || keyCode == 92     // right windows key
                || keyCode == 33     // page up
                || keyCode == 34     // page down
                || evt.altKey == true
