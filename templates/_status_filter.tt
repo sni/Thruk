@@ -2,7 +2,7 @@
 [% SET show_filter_table = 1 IF hidesearch == "2" %]
 <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;">
 [% IF show_form %]
-<form action="[% uri(c) %]" method="GET" id="[% paneprefix %]filterForm">
+<form action="" method="GET" id="[% paneprefix %]filterForm">
 <input type="hidden" name="nav" value="[% nav %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">

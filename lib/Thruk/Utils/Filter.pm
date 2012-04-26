@@ -253,6 +253,8 @@ sub uri_with {
     $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
     $uri =~ s/&amp;/&/gmx;
     $uri =~ s/&/&amp;/gmx;
+    # make relative url
+    $uri =~ s|^/[^?]+/||mx;
     return $uri;
 }
 

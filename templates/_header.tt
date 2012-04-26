@@ -110,7 +110,7 @@
 
   <div class="pref_pane" id="pref_pane" style="display:none;">
     <a href="#" onclick="toggleElement('pref_pane'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="pref_pane_button" border="0" alt="preferences" width="13" height="12"></a>
-    <form action="[% uri(c) %]" method="GET">
+    <form action="" method="GET">
     <table class="pref_pane" border=1 width="470">
       <tr>
         <td>
