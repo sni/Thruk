@@ -44,8 +44,6 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $c->request->parameters->{$param} = 0 unless defined $c->request->parameters->{$param};
     }
 
-    $c->request->parameters->{com_data} =~ s/\n//gmx;
-
     Thruk::Utils::ssi_include($c);
 
     $c->stash->{'cmd_typ'} = $c->{'request'}->{'parameters'}->{'cmd_typ'} || '';

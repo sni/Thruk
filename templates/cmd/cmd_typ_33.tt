@@ -38,7 +38,7 @@
 <tr id="expire_row"[% IF !c.config.cmd_defaults.use_expire %] style="display:none"[% END %]><td class='optBoxItem'>Expire Time:</td><td><b><input type='text' name='end_time' id="end_time" value='[% end_time %]'> <a href="javascript:show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date"></a></b></td></tr>
 [% END %]
 <tr><td class='optBoxRequiredItem'>Author (Your Name):</td><td><b><input type='text' name='com_author' value='[% comment_author %]'[% IF c.config.cgi_cfg.lock_author_names %] readonly disabled[% END %]></b></td></tr>
-<tr><td class='optBoxRequiredItem'>Comment:</td><td><textarea name='com_data'></textarea></td></tr>
+<tr><td class='optBoxRequiredItem'>Comment:</td><td><b><input type='text' name='com_data' value='' size= "40"></b></td></tr>
 
 [% END %]
 [% END %]

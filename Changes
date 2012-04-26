@@ -14,7 +14,6 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added config item to convert usernames to upper/lowercase
           - set custom host/service action icons by custom variable
           - added config item for cookie_path
-          - changed comment inputs to textarea
           - internal changes ( removed prototype library )
           - mobile:
               - added performance graph to mobile interface
