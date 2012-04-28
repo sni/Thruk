@@ -182,7 +182,7 @@ the thruk_local.conf where all settings can be overriden.
 === Debian / Ubuntu
 
 -------
-  #> dpkg -i thruk_1.27_debian6_amd64.deb
+  #> dpkg -i thruk_1.28_debian6_amd64.deb
 -------
 
 In case of dependency errors, run 'apt-get -f install' and try the
@@ -192,7 +192,7 @@ In case of dependency errors, run 'apt-get -f install' and try the
 === Centos / Redhat
 
 -------
-  #> yum install --nogpgcheck thruk-1.27-1.rhel6.x86_64.rpm
+  #> yum install --nogpgcheck thruk-1.28-1.rhel6.x86_64.rpm
 -------
 
 You may need to include an external repository for mod_fastcgi module.
@@ -202,7 +202,7 @@ Epel or Rpmforge should do it.
 === SLES
 
 -------
-  #> zypper install thruk-1.27-1.sles11.x86_64.rpm
+  #> zypper install thruk-1.28-1.sles11.x86_64.rpm
 -------
 
 You may need the SLES sdk dvd for additional dependencies.

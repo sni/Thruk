@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.28     not yet released
+1.28     Sat Apr 28 18:53:49 CEST 2012
           - added support for display_name
           - added filter for custom variables
           - show host/servicegroups only if contact has permission for at least on host/service
