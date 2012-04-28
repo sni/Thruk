@@ -237,8 +237,8 @@ sub get_start_end_for_timeperiod {
     my $start;
     my $end;
     $timeperiod = 'custom' unless defined $timeperiod;
+    my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
     if($timeperiod eq 'today') {
-        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         $start = Mktime($year,$month,$day,  0,0,0);
         $end   = time();
     }
@@ -247,7 +247,6 @@ sub get_start_end_for_timeperiod {
         $start = $end - 86400;
     }
     elsif($timeperiod eq 'yesterday') {
-        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         $start = Mktime($year,$month,$day,  0,0,0) - 86400;
         $end   = $start + 86400;
     }
@@ -271,7 +270,6 @@ sub get_start_end_for_timeperiod {
     }
     elsif($timeperiod eq 'thismonth') {
         # start on first till now
-        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         $start = Mktime($year,$month,1,  0,0,0);
         $end   = time();
     }
@@ -280,19 +278,22 @@ sub get_start_end_for_timeperiod {
         $start = $end - 31 * 86400;
     }
     elsif($timeperiod eq 'lastmonth') {
-        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         $end   = Mktime($year,$month,1,  0,0,0);
         my $lastmonth = $month - 1;
         if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
         $start = Mktime($year,$lastmonth,1,  0,0,0);
     }
+    elsif($timeperiod eq 'last12months') {
+        my $lastmonth = $month - 1;
+        if($lastmonth <= 0) { $lastmonth = $lastmonth + 12; $year--;}
+        $start = Mktime($year-1,$lastmonth,1,  0,0,0);
+        $end   = Mktime($year,$lastmonth,1,  0,0,0);
+    }
     elsif($timeperiod eq 'thisyear') {
-        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         $start = Mktime($year,1,1,  0,0,0);
         $end   = time();
     }
     elsif($timeperiod eq 'lastyear') {
-        my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime();
         $start = Mktime($year-1,1,1,  0,0,0);
         $end   = Mktime($year,1,1,  0,0,0);
     }

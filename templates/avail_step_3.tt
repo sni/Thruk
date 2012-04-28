@@ -36,6 +36,7 @@
                 <option value="thismonth">This Month</option>
                 <option value="last31days">Last 31 Days</option>
                 <option value="lastmonth">Last Month</option>
+                <option value="last12months">Last 12 Months</option>
                 <option value="thisyear">This Year</option>
                 <option value="lastyear">Last Year</option>
                 <option value="custom">* CUSTOM REPORT PERIOD *</option>
