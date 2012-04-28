@@ -6,10 +6,10 @@ use Data::Dumper;
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
 my $cmds = [
-  "grep -nr 'TODO' lib/. templates/. plugins/plugins-available/. root/.",
+  "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/",
 ];
 
-# find all TODOs
+# find all missed debug outputs
 for my $cmd (@{$cmds}) {
   open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
   ok($ph, 'cmd started');
@@ -25,10 +25,7 @@ for my $cmd (@{$cmds}) {
     ) {
       next;
     }
-    TODO: {
-      local $TODO = ' ';
-      fail($line);
-    };
+    fail($line);
   }
   close($ph);
 }
