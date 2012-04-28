@@ -229,6 +229,7 @@ plugins/plugins-available/mobile/templates/mobile_problems.tt
 plugins/plugins-available/mobile/templates/mobile_services.tt
 plugins/plugins-available/mobile/templates/mobile_services_list.tt
 plugins/plugins-available/reports/lib/Thruk/Controller/reports.pm
+plugins/plugins-available/reports/lib/Thruk/Utils/PDF.pm
 plugins/plugins-available/reports/lib/Thruk/Utils/Reports.pm
 plugins/plugins-available/reports/README.txt
 plugins/plugins-available/reports/t/controller_reports.t

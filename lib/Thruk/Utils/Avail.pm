@@ -108,6 +108,7 @@ sub calculate_availability {
     my $show_log_entries             = $c->{'request'}->{'parameters'}->{'show_log_entries'};
     my $full_log_entries             = $c->{'request'}->{'parameters'}->{'full_log_entries'};
     my $zoom                         = $c->{'request'}->{'parameters'}->{'zoom'};
+    my $breakdown                    = $c->{'request'}->{'parameters'}->{'breakdown'} || '';
 
     # calculate zoom
     $zoom = 4 unless defined $zoom;
@@ -168,6 +169,7 @@ sub calculate_availability {
     $c->stash->{full_log_entries}             = $full_log_entries || '';
     $c->stash->{showscheduleddowntime}        = '';
     $c->stash->{zoom}                         = $zoom;
+    $c->stash->{breakdown}                    = $breakdown;
     $c->stash->{servicegroupname}             = '';
     $c->stash->{hostgroupname}                = '';
 
@@ -429,6 +431,7 @@ sub calculate_availability {
         'backtrack'                    => $backtrack,
         'verbose'                      => 1,
         'logger'                       => $c->log,
+        'breakdown'                    => $breakdown,
     );
     $c->stash->{avail_data} = $ma->calculate(
         'start'                        => $start,

@@ -51,17 +51,40 @@ sub reports_cgi : Regex('thruk\/cgi\-bin\/reports\.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    my $report_nr = $c->{'request'}->{'parameters'}->{'report'};
-    if(defined $report_nr) {
-        return Thruk::Utils::Reports::show_report($c, $report_nr);
-    }
-
     $c->stash->{'no_auto_reload'}      = 1;
     $c->stash->{title}                 = 'Reports';
     $c->stash->{page}                  = 'reports';
     $c->stash->{template}              = 'reports.tt';
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';
+
+    my $report_nr = $c->{'request'}->{'parameters'}->{'report'};
+    my $action    = $c->{'request'}->{'parameters'}->{'action'} || 'show';
+
+    if(defined $report_nr) {
+        if($action eq 'show') {
+            if(!Thruk::Utils::Reports::report_show($c, $report_nr)) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+            }
+        }
+        elsif($action eq 'update') {
+            my($name, $template, $data, $backends) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
+
+            if(Thruk::Utils::Reports::report_update($c, $report_nr, $name, $template, $data, $backends)) {
+                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report updated' });
+            } else {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+            }
+        }
+        elsif($action eq 'remove') {
+            if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
+                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report removed' });
+            } else {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+            }
+        }
+    }
+
     Thruk::Utils::ssi_include($c);
 
     return 1;
