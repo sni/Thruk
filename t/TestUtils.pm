@@ -115,6 +115,10 @@ sub test_page {
         ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or BAIL_OUT(Dumper($request));
     }
 
+    if($request->content =~ m/<span\ class="fail_message">([^<]+)<\/span>/mx) {
+        fail('Request '.$opts{'url'}.' had error message: '.$1);
+    }
+
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job.cgi\?job=(.*)$/) {
         # is it a background job page?
         wait_for_job($1);

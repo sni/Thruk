@@ -458,16 +458,28 @@ set a message in an cookie for later display
 
 =cut
 sub set_message {
-    my $c       = shift;
-    my $style   = shift;
-    my $message = shift;
-    my $details = shift;
+    my $c   = shift;
+    my $dat = shift;
+    my($style, $message, $details, $code);
+
+    if(ref $dat eq 'HASH') {
+        $style   = $dat->{'style'};
+        $message = $dat->{'msg'};
+        $details = $dat->{'details'};
+        $code    = $dat->{'code'};
+    } else {
+        $style   = $dat;
+        $message = shift;
+        $details = shift;
+        $code    = shift;
+    }
 
     $c->res->cookies->{'thruk_message'} = {
         value => $style.'~~'.$message,
     };
     $c->stash->{'thruk_message'}         = $style.'~~'.$message;
     $c->stash->{'thruk_message_details'} = $details;
+    $c->response->status($code) if defined $code;
 
     return 1;
 }
