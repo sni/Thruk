@@ -45,11 +45,13 @@ sub report_show {
         return $c->response->redirect('reports.cgi');
     }
 
-    my $pdf_file                = generate_report($c, $nr, $report);
-    $c->stash->{'pdf_template'} = 'passthrough_pdf.tt';
-    $c->stash->{'pdf_file'}     = $pdf_file;
-    $c->stash->{'pdf_filename'} = 'report.pdf'; # downloaded filename
-    $c->forward('View::PDF::Reuse');
+    my $pdf_file = generate_report($c, $nr, $report);
+    if(defined $pdf_file) {
+        $c->stash->{'pdf_template'} = 'passthrough_pdf.tt';
+        $c->stash->{'pdf_file'}     = $pdf_file;
+        $c->stash->{'pdf_filename'} = $report->{'name'}.'.pdf'; # downloaded filename
+        $c->forward('View::PDF::Reuse');
+    }
     return 1;
 }
 
@@ -141,11 +143,20 @@ sub generate_report {
     # prepare pdf
     $c->stash->{'pdf_template'} = 'pdf/'.$options->{'template'};
     $c->stash->{'block'} = 'prepare';
-    $c->view("PDF::Reuse")->render_pdf($c);
+    eval {
+        $c->view("PDF::Reuse")->render_pdf($c);
+    };
+    $c->log->error($@) if $@;
+    return if $@;
 
     # render pdf
     $c->stash->{'block'} = 'render';
-    my $pdf_data = $c->view("PDF::Reuse")->render_pdf($c);
+    my $pdf_data;
+    eval {
+        $pdf_data = $c->view("PDF::Reuse")->render_pdf($c);
+    };
+    $c->log->error($@) if $@;
+    return if $@;
 
     # write out pdf
     mkdir($c->config->{'tmp_path'}.'/reports');
