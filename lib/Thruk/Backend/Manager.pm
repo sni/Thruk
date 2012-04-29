@@ -147,7 +147,7 @@ sub get_peers {
 
   get_peer_by_key()
 
-returns all peer by key
+returns peer by key
 
 =cut
 
@@ -155,7 +155,27 @@ sub get_peer_by_key {
     my $self = shift;
     my $key  = shift;
     for my $peer ( @{ $self->get_peers() } ) {
-        return $peer if $peer->{'key'} eq $key;
+        return $peer if($peer->{'key'} eq $key or $peer->{'name'} eq $key);
+    }
+    confess("no such backend: $key");
+    return;
+}
+
+##########################################################
+
+=head2 get_peer_by_name
+
+  get_peer_by_name()
+
+returns peer by name
+
+=cut
+
+sub get_peer_by_name {
+    my $self = shift;
+    my $name  = shift;
+    for my $peer ( @{ $self->get_peers() } ) {
+        return $peer if $peer->{'name'} eq $name;
     }
     return;
 }
@@ -265,6 +285,14 @@ sub enable_backends {
     my $keys = shift;
 
     if( defined $keys ) {
+        if(ref $keys eq 'ARRAY') {
+            my %hash = map { $_ => 1 } @{$keys};
+            $keys = \%hash;
+        }
+        elsif(ref $keys eq '') {
+            $keys = { $keys => 1 };
+        }
+
         for my $key ( keys %{$keys} ) {
             $self->enable_backend($key);
         }

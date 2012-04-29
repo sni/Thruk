@@ -24,7 +24,7 @@ requires 'URI::Escape'                            => 0;     # required by Thruk:
 requires 'Moose'                                  => 0;     # required by Thruk::Action::AddDefaults
 requires 'Monitoring::Livestatus'                 => 0.74;
 requires 'Monitoring::Livestatus::Class'          => 0.03;
-requires 'Monitoring::Availability'               => 0.26;  # required by Thruk::Controller::avail
+requires 'Monitoring::Availability'               => 0.28;  # required by Thruk::Controller::avail
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
 requires 'Template::Plugin::Date'                 => 0;     # required by Thruk::Utils
@@ -60,6 +60,8 @@ requires 'FCGI::ProcManager'                      => 0;     # required by Thruk
 requires 'FCGI::ProcManager::MaxRequests'         => 0;     # required by Thruk
 requires 'namespace::autoclean'                   => 0;     # required by Catalyst::Script::Thrukembedded
 requires 'Plack::Handler::CGI'                    => 0;     # required by script/thruk
+requires 'PDF::Reuse'                             => 0;     # required by Thruk::View::PDF::Reuse
+requires 'Catalyst::View::PDF::Reuse'             => 0;     # required by Thruk::View::PDF::Reuse
 
 # conf tool plugin
 feature     ('plugin_conf',
@@ -72,6 +74,22 @@ feature     ('plugin_dashboard',
   -default                                        => 0,
   'List::Compare'                                 => 0,
   'List::MoreUtils'                               => 0,
+);
+
+# reporting plugin
+feature     ('plugin_reports',
+  -default                                        => 0,
+  'MIME::Lite'                                    => 0,
+  'Class::Inspector'                              => 0,
+  'Chart::Clicker'                                => 0,
+  'Chart::Clicker::Data::DataSet'                 => 0,
+  'Chart::Clicker::Data::Series'                  => 0,
+  'Chart::Clicker::Data::Marker'                  => 0,
+  'Chart::Clicker::Data::Range'                   => 0,
+  'Chart::Clicker::Decoration::Legend::Tabular'   => 0,
+  'Chart::Clicker::Renderer::Pie'                 => 0,
+  'Chart::Clicker::Renderer::StackedBar'          => 0,
+  'Graphics::Color::RGB'                          => 0,
 );
 
 # requirements test requirements

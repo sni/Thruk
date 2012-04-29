@@ -91,6 +91,7 @@ lib/Thruk/Utils/Trends.pm
 lib/Thruk/View/Excel.pm
 lib/Thruk/View/GD.pm
 lib/Thruk/View/JSON.pm
+lib/Thruk/View/PDF/Reuse.pm
 lib/Thruk/View/TT.pm
 LICENSE
 log4perl.conf.example
@@ -227,6 +228,15 @@ plugins/plugins-available/mobile/templates/mobile_options.tt
 plugins/plugins-available/mobile/templates/mobile_problems.tt
 plugins/plugins-available/mobile/templates/mobile_services.tt
 plugins/plugins-available/mobile/templates/mobile_services_list.tt
+plugins/plugins-available/reports/lib/Thruk/Controller/reports.pm
+plugins/plugins-available/reports/lib/Thruk/Utils/PDF.pm
+plugins/plugins-available/reports/lib/Thruk/Utils/Reports.pm
+plugins/plugins-available/reports/README.txt
+plugins/plugins-available/reports/t/controller_reports.t
+plugins/plugins-available/reports/templates/passthrough_pdf.tt
+plugins/plugins-available/reports/templates/pdf/sla.pdf
+plugins/plugins-available/reports/templates/pdf/sla.tt
+plugins/plugins-available/reports/templates/reports.tt
 plugins/plugins-available/shinken_features/lib/Thruk/Controller/shinken_features.pm
 plugins/plugins-available/shinken_features/root/businessview.css
 plugins/plugins-available/shinken_features/root/businessview.js
@@ -250,6 +260,7 @@ plugins/plugins-available/wml/templates/wml.tt
 plugins/plugins-enabled/conf
 plugins/plugins-enabled/minemap
 plugins/plugins-enabled/mobile
+plugins/plugins-enabled/reports
 plugins/plugins-enabled/shinken_features
 plugins/plugins-enabled/statusmap
 README
@@ -373,6 +384,7 @@ t/themes.t
 t/view_Excel.t
 t/view_GD.t
 t/view_JSON.t
+t/view_PDF-Reuse.t
 t/view_TT.t
 templates/_add_bookmark.tt
 templates/_ajax_search.tt

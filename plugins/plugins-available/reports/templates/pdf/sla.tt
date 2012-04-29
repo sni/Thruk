@@ -1,0 +1,75 @@
+[% IF block == 'prepare' %]
+  [%
+    set_unavailable_states(c, ['CRITICAL', 'DOWN', 'UNREACHABLE']);
+    calculate_availability(c);
+  %]
+[% END %]
+
+[% IF block == 'render' %]
+[%
+  USE date;
+
+  # PAGE 1
+#  pdf.prForm(path_to_template(c, 'pdf/sla.pdf'), 1);
+#  pdf.prFont('Helvetica-Bold');
+#  font(pdf, 20, 'light blue');
+#  IF param.exists('service');
+#    pdf.prText(40,400,'Service: ' _ param.service _ ' on ' _ param.host );
+#  ELSE;
+#    pdf.prText(40,400,'Host: ' _ param.host );
+#  END;
+#  font(pdf, 15, 'dark grey');
+#  pdf.prText(40,350,"Report Timeperiod: " _ format_date(start, "%d.%m.%Y") _ ' - ' _ format_date((end - 1), "%d.%m.%Y"));
+#  pdf.prText(480, 440, format_date(date.now, "%d.%m.%Y"));
+
+  # PAGE 2
+  # availability pie chart
+#  pdf.prPage();
+#  pdf.prForm(path_to_template(c, 'pdf/sla.pdf'), 2);
+#  font(pdf, 20, 'dark grey');
+#  pdf.prText(40,630, 'Availability Chart');
+#  IF param.exists('service');
+#    pie_pdf = render_pie_chart(c, 'service');
+#  ELSE;
+#    pie_pdf = render_pie_chart(c, 'host');
+#  END;
+#  pdf.prDocForm({file => pie_pdf, x => 100, y => 130});
+
+  # page footer
+#  font(pdf, 10, 'white');
+#  pdf.prText(560,58, '2');
+
+
+  # PAGE 2
+  # availability bar chart
+#  pdf.prPage();
+  pdf.prForm(path_to_template(c, 'pdf/sla.pdf'), 2);
+  font(pdf, 20, 'dark grey');
+  pdf.prText(40,630, 'Availability Chart');
+  IF param.exists('service');
+    bar_pdf = render_bar_chart(c, 'service');
+  ELSE;
+    bar_pdf = render_bar_chart(c, 'host');
+  END;
+  pdf.prDocForm({file => bar_pdf, x => 25, y => 160});
+
+  # page footer
+  font(pdf, 10, 'white');
+  pdf.prText(560,58, '2');
+
+
+  # PAGE 3
+  # logfile entries
+  pdf.prPage();
+  pdf.prForm(path_to_template(c, 'pdf/sla.pdf'), 2);
+  font(pdf, 20, 'dark grey');
+  pdf.prText(40,630, 'Details');
+
+  font(pdf, 10, 'dark grey');
+  outages(c, pdf, logs, start, end, 50, 590, 17, 20);
+
+  # page footer
+  font(pdf, 10, 'white');
+  pdf.prText(560,58, '3');
+%]
+[% END %]

@@ -213,8 +213,9 @@ if(-f $project_root."/.author") {
     $config{'View::TT'}->{'STAT_TTL'}   = 5;
     $config{'View::TT'}->{'PRE_DEFINE'}->{'author'} = 1;
 }
-$config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
+$config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT
+$config{'View::PDF::Reuse'}                            = $config{'View::TT'}; # use same config as well
 
 ###################################################
 # set some defaults
