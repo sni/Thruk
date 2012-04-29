@@ -31,20 +31,21 @@ return new host
 sub new {
     my ( $class, $file, $readonlypattern, $coretype ) = @_;
     my $self = {
-        'path'        => $file,
-        'mtime'       => undef,
-        'md5'         => undef,
-        'inode'       => 0,
-        'parsed'      => 0,
-        'changed'     => 0,
-        'readonly'    => 0,
-        'lines'       => 0,
-        'is_new_file' => 0,
-        'deleted'     => 0,
-        'objects'     => [],
-        'errors'      => [],
-        'macros'      => { 'host' => {}, 'service' => {}},
-        'coretype'    => $coretype,
+        'path'         => $file,
+        'mtime'        => undef,
+        'md5'          => undef,
+        'inode'        => 0,
+        'parsed'       => 0,
+        'changed'      => 0,
+        'readonly'     => 0,
+        'lines'        => 0,
+        'is_new_file'  => 0,
+        'deleted'      => 0,
+        'objects'      => [],
+        'errors'       => [],
+        'parse_errors' => [],
+        'macros'       => { 'host' => {}, 'service' => {}},
+        'coretype'     => $coretype,
     };
     bless $self, $class;
 
@@ -95,9 +96,10 @@ sub update_objects {
 
     my $current_object;
     my $in_unknown_object;
-    my $comments       = [];
-    $self->{'objects'} = [];
-    $self->{'errors'}  = [];
+    my $comments            = [];
+    $self->{'objects'}      = [];
+    $self->{'errors'}       = [];
+    $self->{'parse_errors'} = [];
 
     open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
@@ -117,7 +119,7 @@ sub update_objects {
     }
 
     if(defined $current_object or $in_unknown_object) {
-        push @{$self->{'errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
+        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
     }
 
     # add trailing comments to last object
@@ -149,9 +151,10 @@ sub update_objects_from_text {
     my $current_object;
     my $object_at_line;
     my $in_unknown_object;
-    my $comments       = [];
-    $self->{'objects'} = [];
-    $self->{'errors'}  = [];
+    my $comments            = [];
+    $self->{'objects'}      = [];
+    $self->{'errors'}       = [];
+    $self->{'parse_errors'} = [];
 
     my $linenr = 1;
     my $buffer = '';
@@ -180,7 +183,7 @@ sub update_objects_from_text {
     }
 
     if(defined $current_object or $in_unknown_object) {
-        push @{$self->{'errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
+        push @{$self->{'parse_errors'}}, "expected end of object in ".$self->{'path'}.":".$.;
     }
 
     # add trailing comments to last object
@@ -234,7 +237,7 @@ sub _parse_line {
     if(substr($line, 0, 7) eq 'define ' and $line =~ m/^define\s+(\w+)(\s|{|$)/gmxo) {
         $current_object = Monitoring::Config::Object->new(type => $1, file => $self, line => $linenr, 'coretype' => $self->{'coretype'});
         unless(defined $current_object) {
-            push @{$self->{'errors'}}, "unknown object type '".$1."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+            push @{$self->{'parse_errors'}}, "unknown object type '".$1."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             $in_unknown_object = 1;
             return($current_object, $in_unknown_object, $comments);
         }
@@ -243,13 +246,13 @@ sub _parse_line {
     # old object finished
     elsif($line eq '}') {
         unless(defined $current_object) {
-            push @{$self->{'errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+            push @{$self->{'parse_errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             return($current_object, $in_unknown_object, $comments);
         }
         $current_object->{'comments'} = $comments;
         $current_object->{'line2'}    = $linenr;
-        my $errors = $current_object->parse();
-        if(scalar @{$errors} > 0) { push @{$self->{'errors'}}, @{$errors} }
+        my $parse_errors = $current_object->parse();
+        if(scalar @{$parse_errors} > 0) { push @{$self->{'parse_errors'}}, @{$parse_errors} }
         $current_object->{'id'} = $current_object->_make_id();
         push @{$self->{'objects'}}, $current_object;
         undef $current_object;
@@ -280,16 +283,16 @@ sub _parse_line {
             }
             if(defined $timedef) {
                 if(defined $current_object->{'conf'}->{$timedef}) {
-                    push @{$self->{'errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                    push @{$self->{'parse_errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
                 }
                 $current_object->{'conf'}->{$timedef} = $timeranges;
             } else {
-                push @{$self->{'errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
         }
         else {
             if(defined $current_object->{'conf'}->{$key}) {
-                push @{$self->{'errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+                push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
             $current_object->{'conf'}->{$key} = $value;
 
@@ -300,7 +303,7 @@ sub _parse_line {
 
     # something totally unknown
     else {
-        push @{$self->{'errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+        push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
     }
 
     return($current_object, $in_unknown_object, $comments);

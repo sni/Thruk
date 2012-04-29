@@ -10,6 +10,23 @@
 
     <table>
 
+    [% IF parse_errors.size > 0 %]
+    <tr>
+      <td class='dataVar' style="padding-top: 5px;">
+        Config Parse Errors
+      </td>
+      <td class='dataVar'>
+        <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='there are parse errors' title='there are parse errors' width="16" height="16" style="vertical-align: text-top">
+      </td>
+      <td class='dataVal' style="padding-top: 5px; text-align: center;">
+          [% FOREACH err IN parse_errors %]
+            <span class="fail_message">[% err %]</span><br>
+          [% END %]
+      </td>
+    </tr>
+    <tr><td colspan=3><hr></td></tr>
+    [% END %]
+
     <tr>
       <td class='dataVar' style="padding-top: 5px;">
         1. Verify your changes

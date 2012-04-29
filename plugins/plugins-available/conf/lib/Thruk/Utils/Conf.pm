@@ -77,7 +77,6 @@ sub set_object_model {
 
     my $errnum = scalar @{$c->{'obj_db'}->{'errors'}};
     if($errnum > 0) {
-        $c->{'obj_db'}->{'errors_displayed'} = 1;
         my $error = $c->{'obj_db'}->{'errors'}->[0];
         if($errnum > 1) {
             $error = 'Got multiple errors!';

@@ -27,9 +27,9 @@ parse the object config
 
 =cut
 sub parse {
-    my $self   = shift;
-    my $fields = shift;
-    my $errors = [];
+    my $self         = shift;
+    my $fields       = shift;
+    my $parse_errors = [];
 
     delete $self->{'name'};
 
@@ -69,12 +69,12 @@ sub parse {
             if($self->{'type'} eq 'timeperiod' and $value =~ m/^\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}/gmx) {
                 $self->{'conf'}->{$attr} = $value;
             } else {
-                push @{$errors}, "unknown attribute: $attr in ".Thruk::Utils::Conf::_link_obj($self);
+                push @{$parse_errors}, "unknown attribute: $attr in ".Thruk::Utils::Conf::_link_obj($self);
             }
         }
     }
 
-    return $errors;
+    return $parse_errors;
 }
 
 ##########################################################

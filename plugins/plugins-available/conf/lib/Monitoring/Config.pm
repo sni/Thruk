@@ -32,7 +32,7 @@ sub new {
     my $self = {
         'config'             => $config,
         'errors'             => [],
-        'errors_displayed'   => 0,
+        'parse_errors'       => [],
         'files'              => [],
         'initialized'        => 0,
         'cached'             => 0,
@@ -1022,7 +1022,7 @@ sub _get_files_names {
     }
 
     if(!defined $config->{'obj_dir'} and !defined $config->{'obj_file'}) {
-        push @{$self->{'errors'}}, "you need to configure paths (obj_dir, obj_file)";
+        push @{$self->{'parse_errors'}}, "you need to configure paths (obj_dir, obj_file)";
     }
 
     my @uniqfiles = keys %{$files};
@@ -1116,10 +1116,12 @@ sub _check_file_changed {
 # collect errors from all files
 sub _collect_errors {
     my ( $self ) = @_;
+    $self->{'parse_errors'} = [];
     for my $file ( @{$self->{'files'}} ) {
-        push @{$self->{'errors'}}, @{$file->{'errors'}};
+        push @{$self->{'errors'}},       @{$file->{'errors'}};
+        push @{$self->{'parse_errors'}}, @{$file->{'parse_errors'}};
     }
-    return scalar @{$self->{'errors'}};
+    return scalar @{$self->{'errors'}} + scalar @{$self->{'parse_errors'}};
 }
 
 
@@ -1166,7 +1168,7 @@ sub _rebuild_index {
             } else {
                 my $type = $obj->get_type();
                 if($type ne 'hostescalation' and $type ne 'serviceescalation') {
-                    push @{$self->{'errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::_link_obj($obj);
+                    push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::_link_obj($obj);
                 }
             }
         }
@@ -1176,8 +1178,8 @@ sub _rebuild_index {
     $self->{'macros'}             = $macros;
     $self->{'needs_index_update'} = 0;
 
-    my $errors = $self->_check_references();
-    push @{$self->{'errors'}}, @{$errors} if scalar @{$errors} > 0;
+    my $parse_errors = $self->_check_references();
+    push @{$self->{'parse_errors'}}, @{$parse_errors} if scalar @{$parse_errors} > 0;
 
     $self->{'stats'}->profile(end => "M::C::_rebuild_index()") if defined $self->{'stats'};
     return;
@@ -1208,9 +1210,9 @@ sub _update_obj_in_index {
         if(defined $existing_id and $existing_id eq $obj->{'id'}) {
             my $orig = $self->get_object_by_id($existing_id);
             if(defined $orig) {
-                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
+                push @{$self->{'parse_errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
             } else {
-                push @{$self->{'errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj);
+                push @{$self->{'parse_errors'}}, "duplicate ".$obj->{'type'}." template definition $tname in ".Thruk::Utils::Conf::_link_obj($obj);
             }
         }
         $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname} = $obj->{'id'};
@@ -1249,10 +1251,10 @@ sub _update_obj_in_index {
         if(defined $existing_id and $existing_id ne $obj->{'id'}) {
             my $orig = $self->get_object_by_id($existing_id);
             if(!defined $orig) {
-                push @{$self->{'errors'}},
+                push @{$self->{'parse_errors'}},
                     "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::_link_obj($obj);
             } else {
-                push @{$self->{'errors'}},
+                push @{$self->{'parse_errors'}},
                     "duplicate ".$obj->{'type'}." definition $pname in ".Thruk::Utils::Conf::_link_obj($obj)."\n  -> already defined in ".Thruk::Utils::Conf::_link_obj($orig);
             }
         }
@@ -1274,9 +1276,9 @@ sub _update_obj_in_index {
 ##########################################################
 sub _reset_errors {
     my($self,$force) = @_;
-    if($self->{'errors_displayed'} || $force) {
+    if($force) {
         $self->{'errors'}           = [];
-        $self->{'errors_displayed'} = 0;
+        $self->{'parse_errors'}     = [];
     }
     return;
 }
@@ -1301,21 +1303,21 @@ sub _newest_file {
 sub _check_references {
     my($self) = @_;
     $self->{'stats'}->profile(begin => "M::C::_check_references()") if defined $self->{'stats'};
-    my @errors;
+    my @parse_errors;
     $self->_all_object_links_callback(sub {
         my($file, $obj, $attr, $link, $val) = @_;
         if($attr eq 'use') {
             if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
-                push @errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+                push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
             }
         }
         elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
-            push @errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+            push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
         }
     });
 
     $self->{'stats'}->profile(end => "M::C::_check_references()") if defined $self->{'stats'};
-    return \@errors;
+    return \@parse_errors;
 }
 
 ##########################################################

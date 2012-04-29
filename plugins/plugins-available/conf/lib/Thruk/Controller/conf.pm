@@ -120,6 +120,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
         $c->stash->{'obj_model_changed'} = 1;
         $self->_process_objects_page($c);
         Thruk::Utils::Conf::store_model_retention($c) if $c->stash->{'obj_model_changed'};
+        $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
     }
 
     return 1;
