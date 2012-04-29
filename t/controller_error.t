@@ -4,7 +4,7 @@ use Data::Dumper;
 use Test::More;
 
 plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-plan tests => 217;
+plan tests => 240;
 
 BEGIN {
     use lib('t');
@@ -13,17 +13,17 @@ BEGIN {
 }
 use_ok 'Thruk::Controller::error';
 
-my $pages = [];
+$ENV{'TEST_ERROR'} = 1;
 for(0..23) {
-    push @{$pages}, '/error/'.$_;
+    my $nr = $_;
+    my $test = {
+        'url'     => '/error/'.$nr,
+        'fail'    => 1,
+    };
+    if($nr == 13) {
+        $test->{'unlike'} = ['ARRAY', 'HASH'];
+    }
+    TestUtils::test_page(%{$test});
 }
 
-$ENV{'TEST_ERROR'} = 1;
-for my $url (@{$pages}) {
-    TestUtils::test_page(
-        'url'     => $url,
-        'fail'    => 1,
-        'unlike'  => [ 'HASH', 'ARRAY' ],
-    );
-}
 delete $ENV{'TEST_ERROR'};

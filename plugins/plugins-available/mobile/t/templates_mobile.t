@@ -23,6 +23,5 @@ SKIP: {
 TestUtils::test_page(
     'url'      => '/thruk/cgi-bin/mobile.cgi',
     'follow'   => 1,
-    'unlike'   => [ 'internal server error', 'HASH', 'ARRAY' ],
     'like'     => 'Mobile Thruk',
 );

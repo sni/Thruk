@@ -29,7 +29,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Problems and Impacts',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -44,7 +43,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Current Network Status',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -56,6 +54,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Business Elements',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

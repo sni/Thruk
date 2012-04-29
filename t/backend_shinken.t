@@ -33,6 +33,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Use Expire Time:',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

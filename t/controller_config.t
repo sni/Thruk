@@ -29,6 +29,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Configuration',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

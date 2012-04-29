@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 12;
 
 BEGIN {
     use lib('t');
@@ -23,6 +23,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Mobile Thruk',
-        'unlike'  => 'internal server error',
     );
 }

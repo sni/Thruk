@@ -30,10 +30,10 @@ my($host,$service) = TestUtils::get_test_service();
 ###########################################################
 # initialize object config
 TestUtils::test_page(
-    'url'      => '/thruk/cgi-bin/conf.cgi?sub=objects',
-    'follow'   => 1,
-    'unlike'   => [ 'internal server error', 'HASH', 'ARRAY' ],
-    'like'     => 'Config Tool',
+    'url'             => '/thruk/cgi-bin/conf.cgi?sub=objects',
+    'follow'          => 1,
+    'like'            => 'Config Tool',
+    'fail_message_ok' => 1,
 );
 
 ###########################################################
@@ -44,7 +44,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=thruk',
     '/thruk/cgi-bin/conf.cgi?sub=users',
     '/thruk/cgi-bin/conf.cgi?sub=users&action=change&data.username=testuser',
-    '/thruk/cgi-bin/conf.cgi?sub=objects',
+    { url => '/thruk/cgi-bin/conf.cgi?sub=objects', fail_message_ok => 1 },
     '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=browser',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=move&type=host&data.name='.$host,
@@ -60,11 +60,8 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
 }
 
 for my $url (@{$pages}) {
-    TestUtils::test_page(
-        'url'     => $url,
-        'like'    => 'Config Tool',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
-    );
+    my $test = TestUtils::make_test_hash($url, {'like' => 'Config Tool'});
+    TestUtils::test_page(%{$test});
 }
 
 my $redirects = [
@@ -77,7 +74,6 @@ for my $url (@{$redirects}) {
     TestUtils::test_page(
         'url'      => $url,
         'redirect' => 1,
-        'unlike'   => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -85,7 +81,6 @@ for my $url (@{$redirects}) {
 for my $type (@{$Monitoring::Config::Object::Types}, 'icon') {
     my $page = TestUtils::test_page(
         'url'          => '/thruk/cgi-bin/conf.cgi?action=json&type='.$type,
-        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
@@ -112,13 +107,11 @@ for my $type (@{$Monitoring::Config::Object::Types}, 'icon') {
     TestUtils::test_page(
         'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type.'&data.name='.$data->[0]->{'data'}->[0],
         'like'    => [ 'Config Tool', $type, $data->[0]->{'data'}->[0]],
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 
     # new object
     TestUtils::test_page(
         'url'     => '/thruk/cgi-bin/conf.cgi?sub=objects&action=new&type='.$type,
         'like'    => [ 'Config Tool', "new $type"],
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

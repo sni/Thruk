@@ -24,7 +24,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'            => $url,
         'like'           => [ 'WML Thruk' ],
-        'unlike'         => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 

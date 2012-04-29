@@ -18,6 +18,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Tactical Monitoring Overview',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

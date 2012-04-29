@@ -115,7 +115,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => [ 'Current Network Status', 'statusTitle' ],
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -130,7 +129,6 @@ $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'          => $url,
-        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/x-msexcel',
     );
 }
@@ -146,7 +144,6 @@ $pages = [
 for my $url (@{$pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
@@ -165,7 +162,6 @@ $pages = [
 for my $url (@{$pages}) {
     my $page = TestUtils::test_page(
         'url'          => $url,
-        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});

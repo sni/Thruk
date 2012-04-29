@@ -19,6 +19,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Host and Service Alert Histogram',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

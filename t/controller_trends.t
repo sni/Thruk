@@ -40,7 +40,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Host and Service State Trends',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -48,7 +47,6 @@ for my $url (@{$reports}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => [ 'Host and Service State Trends', 'Duration: ' ],
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -56,6 +54,5 @@ for my $url (@{$pictures}) {
     TestUtils::test_page(
         'url'          => $url,
         'content_type' => 'image/png',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

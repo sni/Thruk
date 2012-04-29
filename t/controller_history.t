@@ -27,7 +27,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Alert History',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -39,7 +38,6 @@ $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'          => $url,
-        'unlike'       => [ 'internal server error', 'HASH', 'ARRAY' ],
         'content_type' => 'application/x-msexcel',
     );
 }

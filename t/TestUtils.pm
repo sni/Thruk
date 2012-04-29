@@ -94,17 +94,19 @@ sub test_page {
     my(%opts) = @_;
     my $return = {};
 
-    my $request = _request($opts{'url'});
+    my $opts = _set_test_page_defaults(\%opts);
+
+    my $request = _request($opts->{'url'});
 
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
         diag("got startup link: ".$1);
         # startup fcgid
-        fail("startup url does not match") if $1 ne $opts{'url'};
+        fail("startup url does not match") if $1 ne $opts->{'url'};
         _request('/thruk/side.html');
-        $request = _request($opts{'url'});
+        $request = _request($opts->{'url'});
     }
 
-    if(defined $opts{'follow'}) {
+    if(defined $opts->{'follow'}) {
         my $redirects = 0;
         while(my $location = $request->{'_headers'}->{'location'}) {
             if($location !~ m/^(http|\/)/gmx) { $location = _relative_url($location, $request->base()->as_string()); }
@@ -115,8 +117,10 @@ sub test_page {
         ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or BAIL_OUT(Dumper($request));
     }
 
-    if($request->content =~ m/<span\ class="fail_message">([^<]+)<\/span>/mx) {
-        fail('Request '.$opts{'url'}.' had error message: '.$1);
+    if(!defined $opts->{'fail_message_ok'}) {
+        if($request->content =~ m/<span\ class="fail_message">([^<]+)<\/span>/mx) {
+            fail('Request '.$opts->{'url'}.' had error message: '.$1);
+        }
     }
 
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job.cgi\?job=(.*)$/) {
@@ -129,36 +133,36 @@ sub test_page {
             BAIL_OUT(Dumper($request));
         }
     }
-    elsif(defined $opts{'fail'}) {
-        ok( $request->is_error, 'Request '.$opts{'url'}.' should fail' );
+    elsif(defined $opts->{'fail'}) {
+        ok( $request->is_error, 'Request '.$opts->{'url'}.' should fail' );
     }
-    elsif(defined $opts{'redirect'}) {
-        ok( $request->is_redirect, 'Request '.$opts{'url'}.' should redirect' ) or diag(Dumper($request));
-        if(defined $opts{'location'}) {
-            like($request->{'_headers'}->{'location'}, qr/$opts{'location'}/, "Content should redirect: ".$opts{'location'});
+    elsif(defined $opts->{'redirect'}) {
+        ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($request));
+        if(defined $opts->{'location'}) {
+            like($request->{'_headers'}->{'location'}, qr/$opts->{'location'}/, "Content should redirect: ".$opts->{'location'});
         }
     } else {
-        ok( $request->is_success, 'Request '.$opts{'url'}.' should succeed' ) or BAIL_OUT(Dumper($request));
+        ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or BAIL_OUT(Dumper($request));
     }
     $return->{'content'} = $request->content;
 
     # text that should appear
-    if(defined $opts{'like'}) {
-        if(ref $opts{'like'} eq '') {
-            like($return->{'content'}, qr/$opts{'like'}/, "Content should contain: ".$opts{'like'});
-        } elsif(ref $opts{'like'} eq 'ARRAY') {
-            for my $like (@{$opts{'like'}}) {
+    if(defined $opts->{'like'}) {
+        if(ref $opts->{'like'} eq '') {
+            like($return->{'content'}, qr/$opts->{'like'}/, "Content should contain: ".$opts->{'like'});
+        } elsif(ref $opts->{'like'} eq 'ARRAY') {
+            for my $like (@{$opts->{'like'}}) {
                 like($return->{'content'}, qr/$like/, "Content should contain: ".$like);
             }
         }
     }
 
     # text that shouldn't appear
-    if(defined $opts{'unlike'}) {
-        if(ref $opts{'unlike'} eq '') {
-            unlike($return->{'content'}, qr/$opts{'unlike'}/, "Content should not contain: ".$opts{'unlike'});
-        } elsif(ref $opts{'unlike'} eq 'ARRAY') {
-            for my $unlike (@{$opts{'unlike'}}) {
+    if(defined $opts->{'unlike'}) {
+        if(ref $opts->{'unlike'} eq '') {
+            unlike($return->{'content'}, qr/$opts->{'unlike'}/, "Content should not contain: ".$opts->{'unlike'});
+        } elsif(ref $opts->{'unlike'} eq 'ARRAY') {
+            for my $unlike (@{$opts->{'unlike'}}) {
                 unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike);
             }
         }
@@ -167,8 +171,8 @@ sub test_page {
     # test the content type
     $return->{'content_type'} = $request->header('Content-Type');
     my $content_type = $request->header('Content-Type');
-    if(defined $opts{'content_type'}) {
-        is($return->{'content_type'}, $opts{'content_type'}, 'Content-Type should be: '.$opts{'content_type'});
+    if(defined $opts->{'content_type'}) {
+        is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'});
     }
 
 
@@ -179,7 +183,7 @@ sub test_page {
         while(my $line = <$ph>) {
             if($line =~ m/(\d+)/) {
                 my $rsize = sprintf("%.2f", $1/1024);
-                ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 500MB on '.$opts{'url'});
+                ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 500MB on '.$opts->{'url'});
             }
         }
         close($ph);
@@ -192,7 +196,7 @@ sub test_page {
     }
 
     SKIP: {
-        if($content_type =~ 'text\/html' and (!defined $opts{'skip_html_lint'} or $opts{'skip_html_lint'} == 0)) {
+        if($content_type =~ 'text\/html' and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
             if($use_html_lint == 0) {
                 skip "no HTML::Lint installed", 2;
             }
@@ -364,6 +368,19 @@ sub test_command {
 }
 
 #########################
+sub make_test_hash {
+    my $data = shift;
+    my $test = shift || {};
+    if(ref $data eq '') {
+        $test->{'url'} = $data;
+    } else {
+        for my $key (%{$data}) {
+            $test->{$key} = $data->{$key};
+        }
+    }
+    return $test;
+}
+#########################
 sub _relative_url {
     my $location = shift;
     my $url      = shift;
@@ -387,6 +404,15 @@ sub _request {
         $request = request($url);
     }
     return $request;
+}
+
+#########################
+sub _set_test_page_defaults {
+    my($opts) = @_;
+    if(!exists $opts->{'unlike'}) {
+        $opts->{'unlike'} = [ 'internal server error', 'HASH', 'ARRAY' ];
+    }
+    return $opts;
 }
 
 #########################

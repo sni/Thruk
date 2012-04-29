@@ -17,6 +17,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Network Outages',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

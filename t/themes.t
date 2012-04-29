@@ -31,7 +31,6 @@ for my $theme (@themes) {
     for my $url (@{$pages}) {
         TestUtils::test_page(
             'url'     => $url."?theme=".$theme,
-            'unlike'  => 'internal server error',
         );
     }
 }

@@ -55,7 +55,6 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Availability Report',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -63,7 +62,6 @@ for my $url (@{$reports}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => [ 'Availability Report', 'Availability report completed in' ],
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
 
@@ -77,6 +75,5 @@ for my $url (@{$csv_pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'HOST_NAME, ',
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }

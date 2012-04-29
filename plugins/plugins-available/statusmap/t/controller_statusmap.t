@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 148;
+use Test::More tests => 180;
 
 BEGIN {
     use lib('t');
@@ -44,6 +44,5 @@ for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
         'like'    => 'Network Map For All Hosts',
-        'unlike'  => 'internal server error',
     );
 }

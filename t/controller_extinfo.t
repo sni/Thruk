@@ -30,6 +30,5 @@ my $pages = [
 for my $url (@{$pages}) {
     TestUtils::test_page(
         'url'     => $url,
-        'unlike'  => [ 'internal server error', 'HASH', 'ARRAY' ],
     );
 }
