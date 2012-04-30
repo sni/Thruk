@@ -102,8 +102,7 @@ function show_tree_map(id_to_show) {
 
     // reset page refresh
     setRefreshRate(refresh_rate);
-    if(additionalParams == undefined) { additionalParams = new Hash({}) };
-    additionalParams.set('host', id_to_show);
+    additionalParams['host'] = id_to_show;
 
     var tm = new $jit.TM.Squarified({
         injectInto: 'infovis',
@@ -126,7 +125,7 @@ function show_tree_map(id_to_show) {
                 tip = document.getElementById('tooltip');
                 tip.style.display = 'none';
 
-                additionalParams.set('host', node.id);
+                additionalParams['host'] = node.id;
                 tm.enter(node);
                 return false;
             },
@@ -138,7 +137,7 @@ function show_tree_map(id_to_show) {
                 var tree = eval('(' + json + ')');
                 var parent = $jit.json.getParent(tree, id_to_show);
                 if(parent) {
-                  additionalParams.set('host', parent.id);
+                  additionalParams['host'] = parent.id;
                 }
                 tm.out();
                 return false;
@@ -275,8 +274,7 @@ function show_circle_map(id_to_show, w, h) {
         onBeforeCompute: function(node) {
             // reset page refresh
             setRefreshRate(refresh_rate);
-            if(additionalParams == undefined) { additionalParams = new Hash({}) };
-            additionalParams.set('host', node.id);
+            additionalParams['host'] = node.id;
         },
 
         //Add the name of the node in the correponding label
