@@ -199,23 +199,36 @@ sub set_unavailable_states {
 sub _render_bar_chart {
     my($c, $options) = @_;
     my $cc = Chart::Clicker->new('format' => 'pdf', width => 550, height => 400);
-    my(@series, @colors);
-    my $total = 0;
-    for my $item (@{$options->{'values'}}) {
-        $total += $item->{'value'};
+    my @months = ();
+    my $colors = {};
+    for my $name (sort keys %{$options->{'values'}}) {
+        push @months, _date_to_tick_name($name);
+        my $total = 0;
+        for my $item (@{$options->{'values'}->{$name}->{'values'}}) {
+            $colors->{$item->{'name'}} = $item->{'color'};
+            $total += $item->{'value'};
+        }
+        $options->{'values'}->{$name}->{'total'} = $total;
     }
-    my @months = qw/Apr May Jun Jul Aug Sep Oct Nov Dec Jan Feb Mar/;
+
     my $percs = {};
-    for my $m (@months) { $percs->{$m} = 0 }
-    for my $item (@{$options->{'values'}}) {
-        my $perc = sprintf("%05.2f", $item->{'value'}*100/$total);
-        push @colors, $item ->{'color'};
+    for my $name (sort keys %{$options->{'values'}}) {
+        for my $item (@{$options->{'values'}->{$name}->{'values'}}) {
+            my $total = $options->{'values'}->{$name}->{'total'};
+            my $perc  = '00.00';
+            $perc     = sprintf("%05.2f", $item->{'value'}*100/$total) if $total > 0;
+            push @{$percs->{$item->{'name'}}}, $perc;
+        }
+    }
+
+    my(@series, @colors);
+    for my $name ('AVAILABLE', 'NOT AVAILABLE') {
+        push @colors, $colors->{$name};
         push @series, Chart::Clicker::Data::Series->new(
-            name    => $item->{'name'},
+            name    => $name,
             keys    => [ 1..12 ],
-            values  => [ 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0, 0, $perc ],
+            values  => $percs->{$name},
         );
-        $percs->{'Mar'} = $perc if $item->{'name'} eq 'AVAILABLE';
     }
     my $ds = Chart::Clicker::Data::DataSet->new(series => \@series );
     $cc->add_to_datasets($ds);
@@ -229,6 +242,7 @@ sub _render_bar_chart {
     $def->range_axis->tick_values([90..100]);
     $def->range_axis->format('%d');
     $def->domain_axis->tick_values([1..12]);
+
     $def->domain_axis->tick_labels(\@months);
     $def->domain_axis->format('%d');
 
@@ -260,30 +274,37 @@ sub _render_svc_bar_chart {
     my $avail          = $c->stash->{'avail_data'}->{'services'}->{$host}->{$service};
     return unless defined $avail;
 
-    my($time_avail, $time_unavail) = (0,0);
-    for my $s (qw/OK WARNING CRITICAL UNKNOWN UNDETERMINED/) {
-        my $time = 0;
-        if($s eq 'OK')           { $time += $avail->{'time_ok'} + $avail->{'scheduled_time_warning'} + $avail->{'scheduled_time_critical'} + $avail->{'scheduled_time_unknown'} }
-        if($s eq 'WARNING')      { $time += $avail->{'time_warning'}  - $avail->{'scheduled_time_warning'} }
-        if($s eq 'CRITICAL')     { $time += $avail->{'time_critical'} - $avail->{'scheduled_time_critical'} }
-        if($s eq 'UNKNOWN')      { $time += $avail->{'time_unknown'}  - $avail->{'scheduled_time_unknown'} }
-        if($s eq 'UNDETERMINED') { $time += $avail->{'time_indeterminate_notrunning'} + $avail->{'time_indeterminate_nodata'} + $avail->{'time_indeterminate_outside_timeperiod'} }
+    my $bar = { values => {} };
+    for my $name (sort keys %{$avail->{'breakdown'}}) {
+        my $t = $avail->{'breakdown'}->{$name};
+        my($time_avail, $time_unavail) = (0,0);
+        for my $s (qw/OK WARNING CRITICAL UNKNOWN UNDETERMINED/) {
+            my $time = 0;
+            if($s eq 'OK')           { $time += $t->{'time_ok'} + $t->{'scheduled_time_warning'} + $t->{'scheduled_time_critical'} + $t->{'scheduled_time_unknown'} }
+            if($s eq 'WARNING')      { $time += $t->{'time_warning'}  - $t->{'scheduled_time_warning'} }
+            if($s eq 'CRITICAL')     { $time += $t->{'time_critical'} - $t->{'scheduled_time_critical'} }
+            if($s eq 'UNKNOWN')      { $time += $t->{'time_unknown'}  - $t->{'scheduled_time_unknown'} }
+            if($s eq 'UNDETERMINED') { $time += $t->{'time_indeterminate_notrunning'} + $t->{'time_indeterminate_nodata'} + $t->{'time_indeterminate_outside_timeperiod'} }
 
-        if(defined $c->stash->{'unavailable_states'}->{$s}) {
-            $time_unavail += $time;
-        } else {
-            $time_avail += $time;
+            if(defined $c->stash->{'unavailable_states'}->{$s}) {
+                $time_unavail += $time;
+            } else {
+                $time_avail += $time;
+            }
         }
+
+        my $undetermined   = $t->{'time_indeterminate_notrunning'} + $t->{'time_indeterminate_nodata'} + $t->{'time_indeterminate_outside_timeperiod'};
+        my $time_ok        = $t->{'time_ok'} + $t->{'scheduled_time_critical'} + $t->{'scheduled_time_unknown'} + $t->{'scheduled_time_warning'}  + $t->{'scheduled_time_ok'};
+
+        $bar->{'values'}->{$name} = {
+            name => $name,
+            values => [
+                { name => 'AVAILABLE',     value => $time_avail,   color => $col->{'ok'} },
+                { name => 'NOT AVAILABLE', value => $time_unavail, color => $col->{'critical'} },
+            ],
+        };
     }
 
-    my $undetermined   = $avail->{'time_indeterminate_notrunning'} + $avail->{'time_indeterminate_nodata'} + $avail->{'time_indeterminate_outside_timeperiod'};
-    my $time_ok        = $avail->{'time_ok'} + $avail->{'scheduled_time_critical'} + $avail->{'scheduled_time_unknown'} + $avail->{'scheduled_time_warning'}  + $avail->{'scheduled_time_ok'};
-    my $bar = {
-        values => [
-            { name => 'AVAILABLE',     value => $time_avail,   color => $col->{'ok'} },
-            { name => 'NOT AVAILABLE', value => $time_unavail, color => $col->{'critical'} },
-        ],
-    };
     my $bar_file = _render_bar_chart($c, $bar);
     return $bar_file;
 }
@@ -393,6 +414,31 @@ sub _get_colors {
         'unreachable'  => Graphics::Color::RGB->new(red => 1,    green => 0.48, blue => 0.35, alpha => 1),
     };
     return $colors;
+}
+
+##########################################################
+# convert date to tick name
+sub _date_to_tick_name {
+    my $date = shift;
+    if($date =~ m/^\d{4}\-(\d{2})$/mx) {
+        my $names = {
+            '01' => 'Jan',
+            '02' => 'Feb',
+            '03' => 'Mar',
+            '04' => 'Apr',
+            '05' => 'May',
+            '06' => 'Jun',
+            '07' => 'Jul',
+            '08' => 'Aug',
+            '09' => 'Sep',
+            '10' => 'Oct',
+            '11' => 'Nov',
+            '12' => 'Dec',
+        };
+        return $names->{$1} if defined $names->{$1};
+        return $1;
+    }
+    return $date;
 }
 
 ##########################################################

@@ -10,17 +10,17 @@
   USE date;
 
   # PAGE 1
-#  pdf.prForm(path_to_template(c, 'pdf/sla.pdf'), 1);
-#  pdf.prFont('Helvetica-Bold');
-#  font(pdf, 20, 'light blue');
-#  IF param.exists('service');
-#    pdf.prText(40,400,'Service: ' _ param.service _ ' on ' _ param.host );
-#  ELSE;
-#    pdf.prText(40,400,'Host: ' _ param.host );
-#  END;
-#  font(pdf, 15, 'dark grey');
-#  pdf.prText(40,350,"Report Timeperiod: " _ format_date(start, "%d.%m.%Y") _ ' - ' _ format_date((end - 1), "%d.%m.%Y"));
-#  pdf.prText(480, 440, format_date(date.now, "%d.%m.%Y"));
+  pdf.prForm(path_to_template(c, 'pdf/sla.pdf'), 1);
+  pdf.prFont('Helvetica-Bold');
+  font(pdf, 20, 'light blue');
+  IF param.exists('service');
+    pdf.prText(40,400,'Service: ' _ param.service _ ' on ' _ param.host );
+  ELSE;
+    pdf.prText(40,400,'Host: ' _ param.host );
+  END;
+  font(pdf, 15, 'dark grey');
+  pdf.prText(40,350,"Report Timeperiod: " _ format_date(start, "%d.%m.%Y") _ ' - ' _ format_date((end - 1), "%d.%m.%Y"));
+  pdf.prText(480, 440, format_date(date.now, "%d.%m.%Y"));
 
   # PAGE 2
   # availability pie chart
@@ -42,7 +42,7 @@
 
   # PAGE 2
   # availability bar chart
-#  pdf.prPage();
+  pdf.prPage();
   pdf.prForm(path_to_template(c, 'pdf/sla.pdf'), 2);
   font(pdf, 20, 'dark grey');
   pdf.prText(40,630, 'Availability Chart');
