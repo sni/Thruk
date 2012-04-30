@@ -106,6 +106,7 @@ feature     ('author_test',
   'Perl::Critic::Policy::Dynamic::NoIndirect'                               => 0,
   'Perl::Critic::Policy::NamingConventions::ProhibitMixedCaseSubs'          => 0,
   'Perl::Critic::Policy::ValuesAndExpressions::ProhibitAccessOfPrivateData' => 0,
+  'WWW::Mechanize::Firefox'                                                 => 0,
 );
 
 ##################################
