@@ -259,13 +259,15 @@ if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
     unless(-s $secretfile) {
         my $digest = md5_hex(rand(1000).time());
         chomp($digest);
-        open(my $fh, ">$secretfile");
-        print $fh $digest;
-        close($fh);
-        chmod(0660, $secretfile);
-        if($> == 0) {
-            my @stat = stat($var_path);
-            chown($stat[4], $stat[5], $secretfile);
+        open(my $fh, ">$secretfile") or warn("cannot write to $secretfile: $!");
+        if(defined $fh) {
+            print $fh $digest;
+            close($fh);
+            chmod(0660, $secretfile);
+            if($> == 0) {
+                my @stat = stat($var_path);
+                chown($stat[4], $stat[5], $secretfile);
+            }
         }
         __PACKAGE__->config->{'secret_key'} = $digest;
     } else {
