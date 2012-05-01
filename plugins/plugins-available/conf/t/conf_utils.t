@@ -109,7 +109,7 @@ isa_ok( $objects, 'Monitoring::Config' );
 is( scalar @{ $objects->{'files'} }, 1, 'number of files parsed' ) or BAIL_OUT("useless without parsed files");
 my $parsedfile = $objects->{'files'}->[0];
 is( $parsedfile->{'md5'}, 'bf6f91fcc7c569f4cc96bcdf8e926811', 'files md5 sum' );
-like( $parsedfile->{'errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );
+like( $parsedfile->{'parse_errors'}->[0], '/unknown object type \'blah\'/', 'parse error' );
 my $obj = $parsedfile->{'objects'}->[0];
 my $host = {
     '_CUST1'         => 'cust 1 val',
@@ -284,4 +284,3 @@ $objects->init();
 $objs = $objects->get_objects();
 is(scalar @{$objects->{'errors'}}, 0, "number of errors") or diag(Dumper($objects->{'errors'}));
 is(scalar @{$objs}, 2, "number of objects");
-
