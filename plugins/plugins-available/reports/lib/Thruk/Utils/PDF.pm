@@ -198,6 +198,7 @@ sub set_unavailable_states {
 ##########################################################
 sub _render_bar_chart {
     my($c, $options) = @_;
+
     my $cc = Chart::Clicker->new('format' => 'pdf', width => 550, height => 400);
     my @months = ();
     my $colors = {};

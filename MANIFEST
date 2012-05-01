@@ -346,6 +346,7 @@ t/01app.t
 t/10-Thruk-Utils.t
 t/11-Thruk-Backend.t
 t/20-Log-Log4perl.t
+t/89-javascript.t
 t/91_moose.t
 t/92_clean_debug.t
 t/92_todo.t
