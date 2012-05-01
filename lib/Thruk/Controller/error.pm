@@ -225,6 +225,12 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     $c->response->headers->expires(time - 3600);
     $c->response->headers->header(cache_control => "public, max-age=0");
 
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+        Thruk::Utils::CLI::_error($c->stash->{errorMessage});
+        Thruk::Utils::CLI::_error($c->stash->{errorDescription});
+        Thruk::Utils::CLI::_error($c->stash->{errorDetails}) if defined $c->stash->{errorDetails};
+    }
+
     return 1;
 }
 

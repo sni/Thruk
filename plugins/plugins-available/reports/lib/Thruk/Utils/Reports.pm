@@ -16,6 +16,7 @@ use Carp;
 use Class::Inspector;
 use File::Slurp;
 use Data::Dumper;
+use Thruk::Utils::CLI;
 use Thruk::Utils::PDF;
 
 ##########################################################
@@ -34,11 +35,6 @@ sub report_show {
 
     my $report   = _read_report_file($c, $nr);
     return unless defined $report;
-
-    if(defined $report->{'backends'}) {
-        $c->{'db'}->disable_backends();
-        $c->{'db'}->enable_backends($report->{'backends'});
-    }
 
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
@@ -116,8 +112,19 @@ generate a new report
 =cut
 sub generate_report {
     my($c, $nr, $options) = @_;
+    $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
     return unless defined $options;
+
+    unless ($c->user_exists) {
+        $ENV{'REMOTE_USER'} = $options->{'user'};
+        $c->authenticate( {} );
+    }
+
+    if(defined $options->{'backends'}) {
+        $c->{'db'}->disable_backends();
+        $c->{'db'}->enable_backends($options->{'backends'});
+    }
 
     # set some defaults
     Thruk::Utils::PDF::set_unavailable_states($c, [qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
@@ -146,7 +153,7 @@ sub generate_report {
     eval {
         $c->view("PDF::Reuse")->render_pdf($c);
     };
-    $c->log->error($@) if $@;
+    Thruk::Utils::CLI::_error($@) if $@;
     return if $@;
 
     # render pdf
@@ -155,7 +162,7 @@ sub generate_report {
     eval {
         $pdf_data = $c->view("PDF::Reuse")->render_pdf($c);
     };
-    $c->log->error($@) if $@;
+    Thruk::Utils::CLI::_error($@) if $@;
     return if $@;
 
     # write out pdf
@@ -166,6 +173,7 @@ sub generate_report {
     print $fh $pdf_data;
     close($fh);
 
+    $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $pdf_file;
 }
 
@@ -198,9 +206,15 @@ sub get_report_data_from_param {
 ##########################################################
 sub _read_report_file {
     my($c, $nr) = @_;
-    return unless $nr =~ m/^\d+$/mx;
+    unless($nr =~ m/^\d+$/mx) {
+        Thruk::Utils::CLI::_error("not a valid report number");
+        return;
+    }
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
-    return unless -f $file;
+    unless(-f $file) {
+        Thruk::Utils::CLI::_error("report does not exist: $!");
+        return;
+    }
     my $data = read_file($file);
     my $report;
     ## no critic
@@ -215,10 +229,11 @@ sub _read_report_file {
 ##########################################################
 sub _is_authorized_for_report {
     my($c, $report) = @_;
+    return 1 if defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI';
     if(defined $report->{'user'} and defined $c->stash->{'remote_user'} and $report->{'user'} eq $c->stash->{'remote_user'}) {
         return 1;
     }
-    $c->log->debug("user: ".$c->stash->{'remote_user'}." is not authorized for report");
+    Thruk::Utils::CLI::_debug("user: ".$c->stash->{'remote_user'}." is not authorized for report");
     return;
 }
 

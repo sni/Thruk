@@ -19,6 +19,7 @@ use JSON::XS;
 use File::Slurp;
 
 $Thruk::Utils::CLI::verbose = 0;
+$Thruk::Utils::CLI::c       = undef;
 
 ##############################################
 
@@ -209,6 +210,7 @@ sub _from_fcgi {
     my $data = decode_json($data_str);
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
+    $Thruk::Utils::CLI::c       = $c;
 
     # check credentials
     my $res = {};
@@ -230,6 +232,7 @@ sub _from_fcgi {
 ##############################################
 sub _run_commands {
     my($c, $opt) = @_;
+    $c->stats->profile(begin => "Utils::CLI::_run_commands");
     my $data = {
         'version' => $c->config->{'version'},
         'output'  => '',
@@ -248,6 +251,7 @@ sub _run_commands {
     # list backends
     if($action eq 'listbackends') {
         $data->{'output'} = _listbackends($c);
+        $c->stats->profile(end => "Utils::CLI::_run_commands");
         return $data;
     }
 
@@ -264,9 +268,12 @@ sub _run_commands {
     if($action =~ /^report=(.*)$/mx) {
         my $nr = $1;
         my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
-        $data->{'output'} = read_file($pdf_file);
+        if(defined $pdf_file) {
+            $data->{'output'} = read_file($pdf_file);
+        }
     }
 
+    $c->stats->profile(end => "Utils::CLI::_run_commands");
     return $data;
 }
 
@@ -344,15 +351,28 @@ sub _request_url {
 }
 
 ##############################################
+sub _error {
+    return _debug($_[0],'error');
+}
+
+##############################################
 sub _debug {
-    my($data) = @_;
-    return unless $Thruk::Utils::CLI::verbose > 0;
+    my($data, $lvl, $caller) = @_;
+    $lvl = 'DEBUG' unless defined $lvl;
+    return if($Thruk::Utils::CLI::verbose <= 0 and uc($lvl) ne 'ERROR');
     if(ref $data) {
-        return debug(Dumper($data));
+        return _debug(Dumper($data), $lvl);
     }
     my $time = scalar localtime();
     for my $line (split/\n/mx, $data) {
-        print "[".$time."][DEBUG] ".$line."\n";
+        if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+            print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
+        } else {
+            my $c = $Thruk::Utils::CLI::c;
+            if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
+            if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }
+            if(uc($lvl) eq 'DEBUG') { $c->log->debug($line) }
+        }
     }
     return;
 }
