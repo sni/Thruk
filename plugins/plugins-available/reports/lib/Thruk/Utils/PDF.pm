@@ -221,16 +221,16 @@ sub set_unavailable_states {
 
 =head2 fill_availability_table
 
-  fill_availability_table()
+  fill_availability_table($x, $y)
 
 set list of states which count as unavailable
 
 =cut
 sub fill_availability_table {
+    my($x, $y) = @_;
     my $c   = $Thruk::Utils::PDF::c   or die("not initialized!");
     my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
 
-    my($x, $y) = (40, 147);
     for(my $z=0; $z < @{$Thruk::Utils::PDF::availabilitys->{'values'}}; $z++) {
         $pdf->prText($x,$y,    $Thruk::Utils::PDF::availabilitys->{'months'}->[$z]);
         $pdf->prText($x-10,$y-13, $Thruk::Utils::PDF::availabilitys->{'values'}->[$z]."%");

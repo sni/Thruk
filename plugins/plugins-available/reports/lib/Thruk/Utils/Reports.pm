@@ -18,6 +18,7 @@ use File::Slurp;
 use Data::Dumper;
 use Thruk::Utils::CLI;
 use Thruk::Utils::PDF;
+use MIME::Lite;
 
 ##########################################################
 
@@ -31,11 +32,9 @@ generate and show the report
 
 =cut
 sub report_show {
-    my($c, $nr, $options) = @_;
+    my($c, $nr) = @_;
 
     my $report   = _read_report_file($c, $nr);
-    return unless defined $report;
-
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
         return $c->response->redirect('reports.cgi');
@@ -49,6 +48,84 @@ sub report_show {
         $c->forward('View::PDF::Reuse');
     }
     return 1;
+}
+
+##########################################################
+
+=head2 report_send
+
+  report_send($c, $nr)
+
+generate and send the report
+
+=cut
+sub report_send {
+    my($c, $nr) = @_;
+
+    my $report   = _read_report_file($c, $nr);
+    if(!defined $report) {
+        Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
+        return $c->response->redirect('reports.cgi');
+    }
+
+    my $pdf_file = generate_report($c, $nr, $report);
+    if(defined $pdf_file) {
+
+        $c->stash->{'block'} = 'mail';
+        my $mailtext;
+        eval {
+            $mailtext = $c->view("View::TT")->render($c, $c->stash->{'pdf_template'});
+        };
+        Thruk::Utils::CLI::_error($@) if $@;
+
+        # extract mail header
+        my $mailbody    = "";
+        my $bodystarted = 0;
+        my $mailheader  = {};
+        for my $line (split/\n/mx, $mailtext) {
+            if($line !~ m/^$/mx and $line !~ m/^[A-Z]+:/mx) {
+                $bodystarted = 1;
+            }
+            if($bodystarted) {
+                $mailbody .= $line."\n"
+            } elsif($line =~ m/^([A-Z]+):\s*(.*)$/mx) {
+                $mailheader->{lc($1)} = $2;
+            }
+            if($line =~ m/^$/mx) {
+                $bodystarted = 1;
+            }
+        }
+        my $msg = MIME::Lite->new();
+        $msg->build(
+                 From    => $report->{'from'}    || $mailheader->{'from'},
+                 To      => $report->{'to'}      || $mailheader->{'to'},
+                 Cc      => $report->{'cc'}      || $mailheader->{'cc'},
+                 Bcc     => $report->{'bcc'}     || $mailheader->{'bcc'},
+                 Subject => $report->{'subject'} || $mailheader->{'subject'} || 'Thruk Report',
+                 Type    => 'multipart/mixed',
+        );
+        for my $key (keys %{$mailheader}) {
+            my $value = $mailheader->{$key};
+            $key = lc($key);
+            next if $key eq 'from';
+            next if $key eq 'to';
+            next if $key eq 'cc';
+            next if $key eq 'bcc';
+            next if $key eq 'subject';
+            $msg->add($key => $mailheader->{$key});
+        }
+        $msg->attach(Type     => 'TEXT',
+                     Data     => $mailbody,
+        );
+        $msg->attach(Type    => 'application/pdf',
+                 Path        => $pdf_file,
+                 Filename    => 'report.pdf',
+                 Disposition => 'attachment',
+        );
+        return 1 if $msg->send;
+    }
+    Thruk::Utils::set_message( $c, 'fail_message', 'failed to send report' );
+    return 0;
 }
 
 ##########################################################

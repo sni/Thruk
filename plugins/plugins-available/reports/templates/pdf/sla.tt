@@ -23,26 +23,8 @@
     pdf.prText(40,400,'Host: ' _ param.host );
   END;
   font(15, 'dark grey');
-  pdf.prText(40,350,"Report Timeperiod: " _ format_date(start, "%d.%m.%Y") _ ' - ' _ format_date((end - 1), "%d.%m.%Y"));
+  pdf.prText(40,350, "Report Timeperiod: " _ format_date(start, "%d.%m.%Y") _ ' - ' _ format_date((end - 1), "%d.%m.%Y"));
   pdf.prText(480, 440, format_date(date.now, "%d.%m.%Y"));
-
-  # PAGE 2
-  # availability pie chart
-#  pdf.prPage();
-#  pdf.prForm(path_to_template('pdf/sla.pdf'), 2);
-#  font(20, 'dark grey');
-#  pdf.prText(40,630, 'Availability Chart');
-#  IF param.exists('service');
-#    pie_pdf = render_pie_chart('service');
-#  ELSE;
-#    pie_pdf = render_pie_chart('host');
-#  END;
-#  pdf.prDocForm({file => pie_pdf, x => 100, y => 130});
-
-  # page footer
-#  font(10, 'white');
-#  pdf.prText(560,58, '2');
-
 
   # PAGE 2
   # availability bar chart
@@ -53,7 +35,7 @@
   bar_pdf = render_bar_chart();
   pdf.prDocForm({file => bar_pdf, x => 25, y => 220});
   font(9, 'dark grey');
-  fill_availability_table();
+  fill_availability_table(40, 147);
 
   # page footer
   font(10, 'white');
@@ -75,3 +57,16 @@
   pdf.prText(550,58, '3');
 %]
 [% END %]
+
+[%# SENDING MAIL #%]
+[% IF block == 'mail' +%]
+SUBJECT: Availability Report
+
+See attached availability report.
+
+Host:              [% param.host %]
+[%+ IF param.exists('service') +%]
+Service:           [% param.service %]
+[%+ END +%]
+Report Timeperiod: [% format_date(start, "%d.%m.%Y") %] - [% format_date((end - 1), "%d.%m.%Y") %]
+[%+ END %]

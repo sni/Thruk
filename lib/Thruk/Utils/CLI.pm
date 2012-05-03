@@ -273,6 +273,17 @@ sub _run_commands {
         }
     }
 
+    # report mail
+    if($action =~ /^reportmail=(.*)$/mx) {
+        my $nr = $1;
+        if(Thruk::Utils::Reports::report_send($c, $nr)) {
+            $data->{'output'} = "mail send successfully\n";
+        } else {
+            $data->{'output'} = "cannot send mail\n";
+            $data->{'rc'}     = 1;
+        }
+    }
+
     $c->stats->profile(end => "Utils::CLI::_run_commands");
     return $data;
 }
@@ -358,6 +369,7 @@ sub _error {
 ##############################################
 sub _debug {
     my($data, $lvl, $caller) = @_;
+    return unless defined $data;
     $lvl = 'DEBUG' unless defined $lvl;
     return if($Thruk::Utils::CLI::verbose <= 0 and uc($lvl) ne 'ERROR');
     if(ref $data) {
