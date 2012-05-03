@@ -1808,48 +1808,59 @@ monitor screens where only the current problems should be displayed.
 Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1
 
 
-=== Remote Livestatus with SSL
+=== SLA Reporting
 
-IMPORTANT: unfortunately this does not work with latest Thruk
-versions. Socat somehow disconnects after a few packets. Please use
-stunnel or ssh with the usual xinetd configuration.
+SLA Reporting consists of several parts.
 
-Generate ssl key for the remote machine:
+ - report configuration
+ - master pdf
+ - template (contains mail text and pdf content)
 
+==== Report Configuration
+
+Currently it's not possible to edit reports directly with the web
+interface. You need to create a simple report file like this:
+
+var/reports/1.txt:
 ---------------------
-  %> FILENAME=remote-livestatus
-  %> openssl genrsa -out $FILENAME.key 1024
-  %> openssl req -new -key $FILENAME.key -x509 -days 3653 -out $FILENAME.crt
-  %> cat $FILENAME.key $FILENAME.crt >$FILENAME.pem
-  %> chmod 600 $FILENAME.key $FILENAME.pem
----------------------
-
-Generate ssl key for thruk. Use the same command with a different FILENAME.
----------------------
-  %> FILENAME=thruk-host
----------------------
-
-Now start socat on both machines:
-
-.Remote Machine
----------------------
-  %> /usr/bin/socat \
-       -L/tmp/liveststatus-socat.lock \
-       openssl-listen:9999,reuseaddr,fork,cert=/path_to_your/certs/remote-livestatus.pem,cafile=/path_to_your/certs/thruk-host.crt,keepalive,nodelay \
-       UNIX-CLIENT:/usr/local/nagios/var/live.sock,keepalive
----------------------
-Socat will then listen on port 9999 and connect to the local unix socket from livestatus.
-Change the paths to your needs.
-
-
-Start another socat on the thruk host:
-.Thruk Machine
----------------------
-  %> /usr/bin/socat \
-       -L/tmp/liveststatus-socat.lock \
-       UNIX-LISTEN:/home/thruk/var/remote.sock,fork,keepalive,mode=0660,group=thruk \
-       openssl-connect:remote-host:9999,cert=/path_to_your/certs/thruk-host.pem,cafile=/path_to_your/certs/remote-livestatus.crt
+  {
+    'name'     => 'Service SLA Report',
+    'template' => 'sla.tt',
+    'user'     => 'thrukadmin',
+    'to'       => 'rcpt@domain.de',
+    'params'   => {
+      'sla'        => '95',
+      'timeperiod' => 'last12months',
+      'host'       => 'hostname',
+      'service'    => 'servicename',
+      'breakdown'  => 'months',
+    }
+  }
 ---------------------
 
-Socat will then connect to the remote host on port 9999 and listen on the local unix socket. The tcp connection is encrypted.
-You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.
+Put that file in a 'reports' folder below your 'var_path'.
+
+You may set the following additional fields:
+
+ - from: set 'from' address for
+ - to: set 'to' address for the mail recipient
+ - cc: set 'cc' address for mail reports
+ - bcc: set 'bcc' address for mail reports
+ - subject: set mail subject
+
+The params list is a list of values, just like used on the
+availability page and defines http post parameter used to generate the
+report.
+
+==== Master PDF
+
+The master pdf is used as source for the pdf report and used together
+with the values filled in from the 'template' to generate the pdf
+file. You may adjust the shipped 'sla.pdf' to your needs and put it
+into a 'pdf' subfolder of the 'user_template_path'.
+
+==== Template
+
+The template defines the dynamic content of the sla report. You may
+copy the 'sla.tt' file into a 'pdf' subfolder of the
+'user_template_path' and adjust it to your needs.

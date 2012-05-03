@@ -10453,112 +10453,92 @@ some which are only accessible by adding them directly to the url.</p></div>
 <div class="paragraph"><p>Description: Hides almost any user interface buttons. Usefull for
 monitor screens where only the current problems should be displayed.</p></div>
 <div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28&amp;minimal=1</p></div>
-<h3 id="_remote_livestatus_with_ssl">Remote Livestatus with SSL</h3><div style="clear:left"></div>
-<div class="admonitionblock">
-<table><tr>
-<td class="icon">
-<img alt="Important" src="data:image/png;base64,
-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
-EQn3XQAAAABJRU5ErkJggg==" />
-</td>
-<td class="content">unfortunately this does not work with latest Thruk
-versions. Socat somehow disconnects after a few packets. Please use
-stunnel or ssh with the usual xinetd configuration.</td>
-</tr></table>
-</div>
-<div class="paragraph"><p>Generate ssl key for the remote machine:</p></div>
+<h3 id="_sla_reporting">SLA Reporting</h3><div style="clear:left"></div>
+<div class="paragraph"><p>SLA Reporting consists of several parts.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+report configuration
+</p>
+</li>
+<li>
+<p>
+master pdf
+</p>
+</li>
+<li>
+<p>
+template (contains mail text and pdf content)
+</p>
+</li>
+</ul></div>
+<h4 id="_report_configuration">Report Configuration</h4>
+<div class="paragraph"><p>Currently it&#8217;s not possible to edit reports directly with the web
+interface. You need to create a simple report file like this:</p></div>
+<div class="paragraph"><p>var/reports/1.txt:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>  %&gt; FILENAME=remote-livestatus
-  %&gt; openssl genrsa -out $FILENAME.key 1024
-  %&gt; openssl req -new -key $FILENAME.key -x509 -days 3653 -out $FILENAME.crt
-  %&gt; cat $FILENAME.key $FILENAME.crt &gt;$FILENAME.pem
-  %&gt; chmod 600 $FILENAME.key $FILENAME.pem</tt></pre>
+<pre><tt>  {
+    'name'     =&gt; 'Service SLA Report',
+    'template' =&gt; 'sla.tt',
+    'user'     =&gt; 'thrukadmin',
+    'to'       =&gt; 'rcpt@domain.de',
+    'params'   =&gt; {
+      'sla'        =&gt; '95',
+      'timeperiod' =&gt; 'last12months',
+      'host'       =&gt; 'hostname',
+      'service'    =&gt; 'servicename',
+      'breakdown'  =&gt; 'months',
+    }
+  }</tt></pre>
 </div></div>
-<div class="paragraph"><p>Generate ssl key for thruk. Use the same command with a different FILENAME.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>  %&gt; FILENAME=thruk-host</tt></pre>
-</div></div>
-<div class="paragraph"><p>Now start socat on both machines:</p></div>
-<div class="listingblock">
-<div class="title">Remote Machine</div>
-<div class="content">
-<pre><tt>  %&gt; /usr/bin/socat \
-       -L/tmp/liveststatus-socat.lock \
-       openssl-listen:9999,reuseaddr,fork,cert=/path_to_your/certs/remote-livestatus.pem,cafile=/path_to_your/certs/thruk-host.crt,keepalive,nodelay \
-       UNIX-CLIENT:/usr/local/nagios/var/live.sock,keepalive</tt></pre>
-</div></div>
-<div class="paragraph"><p>Socat will then listen on port 9999 and connect to the local unix socket from livestatus.
-Change the paths to your needs.</p></div>
-<div class="paragraph"><p>Start another socat on the thruk host:
-.Thruk Machine</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>  %&gt; /usr/bin/socat \
-       -L/tmp/liveststatus-socat.lock \
-       UNIX-LISTEN:/home/thruk/var/remote.sock,fork,keepalive,mode=0660,group=thruk \
-       openssl-connect:remote-host:9999,cert=/path_to_your/certs/thruk-host.pem,cafile=/path_to_your/certs/remote-livestatus.crt</tt></pre>
-</div></div>
-<div class="paragraph"><p>Socat will then connect to the remote host on port 9999 and listen on the local unix socket. The tcp connection is encrypted.
-You can now add the /home/thruk/var/remote.sock to your thruk_local.conf.</p></div>
+<div class="paragraph"><p>Put that file in a <em>reports</em> folder below your <em>var_path</em>.</p></div>
+<div class="paragraph"><p>You may set the following additional fields:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+from: set <em>from</em> address for
+</p>
+</li>
+<li>
+<p>
+to: set <em>to</em> address for the mail recipient
+</p>
+</li>
+<li>
+<p>
+cc: set <em>cc</em> address for mail reports
+</p>
+</li>
+<li>
+<p>
+bcc: set <em>bcc</em> address for mail reports
+</p>
+</li>
+<li>
+<p>
+subject: set mail subject
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The params list is a list of values, just like used on the
+availability page and defines http post parameter used to generate the
+report.</p></div>
+<h4 id="_master_pdf">Master PDF</h4>
+<div class="paragraph"><p>The master pdf is used as source for the pdf report and used together
+with the values filled in from the <em>template</em> to generate the pdf
+file. You may adjust the shipped <em>sla.pdf</em> to your needs and put it
+into a <em>pdf</em> subfolder of the <em>user_template_path</em>.</p></div>
+<h4 id="_template">Template</h4>
+<div class="paragraph"><p>The template defines the dynamic content of the sla report. You may
+copy the <em>sla.tt</em> file into a <em>pdf</em> subfolder of the
+<em>user_template_path</em> and adjust it to your needs.</p></div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-04-29 20:45:36 CEST
+Last updated 2012-05-03 23:05:57 CEST
 </div>
 </div>
 </body>
