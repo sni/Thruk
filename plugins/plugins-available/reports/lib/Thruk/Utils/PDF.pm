@@ -309,7 +309,7 @@ sub _render_bar_chart {
         )
     );
 
-    my($fh, $filename) = tempfile("chart_pie.pdf.XXXXX", DIR => $c->config->{'tmp_path'});
+    my($fh, $filename) = tempfile("chart_bar.pdf.XXXXX", DIR => $c->config->{'tmp_path'});
     $cc->write_output($filename);
     return $filename;
 }
