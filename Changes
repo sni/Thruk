@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - updated jquery to 1.7.2
           - Bug Fixes
             - fixed adding bookmarks
+            - fixed selecting multiple filter
             - fixed statusmap js errors
 
 1.28     Sat Apr 28 18:53:49 CEST 2012

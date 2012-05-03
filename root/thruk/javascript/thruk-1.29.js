@@ -186,7 +186,15 @@ function toQueryParams(str) {
     for (var i = 0; i < str.length; ++i) {
         var p=str[i].split('=', 2);
         if (p.length != 2) continue;
-        vars[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+        var val = decodeURIComponent(p[1].replace(/\+/g, " "));
+        if(vars[p[0]] != undefined) {
+            var tmp =  vars[p[0]];
+            vars[p[0]] = new Array();
+            vars[p[0]].push(tmp);
+            vars[p[0]].push(val);
+        } else {
+            vars[p[0]] = val;
+        }
     }
     return vars;
 }
@@ -195,9 +203,16 @@ function toQueryParams(str) {
 function toQueryString(obj) {
     var str = '';
     jQuery.each(obj, function(key, value) {
-        if(str != '') { str = str + '&'; }
-        str = str + key + '=' + encodeURIComponent(value);
+        if(typeof(value) == 'object') {
+            jQuery.each(value, function(k2, v2) {
+                str = str + key + '=' + v2 + '&';
+            });
+        } else {
+            str = str + key + '=' + encodeURIComponent(value) + '&';
+        }
     });
+    // remove last &
+    str = str.substring(0, str.length-1);
     return str;
 }
 
