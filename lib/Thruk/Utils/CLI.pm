@@ -369,6 +369,7 @@ sub _debug {
             print STDERR "[".$time."][".uc($lvl)."] ".$line."\n";
         } else {
             my $c = $Thruk::Utils::CLI::c;
+            confess('no c') unless defined $c;
             if(uc($lvl) eq 'ERROR') { $c->log->error($line) }
             if(uc($lvl) eq 'INFO')  { $c->log->info($line)  }
             if(uc($lvl) eq 'DEBUG') { $c->log->debug($line) }

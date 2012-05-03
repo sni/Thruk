@@ -105,13 +105,16 @@ sub report_remove {
 
 =head2 generate_report
 
-  generate_report($nr, $options)
+  generate_report($c, $nr, $options)
 
 generate a new report
 
 =cut
 sub generate_report {
     my($c, $nr, $options) = @_;
+    $Thruk::Utils::PDF::c = $c;
+    $Thruk::Utils::CLI::c = $c;
+
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
     return unless defined $options;
@@ -127,18 +130,19 @@ sub generate_report {
     }
 
     # set some defaults
-    Thruk::Utils::PDF::set_unavailable_states($c, [qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
+    Thruk::Utils::PDF::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
     $c->{'request'}->{'parameters'}->{'show_log_entries'}           = 1;
     $c->{'request'}->{'parameters'}->{'assumeinitialstates'}        = 'yes';
     $c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 3; # UP
     $c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 6; # OK
+
 
     $c->stash->{'param'} = $options->{'params'};
     for my $p (keys %{$options->{'params'}}) {
         $c->{'request'}->{'parameters'}->{$p} = $options->{'params'}->{$p};
     }
 
-    if(!defined $options->{'template'} or !Thruk::Utils::PDF::path_to_template($c, 'pdf/'.$options->{'template'})) {
+    if(!defined $options->{'template'} or !Thruk::Utils::PDF::path_to_template('pdf/'.$options->{'template'})) {
         confess('template pdf/'.$options->{'template'}.' does not exist');
     }
 

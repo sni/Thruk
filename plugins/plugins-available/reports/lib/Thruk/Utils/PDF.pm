@@ -25,21 +25,39 @@ use Chart::Clicker::Data::Marker;
 use Chart::Clicker::Data::Range;
 use Graphics::Color::RGB;
 
+$Thruk::Utils::PDF::c   = undef;
+$Thruk::Utils::PDF::pdf = undef;
+
 ##########################################################
 
 =head1 METHODS
 
+=head2 init_pdf
+
+  init_pdf($pdf)
+
+set pdf object for later use
+
+=cut
+sub init_pdf {
+    my($pdf) = @_;
+    $Thruk::Utils::PDF::pdf = $pdf;
+    return 1;
+}
+
+##########################################################
+
 =head2 render_pie_chart
 
-  render_pie_chart($c, $type)
+  render_pie_chart($type)
 
 render a pie chart into tmpfile and return filename of the pdf
 
 =cut
 sub render_pie_chart {
-    my($c, $type) = @_;
-    return(_render_svc_pie_chart($c)) if $type eq 'service';
-    return(_render_hst_pie_chart($c)) if $type eq 'host';
+    my($type) = @_;
+    return(_render_svc_pie_chart()) if $type eq 'service';
+    return(_render_hst_pie_chart()) if $type eq 'host';
     return;
 }
 
@@ -47,15 +65,15 @@ sub render_pie_chart {
 
 =head2 render_bar_chart
 
-  render_bar_chart($c, $type)
+  render_bar_chart($type)
 
 render a bar chart into tmp file and return filename of the pdf
 
 =cut
 sub render_bar_chart {
-    my($c, $type) = @_;
-    return(_render_svc_bar_chart($c)) if $type eq 'service';
-    return(_render_hst_bar_chart($c)) if $type eq 'host';
+    my($type) = @_;
+    return(_render_svc_bar_chart()) if $type eq 'service';
+    return(_render_hst_bar_chart()) if $type eq 'host';
     return;
 }
 
@@ -63,14 +81,14 @@ sub render_bar_chart {
 
 =head2 path_to_template
 
-  path_to_template($c, $filename)
+  path_to_template($filename)
 
 return absolute filename for a template
 
 =cut
 sub path_to_template {
-    my($c, $filename) = @_;
-
+    my($filename) = @_;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
     # search template paths
     for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
         if(-e $path.'/'.$filename) {
@@ -84,13 +102,13 @@ sub path_to_template {
 
 =head2 calculate_availability
 
-  calculate_availability($c)
+  calculate_availability()
 
 calculate availability from stash data
 
 =cut
 sub calculate_availability {
-    my($c) = @_;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
     Thruk::Utils::Avail::calculate_availability($c);
     return 1;
 }
@@ -99,13 +117,14 @@ sub calculate_availability {
 
 =head2 font
 
-  font($c, $size, $color)
+  font($size, $color)
 
 set color with given size and color
 
 =cut
 sub font {
-    my($pdf, $size, $color) = @_;
+    my($size, $color) = @_;
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
     my $colors = {
         'white'      => '1.00 1.00 1.00 rg',
         'black'      => '0.00 0.00 0.00 rg',
@@ -122,13 +141,16 @@ sub font {
 
 =head2 outages
 
-  outages($c, $pdf, $logs, $start, $end, $x, $y, $step1, $step2)
+  outages($logs, $start, $end, $x, $y, $step1, $step2, $max)
 
 print outages from log entries
 
 =cut
 sub outages {
-    my($c, $pdf, $logs, $start, $end, $x, $y, $step1, $step2) = @_;
+    my($logs, $start, $end, $x, $y, $step1, $step2, $max) = @_;
+
+    my $c   = $Thruk::Utils::PDF::c   or die("not initialized!");
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
 
     # combine outages
     my @reduced_logs;
@@ -150,7 +172,7 @@ sub outages {
         push @reduced_logs, $combined;
     }
     my $found = 0;
-    for my $l (@reduced_logs) {
+    for my $l (reverse @reduced_logs) {
         next if $end   < $l->{'start'};
         next if $start > $l->{'real_end'};
         $l->{'start'}    = $start if $start > $l->{'start'} ;
@@ -165,6 +187,7 @@ sub outages {
             $y = $y - $step1;
             $pdf->prText($x,$y, '  -> '.$l->{'plugin_output'});
             $y = $y - $step2;
+            last if defined $max and $found >= $max;
         }
     }
 
@@ -181,13 +204,14 @@ sub outages {
 
 =head2 set_unavailable_states
 
-  set_unavailable_states($c, $states)
+  set_unavailable_states($states)
 
 set list of states which count as unavailable
 
 =cut
 sub set_unavailable_states {
-    my($c, $states) = @_;
+    my($states) = @_;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
     $c->stash->{'unavailable_states'} = {};
     for my $s (@{$states}) {
         $c->stash->{'unavailable_states'}->{$s} = 1;
@@ -197,7 +221,8 @@ sub set_unavailable_states {
 
 ##########################################################
 sub _render_bar_chart {
-    my($c, $options) = @_;
+    my($options) = @_;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
 
     my $cc = Chart::Clicker->new('format' => 'pdf', width => 550, height => 400);
     my @months = ();
@@ -265,7 +290,7 @@ sub _render_bar_chart {
 
 ##########################################################
 sub _render_svc_bar_chart {
-    my($c) = @_;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
 
     my $col            = _get_colors();
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
@@ -306,15 +331,14 @@ sub _render_svc_bar_chart {
         };
     }
 
-    my $bar_file = _render_bar_chart($c, $bar);
+    my $bar_file = _render_bar_chart($bar);
     return $bar_file;
 }
 
 
 ##########################################################
 sub _render_svc_pie_chart {
-    my($c) = @_;
-
+    my $c              = $Thruk::Utils::PDF::c or die("not initialized!");
     my $col            = _get_colors();
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
     my $service        = $c->{'request'}->{'parameters'}->{'service'};
@@ -331,14 +355,13 @@ sub _render_svc_pie_chart {
             { name => 'UNDETERMINED', value => $undetermined,             color => $col->{'undetermined'} },
         ],
     };
-    my $pie_file = _render_pie_chart($c, $pie);
+    my $pie_file = _render_pie_chart($pie);
     return $pie_file;
 }
 
 ##########################################################
 sub _render_hst_pie_chart {
-    my($c) = @_;
-
+    my $c              = $Thruk::Utils::PDF::c or die("not initialized!");
     my $col            = _get_colors();
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
     my $avail          = $c->stash->{'avail_data'}->{'hosts'}->{$host};
@@ -353,13 +376,14 @@ sub _render_hst_pie_chart {
             { name => 'UNDETERMINED', value => $undetermined,                color => $col->{'undetermined'} },
         ],
     };
-    my $pie_file = _render_pie_chart($c, $pie);
+    my $pie_file = _render_pie_chart($pie);
     return $pie_file;
 }
 
 ##########################################################
 sub _render_pie_chart {
-    my($c, $options) = @_;
+    my($options) = @_;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
     my $cc = Chart::Clicker->new('format' => 'pdf', width => 400, height => 450);
 
     my(@series, @colors, @legend);
