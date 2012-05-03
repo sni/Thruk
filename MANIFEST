@@ -287,7 +287,7 @@ root/thruk/javascript/cal/img/time-down.png
 root/thruk/javascript/cal/img/time-up.png
 root/thruk/javascript/cal/jscal2.css
 root/thruk/javascript/cal/jscal2.js
-root/thruk/javascript/jquery-1.6.2.min.js
+root/thruk/javascript/jquery-1.7.2.min.js
 root/thruk/javascript/jquery-fieldselection.js
 root/thruk/javascript/jquery-ui/css/smoothness/images/pbar-ani.gif
 root/thruk/javascript/jquery-ui/css/smoothness/images/ui-bg_flat_0_aaaaaa_40x100.png
@@ -381,7 +381,9 @@ t/300-controller_status.t
 t/300-controller_summary.t
 t/300-controller_tac.t
 t/300-controller_trends.t
-t/900-javascript.t
+t/900-firefox-js.t
+t/900-javascript_utils.t
+t/data/javascript_tests.js
 t/data/log4perl.conf
 t/data/resource.cfg
 t/data/resource2.cfg
