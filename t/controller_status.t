@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 934;
+use Test::More tests => 945;
 use JSON::XS;
 
 BEGIN {
@@ -17,6 +17,7 @@ my $servicegroup   = TestUtils::get_test_servicegroup();
 
 my $pages = [
     '/thruk/cgi-bin/status.cgi',
+    { url => '/thruk/cgi-bin/status.cgi', like => '<input\ type="text".*?value=".*\/thruk\/cgi\-bin\/status\.cgi"\ name="bookmark">' },  # test bookmarks
 
 # Host / Hostgroups
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
@@ -112,10 +113,8 @@ my $pages = [
 ];
 
 for my $url (@{$pages}) {
-    TestUtils::test_page(
-        'url'     => $url,
-        'like'    => [ 'Current Network Status', 'statusTitle' ],
-    );
+    my $test = TestUtils::make_test_hash($url, {'like' => [ 'Current Network Status', 'statusTitle' ]});
+    TestUtils::test_page(%{$test});
 }
 
 

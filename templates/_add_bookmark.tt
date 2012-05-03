@@ -19,7 +19,7 @@
   <tr>
     <td>
       <b>Add New Bookmark</b><br>
-      <input type="text" size="60" value="[% short_uri(c) %]" name="bookmark">
+      <input type="text" size="60" value="[% uri(c) %]" name="bookmark">
       <br>
       in category
       <select name="section">
