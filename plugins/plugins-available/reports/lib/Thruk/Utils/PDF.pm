@@ -71,10 +71,7 @@ render a bar chart into tmp file and return filename of the pdf
 
 =cut
 sub render_bar_chart {
-    my($type) = @_;
-    return(_render_svc_bar_chart()) if $type eq 'service';
-    return(_render_hst_bar_chart()) if $type eq 'host';
-    return;
+    return(_generate_bar_chart());
 }
 
 ##########################################################
@@ -179,7 +176,7 @@ sub outages {
         $l->{'real_end'} = $end   if $end   < $l->{'real_end'} ;
         if(defined $c->stash->{'unavailable_states'}->{$l->{'class'}}) {
             $found++;
-            my $txt = ''; # $l->{'class'}.': ';
+            my $txt = '';
             $txt .= Thruk::Utils::format_date($l->{'start'}, $c->{'stash'}->{'datetime_format'});
             $txt .= " - ".Thruk::Utils::format_date($l->{'real_end'}, $c->{'stash'}->{'datetime_format'});
             $txt .= " (".Thruk::Utils::Filter::duration($l->{'real_end'}-$l->{'start'}).")";
@@ -219,6 +216,30 @@ sub set_unavailable_states {
     return 1;
 }
 
+
+##########################################################
+
+=head2 fill_availability_table
+
+  fill_availability_table()
+
+set list of states which count as unavailable
+
+=cut
+sub fill_availability_table {
+    my $c   = $Thruk::Utils::PDF::c   or die("not initialized!");
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+
+    my($x, $y) = (40, 147);
+    for(my $z=0; $z < @{$Thruk::Utils::PDF::availabilitys->{'values'}}; $z++) {
+        $pdf->prText($x,$y,    $Thruk::Utils::PDF::availabilitys->{'months'}->[$z]);
+        $pdf->prText($x-10,$y-13, $Thruk::Utils::PDF::availabilitys->{'values'}->[$z]."%");
+        $x = $x+45;
+    }
+
+    return 1;
+}
+
 ##########################################################
 sub _render_bar_chart {
     my($options) = @_;
@@ -227,6 +248,7 @@ sub _render_bar_chart {
     my $cc = Chart::Clicker->new('format' => 'pdf', width => 550, height => 400);
     my @months = ();
     my $colors = {};
+    my $available = {};
     for my $name (sort keys %{$options->{'values'}}) {
         push @months, _date_to_tick_name($name);
         my $total = 0;
@@ -242,7 +264,7 @@ sub _render_bar_chart {
         for my $item (@{$options->{'values'}->{$name}->{'values'}}) {
             my $total = $options->{'values'}->{$name}->{'total'};
             my $perc  = '00.00';
-            $perc     = sprintf("%05.2f", $item->{'value'}*100/$total) if $total > 0;
+            $perc     = sprintf("%06.3f", $item->{'value'}*100/$total) if $total > 0;
             push @{$percs->{$item->{'name'}}}, $perc;
         }
     }
@@ -256,6 +278,10 @@ sub _render_bar_chart {
             values  => $percs->{$name},
         );
     }
+    $available->{'values'} = $percs->{'AVAILABLE'};
+    $available->{'months'} = \@months;
+    $Thruk::Utils::PDF::availabilitys = $available;
+
     my $ds = Chart::Clicker::Data::DataSet->new(series => \@series );
     $cc->add_to_datasets($ds);
     $cc->color_allocator->colors(\@colors);
@@ -289,15 +315,19 @@ sub _render_bar_chart {
 }
 
 ##########################################################
-sub _render_svc_bar_chart {
+sub _generate_bar_chart {
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");
 
     my $col            = _get_colors();
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
     my $service        = $c->{'request'}->{'parameters'}->{'service'};
     confess("No host in parameters:\n".    Dumper($c->{'request'}->{'parameters'})) unless defined $host;
-    confess("No services in parameters:\n".Dumper($c->{'request'}->{'parameters'})) unless defined $service;
-    my $avail          = $c->stash->{'avail_data'}->{'services'}->{$host}->{$service};
+    my $avail;
+    if(defined $service) {
+        $avail = $c->stash->{'avail_data'}->{'services'}->{$host}->{$service};
+    } else {
+        $avail = $c->stash->{'avail_data'}->{'hosts'}->{$host};
+    }
     return unless defined $avail;
 
     my $bar = { values => {} };

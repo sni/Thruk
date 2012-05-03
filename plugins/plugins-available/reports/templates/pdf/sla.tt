@@ -47,19 +47,17 @@
   # PAGE 2
   # availability bar chart
   pdf.prPage();
-  pdf.prForm(path_to_template('pdf/sla.pdf'), 2);
+  pdf.prForm(path_to_template('pdf/sla.pdf'), 3);
   font(20, 'dark grey');
-  pdf.prText(40,630, 'Availability Chart');
-  IF param.exists('service');
-    bar_pdf = render_bar_chart('service');
-  ELSE;
-    bar_pdf = render_bar_chart('host');
-  END;
-  pdf.prDocForm({file => bar_pdf, x => 25, y => 180});
+  pdf.prText(40,680, 'Availability Chart');
+  bar_pdf = render_bar_chart();
+  pdf.prDocForm({file => bar_pdf, x => 25, y => 220});
+  font(9, 'dark grey');
+  fill_availability_table();
 
   # page footer
   font(10, 'white');
-  pdf.prText(560,58, '2');
+  pdf.prText(550,58, '2');
 
 
   # PAGE 3
@@ -67,13 +65,13 @@
   pdf.prPage();
   pdf.prForm(path_to_template('pdf/sla.pdf'), 2);
   font(20, 'dark grey');
-  pdf.prText(40,630, 'Details');
+  pdf.prText(40,680, 'Details');
 
   font(10, 'dark grey');
-  outages(logs, start, end, 50, 590, 17, 20, 10);
+  outages(logs, start, end, 50, 640, 17, 20, 10);
 
   # page footer
   font(10, 'white');
-  pdf.prText(560,58, '3');
+  pdf.prText(550,58, '3');
 %]
 [% END %]
