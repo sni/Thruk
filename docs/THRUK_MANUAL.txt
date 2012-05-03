@@ -1864,3 +1864,16 @@ into a 'pdf' subfolder of the 'user_template_path'.
 The template defines the dynamic content of the sla report. You may
 copy the 'sla.tt' file into a 'pdf' subfolder of the
 'user_template_path' and adjust it to your needs.
+
+==== Sending Reports By Mail
+
+It's quite easy to setup sla reports by mail. All you need is a
+cronjob running the thruk command line tool:
+
+---------------------
+0 0 1 * * /usr/bin/thruk -a reportmail=1
+---------------------
+
+This will send you the montly report defined by the
+'var/reports/1.txt' above every first day of the month.
+

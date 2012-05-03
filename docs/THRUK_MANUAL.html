@@ -10533,12 +10533,21 @@ into a <em>pdf</em> subfolder of the <em>user_template_path</em>.</p></div>
 <div class="paragraph"><p>The template defines the dynamic content of the sla report. You may
 copy the <em>sla.tt</em> file into a <em>pdf</em> subfolder of the
 <em>user_template_path</em> and adjust it to your needs.</p></div>
+<h4 id="_sending_reports_by_mail">Sending Reports By Mail</h4>
+<div class="paragraph"><p>It&#8217;s quite easy to setup sla reports by mail. All you need is a
+cronjob running the thruk command line tool:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0 0 1 * * /usr/bin/thruk -a reportmail=1</tt></pre>
+</div></div>
+<div class="paragraph"><p>This will send you the montly report defined by the
+<em>var/reports/1.txt</em> above every first day of the month.</p></div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-05-03 23:05:57 CEST
+Last updated 2012-05-03 23:16:20 CEST
 </div>
 </div>
 </body>
