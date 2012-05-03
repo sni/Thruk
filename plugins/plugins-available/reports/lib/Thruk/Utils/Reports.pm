@@ -139,6 +139,7 @@ update report
 =cut
 sub report_update {
     my($c, $nr, $name, $template, $params, $backends) = @_;
+    mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
     if(-f $file) {
         my $report = _read_report_file($c, $nr);
