@@ -368,7 +368,7 @@ sub _error {
 
 ##############################################
 sub _debug {
-    my($data, $lvl, $caller) = @_;
+    my($data, $lvl) = @_;
     return unless defined $data;
     $lvl = 'DEBUG' unless defined $lvl;
     return if($Thruk::Utils::CLI::verbose <= 0 and uc($lvl) ne 'ERROR');
