@@ -20,7 +20,7 @@ set -e
 
 case "$1" in
     configure)
-        # restore themes and plugins
+        # restore themes, plugins and ssi
         if [ -d /tmp/thruk_update/themes/. ]; then
           rm -f /etc/thruk/themes/themes-enabled/*
           cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
@@ -28,6 +28,10 @@ case "$1" in
         if [ -d /tmp/thruk_update/plugins/. ]; then
           rm -f /etc/thruk/plugins/plugins-enabled/*
           cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
+        fi
+        if [ -d /tmp/thruk_update/ssi/. ]; then
+          rm -f /etc/thruk/ssi/*
+          cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
         fi
         rm -rf /tmp/thruk_update
 

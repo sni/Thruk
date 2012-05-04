@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - implemented 'last12months'
             - implemented months breakdown
           - updated jquery to 1.7.2
+          - do not reenable ssi files on pkg updates
           - Bug Fixes
             - fixed adding bookmarks
             - fixed selecting multiple filter

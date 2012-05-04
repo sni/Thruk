@@ -130,7 +130,7 @@ mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/plugins
 
 %pre
-# save themes and plugins so we don't reenable them on every update
+# save themes, plugins and ssi so we don't reenable them on every update
 rm -rf /tmp/thruk_update
 if [ -d /etc/thruk/themes/themes-enabled/. ]; then
   mkdir -p /tmp/thruk_update/themes
@@ -139,6 +139,10 @@ fi
 if [ -d /etc/thruk/plugins/plugins-enabled/. ]; then
   mkdir -p /tmp/thruk_update/plugins
   cp -rp /etc/thruk/plugins/plugins-enabled/* /tmp/thruk_update/plugins/
+fi
+if [ -d /etc/thruk/ssi/. ]; then
+  mkdir -p /tmp/thruk_update/ssi
+  cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
 fi
 exit 0
 
@@ -152,6 +156,10 @@ fi
 if [ -d /tmp/thruk_update/plugins/. ]; then
   rm -f /etc/thruk/plugins/plugins-enabled/*
   cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
+fi
+if [ -d /tmp/thruk_update/ssi/. ]; then
+  rm -f /etc/thruk/ssi/*
+  cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
 fi
 rm -rf /tmp/thruk_update
 mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
@@ -178,7 +186,6 @@ exit 0
 case "$*" in
   0)
     # POSTUN
-    #rm -rf %{_localstatedir}/lib/thruk
     rm -rf %{_localstatedir}/cache/thruk/*
     %{insserv_cleanup}
     ;;

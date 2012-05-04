@@ -10,5 +10,9 @@ if [ -d /etc/thruk/plugins/plugins-enabled/. ]; then
   mkdir -p /tmp/thruk_update/plugins
   cp -rp /etc/thruk/plugins/plugins-enabled/* /tmp/thruk_update/plugins/
 fi
+if [ -d /etc/thruk/ssi/. ]; then
+  mkdir -p /tmp/thruk_update/ssi
+  cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
+fi
 
 exit
