@@ -444,6 +444,7 @@ sub _is_running {
     if(kill(0, $pid) > 0) {
         return 1;
     }
+    unlink($dir."/pid");
 
     return 0;
 }
