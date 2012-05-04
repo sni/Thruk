@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 69;
+use Test::More tests => 79;
 
 BEGIN {
     use lib('t');
@@ -20,6 +20,7 @@ my $pages = [
     '/thruk/index.html',
     '/thruk/main.html',
     '/thruk/side.html',
+    '/thruk/startup.html',
 ];
 
 SKIP: {
