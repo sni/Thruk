@@ -223,8 +223,7 @@ sub test_page {
             next if $match =~ m/^http/;
             next if $match =~ m/^ssh/;
             next if $match =~ m/^mailto:/;
-            next if $match =~ m/^#/;
-            next if $match =~ m/^"/;
+            next if $match =~ m/^(#|'|")/;
             next if $match =~ m/^\/thruk\/cgi\-bin/;
             next if $match =~ m/^\w+\.cgi/;
             next if $match =~ m/^javascript:/;
