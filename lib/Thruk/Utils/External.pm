@@ -178,7 +178,7 @@ sub get_status {
     }
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start = stat($dir."/pid");
+    my @start = stat($dir.'/user');
     my $time  = time() - $start[9];
 
     my $is_running = _is_running($dir);
@@ -261,7 +261,7 @@ sub get_result {
     my $err    = read_file($dir."/stderr");
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start = stat($dir."/pid");
+    my @start = stat($dir."/user");
     my @end   = stat($dir."/stdout");
 
     my $time = $end[9] - $start[9];

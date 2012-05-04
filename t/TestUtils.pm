@@ -224,6 +224,7 @@ sub test_page {
             next if $match =~ m/^ssh/;
             next if $match =~ m/^mailto:/;
             next if $match =~ m/^#/;
+            next if $match =~ m/^"/;
             next if $match =~ m/^\/thruk\/cgi\-bin/;
             next if $match =~ m/^\w+\.cgi/;
             next if $match =~ m/^javascript:/;
@@ -397,7 +398,6 @@ sub _request {
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
         diag("starting up... $1");
         # startup fcgid
-        #fail("startup url does not match: '$1' != '$url'") if $1 ne $url;
         my $r = request('/thruk/side.html');
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
         fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
