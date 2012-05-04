@@ -296,7 +296,6 @@ sub _render_bar_chart {
     $def->domain_axis->tick_values([1..12]);
 
     $def->domain_axis->tick_labels(\@months);
-    $def->domain_axis->format('%d');
 
     $def->domain_axis->fudge_amount(0.05); # adds border at the top
     $def->range_axis->fudge_amount(0.01);

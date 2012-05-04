@@ -229,6 +229,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         Thruk::Utils::CLI::_error($c->stash->{errorMessage});
         Thruk::Utils::CLI::_error($c->stash->{errorDescription});
         Thruk::Utils::CLI::_error($c->stash->{errorDetails}) if defined $c->stash->{errorDetails};
+        if($Thruk::Utils::CLI::verbose) {
+            confess("got an error");
+        }
+        exit(1);
     }
 
     return 1;
