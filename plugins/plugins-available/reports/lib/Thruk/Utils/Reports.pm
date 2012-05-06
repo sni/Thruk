@@ -76,7 +76,10 @@ sub report_send {
         eval {
             $mailtext = $c->view("View::TT")->render($c, $c->stash->{'pdf_template'});
         };
-        Thruk::Utils::CLI::_error($@) if $@;
+        if($@) {
+            Thruk::Utils::CLI::_error($@);
+            return $c->detach('/error/index/13');
+        }
 
         # extract mail header
         my $mailbody    = "";
@@ -235,8 +238,10 @@ sub generate_report {
     eval {
         $c->view("PDF::Reuse")->render_pdf($c);
     };
-    Thruk::Utils::CLI::_error($@) if $@;
-    return if $@;
+    if($@) {
+        Thruk::Utils::CLI::_error($@);
+        return $c->detach('/error/index/13');
+    }
 
     # render pdf
     $c->stash->{'block'} = 'render';
@@ -244,8 +249,10 @@ sub generate_report {
     eval {
         $pdf_data = $c->view("PDF::Reuse")->render_pdf($c);
     };
-    Thruk::Utils::CLI::_error($@) if $@;
-    return if $@;
+    if($@) {
+        Thruk::Utils::CLI::_error($@);
+        return $c->detach('/error/index/13');
+    }
 
     # write out pdf
     mkdir($c->config->{'tmp_path'}.'/reports');
@@ -290,12 +297,12 @@ sub _read_report_file {
     my($c, $nr) = @_;
     unless($nr =~ m/^\d+$/mx) {
         Thruk::Utils::CLI::_error("not a valid report number");
-        return;
+        return $c->detach('/error/index/13');
     }
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
     unless(-f $file) {
         Thruk::Utils::CLI::_error("report does not exist: $!");
-        return;
+        return $c->detach('/error/index/13');
     }
     my $data = read_file($file);
     my $report;
