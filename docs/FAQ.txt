@@ -200,3 +200,18 @@ due to problems with socat and json data. If you see errors like:
 
 and you use socat for livestatus over ssl, please change to stunnel or
 ssh with the normal xinetd solution.
+
+=== undefined symbol: Perl_Istack_sp_ptr
+
+You will get perl errors about undefined symbols when you try to
+install a debian package on ubuntu or a ubuntu 11 deb file on ubuntu
+12 or any package on a different platform than the package was build
+for.
+
+------------------
+/usr/bin/perl: symbol lookup error: /usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/List/Util/Util.so: undefined symbol: Perl_Istack_sp_ptr
+------------------
+
+The solution is simple, use the right package or source installation
+if no package is available for your platform.
+
