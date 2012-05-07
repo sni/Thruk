@@ -266,6 +266,14 @@ sub _run_commands {
 
     # report
     if($action =~ /^report=(.*)$/mx) {
+        eval {
+            require Thruk::Utils::Reports;
+        };
+        if($@) {
+            $data->{'output'} = "reports plugin is not enabled.\n";
+            $data->{'rc'}     = 1;
+            return $data;
+        }
         my $nr = $1;
         my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
         if(defined $pdf_file) {
