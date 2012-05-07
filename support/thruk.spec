@@ -1,5 +1,5 @@
 Name:          thruk
-Version:       1.30
+Version:       1.31
 Release:       1%{?dist}
 License:       GNU Public License version 2
 Packager:      Sven Nierlein <sven.nierlein@consol.de>

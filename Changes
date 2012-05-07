@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.32     not yet released
+          - ...
+
 1.30     Sun May  6 19:37:59 CEST 2012
           - added sla reporting
             - implemented 'last12months'
