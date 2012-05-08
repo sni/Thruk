@@ -31,7 +31,7 @@ if [ -f /etc/sysconfig/thruk ]; then
 fi
 
 # make it possible to override startcmd by sysconfig
-if [ -z $STARTCMD ]; then
+if [ -z "$STARTCMD" ]; then
   STARTCMD="$WGET --post-data='' -q -O /dev/null $STARTURL"
 fi
 
