@@ -96,6 +96,8 @@ sub test_page {
 
     my $opts = _set_test_page_defaults(\%opts);
 
+    ok($opts->{'url'}, $opts->{'url'});
+
     my $request = _request($opts->{'url'});
 
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
@@ -149,10 +151,10 @@ sub test_page {
     # text that should appear
     if(defined $opts->{'like'}) {
         if(ref $opts->{'like'} eq '') {
-            like($return->{'content'}, qr/$opts->{'like'}/, "Content should contain: ".$opts->{'like'});
+            like($return->{'content'}, qr/$opts->{'like'}/, "Content should contain: ".$opts->{'like'}) or diag($opts->{'url'});
         } elsif(ref $opts->{'like'} eq 'ARRAY') {
             for my $like (@{$opts->{'like'}}) {
-                like($return->{'content'}, qr/$like/, "Content should contain: ".$like);
+                like($return->{'content'}, qr/$like/, "Content should contain: ".$like) or diag($opts->{'url'});
             }
         }
     }
@@ -160,10 +162,10 @@ sub test_page {
     # text that shouldn't appear
     if(defined $opts->{'unlike'}) {
         if(ref $opts->{'unlike'} eq '') {
-            unlike($return->{'content'}, qr/$opts->{'unlike'}/, "Content should not contain: ".$opts->{'unlike'});
+            unlike($return->{'content'}, qr/$opts->{'unlike'}/, "Content should not contain: ".$opts->{'unlike'}) or diag($opts->{'url'});
         } elsif(ref $opts->{'unlike'} eq 'ARRAY') {
             for my $unlike (@{$opts->{'unlike'}}) {
-                unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike);
+                unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) or diag($opts->{'url'});
             }
         }
     }
@@ -172,7 +174,7 @@ sub test_page {
     $return->{'content_type'} = $request->header('Content-Type');
     my $content_type = $request->header('Content-Type');
     if(defined $opts->{'content_type'}) {
-        is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'});
+        is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'}) or diag($opts->{'url'});
     }
 
 
@@ -183,7 +185,7 @@ sub test_page {
         while(my $line = <$ph>) {
             if($line =~ m/(\d+)/) {
                 my $rsize = sprintf("%.2f", $1/1024);
-                ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 500MB on '.$opts->{'url'});
+                ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.$opts->{'url'});
             }
         }
         close($ph);
@@ -283,7 +285,7 @@ sub get_themes {
 #########################
 sub wait_for_job {
     my $job = shift;
-    alarm(30);
+    alarm(60);
     while(Thruk::Utils::External::_is_running('./var/jobs/'.$job)) {
         sleep(1);
     }

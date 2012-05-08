@@ -4,7 +4,7 @@ use Data::Dumper;
 use Test::More;
 
 plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-plan tests => 240;
+plan tests => 264;
 
 BEGIN {
     use lib('t');
