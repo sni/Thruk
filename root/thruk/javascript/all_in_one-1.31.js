@@ -1521,7 +1521,6 @@ function toggleFilterPane(prefix) {
     pane.style.visibility = 'hidden';
     img.style.display     = '';
     img.style.visibility  = 'visible';
-    img.enable();
     additionalParams['hidesearch'] = 1;
     document.getElementById('hidesearch').value = 1;
   }

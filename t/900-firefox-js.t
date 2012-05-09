@@ -112,6 +112,7 @@ sub do_clean_exit {
 sub check_js_errors {
     for my $err (@_) {
         next if $err->{'message'} =~ m/JavaScript\ Warning:/mx;
+        next if $err->{'message'} =~ m|modules/services-sync/resource.js|mx;
         fail($err->{'message'});
     }
     return;
