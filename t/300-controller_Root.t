@@ -24,7 +24,7 @@ my $pages = [
 ];
 
 SKIP: {
-    skip 'external tests', 4 if defined $ENV{'CATALYST_SERVER'};
+    skip 'external tests', 5 if defined $ENV{'CATALYST_SERVER'};
 
     for my $url (@{$redirects}) {
         TestUtils::test_page(
@@ -36,8 +36,8 @@ SKIP: {
 
 for my $url (@{$pages}) {
     SKIP: {
-        skip 'external tests', 12 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk';
-        skip 'external tests', 12 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk/';
+        skip 'external tests', 13 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk';
+        skip 'external tests', 13 if defined $ENV{'CATALYST_SERVER'} and $url eq '/thruk/';
 
         TestUtils::test_page(
             'url'     => $url,
