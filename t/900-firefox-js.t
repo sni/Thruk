@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 use Data::Dumper;
 use Cwd;
+use File::Temp qw/tempfile/;
 
 BEGIN {
     use lib('t');
@@ -24,14 +25,28 @@ $SIG{INT} = sub { do_clean_exit(); };
 END {
     do_clean_exit();
 };
-my $cmd="./script/thruk_server.pl --pidfile=$pidfile --port=$testport --background";
+my $server_log = '/tmp/servtest.log';
+# TODO: remove
+#unlink($server_log);
+my $cmd="./script/thruk_server.pl --pidfile=$pidfile --port=$testport > $server_log 2>&1 &";
+ok($cmd, $cmd);
 my $out = `$cmd`;
 my $rc = $?;
-ok($rc == 0, 'test server started') or BAIL_OUT('need test server');
+ok($rc == 0, 'test server started: '.$out) or BAIL_OUT('need test server');
+for my $x (1..10) {
+    last if -f $pidfile;
+    sleep(1);
+}
+ok(-f $pidfile, 'has pidfile') or BAIL_OUT('need test server');
 my $pid = `cat $pidfile`;
 ok($pid > 0, 'got a pid from '.$pidfile) or BAIL_OUT('need test server');
 `ps -p $pid`;
 ok($? == 0, 'test server alive') or BAIL_OUT('need test server');
+for my $x (1..30) {
+    my $out = `grep 'Accepting connections at' $server_log > /dev/null 2>&1`;
+    last if ($?>>8) == 0;
+    sleep(1);
+}
 
 #####################################################################
 # start mechanizer
@@ -68,13 +83,17 @@ for my $page (sort @cleanpages) {
     $mech->clear_js_errors();
     my $res;
     ok($page, $page);
-    eval {
-        $res = $mech->get('http://localhost:'.$testport.$page);
-    };
-    fail($@) if $@;
-    isa_ok($res, 'HTTP::Response');
-    ok($res->is_success, $page.' is_success');
-    check_js_errors($mech->js_errors());
+
+    my $url = 'http://localhost:'.$testport.$page;
+
+    alarm(60);
+    # pages with a download dialog must be catched
+    if($page =~ m/(csvoutput=|view_mode=xls)/mx) {
+        test_download($url);
+    } else {
+        test_response($url);
+    }
+    alarm(0);
 }
 
 do_clean_exit();
@@ -95,5 +114,41 @@ sub check_js_errors {
         next if $err->{'message'} =~ m/JavaScript\ Warning:/mx;
         fail($err->{'message'});
     }
+    return;
+}
+
+#####################################################################
+sub test_download {
+    my $url = shift;
+    my($fh, $target_filename) = tempfile;
+    eval {
+        my $b = $mech->save_url( $url => $target_filename );
+        $b->cancelSave();
+    };
+    if($@) {
+        fail($@) if $@;
+        return;
+    }
+    ok(-f $target_filename, $target_filename);
+    unlink($target_filename);
+    return;
+}
+
+#####################################################################
+sub test_response {
+    my $url = shift;
+    # some urls need specific backend
+    return if $url =~ m#/thruk/cgi-bin/(businessview|outagespbimp|shinken_status)\.cgi#mx;
+    my $res;
+    eval {
+        $res = $mech->get($url);
+    };
+    if($@) {
+        fail($@) if $@;
+        return;
+    }
+    isa_ok($res, 'HTTP::Response');
+    ok($res->is_success, $url.' is_success') or diag(Dumper($res));
+    check_js_errors($mech->js_errors());
     return;
 }

@@ -204,12 +204,8 @@ plugins/plugins-available/mobile/root/jqm/images/icons-18-black.png
 plugins/plugins-available/mobile/root/jqm/images/icons-18-white.png
 plugins/plugins-available/mobile/root/jqm/images/icons-36-black.png
 plugins/plugins-available/mobile/root/jqm/images/icons-36-white.png
-plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.0.css
-plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.0.js
-plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.0.min.css
-plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.0.min.js
-plugins/plugins-available/mobile/root/jqm/jquery.mobile.structure-1.0.css
-plugins/plugins-available/mobile/root/jqm/jquery.mobile.structure-1.0.min.css
+plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.1.0.min.css
+plugins/plugins-available/mobile/root/jqm/jquery.mobile-1.1.0.min.js
 plugins/plugins-available/mobile/root/jquery.mobile.router-0.6.js
 plugins/plugins-available/mobile/root/mobile-1.31.css
 plugins/plugins-available/mobile/root/mobile-1.31.js

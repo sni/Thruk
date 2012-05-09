@@ -6,8 +6,8 @@
   type = "comment";
   [% END +%]
 
-  Event.observe(window, 'load', function() {
-    $$("TR.clickable").each(function(elem) {
+  jQuery(document).ready(function() {
+    jQuery("TR.clickable").each(function(nr, elem) {
       elem.onclick=toggle_comment;
     });
   });

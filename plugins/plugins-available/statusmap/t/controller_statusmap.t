@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 196;
+use Test::More tests => 136;
 
 BEGIN {
     use lib('t');
@@ -20,23 +20,18 @@ my $pages = [
     '/thruk/cgi-bin/statusmap.cgi',
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=parent&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=parent&host='.$host,
-    '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=parent&host='.$host,
 
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=address&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=address&host='.$host,
-    '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=address&host='.$host,
 
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=domain&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=domain&host='.$host,
-    '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=domain&host='.$host,
 
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=hostgroup&host='.$host,
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=hostgroup&host='.$host,
-    '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=hostgroup&host='.$host,
 
     '/thruk/cgi-bin/statusmap.cgi?type=table&groupby=servicegroup&hidetop=',
     '/thruk/cgi-bin/statusmap.cgi?type=circle&groupby=servicegroup&host='.$host,
-    '/thruk/cgi-bin/statusmap.cgi?type=hyper&groupby=servicegroup&host='.$host,
 ];
 
 
