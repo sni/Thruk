@@ -62,7 +62,10 @@ return the peers key
 
 =cut
 sub peer_key {
-    my $self = shift;
+    my($self, $new_val) = @_;
+    if(defined $new_val) {
+        $self->{'live'}->{'backend_obj'}->{'key'} = $new_val;
+    }
     return $self->{'live'}->{'backend_obj'}->peer_key();
 }
 
@@ -173,6 +176,16 @@ sub get_can_submit_commands {
   get_contactgroups_by_contact
 
 returns a list of contactgroups by contact
+
+$VAR1 = [
+          {
+            'peer_addr' => '/omd/sites/devel/tmp/run/live',
+            'name' => 'omd',
+            'peer_key' => '78bcd',
+            'peer_name' => 'devel'
+          },
+          ...
+        ];
 
 =cut
 sub get_contactgroups_by_contact {

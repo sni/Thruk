@@ -62,6 +62,7 @@ lib/Thruk/Action/AddSafeDefaults.pm
 lib/Thruk/Backend/Manager.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
+lib/Thruk/Backend/Provider/Mongodb.pm
 lib/Thruk/Controller/avail.pm
 lib/Thruk/Controller/cmd.pm
 lib/Thruk/Controller/config.pm
@@ -353,6 +354,7 @@ t/097-Pod.t
 t/098-Pod-Coverage.t
 t/099-Perl-Critic.t
 t/100-backend_icinga.t
+t/100-backend_mongodb.t
 t/100-backend_shinken.t
 t/100-cli.t
 t/100-model_Thruk.t

@@ -27,7 +27,8 @@ Manager of backend connections
 ##########################################################
 # use static list instead of slow module find
 $Thruk::Backend::Manager::Provider = [
-          'Thruk::Backend::Provider::Livestatus'
+          'Thruk::Backend::Provider::Livestatus',
+          'Thruk::Backend::Provider::Mongodb',
 ];
 $Thruk::Backend::Manager::stats = undef;
 
@@ -1152,7 +1153,7 @@ sub _initialise_peer {
     };
     # shorten backend id
     $peer->{'key'} = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
-    $peer->{'class'}->{'live'}->{'backend_obj'}->{'key'} = $peer->{'key'};
+    $peer->{'class'}->peer_key($peer->{'key'});
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
     if($self->{'backend_debug'} and Thruk->debug) {
         $peer->{'class'}->set_verbose(1);
