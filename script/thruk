@@ -62,8 +62,9 @@ Options:
                                 which should be used for querys.
   -l, --list-backends           List available backends/sites.
   -a, --action=<action>         Perform this action:
-                                  - url=<url>    output url result
-                                  - report=<nr>  generate report
+                                  - url=<url>        output url result
+                                  - report=<nr>      generate report
+                                  - reportmail=<nr>  send report by mail
 
   -A, --auth=<auth>             Set username for querys
 
@@ -112,7 +113,7 @@ script has the following arguments
 
     - report=<nr>   generate report by specifying its id.
 
-=item B<-a> I<authname>, B<--auth>=I<authname>
+=item B<-A> I<authname>, B<--auth>=I<authname>
 
     use this username for authentication
 
@@ -155,6 +156,14 @@ Urls can be shortened. Export all services into an excel file:
 Export all services into an excel file:
 
   %> thruk -A thrukadmin -a 'url=avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
+
+Generate pdf report
+
+  %> thruk -a 'report=1' > report.pdf
+
+Generate pdf report and send it by mail
+
+  %> thruk -a 'reportmail=1'
 
 =head1 AUTHOR
 
