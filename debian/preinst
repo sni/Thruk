@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -u
+set -e
+
 # save themes and plugins so we don't reenable them on every update
 rm -rf /tmp/thruk_update
 if [ -d /etc/thruk/themes/themes-enabled/. ]; then
