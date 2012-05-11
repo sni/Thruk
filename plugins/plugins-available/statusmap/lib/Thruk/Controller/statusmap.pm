@@ -53,6 +53,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{host} = 'rootid';
     }
 
+    # table layout does not support zoom
+    # yits table breaks if one element is in multiple groups
+    if($c->stash->{type} eq 'table' and ($c->stash->{groupby} eq 'hostgroup' or $c->stash->{groupby} eq 'servicegroup')) {
+        $c->stash->{detail} = 0;
+    }
+
     $self->{'all_nodes'} = {};
 
     my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ]);
