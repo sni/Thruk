@@ -12,7 +12,7 @@
         [% IF show_backends_in_table == 1 %]
         <th class='status' nowrap>Site&nbsp;<a href='[%    uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by site name (ascending)' title='Sort by site name (ascending)'></a><a href='[%       uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by site name (descending)' title='Sort by site name (descending)'></a></th>
         [% END %]
-        <th class='status' nowrap>Status Information</th>
+        <th class='status' nowrap>Status Information&nbsp;<a href='[% uri_with(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by status information (ascending)' title='Sort by status information (ascending)'></a><a href='[% uri_with(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 9) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by status information (descending)' title='Sort by status information (descending)'></a></th>
       </tr>
 
       [% SET lasthost = '' %]

@@ -277,6 +277,7 @@ sub _process_details_page {
         '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
         '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
+        '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
@@ -330,6 +331,7 @@ sub _process_hostdetails_page {
         '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration' ],
         '7' => [ [ 'peer_name', 'name' ], 'site' ],
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
+        '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
@@ -769,6 +771,8 @@ sub _process_combined_page {
         '4' => [ [ 'last_check',             'host_name', 'description' ], 'last check time' ],
         '5' => [ [ 'current_attempt',        'host_name', 'description' ], 'attempt number' ],
         '6' => [ [ 'last_state_change_plus', 'host_name', 'description' ], 'state duration' ],
+        '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
+        '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'svc_orderby'}  = $sortoptions->{$sortoption}->[1];
@@ -792,6 +796,7 @@ sub _process_combined_page {
         '5' => [ [ 'current_attempt',        'name' ], 'attempt number'  ],
         '6' => [ [ 'last_state_change_plus', 'name' ], 'state duration'  ],
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status'  ],
+        '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'hst_orderby'}  = $sortoptions->{$sortoption}->[1];

@@ -1454,7 +1454,7 @@ sub _sort {
 
         # sort alphanumeric
         else {
-            push @compares, '$a->{' . $key . '} cmp $b->{' . $key . '}';
+            push @compares, 'lc($a->{' . $key . '}) cmp lc($b->{' . $key . '})';
         }
     }
     my $sortstring = join( ' || ', @compares );
