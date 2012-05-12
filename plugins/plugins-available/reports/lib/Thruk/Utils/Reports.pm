@@ -196,6 +196,8 @@ sub generate_report {
     $Thruk::Utils::PDF::c = $c;
     $Thruk::Utils::CLI::c = $c;
 
+    $c->stash->{'tmp_files_to_delete'} = [];
+
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
     return unless defined $options;
@@ -261,6 +263,11 @@ sub generate_report {
     binmode $fh;
     print $fh $pdf_data;
     close($fh);
+
+    # clean up tmp files
+    for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
+        unlink($file);
+    }
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $pdf_file;
