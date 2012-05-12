@@ -819,6 +819,7 @@ sub _set_config {
             my $newest = $self->_newest_file(
                                              $ENV{'OMD_ROOT'}.'/tmp/nagios/nagios.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/icinga/icinga.cfg',
+                                             $ENV{'OMD_ROOT'}.'/tmp/icinga/nagios.cfg',
                                              $ENV{'OMD_ROOT'}.'/tmp/shinken/shinken.cfg',
                                             );
             $core_conf = $newest if defined $newest;
@@ -828,7 +829,8 @@ sub _set_config {
             $core_conf = '/omd/sites/'.$1.'/tmp/nagios/nagios.cfg';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/icinga/icinga.cfg|mx) {
-            $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
+            $core_conf = '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg' if -e '/omd/sites/'.$1.'/tmp/icinga/icinga.cfg';
+            $core_conf = '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg' if -e '/omd/sites/'.$1.'/tmp/icinga/nagios.cfg';
         }
         elsif($core_conf =~ m|/omd/sites/(.*?)/etc/shinken/shinken.cfg|mx) {
             $core_conf = '/omd/sites/'.$1.'/tmp/shinken/shinken.cfg';
@@ -860,12 +862,23 @@ sub _update_core_conf {
         $self->{'initialized'} = 0;
         return;
     };
+    $self->{'_corefile'}->{'conf'} = {};
     while(my $line = <$fh>) {
         chomp($line);
         my($key,$value) = split/\s*=\s*/mx, $line, 2;
         next unless defined $value;
         $key   =~ s/^\s*(.*?)\s*$/$1/mx;
         $value =~ s/^\s*(.*?)\s*$/$1/mx;
+
+        if(defined $self->{'_corefile'}->{'conf'}->{$key}) {
+            if(ref $self->{'_corefile'}->{'conf'}->{$key} eq '') {
+                my $values = [ $self->{'_corefile'}->{'conf'}->{$key} ];
+                $self->{'_corefile'}->{'conf'}->{$key} = $values;
+            }
+            push @{$self->{'_corefile'}->{'conf'}->{$key}}, $value;
+        } else {
+            $self->{'_corefile'}->{'conf'}->{$key} = $value;
+        }
 
         if($key eq 'cfg_file') {
             push @{$self->{'config'}->{'obj_file'}}, $self->_resolve_relative_path($value, $basedir);
@@ -898,6 +911,12 @@ sub _set_coretype {
             $self->{'coretype'} = readlink($ENV{'OMD_ROOT'}.'/etc/init.d/core');
             return;
         }
+    }
+
+    # try to determine core type from main config
+    if(defined $self->{'_corefile'}->{'conf'}->{'icinga_user'}) {
+        $self->{'coretype'} = 'icinga';
+        return;
     }
 
     return;
