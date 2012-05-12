@@ -361,7 +361,8 @@ save changes to disk
 sub save {
     my ( $self ) = @_;
 
-    $self->{'errors'} = [];
+    $self->{'errors'}       = [];
+    $self->{'parse_errors'} = [];
     if($self->{'readonly'}) {
         push @{$self->{'errors'}}, 'write denied for readonly file: '.$self->{'path'};
         return;
