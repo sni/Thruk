@@ -777,6 +777,7 @@ sub _apply_config_changes {
     # config check
     elsif(defined $c->{'request'}->{'parameters'}->{'check'}) {
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
+            $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_check($c)',
                                                message => 'please stand by while configuration is beeing checked...'
                                               }
@@ -790,6 +791,7 @@ sub _apply_config_changes {
     # config reload
     elsif(defined $c->{'request'}->{'parameters'}->{'reload'}) {
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
+            $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
                                                message => 'please stand by while configuration is beeing reloaded...'
                                               }
@@ -1580,7 +1582,7 @@ sub _config_reload {
     _nice_check_output($c);
 
     # wait until core responds
-    for(1..10) {
+    for(1..30) {
         sleep(1);
         eval {
             $c->{'db'}->get_processinfo();
