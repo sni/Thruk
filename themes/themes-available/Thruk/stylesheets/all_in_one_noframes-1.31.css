@@ -768,6 +768,10 @@ td.filterValueInput input.filter_pre_value {
 SELECT.filter_op_select {
   width: 45px;
 }
+
+.hidden {
+  visibility:hidden;
+}
 /* navbar */
 div.navbar {
   background-color: black;
