@@ -9,6 +9,7 @@ package TestUtils;
 use strict;
 use Data::Dumper;
 use Test::More;
+use URI::Escape;
 use Thruk::Utils::External;
 
 use Catalyst::Test 'Thruk';
@@ -71,8 +72,8 @@ sub get_test_service {
     }
     isnt($host, undef, "got a host from status.cgi") or BAIL_OUT('got no test host, cannot test.'.diag(Dumper($request)));
     isnt($service, undef, "got a service from status.cgi") or BAIL_OUT('got no test service, cannot test.'.diag(Dumper($request)));
-    $service =~ s/%20/ /gmx;
-    $host    =~ s/%20/ /gmx;
+    $service = uri_unescape($service);
+    $host    = uri_unescape($host);
     return($host, $service);
 }
 
@@ -270,6 +271,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         my $err_str = $error->as_string;
         next if $err_str =~ m/<IMG\ SRC="\/thruk\/.*?">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/Unknown\ attribute\ "data\-\w+"\ for\ tag/imx;
+        next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imx;
         diag($error->as_string."\n");
         push @return, $error;
     }
