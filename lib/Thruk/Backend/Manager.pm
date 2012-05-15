@@ -739,6 +739,7 @@ sub _do_on_peers {
     my( $result, $type, $size );
     my $totalsize = 0;
     my $selected_backends = 0;
+    my $last_error;
     for my $peer ( @{ $self->get_peers() } )
     {
         if(defined $backends) {
@@ -768,6 +769,7 @@ sub _do_on_peers {
             $peer->{'last_error'} = $@;
             $peer->{'last_error'} =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
             $peer->{'last_error'} = "ERROR: ".$peer->{'last_error'};
+            $last_error = $peer->{'last_error'};
         }
         $Thruk::Backend::Manager::stats->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
     }

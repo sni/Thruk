@@ -44,6 +44,18 @@ sub new {
 
 ##########################################################
 
+=head2 reconnect
+
+recreate database connection
+
+=cut
+sub reconnect {
+    my($self) = @_;
+    return;
+}
+
+##########################################################
+
 =head2 peer_key
 
 return the peers key

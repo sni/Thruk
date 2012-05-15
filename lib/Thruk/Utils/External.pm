@@ -54,7 +54,7 @@ sub cmd {
     if ($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
-        _do_child_stuff($dir);
+        _do_child_stuff($c, $dir);
         $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
         open STDERR, '>', $dir."/stderr";
@@ -89,6 +89,7 @@ sub perl {
         ## no critic
         my $rc = eval($conf->{'expr'});
         ## use critic
+        die($@) if $@;
         _finished_job_page($c, $c->stash);
         return $rc;
     }
@@ -100,7 +101,7 @@ sub perl {
     if ($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
-        _do_child_stuff($dir);
+        _do_child_stuff($c, $dir);
         $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
         do {
@@ -114,7 +115,7 @@ sub perl {
 
             if($@) {
                 print STDERR $@;
-                exit;
+                exit 1;
             }
 
             close(STDOUT);
@@ -168,6 +169,8 @@ sub get_status {
     my $id  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
+    return unless -d $dir;
+
     # reap pending zombies
     waitpid(-1, WNOHANG);
 
@@ -177,13 +180,11 @@ sub get_status {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
-    # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start = stat($dir.'/user');
-    my $time  = time() - $start[9];
-
     my $is_running = _is_running($dir);
-
-    my $percent = 0;
+    # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
+    my @start      = stat($dir.'/user');
+    my $time       = time() - $start[9];
+    my $percent    = 0;
     if($is_running == 0) {
         $percent = 100;
         my @end  = stat($dir."/stdout");
@@ -293,6 +294,7 @@ sub job_page {
     }
 
     my($is_running,$time,$percent,$message,$forward) = get_status($c, $job);
+    return $c->detach('/error/index/22') unless defined $is_running;
 
     # try to directly server the request if it takes less than 10seconds
     while($is_running and $time < 10) {
@@ -328,7 +330,7 @@ sub job_page {
 
 ##############################################
 sub _do_child_stuff {
-    my $dir = shift;
+    my($c, $dir) = @_;
 
     POSIX::setsid() or die "Can't start a new session: $!";
 
@@ -338,6 +340,9 @@ sub _do_child_stuff {
     for my $fd (0..1024) {
         POSIX::close($fd);
     }
+
+    # some db drivers need reconnect after forking
+    $c->{'db'}->reconnect();
 
     $|=1; # autoflush
     return;
@@ -451,11 +456,11 @@ sub _is_running {
 
 ##############################################
 
-=head2 _is_running
+=head2 _finished_job_page
 
-  _is_running($dir)
+  _finished_job_page($c, $stash, $forward, $out)
 
-return true if process is still running
+show page for finished jobs
 
 =cut
 sub _finished_job_page {
