@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - fixed mobile interface (jquery version was too old)
             - fixed javascript error on comments/downtimes page
             - fixed deleting all downtimes from extinfo page
+            - fixed removing comments/downtimes from extinfo page
 
 1.30     Sun May  6 19:37:59 CEST 2012
           - added sla reporting
