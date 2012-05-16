@@ -702,8 +702,10 @@ sub _set_host_service_from_down_com_ids {
     my( $self, $c ) = @_;
     my $data;
 
-    $c->{'request'}->{'parameters'}->{'host'}    = '';
-    $c->{'request'}->{'parameters'}->{'service'} = '';
+    if( $c->{'request'}->{'parameters'}->{'com_id'} or $c->{'request'}->{'parameters'}->{'down_id'} ) {
+        $c->{'request'}->{'parameters'}->{'host'}    = '';
+        $c->{'request'}->{'parameters'}->{'service'} = '';
+    }
 
     # for comment ids
     if( $c->{'request'}->{'parameters'}->{'com_id'} ) {
@@ -714,6 +716,7 @@ sub _set_host_service_from_down_com_ids {
     if( $c->{'request'}->{'parameters'}->{'down_id'} ) {
         $data = $c->{'db'}->get_downtimes(filter => [ id => $c->{'request'}->{'parameters'}->{'down_id'} ]);
     }
+
     if( defined $data->[0] ) {
         $c->{'request'}->{'parameters'}->{'host'}    = $data->[0]->{'host_name'};
         $c->{'request'}->{'parameters'}->{'service'} = $data->[0]->{'service_description'};
