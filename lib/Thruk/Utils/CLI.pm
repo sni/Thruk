@@ -82,6 +82,25 @@ sub get_object_db {
 }
 
 ##############################################
+
+=head2 store_objects
+
+  store_objects()
+
+store changed object, not yet saved to disk
+
+=cut
+sub store_objects {
+    my($self) = @_;
+    my $c = $self->get_c();
+    die("config tool not enabled") unless $c->config->{'use_feature_configtool'} == 1;
+    $c->{'obj_db'}->{'needs_commit'} = 1;
+    $c->{'obj_db'}->{'last_changed'} = time();
+    Thruk::Utils::Conf::store_model_retention($c) or die("failed to store objects model");
+    return;
+}
+
+##############################################
 sub _read_secret {
     my($self) = @_;
     my $files = [];
