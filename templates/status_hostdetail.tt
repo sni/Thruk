@@ -92,7 +92,11 @@
           [% PROCESS _add_bookmark.tt %]
           [% PROCESS _show_link.tt %]
           [% PROCESS _json_export.tt %]
-          [% PROCESS _excel_export.tt columns=[ 'Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Site' ] %]
+          [% IF show_backends_in_table == 0 %]
+            [% PROCESS _excel_export.tt columns=[ 'Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Extra Status Information' ] %]
+          [% ELSE %]
+            [% PROCESS _excel_export.tt columns=[ 'Hostname', 'IP', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Duration', 'Status Information', 'Extra Status Information', 'Site' ] %]
+          [% END %]
         </td>
       </tr>
     </table>

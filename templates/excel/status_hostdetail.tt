@@ -6,7 +6,7 @@
     <row>
       <format bold='1' bg_color='silver' align='center'>
         [% IF show_backends_in_table %]
-          [% IF columns.12 %]<cell width='15'>Site</cell>[% END %]
+          [% IF columns.13 %]<cell width='15'>Site</cell>[% END %]
         [% END %]
         [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
         [% IF columns.2  %]<cell width='10'>IP</cell>[% END %]
@@ -19,6 +19,7 @@
         [% IF columns.9  %]<cell width='20'>Last Check</cell>[% END %]
         [% IF columns.10 %]<cell width='15'>Duration</cell>[% END %]
         [% IF columns.11 %]<cell width='80'>Status Information</cell>[% END %]
+        [% IF columns.12 %]<cell width='80'>Extra Status Information</cell>[% END %]
       </format>
     </row>
     [% FOREACH h = data %]
@@ -40,7 +41,7 @@
       [% END %]
       <row>
         [% IF show_backends_in_table %]
-          [% IF columns.12 %]<cell>[% h.peer_name %]</cell>[% END %]
+          [% IF columns.13 %]<cell>[% h.peer_name %]</cell>[% END %]
         [% END %]
         [% IF columns.1  %]<cell>[% h.name %]</cell>[% END %]
         [% IF columns.2  %]<cell>[% h.address %]</cell>[% END %]
@@ -57,6 +58,7 @@
         </format>[% END %]
         [% IF columns.10 %]<cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>[% END %]
         [% IF columns.11 %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% escape_xml(h.plugin_output) %][% END %]</cell>[% END %]
+        [% IF columns.12 %]<cell>[% IF h.has_been_checked == 1 %][% escape_xml(h.long_plugin_output) %][% END %]</cell>[% END %]
       </row>
     [% END %]
   </worksheet>
