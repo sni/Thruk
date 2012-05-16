@@ -500,9 +500,7 @@ sub update_object {
     my $data    = shift;
     my $comment = shift || '';
     my $rebuild = shift;
-    my $follow  = shift;
     $rebuild = 1 unless defined $rebuild;
-    $follow  = 1 unless defined $follow;
 
     return unless defined $obj;
 
