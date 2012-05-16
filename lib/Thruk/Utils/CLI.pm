@@ -58,7 +58,9 @@ return catalysts c object
 =cut
 sub get_c {
     my($self) = @_;
+    return $Thruk::Utils::CLI::c if defined $Thruk::Utils::CLI::c;
     my($c, $failed) = $self->_dummy_c();
+    $Thruk::Utils::CLI::c = $c;
     return $c;
 }
 
