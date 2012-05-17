@@ -18,6 +18,7 @@ plan skip_all => 'WWW::Mechanize::Firefox required' if $@;
 
 my $pidfile  = getcwd."/test.pid";
 my $testport = 51234;
+my $pattern  = $ARGV[0];
 
 #####################################################################
 # start test catalyst server
@@ -26,8 +27,7 @@ END {
     do_clean_exit();
 };
 my $server_log = '/tmp/servtest.log';
-# TODO: remove
-#unlink($server_log);
+unlink($server_log);
 my $cmd="./script/thruk_server.pl --pidfile=$pidfile --port=$testport > $server_log 2>&1 &";
 ok($cmd, $cmd);
 my $out = `$cmd`;
@@ -76,6 +76,8 @@ for my $page (@pages) {
     $page =~ s/("|')\.\$timeperiod(\."|\.'|,)/$timeperiod/mx;
     next unless $page =~ m#^.*:\s*('|"|)(/thruk/[^'"]+)('|"|,|$)#mx;
     $page = $2;
+    # allow to reduce the amount of pages tested
+    next if(defined $pattern and $page !~ m/$pattern/);
     push @cleanpages, $page;
 }
 

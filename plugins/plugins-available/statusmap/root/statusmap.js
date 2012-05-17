@@ -274,7 +274,9 @@ function show_circle_map(id_to_show, w, h) {
         onBeforeCompute: function(node) {
             // reset page refresh
             setRefreshRate(refresh_rate);
-            additionalParams['host'] = node.id;
+            if(node != undefined) {
+              additionalParams['host'] = node.id;
+            }
         },
 
         //Add the name of the node in the correponding label

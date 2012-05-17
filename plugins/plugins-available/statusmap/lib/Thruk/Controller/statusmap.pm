@@ -154,45 +154,49 @@ sub _get_json_for_hosts {
     my($sum_hosts,$state_up,$state_down,$state_unreachable,$state_pending) = (0,0,0,0,0);
     for my $key (sort keys %{$data}) {
         my $dat = $data->{$key};
-        if(ref $dat ne 'HASH') {
-            my @caller = caller;
-            confess('not a hash ref: '.Dumper($dat)."\n".Dumper(\@caller));
-        }
-        if(exists $dat->{'id'}) {
-            $self->{'all_nodes'}->{$dat->{'id'}} = 1;
-            push @{$children}, $dat;
-            $sum_hosts         += $dat->{'data'}->{'$area'};
-            $state_up          += $dat->{'data'}->{'state_up'};
-            $state_down        += $dat->{'data'}->{'state_down'};
-            $state_unreachable += $dat->{'data'}->{'state_unreachable'};
-            $state_pending     += $dat->{'data'}->{'state_pending'};
-        }
-        else {
-            my($childs,
-               $child_sum_hosts,
-               $child_sum_up,
-               $child_sum_down,
-               $child_sum_unreachable,
-               $child_sum_pending
-            ) = $self->_get_json_for_hosts($dat, ($level+1));
-            $sum_hosts          += $child_sum_hosts;
-            $state_up           += $child_sum_up;
-            $state_down         += $child_sum_down;
-            $state_unreachable  += $child_sum_unreachable;
-            $state_pending      += $child_sum_pending;
-            push @{$children}, {
-                'id'       => 'sub_node_'.$level.'_'.$key,
-                'name'     => $key,
-                'data'     => {
-                                '$area'            => $child_sum_hosts,
-                                'state_up'         => $child_sum_up,
-                                'state_down'       => $child_sum_down,
-                                'state_unreachable'=> $child_sum_unreachable,
-                                'state_pending'    => $child_sum_pending,
-                              },
-                'children' => $childs,
-            };
-            $self->{'all_nodes'}->{'sub_node_'.$level.'_'.$key} = 1;
+        my $dats = [$dat];
+        $dats = $dat if ref $dat eq 'ARRAY';
+        for my $dat (@{$dats}) {
+            if(ref $dat ne 'HASH') {
+                my @caller = caller;
+                confess('not a hash ref: '.Dumper($dat)."\n".Dumper(\@caller));
+            }
+            if(exists $dat->{'id'}) {
+                $self->{'all_nodes'}->{$dat->{'id'}} = 1;
+                push @{$children}, $dat;
+                $sum_hosts         += $dat->{'data'}->{'$area'};
+                $state_up          += $dat->{'data'}->{'state_up'};
+                $state_down        += $dat->{'data'}->{'state_down'};
+                $state_unreachable += $dat->{'data'}->{'state_unreachable'};
+                $state_pending     += $dat->{'data'}->{'state_pending'};
+            }
+            else {
+                my($childs,
+                   $child_sum_hosts,
+                   $child_sum_up,
+                   $child_sum_down,
+                   $child_sum_unreachable,
+                   $child_sum_pending
+                ) = $self->_get_json_for_hosts($dat, ($level+1));
+                $sum_hosts          += $child_sum_hosts;
+                $state_up           += $child_sum_up;
+                $state_down         += $child_sum_down;
+                $state_unreachable  += $child_sum_unreachable;
+                $state_pending      += $child_sum_pending;
+                push @{$children}, {
+                    'id'       => 'sub_node_'.$level.'_'.$key,
+                    'name'     => $key,
+                    'data'     => {
+                                    '$area'            => $child_sum_hosts,
+                                    'state_up'         => $child_sum_up,
+                                    'state_down'       => $child_sum_down,
+                                    'state_unreachable'=> $child_sum_unreachable,
+                                    'state_pending'    => $child_sum_pending,
+                                  },
+                    'children' => $childs,
+                };
+                $self->{'all_nodes'}->{'sub_node_'.$level.'_'.$key} = 1;
+            }
         }
     }
 
@@ -239,7 +243,19 @@ sub _get_hosts_by_split_attribute {
                 $key .= $chunks[$x];
             }
             if($x == $num-1) {
-                $subtree->{$key} = $json_host;
+                if(defined $subtree->{$key}) {
+                    if(ref $subtree->{$key} eq 'ARRAY') {
+                        push @{$subtree->{$key}}, $json_host;
+                    } else {
+                        my $old = $subtree->{$key};
+                        $subtree->{$key} = [
+                            $json_host,
+                            $old
+                        ];
+                    }
+                } else {
+                    $subtree->{$key} = $json_host;
+                }
             }
             else {
                 if(!exists $subtree->{$key}) { $subtree->{$key} = {}; }
