@@ -61,7 +61,7 @@ sub cmd {
         open STDOUT, '>', $dir."/stdout";
 
         exec("/bin/sh -c '".$conf->{'cmd'}."'");
-        exit; # just to be sure
+        exit(1); # just to be sure
     }
 }
 
@@ -101,32 +101,44 @@ sub perl {
     if ($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
-        _do_child_stuff($c, $dir);
-        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+        eval {
+            _do_child_stuff($c, $dir);
+            $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
-        do {
-            ## no critic
-            local *STDOUT;
-            local *STDERR;
-            open STDERR, '>', $dir."/stderr";
-            open STDOUT, '>', $dir."/stdout";
-            eval($conf->{'expr'});
-            ## use critic
+            do {
+                ## no critic
+                local *STDOUT;
+                local *STDERR;
+                open STDERR, '>', $dir."/stderr";
+                open STDOUT, '>', $dir."/stdout";
+                eval($conf->{'expr'});
+                ## use critic
 
-            if($@) {
-                print STDERR $@;
-                exit 1;
-            }
+                if($@) {
+                    print STDERR $@;
+                    exit(1);
+                }
 
-            close(STDOUT);
-            close(STDERR);
+                close(STDOUT);
+                close(STDERR);
+            };
+
+            # save stash
+            _clean_code_refs($c->stash);
+            store(\%{$c->stash}, $dir."/stash");
         };
-
-        # save stash
-        store(\%{$c->stash}, $dir."/stash");
-
-        exit;
+        if($@) {
+            my $err = $@;
+            eval {
+                open(my $fh, '>>', $dir."/stderr");
+                print $fh $err;
+                close($fh);
+            };
+            exit(1);
+        }
+        exit(0);
     }
+    exit(1);
 }
 
 
@@ -499,6 +511,15 @@ sub _finished_job_page {
     $c->stash->{text}     = $out;
     $c->stash->{template} = 'passthrough.tt';
     return;
+}
+
+##############################################
+sub _clean_code_refs {
+    my $var = shift;
+    for my $key (keys %{$var}) {
+        delete $var->{$key} if ref $var->{$key} eq 'CODE';
+    }
+    return $var;
 }
 
 ##############################################
