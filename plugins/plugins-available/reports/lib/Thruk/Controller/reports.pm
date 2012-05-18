@@ -70,6 +70,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
         }
         elsif($action eq 'edit') {
+            return $self->report_edit($c, $report_nr);
+        }
+        elsif($action eq 'edit2') {
+            return $self->report_edit_step2($c, $report_nr);
         }
         elsif($action eq 'update') {
             Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Reports::generate_report($c, '.$report_nr.')', 'background' => 1 });
@@ -77,13 +81,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
         }
         elsif($action eq 'save') {
-            my($name, $template, $data, $backends) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
-
-            if(Thruk::Utils::Reports::report_save($c, $report_nr, $name, $template, $data, $backends)) {
-                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report updated' });
+            my($data) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
+            my $msg = 'report updated';
+            if($report_nr eq 'new') { $msg = 'report created'; }
+            if($report_nr = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
+                Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
             } else {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
             }
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
         }
         elsif($action eq 'remove') {
             if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
@@ -101,6 +107,73 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     Thruk::Utils::ssi_include($c);
 
     return 1;
+}
+
+##########################################################
+
+=head2 report_edit
+
+=cut
+sub report_edit {
+    my($self, $c, $report_nr) = @_;
+
+    my $r;
+    if($report_nr eq 'new') {
+        $r = Thruk::Utils::Reports::_get_new_report($c);
+        $r->{'backends'} = [ keys %{$c->stash->{'backend_detail'}} ];
+    } else {
+        $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+        if(!defined $r or $r->{'readonly'}) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+        }
+    }
+
+    $c->stash->{r} = $r;
+
+    # get templates
+    my $templates = {};
+    for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
+        for my $file (glob($path.'/pdf/*.tt')) {
+            $file =~ s/^.*\/(.*)$/$1/mx;
+            $templates->{$file} = 1;
+        }
+    }
+    my @templates_files = sort keys %{$templates};
+    $c->stash->{templates} = \@templates_files;
+
+    Thruk::Utils::ssi_include($c);
+    $c->stash->{template} = 'reports_edit.tt';
+    return;
+}
+
+##########################################################
+
+=head2 report_edit_step2
+
+=cut
+sub report_edit_step2 {
+    my($self, $c, $report_nr) = @_;
+
+    my($data) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
+
+    my $r;
+    if($report_nr eq 'new') {
+        $r = Thruk::Utils::Reports::_get_new_report($c, $data);
+    } else {
+        delete $data->{'params'};
+        $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr, $data);
+        if(!defined $r or $r->{'readonly'}) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'cannot change report' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+        }
+    }
+
+    $c->stash->{r} = $r;
+
+    Thruk::Utils::ssi_include($c);
+    $c->stash->{template} = 'reports_edit_step2.tt';
+    return;
 }
 
 ##########################################################

@@ -1,4 +1,4 @@
-[% PROCESS _header.tt %]
+[% PROCESS _header.tt css="thruk/plugins/reports/reports.css" js="thruk/plugins/reports/reports.js" %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
@@ -18,10 +18,10 @@
     </td>
   </tr>
 </table>
-<br><br>
 
-<div style="margin-left: 10px;"><a href="reports.cgi?action=new">create new report</a></div>
-<table border="1" width="900" class='status' id="statusTable" style="margin-left: 10px;">
+<div style="margin-left: 10px; display: table;">
+<div style="text-align: right; margin-bottom: 3px;"><a href="reports.cgi?action=edit&amp;report=new" class="report_button report_save_button" style="width: 150px;">create new report</a></div>
+<table border="1" class='status' id="statusTable" style="max-width: 1000px;">
   <tr>
     <th class="status" nowrap width="250">Name</th>
     <th class="status" nowrap>Description</th>
@@ -37,7 +37,7 @@
   [% SET rowclass = 'statusEven' IF loop.odd %]
   <tr[% IF loop.first %] class="firstrow"[% END %]>
     <td class="status [% rowclass %]" align="left">[% r.name %]</td>
-    <td class="status [% rowclass %]" align="left">[% r.desc %]</td>
+    <td class="status [% rowclass %]" align="left">[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
     <td class="status [% rowclass %]">
       [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
@@ -64,3 +64,10 @@
   </tr>
   [% END %]
 </table>
+</div>
+
+<script type="text/javascript">
+<!--
+  init_report_tool_buttons();
+-->
+</script>

@@ -1,0 +1,24 @@
+[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'host'                => [ 'Host',                  'hosts',           ''                      ] },
+        { 'service'             => [ 'Service',               'services',        ''                      ] },
+        { 'timeperiod'          => [ 'Timeperiod',            'rptimeperiod',    'last12months'          ] },
+        { 'breakdown'           => [ 'Breakdown by',          'breakdowns',      'months'                ] },
+        { 'sla'                 => [ 'SLA %',                 'int',             '98'                    ] },
+        { 'assumeinitialstates' => [ 'Assume Initial States', 'yes_no',          'yes'                   ] },
+        { 'includesoftstates'   => [ 'Include Soft States',   'yes_no',          'no'                    ] },
+        { 'unavailable'         => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown'] ] },
+    ];
+  %]
+[% END %]
+
+[%# PREPERATION #%]
+[% PROCESS 'pdf/defaults/prepare.tt' %]
+
+[%# RENDERING PDF #%]
+[% PROCESS 'pdf/defaults/render_sla.tt' %]
+
+[%# SENDING MAIL #%]
+[% PROCESS 'pdf/defaults/mail.tt' %]

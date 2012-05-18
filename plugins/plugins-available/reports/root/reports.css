@@ -1,0 +1,26 @@
+body.reports TABLE.reports {
+  min-width: 600px;
+  margin-left: 10px;
+}
+body.reports TABLE.reports TD {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+body.reports TABLE.reports INPUT[type=text] {
+  width: 515px;
+}
+body.reports TABLE.reports TEXTAREA {
+  white-space: nowrap;
+  word-wrap: normal;
+  width: 520px;
+  height: 80px;
+}
+
+TABLE.unavailable_states {
+  border-collapse: collapse;
+}
+TABLE.unavailable_states TD, TABLE.unavailable_states TH {
+  border: 1px solid grey;
+  padding-left: 4px;
+  padding-right: 4px;
+}

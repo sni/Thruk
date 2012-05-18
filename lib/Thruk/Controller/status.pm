@@ -145,6 +145,17 @@ sub _process_raw_request {
                     }
                 }
             }
+            elsif($type eq 'host' or $type eq 'hosts') {
+                $data = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+            }
+            elsif($type eq 'service' or $type eq 'services') {
+                my $host = $c->{'request'}->{'parameters'}->{'host'};
+                my $additional_filter;
+                if(defined $host and $host ne '') {
+                    $additional_filter = { 'host_name' => $host };
+                }
+                $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter ] );
+            }
             elsif($type eq 'custom variable') {
                 $data = [];
             } else {

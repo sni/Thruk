@@ -11,7 +11,7 @@
 <div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
 <table border="0" class='data conftoolobj' style="width: 100%; height: 100%;">
   <tr>
-    <th class='data' style="width: 40px;"><a href='[% IF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+    <th class='data' style="width: 40px;"><a href='[% IF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
     <th class='data'><span  style="font-size: larger;">/[% file_name %]</span>[% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]</th>
     <th class='data' style="width: 40px;">[% UNLESS file.readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
   </tr>

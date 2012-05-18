@@ -42,6 +42,9 @@ sub get_report_list {
         }
     }
 
+    # sort by name
+    @{$reports} = sort { $a->{'name'} cmp $b->{'name'} } @{$reports};
+
     return $reports;
 }
 
@@ -161,32 +164,24 @@ sub report_send {
 
 =head2 report_save
 
-  report_save($c, $nr, $name, $params)
+  report_save($c, $nr, $data)
 
 save a report
 
 =cut
 sub report_save {
-    my($c, $nr, $name, $template, $params, $backends) = @_;
+    my($c, $nr, $data) = @_;
     mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
     my $old_report;
-    if(-f $file) {
+    if($nr ne 'new' and -f $file) {
         $old_report = _read_report_file($c, $nr);
         return unless defined $old_report;
     }
-    my $report = {
-        name     => $name,
-        template => $template,
-        user     => $c->stash->{'remote_user'},
-        params   => $params,
-        var      => {},
-    };
-    $report->{'backends'} = $backends if defined $backends;
-    $report->{'var'}      = $old_report->{'var'} if defined $old_report->{'var'};
-
+    my $report       = _get_new_report($c, $data);
+    $report->{'var'} = $old_report->{'var'} if defined $old_report->{'var'};
     delete $report->{'readonly'};
-
+    delete $report->{'nr'};
     return _report_save($c, $nr, $report);
 }
 
@@ -202,9 +197,15 @@ remove report
 sub report_remove {
     my($c, $nr) = @_;
 
-    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
-    return 1 unless -f $file;
-    return 1 if unlink($file);
+    my $report = _read_report_file($c, $nr);
+    return unless defined $report;
+    return unless defined $report->{'readonly'};
+    return unless $report->{'readonly'} == 0;
+
+    my @files;
+    push @files, $c->config->{'var_path'}.'/reports/'.$nr.'.txt' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+    return 1 if unlink @files;
     return;
 }
 
@@ -231,18 +232,22 @@ sub generate_report {
     my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
 
     # report is already beeing generated
-    if($options->{'var'}->{'is_running'} == 1) {
-        while($options->{'var'}->{'is_running'} == 1) {
+    if($options->{'var'}->{'is_running'}) {
+        while($options->{'var'}->{'is_running'}) {
+            if(kill(0, $options->{'var'}->{'is_running'}) != 1) {
+                unlink($pdf_file);
+                last;
+            }
             sleep 1;
         }
-        # just wait till its finised and return
+        # just wait till its finished and return
         if(-e $pdf_file) {
             return $pdf_file;
         }
     }
 
     # update report runtime data
-    $options->{'var'}->{'is_running'} = 1;
+    $options->{'var'}->{'is_running'} = $$;
     $options->{'var'}->{'start_time'} = time();
     _report_save($c, $nr, $options);
 
@@ -251,7 +256,7 @@ sub generate_report {
         $c->authenticate( {} );
     }
 
-    if(defined $options->{'backends'}) {
+    if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0) {
         $c->{'db'}->disable_backends();
         $c->{'db'}->enable_backends($options->{'backends'});
     }
@@ -333,19 +338,51 @@ return report data for given params
 =cut
 sub get_report_data_from_param {
     my $params = shift;
-
-    my $name     = $params->{'name'}     || 'New Report';
-    my $template = $params->{'template'} || 'sla.tt';
-    # TODO: implement
-    my $backends = undef;
-
-    my $data     = {};
+    my $p = {};
     for my $key (keys %{$params}) {
-        next unless $key =~ m/^params\.(\w+)$/mx;
-        $data->{$1} = $params->{$key};
+        next unless $key =~ m/^params\.([\w\.]+)$/mx;
+        if(ref $params->{$key} eq 'ARRAY') {
+            # remove empty elements
+            @{$params->{$key}} = grep(!/^$/mx, @{$params->{$key}});
+        }
+        $p->{$1} = $params->{$key};
     }
 
-    return($name, $template, $data, $backends);
+    my $data = {
+        'name'      => $params->{'name'}        || 'New Report',
+        'desc'      => $params->{'desc'}        || '',
+        'template'  => $params->{'template'}    || 'sla.tt',
+        'is_public' => $params->{'is_public'}   || 0,
+        'to'        => $params->{'to'}          || '',
+        'cc'        => $params->{'cc'}          || '',
+        'backends'  => $params->{'backends'}    || [],
+        'params'    => $p,
+    };
+
+    return($data);
+}
+
+##########################################################
+sub _get_new_report {
+    my($c, $data) = @_;
+    $data = {} unless defined $data;
+    my $r = {
+        'name'      => 'New Report',
+        'desc'      => 'Description',
+        'nr'        => 'new',
+        'template'  => '',
+        'params'    => {},
+        'var'       => {},
+        'to'        => '',
+        'cc'        => '',
+        'is_public' => 0,
+        'user'      => $c->stash->{'remote_user'},
+        'backends'  => [],
+    };
+    for my $key (keys %{$data}) {
+        $r->{$key} = $data->{$key};
+    }
+    return $r;
 }
 
 ##########################################################
@@ -353,18 +390,27 @@ sub _report_save {
     my($c, $nr, $report) = @_;
     mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    if($nr eq 'new') {
+        # find next free number
+        $nr = 1;
+        $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+        while(-e $file) {
+            $nr++;
+            $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+        }
+    }
     my $data = Dumper($report);
     $data    =~ s/^\$VAR1\ =\ //mx;
     $data    =~ s/^\ \ \ \ \ \ \ \ //gmx;
     open(my $fh, '>'.$file) or confess('cannot write to '.$file.": ".$!);
     print $fh $data;
     close($fh);
-    return 1;
+    return $nr;
 }
 
 ##########################################################
 sub _read_report_file {
-    my($c, $nr) = @_;
+    my($c, $nr, $rdata) = @_;
     unless($nr =~ m/^\d+$/mx) {
         Thruk::Utils::CLI::_error("not a valid report number");
         return $c->detach('/error/index/13');
@@ -393,8 +439,17 @@ sub _read_report_file {
     $report->{'var'}->{'start_time'} = 0 unless defined $report->{'var'}->{'start_time'};
     $report->{'var'}->{'end_time'}   = 0 unless defined $report->{'var'}->{'end_time'};
     $report->{'desc'}       = '' unless defined $report->{'desc'};
+    $report->{'to'}         = '' unless defined $report->{'to'};
+    $report->{'cc'}         = '' unless defined $report->{'cc'};
     $report->{'nr'}         = $nr;
     $report->{'is_public'}  = 0 unless defined $report->{'is_public'};
+
+    # preset values from data
+    if(defined $rdata) {
+        for my $key (keys %{$rdata}) {
+            $report->{$key} = $rdata->{$key};
+        }
+    }
 
     return $report;
 }

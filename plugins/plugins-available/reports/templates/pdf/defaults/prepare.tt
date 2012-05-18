@@ -1,0 +1,7 @@
+[%# PREPERATION #%]
+[% IF block == 'prepare' %]
+  [%
+    set_unavailable_states(param.unavailable);
+    calculate_availability();
+  %]
+[% END %]

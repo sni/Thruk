@@ -1,0 +1,159 @@
+[% PROCESS _header.tt css="thruk/plugins/reports/reports.css" js="thruk/plugins/reports/reports.js" %]
+[% PROCESS _message.tt %]
+[% USE date %]
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="top" width="33%">
+      <br><br>
+      <div align="center" class='dataTitle'>
+        Reporting
+      </div>
+    </td>
+    <td align="right" valign="bottom" width="33%">
+      [% PROCESS _help.tt topic = "reports" %]
+    </td>
+  </tr>
+</table>
+<br><br>
+
+[% temp = 'pdf/' _ r.template %]
+[% PROCESS $temp block = 'edit' %]
+
+<form action="reports.cgi" method="POST">
+<input type="hidden" name="action" value="save">
+[% FOREACH key = r.keys %]
+[% IF key == 'var' || key == 'params' %][% NEXT %][% END %]
+[% IF key == 'backends' %]
+[% FOREACH k = r.$key %]
+  <input type="hidden" name="[% key %]" value="[% k %]">
+[% END %]
+[% ELSE %]
+<input type="hidden" name="[% key %]" value="[% r.$key %]">
+[% END %]
+[% END %]
+<input type="hidden" name="report" value="[% r.nr %]">
+<table border="1" class='data reports'>
+  <tr>
+    <th class='data' style="width:125px;"><a href='reports.cgi?action=edit&amp;report=[% r.nr %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report - Step 2</th>
+    <th class='data' style="width:125px;"></th>
+  </tr>
+  [% FOREACH f = required_fields %]
+  [% key     = f.keys.0 %]
+  [% name    = f.values.0.0 %]
+  [% type    = f.values.0.1 %]
+  [% default = f.values.0.2 %]
+  [% value   = default %]
+  [% IF r.params.exists(key) %][% value = r.params.$key %][% END %]
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>[% name %]</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      [% IF type == 'int' %]
+        <input type="text" name="params.[% key %]" value="[% value %]">
+      [% ELSIF type == 'yes_no' %]
+        <select name="params.[% key %]">
+          <option value="yes"[% IF value == 'yes' %] selected[% END %]>Yes</option>
+          <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
+        </select>
+      [% ELSIF type == 'hosts' %]
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { autosubmit:false })"[% END %]>
+      [% ELSIF type == 'services' %]
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'params.host' })"[% END %]>
+      [% ELSIF type == 'rptimeperiod' %]
+        <select name="params.[% key %]">
+          <option value="today"[% IF        value == 'today'        %] selected[% END %]>Today</option>
+          <option value="last24hours"[% IF  value == 'last24hours'  %] selected[% END %]>Last 24 Hours</option>
+          <option value="yesterday"[% IF    value == 'yesterday'    %] selected[% END %]>Yesterday</option>
+          <option value="thisweek"[% IF     value == 'thisweek'     %] selected[% END %]>This Week</option>
+          <option value="last7days"[% IF    value == 'last7days'    %] selected[% END %]>Last 7 Days</option>
+          <option value="lastweek"[% IF     value == 'lastweek'     %] selected[% END %]>Last Week</option>
+          <option value="thismonth"[% IF    value == 'thismonth'    %] selected[% END %]>This Month</option>
+          <option value="last31days"[% IF   value == 'last31days'   %] selected[% END %]>Last 31 Days</option>
+          <option value="lastmonth"[% IF    value == 'lastmonth'    %] selected[% END %]>Last Month</option>
+          <option value="last12months"[% IF value == 'last12months' %] selected[% END %]>Last 12 Months</option>
+          <option value="thisyear"[% IF     value == 'thisyear'     %] selected[% END %]>This Year</option>
+          <option value="lastyear"[% IF     value == 'lastyear'     %] selected[% END %]>Last Year</option>
+        </select>
+      [% ELSIF type == 'breakdowns' %]
+        <select name="params.[% key %]">
+          <option value="months"[% IF value == 'months' %] selected[% END %]>Months</option>
+          <option value="weeks"[%  IF value == 'weeks'  %] selected[% END %]>Weeks</option>
+          <option value="days"[%   IF value == 'days'   %] selected[% END %]>Days</option>
+        </select>
+      [% ELSIF type == 'hst_unavailable' %]
+        <input type="hidden" name="params.[% key %]" value="">
+        [% lookup = {} %]
+        [% FOREACH tmp = value %][% lookup.$tmp = 1 %][% END %]
+        <table class="unavailable_states">
+          <tr>
+            <th>State</th><th>Normal</th><th>During Downtime</th>
+          </tr>
+          <tr>
+            <td>Up</td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="up"[% IF lookup.exists('up') %] checked[% END %]></td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="up_downtime"[% IF lookup.exists('up_downtime') %] checked[% END %]></td>
+          </tr>
+          <tr>
+            <td>Down</td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="down"[% IF lookup.exists('down') %] checked[% END %]></td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="down_downtime"[% IF lookup.exists('down_downtime') %] checked[% END %]></td>
+          </tr>
+          <tr>
+            <td>Unreachable</td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="unreachable"[% IF lookup.exists('unreachable') %] checked[% END %]></td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="unreachable_downtime"[% IF lookup.exists('unreachable_downtime') %] checked[% END %]></td>
+          </tr>
+        </table>
+      [% ELSIF type == 'svc_unavailable' %]
+        <input type="hidden" name="params.[% key %]" value="">
+        [% lookup = {} %]
+        [% FOREACH tmp = value %][% lookup.$tmp = 1 %][% END %]
+        <table class="unavailable_states">
+          <tr>
+            <th>State</th><th>Normal</th><th>During Downtime</th>
+          </tr>
+          <tr>
+            <td>Ok</td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="ok"[% IF lookup.exists('ok') %] checked[% END %]></td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="ok_downtime"[% IF lookup.exists('ok_downtime') %] checked[% END %]></td>
+          </tr>
+          <tr>
+            <td>Warning</td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="warning"[% IF lookup.exists('warning') %] checked[% END %]></td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="warning_downtime"[% IF lookup.exists('warning_downtime') %] checked[% END %]></td>
+          </tr>
+          <tr>
+            <td>Critical</td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="critical"[% IF lookup.exists('critical') %] checked[% END %]></td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="critical_downtime"[% IF lookup.exists('critical_downtime') %] checked[% END %]></td>
+          </tr>
+          <tr>
+            <td>Unknown</td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="unknown"[% IF lookup.exists('unknown') %] checked[% END %]></td>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="unknown_downtime"[% IF lookup.exists('unknown_downtime') %] checked[% END %]></td>
+          </tr>
+        </table>
+      [% ELSE %]
+        <input type="text" name="params.[% key %]" value="[% value %]">
+      [% END %]
+    </td>
+  </tr>
+  [% END %]
+  <tr>
+    <td class="dataEven" align="center" colspan=3>
+      <button class="report_save_button report_button" style="width: 150px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
+    </td>
+  </tr>
+</table>
+</form>
+
+
+<script type="text/javascript">
+<!--
+  init_report_tool_buttons();
+-->
+</script>

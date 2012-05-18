@@ -122,15 +122,8 @@ set color with given size and color
 sub font {
     my($size, $color) = @_;
     my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
-    my $colors = {
-        'white'      => '1.00 1.00 1.00 rg',
-        'black'      => '0.00 0.00 0.00 rg',
-        'dark grey'  => '0.35 0.35 0.35 rg',
-        'light blue' => '0.33 0.56 0.80 rg',
-    };
-    $color = $colors->{$color} if defined $color;
     $pdf->prFontSize($size);
-    $pdf->prAdd($color);
+    _pdf_color($color);
     return 1;
 }
 
@@ -221,19 +214,28 @@ sub set_unavailable_states {
 
 =head2 fill_availability_table
 
-  fill_availability_table($x, $y)
+  fill_availability_table($x, $y, $c1, $c2)
 
 set list of states which count as unavailable
 
 =cut
 sub fill_availability_table {
-    my($x, $y) = @_;
+    my($x, $y, $c1, $c2) = @_;
+    $c1 = 'dark grey' unless defined $c1;
+    $c2 = 'red'       unless defined $c2;
     my $c   = $Thruk::Utils::PDF::c   or die("not initialized!");
     my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+    my $sla = $c->stash->{'param'}->{'sla'};
 
-    for(my $z=0; $z < @{$Thruk::Utils::PDF::availabilitys->{'values'}}; $z++) {
-        $pdf->prText($x,$y,    $Thruk::Utils::PDF::availabilitys->{'months'}->[$z]);
-        $pdf->prText($x-10,$y-13, $Thruk::Utils::PDF::availabilitys->{'values'}->[$z]."%");
+    # only the last 12 values can be displayed
+    my $z = 0;
+    if(@{$Thruk::Utils::PDF::availabilitys->{'values'}} > 12) { $z = @{$Thruk::Utils::PDF::availabilitys->{'values'}} - 12; }
+    for(;$z < @{$Thruk::Utils::PDF::availabilitys->{'values'}}; $z++) {
+        my $val = $Thruk::Utils::PDF::availabilitys->{'values'}->[$z];
+        _pdf_color($c1);
+        $pdf->prText($x,$y,    $Thruk::Utils::PDF::availabilitys->{'lables'}->[$z]);
+        _pdf_color($c2) if $val < $sla;
+        $pdf->prText($x-10,$y-13, $val."%");
         $x = $x+45;
     }
 
@@ -246,11 +248,11 @@ sub _render_bar_chart {
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");
 
     my $cc = Chart::Clicker->new('format' => 'pdf', width => 550, height => 400);
-    my @months = ();
+    my @lables = ();
     my $colors = {};
     my $available = {};
     for my $name (sort keys %{$options->{'values'}}) {
-        push @months, _date_to_tick_name($name);
+        push @lables, _date_to_tick_name($name);
         my $total = 0;
         for my $item (@{$options->{'values'}->{$name}->{'values'}}) {
             $colors->{$item->{'name'}} = $item->{'color'};
@@ -268,18 +270,19 @@ sub _render_bar_chart {
             push @{$percs->{$item->{'name'}}}, $perc;
         }
     }
+    my $number_of_bars = (scalar @{$percs->{'AVAILABLE'}});
 
     my(@series, @colors);
     for my $name ('AVAILABLE', 'NOT AVAILABLE') {
         push @colors, $colors->{$name};
         push @series, Chart::Clicker::Data::Series->new(
             name    => $name,
-            keys    => [ 1..12 ],
+            keys    => [ 1..$number_of_bars ],
             values  => $percs->{$name},
         );
     }
     $available->{'values'} = $percs->{'AVAILABLE'};
-    $available->{'months'} = \@months;
+    $available->{'lables'} = \@lables;
     $Thruk::Utils::PDF::availabilitys = $available;
 
     my $ds = Chart::Clicker::Data::DataSet->new(series => \@series );
@@ -293,9 +296,10 @@ sub _render_bar_chart {
     $def->range_axis->range->min(90);
     $def->range_axis->tick_values([90..100]);
     $def->range_axis->format('%d');
-    $def->domain_axis->tick_values([1..12]);
 
-    $def->domain_axis->tick_labels(\@months);
+    my $lables = _reduce_lables(\@lables);
+    $def->domain_axis->tick_values([1..(scalar @{$lables})]);
+    $def->domain_axis->tick_labels($lables);
 
     $def->domain_axis->fudge_amount(0.05); # adds border at the top
     $def->range_axis->fudge_amount(0.01);
@@ -330,33 +334,42 @@ sub _generate_bar_chart {
     }
     return unless defined $avail;
 
+    my $u = $c->stash->{'unavailable_states'};
     my $bar = { values => {} };
     for my $name (sort keys %{$avail->{'breakdown'}}) {
         my $t = $avail->{'breakdown'}->{$name};
-        my($time_avail, $time_unavail) = (0,0);
-        for my $s (qw/OK WARNING CRITICAL UNKNOWN UNDETERMINED/) {
-            my $time = 0;
-            if($s eq 'OK')           { $time += $t->{'time_ok'} + $t->{'scheduled_time_warning'} + $t->{'scheduled_time_critical'} + $t->{'scheduled_time_unknown'} }
-            if($s eq 'WARNING')      { $time += $t->{'time_warning'}  - $t->{'scheduled_time_warning'} }
-            if($s eq 'CRITICAL')     { $time += $t->{'time_critical'} - $t->{'scheduled_time_critical'} }
-            if($s eq 'UNKNOWN')      { $time += $t->{'time_unknown'}  - $t->{'scheduled_time_unknown'} }
-            if($s eq 'UNDETERMINED') { $time += $t->{'time_indeterminate_notrunning'} + $t->{'time_indeterminate_nodata'} + $t->{'time_indeterminate_outside_timeperiod'} }
-
-            if(defined $c->stash->{'unavailable_states'}->{$s}) {
-                $time_unavail += $time;
-            } else {
-                $time_avail += $time;
+        my $time = {
+            'available'    => 0,
+            'unavailable'  => 0,
+            'undetermined' => 0,
+        };
+        for my $s ( keys %{$t} ) {
+            for my $state (qw/ok warning critical unknown up down unreachable/) {
+                if($s eq 'time_'.$state) {
+                    if(defined $u->{$state}) {
+                        $time->{'unavailable'} += $t->{'time_'.$state};
+                    } else {
+                        $time->{'available'}   += $t->{'time_'.$state};
+                    }
+                }
+                elsif($s eq 'scheduled_time_'.$state) {
+                    if(defined $u->{$state.'_downtime'}) {
+                        $time->{'unavailable'} += $t->{'scheduled_time_'.$state};
+                    } else {
+                        $time->{'available'}   += $t->{'scheduled_time_'.$state};
+                    }
+                }
             }
+            $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'};
+            $time->{'undetermined'} += $t->{'time_indeterminate_nodata'};
+            $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'};
         }
-
-        my $undetermined   = $t->{'time_indeterminate_notrunning'} + $t->{'time_indeterminate_nodata'} + $t->{'time_indeterminate_outside_timeperiod'};
-        my $time_ok        = $t->{'time_ok'} + $t->{'scheduled_time_critical'} + $t->{'scheduled_time_unknown'} + $t->{'scheduled_time_warning'}  + $t->{'scheduled_time_ok'};
 
         $bar->{'values'}->{$name} = {
             name => $name,
             values => [
-                { name => 'AVAILABLE',     value => $time_avail,   color => $col->{'ok'} },
-                { name => 'NOT AVAILABLE', value => $time_unavail, color => $col->{'critical'} },
+                { name => 'AVAILABLE',     value => $time->{'available'},   color => $col->{'ok'} },
+                { name => 'NOT AVAILABLE', value => $time->{'unavailable'}, color => $col->{'critical'} },
             ],
         };
     }
@@ -458,6 +471,22 @@ sub _render_pie_chart {
 }
 
 ##########################################################
+sub _pdf_color {
+    my $color = shift;
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+    my $colors = {
+        'white'      => '1.00 1.00 1.00 rg',
+        'black'      => '0.00 0.00 0.00 rg',
+        'dark grey'  => '0.35 0.35 0.35 rg',
+        'light blue' => '0.33 0.56 0.80 rg',
+        'red'        => '1.00 0.00 0.00 rg',
+    };
+    $color = $colors->{$color} if defined $color;
+    $pdf->prAdd($color);
+    return 1;
+}
+
+##########################################################
 sub _get_colors {
     my $colors = {
         'ok'           => Graphics::Color::RGB->new(red => 0,    green => 0.72, blue => 0.18, alpha => 1),
@@ -476,27 +505,53 @@ sub _get_colors {
 # convert date to tick name
 sub _date_to_tick_name {
     my $date = shift;
+    my $names = {
+        '01' => 'Jan',
+        '02' => 'Feb',
+        '03' => 'Mar',
+        '04' => 'Apr',
+        '05' => 'May',
+        '06' => 'Jun',
+        '07' => 'Jul',
+        '08' => 'Aug',
+        '09' => 'Sep',
+        '10' => 'Oct',
+        '11' => 'Nov',
+        '12' => 'Dec',
+    };
     if($date =~ m/^\d{4}\-(\d{2})$/mx) {
-        my $names = {
-            '01' => 'Jan',
-            '02' => 'Feb',
-            '03' => 'Mar',
-            '04' => 'Apr',
-            '05' => 'May',
-            '06' => 'Jun',
-            '07' => 'Jul',
-            '08' => 'Aug',
-            '09' => 'Sep',
-            '10' => 'Oct',
-            '11' => 'Nov',
-            '12' => 'Dec',
-        };
         return $names->{$1} if defined $names->{$1};
         return $1;
+    }
+    elsif($date =~ m/^\d{4}\-KW(\d+)$/mx) {
+        return 'KW'.$1;
+    }
+    elsif($date =~ m/^\d{4}\-(\d{2})\-(\d{2})$/mx) {
+        return $names->{$1}." ".$2 if defined $names->{$1};
+    } else {
+        die("unknown date: $date");
     }
     return $date;
 }
 
 ##########################################################
+sub _reduce_lables {
+    my $lables = shift;
+    my $size   = scalar @{$lables};
+    my $newlables = [];
+    if($size > 12) {
+        my $show   = int($size / 12) + 1;
+        for my $x (0..$size-1) {
+            # remove every second except the last one
+            if($x%$show == 0) {
+                push @{$newlables}, $lables->[$x];
+            } else {
+                push @{$newlables}, '';
+            }
+        }
+        return $newlables;
+    }
+    return $lables;
+}
 
 1;
