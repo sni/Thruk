@@ -224,3 +224,23 @@ padding: 1px;
 background-color: #DEDBD2;
 height: 22px;
 }
+
+
+TD.extdetails TD.dataVal, TD.checkstatus TD.dataVal {
+    width: inherit;
+}
+TD.extdetails TD.dataVar, TD.checkstatus TD.dataVar {
+    width: 200px;
+}
+TD.stateInfoTable1 TABLE {
+    width: 100%;
+}
+TD.stateInfoPanel TABLE {
+    width: 100%;
+}
+TD.extdetails DIV, TD.checkstatus DIV {
+    width: 200px;
+}
+TABLE.extCommandPanel {
+    width: 270px;
+}
