@@ -1022,11 +1022,20 @@ sub _parse_date {
     my $string = shift;
     my $timestamp;
 
-    if($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
+    # just a timestamp?
+    if($string =~ m/^(\d{9,12})$/mx) {
+        $timestamp = $1;
+    }
+
+    # real date?
+    elsif($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2}):(\d{2})/mx) {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
     }
+
+    # everything else
     else {
         $timestamp = UnixDate($string, '%s');
+        $c->log->error("not a valid date: ".$string);
         if(!defined $timestamp) {
             return;
         }

@@ -1,4 +1,5 @@
-﻿<table border="0" cellpadding="0" cellspacing="0">
+﻿[% USE date %]
+<table border="0" cellpadding="0" cellspacing="0">
   <tr>
     <td align="center" valign="top" class='commandPanel'>
       <div class='commandTitle'>Host Commands</div>
@@ -29,7 +30,10 @@
               [% UNLESS c.config.command_disabled.exists('96') %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Host Check' title='Re-schedule Next Host Check' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name | uri %][% IF host.checks_enabled %]&amp;force_check[% END %]&amp;backend=[% host.peer_key %]'>Re-schedule the next check of this host</a></td>
+                <td class='command'>
+                  <a href='cmd.cgi?cmd_typ=96&amp;host=[% host.name | uri %][% IF host.checks_enabled %]&amp;force_check[% END %]&amp;backend=[% host.peer_key %]'>Re-schedule the next check of this host</a>
+                  (<a href='cmd.cgi?cmd_typ=96&amp;cmd_mod=2&amp;start_time=[% date.now %]&amp;host=[% host.name | uri %][% IF host.checks_enabled %]&amp;force_check[% END %]&amp;backend=[% host.peer_key %]&amp;referer=[% short_uri(c) | uri %]'> Now </a>)
+                </td>
               </tr>
               [% END %]
               [% IF host.accept_passive_checks %]
