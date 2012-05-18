@@ -24,6 +24,29 @@ use MIME::Lite;
 
 =head1 METHODS
 
+=head2 get_report_list
+
+  get_report_list($c)
+
+return list of all reports for this user
+
+=cut
+sub get_report_list {
+    my($c) = @_;
+
+    my $reports = [];
+    for my $rfile (glob($c->config->{'var_path'}.'/reports/*.txt')) {
+        if($rfile =~ m/\/(\d+)\.txt/mx) {
+            my $r = _read_report_file($c, $1);
+            push @{$reports}, $r if defined $r;
+        }
+    }
+
+    return $reports;
+}
+
+##########################################################
+
 =head2 report_show
 
   report_show($c, $nr)
@@ -32,16 +55,19 @@ generate and show the report
 
 =cut
 sub report_show {
-    my($c, $nr) = @_;
+    my($c, $nr, $refresh) = @_;
 
-    my $report   = _read_report_file($c, $nr);
+    my $report = _read_report_file($c, $nr);
     if(!defined $report) {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
         return $c->response->redirect('reports.cgi');
     }
 
-    my $pdf_file = generate_report($c, $nr, $report);
-    if(defined $pdf_file) {
+    my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+    if($refresh or ! -f $pdf_file) {
+        generate_report($c, $nr, $report);
+    }
+    if(defined $pdf_file and -f $pdf_file) {
         $c->stash->{'pdf_template'} = 'passthrough_pdf.tt';
         $c->stash->{'pdf_file'}     = $pdf_file;
         $c->stash->{'pdf_filename'} = $report->{'name'}.'.pdf'; # downloaded filename
@@ -133,35 +159,35 @@ sub report_send {
 
 ##########################################################
 
-=head2 report_update
+=head2 report_save
 
-  report_update($c, $nr, $name, $params)
+  report_save($c, $nr, $name, $params)
 
-update report
+save a report
 
 =cut
-sub report_update {
+sub report_save {
     my($c, $nr, $name, $template, $params, $backends) = @_;
     mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    my $old_report;
     if(-f $file) {
-        my $report = _read_report_file($c, $nr);
-        return unless defined $report;
+        $old_report = _read_report_file($c, $nr);
+        return unless defined $old_report;
     }
     my $report = {
         name     => $name,
         template => $template,
         user     => $c->stash->{'remote_user'},
         params   => $params,
+        var      => {},
     };
     $report->{'backends'} = $backends if defined $backends;
-    my $data = Dumper($report);
-    $data    =~ s/^\$VAR1\ =\ //mx;
-    $data    =~ s/^\ \ \ \ \ \ \ \ //gmx;
-    open(my $fh, '>'.$file) or confess('cannot write to '.$file.": ".$!);
-    print $fh $data;
-    close($fh);
-    return 1;
+    $report->{'var'}      = $old_report->{'var'} if defined $old_report->{'var'};
+
+    delete $report->{'readonly'};
+
+    return _report_save($c, $nr, $report);
 }
 
 ##########################################################
@@ -201,6 +227,24 @@ sub generate_report {
     $c->stats->profile(begin => "Utils::Reports::generate_report()");
     $options = _read_report_file($c, $nr) unless defined $options;
     return unless defined $options;
+
+    my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+
+    # report is already beeing generated
+    if($options->{'var'}->{'is_running'} == 1) {
+        while($options->{'var'}->{'is_running'} == 1) {
+            sleep 1;
+        }
+        # just wait till its finised and return
+        if(-e $pdf_file) {
+            return $pdf_file;
+        }
+    }
+
+    # update report runtime data
+    $options->{'var'}->{'is_running'} = 1;
+    $options->{'var'}->{'start_time'} = time();
+    _report_save($c, $nr, $options);
 
     unless ($c->user_exists) {
         $ENV{'REMOTE_USER'} = $options->{'user'};
@@ -258,7 +302,6 @@ sub generate_report {
 
     # write out pdf
     mkdir($c->config->{'tmp_path'}.'/reports');
-    my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
     open(my $fh, '>', $pdf_file);
     binmode $fh;
     print $fh $pdf_data;
@@ -268,6 +311,12 @@ sub generate_report {
     for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
         unlink($file);
     }
+
+    # update report runtime data
+    $options = _read_report_file($c, $nr);
+    $options->{'var'}->{'end_time'}   = time();
+    $options->{'var'}->{'is_running'} = 0;
+    _report_save($c, $nr, $options);
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $pdf_file;
@@ -300,6 +349,20 @@ sub get_report_data_from_param {
 }
 
 ##########################################################
+sub _report_save {
+    my($c, $nr, $report) = @_;
+    mkdir($c->config->{'var_path'}.'/reports/');
+    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    my $data = Dumper($report);
+    $data    =~ s/^\$VAR1\ =\ //mx;
+    $data    =~ s/^\ \ \ \ \ \ \ \ //gmx;
+    open(my $fh, '>'.$file) or confess('cannot write to '.$file.": ".$!);
+    print $fh $data;
+    close($fh);
+    return 1;
+}
+
+##########################################################
 sub _read_report_file {
     my($c, $nr) = @_;
     unless($nr =~ m/^\d+$/mx) {
@@ -317,7 +380,21 @@ sub _read_report_file {
     eval('$report = '.$data.';');
     ## use critic
 
-    return unless _is_authorized_for_report($c, $report);
+    $report->{'readonly'}   = 1;
+    my $authorized = _is_authorized_for_report($c, $report);
+    return unless $authorized;
+    $report->{'readonly'}   = 0 if $authorized == 1;
+
+    # add some runtime information
+    my $rfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+    $report->{'var'}->{'pdf_exists'} = 0;
+    $report->{'var'}->{'pdf_exists'} = 1 if -f $rfile;
+    $report->{'var'}->{'is_running'} = 0 unless defined $report->{'var'}->{'is_running'};
+    $report->{'var'}->{'start_time'} = 0 unless defined $report->{'var'}->{'start_time'};
+    $report->{'var'}->{'end_time'}   = 0 unless defined $report->{'var'}->{'end_time'};
+    $report->{'desc'}       = '' unless defined $report->{'desc'};
+    $report->{'nr'}         = $nr;
+    $report->{'is_public'}  = 0 unless defined $report->{'is_public'};
 
     return $report;
 }
@@ -326,10 +403,13 @@ sub _read_report_file {
 sub _is_authorized_for_report {
     my($c, $report) = @_;
     return 1 if defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI';
+    if(defined $report->{'is_public'} and $report->{'is_public'} == 1) {
+        return 2;
+    }
     if(defined $report->{'user'} and defined $c->stash->{'remote_user'} and $report->{'user'} eq $c->stash->{'remote_user'}) {
         return 1;
     }
-    Thruk::Utils::CLI::_debug("user: ".$c->stash->{'remote_user'}." is not authorized for report");
+    Thruk::Utils::CLI::_debug("user: ".$c->stash->{'remote_user'}." is not authorized for report: ".$report->{'nr'});
     return;
 }
 

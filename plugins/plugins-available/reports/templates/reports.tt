@@ -1,5 +1,6 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
+[% USE date %]
 
 <table border="0" width="100%" cellspacing="0" cellpadding="0">
   <tr>
@@ -7,6 +8,7 @@
       [% PROCESS _infobox.tt %]
     </td>
     <td align="center" valign="top" width="33%">
+      <br><br>
       <div align="center" class='dataTitle'>
         Reporting
       </div>
@@ -15,4 +17,50 @@
       [% PROCESS _help.tt topic = "reports" %]
     </td>
   </tr>
+</table>
+<br><br>
+
+<div style="margin-left: 10px;"><a href="reports.cgi?action=new">create new report</a></div>
+<table border="1" width="900" class='status' id="statusTable" style="margin-left: 10px;">
+  <tr>
+    <th class="status" nowrap width="250">Name</th>
+    <th class="status" nowrap>Description</th>
+    <th class="status" nowrap width="25">Public</th>
+    <th class="status" nowrap width="150">Last Time Run</th>
+    <th class="status" nowrap width="150">Duration</th>
+    <th class="status" nowrap width="25">&nbsp;</th>
+    <th class="status" nowrap width="25">&nbsp;</th>
+    <th class="status" nowrap width="25">&nbsp;</th>
+  </tr>
+  [% FOREACH r = reports %]
+  [% SET rowclass = 'statusOdd'  IF loop.even %]
+  [% SET rowclass = 'statusEven' IF loop.odd %]
+  <tr[% IF loop.first %] class="firstrow"[% END %]>
+    <td class="status [% rowclass %]" align="left">[% r.name %]</td>
+    <td class="status [% rowclass %]" align="left">[% r.desc %]</td>
+    <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
+    <td class="status [% rowclass %]">
+      [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
+    </td>
+    <td class="status [% rowclass %]">
+      [% IF r.var.start_time %]
+        [% IF r.var.is_running %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
+        [% duration(end_time - r.var.start_time) %]
+      [% END %]
+    </td>
+    <td class="status [% rowclass %]">
+      [% IF r.var.is_running %]
+        <a href="#"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif' border="0" alt='Report is currently beeing refreshed' title='Report is currently beeing refreshed' width=16 height=16></a>
+      [% ELSE %]
+        <a href="reports.cgi?report=[% r.nr %]&amp;action=update"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png' border="0" alt='Refresh Report' title='Refresh Report' width=16 height=16></a>
+      [% END %]
+    </td>
+    <td class="status [% rowclass %]">
+      [% IF ! r.readonly %]
+        <a href="reports.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
+      [% END %]
+    </td>
+    <td class="status [% rowclass %]"><a href="reports.cgi?report=[% r.nr %]&amp;refresh=0"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_acrobat.png' border="0" alt='View PDF Report' title='View PDF Report' width=16 height=16></a></td>
+  </tr>
+  [% END %]
 </table>

@@ -402,7 +402,10 @@ sub _do_parent_stuff {
     }
 
     $c->stash->{'job_id'} = $id;
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
+    if(! defined $conf->{'background'}) {
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
+    }
+    return $id;
 }
 
 

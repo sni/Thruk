@@ -22,10 +22,10 @@ Catalyst Controller.
 
 ######################################
 # add new menu item
-#Thruk::Utils::Menu::insert_item('Reports', {
-#                                    'href'  => '/thruk/cgi-bin/reports.cgi',
-#                                    'name'  => 'Reporting',
-#                         });
+Thruk::Utils::Menu::insert_item('Reports', {
+                                    'href'  => '/thruk/cgi-bin/reports.cgi',
+                                    'name'  => 'Reporting',
+                         });
 
 # enable reporting features if this plugin is loaded
 Thruk->config->{'use_feature_reports'} = 1;
@@ -60,17 +60,26 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     my $report_nr = $c->{'request'}->{'parameters'}->{'report'};
     my $action    = $c->{'request'}->{'parameters'}->{'action'} || 'show';
+    my $refresh   = 0;
+    $refresh = $c->{'request'}->{'parameters'}->{'refresh'} if exists $c->{'request'}->{'parameters'}->{'refresh'};
 
     if(defined $report_nr) {
         if($action eq 'show') {
-            if(!Thruk::Utils::Reports::report_show($c, $report_nr)) {
+            if(!Thruk::Utils::Reports::report_show($c, $report_nr, $refresh)) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
             }
         }
+        elsif($action eq 'edit') {
+        }
         elsif($action eq 'update') {
+            Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Reports::generate_report($c, '.$report_nr.')', 'background' => 1 });
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+        }
+        elsif($action eq 'save') {
             my($name, $template, $data, $backends) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
 
-            if(Thruk::Utils::Reports::report_update($c, $report_nr, $name, $template, $data, $backends)) {
+            if(Thruk::Utils::Reports::report_save($c, $report_nr, $name, $template, $data, $backends)) {
                 Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report updated' });
             } else {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
@@ -84,6 +93,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
         }
     }
+
+    # show list of configured reports
+    $c->stash->{'no_auto_reload'} = 0;
+    $c->stash->{reports} = Thruk::Utils::Reports::get_report_list($c);
 
     Thruk::Utils::ssi_include($c);
 
