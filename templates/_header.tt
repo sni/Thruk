@@ -41,12 +41,6 @@
       var thruk_debug_js          = 0;
       [% END +%]
 
-      jQuery(document).ready(function() {
-          jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
-              jQuery(this).prev('input').val('').focus();
-          }));
-      });
-
       [% IF original_url %]
       var original_url = '[% original_url %]';
       original_url     = original_url.replace(/&amp;/g, '&');
@@ -55,6 +49,7 @@
       }
       [% END %]
 
+      init_page();
     -->
     </script>
 

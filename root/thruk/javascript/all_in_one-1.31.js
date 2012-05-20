@@ -46,6 +46,25 @@ function debug(str) {
     }
 }
 
+/* do initial things */
+function init_page() {
+    jQuery(document).ready(function() {
+        jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
+            jQuery(this).prev('input').val('').focus();
+        }));
+    });
+
+    // remove ugly ?_=... from url
+    var newUrl   = window.location.href;
+    if (history.replaceState) {
+        newUrl = newUrl.replace(/\?_=\d+/g, '?');
+        newUrl = newUrl.replace(/\&_=\d+/g, '');
+        newUrl = newUrl.replace(/\?$/g, '');
+        newUrl = newUrl.replace(/\?&/g, '?');
+        history.replaceState({}, "", newUrl);
+    }
+}
+
 /* hide a element by id */
 function hideElement(id, icon) {
   var pane;
