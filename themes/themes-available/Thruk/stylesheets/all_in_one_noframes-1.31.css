@@ -728,11 +728,20 @@ SPAN.deleteicon INPUT {
 .ui-save-button {
   background-image: url(../images/disk.png) !important;
 }
+.ui-remove-button {
+  background-image: url(../images/delete.png) !important;
+}
 .ui-preview-button {
   background-image: url(../images/lightning_go.png) !important;
 }
 .ui-wzd-button {
   background-image: url(../images/wand.png) !important;
+}
+.ui-r-arrow-button {
+  background-image: url(../images/arrow_right.png) !important;
+}
+.ui-l-arrow-button {
+  background-image: url(../images/arrow_left.png) !important;
 }
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
