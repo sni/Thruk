@@ -144,7 +144,7 @@ sub test_response {
     return if $url =~ m#/thruk/cgi-bin/(businessview|outagespbimp|shinken_status)\.cgi#mx;
     my $res;
     eval {
-        $res = $mech->get($url);
+        $res = $mech->get($url, no_cache => 1);
     };
     if($@) {
         fail($@) if $@;
