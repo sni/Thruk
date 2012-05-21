@@ -96,6 +96,8 @@ sub report_send {
         Thruk::Utils::set_message( $c, 'fail_message', 'no such report' );
         return $c->response->redirect('reports.cgi');
     }
+    # make report available in template
+    $c->stash->{'r'} = $report;
 
     my $pdf_file = generate_report($c, $nr, $report);
     if(defined $pdf_file) {
@@ -273,6 +275,7 @@ sub generate_report {
 
 
     $c->stash->{'param'} = $options->{'params'};
+    $c->stash->{'r'}     = $options;
     for my $p (keys %{$options->{'params'}}) {
         $c->{'request'}->{'parameters'}->{$p} = $options->{'params'}->{$p};
     }

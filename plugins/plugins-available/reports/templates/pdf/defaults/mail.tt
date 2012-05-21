@@ -1,6 +1,6 @@
 [%# SENDING MAIL #%]
 [% IF block == 'mail' +%]
-SUBJECT: Availability Report
+SUBJECT: Report: [% r.name %]
 
 See attached availability report.
 
@@ -10,3 +10,5 @@ Service:           [% param.service %]
 [%+ END +%]
 Report Timeperiod: [% format_date(start, "%d.%m.%Y") %] - [% format_date((end - 1), "%d.%m.%Y") %]
 [%+ END %]
+
+[% r.desc %]
