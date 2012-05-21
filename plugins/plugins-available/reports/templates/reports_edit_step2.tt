@@ -137,6 +137,23 @@
             <td align="center"><input type="checkbox" name="params.[% key %]" value="unknown_downtime"[% IF lookup.exists('unknown_downtime') %] checked[% END %]></td>
           </tr>
         </table>
+      [% ELSIF type == 'hst_initialassumedstate' %]
+        <select name='initialassumedhoststate'>
+          <option value=0[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
+          <option value=-1[% IF value == '-1' %] selected[% END %]>Current State</option>
+          <option value=3[% IF  value ==  '3' %] selected[% END %]>Host Up</option>
+          <option value=4[% IF  value ==  '4' %] selected[% END %]>Host Down</option>
+          <option value=5[% IF  value ==  '5' %] selected[% END %]>Host Unreachable</option>
+        </select>
+      [% ELSIF type == 'svc_initialassumedstate' %]
+        <select name='initialassumedservicestate'>
+          <option value="0"[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
+          <option value="-1"[% IF value == '-1' %] selected[% END %]>Current State</option>
+          <option value="6"[% IF  value ==  '6' %] selected[% END %]>Service Ok</option>
+          <option value="8"[% IF  value ==  '8' %] selected[% END %]>Service Warning</option>
+          <option value="7"[% IF  value ==  '7' %] selected[% END %]>Service Unknown</option>
+          <option value="9"[% IF  value ==  '9' %] selected[% END %]>Service Critical</option>
+        </select>
       [% ELSE %]
         <input type="text" name="params.[% key %]" value="[% value %]">
       [% END %]
@@ -145,7 +162,7 @@
   [% END %]
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      <button class="report_save_button report_button" style="width: 150px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
+      <button class="report_save_button report_button" style="width: 160px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
     </td>
   </tr>
 </table>

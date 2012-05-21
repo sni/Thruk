@@ -20,7 +20,7 @@
 </table>
 
 <div style="margin-left: 10px; display: table;">
-<div style="text-align: right; margin-bottom: 3px;"><a href="reports.cgi?action=edit&amp;report=new" class="report_button report_save_button" style="width: 150px;">create new report</a></div>
+<div style="text-align: right; margin-bottom: 3px;"><a href="reports.cgi?action=edit&amp;report=new" class="report_button report_save_button" style="width: 160px;">create new report</a></div>
 <table border="1" class='status' id="statusTable" style="max-width: 1000px;">
   <tr>
     <th class="status" nowrap width="250">Name</th>
