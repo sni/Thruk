@@ -1342,6 +1342,25 @@ ex.:
   no_external_job_forks = 1
 
 
+==== cron_file
+Specifiy a file which is then completly under the control of Thruk.
+It will be used to store cronjobs, ex. for reports. The file has to be
+writable by Thruk.
+
+ex.:
+
+  cron_file = /etc/cron.d/thruk
+
+
+==== cron_post_edit_cmd
+The post edit cmd is necessary for OMD where you need to reload the
+crontab after editing.
+
+ex.:
+
+  cron_post_edit_cmd = omd reload crontab
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it

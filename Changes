@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added mongodb support (experimental)
           - reporting:
             - added report editor
+            - added cron editor for scheduling reports
           - Bug Fixes
             - fixed mobile interface (jquery version was too old)
             - fixed javascript error on comments/downtimes page

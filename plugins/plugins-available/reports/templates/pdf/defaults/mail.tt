@@ -9,6 +9,6 @@ Host:              [% param.host %]
 Service:           [% param.service %]
 [%+ END +%]
 Report Timeperiod: [% format_date(start, "%d.%m.%Y") %] - [% format_date((end - 1), "%d.%m.%Y") %]
-[%+ END %]
 
 [% r.desc %]
+[%+ END %]

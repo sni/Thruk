@@ -1002,6 +1002,72 @@ sub choose_mobile {
 }
 
 
+##############################################
+
+=head2 update_cron_file
+
+  update_cron_file($c, $section, $entries)
+
+write crontab section
+
+=cut
+
+sub update_cron_file {
+    my($c, $section, $entries) = @_;
+    if(!$c->config->{'cron_file'}) {
+        set_message($c, 'fail_message', 'no \'cron_file\' set, check your settings!');
+        return;
+    }
+    # read complete file
+    my $sections = {};
+    if(-e $c->config->{'cron_file'}) {
+        open(my $fh, '<', $c->config->{'cron_file'}) or die('cannot read '.$c->config->{'cron_file'}.': '.$!);
+        my $lastsection;
+        while(my $line = <$fh>) {
+            chomp($line);
+            if($line =~ m/^\#\ (\w+)$/mx) {
+                $lastsection = $1;
+                next;
+            }
+            next if $line =~ m/^\#/mx;
+            next if $line =~ m/^\s*$/mx;
+            next unless defined $lastsection;
+            $sections->{$lastsection} = [] unless defined $sections->{$lastsection};
+            push @{$sections->{$lastsection}}, $line;
+        }
+        close($fh);
+    }
+
+    # write out new file
+    delete $sections->{$section};
+    my $user = '';
+    if(substr($c->config->{'cron_file'}, 0, 12) eq '/etc/cron.d/') {
+        $user = ' root ';
+    }
+    $sections->{$section} = [];
+    for my $entry (@{$entries}) {
+        push @{$sections->{$section}}, $entry->[0]." ".$user.$entry->[1];
+    }
+
+    open(my $fh, '>', $c->config->{'cron_file'}) or die('cannot write '.$c->config->{'cron_file'}.': '.$!);
+    print $fh "##############################################################\n";
+    print $fh "# THIS FILE IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN #\n";
+    print $fh "##############################################################\n";
+    for my $s (sort keys %{$sections}) {
+        print $fh '# '.$s."\n";
+        for my $line (@{$sections->{$s}}) {
+            print $fh $line, "\n";
+        }
+        print $fh "\n";
+    }
+    close($fh);
+
+    if($c->config->{'cron_post_edit_cmd'}) {
+        system($c->config->{'cron_post_edit_cmd'});
+    }
+    return 1;
+}
+
 ########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;

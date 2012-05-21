@@ -32,12 +32,12 @@ return list of all reports for this user
 
 =cut
 sub get_report_list {
-    my($c) = @_;
+    my($c, $noauth) = @_;
 
     my $reports = [];
     for my $rfile (glob($c->config->{'var_path'}.'/reports/*.txt')) {
         if($rfile =~ m/\/(\d+)\.txt/mx) {
-            my $r = _read_report_file($c, $1);
+            my $r = _read_report_file($c, $1, undef, $noauth);
             push @{$reports}, $r if defined $r;
         }
     }
@@ -354,18 +354,84 @@ sub get_report_data_from_param {
         $p->{$1} = $params->{$key};
     }
 
+    my $send_types = [];
+    for my $x (1..99) {
+        if(defined $params->{'send_type_'.$x}) {
+            my @weekdays = ref $params->{'week_day_'.$x} eq 'ARRAY' ? @{$params->{'week_day_'.$x}} : ($params->{'week_day_'.$x});
+            @weekdays = grep {!/^$/mx} @weekdays;
+            push @{$send_types}, {
+                'type'      => $params->{'send_type_'.$x},
+                'hour'      => $params->{'send_hour_'.$x},
+                'minute'    => $params->{'send_minute_'.$x},
+                'week_day'  => join(',', @weekdays),
+                'day'       => $params->{'send_day_'.$x},
+            };
+        }
+    }
+
     my $data = {
-        'name'      => $params->{'name'}        || 'New Report',
-        'desc'      => $params->{'desc'}        || '',
-        'template'  => $params->{'template'}    || 'sla.tt',
-        'is_public' => $params->{'is_public'}   || 0,
-        'to'        => $params->{'to'}          || '',
-        'cc'        => $params->{'cc'}          || '',
-        'backends'  => $params->{'backends'}    || [],
-        'params'    => $p,
+        'name'       => $params->{'name'}        || 'New Report',
+        'desc'       => $params->{'desc'}        || '',
+        'template'   => $params->{'template'}    || 'sla.tt',
+        'is_public'  => $params->{'is_public'}   || 0,
+        'to'         => $params->{'to'}          || '',
+        'cc'         => $params->{'cc'}          || '',
+        'backends'   => $params->{'backends'}    || [],
+        'params'     => $p,
+        'send_types' => $send_types,
     };
 
     return($data);
+}
+
+##########################################################
+
+=head2 update_cron_file
+
+  update_cron_file($c)
+
+update reporting cronjobs
+
+=cut
+sub update_cron_file {
+    my($c) = @_;
+
+    # gather reporting send types from all reports
+    my $cron_entries = [];
+    for my $r (@{get_report_list($c, 1)}) {
+        next unless defined $r->{'send_types'};
+        next unless scalar @{$r->{'send_types'}} > 0;
+        next unless ($r->{'to'} or $r->{'cc'});
+        for my $st (@{$r->{'send_types'}}) {
+            $st->{'nr'} = $r->{'nr'};
+            push @{$cron_entries}, [_get_cron_entry($c, $st)];
+        }
+    }
+
+    Thruk::Utils::update_cron_file($c, 'reports', $cron_entries);
+    return 1;
+}
+
+##########################################################
+sub _get_cron_entry {
+    my($c, $st) = @_;
+
+    my $cmd = "/usr/bin/thruk -a reportmail=".$st->{'nr'};
+    if($st->{'type'} eq 'month') {
+        my $cron = sprintf("%s %s %s * *", $st->{'minute'}, $st->{'hour'}, $st->{'day'});
+        return($cron, $cmd);
+    }
+    elsif($st->{'type'} eq 'week') {
+        my $cron = sprintf("%s %s * * %s", $st->{'minute'}, $st->{'hour'}, $st->{'week_day'});
+        return($cron, $cmd);
+    }
+    elsif($st->{'type'} eq 'day') {
+        my $cron = sprintf("%s %s * * *", $st->{'minute'}, $st->{'hour'});
+        return($cron, $cmd);
+    } else {
+        confess("unknown cron type: ".$st->{'type'});
+    }
+    return;
 }
 
 ##########################################################
@@ -373,17 +439,18 @@ sub _get_new_report {
     my($c, $data) = @_;
     $data = {} unless defined $data;
     my $r = {
-        'name'      => 'New Report',
-        'desc'      => 'Description',
-        'nr'        => 'new',
-        'template'  => '',
-        'params'    => {},
-        'var'       => {},
-        'to'        => '',
-        'cc'        => '',
-        'is_public' => 0,
-        'user'      => $c->stash->{'remote_user'},
-        'backends'  => [],
+        'name'       => 'New Report',
+        'desc'       => 'Description',
+        'nr'         => 'new',
+        'template'   => '',
+        'params'     => {},
+        'var'        => {},
+        'to'         => '',
+        'cc'         => '',
+        'is_public'  => 0,
+        'user'       => $c->stash->{'remote_user'},
+        'backends'   => [],
+        'send_types' => [],
     };
     for my $key (keys %{$data}) {
         $r->{$key} = $data->{$key};
@@ -416,7 +483,7 @@ sub _report_save {
 
 ##########################################################
 sub _read_report_file {
-    my($c, $nr, $rdata) = @_;
+    my($c, $nr, $rdata, $noauth) = @_;
     unless($nr =~ m/^\d+$/mx) {
         Thruk::Utils::CLI::_error("not a valid report number");
         return $c->detach('/error/index/13');
@@ -432,10 +499,16 @@ sub _read_report_file {
     eval('$report = '.$data.';');
     ## use critic
 
-    $report->{'readonly'}   = 1;
-    my $authorized = _is_authorized_for_report($c, $report);
-    return unless $authorized;
-    $report->{'readonly'}   = 0 if $authorized == 1;
+    # add defaults
+    $report = _get_new_report($c, $report);
+
+    unless($noauth) {
+        $report->{'readonly'}   = 1;
+        my $authorized = _is_authorized_for_report($c, $report);
+        return unless $authorized;
+        $report->{'readonly'}   = 0 if $authorized == 1;
+    }
+
 
     # add some runtime information
     my $rfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';

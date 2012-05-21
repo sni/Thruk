@@ -26,14 +26,23 @@
 <form action="reports.cgi" method="POST">
 <input type="hidden" name="action" value="save">
 [% FOREACH key = r.keys %]
-[% IF key == 'var' || key == 'params' %][% NEXT %][% END %]
-[% IF key == 'backends' %]
-[% FOREACH k = r.$key %]
-  <input type="hidden" name="[% key %]" value="[% k %]">
-[% END %]
-[% ELSE %]
-<input type="hidden" name="[% key %]" value="[% r.$key %]">
-[% END %]
+  [% IF key == 'var' || key == 'params' %][% NEXT %][% END %]
+  [% IF key == 'backends' %]
+    [% FOREACH k = r.$key %]
+      <input type="hidden" name="[% key %]" value="[% k %]">
+    [% END %]
+  [% ELSIF key == 'send_types' %]
+    [% FOREACH k = r.$key %]
+      [% nr = loop.index + 1 %]
+      <input type="hidden" name="send_type_[% nr %]" value="[% k.type %]">
+      <input type="hidden" name="send_day_[% nr %]" value="[% k.day %]">
+      <input type="hidden" name="week_day_[% nr %]" value="[% k.week_day %]">
+      <input type="hidden" name="send_hour_[% nr %]" value="[% k.hour %]">
+      <input type="hidden" name="send_minute_[% nr %]" value="[% k.minute %]">
+    [% END %]
+  [% ELSE %]
+    <input type="hidden" name="[% key %]" value="[% r.$key %]">
+  [% END %]
 [% END %]
 <input type="hidden" name="report" value="[% r.nr %]">
 <table border="1" class='data reports'>

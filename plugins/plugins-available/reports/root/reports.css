@@ -24,3 +24,17 @@ TABLE.unavailable_states TD, TABLE.unavailable_states TH {
   padding-left: 4px;
   padding-right: 4px;
 }
+
+A.report_button {
+  height: 25px;
+}
+BUTTON.report_button {
+  height: 27px;
+  min-width: 27px;
+}
+
+body.reports TABLE.weekly_days TD {
+  padding-bottom: 0px;
+  padding-top: 0px;
+  line-height: 8px;
+}

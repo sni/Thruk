@@ -85,7 +85,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             my $msg = 'report updated';
             if($report_nr eq 'new') { $msg = 'report created'; }
             if($report_nr = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
-                Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
+                if(Thruk::Utils::Reports::update_cron_file($c)) {
+                    Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
+                }
             } else {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
             }

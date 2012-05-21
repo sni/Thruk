@@ -1959,6 +1959,19 @@ function replaceIdAndNames(elems, new_prefix) {
   };
 }
 
+/* replace id and name of a object */
+function replace_ids_and_names(elem, new_nr) {
+    if(elem.id) {
+        var new_id = elem.id.replace(/_\d+$/, '_'+new_nr);
+        elem.setAttribute('id', new_id);
+    }
+    if(elem.name) {
+        var new_name = elem.name.replace(/_\d+$/, '_'+new_nr);
+        elem.setAttribute('name', new_name);
+    }
+    return elem
+}
+
 /* remove a search panel */
 function deleteSearchPane(id) {
   pane_prefix   = id.substring(0,4);
