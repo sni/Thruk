@@ -208,3 +208,20 @@ body.extinfo TD.ext_head_attributes DIV.dataTitle {
 .infoBoxBadProcStatus {
   color:red;
 }
+
+
+/* tweaks for the extinfo page */
+TD.extdetails DIV, TD.checkstatus DIV {
+    float: left;
+    min-width: 80px;
+    width: auto;
+    padding-left: 4px;
+    padding-right: 4px;
+    min-height: 16px;
+    line-height: 16px;
+}
+
+/* tweaks for the extinfo page */
+TD.extdetails TD.dataVar, TD.checkstatus TD.dataVar {
+    width: 150px;
+}

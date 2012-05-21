@@ -699,7 +699,6 @@ TD.serviceTotalsWARNING {
 
 TD.stateInfoTable1 > TABLE,TD.stateInfoTable2 > TABLE {
   border-collapse: collapse;
-  width:300px;
 }
 
 TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGDOWN,TD.statusBGDOWNACK,TD.statusBGDOWNSCHED,TD.statusBGUNREACHABLE,TD.statusBGUNREACHABLEACK,TD.statusBGUNREACHABLESCHED {
@@ -1018,7 +1017,7 @@ TABLE.tac TD.hostHeader, TABLE.tac TD.serviceHeader, TABLE.tac TD.featureHeader 
 
 TABLE.extdetails TD.dataVar {
   white-space: nowrap;
-  width: 20%;
+  width: 170px;
 }
 
 TABLE.extdetails DIV.hostUP,
