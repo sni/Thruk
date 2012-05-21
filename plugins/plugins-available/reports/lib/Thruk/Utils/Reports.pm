@@ -256,9 +256,12 @@ sub generate_report {
         $c->authenticate( {} );
     }
 
-    if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0) {
-        $c->{'db'}->disable_backends();
-        $c->{'db'}->enable_backends($options->{'backends'});
+    if(defined $options->{'backends'}) {
+        $options->{'backends'} = ref $options->{'backends'} eq 'ARRAY' ? $options->{'backends'} : [ $options->{'backends'} ];
+        if(scalar @{$options->{'backends'}} > 0) {
+            $c->{'db'}->disable_backends();
+            $c->{'db'}->enable_backends($options->{'backends'});
+        }
     }
 
     # set some defaults

@@ -429,10 +429,12 @@ sub calculate_availability {
         'initialassumedhoststate'      => Thruk::Utils::_initialassumedhoststate_to_state($initialassumedhoststate),
         'initialassumedservicestate'   => Thruk::Utils::_initialassumedservicestate_to_state($initialassumedservicestate),
         'backtrack'                    => $backtrack,
-        'verbose'                      => 1,
-        'logger'                       => $c->log,
         'breakdown'                    => $breakdown,
     );
+    if(Thruk->debug) {
+        $ma->{'verbose'} = 1;
+        $ma->{'logger'}  = $c->log;
+    }
     $c->stash->{avail_data} = $ma->calculate(
         'start'                        => $start,
         'end'                          => $end,
