@@ -138,7 +138,7 @@
           </tr>
         </table>
       [% ELSIF type == 'hst_initialassumedstate' %]
-        <select name='initialassumedhoststate'>
+        <select name='params.initialassumedhoststate'>
           <option value=0[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
           <option value=-1[% IF value == '-1' %] selected[% END %]>Current State</option>
           <option value=3[% IF  value ==  '3' %] selected[% END %]>Host Up</option>
@@ -146,7 +146,7 @@
           <option value=5[% IF  value ==  '5' %] selected[% END %]>Host Unreachable</option>
         </select>
       [% ELSIF type == 'svc_initialassumedstate' %]
-        <select name='initialassumedservicestate'>
+        <select name='params.initialassumedservicestate'>
           <option value="0"[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
           <option value="-1"[% IF value == '-1' %] selected[% END %]>Current State</option>
           <option value="6"[% IF  value ==  '6' %] selected[% END %]>Service Ok</option>

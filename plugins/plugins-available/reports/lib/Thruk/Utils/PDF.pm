@@ -240,16 +240,20 @@ sub fill_availability_table {
     my $c   = $Thruk::Utils::PDF::c   or die("not initialized!");
     my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
     my $sla = $c->stash->{'param'}->{'sla'};
+    my $a   = $Thruk::Utils::PDF::availabilitys->{'values'};
+    my $l   = $Thruk::Utils::PDF::availabilitys->{'lables'};
 
     # only the last 12 values can be displayed
     my $z = 0;
-    if(@{$Thruk::Utils::PDF::availabilitys->{'values'}} > 12) { $z = @{$Thruk::Utils::PDF::availabilitys->{'values'}} - 12; }
-    for(;$z < @{$Thruk::Utils::PDF::availabilitys->{'values'}}; $z++) {
-        my $val = $Thruk::Utils::PDF::availabilitys->{'values'}->[$z];
+    if(@{$a->{'AVAILABLE'}} > 12) { $z = @{$a->{'AVAILABLE'}} - 12; }
+    for(;$z < @{$a->{'AVAILABLE'}}; $z++) {
+        my $val = $a->{'AVAILABLE'}->[$z];
         _pdf_color($c1);
-        $pdf->prText($x,$y,    $Thruk::Utils::PDF::availabilitys->{'lables'}->[$z]);
-        _pdf_color($c2) if $val < $sla;
-        $pdf->prText($x-10,$y-13, $val."%");
+        $pdf->prText($x,$y, $l->[$z]);
+        if($a->{'UNDETERMINED'}->[$z] < 100) {
+            _pdf_color($c2) if $val < $sla;
+            $pdf->prText($x-10,$y-13, $val."%");
+        }
         $x = $x+45;
     }
 
@@ -285,17 +289,16 @@ sub _render_bar_chart {
         }
     }
     my $number_of_bars = (scalar @{$percs->{'AVAILABLE'}});
-
     my(@series, @colors);
-    for my $name ('AVAILABLE', 'NOT AVAILABLE') {
+    for my $name ('PLACEHOLDER', 'AVAILABLE', 'NOT AVAILABLE') {
         push @colors, $colors->{$name};
         push @series, Chart::Clicker::Data::Series->new(
-            name    => $name,
+            name    => $name eq 'PLACEHOLDER' ? '' : $name,
             keys    => [ 1..$number_of_bars ],
             values  => $percs->{$name},
         );
     }
-    $available->{'values'} = $percs->{'AVAILABLE'};
+    $available->{'values'} = $percs;
     $available->{'lables'} = \@lables;
     $Thruk::Utils::PDF::availabilitys = $available;
 
@@ -379,11 +382,19 @@ sub _generate_bar_chart {
             $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'};
         }
 
+        # in case we have some data for this period, undetermined is available too
+        if($time->{'undetermined'} > 0 and ($time->{'available'} > 0 or $time->{'unavailable'} > 0)) {
+            $time->{'available'}   += $time->{'undetermined'};
+            $time->{'undetermined'} = 0;
+        }
+
         $bar->{'values'}->{$name} = {
             name => $name,
             values => [
-                { name => 'AVAILABLE',     value => $time->{'available'},   color => $col->{'ok'} },
-                { name => 'NOT AVAILABLE', value => $time->{'unavailable'}, color => $col->{'critical'} },
+                { name => 'PLACEHOLDER',   value => 0,                       color => $col->{'placeholder'} },
+                { name => 'UNDETERMINED',  value => $time->{'undetermined'}, color => $col->{'undetermined'} },
+                { name => 'AVAILABLE',     value => $time->{'available'},    color => $col->{'ok'} },
+                { name => 'NOT AVAILABLE', value => $time->{'unavailable'},  color => $col->{'critical'} },
             ],
         };
     }
@@ -511,6 +522,7 @@ sub _get_colors {
         'up'           => Graphics::Color::RGB->new(red => 0,    green => 0.72, blue => 0.18, alpha => 1),
         'down'         => Graphics::Color::RGB->new(red => 1,    green => 0.36, blue => 0.20, alpha => 1),
         'unreachable'  => Graphics::Color::RGB->new(red => 1,    green => 0.48, blue => 0.35, alpha => 1),
+        'placeholder'  => Graphics::Color::RGB->new(red => 0.9,  green => 0.9,  blue => 0.9,  alpha => 1),
     };
     return $colors;
 }
