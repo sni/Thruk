@@ -141,13 +141,25 @@ sub outages {
 
     my $c   = $Thruk::Utils::PDF::c   or die("not initialized!");
     my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+    my $u   = $c->stash->{'unavailable_states'};
 
     # combine outages
     my @reduced_logs;
     my($combined, $last);
+    my $downtime = 0;
     for my $l (@{$logs}) {
+        $l->{'class'} = lc $l->{'class'};
+        $downtime = $l->{'in_downtime'} if defined $l->{'in_downtime'};
         if(!defined $combined) {
             $combined = $l;
+        }
+        # combine classes if report should contain downtimes too
+        if($downtime) {
+            if(   (defined $u->{$l->{'class'}}  and !defined $u->{$l->{'class'}.'_downtime'})
+               or (!defined $u->{$l->{'class'}} and defined $u->{$l->{'class'}.'_downtime'})
+            ) {
+                $combined->{'class'} = $combined->{'class'}.'_downtime';
+            }
         }
         if($combined->{'class'} ne $l->{'class'}) {
             $combined->{'real_end'} = $l->{'start'};
@@ -161,19 +173,21 @@ sub outages {
         $combined->{'real_end'} = $last->{'end'};
         push @reduced_logs, $combined;
     }
-    my $found = 0;
+
+    my $found    = 0;
     for my $l (reverse @reduced_logs) {
         next if $end   < $l->{'start'};
         next if $start > $l->{'real_end'};
         $l->{'start'}    = $start if $start > $l->{'start'} ;
         $l->{'real_end'} = $end   if $end   < $l->{'real_end'} ;
-        if(defined $c->stash->{'unavailable_states'}->{$l->{'class'}}) {
+        if(defined $u->{$l->{'class'}}) {
             $found++;
             my $txt = '';
             $txt .= Thruk::Utils::format_date($l->{'start'}, $c->{'stash'}->{'datetime_format'});
             $txt .= " - ".Thruk::Utils::format_date($l->{'real_end'}, $c->{'stash'}->{'datetime_format'});
-            $txt .= " (".Thruk::Utils::Filter::duration($l->{'real_end'}-$l->{'start'}).")";
             $pdf->prText($x,$y, $txt);
+            $txt = "(".Thruk::Utils::Filter::duration($l->{'real_end'}-$l->{'start'}).")";
+            $pdf->prText($x+400,$y, $txt);
             $y = $y - $step1;
             $pdf->prText($x,$y, '  -> '.$l->{'plugin_output'});
             $y = $y - $step2;

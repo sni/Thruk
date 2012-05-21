@@ -416,7 +416,7 @@ sub calculate_availability {
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
 
     $c->stats->profile(begin => "avail.pm fetchlogs");
-    $logs = $c->{'db'}->get_logs(filter => $filter);
+    $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type options/ ]);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
     $c->stats->profile(begin => "calculate availability");
