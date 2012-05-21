@@ -52,6 +52,7 @@ install: build
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/themes/themes-enabled
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-available
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-enabled
+	mkdir -p $(CURDIR)/debian/thruk/etc/cron.d
 	rsync -av . $(CURDIR)/debian/thruk/usr/share/thruk/
 
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/var
@@ -109,6 +110,7 @@ install: build
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/debian
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/LICENSE
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/root/thruk/plugins
+	touch $(CURDIR)/debian/thruk/etc/cron.d/thruk
 
 
 # Build architecture-independent files here.

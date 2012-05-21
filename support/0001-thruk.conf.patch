@@ -1,6 +1,6 @@
---- a/thruk.conf	2012-02-11 23:10:59.735010971 +0100
-+++ b/thruk.conf	2012-02-11 23:13:32.992044583 +0100
-@@ -47,11 +47,11 @@
+--- a/thruk.conf	2012-05-22 00:09:59.573802098 +0200
++++ b/thruk.conf	2012-05-22 00:11:32.960675966 +0200
+@@ -62,11 +62,11 @@
  
  ######################################
  # location of your cgi.cfg
@@ -14,7 +14,7 @@
  
  ######################################
  # normally passive checks would be marked as disabled.
-@@ -113,27 +113,27 @@
+@@ -133,27 +133,27 @@
  
  ######################################
  # temporary directory, used for template cache...
@@ -47,7 +47,7 @@
  
  ######################################
  # custom templates
-@@ -141,7 +141,7 @@
+@@ -161,7 +161,7 @@
  
  ######################################
  # log4perl config
@@ -56,7 +56,16 @@
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -340,6 +340,20 @@
+@@ -341,7 +341,7 @@
+ # Specifiy a file which is then completly under the control of Thruk.
+ # It will be used to store cronjobs, ex. for reports. The file has to
+ # be writable by Thruk.
+-#cron_file =
++cron_file = /etc/cron.d/thruk
+ 
+ # The post edit cmd is necessary for OMD where you need to reload the
+ # crontab after editing.
+@@ -374,6 +374,20 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -77,7 +86,7 @@
  #    <peer>
  #        name   = Local Nagios
  #        type   = livestatus
-@@ -389,7 +403,7 @@
+@@ -423,7 +437,7 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  

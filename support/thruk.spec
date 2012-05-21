@@ -61,6 +61,7 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/themes/themes-enabled
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-available
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/cron.d
 %{__mkdir} -p %{buildroot}%{_initrddir}
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
 %{__mkdir} -p %{buildroot}/usr/lib/thruk
@@ -128,6 +129,7 @@ mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/debian
 %{__rm} -rf %{buildroot}%{_sysconfdir}/thruk/ssi/README
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/plugins
+touch %{buildroot}%{_sysconfdir}/cron.d/thruk
 
 %pre
 # save themes, plugins and ssi so we don't reenable them on every update
@@ -228,11 +230,13 @@ exit 0
 %attr(755,wwwrun,root) %{_localstatedir}/cache/thruk
 %attr(755,wwwrun,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,wwwrun,root) %{_localstatedir}/log/thruk
+%attr(755,wwwrun,root) %{_sysconfdir}/cron.d/thruk
 %else
 %attr(755,apache,root) %{_localstatedir}/lib/thruk
 %attr(755,apache,root) %{_localstatedir}/cache/thruk
 %attr(755,apache,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,apache,root) %{_localstatedir}/log/thruk
+%attr(755,apache,root) %{_sysconfdir}/cron.d/thruk
 %endif
 
 %defattr(-,root,root)

@@ -43,7 +43,7 @@ case "$1" in
 
         # set permissions
         mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
-        chown www-data: /var/lib/thruk /var/cache/thruk /var/log/thruk
+        chown www-data: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/cron.d/thruk
         chown 755 /usr/share/thruk/fcgid_env.sh
         chown 755 /usr/bin/thruk
 
