@@ -63,6 +63,11 @@
     <td class="status [% rowclass %]"><a href="reports.cgi?report=[% r.nr %]&amp;refresh=0"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_acrobat.png' border="0" alt='View PDF Report' title='View PDF Report' width=16 height=16></a></td>
   </tr>
   [% END %]
+  [% IF reports.size == 0 %]
+  <tr class="firstrow">
+    <td class="status statusOdd" align="center" colspan="8">no reports defined yet</td>
+  </tr>
+  [% END %]
 </table>
 </div>
 
