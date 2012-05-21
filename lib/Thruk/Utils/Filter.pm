@@ -16,7 +16,7 @@ use Carp;
 use Data::Dumper;
 use Date::Calc qw/Localtime Today/;
 use Date::Manip;
-
+use URI::Escape;
 
 ##############################################
 
@@ -210,17 +210,43 @@ sub full_uri {
 
 ########################################
 
+=head2 as_url_arg
+
+  as_url_arg($str)
+
+returns encoded string for use in url args
+
+=cut
+sub as_url_arg {
+    my($str) = @_;
+    $str =~ s/&amp;/&/gmx;
+    $str = uri_escape($str);
+    return $str;
+}
+
+
+########################################
+
 =head2 short_uri
 
-  short_uri($c)
+  short_uri($c, $filter)
 
 returns a correct uri but only the url part
 
 =cut
 sub short_uri {
-    my $c = shift;
-    my $uri = uri_with($c, $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'});
-    $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
+    my($c, $data) = @_;
+    my $filter = {};
+    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
+        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    }
+    if(defined $data) {
+        for my $key (%{$data}) {
+            $filter->{$key} = $data->{$key};
+        }
+    }
+    my $uri = uri_with($c, $filter);
+    $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
     return $uri;
 }
 
