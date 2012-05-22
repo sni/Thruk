@@ -81,17 +81,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
         }
         elsif($action eq 'save') {
-            my($data) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
-            my $msg = 'report updated';
-            if($report_nr eq 'new') { $msg = 'report created'; }
-            if($report_nr = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
-                if(Thruk::Utils::Reports::update_cron_file($c)) {
-                    Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
-                }
-            } else {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
-            }
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+            return $self->report_save($c, $report_nr);
         }
         elsif($action eq 'remove') {
             if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
@@ -176,6 +166,32 @@ sub report_edit_step2 {
     Thruk::Utils::ssi_include($c);
     $c->stash->{template} = 'reports_edit_step2.tt';
     return;
+}
+
+
+##########################################################
+
+=head2 report_save
+
+=cut
+sub report_save {
+    my($self, $c, $report_nr) = @_;
+
+    my($data) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
+    my $msg = 'report updated';
+    if($report_nr eq 'new') { $msg = 'report created'; }
+    if($report_nr = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
+        if(Thruk::Utils::Reports::update_cron_file($c)) {
+            if(scalar @{$data->{'send_types'}} > 0 and (!$data->{'to'} or $data->{'cc'})) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'sending mails configured but no To/Cc!' });
+            } else {
+                Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
+            }
+        }
+    } else {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+    }
+    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
 }
 
 ##########################################################
