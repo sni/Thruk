@@ -510,7 +510,6 @@ sub _read_report_file {
         $report->{'readonly'}   = 0 if $authorized == 1;
     }
 
-
     # add some runtime information
     my $rfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
     $report->{'var'}->{'pdf_exists'} = 0;
@@ -523,6 +522,15 @@ sub _read_report_file {
     $report->{'cc'}         = '' unless defined $report->{'cc'};
     $report->{'nr'}         = $nr;
     $report->{'is_public'}  = 0 unless defined $report->{'is_public'};
+
+    # check if its really running
+    if($report->{'var'}->{'is_running'} and kill(0, $report->{'var'}->{'is_running'}) != 1) {
+        $report->{'var'}->{'is_running'} = 0;
+    }
+    if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
+        $report->{'var'}->{'end_time'} = $report->{'var'}->{'start_time'};
+    }
+
 
     # preset values from data
     if(defined $rdata) {
