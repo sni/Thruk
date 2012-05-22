@@ -123,7 +123,6 @@ mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfd
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initrddir}/thruk
 mv %{buildroot}%{_datadir}/thruk/support/thruk.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/thruk
-mv %{buildroot}%{_datadir}/thruk/support/thruk.cron %{buildroot}%{_sysconfdir}/cron.d/thruk
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
@@ -165,15 +164,19 @@ if [ -d /tmp/thruk_update/ssi/. ]; then
 fi
 rm -rf /tmp/thruk_update
 mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
+rm -f /etc/cron.d/thruk
+chmod go+x /etc/cron.d/
+ln -s /var/lib/thruk/cron /etc/cron.d/thruk
+touch /var/lib/thruk/cron
 %if %{defined suse_version}
-chown wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk
+chown wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /var/lib/thruk/cron
 a2enmod alias
 a2enmod fcgid
 a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
-chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk
+chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /var/lib/thruk/cron
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 %endif
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
@@ -230,13 +233,11 @@ exit 0
 %attr(755,wwwrun,root) %{_localstatedir}/cache/thruk
 %attr(755,wwwrun,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,wwwrun,root) %{_localstatedir}/log/thruk
-%attr(644,wwwrun,root) %{_sysconfdir}/cron.d/thruk
 %else
 %attr(755,apache,root) %{_localstatedir}/lib/thruk
 %attr(755,apache,root) %{_localstatedir}/cache/thruk
 %attr(755,apache,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,apache,root) %{_localstatedir}/log/thruk
-%attr(644,apache,root) %{_sysconfdir}/cron.d/thruk
 %endif
 
 %defattr(-,root,root)

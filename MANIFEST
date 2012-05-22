@@ -344,7 +344,6 @@ support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd
 support/menu_local.conf
-support/thruk.cron
 support/thruk.init
 support/thruk.logrotate
 support/thruk.spec
