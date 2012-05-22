@@ -123,13 +123,13 @@ mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfd
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initrddir}/thruk
 mv %{buildroot}%{_datadir}/thruk/support/thruk.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/thruk
+mv %{buildroot}%{_datadir}/thruk/thruk.cron %{buildroot}%{_sysconfdir}/cron.d/thruk
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/debian
 %{__rm} -rf %{buildroot}%{_sysconfdir}/thruk/ssi/README
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/plugins
-touch %{buildroot}%{_sysconfdir}/cron.d/thruk
 
 %pre
 # save themes, plugins and ssi so we don't reenable them on every update
@@ -230,13 +230,13 @@ exit 0
 %attr(755,wwwrun,root) %{_localstatedir}/cache/thruk
 %attr(755,wwwrun,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,wwwrun,root) %{_localstatedir}/log/thruk
-%attr(755,wwwrun,root) %{_sysconfdir}/cron.d/thruk
+%attr(644,wwwrun,root) %{_sysconfdir}/cron.d/thruk
 %else
 %attr(755,apache,root) %{_localstatedir}/lib/thruk
 %attr(755,apache,root) %{_localstatedir}/cache/thruk
 %attr(755,apache,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,apache,root) %{_localstatedir}/log/thruk
-%attr(755,apache,root) %{_sysconfdir}/cron.d/thruk
+%attr(644,apache,root) %{_sysconfdir}/cron.d/thruk
 %endif
 
 %defattr(-,root,root)

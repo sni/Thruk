@@ -102,6 +102,7 @@ install: build
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/menu_local.conf $(CURDIR)/debian/thruk/etc/thruk/menu_local.conf
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/htpasswd $(CURDIR)/debian/thruk/etc/thruk/htpasswd
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk.init $(CURDIR)/debian/thruk/etc/init.d/thruk
+	mv $(CURDIR)/debian/thruk/usr/share/thruk/support/thruk.cron $(CURDIR)/debian/thruk/etc/cron.d/thruk
 	mkdir -p $(CURDIR)/debian/thruk/usr/share/doc/thruk
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/debian/copyright $(CURDIR)/debian/thruk/usr/share/doc/thruk/copyright
 	mv $(CURDIR)/debian/thruk/usr/share/thruk/local-lib $(CURDIR)/debian/thruk/usr/lib/thruk/perl5
@@ -110,7 +111,6 @@ install: build
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/debian
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/LICENSE
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/root/thruk/plugins
-	touch $(CURDIR)/debian/thruk/etc/cron.d/thruk
 
 
 # Build architecture-independent files here.
