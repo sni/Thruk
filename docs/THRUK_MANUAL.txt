@@ -1361,6 +1361,22 @@ ex.:
   cron_post_edit_cmd = omd reload crontab
 
 
+==== thruk_bin
+Path to your thruk executable. Will be used in cronjobs.
+
+ex.:
+
+  thruk_bin = /usr/bin/thruk
+
+
+==== thruk_init
+Path to your thruk init script. Will be used to restart thruk.
+
+ex.:
+
+  thruk_init = /etc/init.d/thruk
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
@@ -1896,4 +1912,3 @@ cronjob running the thruk command line tool:
 
 This will send you the montly report defined by the
 'var/reports/1.txt' above every first day of the month.
-

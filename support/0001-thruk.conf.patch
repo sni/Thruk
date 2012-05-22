@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-05-22 00:09:59.573802098 +0200
-+++ b/thruk.conf	2012-05-22 00:11:32.960675966 +0200
+--- a/thruk.conf	2012-05-22 08:57:06.955772341 +0200
++++ b/thruk.conf	2012-05-22 08:57:27.767896869 +0200
 @@ -62,11 +62,11 @@
  
  ######################################
@@ -65,7 +65,20 @@
  
  # The post edit cmd is necessary for OMD where you need to reload the
  # crontab after editing.
-@@ -374,6 +374,20 @@
+@@ -350,10 +350,10 @@
+ #####################################
+ # path setting
+ # Path to your thruk executable. Will be used in cronjobs.
+-#thruk_bin = /usr/bin/thruk
++thruk_bin = /usr/bin/thruk
+ 
+ # Path to your thruk init script. Will be used to restart thruk.
+-#thruk_init = /etc/init.d/thruk
++thruk_init = /etc/init.d/thruk
+ 
+ #####################################
+ # Waiting is a livestatus feature. When enabled, Thruk will wait
+@@ -382,6 +382,20 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -86,7 +99,7 @@
  #    <peer>
  #        name   = Local Nagios
  #        type   = livestatus
-@@ -423,7 +437,7 @@
+@@ -431,7 +445,7 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  

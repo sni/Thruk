@@ -9796,6 +9796,20 @@ crontab after editing.</p></div>
 <div class="content">
 <pre><tt>cron_post_edit_cmd = omd reload crontab</tt></pre>
 </div></div>
+<h4 id="_thruk_bin">thruk_bin</h4>
+<div class="paragraph"><p>Path to your thruk executable. Will be used in cronjobs.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>thruk_bin = /usr/bin/thruk</tt></pre>
+</div></div>
+<h4 id="_thruk_init">thruk_init</h4>
+<div class="paragraph"><p>Path to your thruk init script. Will be used to restart thruk.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>thruk_init = /etc/init.d/thruk</tt></pre>
+</div></div>
 <h4 id="_enable_shinken_features">enable_shinken_features</h4>
 <div class="paragraph"><p>This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
@@ -10569,7 +10583,7 @@ cronjob running the thruk command line tool:</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-05-21 23:34:15 CEST
+Last updated 2012-05-22 09:02:02 CEST
 </div>
 </div>
 </body>
