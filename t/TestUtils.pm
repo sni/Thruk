@@ -142,7 +142,11 @@ sub test_page {
     elsif(defined $opts->{'redirect'}) {
         ok( $request->is_redirect, 'Request '.$opts->{'url'}.' should redirect' ) or diag(Dumper($request));
         if(defined $opts->{'location'}) {
-            like($request->{'_headers'}->{'location'}, qr/$opts->{'location'}/, "Content should redirect: ".$opts->{'location'});
+            if(defined $request->{'_headers'}->{'location'}) {
+                like($request->{'_headers'}->{'location'}, qr/$opts->{'location'}/, "Content should redirect: ".$opts->{'location'});
+            } else {
+                fail('no redirect header found');
+            }
         }
     } else {
         ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or BAIL_OUT(Dumper($request));
