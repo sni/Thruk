@@ -68,8 +68,8 @@
           <option value="yes"[% IF value == 'yes' %] selected[% END %]>Yes</option>
           <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
         </select>
-      [% ELSIF type == 'hosts' %]
-        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'hosts', { autosubmit:false })"[% END %]>
+      [% ELSIF type == 'hosts' OR type == 'hostgroups' %]
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, '[% type %]', { autosubmit:false })"[% END %]>
       [% ELSIF type == 'services' %]
         <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'params.host' })"[% END %]>
       [% ELSIF type == 'rptimeperiod' %]

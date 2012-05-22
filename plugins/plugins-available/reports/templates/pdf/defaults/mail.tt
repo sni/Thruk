@@ -4,8 +4,11 @@ SUBJECT: Report: [% r.name %]
 
 See attached availability report.
 
+[%+ IF param.exists('hostgroup') +%]
+Hostgroup:         [% param.hostgroup %]
+[%+ ELSIF param.exists('host') +%]
 Host:              [% param.host %]
-[%+ IF param.exists('service') +%]
+[%+ ELSIF param.exists('service') +%]
 Service:           [% param.service %]
 [%+ END +%]
 Report Timeperiod: [% format_date(start, "%d.%m.%Y") %] - [% format_date((end - 1), "%d.%m.%Y") %]
