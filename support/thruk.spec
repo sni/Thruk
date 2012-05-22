@@ -19,7 +19,7 @@ Patch4:        0005-thruk_script.patch
 Requires(pre): shadow-utils
 Requires:      perl logrotate
 %if %{defined suse_version}
-Requires: apache2 apache2-mod_fcgid
+Requires: apache2 apache2-mod_fcgid cron
 %else
 Requires: httpd mod_fcgid
 %endif
@@ -123,7 +123,7 @@ mv %{buildroot}%{_datadir}/thruk/support/menu_local.conf %{buildroot}%{_sysconfd
 mv %{buildroot}%{_datadir}/thruk/support/htpasswd %{buildroot}%{_sysconfdir}/thruk/htpasswd
 mv %{buildroot}%{_datadir}/thruk/support/thruk.init %{buildroot}%{_initrddir}/thruk
 mv %{buildroot}%{_datadir}/thruk/support/thruk.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/thruk
-mv %{buildroot}%{_datadir}/thruk/thruk.cron %{buildroot}%{_sysconfdir}/cron.d/thruk
+mv %{buildroot}%{_datadir}/thruk/support/thruk.cron %{buildroot}%{_sysconfdir}/cron.d/thruk
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8

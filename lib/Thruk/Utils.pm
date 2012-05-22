@@ -1049,7 +1049,7 @@ sub update_cron_file {
         push @{$sections->{$section}}, $entry->[0]." ".$user.$entry->[1];
     }
 
-    open(my $fh, '>', $c->config->{'cron_file'}) or die('cannot write '.$c->config->{'cron_file'}.': '.$!);
+    open(my $fh, '>', $c->config->{'cron_file'}) or die('cannot write ('.$>.','.$<.')'.$c->config->{'cron_file'}.': '.$!);
     print $fh "##############################################################\n";
     print $fh "# THIS FILE IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN #\n";
     print $fh "##############################################################\n";

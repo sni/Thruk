@@ -26,6 +26,7 @@ case "$1" in
     purge)
         rm -rf /var/cache/thruk
         rm -rf /var/lib/thruk
+        rm -rf /var/log/thruk
     ;;
 
     failed-upgrade|abort-install|abort-upgrade|disappear)
