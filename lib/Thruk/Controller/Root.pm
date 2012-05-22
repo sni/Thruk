@@ -128,6 +128,8 @@ sub begin : Private {
         host_action_icon                    => 'action.gif',
         service_action_icon                 => 'action.gif',
         cookie_path                         => $c->config->{'url_prefix'}.'thruk',
+        thruk_bin                           => '/usr/bin/thruk',
+        thruk_init                          => '/etc/init.d/thruk',
     };
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};

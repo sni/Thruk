@@ -416,7 +416,8 @@ sub update_cron_file {
 sub _get_cron_entry {
     my($c, $st) = @_;
 
-    my $cmd = "/usr/bin/thruk -a reportmail=".$st->{'nr'};
+    my $thruk_bin = $c->config->{'thruk_bin'};
+    my $cmd = $thruk_bin." -a reportmail=".$st->{'nr'};
     if($st->{'type'} eq 'month') {
         my $cron = sprintf("%s %s %s * *", $st->{'minute'}, $st->{'hour'}, $st->{'day'});
         return($cron, $cmd);
