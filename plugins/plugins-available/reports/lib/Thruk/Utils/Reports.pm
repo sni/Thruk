@@ -35,8 +35,8 @@ sub get_report_list {
     my($c, $noauth) = @_;
 
     my $reports = [];
-    for my $rfile (glob($c->config->{'var_path'}.'/reports/*.txt')) {
-        if($rfile =~ m/\/(\d+)\.txt/mx) {
+    for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
+        if($rfile =~ m/\/(\d+)\.rpt/mx) {
             my $r = _read_report_file($c, $1, undef, $noauth);
             push @{$reports}, $r if defined $r;
         }
@@ -174,7 +174,7 @@ save a report
 sub report_save {
     my($c, $nr, $data) = @_;
     mkdir($c->config->{'var_path'}.'/reports/');
-    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     my $old_report;
     if($nr ne 'new' and -f $file) {
         $old_report = _read_report_file($c, $nr);
@@ -205,7 +205,7 @@ sub report_remove {
     return unless $report->{'readonly'} == 0;
 
     my @files;
-    push @files, $c->config->{'var_path'}.'/reports/'.$nr.'.txt' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    push @files, $c->config->{'var_path'}.'/reports/'.$nr.'.rpt' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
     return 1 if unlink @files;
     return;
@@ -463,14 +463,14 @@ sub _get_new_report {
 sub _report_save {
     my($c, $nr, $report) = @_;
     mkdir($c->config->{'var_path'}.'/reports/');
-    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     if($nr eq 'new') {
         # find next free number
         $nr = 1;
-        $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+        $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
         while(-e $file) {
             $nr++;
-            $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+            $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
         }
     }
     my $data = Dumper($report);
@@ -489,7 +489,7 @@ sub _read_report_file {
         Thruk::Utils::CLI::_error("not a valid report number");
         return $c->detach('/error/index/13');
     }
-    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.txt';
+    my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     unless(-f $file) {
         Thruk::Utils::CLI::_error("report does not exist: $!");
         return $c->detach('/error/index/13');
