@@ -83,3 +83,12 @@ function add_report_send_row(e) {
     var currentLastRow = tblBody.rows[lastRowNr];
     tblBody.insertBefore(newRow, currentLastRow);
 }
+
+/* update report list status */
+function update_reports_status() {
+    jQuery('#reports_table').load('reports.cgi #statusTable');
+    // now count is_running elements
+    if(jQuery('.is_running').size() == 0) {
+        window.clearInterval(update_reports_status_int);
+    }
+}
