@@ -43,7 +43,8 @@ sub cmd {
 
     if($c->config->{'no_external_job_forks'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        my $out = `/bin/sh -c '".$conf->{'cmd'}."'"`;
+        my $cmd = "/bin/sh -c '".$conf->{'cmd'}."'";
+        my $out = `$cmd`;
         return _finished_job_page($c, $c->stash, undef, $out);
     }
 

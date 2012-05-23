@@ -79,6 +79,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             Thruk::Utils::Reports::set_running($c, $report_nr, -1, time());
             my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
             if($report) {
+                unlink($c->config->{'tmp_path'}."/reports/".$report_nr.".log");
                 my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);
                 Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1 });
                 Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
