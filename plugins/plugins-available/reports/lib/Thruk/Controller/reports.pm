@@ -76,7 +76,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $self->report_edit_step2($c, $report_nr);
         }
         elsif($action eq 'update') {
-            Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Reports::generate_report($c, '.$report_nr.')', 'background' => 1 });
+            if($c->config->{'thruk_bin'}) {
+                Thruk::Utils::Reports::set_running($c, $report_nr, -1);
+                my $cmd = "cd ".$c->config->{'project_root'}." && ".$c->config->{'thruk_bin'}.' -a report='.$report_nr.' >/dev/null 2>'.$c->{'tmp_path'}.'/reports/'.$report_nr.'.log';
+                Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1 });
+            } else {
+                Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Reports::generate_report($c, '.$report_nr.')', 'background' => 1 });
+            }
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
         }
@@ -182,11 +188,7 @@ sub report_save {
     if($report_nr eq 'new') { $msg = 'report created'; }
     if($report_nr = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
         if(Thruk::Utils::Reports::update_cron_file($c)) {
-            if(scalar @{$data->{'send_types'}} > 0 and (!$data->{'to'} or $data->{'cc'})) {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'sending mails configured but no To/Cc!' });
-            } else {
-                Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
-            }
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
         }
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });

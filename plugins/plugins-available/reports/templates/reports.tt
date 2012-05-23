@@ -45,13 +45,19 @@
       [% IF r.var.start_time %][% date_format(c, r.var.start_time) %][% ELSE %]never[% END %]
     </td>
     <td class="status [% rowclass %]">
-      [% IF r.var.start_time %]
-        [% IF r.var.is_running %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
-        [% duration(end_time - r.var.start_time) %]
+      [% IF r.failed %]
+        <span class="clickable" style="color: red;" [% info_popup_event_type %]="return overlib('[% escape_quotes(r.error) | nl2br %]',CAPTION,'report error',WIDTH,700,[% c.config.info_popup_options %]);">
+        failed
+        </span>
+      [% ELSE %]
+        [% IF r.var.start_time %]
+          [% IF r.var.is_running > 0 %][% end_time = date.now %][% ELSE %][% end_time = r.var.end_time %][% END %]
+          [% duration(end_time - r.var.start_time) %]
+        [% END %]
       [% END %]
     </td>
     <td class="status [% rowclass %]">
-      [% IF r.var.is_running %]
+      [% IF r.var.is_running != 0 %]
         [% running = running + 1 %]
         <a href="#" class="is_running"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif' border="0" alt='Report is currently beeing refreshed' title='Report is currently beeing refreshed' width=16 height=16></a>
       [% ELSE %]
@@ -63,7 +69,11 @@
         <a href="reports.cgi?report=[% r.nr %]&amp;action=edit"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/config.png' border="0" alt='Change Report' title='Change Report' width=16 height=16></a>
       [% END %]
     </td>
-    <td class="status [% rowclass %]"><a href="reports.cgi?report=[% r.nr %]&amp;refresh=0"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_acrobat.png' border="0" alt='View PDF Report' title='View PDF Report' width=16 height=16></a></td>
+    <td class="status [% rowclass %]">
+      [% IF r.var.pdf_exists %]
+      <a href="reports.cgi?report=[% r.nr %]&amp;refresh=0"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_white_acrobat.png' border="0" alt='View PDF Report' title='View PDF Report' width=16 height=16></a>
+      [% END %]
+    </td>
   </tr>
   [% END %]
   [% IF reports.size == 0 %]

@@ -207,6 +207,7 @@ sub report_remove {
     my @files;
     push @files, $c->config->{'var_path'}.'/reports/'.$nr.'.rpt' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+    push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.log' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     return 1 if unlink @files;
     return;
 }
@@ -234,8 +235,8 @@ sub generate_report {
     my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
 
     # report is already beeing generated
-    if($options->{'var'}->{'is_running'}) {
-        while($options->{'var'}->{'is_running'}) {
+    if($options->{'var'}->{'is_running'} > 0) {
+        while($options->{'var'}->{'is_running'} > 0) {
             if(kill(0, $options->{'var'}->{'is_running'}) != 1) {
                 unlink($pdf_file);
                 last;
@@ -248,10 +249,12 @@ sub generate_report {
         }
     }
 
+    # empty logfile
+    open(my $fh, '>'.$c->{'tmp_path'}.'/reports/'.$nr.'.log');
+    close($fh);
+
     # update report runtime data
-    $options->{'var'}->{'is_running'} = $$;
-    $options->{'var'}->{'start_time'} = time();
-    _report_save($c, $nr, $options);
+    set_running($c, $nr, $$, time());
 
     unless ($c->user_exists) {
         $ENV{'REMOTE_USER'} = $options->{'user'};
@@ -313,7 +316,7 @@ sub generate_report {
 
     # write out pdf
     mkdir($c->config->{'tmp_path'}.'/reports');
-    open(my $fh, '>', $pdf_file);
+    open($fh, '>', $pdf_file);
     binmode $fh;
     print $fh $pdf_data;
     close($fh);
@@ -324,10 +327,7 @@ sub generate_report {
     }
 
     # update report runtime data
-    $options = _read_report_file($c, $nr);
-    $options->{'var'}->{'end_time'}   = time();
-    $options->{'var'}->{'is_running'} = 0;
-    _report_save($c, $nr, $options);
+    set_running($c, $nr, 0, undef, time());
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
     return $pdf_file;
@@ -401,10 +401,11 @@ sub update_cron_file {
     for my $r (@{get_report_list($c, 1)}) {
         next unless defined $r->{'send_types'};
         next unless scalar @{$r->{'send_types'}} > 0;
-        next unless ($r->{'to'} or $r->{'cc'});
+        my $mail = 0;
+        $mail = 1 if ($r->{'to'} or $r->{'cc'});
         for my $st (@{$r->{'send_types'}}) {
             $st->{'nr'} = $r->{'nr'};
-            push @{$cron_entries}, [_get_cron_entry($c, $st)];
+            push @{$cron_entries}, [_get_cron_entry($c, $st, $mail)];
         }
     }
 
@@ -413,11 +414,35 @@ sub update_cron_file {
 }
 
 ##########################################################
+
+=head2 set_running
+
+  set_running($c)
+
+update running state of report
+
+=cut
+sub set_running {
+    my($c, $nr, $val, $start, $end) = @_;
+    my $options = _read_report_file($c, $nr);
+    $options->{'var'}->{'is_running'} = $val;
+    $options->{'var'}->{'start_time'} = $start if defined $start;
+    $options->{'var'}->{'end_time'}   = $end   if defined $end;
+    _report_save($c, $nr, $options);
+    return;
+}
+
+##########################################################
 sub _get_cron_entry {
-    my($c, $st) = @_;
+    my($c, $st, $mail) = @_;
 
     my $thruk_bin = $c->config->{'thruk_bin'};
-    my $cmd = $thruk_bin." -a reportmail=".$st->{'nr'};
+    my $type = 'report';
+    if($mail) {
+        $type = 'reportmail';
+    }
+    my $cmd = "cd ".$c->config->{'project_root'}." && ".$thruk_bin." -a ".$type."=".$st->{'nr'}." >/dev/null 2>".$c->{'tmp_path'}.'/reports/'.$st->{'nr'}.'.log';
+
     if($st->{'type'} eq 'month') {
         my $cron = sprintf("%s %s %s * *", $st->{'minute'}, $st->{'hour'}, $st->{'day'});
         return($cron, $cmd);
@@ -529,6 +554,14 @@ sub _read_report_file {
     }
     if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
         $report->{'var'}->{'end_time'} = $report->{'var'}->{'start_time'};
+    }
+
+    # failed?
+    my $log = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    $report->{'failed'} = 0;
+    if(-s $log) {
+        $report->{'failed'} = 1;
+        $report->{'error'}  = read_file($log);
     }
 
 
