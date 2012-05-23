@@ -32,7 +32,7 @@ fi
 
 # make it possible to override startcmd by sysconfig
 if [ -z "$STARTCMD" ]; then
-  STARTCMD="$WGET --no-proxy --post-data='' -q -O /dev/null $STARTURL"
+  STARTCMD="$WGET --no-proxy --no-check-certificate --post-data='' -q -O /dev/null $STARTURL"
 fi
 
 case "$1" in
