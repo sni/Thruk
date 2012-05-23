@@ -131,6 +131,7 @@ sub begin : Private {
         thruk_bin                           => '/usr/bin/thruk',
         thruk_init                          => '/etc/init.d/thruk',
     };
+    $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
     }
