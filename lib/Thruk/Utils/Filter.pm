@@ -379,7 +379,9 @@ returns an escaped string for xml output
 sub escape_xml {
     my $text = shift;
 
-    return HTML::Entities::encode($text, '<>&');
+    my $return = HTML::Entities::encode($text, '<>&');
+    $return =~ s/\\n\Z//mx;
+    return $return;
 }
 
 
