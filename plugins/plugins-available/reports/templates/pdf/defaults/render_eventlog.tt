@@ -1,0 +1,57 @@
+[% USE date %]
+
+[%# RENDERING PDF #%]
+[% IF block == 'render' %]
+[%
+  init_pdf(pdf);
+
+  # PAGE 1
+  pdf.prForm(path_to_template('pdf/eventlog.pdf'), 1);
+  pdf.prFont('Helvetica-Bold');
+  font(20, 'light blue');
+  pdf.prText(40,400,'Event Report');
+  font(15, 'dark grey');
+  pdf.prText(40,350, "Report Timeperiod: " _ format_date(start, "%d.%m.%Y") _ ' - ' _ format_date((end - 1), "%d.%m.%Y"));
+  pdf.prText(480, 440, format_date(date.now, "%d.%m.%Y"));
+
+  # PAGE 2
+  # events
+  pdf.prPage();
+  pdf.prForm(path_to_template('pdf/sla.pdf'), 2);
+  font(20, 'dark grey');
+  pdf.prText(40,680, 'Events');
+  # page footer
+  font(10, 'white');
+  page = 2;
+  pdf.prText(550,58, page);
+  page = page + 1;
+
+
+
+  font(10, 'dark grey');
+  IF logs.size == 0;
+    pdf.prText(50,640, "no events during this timeperiod.");
+  ELSE;
+    x = 30;
+    y = 640;
+    FOREACH l = logs;
+      IF y < 80;
+        y = 640;
+        pdf.prPage();
+        pdf.prForm(path_to_template('pdf/eventlog.pdf'), 2);
+        font(10, 'white');
+        pdf.prText(550,58, page);
+        page = page + 1;
+        font(20, 'dark grey');
+        pdf.prText(40,680, 'Events');
+        font(10, 'dark grey');
+      END;
+      PROCESS _logs_line.tt;
+      # url_prefix _ "thruk/themes/" _ theme _ "/images/" _ pic
+      pdf.prText(x,y, "[ " _ format_date(l.time, datetime_format) _ "] " _ message.substr(,0, 70));
+      y = y - 20;
+    END;
+  END;
+
+%]
+[% END %]

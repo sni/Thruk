@@ -261,6 +261,43 @@ sub fill_availability_table {
 }
 
 ##########################################################
+
+=head2 get_events
+
+  get_events()
+
+set events by pattern from eventlog
+
+=cut
+sub get_events {
+    my $c             = $Thruk::Utils::PDF::c or die("not initialized!");
+    my($start,$end)   = Thruk::Utils::get_start_end_for_timeperiod_from_param($c);
+    $c->stash->{'start'} = $start;
+    $c->stash->{'end'}   = $end;
+    my $pattern          = $c->{'request'}->{'parameters'}->{'pattern'};
+    my $exclude_pattern  = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
+    die('no pattern') unless defined $pattern;
+
+    my $filter = [];
+    push @{$filter}, { time => { '>=' => $start }};
+    push @{$filter}, { time => { '<=' => $end }};
+
+    if($pattern !~ m/^\s*$/mx) {
+        die("invalid pattern: ".$pattern) unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
+        push @{$filter}, { message => { '~~' => $pattern }};
+    }
+    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+        die("invalid pattern: ".$exclude_pattern) unless Thruk::Utils::is_valid_regular_expression($c, $exclude_pattern);
+        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+    }
+
+    my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
+    my $logs = $c->{'db'}->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
+    $c->stash->{'logs'} = $logs;
+    return 1;
+}
+
+##########################################################
 sub _render_bar_chart {
     my($options) = @_;
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");

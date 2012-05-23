@@ -1,6 +1,7 @@
 error.log
 notes.txt
 .DS_Store
+\.docx
 \.swp
 blib
 tmp

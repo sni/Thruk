@@ -236,7 +236,11 @@ plugins/plugins-available/reports/templates/_report_send_types.tt
 plugins/plugins-available/reports/templates/passthrough_pdf.tt
 plugins/plugins-available/reports/templates/pdf/defaults/mail.tt
 plugins/plugins-available/reports/templates/pdf/defaults/prepare.tt
+plugins/plugins-available/reports/templates/pdf/defaults/prepare_eventlog.tt
+plugins/plugins-available/reports/templates/pdf/defaults/render_eventlog.tt
 plugins/plugins-available/reports/templates/pdf/defaults/render_sla.tt
+plugins/plugins-available/reports/templates/pdf/eventlog.pdf
+plugins/plugins-available/reports/templates/pdf/eventlog.tt
 plugins/plugins-available/reports/templates/pdf/sla.pdf
 plugins/plugins-available/reports/templates/pdf/sla_host.tt
 plugins/plugins-available/reports/templates/pdf/sla_hostgroup.tt

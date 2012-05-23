@@ -1,0 +1,19 @@
+[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'pattern'                 => [ 'Pattern',         'text',         ''            ] },
+        { 'exclude_pattern'         => [ 'Exclude Pattern', 'text',         ''            ] },
+        { 'timeperiod'              => [ 'Timeperiod',      'rptimeperiod', 'last24hours' ] },
+    ];
+  %]
+[% END %]
+
+[%# PREPERATION #%]
+[% PROCESS 'pdf/defaults/prepare_eventlog.tt' %]
+
+[%# RENDERING PDF #%]
+[% PROCESS 'pdf/defaults/render_eventlog.tt' %]
+
+[%# SENDING MAIL #%]
+[% PROCESS 'pdf/defaults/mail.tt' %]
