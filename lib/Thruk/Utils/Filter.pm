@@ -326,6 +326,7 @@ returns a string with only the single- or double-quotes escaped
 =cut
 sub escape_quotes {
     my $string = shift;
+    $string =~ s/\\'/'/gmx;
     $string =~ s/'/\\'/gmx;
     $string =~ s/"/\\'/gmx;
     return $string;
