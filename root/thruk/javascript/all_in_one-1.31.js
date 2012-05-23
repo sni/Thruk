@@ -198,6 +198,11 @@ function stopRefresh() {
   setRefreshRate(0);
 }
 
+/* is this an array? */
+function is_array(o) {
+    return typeof(o) == 'object' && (o instanceof Array);
+}
+
 /* return url variables as hash */
 function toQueryParams(str) {
     var vars = {};
@@ -210,10 +215,14 @@ function toQueryParams(str) {
         if (p.length != 2) continue;
         var val = decodeURIComponent(p[1].replace(/\+/g, " "));
         if(vars[p[0]] != undefined) {
-            var tmp =  vars[p[0]];
-            vars[p[0]] = new Array();
-            vars[p[0]].push(tmp);
-            vars[p[0]].push(val);
+            if(is_array(vars[p[0]])) {
+                vars[p[0]].push(val);
+            } else {
+                var tmp =  vars[p[0]];
+                vars[p[0]] = new Array();
+                vars[p[0]].push(tmp);
+                vars[p[0]].push(val);
+            }
         } else {
             vars[p[0]] = val;
         }
