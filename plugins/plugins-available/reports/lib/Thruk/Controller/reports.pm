@@ -76,7 +76,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $self->report_edit_step2($c, $report_nr);
         }
         elsif($action eq 'update') {
-            Thruk::Utils::Reports::set_running($c, $report_nr, -1);
+            Thruk::Utils::Reports::set_running($c, $report_nr, -1, time());
             my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
             if($report) {
                 my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);

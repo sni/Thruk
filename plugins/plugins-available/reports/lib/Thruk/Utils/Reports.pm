@@ -182,8 +182,6 @@ sub report_save {
     }
     my $report       = _get_new_report($c, $data);
     $report->{'var'} = $old_report->{'var'} if defined $old_report->{'var'};
-    delete $report->{'readonly'};
-    delete $report->{'nr'};
     return _report_save($c, $nr, $report);
 }
 
@@ -493,6 +491,10 @@ sub _report_save {
             $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
         }
     }
+    delete $report->{'readonly'};
+    delete $report->{'nr'};
+    delete $report->{'error'};
+    delete $report->{'failed'};
     my $data = Dumper($report);
     $data    =~ s/^\$VAR1\ =\ //mx;
     $data    =~ s/^\ \ \ \ \ \ \ \ //gmx;
@@ -577,11 +579,11 @@ sub _read_report_file {
 sub _is_authorized_for_report {
     my($c, $report) = @_;
     return 1 if defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI';
-    if(defined $report->{'is_public'} and $report->{'is_public'} == 1) {
-        return 2;
-    }
     if(defined $report->{'user'} and defined $c->stash->{'remote_user'} and $report->{'user'} eq $c->stash->{'remote_user'}) {
         return 1;
+    }
+    if(defined $report->{'is_public'} and $report->{'is_public'} == 1) {
+        return 2;
     }
     Thruk::Utils::CLI::_debug("user: ".$c->stash->{'remote_user'}." is not authorized for report: ".$report->{'nr'});
     return;
