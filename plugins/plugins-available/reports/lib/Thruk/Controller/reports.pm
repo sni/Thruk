@@ -76,14 +76,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $self->report_edit_step2($c, $report_nr);
         }
         elsif($action eq 'update') {
-            if($c->config->{'thruk_bin'}) {
-                Thruk::Utils::Reports::set_running($c, $report_nr, -1);
-                my $cmd = "cd ".$c->config->{'project_root'}." && ".$c->config->{'thruk_bin'}.' -a report='.$report_nr.' >/dev/null 2>'.$c->{'tmp_path'}.'/reports/'.$report_nr.'.log';
+            Thruk::Utils::Reports::set_running($c, $report_nr, -1);
+            my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+            if($report) {
+                my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);
                 Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1 });
+                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
             } else {
-                Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Reports::generate_report($c, '.$report_nr.')', 'background' => 1 });
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
             }
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
         }
         elsif($action eq 'save') {

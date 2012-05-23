@@ -405,7 +405,7 @@ sub update_cron_file {
         $mail = 1 if ($r->{'to'} or $r->{'cc'});
         for my $st (@{$r->{'send_types'}}) {
             $st->{'nr'} = $r->{'nr'};
-            push @{$cron_entries}, [_get_cron_entry($c, $st, $mail)];
+            push @{$cron_entries}, [_get_cron_entry($c, $r, $st, $mail)];
         }
     }
 
@@ -434,14 +434,9 @@ sub set_running {
 
 ##########################################################
 sub _get_cron_entry {
-    my($c, $st, $mail) = @_;
+    my($c, $report, $st, $mail) = @_;
 
-    my $thruk_bin = $c->config->{'thruk_bin'};
-    my $type = 'report';
-    if($mail) {
-        $type = 'reportmail';
-    }
-    my $cmd = "cd ".$c->config->{'project_root'}." && ".$thruk_bin." -a ".$type."=".$st->{'nr'}." >/dev/null 2>".$c->{'tmp_path'}.'/reports/'.$st->{'nr'}.'.log';
+    my $cmd = _get_report_cmd($c, $report, $mail);
 
     if($st->{'type'} eq 'month') {
         my $cron = sprintf("%s %s %s * *", $st->{'minute'}, $st->{'hour'}, $st->{'day'});
@@ -552,6 +547,9 @@ sub _read_report_file {
     if($report->{'var'}->{'is_running'} and kill(0, $report->{'var'}->{'is_running'}) != 1) {
         $report->{'var'}->{'is_running'} = 0;
     }
+    if($report->{'var'}->{'is_running'} == -1 and $report->{'var'}->{'start_time'} < time() - 10) {
+        $report->{'var'}->{'is_running'} = 0;
+    }
     if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
         $report->{'var'}->{'end_time'} = $report->{'var'}->{'start_time'};
     }
@@ -587,6 +585,18 @@ sub _is_authorized_for_report {
     }
     Thruk::Utils::CLI::_debug("user: ".$c->stash->{'remote_user'}." is not authorized for report: ".$report->{'nr'});
     return;
+}
+
+##########################################################
+sub _get_report_cmd {
+    my($c, $report, $mail) = @_;
+    my $thruk_bin = $c->config->{'thruk_bin'};
+    my $type      = 'report';
+    if($mail) {
+        $type = 'reportmail';
+    }
+    my $cmd = "cd ".$c->config->{'project_root'}." && ".$thruk_bin." -a ".$type."=".$report->{'nr'}." >/dev/null 2>".$c->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.log';
+    return $cmd;
 }
 
 ##########################################################
