@@ -1,0 +1,125 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Thruk::Utils::PDF - Utilities Collection for creating PDFs</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#methods">METHODS</a></li>
+	<ul>
+
+		<li><a href="#init_pdf">init_pdf</a></li>
+		<li><a href="#render_pie_chart">render_pie_chart</a></li>
+		<li><a href="#render_bar_chart">render_bar_chart</a></li>
+		<li><a href="#path_to_template">path_to_template</a></li>
+		<li><a href="#calculate_availability">calculate_availability</a></li>
+		<li><a href="#font">font</a></li>
+		<li><a href="#outages">outages</a></li>
+		<li><a href="#set_unavailable_states">set_unavailable_states</a></li>
+		<li><a href="#fill_availability_table">fill_availability_table</a></li>
+		<li><a href="#get_events">get_events</a></li>
+		<li><a href="#log_icon">log_icon</a></li>
+	</ul>
+
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>Thruk::Utils::PDF - Utilities Collection for creating PDFs</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>Utilities Collection for PDFs. All non private subs will be available in PDF templates</p>
+<p>
+</p>
+<hr />
+<h1><a name="methods">METHODS</a></h1>
+<p>
+</p>
+<h2><a name="init_pdf">init_pdf</a></h2>
+<pre>
+  init_pdf($pdf)</pre>
+<p>set pdf object for later use</p>
+<p>
+</p>
+<h2><a name="render_pie_chart">render_pie_chart</a></h2>
+<pre>
+  render_pie_chart($type)</pre>
+<p>render a pie chart into tmpfile and return filename of the pdf</p>
+<p>
+</p>
+<h2><a name="render_bar_chart">render_bar_chart</a></h2>
+<pre>
+  render_bar_chart($type)</pre>
+<p>render a bar chart into tmp file and return filename of the pdf</p>
+<p>
+</p>
+<h2><a name="path_to_template">path_to_template</a></h2>
+<pre>
+  path_to_template($filename)</pre>
+<p>return absolute filename for a template</p>
+<p>
+</p>
+<h2><a name="calculate_availability">calculate_availability</a></h2>
+<pre>
+  calculate_availability()</pre>
+<p>calculate availability from stash data</p>
+<p>
+</p>
+<h2><a name="font">font</a></h2>
+<pre>
+  font($size, $color)</pre>
+<p>set color with given size and color</p>
+<p>
+</p>
+<h2><a name="outages">outages</a></h2>
+<pre>
+  outages($logs, $start, $end, $x, $y, $step1, $step2, $max)</pre>
+<p>print outages from log entries</p>
+<p>
+</p>
+<h2><a name="set_unavailable_states">set_unavailable_states</a></h2>
+<pre>
+  set_unavailable_states($states)</pre>
+<p>set list of states which count as unavailable</p>
+<p>
+</p>
+<h2><a name="fill_availability_table">fill_availability_table</a></h2>
+<pre>
+  fill_availability_table($x, $y, $c1, $c2)</pre>
+<p>set list of states which count as unavailable</p>
+<p>
+</p>
+<h2><a name="get_events">get_events</a></h2>
+<pre>
+  get_events()</pre>
+<p>set events by pattern from eventlog</p>
+<p>
+</p>
+<h2><a name="log_icon">log_icon</a></h2>
+<pre>
+  log_icon(x, y, icon, file)</pre>
+<p>set icon for logfiles</p>
+
+</body>
+
+</html>

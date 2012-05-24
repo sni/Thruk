@@ -30,3 +30,8 @@ if [ $(git status | grep thruk8.txt | wc -l) -gt 0 ]; then
 fi
 
 pod2man -s 3 -n thruk ../script/thruk > thruk.3
+
+# api docs
+/usr/bin/pod2html --infile=../plugins/plugins-available/reports/lib/Thruk/Utils/PDF.pm --outfile=../docs/api/pdf.html
+/usr/bin/pod2html --infile=../lib/Thruk/Utils/CLI.pm                                   --outfile=../docs/api/cli.html
+rm -f pod2htmd.tmp pod2htmi.tmp
