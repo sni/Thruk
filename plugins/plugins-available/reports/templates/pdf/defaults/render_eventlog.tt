@@ -17,7 +17,7 @@
   # PAGE 2
   # events
   pdf.prPage();
-  pdf.prForm(path_to_template('pdf/sla.pdf'), 2);
+  pdf.prForm(path_to_template('pdf/eventlog.pdf'), 2);
   font(20, 'dark grey');
   pdf.prText(40,680, 'Events');
   # page footer
@@ -47,8 +47,11 @@
         font(10, 'dark grey');
       END;
       PROCESS _logs_line.tt;
-      # url_prefix _ "thruk/themes/" _ theme _ "/images/" _ pic
-      pdf.prText(x,y, "[ " _ format_date(l.time, datetime_format) _ "] " _ message.substr(,0, 70));
+
+      log_icon(x, y - 6, pic, path_to_template('pdf/icons.pdf'));
+      pdf.prText(x + 25,y, "[ " _ format_date(l.time, datetime_format) _ "] " _ l.type);
+      y = y - 15;
+      pdf.prText(x,y, l.options.substr(,0, 100));
       y = y - 20;
     END;
   END;

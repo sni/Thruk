@@ -241,6 +241,7 @@ plugins/plugins-available/reports/templates/pdf/defaults/render_eventlog.tt
 plugins/plugins-available/reports/templates/pdf/defaults/render_sla.tt
 plugins/plugins-available/reports/templates/pdf/eventlog.pdf
 plugins/plugins-available/reports/templates/pdf/eventlog.tt
+plugins/plugins-available/reports/templates/pdf/icons.pdf
 plugins/plugins-available/reports/templates/pdf/sla.pdf
 plugins/plugins-available/reports/templates/pdf/sla_host.tt
 plugins/plugins-available/reports/templates/pdf/sla_hostgroup.tt

@@ -86,9 +86,12 @@ return absolute filename for a template
 sub path_to_template {
     my($filename) = @_;
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+    our($path_to_template_cache);
+    return $path_to_template_cache->{$filename} if defined $path_to_template_cache->{$filename};
     # search template paths
     for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
         if(-e $path.'/'.$filename) {
+            $path_to_template_cache->{$filename} = $path.'/'.$filename;
             return $path.'/'.$filename;
         }
     }
@@ -278,23 +281,153 @@ sub get_events {
     my $exclude_pattern  = $c->{'request'}->{'parameters'}->{'exclude_pattern'};
     die('no pattern') unless defined $pattern;
 
-    my $filter = [];
-    push @{$filter}, { time => { '>=' => $start }};
-    push @{$filter}, { time => { '<=' => $end }};
+    my @filter;
+    push @filter, { time => { '>=' => $start }};
+    push @filter, { time => { '<=' => $end }};
 
     if($pattern !~ m/^\s*$/mx) {
         die("invalid pattern: ".$pattern) unless(Thruk::Utils::is_valid_regular_expression($c, $pattern));
-        push @{$filter}, { message => { '~~' => $pattern }};
+        push @filter, { message => { '~~' => $pattern }};
     }
     if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
         die("invalid pattern: ".$exclude_pattern) unless Thruk::Utils::is_valid_regular_expression($c, $exclude_pattern);
-        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+        push @filter, { message => { '!~~' => $exclude_pattern }};
     }
 
-    my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
+    my $event_types = $c->{'request'}->{'parameters'}->{'event_types'};
+    # event type filter set?
+    if(defined $event_types and @{$event_types} > 0) {
+        my @evt_filter;
+        my $typeshash = Thruk::Utils::array2hash($event_types);
+        my $hst_states = 'both';
+        my $svc_states = 'both';
+        for my $state (qw/hard soft both/) {
+            for my $typ (qw/host service/) {
+                if(defined $typeshash->{$typ.'_state_'.$state}) {
+                    $hst_states = $state if $typ eq 'host';
+                    $svc_states = $state if $typ eq 'service';
+                    delete $typeshash->{$typ.'_state_'.$state};
+                }
+            }
+        }
+
+        # host states
+        my $hst_softlogfilter;
+        if($hst_states eq 'hard') {
+            $hst_softlogfilter = { options => { '~' => ';HARD;' }};
+        } elsif($hst_states eq 'soft') {
+            $hst_softlogfilter = { options => { '~' => ';SOFT;' }};
+        }
+        for my $state (qw/up down unreachable/) {
+            if(defined $typeshash->{'host_'.$state}) {
+                my $stateid = 0;
+                $stateid = 1 if $state eq 'down';
+                $stateid = 2 if $state eq 'unreachable';
+                push @evt_filter, { '-and' => [ { type => 'HOST ALERT' }, { state => $stateid }, $hst_softlogfilter ] };
+                delete $typeshash->{'host_'.$state};
+            }
+        }
+
+        # service states
+        my $svc_softlogfilter;
+        if($svc_states eq 'hard') {
+            $svc_softlogfilter = { options => { '~' => ';HARD;' }};
+        } elsif($svc_states eq 'soft') {
+            $svc_softlogfilter = { options => { '~' => ';SOFT;' }};
+        }
+        for my $state (qw/ok warning unknown critical/) {
+            if(defined $typeshash->{'service_'.$state}) {
+                my $stateid = 0;
+                $stateid = 1 if $state eq 'warning';
+                $stateid = 2 if $state eq 'critical';
+                $stateid = 3 if $state eq 'unknown';
+                push @evt_filter, { '-and' => [ { type => 'SERVICE ALERT' }, { state => $stateid }, $svc_softlogfilter ]};
+                delete $typeshash->{'service_'.$state};
+            }
+        }
+
+        # host notifications
+        if(defined $typeshash->{'notification_host'}) {
+            push @evt_filter, { '-and' => [ { type => 'HOST NOTIFICATION' } ] };
+            delete $typeshash->{'notification_host'};
+        }
+
+        # service notifications
+        if(defined $typeshash->{'notification_service'}) {
+            push @evt_filter, { '-and' => [ { type => 'SERVICE NOTIFICATION' } ] };
+            delete $typeshash->{'notification_service'};
+        }
+
+        # combine filter
+        my $or_filter = Thruk::Utils::combine_filter('-or', \@evt_filter);
+        push @filter, $or_filter;
+
+        # unknown filter left?
+        if(scalar keys %{$typeshash} > 0) {
+            die("filter left: ".Dumper($typeshash));
+        }
+    }
+
+    my $total_filter = Thruk::Utils::combine_filter('-and', \@filter);
     my $logs = $c->{'db'}->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
     $c->stash->{'logs'} = $logs;
     return 1;
+}
+
+##########################################################
+
+=head2 log_icon
+
+  log_icon(x, y, icon, file)
+
+set icon for logfiles
+
+=cut
+sub log_icon {
+    my($x, $y, $icon, $pdf_file) = @_;
+
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+
+    $pdf->prImage( { 'file'    => $pdf_file,
+                     'page'    => _icon_to_number($icon),
+                     'imageNo' => 1,
+                     'x'       => $x,
+                     'y'       => $y,
+                   });
+    return 1;
+}
+
+##########################################################
+sub _icon_to_number {
+    my($icon) = @_;
+    our($icon_to_number_cache);
+    return $icon_to_number_cache->{$icon} if defined $icon_to_number_cache->{$icon};
+
+    my $ico = $icon;
+    $ico =~ s/^.*\///mx;
+    my $number = 1;
+    my $tr_table = {
+        'info.png'         => 1,
+        'recovery.png'     => 2,
+        'warning.png'      => 3,
+        'unknown.png'      => 4,
+        'critical.png'     => 5,
+        'command.png'      => 6,
+        'downtime.gif'     => 7,
+        'flapping.gif'     => 8,
+        'serviceevent.gif' => 9,
+        'hostevent.gif'    => 10,
+        'logrotate.png'    => 11,
+        'notify.gif'       => 12,
+        'passiveonly.gif'  => 13,
+        'start.gif'        => 14,
+        'stop.gif'         => 15,
+        'restart.gif'      => 16,
+    };
+    $number = $tr_table->{$ico} if defined $tr_table->{$ico};
+    $icon_to_number_cache->{$icon} = $number;
+    return $number;
 }
 
 ##########################################################

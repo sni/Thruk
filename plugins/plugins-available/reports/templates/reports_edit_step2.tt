@@ -147,7 +147,7 @@
           </tr>
         </table>
       [% ELSIF type == 'hst_initialassumedstate' %]
-        <select name='params.initialassumedhoststate'>
+        <select name='params.[% key %]'>
           <option value=0[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
           <option value=-1[% IF value == '-1' %] selected[% END %]>Current State</option>
           <option value=3[% IF  value ==  '3' %] selected[% END %]>Host Up</option>
@@ -155,7 +155,7 @@
           <option value=5[% IF  value ==  '5' %] selected[% END %]>Host Unreachable</option>
         </select>
       [% ELSIF type == 'svc_initialassumedstate' %]
-        <select name='params.initialassumedservicestate'>
+        <select name='params.[% key %]'>
           <option value="0"[% IF  value ==  '0' %] selected[% END %]>Unspecified</option>
           <option value="-1"[% IF value == '-1' %] selected[% END %]>Current State</option>
           <option value="6"[% IF  value ==  '6' %] selected[% END %]>Service Ok</option>
@@ -163,6 +163,73 @@
           <option value="7"[% IF  value ==  '7' %] selected[% END %]>Service Unknown</option>
           <option value="9"[% IF  value ==  '9' %] selected[% END %]>Service Critical</option>
         </select>
+      [% ELSIF type == 'logclasses' %]
+        <input type="hidden" name="params.[% key %]" value="">
+        [% lookup = {} %]
+        [% FOREACH tmp = value %][% lookup.$tmp = 1 %][% END %]
+        <table class="unavailable_states" style="float: left">
+          <tr>
+            <th align="center" colspan=2>Host Alerts</th>
+          </tr>
+          <tr>
+            <td align="center" colspan=2>
+                <select name='params.[% key %]'>
+                  <option value="host_state_hard"[% IF lookup.exists('host_state_hard') %] selected[% END %]>Hard States</option>
+                  <option value="host_state_soft"[% IF lookup.exists('host_state_soft') %] selected[% END %]>Soft States</option>
+                  <option value="host_state_both"[% IF lookup.exists('host_state_both') %] selected[% END %]>Both</option>
+                </select>
+            </td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="host_up"[% IF lookup.exists('host_up') %] checked[% END %]></td><td>Up</td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="host_down"[% IF lookup.exists('host_down') %] checked[% END %]></td><td>Down</td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="host_unreachable"[% IF lookup.exists('host_unreachable') %] checked[% END %]></td><td>Unreachable</td>
+          </tr>
+        </table>
+
+        <table class="unavailable_states" style="float: left; margin-left: 3px;">
+          <tr>
+            <th align="center" colspan=2>Service Alerts</th>
+          </tr>
+          <tr>
+            <td align="center" colspan=2>
+                <select name='params.[% key %]'>
+                  <option value="service_state_hard"[% IF lookup.exists('service_state_hard') %] selected[% END %]>Hard States</option>
+                  <option value="service_state_soft"[% IF lookup.exists('service_state_soft') %] selected[% END %]>Soft States</option>
+                  <option value="service_state_both"[% IF lookup.exists('service_state_both') %] selected[% END %]>Both</option>
+                </select>
+            </td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="service_ok"[% IF lookup.exists('service_ok') %] checked[% END %]></td><td>OK</td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="service_warning"[% IF lookup.exists('service_warning') %] checked[% END %]></td><td>Warning</td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="service_unknown"[% IF lookup.exists('service_unknown') %] checked[% END %]></td><td>Unknown</td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="service_critical"[% IF lookup.exists('service_critical') %] checked[% END %]></td><td>Critical</td>
+          </tr>
+        </table>
+
+        <table class="unavailable_states" style="float: left; margin-left: 3px;">
+          <tr>
+            <th align="center" colspan=2>Notifications</th>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="notification_host"[%  IF lookup.exists('notification_host') %] checked[% END %]></td><td>Host</td>
+          </tr>
+          <tr>
+            <td align="center"><input type="checkbox" name="params.[% key %]" value="notification_service"[% IF lookup.exists('notification_service') %] checked[% END %]></td><td>Service</td>
+          </tr>
+        </table>
+
       [% ELSE %]
         <input type="text" name="params.[% key %]" value="[% value %]">
       [% END %]
