@@ -1349,16 +1349,26 @@ writable by Thruk.
 
 ex.:
 
-  cron_file = /etc/cron.d/thruk
+  cron_file = /tmp/thruk_cron.tmp
+
+
+==== cron_pre_edit_cmd
+The pre edit cmd can be used to do run a command just before Thruk
+will edit the crontab.
+
+ex.:
+
+  cron_pre_edit_cmd  = /usr/bin/crontab -l > /tmp/thruk_cron.tmp
 
 
 ==== cron_post_edit_cmd
 The post edit cmd is necessary for OMD where you need to reload the
-crontab after editing.
+crontab after editing or for replacing the users cron with the edited
+file.
 
 ex.:
 
-  cron_post_edit_cmd = omd reload crontab
+  cron_post_edit_cmd = crontab /tmp/thruk_cron.tmp
 
 
 ==== thruk_bin

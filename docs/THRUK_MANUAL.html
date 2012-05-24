@@ -9786,15 +9786,24 @@ writable by Thruk.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>cron_file = /etc/cron.d/thruk</tt></pre>
+<pre><tt>cron_file = /tmp/thruk_cron.tmp</tt></pre>
 </div></div>
-<h4 id="_cron_post_edit_cmd">cron_post_edit_cmd</h4>
-<div class="paragraph"><p>The post edit cmd is necessary for OMD where you need to reload the
-crontab after editing.</p></div>
+<h4 id="_cron_pre_edit_cmd">cron_pre_edit_cmd</h4>
+<div class="paragraph"><p>The pre edit cmd can be used to do run a command just before Thruk
+will edit the crontab.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>cron_post_edit_cmd = omd reload crontab</tt></pre>
+<pre><tt>cron_pre_edit_cmd  = /usr/bin/crontab -l &gt; /tmp/thruk_cron.tmp</tt></pre>
+</div></div>
+<h4 id="_cron_post_edit_cmd">cron_post_edit_cmd</h4>
+<div class="paragraph"><p>The post edit cmd is necessary for OMD where you need to reload the
+crontab after editing or for replacing the users cron with the edited
+file.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>cron_post_edit_cmd = crontab /tmp/thruk_cron.tmp</tt></pre>
 </div></div>
 <h4 id="_thruk_bin">thruk_bin</h4>
 <div class="paragraph"><p>Path to your thruk executable. Will be used in cronjobs.</p></div>
@@ -10532,7 +10541,7 @@ send one report at multiple times.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-05-24 09:27:19 CEST
+Last updated 2012-05-25 00:10:40 CEST
 </div>
 </div>
 </body>
