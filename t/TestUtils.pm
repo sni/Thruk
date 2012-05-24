@@ -126,10 +126,21 @@ sub test_page {
         }
     }
 
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job.cgi\?job=(.*)$/) {
+    $return->{'content'} = $request->content;
+    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(.*)$/) {
         # is it a background job page?
         wait_for_job($1);
         my $location = $request->{'_headers'}->{'location'};
+        $request = _request($location);
+        if($request->is_error) {
+            fail('Request '.$location.' should succeed');
+            BAIL_OUT(Dumper($request));
+        }
+    }
+    elsif(defined $return->{'content'} and $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(.*)$/) {
+        # is it a background job page?
+        wait_for_job($1);
+        my $location = "/thruk/cgi-bin/job.cgi?job=".$1;
         $request = _request($location);
         if($request->is_error) {
             fail('Request '.$location.' should succeed');
@@ -151,7 +162,6 @@ sub test_page {
     } else {
         ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or BAIL_OUT(Dumper($request));
     }
-    $return->{'content'} = $request->content;
 
     # text that should appear
     if(defined $opts->{'like'}) {
