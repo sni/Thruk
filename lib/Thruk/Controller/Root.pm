@@ -130,10 +130,16 @@ sub begin : Private {
         cookie_path                         => $c->config->{'url_prefix'}.'thruk',
         thruk_bin                           => '/usr/bin/thruk',
         thruk_init                          => '/etc/init.d/thruk',
+        thruk_shell                         => '/bin/bash -l -c',
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
         $c->config->{$key} = exists $c->config->{$key} ? $c->config->{$key} : $defaults->{$key};
+    }
+
+    # make a nice path
+    for my $key (qw/tmp_path var_path/) {
+        $c->config->{$key} =~ s/\/$//mx;
     }
 
     for my $key (qw/cmd_quick_status cmd_defaults/) {

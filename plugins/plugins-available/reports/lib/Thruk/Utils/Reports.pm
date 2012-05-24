@@ -396,7 +396,9 @@ sub update_cron_file {
 
     # gather reporting send types from all reports
     my $cron_entries = [];
-    for my $r (@{get_report_list($c, 1)}) {
+    my $reports = get_report_list($c, 1);
+    @{$reports} = sort { $a->{'nr'} <=> $b->{'nr'} } @{$reports};
+    for my $r (@{$reports}) {
         next unless defined $r->{'send_types'};
         next unless scalar @{$r->{'send_types'}} > 0;
         my $mail = 0;
@@ -437,15 +439,15 @@ sub _get_cron_entry {
     my $cmd = _get_report_cmd($c, $report, $mail);
 
     if($st->{'type'} eq 'month') {
-        my $cron = sprintf("%s %s %s * *", $st->{'minute'}, $st->{'hour'}, $st->{'day'});
+        my $cron = sprintf("% 2s % 2s % 2s  *  *", $st->{'minute'}, $st->{'hour'}, $st->{'day'});
         return($cron, $cmd);
     }
     elsif($st->{'type'} eq 'week') {
-        my $cron = sprintf("%s %s * * %s", $st->{'minute'}, $st->{'hour'}, $st->{'week_day'});
+        my $cron = sprintf("% 2s % 2s  *  * % 2s", $st->{'minute'}, $st->{'hour'}, $st->{'week_day'});
         return($cron, $cmd);
     }
     elsif($st->{'type'} eq 'day') {
-        my $cron = sprintf("%s %s * * *", $st->{'minute'}, $st->{'hour'});
+        my $cron = sprintf("% 2s % 2s  *  *  *", $st->{'minute'}, $st->{'hour'});
         return($cron, $cmd);
     } else {
         confess("unknown cron type: ".$st->{'type'});
@@ -597,7 +599,15 @@ sub _get_report_cmd {
     if($mail) {
         $type = 'reportmail';
     }
-    my $cmd = "/bin/bash -l -c 'cd ".$c->config->{'project_root'}." && ".$thruk_bin." -a ".$type."=".$report->{'nr'}." >/dev/null 2>".$c->{'tmp_path'}.'/reports/'.$report->{'nr'}.".log'";
+    my $cmd = sprintf("%s 'cd %s && %s -a % 10s=%-3s >/dev/null 2>%s/reports/%d.log'",
+                            $c->config->{'thruk_shell'},
+                            $c->config->{'project_root'},
+                            $thruk_bin,
+                            $type,
+                            $report->{'nr'},
+                            $c->{'tmp_path'},
+                            $report->{'nr'},
+                    );
     return $cmd;
 }
 

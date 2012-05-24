@@ -1037,7 +1037,7 @@ sub update_cron_file {
                 push @orig_cron, $line;
                 next;
             }
-            $thruk_started = 0 if $line =~ m/^\#\ END\ OF\ THRUKS\ PART/mx;
+            $thruk_started = 0 if $line =~ m/^\#\ END\ OF\ THRUK/mx;
 
             if($line =~ m/^\#\ (\w+)$/mx) {
                 $lastsection = $1;
@@ -1068,7 +1068,7 @@ sub update_cron_file {
         print $fh $line, "\n";
     }
 
-    print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN #\n";
+    print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN\n";
     print $fh "##############################################################\n";
     for my $s (sort keys %{$sections}) {
         print $fh '# '.$s."\n";
@@ -1077,7 +1077,7 @@ sub update_cron_file {
         }
     }
     print $fh "##############################################################\n";
-    print $fh "# END OF THRUKS PART                                         #\n";
+    print $fh "# END OF THRUK\n";
     close($fh);
 
     if($c->config->{'cron_post_edit_cmd'}) {
