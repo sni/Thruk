@@ -11,6 +11,8 @@ debian/rules
 debian/thruk.lintian-overrides
 debian/thruk.logrotate
 debian/thruk.manpages
+docs/api/cli.html
+docs/api/pdf.html
 docs/FAQ.html
 docs/FAQ.txt
 docs/source/arch.graffle
