@@ -1854,38 +1854,10 @@ SLA Reporting consists of several parts.
 
 ==== Report Configuration
 
-Currently it's not possible to edit reports directly with the web
-interface. You need to create a simple report file like this:
-
-var/reports/1.txt:
----------------------
-  {
-    'name'     => 'Service SLA Report',
-    'template' => 'sla.tt',
-    'user'     => 'thrukadmin',
-    'to'       => 'rcpt@domain.de',
-    'params'   => {
-      'sla'        => '95',
-      'timeperiod' => 'last12months',
-      'host'       => 'hostname',
-      'service'    => 'servicename',
-      'breakdown'  => 'months',
-    }
-  }
----------------------
-
-Put that file in a 'reports' folder below your 'var_path'.
-
-You may set the following additional fields:
-
- - from: set 'from' address for
- - to: set 'to' address for the mail recipient
- - cc: set 'cc' address for mail reports
- - bcc: set 'bcc' address for mail reports
- - subject: set mail subject
-
-The params list is a list of values, just like used on the
-availability page and defines http post parameter used to generate the
+You can create and adjust report setttings on the 'Reporting' page.
+Make sure the plugin is enabled. After selecting a template for your
+report you have to set specific types of input fields on the second
+page. If you make you report public, eveyone can view and refresh the
 report.
 
 ==== Master PDF
@@ -1903,12 +1875,6 @@ copy the 'sla.tt' file into a 'pdf' subfolder of the
 
 ==== Sending Reports By Mail
 
-It's quite easy to setup sla reports by mail. All you need is a
-cronjob running the thruk command line tool:
-
----------------------
-0 0 1 * * /usr/bin/thruk -a reportmail=1
----------------------
-
-This will send you the montly report defined by the
-'var/reports/1.txt' above every first day of the month.
+It's quite easy to setup sla reports by mail. All you need is to
+create send option in the report configuration. It is even possible to
+send one report at multiple times.
