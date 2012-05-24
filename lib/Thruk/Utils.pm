@@ -1018,13 +1018,27 @@ sub update_cron_file {
         set_message($c, 'fail_message', 'no \'cron_file\' set, check your settings!');
         return;
     }
+
+    if($c->config->{'cron_pre_edit_cmd'}) {
+        system($c->config->{'cron_pre_edit_cmd'});
+    }
+
     # read complete file
     my $sections = {};
+    my @orig_cron;
+    my $thruk_started = 0;
     if(-e $c->config->{'cron_file'}) {
         open(my $fh, '<', $c->config->{'cron_file'}) or die('cannot read '.$c->config->{'cron_file'}.': '.$!);
         my $lastsection;
         while(my $line = <$fh>) {
             chomp($line);
+            $thruk_started = 1 if $line =~ m/^\#\ THIS\ PART\ IS\ WRITTEN\ BY\ THRUK/mx;
+            unless($thruk_started) {
+                push @orig_cron, $line;
+                next;
+            }
+            $thruk_started = 0 if $line =~ m/^\#\ END\ OF\ THRUKS\ PART/mx;
+
             if($line =~ m/^\#\ (\w+)$/mx) {
                 $lastsection = $1;
                 next;
@@ -1050,16 +1064,20 @@ sub update_cron_file {
     }
 
     open(my $fh, '>', $c->config->{'cron_file'}) or die('cannot write ('.$>.','.$<.')'.$c->config->{'cron_file'}.': '.$!);
-    print $fh "##############################################################\n";
-    print $fh "# THIS FILE IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN #\n";
+    for my $line (@orig_cron) {
+        print $fh $line, "\n";
+    }
+
+    print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN #\n";
     print $fh "##############################################################\n";
     for my $s (sort keys %{$sections}) {
         print $fh '# '.$s."\n";
         for my $line (@{$sections->{$s}}) {
             print $fh $line, "\n";
         }
-        print $fh "\n";
     }
+    print $fh "##############################################################\n";
+    print $fh "# END OF THRUKS PART                                         #\n";
     close($fh);
 
     if($c->config->{'cron_post_edit_cmd'}) {

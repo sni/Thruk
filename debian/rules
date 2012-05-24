@@ -52,7 +52,6 @@ install: build
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/themes/themes-enabled
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-available
 	mkdir -p $(CURDIR)/debian/thruk/etc/thruk/plugins/plugins-enabled
-	mkdir -p $(CURDIR)/debian/thruk/etc/cron.d
 	rsync -av . $(CURDIR)/debian/thruk/usr/share/thruk/
 
 	rm -rf $(CURDIR)/debian/thruk/usr/share/thruk/var

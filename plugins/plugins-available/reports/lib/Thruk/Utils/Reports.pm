@@ -597,7 +597,7 @@ sub _get_report_cmd {
     if($mail) {
         $type = 'reportmail';
     }
-    my $cmd = "cd ".$c->config->{'project_root'}." && ".$thruk_bin." -a ".$type."=".$report->{'nr'}." >/dev/null 2>".$c->{'tmp_path'}.'/reports/'.$report->{'nr'}.'.log';
+    my $cmd = "/bin/sh -c 'cd ".$c->config->{'project_root'}." && ".$thruk_bin." -a ".$type."=".$report->{'nr'}." >/dev/null 2>".$c->{'tmp_path'}.'/reports/'.$report->{'nr'}.".log'";
     return $cmd;
 }
 

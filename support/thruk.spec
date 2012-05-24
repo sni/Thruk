@@ -61,7 +61,6 @@ yes n | perl Makefile.PL
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/themes/themes-enabled
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-available
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/thruk/plugins/plugins-enabled
-%{__mkdir} -p %{buildroot}%{_sysconfdir}/cron.d
 %{__mkdir} -p %{buildroot}%{_initrddir}
 %{__mkdir} -p %{buildroot}%{_datadir}/thruk
 %{__mkdir} -p %{buildroot}/usr/lib/thruk
@@ -164,19 +163,15 @@ if [ -d /tmp/thruk_update/ssi/. ]; then
 fi
 rm -rf /tmp/thruk_update
 mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
-rm -f /etc/cron.d/thruk
-chmod go+x /etc/cron.d/
-ln -s /var/lib/thruk/cron /etc/cron.d/thruk
-touch /var/lib/thruk/cron
 %if %{defined suse_version}
-chown wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /var/lib/thruk/cron
+chown wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk
 a2enmod alias
 a2enmod fcgid
 a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 %else
-chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /var/lib/thruk/cron
+chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 %endif
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."

@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-05-22 08:57:06.955772341 +0200
-+++ b/thruk.conf	2012-05-22 08:57:27.767896869 +0200
+--- thruk.conf-2012-05-24	2012-05-24 19:45:10.098056801 +0200
++++ thruk.conf	2012-05-24 19:46:07.344057224 +0200
 @@ -62,11 +62,11 @@
  
  ######################################
@@ -56,16 +56,23 @@
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -341,7 +341,7 @@
+@@ -341,23 +341,23 @@
  # Specifiy a file which is then completly under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
--#cron_file =
-+cron_file = /etc/cron.d/thruk
+-cron_file          = /tmp/thruk_cron.tmp
++cron_file          = /var/cache/thruk/thruk_cron.tmp
+ 
+ # The pre edit cmd can be used to do run a command just before thruk
+ # will edit the crontab.
+-cron_pre_edit_cmd  = /usr/bin/crontab -l > /tmp/thruk_cron.tmp
++cron_pre_edit_cmd  = /usr/bin/crontab -l > /var/cache/thruk/thruk_cron.tmp
  
  # The post edit cmd is necessary for OMD where you need to reload the
  # crontab after editing.
-@@ -350,10 +350,10 @@
+-cron_post_edit_cmd = /usr/bin/crontab /tmp/thruk_cron.tmp && rm -f /tmp/thruk_cron.tmp
++cron_post_edit_cmd = /usr/bin/crontab /var/cache/thruk/thruk_cron.tmp && rm -f /var/cache/thruk/thruk_cron.tmp
+ 
  #####################################
  # path setting
  # Path to your thruk executable. Will be used in cronjobs.
@@ -78,7 +85,7 @@
  
  #####################################
  # Waiting is a livestatus feature. When enabled, Thruk will wait
-@@ -382,6 +382,20 @@
+@@ -386,6 +386,20 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -99,7 +106,7 @@
  #    <peer>
  #        name   = Local Nagios
  #        type   = livestatus
-@@ -431,7 +445,7 @@
+@@ -435,7 +449,7 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
