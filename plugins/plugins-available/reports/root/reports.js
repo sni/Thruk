@@ -86,9 +86,13 @@ function add_report_send_row(e) {
 
 /* update report list status */
 function update_reports_status() {
-    jQuery('#reports_table').load('reports.cgi #statusTable');
+    /* adding timestamp makes IE happy */
+    var ts = new Date().getTime();
+    jQuery('#reports_table').load('reports.cgi?_=' + ts + ' #statusTable');
+
     // now count is_running elements
-    if(jQuery('.is_running').size() == 0) {
+    size = jQuery('.is_running').size();
+    if(size == 0) {
         window.clearInterval(update_reports_status_int);
     }
 }
