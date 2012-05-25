@@ -144,7 +144,7 @@ sub add_defaults {
     $c->stash->{'param_backend'}  = $backend;
     if($backend ne '' and defined $c->{'db'}) {
         my $backends = {};
-        for my $b (ref $backend eq 'ARRAY' ? @{$backend} : ($backend)) {
+        for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
             $backends->{$b} = 1;
         }
 

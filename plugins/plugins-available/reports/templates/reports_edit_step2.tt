@@ -69,9 +69,9 @@
           <option value="no"[%  IF value == 'no'  %] selected[% END %]>No</option>
         </select>
       [% ELSIF type == 'hosts' OR type == 'hostgroups' %]
-        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, '[% type %]', { autosubmit:false })"[% END %]>
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, '[% type %]', { url: 'status.cgi?format=search&amp;backend=[% r.backends.join(',') %]&amp;type=hosts', autosubmit:false })"[% END %]>
       [% ELSIF type == 'services' %]
-        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'params.host' })"[% END %]>
+        <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;backend=[% r.backends.join(',') %]&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'params.host' })"[% END %]>
       [% ELSIF type == 'rptimeperiod' %]
         <select name="params.[% key %]">
           <option value="today"[% IF        value == 'today'        %] selected[% END %]>Today</option>
