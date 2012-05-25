@@ -248,7 +248,7 @@ sub generate_report {
     }
 
     # empty logfile
-    open(my $fh, '>'.$c->{'tmp_path'}.'/reports/'.$nr.'.log');
+    open(my $fh, '>'.$c->config->{'tmp_path'}.'/reports/'.$nr.'.log');
     close($fh);
 
     # update report runtime data
@@ -605,7 +605,7 @@ sub _get_report_cmd {
                             $thruk_bin,
                             $type,
                             $report->{'nr'},
-                            $c->{'tmp_path'},
+                            $c->config->{'tmp_path'},
                             $report->{'nr'},
                     );
     return $cmd;
