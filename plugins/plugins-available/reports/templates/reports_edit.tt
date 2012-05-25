@@ -96,7 +96,7 @@
   </tr>
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      <a href="reports.cgi?action=remove&amp;report=[% r.nr %]" class="report_remove_button report_button" style="width: 80px;">Delete</a>
+      [% IF r.nr != "new" %]<a href="reports.cgi?action=remove&amp;report=[% r.nr %]" class="report_remove_button report_button" style="width: 80px;">Delete</a>[% END %]
       <button class="right_arrow_button report_button" style="width: 160px;">Continue</button>
     </td>
   </tr>
