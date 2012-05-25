@@ -248,6 +248,7 @@ plugins/plugins-available/reports/templates/pdf/sla.pdf
 plugins/plugins-available/reports/templates/pdf/sla_host.tt
 plugins/plugins-available/reports/templates/pdf/sla_hostgroup.tt
 plugins/plugins-available/reports/templates/pdf/sla_service.tt
+plugins/plugins-available/reports/templates/pdf/sla_servicegroup.tt
 plugins/plugins-available/reports/templates/reports.tt
 plugins/plugins-available/reports/templates/reports_edit.tt
 plugins/plugins-available/reports/templates/reports_edit_step2.tt

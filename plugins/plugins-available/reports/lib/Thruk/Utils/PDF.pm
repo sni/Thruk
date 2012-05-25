@@ -399,6 +399,25 @@ sub log_icon {
 }
 
 ##########################################################
+
+=head2 page_footer
+
+  page_footer(x, y, page, size, color)
+
+print page footer
+
+=cut
+sub page_footer {
+    my($x, $y, $page, $size, $color) = @_;
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+    $size = 10 unless defined $size;
+    $color = 'white' unless defined $color;
+    font($size, $color);
+    $pdf->prText($x,$y, $page);
+    return 1;
+}
+
+##########################################################
 sub _icon_to_number {
     my($icon) = @_;
     our($icon_to_number_cache);
@@ -514,7 +533,7 @@ sub _generate_bar_chart {
     my $service        = $c->{'request'}->{'parameters'}->{'service'};
     confess("No host in parameters:\n".    Dumper($c->{'request'}->{'parameters'})) unless defined $host;
     my $avail;
-    if(defined $service) {
+    if($service) {
         $avail = $c->stash->{'avail_data'}->{'services'}->{$host}->{$service};
     } else {
         $avail = $c->stash->{'avail_data'}->{'hosts'}->{$host};

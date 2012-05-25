@@ -151,6 +151,9 @@ sub _process_raw_request {
             elsif($type eq 'hostgroup' or $type eq 'hostgroups') {
                 $data = $c->{'db'}->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
             }
+            elsif($type eq 'servicegroup' or $type eq 'servicegroups') {
+                $data = $c->{'db'}->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ] );
+            }
             elsif($type eq 'service' or $type eq 'services') {
                 my $host = $c->{'request'}->{'parameters'}->{'host'};
                 my $additional_filter;
