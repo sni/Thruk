@@ -600,9 +600,9 @@ sub _get_report_cmd {
     if($mail) {
         $type = 'reportmail';
     }
-    my $cmd = sprintf("%s 'cd %s && %s -a % 10s=%-3s' >/dev/null 2>%s/reports/%d.log",
-                            $c->config->{'thruk_shell'},
+    my $cmd = sprintf("cd %s && %s '%s -a % 10s=%-3s' >/dev/null 2>%s/reports/%d.log",
                             $c->config->{'project_root'},
+                            $c->config->{'thruk_shell'},
                             $thruk_bin,
                             $type,
                             $report->{'nr'},
