@@ -564,6 +564,7 @@ sub _read_report_file {
     if(-s $log) {
         $report->{'failed'} = 1;
         $report->{'error'}  = read_file($log);
+        $report->{'var'}->{'is_running'} = 0;
     }
 
 
@@ -599,7 +600,7 @@ sub _get_report_cmd {
     if($mail) {
         $type = 'reportmail';
     }
-    my $cmd = sprintf("%s 'cd %s && %s -a % 10s=%-3s >/dev/null 2>%s/reports/%d.log'",
+    my $cmd = sprintf("%s 'cd %s && %s -a % 10s=%-3s' >/dev/null 2>%s/reports/%d.log",
                             $c->config->{'thruk_shell'},
                             $c->config->{'project_root'},
                             $thruk_bin,

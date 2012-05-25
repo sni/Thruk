@@ -41,9 +41,13 @@ sub cmd {
     my $c         = shift;
     my $conf      = shift;
 
+    my $cmd = $c->config->{'thruk_shell'}." '".$conf->{'cmd'}."'";
+    if($conf->{'no_shell'}) {
+        $cmd = $conf->{'cmd'};
+    }
+
     if($c->config->{'no_external_job_forks'}) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
-        my $cmd = $c->config->{'thruk_shell'}." '".$conf->{'cmd'}."'";
         my $out = `$cmd`;
         return _finished_job_page($c, $c->stash, undef, $out);
     }
@@ -61,7 +65,7 @@ sub cmd {
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
 
-        exec("/bin/sh -c '".$conf->{'cmd'}."'");
+        exec($cmd);
         exit(1); # just to be sure
     }
 }

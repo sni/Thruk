@@ -76,17 +76,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $self->report_edit_step2($c, $report_nr);
         }
         elsif($action eq 'update') {
-            Thruk::Utils::Reports::set_running($c, $report_nr, -1, time());
-            my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
-            if($report) {
-                unlink($c->config->{'tmp_path'}."/reports/".$report_nr.".log");
-                my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);
-                Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1 });
-                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
-            } else {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
-            }
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+            return $self->report_update($c, $report_nr);
         }
         elsif($action eq 'save') {
             return $self->report_save($c, $report_nr);
@@ -199,6 +189,26 @@ sub report_save {
 }
 
 ##########################################################
+
+=head2 report_update
+
+=cut
+sub report_update {
+    my($self, $c, $report_nr) = @_;
+
+    my $report = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
+    if($report) {
+        Thruk::Utils::Reports::set_running($c, $report_nr, -1, time());
+        unlink($c->config->{'tmp_path'}."/reports/".$report_nr.".log");
+        my $cmd = Thruk::Utils::Reports::_get_report_cmd($c, $report, 0);
+        Thruk::Utils::External::cmd($c, { cmd => $cmd, 'background' => 1, 'no_shell' => 1 });
+        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report scheduled for update' });
+    } else {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+    }
+    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+}
+
 
 =head1 AUTHOR
 
