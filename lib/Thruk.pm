@@ -1,5 +1,15 @@
 package Thruk;
 
+=head1 NAME
+
+Thruk - Catalyst based monitoring web interface
+
+=head1 DESCRIPTION
+
+Catalyst based monitoring web interface for Nagios, Icinga and Shinken
+
+=cut
+
 use 5.008000;
 use strict;
 use warnings;
@@ -363,6 +373,8 @@ if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
 
 ###################################################
 
+=head1 METHODS
+
 =head2 check_user_roles_wrapper
 
   check_user_roles_wrapper()
@@ -378,26 +390,13 @@ sub check_user_roles_wrapper {
     return 0;
 }
 
-
-=head1 NAME
-
-Thruk - Catalyst based monitoring web interface
-
-=head1 SYNOPSIS
-
-    script/thruk_server.pl
-
-=head1 DESCRIPTION
-
-[enter your description here]
-
 =head1 SEE ALSO
 
 L<Thruk::Controller::Root>, L<Catalyst>
 
 =head1 AUTHOR
 
-Sven Nierlein, 2010, <nierlein@cpan.org>
+Sven Nierlein, 2010-2012, <nierlein@cpan.org>
 
 =head1 LICENSE
 

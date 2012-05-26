@@ -6,7 +6,8 @@ Thruk::Utils::CLI - Utilities Collection for CLI Tool
 
 =head1 DESCRIPTION
 
-Utilities Collection for CLI Tool
+Utilities Collection for CLI scripting with Thruk. Allows you to access internal
+structures and change config information.
 
 =cut
 
@@ -66,11 +67,16 @@ sub get_c {
 
 ##############################################
 
+=head1 OBJECT CONFIGURATION
+
+These methods will only be available if you have the config tool plugin enabled
+and if you set core config items to access the core objects config.
+
 =head2 get_object_db
 
   get_object_db()
 
-return config database object
+Return config database as a L<Monitoring::Config|Monitoring::Config> object.
 
 =cut
 sub get_object_db {
@@ -87,7 +93,8 @@ sub get_object_db {
 
   store_objects()
 
-store changed object, not yet saved to disk
+Store changed objects. Changes will be stashed into Thruks internal object cache
+and can then be saved, reviewed or discarded.
 
 =cut
 sub store_objects {
@@ -100,6 +107,9 @@ sub store_objects {
     return;
 }
 
+
+##############################################
+# INTERNAL SUBS
 ##############################################
 sub _read_secret {
     my($self) = @_;

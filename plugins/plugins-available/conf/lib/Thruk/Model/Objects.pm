@@ -7,7 +7,7 @@ use base qw/ Catalyst::Model::Objects::Class /;
 
 =head1 NAME
 
-Thruk::Model::Thruk
+Thruk::Model::Thruk - Thruk Objects Model Class
 
 =head1 SYNOPSIS
 
