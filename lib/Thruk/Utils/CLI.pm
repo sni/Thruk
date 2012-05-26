@@ -61,7 +61,7 @@ sub new {
 
     get_c()
 
-return L<Catalyst|catalysts> context object
+return L<Catalyst|Catalyst> context object
 
 =cut
 sub get_c {
