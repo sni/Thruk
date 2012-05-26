@@ -19,15 +19,16 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=thruk
 PIDFILE=/var/cache/thruk/thruk.pid
 STARTURL="http://localhost/thruk/cgi-bin/remote.cgi"
+WGET="/usr/bin/wget"
+
 if [ ! -z $OMD_SITE ]; then
     STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi"
     PIDFILE=$OMD_ROOT/tmp/thruk/thruk.pid
-fi
-WGET="/usr/bin/wget"
-
-# load extra environment variables
-if [ -f /etc/sysconfig/thruk ]; then
-  . /etc/sysconfig/thruk
+else
+    # load extra environment variables
+    if [ -f /etc/sysconfig/thruk ]; then
+      . /etc/sysconfig/thruk
+    fi
 fi
 
 # make it possible to override startcmd by sysconfig
@@ -42,8 +43,10 @@ case "$1" in
         elif [ ! -f $WGET ]; then
             echo "wget not found, cannot send initial request"
         else
-            if [ -d "/var/lock/subsys" ]; then
-              touch /var/lock/subsys/thruk
+            if [ ! -z $OMD_SITE ]; then
+              if [ -d "/var/lock/subsys" ]; then
+                touch /var/lock/subsys/thruk
+              fi
             fi
             echo -n "Starting $NAME..."
             $STARTCMD > /dev/null 2>&1 &
@@ -65,7 +68,9 @@ case "$1" in
     ;;
     stop)
         echo -n "Stopping $NAME..."
-        rm -f /var/lock/subsys/thruk >/dev/null 2>&1
+        if [ ! -z $OMD_SITE ]; then
+          rm -f /var/lock/subsys/thruk >/dev/null 2>&1
+        fi
         pid=`cat $PIDFILE 2>/dev/null`
         if [ -z $pid ]; then
             echo ". Not running."
