@@ -1883,8 +1883,22 @@ The template defines the dynamic content of the sla report. You may
 copy the 'sla.tt' file into a 'pdf' subfolder of the
 'user_template_path' and adjust it to your needs.
 
+See http://thruk.org/api/Thruk/Utils/PDF.html for details on
+available functions and examples.
+
 ==== Sending Reports By Mail
 
 It's quite easy to setup sla reports by mail. All you need is to
 create send option in the report configuration. It is even possible to
 send one report at multiple times.
+
+
+
+=== CLI Tool & Scripting
+
+It is possible to do comprehensive scripting with Thruk. For example
+set downtimes automatically, schedule reports or change the objects
+of your monitoring core configuration.
+
+See http://thruk.org/api/Thruk/Utils/CLI.html for details and examples.
+
