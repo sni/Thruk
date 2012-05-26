@@ -63,6 +63,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $refresh   = 0;
     $refresh = $c->{'request'}->{'parameters'}->{'refresh'} if exists $c->{'request'}->{'parameters'}->{'refresh'};
 
+    if($action eq 'updatecron') {
+        if(Thruk::Utils::Reports::update_cron_file($c)) {
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'updated crontab' });
+        } else {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'failed to update crontab' });
+        }
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+    }
+
     if(defined $report_nr) {
         if($action eq 'show') {
             if(!Thruk::Utils::Reports::report_show($c, $report_nr, $refresh)) {

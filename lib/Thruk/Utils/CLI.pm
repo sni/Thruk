@@ -302,8 +302,8 @@ sub _run_commands {
         $data->{'output'} = _request_url($c, $url)
     }
 
-    # report
-    if($action =~ /^report=(.*)$/mx) {
+    # report or report mails
+    if($action =~ /^report(\w*)=(.*)$/mx) {
         eval {
             require Thruk::Utils::Reports;
         };
@@ -312,21 +312,20 @@ sub _run_commands {
             $data->{'rc'}     = 1;
             return $data;
         }
-        my $nr = $1;
-        my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
-        if(defined $pdf_file) {
-            $data->{'output'} = read_file($pdf_file);
-        }
-    }
-
-    # report mail
-    if($action =~ /^reportmail=(.*)$/mx) {
-        my $nr = $1;
-        if(Thruk::Utils::Reports::report_send($c, $nr)) {
-            $data->{'output'} = "mail send successfully\n";
+        my $mail = $1;
+        my $nr   = $2;
+        if($mail eq 'mail') {
+            if(Thruk::Utils::Reports::report_send($c, $nr)) {
+                $data->{'output'} = "mail send successfully\n";
+            } else {
+                $data->{'output'} = "cannot send mail\n";
+                $data->{'rc'}     = 1;
+            }
         } else {
-            $data->{'output'} = "cannot send mail\n";
-            $data->{'rc'}     = 1;
+            my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
+            if(defined $pdf_file) {
+                $data->{'output'} = read_file($pdf_file);
+            }
         }
     }
 

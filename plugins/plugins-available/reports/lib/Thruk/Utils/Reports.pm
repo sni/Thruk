@@ -207,6 +207,10 @@ sub report_remove {
     push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
     push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.log' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     return 1 if unlink @files;
+
+    # remove cron entries
+    Thruk::Utils::Reports::update_cron_file($c);
+
     return;
 }
 
