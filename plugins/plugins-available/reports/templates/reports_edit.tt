@@ -65,15 +65,15 @@
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Send Report</b></td>
     <td class="dataOdd" align="left" colspan=2>
-        <table id="report_sends">
-          [% st = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0 } %]
-          [% PROCESS _report_send_types.tt nr = 0 %]
-          [% FOREACH st = r.send_types %]
+        <table id="cron_entries">
+          [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0 } %]
+          [% PROCESS _cron_edit.tt nr = 0 %]
+          [% FOREACH cr = r.send_types %]
               [% nr = loop.index + 1 %]
-              [% PROCESS _report_send_types.tt %]
+              [% PROCESS _cron_edit.tt %]
           [% END %]
           <tr>
-            <td colspan=3 class='newfilter' onclick="add_report_send_row(this); return false;" style="min-width:100px;" nowrap>
+            <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
                 <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" name="add">
                 add more
             </td>

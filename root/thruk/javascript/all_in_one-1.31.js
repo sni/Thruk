@@ -604,6 +604,61 @@ var sort_by = function(field, reverse, primer) {
    }
 }
 
+/* make right pane visible */
+function cron_change_date(id) {
+    // get selected value
+    type_sel = document.getElementById(id);
+    var nr = type_sel.id.match(/_(\d+)$/)[1];
+    type     = type_sel.options[type_sel.selectedIndex].value;
+    hideElement('div_send_month_'+nr);
+    hideElement('div_send_week_'+nr);
+    hideElement('div_send_day_'+nr);
+    showElement('div_send_'+type+'_'+nr);
+}
+
+/* remove a row */
+function delete_cron_row(e) {
+    var row = e;
+    /* find first table row */
+    while(row.parentNode != undefined && row.tagName != 'TR') { row = row.parentNode; }
+    row.parentNode.deleteRow(row.rowIndex);
+    return false;
+}
+
+/* remove a row */
+function add_cron_row(tbl_id) {
+    var tbl            = document.getElementById(tbl_id);
+    var tblBody        = tbl.tBodies[0];
+
+    /* get first table row */
+    var row = tblBody.rows[0];
+    var newRow = row.cloneNode(true);
+
+    /* get highest number */
+    var new_nr = 1;
+    jQuery.each(tblBody.rows, function(i, r) {
+        if(r.id) {
+            var nr = r.id.match(/_(\d+)$/)[1];
+            if(nr >= new_nr) {
+                new_nr = parseInt(nr) + 1;
+            }
+        }
+    });
+
+    /* replace ids / names */
+    replace_ids_and_names(newRow, new_nr);
+    var all = newRow.getElementsByTagName('*');
+    for (var i = -1, l = all.length; ++i < l;) {
+        var elem = all[i];
+        replace_ids_and_names(elem, new_nr);
+    }
+
+    newRow.style.display = "";
+
+    var lastRowNr      = tblBody.rows.length - 1;
+    var currentLastRow = tblBody.rows[lastRowNr];
+    tblBody.insertBefore(newRow, currentLastRow);
+}
 
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
