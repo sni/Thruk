@@ -441,22 +441,8 @@ sub _get_cron_entry {
     my($c, $report, $st, $mail) = @_;
 
     my $cmd = _get_report_cmd($c, $report, $mail);
-
-    if($st->{'type'} eq 'month') {
-        my $cron = sprintf("% 2s % 2s % 2s  *  *", $st->{'minute'}, $st->{'hour'}, $st->{'day'});
-        return($cron, $cmd);
-    }
-    elsif($st->{'type'} eq 'week') {
-        my $cron = sprintf("% 2s % 2s  *  * % 2s", $st->{'minute'}, $st->{'hour'}, $st->{'week_day'});
-        return($cron, $cmd);
-    }
-    elsif($st->{'type'} eq 'day') {
-        my $cron = sprintf("% 2s % 2s  *  *  *", $st->{'minute'}, $st->{'hour'});
-        return($cron, $cmd);
-    } else {
-        confess("unknown cron type: ".$st->{'type'});
-    }
-    return;
+    my $time = Thruk::Utils::get_cron_time_entry($st);
+    return($time, $cmd);
 }
 
 ##########################################################

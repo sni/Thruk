@@ -1060,6 +1060,7 @@ sub update_cron_file {
     }
     $sections->{$section} = [];
     for my $entry (@{$entries}) {
+        next unless defined $entry->[0];
         push @{$sections->{$section}}, $entry->[0]." ".$user.$entry->[1];
     }
 
@@ -1068,22 +1069,58 @@ sub update_cron_file {
         print $fh $line, "\n";
     }
 
-    print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN\n";
-    print $fh "##############################################################\n";
+    my $header_printed = 0;
     for my $s (sort keys %{$sections}) {
+        next if scalar @{$sections->{$s}} == 0;
+        unless($header_printed) {
+            print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN\n";
+            print $fh "##############################################################\n";
+            $header_printed = 1;
+        }
         print $fh '# '.$s."\n";
         for my $line (@{$sections->{$s}}) {
             print $fh $line, "\n";
         }
     }
-    print $fh "##############################################################\n";
-    print $fh "# END OF THRUK\n";
+    if($header_printed) {
+        print $fh "##############################################################\n";
+        print $fh "# END OF THRUK\n";
+    }
     close($fh);
 
     if($c->config->{'cron_post_edit_cmd'}) {
         system($c->config->{'cron_post_edit_cmd'});
     }
     return 1;
+}
+
+##############################################
+
+=head2 get_cron_time_entry
+
+  get_cron_time_entry($cronentry)
+
+return time part of crontab entry
+
+=cut
+
+sub get_cron_time_entry {
+    my($cr) = @_;
+    my $cron;
+    if($cr->{'type'} eq 'month') {
+        $cron = sprintf("% 2s % 2s % 2s  *  *", $cr->{'minute'}, $cr->{'hour'}, $cr->{'day'});
+    }
+    elsif($cr->{'type'} eq 'week') {
+        if($cr->{'week_day'}) {
+            $cron = sprintf("% 2s % 2s  *  * % 2s", $cr->{'minute'}, $cr->{'hour'}, $cr->{'week_day'});
+        }
+    }
+    elsif($cr->{'type'} eq 'day') {
+        $cron = sprintf("% 2s % 2s  *  *  *", $cr->{'minute'}, $cr->{'hour'});
+    } else {
+        confess("unknown cron type: ".$cr->{'type'});
+    }
+    return $cron;
 }
 
 ########################################
