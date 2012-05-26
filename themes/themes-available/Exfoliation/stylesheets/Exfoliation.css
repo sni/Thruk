@@ -36,3 +36,9 @@ td.filter { background-color: white; }
   top: -1px;
   left: -8px;
 }
+
+.ui-button SPAN.ui-button-text {
+  white-space: nowrap;
+  line-height: 1.1;
+  font-size: 0.85em;
+}

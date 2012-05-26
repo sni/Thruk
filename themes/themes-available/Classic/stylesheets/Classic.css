@@ -271,3 +271,9 @@ A:hover {
 .tac A {
   color: black;
 }
+
+.ui-button SPAN.ui-button-text {
+  white-space: nowrap;
+  line-height: 1.1;
+  font-size: 0.9em;
+}

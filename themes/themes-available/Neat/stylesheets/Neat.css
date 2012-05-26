@@ -14,3 +14,9 @@ table.filter .filter        { background-color: white; }
 table.filter .filterTitle   { background-color: white; }
 table.filter .filterValue   { background-color: white; }
 table.filter .filterName    { background-color: white; }
+
+.ui-button SPAN.ui-button-text {
+  white-space: nowrap;
+  line-height: 1.1;
+  font-size: 0.85em;
+}

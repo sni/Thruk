@@ -120,3 +120,7 @@ body.config TABLE.filter {
 .new_attr {
   color: #AAAAAA;
 }
+
+TABLE.confPanel {
+  min-width: 200px;
+}

@@ -53,7 +53,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     $c->stash->{'no_auto_reload'}      = 1;
     $c->stash->{title}                 = 'Reports';
-    $c->stash->{page}                  = 'reports';
+    $c->stash->{page}                  = 'status'; # otherwise we would have to create a reports.css for every theme
     $c->stash->{template}              = 'reports.tt';
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';

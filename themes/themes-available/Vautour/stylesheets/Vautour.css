@@ -19,3 +19,7 @@ td.filter { background-color: white; }
 body.navbar {
   text-align: left;
 }
+
+th.data a {
+  color: white;
+}

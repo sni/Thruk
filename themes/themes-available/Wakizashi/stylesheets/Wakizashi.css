@@ -2085,3 +2085,9 @@ select#quick_command option {
 select#quick_command {
   height: inherit !important;
 }
+
+.ui-button SPAN.ui-button-text {
+  white-space: nowrap;
+  line-height: 1.1;
+  font-size: 1.0em;
+}
