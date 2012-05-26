@@ -246,6 +246,26 @@
                             </td>
                           </tr>
                           <tr>
+                            <td class='dataVar'>In Check Period?</td>
+                            <td class='dataVal'>
+                              [% IF host.in_check_period %]
+                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class='dataVar'>In Notification Period?</td>
+                            <td class='dataVal'>
+                              [% IF host.in_notification_period %]
+                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                              [% ELSE %]
+                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                              [% END %]
+                            </td>
+                          </tr>
+                          <tr>
                             <td class='dataVar'>Last Update:</td>
                             <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>

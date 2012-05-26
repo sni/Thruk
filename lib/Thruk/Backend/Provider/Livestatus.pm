@@ -239,6 +239,7 @@ sub get_hosts {
             parents percent_state_change perf_data plugin_output process_performance_data
             retry_interval scheduled_downtime_depth state state_type modified_attributes_list
             last_time_down last_time_unreachable last_time_up display_name
+            in_check_period in_notification_period
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
@@ -384,6 +385,7 @@ sub get_services {
             state state_type modified_attributes_list
             last_time_critical last_time_ok last_time_unknown last_time_warning
             display_name host_display_name host_custom_variable_names host_custom_variable_values
+            in_check_period in_notification_period
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {

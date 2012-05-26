@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.32     not yet released
+          - added in_check|notification_period to extinfo
           - added sort by status information
           - added reschedule 'now' link to extinfo page
           - added mongodb support (experimental)
