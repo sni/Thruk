@@ -11,8 +11,6 @@ debian/rules
 debian/thruk.lintian-overrides
 debian/thruk.logrotate
 debian/thruk.manpages
-docs/api/cli.html
-docs/api/pdf.html
 docs/FAQ.html
 docs/FAQ.txt
 docs/source/arch.graffle
@@ -234,7 +232,6 @@ plugins/plugins-available/reports/README.txt
 plugins/plugins-available/reports/root/reports.css
 plugins/plugins-available/reports/root/reports.js
 plugins/plugins-available/reports/t/controller_reports.t
-plugins/plugins-available/reports/templates/_report_send_types.tt
 plugins/plugins-available/reports/templates/passthrough_pdf.tt
 plugins/plugins-available/reports/templates/pdf/defaults/mail.tt
 plugins/plugins-available/reports/templates/pdf/defaults/prepare.tt
@@ -408,6 +405,7 @@ t/TestUtils.pm
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
 templates/_common_js.tt
+templates/_cron_edit.tt
 templates/_excel_export.tt
 templates/_extinfo_cmd_pane.tt
 templates/_footer.tt
