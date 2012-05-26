@@ -1,4 +1,4 @@
-[% PROCESS _header.tt  %]
+﻿[% PROCESS _header.tt  %]
 [% PROCESS _message.tt %]
 [% USE date %]
 
@@ -29,12 +29,14 @@
       <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %]>
     </td>
   </tr>
+  [% IF task == 'add_service' %]
   <tr>
     <td class="dataEven" align="center"><b>Service</b></td>
     <td class="dataOdd" align="left" colspan=2>
       <input type="text" id="service" name="service" value="[% rd.service %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"[% END %]>
     </td>
   </tr>
+  [% END %]
   <tr>
     <td class="dataEven" align="center"><b>Comment</b></td>
     <td class="dataOdd" align="left" colspan=2>
@@ -89,5 +91,8 @@
 <script type="text/javascript">
 <!--
   init_buttons();
+  [%+ IF rd.schedule.size == 0 +%]
+  add_cron_row('cron_entries');
+  [%+ END +%]
 -->
 </script>

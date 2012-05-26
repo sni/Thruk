@@ -1,0 +1,58 @@
+﻿<div align="center">
+  <table border="0" class='downtime' style="min-width: 900px;">
+    <tr class='downtime'>
+      [% IF names %]
+      <th class='downtime'>Host Name</th>
+      [% IF type == 'service' %]
+      <th class='downtime'>Service</th>
+      [% END %]
+      [% END %]
+      <th class='downtime'>Entry Time</th>
+      <th class='downtime'>Author</th>
+      <th class='downtime'>Comment</th>
+      <th class='downtime'>Start Time</th>
+      <th class='downtime'>End Time</th>
+      <th class='downtime'>Type</th>
+      <th class='downtime'>Duration</th>
+      <th class='downtime'>Downtime ID</th>
+      <th class='downtime'>Trigger ID</th>
+      <th class='downtime'>Actions</th>
+    </tr>
+    [%  FOREACH d = downtimes %]
+    [% SET class = 'downtimeOdd' IF loop.even %]
+    [% SET class = 'downtimeEven'  IF loop.odd %]
+    <tr class='[% class %] clickable' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% d.id %]">
+      [% IF names %]
+      <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
+      [% IF type == 'service' %]
+      <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]'>[% d.service_description %]</a></td>
+      [% END %]
+      [% END %]
+      <td class='[% class %]'>[% date_format(c, d.entry_time) %]</td>
+      <td class='[% class %]'>[% d.author %]</td>
+      <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
+      <td class='[% class %]'>[% date_format(c, d.start_time) %]</td>
+      <td class='[% class %]'>[% date_format(c, d.end_time) %]</td>
+      <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
+      <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
+      <td class='[% class %]'>[% d.id %]</td>
+      <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
+      [% IF type == 'host' %]
+        [% UNLESS c.config.command_disabled.exists('78') %]
+        <td class='[% class %]'><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+        [% END %]
+      [% END %]
+      [% IF type == 'service' %]
+        [% UNLESS c.config.command_disabled.exists('79') %]
+        <td class='[% class %]'><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
+        [% END %]
+      [% END %]
+    </tr>
+    [% END %]
+    [% IF downtimes.size == 0 %]
+    <tr class='downtimeOdd'>
+      <td class='downtimeOdd' colspan="12">There are no [% type %] downtimes</td>
+    </tr>
+    [% END %]
+  </table>
+</div>

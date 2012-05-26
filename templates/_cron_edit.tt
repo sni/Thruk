@@ -1,4 +1,4 @@
-<tr id="send_pane_[% nr %]"[% IF nr == 0 %] style="display:none"[% END %]>
+﻿<tr id="send_pane_[% nr %]"[% IF nr == 0 %] style="display:none"[% END %]>
   <td>
   <select name="send_type_[% nr %]" id="send_type_[% nr %]" onchange="cron_change_date(this.id)">
       <option value="month"[% IF cr.type == 'month' %] selected[% END %]>monthly</option>

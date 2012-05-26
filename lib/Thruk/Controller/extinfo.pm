@@ -98,8 +98,8 @@ sub _process_comments_page {
 # create the downtimes page
 sub _process_downtimes_page {
     my( $self, $c ) = @_;
-    $c->stash->{'hostdowntimes'}    = [];
-    $c->stash->{'servicedowntimes'} = [];
+    $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
+    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
     return 1;
 }
 
@@ -107,14 +107,24 @@ sub _process_downtimes_page {
 # create the recurring downtimes page
 sub _process_recurring_downtimes_page {
     my( $self, $c ) = @_;
-    my $task = $c->{'request'}->{'parameters'}->{'recurring'} || '';
+    my $task    = $c->{'request'}->{'parameters'}->{'recurring'} || '';
+    my $host    = $c->{'request'}->{'parameters'}->{'host'}      || '';
+    my $service = $c->{'request'}->{'parameters'}->{'service'}   || '';
     if($task eq 'add_host' or $task eq 'add_service') {
         $c->stash->{'no_auto_reload'} = 1;
-        $c->stash->{rd}       = { host => '', service => '', backends => [], schedule => [], duration => 120, comment => '' };
+        $c->stash->{'task'}   = $task;
+        $c->stash->{rd}       = {
+                            host        => $host,
+                            service     => $service,
+                            backends    => [],
+                            schedule    => [],
+                            duration    => 120,
+                            comment     => 'automatic downtime'
+                        };
         $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
     } else {
-        $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
-        $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
+        $c->stash->{'hostdowntimes'}    = [];
+        $c->stash->{'servicedowntimes'} = [];
         $c->stash->{template}           = 'extinfo_type_6_recurring.tt';
     }
     return 1;

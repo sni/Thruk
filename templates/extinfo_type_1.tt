@@ -398,42 +398,7 @@
                 [% END %]
               </tr>
             </table>
-            <div align="center">
-              <table border="0" class='comment'>
-                <tr class='comment'>
-                  <th class='comment' nowrap>Entry Time</th>
-                  <th class='comment'>Author</th>
-                  <th class='comment'>Comment</th>
-                  <th class='comment' nowrap>Comment ID</th>
-                  <th class='comment'>Persistent</th>
-                  <th class='comment'>Type</th>
-                  <th class='comment'>Expires</th>
-                  <th class='comment'>Actions</th>
-                </tr>
-                [% IF comments %]
-                  [% FOREACH comment IN comments %]
-                  [% SET class = 'commentEven' IF loop.even %]
-                  [% SET class = 'commentOdd'  IF loop.odd %]
-                  <tr class='[% class %]'>
-                    <td class='[% class %]' nowrap>[% date_format(c, comment.entry_time) %]</td>
-                    <td class='[% class %]'>[% comment.author %]</td>
-                    <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(comment.comment) %][% ELSE %][% comment.comment %][% END %]</td>
-                    <td class='[% class %]'>[% comment.id %]</td>
-                    <td class='[% class %]'>[% IF comment.persistent %]Yes[% ELSE %]No[% END %]</td>
-                    <td class='[% class %]' nowrap>[% IF comment.entry_type == 1 %]User[% ELSIF comment.entry_type == 2 %]Scheduled Downtime[% ELSIF comment.entry_type == 3 %]Flap Detection[% ELSIF comment.entry_type == 4 %]Acknowledgement[% ELSE %]?[% END %]</td>
-                    <td class='[% class %]'>[% IF comment.expires %][% date_format(c, comment.expire_time) %][% ELSE %]N/A[% END %]</td>
-                    [% UNLESS c.config.command_disabled.exists('2') %]
-                    <td class='[% class %]'><a href='cmd.cgi?cmd_typ=2&amp;com_id=[% comment.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Comment' title='Delete This Comment' width="20" height="20"></a></td>
-                    [% END %]
-                  </tr>
-                  [% END %]
-                [% ELSE %]
-                  <tr class='commentOdd'>
-                    <td class='commentOdd' colspan='9'>This host has no comments associated with it</td>
-                  </tr>
-                [% END %]
-              </table>
-            </div>
+            [% PROCESS _comments_table.tt comments = comments type='host' names=0 %]
           [% END %]
           </td>
         </tr>
@@ -461,42 +426,7 @@
                 [% END %]
               </tr>
             </table>
-            <div align="center">
-              <table border="0" class='comment'>
-                <tr class='comment'>
-                  <th class='comment' nowrap>Entry Time</th>
-                  <th class='comment' nowrap>Start Time</th>
-                  <th class='comment' nowrap>End Time</th>
-                  <th class='comment'>Author</th>
-                  <th class='comment'>Comment</th>
-                  <th class='comment' nowrap>Downtime ID</th>
-                  <th class='comment'>Type</th>
-                  <th class='comment'>Actions</th>
-                </tr>
-                [% IF downtimes %]
-                  [% FOREACH downtime IN downtimes %]
-                  [% SET class = 'commentEven' IF loop.even %]
-                  [% SET class = 'commentOdd'  IF loop.odd %]
-                  <tr class='[% class %]'>
-                    <td class='[% class %]' nowrap>[% date_format(c, downtime.entry_time) %]</td>
-                    <td class='[% class %]' nowrap>[% date_format(c, downtime.start_time) %]</td>
-                    <td class='[% class %]' nowrap>[% date_format(c, downtime.end_time) %]</td>
-                    <td class='[% class %]'>[% downtime.author %]</td>
-                    <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(downtime.comment) %][% ELSE %][% downtime.comment %][% END %]</td>
-                    <td class='[% class %]'>[% downtime.id %]</td>
-                    <td class='[% class %]'>[% downtime.fixed ? 'Fixed' : 'Flexible' %]</td>
-                    [% UNLESS c.config.command_disabled.exists('78') %]
-                    <td class='[% class %]'><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% downtime.id %]&amp;backend=[% host.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete This Downtime' title='Delete This Downtime' width="20" height="20"></a></td>
-                    [% END %]
-                  </tr>
-                  [% END %]
-                [% ELSE %]
-                  <tr class='commentOdd'>
-                    <td class='commentOdd' colspan='8'>This host has no comments associated with it</td>
-                  </tr>
-                [% END %]
-              </table>
-            </div>
+            [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 %]
           [% END %]
           </td>
         </tr>

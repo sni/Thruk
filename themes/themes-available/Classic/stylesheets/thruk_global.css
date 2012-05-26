@@ -791,7 +791,7 @@ BUTTON.button {
   min-width: 27px;
 }
 
-TABLE.recurring_downtimes {
+body.extinfo TABLE.recurring_downtimes {
   min-width: 600px;
   margin-left: 10px;
 }
