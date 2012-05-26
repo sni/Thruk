@@ -209,8 +209,12 @@ function toQueryParams(str) {
     str = str.split('&');
     for (var i = 0; i < str.length; ++i) {
         var p=str[i].split('=', 2);
-        if (p.length != 2) continue;
-        var val = decodeURIComponent(p[1].replace(/\+/g, " "));
+        var val;
+        if (p.length == 1) {
+            val = undefined;
+        } else {
+            val = decodeURIComponent(p[1].replace(/\+/g, " "));
+        }
         if(vars[p[0]] != undefined) {
             if(is_array(vars[p[0]])) {
                 vars[p[0]].push(val);
@@ -235,7 +239,10 @@ function toQueryString(obj) {
             jQuery.each(value, function(k2, v2) {
                 str = str + key + '=' + v2 + '&';
             });
-        } else {
+        } else if (value == undefined) {
+            str = str + key + '&';
+        }
+        else {
             str = str + key + '=' + encodeURIComponent(value) + '&';
         }
     });
