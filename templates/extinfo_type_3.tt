@@ -29,7 +29,7 @@
     </div><br>
     <div class="hint">mark host / services comments with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
-      <table border="0" class='comment'>
+      <table border="0" class='comment' style="min-width: 700px;">
         <tr class='comment'>
           <th class='comment'>Host Name</th>
           <th class='comment'>Entry Time</th>
@@ -78,7 +78,7 @@
     [% END %]
     <div class="hint">mark host / services comments with leftclick. Select multiple with shift + mouse.</div>
     <div align="center">
-      <table border="0" class='comment'>
+      <table border="0" class='comment' style="min-width: 700px;">
         <tr class='comment'>
           <th class='comment'>Host Name</th>
           <th class='comment'>Service</th>

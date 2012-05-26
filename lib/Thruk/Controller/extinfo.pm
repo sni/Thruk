@@ -27,6 +27,10 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     my( $self, $c ) = @_;
     my $type = $c->{'request'}->{'parameters'}->{'type'} || 0;
 
+    $c->stash->{title}        = 'Extended Information';
+    $c->stash->{page}         = 'extinfo';
+    $c->stash->{template}     = 'extinfo_type_' . $type . '.tt';
+
     my $infoBoxTitle;
     if( $type == 0 ) {
         $infoBoxTitle = 'Process Information';
@@ -54,8 +58,13 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $self->_process_hostgroup_cmd_page($c);
     }
     if( $type == 6 ) {
-        $infoBoxTitle = 'All Host and Service Scheduled Downtime';
-        $self->_process_downtimes_page($c);
+        if(exists $c->{'request'}->{'parameters'}->{'recurring'}) {
+            $infoBoxTitle = 'Recurring Downtimes';
+            $self->_process_recurring_downtimes_page($c);
+        } else {
+            $infoBoxTitle = 'All Host and Service Scheduled Downtime';
+            $self->_process_downtimes_page($c);
+        }
     }
     if( $type == 7 ) {
         $infoBoxTitle = 'Check Scheduling Queue';
@@ -66,11 +75,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $self->_process_servicegroup_cmd_page($c);
     }
 
-    $c->stash->{title}        = 'Extended Information';
     $c->stash->{infoBoxTitle} = $infoBoxTitle;
-    $c->stash->{page}         = 'extinfo';
-    $c->stash->{template}     = 'extinfo_type_' . $type . '.tt';
-
     Thruk::Utils::ssi_include($c);
 
     return 1;
@@ -93,8 +98,25 @@ sub _process_comments_page {
 # create the downtimes page
 sub _process_downtimes_page {
     my( $self, $c ) = @_;
-    $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
-    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
+    $c->stash->{'hostdowntimes'}    = [];
+    $c->stash->{'servicedowntimes'} = [];
+    return 1;
+}
+
+##########################################################
+# create the recurring downtimes page
+sub _process_recurring_downtimes_page {
+    my( $self, $c ) = @_;
+    my $task = $c->{'request'}->{'parameters'}->{'recurring'} || '';
+    if($task eq 'add_host' or $task eq 'add_service') {
+        $c->stash->{'no_auto_reload'} = 1;
+        $c->stash->{rd}       = { host => '', service => '', backends => [], schedule => [], duration => 120, comment => '' };
+        $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
+    } else {
+        $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
+        $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
+        $c->stash->{template}           = 'extinfo_type_6_recurring.tt';
+    }
     return 1;
 }
 

@@ -450,7 +450,10 @@
               <tr>
                 [% UNLESS c.config.command_disabled.exists('56') %]
                 <td valign="middle"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20"></td>
-                <td class='comment'><a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a></td>
+                <td class='comment'>
+                  <a href='cmd.cgi?cmd_typ=56&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add a new downtime</a> |
+                  <a href='extinfo.cgi?type=6&amp;recurring=add_service&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]' class='comment'>Add recurring downtime</a>
+                </td>
                 [% END %]
                 [% IF downtimes %]
                 [% UNLESS c.config.command_disabled.exists('5') %]

@@ -578,6 +578,8 @@ templates/extinfo_type_3.tt
 templates/extinfo_type_4.tt
 templates/extinfo_type_5.tt
 templates/extinfo_type_6.tt
+templates/extinfo_type_6_recurring.tt
+templates/extinfo_type_6_recurring_edit.tt
 templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
 templates/extra_headers.tt

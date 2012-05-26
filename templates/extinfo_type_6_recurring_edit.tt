@@ -1,0 +1,93 @@
+[% PROCESS _header.tt  %]
+[% PROCESS _message.tt %]
+[% USE date %]
+
+    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="left" valign="top" width="33%">
+        [% PROCESS _infobox.tt %]
+        </td>
+        <td align="center" valign="middle" width="33%"></td>
+        <td align="right" valign="bottom" width="33%">
+          [% PROCESS _help.tt topic = "extinfo_6" %]
+        </td>
+      </tr>
+    </table><br>
+    <br>
+
+<form action="reports.cgi" method="POST">
+<input type="hidden" name="action" value="save">
+<table border="1" class='data recurring_downtimes'>
+  <tr>
+    <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class="data" nowrap>Recurring Downtime</th>
+    <th class='data' style="width:125px;"></th>
+  </tr>
+  <tr class="firstrow">
+    <td class="dataEven" align="center"><b>Host</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %]>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Service</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type="text" id="service" name="service" value="[% rd.service %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'services', { url: 'status.cgi?format=search&amp;type=services&amp;host=', autosubmit:false, append_value_of: 'host' })"[% END %]>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Comment</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type="text" name="comment" value="[% rd.comment %]">
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <select name="backends" multiple style="min-width: 180px;">
+        [% FOREACH b = backends %]
+        <option value="[% b %]"[% FOREACH rb = rd.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        [% END %]
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+        <table id="cron_entries">
+          [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0 } %]
+          [% PROCESS _cron_edit.tt nr = 0 %]
+          [% FOREACH cr = rd.schedule %]
+              [% nr = loop.index + 1 %]
+              [% PROCESS _cron_edit.tt %]
+          [% END %]
+          <tr>
+            <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
+                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" name="add">
+                add more
+            </td>
+          </tr>
+        </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Duration<br>(in minutes)</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type="text" name="duration" value="[% rd.duration %]">
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center" colspan=3>
+      [% IF rd.host %]<a href="extinfo.cgi?recurring=remove&amp;host=[% rd.host %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
+      <button class="save_button button" style="width: 160px;">Save</button>
+    </td>
+  </tr>
+</table>
+</form>
+
+
+<script type="text/javascript">
+<!--
+  init_buttons();
+-->
+</script>
