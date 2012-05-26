@@ -1116,10 +1116,15 @@ sub _parse_date {
         $timestamp = Mktime($1,$2,$3, $4,$5,$6);
     }
 
+    # real date without seconds?
+    elsif($string =~ m/(\d{4})\-(\d{2})\-(\d{2})\ (\d{2}):(\d{2})/mx) {
+        $timestamp = Mktime($1,$2,$3, $4,$5,0);
+    }
+
     # everything else
     else {
         $timestamp = UnixDate($string, '%s');
-        $c->log->error("not a valid date: ".$string);
+        $c->log->debug("not a valid date: ".$string);
         if(!defined $timestamp) {
             return;
         }
