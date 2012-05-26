@@ -28,9 +28,16 @@ $Thruk::Utils::CLI::c       = undef;
 
 =head2 new
 
-  new($options)
+    new([ $options ])
 
-create CLI Tool object
+ $options = {
+    verbose         => 0|1,         # be more verbose
+    credential      => 'secret',    # secret key when accessing remote instances
+    remoteurl       => 'url',       # url where to access remote instances
+    local           => 0|1,         # local requests only
+ }
+
+create CLI tool object
 
 =cut
 sub new {
@@ -52,9 +59,9 @@ sub new {
 
 =head2 get_c
 
-  get_c()
+    get_c()
 
-return catalysts c object
+return L<Catalyst|catalysts> context object
 
 =cut
 sub get_c {
@@ -74,7 +81,7 @@ and if you set core config items to access the core objects config.
 
 =head2 get_object_db
 
-  get_object_db()
+    get_object_db()
 
 Return config database as a L<Monitoring::Config|Monitoring::Config> object.
 
@@ -91,7 +98,7 @@ sub get_object_db {
 
 =head2 store_objects
 
-  store_objects()
+    store_objects()
 
 Store changed objects. Changes will be stashed into Thruks internal object cache
 and can then be saved, reviewed or discarded.
@@ -428,5 +435,25 @@ sub _debug {
     }
     return;
 }
+
+##############################################
+
+=head1 EXAMPLES
+
+there are some cli scripting examples in the examples subfolder of the source
+package.
+
+=head1 AUTHOR
+
+Sven Nierlein, 2012, <nierlein@cpan.org>
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+##############################################
 
 1;

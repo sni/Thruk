@@ -6,7 +6,9 @@ Thruk::Utils::PDF - Utilities Collection for creating PDFs
 
 =head1 DESCRIPTION
 
-Utilities Collection for PDFs. All non private subs will be available in PDF templates
+Utilities Collection for PDFs. All subs will be available in PDF templates.
+Templates are Template::Toolkit templates and are responsible for the pdf
+layout, the mail content and the required parameters for a report.
 
 =cut
 
@@ -65,7 +67,7 @@ sub render_pie_chart {
 
 =head2 render_bar_chart
 
-  render_bar_chart($type)
+  render_bar_chart()
 
 render a bar chart into tmp file and return filename of the pdf
 
@@ -402,7 +404,7 @@ sub log_icon {
 
 =head2 page_footer
 
-  page_footer(x, y, page, size, color)
+  page_footer(x, y, page, [ size, [ color ]])
 
 print page footer
 
@@ -417,6 +419,8 @@ sub page_footer {
     return 1;
 }
 
+##########################################################
+# INTERNAL SUBS
 ##########################################################
 sub _icon_to_number {
     my($icon) = @_;
@@ -768,5 +772,25 @@ sub _reduce_lables {
     }
     return $lables;
 }
+
+##############################################
+
+=head1 EXAMPLES
+
+See the shipped reports for some examples. Shipped reports are in the
+'plugins/plugins-available/reports/templates/pdf' folder.
+
+=head1 AUTHOR
+
+Sven Nierlein, 2012, <nierlein@cpan.org>
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+##############################################
 
 1;

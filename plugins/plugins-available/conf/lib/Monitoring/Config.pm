@@ -7,11 +7,11 @@ use Monitoring::Config::File;
 
 =head1 NAME
 
-Monitoring::Config - Object Configuration
+Monitoring::Config - Thruks Object Database
 
 =head1 DESCRIPTION
 
-Defaults for various objects
+Provides access to core objects like hosts, services etc...
 
 =head1 METHODS
 
@@ -22,7 +22,9 @@ Defaults for various objects
 
 =head2 new
 
-return objects object
+    new($config)
+
+return new objects database
 
 =cut
 sub new {
@@ -53,6 +55,8 @@ sub new {
 ##########################################################
 
 =head2 init
+
+    init($config, [ $stats ])
 
 initialize configs
 
@@ -95,6 +99,8 @@ sub init {
 
 =head2 commit
 
+    commit()
+
 commit changes to disk
 
 =cut
@@ -131,6 +137,8 @@ sub commit {
 
 =head2 get_files
 
+    get_files()
+
 get all files
 
 =cut
@@ -143,6 +151,8 @@ sub get_files {
 ##########################################################
 
 =head2 get_file_by_path
+
+    get_file_by_path($path)
 
 get file by path
 
@@ -161,6 +171,8 @@ sub get_file_by_path {
 
 =head2 get_changed_files
 
+    get_changed_files()
+
 get all changed files
 
 =cut
@@ -178,6 +190,8 @@ sub get_changed_files {
 
 =head2 get_objects
 
+    get_objects()
+
 get all objects
 
 =cut
@@ -191,6 +205,8 @@ sub get_objects {
 ##########################################################
 
 =head2 get_objects_by_type
+
+    get_objects_by_type($type, [ $filter ])
 
 get objects by type
 
@@ -223,6 +239,8 @@ sub get_objects_by_type {
 ##########################################################
 
 =head2 get_objects_by_name
+
+    get_objects_by_name($type, $name, [ $templates_only , [ $name2 ]])
 
 get objects by name
 
@@ -290,6 +308,8 @@ sub get_objects_by_name {
 
 =head2 get_templates_by_type
 
+    get_templates_by_type($type)
+
 get templates by type
 
 =cut
@@ -312,6 +332,8 @@ sub get_templates_by_type {
 
 =head2 get_template_by_name
 
+    get_template_by_name($type, $name)
+
 get template object by name
 
 =cut
@@ -331,6 +353,8 @@ sub get_template_by_name {
 ##########################################################
 
 =head2 get_object_by_location
+
+    get_object_by_location($path, $linenr)
 
 get object by location
 
@@ -356,6 +380,8 @@ sub get_object_by_location {
 
 =head2 get_object_by_id
 
+    get_object_by_id($id)
+
 get object by id
 
 =cut
@@ -370,6 +396,8 @@ sub get_object_by_id {
 ##########################################################
 
 =head2 get_services_for_host
+
+    get_services_for_host($hostobj)
 
 returns services
 
@@ -432,6 +460,8 @@ sub get_services_for_host {
 
 =head2 update
 
+    update()
+
 update objects config
 
 =cut
@@ -453,6 +483,8 @@ sub update {
 ##########################################################
 
 =head2 check_files_changed
+
+    check_files_changed([ $reload ])
 
 update objects config
 
@@ -490,6 +522,8 @@ sub check_files_changed {
 ##########################################################
 
 =head2 update_object
+
+    update_object($obj, $newdata, [ $comments, [ $rebuild ]])
 
 update objects config
 
@@ -538,6 +572,8 @@ sub update_object {
 
 =head2 delete_object
 
+    delete_object($obj, [ $rebuild ])
+
 update objects config
 
 =cut
@@ -568,6 +604,8 @@ sub delete_object {
 ##########################################################
 
 =head2 move_object
+
+    move_object($obj, $newfile, [ $rebuild ])
 
 move object to different file
 
@@ -602,6 +640,8 @@ sub move_object {
 
 =head2 file_add
 
+    file_add($file, [ $rebuild ])
+
 add new file to config
 
 =cut
@@ -619,6 +659,8 @@ sub file_add {
 ##########################################################
 
 =head2 file_delete
+
+    file_delete($file, [ $rebuild ])
 
 remove a file from the config
 
@@ -641,6 +683,8 @@ sub file_delete {
 
 =head2 file_undelete
 
+    file_undelete($file, [ $rebuild ])
+
 undelete a file marked for removal
 
 =cut
@@ -662,6 +706,8 @@ sub file_undelete {
 ##########################################################
 
 =head2 rename_dependencies
+
+    rename_dependencies($obj, $oldname, $newname)
 
 rename dependencies
 
@@ -718,6 +764,8 @@ sub rename_dependencies {
 ##########################################################
 
 =head2 get_references
+
+    get_references($obj, [ $name ])
 
 return all references for this object
 
@@ -780,11 +828,13 @@ sub get_references {
 
 =head2 get_default_keys
 
-return the sorted default config keys for a type of object
+    get_default_keys($type, [ $options ])
 
-    $options = {
-        no_alias => 0,   # skip alias definitions
-    }
+ $options = {
+     no_alias => 0,   # skip alias definitions
+ }
+
+return the sorted default config keys for a type of object
 
 =cut
 sub get_default_keys {
@@ -803,6 +853,8 @@ sub get_default_keys {
 }
 
 
+##########################################################
+# INTERNAL SUBS
 ##########################################################
 sub _set_config {
     my $self  = shift;
@@ -841,6 +893,7 @@ sub _set_config {
 
     return;
 }
+
 
 ##########################################################
 sub _update_core_conf {
@@ -893,6 +946,7 @@ sub _update_core_conf {
     return;
 }
 
+
 ##########################################################
 sub _set_coretype {
     my $self = shift;
@@ -919,6 +973,7 @@ sub _set_coretype {
 
     return;
 }
+
 
 ##########################################################
 sub _read_objects {
@@ -1100,6 +1155,7 @@ sub _check_files_changed {
     return;
 }
 
+
 ##########################################################
 # check if file has changed
 sub _check_file_changed {
@@ -1128,6 +1184,7 @@ sub _check_file_changed {
     }
     return 0;
 }
+
 
 ##########################################################
 # collect errors from all files
@@ -1300,6 +1357,7 @@ sub _reset_errors {
     return;
 }
 
+
 ##########################################################
 sub _newest_file {
     my($self, @files) = @_;
@@ -1315,6 +1373,7 @@ sub _newest_file {
     return $filelist{$newest} if defined $newest;
     return;
 }
+
 
 ##########################################################
 sub _check_references {
@@ -1336,6 +1395,7 @@ sub _check_references {
     $self->{'stats'}->profile(end => "M::C::_check_references()") if defined $self->{'stats'};
     return \@parse_errors;
 }
+
 
 ##########################################################
 sub _check_orphaned_objects {
@@ -1382,6 +1442,7 @@ sub _check_orphaned_objects {
     return \@errors;
 }
 
+
 ##########################################################
 # run callback function for every link
 sub _all_object_links_callback {
@@ -1419,6 +1480,7 @@ sub _all_object_links_callback {
     }
     return;
 }
+
 
 ##########################################################
 sub _resolve_relative_path {
