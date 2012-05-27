@@ -210,6 +210,7 @@ sub _get_downtimes_list {
         @pattern = ($file);
     }
     for my $dfile (@pattern) {
+        next unless -f $dfile;
         my $d = Thruk::Utils::read_data_file($dfile);
         $d->{'file'} = $dfile;
         unless($noauth) {

@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
   <table border="0" class='downtime' style="min-width: 700px;">
     <tr class='downtime'>
       [% IF names == 1 %]
