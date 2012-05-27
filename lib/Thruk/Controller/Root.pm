@@ -131,6 +131,7 @@ sub begin : Private {
         thruk_bin                           => '/usr/bin/thruk',
         thruk_init                          => '/etc/init.d/thruk',
         thruk_shell                         => '/bin/bash -l -c',
+        report_nice_level                   => 5,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {

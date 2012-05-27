@@ -1,15 +1,15 @@
-body.reports TABLE.reports {
+body.status TABLE.reports {
   min-width: 600px;
   margin-left: 10px;
 }
-body.reports TABLE.reports TD {
+body.status TABLE.reports TD {
   padding-top: 3px;
   padding-bottom: 3px;
 }
-body.reports TABLE.reports INPUT[type=text] {
+body.status TABLE.reports INPUT[type=text] {
   width: 515px;
 }
-body.reports TABLE.reports TEXTAREA {
+body.status TABLE.reports TEXTAREA {
   white-space: nowrap;
   word-wrap: normal;
   width: 520px;
@@ -33,7 +33,7 @@ BUTTON.report_button {
   min-width: 27px;
 }
 
-body.reports TABLE.weekly_days TD {
+body.status TABLE.weekly_days TD {
   padding-bottom: 0px;
   padding-top: 0px;
   line-height: 8px;

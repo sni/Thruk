@@ -1388,6 +1388,14 @@ ex.:
   thruk_init = /etc/init.d/thruk
 
 
+==== report_nice_level
+Execute regular scheduled reports with this nice level.
+
+ex.:
+
+  report_nice_level = 5
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
