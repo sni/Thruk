@@ -1375,6 +1375,7 @@ function check_selected_command() {
         enableFormElement('row_start');
         enableFormElement('row_end');
         enableFormElement('row_comment');
+        enableFormElement('row_downtime_options');
     }
     if(value == 3) { /* add comment */
         enableFormElement('row_comment');
@@ -1414,7 +1415,7 @@ function check_selected_command() {
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
+    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_downtime_options', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
     jQuery.each(elems, function(index, id) {
         obj = document.getElementById(id);
         obj.style.display = "none";

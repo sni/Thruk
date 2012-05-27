@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added reschedule 'now' link to extinfo page
           - added mongodb support (experimental)
           - added long plugin output to excel export
+          - added child options to downtimes (Jason Lempka)
           - reporting:
             - added report editor
             - added cron editor for scheduling reports
