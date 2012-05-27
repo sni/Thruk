@@ -66,11 +66,72 @@ return date from timestamp in given format
 
 =cut
 sub format_date {
-    my $timestamp = shift;
-    my $format    = shift;
-    my $tpd  = Template::Plugin::Date->new();
+    my($timestamp, $format) = @_;
+    our($tpd);
+    $tpd = Template::Plugin::Date->new() unless defined $tpd;
     my $date = $tpd->format($timestamp, $format);
     return decode("utf-8", $date);
+}
+
+
+##############################################
+
+=head2 format_cronentry
+
+  my $cron_string = format_cronentry($cron_entry)
+
+return cron entry as string
+
+=cut
+sub format_cronentry {
+    my($c, $cr) = @_;
+    my $cron;
+    if($cr->{'type'} eq 'month') {
+        my $app = 'th';
+        if($cr->{'day'} == 1) { $app = 'st'; }
+        if($cr->{'day'} == 2) { $app = 'nd'; }
+        if($cr->{'day'} == 3) { $app = 'rd'; }
+        $cron = sprintf("every %s%s at %02s:%02s", $cr->{'day'}, $app, $cr->{'hour'}, $cr->{'minute'});
+    }
+    elsif($cr->{'type'} eq 'week') {
+        if($cr->{'week_day'}) {
+            my @days;
+            my @daynr = split/,/mx, $cr->{'week_day'};
+            my $lastconcated = [];
+            for my $x (0..$#daynr) {
+                my $nr = $daynr[$x];
+                $nr = 7 if $nr == 0;
+                my $next = $daynr[$x+1] || 0;
+                $next = 7 if $next == 0;
+                if($next == $nr+1) {
+                    if(!defined $lastconcated->[0]) {
+                        $lastconcated->[0] = $c->config->{'weekdays'}->{$nr};
+                    } else {
+                        $lastconcated->[1] = $c->config->{'weekdays'}->{$nr};
+                    }
+                } else {
+                    if(defined $lastconcated->[0]) {
+                        push @days, $lastconcated->[0].'-'.$c->config->{'weekdays'}->{$nr};
+                        $lastconcated = [];
+                    } else {
+                        push @days, $c->config->{'weekdays'}->{$nr};
+                    }
+                }
+            }
+            if(defined $lastconcated->[0]) {
+                push @days, $lastconcated->[0].'-'.$lastconcated->[1];
+            }
+            $cron = sprintf("%s at %02s:%02s", join(', ', @days), $cr->{'minute'}, $cr->{'hour'});
+        } else {
+            $cron = 'never';
+        }
+    }
+    elsif($cr->{'type'} eq 'day') {
+        $cron = sprintf("daily at %02s:%02s", $cr->{'hour'}, $cr->{'minute'});
+    } else {
+        confess("unknown cron type: ".$cr->{'type'});
+    }
+    return $cron;
 }
 
 

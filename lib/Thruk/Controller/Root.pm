@@ -132,6 +132,16 @@ sub begin : Private {
         thruk_init                          => '/etc/init.d/thruk',
         thruk_shell                         => '/bin/bash -l -c',
         report_nice_level                   => 5,
+        weekdays                        => {
+                    '0'                     => 'Sunday',
+                    '1'                     => 'Monday',
+                    '2'                     => 'Tuesday',
+                    '3'                     => 'Wednesday',
+                    '4'                     => 'Thursday',
+                    '5'                     => 'Friday',
+                    '6'                     => 'Saterday',
+                    '7'                     => 'Sunday',
+                                           },
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
