@@ -44,6 +44,7 @@
       <input type="text" name="comment" value="[% rd.comment %]">
     </td>
   </tr>
+  [% IF backends.size > 1 %]
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
     <td class="dataOdd" align="left" colspan=2>
@@ -54,6 +55,7 @@
       </select>
     </td>
   </tr>
+  [% END %]
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
     <td class="dataOdd" align="left" colspan=2>

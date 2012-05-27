@@ -41,7 +41,7 @@
         [% SET class = 'downtimeEven'  IF loop.odd %]
         <tr class='[% class %]'>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a></td>
-          <td class='[% class %]' nowrap>[% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %]</td>
+          <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
           <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
           <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;recurring=edit&amp;host=[% d.host | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
@@ -80,7 +80,7 @@
         <tr class='[% class %]'>
           <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a></td>
           <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'>[% d.service %]</a></td>
-          <td class='[% class %]' nowrap>[% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %]</td>
+          <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
           <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
           <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
           <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;recurring=edit&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>

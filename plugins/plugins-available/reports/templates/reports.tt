@@ -82,7 +82,7 @@
   [% END %]
   [% IF reports.size == 0 %]
   <tr class="firstrow">
-    <td class="status statusOdd" align="center" colspan="8">no reports defined yet</td>
+    <td class="status statusOdd" align="center" colspan="10">no reports defined yet</td>
   </tr>
   [% END %]
 </table>

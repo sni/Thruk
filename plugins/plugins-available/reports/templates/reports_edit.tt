@@ -41,6 +41,7 @@
     <td class="dataEven" align="center"><b>Public</b></td>
     <td class="dataOdd" align="left" colspan=2><input type="radio" name="is_public" value="1"[% IF r.is_public %] checked[% END %]> yes  <input type="radio" name="is_public" value="0"[% IF !r.is_public %] checked[% END %]> no</td>
   </tr>
+  [% IF backends.size > 1 %]
   <tr>
     <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
     <td class="dataOdd" align="left" colspan=2>
@@ -51,6 +52,7 @@
       </select>
     </td>
   </tr>
+  [% END %]
   <tr>
     <td class="dataEven" align="center" colspan=3><b>E-Mail Settings:</b></td>
   </tr>
