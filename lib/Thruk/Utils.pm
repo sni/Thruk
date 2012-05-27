@@ -121,7 +121,7 @@ sub format_cronentry {
             if(defined $lastconcated->[0]) {
                 push @days, $lastconcated->[0].'-'.$lastconcated->[1];
             }
-            $cron = sprintf("%s at %02s:%02s", join(', ', @days), $cr->{'minute'}, $cr->{'hour'});
+            $cron = sprintf("%s at %02s:%02s", join(', ', @days), $cr->{'hour'}, $cr->{'minute'});
         } else {
             $cron = 'never';
         }
