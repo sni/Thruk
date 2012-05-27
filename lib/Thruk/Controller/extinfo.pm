@@ -256,7 +256,7 @@ sub _get_cron_entry {
 ##########################################################
 sub _get_downtime_cmd {
     my($self, $c, $downtime) = @_;
-    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>%s/downtimes.log",
+    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>%s/cron.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
                             $c->config->{'thruk_bin'},
