@@ -136,7 +136,7 @@ sub _process_recurring_downtimes_page {
         $c->stash->{rd}       = {
                             host        => $host,
                             service     => $service,
-                            backends    => [],
+                            backends    => $c->{'db'}->peer_key(),
                             schedule    => [],
                             duration    => 120,
                             comment     => 'automatic downtime'

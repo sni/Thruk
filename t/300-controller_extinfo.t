@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 129;
+use Test::More tests => 162;
 
 BEGIN {
     use lib('t');
@@ -24,6 +24,9 @@ my $pages = [
     '/thruk/cgi-bin/extinfo.cgi?type=5&hostgroup='.$hostgroup,
     '/thruk/cgi-bin/extinfo.cgi?type=6',
     '/thruk/cgi-bin/extinfo.cgi?type=6&recurring',
+    '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=add_host',
+    '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=edit&host='.$host,
+    '/thruk/cgi-bin/extinfo.cgi?type=6&recurring=edit&host='.$host.'&service='.$service,
     '/thruk/cgi-bin/extinfo.cgi?type=7',
     '/thruk/cgi-bin/extinfo.cgi?type=8&servicegroup='.$servicegroup,
 ];

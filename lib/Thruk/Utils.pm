@@ -1130,11 +1130,11 @@ sub get_cron_time_entry {
 
 ##############################################
 
-=head2 get_cron_time_entry
+=head2 get_cron_entries_from_param
 
-  get_cron_time_entry($cronentry)
+  get_cron_entries_from_param($cronentry)
 
-return time part of crontab entry
+return array of cron entries from param
 
 =cut
 

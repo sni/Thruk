@@ -18,6 +18,7 @@ use Data::Dumper;
 use LWP::UserAgent;
 use JSON::XS;
 use File::Slurp;
+use URI::Escape;
 
 $Thruk::Utils::CLI::verbose = 0;
 $Thruk::Utils::CLI::c       = undef;
@@ -299,7 +300,7 @@ sub _run_commands {
         if($url =~ m|^\w+\.cgi|gmx) {
             $url = '/thruk/cgi-bin/'.$url;
         }
-        $data->{'output'} = _request_url($c, $url)
+        $data->{'output'} = _request_url($c, $url);
     }
 
     # report or report mails
@@ -328,6 +329,32 @@ sub _run_commands {
             }
         }
     }
+
+   # downtime?
+   if($action =~ /^downtimetask=(.*)$/mx) {
+        my $downtime = Thruk::Utils::read_data_file($1);
+        # convert to normal url request
+        my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=1&childoptions=0&backend=%s%s',
+                          $downtime->{'service'} ? 56 : 55,
+                          uri_escape($downtime->{'host'}),
+                          uri_escape($downtime->{'comment'}),
+                          'cron',
+                          uri_escape(Thruk::Utils::format_date(time(), '%Y-%m-%d %H:%M:%S')),
+                          uri_escape(Thruk::Utils::format_date(time() + ($downtime->{'duration'}*60), '%Y-%m-%d %H:%M:%S')),
+                          $downtime->{'backends'},
+                          $downtime->{'service'} ? '&service='.uri_escape($downtime->{'service'}) : '',
+                         );
+        my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
+        $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
+        _request_url($c, $url);
+        $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
+        if($downtime->{'service'}) {
+            $data->{'output'} = 'scheduled downtime for '.$downtime->{'service'}.' on '.$downtime->{'host'};
+        } else {
+            $data->{'output'} = 'scheduled downtime for '.$downtime->{'host'};
+        }
+        $data->{'output'} .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
+   }
 
     $c->stats->profile(end => "Utils::CLI::_run_commands");
     return $data;
