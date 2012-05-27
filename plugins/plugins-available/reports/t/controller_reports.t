@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 82;
+use Test::More tests => 81;
 
 BEGIN {
     use lib('t');
@@ -29,7 +29,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/reports.cgi?report=999', like => [ '%PDF-1.4', '%%EOF' ] },
     { url => '/thruk/cgi-bin/reports.cgi?report=999&action=edit' },
     { url => '/thruk/cgi-bin/reports.cgi?report=999&action=update', 'redirect' => 1, location => 'reports.cgi', like => 'This item has moved' },
-    { url => '/thruk/cgi-bin/reports.cgi?action=remove&report=999' },
+    { url => '/thruk/cgi-bin/reports.cgi?action=remove&report=999', 'redirect' => 1, location => 'reports.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/reports.cgi?action=edit&report=new', like => ['Create Report'] },
 ];
 
