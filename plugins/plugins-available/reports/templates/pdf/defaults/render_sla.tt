@@ -24,29 +24,14 @@
 
   # availability bar chart
   page = 2;
-  FOREACH hst = avail_data.hosts.keys;
-    c.request.parameters.host    = hst;
-    c.request.parameters.service = "";
-    pdf.prPage();
-    pdf.prForm(path_to_template('pdf/sla.pdf'), 3);
-    font(20, 'dark grey');
-    pdf.prText(40,680, 'Host: ' _ hst);
-    bar_pdf = render_bar_chart();
-    pdf.prDocForm({file => bar_pdf, x => 25, y => 220});
-    font(9, 'dark grey');
-    fill_availability_table(40, 147, 'dark grey', 'red');
-
-    page_footer(550, 58, page); page = page + 1;
-  END;
-
-  FOREACH hst = avail_data.services.keys;
-    FOREACH svc = avail_data.services.$hst.keys;
+  IF param.exists('host') OR param.exists('hostgroup') OR param.exists('servicegroup');
+    FOREACH hst = avail_data.hosts.keys.sort;
       c.request.parameters.host    = hst;
-      c.request.parameters.service = svc;
+      c.request.parameters.service = "";
       pdf.prPage();
       pdf.prForm(path_to_template('pdf/sla.pdf'), 3);
       font(20, 'dark grey');
-      pdf.prText(40,680, 'Service: ' _ svc _ ' on ' _ hst);
+      pdf.prText(40,680, 'Host: ' _ hst);
       bar_pdf = render_bar_chart();
       pdf.prDocForm({file => bar_pdf, x => 25, y => 220});
       font(9, 'dark grey');
@@ -56,10 +41,29 @@
     END;
   END;
 
+  IF param.exists('service') OR param.exists('servicegroup');
+    FOREACH hst = avail_data.services.keys.sort;
+      FOREACH svc = avail_data.services.$hst.keys.sort;
+        c.request.parameters.host    = hst;
+        c.request.parameters.service = svc;
+        pdf.prPage();
+        pdf.prForm(path_to_template('pdf/sla.pdf'), 3);
+        font(20, 'dark grey');
+        pdf.prText(40,680, 'Service: ' _ svc _ ' on ' _ hst);
+        bar_pdf = render_bar_chart();
+        pdf.prDocForm({file => bar_pdf, x => 25, y => 220});
+        font(9, 'dark grey');
+        fill_availability_table(40, 147, 'dark grey', 'red');
+
+        page_footer(550, 58, page); page = page + 1;
+      END;
+    END;
+  END;
+
 
   # LAST PAGE
   # logfile entries
-  IF ! param.exists('hostgroup') AND ! param.exists('servicegroup');
+  IF param.exists('host') OR param.exists('service');
     pdf.prPage();
     pdf.prForm(path_to_template('pdf/sla.pdf'), 2);
     font(20, 'dark grey');
