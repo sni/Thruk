@@ -24,6 +24,7 @@
 [% PROCESS $temp block = 'edit' %]
 
 <form action="reports.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="save">
 [% FOREACH key = r.keys %]
   [% IF key == 'var' || key == 'params' %][% NEXT %][% END %]

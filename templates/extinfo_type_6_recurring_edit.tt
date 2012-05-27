@@ -16,6 +16,7 @@
     <br>
 
 <form action="extinfo.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="recurring" value="save">
 <input type="hidden" name="old_host" value="[% rd.host %]">
 [% IF task == 'add_service' OR (task == 'edit' AND rd.service ) %]

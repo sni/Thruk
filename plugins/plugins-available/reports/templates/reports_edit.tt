@@ -21,6 +21,7 @@
 <br><br>
 
 <form action="reports.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="edit2">
 <input type="hidden" name="report" value="[% r.nr %]">
 <table border="1" class='data reports'>
