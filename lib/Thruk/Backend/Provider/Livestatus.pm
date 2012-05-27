@@ -279,7 +279,7 @@ sub get_hosts_by_servicequery {
 
     my $data = $self->_get_table('services', \%options);
     unless(wantarray) {
-        confess("get_services() should not be called in scalar context");
+        confess("get_hosts_by_servicequery() should not be called in scalar context");
     }
     return($data, undef);
 }

@@ -781,6 +781,27 @@ SELECT.filter_op_select {
 .hidden {
   visibility:hidden;
 }
+
+
+A.button {
+  height: 25px;
+}
+BUTTON.button {
+  height: 27px;
+  min-width: 27px;
+}
+
+body.extinfo TABLE.recurring_downtimes {
+  min-width: 600px;
+  margin-left: 10px;
+}
+TABLE.recurring_downtimes TD {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+TABLE.recurring_downtimes INPUT[type=text] {
+  width: 515px;
+}
 /* navbar */
 div.navbar {
   background-color: black;

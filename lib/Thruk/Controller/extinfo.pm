@@ -110,7 +110,27 @@ sub _process_recurring_downtimes_page {
     my $task    = $c->{'request'}->{'parameters'}->{'recurring'} || '';
     my $host    = $c->{'request'}->{'parameters'}->{'host'}      || '';
     my $service = $c->{'request'}->{'parameters'}->{'service'}   || '';
-    if($task eq 'add_host' or $task eq 'add_service') {
+    if($task eq 'save') {
+        my $rd = {
+            'host'     => $host,
+            'service'  => $service,
+            'schedule' => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
+            'duration' => $c->{'request'}->{'parameters'}->{'duration'}  || '',
+            'comment'  => $c->{'request'}->{'parameters'}->{'comment'}  || '',
+            'backends' => $c->{'request'}->{'parameters'}->{'backends'}  || '',
+        };
+        mkdir($c->config->{'var_path'}.'/downtimes/');
+        my $file = $self->_get_data_file_name($c, $host, $service);
+        Thruk::Utils::write_data_file($file, $rd);
+        $self->_update_cron_file($c);
+        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime saved' });
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+    }
+    if($task eq 'add_host' or $task eq 'add_service' or $task eq 'edit') {
+        my $file = $self->_get_data_file_name($c, $host, $service);
+        if(-s $file) {
+            $c->stash->{rd} = Thruk::Utils::read_data_file($file);
+        }
         $c->stash->{'no_auto_reload'} = 1;
         $c->stash->{'task'}   = $task;
         $c->stash->{rd}       = {
@@ -120,14 +140,111 @@ sub _process_recurring_downtimes_page {
                             schedule    => [],
                             duration    => 120,
                             comment     => 'automatic downtime'
-                        };
+                        } unless defined $c->stash->{rd};
         $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
+    }
+    elsif($task eq 'remove') {
+        my $file = $self->_get_data_file_name($c, $host, $service);
+        if(-s $file) {
+            unlink($file);
+        }
+        $self->_update_cron_file($c);
+        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'recurring downtime removed' });
+        return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
     } else {
-        $c->stash->{'hostdowntimes'}    = [];
-        $c->stash->{'servicedowntimes'} = [];
-        $c->stash->{template}           = 'extinfo_type_6_recurring.tt';
+        $c->stash->{'downtimes'} = $self->_get_downtimes_list($c);
+        $c->stash->{template}    = 'extinfo_type_6_recurring.tt';
     }
     return 1;
+}
+
+##########################################################
+# update downtimes cron
+sub _update_cron_file {
+    my( $self, $c ) = @_;
+
+    # gather reporting send types from all reports
+    my $cron_entries = [];
+    my $downtimes = $self->_get_downtimes_list($c, 1);
+    for my $d (@{$downtimes}) {
+        next unless defined $d->{'schedule'};
+        next unless scalar @{$d->{'schedule'}} > 0;
+        for my $cr (@{$d->{'schedule'}}) {
+            push @{$cron_entries}, [$self->_get_cron_entry($c, $d, $cr)];
+        }
+    }
+
+    Thruk::Utils::update_cron_file($c, 'downtimes', $cron_entries);
+    return;
+}
+
+##########################################################
+# return list of downtimes
+sub _get_downtimes_list {
+    my($self, $c, $noauth) = @_;
+
+    my($hosts, $services);
+    unless($noauth) {
+        my $host_data    = $c->{'db'}->get_host_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+        my $service_data = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], columns => [qw/host_name description/] );
+        $hosts    = Thruk::Utils::array2hash($host_data);
+        $services = Thruk::Utils::array2hash($service_data,  'host_name', 'description');
+    }
+
+    my $downtimes = [];
+    for my $dfile (glob($c->config->{'var_path'}.'/downtimes/*.tsk')) {
+        my $d = Thruk::Utils::read_data_file($dfile);
+        $d->{'file'} = $dfile;
+        unless($noauth) {
+            if($d->{'service'}) {
+                next unless defined $services->{$d->{'host'}}->{$d->{'service'}};
+            } else {
+                next unless defined $hosts->{$d->{'host'}};
+            }
+        }
+        push @{$downtimes}, $d if defined $d;
+    }
+
+    # sort by host & service
+    @{$downtimes} = sort { $a->{'host'} cmp $b->{'host'} or $a->{'service'} cmp $b->{'service'} } @{$downtimes};
+
+    return $downtimes;
+}
+
+##########################################################
+# return cmd line for downtime
+sub _get_cron_entry {
+    my($self, $c, $downtime, $rd) = @_;
+
+    my $cmd = $self->_get_downtime_cmd($c, $downtime);
+    my $time = Thruk::Utils::get_cron_time_entry($rd);
+    return($time, $cmd);
+}
+
+##########################################################
+sub _get_downtime_cmd {
+    my($self, $c, $downtime) = @_;
+    my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>%s/downtimes.log",
+                            $c->config->{'project_root'},
+                            $c->config->{'thruk_shell'},
+                            $c->config->{'thruk_bin'},
+                            $downtime->{'file'},
+                            $c->config->{'var_path'},
+                    );
+    return $cmd;
+}
+
+##########################################################
+# return filename for data file
+sub _get_data_file_name {
+    my($self, $c, $host, $service) = @_;
+    my $name = 'hst_'.$host;
+    if($service) {
+        $name = 'svc_'.$host.'_'.$service;
+    }
+    $name =~ s/[^\w_\-\.]/_/gmx;
+    my $file = $c->config->{'var_path'}.'/downtimes/'.$name.'.tsk';
+    return $file;
 }
 
 ##########################################################

@@ -622,7 +622,7 @@ sub combine_filter {
 
 =head2 array2hash
 
-  array2hash($data, $key)
+  array2hash($data, [ $key, [ $key2 ]])
 
 create a hash by key
 
@@ -630,12 +630,17 @@ create a hash by key
 sub array2hash {
     my $data = shift;
     my $key  = shift;
+    my $key2 = shift;
 
     return {} unless defined $data;
     confess("not an array") unless ref $data eq 'ARRAY';
 
     my %hash;
-    if(defined $key) {
+    if(defined $key2) {
+        for my $d (@{$data}) {
+            $hash{$d->{$key}}->{$d->{$key2}} = $d;
+        }
+    } elsif(defined $key) {
         %hash = map { $_->{$key} => $_ } @{$data};
     } else {
         %hash = map { $_ => $_ } @{$data};
@@ -1121,6 +1126,81 @@ sub get_cron_time_entry {
         confess("unknown cron type: ".$cr->{'type'});
     }
     return $cron;
+}
+
+##############################################
+
+=head2 get_cron_time_entry
+
+  get_cron_time_entry($cronentry)
+
+return time part of crontab entry
+
+=cut
+
+sub get_cron_entries_from_param {
+    my($params) = @_;
+
+    my $cron_entries = [];
+    for my $x (1..99) {
+        if(defined $params->{'send_type_'.$x}) {
+            my @weekdays = ref $params->{'week_day_'.$x} eq 'ARRAY' ? @{$params->{'week_day_'.$x}} : ($params->{'week_day_'.$x});
+            @weekdays = grep {!/^$/mx} @weekdays;
+            push @{$cron_entries}, {
+                'type'      => $params->{'send_type_'.$x},
+                'hour'      => $params->{'send_hour_'.$x},
+                'minute'    => $params->{'send_minute_'.$x},
+                'week_day'  => join(',', @weekdays),
+                'day'       => $params->{'send_day_'.$x},
+            };
+        }
+    }
+    return $cron_entries;
+}
+
+##############################################
+
+=head2 read_data_file
+
+  read_data_file($filename)
+
+return data for datafile
+
+=cut
+
+sub read_data_file {
+    my($filename) = @_;
+
+    my $cont = read_file($filename);
+    my $data;
+    ## no critic
+    eval('$data = '.$cont.';');
+    ## use critic
+
+    return $data;
+}
+
+##############################################
+
+=head2 write_data_file
+
+  write_data_file($filename, $data)
+
+write data to datafile
+
+=cut
+
+sub write_data_file {
+    my($filename, $data) = @_;
+
+    my $d = Dumper($data);
+    $d    =~ s/^\$VAR1\ =\ //mx;
+    $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
+    open(my $fh, '>'.$filename) or confess('cannot write to '.$filename.": ".$!);
+    print $fh $d;
+    close($fh);
+
+    return;
 }
 
 ########################################

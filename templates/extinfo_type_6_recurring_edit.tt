@@ -15,8 +15,9 @@
     </table><br>
     <br>
 
-<form action="reports.cgi" method="POST">
-<input type="hidden" name="action" value="save">
+<form action="extinfo.cgi" method="POST">
+<input type="hidden" name="recurring" value="save">
+<input type="hidden" name="type" value="6">
 <table border="1" class='data recurring_downtimes'>
   <tr>
     <th class='data' style="width:125px;"><a href='extinfo.cgi?type=6&amp;recurring'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
@@ -29,7 +30,7 @@
       <input type="text" id="host" name="host" value="[% rd.host %]" [% IF use_ajax_search %]onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=host', autosubmit:false })"[% END %]>
     </td>
   </tr>
-  [% IF task == 'add_service' %]
+  [% IF task == 'add_service' OR (task == 'edit' AND rd.service ) %]
   <tr>
     <td class="dataEven" align="center"><b>Service</b></td>
     <td class="dataOdd" align="left" colspan=2>
@@ -80,7 +81,7 @@
   </tr>
   <tr>
     <td class="dataEven" align="center" colspan=3>
-      [% IF rd.host %]<a href="extinfo.cgi?recurring=remove&amp;host=[% rd.host %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
+      [% IF rd.host %]<a href="extinfo.cgi?type=6&amp;recurring=remove&amp;host=[% rd.host | uri %][% IF rd.service %]&amp;service=[% rd.service %][% END %]" class="remove_button button" style="width: 80px;">Delete</a>[% END %]
       <button class="save_button button" style="width: 160px;">Save</button>
     </td>
   </tr>

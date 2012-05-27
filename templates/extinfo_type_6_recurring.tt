@@ -25,30 +25,27 @@
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='extinfo.cgi?type=6&amp;recurring=add_host'>Add recurring host downtime</a></div><br>
     [% END %]
     <div align="center">
-      <table border="0" class='downtime' style="min-width: 600px;">
+      <table border="0" class='downtime' style="min-width: 700px;">
         <tr class='downtime'>
           <th class='downtime'>Host Name</th>
-          <th class='downtime'>Author</th>
           <th class='downtime'>Comment</th>
-          <th class='downtime'>Type</th>
           <th class='downtime'>Duration</th>
           <th class='downtime'>Actions</th>
         </tr>
-        [%  FOREACH d = hostdowntimes %]
+        [% hostdowntimes = 0 %]
+        [%  FOREACH d = downtimes %]
+        [% NEXT IF d.service %]
+        [% hostdowntimes = hostdowntimes + 1 %]
         [% SET class = 'downtimeOdd' IF loop.even %]
         [% SET class = 'downtimeEven'  IF loop.odd %]
-        <tr class='[% class %] clickable' id="hst_[% d.id %]">
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
-          <td class='[% class %]'>[% d.author %]</td>
+        <tr class='[% class %]'>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a></td>
           <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-          <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
-          <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
-          [% UNLESS c.config.command_disabled.exists('78') %]
-          <td class='[% class %]'><a href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
-          [% END %]
+          <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;recurring=edit&amp;host=[% d.host | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
         </tr>
         [% END %]
-        [% IF hostdowntimes.size == 0 %]
+        [% IF hostdowntimes == 0 %]
         <tr class='downtimeOdd'>
           <td class='downtimeOdd' colspan="11">There are no recurring host downtimes</td>
         </tr>
@@ -63,32 +60,29 @@
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='extinfo.cgi?type=6&amp;recurring=add_service'>Add recurring service downtime</a></div><br>
     [% END %]
     <div align="center">
-      <table border="0" class='downtime' style="min-width: 600px;">
+      <table border="0" class='downtime' style="min-width: 700px;">
         <tr class='downtime'>
           <th class='downtime'>Host Name</th>
           <th class='downtime'>Service</th>
-          <th class='downtime'>Author</th>
           <th class='downtime'>Comment</th>
-          <th class='downtime'>Type</th>
           <th class='downtime'>Duration</th>
           <th class='downtime'>Actions</th>
         </tr>
-        [%  FOREACH d = servicedowntimes %]
+        [% servicedowntimes = 0 %]
+        [%  FOREACH d = downtimes %]
+        [% NEXT IF ! d.service %]
+        [% servicedowntimes = servicedowntimes + 1 %]
         [% SET class = 'downtimeOdd' IF loop.even %]
         [% SET class = 'downtimeEven'  IF loop.odd %]
-        <tr class='[% class %] clickable' id="svc_[% d.id %]">
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host_name | uri %]&amp;service=[% d.service_description | uri %]'>[% d.service_description %]</a></td>
-          <td class='[% class %]'>[% d.author %]</td>
+        <tr class='[% class %]'>
+          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a></td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'>[% d.service %]</a></td>
           <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-          <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
-          <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
-          [% UNLESS c.config.command_disabled.exists('79') %]
-          <td class='[% class %]'><a href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete/Cancel This Scheduled Downtime Entry' title='Delete/Cancel This Scheduled Downtime Entry' width="20" height="20"></a></td>
-          [% END %]
+          <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
+          <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;recurring=edit&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
         </tr>
         [% END %]
-        [% IF servicedowntimes.size == 0 %]
+        [% IF servicedowntimes == 0 %]
         <tr class='downtimeOdd'>
           <td class='downtimeOdd' colspan="12">There are no recurring service downtimes</td>
         </tr>

@@ -356,21 +356,7 @@ sub get_report_data_from_param {
         $p->{$1} = $params->{$key};
     }
 
-    my $send_types = [];
-    for my $x (1..99) {
-        if(defined $params->{'send_type_'.$x}) {
-            my @weekdays = ref $params->{'week_day_'.$x} eq 'ARRAY' ? @{$params->{'week_day_'.$x}} : ($params->{'week_day_'.$x});
-            @weekdays = grep {!/^$/mx} @weekdays;
-            push @{$send_types}, {
-                'type'      => $params->{'send_type_'.$x},
-                'hour'      => $params->{'send_hour_'.$x},
-                'minute'    => $params->{'send_minute_'.$x},
-                'week_day'  => join(',', @weekdays),
-                'day'       => $params->{'send_day_'.$x},
-            };
-        }
-    }
-
+    my $send_types = Thruk::Utils::get_cron_entries_from_param($params);
     my $data = {
         'name'       => $params->{'name'}        || 'New Report',
         'desc'       => $params->{'desc'}        || '',
@@ -487,12 +473,8 @@ sub _report_save {
     delete $report->{'nr'};
     delete $report->{'error'};
     delete $report->{'failed'};
-    my $data = Dumper($report);
-    $data    =~ s/^\$VAR1\ =\ //mx;
-    $data    =~ s/^\ \ \ \ \ \ \ \ //gmx;
-    open(my $fh, '>'.$file) or confess('cannot write to '.$file.": ".$!);
-    print $fh $data;
-    close($fh);
+
+    Thruk::Utils::write_data_file($file, $report);
     return $nr;
 }
 
@@ -508,12 +490,8 @@ sub _read_report_file {
         Thruk::Utils::CLI::_error("report does not exist: $!");
         return $c->detach('/error/index/13');
     }
-    my $data = read_file($file);
-    my $report;
-    ## no critic
-    eval('$report = '.$data.';');
-    ## use critic
 
+    my $report = Thruk::Utils::read_data_file($file);
     # add defaults
     $report = _get_new_report($c, $report);
 

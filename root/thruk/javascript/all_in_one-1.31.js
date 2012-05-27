@@ -3056,6 +3056,30 @@ function move_png_img(factor) {
 
     return set_png_img(start, end);
 }
+
+/* initialize all buttons */
+function init_buttons() {
+    jQuery('A.report_button').button();
+    jQuery('BUTTON.report_button').button();
+
+    jQuery('.save_button').button({
+        icons: {primary: 'ui-save-button'}
+    });
+
+    jQuery('.right_arrow_button').button({
+        icons: {primary: 'ui-r-arrow-button'}
+    });
+
+    jQuery('.add_button').button({
+        icons: {primary: 'ui-add-button'}
+    });
+
+    jQuery('.remove_button').button({
+        icons: {primary: 'ui-remove-button'}
+    }).click(function() {
+        return confirm('really delete?');
+    });
+}
 /**
  *                                                        ____   _____
  *  Dynarch Calendar -- JSCal2, version 1.7               \  /_  /   /
