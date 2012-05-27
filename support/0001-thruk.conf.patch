@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-05-24 19:45:10.098056801 +0200
-+++ b/thruk.conf	2012-05-24 19:46:07.344057224 +0200
+--- a/thruk.conf	2012-05-27 14:06:18.442308422 +0200
++++ b/thruk.conf	2012-05-27 14:06:24.343307098 +0200
 @@ -62,11 +62,11 @@
  
  ######################################
@@ -83,9 +83,9 @@
 -#thruk_init = /etc/init.d/thruk
 +thruk_init = /etc/init.d/thruk
  
- #####################################
- # Waiting is a livestatus feature. When enabled, Thruk will wait
-@@ -386,6 +386,20 @@
+ # execute regular scheduled reports with this nice level
+ #report_nice_level = 5
+@@ -389,6 +389,20 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -106,7 +106,7 @@
  #    <peer>
  #        name   = Local Nagios
  #        type   = livestatus
-@@ -435,7 +449,7 @@
+@@ -438,7 +452,7 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
