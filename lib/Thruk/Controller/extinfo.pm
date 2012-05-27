@@ -112,14 +112,26 @@ sub _process_recurring_downtimes_page {
     my $service     = $c->{'request'}->{'parameters'}->{'service'}      || '';
     my $old_host    = $c->{'request'}->{'parameters'}->{'old_host'}     || '';
     my $old_service = $c->{'request'}->{'parameters'}->{'old_service'}  || '';
+
+     my $default_rd = {
+            host         => $host,
+            service      => $service,
+            backends     => $c->{'db'}->peer_key(),
+            schedule     => [],
+            duration     => 120,
+            comment      => 'automatic downtime',
+            childoptions => 0,
+    };
+
     if($task eq 'save') {
         my $rd = {
-            'host'     => $host,
-            'service'  => $service,
-            'schedule' => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
-            'duration' => $c->{'request'}->{'parameters'}->{'duration'}  || '',
-            'comment'  => $c->{'request'}->{'parameters'}->{'comment'}  || '',
-            'backends' => $c->{'request'}->{'parameters'}->{'backends'}  || '',
+            'host'          => $host,
+            'service'       => $service,
+            'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
+            'duration'      => $c->{'request'}->{'parameters'}->{'duration'}        || '',
+            'comment'       => $c->{'request'}->{'parameters'}->{'comment'}         || '',
+            'backends'      => $c->{'request'}->{'parameters'}->{'backends'}        || '',
+            'childoptions'  => $c->{'request'}->{'parameters'}->{'childoptions'}    || 0,
         };
         if($service) {
             if(!$c->check_cmd_permissions('service', $service, $host)) {
@@ -159,14 +171,10 @@ sub _process_recurring_downtimes_page {
         }
         $c->stash->{'no_auto_reload'} = 1;
         $c->stash->{'task'}   = $task;
-        $c->stash->{rd}       = {
-                            host        => $host,
-                            service     => $service,
-                            backends    => $c->{'db'}->peer_key(),
-                            schedule    => [],
-                            duration    => 120,
-                            comment     => 'automatic downtime'
-                        } unless defined $c->stash->{rd};
+        $c->stash->{rd}       = $default_rd unless defined $c->stash->{rd};
+        for my $key (keys %{$default_rd}) {
+            $c->stash->{rd}->{$key} = $default_rd->{$key}  unless defined $c->stash->{rd}->{$key};
+        }
         $c->stash->{template} = 'extinfo_type_6_recurring_edit.tt';
     }
     elsif($task eq 'remove') {

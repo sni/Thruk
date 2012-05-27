@@ -334,14 +334,15 @@ sub _run_commands {
    if($action =~ /^downtimetask=(.*)$/mx) {
         my $downtime = Thruk::Utils::read_data_file($1);
         # convert to normal url request
-        my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=1&childoptions=0&backend=%s%s',
+        my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=1&childoptions=0&backend=%s%s%s',
                           $downtime->{'service'} ? 56 : 55,
                           uri_escape($downtime->{'host'}),
                           uri_escape($downtime->{'comment'}),
                           'cron',
                           uri_escape(Thruk::Utils::format_date(time(), '%Y-%m-%d %H:%M:%S')),
                           uri_escape(Thruk::Utils::format_date(time() + ($downtime->{'duration'}*60), '%Y-%m-%d %H:%M:%S')),
-                          $downtime->{'backends'},
+                          ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
+                          defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
                           $downtime->{'service'} ? '&service='.uri_escape($downtime->{'service'}) : '',
                          );
         my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
