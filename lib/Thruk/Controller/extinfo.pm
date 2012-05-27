@@ -119,6 +119,18 @@ sub _process_recurring_downtimes_page {
             'comment'  => $c->{'request'}->{'parameters'}->{'comment'}  || '',
             'backends' => $c->{'request'}->{'parameters'}->{'backends'}  || '',
         };
+        if($service) {
+            unless($c->check_permissions('service', $service, $host)) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such service' });
+                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+            }
+        }
+        if($host) {
+            unless($c->check_permissions('host', $host)) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such host' });
+                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
+            }
+        }
         mkdir($c->config->{'var_path'}.'/downtimes/');
         my $file = $self->_get_data_file_name($c, $host, $service);
         Thruk::Utils::write_data_file($file, $rd);
@@ -181,7 +193,7 @@ sub _update_cron_file {
 ##########################################################
 # return list of downtimes
 sub _get_downtimes_list {
-    my($self, $c, $noauth) = @_;
+    my($self, $c, $noauth, $host, $service) = @_;
 
     my($hosts, $services);
     unless($noauth) {
@@ -192,7 +204,12 @@ sub _get_downtimes_list {
     }
 
     my $downtimes = [];
-    for my $dfile (glob($c->config->{'var_path'}.'/downtimes/*.tsk')) {
+    my @pattern = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
+    if(defined $host) {
+        my $file = $self->_get_data_file_name($c, $host, $service);
+        @pattern = ($file);
+    }
+    for my $dfile (@pattern) {
         my $d = Thruk::Utils::read_data_file($dfile);
         $d->{'file'} = $dfile;
         unless($noauth) {
@@ -321,6 +338,9 @@ sub _process_host_page {
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $host);
 
+    # recurring downtimes
+    $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname);
+
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, $host);
 
@@ -432,6 +452,9 @@ sub _process_service_page {
 
     # pnp graph?
     $c->stash->{'pnp_url'} = Thruk::Utils::get_pnp_url($c, $service);
+
+    # recurring downtimes
+    $c->stash->{'recurring_downtimes'} = $self->_get_downtimes_list($c, 1, $hostname, $servicename);
 
     # set allowed custom vars into stash
     Thruk::Utils::set_custom_vars($c, $service);

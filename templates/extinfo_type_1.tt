@@ -398,7 +398,9 @@
                 [% END %]
               </tr>
             </table>
-            [% PROCESS _comments_table.tt comments = comments type='host' names=0 %]
+            [% IF comments.size > 0 %]
+              [% PROCESS _comments_table.tt comments = comments type='host' names=0 %]
+            [% END %]
           [% END %]
           </td>
         </tr>
@@ -426,7 +428,13 @@
                 [% END %]
               </tr>
             </table>
-            [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 %]
+            [% IF downtimes.size > 0 %]
+              [% PROCESS _downtimes_table.tt downtimes = downtimes type='host' names=0 %]
+            [% END %]
+            [% IF recurring_downtimes.size > 0 %]
+              <div class='commentTitle'>Recurring Host Downtime</div>
+              [% PROCESS _downtimes_recurring_table.tt downtimes = recurring_downtimes type='host' names=0 %]
+            [% END %]
           [% END %]
           </td>
         </tr>

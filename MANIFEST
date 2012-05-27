@@ -407,6 +407,7 @@ templates/_ajax_search.tt
 templates/_comments_table.tt
 templates/_common_js.tt
 templates/_cron_edit.tt
+templates/_downtimes_recurring_table.tt
 templates/_downtimes_table.tt
 templates/_excel_export.tt
 templates/_extinfo_cmd_pane.tt
