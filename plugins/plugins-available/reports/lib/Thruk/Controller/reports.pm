@@ -91,11 +91,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             return $self->report_save($c, $report_nr);
         }
         elsif($action eq 'remove') {
-            if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
-                Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report removed' });
-            } else {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
-            }
+            return $self->report_remove($c, $report_nr);
         }
     }
 
@@ -218,6 +214,23 @@ sub report_update {
     return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
 }
 
+##########################################################
+
+=head2 report_remove
+
+=cut
+sub report_remove {
+    my($self, $c, $report_nr) = @_;
+
+    if(Thruk::Utils::Reports::report_remove($c, $report_nr)) {
+        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'report removed' });
+    } else {
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
+    }
+    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
+}
+
+##########################################################
 
 =head1 AUTHOR
 
