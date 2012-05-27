@@ -120,14 +120,14 @@ sub _process_recurring_downtimes_page {
             'backends' => $c->{'request'}->{'parameters'}->{'backends'}  || '',
         };
         if($service) {
-            unless($c->check_permissions('service', $service, $host)) {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such service' });
+            unless($c->check_cmd_permissions('service', $service, $host)) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such service or no permission' });
                 return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
             }
         }
         if($host) {
-            unless($c->check_permissions('host', $host)) {
-                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such host' });
+            unless($c->check_cmd_permissions('host', $host)) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such host or no permission' });
                 return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
             }
         }
