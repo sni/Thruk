@@ -178,6 +178,10 @@ echo "Thruk has been configured for http://$(hostname)/thruk/. User and password
 exit 0
 
 %preun
+if [ $1 = 0 ]; then
+    # last version will be deinstalled
+    /usr/bin/thruk -a uninstallcron
+fi
 /etc/init.d/thruk stop
 chkconfig --del thruk
 exit 0

@@ -1080,6 +1080,7 @@ write crontab section
 
 sub update_cron_file {
     my($c, $section, $entries) = @_;
+
     if(!$c->config->{'cron_file'}) {
         set_message($c, 'fail_message', 'no \'cron_file\' set, check your settings!');
         return;
@@ -1119,38 +1120,42 @@ sub update_cron_file {
     }
 
     # write out new file
-    delete $sections->{$section};
-    my $user = '';
-    if(substr($c->config->{'cron_file'}, 0, 12) eq '/etc/cron.d/') {
-        $user = ' root ';
-    }
-    $sections->{$section} = [];
-    for my $entry (@{$entries}) {
-        next unless defined $entry->[0];
-        push @{$sections->{$section}}, $entry->[0]." ".$user.$entry->[1];
+    if(defined $section) {
+        delete $sections->{$section};
+        my $user = '';
+        if(substr($c->config->{'cron_file'}, 0, 12) eq '/etc/cron.d/') {
+            $user = ' root ';
+        }
+        $sections->{$section} = [];
+        for my $entry (@{$entries}) {
+            next unless defined $entry->[0];
+            push @{$sections->{$section}}, $entry->[0]." ".$user.$entry->[1];
+        }
     }
 
-    open(my $fh, '>', $c->config->{'cron_file'}) or die('cannot write ('.$>.','.$<.')'.$c->config->{'cron_file'}.': '.$!);
+    open(my $fh, '>', $c->config->{'cron_file'}) or die('cannot write '.$c->config->{'cron_file'}.': '.$!);
     for my $line (@orig_cron) {
         print $fh $line, "\n";
     }
 
-    my $header_printed = 0;
-    for my $s (sort keys %{$sections}) {
-        next if scalar @{$sections->{$s}} == 0;
-        unless($header_printed) {
-            print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN\n";
+    if(defined $section) {
+        my $header_printed = 0;
+        for my $s (sort keys %{$sections}) {
+            next if scalar @{$sections->{$s}} == 0;
+            unless($header_printed) {
+                print $fh "# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN\n";
+                print $fh "##############################################################\n";
+                $header_printed = 1;
+            }
+            print $fh '# '.$s."\n";
+            for my $line (@{$sections->{$s}}) {
+                print $fh $line, "\n";
+            }
+        }
+        if($header_printed) {
             print $fh "##############################################################\n";
-            $header_printed = 1;
+            print $fh "# END OF THRUK\n";
         }
-        print $fh '# '.$s."\n";
-        for my $line (@{$sections->{$s}}) {
-            print $fh $line, "\n";
-        }
-    }
-    if($header_printed) {
-        print $fh "##############################################################\n";
-        print $fh "# END OF THRUK\n";
     }
     close($fh);
 

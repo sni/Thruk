@@ -271,7 +271,7 @@ sub _from_fcgi {
 ##############################################
 sub _run_commands {
     my($c, $opt) = @_;
-    $c->stats->profile(begin => "Utils::CLI::_run_commands");
+
     my $data = {
         'version' => $c->config->{'version'},
         'output'  => '',
@@ -289,80 +289,34 @@ sub _run_commands {
 
     # list backends
     if($action eq 'listbackends') {
-        $data->{'output'} = _listbackends($c);
-        $c->stats->profile(end => "Utils::CLI::_run_commands");
-        return $data;
+        $data->{'output'} = _cmd_listbackends($c);
     }
 
     # request url
-    if($action =~ /^url=(.*)$/mx) {
-        my $url = $1;
-        if($url =~ m|^\w+\.cgi|gmx) {
-            $url = '/thruk/cgi-bin/'.$url;
-        }
-        $data->{'output'} = _request_url($c, $url);
+    elsif($action =~ /^url=(.*)$/mx) {
+        $data->{'output'} = _cmd_url($c, $1);
     }
 
     # report or report mails
-    if($action =~ /^report(\w*)=(.*)$/mx) {
-        eval {
-            require Thruk::Utils::Reports;
-        };
-        if($@) {
-            $data->{'output'} = "reports plugin is not enabled.\n";
-            $data->{'rc'}     = 1;
-            return $data;
-        }
-        my $mail = $1;
-        my $nr   = $2;
-        if($mail eq 'mail') {
-            if(Thruk::Utils::Reports::report_send($c, $nr)) {
-                $data->{'output'} = "mail send successfully\n";
-            } else {
-                $data->{'output'} = "cannot send mail\n";
-                $data->{'rc'}     = 1;
-            }
-        } else {
-            my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
-            if(defined $pdf_file) {
-                $data->{'output'} = read_file($pdf_file);
-            }
-        }
+    elsif($action =~ /^report(\w*)=(.*)$/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_report($c, $1, $2);
     }
 
-   # downtime?
-   if($action =~ /^downtimetask=(.*)$/mx) {
-        my $downtime = Thruk::Utils::read_data_file($1);
-        # convert to normal url request
-        my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=1&childoptions=0&backend=%s%s%s',
-                          $downtime->{'service'} ? 56 : 55,
-                          uri_escape($downtime->{'host'}),
-                          uri_escape($downtime->{'comment'}),
-                          'cron',
-                          uri_escape(Thruk::Utils::format_date(time(), '%Y-%m-%d %H:%M:%S')),
-                          uri_escape(Thruk::Utils::format_date(time() + ($downtime->{'duration'}*60), '%Y-%m-%d %H:%M:%S')),
-                          ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
-                          defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
-                          $downtime->{'service'} ? '&service='.uri_escape($downtime->{'service'}) : '',
-                         );
-        my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
-        $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
-        _request_url($c, $url);
-        $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
-        if($downtime->{'service'}) {
-            $data->{'output'} = 'scheduled downtime for '.$downtime->{'service'}.' on '.$downtime->{'host'};
-        } else {
-            $data->{'output'} = 'scheduled downtime for '.$downtime->{'host'};
-        }
-        $data->{'output'} .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
-   }
+    # downtime?
+    elsif($action =~ /^downtimetask=(.*)$/mx) {
+        $data->{'output'} = _cmd_downtimetask($c, $1);
+    }
 
-    $c->stats->profile(end => "Utils::CLI::_run_commands");
+    # uninstall cron
+    elsif($action eq 'uninstallcron') {
+        $data->{'output'} = _cmd_uninstallcron($c);
+    }
+
     return $data;
 }
 
 ##############################################
-sub _listbackends {
+sub _cmd_listbackends {
     my($c) = @_;
     $c->{'db'}->enable_backends();
     $c->{'db'}->get_processinfo();
@@ -461,6 +415,93 @@ sub _debug {
         }
     }
     return;
+}
+
+##############################################
+sub _cmd_uninstallcron {
+    my($c) = @_;
+    $c->stats->profile(begin => "_cmd_uninstallcron()");
+    Thruk::Utils::update_cron_file($c);
+    $c->stats->profile(end => "_cmd_uninstallcron()");
+    return "cron entries removed\n";
+}
+
+##############################################
+sub _cmd_report {
+    my($c, $mail, $nr) = @_;
+
+    $c->stats->profile(begin => "_cmd_report()");
+
+    my($output, $rc);
+    eval {
+        require Thruk::Utils::Reports;
+    };
+    if($@) {
+        return("reports plugin is not enabled.\n", 1)
+    }
+    if($mail eq 'mail') {
+        if(Thruk::Utils::Reports::report_send($c, $nr)) {
+            $output = "mail send successfully\n";
+        } else {
+            return("cannot send mail\n", 1)
+        }
+    } else {
+        my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
+        if(defined $pdf_file) {
+            $output = read_file($pdf_file);
+        }
+    }
+
+    $c->stats->profile(end => "_cmd_report()");
+    return($output, 0)
+}
+
+##############################################
+sub _cmd_downtimetask {
+    my($c, $file) = @_;
+    $c->stats->profile(begin => "_cmd_downtimetask()");
+
+    my $downtime = Thruk::Utils::read_data_file($file);
+    my $output   = '';
+    # convert to normal url request
+    my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=1&childoptions=0&backend=%s%s%s',
+                      $downtime->{'service'} ? 56 : 55,
+                      uri_escape($downtime->{'host'}),
+                      uri_escape($downtime->{'comment'}),
+                      'cron',
+                      uri_escape(Thruk::Utils::format_date(time(), '%Y-%m-%d %H:%M:%S')),
+                      uri_escape(Thruk::Utils::format_date(time() + ($downtime->{'duration'}*60), '%Y-%m-%d %H:%M:%S')),
+                      ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
+                      defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
+                      $downtime->{'service'} ? '&service='.uri_escape($downtime->{'service'}) : '',
+                     );
+    my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
+    $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
+    _request_url($c, $url);
+    $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
+    if($downtime->{'service'}) {
+        $output = 'scheduled downtime for '.$downtime->{'service'}.' on '.$downtime->{'host'};
+    } else {
+        $output = 'scheduled downtime for '.$downtime->{'host'};
+    }
+    $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
+
+    $c->stats->profile(end => "_cmd_downtimetask()");
+    return $output;
+}
+
+##############################################
+sub _cmd_url {
+    my($c, $url) = @_;
+    $c->stats->profile(begin => "_cmd_downtimetask()");
+
+    if($url =~ m|^\w+\.cgi|gmx) {
+        $url = '/thruk/cgi-bin/'.$url;
+    }
+    my $output = _request_url($c, $url);
+
+    $c->stats->profile(end => "_cmd_downtimetask()");
+    return $output;
 }
 
 ##############################################
