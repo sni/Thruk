@@ -201,6 +201,8 @@ sub _request {
         _debug(" -> success");
         my $data_str = $response->decoded_content;
         my $data     = decode_json($data_str);
+        _debug("   -> ".Dumper($response));
+        _debug("   -> ".Dumper($data));
         return($data, $response);
     } else {
         _debug(" -> failed: ".Dumper($response));
@@ -251,6 +253,8 @@ sub _from_fcgi {
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
     $Thruk::Utils::CLI::c       = $c;
+    local $ENV{'THRUK_SRC'}     = 'CLI';
+    $c->stash->{'remote_user'}  = $data->{'options'}->{'auth'} if defined $data->{'options'}->{'auth'};
 
     # check credentials
     my $res = {};
@@ -482,7 +486,7 @@ sub _cmd_report {
         if(defined $pdf_file) {
             $output = read_file($pdf_file);
         } else {
-            return("failed\n", 1)
+            return("generating pdf failed\n", 1)
         }
     }
 

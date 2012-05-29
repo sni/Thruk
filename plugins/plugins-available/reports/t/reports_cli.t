@@ -20,7 +20,7 @@ $BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CA
 my $test = { cmd  => $BIN.' -a listhosts' };
 TestUtils::test_command($test);
 my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef) or BAIL_OUT("need test host");
+isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host");
 
 # create report
 TestUtils::test_command({
@@ -30,8 +30,18 @@ TestUtils::test_command({
 
 # generate report
 TestUtils::test_command({
+    cmd  => $BIN.' -a report=999 --local',
+    like => [ '/%PDF\-1\.4/', '/%%EOF/' ],
+});
+TestUtils::test_command({
     cmd  => $BIN.' -a report=999',
     like => [ '/%PDF\-1\.4/', '/%%EOF/' ],
+});
+
+# update report
+TestUtils::test_command({
+    cmd  => $BIN.' "/thruk/cgi-bin/reports.cgi?action=update&report=999"',
+    like => ['/^OK - report scheduled for update$/'],
 });
 
 # remove report

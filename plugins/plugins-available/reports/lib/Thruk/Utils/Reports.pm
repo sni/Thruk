@@ -492,6 +492,7 @@ sub _read_report_file {
     }
 
     my $report = Thruk::Utils::read_data_file($file);
+    $report->{'nr'} = $nr;
     # add defaults
     $report = _get_new_report($c, $report);
 
@@ -512,7 +513,6 @@ sub _read_report_file {
     $report->{'desc'}       = '' unless defined $report->{'desc'};
     $report->{'to'}         = '' unless defined $report->{'to'};
     $report->{'cc'}         = '' unless defined $report->{'cc'};
-    $report->{'nr'}         = $nr;
     $report->{'is_public'}  = 0 unless defined $report->{'is_public'};
 
     # check if its really running
@@ -556,13 +556,14 @@ sub _is_authorized_for_report {
     if(defined $report->{'is_public'} and $report->{'is_public'} == 1) {
         return 2;
     }
-    Thruk::Utils::CLI::_debug("user: ".(defined $c->stash->{'remote_user'} ? $c->stash->{'remote_user'} : '?')." is not authorized for report: ".(defined $report->{'nr'} ? $report->{'nr'} : '?'));
+    Thruk::Utils::CLI::_debug("user: ".(defined $c->stash->{'remote_user'} ? $c->stash->{'remote_user'} : '?')." is not authorized for report: ".$report->{'nr'});
     return;
 }
 
 ##########################################################
 sub _get_report_cmd {
     my($c, $report, $mail) = @_;
+    mkdir($c->config->{'var_path'}.'/reports/');
     my $thruk_bin = $c->config->{'thruk_bin'};
     my $type      = 'report';
     if($mail) {
@@ -573,7 +574,7 @@ sub _get_report_cmd {
     if($c->config->{'report_nice_level'} > 0) {
         $thruk_bin = $nice.' -n '.$c->config->{'report_nice_level'}.' '.$thruk_bin;
     }
-    my $cmd = sprintf("cd %s && %s '%s -a % 10s=%-3s' >/dev/null 2>%s/reports/%d.log",
+    my $cmd = sprintf("cd %s && %s '%s --local -a % 10s=%-3s' >/dev/null 2>%s/reports/%d.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
                             $thruk_bin,

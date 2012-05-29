@@ -36,6 +36,7 @@ $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
 $options->{'remoteurl'} = defined $ENV{'OMD_SITE'} ? 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi'
                                                    : 'http://localhost/thruk/cgi-bin/remote.cgi'
                           unless defined $options->{'remoteurl'};
+$options->{'remoteurl'} =~ s|/thruk/*$||mx;
 $options->{'remoteurl'} = $options->{'remoteurl'}.'/thruk/cgi-bin/remote.cgi' if $options->{'remoteurl'} !~ m/remote\.cgi$/;
 
 use Thruk::Utils::CLI;
