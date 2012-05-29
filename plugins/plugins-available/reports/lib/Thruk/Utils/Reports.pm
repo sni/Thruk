@@ -556,7 +556,7 @@ sub _is_authorized_for_report {
     if(defined $report->{'is_public'} and $report->{'is_public'} == 1) {
         return 2;
     }
-    Thruk::Utils::CLI::_debug("user: ".$c->stash->{'remote_user'}." is not authorized for report: ".$report->{'nr'});
+    Thruk::Utils::CLI::_debug("user: ".(defined $c->stash->{'remote_user'} ? $c->stash->{'remote_user'} : '?')." is not authorized for report: ".(defined $report->{'nr'} ? $report->{'nr'} : '?'));
     return;
 }
 

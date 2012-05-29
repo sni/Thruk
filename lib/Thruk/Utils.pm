@@ -1086,8 +1086,22 @@ sub update_cron_file {
         return;
     }
 
+    # prevents 'No child processes' error
+    local $SIG{CHLD} = 'DEFAULT';
+
+    my $errorlog = $c->config->{'var_path'}.'/cron.log';
+
     if($c->config->{'cron_pre_edit_cmd'}) {
-        system($c->config->{'cron_pre_edit_cmd'});
+        my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$errorlog;
+        my $output = `$cmd`;
+        if ($? == -1) {
+            die("cron_pre_edit_cmd (".$cmd.") failed: ".$!);
+        } elsif ($? & 127) {
+            die(sprintf("cron_pre_edit_cmd (".$cmd.") died with signal %d:\n", ($? & 127), $output));
+        } else {
+            my $rc = $? >> 8;
+            die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output)) if $rc != 0;
+        }
     }
 
     # read complete file
@@ -1160,7 +1174,16 @@ sub update_cron_file {
     close($fh);
 
     if($c->config->{'cron_post_edit_cmd'}) {
-        system($c->config->{'cron_post_edit_cmd'});
+        my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
+        my $output = `$cmd`;
+        if ($? == -1) {
+            die("cron_post_edit_cmd (".$cmd.") failed: ".$!);
+        } elsif ($? & 127) {
+            die(sprintf("cron_post_edit_cmd (".$cmd.") died with signal %d:\n", ($? & 127), $output));
+        } else {
+            my $rc = $? >> 8;
+            die(sprintf("cron_post_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output)) if $rc != 0;
+        }
     }
     return 1;
 }
@@ -1196,6 +1219,45 @@ sub get_cron_time_entry {
 
 ##############################################
 
+=head2 get_user
+
+  get_user($from_folder)
+
+return user and groups thruk runs with
+
+=cut
+
+sub get_user {
+    my($from_folder) = @_;
+    confess($from_folder." ".$!) unless -d $from_folder;
+    my $uid = (stat $from_folder)[4];
+    my($name,$gid) = (getpwuid($uid))[0, 3];
+    my @groups = ( $gid );
+    while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
+        $users =~ /\b$name\b/mx and push @groups, $gid;
+    }
+    return($uid, \@groups);
+}
+
+##############################################
+
+=head2 switch_user
+
+  switch_user($uid, $groups)
+
+switch user and groups
+
+=cut
+
+sub switch_user {
+    my($uid, $groups) = @_;
+    $) = join(" ", @{$groups});
+    $> = $uid;
+    return;
+}
+
+##############################################
+
 =head2 get_cron_entries_from_param
 
   get_cron_entries_from_param($cronentry)
@@ -1210,6 +1272,7 @@ sub get_cron_entries_from_param {
     my $cron_entries = [];
     for my $x (1..99) {
         if(defined $params->{'send_type_'.$x}) {
+            $params->{'week_day_'.$x} = [] unless defined $params->{'week_day_'.$x};
             my @weekdays = ref $params->{'week_day_'.$x} eq 'ARRAY' ? @{$params->{'week_day_'.$x}} : ($params->{'week_day_'.$x});
             @weekdays = grep {!/^$/mx} @weekdays;
             push @{$cron_entries}, {

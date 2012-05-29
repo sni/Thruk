@@ -10,6 +10,7 @@ use strict;
 use Data::Dumper;
 use Test::More;
 use URI::Escape;
+use Thruk::Utils;
 use Thruk::Utils::External;
 
 use Catalyst::Test 'Thruk';
@@ -298,6 +299,20 @@ sub diag_lint_errors_and_remove_some_exceptions {
 sub get_themes {
     my @themes = @{Thruk->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'}};
     return @themes;
+}
+
+#########################
+sub get_c {
+    my($res, $c) = ctx_request('/thruk/side.html');
+    return $c;
+}
+
+#########################
+sub get_user {
+    my $c = get_c();
+    my ($uid, $groups) = Thruk::Utils::get_user($c);
+    my $user           = getpwuid($uid);
+    return $user;
 }
 
 #########################

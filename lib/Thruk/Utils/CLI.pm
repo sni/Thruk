@@ -395,6 +395,9 @@ sub _request_url {
         }
         return $msg.' - '.$txt."\n";
     }
+    elsif($result->{'code'} == 500) {
+        return 'request failed: '.$result->{'code'}."\ninternal error, please consult your logfiles\n";
+    }
     elsif($result->{'code'} != 200) {
         return 'request failed: '.$result->{'code'}."\n".Dumper($result);
     }

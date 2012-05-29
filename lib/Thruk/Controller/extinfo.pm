@@ -128,7 +128,7 @@ sub _process_recurring_downtimes_page {
             'host'          => $host,
             'service'       => $service,
             'schedule'      => Thruk::Utils::get_cron_entries_from_param($c->{'request'}->{'parameters'}),
-            'duration'      => $c->{'request'}->{'parameters'}->{'duration'}        || '',
+            'duration'      => $c->{'request'}->{'parameters'}->{'duration'}        || 5,
             'comment'       => $c->{'request'}->{'parameters'}->{'comment'}         || '',
             'backends'      => $c->{'request'}->{'parameters'}->{'backends'}        || '',
             'childoptions'  => $c->{'request'}->{'parameters'}->{'childoptions'}    || 0,

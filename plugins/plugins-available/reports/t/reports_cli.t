@@ -13,9 +13,17 @@ BEGIN {
 }
 
 my $BIN = defined $ENV{'CATALYST_SERVER'} ? '/usr/bin/thruk' : './script/thruk';
+my $VAR = (defined $ENV{'CATALYST_SERVER'} or ! -d './var') ? '/var/lib/thruk' : './var';
+$BIN    = $BIN." --local ";
 
 my $oldextsrv = $ENV{'CATALYST_SERVER'};
 delete $ENV{'CATALYST_SERVER'};
+
+my ($uid, $groups) = Thruk::Utils::get_user($VAR);
+ok($uid > 0, 'got a uid: '.$uid);
+if(defined $uid and $> == 0) {
+    Thruk::Utils::switch_user($uid, $groups);
+}
 
 my($hostname,$servicename) = TestUtils::get_test_service();
 

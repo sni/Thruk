@@ -54,6 +54,9 @@ case "$1" in
             /etc/init.d/apache2 reload
         fi
 
+        # create empty crontab
+        /usr/bin/crontab -l -u www-data 2>/dev/null | /usr/bin/crontab -u www-data -
+
         echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
     ;;
 

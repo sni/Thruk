@@ -29,6 +29,9 @@ else
     if [ -f /etc/sysconfig/thruk ]; then
       . /etc/sysconfig/thruk
     fi
+    if [ -f /etc/default/thruk ]; then
+      . /etc/default/thruk
+    fi
 fi
 
 # make it possible to override startcmd by sysconfig

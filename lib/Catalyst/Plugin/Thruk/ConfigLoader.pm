@@ -1,6 +1,7 @@
 package Catalyst::Plugin::Thruk::ConfigLoader;
 
 use strict;
+use Thruk::Utils;
 use base 'Catalyst::Plugin::ConfigLoader';
 
 sub finalize_config {
@@ -11,16 +12,9 @@ sub finalize_config {
     ###################################################
     # switch user when running as root
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-        my $var_path = $c->config->{'var_path'} || './var';
-        my $uid = (stat $var_path)[4];
+        my ($uid, $groups) = Thruk::Utils::get_user($c->config->{'var_path'} || './var');
         if(defined $uid and $> == 0) {
-            my($name,$gid) = (getpwuid($uid))[0, 3];
-            my @groups = ( $gid );
-            while ( my ( $gid, $users ) = ( getgrent )[ 2, -1 ] ) {
-                $users =~ /\b$name\b/mx and push @groups, $gid;
-            }
-            $) = join(" ", @groups);
-            $> = $uid;
+            Thruk::Utils::switch_user($uid, $groups);
         }
     }
 

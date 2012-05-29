@@ -170,9 +170,11 @@ a2enmod fcgid
 a2enmod auth_basic
 a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
+/usr/bin/crontab -l -u wwwrun 2>/dev/null | /usr/bin/crontab -u wwwrun -
 %else
 chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk
 /etc/init.d/httpd restart || /etc/init.d/httpd start
+/usr/bin/crontab -l -u apache 2>/dev/null | /usr/bin/crontab -u apache -
 %endif
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
