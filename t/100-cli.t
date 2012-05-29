@@ -24,6 +24,11 @@ TestUtils::test_command({
             ],
 });
 
+TestUtils::test_command({
+    cmd  => $BIN.' reports.cgi?action=updatecron >/dev/null',
+    like => ['/^OK - updated crontab$/'],
+});
+
 # Excel export
 TestUtils::test_command({
     cmd  => '/bin/sh -c \''.$BIN.' -A thrukadmin -a "url=status.cgi?view_mode=xls&host=all" > /tmp/allservices.xls\'',

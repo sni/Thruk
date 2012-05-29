@@ -382,6 +382,19 @@ sub _request_url {
             $x++;
         }
     }
+    elsif($result->{'code'} == 302
+          and defined $result->{'headers'}->{'Set-Cookie'}
+          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/
+    ) {
+        my $txt = uri_unescape($2);
+        my $msg = '';
+        if($1 eq 'success_message') {
+            $msg = 'OK';
+        } else {
+            $msg = 'FAILED';
+        }
+        return $msg.' - '.$txt."\n";
+    }
     elsif($result->{'code'} != 200) {
         return 'request failed: '.$result->{'code'}."\n".Dumper($result);
     }
