@@ -462,6 +462,8 @@ sub _cmd_report {
         my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
         if(defined $pdf_file) {
             $output = read_file($pdf_file);
+        } else {
+            return("failed\n", 1)
         }
     }
 
