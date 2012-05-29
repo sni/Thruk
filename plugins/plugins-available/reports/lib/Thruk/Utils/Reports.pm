@@ -568,8 +568,10 @@ sub _get_report_cmd {
     if($mail) {
         $type = 'reportmail';
     }
+    my $nice = '/usr/bin/nice';
+    if(-e '/bin/nice') { $nice = '/bin/nice'; }
     if($c->config->{'report_nice_level'} > 0) {
-        $thruk_bin = '/usr/bin/nice -n '.$c->config->{'report_nice_level'}.' '.$thruk_bin;
+        $thruk_bin = $nice.' -n '.$c->config->{'report_nice_level'}.' '.$thruk_bin;
     }
     my $cmd = sprintf("cd %s && %s '%s -a % 10s=%-3s' >/dev/null 2>%s/reports/%d.log",
                             $c->config->{'project_root'},
