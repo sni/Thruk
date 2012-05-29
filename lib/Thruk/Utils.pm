@@ -1252,7 +1252,9 @@ switch user and groups
 sub switch_user {
     my($uid, $groups) = @_;
     $) = join(" ", @{$groups});
-    $> = $uid;
+    # using POSIX::setuid here leads to
+    # 'Insecure dependency in eval while running setgid'
+    $> = $uid or confess("setuid failed: ".$!);
     return;
 }
 

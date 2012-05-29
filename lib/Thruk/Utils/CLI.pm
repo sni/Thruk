@@ -212,6 +212,7 @@ sub _request {
 sub _dummy_c {
     my($self) = @_;
     _debug("_dummy_c()");
+    local $ENV{'CATALYST_SERVER'} = undef;
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
     my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
@@ -292,6 +293,11 @@ sub _run_commands {
         $data->{'output'} = _cmd_listbackends($c);
     }
 
+    # list hosts
+    if($action eq 'listhosts') {
+        $data->{'output'} = _cmd_listhosts($c);
+    }
+
     # request url
     elsif($action =~ /^url=(.*)$/mx) {
         $data->{'output'} = _cmd_url($c, $1);
@@ -313,6 +319,16 @@ sub _run_commands {
     }
 
     return $data;
+}
+
+##############################################
+sub _cmd_listhosts {
+    my($c) = @_;
+    my $output = '';
+    for my $host (@{$c->{'db'}->get_hosts()}) {
+        $output .= $host->{'name'}."\n";
+    }
+    return $output;
 }
 
 ##############################################

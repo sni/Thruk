@@ -12,30 +12,21 @@ BEGIN {
     import TestUtils;
 }
 
-my $BIN = defined $ENV{'CATALYST_SERVER'} ? '/usr/bin/thruk' : './script/thruk';
-my $VAR = (defined $ENV{'CATALYST_SERVER'} or ! -d './var') ? '/var/lib/thruk' : './var';
-$BIN    = $BIN." --local ";
+my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
+$BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
+$BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
 
-my $oldextsrv = $ENV{'CATALYST_SERVER'};
-delete $ENV{'CATALYST_SERVER'};
+# get test host
+my $test = { cmd  => $BIN.' -a listhosts' };
+TestUtils::test_command($test);
+my $host = (split(/\n/mx, $test->{'stdout'}))[0];
+isnt($host, undef) or BAIL_OUT("need test host");
 
-my ($uid, $groups) = Thruk::Utils::get_user($VAR);
-ok($uid > 0, 'got a uid: '.$uid);
-if(defined $uid and $> == 0) {
-    Thruk::Utils::switch_user($uid, $groups);
-}
-
-my($hostname,$servicename) = TestUtils::get_test_service();
-
-my $pages = [
-    { url => '/thruk/cgi-bin/reports.cgi?action=save&report=999&name=Service%20SLA%20Report%20for%20'.$hostname.'%20-%20'.$servicename.'&template=sla_service.tt&params.sla=95&params.timeperiod=last12months&params.host='.$hostname.'&params.service='.$servicename.'&params.breakdown=months&params.unavailable=critical&params.unavailable=unknown', 'redirect' => 1, location => 'reports.cgi', like => 'This item has moved' },
-];
-
-for my $test (@{$pages}) {
-    $test->{'unlike'} = [ 'internal server error', 'HASH', 'ARRAY' ] unless defined $test->{'unlike'};
-    $test->{'like'}   = [ 'Reports' ]                                unless defined $test->{'like'};
-    TestUtils::test_page(%{$test});
-}
+# create report
+TestUtils::test_command({
+    cmd  => $BIN.' "/thruk/cgi-bin/reports.cgi?action=save&report=999&name=Service%20SLA%20Report%20for%20'.$host.'&template=sla_host.tt&params.sla=95&params.timeperiod=last12months&params.host='.$host.'&params.breakdown=months&params.unavailable=critical&params.unavailable=unknown"',
+    like => ['/^OK - report updated$/'],
+});
 
 # generate report
 TestUtils::test_command({
@@ -43,16 +34,10 @@ TestUtils::test_command({
     like => [ '/%PDF\-1\.4/', '/%%EOF/' ],
 });
 
-$pages = [
-    { url => '/thruk/cgi-bin/reports.cgi?action=remove&report=999', 'redirect' => 1, location => 'reports.cgi', like => 'This item has moved' },
-];
-for my $test (@{$pages}) {
-    $test->{'unlike'} = [ 'internal server error', 'HASH', 'ARRAY' ] unless defined $test->{'unlike'};
-    $test->{'like'}   = [ 'Reports' ]                                unless defined $test->{'like'};
-    TestUtils::test_page(%{$test});
-}
+# remove report
+TestUtils::test_command({
+    cmd  => $BIN.' "/thruk/cgi-bin/reports.cgi?action=remove&report=999"',
+    like => ['/^OK - report removed$/'],
+});
 
-
-# restore env
-defined $oldextsrv ? $ENV{'CATALYST_SERVER'} = $oldextsrv : delete $ENV{'CATALYST_SERVER'};
 done_testing();
