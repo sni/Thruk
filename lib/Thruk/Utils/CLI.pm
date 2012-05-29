@@ -384,7 +384,7 @@ sub _request_url {
     }
     elsif($result->{'code'} == 302
           and defined $result->{'headers'}->{'Set-Cookie'}
-          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/
+          and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mx
     ) {
         my $txt = uri_unescape($2);
         my $msg = '';
