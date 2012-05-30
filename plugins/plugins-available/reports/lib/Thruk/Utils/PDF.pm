@@ -252,6 +252,7 @@ sub fill_availability_table {
     my $z = 0;
     if(@{$a->{'AVAILABLE'}} > 12) { $z = @{$a->{'AVAILABLE'}} - 12; }
     for(;$z < @{$a->{'AVAILABLE'}}; $z++) {
+        next if $l->[$z] eq '';
         my $val = $a->{'AVAILABLE'}->[$z];
         _pdf_color($c1);
         $pdf->prText($x,$y, $l->[$z]);
@@ -527,6 +528,19 @@ sub _render_bar_chart {
     my($options) = @_;
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");
 
+    # cannot render single bars
+    if(scalar keys %{$options->{'values'}} == 1) {
+        my $col = _get_colors();
+        $options->{'values'}->{''} = {
+            'name'   => '',
+            'values' => [
+                { name => 'PLACEHOLDER',   value => 0, color => $col->{'placeholder'} },
+                { name => 'UNDETERMINED',  value => 0, color => $col->{'undetermined'} },
+                { name => 'AVAILABLE',     value => 0, color => $col->{'ok'} },
+                { name => 'NOT AVAILABLE', value => 0, color => $col->{'critical'} },
+            ],
+        }
+    }
     my $cc = Chart::Clicker->new('format' => 'pdf', width => 550, height => 400);
     my @lables = ();
     my $colors = {};
@@ -793,6 +807,7 @@ sub _get_colors {
 # convert date to tick name
 sub _date_to_tick_name {
     my $date = shift;
+    return '' if $date eq '';
     my $names = {
         '01' => 'Jan',
         '02' => 'Feb',
