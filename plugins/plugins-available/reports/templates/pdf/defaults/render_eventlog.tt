@@ -15,17 +15,23 @@
   pdf.prText(480, 440, format_date(date.now, "%d.%m.%Y"));
 
   # PAGE 2
+  # legend
+  pdf.prPage();
+  pdf.prFont('Calibri');
+  pdf.prForm(path_to_template('pdf/eventlog.pdf'), 3);
+  font(20, 'dark grey');
+  pdf.prText(40,680, 'Legend');
+  print_event_totals(235, 612, 22.5);
+  page = 2;
+  page_footer(550, 58, page); page = page + 1;
+
+  # PAGE 3
   # events
   pdf.prPage();
   pdf.prForm(path_to_template('pdf/eventlog.pdf'), 2);
   font(20, 'dark grey');
   pdf.prText(40,680, 'Events');
-  # page footer
-  font(10, 'white');
-  page = 2;
-  pdf.prText(550,58, page);
-  page = page + 1;
-
+  page_footer(550, 58, page); page = page + 1;
 
 
   font(10, 'dark grey');
@@ -35,13 +41,11 @@
     x = 30;
     y = 640;
     FOREACH l = logs;
-      IF y < 80;
+      IF y < 90;
         y = 640;
         pdf.prPage();
         pdf.prForm(path_to_template('pdf/eventlog.pdf'), 2);
-        font(10, 'white');
-        pdf.prText(550,58, page);
-        page = page + 1;
+        page_footer(550, 58, page); page = page + 1;
         font(20, 'dark grey');
         pdf.prText(40,680, 'Events');
         font(10, 'dark grey');

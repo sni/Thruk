@@ -378,6 +378,75 @@ sub get_events {
 
 ##########################################################
 
+=head2 print_event_totals
+
+  print_event_totals()
+
+count host / service totals from events
+
+=cut
+sub print_event_totals {
+    my($x, $y, $step) = @_;
+    my $c   = $Thruk::Utils::PDF::c or die("not initialized!");
+    my $pdf = $Thruk::Utils::PDF::pdf or die("not initialized!");
+    confess("no logs, forgot to run get_events()?") unless defined $c->stash->{'logs'};
+    my $totals = {
+        'ok'            => 0,
+        'warning'       => 0,
+        'unknown'       => 0,
+        'critical'      => 0,
+        'up'            => 0,
+        'down'          => 0,
+        'unreachable'   => 0,
+    };
+
+    for my $l (@{$c->stash->{'logs'}}) {
+        if($l->{'service_description'}) {
+            if($l->{'state'} == 0) {
+                $totals->{'ok'}++;
+            }
+            elsif($l->{'state'} == 1) {
+                $totals->{'warning'}++;
+            }
+            elsif($l->{'state'} == 2) {
+                $totals->{'critical'}++;
+            }
+            elsif($l->{'state'} == 3) {
+                $totals->{'unknown'}++;
+            }
+        }
+        elsif($l->{'host_name'}) {
+            if($l->{'state'} == 0) {
+                $totals->{'up'}++;
+            }
+            elsif($l->{'state'} == 1) {
+                $totals->{'down'}++;
+            }
+            elsif($l->{'state'} == 2) {
+                $totals->{'unreachable'}++;
+            }
+        }
+    }
+
+    $pdf->prText( $x, $y, $totals->{'up'}, 'right');
+    $y = $y - $step;
+    $pdf->prText( $x, $y, $totals->{'down'}, 'right');
+    $y = $y - $step;
+    $pdf->prText( $x, $y, $totals->{'unreachable'}, 'right');
+    $y = $y - $step * 3;
+    $pdf->prText( $x, $y, $totals->{'ok'}, 'right');
+    $y = $y - $step;
+    $pdf->prText( $x, $y, $totals->{'warning'}, 'right');
+    $y = $y - $step;
+    $pdf->prText( $x, $y, $totals->{'unknown'}, 'right');
+    $y = $y - $step;
+    $pdf->prText( $x, $y, $totals->{'critical'}, 'right');
+
+    return 1;
+}
+
+##########################################################
+
 =head2 log_icon
 
   log_icon(x, y, icon, file)
@@ -415,7 +484,7 @@ sub page_footer {
     $size = 10 unless defined $size;
     $color = 'white' unless defined $color;
     font($size, $color);
-    $pdf->prText($x,$y, $page);
+    $pdf->prText($x,$y, $page, 'right');
     return 1;
 }
 
