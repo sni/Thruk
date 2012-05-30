@@ -174,6 +174,7 @@ save a report
 sub report_save {
     my($c, $nr, $data) = @_;
     mkdir($c->config->{'var_path'}.'/reports/');
+    mkdir($c->config->{'tmp_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     my $old_report;
     if($nr ne 'new' and -f $file) {
@@ -564,6 +565,7 @@ sub _is_authorized_for_report {
 sub _get_report_cmd {
     my($c, $report, $mail) = @_;
     mkdir($c->config->{'var_path'}.'/reports/');
+    mkdir($c->config->{'tmp_path'}.'/reports/');
     my $thruk_bin = $c->config->{'thruk_bin'};
     my $type      = 'report';
     if($mail) {
