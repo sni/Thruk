@@ -217,7 +217,7 @@ sub _request {
 sub _dummy_c {
     my($self) = @_;
     _debug("_dummy_c()");
-    local $ENV{'CATALYST_SERVER'} = undef if defined $ENV{'CATALYST_SERVER'};
+    delete local $ENV{'CATALYST_SERVER'} if defined $ENV{'CATALYST_SERVER'};
     require Catalyst::Test;
     Catalyst::Test->import('Thruk');
     my($res, $c) = ctx_request('/thruk/cgi-bin/remote.cgi');
