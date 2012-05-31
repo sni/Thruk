@@ -203,7 +203,13 @@ function is_array(o) {
 /* return url variables as hash */
 function toQueryParams(str) {
     var vars = {};
-    if(str == undefined) { str = window.location.href.slice(window.location.href.indexOf('?') + 1); }
+    if(str == undefined) {
+        var i = window.location.href.indexOf('?');
+        if(i == -1) {
+            return vars;
+        }
+        str = window.location.href.slice(i + 1);
+    }
     if (str == "") { return vars; };
     str = str.replace(/#.*$/g, '');
     str = str.split('&');
