@@ -105,7 +105,7 @@
           <tr>
             <td>Up</td>
             <td align="center"><input type="checkbox" name="params.[% key %]" value="up"[% IF lookup.exists('up') %] checked[% END %]></td>
-            <td align="center"><input type="checkbox" name="params.[% key %]" value="up_downtime"[% IF lookup.exists('up_downtime') %] checked[% END %]></td>
+            <td align="center"></td>
           </tr>
           <tr>
             <td>Down</td>
@@ -129,7 +129,7 @@
           <tr>
             <td>Ok</td>
             <td align="center"><input type="checkbox" name="params.[% key %]" value="ok"[% IF lookup.exists('ok') %] checked[% END %]></td>
-            <td align="center"><input type="checkbox" name="params.[% key %]" value="ok_downtime"[% IF lookup.exists('ok_downtime') %] checked[% END %]></td>
+            <td align="center"></td>
           </tr>
           <tr>
             <td>Warning</td>
