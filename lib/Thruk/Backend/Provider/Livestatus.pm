@@ -535,12 +535,18 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, %options) = @_;
+    if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
+        $options{'filter'} = [] unless defined $options{'filter'};
+        push @{$options{'filter'}}, {peer_key => $self->peer_key()};
+        return $self->{'logcache'}->get_logs(%options);
+    }
     $options{'columns'} = [qw/
-        class time type state host_name service_description plugin_output message options contact_name command_name state_type current_host_groups current_service_groups
+        class time type state host_name service_description plugin_output message options contact_name command_name state_type
         /] unless defined $options{'columns'};
     my @logs = reverse @{$self->_get_table('log', \%options)};
     return \@logs;
 }
+
 
 ##########################################################
 
@@ -1071,6 +1077,47 @@ sub _get_query_size {
     $entries  = $entries * $page;
     return($size, $entries);
 }
+
+##########################################################
+
+=head2 _get_logs_start_end
+
+  _get_logs_start_end
+
+returns the min/max timestamp for given logs
+
+=cut
+sub _get_logs_start_end {
+    my($self, %options) = @_;
+    my $class = $self->_get_class('log', \%options);
+    my $rows  = $class->stats([ 'start' => { -isa => [ -min => 'time' ]},
+                                'end'   => { -isa => [ -max => 'time' ]}
+                             ])
+                      ->hashref_array();
+    return($rows->[0]->{'start'}, $rows->[0]->{'end'});
+}
+
+##########################################################
+
+=head2 renew_logcache
+
+  renew_logcache
+
+renew logcache
+
+=cut
+sub renew_logcache {
+    my($self, $c) = @_;
+    return unless defined $self->{'logcache'};
+    # renew cache?
+    if(!defined $self->{'lastcacheupdate'} or $self->{'lastcacheupdate'} < time()-5) {
+        $self->{'lastcacheupdate'} = time();
+        $self->{'logcache'}->_import_logs($c, 'update');
+    }
+    return;
+}
+
+##########################################################
 
 =head1 AUTHOR
 

@@ -543,6 +543,19 @@ sub set_stash {
     return;
 }
 
+##########################################################
+
+=head2 renew_logcache
+
+  renew_logcache
+
+renew logcache
+
+=cut
+sub renew_logcache {
+    return;
+}
+
 
 =head1 AUTHOR
 

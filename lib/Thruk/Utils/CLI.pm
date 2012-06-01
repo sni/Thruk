@@ -322,6 +322,14 @@ sub _run_commands {
         $data->{'output'} = _cmd_uninstallcron($c);
     }
 
+    # import mongodb logs
+    elsif($action =~ /^importlogs$/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import');
+    }
+    elsif($action =~ /^updatelogs$/mx) {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update');
+    }
+
     return $data;
 }
 
@@ -540,6 +548,29 @@ sub _cmd_url {
 
     $c->stats->profile(end => "_cmd_downtimetask()");
     return $output;
+}
+
+##############################################
+sub _cmd_import_logs {
+    my($c, $mode) = @_;
+    $c->stats->profile(begin => "_cmd_import_logs()");
+
+    eval {
+        require Thruk::Backend::Provider::Mongodb;
+        Thruk::Backend::Provider::Mongodb->import;
+    };
+    if($@) {
+        return("FAILED - failed to load mongodb support: ".$@."\n", 1);
+    }
+
+    if(!defined $c->config->{'logcache'}) {
+        return("FAILED - logcache is not enabled\n", 1);
+    }
+
+    my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode);
+
+    $c->stats->profile(end => "_cmd_import_logs()");
+    return('OK - imported '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
 }
 
 ##############################################

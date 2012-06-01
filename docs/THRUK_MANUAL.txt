@@ -1396,6 +1396,17 @@ ex.:
   report_nice_level = 5
 
 
+==== logcache
+Enables caching logfiles for faster access. Cache supports MongoDB
+only. Format is a MongoDB connection string like 'hostname:port/db'.
+Using a cache dramatically decreases cpu and memory usage of Thruk
+when accessing logfiles, for example when creating reports.
+
+ex.:
+
+  logcache = localhost:27017/thruk_log_cache
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
@@ -1449,7 +1460,7 @@ ex.:
 
 ==== backend_debug
 Set logging of backend in verbose mode. This only
-makes sens when debug logging is activated.
+makes sense when debug logging is activated.
 
 ex.:
 

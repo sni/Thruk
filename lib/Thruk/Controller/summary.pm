@@ -373,6 +373,10 @@ sub _get_alerts_from_log {
 
     my($hostlogs, $servicelogs);
 
+    $c->stats->profile(begin => "summary::updatecache");
+    $c->{'db'}->renew_logcache($c);
+    $c->stats->profile(end   => "summary::updatecache");
+
     if($c->stash->{alerttypefilter} ne "Service") {
         $c->stats->profile(begin => "summary.pm fetch host logs");
         $hostlogs = $c->{'db'}->get_logs(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'log'), $hostfilter]);

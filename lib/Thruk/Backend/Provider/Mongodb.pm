@@ -1589,6 +1589,136 @@ sub _get_subfilter {
     return $inp;
 }
 
+##########################################################
+
+=head2 _get_logs_start_end
+
+  _get_logs_start_end
+
+returns the min/max timestamp for given logs
+
+=cut
+sub _get_logs_start_end {
+    my($self, %options) = @_;
+    my(@data, $start, $end);
+    @data = $self->_db->logs
+                      ->find($self->_get_filter($options{'filter'}))
+                      ->fields({ 'time' => 1 })
+                      ->sort({'time' => 1})
+                      ->limit(1)
+                      ->all();
+    $start = $data[0]->{'time'} if defined $data[0];
+    @data = $self->_db->logs
+                      ->find($self->_get_filter($options{'filter'}))
+                      ->fields({ 'time' => 1 })
+                      ->sort({'time' => -1})
+                      ->limit(1)
+                      ->all();
+    $end = $data[0]->{'time'} if defined $data[0];
+    return($start, $end);
+}
+
+##########################################################
+
+=head2 _import_logs
+
+  _import_logs
+
+imports logs into mongodb
+
+=cut
+
+sub _import_logs {
+    my($self, $c, $mode) = @_;
+
+    $c->stats->profile(begin => "Mongodb::_import_logs($mode)");
+
+    my $backend_count = 0;
+    my $log_count     = 0;
+
+    Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
+
+    my $table = 'logs'; # must be logs, otherwise mongodb.pm does not find the table
+    my $dropped = 0;
+    for my $key (@{$c->stash->{'backends'}}) {
+        my $peer = $c->{'db'}->get_peer_by_key($key);
+        next unless $peer->{'enabled'};
+        $c->stats->profile(begin => "$key");
+        $backend_count++;
+        $peer->{'logcache'}->reconnect();
+        my $db = $peer->{'logcache'}->_db;
+        if($mode eq 'import' and !$dropped) {
+            $db->run_command({drop => $table});
+            $dropped = 1;
+        }
+
+        # get start / end timestamp
+        my($mstart, $mend);
+        my($start, $end);
+        my $filter = [];
+        if($mode eq 'update') {
+            $c->stats->profile(begin => "get last mongo timestamp");
+            # get last timestamp from mongodb
+            my $mfilter = [];
+            push @{$mfilter}, {peer_key => $key};
+            ($mstart, $mend) = $peer->{'logcache'}->_get_logs_start_end(filter => $mfilter);
+            if(defined $mend) {
+                push @{$filter}, {time => { '>=' => $mend }};
+                $start = $mend;
+            }
+            $c->stats->profile(end => "get last mongo timestamp");
+        }
+        $c->stats->profile(begin => "get livestatus timestamp");
+        ($start, $end) = $peer->{'class'}->_get_logs_start_end(filter => $filter);
+        $c->stats->profile(end => "get livestatus timestamp");
+        #print "\nimporting ", scalar localtime $start, " till ", scalar localtime $end, "\n";
+        my $time = $start;
+        my $col = $db->$table;
+        $col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
+        while($time <= $end) {
+            my $stime = scalar localtime $time;
+            $c->stats->profile(begin => $stime);
+            my $lookup = {};
+            #print "\n",scalar localtime $time;
+            my($logs) = $peer->{'class'}->get_logs(nocache => 1,
+                                                    filter  => [{ '-and' => [
+                                                                            { time => { '>=' => $time } },
+                                                                            { time => { '<'  => $time + 86400 } }
+                                                               ]}]
+                                                  );
+            if($mode eq 'update') {
+                my($mlogs) = $peer->{'class'}->get_logs(
+                                                    filter  => [{ '-and' => [
+                                                                            { time => { '>=' => $time } },
+                                                                            { time => { '<=' => $time + 86400 } }
+                                                               ]}]
+                                          );
+                for my $l (@{$mlogs}) {
+                    $lookup->{$l->{'message'}} = 1;
+                }
+            }
+
+            $time = $time + 86400;
+            for my $l (@{$logs}) {
+                if($mode eq 'update') {
+                    next if defined $lookup->{$l->{'message'}};
+                }
+                $log_count++;
+                #print '.' if $log_count%100 == 0;
+                $col->insert($l, {safe => 1});
+            }
+            $c->stats->profile(end => $stime);
+        }
+        $c->stats->profile(end => "$key");
+    }
+    #print "\n";
+
+    $c->stats->profile(end => "Mongodb::_import_logs($mode)");
+    return($backend_count, $log_count);
+}
+
+##########################################################
+
 =head1 AUTHOR
 
 Sven Nierlein, 2010, <nierlein@cpan.org>

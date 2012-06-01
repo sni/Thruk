@@ -1150,6 +1150,7 @@ sub _initialise_peer {
                                     ),
         'configtool'    => $config->{'configtool'} || {},
         'last_error'    => undef,
+        'logcache'      => undef,
     };
     # shorten backend id
     $peer->{'key'} = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
@@ -1157,6 +1158,17 @@ sub _initialise_peer {
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
     if($self->{'backend_debug'} and Thruk->debug) {
         $peer->{'class'}->set_verbose(1);
+    }
+
+    # log cache?
+    if(defined $self->{'config'}->{'logcache'} and $config->{'type'} eq 'livestatus') {
+        require Thruk::Backend::Provider::Mongodb;
+        Thruk::Backend::Provider::Mongodb->import;
+        $peer->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
+                                                peer     => $self->{'config'}->{'logcache'},
+                                                peer_key => $peer->{'key'},
+                                            });
+        $peer->{'class'}->{'logcache'} = $peer->{'logcache'};
     }
 
     return $peer;

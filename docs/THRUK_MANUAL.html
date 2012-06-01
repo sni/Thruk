@@ -9831,6 +9831,16 @@ file.</p></div>
 <div class="content">
 <pre><tt>report_nice_level = 5</tt></pre>
 </div></div>
+<h4 id="_logcache">logcache</h4>
+<div class="paragraph"><p>Enables caching logfiles for faster access. Cache supports MongoDB
+only. Format is a MongoDB connection string like <em>hostname:port/db</em>.
+Using a cache dramatically decreases cpu and memory usage of Thruk
+when accessing logfiles, for example when creating reports.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>logcache = localhost:27017/thruk_log_cache</tt></pre>
+</div></div>
 <h4 id="_enable_shinken_features">enable_shinken_features</h4>
 <div class="paragraph"><p>This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
@@ -9880,7 +9890,7 @@ alias of the address of your remote backends.</p></div>
 </div></div>
 <h4 id="_backend_debug">backend_debug</h4>
 <div class="paragraph"><p>Set logging of backend in verbose mode. This only
-makes sens when debug logging is activated.</p></div>
+makes sense when debug logging is activated.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -10560,7 +10570,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-05-27 10:51:17 CEST
+Last updated 2012-06-01 09:38:19 CEST
 </div>
 </div>
 </body>
