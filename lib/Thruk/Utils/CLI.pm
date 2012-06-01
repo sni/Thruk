@@ -185,7 +185,7 @@ sub _run {
         binmode STDERR;
         print STDERR $result->{'output'};
     }
-    _debug("".$c->stats->report);
+    _debug("".$c->stats->report) if defined $c;
     return $result->{'rc'};
 }
 

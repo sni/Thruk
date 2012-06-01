@@ -16,6 +16,7 @@ use warnings;
 
 use utf8;
 use Carp;
+use GD;
 use POSIX qw(tzset);
 use Log::Log4perl::Catalyst;
 use Digest::MD5 qw(md5_hex);
@@ -342,21 +343,6 @@ if(defined $log4perl_conf and -s $log4perl_conf) {
 elsif(!__PACKAGE__->debug) {
     __PACKAGE__->log->levels( 'info', 'warn', 'error', 'fatal' );
 }
-
-
-###################################################
-# GD installed?
-# set to true unless there is a way to load trends.pm safely without GD
-__PACKAGE__->config->{'has_gd'} = 0;
-eval {
-    require("GD.pm");
-    __PACKAGE__->config->{'has_gd'} = 1;
-};
-if($@) {
-    __PACKAGE__->log->error("cannot load GD.pm: did you forget to install libgd, libxpm or GD.pm?\n".$@);
-    croak('cannot start');
-}
-
 
 ###################################################
 # additional user template paths?

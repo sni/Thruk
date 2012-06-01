@@ -135,11 +135,6 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             'dscr' => 'If you believe this is an error, check the HTTP server authentication requirements for accessing this CGI<br>and check the authorization options in your CGI configuration file.',
             'code' => 403, # forbidden
         },
-        '16'  => {
-            'mess' => 'missing library',
-            'dscr' => 'problems while loading graphics library, look at your logfile for details',
-            'code' => 500, # internal server error
-        },
         '17'  => {
             'mess' => 'This host does not exist...',
             'dscr' => 'If you believe this is an error, check your monitoring configuration and make sure all backends are connected.',

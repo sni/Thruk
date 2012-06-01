@@ -29,9 +29,6 @@ use constant {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    # gd lib loaded?
-    return $c->detach('/error/index/16') unless(Thruk->config->{'has_gd'});
-
     require Thruk::Utils::Trends;
     Thruk::Utils::Trends->import();
 

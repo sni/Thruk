@@ -49,6 +49,7 @@ sub begin : Private {
         ajax_search_servicegroups       => 1,
         ajax_search_timeperiods         => 1,
         shown_inline_pnp                => 1,
+        use_feature_trends              => 1,
         use_wait_feature                => 1,
         wait_timeout                    => 10,
         use_frames                      => 1,
@@ -167,6 +168,7 @@ sub begin : Private {
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
                   priorities show_modified_attributes downtime_duration expire_ack_duration
                   show_backends_in_table host_action_icon service_action_icon cookie_path
+                  use_feature_trends
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }
@@ -209,11 +211,6 @@ sub begin : Private {
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
-
-    # enable trends if gd loaded
-    if( $c->config->{'has_gd'} ) {
-        $c->stash->{'use_feature_trends'} = 1;
-    }
 
     # which theme?
     my($param_theme, $cookie_theme);
