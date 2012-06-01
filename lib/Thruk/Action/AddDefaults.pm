@@ -440,10 +440,11 @@ sub _set_enabled_backends {
 
 ########################################
 sub _set_env_backends {
-    my($c) = @_;
-    if(defined $ENV{'THRUK_BACKENDS'}) {
+    my($c, $opt_backends) = @_;
+    $opt_backends = $ENV{'THRUK_BACKENDS'} unless defined $opt_backends;
+    if(defined $opt_backends) {
         my $backends = {};
-        for my $b (split/,/mx, $ENV{'THRUK_BACKENDS'}) {
+        for my $b (ref $opt_backends eq 'ARRAY' ? @{$opt_backends} : split(/,/mx, $opt_backends)) {
             $backends->{$b} = 1;
         }
 

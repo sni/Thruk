@@ -1339,6 +1339,19 @@ sub set_stash {
 
 ##########################################################
 
+=head2 renew_logcache
+
+  renew_logcache
+
+renew logcache
+
+=cut
+sub renew_logcache {
+    return;
+}
+
+##########################################################
+
 =head2 _get_query_size
 
   _get_query_size

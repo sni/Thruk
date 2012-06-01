@@ -553,6 +553,8 @@ renew logcache
 
 =cut
 sub renew_logcache {
+    my $self = shift;
+    confess("unimplemented");
     return;
 }
 

@@ -152,17 +152,19 @@ sub _read_secret {
 sub _run {
     my($self) = @_;
     my($result, $response);
+    my($c, $failed);
     _debug("_run(): ".Dumper($self->{'opt'}));
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
     }
     if(!defined $result and $self->{'opt'}->{'remoteurl'} !~ m|/localhost/|mx) {
-        print STDERR "remote command failed:\n".Dumper($response);
+        _error("remote command failed:");
+        _error($response);
         return 1;
     }
 
     unless(defined $result) {
-        my($c, $failed) = $self->_dummy_c();
+        ($c, $failed) = $self->_dummy_c();
         if($failed) {
             print STDERR "command failed";
             return 1;
@@ -183,6 +185,7 @@ sub _run {
         binmode STDERR;
         print STDERR $result->{'output'};
     }
+    _debug("".$c->stats->report);
     return $result->{'rc'};
 }
 
@@ -277,6 +280,14 @@ sub _from_fcgi {
 sub _run_commands {
     my($c, $opt) = @_;
 
+    unless(defined $c->stash->{'defaults_added'}) {
+        Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
+    }
+    # set backends from options
+    if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
+        Thruk::Action::AddDefaults::_set_env_backends($c, $opt->{'backends'});
+    }
+
     my $data = {
         'version' => $c->config->{'version'},
         'output'  => '',
@@ -291,6 +302,8 @@ sub _run_commands {
     if(defined $opt->{'listbackends'}) {
         $action = 'listbackends';
     }
+
+    $c->stats->profile(begin => "_run_commands($action)");
 
     # list backends
     if($action eq 'listbackends') {
@@ -329,6 +342,8 @@ sub _run_commands {
     elsif($action =~ /^updatelogs$/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update');
     }
+
+    $c->stats->profile(end => "_run_commands($action)");
 
     return $data;
 }
