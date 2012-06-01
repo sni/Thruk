@@ -751,26 +751,37 @@ sub _do_on_peers {
         $peer->{'last_error'} = undef;
         $Thruk::Backend::Manager::stats->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
         $selected_backends++;
-        eval {
-            my( $data, $typ, $size ) = $peer->{'class'}->$function( @{$arg} );
-            if(defined $data and !defined $size) {
-                if(ref $data eq 'ARRAY') {
-                    $size = scalar @{$data};
+        my $errors = 0;
+        while($errors < 3) {
+            eval {
+                my( $data, $typ, $size ) = $peer->{'class'}->$function( @{$arg} );
+                if(defined $data and !defined $size) {
+                    if(ref $data eq 'ARRAY') {
+                        $size = scalar @{$data};
+                    }
+                    elsif(ref $data eq 'HASH') {
+                        $size = scalar keys %{$data};
+                    }
                 }
-                elsif(ref $data eq 'HASH') {
-                    $size = scalar keys %{$data};
+                $size = 0 unless defined $size;
+                $type = $typ if defined $typ;
+                $totalsize += $size;
+                $result->{ $peer->{'key'} } = $data;
+            };
+            if($@) {
+                $peer->{'last_error'} = $@;
+                $peer->{'last_error'} =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
+                $peer->{'last_error'} = "ERROR: ".$peer->{'last_error'};
+                $last_error = $peer->{'last_error'};
+                $errors++;
+                if($last_error =~ m/can't\ get\ db\ response,\ not\ connected\ at/mx) {
+                    $peer->{'class'}->reconnect();
+                } else {
+                    last;
                 }
+            } else {
+                last;
             }
-            $size = 0 unless defined $size;
-            $type = $typ if defined $typ;
-            $totalsize += $size;
-            $result->{ $peer->{'key'} } = $data;
-        };
-        if($@) {
-            $peer->{'last_error'} = $@;
-            $peer->{'last_error'} =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
-            $peer->{'last_error'} = "ERROR: ".$peer->{'last_error'};
-            $last_error = $peer->{'last_error'};
         }
         $Thruk::Backend::Manager::stats->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
     }
@@ -813,7 +824,9 @@ sub _do_on_peers {
         }
 
         if( $arg{'sort'} ) {
-            $data = $self->_sort( $data, $arg{'sort'} );
+            if($type ne 'sorted') {
+                $data = $self->_sort( $data, $arg{'sort'} );
+            }
         }
 
         if( $arg{'limit'} ) {

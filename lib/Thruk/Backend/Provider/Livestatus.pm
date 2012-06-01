@@ -51,6 +51,9 @@ recreate database connection
 =cut
 sub reconnect {
     my($self) = @_;
+    if(defined $self->{'logcache'}) {
+        $self->{'logcache'}->reconnect();
+    }
     return;
 }
 

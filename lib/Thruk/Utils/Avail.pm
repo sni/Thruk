@@ -270,12 +270,19 @@ sub calculate_availability {
     # one or all hostgroups
     elsif(defined $hostgroup and $hostgroup ne '') {
         if($hostgroup ne '' and $hostgroup ne 'all') {
-            $groupfilter       = { name => $hostgroup };
             $hostfilter        = { groups => { '>=' => $hostgroup }};
-            $loghostheadfilter = { current_host_groups => { '>=' => $hostgroup }};
         }
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
+        if($hostgroup ne '' and $hostgroup ne 'all') {
+            $groupfilter       = { name => $hostgroup };
+            $loghostheadfilter = { current_host_groups => { '>=' => $hostgroup }};
+            my @hosts_from_groups = ();
+            for my $hostname (keys %{$host_data}) {
+                push @hosts_from_groups, { host_name => $hostname };
+            }
+            $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hosts_from_groups);
+        }
         my $groups    = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $groupfilter ]);
 
         # join our groups together
@@ -318,7 +325,6 @@ sub calculate_availability {
         if($servicegroup ne '' and $servicegroup ne 'all') {
             $groupfilter          = { name => $servicegroup };
             $servicefilter        = { groups => { '>=' => $servicegroup }};
-            $logserviceheadfilter = { current_service_groups => { '>=' => $servicegroup }};
         }
         my $all_services = $c->{'db'}->get_services(filter => [ $servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'services') ]);
         my $groups       = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $groupfilter ]);
@@ -370,6 +376,16 @@ sub calculate_availability {
                 $initial_states->{'hosts'}->{$service->{host_name}} = $service->{'host_state'};
             }
         }
+
+        # which services?
+        if($servicegroup ne '' and $servicegroup ne 'all') {
+            $logserviceheadfilter = { current_service_groups => { '>=' => $servicegroup }};
+            my @services_from_groups = ();
+            for my $data (@{$services}) {
+                push @services_from_groups, { '-and' => [ { host_name => $data->{'host'}}, { service_description => $data->{'service'}} ] };
+            }
+            $logserviceheadfilter = Thruk::Utils::combine_filter('-or', \@services_from_groups);
+        }
     } else {
         croak("unknown report type: ".Dumper($c->{'request'}->{'parameters'}));
     }
@@ -418,7 +434,6 @@ sub calculate_availability {
     $c->stats->profile(begin => "avail.pm updatecache");
     $c->{'db'}->renew_logcache($c);
     $c->stats->profile(end   => "avail.pm updatecache");
-
     $c->stats->profile(begin => "avail.pm fetchlogs");
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type options/ ]);
     $c->stats->profile(end   => "avail.pm fetchlogs");

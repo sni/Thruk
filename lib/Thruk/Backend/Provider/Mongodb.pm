@@ -581,10 +581,15 @@ returns logfile entries
 sub get_logs {
     my($self, %options) = @_;
     my @data;
+    my $sort = {'time' => 1};
+    if(defined $options{'sort'}->{'DESC'} and $options{'sort'}->{'DESC'} eq 'time') {
+        $sort = {'time' => -1};
+    }
     @data = $self->_db->logs
                       ->find($self->_get_filter($options{'filter'}))
+                      ->sort($sort)
                       ->all;
-    return(\@data);
+    return(\@data, 'sorted');
 }
 
 ##########################################################
