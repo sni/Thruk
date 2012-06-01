@@ -311,8 +311,13 @@ sub _run_commands {
     }
 
     # list hosts
-    if($action eq 'listhosts') {
+    elsif($action eq 'listhosts') {
         $data->{'output'} = _cmd_listhosts($c);
+    }
+
+    # list hostgroups
+    elsif($action eq 'listhostgroups') {
+        $data->{'output'} = _cmd_listhostgroups($c);
     }
 
     # request url
@@ -342,6 +347,10 @@ sub _run_commands {
     elsif($action =~ /^updatelogs$/mx) {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update');
     }
+    else {
+        $data->{'output'} = "FAILED - no such command\n";
+        $data->{'rc'}     = 1;
+    }
 
     $c->stats->profile(end => "_run_commands($action)");
 
@@ -352,8 +361,18 @@ sub _run_commands {
 sub _cmd_listhosts {
     my($c) = @_;
     my $output = '';
-    for my $host (@{$c->{'db'}->get_hosts()}) {
+    for my $host (@{$c->{'db'}->get_hosts(sort => {'ASC' => 'name'})}) {
         $output .= $host->{'name'}."\n";
+    }
+    return $output;
+}
+
+##############################################
+sub _cmd_listhostgroups {
+    my($c) = @_;
+    my $output = '';
+    for my $group (@{$c->{'db'}->get_hostgroups(sort => {'ASC' => 'name'})}) {
+        $output .= $group->{'name'}."\n";
     }
     return $output;
 }
