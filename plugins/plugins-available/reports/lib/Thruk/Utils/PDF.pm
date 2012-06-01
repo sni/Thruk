@@ -653,9 +653,9 @@ sub _generate_bar_chart {
                     }
                 }
             }
-            $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'};
-            $time->{'undetermined'} += $t->{'time_indeterminate_nodata'};
-            $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'};
+            $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'}         || 0;
+            $time->{'undetermined'} += $t->{'time_indeterminate_nodata'}             || 0;
+            $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'} || 0;
         }
 
         # in case we have some data for this period, undetermined is available too
