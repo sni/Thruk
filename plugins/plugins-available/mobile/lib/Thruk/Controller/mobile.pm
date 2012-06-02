@@ -79,8 +79,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                 { 'time' => { '>=' => time() - 86400*3 } },
                                 { 'time' => { '<=' => time() } },
                                 { '-or' => [
-                                    { '-and' => [ { 'options' => { '~' => ';HARD;' }, 'type' => 'SERVICE ALERT' } ] },
-                                    { '-and' => [ { 'options' => { '~' => ';HARD;' }, 'type' => 'HOST ALERT' } ] },
+                                    { '-and' => [ { 'options' => { '~' => ';HARD;' }}, { 'type' => 'SERVICE ALERT' } ] },
+                                    { '-and' => [ { 'options' => { '~' => ';HARD;' }}, { 'type' => 'HOST ALERT' } ] },
                                     { 'type' => 'SERVICE FLAPPING ALERT' },
                                     { 'type' => 'HOST FLAPPING ALERT' },
                                 ]
