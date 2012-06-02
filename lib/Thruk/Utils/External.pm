@@ -275,12 +275,18 @@ sub get_result {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
-    my $out    = read_file($dir."/stdout");
-    my $err    = read_file($dir."/stderr");
+    my($out, $err) = ('', '');
+    $out = read_file($dir."/stdout") if -f $dir."/stdout";
+    $err = read_file($dir."/stderr") if -f $dir."/stderr";
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
     my @start = stat($dir."/user");
-    my @end   = stat($dir."/stdout");
+    my @end;
+    if(-f $dir."/stdout") {
+        @end = stat($dir."/stdout")
+    } elsif(-f $dir."/stderr") {
+        @end = stat($dir."/stderr")
+    }
 
     my $time = $end[9] - $start[9];
 
