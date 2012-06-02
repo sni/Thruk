@@ -100,7 +100,7 @@ for my $page (sort @cleanpages) {
 do_clean_exit();
 
 # check logfile for errors
-my $out = `grep -v 'Accepting connections at' $server_log`;
+$out = `grep -v 'Accepting connections at' $server_log`;
 is($out, '', 'no errors in error log');
 done_testing();
 exit(0);

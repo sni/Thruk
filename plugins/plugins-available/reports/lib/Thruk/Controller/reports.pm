@@ -73,7 +73,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     if(defined $report_nr) {
-        if($report_nr !~ m/^\d+$/) {
+        if($report_nr !~ m/^\d+$/mx and $report_nr ne 'new') {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'invalid report number: '.$report_nr });
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports.cgi");
         }
