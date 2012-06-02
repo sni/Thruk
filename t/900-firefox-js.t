@@ -12,7 +12,6 @@ BEGIN {
 }
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR_JS} to a true value to run.' unless $ENV{TEST_AUTHOR_JS};
-plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 eval "use WWW::Mechanize::Firefox";
 plan skip_all => 'WWW::Mechanize::Firefox required' if $@;
 
@@ -99,7 +98,12 @@ for my $page (sort @cleanpages) {
 }
 
 do_clean_exit();
+
+# check logfile for errors
+my $out = `grep -v 'Accepting connections at' $server_log`;
+is($out, '', 'no errors in error log');
 done_testing();
+exit(0);
 
 
 #####################################################################
