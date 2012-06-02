@@ -143,6 +143,7 @@ sub begin : Private {
                     '6'                     => 'Saterday',
                     '7'                     => 'Sunday',
                                            },
+        'default_cli_user_name'         => 'thruk_cli',
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {

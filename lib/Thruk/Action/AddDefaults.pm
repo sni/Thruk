@@ -114,6 +114,7 @@ sub add_defaults {
             $last_program_restart = _set_processinfo($c, $cache, $cached_data);
         };
         last unless $@;
+        $c->log->debug("retry $x, data source error: $@");
         last if $x == $retrys;
         sleep 1;
     }

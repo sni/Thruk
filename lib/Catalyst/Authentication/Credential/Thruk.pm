@@ -115,6 +115,10 @@ sub authenticate {
         $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
     }
 
+    if(!defined $username and defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+        $username = $c->config->{'default_cli_user_name'};
+    }
+
     if(!defined $username or $username eq '') {
         return;
     }
