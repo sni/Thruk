@@ -138,7 +138,7 @@ sub _do_report {
         my $dir = $c->config->{'var_path'}."/jobs/".$c->stash->{job_id};
         open(my $fh, '>', $dir."/graph.png");
         print $fh $gd_image->png;
-        close($fh);
+        Thruk::Utils::IO::close($fh, $dir."/graph.png");
     }
 
     unless(exists $c->{'request'}->{'parameters'}->{'nomap'}) {

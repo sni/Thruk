@@ -941,7 +941,7 @@ sub _update_core_conf {
             $self->{'config'}->{'obj_resource_file'} = $self->_resolve_relative_path($value, $basedir);
         }
     }
-    close($fh);
+    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
 
     return;
 }

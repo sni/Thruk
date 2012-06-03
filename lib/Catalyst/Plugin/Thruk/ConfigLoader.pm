@@ -12,7 +12,7 @@ sub finalize_config {
     ###################################################
     # switch user when running as root
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-        my ($uid, $groups) = Thruk::Utils::get_user($c->config->{'var_path'} || './var');
+        my($uid, $groups) = ($ENV{'THRUK_USER_ID'}, split(/,/mx, $ENV{'THRUK_GROUPS'}));
         if(defined $uid and $> == 0) {
             Thruk::Utils::switch_user($uid, $groups);
         }
@@ -33,7 +33,7 @@ sub finalize_config {
 
         # does the plugin directory exist?
         if(! -d $project_root.'/root/thruk/plugins/' and -w $project_root.'/root/thruk' ) {
-            mkdir($project_root.'/root/thruk/plugins/') or die('cannot create '.$project_root.'/root/thruk/plugins/ : '.$!);
+            CORE::mkdir($project_root.'/root/thruk/plugins');
         }
 
         print STDERR "loading plugin: ".$addon_name."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
@@ -77,11 +77,12 @@ sub finalize_config {
     $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
     ###################################################
-    # set tmp dir
+    # set var / tmp dir
     # use uid to make tmp dir more uniq
-    $c->config->{'tmp_path'} = exists $c->config->{'tmp_path'} ? $c->config->{'tmp_path'} : '/tmp';
+    $c->config->{'var_path'} = './var'          unless defined $c->config->{'var_path'};
+    $c->config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $c->config->{'tmp_path'};
     my $tmp_dir = $c->config->{'tmp_path'};
-    $c->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/thruk_ttc_'.$>;
+    $c->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/ttc';
 
     return;
 }

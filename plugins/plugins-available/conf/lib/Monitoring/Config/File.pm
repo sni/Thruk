@@ -8,6 +8,7 @@ use Monitoring::Config::Object;
 use File::Slurp;
 use utf8;
 use Encode qw(encode_utf8 decode);
+use Thruk::Utils::IO;
 
 =head1 NAME
 
@@ -127,7 +128,7 @@ sub update_objects {
         push @{$self->{'objects'}->[scalar @{$self->{'objects'}}-1]->{'comments'}}, @{$comments};
     }
 
-    close($fh);
+    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
 
     $self->{'parsed'}  = 1;
     $self->{'changed'} = 0;
@@ -338,7 +339,7 @@ sub get_meta_data {
     open(my $fh, $self->{'path'});
     $ctx->addfile($fh);
     $meta->{'md5'} = $ctx->hexdigest;
-    close($fh);
+    Thruk::Utils::IO::close($fh, $self->{'path'}, 1);
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
@@ -374,7 +375,7 @@ sub save {
         pop @path; # remove file
         map { push @dirs, $_; mkdir join('/', @dirs) } @path;
         if(open(my $fh, '>', $self->{'path'})) {
-            close($fh);
+            Thruk::Utils::IO::close($fh, $self->{'path'});
         } else {
             push @{$self->{'errors'}}, "cannot create ".$self->{'path'}.": ".$!;
             return;
@@ -394,7 +395,7 @@ sub save {
         return;
     };
     print $fh $content;
-    close($fh);
+    Thruk::Utils::IO::close($fh, $self->{'path'});
 
     $self->{'changed'}     = 0;
     $self->{'is_new_file'} = 0;
@@ -417,7 +418,7 @@ sub diff {
     my ($fh, $filename) = tempfile();
     my $content         = $self->_get_new_file_content();
     print $fh $content;
-    close($fh);
+    Thruk::Utils::IO::close($fh, $filename);
 
     my $diff = `diff -wuN "$self->{'path'}" "$filename" 2>&1`;
 

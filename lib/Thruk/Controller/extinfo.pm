@@ -153,7 +153,7 @@ sub _process_recurring_downtimes_page {
                 return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/extinfo.cgi?type=6&recurring");
             }
         }
-        mkdir($c->config->{'var_path'}.'/downtimes/');
+        Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/downtimes/');
         my $file = $self->_get_data_file_name($c, $host, $service);
         Thruk::Utils::write_data_file($file, $rd);
         if($old_host and ($old_host ne $host or $old_service ne $service)) {
@@ -266,8 +266,7 @@ sub _get_downtime_cmd {
     my($self, $c, $downtime) = @_;
     # ensure proper cron.log permission
     open(my $fh, '>>', $c->config->{'var_path'}.'/cron.log');
-    close($fh);
-    chmod(0660, $c->config->{'var_path'}.'/cron.log');
+    Thruk::Utils::IO::close($fh, $c->config->{'var_path'}.'/cron.log');
     my $cmd = sprintf("cd %s && %s '%s -a downtimetask=%s' >/dev/null 2>%s/cron.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},

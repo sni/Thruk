@@ -181,7 +181,7 @@ sub update_conf {
 
     open(my $fh, ">", $file) or return("cannot update, failed to write to $file: $!");
     print $fh $new_content;
-    close($fh);
+    Thruk::Utils::IO::close($fh, $file);
 
     return;
 }

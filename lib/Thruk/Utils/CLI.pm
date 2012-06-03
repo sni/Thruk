@@ -19,6 +19,7 @@ use LWP::UserAgent;
 use JSON::XS;
 use File::Slurp;
 use URI::Escape;
+use Thruk::Utils::IO;
 
 $Thruk::Utils::CLI::verbose = 0;
 $Thruk::Utils::CLI::c       = undef;
@@ -134,7 +135,7 @@ sub _read_secret {
             next unless $line =~ m/^\s*var_path\s+=\s*(.*)$/mx;
             $var_path = $1;
         }
-        close($fh);
+        Thruk::Utils::IO::close($fh, $file, 1);
     }
     my $secret;
     my $secretfile = $var_path.'/secret.key';
@@ -229,21 +230,6 @@ sub _dummy_c {
 sub _from_local {
     my($self, $c, $options) = @_;
     _debug("_from_local()");
-
-    # verify that we are running with the right user
-    require Thruk;
-    Thruk->import();
-    my $var_path = Thruk->config->{'var_path'} || './var';
-    _debug("var_path: ".$var_path);
-    my $uid = (stat $var_path)[4];
-    if(!defined $uid) {
-        print("Broken installation, could not stat ".$var_path." \n");
-        exit 1;
-    }
-    if($> != $uid) {
-        print("Wrong user! Please run as user: ".getpwuid($uid)."\n");
-        exit 1;
-    }
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     return _run_commands($c, $options);
 }

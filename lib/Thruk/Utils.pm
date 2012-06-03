@@ -596,7 +596,7 @@ sub read_ssi {
        open(my $ph, '-|', $c->config->{'ssi_path'}."/".$file.' 2>&1') or carp("cannot execute ssi: $!");
        local $/=undef;
        my $output = <$ph>;
-       close($ph);
+       Thruk::Utils::IO::close($ph, undef, 1);
        return $output;
     }
     elsif( -r $c->config->{'ssi_path'}."/".$file ){
@@ -874,11 +874,10 @@ sub store_user_data {
 
     for my $dir ($c->config->{'var_path'}, $c->config->{'var_path'}."/users") {
         if(! -d $dir) {
-            mkdir($dir) or do {
+            Thruk::Utils::IO::mkdir($dir) or do {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: mkdir '.$dir.': '.$! );
                 return;
             };
-            chmod 0770, $dir;
         }
     }
 
@@ -888,9 +887,8 @@ sub store_user_data {
         return;
     };
     print $fh Dumper($data);
-    close($fh);
-    chmod(0660, $file.'.new');
-    chmod(0660, $file);
+    Thruk::Utils::IO::close($fh, $file.'.new');
+    Thruk::Utils::IO::ensure_permissions('file', $file);
 
     move($file.'.new', $file) or do {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: move '.$file.'.new '.$file.': '.$! );
@@ -1094,8 +1092,7 @@ sub update_cron_file {
     my $errorlog = $c->config->{'var_path'}.'/cron.log';
     # ensure proper cron.log permission
     open(my $fh, '>>', $errorlog);
-    close($fh);
-    chmod(0660, $errorlog);
+    Thruk::Utils::IO::close($fh, $errorlog);
 
     if($c->config->{'cron_pre_edit_cmd'}) {
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$errorlog;
@@ -1136,7 +1133,7 @@ sub update_cron_file {
             $sections->{$lastsection} = [] unless defined $sections->{$lastsection};
             push @{$sections->{$lastsection}}, $line;
         }
-        close($fh);
+        Thruk::Utils::IO::close($fh, undef, 1);
     }
 
     # write out new file
@@ -1177,8 +1174,7 @@ sub update_cron_file {
             print $fh "# END OF THRUK\n";
         }
     }
-    close($fh);
-    chmod(0660, $c->config->{'cron_file'});
+    Thruk::Utils::IO::close($fh, $c->config->{'cron_file'});
 
     if($c->config->{'cron_post_edit_cmd'}) {
         my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
@@ -1336,8 +1332,7 @@ sub write_data_file {
     $d    =~ s/^\ \ \ \ \ \ \ \ //gmx;
     open(my $fh, '>'.$filename) or confess('cannot write to '.$filename.": ".$!);
     print $fh $d;
-    close($fh);
-    chmod(0660, $filename);
+    Thruk::Utils::IO::close($fh, $filename);
 
     return;
 }

@@ -173,10 +173,8 @@ save a report
 =cut
 sub report_save {
     my($c, $nr, $data) = @_;
-    mkdir($c->config->{'var_path'}.'/reports/');
-    mkdir($c->config->{'tmp_path'}.'/reports/');
-    chmod(0770, $c->config->{'var_path'}.'/reports/');
-    chmod(0770, $c->config->{'tmp_path'}.'/reports/');
+    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/',
+                            $c->config->{'tmp_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     my $old_report;
     if($nr ne 'new' and -f $file) {
@@ -255,9 +253,9 @@ sub generate_report {
     }
 
     # empty logfile
-    open(my $fh, '>'.$c->config->{'tmp_path'}.'/reports/'.$nr.'.log');
-    close($fh);
-    chmod(0660, $c->config->{'tmp_path'}.'/reports/'.$nr.'.log');
+    my $logfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    open(my $fh, '>', $logfile);
+    Thruk::Utils::IO::close($fh, $logfile);
 
     # update report runtime data
     set_running($c, $nr, $$, time());
@@ -321,13 +319,11 @@ sub generate_report {
     }
 
     # write out pdf
-    mkdir($c->config->{'tmp_path'}.'/reports');
-    chmod(0770, $c->config->{'tmp_path'}.'/reports/');
+    Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/reports/');
     open($fh, '>', $pdf_file);
     binmode $fh;
     print $fh $pdf_data;
-    close($fh);
-    chmod(0660, $pdf_file);
+    Thruk::Utils::IO::close($fh, $pdf_file);
 
     # clean up tmp files
     for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
@@ -464,8 +460,7 @@ sub _get_new_report {
 ##########################################################
 sub _report_save {
     my($c, $nr, $report) = @_;
-    mkdir($c->config->{'var_path'}.'/reports/');
-    chmod(0770, $c->config->{'var_path'}.'/reports/');
+    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     if($nr eq 'new') {
         # find next free number
@@ -570,10 +565,8 @@ sub _is_authorized_for_report {
 ##########################################################
 sub _get_report_cmd {
     my($c, $report, $mail) = @_;
-    mkdir($c->config->{'var_path'}.'/reports/');
-    mkdir($c->config->{'tmp_path'}.'/reports/');
-    chmod(0770, $c->config->{'var_path'}.'/reports/');
-    chmod(0770, $c->config->{'tmp_path'}.'/reports/');
+    Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/',
+                            $c->config->{'tmp_path'}.'/reports/');
     my $thruk_bin = $c->config->{'thruk_bin'};
     my $type      = 'report';
     if($mail) {

@@ -25,6 +25,7 @@ use Thruk::Backend::Manager;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
 use Thruk::Utils::Filter;
+use Thruk::Utils::IO;
 use Thruk::Utils::Menu;
 use Thruk::Utils::Avail;
 use Thruk::Utils::External;
@@ -245,8 +246,18 @@ __PACKAGE__->config(%config);
 __PACKAGE__->setup();
 
 ###################################################
+# save user/group id
+my $var_path = __PACKAGE__->config->{'var_path'} or die("no var path!");
+die('.'.$var_path."' does not exist, make sure it exists and has proper user/groups/permissions") unless -d $var_path.'/.';
+my ($uid, $groups) = Thruk::Utils::get_user($var_path);
+$ENV{'THRUK_USER_ID'}  = $uid;
+$ENV{'THRUK_GROUP_ID'} = $groups->[0];
+$ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
+
+###################################################
 # save pid
-my $pidfile  = (__PACKAGE__->config->{'tmp_path'} || '/tmp').'/thruk.pid';
+Thruk::Utils::IO::mkdir(__PACKAGE__->config->{'tmp_path'});
+my $pidfile  = __PACKAGE__->config->{'tmp_path'}.'/thruk.pid';
 sub _remove_pid {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         unlink($pidfile);
@@ -256,7 +267,7 @@ sub _remove_pid {
 if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
     open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
     print $fh $$."\n";
-    close($fh);
+    Thruk::Utils::IO::close($fh, $pidfile);
     $SIG{INT}  = sub { _remove_pid();  exit; };
     $SIG{TERM} = sub { _remove_pid(); exit; };
 }
@@ -267,7 +278,6 @@ END {
 ###################################################
 # create secret file
 if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
-    my $var_path   = __PACKAGE__->config->{'var_path'} || './var';
     my $secretfile = $var_path.'/secret.key';
     unless(-s $secretfile) {
         my $digest = md5_hex(rand(1000).time());
@@ -275,12 +285,7 @@ if(!defined $ENV{'THRUK_SRC'} or $ENV{'THRUK_SRC'} ne 'SCRIPTS') {
         open(my $fh, ">$secretfile") or warn("cannot write to $secretfile: $!");
         if(defined $fh) {
             print $fh $digest;
-            close($fh);
-            chmod(0660, $secretfile);
-            if($> == 0) {
-                my @stat = stat($var_path);
-                chown($stat[4], $stat[5], $secretfile);
-            }
+            Thruk::Utils::IO::close($fh, $secretfile);
         }
         __PACKAGE__->config->{'secret_key'} = $digest;
     } else {

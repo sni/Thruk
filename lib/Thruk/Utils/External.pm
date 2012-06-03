@@ -137,7 +137,7 @@ sub perl {
             eval {
                 open(my $fh, '>>', $dir."/stderr");
                 print $fh $err;
-                close($fh);
+                Thruk::Utils::IO::close($fh, $dir."/stderr");
             };
             exit(1);
         }
@@ -385,7 +385,7 @@ sub _do_parent_stuff {
     open(my $fh, '>', $pidfile) or die("cannot write pid $pidfile: $!");
     print $fh $pid;
     print $fh "\n";
-    close($fh);
+    Thruk::Utils::IO::close($fh, $pidfile);
 
     # write user file
     if(!defined $conf->{'allow'} or defined $conf->{'allow'} eq 'user') {
@@ -393,7 +393,7 @@ sub _do_parent_stuff {
         open($fh, '>', $dir."/user") or die("cannot write user: $!");
         print $fh $c->stash->{'remote_user'};
         print $fh "\n";
-        close($fh);
+        Thruk::Utils::IO::close($fh, $dir."/user");
     }
 
     # write message file
@@ -401,7 +401,7 @@ sub _do_parent_stuff {
         open($fh, '>', $dir."/message") or die("cannot write message: $!");
         print $fh $conf->{'message'};
         print $fh "\n";
-        close($fh);
+        Thruk::Utils::IO::close($fh, $dir."/message");
     }
 
     # write forward file
@@ -409,7 +409,7 @@ sub _do_parent_stuff {
         open($fh, '>', $dir."/forward") or die("cannot write forward: $!");
         print $fh $conf->{'forward'};
         print $fh "\n";
-        close($fh);
+        Thruk::Utils::IO::close($fh, $dir."/forward");
     }
 
     $c->stash->{'job_id'} = $id;
@@ -428,11 +428,10 @@ sub _init_external {
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     for my $mdir ($c->config->{'var_path'}, $c->config->{'var_path'}."/jobs", $dir) {
         if(! -d $mdir) {
-            mkdir($mdir) or do {
+            Thruk::Utils::IO::mkdir($mdir) or do {
                 Thruk::Utils::set_message( $c, 'fail_message', 'background job failed to start, mkdir failed '.$mdir.': '.$! );
                 die("mkdir $mdir failed: $!");
             };
-            chmod 0770, $mdir;
         }
     }
 
@@ -500,7 +499,7 @@ sub _finished_job_page {
             binmode $fh;
             local $/ = undef;
             $c->res->body(<$fh>);
-            close($fh);
+            Thruk::Utils::IO::close($fh, $file);
             unlink($file) if defined $c->stash->{cleanfile};
             return;
         }
