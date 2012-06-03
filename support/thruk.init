@@ -24,6 +24,17 @@ WGET="/usr/bin/wget"
 if [ ! -z $OMD_SITE ]; then
     STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi"
     PIDFILE=$OMD_ROOT/tmp/thruk/thruk.pid
+    . $OMD_ROOT/etc/omd/site.conf
+    if [ "$CONFIG_APACHE_MODE" != "own" ]; then
+        echo "only available for apaches 'own' mode!"
+        exit 1
+    fi
+    # make sure apache is running
+    omd status apache > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "apaches is not running, cannot start!"
+        exit 1
+    fi
 else
     # load extra environment variables
     if [ -f /etc/sysconfig/thruk ]; then
