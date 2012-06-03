@@ -1172,6 +1172,7 @@ sub update_cron_file {
         }
     }
     close($fh);
+    chmod(0660, $c->config->{'cron_file'});
 
     if($c->config->{'cron_post_edit_cmd'}) {
         my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
