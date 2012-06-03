@@ -889,6 +889,8 @@ sub store_user_data {
     };
     print $fh Dumper($data);
     close($fh);
+    chmod(0660, $file.'.new');
+    chmod(0660, $file);
 
     move($file.'.new', $file) or do {
         Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: move '.$file.'.new '.$file.': '.$! );
@@ -1090,6 +1092,10 @@ sub update_cron_file {
     local $SIG{CHLD} = 'DEFAULT';
 
     my $errorlog = $c->config->{'var_path'}.'/cron.log';
+    # ensure proper cron.log permission
+    open(my $fh, '>>', $errorlog);
+    close($fh);
+    chmod(0660, $errorlog);
 
     if($c->config->{'cron_pre_edit_cmd'}) {
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$errorlog;
@@ -1147,7 +1153,7 @@ sub update_cron_file {
         }
     }
 
-    open(my $fh, '>', $c->config->{'cron_file'}) or die('cannot write '.$c->config->{'cron_file'}.': '.$!);
+    open($fh, '>', $c->config->{'cron_file'}) or die('cannot write '.$c->config->{'cron_file'}.': '.$!);
     for my $line (@orig_cron) {
         print $fh $line, "\n";
     }
@@ -1331,6 +1337,7 @@ sub write_data_file {
     open(my $fh, '>'.$filename) or confess('cannot write to '.$filename.": ".$!);
     print $fh $d;
     close($fh);
+    chmod(0660, $filename);
 
     return;
 }
