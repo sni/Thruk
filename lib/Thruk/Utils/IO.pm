@@ -13,6 +13,7 @@ IO Utilities Collection for Thruk
 use strict;
 use warnings;
 use Carp;
+use Fcntl ':mode';
 
 ##############################################
 =head1 METHODS
@@ -65,15 +66,25 @@ sub ensure_permissions {
     my($mode, $path) = @_;
     return unless -e $path;
 
+    my @stat = stat($path);
+    my $cur  = sprintf "%04o", S_IMODE($stat[2]);
+
     # set modes
     if($mode eq 'file') {
-        chmod(0660, $path) or confess("failed to ensure permissions for ".$path.": ".$!);
+        if($cur ne '0660') {
+            chmod(0660, $path)
+                or confess("failed to ensure permissions (0660/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
+        }
     }
     elsif($mode eq 'dir') {
-        chmod(0770, $path) or confess("failed to ensure permissions for ".$path.": ".$!);
+        if($cur ne '0770') {
+            chmod(0770, $path)
+                or confess("failed to ensure permissions (0770/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
+        }
     }
     else {
-        chmod($mode, $path) or confess("failed to ensure permissions for ".$path.": ".$!);
+        chmod($mode, $path)
+            or confess("failed to ensure permissions (".$mode.") with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
     }
 
     # change owner too if we are root

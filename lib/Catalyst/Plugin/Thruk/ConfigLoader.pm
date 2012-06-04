@@ -82,7 +82,7 @@ sub finalize_config {
     $c->config->{'var_path'} = './var'          unless defined $c->config->{'var_path'};
     $c->config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $c->config->{'tmp_path'};
     my $tmp_dir = $c->config->{'tmp_path'};
-    $c->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/ttc';
+    $c->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/ttc_'.$>;
 
     return;
 }
