@@ -59,7 +59,7 @@ case "$1" in
         else
             if [ ! -z $OMD_SITE ]; then
               if [ -d "/var/lock/subsys" ]; then
-                touch /var/lock/subsys/thruk
+                touch /var/lock/subsys/thruk >/dev/null 2>&1
               fi
             fi
             echo -n "Starting $NAME..."
