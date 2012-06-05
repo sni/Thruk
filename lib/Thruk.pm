@@ -53,7 +53,7 @@ use Catalyst qw/
                 Cache
                 Thruk::RemoveNastyCharsFromHttpParam
                 /;
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 
 ###################################################
 # Configure the application.
@@ -74,7 +74,7 @@ if(-d $project_root.'/.git') {
 }
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
-              'released'               => 'June 02, 2012',
+              'released'               => 'June 05, 2012',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',

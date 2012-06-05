@@ -1,32 +1,34 @@
+ -- Sven Nierlein <sven@consol.de>  Tue, 05 Jun 2012 22:27:35 +0200
+
 thruk (1.32) UNRELEASED; urgency=low
 
   * new upstream release
 
- -- Sven Nierlein <sven@tsui.int.consol.de>  Sat, 02 Jun 2012 18:46:17 +0200
+ -- Sven Nierlein <sven@consol.de>  Sat, 02 Jun 2012 18:46:17 +0200
 
 thruk (1.30) UNRELEASED; urgency=low
 
   * new upstream release
 
- -- Sven Nierlein <sven@tsui.int.consol.de>  Sun, 06 May 2012 19:37:27 +0200
+ -- Sven Nierlein <sven@consol.de>  Sun, 06 May 2012 19:37:27 +0200
 
 thruk (1.28) UNRELEASED; urgency=low
 
   * new upstream release
 
- -- sven <sven@mo.nierlein.de>  Sat, 28 Apr 2012 18:53:21 +0200
+ -- sven <sven@consol.de>  Sat, 28 Apr 2012 18:53:21 +0200
 
 thruk (1.26) UNRELEASED; urgency=low
 
   * new upstream release
 
- -- Sven Nierlein <sven@tsui.int.consol.de>  Mon, 26 Mar 2012 13:43:52 +0200
+ -- Sven Nierlein <sven@consol.de>  Mon, 26 Mar 2012 13:43:52 +0200
 
 thruk (1.24) UNRELEASED; urgency=low
 
   * new upstream release
 
- -- Sven Nierlein <sven@tsui.int.consol.de>  Mon, 19 Mar 2012 12:16:18 +0100
+ -- Sven Nierlein <sven@consol.de>  Mon, 19 Mar 2012 12:16:18 +0100
 
 thruk (1.22) UNRELEASED; urgency=low
 
@@ -50,4 +52,4 @@ thruk (1.0) UNRELEASED; urgency=low
 
   * Initial release.
 
- -- Sven Nierlein <sven.nierlein@consol.de>  Fri, 10 Feb 2012 23:13:52 +0100
+ -- Sven Nierlein <sven@consol.de>  Fri, 10 Feb 2012 23:13:52 +0100
