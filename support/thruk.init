@@ -25,6 +25,9 @@ if [ ! -z $OMD_SITE ]; then
     STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi"
     PIDFILE=$OMD_ROOT/tmp/thruk/thruk.pid
     . $OMD_ROOT/etc/omd/site.conf
+    if [ -e $OMD_ROOT/.thruk ]; then
+        . $OMD_ROOT/.thruk
+    fi
     if [ "$CONFIG_APACHE_MODE" != "own" ]; then
         echo "only available for apaches 'own' mode!"
         exit 1
