@@ -18,7 +18,7 @@
       <td class='dataVar'>
         <img src='[% url_prefix %]thruk/themes/[% theme %]/images/error.png' alt='there are parse errors' title='there are parse errors' width="16" height="16" style="vertical-align: text-top">
       </td>
-      <td class='dataVal' style="padding-top: 5px; text-align: center;">
+      <td class='dataVal' style="padding-top: 5px; text-align: left;">
           [% FOREACH err IN parse_errors %]
             <span class="fail_message">[% err %]</span><br>
           [% END %]
