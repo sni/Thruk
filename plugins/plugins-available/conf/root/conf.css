@@ -71,7 +71,9 @@ UL.obj_browse LI IMG {
 
 DIV.obj_browse_name {
   float: left;
-  width: 200px;
+  width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 DIV.obj_browse_date {
