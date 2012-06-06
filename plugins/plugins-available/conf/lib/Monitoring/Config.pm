@@ -82,7 +82,7 @@ sub init {
 
     # set default excludes when defined manual paths
     if(!defined $self->{'config'}->{'obj_exclude'}
-       and !defined $self->{'config'}->{'core_conf'}) {
+       and !$self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_exclude'} = [
                     '^cgi.cfg$',
                     '^resource.cfg$',
@@ -859,7 +859,7 @@ sub get_default_keys {
 sub _set_config {
     my $self  = shift;
 
-    if(defined $self->{'config'}->{'core_conf'}) {
+    if($self->{'config'}->{'core_conf'}) {
         $self->{'config'}->{'obj_file'}          = [];
         $self->{'config'}->{'obj_dir'}           = [];
         $self->{'config'}->{'obj_resource_file'} = undef;
