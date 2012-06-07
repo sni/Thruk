@@ -4,6 +4,12 @@
 .servicePENDING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #ACACAC;  font-weight: bold; float: left; }
 .itemTotalsTitle { font-family: arial,serif;  font-size: 8pt;  text-align: center; }
 
+@media print {
+  .noprint {
+    display:none;
+  }
+}
+
 .nav_small_logo { margin: 0px; padding: 0px; }
 
 /* always display left scrollbar so pages

@@ -202,7 +202,7 @@
     </td>
     [% UNLESS minimal %]
     <td>
-      <input class="noprint" type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
+      <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
     </td>
     <td class="top_nav_pref">
       <input type="button" class="top_nav_pref_button noprint" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('pref_pane'); return false;">
