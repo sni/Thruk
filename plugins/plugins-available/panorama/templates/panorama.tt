@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>[% title_prefix %]Thruk Panorama</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/resources/css/ext-all-gray.css">
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/panorama/panorama-[% version %].css' />
+    <script type="application/x-javascript">
+      var theme                  = '[% theme %]';
+      var url_prefix             = '[% url_prefix %]';
+      var cookie_path            = '[% cookie_path %]';
+      var base                   = '[% url_prefix %]thruk/plugins/panorama';
+    </script>
+
+    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/ext-all-debug.js"></script>
+    <script src="[% url_prefix %]thruk/plugins/panorama/panorama-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+      [% PROCESS _panorama_js.tt %]
+    </script>
+</head>
+<body>
+</body>
+</html>

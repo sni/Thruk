@@ -1,0 +1,123 @@
+Ext.BLANK_IMAGE_URL = '[% url_prefix %]thruk/plugins/panorama/s.gif';
+
+/* send debug output to firebug console */
+function debug(str) {
+    if (window.console != undefined) {
+        console.debug(str);
+    }
+}
+
+Ext.state.Manager.setProvider(new Ext.state.CookieProvider({
+    expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
+}));
+
+/* global Thruk Panorama Object */
+Ext.namespace("TP");
+var TP = {
+    snap_x: 20,
+    snap_y: 20,
+
+    save_state: function() {
+        console.log("state saved");
+        return;
+    },
+
+    get_snap: function (x, y) {
+        newx = Math.round(x/TP.snap_x) * TP.snap_x;
+        newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
+        return([newx, newy]);
+    },
+
+    create_window: function() {
+        var win = Ext.create('TP.Panlet', {});
+    }
+}
+
+
+Ext.define('TP.Panlet', {
+    extend: 'Ext.window.Window',
+
+    title:      'title',
+    x:          0,
+    y:          25,
+    height:     200,
+    width:      400,
+    layout:     'fit',
+    constrain:  true,
+    stateful:   true,
+    stateId:    'test',
+    resizable:  new Ext.Panel({   // make resize snap to grid
+        widthIncrement:  TP.snap_x,
+        heightIncrement: TP.snap_y
+    }),
+    autoShow:   true,
+    tools:      [{ type: 'gear' }],
+    html:       'content',
+    onEsc:      function() { return false; },
+    listeners:  {
+        move: function( This, x, y, eOpts ) {
+            var newpos = TP.get_snap(x, y);
+            if(newpos[0] != x || newpos[1] != y) {
+                This.setPosition( newpos[0], newpos[1], false );
+            }
+            var shadow = Ext.get(This.id + '_shadow');
+            if(shadow != undefined) { shadow.hide(); }
+                TP.save_state();
+        },
+        removed: function( This, ownerCt, eOpts ) {
+            TP.save_state();
+        },
+        show: function(This, eOpts) {
+            var win_shadow = Ext.create('Ext.Layer', {
+                shadow: 'drop',
+                id:     This.id + '_shadow',
+                cls:    'window_drop_shadow'
+            });
+            // make move show snap shadow
+            This.dd.onDrag = function(e){
+                // original onDrag function
+                var me = this,
+                comp   = (me.proxy && !me.comp.liveDrag) ? me.proxy : me.comp,
+                offset = me.getOffset(me.constrain || me.constrainDelegate ? 'dragTarget' : null);
+                x = me.startPosition[0] + offset[0];
+                y = me.startPosition[1] + offset[1];
+                comp.setPagePosition(x, y);
+                // show shadow
+                var newpos = TP.get_snap(x, y);
+                win_shadow.moveTo(newpos[0], newpos[1]);
+                win_shadow.setSize(This.getSize());
+                win_shadow.show();
+            }
+        }
+    }
+});
+
+Ext.onReady(function() {
+  TP.viewport = new Ext.Viewport({
+    layout: 'border',
+    renderTo: Ext.getBody(),
+    margins: '0 0 0 0',
+    items: [
+      new Ext.Panel({
+          layout:'table',
+          title: 'Thruk Panorama',
+          height: 25,
+          region:'north',
+          margins: '0 0 0 0',
+          tools: [{
+            type: 'gear',
+            listeners: {
+              click: function() { TP.create_window() }
+            }
+          }]
+      }),
+      new Ext.Panel({
+        region:'center',
+        margins: '0 0 0 0',
+        bodyPadding: '0',
+        layout:'absolute',
+        items: [ ]
+      })
+    ]
+  });
+});

@@ -26,6 +26,8 @@ version:
 		if [ -e ".git" ]; then git="git"; else git=""; fi && \
 		$$git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).css plugins/plugins-available/mobile/root/mobile-$$newversion.css && \
 		$$git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).js plugins/plugins-available/mobile/root/mobile-$$newversion.js && \
+		$$git mv plugins/plugins-available/panorama/root/panorama-$(VERSION).css plugins/plugins-available/panorama/root/panorama-$$newversion.css && \
+		$$git mv plugins/plugins-available/panorama/root/panorama-$(VERSION).js plugins/plugins-available/panorama/root/panorama-$$newversion.js && \
 		$$git mv root/thruk/javascript/thruk-$(VERSION).js root/thruk/javascript/thruk-$$newversion.js && \
 		$$git mv root/thruk/javascript/all_in_one-$(VERSION).js root/thruk/javascript/all_in_one-$$newversion.js && \
 		$$git mv themes/themes-available/Thruk/stylesheets/all_in_one-$(VERSION).css themes/themes-available/Thruk/stylesheets/all_in_one-$$newversion.css && \
