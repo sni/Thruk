@@ -138,7 +138,7 @@ my %config = ('name'                   => 'Thruk',
                                           'paneprefix'     => 'dfl_',   # used in _status_filter.tt
                                           'sortprefix'     => '',       # used in _status_detail_table.tt / _status_hostdetail_table.tt
                                           'show_form'      => '1',      # used in _status_filter.tt
-                                          'author'         => 0,
+                                          'thruk_debug'    => 0,
                                           'all_in_one_css' => 0,
                                           'hide_backends_chooser' => 0,
                                           'backend_chooser'       => 'select',
@@ -225,7 +225,7 @@ if(-f $project_root."/.author") {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0;
     $config{'View::TT'}->{'STAT_TTL'}   = 5;
-    $config{'View::TT'}->{'PRE_DEFINE'}->{'author'} = 1;
+    $config{'View::TT'}->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
 }
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT

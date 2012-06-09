@@ -6,7 +6,7 @@
   var has_expire_acks        = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
 -->
 </script>
-[%+ UNLESS author %]
+[%+ UNLESS thruk_debug %]
 <script type="text/javascript" src="[% url_prefix %]thruk/javascript/all_in_one-[% version %].js"></script>
 [% ELSE %]
   [% FOREACH jsfiles = all_in_one_javascript %]

@@ -35,7 +35,7 @@
       [% IF enable_shinken_features +%]
       var priorities              = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
       [% END +%]
-      [% IF author +%]
+      [% IF thruk_debug +%]
       var thruk_debug_js          = 1;
       [% ELSE %]
       var thruk_debug_js          = 0;
@@ -58,11 +58,11 @@
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% page %].css' />
     [% END %]
-    [% IF theme != 'Thruk' || author %]
+    [% IF theme != 'Thruk' || thruk_debug %]
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_global.css' />
     [% END %]
     [% UNLESS use_frames %]
-      [% IF theme != 'Thruk' || author %]
+      [% IF theme != 'Thruk' || thruk_debug %]
       <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes.css' />
       [% END %]
       <!--[if IE 5]>
@@ -72,10 +72,10 @@
       <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
       <![endif]-->
     [% END %]
-    [% IF theme != 'Thruk' || author %]
+    [% IF theme != 'Thruk' || thruk_debug %]
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
     [% END %]
-    [% IF theme == 'Thruk' && !author %]
+    [% IF theme == 'Thruk' && !thruk_debug %]
       [% IF use_frames %]
       <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one-[% version %].css' />
       [% ELSE %]
