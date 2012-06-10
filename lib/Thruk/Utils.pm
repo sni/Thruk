@@ -1048,7 +1048,11 @@ sub choose_mobile {
     my($c,$url) = @_;
 
     return unless defined $c->{'request'}->{'headers'}->{'user-agent'};
-    return unless $c->{'request'}->{'headers'}->{'user-agent'} =~ m/(iPhone|Android|IEMobile)/mx;
+    my $found = 0;
+    for my $agent (split(/\s*,\s*/mx, $c->config->{'mobile_agent'})) {
+        $found++ if $c->{'request'}->{'headers'}->{'user-agent'} =~ m/$agent/mx;
+    }
+    return unless $found;
 
     my $choose_mobile;
     if(defined $c->request->cookie('thruk_mobile')) {

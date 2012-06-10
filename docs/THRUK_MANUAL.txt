@@ -1332,6 +1332,15 @@ ex.:
   wait_timeout = 10
 
 
+==== mobile_agent
+Specify user agents which will be redirected to the mobile plugin (if
+enabled).
+
+ex.:
+
+  mobile_agent=iPhone,Android,IEMobile
+
+
 ==== no_external_job_forks
 Normally reports will be generated in an external process to avoid
 timeouts on long running reports. Use this switch to turn external
