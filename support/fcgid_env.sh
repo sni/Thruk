@@ -7,6 +7,9 @@ export CATALYST_CONFIG="/etc/thruk"
 if [ -f /etc/sysconfig/thruk ]; then
   . /etc/sysconfig/thruk
 fi
+if [ -f /etc/default/thruk ]; then
+  . /etc/default/thruk
+fi
 
 # execute fastcgi server
 exec /usr/share/thruk/script/thruk_fastcgi.pl

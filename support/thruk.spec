@@ -193,6 +193,7 @@ case "$*" in
   0)
     # POSTUN
     rm -rf %{_localstatedir}/cache/thruk/*
+    rm -f %{_datadir}/thruk/root/thruk/plugins/*
     %{insserv_cleanup}
     ;;
   1)
@@ -232,13 +233,13 @@ exit 0
 %if %{defined suse_version}
 %attr(755,wwwrun,root) %{_localstatedir}/lib/thruk
 %attr(755,wwwrun,root) %{_localstatedir}/cache/thruk
-%attr(755,wwwrun,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,wwwrun,root) %{_localstatedir}/log/thruk
+%attr(755,wwwrun,root) %{_datadir}/thruk/fcgid_env.sh
 %else
 %attr(755,apache,root) %{_localstatedir}/lib/thruk
 %attr(755,apache,root) %{_localstatedir}/cache/thruk
-%attr(755,apache,root) %{_datadir}/thruk/fcgid_env.sh
 %attr(755,apache,root) %{_localstatedir}/log/thruk
+%attr(755,apache,root) %{_datadir}/thruk/fcgid_env.sh
 %endif
 
 %defattr(-,root,root)

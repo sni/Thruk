@@ -51,6 +51,7 @@ sub finalize_config {
         }
 
         # static content included?
+        # only needed for development server, handled by apache aliasmatch otherwise
         if( -d $addon.'root' and -w $project_root.'/root/thruk/plugins/' ) {
             print STDERR " -> root\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
             my $target_symlink = $project_root.'/root/thruk/plugins/'.$addon_name;

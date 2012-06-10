@@ -8,6 +8,7 @@ set -e
 case "$1" in
   remove|deconfigure)
     /usr/bin/thruk -a uninstallcron
+    rm -f /usr/share/thruk/root/thruk/plugins/*
   ;;
 
   upgrade|failed-upgrade)
