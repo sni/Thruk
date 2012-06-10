@@ -8,6 +8,42 @@
 
     [% SET page = 'status' IF page == '' %]
 
+    <!-- stylesheets -->
+    [%+ UNLESS all_in_one_css %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% page %].css' />
+    [% END %]
+    [% IF theme != 'Thruk' || thruk_debug %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_global.css' />
+    [% END %]
+    [% UNLESS use_frames %]
+      [% IF theme != 'Thruk' || thruk_debug %]
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes.css' />
+      [% END %]
+      <!--[if IE 5]>
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+      <![endif]-->
+      <!--[if IE 6]>
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+      <![endif]-->
+    [% END %]
+    [% IF theme != 'Thruk' || thruk_debug %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
+    [% END %]
+    [% IF theme == 'Thruk' && !thruk_debug %]
+      [% IF use_frames %]
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one-[% version %].css' />
+      [% ELSE %]
+      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one_noframes-[% version %].css' />
+      [% END %]
+    [% END %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.8.16.custom.css' />
+    [% IF css.list.size > 0 %][% FOREACH cs = css.list %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix _ cs %]' />
+    [% END %][% END %]
+
+    <!-- javascript -->
     [% PROCESS _common_js.tt %]
     [% FOREACH j = js.list %]
       <script type="text/javascript" src="[% url_prefix _ j %]"></script>
@@ -53,40 +89,6 @@
     -->
     </script>
 
-    <!-- stylesheets -->
-    [%+ UNLESS all_in_one_css %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% page %].css' />
-    [% END %]
-    [% IF theme != 'Thruk' || thruk_debug %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_global.css' />
-    [% END %]
-    [% UNLESS use_frames %]
-      [% IF theme != 'Thruk' || thruk_debug %]
-      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes.css' />
-      [% END %]
-      <!--[if IE 5]>
-      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
-      <![endif]-->
-      <!--[if IE 6]>
-      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
-      <![endif]-->
-    [% END %]
-    [% IF theme != 'Thruk' || thruk_debug %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% theme %].css' />
-    [% END %]
-    [% IF theme == 'Thruk' && !thruk_debug %]
-      [% IF use_frames %]
-      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one-[% version %].css' />
-      [% ELSE %]
-      <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/all_in_one_noframes-[% version %].css' />
-      [% END %]
-    [% END %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/cal/jscal2.css' />
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/javascript/jquery-ui/css/smoothness/jquery-ui-1.8.16.custom.css' />
-    [% IF css.list.size > 0 %][% FOREACH cs = css.list %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix _ cs %]' />
-    [% END %][% END %]
     [% IF show_nav_button && use_frames %]
     <style type='text/css'>
       body {
