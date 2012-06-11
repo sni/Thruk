@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added config item to specify mobile agents
           - Bug Fixes
             - fixed 'All types' link not working all the time
+            - fixed sticky acknowledgements
 
 1.32     Sat Jun  2 18:46:38 CEST 2012
           - added recurring downtimes
