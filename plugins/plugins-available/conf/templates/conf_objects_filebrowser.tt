@@ -114,7 +114,7 @@
         html += "<input type='checkbox' name='files' value='"+ path +"' class='obj_browse_box'>";
         html += "<a href='#"+ path +"' onclick='setdir(\""+ path +"\")'>";
         html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/folder.png' border='0' alt='folder' title='folder' width='16' height='16'> ";
-        html += "<div class='obj_browse_name'>" + name + "<\/div> ";
+        html += "<div class='obj_browse_name'>" + name + "<\/div>";
         html += "<div class='obj_browse_date'>"+ date + "<\/div>";
         html += "<\/a>";
         html += "<\/li>";
@@ -136,7 +136,7 @@
         html += "<input type='checkbox' name='files' value='"+ path + name +"' class='obj_browse_box'>";
         html += "<a href='conf.cgi?sub=objects&action=editor&file="+ path + name + "' class='" + css + "'>";
         html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/" + icon + "' border='0' alt='cfg' title='cfg' width='16' height='16'> ";
-        html += "<div class='obj_browse_name "+ css +"'>" + name + "<\/div> ";
+        html += "<div class='obj_browse_name "+ css +"'>" + name + "<\/div>";
         html += "<div class='obj_browse_date "+ css +"'>"+ date + "<\/div>";
         html += "<\/a>";
         html += "<\/li>";

@@ -45,6 +45,7 @@ body.config TD.conf_row {
 
 TD#filesystem {
   text-align: left;
+  min-width: 600px;
 }
 
 TD#filepath {
@@ -70,16 +71,18 @@ UL.obj_browse LI IMG {
 }
 
 DIV.obj_browse_name {
-  float: left;
   width: 250px;
   white-space: nowrap;
   overflow: hidden;
+  display:inline-block;
+  max-width: 50%;
 }
 
 DIV.obj_browse_date {
-  float: left;
   width: 120px;
   text-align: right;
+  display:inline-block;
+  max-width: 50%;
 }
 INPUT.obj_browse_box {
   float: left;
