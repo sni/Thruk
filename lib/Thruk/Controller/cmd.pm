@@ -677,7 +677,6 @@ sub _check_reschedule_alias {
             $c->request->parameters->{'service'} = $master;
             $c->stash->{'additional_wait'} = 1;
             return;
-        } else {
         }
 
         my $commands = $service->{'check_command'};
@@ -688,7 +687,6 @@ sub _check_reschedule_alias {
             $c->request->parameters->{'service'} = $master;
             $c->stash->{'additional_wait'} = 1;
             return;
-        } else {
         }
     }
 
