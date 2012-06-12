@@ -1241,7 +1241,7 @@ sub _rebuild_index {
                 }
             } else {
                 my $type = $obj->get_type();
-                if($type ne 'hostescalation' and $type ne 'serviceescalation') {
+                if($type ne 'hostescalation' and $type ne 'serviceescalation' and $type ne 'hostgroup') {
                     push @{$self->{'parse_errors'}}, $obj->get_type()." object has no name in ".Thruk::Utils::Conf::_link_obj($obj);
                 }
             }
