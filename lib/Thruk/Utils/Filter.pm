@@ -262,8 +262,8 @@ returns a url with referer removed
 =cut
 sub clean_referer {
     my $uri = shift;
-    $uri =~ s/&referer=[^&]+//mx;
-    $uri =~ s/&bookmark=[^&]+//mx;
+    $uri =~ s/&amp;referer=[^&]+//gmx;
+    $uri =~ s/&amp;bookmark=[^&]+//gmx;
     return $uri;
 }
 
