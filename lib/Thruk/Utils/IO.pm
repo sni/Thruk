@@ -73,18 +73,18 @@ sub ensure_permissions {
     if($mode eq 'file') {
         if($cur ne '0660') {
             chmod(0660, $path)
-                or confess("failed to ensure permissions (0660/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
+                or warn("failed to ensure permissions (0660/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
         }
     }
     elsif($mode eq 'dir') {
         if($cur ne '0770') {
             chmod(0770, $path)
-                or confess("failed to ensure permissions (0770/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
+                or warn("failed to ensure permissions (0770/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
         }
     }
     else {
         chmod($mode, $path)
-            or confess("failed to ensure permissions (".$mode.") with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
+            or warn("failed to ensure permissions (".$mode.") with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
     }
 
     # change owner too if we are root
