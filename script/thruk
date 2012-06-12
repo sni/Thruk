@@ -150,11 +150,12 @@ Export the event log as excel file:
 
   %> thruk -A thrukadmin -a 'url=/thruk/cgi-bin/showlog.cgi?view_mode=xls' > eventlog.xls
 
-Urls can be shortened. Export all services into an excel file:
+Urls can be shortened.
+Export all services into an excel file:
 
   %> thruk 'status.cgi?view_mode=xls&host=all' > allservices.xls
 
-Export all services into an excel file:
+Export service availability data into a csv file:
 
   %> thruk -A thrukadmin -a 'url=avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
 
