@@ -158,7 +158,6 @@ sub get_peer_by_key {
     for my $peer ( @{ $self->get_peers() } ) {
         return $peer if($peer->{'key'} eq $key or $peer->{'name'} eq $key);
     }
-    confess("no such backend: $key");
     return;
 }
 
