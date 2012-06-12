@@ -49,7 +49,18 @@ sub new {
         'opt' => $options,
     };
     bless $self, $class;
+
+    # set some env defaults
     $ENV{'THRUK_SRC'} = 'CLI';
+    $ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
+    $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if scalar @{$options->{'backends'}} > 0;
+    $ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};
+    $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
+    $options->{'remoteurl'} = defined $ENV{'OMD_SITE'} ? 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi'
+                                                       : 'http://localhost/thruk/cgi-bin/remote.cgi'
+                              unless defined $options->{'remoteurl'};
+    $options->{'remoteurl'} =~ s|/thruk/*$||mx;
+    $options->{'remoteurl'} = $options->{'remoteurl'}.'/thruk/cgi-bin/remote.cgi' if $options->{'remoteurl'} !~ m/remote\.cgi$/;
 
     # try to read secret file
     $self->{'opt'}->{'credential'} = $self->_read_secret() unless defined $self->{'opt'}->{'credential'};
@@ -165,8 +176,8 @@ sub _run {
     }
 
     unless(defined $result) {
-        ($c, $failed) = $self->_dummy_c();
-        if($failed) {
+        $c = $self->get_c();
+        if(!defined $c) {
             print STDERR "command failed";
             return 1;
         }

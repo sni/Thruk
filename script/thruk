@@ -29,16 +29,6 @@ if($options->{'version'}) { require Thruk; print "Thruk Version $Thruk::VERSION\
 pod2usage( { -verbose => 2, -exit => 1 } ) if $options->{'help'};
 pod2usage( { -verbose => 2, -exit => 1 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
 
-$ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
-$ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if scalar @{$options->{'backends'}} > 0;
-$ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};
-$ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
-$options->{'remoteurl'} = defined $ENV{'OMD_SITE'} ? 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi'
-                                                   : 'http://localhost/thruk/cgi-bin/remote.cgi'
-                          unless defined $options->{'remoteurl'};
-$options->{'remoteurl'} =~ s|/thruk/*$||mx;
-$options->{'remoteurl'} = $options->{'remoteurl'}.'/thruk/cgi-bin/remote.cgi' if $options->{'remoteurl'} !~ m/remote\.cgi$/;
-
 use Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
