@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.34     not yet released
           - added config item to specify mobile agents
+          - added refresh url parameter to set custom refresh rate
           - Bug Fixes
             - fixed 'All types' link not working all the time
             - fixed sticky acknowledgements

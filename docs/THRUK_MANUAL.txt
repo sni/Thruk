@@ -1883,6 +1883,16 @@ monitor screens where only the current problems should be displayed.
 Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1
 
 
+==== refresh
+
+Pages: all pages
+
+Description: Sets refresh timer to a custom value.
+
+Example: /thruk/cgi-bin/status.cgi?refresh=30
+
+
+
 === SLA Reporting
 
 SLA Reporting consists of several parts.
