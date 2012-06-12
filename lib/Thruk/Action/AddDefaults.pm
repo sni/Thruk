@@ -372,14 +372,16 @@ sub _set_processinfo {
        or !defined $cached_data->{'prev_last_program_restart'}
        or $cached_data->{'prev_last_program_restart'} < $last_program_restart
       ) {
-        my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+        if(defined $c->stash->{'remote_user'}) {
+            my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
 
-        $cached_data = {
-            'prev_last_program_restart' => $last_program_restart,
-            'contactgroups'             => $contactgroups,
-        };
-        $cache->set($c->stash->{'remote_user'}, $cached_data) if defined $c->stash->{'remote_user'};
-        $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
+            $cached_data = {
+                'prev_last_program_restart' => $last_program_restart,
+                'contactgroups'             => $contactgroups,
+            };
+            $cache->set($c->stash->{'remote_user'}, $cached_data) if defined $c->stash->{'remote_user'};
+            $c->log->debug("creating new user cache for ".$c->stash->{'remote_user'});
+        }
     }
 
     # check our backends uptime

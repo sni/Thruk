@@ -435,6 +435,8 @@ sub set_dynamic_roles {
     $c->stats->profile(begin => "Thruk::Utils::set_dynamic_roles");
     my $username = $c->request->{'user'}->{'username'};
 
+    return unless defined $username;
+
     # is the contact allowed to send commands?
     my($can_submit_commands,$alias,$data);
     my $cache = $c->cache;
