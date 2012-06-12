@@ -253,6 +253,24 @@ sub short_uri {
 
 ########################################
 
+=head2 clean_referer
+
+  clean_referer($url)
+
+returns a url with referer removed
+
+=cut
+sub clean_referer {
+    my $uri = shift;
+    $uri =~ s/&referer=[^&]+//mx;
+    $uri =~ s/&bookmark=[^&]+//mx;
+    return $uri;
+}
+
+
+
+########################################
+
 =head2 uri_with
 
   uri_with($c, $data)
@@ -264,14 +282,19 @@ sub uri_with {
     my $c    = shift;
     my $data = shift;
 
+    my $filter = {};
+    for my $key (keys %{$c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}}) {
+        $filter->{$key} = $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'uri_filter'}->{$key};
+    }
     for my $key (keys %{$data}) {
         next unless defined $data->{$key};
-        $data->{$key} = undef if $data->{$key} eq 'undef';
+        $filter->{$key} = $data->{$key};
+        $filter->{$key} = undef if $filter->{$key} eq 'undef';
     }
 
     my $uri;
     eval {
-        $uri = $c->request->uri_with($data);
+        $uri = $c->request->uri_with($filter);
     };
     if($@) {
         confess("ERROR in uri_with(): ".$@);

@@ -60,7 +60,7 @@ sub new {
                                                        : 'http://localhost/thruk/cgi-bin/remote.cgi'
                               unless defined $options->{'remoteurl'};
     $options->{'remoteurl'} =~ s|/thruk/*$||mx;
-    $options->{'remoteurl'} = $options->{'remoteurl'}.'/thruk/cgi-bin/remote.cgi' if $options->{'remoteurl'} !~ m/remote\.cgi$/;
+    $options->{'remoteurl'} = $options->{'remoteurl'}.'/thruk/cgi-bin/remote.cgi' if $options->{'remoteurl'} !~ m/remote\.cgi$/mx;
 
     # try to read secret file
     $self->{'opt'}->{'credential'} = $self->_read_secret() unless defined $self->{'opt'}->{'credential'};

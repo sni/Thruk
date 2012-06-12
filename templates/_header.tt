@@ -120,7 +120,7 @@
                   <option value="[% t %]"[% IF t == theme %] selected[% END %]>[% t %]</option>
                   [% END %]
                 </select>
-                <input type="button" name="submit" value="change" onClick="prefSubmit('[% escape_html(c.request.uri) %]', '[% theme %]')">
+                <input type="button" name="submit" value="change" onClick="prefSubmit('[% escape_html(full_uri(c)) %]', '[% theme %]')">
               </td>
             </tr>
             [% IF show_sounds %]
@@ -128,7 +128,7 @@
               <th>Sounds:</th>
               <td>
                 [% IF has_cgi_sounds %]
-                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(c.request.uri) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
+                <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(full_uri(c)) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
                 [% ELSE %]
                 <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled>
                 [% END %]
@@ -168,9 +168,9 @@
   [% END %]
   [% IF show_nav_button %]
     [% UNLESS use_frames %]
-    <div class="hidenav clickable" onclick="window.location='[% uri_with(c, 'nav' => 0) %]'" title="hide navigation"></div>
+    <div class="hidenav clickable" onclick="window.location='[% short_uri(c, 'nav' => 0) %]'" title="hide navigation"></div>
     [% ELSE %]
-    <div class="shownav clickable" onclick="window.location='[% uri_with(c, 'nav' => 1) %]'"></div>
+    <div class="shownav clickable" onclick="window.location='[% short_uri(c, 'nav' => 1) %]'"></div>
     [% END %]
   [% END %]
 
