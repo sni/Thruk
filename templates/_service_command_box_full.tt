@@ -26,7 +26,7 @@
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delay.gif' border="0" alt='Re-schedule Next Service Check' title='Re-schedule Next Service Check' width="20" height="20"></td>
                 <td class='command'>
-                  <a href='cmd.cgi?cmd_typ=7&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check&amp;backend=[% service.peer_key %]'>Re-schedule the next check of this service</a>
+                  <a href='cmd.cgi?cmd_typ=7&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check&amp;backend=[% service.peer_key %]'>Re-schedule next check of this service</a>
                   (<a href='cmd.cgi?cmd_typ=7&amp;cmd_mod=2&amp;start_time=[% date.now %]&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;force_check&amp;backend=[% service.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'> Now </a>)
                 </td>
               </tr>
