@@ -219,10 +219,13 @@ sub get_hosts {
     my($self, %options) = @_;
 
     # try to reduce the amount of transfered data
-    my($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
-    if(defined $size) {
-        # then set the limit for the real query
-        $options{'options'}->{'limit'} = $limit + 50;
+    my($size, $limit);
+    if(defined $options{'pager'} and $options{'pager'}->stash->{'use_paging'}) {
+        ($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit + 50;
+        }
     }
 
     unless(defined $options{'columns'}) {
@@ -360,10 +363,13 @@ sub get_services {
     my($self, %options) = @_;
 
     # try to reduce the amount of transfered data
-    my($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
-    if(defined $size) {
-        # then set the limit for the real query
-        $options{'options'}->{'limit'} = $limit + 50;
+    my($size, $limit);
+    if(defined $options{'pager'} and $options{'pager'}->stash->{'use_paging'}) {
+        ($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
+        if(defined $size) {
+            # then set the limit for the real query
+            $options{'options'}->{'limit'} = $limit + 50;
+        }
     }
 
     unless(defined $options{'columns'}) {
