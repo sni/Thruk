@@ -406,6 +406,7 @@ sub escape_xml {
     my $return = HTML::Entities::encode($text, '<>&');
     $return =~ s/\\n\Z//mx;
     $return =~ s/\\n/\n/gmx;
+    $return =~ tr/\x80-\xFF//d;
     return $return;
 }
 
