@@ -1461,6 +1461,7 @@ sub _all_object_links_callback {
                         my $ref2 = "$ref";
                         if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
                         next if index($ref2, '*') != -1;
+                        next if $ref2 eq '';
                         &$cb($file, $obj, $key, $link, $ref2);
                     }
                 }
@@ -1472,6 +1473,7 @@ sub _all_object_links_callback {
                         my $ref2 = "$ref";
                         if(substr($ref2, 0, 1) eq '!' or substr($ref2, 0, 1) eq '+') { $ref2 = substr($ref2, 1); }
                         next if index($ref2, '*') != -1;
+                        next if $ref2 eq '';
                         &$cb($file, $obj, $key, $link, $ref2);
                     }
                 }
