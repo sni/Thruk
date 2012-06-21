@@ -1388,7 +1388,10 @@ sub _check_references {
             }
         }
         elsif(!defined $self->{'objects'}->{'byname'}->{$link}->{$val}) {
-            push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+            # hostgroups are allowed to have a register 0
+            if($link ne 'hostgroup' or !defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
+                push @parse_errors, 'referenced '.$link." '".$val."' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);
+            }
         }
     });
 
