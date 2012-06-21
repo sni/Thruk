@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.36     not yet released
+          - Bug Fixes
+            - config tool: allowed hostgroups with register 0
+
 1.34     Tue Jun 19 17:38:46 CEST 2012
           - added config item to specify mobile agents
           - added refresh url parameter to set custom refresh rate
