@@ -7,20 +7,17 @@ function debug(str) {
     }
 }
 
-Ext.state.Manager.setProvider(new Ext.state.CookieProvider({
-    expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
-}));
+/* create state provider */
+var cp = new Ext.state.HttpProvider({
+    url: '[% url_prefix %]thruk/cgi-bin/panorama.cgi?state'
+});
+Ext.state.Manager.setProvider(cp);
 
 /* global Thruk Panorama Object */
 Ext.namespace("TP");
 var TP = {
     snap_x: 20,
     snap_y: 20,
-
-    save_state: function() {
-        console.log("state saved");
-        return;
-    },
 
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
@@ -29,74 +26,43 @@ var TP = {
     },
 
     create_window: function() {
+        var pan = Ext.getCmp('tabpan');
         var win = Ext.create('TP.Panlet', {});
+        pan..add(win);
     }
 }
 
-
-Ext.define('TP.Panlet', {
-    extend: 'Ext.window.Window',
-
-    title:      'title',
-    x:          0,
-    y:          25,
-    height:     200,
-    width:      400,
-    layout:     'fit',
-    constrain:  true,
-    stateful:   true,
-    stateId:    'test',
-    resizable:  new Ext.Panel({   // make resize snap to grid
-        widthIncrement:  TP.snap_x,
-        heightIncrement: TP.snap_y
-    }),
-    autoShow:   true,
-    tools:      [{ type: 'gear' }],
-    html:       'content',
-    onEsc:      function() { return false; },
-    listeners:  {
-        move: function( This, x, y, eOpts ) {
-            var newpos = TP.get_snap(x, y);
-            if(newpos[0] != x || newpos[1] != y) {
-                This.setPosition( newpos[0], newpos[1], false );
-            }
-            var shadow = Ext.get(This.id + '_shadow');
-            if(shadow != undefined) { shadow.hide(); }
-                TP.save_state();
-        },
-        removed: function( This, ownerCt, eOpts ) {
-            TP.save_state();
-        },
-        show: function(This, eOpts) {
-            var win_shadow = Ext.create('Ext.Layer', {
-                shadow: 'drop',
-                id:     This.id + '_shadow',
-                cls:    'window_drop_shadow'
-            });
-            // make move show snap shadow
-            This.dd.onDrag = function(e){
-                // original onDrag function
-                var me = this,
-                comp   = (me.proxy && !me.comp.liveDrag) ? me.proxy : me.comp,
-                offset = me.getOffset(me.constrain || me.constrainDelegate ? 'dragTarget' : null);
-                x = me.startPosition[0] + offset[0];
-                y = me.startPosition[1] + offset[1];
-                comp.setPagePosition(x, y);
-                // show shadow
-                var newpos = TP.get_snap(x, y);
-                win_shadow.moveTo(newpos[0], newpos[1]);
-                win_shadow.setSize(This.getSize());
-                win_shadow.show();
-            }
-        }
-    }
-});
-
 Ext.onReady(function() {
-  TP.viewport = new Ext.Viewport({
-    layout: 'border',
+  Ext.create('Ext.tab.Panel', {
+    //plugins: Ext.create('Ext.ux.TabReorderer'),
     renderTo: Ext.getBody(),
-    margins: '0 0 0 0',
+    id: 'tabpan',
+    minTabWidth: 80,
+    items: [{
+        title: 'Dashboard',
+        closable: true
+    }, {
+        title: '+',
+        tabConfig: {
+          minWidth: 25
+        },
+        listeners: {
+          beforeactivate: function(This, eOpts) {
+              var tabpan = Ext.getCmp('tabpan');
+              var size = tabpan.items.length;
+              tabpan.add({ title: 'Dashboard', closable: true }).show();
+              tabpan.getTabBar().move(size-1, size);
+              return false;
+          }
+        }
+    }]
+  });
+
+/*
+  TP.viewport = new Ext.Viewport({
+    layout:     'border',
+    renderTo:   Ext.getBody(),
+    margins:    '0 0 0 0',
     items: [
       new Ext.Panel({
           layout:'table',
@@ -112,12 +78,16 @@ Ext.onReady(function() {
           }]
       }),
       new Ext.Panel({
-        region:'center',
-        margins: '0 0 0 0',
+        id:          'centerpanel',
+        region:      'center',
+        margins:     '0 0 0 0',
         bodyPadding: '0',
-        layout:'absolute',
-        items: [ ]
+        layout:      'absolute',
+        stateful:    true,
+        stateId:     'viewport',
+        items:       [ ]
       })
     ]
   });
+*/
 });

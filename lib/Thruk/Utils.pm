@@ -834,7 +834,7 @@ sub _initialassumedhoststate_to_state {
 
 =head2 get_user_data
 
-  get_user_data()
+  get_user_data($c)
 
 returns user data
 
@@ -865,7 +865,7 @@ sub get_user_data {
 
 =head2 store_user_data
 
-  store_user_data($section, $data)
+  store_user_data($c, $data)
 
 store user data for section
 
@@ -877,7 +877,7 @@ sub store_user_data {
     for my $dir ($c->config->{'var_path'}, $c->config->{'var_path'}."/users") {
         if(! -d $dir) {
             Thruk::Utils::IO::mkdir($dir) or do {
-                Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: mkdir '.$dir.': '.$! );
+                Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: mkdir '.$dir.': '.$! );
                 return;
             };
         }
@@ -885,7 +885,7 @@ sub store_user_data {
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
     open(my $fh, '>', $file.'.new') or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: open '.$file.'.new : '.$! );
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: open '.$file.'.new : '.$! );
         return;
     };
     print $fh Dumper($data);
@@ -893,7 +893,7 @@ sub store_user_data {
     Thruk::Utils::IO::ensure_permissions('file', $file);
 
     move($file.'.new', $file) or do {
-        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Bookmarks failed: move '.$file.'.new '.$file.': '.$! );
+        Thruk::Utils::set_message( $c, 'fail_message', 'Saving Data failed: move '.$file.'.new '.$file.': '.$! );
         return;
     };
 

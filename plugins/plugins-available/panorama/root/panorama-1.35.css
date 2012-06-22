@@ -1,0 +1,11 @@
+.window_drop_shadow {
+  border: 1px dashed black;
+}
+
+/* make tab close only show on mouseover */
+A.x-tab-close-btn {
+  display: none;
+}
+DIV.x-tab-default-over A.x-tab-close-btn {
+  display: inherit;
+}

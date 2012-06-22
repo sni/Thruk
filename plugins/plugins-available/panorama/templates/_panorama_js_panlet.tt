@@ -1,0 +1,57 @@
+Ext.define('TP.Panlet', {
+    extend: 'Ext.window.Window',
+
+    title:     'title',   /* TODO: implement */
+    x:         0,
+    y:         25,
+    height:    200,
+    width:     400,
+    layout:    'fit',
+    constrain: true,
+    stateful:  true,
+    stateId:   'test',   /* TODO: implement */
+    resizable: new Ext.Panel({   // make resize snap to grid
+        widthIncrement:  TP.snap_x,
+        heightIncrement: TP.snap_y
+    }),
+    autoShow:   true,
+    tools:      [{ type: 'gear' }], /* TODO: implement */
+    html:       'content',
+    onEsc:      function() { return false; },
+    listeners:  {
+        /* make shadow snap to grid */
+        move: function( This, x, y, eOpts ) {
+            var newpos = TP.get_snap(x, y);
+            if(newpos[0] != x || newpos[1] != y) {
+                This.setPosition( newpos[0], newpos[1], false );
+            }
+            var shadow = Ext.get(This.id + '_shadow');
+            if(shadow != undefined) { shadow.hide(); }
+        },
+        destroy: function( This, eOpts ) {
+            cp.clear(this.stateId);
+        },
+        show: function(This, eOpts) {
+            var win_shadow = Ext.create('Ext.Layer', {
+                shadow: 'drop',
+                id:     This.id + '_shadow',
+                cls:    'window_drop_shadow'
+            });
+            // make move show snap shadow
+            This.dd.onDrag = function(e){
+                // original onDrag function
+                var me = this,
+                comp   = (me.proxy && !me.comp.liveDrag) ? me.proxy : me.comp,
+                offset = me.getOffset(me.constrain || me.constrainDelegate ? 'dragTarget' : null);
+                x = me.startPosition[0] + offset[0];
+                y = me.startPosition[1] + offset[1];
+                comp.setPagePosition(x, y);
+                // show shadow
+                var newpos = TP.get_snap(x, y);
+                win_shadow.moveTo(newpos[0], newpos[1]);
+                win_shadow.setSize(This.getSize());
+                win_shadow.show();
+            }
+        }
+    }
+});

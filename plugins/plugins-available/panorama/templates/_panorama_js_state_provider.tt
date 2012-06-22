@@ -1,0 +1,76 @@
+/**
+ * @copyright Copyright Intermesh 2007
+ * @author Merijn Schering <mschering@intermesh.nl>
+ *
+ * This file is part of Group-Office.
+ *
+ * Group-Office is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * See file /LICENSE.GPL
+ */
+
+/**
+ * @class Ext.state.HttpProvider
+ * @extends Ext.state.Provider
+ * The default Provider implementation which saves state via XmlHttpRequest calls to save it in
+ * a database.
+ *
+ * @cfg {String} url The server page that will handle the request to save the state
+ * when a value changes it will send 'name' and 'value' to that page.
+ *
+ * @constructor
+ * Create a new HttpProvider
+ * @param {Object} config The configuration object
+ */
+Ext.state.HttpProvider = function(config){
+    Ext.state.HttpProvider.superclass.constructor.call(this);
+    this.url = "";
+
+    Ext.apply(this, config);
+    this.state = this.readValues();
+};
+
+Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
+    set : function(name, value) {
+        if(typeof value == "undefined" || value === null) {
+            this.clear(name);
+            return;
+        }
+        this.setValue(name, value);
+        Ext.state.HttpProvider.superclass.set.call(this, name, value);
+    },
+
+    clear : function(name) {
+        this.clearValue(name);
+        Ext.state.HttpProvider.superclass.clear.call(this, name);
+    },
+
+    readValues : function() {
+        var state = {};
+        for (var name in ExtState) {
+            if(name!='remove') {
+                state[name] = this.decodeValue(ExtState[name]);
+            }
+        }
+        return state;
+    },
+
+    setValue : function(name, value) {
+        var conn = new Ext.data.Connection();
+        conn.request({
+            url: this.url,
+            params: {task: 'set', 'name': name, 'value': this.encodeValue(value) }
+        });
+    },
+
+    clearValue : function(name) {
+        var conn = new Ext.data.Connection();
+        conn.request({
+            url: this.url,
+            params: {task: 'set', 'name': name, 'value': 'null' }
+        });
+    }
+});
