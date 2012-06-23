@@ -28,6 +28,17 @@ Ext.define('TP.Panlet', {
             if(shadow != undefined) { shadow.hide(); }
         },
         destroy: function( This, eOpts ) {
+            /* remove window from panels window ids */
+            var panel = Ext.getCmp(this.panel_id);
+            var list  = panel.window_ids;
+            var newlist = [];
+            for(var nr in list) {
+                if(list[nr] != this.id) {
+                    newlist.push(list[nr]);
+                }
+            }
+            panel.window_ids = newlist;
+            /* clear state information */
             cp.clear(this.id);
         },
         show: function(This, eOpts) {

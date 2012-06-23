@@ -28,6 +28,7 @@ var TP = {
         tabpan.add({
             stateful: true,
             id:       nextid,
+            window_ids:  [],
             stateEvents: ['titlechange'],
             listeners: {
                 destroy: function( This, eOpts ) {
@@ -64,7 +65,9 @@ var TP = {
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
         var win = Ext.create('TP.Panlet', { id: this.getNextId("panlet", id) });
+        win.panel_id = tb.id;
         tb.add(win);
+        tb.window_ids.push(win.id);
     },
 
     getNextId: function(prefix, id) {
@@ -114,8 +117,15 @@ Ext.onReady(function() {
                 }
             },
             listeners: {
-                beforerender: function(This, eOpts) {
-                    debug('beforerender');
+                tabchange: function(tabPanel, newCard, oldCard, eOpts) {
+                    if(oldCard) {
+                        for(nr in oldCard.window_ids) {
+                            Ext.getCmp(oldCard.window_ids[nr]).hide();
+                        }
+                    }
+                    for(nr in newCard.window_ids) {
+                        Ext.getCmp(newCard.window_ids[nr]).show();
+                    }
                 }
             },
             defaults: {
