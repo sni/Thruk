@@ -9,3 +9,12 @@ A.x-tab-close-btn {
 DIV.x-tab-default-over A.x-tab-close-btn {
   display: inherit;
 }
+
+.new-tab {
+    background-image: url("new_tab.gif") !important;
+    left: -4px;
+}
+.gear-tab {
+    background-image: url("gear.gif") !important;
+    left: -4px;
+}

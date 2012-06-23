@@ -40,36 +40,44 @@ Ext.onReady(function() {
     margins:    '0 0 0 0',
     items: [
       new Ext.tab.Panel({
-          //plugins: Ext.create('Ext.ux.TabReorderer'),  /* TODO */
-          id: 'tabpan',
-          region: 'center',
-          minTabWidth: 80,
-          defaults: {
-            title: 'Dashboard',
-            closable: true
-          },
-          items: [{}, {
-              title: '+',
-              closable: false,
-              tabConfig: {
-                minWidth: 25
-              },
-              listeners: {
-                beforeactivate: function(This, eOpts) {
-                    var tabpan = Ext.getCmp('tabpan');
-                    var size = tabpan.items.length;
-                    tabpan.add({}).show();
-                    tabpan.getTabBar().move(size-1, size);
-                    return false;
+            //plugins: Ext.create('Ext.ux.TabReorderer'),  /* TODO */
+            id: 'tabpan',
+            region: 'center',
+            minTabWidth: 80,
+            defaults: {
+                title: 'Dashboard',
+                closable: true
+            },
+            items: [{}, {
+                title: '',
+                closable: false,
+                iconCls: 'new-tab',
+                tabConfig: {
+                    minWidth: 28
+                },
+                listeners: {
+                    beforeactivate: function(This, eOpts) {
+                        var tabpan = Ext.getCmp('tabpan');
+                        var size = tabpan.items.length;
+                        tabpan.add({}).show();
+                        tabpan.getTabBar().move(size-1, size);
+                        return false;
+                    }
                 }
-              }
-          }],
-          tools: [{
-              type: 'gear',
-              listeners: {
-                click: function() { TP.create_window() }
-              }
-          }]
+            }],
+            tabBar:{
+                items:[{
+                    xtype: 'tbfill'
+                },{
+                    title: '',
+                    closable: false,
+                    minWidth: 28,
+                    iconCls: 'gear-tab',
+                    listeners: {
+                      click: function() { TP.create_window() }
+                    }
+                }]
+            }
         })
     ]
   });
