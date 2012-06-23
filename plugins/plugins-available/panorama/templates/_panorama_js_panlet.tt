@@ -8,7 +8,6 @@ Ext.define('TP.Panlet', {
     width:     400,
     layout:    'fit',
     constrain: true,
-    //renderTo:         /* TODO: render/bind to container instead of body */
     stateful:  true,
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,

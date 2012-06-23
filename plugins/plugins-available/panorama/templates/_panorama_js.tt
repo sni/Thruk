@@ -16,6 +16,7 @@ var TP = {
     get_snap: function (x, y) {
         newx = Math.round(x/TP.snap_x) * TP.snap_x;
         newy = Math.round(y/TP.snap_y) * TP.snap_y + 5;
+        if(newy < 25) { newy = 25; }
         return([newx, newy]);
     },
 
