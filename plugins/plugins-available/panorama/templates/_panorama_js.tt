@@ -29,7 +29,7 @@ var TP = {
             stateful: true,
             id:       nextid,
             window_ids:  [],
-            stateEvents: ['titlechange'],
+            stateEvents: ['add', 'titlechange'],
             listeners: {
                 destroy: function( This, eOpts ) {
                     cp.clear(this.id);
@@ -37,7 +37,20 @@ var TP = {
             },
             getState: function() {
                 return {
-                    title: this.title
+                    title:      this.title,
+                    window_ids: this.window_ids
+                }
+            },
+            applyState: function(state) {
+                if (state) {
+                    for(nr in state.window_ids) {
+                        if(state.window_ids[nr]) {
+                            TP.add_panlet(state.window_ids[nr], true);
+                        }
+                    };
+                    this.window_ids = state.window_ids;
+                    this.setTitle(state.title);
+                    Ext.apply(this, state);
                 }
             }
         }).show();
@@ -54,20 +67,22 @@ var TP = {
                     if(btn == 'ok') {
                         Ext.getCmp(nextid).setTitle(text);
                     }
-                }, this, false, tabhead.getText());
+                }, undefined, undefined, tabhead.getText());
             });
         });
 
         return false;
     },
 
-    add_panlet: function(id) {
+    add_panlet: function(id, skip_state) {
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
         var win = Ext.create('TP.Panlet', { id: this.getNextId("panlet", id) });
         win.panel_id = tb.id;
-        tb.add(win);
-        tb.window_ids.push(win.id);
+        if(!skip_state) {
+            tb.window_ids.push(win.id);
+            tb.saveState();
+        }
     },
 
     getNextId: function(prefix, id) {
