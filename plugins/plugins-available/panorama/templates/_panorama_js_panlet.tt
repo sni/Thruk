@@ -8,8 +8,8 @@ Ext.define('TP.Panlet', {
     width:     400,
     layout:    'fit',
     constrain: true,
+    //renderTo:         /* TODO: render/bind to container instead of body */
     stateful:  true,
-    stateId:   'test',   /* TODO: implement */
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
         heightIncrement: TP.snap_y
@@ -29,7 +29,7 @@ Ext.define('TP.Panlet', {
             if(shadow != undefined) { shadow.hide(); }
         },
         destroy: function( This, eOpts ) {
-            cp.clear(this.stateId);
+            cp.clear(this.id);
         },
         show: function(This, eOpts) {
             var win_shadow = Ext.create('Ext.Layer', {

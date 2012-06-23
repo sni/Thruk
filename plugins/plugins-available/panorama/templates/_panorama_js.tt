@@ -7,12 +7,6 @@ function debug(str) {
     }
 }
 
-/* create state provider */
-var cp = new Ext.state.HttpProvider({
-    url: '[% url_prefix %]thruk/cgi-bin/panorama.cgi?state'
-});
-Ext.state.Manager.setProvider(cp);
-
 /* global Thruk Panorama Object */
 Ext.namespace("TP");
 var TP = {
@@ -25,31 +19,62 @@ var TP = {
         return([newx, newy]);
     },
 
-    add_pantab: function() {
+    add_pantab: function(id) {
         var tabpan = Ext.getCmp('tabpan');
-        var size = tabpan.items.length;
-        tabpan.add({}).show();
+        var size   = tabpan.items.length;
+        var nextid = this.getNextId("tabpan-tab", id);
+        /* add new tab panel */
+        tabpan.add({
+            stateful: true,
+            id:       nextid,
+            stateEvents: ['titlechange'],
+            listeners: {
+                destroy: function( This, eOpts ) {
+                    cp.clear(this.id);
+                }
+            },
+            getState: function() {
+                return {
+                    title: this.title
+                }
+            }
+        }).show();
+
+        /* move new-tab button at the end */
         tabpan.getTabBar().move(size-1, size);
 
+        /* make tab title editable */
         var tabhead = tabpan.getTabBar().items.getAt(size-1);
         tabhead.addListener('afterrender', function(This, eOpts) {
             el = This.getEl();
             el.on("dblclick", function() {
                 Ext.Msg.prompt('Change Title', '', function(btn, text) {
                     if(btn == 'ok') {
-                        tabhead.setText(text);
+                        Ext.getCmp(nextid).setTitle(text);
                     }
                 }, this, false, tabhead.getText());
             });
         });
+
         return false;
     },
 
-    add_panlet: function() {
+    add_panlet: function(id) {
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
-        var win = Ext.create('TP.Panlet', {});
+        var win = Ext.create('TP.Panlet', { id: this.getNextId("panlet", id) });
         tb.add(win);
+    },
+
+    getNextId: function(prefix, id) {
+        if(id != undefined) {
+            return id;
+        }
+        var nr = 1;
+        while(Ext.getCmp(prefix + "_" + nr) != undefined) {
+            nr++;
+        }
+        return(prefix + "_" + nr);
     }
 }
 
@@ -61,9 +86,37 @@ Ext.onReady(function() {
     items: [
       new Ext.tab.Panel({
             //plugins: Ext.create('Ext.ux.TabReorderer'),  /* TODO */
-            id: 'tabpan',
-            region: 'center',
+            id:          'tabpan',
+            region:      'center',
             minTabWidth: 80,
+            stateful:    true,
+            stateEvents: ['tabchange'],
+            getState:   function() {
+                var item_ids = [];
+                this.items.each(function(item, idx, length) {
+                    item_ids.push(item.getStateId());
+                });
+                return {
+                    item_ids:  item_ids,
+                    activeTab: this.items.indexOf(this.getActiveTab())
+                }
+            },
+            applyState: function(state) {
+                if (state) {
+                    for(nr in state.item_ids) {
+                        if(state.item_ids[nr]) {
+                            TP.add_pantab(state.item_ids[nr]);
+                        }
+                    };
+                    this.setActiveTab(state.activeTab);
+                    Ext.apply(this, state);
+                }
+            },
+            listeners: {
+                beforerender: function(This, eOpts) {
+                    debug('beforerender');
+                }
+            },
             defaults: {
                 title: 'Dashboard',
                 closable: true

@@ -67,7 +67,7 @@ sub _stateprovider {
 use Data::Dumper; print STDERR Dumper($c->request->parameters);
     if($task eq 'set') {
         my $data = Thruk::Utils::get_user_data($c);
-        if($data eq 'null') {
+        if($value eq 'null') {
             delete $data->{'panorama'}->{'state'}->{$name};
         } else {
             $data->{'panorama'}->{'state'}->{$name} = $value;

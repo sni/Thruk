@@ -74,3 +74,10 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         });
     }
 });
+
+
+/* create state provider */
+var cp = new Ext.state.HttpProvider({
+    url: '[% url_prefix %]thruk/cgi-bin/panorama.cgi?state'
+});
+Ext.state.Manager.setProvider(cp);
