@@ -59,11 +59,16 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
     },
 
     setValue : function(name, value) {
+        encoded = this.encodeValue(value)
+        if(ExtState[name] != undefined && ExtState[name] == encoded) {
+            return;
+        }
         var conn = new Ext.data.Connection();
         conn.request({
             url: this.url,
-            params: {task: 'set', 'name': name, 'value': this.encodeValue(value) }
+            params: {task: 'set', 'name': name, 'value': encoded }
         });
+        ExtState[name] = encoded;
     },
 
     clearValue : function(name) {
@@ -72,6 +77,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             url: this.url,
             params: {task: 'set', 'name': name, 'value': 'null' }
         });
+        delete ExtState[name];
     }
 });
 
