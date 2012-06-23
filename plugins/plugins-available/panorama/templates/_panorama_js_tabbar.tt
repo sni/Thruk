@@ -1,7 +1,6 @@
 Ext.define('TP.TabBar', {
     extend: 'Ext.tab.Panel',
 
-    //plugins: Ext.create('Ext.ux.TabReorderer'),  /* TODO */
     id:             'tabpan',
     region:         'center',
     minTabWidth:    80,

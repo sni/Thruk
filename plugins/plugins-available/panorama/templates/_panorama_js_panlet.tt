@@ -74,6 +74,18 @@ Ext.define('TP.Panlet', {
                 win_shadow.setSize(This.getSize());
                 win_shadow.show();
             }
+        },
+        render: function(This, eOpts) {
+            /* make title editable */
+            var head = Ext.get(This.id + '_header_hd');
+            head.on("dblclick", function() {
+                Ext.Msg.prompt('Change Title', '', function(btn, text) {
+                    if(btn == 'ok') {
+                        This.setTitle(text);
+                        This.saveState();
+                    }
+                }, undefined, undefined, This.title);
+            });
         }
     }
 });
