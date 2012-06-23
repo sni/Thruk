@@ -27,67 +27,50 @@ var TP = {
 
     create_window: function() {
         var pan = Ext.getCmp('tabpan');
+        var tb  = pan.getActiveTab();
         var win = Ext.create('TP.Panlet', {});
-        pan..add(win);
+        tb.add(win);
     }
 }
 
 Ext.onReady(function() {
-  Ext.create('Ext.tab.Panel', {
-    //plugins: Ext.create('Ext.ux.TabReorderer'),
-    renderTo: Ext.getBody(),
-    id: 'tabpan',
-    minTabWidth: 80,
-    items: [{
-        title: 'Dashboard',
-        closable: true
-    }, {
-        title: '+',
-        tabConfig: {
-          minWidth: 25
-        },
-        listeners: {
-          beforeactivate: function(This, eOpts) {
-              var tabpan = Ext.getCmp('tabpan');
-              var size = tabpan.items.length;
-              tabpan.add({ title: 'Dashboard', closable: true }).show();
-              tabpan.getTabBar().move(size-1, size);
-              return false;
-          }
-        }
-    }]
-  });
-
-/*
-  TP.viewport = new Ext.Viewport({
+    TP.viewport = new Ext.Viewport({
     layout:     'border',
     renderTo:   Ext.getBody(),
     margins:    '0 0 0 0',
     items: [
-      new Ext.Panel({
-          layout:'table',
-          title: 'Thruk Panorama',
-          height: 25,
-          region:'north',
-          margins: '0 0 0 0',
+      new Ext.tab.Panel({
+          //plugins: Ext.create('Ext.ux.TabReorderer'),  /* TODO */
+          id: 'tabpan',
+          region: 'center',
+          minTabWidth: 80,
+          defaults: {
+            title: 'Dashboard',
+            closable: true
+          },
+          items: [{}, {
+              title: '+',
+              closable: false,
+              tabConfig: {
+                minWidth: 25
+              },
+              listeners: {
+                beforeactivate: function(This, eOpts) {
+                    var tabpan = Ext.getCmp('tabpan');
+                    var size = tabpan.items.length;
+                    tabpan.add({}).show();
+                    tabpan.getTabBar().move(size-1, size);
+                    return false;
+                }
+              }
+          }],
           tools: [{
-            type: 'gear',
-            listeners: {
-              click: function() { TP.create_window() }
-            }
+              type: 'gear',
+              listeners: {
+                click: function() { TP.create_window() }
+              }
           }]
-      }),
-      new Ext.Panel({
-        id:          'centerpanel',
-        region:      'center',
-        margins:     '0 0 0 0',
-        bodyPadding: '0',
-        layout:      'absolute',
-        stateful:    true,
-        stateId:     'viewport',
-        items:       [ ]
-      })
+        })
     ]
   });
-*/
 });
