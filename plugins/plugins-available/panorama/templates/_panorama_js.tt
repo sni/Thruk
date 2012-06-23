@@ -25,7 +25,27 @@ var TP = {
         return([newx, newy]);
     },
 
-    create_window: function() {
+    add_pantab: function() {
+        var tabpan = Ext.getCmp('tabpan');
+        var size = tabpan.items.length;
+        tabpan.add({}).show();
+        tabpan.getTabBar().move(size-1, size);
+
+        var tabhead = tabpan.getTabBar().items.getAt(size-1);
+        tabhead.addListener('afterrender', function(This, eOpts) {
+            el = This.getEl();
+            el.on("dblclick", function() {
+                Ext.Msg.prompt('Change Title', '', function(btn, text) {
+                    if(btn == 'ok') {
+                        tabhead.setText(text);
+                    }
+                }, this, false, tabhead.getText());
+            });
+        });
+        return false;
+    },
+
+    add_panlet: function() {
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
         var win = Ext.create('TP.Panlet', {});
@@ -48,7 +68,7 @@ Ext.onReady(function() {
                 title: 'Dashboard',
                 closable: true
             },
-            items: [{}, {
+            items: [{
                 title: '',
                 closable: false,
                 iconCls: 'new-tab',
@@ -56,13 +76,7 @@ Ext.onReady(function() {
                     minWidth: 28
                 },
                 listeners: {
-                    beforeactivate: function(This, eOpts) {
-                        var tabpan = Ext.getCmp('tabpan');
-                        var size = tabpan.items.length;
-                        tabpan.add({}).show();
-                        tabpan.getTabBar().move(size-1, size);
-                        return false;
-                    }
+                    beforeactivate: function() { return TP.add_pantab() }
                 }
             }],
             tabBar:{
@@ -74,7 +88,7 @@ Ext.onReady(function() {
                     minWidth: 28,
                     iconCls: 'gear-tab',
                     listeners: {
-                      click: function() { TP.create_window() }
+                        click: function() { TP.add_panlet() }
                     }
                 }]
             }
