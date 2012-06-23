@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Data::Dumper;
 use JSON::XS;
+use URI::Escape;
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -64,12 +65,14 @@ sub _stateprovider {
     my $task  = $c->request->parameters->{'task'};
     my $value = $c->request->parameters->{'value'};
     my $name  = $c->request->parameters->{'name'};
-use Data::Dumper; print STDERR Dumper($c->request->parameters);
+
     if($task eq 'set') {
         my $data = Thruk::Utils::get_user_data($c);
         if($value eq 'null') {
+            $c->log->info("panorama: removed ".$name);
             delete $data->{'panorama'}->{'state'}->{$name};
         } else {
+            $c->log->info("panorama: set ".$name." to ".$self->_nice_ext_value($value));
             $data->{'panorama'}->{'state'}->{$name} = $value;
         }
         Thruk::Utils::store_user_data($c, $data);
@@ -82,6 +85,41 @@ use Data::Dumper; print STDERR Dumper($c->request->parameters);
     return $c->forward('Thruk::View::JSON');
 }
 
+##########################################################
+sub _nice_ext_value {
+    my($self, $orig) = @_;
+    my $value = uri_unescape($orig);
+    $value =~ s/^o://gmx;
+    my @val   = split/\^/mx, $value;
+    my $o = {};
+    for my $v (@val) {
+        my($key, $val) = split(/=/mx, $v, 2);
+        $val =~ s/^n%3A//gmx;
+        $val =~ s/^b%3A0/false/gmx;
+        $val =~ s/^b%3A1/true/gmx;
+        if($val =~ m/^a%3A/mx) {
+            $val =~ s/^a%3A//mx;
+            $val =~ s/s%253A//gmx;
+            $val = [ split(m/n%253A|%5E/mx, $val) ];
+            @{$val} = grep {!/^$/} @{$val};
+        }
+        elsif($val =~ m/^o%3A/mx) {
+            $val =~ s/^o%3A//mx;
+            $val = [ split(m/n%253A|%3D|%5E/mx, $val) ];
+            @{$val} = grep {!/^$/} @{$val};
+            $val = {@{$val}};
+        } else {
+            $val =~ s/^s%3A//mx;
+        }
+        $o->{$key} = $val;
+    }
+    $Data::Dumper::Sortkeys = 1;
+    $value = Dumper($o);
+    $value =~ s/^\$VAR1\ =//gmx;
+    $value =~ s/\n/ /gmx;
+    $value =~ s/\s+/ /gmx;
+    return $value;
+}
 ##########################################################
 
 =head1 AUTHOR

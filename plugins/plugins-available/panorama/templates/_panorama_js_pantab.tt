@@ -1,0 +1,50 @@
+Ext.define('TP.Pantab', {
+    extend: 'Ext.panel.Panel',
+
+    title:       'Dashboard',
+    closable:    true,
+    stateful:    true,
+    window_ids:  [],
+    stateEvents: ['add', 'titlechange'],
+    listeners: {
+        beforedestroy: function( This, eOpts ) {
+            for(nr in This.window_ids) {
+                Ext.getCmp(This.window_ids[nr]).destroy();
+            }
+            cp.clear(this.id);
+        },
+        activate: function(This, eOpts) {
+            for(nr in This.window_ids) {
+                Ext.getCmp(This.window_ids[nr]).show();
+            }
+        },
+        hide: function(This, eOpts) {
+            for(nr in This.window_ids) {
+                Ext.getCmp(This.window_ids[nr]).hide();
+            }
+        },
+        beforerender: function(This, eOpts) {
+            for(nr in This.window_ids) {
+                Ext.getCmp(This.window_ids[nr]).hide();
+            }
+        }
+    },
+    getState: function() {
+        return {
+            title:      this.title,
+            window_ids: this.window_ids
+        }
+    },
+    applyState: function(state) {
+        if(state) {
+            for(nr in state.window_ids) {
+                if(state.window_ids[nr]) {
+                    TP.add_panlet(state.window_ids[nr], true);
+                }
+            };
+            this.window_ids = state.window_ids;
+            this.setTitle(state.title);
+            Ext.apply(this, state);
+        }
+    }
+});

@@ -1,0 +1,57 @@
+Ext.define('TP.TabBar', {
+    extend: 'Ext.tab.Panel',
+
+    //plugins: Ext.create('Ext.ux.TabReorderer'),  /* TODO */
+    id:             'tabpan',
+    region:         'center',
+    minTabWidth:    80,
+    deferredRender: false,
+    stateful:    true,
+    stateEvents: ['tabchange'],
+    getState:   function() {
+        var item_ids = [];
+        this.items.each(function(item, idx, length) {
+            var stateId = item.getStateId();
+            if(stateId) {
+                item_ids.push(stateId);
+            }
+        });
+        return {
+            item_ids:  item_ids,
+            activeTab: this.items.indexOf(this.getActiveTab())
+        }
+    },
+    applyState: function(state) {
+        if (state) {
+            for(nr in state.item_ids) {
+                TP.add_pantab(state.item_ids[nr]);
+            };
+            this.setActiveTab(state.activeTab);
+            Ext.apply(this, state);
+        }
+    },
+    items: [{
+        title: '',
+        closable: false,
+        iconCls: 'new-tab',
+        tabConfig: {
+            minWidth: 28
+        },
+        listeners: {
+            beforeactivate: function() { return TP.add_pantab() }
+        }
+    }],
+    tabBar:{
+        items:[{
+            xtype: 'tbfill'
+        },{
+            title: '',
+            closable: false,
+            minWidth: 28,
+            iconCls: 'gear-tab',
+            listeners: {
+                click: function() { TP.add_panlet() }
+            }
+        }]
+    }
+});

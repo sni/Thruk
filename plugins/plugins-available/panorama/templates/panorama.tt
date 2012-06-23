@@ -19,6 +19,8 @@
       [%+ PROCESS _panorama_js_plugins.tt +%]
       [%+ PROCESS _panorama_js_state_provider.tt +%]
       [%+ PROCESS _panorama_js.tt +%]
+      [%+ PROCESS _panorama_js_tabbar.tt +%]
+      [%+ PROCESS _panorama_js_pantab.tt +%]
       [%+ PROCESS _panorama_js_panlet.tt +%]
     </script>
 </head>

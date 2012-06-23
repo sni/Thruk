@@ -8,6 +8,7 @@ Ext.define('TP.Panlet', {
     width:     400,
     layout:    'fit',
     constrain: true,
+    hideMode:  'visibility',
     stateful:  true,
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
@@ -17,6 +18,17 @@ Ext.define('TP.Panlet', {
     tools:      [{ type: 'gear' }], /* TODO: implement */
     html:       'content',
     onEsc:      function() { return false; },
+    getState: function() {
+        var state = this.callParent(arguments);
+        state.title = this.title;
+        return state;
+    },
+    applyState: function(state) {
+        this.callParent(arguments);
+        if(state) {
+            this.setTitle(state.title);
+        }
+    },
     listeners:  {
         /* make shadow snap to grid */
         move: function( This, x, y, eOpts ) {
