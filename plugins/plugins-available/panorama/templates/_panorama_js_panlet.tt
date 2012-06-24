@@ -45,10 +45,12 @@ Ext.define('TP.Panlet', {
         this.gearitem = this.items.getAt(0);
     },
     items: [{
+        /* Panlet Settings Panel */
         xtype : 'panel',
         layout: 'fit',
         hidden: true,
         scope:  this,
+        border: 0,
         items: [
             Ext.create('Ext.form.Panel', {
                 bodyPadding: 5,
@@ -56,15 +58,36 @@ Ext.define('TP.Panlet', {
                     anchor: '95%'
                 },
                 items: [{
-                    fieldLabel: 'Refresh Rate',
-                    value:     60,
-                    name:      'refresh',
-                    xtype:     'sliderfield',
-                    minValue:  1,
-                    maxValue:  300,
-                    tipText: function(thumb){
-                        return String(thumb.value) + 's';
-                    }
+                    layout: 'table',
+                    layoutConfig: {
+                      columns: 2
+                    },
+                    border: 0,
+                    items: [{
+                      fieldLabel: 'Refresh Rate',
+                      value:     60,  /* will be changed by afterrender */
+                      name:      'refresh',
+                      xtype:     'sliderfield',
+                      minValue:  1,
+                      maxValue:  300,
+                      width:     200,
+                      tipText: function(thumb){
+                          return String(thumb.value) + 's';
+                      },
+                      listeners: {
+                        change: function(s) {
+                          var form = s.up('form').getForm();
+                          form.setValues({refresh_txt: s.getValue()+'s'});
+                        }
+                      }
+                    }, {
+                      xtype: "textfield",
+                      margin: '0 0 0 10',
+                      name: 'refresh_txt',
+                      readOnly: true,
+                      size: 3,
+                      maxLength: 4
+                    }]
                 }]
             })
         ],
@@ -177,12 +200,14 @@ Ext.define('TP.Panlet', {
             /* set initial form values */
             var form = this.gearitem.down('form').getForm();
             var fields = form.getFields();
+            This.xdata['refresh_txt'] = This.xdata['refresh']+'s';
             fields.each(function(f) {
               var v = This.xdata[f.getName()];
               f.originalValue = [ v ];
               f.setValue(v);
               f.value = v;
             });
+            delete This.xdata['refresh_txt'];
 
             /* start refresh interval */
             this.startInterval();
