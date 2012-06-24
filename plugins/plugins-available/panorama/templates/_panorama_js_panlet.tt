@@ -15,18 +15,20 @@ Ext.define('TP.Panlet', {
         heightIncrement: TP.snap_y
     }),
     initComponent: function() {
-        this.refreshHandler = function() {
-            this.body.update("refreshed...");
-        };
+        this.gearHandler = function() {
+            if(this.gearitem.isHidden()) {
+                this.gearitem.show();
+            } else {
+                this.gearitem.hide();
+            }
+        }
         this.tools = [{
                 type: 'refresh',
                 handler: function() { this.refreshHandler(); },
                 scope: this
             }, {
                 type: 'gear',       /* TODO: implement */
-                handler: function() {
-                    this.body.update("gears...");
-                },
+                handler: function() { this.gearHandler(); },
                 scope: this
             }
         ];
@@ -37,7 +39,18 @@ Ext.define('TP.Panlet', {
             cls:    'window_drop_shadow'
         });
         this.callParent();
+        this.gearitem = this.items.getAt(0);
     },
+    items: [{
+        xtype : 'panel',
+        layout: 'border',
+        title: 'Panlet Settings',
+        hidden: true,
+        buttonAlign: 'center',
+        fbar: [{ xtype : 'button', text: 'cancel', handler: function() { this.up('window').gearitem.hide() } },
+               { xtype : 'button', text: 'save',   handler: function() { this.up('window').gearitem.hide() } },
+        ]
+    }],
     html:       '',
     onEsc:      function() { return false; },
     xdata:      { cls: 'TP.Panlet', refresh: 60 },

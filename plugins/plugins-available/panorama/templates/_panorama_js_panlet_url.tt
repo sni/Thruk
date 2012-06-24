@@ -3,16 +3,6 @@ Ext.define('TP.PanletUrl', {
 
     title: 'url panlet',
     xdata: { cls: 'TP.PanletUrl', refresh: 60, url: '', selector: '' },
-    items : [{
-        xtype : 'component',
-        autoEl : {
-            tag : 'iframe',
-            src : '',
-            style: {
-                border: 0
-            }
-        }
-    }],
     initComponent: function() {
         this.loader = {
             autoLoad: true,
@@ -32,7 +22,7 @@ Ext.define('TP.PanletUrl', {
                 });
                 html      = '<html><head>' + head + '<\/head><body>' + html + '<\/body><\/html>';
                 el.destroy();
-                iframe = this.items.getAt(0).getEl().dom;
+                iframe = this.items.getAt(1).getEl().dom;
                 ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
                 ifrm.document.open();
                 ifrm.document.write(html);
@@ -43,7 +33,19 @@ Ext.define('TP.PanletUrl', {
         this.callParent();
         this.refreshHandler = function() {
             this.loader.load();
+            this.gearitem.hide();
         };
+
+        this.add({
+            xtype : 'component',
+            autoEl : {
+                tag : 'iframe',
+                src : '',
+                style: {
+                    border: 0
+                }
+            }
+        });
 
         /* start refresh interval */
         setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);
