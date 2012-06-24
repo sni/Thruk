@@ -4,32 +4,25 @@ Ext.define('TP.PanletUrl', {
     title: 'url panlet',
     xdata: { cls: 'TP.PanletUrl', refresh: 60, url: '', selector: '' },
     initComponent: function() {
-        this.items = [{
-            xtype: 'panel',
-            border: false,
-            autoScroll: true,
-            loader: {
-                autoLoad: true,
-                //scripts:  true,
-                renderer: 'data',
-                url :     this.xdata.url,
-                callback: function(This, success, response, options) {
-                    var el = new Ext.window.Window({html: response.responseText}).show();
-                    var q = el.body.select(this.xdata.selector).elements[0];
-                    this.body.html = '';
-                    var r = this.body.dom;
-                    r.innerHTML = '<div><\/div>';
-                    r.replaceChild(q.parentNode.removeChild(q), r.firstChild);
-                    el.destroy();
-                },
-                scope: this
-            }
-        }];
+        this.loader = {
+            autoLoad: true,
+            loadMask: true,
+            scripts:  true,
+            renderer: 'data',
+            url :     this.xdata.url,
+            callback: function(This, success, response, options) {
+                /* create pseudo window to render html */
+                var el   = new Ext.window.Window({html: response.responseText, x: -10000, y: -10000}).show();
+                var q    = el.body.select(this.xdata.selector).elements[0];
+                var html = q.innerHTML;
+                el.destroy();
+                this.update(html);
+            },
+            scope: this
+        };
         this.callParent();
         this.refreshHandler = function() {
-            var loader = this.items.getAt(0).loader;
-            debug("refreshed from " + loader.url);
-            loader.load();
+            this.loader.load();
         };
 
         /* start refresh interval */

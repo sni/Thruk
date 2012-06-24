@@ -33,7 +33,7 @@ Ext.define('TP.Panlet', {
         ];
         this.callParent();
     },
-    html:       'content',
+    html:       '',
     onEsc:      function() { return false; },
     xdata:      { cls: 'TP.Panlet', refresh: 60 },
     getState: function() {
