@@ -31,11 +31,18 @@ Ext.define('TP.Panlet', {
                 scope: this
             }
         ];
+        this.shadow_id = this.id + '_shadow';
+        this.win_shadow = new Ext.create('Ext.Layer', {
+            shadow: 'drop',
+            id:     this.shadow_id,
+            cls:    'window_drop_shadow'
+        });
         this.callParent();
     },
     html:       '',
     onEsc:      function() { return false; },
     xdata:      { cls: 'TP.Panlet', refresh: 60 },
+    dd_overriden: false,
     getState: function() {
         var state = this.callParent(arguments);
         state.title = this.title;
@@ -75,25 +82,23 @@ Ext.define('TP.Panlet', {
             cp.clear(this.id);
         },
         show: function(This, eOpts) {
-            var win_shadow = Ext.create('Ext.Layer', {
-                shadow: 'drop',
-                id:     This.id + '_shadow',
-                cls:    'window_drop_shadow'
-            });
             // make move show snap shadow
-            This.dd.onDrag = function(e){
-                // original onDrag function
-                var me = this,
-                comp   = (me.proxy && !me.comp.liveDrag) ? me.proxy : me.comp,
-                offset = me.getOffset(me.constrain || me.constrainDelegate ? 'dragTarget' : null);
-                x = me.startPosition[0] + offset[0];
-                y = me.startPosition[1] + offset[1];
-                comp.setPagePosition(x, y);
-                // show shadow
-                var newpos = TP.get_snap(x, y);
-                win_shadow.moveTo(newpos[0], newpos[1]);
-                win_shadow.setSize(This.getSize());
-                win_shadow.show();
+            if(This.dd_overriden == false) {
+                This.dd.onDrag = function(e){
+                    // original onDrag function
+                    var me = this,
+                    comp   = (me.proxy && !me.comp.liveDrag) ? me.proxy : me.comp,
+                    offset = me.getOffset(me.constrain || me.constrainDelegate ? 'dragTarget' : null);
+                    x = me.startPosition[0] + offset[0];
+                    y = me.startPosition[1] + offset[1];
+                    comp.setPagePosition(x, y);
+                    // show shadow
+                    var newpos = TP.get_snap(x, y);
+                    This.win_shadow.moveTo(newpos[0], newpos[1]);
+                    This.win_shadow.setSize(This.getSize());
+                    This.win_shadow.show();
+                };
+                This.dd_overriden = true;
             }
         },
         render: function(This, eOpts) {
