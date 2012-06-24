@@ -3,6 +3,16 @@ Ext.define('TP.PanletUrl', {
 
     title: 'url panlet',
     xdata: { cls: 'TP.PanletUrl', refresh: 60, url: '', selector: '' },
+    items : [{
+        xtype : 'component',
+        autoEl : {
+            tag : 'iframe',
+            src : '',
+            style: {
+                border: 0
+            }
+        }
+    }],
     initComponent: function() {
         this.loader = {
             autoLoad: true,
@@ -15,8 +25,18 @@ Ext.define('TP.PanletUrl', {
                 var el   = new Ext.window.Window({html: response.responseText, x: -10000, y: -10000}).show();
                 var q    = el.body.select(this.xdata.selector).elements[0];
                 var html = q.innerHTML;
+                /* keep css links */
+                var head = '';
+                el.body.select('LINK').each(function(e) {
+                    head = head + e.dom.outerHTML;
+                });
+                html      = '<html><head>' + head + '<\/head><body>' + html + '<\/body><\/html>';
                 el.destroy();
-                this.update(html);
+                iframe = this.items.getAt(0).getEl().dom;
+                ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
+                ifrm.document.open();
+                ifrm.document.write(html);
+                ifrm.document.close();
             },
             scope: this
         };

@@ -1,7 +1,6 @@
 Ext.define('TP.Panlet', {
     extend: 'Ext.window.Window',
 
-    title:     'title',   /* TODO: implement */
     x:         0,
     y:         25,
     height:    200,
@@ -9,12 +8,12 @@ Ext.define('TP.Panlet', {
     layout:    'fit',
     constrain: true,
     hideMode:  'visibility',
+    autoShow:  true,
     stateful:  true,
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
         heightIncrement: TP.snap_y
     }),
-    autoShow:   true,
     initComponent: function() {
         this.refreshHandler = function() {
             this.body.update("refreshed...");
