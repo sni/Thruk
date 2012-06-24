@@ -21,6 +21,17 @@
       [%+ PROCESS _panorama_js_tabbar.tt +%]
       [%+ PROCESS _panorama_js_pantab.tt +%]
       [%+ PROCESS _panorama_js_panlet.tt +%]
+      [%+ PROCESS _panorama_js_panlet_url.tt +%]
+
+      /* main viewport */
+      Ext.onReady(function() {
+          TP.viewport = new Ext.Viewport({
+          layout:   'border',
+          renderTo: Ext.getBody(),
+          margins:  '0 0 0 0',
+          items:    [ new TP.TabBar() ]
+        });
+      });
     </script>
 </head>
 <body>

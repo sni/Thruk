@@ -48,8 +48,20 @@ Ext.define('TP.TabBar', {
             closable: false,
             minWidth: 28,
             iconCls: 'gear-tab',
-            listeners: {
-                click: function() { TP.add_panlet() }
+            menu: {
+                items: [{
+                        text: 'Settings',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png'
+                    }, '-', {
+                        text: 'Add Url Panlet',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
+                        handler: function(m, e) {
+                            TP.add_panlet({type:'TP.PanletUrl'});
+                        }
+                    },{
+                        text: 'Add Mod-Gearman Panlet',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png'
+                }]
             }
         }]
     }

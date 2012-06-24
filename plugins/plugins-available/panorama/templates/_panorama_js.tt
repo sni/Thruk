@@ -1,4 +1,4 @@
-Ext.BLANK_IMAGE_URL = '[% url_prefix %]thruk/plugins/panorama/s.gif';
+Ext.BLANK_IMAGE_URL = '[% url_prefix %]thruk/plugins/panorama/images/s.gif';
 
 /* send debug output to firebug console */
 function debug(str) {
@@ -48,12 +48,27 @@ var TP = {
         return false;
     },
 
-    add_panlet: function(id, skip_state) {
+    add_panlet: function(config) {
+        if(config.conf == undefined) {
+            config.conf = {};
+        }
+        config.conf.id = this.getNextId("panlet", config.id);
+        var state = cp.readValues();
+        if(state[config.conf.id] != undefined
+           && state[config.conf.id].xdata != undefined
+           && state[config.conf.id].xdata.cls != undefined) {
+            config.type = state[config.conf.id].xdata.cls;
+        }
+        if(config.type == undefined) {
+            debug("add_panlet(): no type!");
+            console.trace();
+            return;
+        }
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
-        var win = Ext.create('TP.Panlet', { id: this.getNextId("panlet", id) });
+        var win = Ext.create(config.type, config.conf);
         win.panel_id = tb.id;
-        if(!skip_state) {
+        if(!config.skip_state) {
             tb.window_ids.push(win.id);
             tb.saveState();
         }
@@ -70,13 +85,3 @@ var TP = {
         return(prefix + "_" + nr);
     }
 }
-
-/* main viewport */
-Ext.onReady(function() {
-    TP.viewport = new Ext.Viewport({
-    layout:   'border',
-    renderTo: Ext.getBody(),
-    margins:  '0 0 0 0',
-    items:    [ new TP.TabBar() ]
-  });
-});

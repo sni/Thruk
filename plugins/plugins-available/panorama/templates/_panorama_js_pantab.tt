@@ -39,7 +39,7 @@ Ext.define('TP.Pantab', {
         if(state) {
             for(nr in state.window_ids) {
                 if(state.window_ids[nr]) {
-                    TP.add_panlet(state.window_ids[nr], true);
+                    TP.add_panlet({id:state.window_ids[nr], skip_state:true});
                 }
             };
             this.window_ids = state.window_ids;

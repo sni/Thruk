@@ -11,10 +11,10 @@ DIV.x-tab-default-over A.x-tab-close-btn {
 }
 
 .new-tab {
-    background-image: url("new_tab.gif") !important;
+    background-image: url("images/new_tab.gif") !important;
     left: -4px;
 }
 .gear-tab {
-    background-image: url("gear.gif") !important;
+    background-image: url("images/gear.gif") !important;
     left: -4px;
 }

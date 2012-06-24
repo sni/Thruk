@@ -44,7 +44,11 @@ sub panorama_cgi : Regex('thruk\/cgi\-bin\/panorama\.cgi') {
 =cut
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
-    if($c->request->query_keywords eq 'state') {
+    if(defined $c->request->query_keywords and $c->request->query_keywords eq 'state') {
+        return($self->_stateprovider($c));
+    }
+
+    if(defined $c->request->parameters->{'proxy'}) {
         return($self->_stateprovider($c));
     }
 
@@ -66,7 +70,7 @@ sub _stateprovider {
     my $value = $c->request->parameters->{'value'};
     my $name  = $c->request->parameters->{'name'};
 
-    if($task eq 'set') {
+    if(defined $task and $task eq 'set') {
         my $data = Thruk::Utils::get_user_data($c);
         if($value eq 'null') {
             $c->log->info("panorama: removed ".$name);
@@ -76,11 +80,15 @@ sub _stateprovider {
             $data->{'panorama'}->{'state'}->{$name} = $value;
         }
         Thruk::Utils::store_user_data($c, $data);
-    }
 
-    $c->stash->{'json'} = {
-        'status' => 'ok'
-    };
+        $c->stash->{'json'} = {
+            'status' => 'ok'
+        };
+    } else {
+        $c->stash->{'json'} = {
+            'status' => 'failed'
+        };
+    }
 
     return $c->forward('Thruk::View::JSON');
 }

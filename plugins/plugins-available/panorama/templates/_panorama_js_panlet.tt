@@ -15,17 +15,36 @@ Ext.define('TP.Panlet', {
         heightIncrement: TP.snap_y
     }),
     autoShow:   true,
-    tools:      [{ type: 'gear' }], /* TODO: implement */
+    initComponent: function() {
+        this.tools = [{
+                type: 'refresh',    /* TODO: implement */
+                handler: function() {
+                    this.body.update("refreshed...");
+                },
+                scope: this
+            }, {
+                type: 'gear',       /* TODO: implement */
+                handler: function() {
+                    this.body.update("gears...");
+                },
+                scope: this
+            }
+        ];
+        this.callParent();
+    },
     html:       'content',
     onEsc:      function() { return false; },
+    xdata:      { cls: 'TP.Panlet', refresh: 60 },
     getState: function() {
         var state = this.callParent(arguments);
         state.title = this.title;
+        state.xdata = this.xdata;
         return state;
     },
     applyState: function(state) {
         this.callParent(arguments);
         if(state) {
+            this.xdata = state.xdata;
             this.setTitle(state.title);
         }
     },
@@ -50,6 +69,7 @@ Ext.define('TP.Panlet', {
                 }
             }
             panel.window_ids = newlist;
+            panel.saveState();
             /* clear state information */
             cp.clear(this.id);
         },

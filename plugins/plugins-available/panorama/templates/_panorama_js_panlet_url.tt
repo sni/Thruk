@@ -1,0 +1,25 @@
+Ext.define('TP.PanletUrl', {
+    extend: 'TP.Panlet',
+
+    title: 'url panlet',
+    xdata: { cls: 'TP.PanletUrl', refresh: 60 },
+    initComponent: function() {
+        this.items = [{
+            xtype: 'panel',
+            border: false,
+            autoScroll: true,
+            loader: {
+                autoLoad: true,
+                loadMask: true,
+                //scripts:  true,
+                renderer: 'data',
+                url :     '[% url_prefix %]thruk/cgi-bin/tac.cgi?nav=0',
+                callback: function(This, success, response, options) {
+                    this.body.update(response.responseText);
+                },
+                scope: this
+            },
+        }]
+        this.callParent();
+    },
+});
