@@ -58,7 +58,13 @@ Ext.define('TP.TabBar', {
                         handler: function(m, e) {
                             TP.add_panlet({type:'TP.PanletUrl'});
                         }
-                    },{
+                    }, {
+                        text: 'Host / Service Performance',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
+                        handler: function(m, e) {
+                            TP.add_panlet({type:'TP.PanletUrlTacPerf'});
+                        }
+                    }, {
                         text: 'Add Mod-Gearman Panlet',
                         icon: '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png'
                 }]

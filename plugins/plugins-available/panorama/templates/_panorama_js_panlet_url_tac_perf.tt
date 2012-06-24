@@ -1,0 +1,11 @@
+Ext.define('TP.PanletUrlTacPerf', {
+    extend: 'TP.PanletUrl',
+
+    title: 'Host / Service Performance',
+    xdata: {
+        cls:      'TP.PanletUrlTacPerf',
+        refresh:  60,
+        url:      '[% url_prefix %]thruk/cgi-bin/tac.cgi?nav=0',
+        selector: 'TABLE.perfBox'
+    }
+});

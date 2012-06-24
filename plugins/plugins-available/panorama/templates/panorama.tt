@@ -22,6 +22,7 @@
       [%+ PROCESS _panorama_js_pantab.tt +%]
       [%+ PROCESS _panorama_js_panlet.tt +%]
       [%+ PROCESS _panorama_js_panlet_url.tt +%]
+      [%+ PROCESS _panorama_js_panlet_url_tac_perf.tt +%]
 
       /* main viewport */
       Ext.onReady(function() {

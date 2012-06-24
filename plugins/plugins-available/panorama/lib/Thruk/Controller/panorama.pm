@@ -109,12 +109,12 @@ sub _nice_ext_value {
             $val =~ s/^a%3A//mx;
             $val =~ s/s%253A//gmx;
             $val = [ split(m/n%253A|%5E/mx, $val) ];
-            @{$val} = grep {!/^$/} @{$val};
+            @{$val} = grep {!/^$/mx} @{$val};
         }
         elsif($val =~ m/^o%3A/mx) {
             $val =~ s/^o%3A//mx;
             $val = [ split(m/n%253A|%3D|%5E/mx, $val) ];
-            @{$val} = grep {!/^$/} @{$val};
+            @{$val} = grep {!/^$/mx} @{$val};
             $val = {@{$val}};
         } else {
             $val =~ s/^s%3A//mx;

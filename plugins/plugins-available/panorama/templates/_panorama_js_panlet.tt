@@ -16,11 +16,12 @@ Ext.define('TP.Panlet', {
     }),
     autoShow:   true,
     initComponent: function() {
+        this.refreshHandler = function() {
+            this.body.update("refreshed...");
+        };
         this.tools = [{
-                type: 'refresh',    /* TODO: implement */
-                handler: function() {
-                    this.body.update("refreshed...");
-                },
+                type: 'refresh',
+                handler: function() { this.refreshHandler(); },
                 scope: this
             }, {
                 type: 'gear',       /* TODO: implement */

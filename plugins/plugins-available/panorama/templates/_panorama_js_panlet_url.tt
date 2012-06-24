@@ -2,7 +2,7 @@ Ext.define('TP.PanletUrl', {
     extend: 'TP.Panlet',
 
     title: 'url panlet',
-    xdata: { cls: 'TP.PanletUrl', refresh: 60 },
+    xdata: { cls: 'TP.PanletUrl', refresh: 60, url: '', selector: '' },
     initComponent: function() {
         this.items = [{
             xtype: 'panel',
@@ -10,16 +10,29 @@ Ext.define('TP.PanletUrl', {
             autoScroll: true,
             loader: {
                 autoLoad: true,
-                loadMask: true,
                 //scripts:  true,
                 renderer: 'data',
-                url :     '[% url_prefix %]thruk/cgi-bin/tac.cgi?nav=0',
+                url :     this.xdata.url,
                 callback: function(This, success, response, options) {
-                    this.body.update(response.responseText);
+                    var el = new Ext.window.Window({html: response.responseText}).show();
+                    var q = el.body.select(this.xdata.selector).elements[0];
+                    this.body.html = '';
+                    var r = this.body.dom;
+                    r.innerHTML = '<div><\/div>';
+                    r.replaceChild(q.parentNode.removeChild(q), r.firstChild);
+                    el.destroy();
                 },
                 scope: this
-            },
-        }]
+            }
+        }];
         this.callParent();
+        this.refreshHandler = function() {
+            var loader = this.items.getAt(0).loader;
+            debug("refreshed from " + loader.url);
+            loader.load();
+        };
+
+        /* start refresh interval */
+        setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);
     },
 });
