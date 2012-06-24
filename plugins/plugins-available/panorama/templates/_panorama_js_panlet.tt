@@ -18,6 +18,7 @@ Ext.define('TP.Panlet', {
         this.gearHandler = function() {
             if(this.gearitem.isHidden()) {
                 if(this.loader != undefined) { this.loader.loadMask = false }
+                this.gearitem.down('form').getForm().reset();
                 this.gearitem.show();
             } else {
                 if(this.loader != undefined) { this.loader.loadMask = true }
@@ -29,7 +30,7 @@ Ext.define('TP.Panlet', {
                 handler: function() { this.refreshHandler(); },
                 scope: this
             }, {
-                type: 'gear',       /* TODO: implement */
+                type: 'gear',
                 handler: function() { this.gearHandler(); },
                 scope: this
             }
@@ -42,20 +43,70 @@ Ext.define('TP.Panlet', {
         });
         this.callParent();
         this.gearitem = this.items.getAt(0);
+
+        /* start refresh interval */
+        this.startInterval();
     },
     items: [{
         xtype : 'panel',
-        layout: 'border',
-        title: 'Panlet Settings',
+        layout: 'fit',
         hidden: true,
+        scope:  this,
+        items: [
+            Ext.create('Ext.form.Panel', {
+                bodyPadding: 5,
+                defaults: {
+                    anchor: '95%',
+                },
+                items: [{
+                    fieldLabel: 'Refresh Rate',
+                    value:     60,
+                    name:      'refresh',
+                    xtype:     'sliderfield',
+                    minValue:  1,
+                    maxValue:  300,
+                    increment: 1,
+                    keyIncrement: 5,
+                    tipText: function(thumb){
+                        return String(thumb.value) + 's';
+                    }
+                }]
+            })
+        ],
         buttonAlign: 'center',
         fbar: [{ xtype : 'button', text: 'cancel', handler: function() { this.up('window').gearitem.hide() } },
-               { xtype : 'button', text: 'save',   handler: function() { this.up('window').gearitem.hide() } },
+               { xtype : 'button',
+                 text:   'save',
+                 handler: function() {
+                    var win      = this.up('window');
+                    var form     = win.gearitem.down('form').getForm();
+                    if(form.isValid()) {
+                        win.gearitem.hide();
+                        var fields = form.getFields();
+                        var values = form.getFieldValues();
+                        /* set new default value */
+                        fields.each(function(f) {
+                            var v = values[f.getName()];
+                            f.originalValue = [ v ];
+                        });
+                        /* save values to xdata store */
+                        for(var key in values) {
+                            win.xdata[key] = values[key];
+                        };
+                        win.startInterval();
+                        win.saveState();
+                    }
+                 }
+               },
         ]
     }],
     html:       '',
     onEsc:      function() { return false; },
     xdata:      { cls: 'TP.Panlet', refresh: 60 },
+    startInterval: function() {
+        window.clearInterval(this.interval);
+        this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);
+    },
     dd_overriden: false,
     getState: function() {
         var state = this.callParent(arguments);

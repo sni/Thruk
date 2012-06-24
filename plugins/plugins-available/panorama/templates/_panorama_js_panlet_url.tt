@@ -9,6 +9,7 @@ Ext.define('TP.PanletUrl', {
             loadMask: true,
             scripts:  true,
             renderer: 'data',
+            scope:    this,
             url :     this.xdata.url,
             callback: function(This, success, response, options) {
                 /* create pseudo window to render html */
@@ -27,12 +28,16 @@ Ext.define('TP.PanletUrl', {
                 ifrm.document.open();
                 ifrm.document.write(html);
                 ifrm.document.close();
-            },
-            scope: this
+            }
         };
+        if(this.loader.url == '') {
+            this.loader.autoLoad = false;
+        }
         this.callParent();
         this.refreshHandler = function() {
-            this.loader.load();
+            if(this.loader.url != '') {
+                this.loader.load();
+            }
         };
 
         this.add({
@@ -45,8 +50,5 @@ Ext.define('TP.PanletUrl', {
                 }
             }
         });
-
-        /* start refresh interval */
-        setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);
     },
 });
