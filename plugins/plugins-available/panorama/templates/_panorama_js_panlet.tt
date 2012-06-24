@@ -43,9 +43,6 @@ Ext.define('TP.Panlet', {
         });
         this.callParent();
         this.gearitem = this.items.getAt(0);
-
-        /* start refresh interval */
-        this.startInterval();
     },
     items: [{
         xtype : 'panel',
@@ -56,7 +53,7 @@ Ext.define('TP.Panlet', {
             Ext.create('Ext.form.Panel', {
                 bodyPadding: 5,
                 defaults: {
-                    anchor: '95%',
+                    anchor: '95%'
                 },
                 items: [{
                     fieldLabel: 'Refresh Rate',
@@ -65,8 +62,6 @@ Ext.define('TP.Panlet', {
                     xtype:     'sliderfield',
                     minValue:  1,
                     maxValue:  300,
-                    increment: 1,
-                    keyIncrement: 5,
                     tipText: function(thumb){
                         return String(thumb.value) + 's';
                     }
@@ -177,6 +172,20 @@ Ext.define('TP.Panlet', {
                     }
                 }, undefined, undefined, This.title);
             });
+        },
+        afterrender: function(This, eOpts) {
+            /* set initial form values */
+            var form = this.gearitem.down('form').getForm();
+            var fields = form.getFields();
+            fields.each(function(f) {
+              var v = This.xdata[f.getName()];
+              f.originalValue = [ v ];
+              f.setValue(v);
+              f.value = v;
+            });
+
+            /* start refresh interval */
+            this.startInterval();
         }
     }
 });
