@@ -51,7 +51,10 @@ Ext.define('TP.TabBar', {
             menu: {
                 items: [{
                         text: 'Settings',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png'
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
+                        handler: function(m, e) {
+                            Ext.MessageBox.alert('TODO', 'Not implemented yet');
+                        }
                     }, '-', {
                         text: 'Add Url Panlet',
                         icon: '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
@@ -66,13 +69,16 @@ Ext.define('TP.TabBar', {
                         }
                     }, {
                         text: 'Livestatus Metrics',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
                         handler: function(m, e) {
                             TP.add_panlet({type:'TP.PanletUrlPerfLivestatus'});
                         }
                     }, {
                         text: 'Add Mod-Gearman Panlet',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png'
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',
+                        handler: function(m, e) {
+                            Ext.MessageBox.alert('TODO', 'Not implemented yet');
+                        }
                 }]
             }
         }]
