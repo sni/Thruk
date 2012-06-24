@@ -17,8 +17,10 @@ Ext.define('TP.Panlet', {
     initComponent: function() {
         this.gearHandler = function() {
             if(this.gearitem.isHidden()) {
+                if(this.loader != undefined) { this.loader.loadMask = false }
                 this.gearitem.show();
             } else {
+                if(this.loader != undefined) { this.loader.loadMask = true }
                 this.gearitem.hide();
             }
         }

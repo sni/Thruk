@@ -20,7 +20,7 @@ Ext.define('TP.PanletUrl', {
                 el.body.select('LINK').each(function(e) {
                     head = head + e.dom.outerHTML;
                 });
-                html      = '<html><head>' + head + '<\/head><body>' + html + '<\/body><\/html>';
+                html      = '<html style="overflow-x:hidden; overflow-y: hidden;"><head>' + head + '<\/head><body>' + html + '<\/body><\/html>';
                 el.destroy();
                 iframe = this.items.getAt(1).getEl().dom;
                 ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
@@ -33,7 +33,6 @@ Ext.define('TP.PanletUrl', {
         this.callParent();
         this.refreshHandler = function() {
             this.loader.load();
-            this.gearitem.hide();
         };
 
         this.add({

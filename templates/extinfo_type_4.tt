@@ -21,7 +21,7 @@
             <table border="1" cellspacing="0" cellpadding="0" class="data">
               <tr>
                 <td class='stateInfoTable1'>
-                  <table border="0">
+                  <table border="0" class="service_metrics">
                     <tr class='data'>
                       <th class='data'>Time Frame</th>
                       <th class='data'>Services Checked</th>
@@ -52,7 +52,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data service_check_metrics">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -89,7 +89,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Services Passively Checked:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data service_passive_metrics">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -123,7 +123,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data services_passive_check_metrics">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -148,7 +148,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Hosts Actively Checked:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data host_metrics">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -182,7 +182,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data host_check_metrics">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -219,7 +219,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Hosts Passively Checked:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data host_passive_metrics">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
@@ -253,7 +253,7 @@
             </table>
           </td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data host_passive_check_metrics">
               <tr>
                 <td class='stateInfoTable2'>
                   <table border="0">
@@ -281,7 +281,7 @@
         <tr>
           <td valign="middle"><div class='perfTypeTitle'>Livestatus Statistics:</div></td>
           <td valign="top">
-            <table border="1" cellspacing="0" cellpadding="0" class="data">
+            <table border="1" cellspacing="0" cellpadding="0" class="data livestatus_metrics">
               <tr>
                 <td class='stateInfoTable1'>
                   <table border="0">
