@@ -2,7 +2,7 @@ Ext.define('TP.PanletUrl', {
     extend: 'TP.Panlet',
 
     title: 'url panlet',
-    xdata: { cls: 'TP.PanletUrl', refresh: 60, url: '', selector: '' },
+    xdata: { cls: 'TP.PanletUrl', refresh: 60, url: '', selector: '', keepcss: true },
     initComponent: function() {
         this.loader = {
             autoLoad: true,
@@ -12,17 +12,37 @@ Ext.define('TP.PanletUrl', {
             scope:    this,
             url :     this.xdata.url,
             callback: function(This, success, response, options) {
-                /* create pseudo window to render html */
-                var el   = new Ext.window.Window({html: response.responseText, x: -10000, y: -10000}).show();
-                var q    = el.body.select(this.xdata.selector).elements[0];
-                var html = q.innerHTML;
-                /* keep css links */
-                var head = '';
-                el.body.select('LINK').each(function(e) {
-                    head = head + e.dom.outerHTML;
-                });
-                html      = '<html style="overflow-x:hidden; overflow-y: hidden;"><head>' + head + '<\/head><body>' + html + '<\/body><\/html>';
-                el.destroy();
+                var html;
+                if(response.status == 200) {
+                    /* create pseudo window to render html */
+                    var el = new Ext.window.Window({html: response.responseText, x: -10000, y: -10000}).show();
+
+                    /* should we pick only a part of the page */
+                    if(this.xdata.selector != '') {
+                        var q = el.body.select(this.xdata.selector).elements[0];
+                        if(q == undefined) {
+                            html = 'ERROR: selector not found';
+                        } else {
+                            html = q.innerHTML;
+                        }
+                    } else {
+                        html  = el.body;
+                    }
+
+                    var head = '';
+                    /* keep css links */
+                    if(this.xdata.keepcss) {
+                        el.body.select('LINK').each(function(e) {
+                            head = head + e.dom.outerHTML;
+                        });
+                        head = '<head>' + head + '<\/head>';
+                    }
+                    html = '<html style="overflow-x:hidden; overflow-y: hidden;">' + head + '<body>' + html + '<\/body><\/html>';
+                    el.destroy();
+                } else {
+                    html = 'ERROR: request failed with status: ' + response.status;
+                    debug(response);
+                }
                 iframe = this.items.getAt(1).getEl().dom;
                 ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
                 ifrm.document.open();
@@ -30,9 +50,6 @@ Ext.define('TP.PanletUrl', {
                 ifrm.document.close();
             }
         };
-        if(this.loader.url == '') {
-            this.loader.autoLoad = false;
-        }
         this.callParent();
         this.refreshHandler = function() {
             if(this.loader.url != '') {
@@ -50,5 +67,5 @@ Ext.define('TP.PanletUrl', {
                 }
             }
         });
-    },
+    }
 });

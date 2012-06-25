@@ -4,11 +4,11 @@ Ext.define('TP.PanletUrlTacPerf', {
     title:  'Host / Service Performance',
     height: 180,
     width:  380,
-    xdata: {
-        cls:      'TP.PanletUrlTacPerf',
-        refresh:  60,
-        url:      '[% url_prefix %]thruk/cgi-bin/tac.cgi?nav=0&theme=Classic',
-        selector: 'TABLE.perfBox'
+    initComponent: function() {
+        this.xdata.cls       = 'TP.PanletUrlTacPerf';
+        this.xdata.url       = 'tac.cgi?nav=0&theme=Classic';
+        this.xdata.selector  = 'TABLE.perfBox';
+        this.callParent();
     }
 });
 
@@ -18,10 +18,10 @@ Ext.define('TP.PanletUrlPerfLivestatus', {
     title:  'Livestatus Metrics',
     height: 180,
     width:  280,
-    xdata: {
-        cls:      'TP.PanletUrlPerfLivestatus',
-        refresh:  60,
-        url:      '[% url_prefix %]thruk/cgi-bin/extinfo.cgi?nav=0&type=4&theme=Classic',
-        selector: 'TABLE.livestatus_metrics'
+    initComponent: function() {
+        this.xdata.cls       = 'TP.PanletUrlPerfLivestatus';
+        this.xdata.url       = 'extinfo.cgi?nav=0&type=4&theme=Classic';
+        this.xdata.selector  = 'TABLE.livestatus_metrics';
+        this.callParent();
     }
 });
