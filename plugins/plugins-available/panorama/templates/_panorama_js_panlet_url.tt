@@ -43,6 +43,8 @@ Ext.define('TP.PanletUrl', {
                     html = 'ERROR: request failed with status: ' + response.status;
                     debug(response);
                 }
+
+                /* replace iframe content */
                 iframe = this.items.getAt(1).getEl().dom;
                 ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
                 ifrm.document.open();
@@ -57,6 +59,7 @@ Ext.define('TP.PanletUrl', {
             }
         };
 
+        /* url content should be in an iframe */
         this.add({
             xtype : 'component',
             autoEl : {

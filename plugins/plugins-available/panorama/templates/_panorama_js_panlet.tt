@@ -24,7 +24,7 @@ Ext.define('TP.Panlet', {
                 if(this.loader != undefined) { this.loader.loadMask = true }
                 this.gearitem.hide();
             }
-        }
+        };
         this.tools = [{
                 type: 'refresh',
                 handler: function() { this.refreshHandler(); },
@@ -58,35 +58,39 @@ Ext.define('TP.Panlet', {
                     anchor: '95%'
                 },
                 items: [{
+                    fieldLabel: 'Title',
+                    xtype:      'textfield',
+                    name:       'title'
+                }, {
                     layout: 'table',
                     layoutConfig: {
-                      columns: 2
+                        columns: 2
                     },
                     border: 0,
                     items: [{
-                      fieldLabel: 'Refresh Rate',
-                      value:     60,  /* will be changed by afterrender */
-                      name:      'refresh',
-                      xtype:     'sliderfield',
-                      minValue:  1,
-                      maxValue:  300,
-                      width:     200,
-                      tipText: function(thumb){
-                          return String(thumb.value) + 's';
-                      },
-                      listeners: {
-                        change: function(s) {
-                          var form = s.up('form').getForm();
-                          form.setValues({refresh_txt: s.getValue()+'s'});
+                        fieldLabel: 'Refresh Rate',
+                        value:      60,  /* will be changed by afterrender */
+                        name:       'refresh',
+                        xtype:      'sliderfield',
+                        minValue:   1,
+                        maxValue:   300,
+                        width:      200,
+                        tipText: function(thumb){
+                            return String(thumb.value) + 's';
+                        },
+                        listeners: {
+                            change: function(s) {
+                                var form = s.up('form').getForm();
+                                form.setValues({refresh_txt: s.getValue()+'s'});
+                            }
                         }
-                      }
                     }, {
-                      xtype: "textfield",
-                      margin: '0 0 0 10',
-                      name: 'refresh_txt',
-                      readOnly: true,
-                      size: 3,
-                      maxLength: 4
+                        xtype:     'textfield',
+                        margin:    '0 0 0 10',
+                        name:      'refresh_txt',
+                        readOnly:  true,
+                        size:      3,
+                        maxLength: 4
                     }]
                 }]
             })
@@ -109,7 +113,11 @@ Ext.define('TP.Panlet', {
                         });
                         /* save values to xdata store */
                         for(var key in values) {
-                            win.xdata[key] = values[key];
+                            if(key == 'title') {
+                                win.setTitle(values[key]);
+                            } else {
+                                win.xdata[key] = values[key];
+                            }
                         };
                         win.startInterval();
                         win.saveState();
@@ -191,6 +199,7 @@ Ext.define('TP.Panlet', {
                 Ext.Msg.prompt('Change Title', '', function(btn, text) {
                     if(btn == 'ok') {
                         This.setTitle(text);
+                        This.setFormDefaults();
                         This.saveState();
                     }
                 }, undefined, undefined, This.title);
@@ -198,19 +207,26 @@ Ext.define('TP.Panlet', {
         },
         afterrender: function(This, eOpts) {
             /* set initial form values */
-            var form = this.gearitem.down('form').getForm();
-            var fields = form.getFields();
-            This.xdata['refresh_txt'] = This.xdata['refresh']+'s';
-            fields.each(function(f) {
-              var v = This.xdata[f.getName()];
-              f.originalValue = [ v ];
-              f.setValue(v);
-              f.value = v;
-            });
-            delete This.xdata['refresh_txt'];
+            this.setFormDefaults();
 
             /* start refresh interval */
             this.startInterval();
         }
+    },
+    setFormDefaults: function() {
+        /* set initial form values */
+        var me     = this;
+        var form   = this.gearitem.down('form').getForm();
+        var fields = form.getFields();
+        this.xdata['refresh_txt'] = this.xdata['refresh']+'s';
+        this.xdata['title']       = this.title;
+        fields.each(function(f) {
+            var v = me.xdata[f.getName()];
+            f.originalValue = [ v ];
+            f.setValue(v);
+            f.value = v;
+        });
+        delete this.xdata['refresh_txt'];
+        delete this.xdata['title'];
     }
 });
