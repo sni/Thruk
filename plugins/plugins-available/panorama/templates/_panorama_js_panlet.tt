@@ -49,10 +49,9 @@ Ext.define('TP.Panlet', {
         xtype : 'panel',
         layout: 'fit',
         hidden: true,
-        scope:  this,
         border: 0,
-        items: [
-            Ext.create('Ext.form.Panel', {
+        items: [{
+                xtype:      'form',
                 bodyPadding: 5,
                 defaults: {
                     anchor: '95%'
@@ -93,8 +92,7 @@ Ext.define('TP.Panlet', {
                         maxLength: 4
                     }]
                 }]
-            })
-        ],
+        }],
         buttonAlign: 'center',
         fbar: [{ xtype : 'button', text: 'cancel', handler: function() { this.up('window').gearitem.hide() } },
                { xtype : 'button',
