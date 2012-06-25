@@ -6,7 +6,6 @@ Ext.define('TP.TabBar', {
     minTabWidth:    80,
     deferredRender: false,
     stateful:    true,
-    stateEvents: ['tabchange'],
     getState:   function() {
         var item_ids = [];
         this.items.each(function(item, idx, length) {

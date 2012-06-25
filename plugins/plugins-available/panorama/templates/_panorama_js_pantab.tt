@@ -12,6 +12,9 @@ Ext.define('TP.Pantab', {
             for(nr in This.window_ids) {
                 Ext.getCmp(This.window_ids[nr]).destroy();
             }
+            var tabpan = Ext.getCmp('tabpan');
+            tabpan.item_ids = TP.removeFromList(tabpan.item_ids, this.id);
+            tabpan.saveState();
             cp.clear(this.id);
         },
         activate: function(This, eOpts) {

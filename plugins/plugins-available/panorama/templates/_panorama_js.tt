@@ -71,6 +71,7 @@ var TP = {
             tb.window_ids.push(win.id);
             tb.saveState();
         }
+        return true;
     },
 
     getNextId: function(prefix, id) {
@@ -82,5 +83,15 @@ var TP = {
             nr++;
         }
         return(prefix + "_" + nr);
+    },
+
+    removeFromList: function(list, item) {
+        var newlist = [];
+        for(var key in list) {
+            if(list[key] != item) {
+                newlist.push(list[key]);
+            }
+        }
+        return(newlist);
     }
 }

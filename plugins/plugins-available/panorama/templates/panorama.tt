@@ -32,6 +32,11 @@
           margins:  '0 0 0 0',
           items:    [ new TP.TabBar() ]
         });
+
+        /* save pantab state on exit instead of every tabchange */
+        Ext.EventManager.on(window, 'beforeunload', function() {
+            Ext.getCmp('tabpan').saveState();
+        });
       });
     </script>
 </head>
