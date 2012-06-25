@@ -998,11 +998,8 @@ plugins/plugins-available/panorama/root/images/s.gif
 plugins/plugins-available/panorama/root/images/server_connect.png
 plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
-plugins/plugins-available/panorama/root/panorama-1.33.css
-plugins/plugins-available/panorama/root/panorama-1.33.js
 plugins/plugins-available/panorama/root/panorama-1.35.css
 plugins/plugins-available/panorama/root/panorama-1.35.js
-plugins/plugins-available/panorama/root/s.gif
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/templates/_panorama_js.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet.tt
@@ -1060,6 +1057,7 @@ plugins/plugins-available/wml/templates/wml.tt
 plugins/plugins-enabled/conf
 plugins/plugins-enabled/minemap
 plugins/plugins-enabled/mobile
+plugins/plugins-enabled/panorama
 plugins/plugins-enabled/reports
 plugins/plugins-enabled/shinken_features
 plugins/plugins-enabled/statusmap
