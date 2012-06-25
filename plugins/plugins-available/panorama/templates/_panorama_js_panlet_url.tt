@@ -14,11 +14,11 @@ Ext.define('TP.PanletUrl', {
             callback: function(This, success, response, options) {
                 var html;
                 if(response.status == 200) {
-                    /* create pseudo window to render html */
-                    var el = new Ext.window.Window({html: response.responseText, x: -10000, y: -10000}).show();
-
                     /* should we pick only a part of the page */
+                    var el;
                     if(this.xdata.selector != '') {
+                        /* create pseudo window to render html */
+                        el    = new Ext.window.Window({html: response.responseText, x: -10000, y: -10000}).show();
                         var q = el.body.select(this.xdata.selector).elements[0];
                         if(q == undefined) {
                             html = 'ERROR: selector not found';
@@ -26,19 +26,21 @@ Ext.define('TP.PanletUrl', {
                             html = q.innerHTML;
                         }
                     } else {
-                        html  = el.body;
+                        html  = response.responseText;
                     }
 
                     var head = '';
                     /* keep css links */
-                    if(this.xdata.keepcss) {
+                    if(this.xdata.keepcss && this.xdata.selector != '') {
                         el.body.select('LINK').each(function(e) {
                             head = head + e.dom.outerHTML;
                         });
                         head = '<head>' + head + '<\/head>';
                     }
                     html = '<html style="overflow-x:hidden; overflow-y: hidden;">' + head + '<body>' + html + '<\/body><\/html>';
-                    el.destroy();
+                    if(el != undefined) {
+                        el.destroy();
+                    }
                 } else {
                     html = 'ERROR: request failed with status: ' + response.status;
                     debug(response);
@@ -69,6 +71,20 @@ Ext.define('TP.PanletUrl', {
                     border: 0
                 }
             }
+        });
+
+        this.down('form').add({
+            fieldLabel: 'URL',
+            xtype:      'textfield',
+            name:       'url'
+        }, {
+            fieldLabel: 'CSS Selector',
+            xtype:      'textfield',
+            name:       'selector'
+        }, {
+            fieldLabel: 'Keep CSS',
+            xtype:      'checkbox',
+            name:       'keepcss'
         });
     }
 });

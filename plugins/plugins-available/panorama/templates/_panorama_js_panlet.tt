@@ -10,6 +10,7 @@ Ext.define('TP.Panlet', {
     hideMode:  'visibility',
     autoShow:  true,
     stateful:  true,
+    saveDelay: 3000,             // delay savestate writes
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
         heightIncrement: TP.snap_y
@@ -53,6 +54,8 @@ Ext.define('TP.Panlet', {
         items: [{
                 xtype:      'form',
                 bodyPadding: 5,
+                border: 0,
+                bodyStyle: 'overflow-y: auto',
                 defaults: {
                     anchor: '95%'
                 },
@@ -104,11 +107,6 @@ Ext.define('TP.Panlet', {
                         win.gearitem.hide();
                         var fields = form.getFields();
                         var values = form.getFieldValues();
-                        /* set new default value */
-                        fields.each(function(f) {
-                            var v = values[f.getName()];
-                            f.originalValue = [ v ];
-                        });
                         /* save values to xdata store */
                         for(var key in values) {
                             if(key == 'title') {
@@ -117,6 +115,7 @@ Ext.define('TP.Panlet', {
                                 win.xdata[key] = values[key];
                             }
                         };
+                        win.setFormDefaults();
                         win.startInterval();
                         win.saveState();
                     }
@@ -220,9 +219,13 @@ Ext.define('TP.Panlet', {
         this.xdata['title']       = this.title;
         fields.each(function(f) {
             var v = me.xdata[f.getName()];
-            f.originalValue = [ v ];
-            f.setValue(v);
-            f.value = v;
+            if(f.inputType == 'checkbox') {
+                f.originalValue = v;
+            } else {
+                f.originalValue = [ v ];
+                f.setValue(v);
+                f.value = v;
+            }
         });
         delete this.xdata['refresh_txt'];
         delete this.xdata['title'];

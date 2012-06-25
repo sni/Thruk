@@ -4,6 +4,7 @@ Ext.define('TP.Pantab', {
     title:       'Dashboard',
     closable:    true,
     stateful:    true,
+    saveDelay:   3000, // delay savestate writes
     window_ids:  [],
     stateEvents: ['add', 'titlechange'],
     listeners: {
