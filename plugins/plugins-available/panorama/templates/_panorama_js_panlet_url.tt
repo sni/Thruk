@@ -2,15 +2,18 @@ Ext.define('TP.PanletUrl', {
     extend: 'TP.Panlet',
 
     title: 'url panlet',
-    xdata: { cls: 'TP.PanletUrl', refresh: 60, url: '', selector: '', keepcss: true },
     initComponent: function() {
+        this.callParent();
+        this.xdata.url      = '';
+        this.xdata.selector = '';
+        this.xdata.keepcss  = true;
+
         this.loader = {
-            autoLoad: true,
+            autoLoad: false,
             loadMask: true,
             scripts:  true,
             renderer: 'data',
             scope:    this,
-            url :     this.xdata.url,
             callback: function(This, success, response, options) {
                 var html;
                 if(response.status == 200) {
@@ -54,10 +57,10 @@ Ext.define('TP.PanletUrl', {
                 ifrm.document.close();
             }
         };
-        this.callParent();
+
         this.refreshHandler = function() {
-            if(this.loader.url != '') {
-                this.loader.load();
+            if(this.xdata.url != '') {
+                this.loader.load({url: this.xdata.url});
             }
         };
 
@@ -85,6 +88,15 @@ Ext.define('TP.PanletUrl', {
             fieldLabel: 'Keep CSS',
             xtype:      'checkbox',
             name:       'keepcss'
+        });
+
+        /* auto load when url is set */
+        this.addListener('afterrender', function() {
+            if(this.xdata.url == '') {
+                this.gearHandler();
+            } else {
+                this.refreshHandler();
+            }
         });
     }
 });

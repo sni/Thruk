@@ -1,0 +1,114 @@
+Ext.define('GearmanTop', {
+    extend: 'Ext.data.Model',
+    fields: [{ name:'name' },
+             { name:'worker',   type:'int' },
+             { name:'running',  type:'int' },
+             { name:'waiting',  type:'int' },
+             { name:'nr',       type:'int' },
+             { name:'date',     type:'date'}
+            ]
+});
+
+Ext.define('TP.PanletChartGearman', {
+    extend: 'TP.PanletChart',
+
+    title:  'Gearman Queues',
+    width:  640,
+    height: 260,
+    initComponent: function() {
+        this.callParent();
+
+        this.store = new Ext.data.Store({
+                model: 'GearmanTop',
+                data: []
+        });
+        var now = new Date();
+        this.store.suspendEvents();
+        for(var i=this.xdata.nr_dots;i>=0;i--) {
+            var d = new Date(now.getTime() - i * 1000);
+            this.store.loadRawData({
+                name:'service', worker:0, running:0, waiting:0, nr:i, date:d
+            }, true);
+        }
+        this.store.resumeEvents();
+
+        this.xdata.server = 'localhost:4730';
+        this.xdata.url    = 'panorama.cgi?task=gearman_stats&server=' + this.xdata.server;
+
+        /* add graph */
+        this.add({
+            xtype:  'chart',
+            style:  'background:#fff',
+            store:  this.store,
+            shadow: true,
+            theme:  'Category1',
+            legend: {
+                position: 'right'
+            },
+            axes: [{
+                type:           'tp_numeric',
+                minimum:         0,
+                position:       'left',
+                fields:         ['worker', 'running', 'waiting'],
+                title:          'Service Queue',
+                minorTickSteps: 1,
+                majorTickSteps: 4,
+                decimals:       1,
+                grid: {
+                    odd: {
+                        opacity:        0.5,
+                        fill:           '#ddd',
+                        stroke:         '#bbb',
+                        'stroke-width': 0.5
+                    }
+                }
+            }, {
+                type: 'tp_time',
+                position: 'bottom',
+                fields: ['date'],
+                title: 'Mod-Gearman',
+                majorTickSteps: this.xdata.nr_dots,
+                label: {
+                    renderer: function(val){
+                        var d = new Date(val);
+                        return(Ext.Date.format(d, "H:i"));
+                    }
+                }
+            }],
+            series: [{
+                type: 'line',
+                axis: 'left',
+                xField: 'date',
+                yField: 'worker',
+                showMarkers: false,
+                style: {
+                    'stroke-width': 3
+                }
+            }, {
+                type: 'line',
+                axis: 'left',
+                xField: 'date',
+                yField: 'waiting',
+                showMarkers: false,
+                style: {
+                    'stroke-width': 3
+                }
+            }, {
+                type: 'line',
+                axis: 'left',
+                xField: 'date',
+                yField: 'running',
+                showMarkers: false,
+                style: {
+                    'stroke-width': 3
+                }
+            }]
+        });
+
+        this.down('form').add({
+            fieldLabel: 'Gearman Daemon',
+            xtype:      'textfield',
+            name:       'server'
+        });
+    }
+});

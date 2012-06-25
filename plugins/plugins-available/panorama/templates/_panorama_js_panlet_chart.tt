@@ -1,0 +1,88 @@
+Ext.define('TP.chart.NumericAxis', {
+    extend: 'Ext.chart.axis.Numeric',
+    alias:  'axis.tp_numeric',
+    constructor: function(config) {
+        this.callParent([config]);
+        this._getRange = this.getRange;
+        this.getRange = function() {
+            var range = this._getRange();
+            range.max = Math.floor(range.max/10)*10+10;
+            return(range);
+        }
+        this.type = 'Numeric';
+    }
+});
+
+Ext.define('TP.chart.TimeAxis', {
+    extend: 'Ext.chart.axis.Category',
+    alias:  'axis.tp_time',
+    constructor: function(config) {
+        this.callParent([config]);
+        this.type = 'Category';
+    },
+    setLabels: function() {
+        var store = this.chart.store,
+            fields = this.fields,
+            ln = fields.length,
+            i;
+
+        this.labels = [];
+        store.each(function(record) {
+            for (i = 0; i < ln; i++) {
+                this.labels.push(record.get(fields[i]));
+            }
+        }, this);
+    },
+    applyData: function() {
+        var data = this.callParent();
+        return(data);
+    }
+});
+
+Ext.define('TP.PanletChart', {
+    extend: 'TP.Panlet',
+
+    title:  'chart',
+    width:  640,
+    height: 260,
+    initComponent: function() {
+        this.callParent();
+        this.xdata.nr_dots = 50;
+
+        this.loader = {
+            autoLoad: false,
+            renderer: 'data',
+            scope:    this,
+            url:      '',
+            callback: function(This, success, response, options) {
+                if(response.status == 200) {
+                    var data  = eval("("+response.responseText+")");
+                    var row   = data['service'];
+                    var last  = this.store.data.last();
+                    if(last != undefined) {
+                        row.nr = last.get('nr') + 1;
+                    } else {
+                        row.nr = 1;
+                    }
+                    row.date  = new Date();
+                    row.empty = '';
+                    this.store.suspendEvents();
+                    this.store.loadRawData(row, true);
+                    this.store.resumeEvents();
+                    this.store.remove(this.store.data.first());
+                } else {
+                    debug("ERROR: " + response.status);
+                    debug(response);
+                }
+            }
+        };
+
+        this.refreshHandler = function() {
+            this.loader.load({url:this.xdata.url});
+        },
+
+        this.addListener('afterrender', function() {
+            this.refreshHandler();
+        });
+    }
+});

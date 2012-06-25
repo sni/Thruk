@@ -6,6 +6,8 @@ use Carp;
 use Data::Dumper;
 use JSON::XS;
 use URI::Escape;
+use IO::Socket;
+
 use parent 'Catalyst::Controller';
 
 =head1 NAME
@@ -20,10 +22,19 @@ Catalyst Controller.
 
 =cut
 
+##########################################################
 # enable panorama features if this plugin is loaded
 Thruk->config->{'use_feature_panorama'} = 1;
 
-######################################
+##########################################################
+# add new menu item
+Thruk::Utils::Menu::insert_item('General', {
+                                    'href'  => '/thruk/cgi-bin/panorama.cgi',
+                                    'name'  => 'Panorama View',
+                                    target  => '_parent'
+                         });
+
+##########################################################
 
 =head2 panorama_cgi
 
@@ -48,8 +59,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         return($self->_stateprovider($c));
     }
 
-    if(defined $c->request->parameters->{'proxy'}) {
-        return($self->_stateprovider($c));
+    if(defined $c->request->parameters->{'task'}) {
+        my $task = $c->request->parameters->{'task'};
+        if($task eq 'gearman_stats') {
+            return($self->_gearman_stats($c));
+        }
     }
 
     my $data  = Thruk::Utils::get_user_data($c);
@@ -128,6 +142,48 @@ sub _nice_ext_value {
     $value =~ s/\s+/ /gmx;
     return $value;
 }
+
+##########################################################
+sub _gearman_stats {
+    my($self, $c) = @_;
+
+    my $host = 'localhost';
+    my $port = 4730;
+
+    my $handle = IO::Socket::INET->new(
+        Proto    => "tcp",
+        PeerAddr => $host,
+        PeerPort => $port,
+    )
+    or die "can't connect to port $port on $host: $!";
+    $handle->autoflush(1);
+
+    print $handle "status\n";
+
+    my $data = {};
+
+    while ( defined( my $line = <$handle> ) ) {
+        chomp($line);
+        my($name,$total,$running,$worker) = split(/\t/mx, $line);
+        if(defined $worker) {
+            my $stat = {
+                'name'      => $name,
+                'worker'    => int($worker),
+                'running'   => int($running),
+                'waiting'   => int($total - $running),
+            };
+            $data->{$name} = $stat;
+        }
+        last if $line eq '.';
+    }
+    CORE::close($handle);
+
+
+    $c->stash->{'json'} = $data;
+
+    return $c->forward('Thruk::View::JSON');
+}
+
 ##########################################################
 
 =head1 AUTHOR

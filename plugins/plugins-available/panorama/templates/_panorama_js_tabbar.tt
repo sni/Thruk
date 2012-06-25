@@ -55,30 +55,29 @@ Ext.define('TP.TabBar', {
                             Ext.MessageBox.alert('TODO', 'Not implemented yet');
                         }
                     }, '-', {
-                        text: 'Add Url Panlet',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
-                        handler: function(m, e) {
-                            TP.add_panlet({type:'TP.PanletUrl'});
-                        }
+                        text:    'Add Url Panlet',
+                        icon:    '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
                     }, {
-                        text: 'Host / Service Performance',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
-                        handler: function(m, e) {
-                            TP.add_panlet({type:'TP.PanletUrlTacPerf'});
-                        }
+                        text:   'Host / Service Performance',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletUrlTacPerf'}) }
                     }, {
-                        text: 'Livestatus Metrics',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
-                        handler: function(m, e) {
-                            TP.add_panlet({type:'TP.PanletUrlPerfLivestatus'});
-                        }
+                        text:   'Livestatus Metrics',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletUrlPerfLivestatus'}) }
                     }, {
-                        text: 'Add Mod-Gearman Panlet',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',
-                        handler: function(m, e) {
-                            Ext.MessageBox.alert('TODO', 'Not implemented yet');
+                        text:   'Add Mod-Gearman Panlet',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
+                    }, '-' , {
+                        text:   'Exit Panorama View',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
+                        handler: function() {
+                            window.location = '../';
                         }
-                }]
+                    }
+                ]
             }
         }]
     }

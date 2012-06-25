@@ -16,6 +16,7 @@ Ext.define('TP.Panlet', {
         heightIncrement: TP.snap_y
     }),
     initComponent: function() {
+        this.xdata.cls = this.$className;
         this.gearHandler = function() {
             if(this.gearitem.isHidden()) {
                 if(this.loader != undefined) { this.loader.loadMask = false }
@@ -125,7 +126,7 @@ Ext.define('TP.Panlet', {
     }],
     html:       '',
     onEsc:      function() { return false; },
-    xdata:      { cls: 'TP.Panlet', refresh: 60 },
+    xdata:      { refresh: 60 },
     startInterval: function() {
         window.clearInterval(this.interval);
         this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);

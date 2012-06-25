@@ -18,3 +18,8 @@ DIV.x-tab-default-over A.x-tab-close-btn {
     background-image: url("images/gear.gif") !important;
     left: -4px;
 }
+
+/* make menu items align to icon */
+.x-menu-item-link {
+    line-height: 11px;
+}
