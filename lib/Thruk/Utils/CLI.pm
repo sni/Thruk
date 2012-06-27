@@ -53,7 +53,7 @@ sub new {
     # set some env defaults
     $ENV{'THRUK_SRC'} = 'CLI';
     $ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
-    $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if scalar @{$options->{'backends'}} > 0;
+    $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};
     $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
     $options->{'remoteurl'} = defined $ENV{'OMD_SITE'} ? 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi'

@@ -2,7 +2,7 @@ package Monitoring::Config;
 
 use strict;
 use warnings;
-use Carp;
+use Carp qw/cluck/;
 use Monitoring::Config::File;
 
 =head1 NAME
@@ -101,7 +101,7 @@ sub init {
 
     commit()
 
-commit changes to disk
+Commit changes to disk. Returns 1 on success.
 
 =cut
 sub commit {
@@ -139,7 +139,7 @@ sub commit {
 
     get_files()
 
-get all files
+Get all files. Returns list of L<Monitoring::Config::File|Monitoring::Config::File> objects.
 
 =cut
 sub get_files {
@@ -154,7 +154,7 @@ sub get_files {
 
     get_file_by_path($path)
 
-get file by path
+Get file by path. Returns L<Monitoring::Config::File|Monitoring::Config::File> object or undef.
 
 =cut
 sub get_file_by_path {
@@ -173,7 +173,7 @@ sub get_file_by_path {
 
     get_changed_files()
 
-get all changed files
+Get all changed files. Returns list of L<Monitoring::Config::File|Monitoring::Config::File> objects.
 
 =cut
 sub get_changed_files {
@@ -190,9 +190,9 @@ sub get_changed_files {
 
 =head2 get_objects
 
-    get_objects()
+    $list = get_objects()
 
-get all objects
+Get all objects. Returns list of L<Monitoring::Config::Object|Monitoring::Config::Object> objects.
 
 =cut
 sub get_objects {
@@ -206,9 +206,9 @@ sub get_objects {
 
 =head2 get_objects_by_type
 
-    get_objects_by_type($type, [ $filter ])
+    $list = get_objects_by_type($type, [ $filter ])
 
-get objects by type
+Returns list of L<Monitoring::Config::Object|Monitoring::Config::Object> objects for a type.
 
 =cut
 sub get_objects_by_type {
@@ -242,7 +242,7 @@ sub get_objects_by_type {
 
     get_objects_by_name($type, $name, [ $templates_only , [ $name2 ]])
 
-get objects by name
+Get objects by name. Returns list of L<Monitoring::Config::Object|Monitoring::Config::Object> objects.
 
 =cut
 sub get_objects_by_name {
@@ -310,7 +310,7 @@ sub get_objects_by_name {
 
     get_templates_by_type($type)
 
-get templates by type
+Get templates by type. Returns list of L<Monitoring::Config::Object|Monitoring::Config::Object> objects.
 
 =cut
 sub get_templates_by_type {
@@ -334,7 +334,7 @@ sub get_templates_by_type {
 
     get_template_by_name($type, $name)
 
-get template object by name
+Get template object by name. Returns list of L<Monitoring::Config::Object|Monitoring::Config::Object> objects.
 
 =cut
 sub get_template_by_name {
@@ -356,7 +356,7 @@ sub get_template_by_name {
 
     get_object_by_location($path, $linenr)
 
-get object by location
+Get object by location. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> objects or undef.
 
 =cut
 sub get_object_by_location {
@@ -382,7 +382,7 @@ sub get_object_by_location {
 
     get_object_by_id($id)
 
-get object by id
+Get object by id. Returns L<Monitoring::Config::Object|Monitoring::Config::Object> object or undef.
 
 =cut
 sub get_object_by_id {
@@ -399,7 +399,9 @@ sub get_object_by_id {
 
     get_services_for_host($hostobj)
 
-returns services
+Get services by host. Returns a hashref with ids of references:
+
+ { host => {}, group => {} }
 
 =cut
 sub get_services_for_host {
@@ -500,7 +502,7 @@ sub check_files_changed {
     $self->{'needs_update'} = 0;
     $self->{'last_changed'} = 0 if $reload;
 
-    if(defined $self->{'_corefile'} and $self->_check_file_changed($self->{'_corefile'})) {
+    if($self->{'_corefile'} and $self->_check_file_changed($self->{'_corefile'})) {
         # maybe core type has changed
         $self->_set_coretype();
     }
@@ -901,7 +903,12 @@ sub _update_core_conf {
     my $core_conf = shift;
 
     if(!defined $self->{'_coreconf'} or $self->{'_coreconf'} ne $core_conf) {
-        $self->{'_corefile'} = Monitoring::Config::File->new($core_conf, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
+        if($core_conf) {
+            $self->{'_corefile'} = Monitoring::Config::File->new($core_conf, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
+        } else {
+            $self->{'_corefile'} = undef;
+            return;
+        }
     }
     $self->{'_coreconf'} = $core_conf;
 
@@ -966,7 +973,7 @@ sub _set_coretype {
     }
 
     # try to determine core type from main config
-    if(defined $self->{'_corefile'}->{'conf'}->{'icinga_user'}) {
+    if(defined $self->{'_corefile'} and defined $self->{'_corefile'}->{'conf'}->{'icinga_user'}) {
         $self->{'coretype'} = 'icinga';
         return;
     }
@@ -1161,6 +1168,10 @@ sub _check_files_changed {
 sub _check_file_changed {
     my $self = shift;
     my $file = shift;
+
+    if(!-f $file) {
+        cluck("$file: $!");
+    }
 
     # mtime & inode
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
