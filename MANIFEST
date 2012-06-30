@@ -239,11 +239,14 @@ plugins/plugins-available/reports/templates/passthrough_pdf.tt
 plugins/plugins-available/reports/templates/pdf/defaults/mail.tt
 plugins/plugins-available/reports/templates/pdf/defaults/prepare.tt
 plugins/plugins-available/reports/templates/pdf/defaults/prepare_eventlog.tt
+plugins/plugins-available/reports/templates/pdf/defaults/prepare_nothing.tt
 plugins/plugins-available/reports/templates/pdf/defaults/render_eventlog.tt
 plugins/plugins-available/reports/templates/pdf/defaults/render_sla.tt
+plugins/plugins-available/reports/templates/pdf/defaults/render_url.tt
 plugins/plugins-available/reports/templates/pdf/eventlog.pdf
 plugins/plugins-available/reports/templates/pdf/eventlog.tt
 plugins/plugins-available/reports/templates/pdf/icons.pdf
+plugins/plugins-available/reports/templates/pdf/simple_mail.tt
 plugins/plugins-available/reports/templates/pdf/sla.pdf
 plugins/plugins-available/reports/templates/pdf/sla_host.tt
 plugins/plugins-available/reports/templates/pdf/sla_hostgroup.tt
@@ -695,6 +698,7 @@ themes/themes-available/Classic/images/page_white_excel.png
 themes/themes-available/Classic/images/page_white_key.png
 themes/themes-available/Classic/images/page_white_swoosh.png
 themes/themes-available/Classic/images/page_white_text.png
+themes/themes-available/Classic/images/page_world.png
 themes/themes-available/Classic/images/passiveonly.gif
 themes/themes-available/Classic/images/plus.gif
 themes/themes-available/Classic/images/problem.png
@@ -829,6 +833,7 @@ themes/themes-available/Exfoliation/images/page_white_excel.png
 themes/themes-available/Exfoliation/images/page_white_key.png
 themes/themes-available/Exfoliation/images/page_white_swoosh.png
 themes/themes-available/Exfoliation/images/page_white_text.png
+themes/themes-available/Exfoliation/images/page_world.png
 themes/themes-available/Exfoliation/images/passiveonly.gif
 themes/themes-available/Exfoliation/images/plus.gif
 themes/themes-available/Exfoliation/images/problem.png
@@ -1021,6 +1026,7 @@ themes/themes-available/Nuvola/images/page_white_excel.png
 themes/themes-available/Nuvola/images/page_white_key.png
 themes/themes-available/Nuvola/images/page_white_swoosh.png
 themes/themes-available/Nuvola/images/page_white_text.png
+themes/themes-available/Nuvola/images/page_world.png
 themes/themes-available/Nuvola/images/passiveonly.gif
 themes/themes-available/Nuvola/images/plus.gif
 themes/themes-available/Nuvola/images/problem.png
@@ -1207,6 +1213,7 @@ themes/themes-available/Thruk/images/page_white_excel.png
 themes/themes-available/Thruk/images/page_white_key.png
 themes/themes-available/Thruk/images/page_white_swoosh.png
 themes/themes-available/Thruk/images/page_white_text.png
+themes/themes-available/Thruk/images/page_world.png
 themes/themes-available/Thruk/images/passiveonly.gif
 themes/themes-available/Thruk/images/plus.gif
 themes/themes-available/Thruk/images/problem.png
@@ -1332,6 +1339,7 @@ themes/themes-available/Vautour/images/page_white_excel.png
 themes/themes-available/Vautour/images/page_white_key.png
 themes/themes-available/Vautour/images/page_white_swoosh.png
 themes/themes-available/Vautour/images/page_white_text.png
+themes/themes-available/Vautour/images/page_world.png
 themes/themes-available/Vautour/images/passiveonly.gif
 themes/themes-available/Vautour/images/plus.gif
 themes/themes-available/Vautour/images/problem.png
@@ -1560,6 +1568,7 @@ themes/themes-available/Wakizashi/images/page_white_excel.png
 themes/themes-available/Wakizashi/images/page_white_key.png
 themes/themes-available/Wakizashi/images/page_white_swoosh.png
 themes/themes-available/Wakizashi/images/page_white_text.png
+themes/themes-available/Wakizashi/images/page_world.png
 themes/themes-available/Wakizashi/images/passiveonly.gif
 themes/themes-available/Wakizashi/images/plus.gif
 themes/themes-available/Wakizashi/images/problem.png

@@ -379,6 +379,43 @@ sub get_events {
 
 ##########################################################
 
+=head2 get_url
+
+  get_url()
+
+save content from url
+
+=cut
+sub get_url {
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+
+    my $url = $c->stash->{'param'}->{'url'};
+    if($url =~ m|^\w+\.cgi|gmx) {
+        $url = '/thruk/cgi-bin/'.$url;
+    }
+    Thruk::Utils::CLI::_request_url($c, $url);
+    my $result = $ENV{'HTTP_RESULT'};
+    if(defined $result and defined $result->{'headers'}) {
+        if(defined $result->{'headers'}->{'Content-Disposition'}) {
+            my $file = $result->{'headers'}->{'Content-Disposition'};
+            if($file =~ m/filename="(.*)"/) {
+                $Thruk::Utils::PDF::attachment = $1;
+            }
+        }
+        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
+        $Thruk::Utils::PDF::ctype =~ s/;.*$//mx;
+        my $attachment = $c->stash->{'attachment'};
+        open(my $fh, '>', $attachment);
+        binmode $fh;
+        print $fh $result->{'result'};
+        Thruk::Utils::IO::close($fh, $attachment);
+
+    }
+    return 1;
+}
+
+##########################################################
+
 =head2 print_event_totals
 
   print_event_totals()
