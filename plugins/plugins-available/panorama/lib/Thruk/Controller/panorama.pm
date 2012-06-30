@@ -168,6 +168,7 @@ sub _gearman_stats {
     while ( defined( my $line = <$handle> ) ) {
         chomp($line);
         my($name,$total,$running,$worker) = split(/\t/mx, $line);
+        next if $name eq 'dummy';
         if(defined $worker) {
             my $stat = {
                 'name'      => $name,

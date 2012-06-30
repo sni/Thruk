@@ -34,16 +34,27 @@ Ext.define('TP.PanletChartGearman', {
         }
         this.store.resumeEvents();
 
+        this.xdata.queue  = 'service';
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=gearman_stats&server=' + this.xdata.server;
         this.formUpdatedCallback = function() {
             this.xdata.url = 'panorama.cgi?task=gearman_stats&server=' + this.xdata.server;
+            if(this.setTitle) {
+                this.setTitle('Mod-Gearman ' + ucfirst(this.xdata.queue) + ' Queue');
+            }
         };
         this.getData = function(data) {
-            return data['service'];
+            this.queue_store.removeAll();
+            for(var key in data) {
+                this.queue_store.loadRawData({name:ucfirst(key), value:key}, true);
+            }
+            return data[this.xdata.queue];
         };
         this.updated_callback = function(panel) {
             var chart = this.chart;
+            if(!chart.store) {
+                return;
+            }
             var minutes_to_show = Math.ceil(this.xdata.refresh * this.xdata.nr_dots / 60 * 1.5);
             /* dynamically adjust minimum/maximum and ticks */
             var max     = chart.store.max('date').getTime() / 1000;
@@ -92,7 +103,6 @@ Ext.define('TP.PanletChartGearman', {
                 minimum:         0,
                 position:       'left',
                 fields:         ['worker', 'running', 'waiting'],
-                title:          'Service Queue',
                 majorTickSteps: 4,
                 minorTickSteps: 1,
                 decimals:       1,
@@ -108,7 +118,6 @@ Ext.define('TP.PanletChartGearman', {
                 type: 'tp_time',
                 position: 'bottom',
                 fields: ['date'],
-                title: 'Mod-Gearman',
                 label: {
                     renderer: function(val){
                         val = val - val%60000; // round to 1 minute
@@ -124,7 +133,7 @@ Ext.define('TP.PanletChartGearman', {
                 yField: 'worker',
                 showMarkers: false,
                 style: {
-                    'stroke-width': 3
+                    'stroke-width': 2
                 }
             }, {
                 type: 'line',
@@ -133,7 +142,7 @@ Ext.define('TP.PanletChartGearman', {
                 yField: 'waiting',
                 showMarkers: false,
                 style: {
-                    'stroke-width': 3
+                    'stroke-width': 2
                 }
             }, {
                 type: 'line',
@@ -142,16 +151,30 @@ Ext.define('TP.PanletChartGearman', {
                 yField: 'running',
                 showMarkers: false,
                 style: {
-                    'stroke-width': 3
+                    'stroke-width': 2
                 }
             }]
         });
         this.add(this.chart);
 
+        this.queue_store = new Ext.data.Store({
+                fields: ['name', 'value'],
+                data: []
+        });
+
         this.down('form').add({
             fieldLabel: 'Gearman Daemon',
             xtype:      'textfield',
             name:       'server'
+        });
+        this.down('form').add({
+            fieldLabel:   'Gearman Queue',
+            xtype:        'combobox',
+            name:         'queue',
+            valueField:   'value',
+            displayField: 'name',
+            queryMode:    'local',
+            store:        this.queue_store
         });
     }
 });

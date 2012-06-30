@@ -42,7 +42,7 @@ Ext.define('TP.PanletChart', {
     height: 260,
     initComponent: function() {
         this.callParent();
-        this.xdata.nr_dots = 100;
+        this.xdata.nr_dots = 60;
 
         this.loader = {
             autoLoad: false,
@@ -89,6 +89,9 @@ Ext.define('TP.PanletChart', {
             this.chart.hide();
         });
         this.addListener('show', function() {
+            if(this.updated_callback) {
+                this.updated_callback(this);
+            }
             this.chart.show();
             // restoreZoom helps refreshing the chart after hiding
             this.chart.restoreZoom();
