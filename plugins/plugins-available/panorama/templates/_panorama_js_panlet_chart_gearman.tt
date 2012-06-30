@@ -39,24 +39,24 @@ Ext.define('TP.PanletChartGearman', {
 
         this.updated_callback = function(panel) {
             var chart = this.chart;
-            var minutes_to_show = Math.ceil(this.xdata.refresh * this.xdata.nr_dots / 60) * 1.5;
+            var minutes_to_show = Math.ceil(this.xdata.refresh * this.xdata.nr_dots / 60 * 1.5);
             /* dynamically adjust minimum/maximum and ticks */
             var max     = chart.store.max('date').getTime() / 1000;
             var axis = chart.axes.getAt(1);
             var min = max - minutes_to_show * 60;
             if(minutes_to_show > 30) {
-                axis.majorTickSteps = minutes_to_show / 10;
-                axis.minorTickSteps = 10;
+                axis.majorTickSteps = (minutes_to_show / 10)-1;
+                axis.minorTickSteps = 9;
                 min = min - min%600 + 600;
             }
             else if(minutes_to_show > 10) {
-                axis.majorTickSteps = minutes_to_show / 5;
-                axis.minorTickSteps = 5;
+                axis.majorTickSteps = (minutes_to_show / 5)-1;
+                axis.minorTickSteps = 4;
                 min = min - min%300 + 300;
             }
             else if(minutes_to_show < 10) {
-                axis.majorTickSteps = minutes_to_show;
-                axis.minorTickSteps = 59;
+                axis.majorTickSteps = minutes_to_show-1;
+                axis.minorTickSteps = 5;
                 min = min - min%60 + 60;
             }
             var mindate = min*1000;
@@ -94,16 +94,13 @@ Ext.define('TP.PanletChartGearman', {
                     }
                 }
             }, {
-                type: 'Numeric',
+                type: 'tp_time',
                 position: 'bottom',
                 fields: ['date'],
                 title: 'Mod-Gearman',
-                majorTickSteps: 3,
-                minorTickSteps: 59,
                 label: {
                     renderer: function(val){
-                        // round to 1 minute
-                        val = val - val%60000;
+                        val = val - val%60000; // round to 1 minute
                         var d = new Date(val);
                         return(Ext.Date.format(d, "H:i"));
                     }
