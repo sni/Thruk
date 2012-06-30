@@ -22,17 +22,6 @@ Ext.define('TP.PanletChartGearman', {
                 model: 'GearmanTop',
                 data: []
         });
-        var now = new Date();
-        this.store.suspendEvents();
-        for(var i=this.xdata.nr_dots;i>=0;i--) {
-            var v = now.getTime() - i * 1000 * this.xdata.refresh;
-            v = v - v%60000;
-            var d = new Date(v);
-            this.store.loadRawData({
-                name:'service', worker:0, running:0, waiting:0, nr:i, date:d
-            }, true);
-        }
-        this.store.resumeEvents();
 
         this.xdata.queue  = 'service';
         this.xdata.server = 'localhost:4730';
@@ -42,12 +31,25 @@ Ext.define('TP.PanletChartGearman', {
             if(this.setTitle) {
                 this.setTitle('Mod-Gearman ' + ucfirst(this.xdata.queue) + ' Queue');
             }
+            if(this.lastqueue != this.xdata.queue) {
+                this.lastqueue = this.xdata.queue;
+                this.fill_store();
+                this.refreshHandler();
+            }
         };
         this.getData = function(data) {
+            /* fill queue store */
             this.queue_store.removeAll();
             for(var key in data) {
-                this.queue_store.loadRawData({name:ucfirst(key), value:key}, true);
+                var name = ucfirst(key);
+                if(name == 'Check_results') {
+                    name = 'Check Results';
+                } else{
+                    name = name.replace(/_/, ' ');
+                }
+                this.queue_store.loadRawData({name:name, value:key}, true);
             }
+            this.queue_store.sort('name');
             return data[this.xdata.queue];
         };
         this.updated_callback = function(panel) {
@@ -176,5 +178,21 @@ Ext.define('TP.PanletChartGearman', {
             queryMode:    'local',
             store:        this.queue_store
         });
+    },
+    fill_store: function() {
+        var now = new Date();
+        this.store.suspendEvents();
+        this.chart.hide();
+        this.store.removeAll();
+        for(var i=this.xdata.nr_dots;i>=0;i--) {
+            var v = now.getTime() - i * 1000 * this.xdata.refresh;
+            v = v - v%60000;
+            var d = new Date(v);
+            this.store.loadRawData({
+                name:'', worker:0, running:0, waiting:0, nr:i, date:d
+            }, true);
+        }
+        this.chart.show();
+        this.store.resumeEvents();
     }
 });
