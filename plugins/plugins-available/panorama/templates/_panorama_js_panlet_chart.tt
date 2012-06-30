@@ -49,7 +49,18 @@ Ext.define('TP.PanletChart', {
             renderer: 'data',
             scope:    this,
             url:      '',
+            loading: false,
+            listeners: {
+                'beforeload': function(This, options, eOpts) {
+                    if(this.loading) {
+                        return false;
+                    }
+                    this.loading = true;
+                    return true;
+                }
+            },
             callback: function(This, success, response, options) {
+                This.loading = false;
                 if(response.status == 200) {
                     var data  = eval("("+response.responseText+")");
                     var row   = data;
