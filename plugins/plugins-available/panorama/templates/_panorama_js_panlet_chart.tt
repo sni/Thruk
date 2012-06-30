@@ -85,6 +85,15 @@ Ext.define('TP.PanletChart', {
             this.refreshHandler();
         });
 
+        this.addListener('hide', function() {
+            this.chart.hide();
+        });
+        this.addListener('show', function() {
+            this.chart.show();
+            // restoreZoom helps refreshing the chart after hiding
+            this.chart.restoreZoom();
+        });
+
         this.down('form').add({
             fieldLabel: 'History',
             xtype:      'textfield',

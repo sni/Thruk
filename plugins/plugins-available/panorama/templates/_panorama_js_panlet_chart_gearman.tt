@@ -81,6 +81,12 @@ Ext.define('TP.PanletChartGearman', {
             legend: {
                 position: 'right'
             },
+            listeners: {
+                'beforerefresh': function(This, eOpts) {
+                    // refreshing breaks if chart is not visible
+                    return(!This.isHidden());
+                }
+            },
             axes: [{
                 type:           'tp_numeric',
                 minimum:         0,
