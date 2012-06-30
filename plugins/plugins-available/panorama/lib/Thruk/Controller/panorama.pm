@@ -28,11 +28,11 @@ Thruk->config->{'use_feature_panorama'} = 1;
 
 ##########################################################
 # add new menu item
-Thruk::Utils::Menu::insert_item('General', {
-                                    'href'  => '/thruk/cgi-bin/panorama.cgi',
-                                    'name'  => 'Panorama View',
-                                    target  => '_parent'
-                         });
+#Thruk::Utils::Menu::insert_item('General', {
+#                                    'href'  => '/thruk/cgi-bin/panorama.cgi',
+#                                    'name'  => 'Panorama View',
+#                                    target  => '_parent'
+#                         });
 
 ##########################################################
 
