@@ -16,7 +16,9 @@ Ext.define('TP.Panlet', {
         heightIncrement: TP.snap_y
     }),
     initComponent: function() {
-        this.xdata.cls = this.$className;
+        this.xdata.cls    = this.$className;
+        this.xdata.pinned = false;
+
         this.gearHandler = function() {
             if(this.gearitem.isHidden()) {
                 if(this.loader != undefined) { this.loader.loadMask = false }
@@ -28,6 +30,19 @@ Ext.define('TP.Panlet', {
             }
         };
         this.tools = [{
+                type: 'pin',
+                cls: 'pintool',
+                handler: function() {
+                    if(this.xdata.pinned) {
+                        this.xdata.pinned = false;
+                    } else {
+                        this.xdata.pinned = true;
+                    }
+                    this.check_pintool();
+                },
+                listeners: { afterrender: function() { this.up('panel').pintool = this; }},
+                scope: this
+            }, {
                 type: 'refresh',
                 handler: function() { this.refreshHandler(); },
                 scope: this
@@ -45,6 +60,8 @@ Ext.define('TP.Panlet', {
         });
         this.callParent();
         this.gearitem = this.items.getAt(0);
+
+        this.addListener('afterlayout', function() { this.check_pintool(); });
     },
     items: [{
         /* Panlet Settings Panel */
@@ -157,9 +174,15 @@ Ext.define('TP.Panlet', {
         },
         destroy: function( This, eOpts ) {
             /* remove window from panels window ids */
-            var panel = Ext.getCmp(this.panel_id);
-            panel.window_ids = TP.removeFromList(panel.window_ids, this.id);
-            panel.saveState();
+            var tabpan = Ext.getCmp('tabpan');
+            var win_id = this.id;
+            tabpan.items.each(function(panel) {
+                if(panel.window_ids) {
+                    panel.window_ids = TP.removeFromList(panel.window_ids, win_id);
+                    panel.saveState();
+                }
+            });
+            window.clearInterval(this.interval);
             /* clear state information */
             cp.clear(this.id);
         },
@@ -202,6 +225,11 @@ Ext.define('TP.Panlet', {
 
             /* start refresh interval */
             this.startInterval();
+
+            /* show all pinned panlets */
+            if(this.xdata.pinned) {
+                this.show();
+            }
         }
     },
     setFormDefaults: function() {
@@ -226,5 +254,18 @@ Ext.define('TP.Panlet', {
         if(this.formUpdatedCallback) {
             this.formUpdatedCallback();
         }
+        this.check_pintool();
+    },
+    check_pintool: function() {
+        /* check pin icon and position */
+        if(this.xdata.pinned) {
+            this.pintool.setType('unpin');
+        } else {
+            this.pintool.setType('pin');
+        }
+        /* move pin tool */
+        this.pintool.setPosition(0,1);
+        var head = Ext.get(this.id + '_header_hd');
+        head.setPositioning({left:'20px'});
     }
 });

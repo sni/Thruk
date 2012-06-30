@@ -51,6 +51,9 @@ var TP = {
             });
         });
 
+        /* save tabs state */
+        Ext.getCmp('tabpan').saveState();
+
         /* return false to prevent newtab button being activated */
         return false;
     },

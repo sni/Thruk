@@ -20,7 +20,7 @@ Ext.define('TP.TabBar', {
         }
     },
     applyState: function(state) {
-        if (state) {
+        if(state) {
             for(nr in state.item_ids) {
                 TP.add_pantab(state.item_ids[nr]);
             };
