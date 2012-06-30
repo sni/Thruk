@@ -13,32 +13,6 @@ Ext.define('TP.chart.NumericAxis', {
     }
 });
 
-Ext.define('TP.chart.TimeAxis', {
-    extend: 'Ext.chart.axis.Category',
-    alias:  'axis.tp_time',
-    constructor: function(config) {
-        this.callParent([config]);
-        this.type = 'Category';
-    },
-    setLabels: function() {
-        var store = this.chart.store,
-            fields = this.fields,
-            ln = fields.length,
-            i;
-
-        this.labels = [];
-        store.each(function(record) {
-            for (i = 0; i < ln; i++) {
-                this.labels.push(record.get(fields[i]));
-            }
-        }, this);
-    },
-    applyData: function() {
-        var data = this.callParent();
-        return(data);
-    }
-});
-
 Ext.define('TP.PanletChart', {
     extend: 'TP.Panlet',
 
@@ -47,7 +21,7 @@ Ext.define('TP.PanletChart', {
     height: 260,
     initComponent: function() {
         this.callParent();
-        this.xdata.nr_dots = 50;
+        this.xdata.nr_dots = 61;
 
         this.loader = {
             autoLoad: false,
@@ -66,10 +40,10 @@ Ext.define('TP.PanletChart', {
                     }
                     row.date  = new Date();
                     row.empty = '';
-                    this.store.suspendEvents();
                     this.store.loadRawData(row, true);
-                    this.store.resumeEvents();
-                    this.store.remove(this.store.data.first());
+                    if(this.updated_callback) {
+                        this.updated_callback(this);
+                    }
                 } else {
                     debug("ERROR: " + response.status);
                     debug(response);

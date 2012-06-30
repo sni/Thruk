@@ -25,7 +25,9 @@ Ext.define('TP.PanletChartGearman', {
         var now = new Date();
         this.store.suspendEvents();
         for(var i=this.xdata.nr_dots;i>=0;i--) {
-            var d = new Date(now.getTime() - i * 1000);
+            var v = now.getTime() - i * 1000 * this.xdata.refresh;
+            v = v - v%60000;
+            var d = new Date(v);
             this.store.loadRawData({
                 name:'service', worker:0, running:0, waiting:0, nr:i, date:d
             }, true);
@@ -35,9 +37,38 @@ Ext.define('TP.PanletChartGearman', {
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=gearman_stats&server=' + this.xdata.server;
 
+        this.updated_callback = function(panel) {
+            var chart = this.chart;
+            var minutes_to_show = Math.ceil(this.xdata.refresh * this.xdata.nr_dots / 60) * 1.5;
+            /* dynamically adjust minimum/maximum and ticks */
+            var max     = chart.store.max('date').getTime() / 1000;
+            var axis = chart.axes.getAt(1);
+            var min = max - minutes_to_show * 60;
+            if(minutes_to_show > 30) {
+                axis.majorTickSteps = minutes_to_show / 10;
+                axis.minorTickSteps = 10;
+                min = min - min%600 + 600;
+            }
+            else if(minutes_to_show > 10) {
+                axis.majorTickSteps = minutes_to_show / 5;
+                axis.minorTickSteps = 5;
+                min = min - min%300 + 300;
+            }
+            else if(minutes_to_show < 10) {
+                axis.majorTickSteps = minutes_to_show;
+                axis.minorTickSteps = 59;
+                min = min - min%60 + 60;
+            }
+            var mindate = min*1000;
+            while(this.store.data.first().get('date').getTime() < mindate) {
+                this.store.remove(this.store.data.first());
+            }
+            axis.minimum = mindate;
+            axis.maximum = mindate + minutes_to_show * 60000;
+        }
+
         /* add graph */
-        this.add({
-            xtype:  'chart',
+        this.chart = new Ext.chart.Chart({
             style:  'background:#fff',
             store:  this.store,
             shadow: true,
@@ -51,8 +82,8 @@ Ext.define('TP.PanletChartGearman', {
                 position:       'left',
                 fields:         ['worker', 'running', 'waiting'],
                 title:          'Service Queue',
-                minorTickSteps: 1,
                 majorTickSteps: 4,
+                minorTickSteps: 1,
                 decimals:       1,
                 grid: {
                     odd: {
@@ -63,13 +94,16 @@ Ext.define('TP.PanletChartGearman', {
                     }
                 }
             }, {
-                type: 'tp_time',
+                type: 'Numeric',
                 position: 'bottom',
                 fields: ['date'],
                 title: 'Mod-Gearman',
-                majorTickSteps: this.xdata.nr_dots,
+                majorTickSteps: 3,
+                minorTickSteps: 59,
                 label: {
                     renderer: function(val){
+                        // round to 1 minute
+                        val = val - val%60000;
                         var d = new Date(val);
                         return(Ext.Date.format(d, "H:i"));
                     }
@@ -104,6 +138,7 @@ Ext.define('TP.PanletChartGearman', {
                 }
             }]
         });
+        this.add(this.chart);
 
         this.down('form').add({
             fieldLabel: 'Gearman Daemon',
