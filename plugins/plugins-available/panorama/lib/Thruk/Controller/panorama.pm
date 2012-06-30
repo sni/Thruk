@@ -149,13 +149,16 @@ sub _gearman_stats {
 
     my $host = 'localhost';
     my $port = 4730;
+    if(defined $c->request->parameters->{'server'}) {
+        ($host,$port) = split(/:/mx, $c->request->parameters->{'server'}, 2);
+    }
 
     my $handle = IO::Socket::INET->new(
         Proto    => "tcp",
         PeerAddr => $host,
         PeerPort => $port,
     )
-    or die "can't connect to port $port on $host: $!";
+    or do { warn "can't connect to port $port on $host: $!"; return; };
     $handle->autoflush(1);
 
     print $handle "status\n";

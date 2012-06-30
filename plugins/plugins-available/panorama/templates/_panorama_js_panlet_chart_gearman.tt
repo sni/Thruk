@@ -36,7 +36,12 @@ Ext.define('TP.PanletChartGearman', {
 
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=gearman_stats&server=' + this.xdata.server;
-
+        this.formUpdatedCallback = function() {
+            this.xdata.url = 'panorama.cgi?task=gearman_stats&server=' + this.xdata.server;
+        };
+        this.getData = function(data) {
+            return data['service'];
+        };
         this.updated_callback = function(panel) {
             var chart = this.chart;
             var minutes_to_show = Math.ceil(this.xdata.refresh * this.xdata.nr_dots / 60 * 1.5);
