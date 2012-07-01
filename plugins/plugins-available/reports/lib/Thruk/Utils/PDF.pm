@@ -17,6 +17,8 @@ use strict;
 use Carp;
 use Data::Dumper;
 use File::Temp qw/tempfile/;
+use File::Slurp;
+use MIME::Base64;
 use Chart::Clicker;
 use Chart::Clicker::Data::DataSet;
 use Chart::Clicker::Data::Series;
@@ -393,6 +395,15 @@ sub get_url {
     if($url =~ m|^\w+\.cgi|gmx) {
         $url = '/thruk/cgi-bin/'.$url;
     }
+    if(defined $c->stash->{'param'}->{'theme'}) {
+        $url = $url.'&theme='.$c->stash->{'param'}->{'theme'};
+    }
+    if(defined $c->stash->{'param'}->{'minimal'} and $c->stash->{'param'}->{'minimal'} eq 'yes') {
+        $url = $url.'&minimal=1';
+    }
+    if(defined $c->stash->{'param'}->{'nav'} and $c->stash->{'param'}->{'nav'} eq 'no') {
+        $url = $url.'&nav=0';
+    }
     Thruk::Utils::CLI::_request_url($c, $url);
     my $result = $ENV{'HTTP_RESULT'};
     if(defined $result and defined $result->{'headers'}) {
@@ -413,6 +424,9 @@ sub get_url {
             if($url =~ m|^/thruk/cgi\-bin/([^\.]+)\.cgi|mx) {
                 $Thruk::Utils::PDF::attachment = $1.'.'.$ext;
             }
+        }
+        if($Thruk::Utils::PDF::ctype eq 'text/html') {
+            $result->{'result'} = _replace_css_and_images($result->{'result'});
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
@@ -902,6 +916,90 @@ sub _reduce_lables {
         return $newlables;
     }
     return $lables;
+}
+
+##########################################################
+sub _replace_css_and_images {
+    my $text = shift;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+    $text =~ s/<link[^>]*href=("|')([^'"]*\.css)("|')[^>]*>/&_replace_css($2)/gemx;
+    $text =~ s/<script[^>]*src=("|')([^'"]*\.js)("|')><\/script>/&_replace_js($2)/gemx;
+    $text =~ s/(<img[^>]*src=)
+               ("|')
+               ([^'"]*)
+               ("|')
+               ([^>]*>)
+               /&_replace_img($1,$2,$3,$4,$5)/gemx;
+    return $text;
+}
+
+##########################################################
+sub _replace_img {
+    my($a,$b,$url,$d,$e) = @_;
+    return "" if $url eq '';
+
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+
+    # dynamic images
+    if($url =~ m/^\w+\.cgi/mx) {
+        if($url =~ m|^\w+\.cgi|gmx) {
+            $url = '/thruk/cgi-bin/'.$url;
+        }
+        Thruk::Utils::CLI::_request_url($c, $url);
+        my $result = $ENV{'HTTP_RESULT'};
+        my $text = "data:image/png;base64,".encode_base64($result->{'result'}, '');
+        return $a.$b.$text.$d.$e;
+    }
+    # static images
+    elsif($url =~ m/\.(\w+)$/mx) {
+        my $data = _read_static_content_file($url);
+        my $text = "data:image/$1;base64,".encode_base64($data, '');
+        return $a.$b.$text.$d.$e;
+    }
+    croak("unknown image url: ".$a.$b.$url.$d.$e);
+    return "";
+}
+
+##########################################################
+sub _replace_css {
+    my $url = shift;
+    my $text = "<style type='text/css'>\n<!--\n";
+    $text .= _read_static_content_file($url);
+    $text .= "\n-->\n</style>\n";
+    return $text;
+}
+
+##########################################################
+sub _replace_js {
+    my $url = shift;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+    if(!defined $c->stash->{'param'}->{'js'} or $c->stash->{'param'}->{'js'} eq 'no') {
+        return "";
+    }
+    my $text = "<script type='text/javascript'>\n<!--\n";
+    $text .= _read_static_content_file($url);
+    $text .= "\n-->\n</script>\n";
+    return $text;
+}
+
+##############################################
+sub _read_static_content_file {
+    my $url = shift;
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+    $url =~ s|^.*/thruk/||gmx;
+    my $file;
+    if($url =~ m|^themes/|mx) {
+        $url =~ s|^themes/||gmx;
+        $file = $c->config->{'project_root'} . '/themes/themes-enabled/' . $url;
+    } else {
+        $file = $c->config->{'project_root'}."/root/thruk/".$url;
+    }
+    return '' if $url eq '';
+    if(-e $file) {
+        return read_file($file);
+    }
+    croak("_read_static_content_file($url) $file: $!");
+    return "";
 }
 
 ##############################################

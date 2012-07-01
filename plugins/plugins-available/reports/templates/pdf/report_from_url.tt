@@ -6,6 +6,7 @@
         { 'theme'   => [ 'Used Theme',          'themes', c.config.default_theme,   '(html only)' ] },
         { 'minimal' => [ 'Minmal Layout',       'yes_no', 'yes',                    '(html only)' ] },
         { 'nav'     => [ 'Include Navigation',  'yes_no', 'no',                     '(html only)' ] },
+        { 'js'      => [ 'Include Javascript',  'yes_no', 'no',                     '(html only)' ] },
     ];
   %]
 [% END %]
