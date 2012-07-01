@@ -396,14 +396,27 @@ sub get_url {
     Thruk::Utils::CLI::_request_url($c, $url);
     my $result = $ENV{'HTTP_RESULT'};
     if(defined $result and defined $result->{'headers'}) {
-        if(defined $result->{'headers'}->{'Content-Disposition'}) {
-            my $file = $result->{'headers'}->{'Content-Disposition'};
-            if($file =~ m/filename="(.*)"/) {
-                $Thruk::Utils::PDF::attachment = $1;
-            }
-        }
         $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
         $Thruk::Utils::PDF::ctype =~ s/;.*$//mx;
+        if(defined $result->{'headers'}->{'Content-Disposition'}) {
+            my $file = $result->{'headers'}->{'Content-Disposition'};
+            if($file =~ m/filename="(.*)"/mx) {
+                $Thruk::Utils::PDF::attachment = $1;
+            }
+        } else {
+            my $ext = 'dat';
+            if($Thruk::Utils::PDF::ctype eq 'text/html') {
+                $ext = 'html';
+            } elsif($Thruk::Utils::PDF::ctype =~ m|image/(.*)$|mx) {
+                $ext = $1;
+            }
+            if($url =~ m|^/thruk/cgi\-bin/([^\.]+)\.cgi|mx) {
+                $Thruk::Utils::PDF::attachment = $1.'.'.$ext;
+            }
+            #use Data::Dumper; print STDERR Dumper($result->{'headers'});
+            #use Data::Dumper; print STDERR Dumper($url);
+            #use Data::Dumper; print STDERR Dumper($Thruk::Utils::PDF::attachment);
+        }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
         binmode $fh;

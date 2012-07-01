@@ -78,6 +78,7 @@
       [% icon = 'page_white_acrobat.png' %]
       [% IF    r.var.ctype == 'application/x-msexcel' %][% icon = 'page_white_excel.png' %]
       [% ELSIF r.var.ctype == 'text/html'             %][% icon = 'page_world.png' %]
+      [% ELSIF r.var.ctype == 'image/png'             %][% icon = 'page_white_picture.png' %]
       [% ELSIF r.var.ctype != '' %][% icon = 'page_white_text.png' %]
       [% END %]
       <a href="reports.cgi?report=[% r.nr %]&amp;refresh=0"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
