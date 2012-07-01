@@ -117,9 +117,17 @@ sub report_edit {
     my($self, $c, $report_nr) = @_;
 
     my $r;
+    $c->stash->{'params'} = {};
     if($report_nr eq 'new') {
         $r = Thruk::Utils::Reports::_get_new_report($c);
         $r->{'backends'} = [ keys %{$c->stash->{'backend_detail'}} ];
+        for my $key (keys %{$c->{'request'}->{'parameters'}}) {
+            if($key =~ m/^params\.(.*)$/mx) {
+                $c->stash->{'params'}->{$1} = $c->{'request'}->{'parameters'}->{$key};
+            } else {
+                $r->{$key} = $c->{'request'}->{'parameters'}->{$key} if defined $c->{'request'}->{'parameters'}->{$key};
+            }
+        }
     } else {
         $r = Thruk::Utils::Reports::_read_report_file($c, $report_nr);
         if(!defined $r or $r->{'readonly'}) {
