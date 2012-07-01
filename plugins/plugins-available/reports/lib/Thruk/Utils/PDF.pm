@@ -413,9 +413,6 @@ sub get_url {
             if($url =~ m|^/thruk/cgi\-bin/([^\.]+)\.cgi|mx) {
                 $Thruk::Utils::PDF::attachment = $1.'.'.$ext;
             }
-            #use Data::Dumper; print STDERR Dumper($result->{'headers'});
-            #use Data::Dumper; print STDERR Dumper($url);
-            #use Data::Dumper; print STDERR Dumper($Thruk::Utils::PDF::attachment);
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
