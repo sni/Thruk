@@ -24,6 +24,9 @@
 <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
 <input type="hidden" name="action" value="edit2">
 <input type="hidden" name="report" value="[% r.nr %]">
+[% FOREACH k = params.keys %]
+<input type="hidden" name="params.[% k %]" value="[% params.$k %]">
+[% END %]
 <table border="1" class='data reports'>
   <tr>
     <th class='data' style="width:125px;"><a href='reports.cgi'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>

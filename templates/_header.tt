@@ -134,7 +134,18 @@
                 [% END %]
               </td>
             </tr>
-            [% END %]
+          [% END %]
+          [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
+            <tr>
+              <th>Report:</th>
+              <td>
+                <button onClick="window.location='reports.cgi?action=edit&report=new&template=report_from_url.tt&params.url=[% escape_html(short_uri(c)) %]'; return false;">
+                  <img src="[% url_prefix %]thruk/themes/[% theme %]/images/email_attach.png" ALIGN="absmiddle" width=12 height=12>
+                  Create E-Mail Report for this Page
+                </button>
+              </td>
+            </tr>
+          [% END %]
             <tr>
               <th>Page Refresh:</th>
               <td nowrap>
