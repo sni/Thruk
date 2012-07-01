@@ -21,11 +21,13 @@ Ext.define('TP.Panlet', {
 
         this.gearHandler = function() {
             if(this.gearitem.isHidden()) {
-                if(this.loader != undefined) { this.loader.loadMask = false }
+                if(this.loader != undefined) { this.loader.loadMaskOrig = this.loader.loadMask; this.loader.loadMask = false }
+                this.items.getAt(0).hide();
                 this.gearitem.down('form').getForm().reset();
                 this.gearitem.show();
             } else {
-                if(this.loader != undefined) { this.loader.loadMask = true }
+                if(this.loader != undefined) { this.loader.loadMask = this.loader.loadMaskOrig; }
+                this.items.getAt(0).show();
                 this.gearitem.hide();
             }
         };
@@ -35,6 +37,11 @@ Ext.define('TP.Panlet', {
                 handler: function() {
                     if(this.xdata.pinned) {
                         this.xdata.pinned = false;
+                        /* make sure panelet is now connected to the active tab */
+                        this.removeWindowFromPanels();
+                        var tabpan = Ext.getCmp('tabpan');
+                        tabpan.getActiveTab().window_ids.push(this.id);
+                        tabpan.saveState();
                     } else {
                         this.xdata.pinned = true;
                     }
@@ -174,14 +181,9 @@ Ext.define('TP.Panlet', {
         },
         destroy: function( This, eOpts ) {
             /* remove window from panels window ids */
-            var tabpan = Ext.getCmp('tabpan');
-            var win_id = this.id;
-            tabpan.items.each(function(panel) {
-                if(panel.window_ids) {
-                    panel.window_ids = TP.removeFromList(panel.window_ids, win_id);
-                    panel.saveState();
-                }
-            });
+            this.removeWindowFromPanels();
+
+            /* stop refreshing */
             window.clearInterval(this.interval);
             /* clear state information */
             cp.clear(this.id);
@@ -267,5 +269,16 @@ Ext.define('TP.Panlet', {
         this.pintool.setPosition(0,1);
         var head = Ext.get(this.id + '_header_hd');
         head.setPositioning({left:'20px'});
+    },
+    removeWindowFromPanels: function() {
+        /* remove panel reference */
+        var tabpan = Ext.getCmp('tabpan');
+        var win_id = this.id;
+        tabpan.items.each(function(panel) {
+            if(panel.window_ids) {
+                panel.window_ids = TP.removeFromList(panel.window_ids, win_id);
+                panel.saveState();
+            }
+        });
     }
 });
