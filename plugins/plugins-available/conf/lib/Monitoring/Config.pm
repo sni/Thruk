@@ -1169,8 +1169,8 @@ sub _check_file_changed {
     my $self = shift;
     my $file = shift;
 
-    if(!-f $file) {
-        cluck("$file: $!");
+    if(!-f $file->{'path'}) {
+        cluck(Dumper($file).": $!");
     }
 
     # mtime & inode
