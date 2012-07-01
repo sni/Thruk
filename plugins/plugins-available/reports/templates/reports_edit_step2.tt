@@ -60,7 +60,7 @@
   [% value   = default %]
   [% IF r.params.exists(key) %][% value = r.params.$key %][% END %]
   <tr>
-    <td class="dataEven" align="center" valign="top"><b>[% name %]</b></td>
+    <td class="dataEven" align="center" valign="top"><b>[% name %]</b>[% IF f.values.0.size > 3 %]<br><font size='-2'>[% f.values.0.3 %]</font>[% END %]</td>
     <td class="dataOdd" align="left" colspan=2>
       [% IF type == 'int' %]
         <input type="text" name="params.[% key %]" value="[% value %]">
@@ -230,7 +230,12 @@
             <td align="center"><input type="checkbox" name="params.[% key %]" value="notification_service"[% IF lookup.exists('notification_service') %] checked[% END %]></td><td>Service</td>
           </tr>
         </table>
-
+      [% ELSIF type == 'themes' %]
+        <select name='params.[% key %]'>
+          [% FOR t = themes %]
+          <option value="[% t %]"[% IF t == value %] selected[% END %]>[% t %]</option>
+          [% END %]
+        </select>
       [% ELSE %]
         <input type="text" name="params.[% key %]" value="[% value %]">
       [% END %]

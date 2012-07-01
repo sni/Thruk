@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use URI::Escape;
 use Data::Dumper;
 
 eval "use Test::Cmd";
@@ -28,8 +29,7 @@ TestUtils::test_command($test);
 my $hostgroup = (split(/\n/mx, $test->{'stdout'}))[0];
 isnt($hostgroup, undef, 'got test hostgroup') or BAIL_OUT("need test hostgroup");
 
-my $test_pdf_reports = [
-    {
+my $test_pdf_reports = [{
         'name'                  => 'Host',
         'template'              => 'sla_host.tt',
         'params.sla'            => 95,
@@ -37,7 +37,7 @@ my $test_pdf_reports = [
         'params.host'           => $host,
         'params.breakdown'      => 'months',
         'params.unavailable'    => [ 'down', 'unreachable' ],
-    },{
+    }, {
         'name'                  => 'Hostgroups by Day',
         'template'              => 'sla_hostgroup.tt',
         'params.timeperiod'     => 'last12months',
@@ -45,7 +45,7 @@ my $test_pdf_reports = [
         'params.hostgroup'      => $hostgroup,
         'params.breakdown'      => 'days',
         'params.unavailable'    => [ 'down', 'unreachable' ],
-    } ,{
+    }, {
         'name'                  => 'Day by Months',
         'template'              => 'sla_host.tt',
         'params.host'           => $host,
@@ -53,7 +53,12 @@ my $test_pdf_reports = [
         'params.timeperiod'     => 'today',
         'params.breakdown'      => 'months',
         'params.unavailable'    => [ 'down', 'unreachable' ],
-    },
+    }, {
+        'name'                  => 'Excel Report',
+        'type'                  => 'xls',
+        'template'              => 'report_from_url.tt',
+        'params.url'            => uri_escape('status.cgi?style=hostdetail&hostgroup=all&view_mode=xls'),
+    }
 ];
 
 for my $report (@{$test_pdf_reports}) {
@@ -69,14 +74,22 @@ for my $report (@{$test_pdf_reports}) {
         like => ['/^OK - report updated$/'],
     });
 
+    my $like = [];
+    if(!defined $report->{'type'} or $report->{'type'} eq 'pdf') {
+        $like = [ '/%PDF\-1\.4/', '/%%EOF/' ];
+    }
+    elsif($report->{'type'} eq 'xls') {
+        $like = [ '/Arial1/', '/Tahoma1/' ];
+    }
+
     # generate report
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999 --local',
-        like => [ '/%PDF\-1\.4/', '/%%EOF/' ],
-    });
+        like => $like,
+    }) or BAIL_OUT("failed");
     TestUtils::test_command({
         cmd  => $BIN.' -a report=9999',
-        like => [ '/%PDF\-1\.4/', '/%%EOF/' ],
+        like => $like,
     });
 
     # update report
