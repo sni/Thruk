@@ -37,19 +37,22 @@ Ext.define('TP.PanletChartGearman', {
                 this.refreshHandler();
             }
         };
+        this.updateQueues = true;
         this.getData = function(data) {
-            /* fill queue store */
-            this.queue_store.removeAll();
-            for(var key in data) {
-                var name = ucfirst(key);
-                if(name == 'Check_results') {
-                    name = 'Check Results';
-                } else{
-                    name = name.replace(/_/, ' ');
+            /* fill queue store, but only when not selected currently */
+            if(this.updateQueues) {
+                this.queue_store.removeAll();
+                for(var key in data) {
+                    var name = ucfirst(key);
+                    if(name == 'Check_results') {
+                        name = 'Check Results';
+                    } else{
+                        name = name.replace(/_/, ' ');
+                    }
+                    this.queue_store.loadRawData({name:name, value:key}, true);
                 }
-                this.queue_store.loadRawData({name:name, value:key}, true);
+                this.queue_store.sort('name');
             }
-            this.queue_store.sort('name');
             return data[this.xdata.queue];
         };
         this.updated_callback = function(panel) {
@@ -176,7 +179,11 @@ Ext.define('TP.PanletChartGearman', {
             valueField:   'value',
             displayField: 'name',
             queryMode:    'local',
-            store:        this.queue_store
+            store:        this.queue_store,
+            listeners: {
+                blur: function()  { var panel = Ext.getCmp(this.up('form').up('panel').up('panel').id); panel.updateQueues = true;  },
+                focus: function() { var panel = Ext.getCmp(this.up('form').up('panel').up('panel').id); panel.updateQueues = false; }
+            }
         });
     },
     fill_store: function() {

@@ -87,10 +87,10 @@ sub _stateprovider {
     if(defined $task and $task eq 'set') {
         my $data = Thruk::Utils::get_user_data($c);
         if($value eq 'null') {
-            $c->log->info("panorama: removed ".$name);
+            $c->log->debug("panorama: removed ".$name);
             delete $data->{'panorama'}->{'state'}->{$name};
         } else {
-            $c->log->info("panorama: set ".$name." to ".$self->_nice_ext_value($value));
+            $c->log->debug("panorama: set ".$name." to ".$self->_nice_ext_value($value));
             $data->{'panorama'}->{'state'}->{$name} = $value;
         }
         Thruk::Utils::store_user_data($c, $data);

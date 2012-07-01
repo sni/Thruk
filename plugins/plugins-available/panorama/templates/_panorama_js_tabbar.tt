@@ -5,7 +5,51 @@ Ext.define('TP.TabBar', {
     region:         'center',
     minTabWidth:    80,
     deferredRender: false,
-    stateful:    true,
+    stateful:       true,
+    tabBar:{
+        items:[{ xtype: 'tbfill' },{
+            title: '',
+            closable: false,
+            minWidth: 28,
+            iconCls: 'gear-tab',
+            menu: {
+                items: [{
+                        text: 'About',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
+                        handler: function() { TP.aboutWindow() }
+                    }, {
+                        text: 'Settings',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
+                        handler: function(m, e) {
+                            Ext.MessageBox.alert('TODO', 'No settings so far, suggestions welcome...');
+                        }
+                    }, '-', {
+                        text:    'Add Url Panlet',
+                        icon:    '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
+                    }, {
+                        text:   'Host / Service Performance',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletUrlTacPerf'}) }
+                    }, {
+                        text:   'Livestatus Metrics',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletUrlPerfLivestatus'}) }
+                    }, {
+                        text:   'Add Mod-Gearman Panlet',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
+                    }, '-' , {
+                        text:   'Exit Panorama View',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
+                        handler: function() {
+                            window.location = '../';
+                        }
+                    }
+                ]
+            }
+        }]
+    },
     getState:   function() {
         var item_ids = [];
         this.items.each(function(item, idx, length) {
@@ -38,47 +82,5 @@ Ext.define('TP.TabBar', {
         listeners: {
             beforeactivate: function() { return TP.add_pantab() }
         }
-    }],
-    tabBar:{
-        items:[{
-            xtype: 'tbfill'
-        },{
-            title: '',
-            closable: false,
-            minWidth: 28,
-            iconCls: 'gear-tab',
-            menu: {
-                items: [{
-                        text: 'Settings',
-                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
-                        handler: function(m, e) {
-                            Ext.MessageBox.alert('TODO', 'Not implemented yet');
-                        }
-                    }, '-', {
-                        text:    'Add Url Panlet',
-                        icon:    '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
-                    }, {
-                        text:   'Host / Service Performance',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletUrlTacPerf'}) }
-                    }, {
-                        text:   'Livestatus Metrics',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletUrlPerfLivestatus'}) }
-                    }, {
-                        text:   'Add Mod-Gearman Panlet',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
-                    }, '-' , {
-                        text:   'Exit Panorama View',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
-                        handler: function() {
-                            window.location = '../';
-                        }
-                    }
-                ]
-            }
-        }]
-    }
+    }]
 });

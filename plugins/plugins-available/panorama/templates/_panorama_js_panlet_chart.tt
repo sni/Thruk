@@ -49,7 +49,7 @@ Ext.define('TP.PanletChart', {
             renderer: 'data',
             scope:    this,
             url:      '',
-            loading: false,
+            loading:  false,
             listeners: {
                 'beforeload': function(This, options, eOpts) {
                     if(this.loading) {
@@ -58,6 +58,10 @@ Ext.define('TP.PanletChart', {
                     this.loading = true;
                     return true;
                 }
+            },
+            renderer: function(loader, response, active) {
+                // prevents loosing focus of form elements
+                return true;
             },
             callback: function(This, success, response, options) {
                 This.loading = false;
