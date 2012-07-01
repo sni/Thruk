@@ -379,6 +379,56 @@ sub get_events {
 
 ##########################################################
 
+=head2 get_url
+
+  get_url()
+
+save content from url
+
+=cut
+sub get_url {
+    my $c = $Thruk::Utils::PDF::c or die("not initialized!");
+
+    my $url = $c->stash->{'param'}->{'url'};
+    if($url =~ m|^\w+\.cgi|gmx) {
+        $url = '/thruk/cgi-bin/'.$url;
+    }
+    Thruk::Utils::CLI::_request_url($c, $url);
+    my $result = $ENV{'HTTP_RESULT'};
+    if(defined $result and defined $result->{'headers'}) {
+        $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
+        $Thruk::Utils::PDF::ctype =~ s/;.*$//mx;
+        if(defined $result->{'headers'}->{'Content-Disposition'}) {
+            my $file = $result->{'headers'}->{'Content-Disposition'};
+            if($file =~ m/filename="(.*)"/mx) {
+                $Thruk::Utils::PDF::attachment = $1;
+            }
+        } else {
+            my $ext = 'dat';
+            if($Thruk::Utils::PDF::ctype eq 'text/html') {
+                $ext = 'html';
+            } elsif($Thruk::Utils::PDF::ctype =~ m|image/(.*)$|mx) {
+                $ext = $1;
+            }
+            if($url =~ m|^/thruk/cgi\-bin/([^\.]+)\.cgi|mx) {
+                $Thruk::Utils::PDF::attachment = $1.'.'.$ext;
+            }
+            #use Data::Dumper; print STDERR Dumper($result->{'headers'});
+            #use Data::Dumper; print STDERR Dumper($url);
+            #use Data::Dumper; print STDERR Dumper($Thruk::Utils::PDF::attachment);
+        }
+        my $attachment = $c->stash->{'attachment'};
+        open(my $fh, '>', $attachment);
+        binmode $fh;
+        print $fh $result->{'result'};
+        Thruk::Utils::IO::close($fh, $attachment);
+
+    }
+    return 1;
+}
+
+##########################################################
+
 =head2 print_event_totals
 
   print_event_totals()

@@ -2,7 +2,7 @@
 [% IF block == 'mail' +%]
 SUBJECT: Report: [% r.name %]
 
-See attached availability report.
+Your report is attached.
 
 [%+ IF param.exists('hostgroup') +%]
 Hostgroup:         [% param.hostgroup %]
@@ -11,7 +11,9 @@ Host:              [% param.host %]
 [%+ ELSIF param.exists('service') +%]
 Service:           [% param.service %]
 [%+ END +%]
-Report Timeperiod: [% format_date(start, "%d.%m.%Y") %] - [% format_date((end - 1), "%d.%m.%Y") +%]
+[% IF start %]
+Report Timeperiod: [% format_date(start, "%d.%m.%Y") %] - [% format_date((end - 1), "%d.%m.%Y") %]
+[% END +%]
 
-[%+ r.desc %]
+[% IF r.desc %]Description: [%+ r.desc %][% END %]
 [%+ END %]

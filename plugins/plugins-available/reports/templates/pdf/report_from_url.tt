@@ -1,0 +1,17 @@
+[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'url'  => [ 'Create Report from Url',  'url', '' ] },
+    ];
+  %]
+[% END %]
+
+[%# PREPERATION #%]
+[% PROCESS 'pdf/defaults/prepare_nothing.tt' %]
+
+[%# RENDERING PDF #%]
+[% PROCESS 'pdf/defaults/render_url.tt' %]
+
+[%# SENDING MAIL #%]
+[% PROCESS 'pdf/defaults/mail.tt' %]

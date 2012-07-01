@@ -66,15 +66,22 @@ sub report_show {
         return $c->response->redirect('reports.cgi');
     }
 
-    my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+    my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
     if($refresh or ! -f $pdf_file) {
         generate_report($c, $nr, $report);
     }
     if(defined $pdf_file and -f $pdf_file) {
-        $c->stash->{'pdf_template'} = 'passthrough_pdf.tt';
-        $c->stash->{'pdf_file'}     = $pdf_file;
-        $c->stash->{'pdf_filename'} = $report->{'name'}.'.pdf'; # downloaded filename
-        $c->forward('View::PDF::Reuse');
+        if($report->{'var'}->{'attachment'}) {
+            $c->stash->{'text'}     = read_file($pdf_file);
+            $c->stash->{'template'} = 'passthrough.tt';
+            $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $report->{'var'}->{'attachment'} . q["] );
+            $c->res->content_type($report->{'var'}->{'ctype'}) if $report->{'var'}->{'ctype'};
+        } else {
+            $c->stash->{'pdf_template'} = 'passthrough_pdf.tt';
+            $c->stash->{'pdf_file'}     = $pdf_file;
+            $c->stash->{'pdf_filename'} = $report->{'name'}.'.pdf'; # downloaded filename
+            $c->forward('View::PDF::Reuse');
+        }
     }
     return 1;
 }
@@ -99,12 +106,13 @@ sub report_send {
     # make report available in template
     $c->stash->{'r'} = $report;
 
-    my $pdf_file = generate_report($c, $nr, $report);
-    if(defined $pdf_file) {
+    my $attachment = generate_report($c, $nr, $report);
+    if(defined $attachment) {
 
         $c->stash->{'block'} = 'mail';
         my $mailtext;
         eval {
+            $c->stash->{'start'} = '' unless defined $c->stash->{'start'};
             $mailtext = $c->view("View::TT")->render($c, $c->stash->{'pdf_template'});
         };
         if($@) {
@@ -151,11 +159,20 @@ sub report_send {
         $msg->attach(Type     => 'TEXT',
                      Data     => $mailbody,
         );
-        $msg->attach(Type    => 'application/pdf',
-                 Path        => $pdf_file,
-                 Filename    => 'report.pdf',
-                 Disposition => 'attachment',
-        );
+
+        if($report->{'var'}->{'attachment'}) {
+            $msg->attach(Type    => $report->{'var'}->{'ctype'},
+                     Path        => $attachment,
+                     Filename    => $report->{'var'}->{'attachment'},
+                     Disposition => 'attachment',
+            );
+        } else {
+            $msg->attach(Type    => 'application/pdf',
+                     Path        => $attachment,
+                     Filename    => 'report.pdf',
+                     Disposition => 'attachment',
+            );
+        }
         return 1 if $msg->send;
     }
     Thruk::Utils::set_message( $c, 'fail_message', 'failed to send report' );
@@ -205,7 +222,7 @@ sub report_remove {
 
     my @files;
     push @files, $c->config->{'var_path'}.'/reports/'.$nr.'.rpt' if -e $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
-    push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+    push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
     push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.log' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     return 1 if unlink @files;
 
@@ -228,6 +245,8 @@ sub generate_report {
     my($c, $nr, $options) = @_;
     $Thruk::Utils::PDF::c = $c;
     $Thruk::Utils::CLI::c = $c;
+    $Thruk::Utils::PDF::attachment = '';
+    $Thruk::Utils::PDF::ctype      = '';
 
     $c->stash->{'tmp_files_to_delete'} = [];
 
@@ -235,20 +254,22 @@ sub generate_report {
     $options = _read_report_file($c, $nr) unless defined $options;
     return unless defined $options;
 
-    my $pdf_file = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
+    Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/reports/');
+    my $attachment = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+    $c->stash->{'attachment'} = $attachment;
 
     # report is already beeing generated
     if($options->{'var'}->{'is_running'} > 0) {
         while($options->{'var'}->{'is_running'} > 0) {
             if(kill(0, $options->{'var'}->{'is_running'}) != 1) {
-                unlink($pdf_file);
+                unlink($attachment);
                 last;
             }
             sleep 1;
         }
         # just wait till its finished and return
-        if(-e $pdf_file) {
-            return $pdf_file;
+        if(-e $attachment) {
+            return $attachment;
         }
     }
 
@@ -296,7 +317,7 @@ sub generate_report {
         $c->stash->{$s} = \&{'Thruk::Utils::PDF::'.$s};
     }
 
-    # prepare pdf
+    # prepare report
     $c->stash->{'pdf_template'} = 'pdf/'.$options->{'template'};
     $c->stash->{'block'} = 'prepare';
     eval {
@@ -307,23 +328,24 @@ sub generate_report {
         return $c->detach('/error/index/13');
     }
 
-    # render pdf
+    # render report
     $c->stash->{'block'} = 'render';
-    my $pdf_data;
+    my $attach_data;
     eval {
-        $pdf_data = $c->view("PDF::Reuse")->render_pdf($c);
+        $attach_data = $c->view("PDF::Reuse")->render_pdf($c);
     };
     if($@) {
         Thruk::Utils::CLI::_error($@);
         return $c->detach('/error/index/13');
     }
 
-    # write out pdf
-    Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/reports/');
-    open($fh, '>', $pdf_file);
-    binmode $fh;
-    print $fh $pdf_data;
-    Thruk::Utils::IO::close($fh, $pdf_file);
+    # write out attachment
+    if($Thruk::Utils::PDF::attachment eq '') {
+        open($fh, '>', $attachment);
+        binmode $fh;
+        print $fh $attach_data;
+        Thruk::Utils::IO::close($fh, $attachment);
+    }
 
     # clean up tmp files
     for my $file (@{$c->stash->{'tmp_files_to_delete'}}) {
@@ -334,7 +356,7 @@ sub generate_report {
     set_running($c, $nr, 0, undef, time());
 
     $c->stats->profile(end => "Utils::Reports::generate_report()");
-    return $pdf_file;
+    return $attachment;
 }
 
 ##########################################################
@@ -420,6 +442,8 @@ sub set_running {
     $options->{'var'}->{'is_running'} = $val;
     $options->{'var'}->{'start_time'} = $start if defined $start;
     $options->{'var'}->{'end_time'}   = $end   if defined $end;
+    $options->{'var'}->{'attachment'} = $Thruk::Utils::PDF::attachment if defined $Thruk::Utils::PDF::attachment;
+    $options->{'var'}->{'ctype'}      = $Thruk::Utils::PDF::ctype      if defined $Thruk::Utils::PDF::ctype;
     _report_save($c, $nr, $options);
     return;
 }
@@ -506,12 +530,14 @@ sub _read_report_file {
     }
 
     # add some runtime information
-    my $rfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.pdf';
-    $report->{'var'}->{'pdf_exists'} = 0;
-    $report->{'var'}->{'pdf_exists'} = 1 if -f $rfile;
-    $report->{'var'}->{'is_running'} = 0 unless defined $report->{'var'}->{'is_running'};
-    $report->{'var'}->{'start_time'} = 0 unless defined $report->{'var'}->{'start_time'};
-    $report->{'var'}->{'end_time'}   = 0 unless defined $report->{'var'}->{'end_time'};
+    my $rfile = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+    $report->{'var'}->{'file_exists'} = 0;
+    $report->{'var'}->{'file_exists'} = 1  if -f $rfile;
+    $report->{'var'}->{'is_running'}  = 0  unless defined $report->{'var'}->{'is_running'};
+    $report->{'var'}->{'start_time'}  = 0  unless defined $report->{'var'}->{'start_time'};
+    $report->{'var'}->{'end_time'}    = 0  unless defined $report->{'var'}->{'end_time'};
+    $report->{'var'}->{'ctype'}       = '' unless defined $report->{'var'}->{'ctype'};
+    $report->{'var'}->{'attachment'}  = '' unless defined $report->{'var'}->{'attachment'};
     $report->{'desc'}       = '' unless defined $report->{'desc'};
     $report->{'to'}         = '' unless defined $report->{'to'};
     $report->{'cc'}         = '' unless defined $report->{'cc'};

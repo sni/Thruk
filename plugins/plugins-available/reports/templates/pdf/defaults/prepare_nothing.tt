@@ -1,0 +1,4 @@
+[%# PREPERATION #%]
+[% IF block == 'prepare' %]
+  [%# do nothing #%]
+[% END %]
