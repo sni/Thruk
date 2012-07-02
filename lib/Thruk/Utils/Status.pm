@@ -709,6 +709,7 @@ sub single_search {
             push @servicefilter, { latency => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'execution time' ) {
+            $value = Thruk::Utils::Status::convert_time_amount($value);
             push @hostfilter,    { execution_time => { $op => $value } };
             push @servicefilter, { execution_time => { $op => $value } };
         }
@@ -1592,10 +1593,10 @@ possible conversions are
 sub convert_time_amount {
     my $value = shift;
     if($value =~ m/^(\d+)(w|d|h|m)/gmx) {
-        if($2 eq 'w') { return $1 * 604800; }
-        if($2 eq 'd') { return $1 * 86400; }
-        if($2 eq 'h') { return $1 * 3600; }
-        if($2 eq 'm') { return $1 * 60; }
+        if($2 eq 'w') { return $1 * 604800; }   # weeks
+        if($2 eq 'd') { return $1 * 86400; }    # days
+        if($2 eq 'h') { return $1 * 3600; }     # hours
+        if($2 eq 'm') { return $1 * 60; }       # minutes
     }
     return $value;
 }

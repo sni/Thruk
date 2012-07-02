@@ -2182,6 +2182,17 @@ function verify_op(event) {
       }
     }
   }
+
+  input.title = undefined;
+  if(selValue == 'duration') {
+    input.title = "Duration: Input type is seconds. You may use w (week) or d (day), h (hour) or m (minutes). Ex.: 10m for 10 minutes.";
+  }
+  if(selValue == 'downtime duration') {
+    input.title = "Downtime Duration: Input type is seconds. You may use w (week) or d (day), h (hour) or m (minutes). Ex.: 10m for 10 minutes.";
+  }
+  if(selValue == 'execution time') {
+    input.title = "Execution Time: Input type is seconds. You may use w (week) or d (day), h (hour) or m (minutes). Ex.: 10m for 10 minutes.";
+  }
 }
 
 /* select option from a select by value*/
