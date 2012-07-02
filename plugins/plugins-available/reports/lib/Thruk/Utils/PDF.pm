@@ -404,6 +404,7 @@ sub get_url {
     if(defined $c->stash->{'param'}->{'nav'} and $c->stash->{'param'}->{'nav'} eq 'no') {
         $url = $url.'&nav=0';
     }
+
     Thruk::Utils::CLI::_request_url($c, $url);
     my $result = $ENV{'HTTP_RESULT'};
     if(defined $result and defined $result->{'headers'}) {
@@ -937,6 +938,8 @@ sub _replace_css_and_images {
 sub _replace_img {
     my($a,$b,$url,$d,$e) = @_;
     return "" if $url eq '';
+    # skip some images
+    return "" if $url =~ m/waiting\.gif$/mx;
 
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");
 

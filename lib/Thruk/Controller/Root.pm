@@ -240,7 +240,8 @@ sub begin : Private {
     $c->stash->{hidetop} = $c->{'request'}->{'parameters'}->{'hidetop'} || '';
 
     # minmal custom monitor screen
-    $c->stash->{minimal} = $c->{'request'}->{'parameters'}->{'minimal'} || '';
+    $c->stash->{minimal}         = $c->{'request'}->{'parameters'}->{'minimal'} || '';
+    $c->stash->{show_nav_button} = 0 if $c->stash->{minimal};
 
     # initialize our backends
     unless ( defined $c->{'db'} ) {

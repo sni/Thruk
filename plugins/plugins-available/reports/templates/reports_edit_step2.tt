@@ -237,7 +237,7 @@
           [% END %]
         </select>
       [% ELSE %]
-        <input type="text" name="params.[% key %]" value="[% value %]">
+        <input type="text" name="params.[% key %]" value="[% escape_html(value) %]">
       [% END %]
     </td>
   </tr>
