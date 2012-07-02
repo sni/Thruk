@@ -77,10 +77,11 @@ my( $self, $c ) = @_;
     # set some defaults
     Thruk::Utils::Status::set_default_stash($c);
 
-    $c->stash->{title}        = 'Current Network Status';
-    $c->stash->{infoBoxTitle} = 'Current Network Status';
-    $c->stash->{page}         = 'status';
-    $c->stash->{style}        = $style;
+    $c->stash->{title}         = 'Current Network Status';
+    $c->stash->{infoBoxTitle}  = 'Current Network Status';
+    $c->stash->{page}          = 'status';
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{style}         = $style;
 
     $c->stash->{substyle}     = undef;
 

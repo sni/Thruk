@@ -69,10 +69,11 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $style = $self->_process_search_request($c);
     }
 
-    $c->stash->{title}        = 'Current Network Status';
-    $c->stash->{infoBoxTitle} = 'Current Network Status';
-    $c->stash->{page}         = 'status';
-    $c->stash->{style}        = $style;
+    $c->stash->{title}         = 'Current Network Status';
+    $c->stash->{infoBoxTitle}  = 'Current Network Status';
+    $c->stash->{page}          = 'status';
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{style}         = $style;
 
     $c->stash->{substyle}     = undef;
     if($c->stash->{'hostgroup'}) {

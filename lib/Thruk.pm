@@ -139,6 +139,7 @@ my %config = ('name'                   => 'Thruk',
                                           'paneprefix'     => 'dfl_',   # used in _status_filter.tt
                                           'sortprefix'     => '',       # used in _status_detail_table.tt / _status_hostdetail_table.tt
                                           'show_form'      => '1',      # used in _status_filter.tt
+                                          'show_top_pane'  => 0,        # used in _header.tt on status pages
                                           'thruk_debug'    => 0,
                                           'all_in_one_css' => 0,
                                           'hide_backends_chooser' => 0,

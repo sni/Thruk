@@ -121,10 +121,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $coder = JSON::XS->new->utf8->shrink;   # shortest possible
     $c->stash->{json}         = $coder->encode($json);
 
-    $c->stash->{title}        = 'Network Map';
-    $c->stash->{page}         = 'statusmap';
-    $c->stash->{template}     = 'statusmap.tt';
-    $c->stash->{infoBoxTitle} = 'Network Map For All Hosts';
+    $c->stash->{title}         = 'Network Map';
+    $c->stash->{page}          = 'statusmap';
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{template}      = 'statusmap.tt';
+    $c->stash->{infoBoxTitle}  = 'Network Map For All Hosts';
 
     return 1;
 }
