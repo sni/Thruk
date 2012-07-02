@@ -288,10 +288,7 @@ sub generate_report {
 
     if(defined $options->{'backends'}) {
         $options->{'backends'} = ref $options->{'backends'} eq 'ARRAY' ? $options->{'backends'} : [ $options->{'backends'} ];
-        if(scalar @{$options->{'backends'}} > 0) {
-            $c->{'db'}->disable_backends();
-            $c->{'db'}->enable_backends($options->{'backends'});
-        }
+        $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}});
     }
 
     # set some defaults

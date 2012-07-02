@@ -282,7 +282,7 @@ sub _run_commands {
     }
     # set backends from options
     if(defined $opt->{'backends'} and scalar @{$opt->{'backends'}} > 0) {
-        Thruk::Action::AddDefaults::_set_env_backends($c, $opt->{'backends'});
+        Thruk::Action::AddDefaults::_set_enabled_backends($c, $opt->{'backends'});
     }
 
     my $data = {

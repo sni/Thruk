@@ -97,7 +97,7 @@ sub add_defaults {
     $cached_data = $cache->get($c->stash->{'remote_user'}) if defined $c->stash->{'remote_user'};
 
     ###############################
-    my($disabled_backends,$has_groups) = _set_enabled_backends($c, $cache);
+    my($disabled_backends,$has_groups) = _set_enabled_backends($c);
 
     ###############################
     # add program status
@@ -141,21 +141,6 @@ sub add_defaults {
     _set_possible_backends($c, $disabled_backends);
 
     ###############################
-    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
-    $c->stash->{'param_backend'}  = $backend;
-    if($backend ne '' and defined $c->{'db'}) {
-        my $backends = {};
-        for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
-            $backends->{$b} = 1;
-        }
-
-        $c->{'db'}->disable_backends();
-        $c->{'db'}->enable_backends($backends);
-    }
-
-    # override with env backends (if set)
-    _set_env_backends($c);
-
     if(!defined $c->stash->{'pi_detail'} and _any_backend_enabled($c)) {
         $c->log->error("got no result from any backend, please check backend connection and logfiles");
         return $c->detach('/error/index/9');
@@ -400,18 +385,59 @@ sub _set_processinfo {
 
 ########################################
 sub _set_enabled_backends {
-    my($c, $cache) = @_;
+    my($c, $backends) = @_;
 
     # first all backends are enabled
     if(defined $c->{'db'}) {
         $c->{'db'}->enable_backends();
     }
 
-    ###############################
-    # get backend object
+    my $backend  = $c->{'request'}->{'parameters'}->{'backend'} || '';
+    $c->stash->{'param_backend'}  = $backend;
     my $disabled_backends = {};
     my $num_backends      = @{$c->{'db'}->get_peers()};
-    if($num_backends > 1 and defined $c->request->cookie('thruk_backends')) {
+
+    ###############################
+    # by args
+    if(defined $backends) {
+        # reset
+        $disabled_backends = {};
+        for my $peer (@{$c->{'db'}->get_peers()}) {
+            $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
+        }
+        for my $b (split(/,/mx, $backends)) {
+            $disabled_backends->{$b} = 0;
+        }
+    }
+    ###############################
+    # by env
+    elsif(defined $ENV{'THRUK_BACKENDS'}) {
+        # reset
+        $disabled_backends = {};
+        for my $peer (@{$c->{'db'}->get_peers()}) {
+            $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
+        }
+        for my $b (split(/,/mx, $ENV{'THRUK_BACKENDS'})) {
+            $disabled_backends->{$b} = 0;
+        }
+    }
+
+    ###############################
+    # by param
+    elsif($backend ne '') {
+        # reset
+        $disabled_backends = {};
+        for my $peer (@{$c->{'db'}->get_peers()}) {
+            $disabled_backends->{$peer->{'key'}} = 2;  # set all hidden
+        }
+        for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
+            $disabled_backends->{$b} = 0;
+        }
+    }
+
+    ###############################
+    # by cookie
+    elsif($num_backends > 1 and defined $c->request->cookie('thruk_backends')) {
         for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -422,6 +448,8 @@ sub _set_enabled_backends {
         $disabled_backends = $c->{'db'}->disable_hidden_backends($disabled_backends);
     }
 
+    ###############################
+    # groups affected?
     my $has_groups = 0;
     if(defined $c->{'db'}) {
         for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -436,29 +464,14 @@ sub _set_enabled_backends {
 
     # renew state of connections
     if($c->config->{'check_local_states'}) {
-        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($cache, $disabled_backends);
+        $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($c->cache, $disabled_backends);
     }
 
+    if(defined $backends) {
+        _set_possible_backends($c, $disabled_backends);
+    }
     return($disabled_backends, $has_groups);
 }
-
-########################################
-sub _set_env_backends {
-    my($c, $opt_backends) = @_;
-    $opt_backends = $ENV{'THRUK_BACKENDS'} unless defined $opt_backends;
-    if(defined $opt_backends) {
-        my $backends = {};
-        for my $b (ref $opt_backends eq 'ARRAY' ? @{$opt_backends} : split(/,/mx, $opt_backends)) {
-            $backends->{$b} = 1;
-        }
-
-        $c->{'db'}->disable_backends();
-        $c->{'db'}->enable_backends($backends);
-        return 1;
-    }
-    return;
-}
-
 
 ########################################
 __PACKAGE__->meta->make_immutable;
