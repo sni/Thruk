@@ -94,7 +94,7 @@ sub format_cronentry {
         $cron = sprintf("every %s%s at %02s:%02s", $cr->{'day'}, $app, $cr->{'hour'}, $cr->{'minute'});
     }
     elsif($cr->{'type'} eq 'week') {
-        if($cr->{'week_day'}) {
+        if(defined $cr->{'week_day'} and $cr->{'week_day'} ne '') {
             my @days;
             my @daynr = split/,/mx, $cr->{'week_day'};
             my $lastconcated = [];
@@ -1214,7 +1214,7 @@ sub get_cron_time_entry {
         $cron = sprintf("% 2s % 2s % 2s  *  *", $cr->{'minute'}, $cr->{'hour'}, $cr->{'day'});
     }
     elsif($cr->{'type'} eq 'week') {
-        if($cr->{'week_day'}) {
+        if(defined $cr->{'week_day'} and $cr->{'week_day'} ne '') {
             $cron = sprintf("% 2s % 2s  *  * % 2s", $cr->{'minute'}, $cr->{'hour'}, $cr->{'week_day'});
         }
     }

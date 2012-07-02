@@ -189,6 +189,7 @@ sub _process_outagespbimp {
     $c->stash->{title}          = 'Problems and Impacts';
     $c->stash->{infoBoxTitle}   = 'Problems and Impacts';
     $c->stash->{page}           = 'status';
+    $c->stash->{show_top_pane}  = 1;
     $c->stash->{template}       = 'shinken_outagespbimp.tt';
 
     return 1;
@@ -200,11 +201,12 @@ sub _process_outagespbimp {
 sub _process_bothtypes_page {
     my( $self, $c ) = @_;
 
-    $c->stash->{title}        = 'Current Network Status';
-    $c->stash->{infoBoxTitle} = 'Current Network Status';
-    $c->stash->{page}         = 'status';
-    $c->stash->{style}        = 'bothtypes';
-    $c->stash->{template}     = 'shinken_status_bothtypes.tt';
+    $c->stash->{title}         = 'Current Network Status';
+    $c->stash->{infoBoxTitle}  = 'Current Network Status';
+    $c->stash->{page}          = 'status';
+    $c->stash->{show_top_pane} = 1;
+    $c->stash->{style}         = 'bothtypes';
+    $c->stash->{template}      = 'shinken_status_bothtypes.tt';
 
     # which host to display?
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c);

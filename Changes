@@ -2,9 +2,11 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.36     not yet released
           - reports can now be created for every page (html, xls, ...)
+          - allow human readable values for duration filter like 5h or 10m
           - check version when using the check for updates link
           - clean up menu (don't show grid links in extra row)
           - Bug Fixes
+            - recurring downtimes: fixed adding downtimes on sunday
             - config tool: allowed hostgroups with register 0
 
 1.34     Tue Jun 19 17:38:46 CEST 2012
