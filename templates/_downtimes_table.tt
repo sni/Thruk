@@ -34,7 +34,7 @@
       <td class='[% class %]'>[% date_format(c, d.start_time) %]</td>
       <td class='[% class %]'>[% date_format(c, d.end_time) %]</td>
       <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</td>
-      <td class='[% class %]'>[% duration(d.end_time - d.start_time) %]</td>
+      <td class='[% class %]'>[% IF d.fixed %][% duration(d.end_time - d.start_time) %][% ELSE%][% duration(d.duration) %][% END %]</td>
       <td class='[% class %]'>[% d.id %]</td>
       <td class='[% class %]'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
       [% IF type == 'host' %]
