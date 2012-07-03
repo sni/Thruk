@@ -24,36 +24,8 @@
     [% UNLESS c.config.command_disabled.exists('55') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='extinfo.cgi?type=6&amp;recurring=add_host'>Add recurring host downtime</a></div><br>
     [% END %]
-    <div align="center">
-      <table border="0" class='downtime' style="min-width: 700px;">
-        <tr class='downtime'>
-          <th class='downtime'>Host Name</th>
-          <th class='downtime'>Schedule</th>
-          <th class='downtime'>Duration</th>
-          <th class='downtime'>Comment</th>
-          <th class='downtime'>Actions</th>
-        </tr>
-        [% hostdowntimes = 0 %]
-        [%  FOREACH d = downtimes %]
-        [% NEXT IF d.service %]
-        [% hostdowntimes = hostdowntimes + 1 %]
-        [% SET class = 'downtimeOdd' IF loop.even %]
-        [% SET class = 'downtimeEven'  IF loop.odd %]
-        <tr class='[% class %]'>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a></td>
-          <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
-          <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;recurring=edit&amp;host=[% d.host | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
-        </tr>
-        [% END %]
-        [% IF hostdowntimes == 0 %]
-        <tr class='downtimeOdd'>
-          <td class='downtimeOdd' colspan="12">There are no recurring host downtimes</td>
-        </tr>
-        [% END %]
-      </table>
-    </div><br>
+    [% PROCESS _downtimes_recurring_table.tt downtimes = downtimes type='host' names=1 %]
+    <br>
     <br>
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
@@ -61,38 +33,7 @@
     [% UNLESS c.config.command_disabled.exists('56') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='extinfo.cgi?type=6&amp;recurring=add_service'>Add recurring service downtime</a></div><br>
     [% END %]
-    <div align="center">
-      <table border="0" class='downtime' style="min-width: 700px;">
-        <tr class='downtime'>
-          <th class='downtime'>Host Name</th>
-          <th class='downtime'>Service</th>
-          <th class='downtime'>Schedule</th>
-          <th class='downtime'>Duration</th>
-          <th class='downtime'>Comment</th>
-          <th class='downtime'>Actions</th>
-        </tr>
-        [% servicedowntimes = 0 %]
-        [%  FOREACH d = downtimes %]
-        [% NEXT IF ! d.service %]
-        [% servicedowntimes = servicedowntimes + 1 %]
-        [% SET class = 'downtimeOdd' IF loop.even %]
-        [% SET class = 'downtimeEven'  IF loop.odd %]
-        <tr class='[% class %]'>
-          <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host | uri %]'>[% d.host %]</a></td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=2&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'>[% d.service %]</a></td>
-          <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
-          <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
-          <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
-          <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;recurring=edit&amp;host=[% d.host | uri %]&amp;service=[% d.service | uri %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
-        </tr>
-        [% END %]
-        [% IF servicedowntimes == 0 %]
-        <tr class='downtimeOdd'>
-          <td class='downtimeOdd' colspan="13">There are no recurring service downtimes</td>
-        </tr>
-        [% END %]
-      </table>
-    </div>
-<br><br>
+    [% PROCESS _downtimes_recurring_table.tt downtimes = downtimes type='service' names=1 %]
+    <br><br>
 
 [% PROCESS _footer.tt %]

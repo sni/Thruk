@@ -86,6 +86,21 @@
       <input type="text" name="duration" value="[% rd.duration %]">
     </td>
   </tr>
+  <tr>
+    <td class='dataEven'>Type:</td>
+    <td class="dataOdd" align="left" colspan=2>
+      <select name='fixed'>
+        <option value="1"[% IF rd.fixed == "1" %] selected[% END %]>Fixed </option>
+        <option value="0"[% IF rd.fixed == "0" %] selected[% END %]>Flexible </option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>If Flexible, Range<br>(in minutes)</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <input type="text" name="flex_range" value="[% rd.flex_range %]">
+    </td>
+  </tr>
   [% IF task == 'add_host' OR (task == 'edit' AND !rd.service ) %]
   <tr>
     <td class="dataEven" align="center"><b>Child Hosts:</b></td>

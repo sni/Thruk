@@ -1389,6 +1389,24 @@ sub _parse_date {
     return $timestamp;
 }
 
+##########################################################
+# return default recurring downtime
+sub _get_default_recurring_downtime {
+    my($c, $host, $service) = @_;
+    my $default_rd = {
+            host         => $host,
+            service      => $service,
+            backends     => $c->{'db'}->peer_key(),
+            schedule     => [],
+            duration     => 120,
+            comment      => 'automatic downtime',
+            childoptions => 0,
+            fixed        => 1,
+            flex_range   => 720,
+    };
+    return($default_rd);
+}
+
 ##############################################
 
 1;

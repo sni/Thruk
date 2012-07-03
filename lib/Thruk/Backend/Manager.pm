@@ -730,7 +730,9 @@ sub _do_on_peers {
                     $backends->{$b} = 1;
                 }
             } else {
-                $backends->{$arg{'backend'}} = 1;
+                for my $b (split(/,/mx,$arg{'backend'})) {
+                    $backends->{$b} = 1;
+                }
             }
         }
     }
