@@ -254,7 +254,8 @@ sub _from_fcgi {
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
     $Thruk::Utils::CLI::c       = $c;
     local $ENV{'THRUK_SRC'}     = 'CLI';
-    $c->stash->{'remote_user'}  = $data->{'options'}->{'auth'} if defined $data->{'options'}->{'auth'};
+    $c->stash->{'remote_user'}  = $data->{'options'}->{'auth'} || $c->config->{'default_cli_user_name'};
+    $c->authenticate();
 
     # check credentials
     my $res = {};
