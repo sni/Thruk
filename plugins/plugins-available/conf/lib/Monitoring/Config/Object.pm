@@ -54,7 +54,30 @@ $Monitoring::Config::Object::Types = [
 
 =head2 new
 
-return a new object of given type
+    new({
+        coretype => coretype,  # can be nagios, icinga or shinken
+        type     => type,
+        line     => nr,
+        file     => file object,
+        name     => name
+    })
+
+return a new L<object|Monitoring::Config::Object::Parent> of given type. Type can be any of the following:
+    L<host|Monitoring::Config::Object::Host>
+    L<hostgroup|Monitoring::Config::Object::Hostgroup>
+    L<hostextinfo|Monitoring::Config::Object::Hostextinfo>
+    L<hostdependency|Monitoring::Config::Object::Hostdependency>
+    L<hostescalation|Monitoring::Config::Object::Hostescalation>
+    L<service|Monitoring::Config::Object::Service>
+    L<servicegroup|Monitoring::Config::Object::Servicegroup>
+    L<serviceextinfo|Monitoring::Config::Object::Serviceextinfo>
+    L<servicedependency|Monitoring::Config::Object::Servicedependency>
+    L<serviceescalation|Monitoring::Config::Object::Serviceescalation>
+    L<command|Monitoring::Config::Object::Command>
+    L<timeperiod|Monitoring::Config::Object::Timeperiod>
+    L<contact|Monitoring::Config::Object::Contact>
+    L<contactgroup|Monitoring::Config::Object::Contactgroup>
+    L<module|Monitoring::Config::Object::Module>
 
 =cut
 sub new {
@@ -106,7 +129,6 @@ sub new {
 
 
 ##########################################################
-
 
 =head1 AUTHOR
 
