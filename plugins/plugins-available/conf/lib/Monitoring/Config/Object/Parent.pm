@@ -79,6 +79,60 @@ sub parse {
 
 ##########################################################
 
+=head2 as_text
+
+in scalar context returns this object as text.
+
+in list context, returns [$text, $nr_comment_lines, $nr_object_lines]
+
+=cut
+sub as_text {
+    my($self) = @_;
+
+    # save comments
+    my $text             = "";
+    my $nr_object_lines  = 0;
+    for my $line (@{$self->{'comments'}}) {
+        $line =~ s/^#\s+//gmxo;
+        $line =~ s/^;\s+//gmxo;
+        unless(substr($line,0,1) eq '#' or substr($line,0,1) eq ';') {
+            $line = '# '.$line;
+        }
+        $line =~ s/\s+$//gmx;
+        $text .= $line."\n";
+    }
+    my $nr_comment_lines = scalar @{$self->{'comments'}};
+
+    # save object itself
+    $text .= "define ".$self->{'type'}." {\n"; $nr_object_lines++;
+
+    for my $key (@{$self->get_sorted_keys()}) {
+        my $value;
+        if(defined $self->{'default'}->{$key}
+            and ($self->{'default'}->{$key}->{'type'} eq 'LIST'
+              or $self->{'default'}->{$key}->{'type'} eq 'ENUM'
+            )
+        ) {
+            $value = join(',', @{$self->{'conf'}->{$key}});
+        } else {
+            $value = $self->{'conf'}->{$key};
+        }
+        # empty values are valid syntax
+        $value = '' unless defined $value;
+        $text .= sprintf "  %-30s %s\n", $key, $value;
+        $nr_object_lines++
+    }
+    $text .= "}\n\n";
+    $nr_object_lines += 2;
+
+    if(wantarray) {
+        return($text, $nr_comment_lines, $nr_object_lines);
+    }
+    return $text;
+}
+
+##########################################################
+
 =head2 is_template
 
 returns 1 if this is a template
