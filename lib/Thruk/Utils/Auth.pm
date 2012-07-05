@@ -43,6 +43,11 @@ sub get_auth_filter {
         return;
     }
 
+    # no user at all, for example when used by cli
+    unless ($c->user_exists) {
+        return;
+    }
+
     if($strict and $type ne 'hosts' and $type ne 'services') {
         croak("strict authorization not implemented for: ".$type);
     }

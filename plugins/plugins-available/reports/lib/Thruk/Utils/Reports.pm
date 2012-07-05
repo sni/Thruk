@@ -254,6 +254,9 @@ sub generate_report {
     $options = _read_report_file($c, $nr) unless defined $options;
     return unless defined $options;
 
+    Thruk::Utils::set_user($c, $options->{'user'});
+    $ENV{'REMOTE_USER'} = $options->{'user'};
+
     Thruk::Utils::IO::mkdir($c->config->{'tmp_path'}.'/reports/');
     my $attachment = $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
     $c->stash->{'attachment'} = $attachment;
@@ -281,14 +284,9 @@ sub generate_report {
     # update report runtime data
     set_running($c, $nr, $$, time());
 
-    unless ($c->user_exists) {
-        $ENV{'REMOTE_USER'} = $options->{'user'};
-        $c->authenticate( {} );
-    }
-
     if(defined $options->{'backends'}) {
         $options->{'backends'} = ref $options->{'backends'} eq 'ARRAY' ? $options->{'backends'} : [ $options->{'backends'} ];
-        $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}});
+        $ENV{'THRUK_BACKENDS'} = join(',', @{$options->{'backends'}});
     }
 
     # set some defaults

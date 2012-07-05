@@ -1250,11 +1250,28 @@ sub get_user {
 
 ##############################################
 
+=head2 set_user
+
+  set_user($c, $username)
+
+set and authenticate a user
+
+=cut
+
+sub set_user {
+    my($c, $username) = @_;
+    $c->stash->{'remote_user'} = $username;
+    $c->authenticate({});
+    return;
+}
+
+##############################################
+
 =head2 switch_user
 
   switch_user($uid, $groups)
 
-switch user and groups
+switch real user and groups
 
 =cut
 

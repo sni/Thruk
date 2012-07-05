@@ -254,8 +254,6 @@ sub _from_fcgi {
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
     $Thruk::Utils::CLI::c       = $c;
     local $ENV{'THRUK_SRC'}     = 'CLI';
-    $c->stash->{'remote_user'}  = $data->{'options'}->{'auth'} || $c->config->{'default_cli_user_name'};
-    $c->authenticate();
 
     # check credentials
     my $res = {};
@@ -277,6 +275,12 @@ sub _from_fcgi {
 ##############################################
 sub _run_commands {
     my($c, $opt) = @_;
+
+    if(defined $opt->{'auth'}) {
+        Thruk::Utils::set_user($c, $opt->{'auth'});
+    } elsif(defined $c->config->{'default_cli_user_name'}) {
+        Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'});
+    }
 
     unless(defined $c->stash->{'defaults_added'}) {
         Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
@@ -563,7 +567,7 @@ sub _cmd_downtimetask {
                       $downtime->{'service'} ? 56 : 55,
                       uri_escape($downtime->{'host'}),
                       uri_escape($downtime->{'comment'}),
-                      'cron',
+                      '(cron)',
                       uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
                       uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
                       $downtime->{'fixed'},
