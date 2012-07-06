@@ -1,0 +1,2 @@
+The 'dashboard' plugin shows a nice overview for host- and
+servicegroups.

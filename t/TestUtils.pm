@@ -287,6 +287,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
     for my $error ( $lint->errors ) {
         my $err_str = $error->as_string;
         next if $err_str =~ m/<IMG\ SRC="\/thruk\/.*?">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC="[^"]*\.cgi[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/Unknown\ attribute\ "data\-\w+"\ for\ tag/imx;
         next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imx;
         diag($error->as_string."\n");

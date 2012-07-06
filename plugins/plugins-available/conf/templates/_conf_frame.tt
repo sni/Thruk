@@ -59,6 +59,7 @@
 <!--
 jQuery('INPUT.conf_button').button();
 jQuery('BUTTON.conf_button').button();
+jQuery('.radioset').buttonset();
 -->
 </script>
 

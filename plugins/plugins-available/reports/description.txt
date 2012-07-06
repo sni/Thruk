@@ -1,0 +1,3 @@
+The 'reports' plugin create SLA reports as PDF file which can be send
+by mail regularly. Besides that, you may create a report from any page
+within Thruk.

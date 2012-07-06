@@ -24,6 +24,10 @@
       <td class='dataVal'>User settings, password and permissions</td>
     </tr>
     [% END %]
+    <tr>
+      <td class='dataVar'><a href="conf.cgi?sub=plugins">Plugins</a></td>
+      <td class='dataVal'>Plugin Manager for Thruk Addons</td>
+    </tr>
   </table>
 
   [% IF has_obj_conf %]

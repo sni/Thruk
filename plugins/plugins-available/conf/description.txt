@@ -1,0 +1,2 @@
+The 'Config Tool' plugin enables a config object editor as well as an
+editor for your cgi.cfg and htpasswd.

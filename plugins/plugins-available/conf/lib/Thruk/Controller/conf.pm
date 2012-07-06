@@ -13,6 +13,7 @@ use JSON::XS;
 use parent 'Catalyst::Controller';
 use Storable qw/dclone/;
 use Data::Dumper;
+use File::Slurp;
 use Socket;
 use Encode qw(decode_utf8);
 
@@ -115,6 +116,9 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     }
     elsif($subcat eq 'users') {
         $self->_process_users_page($c);
+    }
+    elsif($subcat eq 'plugins') {
+        $self->_process_plugins_page($c);
     }
     elsif($subcat eq 'objects') {
         $c->stash->{'obj_model_changed'} = 1;
@@ -634,6 +638,71 @@ sub _process_users_page {
     return 1;
 }
 
+##########################################################
+# create the users config page
+sub _process_plugins_page {
+    my( $self, $c ) = @_;
+
+    my $project_root         = $c->config->{home};
+    my $plugin_dir           = $c->config->{'plugin_path'} || $project_root."/plugins";
+    my $plugin_enabled_dir   = $plugin_dir.'/plugins-enabled/*/';
+    my $plugin_available_dir = $project_root.'/plugins/plugins-available/*/';
+
+    if($c->stash->{action} eq 'preview') {
+        my $pic = $c->{'request'}->{'parameters'}->{'pic'} || die("missing pic");
+        if($pic !~ m/^[a-zA-Z_\ ]+$/gmx) {
+            die("unknown pic: ".$pic);
+        }
+        my $path = $project_root.'/plugins/plugins-available/'.$pic.'/preview.png';
+        $c->res->content_type('images/png');
+        $c->stash->{'text'} = "";
+        if(-e $path) {
+            $c->stash->{'text'} = read_file($path);
+        }
+        $c->stash->{'template'} = 'passthrough.tt';
+        return 1;
+    }
+    elsif($c->stash->{action} eq 'save') {
+        if(! -d $plugin_dir.'/plugins-enabled/' or ! -w $plugin_dir.'/plugins-enabled/' ) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Make sure Plugins Folder is writeable: $!' );
+        }
+        else {
+            for my $addon (glob($plugin_available_dir)) {
+                my($addon_name, $dir) = _nice_addon_name($addon);
+                if(!defined $c->{'request'}->{'parameters'}->{'plugin.'.$dir} or $c->{'request'}->{'parameters'}->{'plugin.'.$dir} == 0) {
+                    unlink($plugin_dir.'/plugins-enabled/'.$dir);
+                }
+                if(defined $c->{'request'}->{'parameters'}->{'plugin.'.$dir} and $c->{'request'}->{'parameters'}->{'plugin.'.$dir} == 1) {
+                    if(!-e $plugin_dir.'/plugins-enabled/'.$dir) {
+                        symlink($project_root.'/plugins/plugins-available/'.$dir,
+                                $plugin_dir.'/plugins-enabled/'.$dir)
+                            or die("cannot create ".$plugin_dir.'/plugins-enabled/'.$dir." : ".$!);
+                    }
+                }
+            }
+            Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully. Changes take effect after Restart.' );
+        }
+    }
+
+    my $plugins = {};
+    for my $addon (glob($plugin_available_dir)) {
+        my($addon_name, $dir) = _nice_addon_name($addon);
+        $plugins->{$addon_name} = { enabled => 0, dir => $dir, description => '(no description available.)' };
+        if(-e $project_root.'/plugins/plugins-available/'.$dir.'/description.txt') {
+            $plugins->{$addon_name}->{'description'} = read_file($project_root.'/plugins/plugins-available/'.$dir.'/description.txt');
+        }
+    }
+    for my $addon (glob($plugin_enabled_dir)) {
+        my($addon_name, $dir) = _nice_addon_name($addon);
+        $plugins->{$addon_name}->{'enabled'} = 1;
+    }
+
+    $c->stash->{'plugins'}  = $plugins;
+    $c->stash->{'subtitle'} = "Thruk Addons &amp; Plugin Manager";
+    $c->stash->{'template'} = 'conf_plugins.tt';
+
+    return 1;
+}
 
 ##########################################################
 # create the objects config page
@@ -1625,6 +1694,17 @@ sub _check_external_reload {
         }
     }
     return;
+}
+
+##########################################################
+# return nicer addon name
+sub _nice_addon_name {
+    my($name) = @_;
+    my $dir = $name;
+    $dir =~ s/\/+$//gmx;
+    $dir =~ s/^.*\///gmx;
+    my $nicename = join(' ', map(ucfirst, split(/_/mx, $dir)));
+    return($nicename, $dir);
 }
 
 ##########################################################
