@@ -94,7 +94,7 @@ sub add_defaults {
     # read cached data
     my $cache = $c->cache;
     my $cached_data = {};
-    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+    if(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
         $cached_data = $cache->get($c->stash->{'remote_user'});
     }
 
