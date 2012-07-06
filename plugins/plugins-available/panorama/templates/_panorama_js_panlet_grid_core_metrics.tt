@@ -1,0 +1,11 @@
+Ext.define('TP.PanletGridCoreMetrics', {
+    extend: 'TP.PanletGrid',
+
+    title:  'Core Performance Metrics',
+    height: 200,
+    width:  340,
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url = 'panorama.cgi?task=stats_core_metrics';
+    }
+});

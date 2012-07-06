@@ -61,8 +61,11 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     if(defined $c->request->parameters->{'task'}) {
         my $task = $c->request->parameters->{'task'};
-        if($task eq 'gearman_stats') {
-            return($self->_gearman_stats($c));
+        if($task eq 'stats_core_metrics') {
+            return($self->_stats_core_metrics($c));
+        }
+        elsif($task eq 'stats_gearman') {
+            return($self->_stats_gearman($c));
         }
     }
 
@@ -144,7 +147,43 @@ sub _nice_ext_value {
 }
 
 ##########################################################
-sub _gearman_stats {
+sub _stats_core_metrics {
+    my($self, $c) = @_;
+
+    my $data = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
+    my $json = {
+        columns => [
+            { 'header' => 'Type',  dataIndex => 'type',  flex  => 1 },
+            { 'header' => 'Total', dataIndex => 'total', align => 'right' },
+            { 'header' => 'Rate',  dataIndex => 'rate',  align => 'right', xtype => 'numbercolumn', format => '0.00 /sec' },
+        ],
+        data    => [
+            { type => 'Servicechecks',       total => $data->{'service_checks'}, rate => $data->{'service_checks_rate'} },
+            { type => 'Hostchecks',          total => $data->{'host_checks'},    rate => $data->{'host_checks_rate'} },
+            { type => 'Connections',         total => $data->{'connections'},    rate => $data->{'connections_rate'} },
+            { type => 'Requests',            total => $data->{'requests'},       rate => $data->{'requests_rate'} },
+            { type => 'NEB Callbacks',       total => $data->{'neb_callbacks'},  rate => $data->{'neb_callbacks_rate'} },
+            { type => 'Cached Log Messages', total => $data->{'cached_log_messages'}, rate => '' },
+        ]
+    };
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _stats_check_metrics {
+    my($self, $c) = @_;
+
+    my $data = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
+use Data::Dumper; print STDERR Dumper($data);
+
+    $c->stash->{'json'} = $data;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _stats_gearman {
     my($self, $c) = @_;
 
     my $host = 'localhost';

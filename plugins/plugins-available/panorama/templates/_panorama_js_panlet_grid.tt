@@ -1,0 +1,91 @@
+Ext.define('TP.PanletGrid', {
+    extend: 'TP.Panlet',
+
+    title:  'grid',
+    width:  640,
+    height: 260,
+    initComponent: function() {
+        this.callParent();
+
+        this.loader = {
+            autoLoad: false,
+            renderer: 'data',
+            scope:    this,
+            url:      '',
+            loading:  false,
+            listeners: {
+                'beforeload': function(This, options, eOpts) {
+                    if(this.loading) {
+                        return false;
+                    }
+                    this.loading = true;
+                    return true;
+                }
+            },
+            callback: function(This, success, response, options) {
+                This.loading = false;
+                if(response.status == 200) {
+                    var data   = eval("("+response.responseText+")");
+                    var fields = [];
+                    for(key in data.columns) {
+                        fields.push(data.columns[key].dataIndex);
+                    }
+                    this.gridStore = Ext.create('Ext.data.Store', {
+                        data:  {'items': data.data },
+                        fields: fields,
+                        proxy: {
+                            type: 'memory',
+                            reader: {
+                                type: 'json',
+                                root: 'items'
+                            }
+                        }
+                    });
+                    this.grid.reconfigure(this.gridStore, data.columns);
+                    this.grid.applyState(this.xdata.gridstate);
+                } else {
+                    var row = {date: new Date(), empty:''};
+                    debug("ERROR: " + response.status);
+                    debug(response);
+                }
+            }
+        };
+
+        this.grid = Ext.create('Ext.grid.Panel', {
+            store: this.gridStore,
+            id: this.id + '_gridpanel',
+            stateful: true,
+            stateEvents: ['reconfigure', 'afterlayout'],
+            listeners: {
+                beforestatesave: function(This, state, eOpts) {
+                    var panlet = This.up('panel');
+                    panlet.xdata.gridstate = state;
+                    panlet.saveState();
+                    return false;
+                }
+            },
+            columns: []
+        });
+        this.addListener('beforestaterestore', function(This, state, eOpts) {
+            if(state.xdata.gridstate != undefined) {
+                This.grid.applyState(state.xdata.gridstate);
+            }
+            return true;
+        });
+
+        this.add(this.grid);
+
+        this.refreshHandler = function() {
+            this.loader.load({url:this.xdata.url});
+        },
+        this.addListener('afterrender', function() {
+            this.refreshHandler();
+        });
+
+        this.down('form').add({
+            fieldLabel: 'URL',
+            xtype:      'textfield',
+            name:       'url'
+        });
+    }
+});

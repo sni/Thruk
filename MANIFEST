@@ -236,7 +236,9 @@ plugins/plugins-available/mobile/templates/mobile_options.tt
 plugins/plugins-available/mobile/templates/mobile_problems.tt
 plugins/plugins-available/mobile/templates/mobile_services.tt
 plugins/plugins-available/mobile/templates/mobile_services_list.tt
+plugins/plugins-available/panorama/description.txt
 plugins/plugins-available/panorama/lib/Thruk/Controller/panorama.pm
+plugins/plugins-available/panorama/preview.png
 plugins/plugins-available/panorama/README
 plugins/plugins-available/panorama/root/extjs-4.1.0/ext-all-debug.js
 plugins/plugins-available/panorama/root/extjs-4.1.0/license.txt
@@ -1016,6 +1018,8 @@ plugins/plugins-available/panorama/templates/_panorama_js.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart_gearman.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_core_metrics.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url_perf.tt
 plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt

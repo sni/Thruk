@@ -25,6 +25,8 @@
       [%+ PROCESS _panorama_js_panlet_url_perf.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
+      [%+ PROCESS _panorama_js_panlet_grid.tt +%]
+      [%+ PROCESS _panorama_js_panlet_grid_core_metrics.tt +%]
 
       /* main viewport */
       Ext.onReady(function() {
