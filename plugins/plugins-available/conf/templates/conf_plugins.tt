@@ -1,0 +1,69 @@
+[% WRAPPER _conf_frame.tt %]
+[% first_enabled  = 1 %]
+[% first_disabled = 1 %]
+
+<div align="center">
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="sub" value="plugins">
+<input type="hidden" name="action" value="save">
+<input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
+<table><tr><td valign="top">
+  <table border="0" class='data conftoolusers' style="width:580px;">
+    <tr>
+      <th colspan=5 class='data conftoolheader' style="text-align:center">Enabled Plugins</th>
+    </tr>
+    [% FOREACH name = plugins.keys.sort %]
+    [% plugin = plugins.$name %]
+    [% IF plugin.enabled == 0 %][% NEXT %][% END %]
+    [% IF first_enabled == 0 %]
+    <tr>
+      <td colspan=4><hr></td>
+    </tr>
+    [% END %]
+    [% first_enabled = 0 %]
+    <tr style="height:160px;">
+      <td class='dataVar' align="left">[% name %]</td>
+      <td class='dataVal'><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir %]" alt="[% name %]"></td>
+      <td class='dataVal plugin_description'>[% plugin.description %]</td>
+      <td class='dataVal'>
+        <div class="radioset">
+            <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_on">On</label>
+            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
+        </div>
+      </td>
+    </tr>
+    [% END %]
+  </table>
+</td><td valign="top">
+  <table border="0" class='data conftoolusers' style="width:580px;">
+    <tr>
+      <th colspan=5 class='data conftoolheader' style="text-align:center">Available Plugins</th>
+    </tr>
+    [% FOREACH name = plugins.keys.sort %]
+    [% plugin = plugins.$name %]
+    [% IF plugin.enabled == 1 %][% NEXT %][% END %]
+    [% IF first_disabled == 0 %]
+    <tr>
+      <td colspan=4><hr></td>
+    </tr>
+    [% END %]
+    [% first_disabled = 0 %]
+    <tr style="height:160px;">
+      <td class='dataVar' align="left">[% name %]</td>
+      <td class='dataVal'><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir %]" alt="[% name %]"></td>
+      <td class='dataVal plugin_description'>[% plugin.description %]</td>
+      <td class='dataVal'>
+        <div class="radioset">
+            <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_on">On</label>
+            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
+        </div>
+      </td>
+    </tr>
+    [% END %]
+  </table>
+</td></tr></table>
+<br><input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button">
+</form>
+</div>
+
+[% END %]

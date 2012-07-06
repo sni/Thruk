@@ -1,0 +1,2 @@
+The 'wml' plugin simulates the old WML pages which are still in use by
+some 3rd party addons.
