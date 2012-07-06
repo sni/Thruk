@@ -8,6 +8,7 @@
       [% END %]
       [% END %]
       <th class='downtime'>Schedule</th>
+      <th class='downtime'>Type</th>
       <th class='downtime'>Duration</th>
       <th class='downtime'>Comment</th>
       <th class='downtime'>Actions</th>
@@ -27,6 +28,7 @@
       [% END %]
       [% END %]
       <td class='[% class %]' nowrap>[% IF d.schedule.size == 0 %]never[% ELSE %][% FOREACH cr = d.schedule %][% format_cronentry(c, cr) %]<br>[% END %][% END %]</td>
+      <td class='[% class %]'>[% IF d.fixed %]Fixed[% ELSE %]Flexible ([% duration(d.flex_range * 60) %])[% END %]</td>
       <td class='[% class %]'>[% duration(d.duration * 60) %]</td>
       <td class='[% class %]'>[% IF escape_html_tags %][% escape_html(d.comment) %][% ELSE %][% d.comment %][% END %]</td>
       <td class='[% class %]'><a href='extinfo.cgi?type=6&amp;recurring=edit&amp;host=[% d.host | uri %][% IF type == 'service' %]&amp;service=[% d.service | uri %][% END %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='change / delete recurring duration' title='change / delete recurring duration' width="16" height="16"></a></td>
@@ -34,7 +36,7 @@
     [% END %]
     [% IF count == 0 %]
     <tr class='downtimeOdd'>
-      <td class='downtimeOdd' colspan="6">There are no recurring [% type %] downtimes</td>
+      <td class='downtimeOdd' colspan="7">There are no recurring [% type %] downtimes</td>
     </tr>
     [% END %]
   </table>

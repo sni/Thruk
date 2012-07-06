@@ -843,7 +843,9 @@ returns user data
 sub get_user_data {
     my($c) = @_;
 
-    return {} unless defined $c->stash->{'remote_user'};
+    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+        return {};
+    }
 
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
     return {} unless -f $file;
@@ -873,6 +875,10 @@ store user data for section
 
 sub store_user_data {
     my($c, $data) = @_;
+
+    if(!defined $c->stash->{'remote_user'} or $c->stash->{'remote_user'} eq '?') {
+        return 1;
+    }
 
     for my $dir ($c->config->{'var_path'}, $c->config->{'var_path'}."/users") {
         if(! -d $dir) {
@@ -1250,11 +1256,29 @@ sub get_user {
 
 ##############################################
 
+=head2 set_user
+
+  set_user($c, $username)
+
+set and authenticate a user
+
+=cut
+
+sub set_user {
+    my($c, $username) = @_;
+    $c->stash->{'remote_user'} = $username;
+    $c->authenticate({});
+    $c->stash->{'remote_user'}= $c->user->get('username');
+    return;
+}
+
+##############################################
+
 =head2 switch_user
 
   switch_user($uid, $groups)
 
-switch user and groups
+switch real user and groups
 
 =cut
 
@@ -1387,6 +1411,24 @@ sub _parse_date {
         }
     }
     return $timestamp;
+}
+
+##########################################################
+# return default recurring downtime
+sub _get_default_recurring_downtime {
+    my($c, $host, $service) = @_;
+    my $default_rd = {
+            host         => $host,
+            service      => $service,
+            backends     => $c->{'db'}->peer_key(),
+            schedule     => [],
+            duration     => 120,
+            comment      => 'automatic downtime',
+            childoptions => 0,
+            fixed        => 1,
+            flex_range   => 720,
+    };
+    return($default_rd);
 }
 
 ##############################################

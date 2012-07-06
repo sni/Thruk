@@ -3,7 +3,6 @@
 <div class="shadow"><div class="shadowcontent">
 <form action="cmd.cgi" method="POST" id="quick_cmd_form">
   <input type="hidden" name="referer" value="[% clean_referer(short_uri(c)) %]">
-  <input type="hidden" name="fixed" value="1">
   <input type="hidden" name="selected_services" id="selected_services" value="">
   <input type="hidden" name="selected_hosts"    id="selected_hosts"    value="">
   <table class="cmd_pane" border=1 width="400">
@@ -85,15 +84,16 @@
       <td class="statusOdd"><a href="#" onclick="show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_downtime_options">
-      <td class="statusOdd">Options:</td>
+      <td class="statusOdd" valign="top">Options:</td>
       <td class="statusOdd">
-        Child Hosts:<br>
-        <select name="childoptions">
+        Child Hosts: <select name="childoptions">
           <option value="0">Do nothing with child hosts</option>
-          <option value="1">Schedule triggered downtime for all child hosts</option>
-          <option value="2">Schedule non-triggered downtime for all child hosts</option>
-        </select>
-      </td>
+          <option value="1">Triggered downtime for all child hosts</option>
+          <option value="2">Non-triggered downtime for all childs</option>
+        </select><br>
+        Type: <select name='fixed' onChange="if(this.value==0) {showElement('flexible_options')} else { hideElement('flexible_options') }"><option value="1"> Fixed </option><option value="0"> Flexible </option></select>
+        <span id="flexible_options" style="display:none"><br>If Flexible, Duration: <input type='text' name='hours' value='2' size= "2" maxlength="2"> Hours <input type='text' name='minutes' value='0' size= "2" maxlength="2"> Minutes</span>
+     </td>
     </tr>
     <tr id="row_reschedule_options">
       <td class="statusOdd">Options:</td>

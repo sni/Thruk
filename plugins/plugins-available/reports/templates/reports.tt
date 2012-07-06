@@ -74,7 +74,7 @@
       [% END %]
     </td>
     <td class="status [% rowclass %]">
-      [% IF r.var.file_exists %]
+      [% IF r.var.file_exists && r.var.is_running == 0 %]
       [% icon = 'page_white_acrobat.png' %]
       [% IF    r.var.ctype == 'application/x-msexcel' %][% icon = 'page_white_excel.png' %]
       [% ELSIF r.var.ctype == 'text/html'             %][% icon = 'page_world.png' %]

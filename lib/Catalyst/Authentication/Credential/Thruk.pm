@@ -102,8 +102,12 @@ sub authenticate {
         }
     }
 
+    # from cli
+    if(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
+        $username = $c->stash->{'remote_user'};
+    }
     # basic authentication
-    if(defined $c->engine->env->{'REMOTE_USER'}) {
+    elsif(defined $c->engine->env->{'REMOTE_USER'}) {
         $username = $c->engine->env->{'REMOTE_USER'};
     }
     elsif(defined $ENV{'REMOTE_USER'}) {
@@ -111,11 +115,11 @@ sub authenticate {
     }
 
     # default_user_name?
-    if(!defined $username and defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
+    elsif(defined $c->config->{'cgi_cfg'}->{'default_user_name'}) {
         $username = $c->config->{'cgi_cfg'}->{'default_user_name'};
     }
 
-    if(!defined $username and defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
+    elsif(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         $username = $c->config->{'default_cli_user_name'};
     }
 

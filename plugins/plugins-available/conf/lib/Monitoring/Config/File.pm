@@ -456,41 +456,15 @@ sub _get_new_file_content {
 
     # sort by line number, but put line 0 at the end
     for my $obj (sort { $b->{'line'} > 0 <=> $a->{'line'} > 0 || $a->{'line'} <=> $b->{'line'} } @{$self->{'objects'}}) {
-        # save comments
-        for my $line (@{$obj->{'comments'}}) {
-            $line =~ s/^#\s+//gmxo;
-            $line =~ s/^;\s+//gmxo;
-            unless(substr($line,0,1) eq '#' or substr($line,0,1) eq ';') {
-                $line = '# '.$line;
-            }
-            $line =~ s/\s+$//gmx;
-            $new_content .= $line."\n"; $linenr++;
-        }
 
-        # save object itself
-        $new_content .= "define ".$obj->{'type'}." {\n"; $linenr++;
+        my($text, $nr_comment_lines, $nr_object_lines) = $obj->as_text();
+        $new_content .= $text;
+        $linenr      += $nr_comment_lines;
 
         # update line number of object
         $obj->{'line'} = $linenr;
 
-        for my $key (@{$obj->get_sorted_keys()}) {
-            my $value;
-            if(defined $obj->{'default'}->{$key}
-                and ($obj->{'default'}->{$key}->{'type'} eq 'LIST'
-                  or $obj->{'default'}->{$key}->{'type'} eq 'ENUM'
-                )
-            ) {
-                $value = join(',', @{$obj->{'conf'}->{$key}});
-            } else {
-                $value = $obj->{'conf'}->{$key};
-            }
-            # empty values are valid syntax
-            $value = '' unless defined $value;
-            $new_content .= sprintf "  %-30s %s\n", $key, $value;
-            $linenr++
-        }
-        $new_content .= "}\n\n";
-        $linenr += 2;
+        $linenr += $nr_object_lines;
     }
 
     return encode_utf8($new_content);

@@ -113,15 +113,7 @@ sub _process_recurring_downtimes_page {
     my $old_host    = $c->{'request'}->{'parameters'}->{'old_host'}     || '';
     my $old_service = $c->{'request'}->{'parameters'}->{'old_service'}  || '';
 
-     my $default_rd = {
-            host         => $host,
-            service      => $service,
-            backends     => $c->{'db'}->peer_key(),
-            schedule     => [],
-            duration     => 120,
-            comment      => 'automatic downtime',
-            childoptions => 0,
-    };
+    my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c, $host, $service);
 
     if($task eq 'save') {
         my $rd = {
@@ -132,6 +124,8 @@ sub _process_recurring_downtimes_page {
             'comment'       => $c->{'request'}->{'parameters'}->{'comment'}         || '',
             'backends'      => $c->{'request'}->{'parameters'}->{'backends'}        || '',
             'childoptions'  => $c->{'request'}->{'parameters'}->{'childoptions'}    || 0,
+            'fixed'         => exists $c->{'request'}->{'parameters'}->{'fixed'} ? $c->{'request'}->{'parameters'}->{'fixed'} : 1,
+            'flex_range'    => $c->{'request'}->{'parameters'}->{'flex_range'}      || 720,
         };
         if($service) {
             if(!$c->check_cmd_permissions('service', $service, $host)) {
@@ -225,6 +219,7 @@ sub _get_downtimes_list {
         $services = Thruk::Utils::array2hash($service_data,  'host_name', 'description');
     }
 
+    my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c, $host, $service);
     my $downtimes = [];
     my @pattern = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
     if(defined $host) {
@@ -242,6 +237,11 @@ sub _get_downtimes_list {
                 next unless defined $hosts->{$d->{'host'}};
             }
         }
+        # set some defaults
+        for my $key (keys %{$default_rd}) {
+            $d->{$key} = $default_rd->{$key}  unless defined $d->{$key};
+        }
+
         push @{$downtimes}, $d if defined $d;
     }
 
@@ -570,6 +570,8 @@ sub _set_backend_selector {
     $c->stash->{'backend'}           = $selected;
     return 1;
 }
+
+##########################################################
 
 =head1 AUTHOR
 

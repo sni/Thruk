@@ -254,7 +254,6 @@ sub _from_fcgi {
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
     $Thruk::Utils::CLI::c       = $c;
     local $ENV{'THRUK_SRC'}     = 'CLI';
-    $c->stash->{'remote_user'}  = $data->{'options'}->{'auth'} if defined $data->{'options'}->{'auth'};
 
     # check credentials
     my $res = {};
@@ -276,6 +275,12 @@ sub _from_fcgi {
 ##############################################
 sub _run_commands {
     my($c, $opt) = @_;
+
+    if(defined $opt->{'auth'}) {
+        Thruk::Utils::set_user($c, $opt->{'auth'});
+    } elsif(defined $c->config->{'default_cli_user_name'}) {
+        Thruk::Utils::set_user($c, $c->config->{'default_cli_user_name'});
+    }
 
     unless(defined $c->stash->{'defaults_added'}) {
         Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
@@ -538,16 +543,36 @@ sub _cmd_downtimetask {
     my($c, $file) = @_;
     $c->stats->profile(begin => "_cmd_downtimetask()");
 
-    my $downtime = Thruk::Utils::read_data_file($file);
-    my $output   = '';
+    my $downtime   = Thruk::Utils::read_data_file($file);
+    my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c);
+    for my $key (keys %{$default_rd}) {
+        $downtime->{$key} = $default_rd->{$key} unless defined $downtime->{$key};
+    }
+
+    my $start    = time();
+    my $end      = $start + ($downtime->{'duration'}*60);
+    my $hours    = 0;
+    my $minutes  = 0;
+    my $flexible = '';
+    if($downtime->{'fixed'} == 0) {
+        $flexible = ' flexible';
+        $end      = $start + $downtime->{'flex_range'}*60;
+        $hours    = int($downtime->{'duration'} / 60);
+        $minutes  = $downtime->{'duration'}%60;
+    }
+
+    my $output     = '';
     # convert to normal url request
-    my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=1&childoptions=0&backend=%s%s%s',
+    my $url = sprintf('/thruk/cgi-bin/cmd.cgi?cmd_mod=2&cmd_typ=%d&host=%s&com_data=%s&com_author=%s&trigger=0&start_time=%s&end_time=%s&fixed=%s&hours=%s&minutes=%s&backend=%s%s%s',
                       $downtime->{'service'} ? 56 : 55,
                       uri_escape($downtime->{'host'}),
                       uri_escape($downtime->{'comment'}),
-                      'cron',
-                      uri_escape(Thruk::Utils::format_date(time(), '%Y-%m-%d %H:%M:%S')),
-                      uri_escape(Thruk::Utils::format_date(time() + ($downtime->{'duration'}*60), '%Y-%m-%d %H:%M:%S')),
+                      '(cron)',
+                      uri_escape(Thruk::Utils::format_date($start, '%Y-%m-%d %H:%M:%S')),
+                      uri_escape(Thruk::Utils::format_date($end, '%Y-%m-%d %H:%M:%S')),
+                      $downtime->{'fixed'},
+                      $hours,
+                      $minutes,
                       ref $downtime->{'backends'} eq 'ARRAY' ? join(',', @{$downtime->{'backends'}}) : $downtime->{'backends'},
                       defined $downtime->{'childoptions'} ? '&childoptions='.$downtime->{'childoptions'} : '',
                       $downtime->{'service'} ? '&service='.uri_escape($downtime->{'service'}) : '',
@@ -557,9 +582,9 @@ sub _cmd_downtimetask {
     _request_url($c, $url);
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
     if($downtime->{'service'}) {
-        $output = 'scheduled downtime for '.$downtime->{'service'}.' on '.$downtime->{'host'};
+        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'service'}.' on '.$downtime->{'host'};
     } else {
-        $output = 'scheduled downtime for '.$downtime->{'host'};
+        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'host'};
     }
     $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
 
@@ -570,14 +595,14 @@ sub _cmd_downtimetask {
 ##############################################
 sub _cmd_url {
     my($c, $url) = @_;
-    $c->stats->profile(begin => "_cmd_downtimetask()");
+    $c->stats->profile(begin => "_cmd_url()");
 
     if($url =~ m|^\w+\.cgi|gmx) {
         $url = '/thruk/cgi-bin/'.$url;
     }
     my $output = _request_url($c, $url);
 
-    $c->stats->profile(end => "_cmd_downtimetask()");
+    $c->stats->profile(end => "_cmd_url()");
     return $output;
 }
 

@@ -82,7 +82,7 @@ sub add_defaults {
         }
         $c->log->debug("user authenticated as: ".$c->user->get('username'));
         if($c->user_exists) {
-            $c->stash->{'remote_user'}  = $c->user->get('username');
+            $c->stash->{'remote_user'}= $c->user->get('username');
         }
     }
 
@@ -94,7 +94,9 @@ sub add_defaults {
     # read cached data
     my $cache = $c->cache;
     my $cached_data = {};
-    $cached_data = $cache->get($c->stash->{'remote_user'}) if defined $c->stash->{'remote_user'};
+    if(defined $c->stash->{'remote_user'} and $c->stash->{'remote_user'} ne '?') {
+        $cached_data = $cache->get($c->stash->{'remote_user'});
+    }
 
     ###############################
     my($disabled_backends,$has_groups) = _set_enabled_backends($c);

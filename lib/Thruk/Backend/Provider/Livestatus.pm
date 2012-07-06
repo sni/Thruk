@@ -509,7 +509,7 @@ sub get_downtimes {
     my($self, %options) = @_;
     $options{'columns'} = [qw/
         author comment end_time entry_time fixed host_name
-        id start_time service_description triggered_by
+        id start_time service_description triggered_by duration
         /];
     my $data = $self->_get_table('downtimes', \%options);
 
