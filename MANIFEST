@@ -1021,7 +1021,6 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart_gearman.t
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_core_metrics.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url.tt
-plugins/plugins-available/panorama/templates/_panorama_js_panlet_url_perf.tt
 plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_state_provider.tt
 plugins/plugins-available/panorama/templates/_panorama_js_tabbar.tt
