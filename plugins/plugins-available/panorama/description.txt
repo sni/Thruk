@@ -1,0 +1,2 @@
+The 'Panorama' plugin is a nice, fully customizable dashboard allowing
+you to build your own panorama views.
