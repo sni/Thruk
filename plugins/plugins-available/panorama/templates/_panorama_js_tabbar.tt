@@ -28,13 +28,9 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCoreMetrics'}) }
                     }, {
-                        text:   'Host / Service Performance Old',
+                        text:   'Host / Service Performance',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletUrlTacPerf'}) }
-                    }, {
-                        text:   'Livestatus Metrics',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
-                        handler: function() { TP.add_panlet({type:'TP.PanletUrlPerfLivestatus'}) }
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridCheckMetrics'}) }
                     }, {
                         text:   'Add Mod-Gearman Panlet',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',

@@ -9,3 +9,15 @@ Ext.define('TP.PanletGridCoreMetrics', {
         this.xdata.url = 'panorama.cgi?task=stats_core_metrics';
     }
 });
+
+Ext.define('TP.PanletGridCheckMetrics', {
+    extend: 'TP.PanletGrid',
+
+    title:  'Check Performance Metrics',
+    height: 160,
+    width:  360,
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url = 'panorama.cgi?task=stats_check_metrics';
+    }
+});
