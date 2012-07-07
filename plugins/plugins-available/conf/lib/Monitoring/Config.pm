@@ -444,7 +444,8 @@ sub get_services_for_host {
             if(defined $svc_config->{'hostgroup_name'}) {
                 for my $group (@{$groups}) {
                     if(grep { $_ eq $group} @{$svc_config->{'hostgroup_name'}}) {
-                        $services->{'group'}->{$name} = $svc;
+                        $services->{'group'}->{$name} = {'svc' => $svc, 'groups' => [] } unless defined $services->{'group'}->{$name};
+                        push @{$services->{'group'}->{$name}->{'groups'}}, $group;
                         last;
                     }
                 }
