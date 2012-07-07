@@ -415,7 +415,7 @@ sub _set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
-        $c->log->debug('_set_enabled_backends() by env');
+        $c->log->debug('_set_enabled_backends() by env: '.Dumper($ENV{'THRUK_BACKENDS'}));
         # reset
         $disabled_backends = {};
         for my $peer (@{$c->{'db'}->get_peers()}) {
