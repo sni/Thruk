@@ -1,6 +1,6 @@
 ﻿<button class="conf_button members_wzd_button" id="[% id %]_btn">&nbsp;</button>
 
-<div id="[% id %]_dialog" title="Command Wizzard" style="display: none;">
+<div id="[% id %]_dialog" title="Members Wizzard" style="display: none;">
 <table><tr><td class="filter">
   <table style="width:100%;">
     <tr>
@@ -10,7 +10,8 @@
     </tr>
     <tr>
       <td class="attrName">
-        <select multiple id="[% id %]_available_members" name="[% id %]_available_members" style="width:250px; height:300px;" ondblclick="data_select_move('[% id %]_available_members', '[% id %]_selected_members')">
+        <input type="text" class="filter_available" style="width:250px; border:0; padding:0;" onkeyup="data_filter_select('[% id %]_available_members', this.value)"><br>
+        <select multiple id="[% id %]_available_members" name="[% id %]_available_members" style="width:250px; height:300px; border:0;" ondblclick="data_select_move('[% id %]_available_members', '[% id %]_selected_members')">
             <option disabled>loading...</option>
         </select>
       </td>
@@ -19,16 +20,12 @@
         <button id="[% id %]_remove" onclick="data_select_move('[% id %]_selected_members', '[% id %]_available_members')">&lt;&lt;</button>
       </td>
       <td class="attrName">
-        <select multiple id="[% id %]_selected_members" name="[% id %]_selected_members" style="width:250px; height:300px;" ondblclick="data_select_move('[% id %]_selected_members', '[% id %]_available_members')">
+        <input type="text" class="filter_selected" style="width:250px; border:0; padding:0;" onkeyup="data_filter_select('[% id %]_selected_members', this.value)"><br>
+        <select multiple id="[% id %]_selected_members" name="[% id %]_selected_members" style="width:250px; height:300px; border:0;" ondblclick="data_select_move('[% id %]_selected_members', '[% id %]_available_members')">
             <option disabled>loading...</option>
         </select>
       </td>
     </tr>
-    <!--
-    <tr>
-      <td class="attrName" colspan=3 align="center">Filter: <input type="text" name="filter_members" style="width:480px;"></td>
-    </tr>
-    -->
     <tr>
       <td colspan=3 align="center"><button id="[% id %]_accept">accept</button></td>
     </tr>

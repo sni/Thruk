@@ -496,6 +496,7 @@ function close_accordion() {
 /* handle command line wizard dialog */
 var available_members = new Array();
 var selected_members  = new Array();
+var init_conf_tool_servicegroup_members_wizard_initialized = {};
 function init_conf_tool_servicegroup_members_wizard(id) {
     id = id.substr(0, id.length -3);
 
@@ -508,9 +509,22 @@ function init_conf_tool_servicegroup_members_wizard(id) {
         position:    'top',
         close:       function(event, ui) { ajax_search.hide_results(undefined, 1); return true; }
     });
+    if(init_conf_tool_servicegroup_members_wizard_initialized[id] != undefined) {
+        // reset filter
+        jQuery('INPUT.filter_available').val('');
+        jQuery('INPUT.filter_selected').val('');
+        data_filter_select(id+'available_members', '');
+        data_filter_select(id+'selected_members', '');
+        $d.dialog('open');
+        return;
+    }
+    init_conf_tool_servicegroup_members_wizard_initialized[id] = true;
     jQuery('#' + id + 'accept').button({
         icons: {primary: 'ui-ok-button'}
     }).click(function() {
+        data_filter_select(id+'available_members', '');
+        data_filter_select(id+'selected_members', '');
+
         var newval = '';
         var lb = document.getElementById(id+"selected_members");
         for(i=0; i<lb.length; i++)  {
@@ -563,7 +577,6 @@ function init_conf_tool_servicegroup_members_wizard(id) {
             jQuery("select#"+id+"available_members").html('<option disabled>error<\/option>');
         }
     });
-
 
     $d.dialog('open');
     return;

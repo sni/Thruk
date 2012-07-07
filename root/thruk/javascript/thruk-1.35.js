@@ -416,10 +416,23 @@ function data_select_move(from, to) {
     for(var nr = 0; nr < from_sel.length; nr++) {
         if(from_sel.options[nr].selected == true) {
             elements.push(nr);
+            var option = from_sel.options[nr];
+            if(originalOptions[to] != undefined) {
+                originalOptions[to].push(new Option(option.value, option.text));
+            }
+            if(originalOptions[from] != undefined) {
+                jQuery.each(originalOptions[from], function(i, o) {
+                    if(o.value == option.value) {
+                        originalOptions[from].splice(i, 1);
+                        return false;
+                    }
+                    return true;
+                });
+            }
         }
     }
 
-    // reverse elements so the later remove does disorder the select
+    // reverse elements so the later remove doesn't disorder the select
     elements.reverse();
 
     for(var x = 0; x < elements.length; x++) {
@@ -439,6 +452,56 @@ function data_select_move(from, to) {
     /* sort elements of to field */
     sortlist(to_sel.id);
 }
+
+/* filter select field option */
+var originalOptions = {};
+function data_filter_select(id, filter) {
+    var select  = document.getElementById(id);
+    var pattern = get_trimmed_pattern(filter);
+
+    var options = select.options;
+    /* create backup of original list */
+    if(originalOptions[id] == undefined) {
+        originalOptions[id] = [];
+        jQuery.each(options, function(i, option) {
+            originalOptions[id].push(new Option(option.value, option.text));
+        });
+    } else {
+        options = originalOptions[id];
+    }
+
+    /* filter our options */
+    var newOptions = [];
+    jQuery.each(options, function(i, option) {
+        var found = 0;
+        jQuery.each(pattern, function(i, sub_pattern) {
+            var index = option.value.toLowerCase().indexOf(sub_pattern.toLowerCase());
+            if(index != -1) {
+                found++;
+            }
+        });
+        /* all pattern found */
+        if(found == pattern.length) {
+            newOptions.push(option);
+        }
+    });
+    select.options.length = 0;
+    jQuery.each(newOptions, function(i, option) {
+        select.options[select.options.length] = new Option(option.value, option.text);
+    });
+}
+
+/* return array of trimmed pattern */
+function get_trimmed_pattern(pattern) {
+    var trimmed_pattern = new Array();
+    jQuery.each(pattern.split(" "), function(index, sub_pattern) {
+        if(sub_pattern != '') {
+            trimmed_pattern.push(sub_pattern);
+        }
+    });
+    return trimmed_pattern;
+}
+
 
 /* return keys as array */
 function keys(obj) {
@@ -2678,14 +2741,7 @@ var ajax_search = {
             }
 
             // remove empty strings from pattern array
-            pattern = pattern.split(" ");
-            var trimmed_pattern = new Array();
-            jQuery.each(pattern, function(index, sub_pattern) {
-                if(sub_pattern != '') {
-                    trimmed_pattern.push(sub_pattern);
-                }
-            });
-            pattern = trimmed_pattern;
+            pattern = get_trimmed_pattern(pattern);
             var results = new Array();
             jQuery.each(ajax_search.base, function(index, search_type) {
                 var sub_results = new Array();
