@@ -402,6 +402,7 @@ sub _set_enabled_backends {
     ###############################
     # by args
     if(defined $backends) {
+        $c->log->debug('_set_enabled_backends() by args');
         # reset
         $disabled_backends = {};
         for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -414,6 +415,7 @@ sub _set_enabled_backends {
     ###############################
     # by env
     elsif(defined $ENV{'THRUK_BACKENDS'}) {
+        $c->log->debug('_set_enabled_backends() by env');
         # reset
         $disabled_backends = {};
         for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -427,6 +429,7 @@ sub _set_enabled_backends {
     ###############################
     # by param
     elsif($backend ne '') {
+        $c->log->debug('_set_enabled_backends() by param');
         # reset
         $disabled_backends = {};
         for my $peer (@{$c->{'db'}->get_peers()}) {
@@ -440,6 +443,7 @@ sub _set_enabled_backends {
     ###############################
     # by cookie
     elsif($num_backends > 1 and defined $c->request->cookie('thruk_backends')) {
+        $c->log->debug('_set_enabled_backends() by cookie');
         for my $val (@{$c->request->cookie('thruk_backends')->{'value'}}) {
             my($key, $value) = split/=/mx, $val;
             next unless defined $value;
@@ -447,6 +451,7 @@ sub _set_enabled_backends {
         }
     }
     elsif(defined $c->{'db'}) {
+        $c->log->debug('_set_enabled_backends() using defaults');
         $disabled_backends = $c->{'db'}->disable_hidden_backends($disabled_backends);
     }
 
@@ -465,13 +470,15 @@ sub _set_enabled_backends {
     $c->log->debug("backend groups filter enabled") if $has_groups;
 
     # renew state of connections
-    if($c->config->{'check_local_states'}) {
+    if($num_backends > 1 and $c->config->{'check_local_states'}) {
         $disabled_backends = $c->{'db'}->set_backend_state_from_local_connections($c->cache, $disabled_backends);
     }
 
+    # when set by args, update
     if(defined $backends) {
         _set_possible_backends($c, $disabled_backends);
     }
+    $c->log->debug('disabled_backends: '.Dumper($disabled_backends));
     return($disabled_backends, $has_groups);
 }
 
