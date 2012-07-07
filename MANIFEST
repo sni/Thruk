@@ -161,7 +161,7 @@ plugins/plugins-available/conf/templates/_conf_objects_menu.tt
 plugins/plugins-available/conf/templates/_conf_tools_menu.tt
 plugins/plugins-available/conf/templates/_conf_wizard_command.tt
 plugins/plugins-available/conf/templates/_conf_wizard_commandline.tt
-plugins/plugins-available/conf/templates/_conf_wizard_svcgroup_members.tt
+plugins/plugins-available/conf/templates/_conf_wizard_list.tt
 plugins/plugins-available/conf/templates/conf.tt
 plugins/plugins-available/conf/templates/conf_data.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt

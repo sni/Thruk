@@ -462,10 +462,7 @@ function data_filter_select(id, filter) {
     var options = select.options;
     /* create backup of original list */
     if(originalOptions[id] == undefined) {
-        originalOptions[id] = [];
-        jQuery.each(options, function(i, option) {
-            originalOptions[id].push(new Option(option.value, option.text));
-        });
+        reset_original_options(id);
     } else {
         options = originalOptions[id];
     }
@@ -485,9 +482,24 @@ function data_filter_select(id, filter) {
             newOptions.push(option);
         }
     });
+    set_select_options(id, newOptions);
+}
+
+/* resets originalOptions hash for given id */
+function reset_original_options(id) {
+    var select  = document.getElementById(id);
+    originalOptions[id] = [];
+    jQuery.each(select.options, function(i, option) {
+        originalOptions[id].push(new Option(option.value, option.text));
+    });
+}
+
+/* set options for a select */
+function set_select_options(id, options) {
+    var select  = document.getElementById(id);
     select.options.length = 0;
-    jQuery.each(newOptions, function(i, option) {
-        select.options[select.options.length] = new Option(option.value, option.text);
+    jQuery.each(options, function(i, o) {
+        select.options[select.options.length] = o;
     });
 }
 
@@ -520,7 +532,7 @@ function sortlist(id) {
         if(thruk_debug_js) { alert("ERROR: no element in sortlist() for: " + id ); }
     }
 
-    opts  = new Object();
+    opts = new Object();
 
     for(i=0; i<lb.length; i++)  {
         opts[lb.options[i].text] = lb.options[i].value;

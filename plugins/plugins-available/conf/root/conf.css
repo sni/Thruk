@@ -20,7 +20,7 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
 }
 
 /* input fields with wizards */
-INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members {
+INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members, INPUT.obj_host_hostgroups {
   width: 375px !important;
 }
 INPUT.obj_servicegroup_servicegroup_members {
