@@ -530,7 +530,7 @@ function init_conf_tool_list_wizard(id, type) {
             options.push(new Option(val, val));
         }
     }
-    set_select_options(id+"selected_members", options);
+    set_select_options(id+"selected_members", options, true);
     sortlist(id+"selected_members");
     reset_original_options(id+"selected_members");
 
@@ -549,7 +549,7 @@ function init_conf_tool_list_wizard(id, type) {
                     options.push(new Option(result[x], result[x]));
                 }
             }
-            set_select_options(id+"available_members", options);
+            set_select_options(id+"available_members", options, true);
             sortlist(id+"available_members");
             reset_original_options(id+"available_members");
         },

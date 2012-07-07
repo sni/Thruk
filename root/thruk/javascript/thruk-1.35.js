@@ -482,7 +482,7 @@ function data_filter_select(id, filter) {
             newOptions.push(option);
         }
     });
-    set_select_options(id, newOptions);
+    set_select_options(id, newOptions, true);
 }
 
 /* resets originalOptions hash for given id */
@@ -495,11 +495,15 @@ function reset_original_options(id) {
 }
 
 /* set options for a select */
-function set_select_options(id, options) {
+function set_select_options(id, options, uniq) {
     var select  = document.getElementById(id);
+    var uniqs   = {};
     select.options.length = 0;
     jQuery.each(options, function(i, o) {
-        select.options[select.options.length] = o;
+        if(!uniq || uniqs[o.text] == undefined) {
+            select.options[select.options.length] = o;
+            uniqs[o.text] = true;
+        }
     });
 }
 
