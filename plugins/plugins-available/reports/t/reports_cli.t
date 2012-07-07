@@ -58,6 +58,15 @@ my $test_pdf_reports = [{
         'type'                  => 'xls',
         'template'              => 'report_from_url.tt',
         'params.url'            => uri_escape('status.cgi?style=hostdetail&hostgroup=all&view_mode=xls'),
+    }, {
+        'name'                  => 'HTML Report',
+        'type'                  => 'hmtl',
+        'template'              => 'report_from_url.tt',
+        'params.url'            => uri_escape('status.cgi?host=all'),
+        'params.minimal'        => 'yes',
+        'params.js'             => 'no',
+        'params.css'            => 'yes',
+        'params.theme'          => 'Thruk',
     }
 ];
 
@@ -80,6 +89,9 @@ for my $report (@{$test_pdf_reports}) {
     }
     elsif($report->{'type'} eq 'xls') {
         $like = [ '/Arial1/', '/Tahoma1/' ];
+    }
+    elsif($report->{'type'} eq 'html') {
+        $like = [ '/<html/' ];
     }
 
     # generate report
