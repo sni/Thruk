@@ -993,7 +993,13 @@ sub _read_static_content_file {
     my $file;
     if($url =~ m|^themes/|mx) {
         $url =~ s|^themes/||gmx;
-        $file = $c->config->{'project_root'} . '/themes/themes-enabled/' . $url;
+        my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}."/themes";
+        $file = $themes_dir . '/themes-enabled/' . $url;
+    }
+    elsif($url =~ m|^plugins/|mx) {
+        $url =~ s|^plugins/||gmx;
+        my $plugins_dir = $c->config->{'plugin_path'} || $c->config->{'project_root'}."/plugins";
+        $file = $plugins_dir . '/plugins-enabled/' . $url;
     } else {
         $file = $c->config->{'project_root'}."/root/thruk/".$url;
     }
