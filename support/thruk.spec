@@ -164,7 +164,7 @@ fi
 rm -rf /tmp/thruk_update
 mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
 %if %{defined suse_version}
-chown wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk
+chown -R wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
 a2enmod alias
 a2enmod fcgid
 a2enmod auth_basic
@@ -172,7 +172,7 @@ a2enmod rewrite
 /etc/init.d/apache2 restart || /etc/init.d/apache2 start
 /usr/bin/crontab -l -u wwwrun 2>/dev/null | /usr/bin/crontab -u wwwrun -
 %else
-chown apache: /var/lib/thruk /var/cache/thruk /var/log/thruk
+chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 /usr/bin/crontab -l -u apache 2>/dev/null | /usr/bin/crontab -u apache -
 %endif

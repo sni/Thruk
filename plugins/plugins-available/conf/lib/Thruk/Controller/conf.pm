@@ -645,15 +645,15 @@ sub _process_plugins_page {
 
     my $project_root         = $c->config->{home};
     my $plugin_dir           = $c->config->{'plugin_path'} || $project_root."/plugins";
-    my $plugin_enabled_dir   = $plugin_dir.'/plugins-enabled/*/';
-    my $plugin_available_dir = $project_root.'/plugins/plugins-available/*/';
+    my $plugin_enabled_dir   = $plugin_dir.'/plugins-enabled';
+    my $plugin_available_dir = $project_root.'/plugins/plugins-available';
 
     if($c->stash->{action} eq 'preview') {
         my $pic = $c->{'request'}->{'parameters'}->{'pic'} || die("missing pic");
         if($pic !~ m/^[a-zA-Z_\ ]+$/gmx) {
             die("unknown pic: ".$pic);
         }
-        my $path = $project_root.'/plugins/plugins-available/'.$pic.'/preview.png';
+        my $path = $plugin_available_dir.'/'.$pic.'/preview.png';
         $c->res->content_type('images/png');
         $c->stash->{'text'} = "";
         if(-e $path) {
@@ -663,20 +663,20 @@ sub _process_plugins_page {
         return 1;
     }
     elsif($c->stash->{action} eq 'save') {
-        if(! -d $plugin_dir.'/plugins-enabled/' or ! -w $plugin_dir.'/plugins-enabled/' ) {
-            Thruk::Utils::set_message( $c, 'fail_message', 'Make sure Plugins Folder is writeable: $!' );
+        if(! -d $plugin_enabled_dir or ! -w $plugin_enabled_dir ) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Make sure plugins folder ('.$plugin_enabled_dir.') is writeable: '.$! );
         }
         else {
-            for my $addon (glob($plugin_available_dir)) {
+            for my $addon (glob($plugin_available_dir.'/*/')) {
                 my($addon_name, $dir) = _nice_addon_name($addon);
                 if(!defined $c->{'request'}->{'parameters'}->{'plugin.'.$dir} or $c->{'request'}->{'parameters'}->{'plugin.'.$dir} == 0) {
-                    unlink($plugin_dir.'/plugins-enabled/'.$dir);
+                    unlink($plugin_enabled_dir.'/'.$dir);
                 }
                 if(defined $c->{'request'}->{'parameters'}->{'plugin.'.$dir} and $c->{'request'}->{'parameters'}->{'plugin.'.$dir} == 1) {
-                    if(!-e $plugin_dir.'/plugins-enabled/'.$dir) {
-                        symlink($project_root.'/plugins/plugins-available/'.$dir,
-                                $plugin_dir.'/plugins-enabled/'.$dir)
-                            or die("cannot create ".$plugin_dir.'/plugins-enabled/'.$dir." : ".$!);
+                    if(!-e $plugin_enabled_dir.'/'.$dir) {
+                        symlink($plugin_available_dir.'/'.$dir,
+                                $plugin_enabled_dir.'/'.$dir)
+                            or die("cannot create ".$plugin_enabled_dir.'/'.$dir." : ".$!);
                     }
                 }
             }
@@ -685,14 +685,14 @@ sub _process_plugins_page {
     }
 
     my $plugins = {};
-    for my $addon (glob($plugin_available_dir)) {
+    for my $addon (glob($plugin_available_dir.'/*/')) {
         my($addon_name, $dir) = _nice_addon_name($addon);
         $plugins->{$addon_name} = { enabled => 0, dir => $dir, description => '(no description available.)' };
-        if(-e $project_root.'/plugins/plugins-available/'.$dir.'/description.txt') {
-            $plugins->{$addon_name}->{'description'} = read_file($project_root.'/plugins/plugins-available/'.$dir.'/description.txt');
+        if(-e $plugin_available_dir.'/'.$dir.'/description.txt') {
+            $plugins->{$addon_name}->{'description'} = read_file($plugin_available_dir.'/'.$dir.'/description.txt');
         }
     }
-    for my $addon (glob($plugin_enabled_dir)) {
+    for my $addon (glob($plugin_enabled_dir.'/*/')) {
         my($addon_name, $dir) = _nice_addon_name($addon);
         $plugins->{$addon_name}->{'enabled'} = 1;
     }
