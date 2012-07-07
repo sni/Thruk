@@ -552,6 +552,7 @@ sub update_object {
 
     # update object
     $obj->{'conf'}          = $data;
+    $obj->{'cache'}         = {};
     $obj->{'comments'}      = [ split/\n/mx, $comment ];
     $file->{'changed'}      = 1;
     $self->{'needs_commit'} = 1;
