@@ -286,8 +286,8 @@ sub generate_report {
 
     if(defined $options->{'backends'}) {
         $options->{'backends'} = ref $options->{'backends'} eq 'ARRAY' ? $options->{'backends'} : [ $options->{'backends'} ];
-        $ENV{'THRUK_BACKENDS'} = join(',', @{$options->{'backends'}});
     }
+    local $ENV{'THRUK_BACKENDS'} = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
 
     # set some defaults
     Thruk::Utils::PDF::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);

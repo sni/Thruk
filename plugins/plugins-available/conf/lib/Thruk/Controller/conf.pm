@@ -648,6 +648,11 @@ sub _process_plugins_page {
     my $plugin_enabled_dir   = $plugin_dir.'/plugins-enabled';
     my $plugin_available_dir = $project_root.'/plugins/plugins-available';
 
+    $c->stash->{'readonly'}  = 0;
+    if(! -d $plugin_enabled_dir or ! -w $plugin_enabled_dir ) {
+        $c->stash->{'readonly'}  = 1;
+    }
+
     if($c->stash->{action} eq 'preview') {
         my $pic = $c->{'request'}->{'parameters'}->{'pic'} || die("missing pic");
         if($pic !~ m/^[a-zA-Z_\ ]+$/gmx) {
