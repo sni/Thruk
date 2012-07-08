@@ -27,9 +27,10 @@ Ext.define('TP.PanletGrid', {
                 if(response.status == 200) {
                     var data   = eval("("+response.responseText+")");
                     var fields = [];
+
+                    var newcolumns = Ext.JSON.encode(data.columns);
                     for(key in data.columns) {
                         fields.push(data.columns[key].dataIndex);
-
                         for(key2 in data.columns[key]) {
                             /* this is usually a function, so eval it */
                             if(key2 == 'renderer') {
@@ -48,7 +49,12 @@ Ext.define('TP.PanletGrid', {
                             }
                         }
                     });
-                    this.grid.reconfigure(this.gridStore, data.columns);
+                    if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
+                        this.gridcolumns = newcolumns;
+                        this.grid.reconfigure(this.gridStore, data.columns);
+                    } else {
+                        this.grid.reconfigure(this.gridStore);
+                    }
                     this.grid.applyState(this.xdata.gridstate);
                 } else {
                     var row = {date: new Date(), empty:''};
@@ -65,6 +71,9 @@ Ext.define('TP.PanletGrid', {
             stateEvents: ['reconfigure', 'afterlayout'],
             listeners: {
                 beforestatesave: function(This, state, eOpts) {
+                    if(This.columns.length == 0) {
+                        return false;
+                    }
                     var panlet = This.up('panel');
                     panlet.xdata.gridstate = state;
                     panlet.saveState();
