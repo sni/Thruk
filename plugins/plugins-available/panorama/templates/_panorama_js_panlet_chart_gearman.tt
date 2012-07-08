@@ -1,3 +1,25 @@
+Ext.define('TP.PanletGridGearmanMetrics', {
+    extend: 'TP.PanletGrid',
+
+    title:  'Mod-Gearman Metrics',
+    height: 200,
+    width:  360,
+    initComponent: function() {
+        this.callParent();
+        this.xdata.server = 'localhost:4730';
+        this.xdata.url    = 'panorama.cgi?task=stats_gearman_grid&server=' + this.xdata.server;
+        this.formUpdatedCallback = function() {
+            this.xdata.url = 'panorama.cgi?task=stats_gearman_grid&server=' + this.xdata.server;
+        };
+        this.down('form').add({
+            fieldLabel: 'Gearman Daemon',
+            xtype:      'textfield',
+            name:       'server'
+        });
+    }
+});
+
+
 Ext.define('GearmanTop', {
     extend: 'Ext.data.Model',
     fields: [{ name:'name' },

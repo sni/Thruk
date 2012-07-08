@@ -22,11 +22,11 @@
       [%+ PROCESS _panorama_js_pantab.tt +%]
       [%+ PROCESS _panorama_js_panlet.tt +%]
       [%+ PROCESS _panorama_js_panlet_url.tt +%]
-      [%+ PROCESS _panorama_js_panlet_chart.tt +%]
-      [%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
       [%+ PROCESS _panorama_js_panlet_grid.tt +%]
       [%+ PROCESS _panorama_js_panlet_grid_core_metrics.tt +%]
       [%+ PROCESS _panorama_js_panlet_grid_logs.tt +%]
+      [%+ PROCESS _panorama_js_panlet_chart.tt +%]
+      [%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
 
       /* main viewport */
       Ext.onReady(function() {

@@ -73,6 +73,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'stats_gearman') {
             return($self->_task_stats_gearman($c));
         }
+        elsif($task eq 'stats_gearman_grid') {
+            return($self->_task_stats_gearman_grid($c));
+        }
     }
 
     my $data  = Thruk::Utils::get_user_data($c);
@@ -205,45 +208,35 @@ sub _task_stats_check_metrics {
 ##########################################################
 sub _task_stats_gearman {
     my($self, $c) = @_;
+    $c->stash->{'json'} = _get_gearman_stats($c);
+    return $c->forward('Thruk::View::JSON');
+}
 
-    my $host = 'localhost';
-    my $port = 4730;
-    if(defined $c->request->parameters->{'server'}) {
-        ($host,$port) = split(/:/mx, $c->request->parameters->{'server'}, 2);
-    }
+##########################################################
+sub _task_stats_gearman_grid {
+    my($self, $c) = @_;
 
-    my $handle = IO::Socket::INET->new(
-        Proto    => "tcp",
-        PeerAddr => $host,
-        PeerPort => $port,
-    )
-    or do { warn "can't connect to port $port on $host: $!"; return; };
-    $handle->autoflush(1);
+    my $data = _get_gearman_stats($c);
 
-    print $handle "status\n";
-
-    my $data = {};
-
-    while ( defined( my $line = <$handle> ) ) {
-        chomp($line);
-        my($name,$total,$running,$worker) = split(/\t/mx, $line);
-        next if $name eq 'dummy';
-        if(defined $worker) {
-            my $stat = {
-                'name'      => $name,
-                'worker'    => int($worker),
-                'running'   => int($running),
-                'waiting'   => int($total - $running),
+    my $json = {
+        columns => [
+            { 'header' => 'Queue',   dataIndex => 'name', flex  => 1 },
+            { 'header' => 'Worker',  dataIndex => 'worker',  width => 60, align => 'right', xtype => 'numbercolumn', format => '0,000' },
+            { 'header' => 'Running', dataIndex => 'running', width => 60, align => 'right', xtype => 'numbercolumn', format => '0,000' },
+            { 'header' => 'Waiting', dataIndex => 'waiting', width => 60, align => 'right', xtype => 'numbercolumn', format => '0,000' },
+        ],
+        data    => []
+    };
+    for my $queue (sort keys %{$data}) {
+            push @{$json->{'data'}}, {
+                name    => $queue,
+                worker  => $data->{$queue}->{'worker'},
+                running => $data->{$queue}->{'running'},
+                waiting => $data->{$queue}->{'waiting'},
             };
-            $data->{$name} = $stat;
-        }
-        last if $line eq '.';
     }
-    CORE::close($handle);
 
-
-    $c->stash->{'json'} = $data;
-
+    $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -289,6 +282,48 @@ sub _task_show_logs {
 
     $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _get_gearman_stats {
+    my($c) = @_;
+
+    my $host = 'localhost';
+    my $port = 4730;
+    if(defined $c->request->parameters->{'server'}) {
+        ($host,$port) = split(/:/mx, $c->request->parameters->{'server'}, 2);
+    }
+
+    my $handle = IO::Socket::INET->new(
+        Proto    => "tcp",
+        PeerAddr => $host,
+        PeerPort => $port,
+    )
+    or do { warn "can't connect to port $port on $host: $!"; return; };
+    $handle->autoflush(1);
+
+    print $handle "status\n";
+
+    my $data = {};
+
+    while ( defined( my $line = <$handle> ) ) {
+        chomp($line);
+        my($name,$total,$running,$worker) = split(/\t/mx, $line);
+        next if $name eq 'dummy';
+        if(defined $worker) {
+            my $stat = {
+                'name'      => $name,
+                'worker'    => int($worker),
+                'running'   => int($running),
+                'waiting'   => int($total - $running),
+            };
+            $data->{$name} = $stat;
+        }
+        last if $line eq '.';
+    }
+    CORE::close($handle);
+
+    return $data;
 }
 
 ##########################################################
