@@ -158,7 +158,7 @@ sub _stats_core_metrics {
         columns => [
             { 'header' => 'Type',  dataIndex => 'type',  flex  => 1 },
             { 'header' => 'Total', dataIndex => 'total', align => 'right' },
-            { 'header' => 'Rate',  dataIndex => 'rate',  align => 'right', xtype => 'numbercolumn', format => '0.00 /sec' },
+            { 'header' => 'Rate',  dataIndex => 'rate',  align => 'right', xtype => 'numbercolumn', format => '0.00/s' },
         ],
         data    => [
             { type => 'Servicechecks',       total => $data->{'service_checks'}, rate => $data->{'service_checks_rate'} },
@@ -183,9 +183,9 @@ sub _stats_check_metrics {
     my $json = {
         columns => [
             { 'header' => 'Type',  dataIndex => 'type', flex  => 1 },
-            { 'header' => 'Min',   dataIndex => 'min', width => 60, align => 'right', xtype => 'numbercolumn', format => '0.00' },
-            { 'header' => 'Max',   dataIndex => 'max', width => 60,  align => 'right', xtype => 'numbercolumn', format => '0.00' },
-            { 'header' => 'Avg',   dataIndex => 'avg', width => 60,  align => 'right', xtype => 'numbercolumn', format => '0.00 /sec' },
+            { 'header' => 'Min',   dataIndex => 'min', width => 60, align => 'right', xtype => 'numbercolumn',  format => '0.00s' },
+            { 'header' => 'Max',   dataIndex => 'max', width => 60,  align => 'right', xtype => 'numbercolumn', format => '0.00s' },
+            { 'header' => 'Avg',   dataIndex => 'avg', width => 60,  align => 'right', xtype => 'numbercolumn', format => '0.00s' },
         ],
         data    => [
             { type => 'Service Check Execution Time', min => $data->{'services_execution_time_min'}, max => $data->{'services_execution_time_max'}, avg => $data->{'services_execution_time_max'} },
