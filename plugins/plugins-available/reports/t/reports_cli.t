@@ -18,7 +18,7 @@ $BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
 $BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
 
 # get test host
-my $test = { cmd  => $BIN.' -a listhosts -v', errlike => '/HTTP::Response/' };
+my $test = { cmd  => $BIN.' -a listhosts' };
 TestUtils::test_command($test);
 my $host = (split(/\n/mx, $test->{'stdout'}))[0];
 isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($test));
