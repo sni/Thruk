@@ -1,4 +1,4 @@
-var initial_backend_states = new Object({
+﻿var initial_backend_states = new Object({
     [% FOREACH pd IN backends %]
       [% SET val = '1'                                     %][%# down #%]
       [% SET val = '0' IF backend_detail.$pd.running       %][%# up #%]
