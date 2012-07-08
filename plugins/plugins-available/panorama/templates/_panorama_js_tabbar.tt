@@ -24,6 +24,10 @@ Ext.define('TP.TabBar', {
                             Ext.MessageBox.alert('TODO', 'No settings so far, suggestions welcome...');
                         }
                     }, '-', {
+                        text:   'Site Status',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridServer'}) }
+                    }, {
                         text:   'Core Performance Metrics',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCoreMetrics'}) }

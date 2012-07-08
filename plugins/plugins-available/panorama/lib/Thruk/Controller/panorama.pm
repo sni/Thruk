@@ -70,6 +70,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'show_logs') {
             return($self->_task_show_logs($c));
         }
+        elsif($task eq 'site_status') {
+            return($self->_task_site_status($c));
+        }
         elsif($task eq 'stats_gearman') {
             return($self->_task_stats_gearman($c));
         }
@@ -277,6 +280,47 @@ sub _task_show_logs {
             icon    => Thruk::Utils::Filter::logline_icon($row),
             time    => $row->{'time'},
             message => substr($row->{'message'},13),
+        };
+    }
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_site_status {
+    my($self, $c) = @_;
+
+    my $json = {
+        columns => [
+            { 'header' => 'Id',      dataIndex => 'id', width => 0 },
+            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'function(v, td, item) { return "<div class=\"clickable\" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
+            { 'header' => 'Site',    dataIndex => 'site', width => 60, flex => 1 },
+            { 'header' => 'Version', dataIndex => 'version', width => 50 },
+            { 'header' => 'Runtime', dataIndex => 'runtime', width => 85 },
+        ],
+        data    => []
+    };
+
+    for my $key (@{$c->stash->{'backends'}}) {
+        my $b = $c->stash->{'backend_detail'}->{$key};
+        my $d = {};
+        $d = $c->stash->{'pi_detail'}->{$key} if ref $c->stash->{'pi_detail'} eq 'HASH';
+        my $icon            = 'exclamation.png';
+        if($b->{'running'})          { $icon = 'accept.png'; }
+        elsif($b->{'disabled'} == 2) { $icon = 'sport_golf.png'; }
+        my $runtime = "";
+        my $program_version = $b->{'last_error'};
+        if($b->{'running'}) {
+            $runtime = Thruk::Utils::Filter::duration(time() - $d->{'program_start'});
+            $program_version = $d->{'program_version'};
+        }
+        push @{$json->{'data'}}, {
+            id      => $key,
+            icon    => $icon,
+            site    => $b->{'name'},
+            version => $program_version,
+            runtime => $runtime,
         };
     }
 

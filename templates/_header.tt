@@ -55,16 +55,7 @@
       [% IF refresh_rate +%]
       var refresh_rate            = [% refresh_rate %];
       [% END %]
-      var initial_backend_states = new Object({
-          [% FOREACH pd IN backends %]
-            [% SET val = '1'                                     %][%# down #%]
-            [% SET val = '0' IF backend_detail.$pd.running       %][%# up #%]
-            [% SET val = '2' IF backend_detail.$pd.disabled == 2 %][%# hidden #%]
-            [% SET val = '3' IF backend_detail.$pd.disabled == 3 %][%# unused #%]
-            [% SET val = '3' IF param_backend && pd != param_backend %][%# unused #%]
-            '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
-          [% END %]
-      });
+      [% PROCESS _header_initial_states.tt %]
       /* create clone */
       var current_backend_states  = jQuery.extend(true, {}, initial_backend_states);
       var enable_shinken_features = [% enable_shinken_features %];

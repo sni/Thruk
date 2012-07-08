@@ -10,6 +10,7 @@
       var url_prefix             = '[% url_prefix %]';
       var cookie_path            = '[% cookie_path %]';
       var base                   = '[% url_prefix %]thruk/plugins/panorama';
+      [% PROCESS _header_initial_states.tt %]
     </script>
 
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/ext-all-debug.js"></script>
@@ -25,6 +26,7 @@
       [%+ PROCESS _panorama_js_panlet_grid.tt +%]
       [%+ PROCESS _panorama_js_panlet_grid_core_metrics.tt +%]
       [%+ PROCESS _panorama_js_panlet_grid_logs.tt +%]
+      [%+ PROCESS _panorama_js_panlet_grid_server.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
 

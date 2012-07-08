@@ -29,3 +29,7 @@ TD.icon_column DIV.x-grid-cell-inner {
   padding-bottom:1px;
   padding-top:0px;
 }
+
+.clickable:hover {
+  cursor: pointer;
+}

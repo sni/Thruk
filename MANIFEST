@@ -1001,14 +1001,19 @@ plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray
 plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray/window/icon-warning.gif
 plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray/window/window-default-corners.gif
 plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray/window/window-default-sides.gif
+plugins/plugins-available/panorama/root/images/accept.png
+plugins/plugins-available/panorama/root/images/chart_curve.png
 plugins/plugins-available/panorama/root/images/cog.png
+plugins/plugins-available/panorama/root/images/exclamation.png
 plugins/plugins-available/panorama/root/images/exit.png
 plugins/plugins-available/panorama/root/images/gear.gif
 plugins/plugins-available/panorama/root/images/html_add.png
 plugins/plugins-available/panorama/root/images/information.png
 plugins/plugins-available/panorama/root/images/new_tab.gif
 plugins/plugins-available/panorama/root/images/s.gif
+plugins/plugins-available/panorama/root/images/server.png
 plugins/plugins-available/panorama/root/images/server_connect.png
+plugins/plugins-available/panorama/root/images/sport_golf.png
 plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
@@ -1022,6 +1027,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart_gearman.t
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_core_metrics.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_logs.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_server.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url.tt
 plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_state_provider.tt
@@ -1230,6 +1236,7 @@ templates/_extinfo_cmd_pane.tt
 templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt
+templates/_header_initial_states.tt
 templates/_help.tt
 templates/_host_command_box.tt
 templates/_host_command_box_full.tt

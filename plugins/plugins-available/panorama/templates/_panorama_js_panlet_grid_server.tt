@@ -1,0 +1,35 @@
+Ext.define('TP.PanletGridServer', {
+    extend: 'TP.PanletGrid',
+
+    title:  'Site Status',
+    height: 200,
+    width:  250,
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url       = 'panorama.cgi?task=site_status';
+        this.loader.loadMask = true;
+    }
+});
+
+var backendSelTimer;
+TP.toggleBackend = function(panel, backend) {
+    if(initial_backend_states[backend] == 2) {
+        initial_backend_states[backend] = 0;
+        panel.style.backgroundImage = 'url(../plugins/panorama/images/accept.png)';
+    } else {
+        initial_backend_states[backend] = 2;
+        panel.style.backgroundImage = 'url(../plugins/panorama/images/sport_golf.png)';
+    }
+
+    var parent = panel;
+    while(parent.parentNode != undefined && !parent.id) { parent = parent.parentNode; }
+    panel = Ext.getCmp(parent.id);
+    var panlet = panel.up('panel').up('panel');
+
+    /* save current selected backends in session cookie */
+    document.cookie = "thruk_backends="+Ext.Object.toQueryString(initial_backend_states)+ "; path="+cookie_path+";";
+
+    /* reload panel */
+    window.clearTimeout(backendSelTimer);
+    backendSelTimer = window.setTimeout(Ext.bind(panlet.refreshHandler, panlet, []), 1000);
+}
