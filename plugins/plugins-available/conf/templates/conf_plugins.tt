@@ -6,8 +6,12 @@
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="sub" value="plugins">
 <input type="hidden" name="action" value="save">
+[% IF readonly %]
+Readonly: Make sure the plugins directory is writable!
+[% ELSE %]
 <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
 Don't forget to restart Thruk after changing plugins.
+[% END %]
 <table><tr><td valign="top">
   <table border="0" class='data conftoolusers' style="width:580px;">
     <tr>
@@ -28,8 +32,8 @@ Don't forget to restart Thruk after changing plugins.
       <td class='dataVal plugin_description'>[% plugin.description %]</td>
       <td class='dataVal'>
         <div class="radioset">
-            <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_on">On</label>
-            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
+            <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir %]_on">On</label>
+            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
         </div>
       </td>
     </tr>
@@ -55,16 +59,19 @@ Don't forget to restart Thruk after changing plugins.
       <td class='dataVal plugin_description'>[% plugin.description %]</td>
       <td class='dataVal'>
         <div class="radioset">
-            <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_on">On</label>
-            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
+            <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir %]_on">On</label>
+            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir %]_off">Off</label>
         </div>
       </td>
     </tr>
     [% END %]
   </table>
 </td></tr></table>
-<br><input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
+<br>
+[% IF !readonly %]
+<input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
 Don't forget to restart Thruk after changing plugins.
+[% END %]
 </form>
 </div>
 
