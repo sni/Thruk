@@ -160,7 +160,7 @@ sub _task_stats_core_metrics {
     my $json = {
         columns => [
             { 'header' => 'Type',  dataIndex => 'type',  flex  => 1 },
-            { 'header' => 'Total', dataIndex => 'total', align => 'right' },
+            { 'header' => 'Total', dataIndex => 'total', align => 'right', xtype => 'numbercolumn', format => '0,000' },
             { 'header' => 'Rate',  dataIndex => 'rate',  align => 'right', xtype => 'numbercolumn', format => '0.00/s' },
         ],
         data    => [
