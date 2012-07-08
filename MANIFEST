@@ -288,6 +288,7 @@ plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
 plugins/plugins-available/wml/description.txt
 plugins/plugins-available/wml/lib/Thruk/Controller/wml.pm
+plugins/plugins-available/wml/preview.png
 plugins/plugins-available/wml/README
 plugins/plugins-available/wml/t/controller_wml.t
 plugins/plugins-available/wml/templates/wml.tt
