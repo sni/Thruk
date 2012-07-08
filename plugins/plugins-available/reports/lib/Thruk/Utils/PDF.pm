@@ -930,7 +930,13 @@ sub _replace_css_and_images {
                ([^'"]*)
                ("|')
                ([^>]*>)
-               /&_replace_img($1,$2,$3,$4,$5)/gemx;
+              /&_replace_img($1,$2,$3,$4,$5)/gemx;
+    $text =~ s/(<input[^>]*src=)
+               ("|')
+               ([^'"]*)
+               ("|')
+               ([^>]*>)
+              /&_replace_img($1,$2,$3,$4,$5)/gemx;
     return $text;
 }
 
@@ -966,8 +972,13 @@ sub _replace_img {
 ##########################################################
 sub _replace_css {
     my $url = shift;
+    my $css = _read_static_content_file($url);
+    $css =~ s/(url\()
+              ([^)]*)
+              (\))
+             /&_replace_css_img($url,$1,$2,$3)/gemx;
     my $text = "<style type='text/css'>\n<!--\n";
-    $text .= _read_static_content_file($url);
+    $text .= $css;
     $text .= "\n-->\n</style>\n";
     return $text;
 }
@@ -986,14 +997,37 @@ sub _replace_js {
 }
 
 ##############################################
+sub _replace_css_img {
+    my($css, $a,$file,$b) = @_;
+    # static images
+    if($file =~ m/\.(\w+)$/mx) {
+        my $data = "data:image/$1;base64,";
+        # get basename of css file
+        $css =~ s|/[^/]*$||mx;
+        $data .= encode_base64(_read_static_content_file($css.'/'.$file), '');
+        return "$a$data$b";
+    }
+    return "";
+}
+
+##############################################
 sub _read_static_content_file {
     my $url = shift;
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");
     $url =~ s|^.*/thruk/||gmx;
+    while($url =~ m|[^/\.]+/\.\./|mx) {
+        $url   =~ s|[^/\.]+/\.\./||mx;
+    }
     my $file;
     if($url =~ m|^themes/|mx) {
         $url =~ s|^themes/||gmx;
-        $file = $c->config->{'project_root'} . '/themes/themes-enabled/' . $url;
+        my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}."/themes";
+        $file = $themes_dir . '/themes-enabled/' . $url;
+    }
+    elsif($url =~ m|^plugins/|mx) {
+        $url =~ s|^plugins/||gmx;
+        my $plugins_dir = $c->config->{'plugin_path'} || $c->config->{'project_root'}."/plugins";
+        $file = $plugins_dir . '/plugins-enabled/' . $url;
     } else {
         $file = $c->config->{'project_root'}."/root/thruk/".$url;
     }

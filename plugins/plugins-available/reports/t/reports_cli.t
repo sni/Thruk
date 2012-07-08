@@ -18,10 +18,10 @@ $BIN    = $BIN.' --local' unless defined $ENV{'CATALYST_SERVER'};
 $BIN    = $BIN.' --remote-url="'.$ENV{'CATALYST_SERVER'}.'"' if defined $ENV{'CATALYST_SERVER'};
 
 # get test host
-my $test = { cmd  => $BIN.' -a listhosts' };
+my $test = { cmd  => $BIN.' -a listhosts -v', errlike => '/Debug messages enabled/' };
 TestUtils::test_command($test);
 my $host = (split(/\n/mx, $test->{'stdout'}))[0];
-isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host");
+isnt($host, undef, 'got test hosts') or BAIL_OUT("need test host:\n".Dumper($test));
 
 # get test hostgroup
 $test = { cmd  => $BIN.' -a listhostgroups' };
@@ -58,6 +58,15 @@ my $test_pdf_reports = [{
         'type'                  => 'xls',
         'template'              => 'report_from_url.tt',
         'params.url'            => uri_escape('status.cgi?style=hostdetail&hostgroup=all&view_mode=xls'),
+    }, {
+        'name'                  => 'HTML Report',
+        'type'                  => 'hmtl',
+        'template'              => 'report_from_url.tt',
+        'params.url'            => uri_escape('status.cgi?host=all'),
+        'params.minimal'        => 'yes',
+        'params.js'             => 'no',
+        'params.css'            => 'yes',
+        'params.theme'          => 'Thruk',
     }
 ];
 
@@ -80,6 +89,9 @@ for my $report (@{$test_pdf_reports}) {
     }
     elsif($report->{'type'} eq 'xls') {
         $like = [ '/Arial1/', '/Tahoma1/' ];
+    }
+    elsif($report->{'type'} eq 'html') {
+        $like = [ '/<html/' ];
     }
 
     # generate report

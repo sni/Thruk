@@ -161,7 +161,7 @@ plugins/plugins-available/conf/templates/_conf_objects_menu.tt
 plugins/plugins-available/conf/templates/_conf_tools_menu.tt
 plugins/plugins-available/conf/templates/_conf_wizard_command.tt
 plugins/plugins-available/conf/templates/_conf_wizard_commandline.tt
-plugins/plugins-available/conf/templates/_conf_wizard_svcgroup_members.tt
+plugins/plugins-available/conf/templates/_conf_wizard_list.tt
 plugins/plugins-available/conf/templates/conf.tt
 plugins/plugins-available/conf/templates/conf_data.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt
@@ -1077,6 +1077,7 @@ plugins/plugins-available/statusmap/t/controller_statusmap.t
 plugins/plugins-available/statusmap/templates/statusmap.tt
 plugins/plugins-available/wml/description.txt
 plugins/plugins-available/wml/lib/Thruk/Controller/wml.pm
+plugins/plugins-available/wml/preview.png
 plugins/plugins-available/wml/README
 plugins/plugins-available/wml/t/controller_wml.t
 plugins/plugins-available/wml/templates/wml.tt

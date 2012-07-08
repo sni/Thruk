@@ -5,6 +5,8 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 
+our $VERSION = '1.35';
+
 my $options = {
     'verbose'  => 0,
     'backends' => [],
@@ -25,7 +27,7 @@ GetOptions (
    "<>"                 => sub { $options->{'url'} = "".shift },
 ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
 
-if($options->{'version'}) { require Thruk; print "Thruk Version $Thruk::VERSION\n"; exit 0; }
+if($options->{'version'}) { print "Thruk Version $VERSION\n"; exit 0; }
 pod2usage( { -verbose => 2, -exit => 1 } ) if $options->{'help'};
 pod2usage( { -verbose => 2, -exit => 1 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
 

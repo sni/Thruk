@@ -1,0 +1,34 @@
+﻿<button class="conf_button members_wzd_button" id="[% id %]_btn" name="[% wzd_args %]">&nbsp;</button>
+
+<div id="[% id %]_dialog" title="List Wizzard" style="display: none;">
+<table><tr><td class="filter">
+  <table style="width:100%;">
+    <tr>
+      <td class="attrName"><b>Available</b></td>
+      <td>&nbsp;</td>
+      <td class="attrName"><b>Selected</b></td>
+    </tr>
+    <tr>
+      <td class="attrName">
+        <input type="text" class="filter_available" style="width:250px; border:0; padding:0;" onkeyup="data_filter_select('[% id %]_available_members', this.value)"><br>
+        <select multiple id="[% id %]_available_members" name="[% id %]_available_members" style="width:250px; height:300px; border:0;" ondblclick="data_select_move('[% id %]_available_members', '[% id %]_selected_members')">
+            <option disabled>loading...</option>
+        </select>
+      </td>
+      <td align="center" valign="middle">
+        <button id="[% id %]_add" onclick="data_select_move('[% id %]_available_members', '[% id %]_selected_members')">&gt;&gt;</button><br>
+        <button id="[% id %]_remove" onclick="data_select_move('[% id %]_selected_members', '[% id %]_available_members')">&lt;&lt;</button>
+      </td>
+      <td class="attrName">
+        <input type="text" class="filter_selected" style="width:250px; border:0; padding:0;" onkeyup="data_filter_select('[% id %]_selected_members', this.value)"><br>
+        <select multiple id="[% id %]_selected_members" name="[% id %]_selected_members" style="width:250px; height:300px; border:0;" ondblclick="data_select_move('[% id %]_selected_members', '[% id %]_available_members')">
+            <option disabled>loading...</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=3 align="center"><button id="[% id %]_accept">accept</button></td>
+    </tr>
+  </table>
+</td></tr></table>
+</div>

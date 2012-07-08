@@ -7,6 +7,7 @@
 <input type="hidden" name="sub" value="plugins">
 <input type="hidden" name="action" value="save">
 <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
+Don't forget to restart Thruk after changing plugins.
 <table><tr><td valign="top">
   <table border="0" class='data conftoolusers' style="width:580px;">
     <tr>
@@ -62,7 +63,8 @@
     [% END %]
   </table>
 </td></tr></table>
-<br><input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button">
+<br><input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
+Don't forget to restart Thruk after changing plugins.
 </form>
 </div>
 

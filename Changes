@@ -1,13 +1,16 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.36     not yet released
-          - added plugin&addon manager to config tool
-          - reports can now be created for every page (html, xls, ...)
           - support flexible downtimes from the status page quick command
           - support recurring flexible downtimes
           - allow human readable values for duration filter like 5h or 10m
           - check version when using the check for updates link
           - clean up menu (don't show grid links in extra row)
+          - reporting:
+            - reports can now be created for every page (html, xls, ...)
+          - config tool:
+            - added plugin & addon manager
+            - show hostgroup name on hosts service list
           - Bug Fixes
             - downtimes: fixed display of flexible downtimes
             - recurring downtimes: fixed adding downtimes on sunday

@@ -736,18 +736,22 @@ sub _do_on_peers {
             }
         }
     }
+    $self->{'log'}->debug($function)         if defined $self->{'log'};
+    $self->{'log'}->debug(Dumper($backends)) if defined $self->{'log'} and defined $backends;
 
     # send query to selected backends
     my( $result, $type, $size );
     my $totalsize = 0;
     my $selected_backends = 0;
     my $last_error;
-    for my $peer ( @{ $self->get_peers() } )
-    {
+    for my $peer ( @{ $self->get_peers() } ) {
         if(defined $backends) {
             next unless defined $backends->{$peer->{'key'}};
         }
-        next unless $peer->{'enabled'} == 1;
+        unless($peer->{'enabled'} == 1) {
+            $self->{'log'}->debug("skipped peer: ".$peer->{'name'}) if defined $self->{'log'};
+            next;
+        }
 
         $peer->{'last_error'} = undef;
         $Thruk::Backend::Manager::stats->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
