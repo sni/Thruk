@@ -29,7 +29,7 @@ Don't forget to restart Thruk after changing plugins.
       <td class='dataVal'>
         <div class="radioset">
             <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_on">On</label>
-            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
+            <input type="radio" value="0" id="[% plugin.dir %]_off" name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir %]_off">Off</label>
         </div>
       </td>
     </tr>

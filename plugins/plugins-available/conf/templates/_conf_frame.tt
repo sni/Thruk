@@ -26,6 +26,7 @@
                     [% IF conf_config.exists('cgi.cfg') || conf_config.exists('htpasswd') %]
                     <option value='users'[%  IF sub == 'users' %] selected [% END %]>Users</option>
                     [% END %]
+                    <option value='plugins'[%  IF sub == 'plugins' %] selected [% END %]>Plugins</option>
                     [% IF has_obj_conf %]
                     <option value='objects'[%  IF sub == 'objects' %] selected [% END %]>Objects</option>
                     [% END %]
