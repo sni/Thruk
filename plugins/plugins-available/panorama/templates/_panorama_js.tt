@@ -118,5 +118,8 @@ var TP = {
                 handler: function() { this.up('window').destroy() }
             }]
         });
+    },
+    dateRenderer: function(value) {
+        return "test";
     }
 }

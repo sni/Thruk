@@ -256,7 +256,7 @@ Ext.define('TP.Panlet', {
         delete this.xdata['refresh_txt'];
         delete this.xdata['title'];
         if(this.formUpdatedCallback) {
-            this.formUpdatedCallback();
+            this.formUpdatedCallback(this);
         }
         this.check_pintool();
     },

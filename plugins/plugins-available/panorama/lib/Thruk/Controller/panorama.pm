@@ -62,13 +62,16 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if(defined $c->request->parameters->{'task'}) {
         my $task = $c->request->parameters->{'task'};
         if($task eq 'stats_core_metrics') {
-            return($self->_stats_core_metrics($c));
+            return($self->_task_stats_core_metrics($c));
         }
         elsif($task eq 'stats_check_metrics') {
-            return($self->_stats_check_metrics($c));
+            return($self->_task_stats_check_metrics($c));
+        }
+        elsif($task eq 'show_logs') {
+            return($self->_task_show_logs($c));
         }
         elsif($task eq 'stats_gearman') {
-            return($self->_stats_gearman($c));
+            return($self->_task_stats_gearman($c));
         }
     }
 
@@ -150,7 +153,7 @@ sub _nice_ext_value {
 }
 
 ##########################################################
-sub _stats_core_metrics {
+sub _task_stats_core_metrics {
     my($self, $c) = @_;
 
     my $data = $c->{'db'}->get_extra_perf_stats(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'status' ) ] );
@@ -175,7 +178,7 @@ sub _stats_core_metrics {
 }
 
 ##########################################################
-sub _stats_check_metrics {
+sub _task_stats_check_metrics {
     my($self, $c) = @_;
 
     my $data = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
@@ -200,7 +203,7 @@ sub _stats_check_metrics {
 }
 
 ##########################################################
-sub _stats_gearman {
+sub _task_stats_gearman {
     my($self, $c) = @_;
 
     my $host = 'localhost';
@@ -241,6 +244,50 @@ sub _stats_gearman {
 
     $c->stash->{'json'} = $data;
 
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_show_logs {
+    my($self, $c) = @_;
+
+    my $filter;
+    my $end   = time();
+    my $start = $end - Thruk::Utils::Status::convert_time_amount($c->{'request'}->{'parameters'}->{'time'} || '15m');
+    push @{$filter}, { time => { '>=' => $start }};
+    push @{$filter}, { time => { '<=' => $end }};
+
+    # additional filters set?
+    my $pattern         = $c->{'request'}->{'parameters'}->{'pattern'};
+    my $exclude_pattern = $c->{'request'}->{'parameters'}->{'exclude'};
+    if(defined $pattern and $pattern !~ m/^\s*$/mx) {
+        push @{$filter}, { message => { '~~' => $pattern }};
+    }
+    if(defined $exclude_pattern and $exclude_pattern !~ m/^\s*$/mx) {
+        push @{$filter}, { message => { '!~~' => $exclude_pattern }};
+    }
+    my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
+
+    $c->{'db'}->renew_logcache($c);
+    my $data = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
+
+    my $json = {
+        columns => [
+            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'function(v) { return "<div style=\"width:20px;height:20px;background-image:url(../themes/Thruk/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
+            { 'header' => 'Time',    dataIndex => 'time', width => 60, renderer => 'function(v) { return Ext.Date.format(new Date(v*1000), "H:i:s") }' },
+            { 'header' => 'Message', dataIndex => 'message', flex => 1 },
+        ],
+        data    => []
+    };
+    for my $row (@{$data}) {
+        push @{$json->{'data'}}, {
+            icon    => Thruk::Utils::Filter::logline_icon($row),
+            time    => $row->{'time'},
+            message => substr($row->{'message'},13),
+        };
+    }
+
+    $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
 }
 

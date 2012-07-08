@@ -113,6 +113,7 @@ my %config = ('name'                   => 'Thruk',
                                           'format_cronentry'    => \&Thruk::Utils::format_cronentry,
                                           'nl2br'               => \&Thruk::Utils::Filter::nl2br,
                                           'action_icon'         => \&Thruk::Utils::Filter::action_icon,
+                                          'logline_icon'        => \&Thruk::Utils::Filter::logline_icon,
                                           'calculate_first_notification_delay_remaining' => \&Thruk::Utils::Filter::calculate_first_notification_delay_remaining,
 
                                           'version'        => $VERSION,

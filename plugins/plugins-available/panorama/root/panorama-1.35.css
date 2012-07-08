@@ -23,3 +23,9 @@ DIV.x-tab-default-over A.x-tab-close-btn {
 .x-menu-item-link {
     line-height: 11px;
 }
+
+/* reduce padding of icon grid colums */
+TD.icon_column DIV.x-grid-cell-inner {
+  padding-bottom:1px;
+  padding-top:0px;
+}

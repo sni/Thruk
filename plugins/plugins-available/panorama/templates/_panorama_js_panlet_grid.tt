@@ -29,6 +29,13 @@ Ext.define('TP.PanletGrid', {
                     var fields = [];
                     for(key in data.columns) {
                         fields.push(data.columns[key].dataIndex);
+
+                        for(key2 in data.columns[key]) {
+                            /* this is usually a function, so eval it */
+                            if(key2 == 'renderer') {
+                                eval('data.columns[key][key2]=' + data.columns[key][key2]);
+                            }
+                        }
                     }
                     this.gridStore = Ext.create('Ext.data.Store', {
                         data:  {'items': data.data },
