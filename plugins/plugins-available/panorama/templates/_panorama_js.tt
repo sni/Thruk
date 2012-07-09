@@ -203,5 +203,12 @@ var TP = {
         if(b1.bl.x >= b2.tl.x && b1.bl.x < b2.tr.x && b1.bl.y >  b2.tl.y && b1.bl.y <= b2.bl.y) { return true; }
         if(b1.br.x >  b2.tl.x && b1.br.x < b2.tr.x && b1.br.y >  b2.tl.y && b1.br.y <= b2.bl.y) { return true; }
         return false;
+    },
+    hideFormElements: function(form, list) {
+        form.getFields().each(function(f, i) {
+            for(var nr in list) {
+                if(f.name == list[nr]) { f.hide() }
+            }
+        });
     }
 }

@@ -8,6 +8,7 @@ Ext.define('TP.PanletGridGearmanMetrics', {
         this.callParent();
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=stats_gearman_grid&server=' + this.xdata.server;
+        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.formUpdatedCallback = function() {
             this.xdata.url = 'panorama.cgi?task=stats_gearman_grid&server=' + this.xdata.server;
         };
@@ -48,6 +49,7 @@ Ext.define('TP.PanletChartGearman', {
         this.xdata.queue  = 'service';
         this.xdata.server = 'localhost:4730';
         this.xdata.url    = 'panorama.cgi?task=stats_gearman&server=' + this.xdata.server;
+        TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.formUpdatedCallback = function() {
             this.xdata.url = 'panorama.cgi?task=stats_gearman&server=' + this.xdata.server;
             if(this.setTitle) {
