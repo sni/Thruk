@@ -58,6 +58,12 @@ Ext.define('TP.PanletGrid', {
                     if(this.xdata.gridstate != undefined) {
                         this.grid.applyState(this.xdata.gridstate);
                     }
+                    if(this.initialState != undefined) {
+                        /* applyState throws internal error but state gets applied anyway */
+                        try {
+                            this.grid.applyState(this.initialState);
+                        } catch(e) {}
+                    }
                 } else {
                     var row = {date: new Date(), empty:''};
                     debug("ERROR: " + response.status);
@@ -70,9 +76,10 @@ Ext.define('TP.PanletGrid', {
             store: this.gridStore,
             id: this.id + '_gridpanel',
             stateful: true,
-            stateEvents: ['reconfigure', 'afterlayout'],
+            stateEvents: ['reconfigure', 'afterlayout', 'columnmove', 'columnresize', 'sortchange', 'groupchange'],
             listeners: {
                 beforestatesave: function(This, state, eOpts) {
+                    /* only save filled grids state */
                     if(This.columns.length == 0) {
                         return false;
                     }
@@ -90,6 +97,10 @@ Ext.define('TP.PanletGrid', {
             }
             return true;
         });
+        var state = cp.get(this.id);
+        if(state && state.xdata && state.xdata.gridstate) {
+            this.initialState = Ext.JSON.decode(Ext.JSON.encode(state.xdata.gridstate));
+        }
 
         this.add(this.grid);
 
