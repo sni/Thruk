@@ -28,6 +28,8 @@
       [%+ PROCESS _panorama_js_panlet_grid_server.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
+      [%+ PROCESS _panorama_js_panlet_piechart.tt +%]
+      [%+ PROCESS _panorama_js_panlet_piechart_hosts.tt +%]
 
       /* main viewport */
       Ext.onReady(function() {

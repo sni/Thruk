@@ -106,7 +106,7 @@ Ext.define('TP.PanletGrid', {
 
         this.refreshHandler = function() {
             this.loader.load({url:this.xdata.url});
-        },
+        };
         this.addListener('afterrender', function() {
             this.refreshHandler();
         });

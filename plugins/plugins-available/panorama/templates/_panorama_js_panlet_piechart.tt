@@ -1,0 +1,106 @@
+Ext.define('TP.PanletPieChart', {
+    extend: 'TP.Panlet',
+
+    title:  'chart',
+    width:  200,
+    height: 200,
+    initComponent: function() {
+        this.callParent();
+
+        this.pieStore = Ext.create('Ext.data.Store', {
+            fields: ['name','data'],
+            data:  [{name:'test', data: 100}]
+        });
+
+        this.loader = {
+            autoLoad: false,
+            renderer: 'data',
+            scope:    this,
+            url:      '',
+            loading:  false,
+            listeners: {
+                'beforeload': function(This, options, eOpts) {
+                    if(this.loading) {
+                        return false;
+                    }
+                    this.loading = true;
+                    return true;
+                }
+            },
+            callback: function(This, success, response, options) {
+                This.loading = false;
+                if(response.status == 200) {
+                    var data   = eval("("+response.responseText+")");
+                    var fields = [];
+
+                    for(key in data.columns) {
+                        fields.push(data.columns[key].dataIndex);
+                    }
+                    this.pieStore = Ext.create('Ext.data.Store', {
+                        data:  {'items': data.data },
+                        fields: fields,
+                        proxy: {
+                            type: 'memory',
+                            reader: {
+                                type: 'json',
+                                root: 'items'
+                            }
+                        }
+                    });
+                    this.chart.bindStore(this.pieStore);
+                } else {
+                    debug("ERROR: " + response.status);
+                    debug(response);
+                }
+            }
+        };
+
+        this.chart = Ext.create('Ext.chart.Chart', {
+            xtype: 'chart',
+            animate: true,
+            store: this.pieStore,
+            shadow: true,
+            legend: false,
+            insetPadding: 3,
+            theme: 'Base:gradients',
+            series: [{
+                type: 'pie',
+                field: 'data',
+                donut: false,
+                showInLegend: true,
+                tips: {
+                    trackMouse: true,
+                    width: 140,
+                    height: 28,
+                    renderer: function(storeItem, item) {
+                        //calculate percentage.
+                        var total = 0;
+                        storeItem.store.each(function(rec) {
+                            total += rec.get('data');
+                        });
+                        this.setTitle(storeItem.get('name') + ' :' + storeItem.get('data') + ' (' + Math.round(storeItem.get('data') / total * 100) + '%)');
+                    }
+                },
+                highlight: {
+                    segment: {
+                        margin: 20
+                    }
+                },
+                label: {
+                    field: 'name',
+                    display: 'rotate',
+                    contrast: true,
+                    font: '16px Arial'
+                }
+            }]
+        });
+        this.add(this.chart);
+
+        this.refreshHandler = function() {
+            this.loader.load({url:this.xdata.url});
+        };
+        this.addListener('afterrender', function() {
+            this.refreshHandler();
+        });
+    }
+});

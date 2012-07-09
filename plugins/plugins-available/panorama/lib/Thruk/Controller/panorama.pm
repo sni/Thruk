@@ -73,6 +73,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'site_status') {
             return($self->_task_site_status($c));
         }
+        elsif($task eq 'hosts_pie') {
+            return($self->_task_hosts_pie($c));
+        }
         elsif($task eq 'stats_gearman') {
             return($self->_task_stats_gearman($c));
         }
@@ -321,6 +324,31 @@ sub _task_site_status {
             site    => $b->{'name'},
             version => $program_version,
             runtime => $runtime,
+        };
+    }
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_hosts_pie {
+    my($self, $c) = @_;
+
+    my $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+
+    my $json = {
+        columns => [
+            { 'header' => 'Name',      dataIndex => 'name' },
+            { 'header' => 'Data',      dataIndex => 'data' },
+        ],
+        data    => []
+    };
+
+    for my $state (qw/up down unreachable pending/) {
+        push @{$json->{'data'}}, {
+            name    => ucfirst $state,
+            data    => $data->{$state},
         };
     }
 
