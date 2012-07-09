@@ -1018,7 +1018,6 @@ plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/panorama-1.35.css
-plugins/plugins-available/panorama/root/panorama-1.35.js
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/templates/_panorama_js.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet.tt

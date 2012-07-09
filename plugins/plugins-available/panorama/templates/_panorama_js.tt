@@ -77,6 +77,7 @@ var TP = {
         var tb  = pan.getActiveTab();
         var win = Ext.create(config.type, config.conf);
         win.panel_id = tb.id;
+        TP.fitWindowPlacement(win)
         if(!config.skip_state) {
             tb.window_ids.push(win.id);
             tb.saveState();
@@ -119,7 +120,10 @@ var TP = {
             }]
         });
     },
-    dateRenderer: function(value) {
-        return "test";
+    fitWindowPlacement: function(win) {
+        var pos  = win.getPosition();
+        var size = win.getSize();
+debug(pos);
+debug(size);
     }
 }

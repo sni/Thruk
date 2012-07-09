@@ -3,7 +3,7 @@ Ext.define('TP.PanletGridServer', {
 
     title:  'Site Status',
     height: 200,
-    width:  250,
+    width:  260,
     initComponent: function() {
         this.callParent();
         this.xdata.url       = 'panorama.cgi?task=site_status';
