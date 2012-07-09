@@ -293,9 +293,9 @@ sub _task_site_status {
 
     my $json = {
         columns => [
-            { 'header' => 'Id',      dataIndex => 'id', width => 0 },
-            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'function(v, td, item) { title=""; if(item.data.runtime=="") {title="title=\""+item.data.version+"\""} return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
-            { 'header' => 'Site',    dataIndex => 'site', width => 60, flex => 1 },
+            { 'header' => 'Id',      dataIndex => 'id',      width => 45, hidden => JSON::XS::true },
+            { 'header' => '',        dataIndex => 'icon',    width => 30, tdCls => 'icon_column', renderer => 'function(v, td, item) { title=""; if(item.data.runtime=="") {title="title=\""+item.data.version+"\""} return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
+            { 'header' => 'Site',    dataIndex => 'site',    width => 60, flex => 1 },
             { 'header' => 'Version', dataIndex => 'version', width => 50 },
             { 'header' => 'Runtime', dataIndex => 'runtime', width => 85 },
         ],
