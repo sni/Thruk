@@ -55,7 +55,9 @@ Ext.define('TP.PanletGrid', {
                     } else {
                         this.grid.reconfigure(this.gridStore);
                     }
-                    this.grid.applyState(this.xdata.gridstate);
+                    if(this.xdata.gridstate != undefined) {
+                        this.grid.applyState(this.xdata.gridstate);
+                    }
                 } else {
                     var row = {date: new Date(), empty:''};
                     debug("ERROR: " + response.status);

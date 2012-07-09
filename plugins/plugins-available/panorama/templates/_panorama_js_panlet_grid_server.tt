@@ -11,6 +11,7 @@ Ext.define('TP.PanletGridServer', {
     }
 });
 
+/* toggle backends */
 var backendSelTimer;
 TP.toggleBackend = function(panel, backend) {
     if(initial_backend_states[backend] == 2) {
