@@ -14,7 +14,6 @@
     </script>
 
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/ext-all-debug.js"></script>
-    <script src="[% url_prefix %]thruk/plugins/panorama/panorama-[% version %].js" type="application/x-javascript" charset="utf-8"></script>
     <script type="text/javascript">
       var ExtState = [% state %];
       [%+ PROCESS _panorama_js_state_provider.tt +%]
