@@ -9,6 +9,7 @@ Ext.define('TP.PanletGridServer', {
         this.xdata.url       = 'panorama.cgi?task=site_status';
         TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.loader.loadMask = true;
+        this.reloadOnSiteChanges = true;
     }
 });
 
@@ -33,5 +34,5 @@ TP.toggleBackend = function(panel, backend) {
 
     /* reload panel */
     window.clearTimeout(backendSelTimer);
-    backendSelTimer = window.setTimeout(Ext.bind(panlet.refreshHandler, panlet, []), 1000);
+    backendSelTimer = window.setTimeout(TP.refreshAllSitePanel, 1000);
 }

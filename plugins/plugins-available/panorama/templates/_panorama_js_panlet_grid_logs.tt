@@ -11,6 +11,7 @@ Ext.define('TP.PanletGridLogs', {
         this.xdata.exclude  = '';
         this.xdata.time     = '15m';
         TP.hideFormElements(this.down('form').getForm(), ['url']);
+        this.reloadOnSiteChanges = true;
 
         this.formUpdatedCallback = function() {
             this.loader.baseParams = {

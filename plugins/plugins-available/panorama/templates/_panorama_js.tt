@@ -210,5 +210,28 @@ var TP = {
                 if(f.name == list[nr]) { f.hide() }
             }
         });
+    },
+    refreshAllSitePanel: function() {
+        var panels = TP.getAllPanel();
+        for(var nr in panels) {
+            var p = panels[nr];
+            if(p.reloadOnSiteChanges != undefined && p.reloadOnSiteChanges == true) {
+                p.refreshHandler();
+            }
+        }
+    },
+    getAllPanel: function() {
+        var panels = [];
+        var tabpan = Ext.getCmp('tabpan');
+        tabpan.items.each(function(panel) {
+            if(panel.window_ids) {
+                for(var nr in panel.window_ids) {
+                    var id = panel.window_ids[nr];
+                    var p  = Ext.getCmp(id);
+                    panels.push(p);
+                }
+            }
+        });
+        return panels;
     }
 }

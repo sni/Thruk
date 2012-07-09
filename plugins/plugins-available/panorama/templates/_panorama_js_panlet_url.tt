@@ -7,6 +7,7 @@ Ext.define('TP.PanletUrl', {
         this.xdata.url      = '';
         this.xdata.selector = '';
         this.xdata.keepcss  = true;
+        this.reloadOnSiteChanges = true;
 
         this.loader = {
             autoLoad: false,
