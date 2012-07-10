@@ -29,7 +29,7 @@
       [%+ PROCESS _panorama_js_panlet_chart.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
       [%+ PROCESS _panorama_js_panlet_piechart.tt +%]
-      [%+ PROCESS _panorama_js_panlet_piechart_hosts.tt +%]
+      [%+ PROCESS _panorama_js_panlet_piechart_stats.tt +%]
 
       /* main viewport */
       Ext.onReady(function() {

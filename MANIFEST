@@ -1029,7 +1029,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_core_metri
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_logs.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_server.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart.tt
-plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart_hosts.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart_stats.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url.tt
 plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_state_provider.tt

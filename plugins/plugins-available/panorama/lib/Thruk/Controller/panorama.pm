@@ -76,6 +76,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'hosts_pie') {
             return($self->_task_hosts_pie($c));
         }
+        elsif($task eq 'services_pie') {
+            return($self->_task_services_pie($c));
+        }
         elsif($task eq 'stats_gearman') {
             return($self->_task_stats_gearman($c));
         }
@@ -342,10 +345,37 @@ sub _task_hosts_pie {
             { 'header' => 'Name',      dataIndex => 'name' },
             { 'header' => 'Data',      dataIndex => 'data' },
         ],
+        colors  => [ '#00FF33', '#FF5B33', '#ff7a59', '#ACACAC' ],
         data    => []
     };
 
     for my $state (qw/up down unreachable pending/) {
+        push @{$json->{'data'}}, {
+            name    => ucfirst $state,
+            data    => $data->{$state},
+        };
+    }
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_services_pie {
+    my($self, $c) = @_;
+
+    my $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+
+    my $json = {
+        columns => [
+            { 'header' => 'Name',      dataIndex => 'name' },
+            { 'header' => 'Data',      dataIndex => 'data' },
+        ],
+        colors  => [ '#00FF33', '#FFDE00', '#FF9E00', '#FF5B33', '#ACACAC' ],
+        data    => []
+    };
+
+    for my $state (qw/ok warning unknown critical pending/) {
         push @{$json->{'data'}}, {
             name    => ucfirst $state,
             data    => $data->{$state},

@@ -9,7 +9,7 @@ Ext.define('TP.PanletPieChart', {
 
         this.pieStore = Ext.create('Ext.data.Store', {
             fields: ['name','data'],
-            data:  [{name:'test', data: 100}]
+            data:  [{name:' ', data: 100}]
         });
 
         this.loader = {
@@ -47,6 +47,7 @@ Ext.define('TP.PanletPieChart', {
                             }
                         }
                     });
+                    this.chart.series.getAt(0).colorSet = data.colors;
                     this.chart.bindStore(this.pieStore);
                 } else {
                     debug("ERROR: " + response.status);
@@ -62,18 +63,18 @@ Ext.define('TP.PanletPieChart', {
             shadow: true,
             legend: false,
             insetPadding: 3,
+            style: 'background-color: white;',
             theme: 'Base:gradients',
             series: [{
                 type: 'pie',
                 field: 'data',
-                donut: false,
                 showInLegend: true,
+                colorSet: [ '#00FF00' ],
                 tips: {
                     trackMouse: true,
                     width: 140,
                     height: 28,
                     renderer: function(storeItem, item) {
-                        //calculate percentage.
                         var total = 0;
                         storeItem.store.each(function(rec) {
                             total += rec.get('data');
@@ -90,7 +91,7 @@ Ext.define('TP.PanletPieChart', {
                     field: 'name',
                     display: 'rotate',
                     contrast: true,
-                    font: '16px Arial'
+                    font: '14px Arial'
                 }
             }]
         });

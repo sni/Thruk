@@ -40,6 +40,10 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
                     }, {
+                        text:   'Services Graph',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
+                    }, {
                         text:   'Logfile',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/text_align_left.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
