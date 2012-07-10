@@ -345,8 +345,14 @@ sub _task_hosts_pie {
             { 'header' => 'Name',      dataIndex => 'name' },
             { 'header' => 'Data',      dataIndex => 'data' },
         ],
-        colors  => [ '#00FF33', '#FF5B33', '#ff7a59', '#ACACAC' ],
+        colors  => [ ],
         data    => []
+    };
+    my $colors = {
+        up          => '#00FF33',
+        down        => '#FF5B33',
+        unreachable => '#ff7a59',
+        pending     => '#ACACAC',
     };
 
     for my $state (qw/up down unreachable pending/) {
@@ -354,6 +360,7 @@ sub _task_hosts_pie {
             name    => ucfirst $state,
             data    => $data->{$state},
         };
+        push @{$json->{'colors'}}, $colors->{$state};
     }
 
     $c->stash->{'json'} = $json;
@@ -371,15 +378,24 @@ sub _task_services_pie {
             { 'header' => 'Name',      dataIndex => 'name' },
             { 'header' => 'Data',      dataIndex => 'data' },
         ],
-        colors  => [ '#00FF33', '#FFDE00', '#FF9E00', '#FF5B33', '#ACACAC' ],
+        colors  => [],
         data    => []
+    };
+    my $colors = {
+        ok       => '#00FF33',
+        warning  => '#FFDE00',
+        unknown  => '#FF9E00',
+        critical => '#FF5B33',
+        pending  => '#ACACAC',
     };
 
     for my $state (qw/ok warning unknown critical pending/) {
+        next if $data->{$state} == 0;
         push @{$json->{'data'}}, {
             name    => ucfirst $state,
             data    => $data->{$state},
         };
+        push @{$json->{'colors'}}, $colors->{$state};
     }
 
     $c->stash->{'json'} = $json;
