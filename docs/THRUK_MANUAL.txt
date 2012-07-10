@@ -34,6 +34,7 @@ Main Features / Advantages
   * Mobile interface included
   * SLA Reports in PDF format
   * Recurring Downtimes
+  * Fully Featured Dashboard
 
 
 
