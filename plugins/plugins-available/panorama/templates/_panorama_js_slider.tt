@@ -1,0 +1,46 @@
+Ext.define('TP.Slider', {
+    extend: 'Ext.panel.Panel',
+
+    alias:  'widget.tp_slider',
+
+    layout: {
+        type: 'table',
+        columns: 2,
+        tableAttrs: {
+            style: {
+                width: '100%'
+            }
+        }
+    },
+    border: 0,
+    items: [{
+        xtype:      'sliderfield',
+        minValue:   1,
+        maxValue:   300,
+        width:      '100%',
+        tipText: function(thumb){
+            return String(thumb.value) + 's';
+        },
+        listeners: {
+            change: function(s) {
+                var form = s.up('form').getForm();
+                form.setValues({refresh_txt: s.getValue()+'s'});
+            }
+        }
+    }, {
+        xtype:     'textfield',
+        margin:    '0 0 0 10',
+        readOnly:  true,
+        cellCls:   'slider_txt',
+        size:      3,
+        maxLength: 4
+    }],
+
+    initComponent: function() {
+        this.callParent();
+        this.items.getAt(0).fieldLabel = this.formConf.fieldLabel;
+        this.items.getAt(0).value      = this.formConf.value;
+        this.items.getAt(0).name       = this.formConf.nameS;
+        this.items.getAt(1).name       = this.formConf.nameL;
+    }
+});

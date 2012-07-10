@@ -85,43 +85,20 @@ Ext.define('TP.Panlet', {
                 border: 0,
                 bodyStyle: 'overflow-y: auto',
                 defaults: {
-                    anchor: '95%'
+                    anchor: '99%'
                 },
                 items: [{
                     fieldLabel: 'Title',
                     xtype:      'textfield',
                     name:       'title'
                 }, {
-                    layout: 'table',
-                    layoutConfig: {
-                        columns: 2
-                    },
-                    border: 0,
-                    items: [{
+                    xtype:      'tp_slider',
+                    formConf: {
                         fieldLabel: 'Refresh Rate',
-                        value:      60,  /* will be changed by afterrender */
-                        name:       'refresh',
-                        xtype:      'sliderfield',
-                        minValue:   1,
-                        maxValue:   300,
-                        width:      200,
-                        tipText: function(thumb){
-                            return String(thumb.value) + 's';
-                        },
-                        listeners: {
-                            change: function(s) {
-                                var form = s.up('form').getForm();
-                                form.setValues({refresh_txt: s.getValue()+'s'});
-                            }
-                        }
-                    }, {
-                        xtype:     'textfield',
-                        margin:    '0 0 0 10',
-                        name:      'refresh_txt',
-                        readOnly:  true,
-                        size:      3,
-                        maxLength: 4
-                    }]
+                        value:      60,
+                        nameS:      'refresh',
+                        nameL:      'refresh_txt'
+                    }
                 }]
         }],
         buttonAlign: 'center',
@@ -133,16 +110,8 @@ Ext.define('TP.Panlet', {
                     var form     = win.gearitem.down('form').getForm();
                     if(form.isValid()) {
                         win.gearitem.hide();
-                        var fields = form.getFields();
-                        var values = form.getFieldValues();
-                        /* save values to xdata store */
-                        for(var key in values) {
-                            if(key == 'title') {
-                                win.setTitle(values[key]);
-                            } else {
-                                win.xdata[key] = values[key];
-                            }
-                        };
+                        win.xdata = TP.storeFormToData(form, win.xdata);
+                        win.setTitle(win.xdata.title);
                         win.setFormDefaults();
                         win.startInterval();
                         win.saveState();
@@ -238,22 +207,8 @@ Ext.define('TP.Panlet', {
     },
     setFormDefaults: function() {
         /* set initial form values */
-        var me     = this;
-        var form   = this.gearitem.down('form').getForm();
-        var fields = form.getFields();
-        this.xdata['refresh_txt'] = this.xdata['refresh']+'s';
-        this.xdata['title']       = this.title;
-        fields.each(function(f) {
-            var v = me.xdata[f.getName()];
-            if(f.inputType == 'checkbox') {
-                f.originalValue = v;
-            } else {
-                f.originalValue = [ v ];
-                f.setValue(v);
-                f.value = v;
-            }
-        });
-        delete this.xdata['refresh_txt'];
+        this.xdata['title'] = this.title;
+        TP.applyFormValues(this.gearitem.down('form').getForm(), this.xdata);
         delete this.xdata['title'];
         if(this.formUpdatedCallback) {
             this.formUpdatedCallback(this);

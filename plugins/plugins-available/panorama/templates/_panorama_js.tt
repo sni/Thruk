@@ -180,6 +180,7 @@ var TP = {
         }
         win.setPosition(x, y);
     },
+    /* returns true if any box ovelap */
     boxesOverlap: function(x, y, box, boxes) {
         var tmp_box = {
             tl: { x:x, y:y },
@@ -204,6 +205,7 @@ var TP = {
         if(b1.br.x >  b2.tl.x && b1.br.x < b2.tr.x && b1.br.y >  b2.tl.y && b1.br.y <= b2.bl.y) { return true; }
         return false;
     },
+    /* hide element in given form */
     hideFormElements: function(form, list) {
         form.getFields().each(function(f, i) {
             for(var nr in list) {
@@ -211,6 +213,7 @@ var TP = {
             }
         });
     },
+    /* refresh all site specific panlets */
     refreshAllSitePanel: function() {
         var panels = TP.getAllPanel();
         for(var nr in panels) {
@@ -220,6 +223,7 @@ var TP = {
             }
         }
     },
+    /* return all panlets */
     getAllPanel: function() {
         var panels = [];
         var tabpan = Ext.getCmp('tabpan');
@@ -233,5 +237,32 @@ var TP = {
             }
         });
         return panels;
+    },
+    /* set form values from data hash */
+    applyFormValues: function(form, data) {
+        var fields = form.getFields();
+        data['refresh_txt'] = data['refresh']+'s';
+        fields.each(function(f) {
+            var v = data[f.getName()];
+            if(f.inputType == 'checkbox') {
+                f.originalValue = v;
+            } else {
+                f.originalValue = [ v ];
+                f.setValue(v);
+                f.value = v;
+            }
+        });
+        delete data['refresh_txt'];
+        return true;
+    },
+    /* store form result in data hash  */
+    storeFormToData: function(form, data) {
+        var fields = form.getFields();
+        var values = form.getFieldValues();
+        /* save values to xdata store */
+        for(var key in values) {
+            data[key] = values[key];
+        };
+        return data;
     }
 }

@@ -33,3 +33,8 @@ TD.icon_column DIV.x-grid-cell-inner {
 .clickable:hover {
   cursor: pointer;
 }
+
+/* make sliders tool tip smaller */
+TD.slider_txt {
+  width: 45px;
+}

@@ -1,0 +1,74 @@
+/* show settings window */
+TP.settingsWindow = function() {
+
+    /* the settings form */
+    var settings_form = new Ext.form.Panel({
+        bodyPadding: 5,
+        border:      0,
+        defaults: {
+            labelWidth:  120,
+            anchor: '99%'
+        },
+        items: [{
+            xtype:      'tp_slider',
+            formConf: {
+                fieldLabel: 'Global Refresh Rate',
+                value:      60,
+                nameS:      'refresh',
+                nameL:      'refresh_txt'
+            }
+        }, {
+            fieldLabel: 'Backends / Sites',
+            xtype:      'checkboxgroup',
+            vertical:   true,
+            columns:    1,
+            items: [
+                [% FOREACH b = backends %]
+                { boxLabel: '[% backend_detail.$b.name %]', name: 'sites', inputValue: '[% b %]', checked: false }[% UNLESS loop.last %],[% END %]
+                [% END %]
+            ]
+        }]
+    });
+
+    /* the panel containing the form panel */
+    var settings_panel = new Ext.panel.Panel({
+        layout:     'fit',
+        border:     0,
+        items:      [settings_form],
+        buttonAlign: 'center',
+        fbar: [{ xtype : 'button', text: 'cancel', handler: function() { this.up('window').destroy() } },
+               { xtype : 'button',
+                 text:   'save',
+                 handler: function() {
+                    var win = this.up('window');
+                    var tab = Ext.getCmp('tabpan');
+                    var form = win.down('form').getForm();
+                    if(form.isValid()) {
+                        tab.xdata = TP.storeFormToData(form, tab.xdata);
+                        TP.applyFormValues(form, tab.xdata);
+                        tab.saveState();
+                        win.destroy();
+                    }
+                 }
+               }
+        ],
+        listeners: {
+            afterrender: function(This, eOpts) {
+                var tab = Ext.getCmp('tabpan');
+                var form = This.down('form').getForm();
+                TP.applyFormValues(form, tab.xdata);
+            }
+        }
+    });
+
+    /* the actual settings window containing the panel */
+    var win_settings = new Ext.window.Window({
+        autoShow:    true,
+        modal:       true,
+        width:       400,
+        title:       'Global Settings',
+        html:        '',
+        buttonAlign: 'center',
+        items:       [settings_panel]
+    });
+};
