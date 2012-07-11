@@ -4,9 +4,11 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
+use Thruk::Utils;
 
 our $VERSION = '1.35';
 my $branch   = '';
+$branch      = Thruk::Utils::get_git_name() unless $branch ne '';
 
 my $options = {
     'verbose'  => 0,

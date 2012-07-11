@@ -66,12 +66,7 @@ our $VERSION = '1.35';
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
 my $branch       = '';
-if(-d $project_root.'/.git') {
-    $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
-    chomp($branch);
-    $branch =~ s/^\*\s+//gmx;
-    $branch = '' if $branch eq 'master';
-}
+$branch          = Thruk::Utils::get_git_name($project_root) unless $branch ne '';
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'released'               => 'June 21, 2012',

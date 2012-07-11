@@ -1366,6 +1366,32 @@ sub write_data_file {
 
     return;
 }
+##############################################
+
+=head2 get_git_name
+
+  get_git_name()
+
+write data to datafile
+
+=cut
+
+sub get_git_name {
+    my $project_root = $INC{'Thruk/Utils.pm'};
+    $project_root =~ s/\/Utils\.pm$//gmx;
+    if(-d $project_root.'/../../.git') {
+        my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
+        chomp($branch);
+        $branch =~ s/^\*\s+//gmx;
+        my $hash = `cd $project_root && git log -1 --no-color --pretty=format:%h 2> /dev/null`;
+        chomp($hash);
+        if($branch eq 'master') {
+            return $hash;
+        }
+        return $branch.'.'.$hash;
+    }
+    return '';
+}
 
 ########################################
 sub _initialassumedservicestate_to_state {
