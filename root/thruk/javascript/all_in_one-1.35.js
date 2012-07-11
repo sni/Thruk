@@ -246,7 +246,7 @@ function toQueryString(obj) {
     jQuery.each(obj, function(key, value) {
         if(typeof(value) == 'object') {
             jQuery.each(value, function(k2, v2) {
-                str = str + key + '=' + v2 + '&';
+                str = str + key + '=' + encodeURIComponent(v2) + '&';
             });
         } else if (value == undefined) {
             str = str + key + '&';
