@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - allow human readable values for duration filter like 5h or 10m
           - check version when using the check for updates link
           - clean up menu (don't show grid links in extra row)
+          - allow wildcards in 'show_custom_vars'
           - reporting:
             - reports can now be created for every page (html, xls, ...)
           - config tool:

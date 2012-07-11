@@ -780,11 +780,24 @@ sub set_custom_vars {
 
     my $x = 0;
     while(defined $data->{'custom_variable_names'}->[$x]) {
-        unless(defined $test->{'_'.$data->{'custom_variable_names'}->[$x]}) {
-            $x++;
-            next;
+        my $cust_name  = '_'.$data->{'custom_variable_names'}->[$x];
+        my $cust_value = '_'.$data->{'custom_variable_values'}->[$x];
+        my $found      = 0;
+        if(defined $test->{$cust_name}) {
+            $found = 1;
+        } else {
+            for my $v (keys %{$test}) {
+                next if CORE::index($v, '*') == -1;
+                $v =~ s/\*/.*/gmx;
+                if($cust_name =~ m/^$v$/mx) {
+                    $found = 1;
+                    last;
+                }
+            }
         }
-        $c->stash->{'custom_vars'}->{$data->{'custom_variable_names'}->[$x]} = $data->{'custom_variable_values'}->[$x];
+        if($found) {
+            $c->stash->{'custom_vars'}->{$cust_name} = $cust_value;
+        }
         $x++;
     }
     return;

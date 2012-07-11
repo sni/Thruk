@@ -1287,7 +1287,7 @@ ex.:
 Show custom vars in host / service ext info. List variable names to
 display in the host and service extinfo details page. Can be specified
 more than once to define multiple variables. You may use html in your
-variables.
+variables. Use * as wildcard, ex.: _VAR*
 
 ex.:
 
