@@ -15,7 +15,7 @@ version:
 	date=`date "+%B %d, %Y"`; \
 	sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk.pm && \
 	debversion="$$newversion" && \
-	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk.pm; debversion="$$newversion~$$branch"; fi && \
+	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk.pm script/thruk; debversion="$$newversion~$$branch"; fi && \
 	dch --newversion "$$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"; \
 	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
 		sed -r "s/Version:\s*$(VERSION)/Version:       $$newversion/" -i support/thruk.spec && \
