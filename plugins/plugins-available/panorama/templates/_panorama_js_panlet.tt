@@ -17,9 +17,10 @@ Ext.define('TP.Panlet', {
     }),
     initComponent: function() {
         this.xdata = {
-            refresh: 60,
-            cls:     this.$className,
-            pinned:  false
+            refresh:  60,
+            cls:      this.$className,
+            pinned:   false,
+            backends: []
         };
 
         this.gearHandler = function() {
@@ -80,10 +81,11 @@ Ext.define('TP.Panlet', {
         hidden: true,
         border: 0,
         items: [{
-                xtype:      'form',
-                bodyPadding: 5,
-                border: 0,
-                bodyStyle: 'overflow-y: auto',
+                xtype:           'form',
+                bodyPadding:     5,
+                border:          0,
+                bodyStyle:       'overflow-y: auto',
+                submitEmptyText: false,
                 defaults: {
                     anchor: '99%'
                 },
@@ -98,6 +100,23 @@ Ext.define('TP.Panlet', {
                         value:      60,
                         nameS:      'refresh',
                         nameL:      'refresh_txt'
+                    }
+                }, {
+                    fieldLabel: 'Backends / Sites',
+                    xtype:      'combobox',
+                    emptyText : 'global defaults',
+                    name:       'backends',
+                    multiSelect: true,
+                    queryMode:  'local',
+                    valueField: 'key',
+                    displayField: 'text',
+                    editable:   false,
+                    triggerAction: 'all',
+                    store:      TP.getBackendsArray(initial_backends),
+                    listConfig : {
+                        getInnerTpl: function(displayField) {
+                            return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
+                        }
                     }
                 }]
         }],

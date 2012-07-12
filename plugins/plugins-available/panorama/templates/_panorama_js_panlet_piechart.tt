@@ -98,7 +98,7 @@ Ext.define('TP.PanletPieChart', {
         this.add(this.chart);
 
         this.refreshHandler = function() {
-            this.loader.load({url:this.xdata.url});
+            TP.defaultSiteRefreshHandler(this);
         };
         this.addListener('afterrender', function() {
             this.refreshHandler();

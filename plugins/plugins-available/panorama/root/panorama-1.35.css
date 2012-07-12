@@ -38,3 +38,19 @@ TD.icon_column DIV.x-grid-cell-inner {
 TD.slider_txt {
   width: 45px;
 }
+
+.x-boundlist-item img.chkCombo {
+  background: url("extjs-4.1.0/resources/themes/images/gray/form/checkbox.gif") no-repeat scroll 0 0 transparent;
+  border: 0 none;
+  height: 13px;
+  overflow: hidden;
+  padding: 0;
+  vertical-align: -1px;
+  width: 13px;
+}
+.x-boundlist-selected img.chkCombo{
+  background-position: 0 -13px;
+}
+DIV.x-boundlist-selected {
+  background: none;
+}

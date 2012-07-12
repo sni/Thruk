@@ -73,12 +73,11 @@ Ext.define('TP.TabBar', {
         /* global default setttings */
         this.xdata = {
             refresh:  60,
-            backends: [
-                [% FOREACH b = backends %]
-                '[% b %]'[% UNLESS loop.last %],[% END %]
-                [% END %]
-            ]
+            backends: []
         }
+        [%+ FOREACH b = backend_detail.keys %]
+        [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]
+        [% END +%]
     },
     getState:   function() {
         var item_ids = [];

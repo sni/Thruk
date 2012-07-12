@@ -7,14 +7,13 @@ Ext.define('TP.PanletGridServer', {
     initComponent: function() {
         this.callParent();
         this.xdata.url       = 'panorama.cgi?task=site_status';
-        TP.hideFormElements(this.down('form').getForm(), ['url']);
+        TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
         this.loader.loadMask = true;
         this.reloadOnSiteChanges = true;
     }
 });
 
 /* toggle backends */
-var backendSelTimer;
 TP.toggleBackend = function(panel, backend) {
     if(initial_backend_states[backend] == 2) {
         initial_backend_states[backend] = 0;
@@ -23,16 +22,7 @@ TP.toggleBackend = function(panel, backend) {
         initial_backend_states[backend] = 2;
         panel.style.backgroundImage = 'url(../plugins/panorama/images/sport_golf.png)';
     }
+    initial_backends[backend].state = initial_backend_states[backend];
 
-    var parent = panel;
-    while(parent.parentNode != undefined && !parent.id) { parent = parent.parentNode; }
-    panel = Ext.getCmp(parent.id);
-    var panlet = panel.up('panel').up('panel');
-
-    /* save current selected backends in session cookie */
-    document.cookie = "thruk_backends="+Ext.Object.toQueryString(initial_backend_states)+ "; path="+cookie_path+";";
-
-    /* reload panel */
-    window.clearTimeout(backendSelTimer);
-    backendSelTimer = window.setTimeout(TP.refreshAllSitePanel, 1000);
+    TP.setBackendsCookieAndRefresh(1000);
 }

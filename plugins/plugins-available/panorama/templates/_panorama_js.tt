@@ -244,7 +244,13 @@ var TP = {
         data['refresh_txt'] = data['refresh']+'s';
         fields.each(function(f) {
             var v = data[f.getName()];
-            if(f.inputType == 'checkbox') {
+
+            if(f.xtype == 'combobox' && f.multiSelect == true) {
+                f.originalValue = v;
+                f.value = v;
+                f.setValue(v);
+            }
+            else if(f.inputType == 'checkbox') {
                 f.originalValue = v;
             } else {
                 f.originalValue = [ v ];
@@ -252,17 +258,69 @@ var TP = {
                 f.value = v;
             }
         });
+
+        /* checkbox groups are different */
+        for(var i in form.items) {
+            var f = form.items[i];
+            if(f.xtype == 'checkboxgroup') {
+                f.removeAll();
+                for(var x in initial_backends) {
+                    var checked = false;
+                    if(Ext.Array.contains(data.backends, x)) { checked = true; }
+                    f.add({ boxLabel: initial_backends[x].name, name: 'backends', inputValue: x, checked: checked });
+                }
+            }
+        };
+
         delete data['refresh_txt'];
         return true;
     },
     /* store form result in data hash  */
     storeFormToData: function(form, data) {
-        var fields = form.getFields();
         var values = form.getFieldValues();
         /* save values to xdata store */
         for(var key in values) {
             data[key] = values[key];
         };
+        /* checkboxgroups are different */
+        for(var i in form.items) {
+            var f = form.items[i];
+            if(f.xtype == 'checkboxgroup') {
+                var result = {};
+                var checked = f.getChecked();
+                for(var nr in checked) {
+                    c = checked[nr];
+                    if(result[c.name] == undefined) {
+                        result[c.name] = [];
+                    }
+                    result[c.name].push(c.inputValue);
+                }
+                for(var nr in result) {
+                    data[nr] = result[nr];
+                }
+            }
+        }
         return data;
+    },
+    /* clone an object */
+    clone: function(o) {
+        return(Ext.JSON.decode(Ext.JSON.encode(o)));
+    },
+    /* convert backends into array usable by data store */
+    getBackendsArray: function(backends) {
+        var data = [];
+        for(var key in backends) {
+            data.push([key, backends[key].name]);
+        }
+        return data;
+    },
+    defaultSiteRefreshHandler: function(panel) {
+        if(panel.xdata.url != '') {
+            var url = panel.xdata.url;
+            if(panel.xdata.backends.length > 0) {
+                url = url + '&backend=' + panel.xdata.backends.join(',');
+            }
+            panel.loader.load({url:url});
+        }
     }
 }

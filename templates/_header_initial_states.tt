@@ -1,10 +1,12 @@
 ﻿var initial_backend_states = new Object({
-    [% FOREACH pd IN backends %]
-      [% SET val = '1'                                     %][%# down #%]
-      [% SET val = '0' IF backend_detail.$pd.running       %][%# up #%]
-      [% SET val = '2' IF backend_detail.$pd.disabled == 2 %][%# hidden #%]
-      [% SET val = '3' IF backend_detail.$pd.disabled == 3 %][%# unused #%]
-      [% SET val = '3' IF param_backend && pd != param_backend %][%# unused #%]
-      '[% pd %]': '[% val %]'[% UNLESS loop.last %],[% END %]
-    [% END %]
+    [% FOREACH pd IN backends %]'[% pd %]': '[% backend_detail.$pd.state %]'[% UNLESS loop.last %],[% END %][% END %]
+});
+var initial_backends = new Object({
+    [% FOREACH pd IN backends +%]
+      '[% pd %]': {
+        key:      '[% pd %]',
+        name:     '[% backend_detail.$pd.name %]',
+        state:    [% backend_detail.$pd.state +%]
+      }[% UNLESS loop.last %],[% END +%]
+    [% END +%]
 });

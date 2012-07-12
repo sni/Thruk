@@ -59,9 +59,7 @@ Ext.define('TP.PanletUrl', {
         };
 
         this.refreshHandler = function() {
-            if(this.xdata.url != '') {
-                this.loader.load({url: this.xdata.url});
-            }
+            TP.defaultSiteRefreshHandler(this);
         };
 
         /* url content should be in an iframe */

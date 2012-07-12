@@ -285,8 +285,13 @@ sub _set_possible_backends {
                 'last_error' => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
             };
             if(ref $c->stash->{'pi_detail'} eq 'HASH' and defined $c->stash->{'pi_detail'}->{$back}->{'program_start'}) {
-                $backend_detail{$back}->{'running'} = 1
+                $backend_detail{$back}->{'running'} = 1;
             }
+            # set combined state
+            $backend_detail{$back}->{'state'} = 1; # down
+            if($backend_detail{$back}->{'running'}) { $backend_detail{$back}->{'state'} = 0; }       # up
+            if($backend_detail{$back}->{'disabled'} == 2) { $backend_detail{$back}->{'state'} = 2; } # hidden
+            if($backend_detail{$back}->{'disabled'} == 3) { $backend_detail{$back}->{'state'} = 3; } # unused
             push @new_possible_backends, $back;
         }
     }

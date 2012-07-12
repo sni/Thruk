@@ -2707,7 +2707,7 @@ var ajax_search = {
                || evt.altKey == true
                || evt.ctrlKey == true
                || evt.metaKey == true
-               || evt.shiftKey == true
+               //|| evt.shiftKey == true // prevents suggesting capitals
             ) {
                 return false;
             }

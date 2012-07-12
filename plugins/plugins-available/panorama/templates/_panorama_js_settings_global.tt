@@ -17,17 +17,14 @@ TP.settingsWindow = function() {
                 nameS:      'refresh',
                 nameL:      'refresh_txt'
             }
-        }, {
+        }, new Ext.form.CheckboxGroup({
+            id:         'global_backends',
             fieldLabel: 'Backends / Sites',
             xtype:      'checkboxgroup',
             vertical:   true,
             columns:    1,
-            items: [
-                [% FOREACH b = backends %]
-                { boxLabel: '[% backend_detail.$b.name %]', name: 'sites', inputValue: '[% b %]', checked: false }[% UNLESS loop.last %],[% END %]
-                [% END %]
-            ]
-        }]
+            items:      []
+        })]
     });
 
     /* the panel containing the form panel */
@@ -46,6 +43,7 @@ TP.settingsWindow = function() {
                     if(form.isValid()) {
                         tab.xdata = TP.storeFormToData(form, tab.xdata);
                         TP.applyFormValues(form, tab.xdata);
+                        TP.setBackends(tab.xdata.backends);
                         tab.saveState();
                         win.destroy();
                     }
@@ -56,6 +54,13 @@ TP.settingsWindow = function() {
             afterrender: function(This, eOpts) {
                 var tab = Ext.getCmp('tabpan');
                 var form = This.down('form').getForm();
+                // reset backends to global ones
+                tab.xdata.backends = [];
+                for(var nr in initial_backends) {
+                    if(initial_backends[nr].state != 2) {
+                        tab.xdata.backends.push(nr);
+                    }
+                }
                 TP.applyFormValues(form, tab.xdata);
             }
         }
@@ -71,4 +76,32 @@ TP.settingsWindow = function() {
         buttonAlign: 'center',
         items:       [settings_panel]
     });
+    // checkboxes are wrong otherwise
+    Ext.getCmp('global_backends').reset();
 };
+
+
+/* set backends from list */
+TP.setBackends = function(backends) {
+    for(var nr in initial_backend_states) {
+        initial_backend_states[nr] = 2;
+        initial_backends[nr].state = 2;
+    }
+    for(var nr in backends) {
+        var b = backends[nr];
+        initial_backend_states[b] = 0;
+        initial_backends[b].state = 0;
+    }
+    TP.setBackendsCookieAndRefresh(0);
+}
+
+/* set cookie and reload panels */
+var backendSelTimer;
+TP.setBackendsCookieAndRefresh = function(wait) {
+    /* save current selected backends in session cookie */
+    document.cookie = "thruk_backends="+Ext.Object.toQueryString(initial_backend_states)+ "; path="+cookie_path+";";
+
+    /* reload panel */
+    window.clearTimeout(backendSelTimer);
+    backendSelTimer = window.setTimeout(TP.refreshAllSitePanel, wait);
+}
