@@ -15,7 +15,7 @@ Ext.define('TP.Slider', {
     border: 0,
     items: [{
         xtype:      'sliderfield',
-        minValue:   1,
+        minValue:   0,
         maxValue:   300,
         width:      '100%',
         tipText: function(thumb){
@@ -24,7 +24,12 @@ Ext.define('TP.Slider', {
         listeners: {
             change: function(s) {
                 var form = s.up('form').getForm();
-                form.setValues({refresh_txt: s.getValue()+'s'});
+                var v    = s.getValue();
+                if(v == 0) {
+                    form.setValues({refresh_txt: 'off'});
+                } else {
+                    form.setValues({refresh_txt: s.getValue()+'s'});
+                }
             }
         }
     }, {

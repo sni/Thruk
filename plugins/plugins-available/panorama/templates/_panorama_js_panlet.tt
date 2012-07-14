@@ -104,7 +104,7 @@ Ext.define('TP.Panlet', {
                 }, {
                     fieldLabel: 'Backends / Sites',
                     xtype:      'combobox',
-                    emptyText : 'global defaults',
+                    emptyText : 'global settings',
                     name:       'backends',
                     multiSelect: true,
                     queryMode:  'local',
@@ -143,7 +143,9 @@ Ext.define('TP.Panlet', {
     onEsc:      function() { return false; },
     startInterval: function() {
         window.clearInterval(this.interval);
-        this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);
+        if(this.xdata.refresh > 0) {
+            this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);
+        }
     },
     dd_overriden: false,
     getState: function() {

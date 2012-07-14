@@ -242,6 +242,9 @@ var TP = {
     applyFormValues: function(form, data) {
         var fields = form.getFields();
         data['refresh_txt'] = data['refresh']+'s';
+        if(data['refresh'] == 0) {
+            data['refresh_txt'] = 'off';
+        }
         fields.each(function(f) {
             var v = data[f.getName()];
 
