@@ -13,7 +13,8 @@ TP.settingsWindow = function() {
             xtype:      'tp_slider',
             formConf: {
                 fieldLabel: 'Global Refresh Rate',
-                value:      60,
+                value:      30,
+                minValue:   0,
                 nameS:      'refresh',
                 nameL:      'refresh_txt'
             }

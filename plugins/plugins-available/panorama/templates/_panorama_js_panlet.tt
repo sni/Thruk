@@ -17,7 +17,7 @@ Ext.define('TP.Panlet', {
     }),
     initComponent: function() {
         this.xdata = {
-            refresh:  60,
+            refresh:  -1,
             cls:      this.$className,
             pinned:   false,
             backends: []
@@ -143,8 +143,13 @@ Ext.define('TP.Panlet', {
     onEsc:      function() { return false; },
     startInterval: function() {
         window.clearInterval(this.interval);
-        if(this.xdata.refresh > 0) {
-            this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), this.xdata.refresh * 1000);
+        var refresh = this.xdata.refresh;
+        if(this.xdata.refresh == -1) {
+            var tab = Ext.getCmp('tabpan');
+            refresh = tab.xdata.refresh;
+        }
+        if(refresh > 0) {
+            this.interval = window.setInterval(Ext.bind(this.refreshHandler, this, []), refresh * 1000);
         }
     },
     dd_overriden: false,

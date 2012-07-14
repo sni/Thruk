@@ -245,6 +245,9 @@ var TP = {
         if(data['refresh'] == 0) {
             data['refresh_txt'] = 'off';
         }
+        if(data['refresh'] == -1) {
+            data['refresh_txt'] = 'default';
+        }
         fields.each(function(f) {
             var v = data[f.getName()];
 
