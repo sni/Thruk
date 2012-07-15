@@ -78,6 +78,20 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             params: {task: 'set', 'name': name, 'value': 'null' }
         });
         delete ExtState[name];
+    },
+
+    /* clear all values */
+    clearAll: function() {
+        for(var key in ExtState) {
+            this.clear(key);
+        }
+    },
+
+    /* set state from object */
+    loadData: function(data) {
+        for(var key in data) {
+            this.set(key, data[key]);
+        }
     }
 });
 

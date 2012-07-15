@@ -320,6 +320,7 @@ var TP = {
         }
         return data;
     },
+    /* default refresh handler */
     defaultSiteRefreshHandler: function(panel) {
         if(panel.xdata.url != '') {
             var url = panel.xdata.url;
@@ -329,6 +330,7 @@ var TP = {
             panel.loader.load({url:url});
         }
     },
+    /* convert time frame into seconds */
     timeframe2seconds: function(timedef) {
         var res  = timedef.match(/^(\d+)(\w{1})/);
         if(res.length == 1) {
@@ -341,5 +343,25 @@ var TP = {
         if(unit == 'd') { return nr * 86400; }  // days
         if(unit == 'w') { return nr * 604800; } // weeks
         return 3600;
+    },
+    /* import tabs from string */
+    importAllTabs: function(data) {
+        try {
+            data = cp.decodeValue(decode64(data));
+        }
+        catch(e) {
+            Ext.MessageBox.alert('Failed', 'Import Failed!');
+            return;
+        }
+        if(data == undefined) {
+            Ext.MessageBox.alert('Failed', 'Import Failed!');
+            return;
+        }
+
+        Ext.getCmp('viewport').items.getAt(0).destroy();
+        cp.clearAll();
+        cp.loadData(data);
+        Ext.getCmp('viewport').add(new TP.TabBar());
+        Ext.MessageBox.alert('Success', 'Import Successful!');
     }
 }

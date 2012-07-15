@@ -25,7 +25,50 @@ TP.settingsWindow = function() {
             vertical:   true,
             columns:    1,
             items:      []
-        })]
+        }), {
+            /* Import / Export */
+            xtype: 'panel',
+            layout: {
+                type: 'hbox',
+                align: 'stretch'
+            },
+            items: [{
+                xtype: 'button',
+                text: 'Export All Tabs',
+                handler: function() {
+                    Ext.MessageBox.show({
+                        title:      'All Tabs Export',
+                        multiline:  true,
+                        width:      500,
+                        msg:        'Save this string',
+                        value:      encode64(cp.encodeValue(cp.readValues())),
+                        buttons:    Ext.MessageBox.OK,
+                        icon:       Ext.MessageBox.INFO
+                    });
+                }
+            }, {
+                xtype: 'button',
+                text: 'Import All Tabs',
+                handler: function() {
+                    Ext.MessageBox.prompt({
+                        title:      'Import Tabs Export',
+                        id:         'importdialog',
+                        multiline:  true,
+                        value:      '',
+                        width:      500,
+                        msg:        'Enter Saved String.<br>This will replace all currently existing Tabs and windows!',
+                        buttons:    Ext.MessageBox.OKCANCEL,
+                        icon:       Ext.MessageBox.INFO,
+                        fn:         function(btn, text, window){
+                            if(btn == 'ok') {
+                                TP.importAllTabs(text);
+                                win_settings.close();
+                            }
+                        }
+                    });
+                }
+            }]
+        }]
     });
 
     /* the panel containing the form panel */

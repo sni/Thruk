@@ -24,6 +24,7 @@
       [%+ PROCESS _panorama_js_state_provider_cookie.tt +%]
       [% END %]
       [%+ PROCESS _panorama_js.tt +%]
+      [%+ PROCESS _panorama_js_utils_base64.tt +%]
       [%+ PROCESS _panorama_js_slider.tt +%]
       [%+ PROCESS _panorama_js_settings_global.tt +%]
       [%+ PROCESS _panorama_js_tabbar.tt +%]
@@ -43,6 +44,7 @@
       /* main viewport */
       Ext.onReady(function() {
           TP.viewport = new Ext.Viewport({
+          id:       'viewport',
           layout:   'border',
           renderTo: Ext.getBody(),
           margins:  '0 0 0 0',

@@ -3,8 +3,24 @@
 Ext.define('TP.CookieProvider', {
     extend: 'Ext.state.CookieProvider',
 
+    /* return all saved states */
     readValues: function() {
         return TP.clone(this.readCookies());
+    },
+
+    /* clear all cookies */
+    clearAll: function() {
+        var data = this.readCookies();
+        for(var key in data) {
+            this.clear(key);
+        }
+    },
+
+    /* set state from object */
+    loadData: function(data) {
+        for(var key in data) {
+            this.set(key, data[key]);
+        }
     }
 });
 
