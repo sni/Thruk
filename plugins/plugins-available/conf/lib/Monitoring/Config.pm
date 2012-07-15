@@ -367,7 +367,9 @@ sub get_object_by_location {
     for my $file (@{$self->{'files'}}) {
         next unless $file->{'path'} eq $path;
         for my $obj (@{$file->{'objects'}}) {
-            if($line >= $obj->{'line'} and $line <= $obj->{'line2'}) {
+            if(defined $obj->{'line'} and defined $obj->{'line2'}
+               and $obj->{'line'} ne '' and $obj->{'line'} ne ''
+               and $line >= $obj->{'line'} and $line <= $obj->{'line2'}) {
                 return $obj;
             }
         }
