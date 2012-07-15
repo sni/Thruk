@@ -55,6 +55,11 @@ sub panorama_cgi : Regex('thruk\/cgi\-bin\/panorama\.cgi') {
 =cut
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
+
+    my $stateprovider = $c->config->{'Thruk::Plugin::Panorama'}->{'state_provider'} || 'server';
+    if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
+    $c->stash->{stateprovider} = $stateprovider;
+
     if(defined $c->request->query_keywords and $c->request->query_keywords eq 'state') {
         return($self->_stateprovider($c));
     }

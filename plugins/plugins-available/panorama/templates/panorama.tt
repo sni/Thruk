@@ -18,7 +18,11 @@
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/ext-all-debug.js"></script>
     <script type="text/javascript">
       var ExtState = [% state %];
-      [%+ PROCESS _panorama_js_state_provider.tt +%]
+      [% IF stateprovider == 'server' %]
+      [%+ PROCESS _panorama_js_state_provider_http.tt +%]
+      [% ELSE %]
+      [%+ PROCESS _panorama_js_state_provider_cookie.tt +%]
+      [% END %]
       [%+ PROCESS _panorama_js.tt +%]
       [%+ PROCESS _panorama_js_slider.tt +%]
       [%+ PROCESS _panorama_js_settings_global.tt +%]

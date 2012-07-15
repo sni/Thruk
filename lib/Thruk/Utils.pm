@@ -863,7 +863,7 @@ sub get_user_data {
     my $file = $c->config->{'var_path'}."/users/".$c->stash->{'remote_user'};
     return {} unless -f $file;
 
-    my $dump = read_file($file) or carp("cannot open file $file: $!");
+    my $dump = read_file($file) or carp("cannot open file $file");
     my $VAR1 = {};
 
     ## no critic

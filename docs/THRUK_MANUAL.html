@@ -10118,6 +10118,34 @@ htpasswd            Path to your htpasswd. Enables user management
   htpasswd                  = .../htpasswd
 &lt;/Component&gt;</tt></pre>
 </div></div>
+<h4 id="_component_thruk_plugin_panorama">Component Thruk::Plugin::Panorama</h4>
+<div class="paragraph"><p>The <em>Panorama</em> plugin is a nice, fully customizable dashboard allowing
+you to build your own panorama views.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+general options for the config tool
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+state_provider    Sets the way states between reloads are
+                          preserved.
+                          Valid options are <em>cookie</em> or <em>server</em>.
+                          Cookie store is usefull for demo systems
+                          where lot people share the same account.
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Component Thruk::Plugin::Panorama&gt;
+  state_provider  = server
+&lt;/Component&gt;</tt></pre>
+</div></div>
 <h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga but not all
 values are used.</p></div>
@@ -10587,7 +10615,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-07-11 11:54:40 CEST
+Last updated 2012-07-15 15:31:09 CEST
 </div>
 </div>
 </body>

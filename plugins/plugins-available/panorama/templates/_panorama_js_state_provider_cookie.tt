@@ -1,0 +1,17 @@
+/* cookie state provider */
+
+Ext.define('TP.CookieProvider', {
+    extend: 'Ext.state.CookieProvider',
+
+    readValues: function() {
+        return TP.clone(this.readCookies());
+    }
+});
+
+
+var cp = Ext.create('TP.CookieProvider', {
+    path: "[% url_prefix %]",
+    expires: new Date(new Date().getTime()+(1000*60*60*24*364)) // 1 year
+});
+
+Ext.state.Manager.setProvider(cp);

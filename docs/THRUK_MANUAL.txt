@@ -1587,6 +1587,26 @@ ex.:
   </Component>
 
 
+==== Component Thruk::Plugin::Panorama
+
+The 'Panorama' plugin is a nice, fully customizable dashboard allowing
+you to build your own panorama views.
+
+  * general options for the config tool
+      - state_provider    Sets the way states between reloads are
+                          preserved.
+                          Valid options are 'cookie' or 'server'.
+                          Cookie store is usefull for demo systems
+                          where lot people share the same account.
+
+ex.:
+
+  <Component Thruk::Plugin::Panorama>
+    state_provider  = server
+  </Component>
+
+
+
 === cgi.cfg
 
 The cgi.cfg is mainly the same as in Nagios or Icinga but not all
