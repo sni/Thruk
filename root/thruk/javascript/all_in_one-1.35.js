@@ -3035,7 +3035,7 @@ var ajax_search = {
                 }
             }
             // ie does not support preventDefault, setting returnValue works
-            event.preventDefault ? event.preventDefault() : event.returnValue = false;
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
             return false;
         }
         // return or enter
@@ -3046,13 +3046,13 @@ var ajax_search = {
             if(ajax_search.set_result(ajax_search.res[ajax_search.cur_select])) {
                 return false;
             }
-            event.preventDefault ? event.preventDefault() : event.returnValue = false;
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
             return false
         }
         // hit escape
         if(keyCode == 27) {
             ajax_search.hide_results(undefined, true);
-            event.preventDefault ? event.preventDefault() : event.returnValue = false;
+            evt.preventDefault ? evt.preventDefault() : evt.returnValue = false;
             return false;
         }
         return true;
