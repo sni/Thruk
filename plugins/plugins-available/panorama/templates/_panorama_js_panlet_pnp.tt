@@ -14,13 +14,17 @@ Ext.define('TP.PanletPNP', {
         this.callParent();
         this.xdata.url      = '';
         this.xdata.graph    = '';
-        this.xdata.source   = '';
+        this.xdata.source   = '0';
+        this.xdata.time     = '1h';
 
         this.refreshHandler = function() {
+            if(this.xdata.graph == '') {
+                return;
+            }
             var imgPanel = this.items.getAt(1);
             var url = this.xdata.graph + '&view=1&source='+this.xdata.source;
             var now = new Date();
-            url = url + '&start=' + (Math.round(now.getTime()/1000) - 3600);
+            url = url + '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&end='   + Math.round(now.getTime()/1000);
             var size = imgPanel.getSize();
             if(size.width > 1) {
@@ -56,13 +60,21 @@ Ext.define('TP.PanletPNP', {
             xtype:          'combobox',
             name:           'source',
             queryMode:      'local',
-            store:          [ '0', '1', '2', '3', '4' ],
-            value:          '0'
+            store:          [ '0', '1', '2', '3', '4' ]
+        });
+        this.down('form').add({
+            fieldLabel:     'Time Frame',
+            xtype:          'textfield',
+            name:           'time'
         });
 
         /* auto load when url is set */
         this.addListener('afterrender', function() {
-            this.refreshHandler();
+            if(this.xdata.graph == '') {
+                this.gearHandler();
+            } else {
+                this.refreshHandler();
+            }
         });
         this.addListener('resize', function() {
             this.refreshHandler();

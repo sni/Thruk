@@ -328,5 +328,18 @@ var TP = {
             }
             panel.loader.load({url:url});
         }
+    },
+    timeframe2seconds: function(timedef) {
+        var res  = timedef.match(/^(\d+)(\w{1})/);
+        if(res.length == 1) {
+            return 3600;
+        }
+        var nr    = res[1];
+        var unit  = res[2];
+        if(unit == 'm') { return nr * 60; }     // minutes
+        if(unit == 'h') { return nr * 3600; }   // hours
+        if(unit == 'd') { return nr * 86400; }  // days
+        if(unit == 'w') { return nr * 604800; } // weeks
+        return 3600;
     }
 }

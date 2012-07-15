@@ -85,7 +85,7 @@ Ext.define('TP.Panlet', {
         border: 0,
         items: [{
                 xtype:           'form',
-                bodyPadding:     5,
+                bodyPadding:     2,
                 border:          0,
                 bodyStyle:       'overflow-y: auto',
                 submitEmptyText: false,
