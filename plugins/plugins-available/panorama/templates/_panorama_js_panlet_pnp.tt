@@ -1,0 +1,114 @@
+Ext.define('TP_Graphs', {
+    extend: 'Ext.data.Model',
+    fields: [
+        {name: 'text', type: 'string'},
+        {name: 'url',  type: 'string'}
+    ]
+});
+
+Ext.define('TP.PanletPNP', {
+    extend: 'TP.Panlet',
+
+    title: 'pnpgraph',
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url      = '';
+        this.xdata.graph    = '';
+        this.xdata.source   = '';
+
+        this.refreshHandler = function() {
+            var imgPanel = this.items.getAt(1);
+            var url = this.xdata.graph + '&view=1&source='+this.xdata.source;
+            var now = new Date();
+            url = url + '&start=' + (Math.round(now.getTime()/1000) - 3600);
+            url = url + '&end='   + Math.round(now.getTime()/1000);
+            var size = imgPanel.getSize();
+            if(size.width > 1) {
+                url = url + '&graph_width='+(size.width-97);
+                url = url + '&graph_height='+(size.height-50);
+            }
+            imgPanel.setSrc(url);
+        };
+
+        /* url content should be in an iframe */
+        this.add({
+            xtype: 'image',
+            src:   Ext.BLANK_IMAGE_URL
+        });
+
+        this.graph_store = new Ext.data.Store({
+                fields: ['text', 'url'],
+                data: []
+        });
+
+        this.graph_combo = new Ext.form.field.ComboBox({
+            fieldLabel:     'Graph',
+            xtype:          'combobox',
+            name:           'graph',
+            queryMode:      'local',
+            valueField:     'url',
+            displayField:   'text',
+            store:          this.graph_store
+        });
+        this.down('form').add(this.graph_combo);
+        this.down('form').add({
+            fieldLabel:     'Source',
+            xtype:          'combobox',
+            name:           'source',
+            queryMode:      'local',
+            store:          [ '0', '1', '2', '3', '4' ],
+            value:          '0'
+        });
+
+        /* auto load when url is set */
+        this.addListener('afterrender', function() {
+            this.refreshHandler();
+        });
+        this.addListener('resize', function() {
+            this.refreshHandler();
+        });
+
+        /* available graph loader */
+        this.loader = {
+            autoLoad: false,
+            renderer: 'data',
+            scope:    this,
+            url:      'panorama.cgi?task=pnp_graphs',
+            loading:  false,
+            listeners: {
+                'beforeload': function(This, options, eOpts) {
+                    if(this.loading) {
+                        return false;
+                    }
+                    this.loading = true;
+                    return true;
+                }
+            },
+            callback: function(This, success, response, options) {
+                This.loading = false;
+                if(response.status == 200) {
+                    var data   = eval("("+response.responseText+")");
+                    this.graph_store = Ext.create('Ext.data.Store', {
+                        data:  data,
+                        fields: ['text', 'url'],
+                        proxy: {
+                            type: 'memory',
+                            reader: {
+                                type: 'json',
+                                root: 'data'
+                            }
+                        }
+                    });
+                    this.graph_combo.store = this.graph_store;
+                    this.graph_combo.setValue(this.xdata.graph);
+                } else {
+                    debug("ERROR: " + response.status);
+                    debug(response);
+                }
+            }
+        };
+        this.gearInitCallback = function(This) {
+            this.loader.load({});
+        };
+    }
+});

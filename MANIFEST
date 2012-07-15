@@ -1002,6 +1002,7 @@ plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray
 plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray/window/window-default-corners.gif
 plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray/window/window-default-sides.gif
 plugins/plugins-available/panorama/root/images/accept.png
+plugins/plugins-available/panorama/root/images/chart_bar.png
 plugins/plugins-available/panorama/root/images/chart_curve.png
 plugins/plugins-available/panorama/root/images/chart_pie.png
 plugins/plugins-available/panorama/root/images/cog.png
@@ -1030,6 +1031,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_logs.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_server.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart_stats.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_pnp.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_url.tt
 plugins/plugins-available/panorama/templates/_panorama_js_pantab.tt
 plugins/plugins-available/panorama/templates/_panorama_js_settings_global.tt

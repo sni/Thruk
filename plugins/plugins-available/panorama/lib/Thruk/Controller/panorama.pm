@@ -85,6 +85,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'stats_gearman_grid') {
             return($self->_task_stats_gearman_grid($c));
         }
+        elsif($task eq 'pnp_graphs') {
+            return($self->_task_pnp_graphs($c));
+        }
     }
 
     my $data  = Thruk::Utils::get_user_data($c);
@@ -399,6 +402,38 @@ sub _task_services_pie {
     }
 
     $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_pnp_graphs {
+    my($self, $c) = @_;
+
+    my $graphs = [];
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    for my $hst (@{$data}) {
+        my $url = Thruk::Utils::get_pnp_url($c, $hst, 1);
+        if($url ne '') {
+            push @{$graphs}, {
+                text => $hst->{'name'}.';__HOST__',
+                url  => $url.'/image?host='.$hst->{'name'}.'&srv=__HOST__',
+            };
+        }
+    }
+
+    $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    for my $svc (@{$data}) {
+        my $url = Thruk::Utils::get_pnp_url($c, $svc, 1);
+        if($url ne '') {
+            push @{$graphs}, {
+                text => $svc->{'host_name'}.';'.$svc->{'description'},
+                url  => $url.'/image?host='.$svc->{'host_name'}.'&srv='.$svc->{'description'},
+            };
+        }
+    }
+    $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
+
+    $c->stash->{'json'} = { data => $graphs };
     return $c->forward('Thruk::View::JSON');
 }
 

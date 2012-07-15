@@ -985,10 +985,11 @@ return pnp url for object (host/service)
 =cut
 
 sub get_pnp_url {
-    my $c   = shift;
-    my $obj = shift;
+    my $c     = shift;
+    my $obj   = shift;
+    my $force = shift;
 
-    return '' unless $c->config->{'shown_inline_pnp'};
+    return '' unless $c->config->{'shown_inline_pnp'} || $force;
 
     for my $type (qw/action_url_expanded notes_url_expanded/) {
         for my $regex (qw/pnp4nagios pnp/) {

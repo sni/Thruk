@@ -46,6 +46,10 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/text_align_left.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
                     }, {
+                        text:   'PNP Graph',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_bar.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }
+                    }, {
                         text:   'Mod-Gearman Metrics',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridGearmanMetrics'}) }

@@ -27,6 +27,9 @@ Ext.define('TP.Panlet', {
             if(this.gearitem.isHidden()) {
                 if(this.loader != undefined) { this.loader.loadMaskOrig = this.loader.loadMask; this.loader.loadMask = false }
                 this.items.getAt(0).hide();
+                if(this.gearInitCallback) {
+                    this.gearInitCallback(this);
+                }
                 this.gearitem.down('form').getForm().reset();
                 this.gearitem.show();
             } else {
@@ -87,7 +90,7 @@ Ext.define('TP.Panlet', {
                 bodyStyle:       'overflow-y: auto',
                 submitEmptyText: false,
                 defaults: {
-                    anchor: '99%'
+                    anchor: '98%'
                 },
                 items: [{
                     fieldLabel: 'Title',
@@ -134,6 +137,7 @@ Ext.define('TP.Panlet', {
                         win.setFormDefaults();
                         win.startInterval();
                         win.saveState();
+                        win.refreshHandler();
                     }
                  }
                },
