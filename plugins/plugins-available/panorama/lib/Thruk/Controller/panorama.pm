@@ -373,6 +373,7 @@ sub _task_hosts_pie {
     };
 
     for my $state (qw/up down unreachable pending/) {
+        next if $data->{$state} == 0;
         push @{$json->{'data'}}, {
             name    => ucfirst $state,
             data    => $data->{$state},
