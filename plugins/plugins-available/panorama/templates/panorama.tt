@@ -17,7 +17,9 @@
 
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/ext-all-debug.js"></script>
     <script type="text/javascript">
-      var ExtState = [% state %];
+      var ExtState     = [% state %];
+      var default_view = '[% default_view %]';
+
       [% IF stateprovider == 'server' %]
       [%+ PROCESS _panorama_js_state_provider_http.tt +%]
       [% ELSE %]
@@ -43,17 +45,21 @@
 
       /* main viewport */
       Ext.onReady(function() {
-          TP.viewport = new Ext.Viewport({
+
+        /* do we have a state? */
+        var state = cp.readValues();
+        if(!state['tabpan'] && default_view != '') {
+            debug("using default view");
+            data = cp.decodeValue(decode64(default_view));
+            cp.loadData(data);
+        }
+
+        TP.viewport = new Ext.Viewport({
           id:       'viewport',
           layout:   'border',
           renderTo: Ext.getBody(),
           margins:  '0 0 0 0',
           items:    [ new TP.TabBar() ]
-        });
-
-        /* save pantab state on exit instead of every tabchange */
-        Ext.EventManager.on(window, 'beforeunload', function() {
-            Ext.getCmp('tabpan').saveState();
         });
       });
     </script>

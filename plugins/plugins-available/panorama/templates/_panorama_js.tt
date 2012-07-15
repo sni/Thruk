@@ -353,15 +353,11 @@ var TP = {
             Ext.MessageBox.alert('Failed', 'Import Failed!');
             return;
         }
-        if(data == undefined) {
-            Ext.MessageBox.alert('Failed', 'Import Failed!');
-            return;
-        }
+        if(data == undefined || data == '') { data = {} }
 
-        Ext.getCmp('viewport').items.getAt(0).destroy();
         cp.clearAll();
         cp.loadData(data);
         Ext.getCmp('viewport').add(new TP.TabBar());
-        Ext.MessageBox.alert('Success', 'Import Successful!');
+        window.location.reload();
     }
 }

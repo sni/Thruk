@@ -7,6 +7,7 @@ use Data::Dumper;
 use JSON::XS;
 use URI::Escape;
 use IO::Socket;
+use File::Slurp;
 
 use parent 'Catalyst::Controller';
 
@@ -95,7 +96,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
     }
 
-    my $data  = Thruk::Utils::get_user_data($c);
+    $c->stash->{default_view} = '';
+    if($c->config->{'Thruk::Plugin::Panorama'}->{'default_view'}) {
+        my $default_view = read_file($c->config->{'Thruk::Plugin::Panorama'}->{'default_view'});
+        chomp($default_view);
+        $default_view =~ s/\s//gmx;
+        $c->stash->{default_view} = $default_view;
+    }
+
+    my $data = Thruk::Utils::get_user_data($c);
     $c->stash->{state}     = encode_json($data->{'panorama'}->{'state'} || {});
     $c->stash->{template}  = 'panorama.tt';
     return 1;

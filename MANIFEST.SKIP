@@ -55,3 +55,4 @@ configure-stamp
 debian/files
 debian/thruk.debhelper.log
 my_templates/
+panorama_default_view

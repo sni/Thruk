@@ -74,6 +74,7 @@ Ext.define('TP.TabBar', {
     },
     initComponent: function() {
         this.callParent();
+
         /* global default setttings */
         this.xdata = {
             refresh:  60,
