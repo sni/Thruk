@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Carp qw/cluck/;
 use Monitoring::Config::File;
+use Data::Dumper;
 
 =head1 NAME
 
