@@ -27,7 +27,11 @@ Ext.define('TP.PanletPNP', {
             url = url + '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&end='   + Math.round(now.getTime()/1000);
             var size = imgPanel.getSize();
-            if(size.width > 1) {
+            if(size.height > 1 && size.height < 81) {
+                url = url + '&graph_width='+(size.width);
+                url = url + '&graph_height='+(size.height);
+            }
+            else if(size.width > 1) {
                 url = url + '&graph_width='+(size.width-97);
                 url = url + '&graph_height='+(size.height-50);
             }
