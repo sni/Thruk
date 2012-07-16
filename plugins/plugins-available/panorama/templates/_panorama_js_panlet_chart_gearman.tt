@@ -84,7 +84,11 @@ Ext.define('TP.PanletChartGearman', {
             if(!chart.store) {
                 return;
             }
-            var minutes_to_show = Math.ceil(this.xdata.refresh * this.xdata.nr_dots / 60 * 1.5);
+            var tabpan = Ext.getCmp('tabpan');
+            var refresh = this.xdata.refresh;
+            if(refresh == -1 ) { refresh = tabpan.xdata.refresh; }
+            if(refresh == 0)   { refresh = 60; }
+            var minutes_to_show = Math.ceil(refresh * this.xdata.nr_dots / 60 * 1.5);
             /* dynamically adjust minimum/maximum and ticks */
             var max     = chart.store.max('date').getTime() / 1000;
             var axis = chart.axes.getAt(1);
@@ -105,8 +109,10 @@ Ext.define('TP.PanletChartGearman', {
                 min = min - min%60 + 60;
             }
             var mindate = min*1000;
-            while(this.store.data.first().get('date').getTime() < mindate) {
-                this.store.remove(this.store.data.first());
+            var first   = this.store.data.first();
+            while(first != undefined && first.get('date').getTime() < mindate) {
+                this.store.remove(first);
+                first = this.store.data.first();
             }
             axis.minimum = mindate;
             axis.maximum = mindate + minutes_to_show * 60000;
