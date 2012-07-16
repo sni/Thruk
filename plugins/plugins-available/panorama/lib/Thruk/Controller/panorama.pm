@@ -97,8 +97,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     $c->stash->{default_view} = '';
-    if($c->config->{'Thruk::Plugin::Panorama'}->{'default_view'}) {
-        my $default_view = read_file($c->config->{'Thruk::Plugin::Panorama'}->{'default_view'});
+    my $default_file = $c->config->{'Thruk::Plugin::Panorama'}->{'default_view'};
+    if($default_file) {
+        my $default_view = $default_file;
+        if(-e $default_file) {
+            $default_view = read_file($default_file);
+        }
         chomp($default_view);
         $default_view =~ s/\s//gmx;
         $c->stash->{default_view} = $default_view;
