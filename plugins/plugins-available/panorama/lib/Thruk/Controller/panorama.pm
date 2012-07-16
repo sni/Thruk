@@ -320,11 +320,16 @@ sub _task_site_status {
 
     my $json = {
         columns => [
-            { 'header' => 'Id',      dataIndex => 'id',      width => 45, hidden => JSON::XS::true },
-            { 'header' => '',        dataIndex => 'icon',    width => 30, tdCls => 'icon_column', renderer => 'function(v, td, item) { title=""; if(item.data.runtime=="") {title="title=\""+item.data.version+"\""} return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
-            { 'header' => 'Site',    dataIndex => 'site',    width => 60, flex => 1 },
-            { 'header' => 'Version', dataIndex => 'version', width => 50 },
-            { 'header' => 'Runtime', dataIndex => 'runtime', width => 85 },
+            { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => JSON::XS::true },
+            { 'header' => '',                 dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'function(v, td, item) { title=""; if(item.data.runtime=="") {title="title=\""+item.data.version+"\""} return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
+            { 'header' => 'Site',             dataIndex => 'site',                    width => 60, flex => 1 },
+            { 'header' => 'Version',          dataIndex => 'version',                 width => 50 },
+            { 'header' => 'Runtime',          dataIndex => 'runtime',                 width => 85 },
+            { 'header' => 'Notifications',    dataIndex => 'enable_notifications',    width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
+            { 'header' => 'Svc Checks',       dataIndex => 'execute_service_checks',  width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
+            { 'header' => 'Hst Checks',       dataIndex => 'execute_host_checks',     width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
+            { 'header' => 'Eventhandlers',    dataIndex => 'enable_event_handlers',   width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
+            { 'header' => 'Performance Data', dataIndex => 'process_performance_data',width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
         ],
         data    => []
     };
@@ -342,13 +347,17 @@ sub _task_site_status {
             $runtime = Thruk::Utils::Filter::duration(time() - $d->{'program_start'});
             $program_version = $d->{'program_version'};
         }
-        push @{$json->{'data'}}, {
+        my $row = {
             id      => $key,
             icon    => $icon,
             site    => $b->{'name'},
             version => $program_version,
             runtime => $runtime,
         };
+        for my $attr (qw/enable_notifications execute_host_checks execute_service_checks enable_event_handlers process_performance_data/) {
+            $row->{$attr} = $d->{$attr};
+        }
+        push @{$json->{'data'}}, $row;
     }
 
     $c->stash->{'json'} = $json;
