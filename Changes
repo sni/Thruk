@@ -8,6 +8,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - check version when using the check for updates link
           - clean up menu (don't show grid links in extra row)
           - allow wildcards in 'show_custom_vars'
+          - added cgi sounds to tac page (if enabled)
           - reporting:
             - reports can now be created for every page (html, xls, ...)
           - config tool:
@@ -18,6 +19,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - recurring downtimes: fixed adding downtimes on sunday
             - config tool: allowed hostgroups with register 0
             - fixed reloading pages when multiple filters used (Rupert Roesler-Schmidt)
+            - fixed sounds in IE and Windows Firefox
 
 1.34     Tue Jun 19 17:38:46 CEST 2012
           - added config item to specify mobile agents

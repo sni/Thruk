@@ -25,6 +25,7 @@ Catalyst Controller.
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
+    $c->stash->{'audiofile'}     = '';
     $c->stash->{'stats'}         = $c->{'db'}->get_performance_stats( services_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ) ], hosts_filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ) ] );
     $c->stash->{'host_stats'}    = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
     $c->stash->{'service_stats'} = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
@@ -32,6 +33,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{'infoBoxTitle'}  = 'Tactical Monitoring Overview';
     $c->stash->{'page'}          = 'tac';
     $c->stash->{'template'}      = 'tac.tt';
+
+    # set audio file to play
+    Thruk::Utils::Status::set_audio_file($c);
 
     Thruk::Utils::ssi_include($c);
 
