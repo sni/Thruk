@@ -10136,6 +10136,12 @@ state_provider    Sets the way states between reloads are
                           where lot people share the same account.
 </p>
 </li>
+<li>
+<p>
+default_view      Can be either the string of an exported
+                          view or path to a file with exported view.
+</p>
+</li>
 </ul></div>
 </li>
 </ul></div>
@@ -10144,6 +10150,7 @@ state_provider    Sets the way states between reloads are
 <div class="content">
 <pre><tt>&lt;Component Thruk::Plugin::Panorama&gt;
   state_provider  = server
+  default_view    = /var/lib/thruk/default_panorama_view
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>
@@ -10615,7 +10622,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-07-15 15:31:09 CEST
+Last updated 2012-07-16 11:23:08 CEST
 </div>
 </div>
 </body>

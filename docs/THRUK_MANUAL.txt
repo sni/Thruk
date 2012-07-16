@@ -1598,11 +1598,14 @@ you to build your own panorama views.
                           Valid options are 'cookie' or 'server'.
                           Cookie store is usefull for demo systems
                           where lot people share the same account.
+      - default_view      Can be either the string of an exported
+                          view or path to a file with exported view.
 
 ex.:
 
   <Component Thruk::Plugin::Panorama>
     state_provider  = server
+    default_view    = /var/lib/thruk/default_panorama_view
   </Component>
 
 
