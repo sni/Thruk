@@ -238,7 +238,7 @@ sub _task_stats_check_metrics {
 ##########################################################
 sub _task_stats_gearman {
     my($self, $c) = @_;
-    $c->stash->{'json'} = _get_gearman_stats($c);
+    $c->stash->{'json'} = $self->_get_gearman_stats($c);
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -246,7 +246,7 @@ sub _task_stats_gearman {
 sub _task_stats_gearman_grid {
     my($self, $c) = @_;
 
-    my $data = _get_gearman_stats($c);
+    my $data = $self->_get_gearman_stats($c);
 
     my $json = {
         columns => [
@@ -434,8 +434,8 @@ sub _task_pnp_graphs {
         my $url = Thruk::Utils::get_pnp_url($c, $hst, 1);
         if($url ne '') {
             push @{$graphs}, {
-                text => $hst->{'name'}.';__HOST__',
-                url  => $url.'/image?host='.$hst->{'name'}.'&srv=__HOST__',
+                text => $hst->{'name'}.';_HOST_',
+                url  => $url.'/image?host='.$hst->{'name'}.'&srv=_HOST_',
             };
         }
     }
@@ -458,7 +458,7 @@ sub _task_pnp_graphs {
 
 ##########################################################
 sub _get_gearman_stats {
-    my($c) = @_;
+    my($self, $c) = @_;
 
     my $host = 'localhost';
     my $port = 4730;
