@@ -469,6 +469,7 @@ sub _task_pnp_graphs {
 sub _get_gearman_stats {
     my($self, $c) = @_;
 
+    my $data = {};
     my $host = 'localhost';
     my $port = 4730;
     if(defined $c->request->parameters->{'server'}) {
@@ -480,12 +481,10 @@ sub _get_gearman_stats {
         PeerAddr => $host,
         PeerPort => $port,
     )
-    or do { warn "can't connect to port $port on $host: $!"; return; };
+    or do { $c->log->warn("can't connect to port $port on $host: $!"); return $data; };
     $handle->autoflush(1);
 
     print $handle "status\n";
-
-    my $data = {};
 
     while ( defined( my $line = <$handle> ) ) {
         chomp($line);
