@@ -918,7 +918,9 @@ sub _process_tools_page {
     my $tool   = $c->{'request'}->{'parameters'}->{'tools'} || 'start';
 
     if($tool eq 'check_object_references') {
-        $c->stash->{'warnings'} = [ @{$c->{'obj_db'}->_check_references()}, @{$c->{'obj_db'}->_check_orphaned_objects()} ];
+        my $warnings = [ @{$c->{'obj_db'}->_check_references()}, @{$c->{'obj_db'}->_check_orphaned_objects()} ];
+        @{$warnings} = sort @{$warnings};
+        $c->stash->{'warnings'} = $warnings;
     }
 
     $c->stash->{'tool'} = $tool;

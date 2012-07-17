@@ -140,6 +140,7 @@ returns 1 if this is a template
 =cut
 sub is_template {
     my($self) = @_;
+    return 1 if (defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0);
     return 1 if $self->get_template_name();
     return 0;
 }
@@ -153,6 +154,10 @@ return the objects template name or undef
 =cut
 sub get_template_name {
     my $self = shift;
+    # in case there is no name set, use the primary name
+    if(defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0 and !defined $self->{'conf'}->{'name'} and defined $self->{'conf'}->{$self->{'primary_key'}}) {
+        return $self->{'conf'}->{$self->{'primary_key'}};
+    }
     return $self->{'conf'}->{'name'};
 }
 

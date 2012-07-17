@@ -369,7 +369,7 @@ sub get_object_by_location {
         next unless $file->{'path'} eq $path;
         for my $obj (@{$file->{'objects'}}) {
             if(defined $obj->{'line'} and defined $obj->{'line2'}
-               and $obj->{'line'} ne '' and $obj->{'line'} ne ''
+               and $obj->{'line'} ne '' and $obj->{'line2'} ne ''
                and $line >= $obj->{'line'} and $line <= $obj->{'line2'}) {
                 return $obj;
             }
@@ -1441,6 +1441,7 @@ sub _check_orphaned_objects {
             delete $all_templates->{$link}->{$val};
         }
         else {
+            delete $all_templates->{$link}->{$val} if $link eq 'hostgroup';
             delete $all_objects->{$link}->{$val};
         }
     });
@@ -1453,7 +1454,9 @@ sub _check_orphaned_objects {
         next if $type eq 'service';
         next if $type eq 'servicedependency';
         for my $name (keys %{$all_objects->{$type}}) {
-            push @errors, $type." object '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name}));
+            my $obj = $self->get_object_by_id($self->{'objects'}->{'byname'}->{$type}->{$name});
+            next if defined $obj->{'conf'}->{'members'};
+            push @errors, $type." object '".$name."' is unused in ".Thruk::Utils::Conf::_link_obj($obj);
         }
     }
 
@@ -1495,6 +1498,10 @@ sub _all_object_links_callback {
                         next if $ref2 eq '';
                         &$cb($file, $obj, $key, $link, $ref2);
                     }
+                }
+                elsif($obj->{'default'}->{$key}->{'type'} eq 'COMMAND') {
+                    my($cmd,$args) = split(/!/mx, $obj->{'conf'}->{$key}, 2);
+                    &$cb($file, $obj, $key, $link, $cmd);
                 }
             }
         }

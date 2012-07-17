@@ -14,6 +14,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - config tool:
             - added plugin & addon manager
             - show hostgroup name on hosts service list
+            - fixed unregistered hostgroups showing up as warning
+            - fixed commands in orphaned objects list
           - Bug Fixes
             - downtimes: fixed display of flexible downtimes
             - recurring downtimes: fixed adding downtimes on sunday
