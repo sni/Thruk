@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 1001;
+use Test::More tests => 1025;
 use JSON::XS;
 use Encode qw(encode_utf8 decode_utf8);
 
@@ -46,6 +46,8 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=plugins',
     '/thruk/cgi-bin/conf.cgi?sub=users&action=change&data.username=testuser',
     { url => '/thruk/cgi-bin/conf.cgi?sub=objects', fail_message_ok => 1 },
+    '/thruk/cgi-bin/conf.cgi?edit&host='.$host,
+    '/thruk/cgi-bin/conf.cgi?edit&host='.$host.'&service='.$service,
     '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes',
     '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes&check=yes',
     '/thruk/cgi-bin/conf.cgi?sub=objects&apply=yes&diff=yes',
