@@ -9,6 +9,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - clean up menu (don't show grid links in extra row)
           - allow wildcards in 'show_custom_vars'
           - added cgi sounds to tac page (if enabled)
+          - added link for bug reports on internal errors
           - reporting:
             - reports can now be created for every page (html, xls, ...)
           - config tool:

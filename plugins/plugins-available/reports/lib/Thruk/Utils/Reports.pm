@@ -502,14 +502,20 @@ sub _report_save {
 ##########################################################
 sub _read_report_file {
     my($c, $nr, $rdata, $noauth) = @_;
+    $Thruk::Utils::CLI::c = $c;
+
     unless($nr =~ m/^\d+$/mx) {
         Thruk::Utils::CLI::_error("not a valid report number");
+        $c->stash->{errorMessage}       = "report does not exist";
+        $c->stash->{errorDescription}   = "not a valid report number.";
         return $c->detach('/error/index/13');
     }
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     unless(-f $file) {
         Thruk::Utils::CLI::_error("report does not exist: $!");
-        return $c->detach('/error/index/13');
+        $c->stash->{errorMessage}       = "report does not exist";
+        $c->stash->{errorDescription}   = "please make sure this report exists.";
+        return $c->detach('/error/index/99');
     }
 
     my $report = Thruk::Utils::read_data_file($file);
