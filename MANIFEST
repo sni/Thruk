@@ -1236,6 +1236,7 @@ templates/_add_bookmark.tt
 templates/_ajax_search.tt
 templates/_comments_table.tt
 templates/_common_js.tt
+templates/_common_js_bugs.tt
 templates/_cron_edit.tt
 templates/_downtimes_recurring_table.tt
 templates/_downtimes_table.tt

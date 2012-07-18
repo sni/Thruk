@@ -1,5 +1,6 @@
 ﻿<script type="text/javascript">
 <!--
+  [%+ PROCESS _common_js_bugs.tt +%]
   var url_prefix             = '[% url_prefix %]';
   var cookie_path            = '[% cookie_path %]';
   var theme                  = '[% theme %]';

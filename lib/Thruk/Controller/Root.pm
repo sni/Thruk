@@ -169,7 +169,7 @@ sub begin : Private {
                   show_full_commandline all_problems_link use_ajax_search show_long_plugin_output
                   priorities show_modified_attributes downtime_duration expire_ack_duration
                   show_backends_in_table host_action_icon service_action_icon cookie_path
-                  use_feature_trends
+                  use_feature_trends show_error_reports
                 /) {
         $c->stash->{$key} = $c->config->{$key};
     }

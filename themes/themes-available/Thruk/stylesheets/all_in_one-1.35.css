@@ -766,7 +766,7 @@ TD.action_menu {
   padding-left: 20px;
 }
 
-input.top_refresh_button {
+input.top_refresh_button, img.top_bug_button {
   margin-top: 2px;
   margin-right: 4px;
   width: 16px;

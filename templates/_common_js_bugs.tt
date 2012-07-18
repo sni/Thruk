@@ -1,0 +1,27 @@
+﻿var thruk_errors = [];
+window.onerror = function(msg, url, line) {
+  try {
+    thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);
+
+    var link = document.getElementById('bug_report_link');
+    if(link) {
+        var text = "Please describe what you did:\n\n\n\n\n---------------\n";
+        for(var nr in thruk_errors) {
+            text = text + "\n" + thruk_errors[nr]+"\n";
+        }
+        link.href="mailto:bugs@thruk.org?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
+    }
+    showBugReport('bug_report');
+  }
+  catch(e) {}
+
+  return false;
+};
+
+function showBugReport(id) {
+  var obj = document.getElementById(id);
+  if(obj) {
+    obj.style.display    = '';
+    obj.style.visibility = 'visible';
+  }
+}
