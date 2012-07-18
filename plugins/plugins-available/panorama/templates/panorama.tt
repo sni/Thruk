@@ -12,6 +12,7 @@
       var cookie_path            = '[% cookie_path %]';
       var base                   = '[% url_prefix %]thruk/plugins/panorama';
       [%+ PROCESS _header_initial_states.tt +%]
+      [%+ PROCESS _common_js_bugs.tt +%]
     -->
     </script>
 
@@ -61,6 +62,7 @@
           margins:  '0 0 0 0',
           items:    [ new TP.TabBar() ]
         });
+        Ext.getCmp('bug_report').hide();
       });
     </script>
 </head>

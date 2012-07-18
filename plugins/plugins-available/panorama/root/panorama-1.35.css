@@ -15,8 +15,13 @@ DIV.x-tab-default-over A.x-tab-close-btn {
     left: -4px;
 }
 .gear-tab {
-    background-image: url("images/gear.gif") !important;
+    background-image: url("images/cog_add.png") !important;
     left: -4px;
+}
+.bug-tab {
+    background-image: url("images/bug_error.png") !important;
+    left: 4px;
+    top: 3px;
 }
 
 /* make menu items align to icon */

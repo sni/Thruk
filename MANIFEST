@@ -1002,10 +1002,12 @@ plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray
 plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray/window/window-default-corners.gif
 plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray/window/window-default-sides.gif
 plugins/plugins-available/panorama/root/images/accept.png
+plugins/plugins-available/panorama/root/images/bug_error.png
 plugins/plugins-available/panorama/root/images/chart_bar.png
 plugins/plugins-available/panorama/root/images/chart_curve.png
 plugins/plugins-available/panorama/root/images/chart_pie.png
 plugins/plugins-available/panorama/root/images/cog.png
+plugins/plugins-available/panorama/root/images/cog_add.png
 plugins/plugins-available/panorama/root/images/exclamation.png
 plugins/plugins-available/panorama/root/images/exit.png
 plugins/plugins-available/panorama/root/images/gear.gif
