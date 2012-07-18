@@ -1239,6 +1239,7 @@ templates/_common_js.tt
 templates/_cron_edit.tt
 templates/_downtimes_recurring_table.tt
 templates/_downtimes_table.tt
+templates/_error_report.tt
 templates/_excel_export.tt
 templates/_extinfo_cmd_pane.tt
 templates/_footer.tt
@@ -1455,6 +1456,7 @@ themes/themes-available/Classic/images/arrow_right.png
 themes/themes-available/Classic/images/book_add.png
 themes/themes-available/Classic/images/btn_close.png
 themes/themes-available/Classic/images/btn_close_small.png
+themes/themes-available/Classic/images/bug_error.png
 themes/themes-available/Classic/images/calendar.png
 themes/themes-available/Classic/images/catalyst_170pix.png
 themes/themes-available/Classic/images/chart_organisation.png
@@ -1591,6 +1593,7 @@ themes/themes-available/Exfoliation/images/arrow_right.png
 themes/themes-available/Exfoliation/images/book_add.png
 themes/themes-available/Exfoliation/images/btn_close.png
 themes/themes-available/Exfoliation/images/btn_close_small.png
+themes/themes-available/Exfoliation/images/bug_error.png
 themes/themes-available/Exfoliation/images/calendar.png
 themes/themes-available/Exfoliation/images/catalyst_170pix.png
 themes/themes-available/Exfoliation/images/chart_organisation.png
@@ -1784,6 +1787,7 @@ themes/themes-available/Nuvola/images/border_big.gif
 themes/themes-available/Nuvola/images/border_small.gif
 themes/themes-available/Nuvola/images/btn_close.png
 themes/themes-available/Nuvola/images/btn_close_small.png
+themes/themes-available/Nuvola/images/bug_error.png
 themes/themes-available/Nuvola/images/calendar.png
 themes/themes-available/Nuvola/images/catalyst_170pix.png
 themes/themes-available/Nuvola/images/chart_organisation.png
@@ -1970,6 +1974,7 @@ themes/themes-available/Thruk/images/border_big.gif
 themes/themes-available/Thruk/images/border_small.png
 themes/themes-available/Thruk/images/btn_close.png
 themes/themes-available/Thruk/images/btn_close_small.png
+themes/themes-available/Thruk/images/bug_error.png
 themes/themes-available/Thruk/images/calendar.png
 themes/themes-available/Thruk/images/catalyst_170pix.png
 themes/themes-available/Thruk/images/chart_organisation.png
@@ -2096,6 +2101,7 @@ themes/themes-available/Vautour/images/arrow_right.png
 themes/themes-available/Vautour/images/book_add.png
 themes/themes-available/Vautour/images/btn_close.png
 themes/themes-available/Vautour/images/btn_close_small.png
+themes/themes-available/Vautour/images/bug_error.png
 themes/themes-available/Vautour/images/calendar.png
 themes/themes-available/Vautour/images/catalyst_170pix.png
 themes/themes-available/Vautour/images/chart_organisation.png
@@ -2266,6 +2272,7 @@ themes/themes-available/Wakizashi/images/background.jpg
 themes/themes-available/Wakizashi/images/book_add.png
 themes/themes-available/Wakizashi/images/btn_close.png
 themes/themes-available/Wakizashi/images/btn_close_small.png
+themes/themes-available/Wakizashi/images/bug_error.png
 themes/themes-available/Wakizashi/images/button_close14hi.png
 themes/themes-available/Wakizashi/images/button_close14lo.png
 themes/themes-available/Wakizashi/images/button_closesnapin_hi.png

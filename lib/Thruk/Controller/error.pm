@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 use Data::Dumper;
-use Carp;
+use Carp qw/longmess/;
 
 use parent 'Catalyst::Controller';
 
@@ -185,6 +185,13 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         } else {
             $c->log->debug($errors->{$arg1}->{'mess'});
             $c->log->debug("on page: ".$c->request->uri) if defined $c->request->uri;
+        }
+    }
+
+    $c->stash->{'stacktrace'} = "";
+    if($arg1 == 13 and $c->config->{'show_error_reports'}) {
+        for my $error ( @{ $c->error } ) {
+            $c->stash->{'stacktrace'} .= $error;
         }
     }
 

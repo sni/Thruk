@@ -143,6 +143,7 @@ sub begin : Private {
                     '7'                     => 'Sunday',
                                            },
         'mobile_agent'                  => 'iPhone,Android,IEMobile',
+        'show_error_reports'            => 1,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
