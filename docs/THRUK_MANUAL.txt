@@ -1342,6 +1342,11 @@ ex.:
   mobile_agent=iPhone,Android,IEMobile
 
 
+==== show_error_reports
+Show link to bug reports when internal errors occur.
+show_error_reports = 1
+
+
 ==== no_external_job_forks
 Normally reports will be generated in an external process to avoid
 timeouts on long running reports. Use this switch to turn external

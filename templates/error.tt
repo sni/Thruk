@@ -29,8 +29,9 @@
   [% IF stacktrace %]
   <br>
   <div class='errorDescription'>
-  <img src="[% url_prefix %]thruk/themes/[% theme %]/images/bug_error.png" alt="Send Bug Report" width="16" height="16" style="vertical-align: text-bottom;">
-  Help making Thruk better and send a <a href="mailto:bugs@thruk.org?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]">bug report</a>.<br>
+  <a href="mailto:bugs@thruk.org?subject=Thruk%20Error%20Report&amp;body=[% PROCESS _error_report.tt | uri %]">
+    <img src="[% url_prefix %]thruk/themes/[% theme %]/images/bug_error.png" alt="Send Bug Report" width="16" height="16" style="vertical-align: text-bottom;">
+    Help making Thruk better and send a bug report</a>.<br>
   </div>
   [% END %]
 

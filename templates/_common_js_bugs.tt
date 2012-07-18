@@ -1,4 +1,5 @@
 ﻿var thruk_errors = [];
+[%+ IF show_error_reports +%]
 window.onerror = function(msg, url, line) {
   try {
     thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);
@@ -17,6 +18,7 @@ window.onerror = function(msg, url, line) {
 
   return false;
 };
+[%+ END +%]
 
 function showBugReport(id) {
   var obj = document.getElementById(id);
