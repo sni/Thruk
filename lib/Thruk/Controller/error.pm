@@ -188,7 +188,6 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
         }
     }
 
-    $c->stash->{'stacktrace'} = "";
     if($arg1 == 13 and $c->config->{'show_error_reports'}) {
         for my $error ( @{ $c->error } ) {
             $c->stash->{'stacktrace'} .= $error;
