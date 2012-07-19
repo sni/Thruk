@@ -1061,7 +1061,11 @@ sub _get_context_object {
             for my $type (keys %{$services}) {
                 for my $name (keys %{$services->{$type}}) {
                     if($name eq $c->{'request'}->{'parameters'}->{'service'}) {
-                        $c->stash->{'data_id'} = $services->{$type}->{$name}->{'svc'}->get_id();
+                        if(defined $services->{$type}->{$name}->{'svc'}) {
+                            $c->stash->{'data_id'} = $services->{$type}->{$name}->{'svc'}->get_id();
+                        } else {
+                            $c->stash->{'data_id'} = $services->{$type}->{$name}->get_id();
+                        }
                     }
                 }
             }
