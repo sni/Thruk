@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.36     not yet released
+1.36     Thu Jul 19 13:49:01 CEST 2012
           - added panorama view plugin
           - support flexible downtimes from the status page quick command
           - support recurring flexible downtimes
