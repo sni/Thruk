@@ -225,3 +225,33 @@ TD.extdetails DIV, TD.checkstatus DIV {
 TD.extdetails TD.dataVar, TD.checkstatus TD.dataVar {
     width: 150px;
 }
+
+
+TABLE.extdetails DIV.hostUP,
+TABLE.extdetails DIV.hostDOWN,
+TABLE.extdetails DIV.hostUNREACHABLE,
+TABLE.extdetails DIV.hostPENDING,
+TABLE.extdetails DIV.serviceOK,
+TABLE.extdetails DIV.serviceWARNING,
+TABLE.extdetails DIV.serviceUNKNOWN,
+TABLE.extdetails DIV.serviceCRITICAL,
+TABLE.extdetails DIV.servicePENDING,
+TABLE.extdetails DIV.notflapping,
+TABLE.extdetails DIV.flapping,
+TABLE.extdetails DIV.downtimeINACTIVE,
+TABLE.extdetails DIV.downtimeACTIVE
+{
+  text-align: center;
+}
+
+TABLE.extdetails DIV.notificationsDISABLED,
+TABLE.extdetails DIV.notificationsENABLED,
+TABLE.extdetails DIV.checksDISABLED,
+TABLE.extdetails DIV.checksENABLED,
+TABLE.extdetails DIV.eventhandlersDISABLED,
+TABLE.extdetails DIV.eventhandlersENABLED,
+TABLE.extdetails DIV.flapdetectionDISABLED,
+TABLE.extdetails DIV.flapdetectionENABLED
+{
+  text-align: center;
+}
