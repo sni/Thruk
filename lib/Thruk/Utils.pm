@@ -1408,6 +1408,34 @@ sub get_git_name {
 }
 
 ########################################
+
+=head2 get_debug_details
+
+  get_debug_details()
+
+return details useful for debuging
+
+=cut
+
+sub get_debug_details {
+    chomp(my $uname = `uname -a`);
+    my $release = "";
+    for my $f (qw|/etc/redhat-release /etc/issue|) {
+        if(-e $f) {
+            $release = `cat $f`;
+            last;
+        }
+    }
+    $release =~ s/^\s*//gmx;
+    $release =~ s/\s*$//gmx;
+    my $details =<<EOT;
+uname:      $uname
+release:    $release
+EOT
+    return $details;
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 

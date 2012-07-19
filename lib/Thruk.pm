@@ -113,6 +113,7 @@ my %config = ('name'                   => 'Thruk',
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
+                                          'debug_details'  => Thruk::Utils::get_debug_details(),
                                           'backends'       => [],
                                           'param_backend'  => '',
                                           'refresh_rate'   => '',

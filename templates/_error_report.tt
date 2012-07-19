@@ -3,6 +3,8 @@
 
 
 ---------------
+Url:        [%+ short_uri(c) +%]
 Version:    Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %] / OMD [% c.config.omd_version %][% END +%]
+[%+ debug_details +%]
 Stacktrace:
 [%+ stacktrace %]
