@@ -1,4 +1,5 @@
-﻿var thruk_errors = [];
+﻿var version_info = '[% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %] / OMD [% c.config.omd_version %][% END %]';
+var thruk_errors = [];
 [%+ IF show_error_reports +%]
 window.onerror = function(msg, url, line) {
   try {
@@ -7,6 +8,7 @@ window.onerror = function(msg, url, line) {
     var link = document.getElementById('bug_report-btnEl');
     if(link) {
         var text = "Please describe what you did:\n\n\n\n\n---------------\n";
+        text = text + "\nVersion: " + version_info+"\n";
         for(var nr in thruk_errors) {
             text = text + "\n" + thruk_errors[nr]+"\n";
         }
