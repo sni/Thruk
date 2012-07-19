@@ -33,8 +33,24 @@
     <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report - Step 1</th>
     <th class='data' style="width:125px;"></th>
   </tr>
+  <tr>
+    <td class="dataEven" align="center" colspan=3><b>Choose Report:</b></td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Type</b><span class="required">*</span></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <select name="template" style="min-width: 180px;">
+        [% FOREACH file = templates.keys.sort %]
+        <option value="[% file %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
+        [% END %]
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center" colspan=3><b>Details:</b></td>
+  </tr>
   <tr class="firstrow">
-    <td class="dataEven" align="center"><b>Name</b></td>
+    <td class="dataEven" align="center"><b>Name</b><span class="required">*</span></td>
     <td class="dataOdd" align="left" colspan=2><input type="text" name="name" value="[% r.name %]"></td>
   </tr>
   <tr>
@@ -88,20 +104,8 @@
     </td>
   </tr>
   <tr>
-    <td class="dataEven" align="center" colspan=3><b>Choose Report:</b></td>
-  </tr>
-  <tr>
-    <td class="dataEven" align="center"><b>Template</b></td>
-    <td class="dataOdd" align="left" colspan=2>
-      <select name="template" style="min-width: 180px;">
-        [% FOREACH t = templates %]
-        <option[% IF t == r.template %] selected[% END %]>[% t %]</option>
-        [% END %]
-      </select>
-    </td>
-  </tr>
-  <tr>
     <td class="dataEven" align="center" colspan=3>
+      <span class="required" style="float: left;">* - required</span>
       [% IF r.nr != "new" %]<a href="reports.cgi?action=remove&amp;report=[% r.nr %]" class="report_remove_button report_button" style="width: 80px;">Delete</a>[% END %]
       <button class="right_arrow_button report_button" style="width: 160px;">Continue</button>
     </td>

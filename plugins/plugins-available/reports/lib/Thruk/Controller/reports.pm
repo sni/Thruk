@@ -143,11 +143,17 @@ sub report_edit {
     for my $path (@{$c->config->{templates_paths}}, $c->config->{'View::TT'}->{'INCLUDE_PATH'}) {
         for my $file (glob($path.'/pdf/*.tt')) {
             $file =~ s/^.*\/(.*)$/$1/mx;
-            $templates->{$file} = 1;
+            my $name = $file;
+            $name    =~ s/\.tt$//gmx;
+            $name    = join(' ', map(ucfirst, split(/_/mx, $name)));
+            $name    =~ s/Sla/SLA/gmx;
+            $templates->{$file} = {
+                file => $file,
+                name => $name,
+            };
         }
     }
-    my @templates_files = sort keys %{$templates};
-    $c->stash->{templates} = \@templates_files;
+    $c->stash->{templates} = $templates;
 
     Thruk::Utils::ssi_include($c);
     $c->stash->{template} = 'reports_edit.tt';

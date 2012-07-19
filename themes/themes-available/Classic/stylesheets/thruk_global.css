@@ -808,3 +808,7 @@ TABLE.recurring_downtimes TD {
 TABLE.recurring_downtimes INPUT[type=text] {
   width: 515px;
 }
+
+SPAN.required {
+    color: red;
+}
