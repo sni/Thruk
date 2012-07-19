@@ -856,7 +856,7 @@ sub _do_on_peers {
             }
         }
     }
-    if($function eq "get_service_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_service_stats" and ref $data eq 'ARRAY') {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled ok ok_and_disabled ok_and_scheduled
@@ -871,7 +871,7 @@ sub _do_on_peers {
             $data->{$key} = 0;
         }
     }
-    if($function eq "get_host_stats" and ref $data eq 'ARRAY') {
+    elsif($function eq "get_host_stats" and ref $data eq 'ARRAY') {
         $data = {};
         for my $key (qw{
                         total total_active total_passive pending pending_and_disabled pending_and_scheduled up up_and_disabled up_and_scheduled
@@ -879,6 +879,16 @@ sub _do_on_peers {
                         unreachable_and_disabled unreachable_and_unhandled flapping flapping_disabled notifications_disabled eventhandler_disabled active_checks_disabled passive_checks_disabled outages
                         down_and_disabled_active down_and_disabled_passive unreachable_and_disabled_active unreachable_and_disabled_passive up_and_disabled_active
                         up_and_disabled_passive active_checks_disabled_active active_checks_disabled_passive
+                     }) {
+            $data->{$key} = 0;
+        }
+    }
+    elsif($function eq "get_extra_perf_stats" and ref $data eq 'ARRAY') {
+        $data = {};
+        for my $key (qw{
+                        cached_log_messages connections connections_rate host_checks
+                        host_checks_rate requests requests_rate service_checks
+                        service_checks_rate neb_callbacks neb_callbacks_rate
                      }) {
             $data->{$key} = 0;
         }
