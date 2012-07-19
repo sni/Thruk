@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 94;
+use Test::More tests => 92;
 use JSON::XS;
 
 BEGIN {
@@ -46,6 +46,8 @@ for my $url (@{$pages}) {
         'content_type' => 'application/json; charset=utf-8',
     );
     my $data = decode_json($page->{'content'});
-    is(ref $data, 'HASH', "json result is an array");
-    ok(scalar keys %{$data} > 0, "json result has content");
+    is(ref $data, 'HASH', "json result is an array: ".$url);
+    if($url !~ m/gearman/mx) {
+        ok(scalar keys %{$data} > 0, "json result has content: ".$url);
+    }
 }
