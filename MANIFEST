@@ -1544,6 +1544,8 @@ themes/themes-available/Classic/images/right.gif
 themes/themes-available/Classic/images/right.png
 themes/themes-available/Classic/images/server_edit.png
 themes/themes-available/Classic/images/serviceevent.gif
+themes/themes-available/Classic/images/sound.png
+themes/themes-available/Classic/images/sound_mute.png
 themes/themes-available/Classic/images/start.gif
 themes/themes-available/Classic/images/status2.gif
 themes/themes-available/Classic/images/status3.gif
@@ -1684,6 +1686,8 @@ themes/themes-available/Exfoliation/images/sblogo.png
 themes/themes-available/Exfoliation/images/server_edit.png
 themes/themes-available/Exfoliation/images/serviceevent.gif
 themes/themes-available/Exfoliation/images/sflogo.png
+themes/themes-available/Exfoliation/images/sound.png
+themes/themes-available/Exfoliation/images/sound_mute.png
 themes/themes-available/Exfoliation/images/splunk1.gif
 themes/themes-available/Exfoliation/images/splunk2.gif
 themes/themes-available/Exfoliation/images/start.gif
@@ -1880,6 +1884,8 @@ themes/themes-available/Nuvola/images/right.png
 themes/themes-available/Nuvola/images/sblogo.jpg
 themes/themes-available/Nuvola/images/server_edit.png
 themes/themes-available/Nuvola/images/serviceevent.gif
+themes/themes-available/Nuvola/images/sound.png
+themes/themes-available/Nuvola/images/sound_mute.png
 themes/themes-available/Nuvola/images/start.gif
 themes/themes-available/Nuvola/images/status2.gif
 themes/themes-available/Nuvola/images/status3.gif
@@ -2069,6 +2075,8 @@ themes/themes-available/Thruk/images/right.gif
 themes/themes-available/Thruk/images/right.png
 themes/themes-available/Thruk/images/server_edit.png
 themes/themes-available/Thruk/images/serviceevent.gif
+themes/themes-available/Thruk/images/sound.png
+themes/themes-available/Thruk/images/sound_mute.png
 themes/themes-available/Thruk/images/start.gif
 themes/themes-available/Thruk/images/status2.gif
 themes/themes-available/Thruk/images/status3.gif
@@ -2197,6 +2205,8 @@ themes/themes-available/Vautour/images/right.gif
 themes/themes-available/Vautour/images/right.png
 themes/themes-available/Vautour/images/server_edit.png
 themes/themes-available/Vautour/images/serviceevent.gif
+themes/themes-available/Vautour/images/sound.png
+themes/themes-available/Vautour/images/sound_mute.png
 themes/themes-available/Vautour/images/start.gif
 themes/themes-available/Vautour/images/status2.gif
 themes/themes-available/Vautour/images/status3.gif
@@ -2430,6 +2440,8 @@ themes/themes-available/Wakizashi/images/right.png
 themes/themes-available/Wakizashi/images/server_edit.png
 themes/themes-available/Wakizashi/images/serviceevent.gif
 themes/themes-available/Wakizashi/images/someproblem.png
+themes/themes-available/Wakizashi/images/sound.png
+themes/themes-available/Wakizashi/images/sound_mute.png
 themes/themes-available/Wakizashi/images/start.gif
 themes/themes-available/Wakizashi/images/status2.gif
 themes/themes-available/Wakizashi/images/status3.gif

@@ -119,6 +119,7 @@
               <th>Sounds:</th>
               <td>
                 [% IF has_cgi_sounds %]
+                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(full_uri(c)) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
                 [% ELSE %]
                 <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled>
@@ -130,10 +131,8 @@
             <tr>
               <th>Report:</th>
               <td>
-                <button onClick="window.location='reports.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% short_uri(c).replace('&amp;', '&') | uri %]'; return false;">
-                  <img src="[% url_prefix %]thruk/themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=12 height=12 style="vertical-align:sub;">
-                  Create E-Mail Report for this Page
-                </button>
+                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
+                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='reports.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% short_uri(c).replace('&amp;', '&') | uri %]'; return false;">
               </td>
             </tr>
           [% END %]
