@@ -416,15 +416,18 @@ sub _cmd_listbackends {
 sub _request_url {
     my($c, $url) = @_;
 
-    $ENV{'REQUEST_URI'}      = $url;
-    $ENV{'SCRIPT_NAME'}      = $url;
-    $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-    $ENV{'QUERY_STRING'}     = $1 if defined $1;
-    $ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
-    $ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
-    $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
-    $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
-    $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
+    local $ENV{'REQUEST_URI'}      = $url;
+    local $ENV{'SCRIPT_NAME'}      = $url;
+          $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
+    local $ENV{'QUERY_STRING'}     = $1 if defined $1;
+    local $ENV{'SERVER_PROTOCOL'}  = 'HTTP/1.0'  unless defined $ENV{'SERVER_PROTOCOL'};
+    local $ENV{'REQUEST_METHOD'}   = 'GET'       unless defined $ENV{'REQUEST_METHOD'};
+    local $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
+    local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
+    local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
+    if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'}) {
+        local $ENV{'REMOTE_USER'}  = $c->stash->{'remote_user'};
+    }
     # reset args, otherwise they will be interpreted as args for the script runner
     @ARGV = ();
 
@@ -432,6 +435,7 @@ sub _request_url {
     Catalyst::ScriptRunner->import();
     Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
     my $result = $ENV{'HTTP_RESULT'};
+    delete $ENV{'HTTP_RESULT'};
 
     if($result->{'code'} == 302
        and defined $result->{'headers'}
@@ -444,12 +448,13 @@ sub _request_url {
             $sleep = 1 if $x > 10;
             sleep($sleep);
             $url = $result->{'headers'}->{'Location'};
-            $ENV{'REQUEST_URI'}      = $url;
-            $ENV{'SCRIPT_NAME'}      = $url;
-            $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
-            $ENV{'QUERY_STRING'}     = $1 if defined $1;
+            local $ENV{'REQUEST_URI'}      = $url;
+            local $ENV{'SCRIPT_NAME'}      = $url;
+                  $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;
+            local $ENV{'QUERY_STRING'}     = $1 if defined $1;
             Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
             $result = $ENV{'HTTP_RESULT'};
+            delete $ENV{'HTTP_RESULT'};
             $x++;
         }
     }
