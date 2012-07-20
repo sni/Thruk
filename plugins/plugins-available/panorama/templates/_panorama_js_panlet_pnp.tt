@@ -40,16 +40,18 @@ Ext.define('TP.PanletPNP', {
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.request({
                     url: url,
-                    success: function(response, opts) {
-                        var tmp  = eval("("+response.responseText+")");
+                    callback: function(options, success, response) {
                         var data = [];
-                        for(var nr in tmp) {
-                            var row = tmp[nr];
-                            var match = row.image_url.match(/\&source=(\d+)\&/);
-                            data[match[1]] = {
-                                ds_name: tmp[nr].ds_name,
-                                source:  match[1]
-                            };
+                        var tmp  = TP.getResponse(panel, response);
+                        if(tmp) {
+                            for(var nr in tmp) {
+                                var row = tmp[nr];
+                                var match = row.image_url.match(/\&source=(\d+)\&/);
+                                data[match[1]] = {
+                                    ds_name: tmp[nr].ds_name,
+                                    source:  match[1]
+                                };
+                            }
                         }
                         panel.source_combo.store.removeAll();
                         for(var nr in data) {
@@ -165,8 +167,8 @@ Ext.define('TP.PanletPNP', {
             },
             callback: function(This, success, response, options) {
                 This.loading = false;
-                if(response.status == 200) {
-                    var data   = eval("("+response.responseText+")");
+                var data  = TP.getResponse(this, response);
+                if(data) {
                     this.graph_store = Ext.create('Ext.data.Store', {
                         data:  data,
                         fields: ['text', 'url'],
@@ -180,9 +182,6 @@ Ext.define('TP.PanletPNP', {
                     });
                     this.graph_combo.store = this.graph_store;
                     this.graph_combo.setValue(this.xdata.graph);
-                } else {
-                    debug("ERROR: " + response.status);
-                    debug(response);
                 }
             }
         };

@@ -55,15 +55,18 @@ Ext.define('TP.Panlet', {
                     this.check_pintool();
                 },
                 listeners: { afterrender: function() { this.up('panel').pintool = this; }},
-                scope: this
+                scope: this,
+                tooltip: 'make this panlet sticky'
             }, {
                 type: 'refresh',
                 handler: function() { this.refreshHandler(); },
-                scope: this
+                scope: this,
+                tooltip: 'reload content of this panlet'
             }, {
                 type: 'gear',
                 handler: function() { this.gearHandler(); },
-                scope: this
+                scope: this,
+                tooltip: 'settings'
             }
         ];
         this.shadow_id = this.id + '_shadow';

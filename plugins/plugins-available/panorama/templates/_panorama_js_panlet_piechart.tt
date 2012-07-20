@@ -29,10 +29,9 @@ Ext.define('TP.PanletPieChart', {
             },
             callback: function(This, success, response, options) {
                 This.loading = false;
-                if(response.status == 200) {
-                    var data   = eval("("+response.responseText+")");
+                var data = TP.getResponse(this, response);
+                if(data) {
                     var fields = [];
-
                     for(key in data.columns) {
                         fields.push(data.columns[key].dataIndex);
                     }
@@ -49,9 +48,6 @@ Ext.define('TP.PanletPieChart', {
                     });
                     this.chart.series.getAt(0).colorSet = data.colors;
                     this.chart.bindStore(this.pieStore);
-                } else {
-                    debug("ERROR: " + response.status);
-                    debug(response);
                 }
             }
         };

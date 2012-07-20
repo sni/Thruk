@@ -359,5 +359,25 @@ var TP = {
         cp.loadData(data);
         Ext.getCmp('viewport').add(new TP.TabBar());
         window.location.reload();
+    },
+    /* eval response data */
+    getResponse: function(panlet, response) {
+        var refresh = panlet.tools['refresh'];
+        if(response.status == 200) {
+            var data;
+            try {
+                data = eval("("+response.responseText+")");
+            } catch(e) {
+                refresh.setType('broken');
+                debug(e);
+                return data;
+            }
+            refresh.setType('refresh');
+            return data;
+        }
+        debug("ERROR: " + response.status);
+        debug(response);
+        refresh.setType('broken');
+        return false;
     }
 }

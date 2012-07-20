@@ -24,10 +24,9 @@ Ext.define('TP.PanletGrid', {
             },
             callback: function(This, success, response, options) {
                 This.loading = false;
-                if(response.status == 200) {
-                    var data   = eval("("+response.responseText+")");
+                var data = TP.getResponse(this, response);
+                if(data) {
                     var fields = [];
-
                     var newcolumns = Ext.JSON.encode(data.columns);
                     for(key in data.columns) {
                         fields.push(data.columns[key].dataIndex);
@@ -64,10 +63,6 @@ Ext.define('TP.PanletGrid', {
                             this.grid.applyState(this.initialState);
                         } catch(e) {}
                     }
-                } else {
-                    var row = {date: new Date(), empty:''};
-                    debug("ERROR: " + response.status);
-                    debug(response);
                 }
             }
         };

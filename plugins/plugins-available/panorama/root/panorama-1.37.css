@@ -59,3 +59,8 @@ TD.slider_txt {
 DIV.x-boundlist-selected {
   background: none;
 }
+
+/* type of refresh tool, when connection is broken */
+IMG.x-tool-broken {
+    background-image: url("images/tool_broken.png") !important;
+}

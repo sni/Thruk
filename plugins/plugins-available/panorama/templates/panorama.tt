@@ -46,6 +46,7 @@
 
       /* main viewport */
       Ext.onReady(function() {
+        Ext.QuickTips.init();
 
         /* do we have a state? */
         var state = cp.readValues();
