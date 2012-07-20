@@ -215,13 +215,20 @@ sub _request {
     if($response->is_success) {
         _debug(" -> success");
         my $data_str = $response->decoded_content;
-        my $data     = decode_json($data_str);
+        my $data;
+        eval {
+            $data = decode_json($data_str);
+        };
+        if($@) {
+            _error(" -> decode failed: ".Dumper($response));
+            return(undef, $response);
+        }
         _debug("   -> ".Dumper($response));
         _debug("   -> ".Dumper($data));
         return($data, $response);
-    } else {
-        _debug(" -> failed: ".Dumper($response));
     }
+
+    _error(" -> failed: ".Dumper($response));
     return(undef, $response);
 }
 

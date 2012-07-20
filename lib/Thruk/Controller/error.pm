@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 use Data::Dumper;
-use Carp qw/longmess/;
+use Carp qw/confess longmess/;
 
 use parent 'Catalyst::Controller';
 
@@ -229,9 +229,10 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
         Thruk::Utils::CLI::_error($c->stash->{errorMessage});
         Thruk::Utils::CLI::_error($c->stash->{errorDescription});
-        Thruk::Utils::CLI::_error($c->stash->{errorDetails}) if defined $c->stash->{errorDetails};
+        Thruk::Utils::CLI::_error($c->stash->{errorDetails}) if $c->stash->{errorDetails};
+        Thruk::Utils::CLI::_error($c->stash->{stacktrace})   if $c->stash->{stacktrace};
         if($Thruk::Utils::CLI::verbose) {
-            confess("got an error");
+            confess($c->stash->{errorMessage});
         }
         exit(1);
     }
