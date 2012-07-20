@@ -40,6 +40,7 @@ Ext.define('TP.PanletPNP', {
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.request({
                     url: url,
+                    method: 'POST',
                     callback: function(options, success, response) {
                         var data = [];
                         var tmp  = TP.getResponse(panel, response);
@@ -155,6 +156,7 @@ Ext.define('TP.PanletPNP', {
             renderer: 'data',
             scope:    this,
             url:      'panorama.cgi?task=pnp_graphs',
+            ajaxOptions: { method: 'POST' },
             loading:  false,
             listeners: {
                 'beforeload': function(This, options, eOpts) {

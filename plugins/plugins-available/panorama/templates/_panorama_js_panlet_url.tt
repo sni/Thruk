@@ -14,6 +14,7 @@ Ext.define('TP.PanletUrl', {
             loadMask: true,
             renderer: 'data',
             scope:    this,
+            ajaxOptions: { method: 'POST' },
             callback: function(This, success, response, options) {
                 var html;
                 if(response.status == 200) {

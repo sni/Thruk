@@ -17,6 +17,7 @@ Ext.define('TP.PanletPieChart', {
             renderer: 'data',
             scope:    this,
             url:      '',
+            ajaxOptions: { method: 'POST' },
             loading:  false,
             listeners: {
                 'beforeload': function(This, options, eOpts) {
