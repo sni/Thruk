@@ -12,12 +12,14 @@ Ext.define('TP.TabBar', {
             closable: false,
             minWidth: 28,
             iconCls:  'bug-tab',
-            href:     '#'
+            href:     '#',
+            tooltip:  'Send Bug Report'
         }, {
             title: '',
             closable: false,
             minWidth: 28,
             iconCls: 'gear-tab',
+            tooltip:  'Menu',
             menu: {
                 items: [{
                         text: 'About',
@@ -121,6 +123,7 @@ Ext.define('TP.TabBar', {
         tabConfig: {
             minWidth: 28
         },
+        tooltip:  'Add new Dashboard',
         listeners: {
             beforeactivate: function() { return TP.add_pantab() }
         }
