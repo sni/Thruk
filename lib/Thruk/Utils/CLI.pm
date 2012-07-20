@@ -435,7 +435,6 @@ sub _request_url {
     Catalyst::ScriptRunner->import();
     Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
     my $result = $ENV{'HTTP_RESULT'};
-    delete $ENV{'HTTP_RESULT'};
 
     if($result->{'code'} == 302
        and defined $result->{'headers'}
@@ -454,7 +453,6 @@ sub _request_url {
             local $ENV{'QUERY_STRING'}     = $1 if defined $1;
             Catalyst::ScriptRunner->run('Thruk', 'Thrukembedded');
             $result = $ENV{'HTTP_RESULT'};
-            delete $ENV{'HTTP_RESULT'};
             $x++;
         }
     }
