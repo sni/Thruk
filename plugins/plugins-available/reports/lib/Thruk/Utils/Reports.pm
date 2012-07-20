@@ -508,7 +508,7 @@ sub _read_report_file {
         Thruk::Utils::CLI::_error("not a valid report number");
         $c->stash->{errorMessage}       = "report does not exist";
         $c->stash->{errorDescription}   = "not a valid report number.";
-        return $c->detach('/error/index/13');
+        return $c->detach('/error/index/99');
     }
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     unless(-f $file) {
