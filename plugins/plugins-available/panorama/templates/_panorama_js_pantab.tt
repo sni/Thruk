@@ -25,7 +25,7 @@ Ext.define('TP.Pantab', {
         hide: function(This, eOpts) {
             for(nr in This.window_ids) {
                 var pantab = Ext.getCmp(This.window_ids[nr]);
-                if(!pantab.xdata.pinned) {
+                if(pantab && !pantab.xdata.pinned) {
                     pantab.hide();
                 }
             }
@@ -33,7 +33,7 @@ Ext.define('TP.Pantab', {
         beforerender: function(This, eOpts) {
             for(nr in This.window_ids) {
                 var pantab = Ext.getCmp(This.window_ids[nr]);
-                if(!pantab.xdata.pinned) {
+                if(pantab && !pantab.xdata.pinned) {
                     pantab.hide();
                 }
             }
