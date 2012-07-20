@@ -26,7 +26,7 @@ Ext.define('TP.PanletUrl', {
                         if(q == undefined) {
                             html = 'ERROR: selector not found';
                         } else {
-                            html = q.innerHTML;
+                            html = q.outerHTML;
                         }
                     } else {
                         html  = response.responseText;
@@ -36,7 +36,9 @@ Ext.define('TP.PanletUrl', {
                     /* keep css links */
                     if(this.xdata.keepcss && this.xdata.selector != '') {
                         el.body.select('LINK').each(function(e) {
-                            head = head + e.dom.outerHTML;
+                            if(!e.dom.outerHTML.match(/thruk_noframes\.css/)) {
+                                head = head + e.dom.outerHTML;
+                            }
                         });
                         head = '<head>' + head + '<\/head>';
                     }
