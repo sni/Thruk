@@ -108,6 +108,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{default_view} = $default_view;
     }
 
+    # find images for preloader
+    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
+    my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
+    $c->stash->{preload_img} = [];
+    for my $i (@images) {
+        $i =~ s|^.*/||gmx;
+        push @{$c->stash->{preload_img}}, $i;
+    }
+
     my $data = Thruk::Utils::get_user_data($c);
     $c->stash->{state}     = encode_json($data->{'panorama'}->{'state'} || {});
     $c->stash->{template}  = 'panorama.tt';

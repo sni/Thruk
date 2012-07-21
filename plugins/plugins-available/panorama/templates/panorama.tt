@@ -68,5 +68,8 @@
     </script>
 </head>
 <body>
+[% FOREACH i = preload_img %]
+<img src="[% url_prefix %]thruk/plugins/panorama/images/[% i %]" alt="preloader" height=0 width=0>
+[% END %]
 </body>
 </html>
