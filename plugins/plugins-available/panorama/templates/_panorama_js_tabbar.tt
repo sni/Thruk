@@ -100,6 +100,13 @@ Ext.define('TP.TabBar', {
         [%+ FOREACH b = backend_detail.keys %]
         [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]
         [% END +%]
+
+        /* create new tab */
+        var tabhead = this.getTabBar().items.getAt(0);
+        tabhead.addListener('click', function(This, eOpts) {
+            return TP.add_pantab();
+        });
+
     },
     getState:   function() {
         var item_ids = [];
@@ -133,9 +140,9 @@ Ext.define('TP.TabBar', {
         tabConfig: {
             minWidth: 28
         },
-        tooltip:  'Add new Dashboard',
+        tooltip: 'Add new Dashboard',
         listeners: {
-            beforeactivate: function() { return TP.add_pantab() }
+            beforeactivate: function() { tabpan = Ext.getCmp('tabpan'); if(tabpan.items.length == 1) { TP.add_pantab(); tabpan.setActiveTab(1); } return false; }
         }
     }]
 });
