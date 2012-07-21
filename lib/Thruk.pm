@@ -21,6 +21,7 @@ use POSIX qw(tzset);
 use Log::Log4perl::Catalyst;
 use Digest::MD5 qw(md5_hex);
 use File::Slurp qw(read_file);
+use Data::Dumper;
 use Thruk::Backend::Manager;
 use Thruk::Utils;
 use Thruk::Utils::Auth;
@@ -33,6 +34,7 @@ use Catalyst::Runtime '5.70';
 
 binmode(STDOUT, ":encoding(UTF-8)");
 binmode(STDERR, ":encoding(UTF-8)");
+$Data::Dumper::Sortkeys = 1;
 
 ###################################################
 # Set flags and add plugins for the application
