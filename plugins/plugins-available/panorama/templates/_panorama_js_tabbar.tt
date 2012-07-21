@@ -109,11 +109,11 @@ Ext.define('TP.TabBar', {
     },
     applyState: function(state) {
         if(state) {
+            this.setActiveTab(state.activeTab);
+            this.xdata = state.xdata;
             for(nr in state.item_ids) {
                 TP.add_pantab(state.item_ids[nr]);
             };
-            this.setActiveTab(state.activeTab);
-            this.xdata = state.xdata;
             Ext.apply(this, state);
             TP.startRotatingTabs();
         }

@@ -96,30 +96,43 @@ TP.settingsWindow = function() {
         }]
     });
 
+    /* save global settings */
+    var settingsSave = function() {
+        var win = this.up('window');
+        var tab = Ext.getCmp('tabpan');
+        var form = win.down('form').getForm();
+        if(form.isValid()) {
+            tab.xdata = TP.storeFormToData(form, tab.xdata);
+            TP.setRefreshText(tab.xdata, 'rotate_tabs', 'rotate_tabs_txt');
+            TP.applyFormValues(form, tab.xdata);
+            TP.setBackends(tab.xdata.backends);
+            delete tab.xdata['rotate_tabs_txt'];
+            tab.saveState();
+            win.destroy();
+            TP.startRotatingTabs();
+            /* start refresh for all panlets with global refresh rate */
+            var panels = TP.getAllPanel();
+            for(var nr in panels) {
+                var p = panels[nr];
+                if(p.xdata.refresh == -1) {
+                    p.startInterval();
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     /* the panel containing the form panel */
     var settings_panel = new Ext.panel.Panel({
         layout:     'fit',
         border:     0,
         items:      [settings_form],
         buttonAlign: 'center',
-        fbar: [{ xtype : 'button', text: 'cancel', handler: function() { this.up('window').destroy() } },
-               { xtype : 'button',
-                 text:   'save',
-                 handler: function() {
-                    var win = this.up('window');
-                    var tab = Ext.getCmp('tabpan');
-                    var form = win.down('form').getForm();
-                    if(form.isValid()) {
-                        tab.xdata = TP.storeFormToData(form, tab.xdata);
-                        TP.setRefreshText(tab.xdata, 'rotate_tabs', 'rotate_tabs_txt');
-                        TP.applyFormValues(form, tab.xdata);
-                        TP.setBackends(tab.xdata.backends);
-                        delete tab.xdata['rotate_tabs_txt'];
-                        tab.saveState();
-                        win.destroy();
-                        TP.startRotatingTabs();
-                    }
-                 }
+        fbar: [{ xtype:  'button', text: 'cancel', handler: function() { this.up('window').destroy() } },
+               { xtype:  'button',
+                 text:    'save',
+                 handler: settingsSave
                }
         ],
         listeners: {
