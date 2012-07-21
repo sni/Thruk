@@ -41,16 +41,13 @@ var TP = {
 
         /* make tab title editable */
         var tabhead = tabpan.getTabBar().items.getAt(size-1);
-        tabhead.addListener('afterrender', function(This, eOpts) {
-            el = This.getEl();
-            el.on("dblclick", function() {
-                Ext.Msg.prompt('Change Title', '', function(btn, text) {
-                    if(btn == 'ok') {
-                        Ext.getCmp(nextid).setTitle(text);
-                    }
-                }, undefined, undefined, tabhead.getText());
+        if(tabhead.rendered == false) {
+            tabhead.addListener('afterrender', function(This, eOpts) {
+                TP.addDblClickRename(This.getEl(), tabhead);
             });
-        });
+        } else {
+            TP.addDblClickRename(tabhead.getEl(), tabhead);
+        }
 
         /* save tabs state */
         Ext.getCmp('tabpan').saveState();
@@ -410,5 +407,14 @@ var TP = {
         if(!tabpan.setActiveTab(at)) {
             tabpan.setActiveTab(1);
         }
+    },
+    addDblClickRename: function(el, item) {
+        el.on("dblclick", function() {
+            Ext.Msg.prompt('Change Title', '', function(btn, text) {
+                if(btn == 'ok') {
+                    Ext.getCmp(nextid).setTitle(text);
+                }
+            }, undefined, undefined, item.getText());
+        });
     }
 }
