@@ -38,6 +38,8 @@
       [%+ PROCESS _panorama_js_panlet_grid_core_metrics.tt +%]
       [%+ PROCESS _panorama_js_panlet_grid_logs.tt +%]
       [%+ PROCESS _panorama_js_panlet_grid_server.tt +%]
+      [%+ PROCESS _panorama_js_panlet_grid_hosts.tt +%]
+      [%+ PROCESS _panorama_js_panlet_grid_services.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart.tt +%]
       [%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
       [%+ PROCESS _panorama_js_panlet_piechart.tt +%]

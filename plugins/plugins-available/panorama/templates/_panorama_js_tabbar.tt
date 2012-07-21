@@ -42,9 +42,17 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCheckMetrics'}) }
                     }, {
+                        text:   'Hosts',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridHosts'}) }
+                    }, {
                         text:   'Hosts Graph',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
+                    }, {
+                        text:   'Services',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/computer.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridServices'}) }
                     }, {
                         text:   'Services Graph',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',

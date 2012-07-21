@@ -79,6 +79,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'site_status') {
             return($self->_task_site_status($c));
         }
+        elsif($task eq 'hosts') {
+            return($self->_task_hosts($c));
+        }
+        elsif($task eq 'services') {
+            return($self->_task_services($c));
+        }
         elsif($task eq 'hosts_pie') {
             return($self->_task_hosts_pie($c));
         }
@@ -368,6 +374,57 @@ sub _task_site_status {
         }
         push @{$json->{'data'}}, $row;
     }
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_hosts {
+    my($self, $c) = @_;
+
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+
+    my $json = {
+        columns => [
+            { 'header' => 'Hostname',           width => 120, dataIndex => 'name' },
+            { 'header' => 'Status',             width => 50,  dataIndex => 'state',          align => 'center',
+                                            renderer => 'function(v, td, item) { if(item.has_been_checked==0) { return "Pending" }; if(v==0) { return "Up" }; if(v==1) { return "Unreachable" }; if(v==2) { return "Down" };}' },
+            { 'header' => 'Last Check',         width => 80,  dataIndex => 'last_check',     align => 'center',
+                                            renderer => 'function(v, td, item) { return v; }' },
+            { 'header' => 'Duration',           width => 60,  dataIndex => 'duration',       align => 'center',
+                                            renderer => 'function(v, td, item) { return v; }' },
+            { 'header' => 'Site',               width => 60,  dataIndex => 'peer_name',      align => 'center', },
+            { 'header' => 'Status Information', flex  => 1,   dataIndex => 'plugin_output' },
+        ],
+        data    => $data
+    };
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_services {
+    my($self, $c) = @_;
+
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+
+    my $json = {
+        columns => [
+            { 'header' => 'Hostname',           width => 120, dataIndex => 'host_name' },
+            { 'header' => 'Service',            width => 120, dataIndex => 'description' },
+            { 'header' => 'Status',             width => 50,  dataIndex => 'state',          align => 'center',
+                                            renderer => 'function(v, td, item) { if(item.has_been_checked==0) { return "Pending" }; if(v==0) { return "Up" }; if(v==1) { return "Unreachable" }; if(v==2) { return "Down" };}' },
+            { 'header' => 'Last Check',         width => 80,  dataIndex => 'last_check',     align => 'center',
+                                            renderer => 'function(v, td, item) { return v; }' },
+            { 'header' => 'Duration',           width => 60,  dataIndex => 'duration',       align => 'center',
+                                            renderer => 'function(v, td, item) { return v; }' },
+            { 'header' => 'Site',               width => 60,  dataIndex => 'peer_name',      align => 'center', },
+            { 'header' => 'Status Information', flex  => 1,   dataIndex => 'plugin_output' },
+        ],
+        data    => $data
+    };
 
     $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');

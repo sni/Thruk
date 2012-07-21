@@ -1008,6 +1008,7 @@ plugins/plugins-available/panorama/root/images/chart_curve.png
 plugins/plugins-available/panorama/root/images/chart_pie.png
 plugins/plugins-available/panorama/root/images/cog.png
 plugins/plugins-available/panorama/root/images/cog_add.png
+plugins/plugins-available/panorama/root/images/computer.png
 plugins/plugins-available/panorama/root/images/exclamation.png
 plugins/plugins-available/panorama/root/images/exit.png
 plugins/plugins-available/panorama/root/images/gear.gif
@@ -1030,8 +1031,10 @@ plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart_gearman.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_core_metrics.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_hosts.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_logs.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_server.tt
+plugins/plugins-available/panorama/templates/_panorama_js_panlet_grid_services.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_piechart_stats.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_pnp.tt

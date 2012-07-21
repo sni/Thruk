@@ -1,0 +1,13 @@
+Ext.define('TP.PanletGridHosts', {
+    extend: 'TP.PanletGrid',
+
+    title:  'Hosts',
+    height: 200,
+    width:  700,
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url = 'panorama.cgi?task=hosts';
+        TP.hideFormElements(this.down('form').getForm(), ['url']);
+        this.reloadOnSiteChanges = true;
+    }
+});
