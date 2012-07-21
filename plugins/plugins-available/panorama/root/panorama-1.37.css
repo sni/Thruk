@@ -1,3 +1,16 @@
+/* state colors */
+.PENDING      { background: #ACACAC !important; }
+.UP           { background: #00FF33 !important; }
+.UNREACHABLE  { background: #FF7A59 !important; }
+.DOWN         { background: #FF5B33 !important; }
+.OK           { background: #00FF33 !important; }
+.WARNING      { background: #FFDE00 !important; }
+.CRITICAL     { background: #FF5B33 !important; }
+.UNKNOWN      { background: #FF9E00 !important; }
+
+.BG_UNREACHABLE  { background: #FFC0C0 !important; }
+.BG_DOWN         { background: #FFC0C0 !important; }
+
 .window_drop_shadow {
   border: 1px dashed black;
 }
@@ -64,3 +77,4 @@ DIV.x-boundlist-selected {
 IMG.x-tool-broken {
     background-image: url("images/tool_broken.png") !important;
 }
+

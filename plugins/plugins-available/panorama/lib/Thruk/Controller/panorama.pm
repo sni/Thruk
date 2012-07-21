@@ -311,8 +311,8 @@ sub _task_show_logs {
 
     my $json = {
         columns => [
-            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'function(v) { return "<div style=\"width:20px;height:20px;background-image:url(../themes/Thruk/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
-            { 'header' => 'Time',    dataIndex => 'time', width => 60, renderer => 'function(v) { return Ext.Date.format(new Date(v*1000), "H:i:s") }' },
+            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon' },
+            { 'header' => 'Time',    dataIndex => 'time', width => 60, renderer => 'TP.render_date' },
             { 'header' => 'Message', dataIndex => 'message', flex => 1 },
         ],
         data    => []
@@ -336,15 +336,15 @@ sub _task_site_status {
     my $json = {
         columns => [
             { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => JSON::XS::true },
-            { 'header' => '',                 dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'function(v, td, item) { title=""; if(item.data.runtime=="") {title="title=\""+item.data.version+"\""} return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>" }' },
+            { 'header' => '',                 dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_site' },
             { 'header' => 'Site',             dataIndex => 'site',                    width => 60, flex => 1 },
             { 'header' => 'Version',          dataIndex => 'version',                 width => 50 },
             { 'header' => 'Runtime',          dataIndex => 'runtime',                 width => 85 },
-            { 'header' => 'Notifications',    dataIndex => 'enable_notifications',    width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
-            { 'header' => 'Svc Checks',       dataIndex => 'execute_service_checks',  width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
-            { 'header' => 'Hst Checks',       dataIndex => 'execute_host_checks',     width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
-            { 'header' => 'Eventhandlers',    dataIndex => 'enable_event_handlers',   width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
-            { 'header' => 'Performance Data', dataIndex => 'process_performance_data',width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'function(v, td, item) { if(v==1) { return "On" }; return "Off"; }' },
+            { 'header' => 'Notifications',    dataIndex => 'enable_notifications',    width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Svc Checks',       dataIndex => 'execute_service_checks',  width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Hst Checks',       dataIndex => 'execute_host_checks',     width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Eventhandlers',    dataIndex => 'enable_event_handlers',   width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
+            { 'header' => 'Performance Data', dataIndex => 'process_performance_data',width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
         ],
         data    => []
     };
@@ -387,17 +387,31 @@ sub _task_hosts {
 
     my $json = {
         columns => [
-            { 'header' => 'Hostname',           width => 120, dataIndex => 'name' },
-            { 'header' => 'Status',             width => 50,  dataIndex => 'state',          align => 'center',
-                                            renderer => 'function(v, td, item) { if(item.has_been_checked==0) { return "Pending" }; if(v==0) { return "Up" }; if(v==1) { return "Unreachable" }; if(v==2) { return "Down" };}' },
-            { 'header' => 'Last Check',         width => 80,  dataIndex => 'last_check',     align => 'center',
-                                            renderer => 'function(v, td, item) { return v; }' },
-            { 'header' => 'Duration',           width => 60,  dataIndex => 'duration',       align => 'center',
-                                            renderer => 'function(v, td, item) { return v; }' },
-            { 'header' => 'Site',               width => 60,  dataIndex => 'peer_name',      align => 'center', },
-            { 'header' => 'Status Information', flex  => 1,   dataIndex => 'plugin_output' },
+            { 'header' => 'Hostname',               width => 120, dataIndex => 'name' },
+            { 'header' => 'Status',                 width => 80,  dataIndex => 'state',          align => 'center', renderer => 'TP.render_host_status' },
+            { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',     align => 'center', renderer => 'TP.render_last_check' },
+            { 'header' => 'Duration',               width => 100,  dataIndex => 'duration',      align => 'center', renderer => 'TP.render_duration' },
+            { 'header' => 'Attempt',                width => 60,  dataIndex => 'attempt',        align => 'center', renderer => 'TP.render_attempt' },
+            { 'header' => 'Site',                   width => 60,  dataIndex => 'peer_name',      align => 'center', },
+            { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                     renderer => 'TP.render_plugin_output' },
+
+            { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => JSON::XS::true },
+            { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => JSON::XS::true },
+            { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Check Type',               dataIndex => 'check_type',                  hidden => JSON::XS::true, renderer => 'TP.render_check_type' },
+            { 'header' => 'Site ID',                  dataIndex => 'peer_key',                    hidden => JSON::XS::true },
+            { 'header' => 'Has Been Checked',         dataIndex => 'has_been_checked',            hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Active Checks Enabled',    dataIndex => 'active_checks_enabled',       hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Next Check',               dataIndex => 'next_check',                  hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Notification Number',      dataIndex => 'current_notification_number', hidden => JSON::XS::true },
+            { 'header' => 'First Notification Delay', dataIndex => 'first_notification_delay',    hidden => JSON::XS::true },
+
+            { 'header' => 'Last Time Up',          dataIndex => 'last_time_up',          hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Unreachable', dataIndex => 'last_time_unreachable', hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Down',        dataIndex => 'last_time_down',        hidden => JSON::XS::true, renderer => 'TP.render_date' },
         ],
-        data    => $data
+        data      => $data,
+        pi_detail => $c->stash->{pi_detail},
     };
 
     $c->stash->{'json'} = $json;
@@ -412,18 +426,34 @@ sub _task_services {
 
     my $json = {
         columns => [
-            { 'header' => 'Hostname',           width => 120, dataIndex => 'host_name' },
-            { 'header' => 'Service',            width => 120, dataIndex => 'description' },
-            { 'header' => 'Status',             width => 50,  dataIndex => 'state',          align => 'center',
-                                            renderer => 'function(v, td, item) { if(item.has_been_checked==0) { return "Pending" }; if(v==0) { return "Up" }; if(v==1) { return "Unreachable" }; if(v==2) { return "Down" };}' },
-            { 'header' => 'Last Check',         width => 80,  dataIndex => 'last_check',     align => 'center',
-                                            renderer => 'function(v, td, item) { return v; }' },
-            { 'header' => 'Duration',           width => 60,  dataIndex => 'duration',       align => 'center',
-                                            renderer => 'function(v, td, item) { return v; }' },
-            { 'header' => 'Site',               width => 60,  dataIndex => 'peer_name',      align => 'center', },
-            { 'header' => 'Status Information', flex  => 1,   dataIndex => 'plugin_output' },
+            { 'header' => 'Hostname',               width => 120, dataIndex => 'host_name', renderer => 'TP.render_service_host' },
+            { 'header' => 'Service',                width => 120, dataIndex => 'description' },
+            { 'header' => 'Status',                 width => 70,  dataIndex => 'state',          align => 'center', renderer => 'TP.render_service_status' },
+            { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',     align => 'center', renderer => 'TP.render_last_check' },
+            { 'header' => 'Duration',               width => 100,  dataIndex => 'duration',      align => 'center', renderer => 'TP.render_duration' },
+            { 'header' => 'Attempt',                width => 60,  dataIndex => 'attempt',        align => 'center', renderer => 'TP.render_attempt' },
+            { 'header' => 'Site',                   width => 60,  dataIndex => 'peer_name',      align => 'center', },
+            { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                     renderer => 'TP.render_plugin_output' },
+
+            { 'header' => 'Host Status',              dataIndex => 'host_state',                  hidden => JSON::XS::true, renderer => 'TP.render_host_status' },
+            { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => JSON::XS::true },
+            { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => JSON::XS::true },
+            { 'header' => 'Last State Change',        dataIndex => 'last_state_change',           hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Check Type',               dataIndex => 'check_type',                  hidden => JSON::XS::true, renderer => 'TP.render_check_type' },
+            { 'header' => 'Site ID',                  dataIndex => 'peer_key',                    hidden => JSON::XS::true },
+            { 'header' => 'Has Been Checked',         dataIndex => 'has_been_checked',            hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Active Checks Enabled',    dataIndex => 'active_checks_enabled',       hidden => JSON::XS::true, renderer => 'TP.render_yes_no' },
+            { 'header' => 'Next Check',               dataIndex => 'next_check',                  hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Notification Number',      dataIndex => 'current_notification_number', hidden => JSON::XS::true },
+            { 'header' => 'First Notification Delay', dataIndex => 'first_notification_delay',    hidden => JSON::XS::true },
+
+            { 'header' => 'Last Time Ok',       dataIndex => 'last_time_ok',       hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Warning',  dataIndex => 'last_time_warning',  hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Unknown',  dataIndex => 'last_time_unknown',  hidden => JSON::XS::true, renderer => 'TP.render_date' },
+            { 'header' => 'Last Time Critical', dataIndex => 'last_time_critical', hidden => JSON::XS::true, renderer => 'TP.render_date' },
         ],
-        data    => $data
+        data      => $data,
+        pi_detail => $c->stash->{pi_detail},
     };
 
     $c->stash->{'json'} = $json;
@@ -447,7 +477,7 @@ sub _task_hosts_pie {
     my $colors = {
         up          => '#00FF33',
         down        => '#FF5B33',
-        unreachable => '#ff7a59',
+        unreachable => '#FF7A59',
         pending     => '#ACACAC',
     };
 

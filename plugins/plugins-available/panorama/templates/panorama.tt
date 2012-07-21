@@ -29,6 +29,7 @@
       [%+ PROCESS _panorama_js.tt +%]
       [%+ PROCESS _panorama_js_utils_base64.tt +%]
       [%+ PROCESS _panorama_js_slider.tt +%]
+      [%+ PROCESS _panorama_js_grid_renderer.tt +%]
       [%+ PROCESS _panorama_js_settings_global.tt +%]
       [%+ PROCESS _panorama_js_tabbar.tt +%]
       [%+ PROCESS _panorama_js_pantab.tt +%]

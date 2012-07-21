@@ -1,0 +1,220 @@
+/* render date */
+TP.render_date = function(v, td, item) {
+    return TP.date_format(v);
+}
+
+/* render generic icon */
+TP.render_icon = function(v, td, item) {
+    return "<div style=\"width:20px;height:20px;background-image:url(../themes/Thruk/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>";
+}
+
+/* render site status icon */
+TP.render_icon_site = function(v, td, item) {
+    title="";
+    if(item.data.runtime=="") {
+        title="title=\""+item.data.version+"\"";
+    };
+    return "<div class=\"clickable\" "+title+" onclick=\"TP.toggleBackend(this, \'"+item.data.id+"\')\" style=\"width:20px;height:20px;background-image:url(../plugins/panorama/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>";
+}
+
+/* render enabled / disabled switch */
+TP.render_enabled_switch = function(v, td, item) {
+    if(v==1) {
+        return "On";
+    };
+    return "Off";
+}
+
+/* render yes / no */
+TP.render_yes_no = function(v, td, item) {
+    if(v==1) {
+        return "Yes";
+    };
+    return "No";
+}
+
+/* render On / Off */
+TP.render_on_off = function(v, td, item) {
+    if(v==1) {
+        return "On";
+    };
+    return "Off";
+}
+
+/* render host status */
+TP.render_host_status = function(v, td, item) {
+    var state;
+    if(item.data.has_been_checked==0) {
+        state = 'Pending';
+    }
+    else if(v==0) { state = 'Up';          }
+    else if(v==1) { state = 'Unreachable'; }
+    else if(v==2) { state = 'Down';        }
+
+    td.tdCls = state.toUpperCase();
+    return state;
+}
+
+/* render service status */
+TP.render_service_status = function(v, td, item) {
+    var state;
+    if(item.data.has_been_checked==0) {
+        state = 'Pending';
+    }
+    else if(v==0) { state = 'Ok';       }
+    else if(v==1) { state = 'Warning';  }
+    else if(v==2) { state = 'Critical'; }
+    else if(v==3) { state = 'Unknown';  }
+
+    td.tdCls = state.toUpperCase();
+    return state;
+}
+
+/* render hostname in service grid */
+TP.render_service_host = function(v, td, item, row, col, store, view) {
+    if(view.lastHost == undefined || view.lastHost != v) {
+        view.lastHost = v;
+        var hstate = 'Up';
+        if(item.data.host_state==1) { hstate = 'Unreachable'; }
+        if(item.data.host_state==2) { hstate = 'Down';        }
+        td.tdCls = 'BG_'+hstate.toUpperCase();
+        return v;
+    }
+    return '';
+}
+
+/* render last check date */
+TP.render_last_check = function(v, td, item) {
+    if(item.data.last_check) {
+        return TP.date_format(item.data.last_check);
+    } else {
+        return 'never';
+    }
+}
+
+/* render duration */
+TP.render_duration = function(v, td, item) {
+    var d   = new Date();
+    var now = Math.floor(d.getTime() / 1000);
+    if(item.data.last_state_change) {
+        return TP.duration(now - item.data.last_state_change);
+    } else {
+        var peer_key      = item.data.peer_key;
+        var program_start = initial_backends[peer_key].program_start;
+        return TP.duration(now - program_start)+'+';
+    }
+}
+
+/* render current attempt */
+TP.render_attempt = function(v, td, item) {
+    var ret = item.data.current_attempt + '/' + item.data.max_check_attempts;
+    [%+ IF show_notification_number %]
+    if(item.data.current_notification_number > 0) {
+       ret = ret + ' #'+ item.data.current_notification_number;
+    }
+    if(item.data.first_notification_delay > 0) {
+        var first_remaining = TP.calculate_first_notification_delay_remaining(item.data);
+        if(first_remaining >= 0) {
+            ret = ret + ' ~'+first_remaining+'min';
+        }
+    }
+    [% END +%]
+    return ret;
+}
+
+/* render check type */
+TP.render_check_type = function(v, td, item) {
+    if(v==0) { return "Active" }
+    return "Passive";
+}
+
+/* render plugin output */
+TP.render_plugin_output = function(v, td, item) {
+    var type = 'Host';
+    if(item.data.description != undefined) { type = 'Service'; }
+    if(item.data.has_been_checked == 0) {
+        if(item.data.active_checks_enabled == 0) {
+            return(type+' is not scheduled to be checked...');
+        } else {
+            return(type+' check scheduled for '+TP.date_format(item.data.next_check));
+        }
+    }
+    return v;
+}
+
+
+
+/* format timestamp */
+TP.date_format = function(t) {
+    var d = new Date(t*1000);
+    if(Ext.Date.format(new Date(), "Y-m-d") == Ext.Date.format(d, "Y-m-d")) {
+        return Ext.Date.format(d, "H:i:s");
+    }
+    return Ext.Date.format(d, "Y-m-d H:i:s");
+}
+
+/* format duration */
+TP.duration = function(duration) {
+    var minus = '';
+    if(duration < 0) {
+        duration = duration * -1;
+        minus    = '-';
+    }
+
+    var days    = 0;
+    var hours   = 0;
+    var minutes = 0;
+    var seconds = 0;
+    if(duration >= 86400) {
+        days     = Math.floor(duration/86400);
+        duration = duration%86400;
+    }
+    if(duration >= 3600) {
+        hours    = Math.floor(duration/3600);
+        duration = duration%3600;
+    }
+    if(duration >= 60) {
+        minutes  = Math.floor(duration/60);
+        duration = duration%60;
+    }
+    seconds = duration;
+
+    return(""+minus+days+"d "+hours+"h "+minutes+"m "+seconds+"s");
+}
+
+/* calculate remaining time till next notification */
+TP.calculate_first_notification_delay_remaining = function(obj) {
+    if(obj.state == 0) { return -1; }
+
+    var first_problem_time = -1;
+    if(obj.last_time_ok != undefined) {
+        first_problem_time = obj.last_time_ok;
+        if((obj.last_time_warning < first_problem_time) && (obj.last_time_warning > obj.last_time_ok)) {
+            first_problem_time = obj.last_time_warning;
+        }
+        if((obj.last_time_unknown < first_problem_time) && (obj.last_time_unknown > obj.last_time_ok)) {
+            first_problem_time = obj.last_time_unknown;
+        }
+        if((obj.last_time_critical < first_problem_time) && (obj.last_time_critical > obj.last_time_ok)) {
+            first_problem_time = obj.last_time_critical;
+        }
+    }
+    else if(obj.last_time_up != undefined) {
+        first_problem_time = obj.last_time_up;
+        if((obj.last_time_down < first_problem_time) && (obj.last_time_down > obj.last_time_up)) {
+            first_problem_time = obj.last_time_down;
+        }
+        if((obj.last_time_unreachable < first_problem_time) && (obj.last_time_unreachable > obj.last_time_up)) {
+            irst_problem_time = obj.last_time_unreachable;
+        }
+    }
+    if(first_problem_time == 0) { return -1; }
+    var d = new Date;
+    var t = Math.floor(d.getTime() / 1000);
+    var remaining_min = Math.floor((t - first_problem_time) / 60);
+    if(remaining_min > obj.first_notification_delay) {
+        return -1;
+    }
+
+    return(obj.first_notification_delay - remaining_min);
+}

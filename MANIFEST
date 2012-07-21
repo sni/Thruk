@@ -1026,6 +1026,7 @@ plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/panorama-1.37.css
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/templates/_panorama_js.tt
+plugins/plugins-available/panorama/templates/_panorama_js_grid_renderer.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart_gearman.tt
