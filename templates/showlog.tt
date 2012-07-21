@@ -45,8 +45,10 @@
               <input type="hidden" name="archive" value="" id="archive">
             </td>
             <td align="center" valign="middle" class='navBoxItem' width="75">
+              [% IF end < date.now %]
               Next Day<br>
               <img style="cursor: pointer;" src='[% url_prefix %]thruk/themes/[% theme %]/images/right.gif' alt='Next Day' title='Next Day' onclick="document.getElementById('archive').value='+1'; document.getElementById('date_form').submit();">
+              [% END %]
             </td>
           </tr>
         </table>
