@@ -19,20 +19,16 @@ Ext.define('TP.Slider', {
         maxValue:   300,
         width:      '100%',
         tipText: function(thumb){
-            return String(thumb.value) + 's';
+            return String(TP.sliderValue2Txt(thumb.value));
         },
         listeners: {
             change: function(s) {
-                var form = s.up('form').getForm();
-                var v    = s.getValue();
-                if(v == 0) {
-                    form.setValues({refresh_txt: 'off'});
-                }
-                else if(v == -1) {
-                    form.setValues({refresh_txt: 'default'});
-                } else {
-                    form.setValues({refresh_txt: s.getValue()+'s'});
-                }
+                var form    = s.up('form').getForm();
+                var v       = s.getValue();
+                var label   = s.up('panel').formConf.nameL;
+                var newv    = {};
+                newv[label] = TP.sliderValue2Txt(v);
+                form.setValues(newv);
             }
         }
     }, {

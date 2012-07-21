@@ -10,15 +10,17 @@ TP.settingsWindow = function() {
             anchor: '99%'
         },
         items: [{
+            /* global refresh rate */
             xtype:      'tp_slider',
             formConf: {
                 fieldLabel: 'Global Refresh Rate',
-                value:      30,
+                value:      60,
                 minValue:   0,
                 nameS:      'refresh',
                 nameL:      'refresh_txt'
             }
         }, new Ext.form.CheckboxGroup({
+            /* global backends */
             id:         'global_backends',
             fieldLabel: 'Backends / Sites',
             xtype:      'checkboxgroup',
@@ -26,6 +28,16 @@ TP.settingsWindow = function() {
             columns:    1,
             items:      []
         }), {
+            /* rotating tabs */
+            xtype:      'tp_slider',
+            formConf: {
+                fieldLabel: 'Rotate Tabs',
+                value:      0,
+                minValue:   0,
+                nameS:      'rotate_tabs',
+                nameL:      'rotate_tabs_txt'
+            }
+        }, {
             /* Import / Export */
             xtype: 'panel',
             layout: {
@@ -99,10 +111,13 @@ TP.settingsWindow = function() {
                     var form = win.down('form').getForm();
                     if(form.isValid()) {
                         tab.xdata = TP.storeFormToData(form, tab.xdata);
+                        TP.setRefreshText(tab.xdata, 'rotate_tabs', 'rotate_tabs_txt');
                         TP.applyFormValues(form, tab.xdata);
                         TP.setBackends(tab.xdata.backends);
+                        delete tab.xdata['rotate_tabs_txt'];
                         tab.saveState();
                         win.destroy();
+                        TP.startRotatingTabs();
                     }
                  }
                }
@@ -118,7 +133,9 @@ TP.settingsWindow = function() {
                         tab.xdata.backends.push(nr);
                     }
                 }
+                TP.setRefreshText(tab.xdata, 'rotate_tabs', 'rotate_tabs_txt');
                 TP.applyFormValues(form, tab.xdata);
+                delete tab.xdata['rotate_tabs_txt'];
             }
         }
     });

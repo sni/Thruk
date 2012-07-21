@@ -85,8 +85,9 @@ Ext.define('TP.TabBar', {
 
         /* global default setttings */
         this.xdata = {
-            refresh:  60,
-            backends: []
+            refresh:     60,
+            rotate_tabs:  0,
+            backends:    []
         }
         [%+ FOREACH b = backend_detail.keys %]
         [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]
@@ -114,6 +115,7 @@ Ext.define('TP.TabBar', {
             this.setActiveTab(state.activeTab);
             this.xdata = state.xdata;
             Ext.apply(this, state);
+            TP.startRotatingTabs();
         }
     },
     items: [{

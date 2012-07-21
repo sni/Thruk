@@ -241,16 +241,9 @@ var TP = {
     /* set form values from data hash */
     applyFormValues: function(form, data) {
         var fields = form.getFields();
-        data['refresh_txt'] = data['refresh']+'s';
-        if(data['refresh'] == 0) {
-            data['refresh_txt'] = 'off';
-        }
-        if(data['refresh'] == -1) {
-            data['refresh_txt'] = 'default';
-        }
+        TP.setRefreshText(data, 'refresh', 'refresh_txt');
         fields.each(function(f) {
             var v = data[f.getName()];
-
             if(f.xtype == 'combobox' && f.multiSelect == true) {
                 f.originalValue = v;
                 f.value = v;
@@ -379,5 +372,33 @@ var TP = {
         debug(response);
         refresh.setType('broken');
         return false;
+    },
+    /* sets text for refresh slider */
+    setRefreshText: function(data, slider, text) {
+        data[text] = TP.sliderValue2Txt(data[slider]);
+    },
+    /* convert value to human text */
+    sliderValue2Txt: function(v) {
+        if(v == -1) { return 'default'; }
+        if(v ==  0) { return 'off'; }
+        return v+'s';
+    },
+    /* start tab rotation interval */
+    startRotatingTabs: function() {
+        var tabpan = Ext.getCmp('tabpan');
+        window.clearInterval(tabpan.interval);
+        if(tabpan.xdata.rotate_tabs > 0) {
+            debug("starting tab rotation every " + tabpan.xdata.rotate_tabs + "seconds");
+            tabpan.interval = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
+        }
+    },
+    /* rotate tabs once */
+    rotateTabs: function() {
+        var tabpan = Ext.getCmp('tabpan');
+        var state  = tabpan.getState();
+        var at     = state.activeTab+1;
+        if(!tabpan.setActiveTab(at)) {
+            tabpan.setActiveTab(1);
+        }
     }
 }
