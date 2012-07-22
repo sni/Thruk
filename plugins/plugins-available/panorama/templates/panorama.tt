@@ -27,8 +27,10 @@
       [%+ PROCESS _panorama_js_state_provider_cookie.tt +%]
       [% END %]
       [%+ PROCESS _panorama_js.tt +%]
+      [%+ PROCESS _panorama_js_elements.tt +%]
       [%+ PROCESS _panorama_js_utils_base64.tt +%]
       [%+ PROCESS _panorama_js_slider.tt +%]
+      [%+ PROCESS _panorama_js_form_filter.tt +%]
       [%+ PROCESS _panorama_js_grid_renderer.tt +%]
       [%+ PROCESS _panorama_js_settings_global.tt +%]
       [%+ PROCESS _panorama_js_tabbar.tt +%]
@@ -67,6 +69,7 @@
           items:    [ new TP.TabBar() ]
         });
         Ext.getCmp('bug_report').hide();
+        Ext.getCmp('test_tab').hide();
       });
     </script>
 </head>

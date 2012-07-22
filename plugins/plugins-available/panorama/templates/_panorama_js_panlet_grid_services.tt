@@ -1,7 +1,7 @@
 Ext.define('TP.PanletGridServices', {
     extend: 'TP.PanletGrid',
 
-    title:  'Hosts',
+    title:  'Services',
     height: 200,
     width:  900,
     initComponent: function() {
@@ -9,5 +9,6 @@ Ext.define('TP.PanletGridServices', {
         this.xdata.url = 'panorama.cgi?task=services';
         TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
+        TP.addFormFilter(this, 'service');
     }
 });

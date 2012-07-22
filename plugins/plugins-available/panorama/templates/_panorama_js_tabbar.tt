@@ -8,6 +8,13 @@ Ext.define('TP.TabBar', {
     stateful:       true,
     tabBar:{
         items:[{ xtype: 'tbfill' },{
+            id:       'test_tab',
+            closable: false,
+            minWidth: 28,
+            iconCls:  'test-tab',
+            tooltip:  'Test',
+            handler:  TP.test
+        }, {
             id:       'bug_report',
             closable: false,
             minWidth: 28,

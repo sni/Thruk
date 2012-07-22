@@ -383,7 +383,10 @@ sub _task_site_status {
 sub _task_hosts {
     my($self, $c) = @_;
 
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
 
     my $json = {
         columns => [
@@ -422,7 +425,10 @@ sub _task_hosts {
 sub _task_services {
     my($self, $c) = @_;
 
-    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services')]);
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
 
     my $json = {
         columns => [
@@ -464,7 +470,10 @@ sub _task_services {
 sub _task_hosts_pie {
     my($self, $c) = @_;
 
-    my $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter]);
 
     my $json = {
         columns => [
@@ -498,7 +507,10 @@ sub _task_hosts_pie {
 sub _task_services_pie {
     my($self, $c) = @_;
 
-    my $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $data = $c->{'db'}->get_service_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
 
     my $json = {
         columns => [
@@ -600,6 +612,35 @@ sub _get_gearman_stats {
     CORE::close($handle);
 
     return $data;
+}
+
+##########################################################
+# convert json filter to perl object and do filtering
+sub _do_filter {
+    my($self, $c) = @_;
+
+    if(defined $c->request->parameters->{'filter'}) {
+        my $filter;
+        eval {
+            $filter = decode_json($c->request->parameters->{'filter'});
+        };
+        if($@) {
+            $c->log->warn('filter failed: '.$@);
+            return;
+        }
+
+        my $pre = 'dfl_s0_';
+        for my $key (keys %{$filter}) {
+            $filter->{$key} = '' unless defined $filter->{$key};
+            if($key eq 'type') {
+                $c->request->parameters->{$pre.$key} = lc($filter->{$key});
+            } else {
+                $c->request->parameters->{$pre.$key} = $filter->{$key};
+            }
+        }
+    }
+    my @f = Thruk::Utils::Status::do_filter($c);
+    return @f;
 }
 
 ##########################################################

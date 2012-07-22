@@ -1,0 +1,55 @@
+Ext.define('TP.ComboBoxSum', {
+    extend: 'Ext.form.field.ComboBox',
+
+    alias:  'widget.tp_combobox_sum',
+
+    multiSelect:    true,
+    queryMode:      'local',
+    editable:       false,
+    triggerAction:  'all',
+    listConfig : {
+        getInnerTpl: function(displayField) {
+            return '<div class="x-combo-list-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="chkCombo-default-icon chkCombo" /> {'+displayField+'} <\/div>';
+        }
+    },
+    listeners: {
+        'afterrender': function(This, eOpts) {
+            if(!This.columns) { return };
+            This.getPicker().addListener('beforerender', function(This, eOpts) {
+                This.minWidth = 380;
+            });
+            This.getPicker().addListener('show', function(This, eOpts) {
+                var lis = Ext.DomQuery.select('li', This.getEl().dom);
+                for(var nr in lis) {
+                    var el = Ext.get(lis[nr]);
+                    if(nr%2==0) {
+                        el.addCls('picker_even');
+                    } else {
+                        el.addCls('picker_odd');
+                    }
+                }
+            });
+        }
+    },
+
+    initComponent: function() {
+        /* make it possible to set some special display values through
+         * sum_values: { '0': 'All' }
+         */
+        this._getDisplayValue = this.getDisplayValue;
+        this.getDisplayValue = function() {
+            if(this.sum_values == undefined) {
+                return this._getDisplayValue();
+            }
+            var sum = 0;
+            for(var nr in this.displayTplData) {
+                sum += this.displayTplData[nr].field1;
+            }
+            if(this.sum_values[''+sum] != undefined) {
+                return this.sum_values[''+sum];
+            }
+            return this._getDisplayValue();
+        };
+        this.callParent();
+    }
+});

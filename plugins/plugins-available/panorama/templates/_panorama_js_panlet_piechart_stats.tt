@@ -9,6 +9,7 @@ Ext.define('TP.PanletPieChartHosts', {
         this.xdata.url       = 'panorama.cgi?task=hosts_pie';
         TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
+        TP.addFormFilter(this, 'host');
     }
 });
 
@@ -23,5 +24,6 @@ Ext.define('TP.PanletPieChartServices', {
         this.xdata.url       = 'panorama.cgi?task=services_pie';
         TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
+        TP.addFormFilter(this, 'service');
     }
 });

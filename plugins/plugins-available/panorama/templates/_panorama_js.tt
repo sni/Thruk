@@ -314,8 +314,18 @@ var TP = {
     defaultSiteRefreshHandler: function(panel) {
         if(panel.xdata.url != '') {
             var url = panel.xdata.url;
+            if(panel.loader.baseParams == undefined) {
+                panel.loader.baseParams = {};
+            }
             if(panel.xdata.backends.length > 0) {
-                url = url + '&backend=' + panel.xdata.backends.join(',');
+                panel.loader.baseParams['backends'] = panel.xdata.backends.join(',');
+            } else {
+                delete panel.loader.baseParams['backends'];
+            }
+            if(panel.xdata.filter != undefined) {
+                panel.loader.baseParams['filter'] = panel.xdata.filter;
+            } else {
+                delete panel.loader.baseParams['filter'];
             }
             panel.loader.loadMaskOrig = panel.loader.loadMask;
             if(panel.isHidden()) { panel.loader.loadMask = false; }
@@ -416,5 +426,18 @@ var TP = {
                 }
             }, undefined, undefined, item.getText());
         });
+    },
+    arraySum: function(list) {
+        var l=list.length, i=0, n=0;
+        while(i<l) { n += list[i++]} ;
+        return n;
+    },
+    addFormFilter: function(This, type) {
+        This.obj_filter = new TP.formFilter({
+            fieldLabel:     'Filter',
+            name:           'filter',
+            ftype:          type
+        });
+        This.down('form').add(This.obj_filter);
     }
 }

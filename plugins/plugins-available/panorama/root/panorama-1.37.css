@@ -36,6 +36,11 @@ DIV.x-tab-default-over A.x-tab-close-btn {
     left: 4px;
     top: 3px;
 }
+.test-tab {
+    background-image: url("images/new.png") !important;
+    left: -4px;
+    top: 0px;
+}
 
 /* make menu items align to icon */
 .x-menu-item-link {
@@ -72,9 +77,24 @@ TD.slider_txt {
 DIV.x-boundlist-selected {
   background: none;
 }
+LI.x-boundlist-selected {
+  background: none;
+}
 
 /* type of refresh tool, when connection is broken */
 IMG.x-tool-broken {
     background-image: url("images/tool_broken.png") !important;
 }
 
+LI.picker_even {
+  float: left;
+  width: 180px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+LI.picker_odd {
+  float: left;
+  width: 180px;
+  overflow: hidden;
+  white-space: nowrap;
+}
