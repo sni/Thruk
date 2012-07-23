@@ -39,36 +39,46 @@ Ext.define('TP.Panlet', {
             }
         };
         this.tools = [{
-                type: 'pin',
-                cls: 'pintool',
-                handler: function() {
-                    if(this.xdata.pinned) {
-                        this.xdata.pinned = false;
-                        /* make sure panelet is now connected to the active tab */
-                        this.removeWindowFromPanels();
-                        var tabpan = Ext.getCmp('tabpan');
-                        tabpan.getActiveTab().window_ids.push(this.id);
-                        tabpan.saveState();
-                    } else {
-                        this.xdata.pinned = true;
-                    }
-                    this.check_pintool();
-                },
-                listeners: { afterrender: function() { this.up('panel').pintool = this; }},
+            type: 'pin',
+            cls: 'pintool',
+            handler: function() {
+                if(this.xdata.pinned) {
+                    this.xdata.pinned = false;
+                    /* make sure panelet is now connected to the active tab */
+                    this.removeWindowFromPanels();
+                    var tabpan = Ext.getCmp('tabpan');
+                    tabpan.getActiveTab().window_ids.push(this.id);
+                    tabpan.saveState();
+                } else {
+                    this.xdata.pinned = true;
+                }
+                this.check_pintool();
+            },
+            listeners: { afterrender: function() { this.up('panel').pintool = this; }},
+            scope: this,
+            tooltip: 'make this panlet sticky'
+        }];
+        if(this.has_search_button != undefined) {
+            This = this;
+            this.tools.push({
+                type: 'search',
+                handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }}); },
                 scope: this,
-                tooltip: 'make this panlet sticky'
-            }, {
-                type: 'refresh',
-                handler: function() { this.refreshHandler(); },
-                scope: this,
-                tooltip: 'reload content of this panlet'
-            }, {
-                type: 'gear',
-                handler: function() { this.gearHandler(); },
-                scope: this,
-                tooltip: 'settings'
-            }
-        ];
+                tooltip: 'change search filter'
+            });
+        }
+        this.tools.push({
+            type: 'refresh',
+            handler: function() { this.refreshHandler(); },
+            scope: this,
+            tooltip: 'reload content of this panlet'
+        });
+        this.tools.push({
+            type: 'gear',
+            handler: function() { this.gearHandler(); },
+            scope: this,
+            tooltip: 'settings'
+        });
         this.shadow_id = this.id + '_shadow';
         this.win_shadow = new Ext.create('Ext.Layer', {
             shadow: 'drop',

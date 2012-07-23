@@ -4,11 +4,12 @@ Ext.define('TP.PanletGridHosts', {
     title:  'Hosts',
     height: 200,
     width:  800,
+    has_search_button: 'host',
     initComponent: function() {
         this.callParent();
         this.xdata.url = 'panorama.cgi?task=hosts';
         TP.hideFormElements(this.down('form').getForm(), ['url']);
         this.reloadOnSiteChanges = true;
-        TP.addFormFilter(this, 'host');
+        TP.addFormFilter(this, this.has_search_button);
     }
 });

@@ -131,11 +131,11 @@ Ext.define('TP.TabBar', {
     },
     applyState: function(state) {
         if(state) {
-            this.setActiveTab(state.activeTab);
             this.xdata = state.xdata;
             for(nr in state.item_ids) {
                 TP.add_pantab(state.item_ids[nr]);
             };
+            this.setActiveTab(state.activeTab);
             Ext.apply(this, state);
             TP.startRotatingTabs();
         }
@@ -149,7 +149,7 @@ Ext.define('TP.TabBar', {
         },
         tooltip: 'Add new Dashboard',
         listeners: {
-            beforeactivate: function() { tabpan = Ext.getCmp('tabpan'); if(tabpan.items.length == 1) { TP.add_pantab(); tabpan.setActiveTab(1); } return false; }
+            beforeactivate: function() { tabpan = Ext.getCmp('tabpan'); if(tabpan.items.length == 1) { TP.add_pantab(); } return false; }
         }
     }]
 });
