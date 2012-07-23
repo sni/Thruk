@@ -603,13 +603,9 @@ function verify_time_do(id) {
     var obj = document.getElementById(id);
     debug(obj.value);
 
-    new Ajax.Request(url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value, {
-        onSuccess: function(transport) {
-            if(transport.responseJSON != null) {
-                data = transport.responseJSON;
-            } else {
-                data = eval(transport.responseText);
-            }
+    jQuery.ajax({
+        url: url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value,
+        success: function(data) {
             if(data.verified == "false") {
                 debug(data.error)
                 verification_errors[id] = 1;

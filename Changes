@@ -4,6 +4,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - panorama view:
             - added auto rotating tabs
             - fixed generic url panlet when using css selector
+          - Bug Fixes
+            - fixed date verification in quick commands
 
 1.36     Thu Jul 19 13:49:01 CEST 2012
           - added panorama view plugin
