@@ -1,5 +1,6 @@
 /* render date */
 TP.render_date = function(v, td, item) {
+    if(v == 0) { return 'never'; }
     return TP.date_format(v);
 }
 
@@ -72,7 +73,7 @@ TP.render_service_status = function(v, td, item) {
 
 /* render hostname in service grid */
 TP.render_service_host = function(v, td, item, row, col, store, view) {
-    if(view.lastHost == undefined || view.lastHost != v) {
+    if(row == 0 || view.lastHost == undefined || view.lastHost != v) {
         view.lastHost = v;
         var hstate = 'Up';
         if(item.data.host_state==1) { hstate = 'Unreachable'; }

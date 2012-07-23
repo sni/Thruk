@@ -36,9 +36,10 @@ Ext.define('TP.formFilterSelect', {
 
     alias:  'widget.tp_filter_select',
 
+    border: false,
     layout:     {
             type: 'table',
-            columns: 3,
+            columns: 4,
             tableAttrs: {
                 style: {
                     width: '100%'
@@ -88,7 +89,16 @@ Ext.define('TP.formFilterSelect', {
     }, {
         name:           'value',
         xtype:          'combobox',
-        width:          129
+        width:          130
+    }, {
+        xtype:      'panel',
+        border:     false,
+        html:       '<div align="center" class="clickable"><img src="[% url_prefix %]thruk/plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: middle"><\/div>',
+        listeners:  {
+            afterrender: function(This, eOpts) { This.body.on('click', function() {
+                This.up('panel').destroy();
+            })}
+        }
     }],
 
     initComponent: function() {
@@ -103,7 +113,8 @@ TP.filterWindow = function(ftype, base_el) {
         modal:       true,
         maximizable: true,
         items: {
-            xtype: 'form',
+            xtype:  'form',
+            bodyPadding: 3,
             items: [{
                     fieldLabel: 'Host Status Types',
                     name:       'hoststatustypes',
@@ -168,6 +179,16 @@ TP.filterWindow = function(ftype, base_el) {
                                  [16777216,'Has Modified Attributes'], [33554432,'No Modified Attributes']]
                 }, {
                     xtype:      'tp_filter_select'
+                }, {
+                    xtype:      'panel',
+                    border:     false,
+                    html:       '<div align="center" class="clickable"><img src="[% url_prefix %]thruk/plugins/panorama/images/down.png" alt="add new filter" style="vertical-align: middle"> and<\/div>',
+                    listeners:  {
+                        afterrender: function(This, eOpts) { This.body.on('click', function() {
+                            var form = This.up('form');
+                            form.insert(form.items.length-1, {xtype: 'tp_filter_select'});
+                        })}
+                    }
             }],
             buttonAlign: 'center',
             fbar: [{ xtype:  'button', text: 'cancel', handler: function() { this.up('window').destroy() } },

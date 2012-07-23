@@ -630,12 +630,16 @@ sub _do_filter {
         }
 
         my $pre = 'dfl_s0_';
-        for my $key (keys %{$filter}) {
-            $filter->{$key} = '' unless defined $filter->{$key};
-            if($key eq 'type') {
-                $c->request->parameters->{$pre.$key} = lc($filter->{$key});
-            } else {
-                $c->request->parameters->{$pre.$key} = $filter->{$key};
+        for my $key (qw/hostprops hoststatustypes serviceprops servicestatustypes/) {
+            $c->request->parameters->{$pre.$key} = $filter->{$key};
+        }
+        for my $type (qw/op type value/) {
+            if(ref $filter->{$type} ne 'ARRAY') { $filter->{$type} = [$filter->{$type}]; }
+            for my $val (@{$filter->{$type}}) {
+                $c->request->parameters->{$pre.$type} = [] unless defined $c->request->parameters->{$pre.$type};
+                $val = '' unless defined $val;
+                $val = lc($val) if $type eq 'type';
+                push @{$c->request->parameters->{$pre.$type}}, $val;
             }
         }
     }
