@@ -55,7 +55,6 @@ Ext.define('TP.formFilterSelect', {
         forceSelection: true,
         autoSelect:     true,
         width:          140,
-        value:          'Search',
         store:          ['Search',
                          'Check Period',
                          'Comment',
@@ -84,7 +83,6 @@ Ext.define('TP.formFilterSelect', {
         forceSelection: true,
         autoSelect:     true,
         width:          50,
-        value:          '~',
         store:          ['~','!~','=','!=','<=','>=']
     }, {
         name:           'value',
@@ -93,34 +91,34 @@ Ext.define('TP.formFilterSelect', {
     }, {
         xtype:      'panel',
         border:     false,
-        html:       '<div align="center" class="clickable"><img src="[% url_prefix %]thruk/plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: middle"><\/div>',
+        width:      14,
+        html:       '<div align="center" class="clickable"><img src="[% url_prefix %]thruk/plugins/panorama/images/remove.png" alt="remove filter" style="vertical-align: top"><\/div>',
         listeners:  {
             afterrender: function(This, eOpts) { This.body.on('click', function() {
-                This.up('panel').destroy();
+                var row = This.up('panel');
+                var form = This.up('panel').up('form');
+                form.remove(row);
             })}
         }
     }],
 
     initComponent: function() {
         this.callParent();
+        this.items.getAt(0).setValue(this.val_type  || 'Search');
+        this.items.getAt(1).setValue(this.val_op    || '~');
+        this.items.getAt(2).setValue(this.val_value || '');
     }
 });
 
 TP.filterWindow = function(ftype, base_el) {
-    var win = Ext.create('Ext.window.Window', {
-        title:      'Filter',
-        layout:     'fit',
-        modal:       true,
-        maximizable: true,
-        items: {
-            xtype:  'form',
+
+    var form = new Ext.form.Panel({
             bodyPadding: 3,
             items: [{
                     fieldLabel: 'Host Status Types',
                     name:       'hoststatustypes',
                     xtype:      'tp_combobox_sum',
                     width:      320,
-                    submitEmptyText: false,
                     value:      [1,2,4,8],
                     sum_values: {'15': 'All', '12': 'All Problems' },
                     store:      [[2,'Up'], [4,'Down'], [8,'Unreachable'], [1,'Pending']]
@@ -130,7 +128,6 @@ TP.filterWindow = function(ftype, base_el) {
                     xtype:      'tp_combobox_sum',
                     width:      320,
                     columns:    true,
-                    submitEmptyText: false,
                     value:      [],
                     sum_values: {'0': 'Any' },
                     store:      [[1,'In Scheduled Downtime'], [2,'Not In Scheduled Downtime'],
@@ -151,7 +148,6 @@ TP.filterWindow = function(ftype, base_el) {
                     name:       'servicestatustypes',
                     xtype:      'tp_combobox_sum',
                     width:      320,
-                    submitEmptyText: false,
                     value:      [1,2,4,8,16],
                     sum_values: {'31': 'All', '28': 'All Problems' },
                     store:      [[2,'Ok'],[4,'Warning'],[8,'Unknown'],[16,'Critical'],[1,'Pending']]
@@ -161,7 +157,6 @@ TP.filterWindow = function(ftype, base_el) {
                     xtype:      'tp_combobox_sum',
                     width:      320,
                     columns:    true,
-                    submitEmptyText: false,
                     value:      [],
                     sum_values: {'0': 'Any' },
                     store:      [[1,'In Scheduled Downtime'], [2,'Not In Scheduled Downtime'],
@@ -177,8 +172,6 @@ TP.filterWindow = function(ftype, base_el) {
                                  [1048576,'In Check Period'], [2097152,'Outside Check Period'],
                                  [4194304,'In Notification Period'], [8388608,'Outside Notification Period'],
                                  [16777216,'Has Modified Attributes'], [33554432,'No Modified Attributes']]
-                }, {
-                    xtype:      'tp_filter_select'
                 }, {
                     xtype:      'panel',
                     border:     false,
@@ -205,11 +198,54 @@ TP.filterWindow = function(ftype, base_el) {
                         this.up('window').destroy();
                      }
             }]
-        }
     });
+
+    var win = new Ext.window.Window({
+        title:      'Filter',
+        layout:     'fit',
+        modal:       true,
+        maximizable: true,
+        items:       [form]
+    });
+
+    /* hide service specific fields for hosts */
     if(ftype == 'host') {
-        win.items.getAt(0).items.getAt(2).hide();
-        win.items.getAt(0).items.getAt(3).hide();
+        form.items.getAt(2).hide();
+        form.items.getAt(3).hide();
     }
+
+    /* add values */
+    var val = Ext.JSON.decode(base_el.getValue());
+    if(val) {
+        var values = {
+            hoststatustypes:    TP.dec2bin(val.hoststatustypes),
+            hostprops:          TP.dec2bin(val.hostprops),
+            servicestatustypes: TP.dec2bin(val.servicestatustypes),
+            serviceprops:       TP.dec2bin(val.serviceprops)
+        };
+        if(Ext.isArray(val.type)) {
+            for(var nr in val.type) {
+                form.insert(form.items.length-1, {
+                    xtype:     'tp_filter_select',
+                    val_op:     val.op[nr],
+                    val_type:   val.type[nr],
+                    val_value:  val.value[nr]
+                });
+            }
+        } else {
+            form.insert(form.items.length-1, {
+                xtype:     'tp_filter_select',
+                val_op:     val.op,
+                val_type:   val.type,
+                val_value:  val.value
+            });
+        }
+        form.getForm().setValues(values);
+    } else {
+        /* add one empty search field */
+        form.insert(form.items.length-1, {xtype: 'tp_filter_select'});
+    }
+
+    /* show the window */
     win.show();
 }
