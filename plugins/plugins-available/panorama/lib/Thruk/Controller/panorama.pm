@@ -633,13 +633,27 @@ sub _do_filter {
         for my $key (qw/hostprops hoststatustypes serviceprops servicestatustypes/) {
             $c->request->parameters->{$pre.$key} = $filter->{$key};
         }
-        for my $type (qw/op type value/) {
+        for my $type (qw/op type value value_date/) {
             if(ref $filter->{$type} ne 'ARRAY') { $filter->{$type} = [$filter->{$type}]; }
+        }
+
+        for my $type (qw/op type value/) {
+            my $x = 0;
             for my $val (@{$filter->{$type}}) {
                 $c->request->parameters->{$pre.$type} = [] unless defined $c->request->parameters->{$pre.$type};
-                $val = '' unless defined $val;
-                $val = lc($val) if $type eq 'type';
+                if($type eq 'value') {
+                    if(!defined $val) { $val = ''; }
+                    if(defined $filter->{'value_date'}->[$x] and $filter->{'value_date'}->[$x] ne '') {
+                        $val = $filter->{'value_date'}->[$x];
+                        $val =~ s/T/ /gmx;
+                    }
+                }
+                elsif($type eq 'type') {
+                    $val = lc($val)
+                }
+
                 push @{$c->request->parameters->{$pre.$type}}, $val;
+                $x++;
             }
         }
     }
