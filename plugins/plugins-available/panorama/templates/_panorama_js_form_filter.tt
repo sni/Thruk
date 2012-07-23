@@ -73,7 +73,31 @@ Ext.define('TP.formFilterSelect', {
                          'Parent',
                          'Service',
                          'Servicegroup',
-                         '% State Change']
+                         '% State Change'],
+        listeners: {
+            change: function(This, newV, oldV, eOpts) {
+                /* update value store */
+                newV = newV.toLowerCase();
+                var combo = This.up('panel').items.getAt(2);
+                combo.store.removeAll();
+                if(newV == 'host' || newV == 'service' || newV == 'hostgroup' || newV == 'servicegroup') {
+                    var url = 'status.cgi?format=search&hash=1&type='+newV;
+                    Ext.Ajax.request({
+                        url: url,
+                        method: 'POST',
+                        callback: function(options, success, response) {
+                            var tmp  = TP.getResponse(undefined, response);
+                            if(tmp) {
+                                combo.store.removeAll();
+                                for(var nr in tmp[0].data) {
+                                    combo.store.loadRawData([[tmp[0].data[nr]]], true);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
     }, {
         name:           'op',
         xtype:          'combobox',
@@ -87,7 +111,8 @@ Ext.define('TP.formFilterSelect', {
     }, {
         name:           'value',
         xtype:          'combobox',
-        width:          130
+        width:          130,
+        store:          []
     }, {
         xtype:      'panel',
         border:     false,
@@ -175,9 +200,9 @@ TP.filterWindow = function(ftype, base_el) {
                 }, {
                     xtype:      'panel',
                     border:     false,
-                    html:       '<div align="center" class="clickable"><img src="[% url_prefix %]thruk/plugins/panorama/images/down.png" alt="add new filter" style="vertical-align: middle"> and<\/div>',
+                    html:       '<div align="center"><div class="clickable" style="width: 40px;"><img src="[% url_prefix %]thruk/plugins/panorama/images/down.png" alt="add new filter" style="vertical-align: middle"> and<\/div><\/div>',
                     listeners:  {
-                        afterrender: function(This, eOpts) { This.body.on('click', function() {
+                        afterrender: function(This, eOpts) { Ext.get(This.body.dom.firstChild.firstChild).on('click', function() {
                             var form = This.up('form');
                             form.insert(form.items.length-1, {xtype: 'tp_filter_select'});
                         })}

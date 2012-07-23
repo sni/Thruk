@@ -367,7 +367,10 @@ var TP = {
     },
     /* eval response data */
     getResponse: function(panlet, response) {
-        var refresh = panlet.tools['refresh'];
+        var refresh = {setType: Ext.emptyFn };
+        if(panlet != undefined) {
+            refresh = panlet.tools['refresh'];
+        }
         if(response.status == 200) {
             var data;
             try {
