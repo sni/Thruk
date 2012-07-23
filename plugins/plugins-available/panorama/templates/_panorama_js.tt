@@ -432,6 +432,7 @@ var TP = {
             }, undefined, undefined, item.getText());
         });
     },
+    /* sum list elements */
     arraySum: function(list) {
         var l=list.length, i=0, n=0;
         while(i<l) { n += list[i++]} ;
@@ -445,6 +446,7 @@ var TP = {
         });
         This.down('form').add(This.obj_filter);
     },
+    /* convert number to binary list */
     dec2bin: function(dec) {
         var potencies = new Array();
         var binary = [];
@@ -465,5 +467,12 @@ var TP = {
             dec -= potencies[j] * zeroOne;
         }
         return binary;
+    },
+    /* update an array store with new data */
+    updateArrayStore: function(store, data) {
+        store.removeAll();
+        for(var nr in data) {
+            store.loadRawData([[data[nr]]], true);
+        }
     }
 }

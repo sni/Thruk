@@ -89,10 +89,7 @@ Ext.define('TP.formFilterSelect', {
                         callback: function(options, success, response) {
                             var tmp  = TP.getResponse(undefined, response);
                             if(tmp) {
-                                combo.store.removeAll();
-                                for(var nr in tmp[0].data) {
-                                    combo.store.loadRawData([[tmp[0].data[nr]]], true);
-                                }
+                                TP.updateArrayStore(combo.store, tmp[0].data);
                             }
                         }
                     });
@@ -134,17 +131,45 @@ Ext.define('TP.formFilterSelect', {
 
     /* check datetime or input field */
     check_changed: function(v) {
+        if(!this.items.getAt(2).rendered || !this.items.getAt(2).rendered) {
+            return;
+        }
         v = v.toLowerCase();
         if(v == 'last check' || v == 'next check') {
-            if(this.items.getAt(2).rendered) {
-                this.items.getAt(2).hide();
-            }
+            this.items.getAt(2).hide();
             this.items.getAt(3).show();
         } else {
             this.items.getAt(2).show();
-            if(this.items.getAt(2).rendered) {
-                this.items.getAt(3).hide();
-            }
+            this.items.getAt(3).hide();
+        }
+        var op = this.items.getAt(1).getValue();
+
+        var ops = {
+            'search':              ['~','!~','=','!='],
+            'check period':        ['~','!~','=','!='],
+            'comment':             ['~','!~','=','!='],
+            'contact':             ['~','!~','=','!='],
+            'current attempt':     ['=','!=','<=','>='],
+            'custom variable':     ['~','!~','=','!='],
+            'downtime duration':   ['=','!=','<=','>='],
+            'duration':            ['=','!=','<=','>='],
+            'execution time':      ['=','!=','<=','>='],
+            'host':                ['~','!~','=','!='],
+            'hostgroup':           ['~','!~','=','!='],
+            'last check':          ['=','!=','<=','>='],
+            'latency':             ['=','!=','<=','>='],
+            'next check':          ['=','!=','<=','>='],
+            'notification period': ['~','!~','=','!='],
+            'parent':              ['~','!~','=','!='],
+            'service':             ['~','!~','=','!='],
+            'servicegroup':        ['~','!~','=','!='],
+            '% state change':      ['=','!=','<=','>=']
+        };
+
+        TP.updateArrayStore(this.items.getAt(1).store, ops[v], op);
+        this.items.getAt(1).setValue(op);
+        if(this.items.getAt(1).getValue() == null) {
+            this.items.getAt(1).setRawValue(ops[v][0]);
         }
     },
 
