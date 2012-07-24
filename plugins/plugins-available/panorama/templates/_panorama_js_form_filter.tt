@@ -39,7 +39,7 @@ Ext.define('TP.formFilterSelect', {
     border: false,
     layout:     {
             type: 'table',
-            columns: 4,
+            columns: 5,
             tableAttrs: {
                 style: {
                     width: '100%'
@@ -79,7 +79,7 @@ Ext.define('TP.formFilterSelect', {
                 /* update value store */
                 var panel = This.up('panel');
                 newV = newV.toLowerCase();
-                var combo = panel.items.getAt(2);
+                var combo = panel.items.getAt(3);
                 combo.store.removeAll();
                 if(newV == 'host' || newV == 'service' || newV == 'hostgroup' || newV == 'servicegroup' || newV == 'check period' || newV == 'notification period') {
                     var type = newV;
@@ -101,6 +101,12 @@ Ext.define('TP.formFilterSelect', {
                 panel.check_changed(newV);
             }
         }
+    }, {
+        name:           'val_pre',
+        xtype:          'textfield',
+        width:          100,
+        value:          [],
+        tooltip:        'Name of the custom variable. e.x: VAR1 (without the underline)'
     }, {
         name:           'op',
         xtype:          'combobox',
@@ -135,18 +141,23 @@ Ext.define('TP.formFilterSelect', {
 
     /* check datetime or input field */
     check_changed: function(v) {
-        if(!this.items.getAt(2).rendered || !this.items.getAt(2).rendered) {
+        if(!this.items.getAt(1).rendered || !this.items.getAt(3).rendered || !this.items.getAt(4).rendered) {
             return;
         }
         v = v.toLowerCase();
         if(v == 'last check' || v == 'next check') {
-            this.items.getAt(2).hide();
-            this.items.getAt(3).show();
-        } else {
-            this.items.getAt(2).show();
+            this.items.getAt(1).hide();
             this.items.getAt(3).hide();
+            this.items.getAt(4).show();
+        } else {
+            this.items.getAt(1).hide();
+            this.items.getAt(3).show();
+            this.items.getAt(4).hide();
         }
-        var op = this.items.getAt(1).getValue();
+        if(v == 'custom variable') {
+            this.items.getAt(1).show();
+        }
+        var op = this.items.getAt(2).getValue();
 
         var ops = {
             'search':              ['~','!~','=','!='],
@@ -170,23 +181,24 @@ Ext.define('TP.formFilterSelect', {
             '% state change':      ['=','!=','<=','>=']
         };
 
-        TP.updateArrayStore(this.items.getAt(1).store, ops[v], op);
-        this.items.getAt(1).setValue(op);
-        if(this.items.getAt(1).getValue() == null) {
-            this.items.getAt(1).setRawValue(ops[v][0]);
+        TP.updateArrayStore(this.items.getAt(2).store, ops[v], op);
+        this.items.getAt(2).setValue(op);
+        if(this.items.getAt(2).getValue() == null) {
+            this.items.getAt(2).setRawValue(ops[v][0]);
         }
     },
 
     initComponent: function() {
         this.callParent();
         this.items.getAt(0).setValue(this.val_type  || 'Search');
-        this.items.getAt(1).setValue(this.val_op    || '~');
-        this.items.getAt(2).setValue(this.val_value || '');
+        this.items.getAt(1).setValue(this.val_pre   || '');
+        this.items.getAt(2).setValue(this.val_op    || '~');
+        this.items.getAt(3).setValue(this.val_value || '');
         if(this.val_val_d) {
             var d = Date.parse(this.val_val_d);
-            this.items.getAt(3).setValue(new Date(d));
+            this.items.getAt(4).setValue(new Date(d));
         } else {
-            this.items.getAt(3).setValue(new Date());
+            this.items.getAt(4).setValue(new Date());
         }
 
         this.addListener('afterrender', function(This, eOpts) {
@@ -318,6 +330,7 @@ TP.filterWindow = function(ftype, base_el) {
                     xtype:     'tp_filter_select',
                     val_op:     val.op[nr],
                     val_type:   val.type[nr],
+                    val_pre:    val.val_pre[nr],
                     val_value:  val.value[nr],
                     val_val_d:  val.value_date[nr]
                 });
@@ -327,6 +340,7 @@ TP.filterWindow = function(ftype, base_el) {
                 xtype:     'tp_filter_select',
                 val_op:     val.op,
                 val_type:   val.type,
+                val_pre:    val.val_pre,
                 val_value:  val.value,
                 val_val_d:  val.value_date
             });
