@@ -54,7 +54,7 @@ Ext.define('TP.TabBar', {
                         handler: function() { TP.add_panlet({type:'TP.PanletGridHosts'}) }
                     }, {
                         text:   'Hosts Totals',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/application_view_columns.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridHostTotals'}) }
                     }, {
                         text:   'Hosts Graph',
@@ -66,7 +66,7 @@ Ext.define('TP.TabBar', {
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServices'}) }
                     }, {
                         text:   'Services Totals',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/computer.png',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/application_view_columns.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServiceTotals'}) }
                     }, {
                         text:   'Services Graph',
