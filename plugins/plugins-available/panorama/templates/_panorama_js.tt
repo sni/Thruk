@@ -474,5 +474,21 @@ var TP = {
         for(var nr in data) {
             store.loadRawData([[data[nr]]], true);
         }
+    },
+    /* return location object for url */
+    getLocationObject: function(url) {
+        var a  = document.createElement('a');
+        a.href = url;
+        return(a);
+    },
+    /* compare same origin policy */
+    isSameOrigin: function(l1, l2) {
+        if(l1.protocol != l2.protocol) {
+            return false;
+        }
+        if(l1.host != l2.host) {
+            return false;
+        }
+        return true;
     }
 }

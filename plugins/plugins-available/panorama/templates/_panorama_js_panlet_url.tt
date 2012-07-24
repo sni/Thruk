@@ -53,16 +53,29 @@ Ext.define('TP.PanletUrl', {
                 }
 
                 /* replace iframe content */
-                iframe = this.items.getAt(1).getEl().dom;
-                ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
-                ifrm.document.open();
-                ifrm.document.write(html);
-                ifrm.document.close();
+                var iframe = this.items.getAt(1).getEl().dom;
+
+                var ifrm = (iframe.contentWindow) ? iframe.contentWindow : (iframe.contentDocument.document) ? iframe.contentDocument.document : iframe.contentDocument;
+                try {
+                    ifrm.document.open();
+                    ifrm.document.write(html);
+                    ifrm.document.close();
+                } catch(e) {
+                    /* first reload after changing from external to internal url does not work*/
+                    iframe.src = 'about:blank';
+                    window.setTimeout(Ext.bind(this.refreshHandler, this, []), 1000);
+                }
             }
         };
 
         this.refreshHandler = function() {
-            TP.defaultSiteRefreshHandler(this);
+            if(!TP.isSameOrigin(window.location, TP.getLocationObject(this.xdata.url))) {
+                /* set external url as src */
+                iframe     = this.items.getAt(1).getEl().dom;
+                iframe.src = Ext.urlAppend(this.xdata.url, '_dc='+Ext.Date.now())
+            } else {
+                TP.defaultSiteRefreshHandler(this);
+            }
         };
 
         /* url content should be in an iframe */
@@ -80,7 +93,27 @@ Ext.define('TP.PanletUrl', {
         this.down('form').add({
             fieldLabel: 'URL',
             xtype:      'textfield',
-            name:       'url'
+            name:       'url',
+            listeners: {
+                change: function(This, newV, oldV, eOpts) {
+                    var pan = This.up('panel');
+                    var sel = pan.items.getAt(4);
+                    var css = pan.items.getAt(5);
+                    if(!TP.isSameOrigin(window.location, TP.getLocationObject(newV))) {
+                        sel.emptyText = "css selector only supported for internal urls";
+                        sel.setValue("");
+                        sel.disable();
+                        css.disable();
+                    } else {
+                        sel.emptyText = " ";
+                        sel.enable();
+                        css.enable();
+                        var old = sel.getValue();
+                        sel.setValue("");
+                        sel.setValue(old);
+                    }
+                }
+            }
         }, {
             fieldLabel: 'CSS Selector',
             xtype:      'textfield',
