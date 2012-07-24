@@ -4,6 +4,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - panorama view:
             - added auto rotating tabs
             - added hosts / services panlet
+            - added host / service totals panlet
+            - added filter for all host/services based panlets
             - generic url panlet can now show external urls
             - fixed generic url panlet when using css selector
           - Bug Fixes

@@ -53,6 +53,10 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridHosts'}) }
                     }, {
+                        text:   'Hosts Totals',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridHostTotals'}) }
+                    }, {
                         text:   'Hosts Graph',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPieChartHosts'}) }
@@ -60,6 +64,10 @@ Ext.define('TP.TabBar', {
                         text:   'Services',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/computer.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServices'}) }
+                    }, {
+                        text:   'Services Totals',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/computer.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridServiceTotals'}) }
                     }, {
                         text:   'Services Graph',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',

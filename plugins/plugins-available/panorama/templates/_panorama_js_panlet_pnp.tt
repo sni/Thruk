@@ -17,7 +17,7 @@ Ext.define('TP_Sources', {
 Ext.define('TP.PanletPNP', {
     extend: 'TP.Panlet',
 
-    title: 'pnpgraph',
+    title: 'PNPGraph',
     initComponent: function() {
         this.callParent();
         this.xdata.url      = '';

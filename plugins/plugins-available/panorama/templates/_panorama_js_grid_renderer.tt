@@ -71,6 +71,14 @@ TP.render_service_status = function(v, td, item) {
     return state;
 }
 
+/* render status totals */
+TP.render_statuscount = function(v, td, item, row, col, store, view) {
+    if(v > 0) {
+        td.tdCls = item.data.state.toUpperCase();
+    }
+    return v;
+}
+
 /* render hostname in service grid */
 TP.render_service_host = function(v, td, item, row, col, store, view) {
     if(row == 0 || view.lastHost == undefined || view.lastHost != v) {

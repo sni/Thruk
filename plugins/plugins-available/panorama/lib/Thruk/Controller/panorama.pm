@@ -82,8 +82,14 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'hosts') {
             return($self->_task_hosts($c));
         }
+        elsif($task eq 'hosttotals') {
+            return($self->_task_hosttotals($c));
+        }
         elsif($task eq 'services') {
             return($self->_task_services($c));
+        }
+        elsif($task eq 'servicetotals') {
+            return($self->_task_servicetotals($c));
         }
         elsif($task eq 'hosts_pie') {
             return($self->_task_hosts_pie($c));
@@ -510,6 +516,62 @@ sub _task_services {
 }
 
 ##########################################################
+sub _task_hosttotals {
+    my($self, $c) = @_;
+
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $s = $c->stash->{'host_stats'};
+    my $json = {
+        columns => [
+            { 'header' => '#',     width => 40, dataIndex => 'count', align => 'right', renderer => 'TP.render_statuscount' },
+            { 'header' => 'State', flex  => 1,  dataIndex => 'state' },
+        ],
+        data      => [],
+        pi_detail => $c->stash->{pi_detail},
+    };
+
+    for my $state (qw/up down unreachable pending/) {
+        push @{$json->{'data'}}, {
+            state => ucfirst $state,
+            count => $s->{$state},
+        };
+    }
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_servicetotals {
+    my($self, $c) = @_;
+
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my $s = $c->stash->{'service_stats'};
+    my $json = {
+        columns => [
+            { 'header' => '#',     width => 40, dataIndex => 'count', align => 'right', renderer => 'TP.render_statuscount' },
+            { 'header' => 'State', flex  => 1,  dataIndex => 'state' },
+        ],
+        data      => [],
+        pi_detail => $c->stash->{pi_detail},
+    };
+
+    for my $state (qw/ok warning unknown critical pending/) {
+        push @{$json->{'data'}}, {
+            state => ucfirst $state,
+            count => $s->{$state},
+        };
+    }
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
 sub _task_hosts_pie {
     my($self, $c) = @_;
 
@@ -523,8 +585,9 @@ sub _task_hosts_pie {
             { 'header' => 'Name',      dataIndex => 'name' },
             { 'header' => 'Data',      dataIndex => 'data' },
         ],
-        colors  => [ ],
-        data    => []
+        colors    => [ ],
+        data      => [],
+        pi_detail => $c->stash->{pi_detail},
     };
     my $colors = {
         up          => '#00FF33',
@@ -560,8 +623,9 @@ sub _task_services_pie {
             { 'header' => 'Name',      dataIndex => 'name' },
             { 'header' => 'Data',      dataIndex => 'data' },
         ],
-        colors  => [],
-        data    => []
+        colors    => [],
+        data      => [],
+        pi_detail => $c->stash->{pi_detail},
     };
     my $colors = {
         ok       => '#00FF33',

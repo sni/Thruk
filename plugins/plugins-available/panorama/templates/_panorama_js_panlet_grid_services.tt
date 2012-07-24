@@ -13,3 +13,19 @@ Ext.define('TP.PanletGridServices', {
         TP.addFormFilter(this, this.has_search_button);
     }
 });
+
+Ext.define('TP.PanletGridServiceTotals', {
+    extend: 'TP.PanletGrid',
+
+    title:  'Service Totals',
+    height: 200,
+    width:  140,
+    has_search_button: 'service',
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url = 'panorama.cgi?task=servicetotals';
+        TP.hideFormElements(this.down('form').getForm(), ['url']);
+        this.reloadOnSiteChanges = true;
+        TP.addFormFilter(this, this.has_search_button);
+    }
+});

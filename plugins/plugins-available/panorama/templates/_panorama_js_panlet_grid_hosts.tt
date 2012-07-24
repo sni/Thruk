@@ -13,3 +13,19 @@ Ext.define('TP.PanletGridHosts', {
         TP.addFormFilter(this, this.has_search_button);
     }
 });
+
+Ext.define('TP.PanletGridHostTotals', {
+    extend: 'TP.PanletGrid',
+
+    title:  'Hosts Totals',
+    height: 200,
+    width:  140,
+    has_search_button: 'host',
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url = 'panorama.cgi?task=hosttotals';
+        TP.hideFormElements(this.down('form').getForm(), ['url']);
+        this.reloadOnSiteChanges = true;
+        TP.addFormFilter(this, this.has_search_button);
+    }
+});
