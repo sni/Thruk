@@ -387,6 +387,7 @@ sub do_search {
     # set stash to reflect a classic search
     if(     scalar @{$searches} == 1
         and scalar @{ $searches->[0]->{'text_filter'} } == 1
+        and defined $searches->[0]->{'text_filter'}->[0]->{'op'}
         and $searches->[0]->{'text_filter'}->[0]->{'op'} eq '=' )
     {
         my $type  = $searches->[0]->{'text_filter'}->[0]->{'type'};
