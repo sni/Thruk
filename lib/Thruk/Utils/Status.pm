@@ -417,7 +417,9 @@ fill host and service totals box
 
 =cut
 sub fill_totals_box {
-    my( $c, $hostfilter, $servicefilter ) = @_;
+    my( $c, $hostfilter, $servicefilter, $force ) = @_;
+
+    return 1 if($c->stash->{'no_totals'} and !$force);
 
     # host status box
     my $host_stats = {};
@@ -453,9 +455,7 @@ sub fill_totals_box {
     $c->stash->{'host_stats'} = $host_stats;
 
     # services status box
-    my $service_stats = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
-
-    $c->stash->{'service_stats'} = $service_stats;
+    $c->stash->{'service_stats'} = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
 
     # set audio file to play
     Thruk::Utils::Status::set_audio_file($c);

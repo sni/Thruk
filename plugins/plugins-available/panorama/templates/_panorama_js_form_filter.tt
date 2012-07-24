@@ -316,8 +316,9 @@ TP.filterWindow = function(ftype, base_el) {
     }
 
     /* add values */
-    var val = Ext.JSON.decode(base_el.getValue());
+    var val = base_el.getValue();
     if(val) {
+        val = Ext.JSON.decode(val);
         var values = {
             hoststatustypes:    TP.dec2bin(val.hoststatustypes),
             hostprops:          TP.dec2bin(val.hostprops),

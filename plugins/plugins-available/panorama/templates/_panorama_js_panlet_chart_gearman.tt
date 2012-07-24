@@ -7,11 +7,8 @@ Ext.define('TP.PanletGridGearmanMetrics', {
     initComponent: function() {
         this.callParent();
         this.xdata.server = 'localhost:4730';
-        this.xdata.url    = 'panorama.cgi?task=stats_gearman_grid&server=' + this.xdata.server;
+        this.xdata.url    = 'panorama.cgi?task=stats_gearman_grid';
         TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
-        this.formUpdatedCallback = function() {
-            this.xdata.url = 'panorama.cgi?task=stats_gearman_grid&server=' + this.xdata.server;
-        };
         this.down('form').add({
             fieldLabel: 'Gearman Daemon',
             xtype:      'textfield',
@@ -48,10 +45,9 @@ Ext.define('TP.PanletChartGearman', {
 
         this.xdata.queue  = 'service';
         this.xdata.server = 'localhost:4730';
-        this.xdata.url    = 'panorama.cgi?task=stats_gearman&server=' + this.xdata.server;
+        this.xdata.url    = 'panorama.cgi?task=stats_gearman';
         TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
         this.formUpdatedCallback = function() {
-            this.xdata.url = 'panorama.cgi?task=stats_gearman&server=' + this.xdata.server;
             if(this.setTitle) {
                 this.setTitle('Mod-Gearman ' + ucfirst(this.xdata.queue) + ' Queue');
             }

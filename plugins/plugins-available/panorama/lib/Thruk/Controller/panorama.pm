@@ -60,6 +60,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     my $stateprovider = $c->config->{'Thruk::Plugin::Panorama'}->{'state_provider'} || 'server';
     if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
     $c->stash->{stateprovider} = $stateprovider;
+    $c->stash->{'no_totals'}   = 1;
 
     if(defined $c->request->query_keywords and $c->request->query_keywords eq 'state') {
         return($self->_stateprovider($c));
@@ -521,6 +522,7 @@ sub _task_hosttotals {
 
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
+    Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, undef, 1);
 
     my $s = $c->stash->{'host_stats'};
     my $json = {
@@ -549,6 +551,7 @@ sub _task_servicetotals {
 
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
+    Thruk::Utils::Status::fill_totals_box( $c, undef, $servicefilter, 1 );
 
     my $s = $c->stash->{'service_stats'};
     my $json = {
@@ -687,6 +690,7 @@ sub _get_gearman_stats {
     my $data = {};
     my $host = 'localhost';
     my $port = 4730;
+
     if(defined $c->request->parameters->{'server'}) {
         ($host,$port) = split(/:/mx, $c->request->parameters->{'server'}, 2);
     }
@@ -726,7 +730,7 @@ sub _get_gearman_stats {
 sub _do_filter {
     my($self, $c) = @_;
 
-    if(defined $c->request->parameters->{'filter'}) {
+    if(defined $c->request->parameters->{'filter'} and $c->request->parameters->{'filter'} ne '') {
         my $filter;
         eval {
             $filter = decode_json($c->request->parameters->{'filter'});
