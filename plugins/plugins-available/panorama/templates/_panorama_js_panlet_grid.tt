@@ -47,7 +47,8 @@ Ext.define('TP.PanletGrid', {
                                 type: 'json',
                                 root: 'items'
                             }
-                        }
+                        },
+                        groupField: data.group
                     });
                     if(this.gridcolumns == undefined || this.gridcolumns != newcolumns) {
                         this.gridcolumns = newcolumns;
@@ -68,8 +69,13 @@ Ext.define('TP.PanletGrid', {
             }
         };
 
+        var groupingFeature = Ext.create('Ext.grid.feature.Grouping',{
+            groupHeaderTpl: '{name}'
+        });
+
         this.grid = Ext.create('Ext.grid.Panel', {
             store: this.gridStore,
+            features: [groupingFeature],
             id: this.id + '_gridpanel',
             stateful: true,
             stateEvents: ['reconfigure', 'afterlayout', 'columnmove', 'columnresize', 'sortchange', 'groupchange'],

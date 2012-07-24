@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 92;
+use Test::More tests => 137;
 use JSON::XS;
 
 BEGIN {
@@ -29,11 +29,16 @@ for my $url (@{$pages}) {
 
 # json pages
 $pages = [
+    '/thruk/cgi-bin/panorama.cgi?task=server_stats',
     '/thruk/cgi-bin/panorama.cgi?task=stats_core_metrics',
     '/thruk/cgi-bin/panorama.cgi?task=stats_check_metrics',
     '/thruk/cgi-bin/panorama.cgi?task=show_logs',
     '/thruk/cgi-bin/panorama.cgi?task=site_status',
+    '/thruk/cgi-bin/panorama.cgi?task=hosts',
+    '/thruk/cgi-bin/panorama.cgi?task=hosttotals',
     '/thruk/cgi-bin/panorama.cgi?task=hosts_pie',
+    '/thruk/cgi-bin/panorama.cgi?task=services',
+    '/thruk/cgi-bin/panorama.cgi?task=servicetotals',
     '/thruk/cgi-bin/panorama.cgi?task=services_pie',
     '/thruk/cgi-bin/panorama.cgi?task=stats_gearman',
     '/thruk/cgi-bin/panorama.cgi?task=stats_gearman_grid',

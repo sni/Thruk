@@ -8,6 +8,7 @@ use JSON::XS;
 use URI::Escape;
 use IO::Socket;
 use File::Slurp;
+use Thruk::Utils::PanoramaCpuStats;
 
 use parent 'Catalyst::Controller';
 
@@ -61,6 +62,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
     $c->stash->{stateprovider} = $stateprovider;
     $c->stash->{'no_totals'}   = 1;
+    $c->stash->{'limit'}       = 200;
 
     if(defined $c->request->query_keywords and $c->request->query_keywords eq 'state') {
         return($self->_stateprovider($c));
@@ -73,6 +75,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
         elsif($task eq 'stats_check_metrics') {
             return($self->_task_stats_check_metrics($c));
+        }
+        elsif($task eq 'server_stats') {
+            return($self->_task_server_stats($c));
         }
         elsif($task eq 'show_logs') {
             return($self->_task_show_logs($c));
@@ -258,6 +263,50 @@ sub _task_stats_check_metrics {
 }
 
 ##########################################################
+sub _task_server_stats {
+    my($self, $c) = @_;
+
+    my $mem = {};
+    for my $line (split/\n/mx,(read_file('/proc/meminfo'))) {
+        my($name,$val,$unit) = split(/\s+/mx,$line,3);
+        next unless defined $unit;
+        $name =~ s/:$//gmx;
+        $mem->{$name} = int($val / 1024);
+    }
+    my @load = split(/\s+/mx,(read_file('/proc/loadavg')));
+    my $pcs  = Thruk::Utils::PanoramaCpuStats->new();
+    my $cpu  = $pcs->get();
+    $cpu     = $cpu->{'cpu'};
+
+    my $json = {
+        columns => [
+            { 'header' => 'Cat',    dataIndex => 'cat',   hidden => JSON::XS::true },
+            { 'header' => 'Type',   dataIndex => 'type',  width => 60, align => 'right' },
+            { 'header' => 'Value',  dataIndex => 'value', width => 65, align => 'right' },
+            { 'header' => 'Graph',  dataIndex => 'graph', flex  => 1 },
+        ],
+        data  => [
+            { cat => 'Load',    type => 'load 1',   value => $load[0],            graph => '' },
+            { cat => 'Load',    type => 'load 5',   value => $load[1],            graph => '' },
+            { cat => 'Load',    type => 'load 15',  value => $load[2],            graph => '' },
+            { cat => 'CPU',     type => 'User',     value => $cpu->{'user'},      graph => '' },
+            { cat => 'CPU',     type => 'Nice',     value => $cpu->{'nice'},      graph => '' },
+            { cat => 'CPU',     type => 'System',   value => $cpu->{'system'},    graph => '' },
+            { cat => 'CPU',     type => 'Wait IO',  value => $cpu->{'iowait'},    graph => '' },
+            { cat => 'Memory',  type => 'total',    value => $mem->{'MemTotal'},  graph => '' },
+            { cat => 'Memory',  type => 'free',     value => $mem->{'MemFree'},   graph => '' },
+            { cat => 'Memory',  type => 'used',     value => $mem->{'MemTotal'}-$mem->{'MemFree'}-$mem->{'Buffers'}-$mem->{'Cached'},   graph => '' },
+            { cat => 'Memory',  type => 'buffers',  value => $mem->{'Buffers'},   graph => '' },
+            { cat => 'Memory',  type => 'cached',   value => $mem->{'Cached'},    graph => '' },
+        ],
+        group => 'cat'
+    };
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
 sub _task_stats_gearman {
     my($self, $c) = @_;
     $c->stash->{'json'} = $self->_get_gearman_stats($c);
@@ -393,7 +442,7 @@ sub _task_hosts {
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], limit => $c->stash->{'limit'});
 
     my $json = {
         columns => [
@@ -448,7 +497,7 @@ sub _task_services {
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter]);
+    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], limit => $c->stash->{'limit'});
 
     my $json = {
         columns => [

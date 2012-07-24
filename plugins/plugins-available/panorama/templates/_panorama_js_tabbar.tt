@@ -41,6 +41,10 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServer'}) }
                     }, {
+                        text:   'Server Status',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/bricks.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridServerStats'}) }
+                    }, {
                         text:   'Core Performance Metrics',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCoreMetrics'}) }
