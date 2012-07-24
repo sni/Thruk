@@ -2258,7 +2258,7 @@ function verify_op(event) {
     }
   }
 
-  input.title = undefined;
+  input.title = '';
   if(selValue == 'duration') {
     input.title = "Duration: Input type is seconds. You may use w (week) or d (day), h (hour) or m (minutes). Ex.: 10m for 10 minutes.";
   }

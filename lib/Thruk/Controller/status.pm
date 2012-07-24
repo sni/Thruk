@@ -163,6 +163,9 @@ sub _process_raw_request {
                 }
                 $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter ] );
             }
+            elsif($type eq 'timeperiod' or $type eq 'timeperiods') {
+                $data = $c->{'db'}->get_timeperiod_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'timeperiods' ) ] );
+            }
             elsif($type eq 'custom variable') {
                 $data = [];
             } else {

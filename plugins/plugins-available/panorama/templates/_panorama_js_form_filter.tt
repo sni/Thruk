@@ -81,8 +81,12 @@ Ext.define('TP.formFilterSelect', {
                 newV = newV.toLowerCase();
                 var combo = panel.items.getAt(2);
                 combo.store.removeAll();
-                if(newV == 'host' || newV == 'service' || newV == 'hostgroup' || newV == 'servicegroup') {
-                    var url = 'status.cgi?format=search&hash=1&type='+newV;
+                if(newV == 'host' || newV == 'service' || newV == 'hostgroup' || newV == 'servicegroup' || newV == 'check period' || newV == 'notification period') {
+                    var type = newV;
+                    if(newV == 'check period' || newV == 'notification period') {
+                        type = 'timeperiod';
+                    }
+                    var url = 'status.cgi?format=search&hash=1&type='+type;
                     Ext.Ajax.request({
                         url: url,
                         method: 'POST',
