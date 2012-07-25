@@ -250,6 +250,7 @@ sub test_page {
             next if $match =~ m/^'\+\w+\+'$/         and defined $ENV{'CATALYST_SERVER'};
             next if $match =~ m|^/thruk/frame\.html| and defined $ENV{'CATALYST_SERVER'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/;
+            next if $match =~ m/\/"\+/;
             $match =~ s/"\s*\+\s*url_prefix\s*\+\s*"/\//gmx;
             $match =~ s/"\s*\+\s*theme\s*\+\s*"/Thruk/gmx;
             $links_to_check->{$match} = 1;

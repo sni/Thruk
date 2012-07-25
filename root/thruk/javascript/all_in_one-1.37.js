@@ -61,7 +61,9 @@ function init_page() {
         newUrl = newUrl.replace(/\&_=\d+/g, '');
         newUrl = newUrl.replace(/\?$/g, '');
         newUrl = newUrl.replace(/\?&/g, '?');
-        history.replaceState({}, "", newUrl);
+        try {
+            history.replaceState({}, "", newUrl);
+        } catch(e) { debug(e) }
     }
 }
 
