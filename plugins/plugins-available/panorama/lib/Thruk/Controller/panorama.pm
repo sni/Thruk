@@ -266,6 +266,7 @@ sub _task_stats_check_metrics {
 sub _task_server_stats {
     my($self, $c) = @_;
 
+    # gather system statistics
     my $mem = {};
     for my $line (split/\n/mx,(read_file('/proc/meminfo'))) {
         my($name,$val,$unit) = split(/\s+/mx,$line,3);
@@ -274,30 +275,39 @@ sub _task_server_stats {
         $mem->{$name} = int($val / 1024);
     }
     my @load = split(/\s+/mx,(read_file('/proc/loadavg')));
-    my $pcs  = Thruk::Utils::PanoramaCpuStats->new();
+    my $lastcpu = $c->cache->get('panorama_sys_cpu');
+    my $pcs  = Thruk::Utils::PanoramaCpuStats->new({sleep => 3, init => $lastcpu->{'init'}});
     my $cpu  = $pcs->get();
+    # don't save more often than 5 seconds to keep a better reference
+    if(!defined $lastcpu->{'time'} or $lastcpu->{'time'} +5 < time()) {
+        $c->cache->set('panorama_sys_cpu', { init => $pcs->{'init'}, time => time() });
+    }
+    my $cpucount = (scalar keys %{$cpu}) - 1;
     $cpu     = $cpu->{'cpu'};
 
     my $json = {
         columns => [
             { 'header' => 'Cat',    dataIndex => 'cat',   hidden => JSON::XS::true },
             { 'header' => 'Type',   dataIndex => 'type',  width => 60, align => 'right' },
-            { 'header' => 'Value',  dataIndex => 'value', width => 65, align => 'right' },
-            { 'header' => 'Graph',  dataIndex => 'graph', flex  => 1 },
+            { 'header' => 'Value',  dataIndex => 'value', width => 65, align => 'right', renderer => 'TP.render_systat_value' },
+            { 'header' => 'Graph',  dataIndex => 'graph', flex  => 1,                    renderer => 'TP.render_systat_graph' },
+            { 'header' => 'Warn',   dataIndex => 'warn',  hidden => JSON::XS::true },
+            { 'header' => 'Crit',   dataIndex => 'crit',  hidden => JSON::XS::true },
+            { 'header' => 'Max',    dataIndex => 'max',   hidden => JSON::XS::true },
         ],
         data  => [
-            { cat => 'Load',    type => 'load 1',   value => $load[0],            graph => '' },
-            { cat => 'Load',    type => 'load 5',   value => $load[1],            graph => '' },
-            { cat => 'Load',    type => 'load 15',  value => $load[2],            graph => '' },
-            { cat => 'CPU',     type => 'User',     value => $cpu->{'user'},      graph => '' },
-            { cat => 'CPU',     type => 'Nice',     value => $cpu->{'nice'},      graph => '' },
-            { cat => 'CPU',     type => 'System',   value => $cpu->{'system'},    graph => '' },
-            { cat => 'CPU',     type => 'Wait IO',  value => $cpu->{'iowait'},    graph => '' },
-            { cat => 'Memory',  type => 'total',    value => $mem->{'MemTotal'},  graph => '' },
-            { cat => 'Memory',  type => 'free',     value => $mem->{'MemFree'},   graph => '' },
-            { cat => 'Memory',  type => 'used',     value => $mem->{'MemTotal'}-$mem->{'MemFree'}-$mem->{'Buffers'}-$mem->{'Cached'},   graph => '' },
-            { cat => 'Memory',  type => 'buffers',  value => $mem->{'Buffers'},   graph => '' },
-            { cat => 'Memory',  type => 'cached',   value => $mem->{'Cached'},    graph => '' },
+            { cat => 'Load',    type => 'load 1',   value => $load[0],            'warn' => $cpucount*2.5, crit => $cpucount*5.0, max => $cpucount*3, graph => '' },
+            { cat => 'Load',    type => 'load 5',   value => $load[1],            'warn' => $cpucount*2.0, crit => $cpucount*3.0, max => $cpucount*3, graph => '' },
+            { cat => 'Load',    type => 'load 15',  value => $load[2],            'warn' => $cpucount*1.5, crit => $cpucount*2,   max => $cpucount*3, graph => '' },
+            { cat => 'CPU',     type => 'User',     value => $cpu->{'user'},      'warn' => 70, crit => 90, max => 100, graph => '' },
+            { cat => 'CPU',     type => 'Nice',     value => $cpu->{'nice'},      'warn' => 70, crit => 90, max => 100, graph => '' },
+            { cat => 'CPU',     type => 'System',   value => $cpu->{'system'},    'warn' => 70, crit => 90, max => 100, graph => '' },
+            { cat => 'CPU',     type => 'Wait IO',  value => $cpu->{'iowait'},    'warn' => 70, crit => 90, max => 100, graph => '' },
+            { cat => 'Memory',  type => 'total',    value => $mem->{'MemTotal'},  graph => '', warn => $mem->{'MemTotal'}, crit => $mem->{'MemTotal'}, max => $mem->{'MemTotal'} },
+            { cat => 'Memory',  type => 'free',     value => $mem->{'MemFree'},   'warn' => $mem->{'MemTotal'}*0.7, crit => $mem->{'MemTotal'}*0.8, max => $mem->{'MemTotal'}, graph => '' },
+            { cat => 'Memory',  type => 'used',     value => $mem->{'MemTotal'}-$mem->{'MemFree'}-$mem->{'Buffers'}-$mem->{'Cached'}, 'warn' => $mem->{'MemTotal'}*0.7, crit => $mem->{'MemTotal'}*0.8, max => $mem->{'MemTotal'}, graph => '' },
+            { cat => 'Memory',  type => 'buffers',  value => $mem->{'Buffers'},   'warn' => $mem->{'MemTotal'}*0.8, crit => $mem->{'MemTotal'}*0.9, max => $mem->{'MemTotal'}, graph => '' },
+            { cat => 'Memory',  type => 'cached',   value => $mem->{'Cached'},    'warn' => $mem->{'MemTotal'}*0.8, crit => $mem->{'MemTotal'}*0.9, max => $mem->{'MemTotal'}, graph => '' },
         ],
         group => 'cat'
     };

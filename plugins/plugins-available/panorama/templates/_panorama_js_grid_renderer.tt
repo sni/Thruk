@@ -137,6 +137,32 @@ TP.render_check_type = function(v, td, item) {
     return "Passive";
 }
 
+/* render value of systat */
+TP.render_systat_value = function(v, td, item, row, col, store, view) {
+    if(item.data.cat == 'CPU') {
+        return v + '%';
+    }
+    if(item.data.cat == 'Memory') {
+        return v + 'MB';
+    }
+    return v;
+}
+
+/* render graph of systat */
+TP.render_systat_graph = function(v, td, item, row, col, store, view) {
+    if(item.data.warn == '') {
+        return '';
+    }
+    var val = item.data.value;
+    if(val > item.data.max) { val = item.data.max; }
+    var perc   = Math.floor(val/item.data.max*100);
+    var status = 'ok';
+    if(item.data.value > item.data.warn) { status = 'warn'; }
+    if(item.data.value > item.data.crit) { status = 'crit'; }
+    td.tdCls = 'systat_graph';
+    return "<div><div style='width:"+perc+"%; height: 15px;' class='systat_"+status+"'>&nbsp;<\/div><\/div>";
+}
+
 /* render plugin output */
 TP.render_plugin_output = function(v, td, item) {
     var type = 'Host';

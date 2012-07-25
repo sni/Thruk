@@ -98,3 +98,10 @@ LI.picker_odd {
   overflow: hidden;
   white-space: nowrap;
 }
+
+DIV.systat_ok   { background: #00FF33 !important; }
+DIV.systat_warn { background: #FFDE00 !important; }
+DIV.systat_crit { background: #FF5B33 !important; }
+TD.systat_graph DIV.x-grid-cell-inner {
+  padding: 1px;
+}

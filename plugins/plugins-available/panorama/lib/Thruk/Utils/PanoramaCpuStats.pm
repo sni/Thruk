@@ -23,23 +23,45 @@ package Thruk::Utils::PanoramaCpuStats;
 use strict;
 use warnings;
 use Carp qw(croak);
+use Thruk::Utils::IO;
+
+=head1 METHODS
+
+=head2 new
+
+create new object
+
+=cut
 
 sub new {
     my $class = shift;
-    my $opts  = ref($_[0]) ? shift : {@_};
-    my %self  = ();
-    return bless \%self, $class;
+    my $self  = shift || {};
+    return bless $self, $class;
 }
 
-sub _init {
+=head2 init
+
+init reference values
+
+=cut
+
+sub init {
     my $self = shift;
     $self->{init} = $self->_load;
+    return;
 }
 
+=head2 get
+
+return stats
+
+=cut
 sub get {
     my $self  = shift;
-    $self->_init;
-    sleep(1);
+    if(!defined $self->{init}) {
+        $self->init;
+        sleep($self->{'sleep'});
+    }
     $self->{stats} = $self->_load;
     $self->_deltas;
     return $self->{stats};
@@ -55,11 +77,11 @@ sub _load {
     open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
-        if ($line =~ /^(cpu.*?)\s+(.*)$/) {
+        if ($line =~ /^(cpu.*?)\s+(.*)$/mx) {
             my $cpu = \%{$stats{$1}};
             (@{$cpu}{qw(user nice system idle)},
-                $iowait, $irq, $softirq, $steal) = split /\s+/, $2;
-            # iowait, irq and softirq are only set 
+                $iowait, $irq, $softirq, $steal) = split /\s+/mx, $2;
+            # iowait, irq and softirq are only set
             # by kernel versions higher than 2.4.
             # steal is available since 2.6.11.
             $cpu->{iowait}  = $iowait  if defined $iowait;
@@ -69,7 +91,7 @@ sub _load {
         }
     }
 
-    close($fh);
+    CORE::close($fh);
     return \%stats;
 }
 
@@ -89,7 +111,7 @@ sub _deltas {
                 croak "$class: not defined key found '$k'";
             }
 
-            if ($v !~ /^\d+\z/ || $dcpu->{$k} !~ /^\d+\z/) {
+            if ($v !~ /^\d+\z/mx || $dcpu->{$k} !~ /^\d+\z/mx) {
                 croak "$class: invalid value for key '$k'";
             }
 
@@ -110,7 +132,7 @@ sub _deltas {
 
         $dcpu->{total} = sprintf('%.2f', 100 - $dcpu->{idle});
     }
+    return;
 }
 
 1;
-

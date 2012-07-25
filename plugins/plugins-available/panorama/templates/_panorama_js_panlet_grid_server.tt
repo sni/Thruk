@@ -38,7 +38,5 @@ Ext.define('TP.PanletGridServerStats', {
         this.callParent();
         this.xdata.url       = 'panorama.cgi?task=server_stats';
         TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
-        this.loader.loadMask = true;
-        this.reloadOnSiteChanges = true;
     }
 });
