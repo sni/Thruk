@@ -122,6 +122,7 @@
                 <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(full_uri(c)) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
                 [% ELSE %]
+                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled>
                 [% END %]
               </td>
