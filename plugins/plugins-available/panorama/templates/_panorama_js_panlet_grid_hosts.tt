@@ -19,7 +19,7 @@ Ext.define('TP.PanletGridHostTotals', {
 
     title:  'Hosts Totals',
     height: 200,
-    width:  140,
+    width:  200,
     has_search_button: 'host',
     initComponent: function() {
         this.callParent();

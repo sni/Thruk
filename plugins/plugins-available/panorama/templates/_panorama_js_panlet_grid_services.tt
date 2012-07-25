@@ -19,7 +19,7 @@ Ext.define('TP.PanletGridServiceTotals', {
 
     title:  'Service Totals',
     height: 200,
-    width:  140,
+    width:  200,
     has_search_button: 'service',
     initComponent: function() {
         this.callParent();

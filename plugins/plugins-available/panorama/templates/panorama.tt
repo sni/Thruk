@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>[% title_prefix %]Thruk Panorama</title>
+    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/resources/css/ext-all-gray.css">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/panorama/panorama-[% version %].css' />
