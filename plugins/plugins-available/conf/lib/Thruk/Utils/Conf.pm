@@ -478,7 +478,7 @@ sub store_model_retention {
     }
 
     $c->stats->profile(end => "store_model_retention()");
-    return;
+    return 1;
 }
 
 ##########################################################
