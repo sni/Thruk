@@ -26,6 +26,9 @@ Ext.define('TP.PanletPNP', {
         this.xdata.time     = '1h';
         this.lastGraph      = '';
 
+        this.size_adjustment_x = 97;
+        this.size_adjustment_y = 50;
+
         /* update source selector */
         this.source_store = Ext.create('Ext.data.Store', {
             model: 'TP_Sources',
@@ -75,13 +78,22 @@ Ext.define('TP.PanletPNP', {
             url = url + '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&end='   + Math.round(now.getTime()/1000);
             var size = imgPanel.getSize();
+            var naturalWidth  = imgPanel.getEl().dom.naturalWidth;
+            var naturalHeight = imgPanel.getEl().dom.naturalHeight;
             if(size.height > 1 && size.height < 81) {
                 url = url + '&graph_width='+(size.width);
                 url = url + '&graph_height='+(size.height);
             }
             else if(size.width > 1) {
-                url = url + '&graph_width='+(size.width-97);
-                url = url + '&graph_height='+(size.height-50);
+                if(naturalWidth && naturalWidth > 1) {
+                    this.size_adjustment_x += (naturalWidth  - size.width);
+                    this.size_adjustment_y += (naturalHeight - size.height);
+                    url = url + '&graph_width='+(size.width-this.size_adjustment_x);
+                    url = url + '&graph_height='+(size.height-this.size_adjustment_y);
+                } else {
+                    url = url + '&graph_width='+(size.width);
+                    url = url + '&graph_height='+(size.height);
+                }
             }
             imgPanel.setSrc(url);
         };
@@ -89,7 +101,19 @@ Ext.define('TP.PanletPNP', {
         /* url content should be in an iframe */
         this.add({
             xtype: 'image',
-            src:   Ext.BLANK_IMAGE_URL
+            src:   Ext.BLANK_IMAGE_URL,
+            listeners: {
+                afterrender: function (me) {
+                    me.el.on({
+                        load: function (evt, ele, opts) {
+                            me.up('panel').tools['refresh'].setType('refresh');
+                        },
+                        error: function (evt, ele, opts) {
+                            me.up('panel').tools['refresh'].setType('broken');
+                        }
+                    });
+                }
+            }
         });
 
         this.graph_store = new Ext.data.Store({
