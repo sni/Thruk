@@ -7,7 +7,7 @@ window.onerror = function(msg, url, line) {
 
     var link = document.getElementById('bug_report-btnEl');
     if(link) {
-        var text = "Please describe what you did:\n\n\n\n\n---------------\n";
+        var text = "Please describe what you did:\n\n\n\n\nMake sure the report does not contain confidential information.\n\n---------------\n";
         text = text + "Version:    " + version_info+"\n";
         text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
         text = text + "Backends:   ";

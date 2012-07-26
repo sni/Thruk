@@ -791,8 +791,17 @@ sub _do_on_peers {
         $Thruk::Backend::Manager::stats->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
     }
     if(!defined $result and $selected_backends != 0) {
-        #confess("Error in _do_on_peers: ".$@."called as ".Dumper($function)."with args: ".Dumper($arg));
-        die($@);
+        sub filter {
+            my @keys;
+            for my $key (sort keys %{$_[0]}) {
+                next if $key eq 'pager';
+                push @keys, $key;
+            }
+            return \@keys;
+        };
+        local $Data::Dumper::Sortkeys = \&filter;
+        local $Data::Dumper::Deepcopy = 1;
+        confess("Error in _do_on_peers: ".$@."called as ".Dumper($function)."with args: ".Dumper(\%arg));
     }
     $type = '' unless defined $type;
 
