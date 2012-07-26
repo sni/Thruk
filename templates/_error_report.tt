@@ -5,6 +5,10 @@
 ---------------
 Url:        [%+ short_uri(c) +%]
 Version:    Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %] / OMD [% c.config.omd_version %][% END +%]
-[%+ debug_details +%]
+Backends:   [%+ FOREACH pd IN backends %][% UNLESS loop.first +%]
+            [%+ END %]
+            [% backend_detail.$pd.state %] / [% IF pi_detail.$pd.exists('program_version') %][% pi_detail.$pd.program_version %][% END %] / [% IF pi_detail.$pd.exists('data_source_version') %][% pi_detail.$pd.data_source_version %][% END %]
+[%+ END +%]
+[%+ debug_details %]
 Stacktrace:
-[%+ stacktrace %]
+[% stacktrace %]

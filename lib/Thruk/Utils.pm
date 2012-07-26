@@ -1427,6 +1427,7 @@ sub get_debug_details {
         }
     }
     $release =~ s/^\s*//gmx;
+    $release =~ s/\\\w//gmx;
     $release =~ s/\s*$//gmx;
     my $details =<<EOT;
 uname:      $uname

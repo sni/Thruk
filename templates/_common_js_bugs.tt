@@ -10,9 +10,17 @@ window.onerror = function(msg, url, line) {
         var text = "Please describe what you did:\n\n\n\n\n---------------\n";
         text = text + "Version:    " + version_info+"\n";
         text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
-        text = text + "[% debug_details.replace('\n', '\\n') %]";
+        text = text + "Backends:   ";
+        var first = 1;
+        for(var nr in initial_backends) {
+            if(!first) { text = text + '            '; }
+            text = text + initial_backends[nr].state + ' / ' + initial_backends[nr].version + ' / ' + initial_backends[nr].data_src_version + "\n";
+            first = 0;
+        }
+        text = text + "[% debug_details.replace('\n', '\\n') %]\n";
+        text = text + "Stacktrace:\n";
         for(var nr in thruk_errors) {
-            text = text + "\n" + thruk_errors[nr]+"\n";
+            text = text + thruk_errors[nr]+"\n";
         }
         link.href="mailto:bugs@thruk.org?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
     }
@@ -36,3 +44,4 @@ function showBugReport(id) {
     }
   }
 }
+
