@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.38     not yet released
+          - added button to check/uncheck all columns for status excel export
           - panorama view:
             - added auto rotating tabs
             - added hosts / services panlet

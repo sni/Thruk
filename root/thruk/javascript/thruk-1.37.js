@@ -2160,6 +2160,20 @@ function toggleFilterCheckBox(id) {
   }
 }
 
+/* toogle all checkbox for attribute filter */
+function toggleAllFilterCheckBox() {
+  var box = document.getElementById("ht0");
+  var state = false;
+  if(box.checked) {
+    state = true;
+  }
+  for(var x = 0; x <= 99; x++) {
+      var el = document.getElementById('ht'+x);
+      if(!el) { break; }
+      el.checked = state;
+  }
+}
+
 /* verify operator for search type selects */
 function verify_op(event) {
   var selElem;

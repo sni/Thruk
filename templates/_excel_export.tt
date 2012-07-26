@@ -19,6 +19,10 @@
         </tr>
         [% END %]
         <tr>
+          <td valign="top" align="right" class='filterName clickable' id="ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox();">check all</td>
+          <td valign="top" align="left" class='filterValueCheck'><input type="checkbox" id="ht0" value="" name="all_col" checked onclick="toggleAllFilterCheckBox()"></td>
+        </tr>
+        <tr>
           <td colspan=2 align="center">
             <input type="submit" name="export" value="export" onclick="toggleElement('excel_export_columns'); document.getElementById('excel_form').submit(); return false;">
           </td>
