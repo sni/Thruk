@@ -73,27 +73,17 @@ Ext.define('TP.PanletPNP', {
                 return;
             }
             var imgPanel = this.items.getAt(1);
-            var url = this.xdata.graph + '&view=1&source='+this.xdata.source;
-            var now = new Date();
+            var size     = imgPanel.getSize();
+            var url      = this.xdata.graph + '&view=1&source='+this.xdata.source;
+            var now      = new Date();
             url = url + '&start=' + (Math.round(now.getTime()/1000) - TP.timeframe2seconds(this.xdata.time));
             url = url + '&end='   + Math.round(now.getTime()/1000);
-            var size = imgPanel.getSize();
-            var naturalWidth  = imgPanel.getEl().dom.naturalWidth;
-            var naturalHeight = imgPanel.getEl().dom.naturalHeight;
-            if(size.height > 1 && size.height < 81) {
-                url = url + '&graph_width='+(size.width);
-                url = url + '&graph_height='+(size.height);
-            }
-            else if(size.width > 1) {
-                if(naturalWidth && naturalWidth > 1) {
-                    this.size_adjustment_x += (naturalWidth  - size.width);
-                    this.size_adjustment_y += (naturalHeight - size.height);
-                    url = url + '&graph_width='+(size.width-this.size_adjustment_x);
-                    url = url + '&graph_height='+(size.height-this.size_adjustment_y);
-                } else {
-                    url = url + '&graph_width='+(size.width);
-                    url = url + '&graph_height='+(size.height);
-                }
+            if(size.height > 1 && (size.height - this.size_adjustment_y) < 81) {
+                url = url + '&graph_width=' + size.width;
+                url = url + '&graph_height='+ size.height;
+            } else {
+                url = url + '&graph_width=' +(size.width  - this.size_adjustment_x);
+                url = url + '&graph_height='+(size.height - this.size_adjustment_y);
             }
             imgPanel.setSrc(url);
         };
@@ -107,6 +97,7 @@ Ext.define('TP.PanletPNP', {
                     me.el.on({
                         load: function (evt, ele, opts) {
                             me.up('panel').tools['refresh'].setType('refresh');
+                            me.up('panel').adjustImgSize();
                         },
                         error: function (evt, ele, opts) {
                             me.up('panel').tools['refresh'].setType('broken');
@@ -168,7 +159,13 @@ Ext.define('TP.PanletPNP', {
                 this.refreshHandler();
             }
         });
-        this.addListener('resize', function() {
+        this.addListener('resize', function(This, adjWidth, adjHeight, eOpts) {
+            var size     = This.getSize();
+            // not on initial resizing
+            if(size.width != adjWidth || size.height != adjHeight) {
+                this.size_adjustment_x += adjWidth;
+                this.size_adjustment_y += adjHeight;
+            }
             this.refreshHandler();
         });
 
@@ -212,5 +209,17 @@ Ext.define('TP.PanletPNP', {
         this.gearInitCallback = function(This) {
             this.loader.load({});
         };
+
+        /* adjust size of image */
+        this.adjustImgSize = function() {
+            var imgPanel = this.items.getAt(1);
+            var size     = imgPanel.getSize();
+            var naturalWidth  = imgPanel.getEl().dom.naturalWidth;
+            var naturalHeight = imgPanel.getEl().dom.naturalHeight;
+            if(naturalWidth && naturalWidth > 81 && size.height - this.size_adjustment_y > 81) {
+                this.size_adjustment_x += (naturalWidth  - size.width);
+                this.size_adjustment_y += (naturalHeight - size.height);
+            }
+        }
     }
 });
