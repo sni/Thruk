@@ -62,7 +62,6 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
     $c->stash->{stateprovider} = $stateprovider;
     $c->stash->{'no_totals'}   = 1;
-    $c->stash->{'limit'}       = 200;
 
     if(defined $c->request->query_keywords and $c->request->query_keywords eq 'state') {
         return($self->_stateprovider($c));
@@ -377,7 +376,7 @@ sub _task_show_logs {
 
     my $json = {
         columns => [
-            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'TP.render_log_icon' },
+            { 'header' => '',        dataIndex => 'icon', width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_log' },
             { 'header' => 'Time',    dataIndex => 'time', width => 60, renderer => 'TP.render_date' },
             { 'header' => 'Message', dataIndex => 'message', flex => 1 },
         ],
@@ -452,7 +451,10 @@ sub _task_hosts {
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], limit => $c->stash->{'limit'});
+    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'pageSize'};
+    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'currentPage'};
+
+    my $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => $c);
 
     my $json = {
         columns => [
@@ -492,8 +494,12 @@ sub _task_hosts {
             { 'header' => 'Last Time Unreachable', dataIndex => 'last_time_unreachable', hidden => JSON::XS::true, renderer => 'TP.render_date' },
             { 'header' => 'Last Time Down',        dataIndex => 'last_time_down',        hidden => JSON::XS::true, renderer => 'TP.render_date' },
         ],
-        data      => $data,
-        pi_detail => $c->stash->{pi_detail},
+        data        => $data,
+        data        => $c->stash->{'data'},
+        totalCount  => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => JSON::XS::true,
+        pi_detail   => $c->stash->{pi_detail},
     };
 
     $c->stash->{'json'} = $json;
@@ -507,7 +513,10 @@ sub _task_services {
     my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], limit => $c->stash->{'limit'});
+    $c->{'request'}->{'parameters'}->{'entries'} = $c->{'request'}->{'parameters'}->{'pageSize'};
+    $c->{'request'}->{'parameters'}->{'page'}    = $c->{'request'}->{'parameters'}->{'currentPage'};
+
+    $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter], pager => $c);
 
     my $json = {
         columns => [
@@ -567,8 +576,11 @@ sub _task_services {
             { 'header' => 'Last Time Unknown',  dataIndex => 'last_time_unknown',  hidden => JSON::XS::true, renderer => 'TP.render_date' },
             { 'header' => 'Last Time Critical', dataIndex => 'last_time_critical', hidden => JSON::XS::true, renderer => 'TP.render_date' },
         ],
-        data      => $data,
-        pi_detail => $c->stash->{pi_detail},
+        data        => $c->stash->{'data'},
+        totalCount  => $c->stash->{'pager'}->{'total_entries'},
+        currentPage => $c->stash->{'pager'}->{'current_page'},
+        paging      => JSON::XS::true,
+        pi_detail   => $c->stash->{pi_detail},
     };
 
     $c->stash->{'json'} = $json;

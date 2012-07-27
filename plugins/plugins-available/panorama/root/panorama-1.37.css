@@ -99,9 +99,18 @@ LI.picker_odd {
   white-space: nowrap;
 }
 
+/* systat backgrounds */
 DIV.systat_ok   { background: #00FF33 !important; }
 DIV.systat_warn { background: #FFDE00 !important; }
 DIV.systat_crit { background: #FF5B33 !important; }
 TD.systat_graph DIV.x-grid-cell-inner {
   padding: 1px;
+}
+
+DIV.TP_PanletGridHosts DIV.x-grid-cell-inner, DIV.TP_PanletGridServices DIV.x-grid-cell-inner {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+DIV.TP_PanletGridHosts TD.x-grid-cell, DIV.TP_PanletGridServices TD.x-grid-cell {
+    vertical-align: middle;
 }

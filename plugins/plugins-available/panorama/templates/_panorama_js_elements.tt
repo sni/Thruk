@@ -187,3 +187,89 @@ Ext.define('Ext.ux.form.field.DateTime', {
         this.timeField.reset();
     }
 });
+
+
+Ext.define('TP.PagingToolbar', {
+    extend:'Ext.toolbar.Paging',
+
+    dock:       'bottom',
+    displayInfo: true,
+    getPageData: function() {
+        var panel  = this.up('panel').up('panel');
+        var data   = {
+            total:          parseInt(panel.xdata.totalCount),
+            currentPage:    parseInt(panel.xdata.currentPage),
+            pageCount:      Math.ceil(panel.xdata.totalCount / panel.xdata.pageSize),
+            fromRecord:     ((panel.xdata.currentPage - 1) * panel.xdata.pageSize),
+            toRecord:       Math.min(panel.xdata.currentPage * panel.xdata.pageSize, panel.xdata.totalCount)
+        };
+        return(data);
+    },
+    updateInfo : function(){
+        var me = this,
+            displayItem = me.child('#displayItem'),
+            pageData = me.getPageData(),
+            count, msg;
+        if (displayItem) {
+            msg = Ext.String.format(
+                me.displayMsg,
+                (pageData.fromRecord+1),
+                pageData.toRecord,
+                pageData.total
+            );
+            displayItem.setText(msg);
+            me.doComponentLayout();
+        }
+    },
+    onLoad : function(){
+        var me = this,
+            pageData,
+            currPage,
+            pageCount,
+            afterText;
+
+        if (!me.rendered) {
+            return;
+        }
+
+        pageData  = me.getPageData();
+        currPage  = pageData.currentPage;
+        pageCount = pageData.pageCount;
+        afterText = Ext.String.format(me.afterPageText, isNaN(pageCount) ? 1 : pageCount);
+        me.child('#afterTextItem').setText(afterText);
+        me.child('#inputItem').setValue(currPage);
+        me.child('#first').setDisabled(currPage === 1);
+        me.child('#prev').setDisabled(currPage === 1);
+        me.child('#next').setDisabled(currPage === pageCount);
+        me.child('#last').setDisabled(currPage === pageCount);
+        me.child('#refresh').enable();
+        me.updateInfo();
+        me.fireEvent('change', me, pageData);
+    },
+    updateData: function(data) {
+        var panel = this.up('panel').up('panel');
+        panel.xdata.totalCount  = data.totalCount;
+        panel.xdata.currentPage = data.currentPage;
+    },
+    moveNext: function() {
+        var panel = this.up('panel').up('panel');
+        panel.xdata.currentPage++;
+        panel.refreshHandler();
+    },
+    moveLast: function() {
+        var panel = this.up('panel').up('panel');
+        var pageData = this.getPageData();
+        panel.xdata.currentPage = pageData.pageCount;
+        panel.refreshHandler();
+    },
+    moveFirst: function() {
+        var panel = this.up('panel').up('panel');
+        panel.xdata.currentPage = 1;
+        panel.refreshHandler();
+    },
+    movePrevious: function() {
+        var panel = this.up('panel').up('panel');
+        panel.xdata.currentPage--;
+        panel.refreshHandler();
+    }
+});

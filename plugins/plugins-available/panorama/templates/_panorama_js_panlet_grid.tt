@@ -6,6 +6,9 @@ Ext.define('TP.PanletGrid', {
     height: 260,
     initComponent: function() {
         this.callParent();
+        this.xdata.pageSize    = 5;
+        this.xdata.currentPage = 1;
+        this.xdata.totalCount  = 1;
 
         this.loader = {
             autoLoad: false,
@@ -27,6 +30,14 @@ Ext.define('TP.PanletGrid', {
                 This.loading = false;
                 var data = TP.getResponse(this, response);
                 if(data) {
+                    if(data.paging) {
+                        this.pagingToolbar.show();
+                        this.pagingToolbar.items.getAt(9).hide();  // hide seperator
+                        this.pagingToolbar.items.getAt(10).hide(); // hide refresh
+                        this.pagingToolbar.updateData(data);
+                    } else {
+                        this.pagingToolbar.hide();
+                    }
                     var fields = [];
                     var newcolumns = Ext.JSON.encode(data.columns);
                     for(key in data.columns) {
@@ -41,6 +52,7 @@ Ext.define('TP.PanletGrid', {
                     this.gridStore = Ext.create('Ext.data.Store', {
                         data:  {'items': data.data },
                         fields: fields,
+                        pageSize: this.xdata.pageSize,
                         proxy: {
                             type: 'memory',
                             reader: {
@@ -65,6 +77,10 @@ Ext.define('TP.PanletGrid', {
                             this.grid.applyState(this.initialState);
                         } catch(e) {}
                     }
+                    this.pagingToolbar.onLoad();
+                    if(data.paging && this.pagingToolbar.getPageData().pageCount == 1) {
+                        this.pagingToolbar.hide();
+                    }
                 }
             }
         };
@@ -73,10 +89,14 @@ Ext.define('TP.PanletGrid', {
             groupHeaderTpl: '{name}'
         });
 
+        this.pagingToolbar = new TP.PagingToolbar();
+
         this.grid = Ext.create('Ext.grid.Panel', {
             store: this.gridStore,
             features: [groupingFeature],
             id: this.id + '_gridpanel',
+            cls: this.$className.replace('.', '_'),
+            scroll: 'horizontal',
             stateful: true,
             stateEvents: ['reconfigure', 'afterlayout', 'columnmove', 'columnresize', 'sortchange', 'groupchange'],
             listeners: {
@@ -89,9 +109,22 @@ Ext.define('TP.PanletGrid', {
                     panlet.xdata.gridstate = state;
                     panlet.saveState();
                     return false;
+                },
+                resize: function(This, adjWidth, adjHeight, eOpts) {
+                    this.adjustPageSize();
                 }
             },
-            columns: []
+            adjustPageSize: function() {
+                var panlet      = this.up('panel');
+                var bodySize    = Ext.get(panlet.id + '_gridpanel-body').getSize();
+                if(bodySize.height > 2) {
+                    panlet.xdata.pageSize = Math.floor(bodySize.height / 25.5);
+                    if(panlet.xdata.pageSize <= 0) { panlet.xdata.pageSize = 1; }
+                }
+                panlet.refreshHandler();
+            },
+            columns: [],
+            dockedItems: [this.pagingToolbar]
         });
         this.addListener('beforestaterestore', function(This, state, eOpts) {
             if(state.xdata.gridstate != undefined) {
@@ -110,7 +143,7 @@ Ext.define('TP.PanletGrid', {
             TP.defaultSiteRefreshHandler(this);
         };
         this.addListener('afterrender', function() {
-            this.refreshHandler();
+            this.grid.adjustPageSize();
         });
 
         this.down('form').add({
