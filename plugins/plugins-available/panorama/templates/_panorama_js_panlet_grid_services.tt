@@ -4,6 +4,7 @@ Ext.define('TP.PanletGridServices', {
     title:  'Services',
     height: 200,
     width:  900,
+    maximizable: true,
     has_search_button: 'service',
     initComponent: function() {
         this.callParent();

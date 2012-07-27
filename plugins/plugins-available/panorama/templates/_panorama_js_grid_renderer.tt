@@ -4,8 +4,8 @@ TP.render_date = function(v, td, item) {
     return TP.date_format(v);
 }
 
-/* render generic icon */
-TP.render_icon = function(v, td, item) {
+/* render log icon */
+TP.render_log_icon = function(v, td, item) {
     return "<div style=\"width:20px;height:20px;background-image:url(../themes/[% theme %]/images/"+v+");background-position:center center;background-repeat:no-repeat;\">&nbsp;<\/div>";
 }
 
@@ -262,7 +262,7 @@ TP.render_url = function(v, td, item, row, col, store, view) {
     return "<a href='"+v+"' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>";
 }
 
-/* render icon */
+/* render icon image */
 TP.render_icon = function(v, td, item, row, col, store, view) {
     return "<img src='[% logo_path_prefix %]"+v+"' border='0' width='20' height='20' alt='"+item.data.icon_image_alt+"' title='"+item.data.icon_image_alt+"'>";
 }

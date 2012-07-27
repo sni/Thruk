@@ -4,6 +4,7 @@ Ext.define('TP.PanletGridHosts', {
     title:  'Hosts',
     height: 200,
     width:  800,
+    maximizable: true,
     has_search_button: 'host',
     initComponent: function() {
         this.callParent();

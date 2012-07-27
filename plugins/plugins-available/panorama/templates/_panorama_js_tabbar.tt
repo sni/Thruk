@@ -48,7 +48,7 @@ Ext.define('TP.TabBar', {
                         text:   'Core Performance Metrics',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_lightning.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCoreMetrics'}) }
-                    }, {
+                    }, '-', {
                         text:   'Host / Service Performance',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/table_gear.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridCheckMetrics'}) }
@@ -76,23 +76,23 @@ Ext.define('TP.TabBar', {
                         text:   'Services Graph',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }
-                    }, {
+                    }, '-', {
                         text:   'Logfile',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/text_align_left.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridLogs'}) }
                     }, {
                         text:   'PNP Graph',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_bar.png',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_curve.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPNP'}) }
-                    }, {
+                    }, '-', {
                         text:   'Mod-Gearman Metrics',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/server_connect.png',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/modgearman.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridGearmanMetrics'}) }
                     }, {
                         text:   'Mod-Gearman Charts',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_curve.png',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/modgearman.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletChartGearman'}) }
-                    }, {
+                    }, '-', {
                         text:    'Generic Url Panlet',
                         icon:    '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }

@@ -18,6 +18,9 @@ Ext.define('TP.PanletPNP', {
     extend: 'TP.Panlet',
 
     title: 'PNPGraph',
+    height: 200,
+    width:  360,
+    maximizable: true,
     initComponent: function() {
         this.callParent();
         this.xdata.url      = '';
