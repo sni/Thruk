@@ -1213,7 +1213,7 @@ function selectHostById(row_id, state) {
 
     // dont select the empty cells in services view
     row = document.getElementById(row_id);
-    if(!row) {
+    if(!row || !row.cells || row.cells.length == 0) {
       return false;
     }
     if(row.cells[0].innerHTML == "") {
