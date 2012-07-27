@@ -403,7 +403,7 @@ sub _task_site_status {
             { 'header' => 'Id',               dataIndex => 'id',                      width => 45, hidden => JSON::XS::true },
             { 'header' => '',                 dataIndex => 'icon',                    width => 30, tdCls => 'icon_column', renderer => 'TP.render_icon_site' },
             { 'header' => 'Site',             dataIndex => 'site',                    width => 60, flex => 1 },
-            { 'header' => 'Version',          dataIndex => 'version',                 width => 50 },
+            { 'header' => 'Version',          dataIndex => 'version',                 width => 50, renderer => 'TP.add_title' },
             { 'header' => 'Runtime',          dataIndex => 'runtime',                 width => 85 },
             { 'header' => 'Notifications',    dataIndex => 'enable_notifications',    width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },
             { 'header' => 'Svc Checks',       dataIndex => 'execute_service_checks',  width => 65, hidden => JSON::XS::true, align => 'center', renderer => 'TP.render_enabled_switch' },

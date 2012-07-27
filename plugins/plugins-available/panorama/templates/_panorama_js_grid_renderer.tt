@@ -4,6 +4,11 @@ TP.render_date = function(v, td, item) {
     return TP.date_format(v);
 }
 
+/* just add title */
+TP.add_title  = function(v, td, item, row, col, store, view) {
+    return "<div title='"+v+"'>"+v+"<\/div>";
+}
+
 /* render icon image */
 TP.render_icon = function(v, td, item, row, col, store, view) {
     return "<img src='[% logo_path_prefix %]"+v+"' border='0' width='20' height='20' alt='"+item.data.icon_image_alt+"' title='"+item.data.icon_image_alt+"'>";
