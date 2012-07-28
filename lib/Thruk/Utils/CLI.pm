@@ -425,9 +425,8 @@ sub _request_url {
     local $ENV{'HTTP_HOST'}        = '127.0.0.1' unless defined $ENV{'HTTP_HOST'};
     local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
     local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
-    if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'}) {
-        local $ENV{'REMOTE_USER'}  = $c->stash->{'remote_user'};
-    }
+    local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
+
     # reset args, otherwise they will be interpreted as args for the script runner
     @ARGV = ();
 
