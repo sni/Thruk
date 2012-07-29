@@ -149,6 +149,13 @@ image:source/Mobile.png[Mobile Interface]
 
 There are several ways of installing Thruk.
 
+=== Labs Consol Repository
+The https://labs.consol.de/repo/[Labs Repository] provides packages of
+latest Thruk releases (including daily development builds) and other
+Tools like Mod-Gearman. Just follow the guide on the labs page for
+your distribution.
+
+
 === Use OMD
 An easy way of installing thruk is using OMD from
 http://omdistro.org[omdistro.org]. There are Debian, Ubuntu, Centos
