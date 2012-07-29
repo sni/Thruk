@@ -96,6 +96,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'services') {
             return($self->_task_services($c));
         }
+        elsif($task eq 'servicesminemap') {
+            return($self->_task_servicesminemap($c));
+        }
         elsif($task eq 'servicetotals') {
             return($self->_task_servicetotals($c));
         }
@@ -729,6 +732,56 @@ sub _task_services_pie {
             data    => $data->{$state},
         };
         push @{$json->{'colors'}}, $colors->{$state};
+    }
+
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_servicesminemap {
+    my($self, $c) = @_;
+
+    my( $hostfilter, $servicefilter, $groupfilter ) = $self->_do_filter($c);
+    return if $c->stash->{'has_error'};
+
+    my($uniq_services, $hosts, $matrix) = Thruk::Utils::Status::get_service_matrix($c, $servicefilter);
+
+    my $service2index = {};
+    my $json = {
+        columns => [
+            { 'header' => '<div class="minemap_first_col">Hostname</div>', width => 120, height => 120, dataIndex => 'host_display_name' },
+        ],
+        data        => [],
+        pi_detail   => $c->stash->{pi_detail},
+    };
+
+    my $x=0;
+    for my $svc (sort keys %{$uniq_services}) {
+        my $index = 'col'.$x;
+        $service2index->{$svc} = $index;
+        push @{$json->{'columns'}}, {
+                    'header'    => '<div class="vertical">'.$svc.'</div>',
+                    'width'     => 20,
+                    'height'    => 120,
+                    'dataIndex' => $index,
+                    'align'     => 'center',
+                    'tdCls'     => 'mine_map_cell'
+        };
+        $x++;
+    }
+    for my $name (sort keys %{$hosts}) {
+        my $hst  = $hosts->{$name};
+        my $data = { 'host_display_name' => $hst->{'host_display_name'} };
+        for my $svc (keys %{$uniq_services}) {
+            my $service = $matrix->{$name}->{$svc};
+            my $cls  = 'mine_map_state'.$service->{state};
+            my $text = '&nbsp;';
+            if($service->{'scheduled_downtime_depth'}) { $text = '<img src="'.$c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/downtime.gif" alt="downtime" height="15" width="15">' }
+            if($service->{'acknowledged'})             { $text = '<img src="'.$c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/ack.gif" alt="acknowledged" height="15" width="15">' }
+            $data->{$service2index->{$svc}} = '<div class="'.$cls.'">'.$text.'</div>';
+        }
+        push @{$json->{'data'}}, $data;
     }
 
     $c->stash->{'json'} = $json;

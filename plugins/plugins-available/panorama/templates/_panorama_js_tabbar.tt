@@ -79,6 +79,10 @@ Ext.define('TP.TabBar', {
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/application_view_columns.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServiceTotals'}) }
                     }, {
+                        text:   'Mine Map',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/minemap.png',
+                        handler: function() { TP.add_panlet({type:'TP.PanletGridServiceMineMap'}) }
+                    }, {
                         text:   'Services Graph',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/chart_pie.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletPieChartServices'}) }

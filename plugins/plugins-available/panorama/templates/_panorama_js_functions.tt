@@ -364,6 +364,9 @@ var TP = {
                 if(panlet.tools[nr].type == 'refresh') {
                     refresh = panlet.tools[nr];
                 }
+                if(panlet.tools[nr].type == 'broken') {
+                    refresh = panlet.tools[nr];
+                }
             }
         }
         if(response.status == 200) {
