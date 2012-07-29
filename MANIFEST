@@ -1034,9 +1034,10 @@ plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/images/tool_broken.png
 plugins/plugins-available/panorama/root/panorama-1.39.css
 plugins/plugins-available/panorama/t/controller_panorama.t
-plugins/plugins-available/panorama/templates/_panorama_js.tt
+plugins/plugins-available/panorama/t/javascript.t
 plugins/plugins-available/panorama/templates/_panorama_js_elements.tt
 plugins/plugins-available/panorama/templates/_panorama_js_form_filter.tt
+plugins/plugins-available/panorama/templates/_panorama_js_functions.tt
 plugins/plugins-available/panorama/templates/_panorama_js_grid_renderer.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet.tt
 plugins/plugins-available/panorama/templates/_panorama_js_panlet_chart.tt
@@ -1059,6 +1060,7 @@ plugins/plugins-available/panorama/templates/_panorama_js_state_provider_http.tt
 plugins/plugins-available/panorama/templates/_panorama_js_tabbar.tt
 plugins/plugins-available/panorama/templates/_panorama_js_utils_base64.tt
 plugins/plugins-available/panorama/templates/panorama.tt
+plugins/plugins-available/panorama/templates/panorama_js.tt
 plugins/plugins-available/reports/description.txt
 plugins/plugins-available/reports/lib/Thruk/Controller/reports.pm
 plugins/plugins-available/reports/lib/Thruk/Utils/PDF.pm

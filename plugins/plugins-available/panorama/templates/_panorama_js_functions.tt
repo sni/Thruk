@@ -71,6 +71,9 @@ var TP = {
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
         if(!tb) {
+            tb = pan.setActiveTab(0);
+        }
+        if(!tb) {
             throw("add_panlet(): no active tab!");
         }
         var win = Ext.create(config.type, config.conf);
@@ -357,18 +360,22 @@ var TP = {
     getResponse: function(panlet, response) {
         var refresh = {setType: Ext.emptyFn };
         if(panlet != undefined) {
-            refresh = panlet.tools['refresh'];
+            for(var nr in panlet.tools) {
+                if(panlet.tools[nr].type == 'refresh') {
+                    refresh = panlet.tools[nr];
+                }
+            }
         }
         if(response.status == 200) {
             var data;
             try {
                 data = eval("("+response.responseText+")");
             } catch(e) {
-                refresh.setType('broken');
+                if(refresh) { refresh.setType('broken') }
                 debug(e);
                 return data;
             }
-            refresh.setType('refresh');
+            if(refresh) { refresh.setType('refresh') }
             /* extract pi details */
             if(data.pi_detail != undefined) {
                 for(var key in data.pi_detail) {
@@ -380,7 +387,7 @@ var TP = {
         }
         debug("ERROR: " + response.status);
         debug(response);
-        refresh.setType('broken');
+        if(refresh) { refresh.setType('broken') }
         return false;
     },
     /* sets text for refresh slider */

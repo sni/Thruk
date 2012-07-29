@@ -8,9 +8,12 @@
     <link rel="stylesheet" type="text/css" href="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/resources/css/ext-all-gray.css">
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/panorama/panorama-[% version %].css' />
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.0/ext-all-debug.js"></script>
+    <!--[IF !IE]> -->
     <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1&amp;_dc=[% date.now %]"></script>
+    <!-- <![ENDIF]-->
 </head>
 <body>
+<!--[IF IE]>Thruks Panorama View does not support Internet Explorer.<![ENDIF]-->
 [%+ FOREACH i = preload_img %]
 <img src="[% url_prefix %]thruk/plugins/panorama/images/[% i %]" alt="preloader" height=0 width=0>
 [%+ END %]
