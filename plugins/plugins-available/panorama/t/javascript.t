@@ -2,10 +2,17 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
+use File::Temp qw/ tempfile /;
 
-plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
-eval "use Test::JavaScript";
-plan skip_all => 'Test::JavaScript required' if $@;
+BEGIN {
+    plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+    eval "use Test::JavaScript";
+    plan skip_all => 'Test::JavaScript required' if $@;
+
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
 
 #################################################
 # create minimal window object
@@ -41,19 +48,20 @@ var document  = window.document;
 setTimeout    = function() {};
 setInterval   = function() {};
 ", 'set window object') or BAIL_OUT("failed to create window object");
-my @jsfiles = glob('root/thruk/javascript/jquery-*.js');
+my @jsfiles = glob('plugins/plugins-available/panorama/root/extjs-*/ext-all-debug.js');
 ok($jsfiles[0], $jsfiles[0]);
-js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load jQuery");
-js_ok("jQuery = window.jQuery", 'set jQuery into global space') or BAIL_OUT("failed to globalize jQuery");
-js_ok("jQuery.noConflict()", 'set jQuery noConflict') or BAIL_OUT("failed to so noConflict");
+js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load extjs");
 
 #################################################
-js_ok("url_prefix='/'", 'set url prefix');
-@jsfiles = glob('root/thruk/javascript/thruk-*.js');
-ok($jsfiles[0], $jsfiles[0]);
-js_eval_ok($jsfiles[0]);
-
-js_eval_ok('t/data/javascript_tests.js');
-js_is("test1()", '1', 'test1()');
+my $tst = TestUtils::test_page(
+    'url'           => '/thruk/cgi-bin/panorama.cgi?js=1',
+    'like'          => 'BLANK_IMAGE_URL',
+    'content_type'  => 'text/javascript; charset=UTF-8',
+);
+my($fh, $filename) = tempfile();
+print $fh $tst->{'content'};
+close($fh);
+js_eval_ok($filename);
+unlink($filename);
 
 done_testing();

@@ -1,0 +1,62 @@
+Ext.BLANK_IMAGE_URL        = '[% url_prefix %]thruk/plugins/panorama/images/s.gif';
+var theme                  = '[% theme %]';
+var url_prefix             = '[% url_prefix %]';
+var cookie_path            = '[% cookie_path %]';
+var base                   = '[% url_prefix %]thruk/plugins/panorama';
+[%+ PROCESS _header_initial_states.tt +%]
+[%+ PROCESS _common_js_bugs.tt +%]
+
+var ExtState     = [% state %];
+var default_view = '[% default_view %]';
+
+[% IF stateprovider == 'server' %]
+    [%+ PROCESS _panorama_js_state_provider_http.tt +%]
+[% ELSE %]
+    [%+ PROCESS _panorama_js_state_provider_cookie.tt +%]
+[% END %]
+
+[%+ PROCESS _panorama_js_functions.tt +%]
+[%+ PROCESS _panorama_js_elements.tt +%]
+[%+ PROCESS _panorama_js_utils_base64.tt +%]
+[%+ PROCESS _panorama_js_slider.tt +%]
+[%+ PROCESS _panorama_js_form_filter.tt +%]
+[%+ PROCESS _panorama_js_grid_renderer.tt +%]
+[%+ PROCESS _panorama_js_settings_global.tt +%]
+[%+ PROCESS _panorama_js_tabbar.tt +%]
+[%+ PROCESS _panorama_js_pantab.tt +%]
+[%+ PROCESS _panorama_js_panlet.tt +%]
+[%+ PROCESS _panorama_js_panlet_url.tt +%]
+[%+ PROCESS _panorama_js_panlet_grid.tt +%]
+[%+ PROCESS _panorama_js_panlet_grid_core_metrics.tt +%]
+[%+ PROCESS _panorama_js_panlet_grid_logs.tt +%]
+[%+ PROCESS _panorama_js_panlet_grid_server.tt +%]
+[%+ PROCESS _panorama_js_panlet_grid_hosts.tt +%]
+[%+ PROCESS _panorama_js_panlet_grid_services.tt +%]
+[%+ PROCESS _panorama_js_panlet_chart.tt +%]
+[%+ PROCESS _panorama_js_panlet_chart_gearman.tt +%]
+[%+ PROCESS _panorama_js_panlet_piechart.tt +%]
+[%+ PROCESS _panorama_js_panlet_piechart_stats.tt +%]
+[%+ PROCESS _panorama_js_panlet_pnp.tt +%]
+
+/* main viewport */
+Ext.onReady(function() {
+  Ext.QuickTips.init();
+
+  /* do we have a state? */
+  var state = cp.readValues();
+  if(!state['tabpan'] && default_view != '') {
+      debug("using default view");
+      data = cp.decodeValue(decode64(default_view));
+      cp.loadData(data);
+  }
+
+  TP.viewport = new Ext.Viewport({
+    id:       'viewport',
+    layout:   'border',
+    renderTo: Ext.getBody(),
+    margins:  '0 0 0 0',
+    items:    [ new TP.TabBar() ]
+  });
+  Ext.getCmp('bug_report').hide();
+  Ext.getCmp('test_tab').hide();
+});

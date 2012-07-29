@@ -1,5 +1,3 @@
-Ext.BLANK_IMAGE_URL = '[% url_prefix %]thruk/plugins/panorama/images/s.gif';
-
 /* send debug output to firebug console */
 function debug(str) {
     if (window.console != undefined) {
@@ -12,7 +10,6 @@ function ucfirst(str) {
     var firstLetter = str.slice(0,1);
     return firstLetter.toUpperCase() + str.substring(1);
 }
-
 
 /* global Thruk Panorama Object */
 Ext.namespace("TP");

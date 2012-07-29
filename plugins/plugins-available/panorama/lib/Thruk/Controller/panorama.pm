@@ -58,13 +58,16 @@ sub panorama_cgi : Regex('thruk\/cgi\-bin\/panorama\.cgi') {
 sub index :Path :Args(0) :MyAction('AddDefaults') {
     my ( $self, $c ) = @_;
 
-    my $stateprovider = $c->config->{'Thruk::Plugin::Panorama'}->{'state_provider'} || 'server';
-    if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
-    $c->stash->{stateprovider} = $stateprovider;
     $c->stash->{'no_totals'}   = 1;
 
-    if(defined $c->request->query_keywords and $c->request->query_keywords eq 'state') {
-        return($self->_stateprovider($c));
+    if(defined $c->request->query_keywords) {
+        if($c->request->query_keywords eq 'state') {
+            return($self->_stateprovider($c));
+        }
+    }
+
+    if(defined $c->request->parameters->{'js'}) {
+        return($self->_js($c));
     }
 
     if(defined $c->request->parameters->{'task'}) {
@@ -113,6 +116,27 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         }
     }
 
+    # find images for preloader
+    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
+    my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
+    $c->stash->{preload_img} = [];
+    for my $i (@images) {
+        $i =~ s|^.*/||gmx;
+        push @{$c->stash->{preload_img}}, $i;
+    }
+
+    $c->stash->{template}  = 'panorama.tt';
+    return 1;
+}
+
+##########################################################
+sub _js {
+    my ( $self, $c ) = @_;
+
+    my $stateprovider = $c->config->{'Thruk::Plugin::Panorama'}->{'state_provider'} || 'server';
+    if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
+    $c->stash->{stateprovider} = $stateprovider;
+
     $c->stash->{default_view} = '';
     my $default_file = $c->config->{'Thruk::Plugin::Panorama'}->{'default_view'};
     if($default_file) {
@@ -125,26 +149,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stash->{default_view} = $default_view;
     }
 
-    # find images for preloader
-    my $plugin_dir = $c->config->{'plugin_path'} || $c->config->{home}."/plugins";
-    my @images = glob($plugin_dir.'/plugins-enabled/panorama/root/images/*');
-    $c->stash->{preload_img} = [];
-    for my $i (@images) {
-        $i =~ s|^.*/||gmx;
-        push @{$c->stash->{preload_img}}, $i;
-    }
-
     my $data = Thruk::Utils::get_user_data($c);
     $c->stash->{state}     = encode_json($data->{'panorama'}->{'state'} || {});
-    $c->stash->{template}  = 'panorama.tt';
+
+    $c->res->content_type('text/javascript');
+    $c->stash->{template}  = 'panorama_js.tt';
     return 1;
 }
 
 ##########################################################
-
-=head2 index
-
-=cut
 sub _stateprovider {
     my ( $self, $c ) = @_;
 

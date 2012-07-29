@@ -1,7 +1,7 @@
-﻿var initial_backend_states = new Object({
-    [% FOREACH pd IN backends %]'[% pd %]': '[% backend_detail.$pd.state %]'[% UNLESS loop.last %],[% END %][% END %]
-});
-var initial_backends = new Object({
+﻿var initial_backend_states = {
+    [% FOREACH pd IN backends %]'[% pd %]': '[% backend_detail.$pd.state %]'[% UNLESS loop.last %], [% END %][% END %]
+};
+var initial_backends = {
     [% FOREACH pd IN backends +%]
       '[% pd %]': {
         key:              '[% pd %]',
@@ -12,4 +12,4 @@ var initial_backends = new Object({
         program_start:    '[% IF pi_detail.$pd.exists('program_start') %][% pi_detail.$pd.program_start %][% END %]'
       }[% UNLESS loop.last %],[% END +%]
     [% END +%]
-});
+};
