@@ -1394,6 +1394,10 @@ sub get_git_name {
     my $project_root = $INC{'Thruk/Utils.pm'};
     $project_root =~ s/\/Utils\.pm$//gmx;
     if(-d $project_root.'/../../.git') {
+        # directly on git tag?
+        my $tag = `cd $project_root && git describe --tag --exact-match 2>/dev/null`;
+        return '' if $tag;
+
         my $branch = `cd $project_root && git branch --no-color 2> /dev/null | grep ^\*`;
         chomp($branch);
         $branch =~ s/^\*\s+//gmx;
