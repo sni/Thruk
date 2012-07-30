@@ -1,0 +1,192 @@
+Ext.define('TP.PanletService', {
+    extend: 'TP.Panlet',
+
+    title: 'Service',
+    height: 280,
+    width:  460,
+    initComponent: function() {
+        this.callParent();
+        this.xdata.url         = 'panorama.cgi?task=service_detail';
+        if(this.xdata.host    == undefined) { this.xdata.host    = '' }
+        if(this.xdata.service == undefined) { this.xdata.service = '' }
+
+        this.refreshHandler = function() {
+            TP.defaultSiteRefreshHandler(this);
+        };
+
+        /* load service data */
+        this.loader = {
+            autoLoad: false,
+            renderer: 'data',
+            scope:    this,
+            ajaxOptions: { method: 'POST' },
+            loading:  false,
+            listeners: {
+                'beforeload': function(This, options, eOpts) {
+                    if(this.loading) {
+                        return false;
+                    }
+                    this.loading = true;
+                    return true;
+                }
+            },
+            callback: function(This, success, response, options) {
+                This.loading = false;
+                var data  = TP.getResponse(this, response);
+                if(data && data.data) {
+                    var d = data.data;
+                    var panel = this.items.getAt(1);
+                    panel.getComponent('current_status').update('<div class="extinfostate '+TP.render_service_status(d.state, {}, data).toUpperCase()+'">'+TP.render_service_status(d.state, {}, data).toUpperCase()+'</div> (for ' + TP.render_duration('', '', data)+')');
+                    panel.getComponent('status_information').update(d.plugin_output);
+                    panel.getComponent('perf_data').update(d.perf_data);
+                    panel.getComponent('cur_attempt').update(d.current_attempt + '/' + d.max_check_attempts);
+                    panel.getComponent('last_check_time').update(TP.date_format(d.last_check));
+                    panel.getComponent('check_type').update(d.check_type == 0 ? 'ACTIVE' : 'PASSIVE');
+                    panel.getComponent('check_latency').update(d.latency.toFixed(3) + ' / ' + d.execution_time.toFixed(3) + ' seconds');
+                    panel.getComponent('next_check').update(TP.date_format(d.next_check));
+                    panel.getComponent('last_change').update(TP.date_format(d.last_state_change));
+                    panel.getComponent('last_notification').update((d.last_notification == 0 ? 'N/A' : TP.date_format(d.last_notification)) + ' (notification '+d.current_notification_number+')');
+                }
+            }
+        };
+        this.add({
+            xtype:     'panel',
+            autoScroll: true,
+            border:     false,
+            layout: {
+                type:   'table',
+                columns: 2,
+                tableAttrs: {
+                    cellpadding: '0',
+                    cellspacing: '1',
+                    border:      '1',
+                    bordercolor: '#D0D0D0'
+                },
+                tdAttrs: {
+                    valign: 'top'
+                }
+            },
+            defaults: {
+                bodyStyle: 'padding: 3px;',
+                cls: 'extinfo_val',
+                layout: 'fit',
+                border: false
+            },
+            items: [
+                    { html: 'Current Status' },             { cls: 'extinfo_var', html: '', itemId: 'current_status'  },
+                    { html: 'Status Information' },         { cls: 'extinfo_var', html: '', itemId: 'status_information' },
+                    { html: 'Performance Data' },           { cls: 'extinfo_var', html: '', itemId: 'perf_data' },
+                    { html: 'Current Attempt' },            { cls: 'extinfo_var', html: '', itemId: 'cur_attempt' },
+                    { html: 'Last Check Time' },            { cls: 'extinfo_var', html: '', itemId: 'last_check_time' },
+                    { html: 'Check Type' },                 { cls: 'extinfo_var', html: '', itemId: 'check_type' },
+                    { html: 'Check Latency / Duration' },   { cls: 'extinfo_var', html: '', itemId: 'check_latency' },
+                    { html: 'Next Scheduled Check' },       { cls: 'extinfo_var', html: '', itemId: 'next_check' },
+                    { html: 'Last State Change' },          { cls: 'extinfo_var', html: '', itemId: 'last_change' },
+                    { html: 'Last Notification' },          { cls: 'extinfo_var', html: '', itemId: 'last_notification' },
+            ]
+        });
+
+
+
+        /* Settings */
+        this.hosts_store = new Ext.data.Store({
+                fields: ['name'],
+                data: []
+        });
+        this.host_combo = new Ext.form.field.ComboBox({
+            fieldLabel:     'Host',
+            name:           'host',
+            queryMode:      'local',
+            valueField:     'name',
+            displayField:   'name',
+            store:          this.hosts_store,
+            listeners: {
+                select: function( combo, records, eOpts ) {
+                    panel = combo.up('panel').up('panel').up('panel');
+                    panel.xdata.service = '';
+                    panel.updateService();
+                },
+                change: function( combo, newValue, oldValue, eOpts ) {
+                    panel = combo.up('panel').up('panel').up('panel');
+                    panel.updateService();
+                }
+            }
+        });
+        this.down('form').add(this.host_combo);
+
+        this.services_store = Ext.create('Ext.data.Store', {
+            fields: ['description'],
+            data :  []
+        });
+        this.service_combo = new Ext.form.field.ComboBox({
+            fieldLabel:     'Service',
+            name:           'service',
+            queryMode:      'local',
+            displayField:   'description',
+            valueField:     'description',
+            forceSelection: true,
+            editable:       false,
+            store:          this.services_store
+        });
+        this.down('form').add(this.service_combo);
+        this.gearInitCallback = function(This) {
+            this.updateHost();
+        };
+
+        this.updateHost = function() {
+            var panel  = this;
+            var form   = this.down('form').getForm();
+            var values = form.getValues();
+            var url = 'panorama.cgi?task=host_list';
+            Ext.Ajax.request({
+                url: url,
+                method: 'POST',
+                callback: function(options, success, response) {
+                    var data  = TP.getResponse(panel, response);
+                    panel.host_combo.store.removeAll();
+                    for(var nr in data.data) {
+                        panel.host_combo.store.loadRawData(data.data[nr], true);
+                    }
+                    panel.host_combo.setValue(panel.xdata.host);
+                }
+            });
+        };
+
+        this.updateService = function() {
+            var panel  = this;
+            var form   = this.down('form').getForm();
+            var values = form.getValues();
+            if(values.host != this.lastHost) {
+                this.lastHost = values.host;
+                var url = 'panorama.cgi?task=service_list';
+                url = Ext.urlAppend(url, Ext.Object.toQueryString({host: values.host}));
+                Ext.Ajax.request({
+                    url: url,
+                    method: 'POST',
+                    callback: function(options, success, response) {
+                        var data  = TP.getResponse(panel, response);
+                        panel.service_combo.store.removeAll();
+                        for(var nr in data.data) {
+                            panel.service_combo.store.loadRawData(data.data[nr], true);
+                        }
+                        panel.service_combo.setValue(panel.xdata.service);
+                    }
+                });
+            }
+        };
+
+        /* auto load when host is set */
+        this.addListener('afterrender', function() {
+            this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
+            if(this.xdata.host == '') {
+                this.gearHandler();
+            } else {
+                this.refreshHandler();
+            }
+        });
+
+        this.formUpdatedCallback = function() {
+            this.setTitle(this.xdata.host + ' - ' + this.xdata.service);
+        }
+    }
+});

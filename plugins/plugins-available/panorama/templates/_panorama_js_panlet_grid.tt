@@ -116,6 +116,10 @@ Ext.define('TP.PanletGrid', {
                 },
                 resize: function(This, adjWidth, adjHeight, eOpts) {
                     this.adjustPageSize();
+                },
+                beforeselect: function(This, record, index, eOpts) {
+                    /* prevent selections */
+                    return false;
                 }
             },
             adjustPageSize: function() {

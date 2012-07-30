@@ -196,3 +196,19 @@ TD.mine_map_cell DIV.x-grid-cell-inner {
 SPAN.x-menu-item-text DIV.vertical, SPAN.x-menu-item-text DIV.minemap_first_col {
   display: inline;
 }
+
+.extinfo_val {
+    font-weight: bold;
+    white-space: nowrap;
+    vertical-align: top;
+}
+.extinfo_var {
+}
+
+DIV.extinfostate {
+    display: inline-block;
+    width: 80px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+}

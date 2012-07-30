@@ -1,10 +1,3 @@
-Ext.define('TP_Graphs', {
-    extend: 'Ext.data.Model',
-    fields: [
-        {name: 'text', type: 'string'},
-        {name: 'url',  type: 'string'}
-    ]
-});
 Ext.define('TP_Sources', {
     extend: 'Ext.data.Model',
     fields: [
@@ -91,7 +84,7 @@ Ext.define('TP.PanletPNP', {
             imgPanel.setSrc(url);
         };
 
-        /* url content should be in an iframe */
+        /* panel content should be in an image */
         this.add({
             xtype: 'image',
             src:   Ext.BLANK_IMAGE_URL,

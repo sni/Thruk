@@ -37,6 +37,7 @@ var default_view = '[% default_view %]';
 [%+ PROCESS _panorama_js_panlet_piechart.tt +%]
 [%+ PROCESS _panorama_js_panlet_piechart_stats.tt +%]
 [%+ PROCESS _panorama_js_panlet_pnp.tt +%]
+[%+ PROCESS _panorama_js_panlet_service.tt +%]
 
 /* main viewport */
 Ext.onReady(function() {

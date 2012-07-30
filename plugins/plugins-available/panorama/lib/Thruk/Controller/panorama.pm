@@ -105,6 +105,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'hosts_pie') {
             return($self->_task_hosts_pie($c));
         }
+        elsif($task eq 'host_list') {
+            return($self->_task_host_list($c));
+        }
+        elsif($task eq 'service_list') {
+            return($self->_task_service_list($c));
+        }
+        elsif($task eq 'service_detail') {
+            return($self->_task_service_detail($c));
+        }
         elsif($task eq 'services_pie') {
             return($self->_task_services_pie($c));
         }
@@ -781,7 +790,7 @@ sub _task_servicesminemap {
             my $text    = '&nbsp;';
             if($service->{'scheduled_downtime_depth'}) { $text = '<img src="'.$c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/downtime.gif" alt="downtime" height="15" width="15">' }
             if($service->{'acknowledged'})             { $text = '<img src="'.$c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/ack.gif" alt="acknowledged" height="15" width="15">' }
-            $data->{$service2index->{$svc}} = '<div class="'.$cls.'">'.$text.'</div>';
+            $data->{$service2index->{$svc}} = '<div class="clickable '.$cls.'" '.$self->_generate_service_popup($c, $service).'>'.$text.'</div>';
         }
         push @{$json->{'data'}}, $data;
     }
@@ -819,6 +828,51 @@ sub _task_pnp_graphs {
     $graphs = Thruk::Backend::Manager::_sort({}, $graphs, 'text');
 
     $c->stash->{'json'} = { data => $graphs };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_host_list {
+    my($self, $c) = @_;
+
+    my $hosts = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
+    my $data = [];
+    for my $hst (@{$hosts}) {
+        push @{$data}, { name => $hst->{'name'} };
+    }
+
+    $data = Thruk::Backend::Manager::_sort({}, $data, 'name');
+    $c->stash->{'json'} = { data => $data };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_service_list {
+    my($self, $c) = @_;
+
+    my $host     = $c->request->parameters->{'host'} || '';
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host }]);
+    my $data = [];
+    for my $svc (@{$services}) {
+        push @{$data}, { description => $svc->{'description'} };
+    }
+
+    $data = Thruk::Backend::Manager::_sort({}, $data, 'description');
+    $c->stash->{'json'} = { data => $data };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_service_detail {
+    my($self, $c) = @_;
+
+    my $host        = $c->request->parameters->{'host'}    || '';
+    my $description = $c->request->parameters->{'service'} || '';
+    $c->stash->{'json'} = {};
+    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
+    if(defined $services and scalar @{$services} > 0) {
+        $c->stash->{'json'} = { data => $services->[0] };
+    }
     return $c->forward('Thruk::View::JSON');
 }
 
@@ -912,6 +966,12 @@ sub _do_filter {
     }
     my @f = Thruk::Utils::Status::do_filter($c);
     return @f;
+}
+
+##########################################################
+sub _generate_service_popup {
+    my ($self, $c, $service) = @_;
+    return ' title="'.Thruk::Utils::Filter::escape_quotes($service->{'plugin_output'}).'"  onclick="TP.add_panlet({type:\'TP.PanletService\', conf: { xdata: { host: \''.$service->{'host_name'}.'\', service: \''.$service->{'description'}.'\', }}})"';
 }
 
 ##########################################################

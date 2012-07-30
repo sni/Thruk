@@ -16,12 +16,15 @@ Ext.define('TP.Panlet', {
         heightIncrement: TP.snap_y
     }),
     initComponent: function() {
-        this.xdata = {
-            refresh:  -1,
-            cls:      this.$className,
-            pinned:   false,
-            backends: []
-        };
+        if(this.xdata == undefined) {
+            this.xdata = {};
+        } else {
+            this.xdata = TP.clone(this.xdata);
+        }
+        this.xdata.refresh  = -1;
+        this.xdata.cls      = this.$className;
+        this.xdata.pinned   = false;
+        this.xdata.backends = [];
 
         this.gearHandler = function() {
             if(this.gearitem.isHidden()) {
