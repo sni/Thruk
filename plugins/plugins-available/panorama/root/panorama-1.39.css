@@ -8,6 +8,7 @@
 .CRITICAL     { background: #FF5B33 !important; }
 .UNKNOWN      { background: #FF9E00 !important; }
 
+.BG_WARNING      { background: #FFFF99 !important; }
 .BG_UNREACHABLE  { background: #FFC0C0 !important; }
 .BG_DOWN         { background: #FFC0C0 !important; }
 

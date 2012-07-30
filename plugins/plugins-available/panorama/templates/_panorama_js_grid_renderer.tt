@@ -272,6 +272,20 @@ TP.render_url = function(v, td, item, row, col, store, view) {
     return "<a href='"+v+"' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>";
 }
 
+/* render gearman queues */
+TP.render_gearman_queue = function(v, td, item, row, col, store, view) {
+    if(item.data.worker * 10 <= item.data.waiting) {
+        td.tdCls = 'BG_WARNING';
+    }
+    if(item.data.worker * 20 <= item.data.waiting) {
+        td.tdCls = 'BG_DOWN';
+    }
+    if(item.data.worker == 0 && item.data.waiting > 0) {
+        td.tdCls = 'BG_DOWN';
+    }
+    return v;
+}
+
 /* format timestamp */
 TP.date_format = function(t) {
     var d = new Date(t*1000);
