@@ -23,24 +23,12 @@ var window = {
     createDocumentFragment:function(){return({})},
     createComment:function(){},
     getElementById:function(){},
-    getElementsByTagName:function(){ return([])},
     documentElement:{
-        style: {},
         insertBefore:function(){},
         removeChild:function(){}
-    },
-    addEventListener: function(){},
-    removeEventListener: function(){}
-  },
-  location: {},
-  addEventListener: function(){},
-  removeEventListener: function(){}
-};
-var navigator = window.navigator;
-var document  = window.document;
-setTimeout    = function() {};
-setInterval   = function() {};
-", 'set window object') or BAIL_OUT("failed to create window object");
+    }
+  }
+}", 'set window object') or BAIL_OUT("failed to create window object");
 my @jsfiles = glob('root/thruk/javascript/jquery-*.js');
 ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]) or BAIL_OUT("failed to load jQuery");
