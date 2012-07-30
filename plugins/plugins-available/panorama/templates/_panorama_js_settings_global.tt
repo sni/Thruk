@@ -1,6 +1,9 @@
 /* show settings window */
 TP.settingsWindow = function() {
 
+    /* stop rotation */
+    TP.stopRotatingTabs();
+
     /* the settings form */
     var settings_form = new Ext.form.Panel({
         bodyPadding: 5,

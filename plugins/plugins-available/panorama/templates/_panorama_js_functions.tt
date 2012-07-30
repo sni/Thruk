@@ -412,6 +412,11 @@ var TP = {
             tabpan.interval = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
         }
     },
+    /* stop tab rotation interval */
+    stopRotatingTabs: function() {
+        var tabpan = Ext.getCmp('tabpan');
+        window.clearInterval(tabpan.interval);
+    },
     /* rotate tabs once */
     rotateTabs: function() {
         var tabpan = Ext.getCmp('tabpan');
