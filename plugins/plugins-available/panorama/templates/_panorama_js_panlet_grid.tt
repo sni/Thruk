@@ -30,18 +30,24 @@ Ext.define('TP.PanletGrid', {
                 This.loading = false;
                 var data = TP.getResponse(this, response);
                 if(data) {
-                    var body = Ext.get(this.grid.id+"-body").dom.firstChild;
+                    var b    = Ext.get(this.grid.id+"-body");
+                    var body;
+                    if(b) { body = b.dom.firstChild }
                     if(data.paging) {
                         this.pagingToolbar.show();
                         this.pagingToolbar.items.getAt(9).hide();  // hide seperator
                         this.pagingToolbar.items.getAt(10).hide(); // hide refresh
                         this.pagingToolbar.updateData(data);
-                        body.style.overflow  = 'inherit';
-                        body.style.overflowY = 'hidden';
+                        if(body) {
+                            body.style.overflow  = 'inherit';
+                            body.style.overflowY = 'hidden';
+                        }
                     } else {
                         this.pagingToolbar.hide();
-                        body.style.overflowY = 'inherit';
-                        body.style.overflow  = 'auto';
+                        if(body) {
+                            body.style.overflowY = 'inherit';
+                            body.style.overflow  = 'auto';
+                        }
                     }
                     var fields = [];
                     var newcolumns = Ext.JSON.encode(data.columns);
