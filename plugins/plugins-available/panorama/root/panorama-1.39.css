@@ -125,13 +125,11 @@ DIV.x-grid-header-ct DIV.vertical {
   -o-transform: rotate(-90deg);
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
-/* make first row align to bottom */
 DIV.x-grid-header-ct DIV.minemap_first_col {
   position: relative;
   top: 50px;
 }
-
-DIV.mine_map_state0, DIV.mine_map_state1, DIV.mine_map_state2, DIV.mine_map_state3 {
+DIV.mine_map_state0, DIV.mine_map_state1, DIV.mine_map_state2, DIV.mine_map_state3, DIV.mine_map_state4 {
   width: 16px;
   height: 16px;
 }
@@ -147,10 +145,15 @@ DIV.mine_map_state2 {
 DIV.mine_map_state3 {
   background: #FF9E00;
 }
-
+DIV.mine_map_state4 {
+  background: #ACACAC;
+}
 TD.mine_map_cell DIV.x-grid-cell-inner {
   padding-top:    0px;
   padding-bottom: 0px;
   padding-left:   1px;
   padding-right:  1px;
+}
+SPAN.x-menu-item-text DIV.vertical, SPAN.x-menu-item-text DIV.minemap_first_col {
+  display: inline;
 }

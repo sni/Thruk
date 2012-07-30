@@ -775,8 +775,10 @@ sub _task_servicesminemap {
         my $data = { 'host_display_name' => $hst->{'host_display_name'} };
         for my $svc (keys %{$uniq_services}) {
             my $service = $matrix->{$name}->{$svc};
-            my $cls  = 'mine_map_state'.$service->{state};
-            my $text = '&nbsp;';
+            next unless defined $service->{state};
+            my $cls     = 'mine_map_state'.$service->{state};
+            $cls        = 'mine_map_state4' if $service->{has_been_checked} == 0;
+            my $text    = '&nbsp;';
             if($service->{'scheduled_downtime_depth'}) { $text = '<img src="'.$c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/downtime.gif" alt="downtime" height="15" width="15">' }
             if($service->{'acknowledged'})             { $text = '<img src="'.$c->stash->{'url_prefix'}.'thruk/themes/'.$c->stash->{'theme'}.'/images/ack.gif" alt="acknowledged" height="15" width="15">' }
             $data->{$service2index->{$svc}} = '<div class="'.$cls.'">'.$text.'</div>';
