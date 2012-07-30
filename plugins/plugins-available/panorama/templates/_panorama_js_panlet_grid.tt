@@ -2,8 +2,8 @@ Ext.define('TP.PanletGrid', {
     extend: 'TP.Panlet',
 
     title:  'grid',
-    width:  640,
-    height: 260,
+    width:   640,
+    height:  260,
     initComponent: function() {
         this.callParent();
         this.xdata.pageSize    = 5;
@@ -97,11 +97,11 @@ Ext.define('TP.PanletGrid', {
         this.pagingToolbar = new TP.PagingToolbar();
 
         this.grid = Ext.create('Ext.grid.Panel', {
-            store: this.gridStore,
-            features: [groupingFeature],
-            id: this.id + '_gridpanel',
-            cls: this.$className.replace('.', '_'),
-            stateful: true,
+            store:        this.gridStore,
+            features:    [groupingFeature],
+            id:           this.id + '_gridpanel',
+            cls:          this.$className.replace('.', '_'),
+            stateful:     true,
             stateEvents: ['reconfigure', 'afterlayout', 'columnmove', 'columnresize', 'sortchange', 'groupchange'],
             listeners: {
                 beforestatesave: function(This, state, eOpts) {

@@ -130,23 +130,62 @@ DIV.x-grid-header-ct DIV.minemap_first_col {
   top: 50px;
 }
 DIV.mine_map_state0, DIV.mine_map_state1, DIV.mine_map_state2, DIV.mine_map_state3, DIV.mine_map_state4 {
-  width: 16px;
+  width:  16px;
   height: 16px;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
 }
 DIV.mine_map_state0 {
-  background: #00FF33;
+  /*http://ie.microsoft.com/testdrive/graphics/cssgradientbackgroundmaker/
+    background: #00FF33;*/
+    /* IE10 Consumer Preview */
+    background-image: -ms-radial-gradient(center, circle closest-corner, #00FF33 0%, #00991F 100%);
+    /* Mozilla Firefox */
+    background-image: -moz-radial-gradient(center, circle closest-corner, #00FF33 0%, #00991F 100%);
+    /* Opera */
+    background-image: -o-radial-gradient(center, circle closest-corner, #00FF33 0%, #00991F 100%);
+    /* Webkit (Safari/Chrome 10) */
+    background-image: -webkit-gradient(radial, center center, 0, center center, 497, color-stop(0, #00FF33), color-stop(1, #00991F));
+    /* Webkit (Chrome 11+) */
+    background-image: -webkit-radial-gradient(center, circle closest-corner, #00FF33 0%, #00991F 100%);
+    /* W3C Markup, IE10 Release Preview */
+    background-image: radial-gradient(circle closest-corner at center, #00FF33 0%, #00991F 100%);
 }
 DIV.mine_map_state1 {
-  background: #FFDE00;
+  /*background: #FFDE00;*/
+  background-image: -ms-radial-gradient(center, circle closest-corner, #FFDE00 0%, #A69000 100%);
+  background-image: -moz-radial-gradient(center, circle closest-corner, #FFDE00 0%, #A69000 100%);
+  background-image: -o-radial-gradient(center, circle closest-corner, #FFDE00 0%, #A69000 100%);
+  background-image: -webkit-gradient(radial, center center, 0, center center, 497, color-stop(0, #FFDE00), color-stop(1, #A69000));
+  background-image: -webkit-radial-gradient(center, circle closest-corner, #FFDE00 0%, #A69000 100%);
+  background-image: radial-gradient(circle closest-corner at center, #FFDE00 0%, #A69000 100%);
 }
 DIV.mine_map_state2 {
-  background: #FF5B33;
+  /*background: #FF5B33;*/
+  background-image: -ms-radial-gradient(center, circle closest-corner, #FF5533 0%, #A33A21 100%);
+  background-image: -moz-radial-gradient(center, circle closest-corner, #FF5533 0%, #A33A21 100%);
+  background-image: -o-radial-gradient(center, circle closest-corner, #FF5533 0%, #A33A21 100%);
+  background-image: -webkit-gradient(radial, center center, 0, center center, 497, color-stop(0, #FF5533), color-stop(1, #A33A21));
+  background-image: -webkit-radial-gradient(center, circle closest-corner, #FF5533 0%, #A33A21 100%);
+  background-image: radial-gradient(circle closest-corner at center, #FF5533 0%, #A33A21 100%);
 }
 DIV.mine_map_state3 {
-  background: #FF9E00;
+  /*background: #FF9E00;*/
+  background-image: -ms-radial-gradient(center, circle closest-corner, #FF9E00 0%, #AD6B00 100%);
+  background-image: -moz-radial-gradient(center, circle closest-corner, #FF9E00 0%, #AD6B00 100%);
+  background-image: -o-radial-gradient(center, circle closest-corner, #FF9E00 0%, #AD6B00 100%);
+  background-image: -webkit-gradient(radial, center center, 0, center center, 497, color-stop(0, #FF9E00), color-stop(1, #AD6B00));
+  background-image: -webkit-radial-gradient(center, circle closest-corner, #FF9E00 0%, #AD6B00 100%);
+  background-image: radial-gradient(circle closest-corner at center, #FF9E00 0%, #AD6B00 100%);
 }
 DIV.mine_map_state4 {
-  background: #ACACAC;
+  /*background: #ACACAC;*/
+  background-image: -ms-radial-gradient(center, circle closest-corner, #CFCFCF 0%, #525252 100%);
+  background-image: -moz-radial-gradient(center, circle closest-corner, #CFCFCF 0%, #525252 100%);
+  background-image: -o-radial-gradient(center, circle closest-corner, #CFCFCF 0%, #525252 100%);
+  background-image: -webkit-gradient(radial, center center, 0, center center, 497, color-stop(0, #CFCFCF), color-stop(1, #525252));
+  background-image: -webkit-radial-gradient(center, circle closest-corner, #CFCFCF 0%, #525252 100%);
+  background-image: radial-gradient(circle closest-corner at center, #CFCFCF 0%, #525252 100%);
 }
 TD.mine_map_cell DIV.x-grid-cell-inner {
   padding-top:    0px;
