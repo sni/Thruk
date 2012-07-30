@@ -2,7 +2,7 @@ Ext.define('TP.PanletService', {
     extend: 'TP.Panlet',
 
     title: 'Service',
-    height: 280,
+    height: 420,
     width:  460,
     initComponent: function() {
         this.callParent();
@@ -43,9 +43,18 @@ Ext.define('TP.PanletService', {
                     panel.getComponent('last_check_time').update(TP.date_format(d.last_check));
                     panel.getComponent('check_type').update(d.check_type == 0 ? 'ACTIVE' : 'PASSIVE');
                     panel.getComponent('check_latency').update(d.latency.toFixed(3) + ' / ' + d.execution_time.toFixed(3) + ' seconds');
-                    panel.getComponent('next_check').update(TP.date_format(d.next_check));
+                    panel.getComponent('next_check').update(d.next_check ? TP.date_format(d.next_check) : 'N/A');
                     panel.getComponent('last_change').update(TP.date_format(d.last_state_change));
                     panel.getComponent('last_notification').update((d.last_notification == 0 ? 'N/A' : TP.date_format(d.last_notification)) + ' (notification '+d.current_notification_number+')');
+                    if(d.flap_detection_enabled) {
+                        panel.getComponent('is_flapping').update('<div class="extinfo_noyes_'+d.is_flapping+'">'+ (d.is_flapping ? 'YES' : 'NO') +'</div> ('+d.percent_state_change.toFixed(3)+'% state change)');
+                    } else {
+                        panel.getComponent('is_flapping').update('N/A');
+                    }
+                    panel.getComponent('in_downtime').update('<div class="extinfo_noyes_'+(d.scheduled_downtime_depth>0?1:0)+'">'+ (d.scheduled_downtime_depth>0 ? 'YES' : 'NO') +'</div>');
+                    panel.getComponent('in_check_period').update('<div class="extinfo_yesno_'+d.in_check_period+'">'+ (d.in_check_period>0 ? 'YES' : 'NO') +'</div>');
+                    panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'</div>');
+                    panel.getComponent('site').update(d.peer_name);
                 }
             }
         };
@@ -57,6 +66,7 @@ Ext.define('TP.PanletService', {
                 type:   'table',
                 columns: 2,
                 tableAttrs: {
+                    width:       '99%',
                     cellpadding: '0',
                     cellspacing: '1',
                     border:      '1',
@@ -83,6 +93,11 @@ Ext.define('TP.PanletService', {
                     { html: 'Next Scheduled Check' },       { cls: 'extinfo_var', html: '', itemId: 'next_check' },
                     { html: 'Last State Change' },          { cls: 'extinfo_var', html: '', itemId: 'last_change' },
                     { html: 'Last Notification' },          { cls: 'extinfo_var', html: '', itemId: 'last_notification' },
+                    { html: 'Is This Service Flapping?' },  { cls: 'extinfo_var', html: '', itemId: 'is_flapping' },
+                    { html: 'In Scheduled Downtime?' },     { cls: 'extinfo_var', html: '', itemId: 'in_downtime' },
+                    { html: 'In Check Period?' },           { cls: 'extinfo_var', html: '', itemId: 'in_check_period' },
+                    { html: 'In Notification Period?' },    { cls: 'extinfo_var', html: '', itemId: 'in_notification_period' },
+                    { html: 'Monitored by:' },              { cls: 'extinfo_var', html: '', itemId: 'site' },
             ]
         });
 

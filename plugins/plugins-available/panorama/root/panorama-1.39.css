@@ -212,3 +212,15 @@ DIV.extinfostate {
     line-height: 18px;
     text-align: center;
 }
+
+DIV.extinfo_yesno_0, DIV.extinfo_yesno_1, DIV.extinfo_noyes_0, DIV.extinfo_noyes_1 {
+  display: inline-block;
+  width: 60px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+}
+DIV.extinfo_yesno_0 { background: #FF5B33 !important; }
+DIV.extinfo_yesno_1 { background: #00FF33 !important; }
+DIV.extinfo_noyes_0 { background: #00FF33 !important; }
+DIV.extinfo_noyes_1 { background: #FF5B33 !important; }
