@@ -224,8 +224,10 @@ sub set_unavailable_states {
     my($states) = @_;
     my $c = $Thruk::Utils::PDF::c or die("not initialized!");
     $c->stash->{'unavailable_states'} = {};
-    for my $s (@{$states}) {
-        $c->stash->{'unavailable_states'}->{$s} = 1;
+    if(defined $states and $states ne '') {
+        for my $s (@{$states}) {
+            $c->stash->{'unavailable_states'}->{$s} = 1;
+        }
     }
     return 1;
 }
