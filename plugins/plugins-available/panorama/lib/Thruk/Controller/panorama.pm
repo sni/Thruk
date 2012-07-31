@@ -971,7 +971,7 @@ sub _do_filter {
 ##########################################################
 sub _generate_service_popup {
     my ($self, $c, $service) = @_;
-    return ' title="'.Thruk::Utils::Filter::escape_quotes($service->{'plugin_output'}).'"  onclick="TP.add_panlet({type:\'TP.PanletService\', conf: { xdata: { host: \''.$service->{'host_name'}.'\', service: \''.$service->{'description'}.'\', }}})"';
+    return ' title="'.Thruk::Utils::Filter::escape_quotes($service->{'plugin_output'}).'" onclick="TP.add_panlet({type:\'TP.PanletService\', conf: { xdata: { host: \''.Thruk::Utils::Filter::escape_bslash($service->{'host_name'}).'\', service: \''.Thruk::Utils::Filter::escape_bslash($service->{'description'}).'\', }}})"';
 }
 
 ##########################################################
