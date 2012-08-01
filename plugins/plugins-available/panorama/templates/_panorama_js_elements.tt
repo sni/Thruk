@@ -90,21 +90,22 @@ Ext.define('Ext.ux.form.field.DateTime', {
             layout: l,
             defaults: d,
             items: [Ext.apply({
-                xtype: 'datefield',
-                format: 'Y-m-d',
-                width: this.timePosition != 'below' ? 100 : undefined,
-                allowBlank: this.allowBlank,
+                xtype:      'datefield',
+                format:     'Y-m-d',
+                width:       this.timePosition != 'below' ? 100 : undefined,
+                allowBlank:  this.allowBlank,
                 listeners: {
                     specialkey: this.onSpecialKey,
                     scope: this
                 },
                 isFormField: false // prevent submission
             }, this.dateCfg), Ext.apply({
-                xtype: 'timefield',
-                format: 'H:i',
-                margin: this.timePosition != 'below' ? '0 0 0 3' : 0,
-                width: this.timePosition != 'below' ? 80 : undefined,
-                allowBlank: this.allowBlank,
+                xtype:        'timefield',
+                format:       'H:i',
+                submitFormat: 'H:i:s',
+                margin:        this.timePosition != 'below' ? '0 0 0 3' : 0,
+                width:         this.timePosition != 'below' ? 80 : undefined,
+                allowBlank:    this.allowBlank,
                 listeners: {
                     specialkey: this.onSpecialKey,
                     scope: this
@@ -160,7 +161,9 @@ Ext.define('Ext.ux.form.field.DateTime', {
     getSubmitData: function() {
         var value = this.getValue();
         var format = this.getFormat();
-        return value ? Ext.Date.format(value, format) : null;
+        var v = {};
+        v[this.name] = value ? Ext.Date.format(value, format) : null;
+        return v;
     },
 
     getFormat: function() {

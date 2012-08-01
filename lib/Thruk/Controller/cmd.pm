@@ -452,6 +452,10 @@ sub _redirect_or_success {
         }
     }
     else {
+        if($c->{'request'}->{'parameters'}->{'json'}) {
+            $c->stash->{'json'} = {'success' => 1};
+            return $c->detach('View::JSON');
+        }
         $c->stash->{template} = 'cmd_success.tt';
     }
 

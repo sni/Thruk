@@ -1005,6 +1005,10 @@ plugins/plugins-available/panorama/root/extjs-4.1.0/resources/themes/images/gray
 plugins/plugins-available/panorama/root/images/accept.png
 plugins/plugins-available/panorama/root/images/application_view_columns.png
 plugins/plugins-available/panorama/root/images/bricks.png
+plugins/plugins-available/panorama/root/images/btn_ack.png
+plugins/plugins-available/panorama/root/images/btn_ack_remove.png
+plugins/plugins-available/panorama/root/images/btn_delay.png
+plugins/plugins-available/panorama/root/images/btn_downtime.png
 plugins/plugins-available/panorama/root/images/bug_error.png
 plugins/plugins-available/panorama/root/images/chart_bar.png
 plugins/plugins-available/panorama/root/images/chart_curve.png

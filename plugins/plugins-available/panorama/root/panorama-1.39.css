@@ -225,3 +225,7 @@ DIV.extinfo_yesno_0 { background: #FF5B33 !important; }
 DIV.extinfo_yesno_1 { background: #00FF33 !important; }
 DIV.extinfo_noyes_0 { background: #00FF33 !important; }
 DIV.extinfo_noyes_1 { background: #FF5B33 !important; }
+
+TABLE.x-form-item-hidden {
+  margin-bottom: 0;
+}

@@ -869,9 +869,12 @@ sub _task_service_detail {
     my $host        = $c->request->parameters->{'host'}    || '';
     my $description = $c->request->parameters->{'service'} || '';
     $c->stash->{'json'} = {};
-    my $services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
+    my $services  = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { host_name => $host, description => $description }]);
+    my $downtimes = $c->{'db'}->get_downtimes(
+        filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => $description } ],
+        sort => { 'DESC' => 'id' } );
     if(defined $services and scalar @{$services} > 0) {
-        $c->stash->{'json'} = { data => $services->[0] };
+        $c->stash->{'json'} = { data => $services->[0], downtimes => $downtimes };
     }
     return $c->forward('Thruk::View::JSON');
 }

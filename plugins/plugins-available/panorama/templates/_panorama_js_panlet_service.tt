@@ -3,7 +3,8 @@ Ext.define('TP.PanletService', {
 
     title: 'Service',
     height: 420,
-    width:  460,
+    width:  480,
+    menusnr: 0,
     initComponent: function() {
         this.callParent();
         this.xdata.url         = 'panorama.cgi?task=service_detail';
@@ -34,9 +35,10 @@ Ext.define('TP.PanletService', {
                 This.loading = false;
                 var data  = TP.getResponse(this, response);
                 if(data && data.data) {
-                    var d = data.data;
+                    var d         = data.data;
+                    var downtimes = data.downtimes;
                     var panel = this.items.getAt(1);
-                    panel.getComponent('current_status').update('<div class="extinfostate '+TP.render_service_status(d.state, {}, data).toUpperCase()+'">'+TP.render_service_status(d.state, {}, data).toUpperCase()+'</div> (for ' + TP.render_duration('', '', data)+')');
+                    panel.getComponent('current_status').update('<div class="extinfostate '+TP.render_service_status(d.state, {}, data).toUpperCase()+'">'+TP.render_service_status(d.state, {}, data).toUpperCase()+'</div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
                     panel.getComponent('status_information').update(d.plugin_output);
                     panel.getComponent('perf_data').update(d.perf_data);
                     panel.getComponent('cur_attempt').update(d.current_attempt + '/' + d.max_check_attempts);
@@ -51,10 +53,37 @@ Ext.define('TP.PanletService', {
                     } else {
                         panel.getComponent('is_flapping').update('N/A');
                     }
-                    panel.getComponent('in_downtime').update('<div class="extinfo_noyes_'+(d.scheduled_downtime_depth>0?1:0)+'">'+ (d.scheduled_downtime_depth>0 ? 'YES' : 'NO') +'</div>');
+                    if(d.scheduled_downtime_depth==0) {
+                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_0">NO</div>');
+                    } else {
+                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES</div> ('+TP.date_format(downtimes[0].start_time)+' - '+TP.date_format(downtimes[0].end_time)+')');
+                    }
                     panel.getComponent('in_check_period').update('<div class="extinfo_yesno_'+d.in_check_period+'">'+ (d.in_check_period>0 ? 'YES' : 'NO') +'</div>');
                     panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'</div>');
                     panel.getComponent('site').update(d.peer_name);
+                    /* update acknowledged button */
+                    var toolbar = panel.dockedItems.getAt(0);
+                    if(d.acknowledged) {
+                        if(toolbar.items.get('ack')) {
+                            toolbar.remove(1);
+                            toolbar.insert(1, new Ext.button.Button({
+                                itemId: 'noack',
+                                text:   'Remove Ack.',
+                                icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_ack_remove.png',
+                                menu:    TP.service_ack_remove_menu()
+                            }));
+                        }
+                    } else {
+                        if(toolbar.items.get('noack')) {
+                            toolbar.remove(1);
+                            toolbar.insert(1, new Ext.button.Button({
+                                itemId: 'ack',
+                                text:   'Acknowledge',
+                                icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png',
+                                menu:    TP.service_ack_menu()
+                            }));
+                        }
+                    }
                 }
             }
         };
@@ -98,7 +127,39 @@ Ext.define('TP.PanletService', {
                     { html: 'In Check Period?' },           { cls: 'extinfo_var', html: '', itemId: 'in_check_period' },
                     { html: 'In Notification Period?' },    { cls: 'extinfo_var', html: '', itemId: 'in_notification_period' },
                     { html: 'Monitored by:' },              { cls: 'extinfo_var', html: '', itemId: 'site' },
-            ]
+            ],
+            dockedItems: [{
+                xtype:  'toolbar',
+                dock:   'bottom',
+                ui:     'footer',
+                defaults: {
+                    width: 120,
+                    listeners: {
+                        mouseover: function( This, eOpts ) { if(This.menu) { This.menu.letItClose = true  }},
+                        mouseout: function(  This, eOpts ) { if(This.menu) { This.menu.letItClose = false }}
+                    }
+                },
+                buttonAlign: 'center',
+                items: [{
+                        /* Add New Downtime */
+                        itemId: 'downtime',
+                        text:   'Add Downtime',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_downtime.png',
+                        menu:    TP.service_downtime_menu()
+                    }, {
+                        /* Acknowledge */
+                        itemId: 'ack',
+                        text:   'Acknowledge',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png',
+                        menu:    TP.service_ack_menu()
+                    }, {
+                        /* Reschedule */
+                        itemId: 'reschedule',
+                        text:   'Reschedule',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_delay.png',
+                        menu:    TP.service_reschedule_menu()
+                }]
+            }]
         });
 
 
@@ -205,3 +266,167 @@ Ext.define('TP.PanletService', {
         }
     }
 });
+
+/* Add new downtime menu item */
+TP.service_downtime_menu = function() {
+    var fields = [{
+            fieldLabel: 'Comment',
+            xtype:      'textfield',
+            name:       'com_data',
+            emptyText:  'comment',
+            width:      288
+        }, {
+            fieldLabel: 'Next Check',
+            xtype:      'datetimefield',
+            name:       'start_time'
+        }, {
+            fieldLabel: 'End Time',
+            xtype:      'datetimefield',
+            name:       'end_time'
+        }, {
+            xtype: 'hidden', name: 'com_author',  value: '[% remote_user %]'
+        }, {
+            xtype: 'hidden', name: 'fixed',       value: '1'
+    }];
+    return TP.service_menu_command('Add', 56, fields);
+}
+
+/* Acknowledge menu item */
+TP.service_ack_menu = function() {
+    var fields = [{
+            fieldLabel: 'Comment',
+            xtype:      'textfield',
+            name:       'com_data',
+            emptyText:  'comment',
+            width:      288
+        }, {
+            fieldLabel: 'Sticky Acknowledgement',
+            xtype:      'checkbox',
+            name:       'sticky_ack'
+        }, {
+            fieldLabel: 'Send Notification',
+            xtype:      'checkbox',
+            name:       'send_notification'
+        }, {
+            fieldLabel: 'Persistent Comment',
+            xtype:      'checkbox',
+            name:       'persistent'
+        }, {
+            xtype: 'hidden', name: 'com_author',  value: '[% remote_user %]'
+    }];
+    var defaults = {
+        labelWidth: 140
+    };
+    return TP.service_menu_command('Acknowledge', 34, fields, defaults);
+}
+
+/* Remove Acknowledge menu item */
+TP.service_ack_remove_menu = function() {
+    var fields = [{
+        fieldLabel: '',
+        xtype:      'displayfield',
+        value:      'no options needed',
+        name:       'display',
+        width:      240
+    }];
+    return TP.service_menu_command('Remove Acknowledgement', 52, fields);
+}
+
+/* Reschedule check menu item */
+TP.service_reschedule_menu = function() {
+    var fields = [{
+        fieldLabel: 'Next Check',
+        xtype:      'datetimefield',
+        name:       'start_time',
+        value:      new Date()
+    }];
+    return TP.service_menu_command('Reschedule', 7, fields);
+}
+
+/* form submit handler */
+TP.cmd_form_handler = function() {
+    var menu  = this.up('menu');
+    var panel = menu.up('panel').up('panel');
+    var form  = this.up('menu').down('form').getForm();
+    if(form.isValid()) {
+        form.submit({
+            success: function(form, action) {
+                //debug(action.result);
+                //Ext.Msg.alert('Success', action.result.msg);
+                menu.letItClose=true;
+                menu.hide();
+                panel.refreshHandler();
+             },
+             failure: function(form, action) {
+                //debug(action.result);
+                //Ext.Msg.alert('Failed', action.result.msg);
+             },
+             waitMsg: 'sending command...'
+        });
+    }
+}
+
+/* form for sending cmd */
+TP.service_menu_command = function(btn_text, cmd_typ, fields, defaults) {
+    if(defaults == undefined) { defaults = {} }
+    fields.push({ xtype: 'hidden', name: 'json',    value: 1 });
+    fields.push({ xtype: 'hidden', name: 'host',    value: '' });
+    fields.push({ xtype: 'hidden', name: 'service', value: '' });
+    fields.push({ xtype: 'hidden', name: 'cmd_typ', value: cmd_typ });
+    fields.push({ xtype: 'hidden', name: 'cmd_mod', value: '2' });
+    return {
+        plain:      true,
+        letItClose: false,
+        items: [{
+            xtype: 'panel',
+            items: [{
+                xtype:        'form',
+                waitMsgTarget: true,
+                url:          'cmd.cgi',
+                bodyPadding:   3,
+                defaults:      defaults,
+                items:         fields
+            }],
+            buttonAlign: 'center',
+            buttons: [{
+                text:      'Cancel',
+                handler:    function() { this.up('menu').letItClose=true; this.up('menu').hide(); },
+                pack:      'start'
+            }, { xtype: 'tbfill' } ,{
+                text:       btn_text,
+                formBind:   true,
+                handler:    TP.cmd_form_handler
+            }]
+        }],
+        listeners: {
+            beforehide: function( This, eOpts ) {
+                var panel = This.up('panel').up('panel');
+                if(This.letItClose) {
+                    panel.menusnr = panel.menusnr - 1;
+                    return true;
+                }
+                return false;
+            },
+            beforeshow: function(This, eOpts) {
+                /* don't show more than one menu */
+                var panel = This.up('panel').up('panel');
+                if(panel.menusnr > 0) {
+                    return false;
+                }
+                var form  = This.down('form').getForm();
+                var xdata = panel.xdata;
+                form.setValues({
+                    host:               xdata.host,
+                    service:            xdata.service,
+                    end_time:           new Date(new Date().getTime()+ [% downtime_duration %]*1000),
+                    start_time:         new Date(),
+                    sticky_ack:         [% IF c.config.cmd_defaults.sticky_ack %]true[% ELSE %]false[% END %],
+                    send_notification:  [% IF c.config.cmd_defaults.send_notification %]true[% ELSE %]false[% END %],
+                    persistent:         [% IF c.config.cmd_defaults.persistent_ack %]true[% ELSE %]false[% END %],
+                });
+                panel.menusnr = panel.menusnr + 1;
+                return true;
+            }
+        }
+    }
+}
