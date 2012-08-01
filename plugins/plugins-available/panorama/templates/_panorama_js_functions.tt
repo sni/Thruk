@@ -40,10 +40,10 @@ var TP = {
         var tabhead = tabpan.getTabBar().items.getAt(size-1);
         if(tabhead.rendered == false) {
             tabhead.addListener('afterrender', function(This, eOpts) {
-                TP.addDblClickRename(This.getEl(), tabhead);
+                TP.addDblClickRename(This.getEl(), tabhead, nextid);
             });
         } else {
-            TP.addDblClickRename(tabhead.getEl(), tabhead);
+            TP.addDblClickRename(tabhead.getEl(), tabhead, nextid);
         }
 
         /* save tabs state */
@@ -426,11 +426,11 @@ var TP = {
             tabpan.setActiveTab(1);
         }
     },
-    addDblClickRename: function(el, item) {
+    addDblClickRename: function(el, item, id) {
         el.on("dblclick", function() {
             Ext.Msg.prompt('Change Title', '', function(btn, text) {
                 if(btn == 'ok') {
-                    Ext.getCmp(nextid).setTitle(text);
+                    Ext.getCmp(id).setTitle(text);
                 }
             }, undefined, undefined, item.getText());
         });
