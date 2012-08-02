@@ -55,8 +55,17 @@ sub finalize_config {
         if( -d $addon.'root' and -w $project_root.'/root/thruk/plugins/' ) {
             print STDERR " -> root\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
             my $target_symlink = $project_root.'/root/thruk/plugins/'.$addon_name;
-            if(-e $target_symlink) { unlink($target_symlink) or die("cannot unlink: ".$target_symlink." : $!"); }
-            symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
+            if(-e $target_symlink) {
+                my @s1 = stat($target_symlink."/.");
+                my @s2 = stat($addon.'root/.');
+                if($s1[1] != $s2[1]) {
+                    print STDERR " -> inodes mismatch, trying to delete\n" if $ENV{'THRUK_PLUGIN_DEBUG'};
+                    unlink($target_symlink) or die("failed to unlink: ".$target_symlink." : ".$!);
+                }
+            }
+            if(!-e $target_symlink) {
+                symlink($addon.'root', $target_symlink) or die("cannot create ".$target_symlink." : ".$!);
+            }
         }
     }
 
