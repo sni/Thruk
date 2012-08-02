@@ -79,6 +79,7 @@ var TP = {
         var win = Ext.create(config.type, config.conf);
         win.panel_id = tb.id;
         if(smartPlacement == undefined || smartPlacement == true) {
+            pan.setActiveTab(tb); /* other wise panel won't be rendered and panel size is 0 */
             TP.fitWindowPlacement(tb, win);
         }
         if(!config.skip_state) {
