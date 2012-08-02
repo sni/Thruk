@@ -8,7 +8,6 @@ Ext.define('TP.PanletGridServer', {
         this.callParent();
         this.xdata.url       = 'panorama.cgi?task=site_status';
         TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
-        this.loader.loadMask = true;
         this.reloadOnSiteChanges = true;
     }
 });

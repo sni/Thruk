@@ -28,7 +28,6 @@ Ext.define('TP.Panlet', {
 
         this.gearHandler = function() {
             if(this.gearitem.isHidden()) {
-                if(this.loader != undefined) { this.loader.loadMaskOrig = this.loader.loadMask; this.loader.loadMask = false }
                 this.items.getAt(0).hide();
                 if(this.gearInitCallback) {
                     this.gearInitCallback(this);
@@ -36,7 +35,6 @@ Ext.define('TP.Panlet', {
                 this.gearitem.down('form').getForm().reset();
                 this.gearitem.show();
             } else {
-                if(this.loader != undefined) { this.loader.loadMask = this.loader.loadMaskOrig; }
                 this.items.getAt(0).show();
                 this.gearitem.hide();
             }
@@ -65,22 +63,22 @@ Ext.define('TP.Panlet', {
             var This = this;
             this.tools.push({
                 type: 'search',
-                handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}); },
                 scope: this,
-                tooltip: 'change search filter'
+                tooltip: 'change search filter',
+                handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}); }
             });
         }
         this.tools.push({
-            type: 'refresh',
-            handler: function() { this.refreshHandler(); },
-            scope: this,
-            tooltip: 'reload content of this panlet'
+            type:    'refresh',
+            scope:    this,
+            tooltip: 'reload content of this panlet',
+            handler:  function() { this.manualRefresh() }
         });
         this.tools.push({
             type: 'gear',
-            handler: function() { this.gearHandler(); },
             scope: this,
-            tooltip: 'settings'
+            tooltip: 'settings',
+            handler: function() { this.gearHandler() }
         });
         this.shadow_id = this.id + '_shadow';
         this.win_shadow = new Ext.create('Ext.Layer', {
@@ -285,5 +283,10 @@ Ext.define('TP.Panlet', {
                 panel.saveState();
             }
         });
+    },
+    manualRefresh: function() {
+        if(this.loader != undefined) { this.loader.loadMask=true; }
+        this.refreshHandler();
+        if(this.loader != undefined) { this.loader.loadMask=false; }
     }
 });

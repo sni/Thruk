@@ -11,7 +11,6 @@ Ext.define('TP.PanletUrl', {
 
         this.loader = {
             autoLoad: false,
-            loadMask: true,
             renderer: 'data',
             scope:    this,
             ajaxOptions: { method: 'POST' },

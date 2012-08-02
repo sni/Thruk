@@ -321,10 +321,7 @@ var TP = {
                 panel.loader.baseParams = {};
             }
             var baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
-            panel.loader.loadMaskOrig = panel.loader.loadMask;
-            if(panel.isHidden()) { panel.loader.loadMask = false; }
             panel.loader.load({url:url, baseParams: baseParams});
-            panel.loader.loadMask = panel.loader.loadMaskOrig;
         }
     },
     /* convert time frame into seconds */

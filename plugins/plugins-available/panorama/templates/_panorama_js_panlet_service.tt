@@ -257,7 +257,7 @@ Ext.define('TP.PanletService', {
             if(this.xdata.host == '') {
                 this.gearHandler();
             } else {
-                this.refreshHandler();
+                this.manualRefresh();
             }
         });
 
@@ -355,7 +355,7 @@ TP.cmd_form_handler = function() {
                 //Ext.Msg.alert('Success', action.result.msg);
                 menu.letItClose=true;
                 menu.hide();
-                panel.refreshHandler();
+                panel.manualRefresh();
              },
              failure: function(form, action) {
                 //debug(action.result);
