@@ -262,6 +262,11 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
         $self->_check_for_commands($c);
     }
 
+    if($c->{'request'}->{'parameters'}->{'json'} and $c->stash->{'form_errors'}) {
+        $c->stash->{'json'} = {'success' => 0, errors => $c->stash->{'form_errors'} };
+        return $c->detach('View::JSON');
+    }
+
     return 1;
 }
 
@@ -368,43 +373,69 @@ sub _redirect_or_success {
     $c->stash->{how_far_back} = $how_far_back;
 
     my $referer = $c->{'request'}->{'parameters'}->{'referer'} || '';
-    if( $referer ne '' ) {
-
+    if( $referer ne '' or $c->{'request'}->{'parameters'}->{'json'}) {
         # send a wait header?
         if(    $wait
            and defined $c->stash->{'lasthost'}
            and $c->stash->{'lasthost'} !~ m/\s+/gmx
-           and (   $c->{'request'}->{'parameters'}->{'cmd_typ'} == 7
-                or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96
-               )
+           and defined $c->stash->{'start_time_unix'}
+           and $c->stash->{'start_time_unix'} <= $c->stash->{'now'}
         ) {
-            my $options = {
-                        'header' => {
-                            'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
-                            'WaitTrigger'   => 'check',
-                            'WaitCondition' => 'last_check >= '.$c->stash->{'now'},
-                        }
-            };
-            if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
-                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
-                $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
-                                                   { 'name' => $c->stash->{'lasthost'} } ],
-                                        columns => [ 'name' ],
-                                        options => $options
-                                    );
+            my($waittrigger, $waitcondition);
+            # reschedules
+            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 7 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 96) {
+                $waittrigger   = 'check';
+                $waitcondition = 'last_check >= '.$c->stash->{'now'};
             }
-            if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
-                $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.";".$c->stash->{'lastservice'};
-                $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
-                                                      { 'host_name'   => $c->stash->{'lasthost'} },
-                                                      { 'description' => $c->stash->{'lastservice'} }
-                                                     ],
-                                          columns => [ 'description' ],
-                                          options => $options
+            # add downtime
+            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 55 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 56) {
+                $waittrigger   = 'downtime';
+                $waitcondition = 'scheduled_downtime_depth > 0';
+            }
+            # remove downtime
+            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 78 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 79) {
+                $waittrigger   = 'downtime';
+                $waitcondition = 'scheduled_downtime_depth = 0';
+            }
+            # add acknowledged
+            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 33 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 34) {
+                $waittrigger   = 'command';
+                $waitcondition = 'acknowledged = 1';
+            }
+            # remove acknowledged
+            if($c->{'request'}->{'parameters'}->{'cmd_typ'} == 51 or $c->{'request'}->{'parameters'}->{'cmd_typ'} == 52) {
+                $waittrigger   = 'command';
+                $waitcondition = 'acknowledged = 0';
+            }
+            if($waittrigger) {
+                my $options = {
+                            'header' => {
+                                'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
+                                'WaitTrigger'   => $waittrigger,
+                                'WaitCondition' => $waitcondition,
+                            }
+                };
+                if(!defined $c->stash->{'lastservice'} or $c->stash->{'lastservice'} eq '') {
+                    $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'};
+                    $c->{'db'}->get_hosts(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                                       { 'name' => $c->stash->{'lasthost'} } ],
+                                            columns => [ 'name' ],
+                                            options => $options
                                         );
-            }
-            if(defined $c->stash->{'additional_wait'}) {
-                sleep(1);
+                }
+                if(defined $c->stash->{'lastservice'} and $c->stash->{'lastservice'} ne '') {
+                    $options->{'header'}->{'WaitObject'} = $c->stash->{'lasthost'}.";".$c->stash->{'lastservice'};
+                    $c->{'db'}->get_services( filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ),
+                                                          { 'host_name'   => $c->stash->{'lasthost'} },
+                                                          { 'description' => $c->stash->{'lastservice'} }
+                                                         ],
+                                              columns => [ 'description' ],
+                                              options => $options
+                                            );
+                }
+                if(defined $c->stash->{'additional_wait'}) {
+                    sleep(1);
+                }
             }
         }
         else {
@@ -412,7 +443,13 @@ sub _redirect_or_success {
             sleep(1);
         }
 
-        $c->response->redirect($referer);
+        if($c->{'request'}->{'parameters'}->{'json'}) {
+            $c->stash->{'json'} = {'success' => 1};
+            return $c->detach('View::JSON');
+        }
+        else {
+            $c->response->redirect($referer);
+        }
     }
     else {
         $c->stash->{template} = 'cmd_success.tt';
@@ -566,8 +603,9 @@ sub _do_send_command {
         push @{$c->stash->{'commands2send'}}, $cmd_line;
     }
 
-    $c->stash->{'lasthost'}    = $c->{'request'}->{'parameters'}->{'host'};
-    $c->stash->{'lastservice'} = $c->{'request'}->{'parameters'}->{'service'};
+    $c->stash->{'start_time_unix'} = $start_time_unix;
+    $c->stash->{'lasthost'}        = $c->{'request'}->{'parameters'}->{'host'};
+    $c->stash->{'lastservice'}     = $c->{'request'}->{'parameters'}->{'service'};
 
     return 1;
 }
