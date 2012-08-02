@@ -29,12 +29,14 @@ Ext.define('TP.PanletGridLogs', {
         this.down('form').add({
             fieldLabel: 'Include Pattern',
             xtype:      'textfield',
-            name:       'pattern'
+            name:       'pattern',
+            emptyText:  'regular search expression'
         });
         this.down('form').add({
             fieldLabel: 'Exclude Pattern',
             xtype:      'textfield',
-            name:       'exclude'
+            name:       'exclude',
+            emptyText:  'regular search exclude expression'
         });
     }
 });

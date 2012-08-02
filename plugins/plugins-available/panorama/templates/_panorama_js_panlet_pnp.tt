@@ -11,8 +11,8 @@ Ext.define('TP.PanletPNP', {
     extend: 'TP.Panlet',
 
     title: 'PNPGraph',
-    height: 200,
-    width:  360,
+    height: 240,
+    width:  420,
     maximizable: true,
     initComponent: function() {
         this.callParent();
@@ -62,6 +62,7 @@ Ext.define('TP.PanletPNP', {
                 });
             }
         };
+        this.loader = {};
 
         /* update graph source */
         this.refreshHandler = function() {
@@ -81,12 +82,12 @@ Ext.define('TP.PanletPNP', {
                 url = url + '&graph_width=' +(size.width  - this.size_adjustment_x);
                 url = url + '&graph_height='+(size.height - this.size_adjustment_y);
             }
+            if(this.loader.loadMask == true) { this.imgMask.show(); }
             imgPanel.setSrc(url);
         };
 
         /* panel content should be in an image */
-        this.add({
-            xtype: 'image',
+        this.imgItem = new Ext.Img({
             src:   Ext.BLANK_IMAGE_URL,
             listeners: {
                 afterrender: function (me) {
@@ -94,14 +95,18 @@ Ext.define('TP.PanletPNP', {
                         load: function (evt, ele, opts) {
                             me.up('panel').tools['refresh'].setType('refresh');
                             me.up('panel').adjustImgSize();
+                            me.up('panel').imgMask.hide();
                         },
                         error: function (evt, ele, opts) {
                             me.up('panel').tools['refresh'].setType('broken');
+                            me.up('panel').imgMask.hide();
                         }
                     });
                 }
             }
         });
+        this.add(this.imgItem);
+        this.imgMask = new Ext.LoadMask(this.imgItem, {msg:"Loading..."});
 
         this.graph_store = new Ext.data.Store({
                 fields: ['text', 'url'],

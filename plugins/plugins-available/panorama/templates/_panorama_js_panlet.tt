@@ -101,10 +101,10 @@ Ext.define('TP.Panlet', {
                 xtype:           'form',
                 bodyPadding:     2,
                 border:          0,
-                bodyStyle:       'overflow-y: auto',
+                bodyStyle:       'overflow-y: auto;',
                 submitEmptyText: false,
                 defaults: {
-                    anchor: '98%'
+                    anchor: '-12'
                 },
                 items: [{
                     fieldLabel: 'Title',
@@ -139,6 +139,7 @@ Ext.define('TP.Panlet', {
         }],
         buttonAlign: 'center',
         fbar: [{ xtype : 'button', text: 'cancel', handler: function() { this.up('window').gearitem.hide() } },
+               /* panlet setting save button */
                { xtype : 'button',
                  text:   'save',
                  handler: function() {
@@ -151,7 +152,7 @@ Ext.define('TP.Panlet', {
                         win.setFormDefaults();
                         win.startInterval();
                         win.saveState();
-                        win.refreshHandler();
+                        win.manualRefresh();
                     }
                  }
                },
