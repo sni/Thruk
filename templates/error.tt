@@ -1,4 +1,19 @@
-﻿[% IF die_on_errors %][% throw(errorMessage) %][% END %]
+﻿[% IF c.request.parameters.exists('json') %]
+[% IF die_on_errors %][% throw(errorMessage) %][% END %]
+{
+  [% IF errorMessage %]
+    errorMessage: '[% escape_quotes(errorMessage) %]',
+    errorDescription: '[% escape_quoteserrorDescription) %]'
+  [% ELSE %]
+    errorMessage: 'internal server error',
+    errorDescription: 'internal server error occured, please look at your catalyst logfile'
+  [% END %]
+  [% IF errorDetails %]
+  , errorDetails: '[% escape_quotes(errorDetails) %]'
+  [% END %]
+}
+[% ELSE %]
+[% IF die_on_errors %][% throw(errorMessage) %][% END %]
 [% PROCESS _header.tt %]
 
   <table border="0" width="100%" cellspacing="0" cellpadding="0">
@@ -35,5 +50,5 @@
     Help making Thruk better and send a bug report</a>.<br>
   </div>
   [% END %]
-
 [% PROCESS _footer.tt %]
+[% END %]
