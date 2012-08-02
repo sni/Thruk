@@ -344,6 +344,11 @@ sub _run_commands {
         $data->{'output'} = _cmd_downtimetask($c, $1);
     }
 
+    # install cron
+    elsif($action eq 'installcron') {
+        $data->{'output'} = _cmd_installcron($c);
+    }
+
     # uninstall cron
     elsif($action eq 'uninstallcron') {
         $data->{'output'} = _cmd_uninstallcron($c);
@@ -504,6 +509,18 @@ sub _debug {
         }
     }
     return;
+}
+
+##############################################
+sub _cmd_installcron {
+    my($c) = @_;
+    $c->stats->profile(begin => "_cmd_installcron()");
+    Thruk::Controller::extinfo->_update_cron_file($c);
+    if($c->config->{'use_feature_reports'}) {
+        Thruk::Utils::Reports::update_cron_file($c);
+    }
+    $c->stats->profile(end => "_cmd_installcron()");
+    return "updated cron entries\n";
 }
 
 ##############################################
