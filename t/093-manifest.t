@@ -51,7 +51,7 @@ while(<$ph>) {
     my $line = $_;
     chomp($line);
     my $dst = readlink($line);
-    if($dst =~ m/^\//) {
+    if($dst =~ m|/root$|) {
         if(defined $manifest->{$line}) {
             fail("$line is in the MANIFEST but should not: $dst");
         } else {

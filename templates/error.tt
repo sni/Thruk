@@ -3,7 +3,7 @@
 {
   [% IF errorMessage %]
     errorMessage: '[% escape_quotes(errorMessage) %]',
-    errorDescription: '[% escape_quoteserrorDescription) %]'
+    errorDescription: '[% escape_quotes(errorDescription) %]'
   [% ELSE %]
     errorMessage: 'internal server error',
     errorDescription: 'internal server error occured, please look at your catalyst logfile'
