@@ -515,6 +515,7 @@ sub _debug {
 sub _cmd_installcron {
     my($c) = @_;
     $c->stats->profile(begin => "_cmd_installcron()");
+    Thruk::Utils::switch_realuser($c);
     Thruk::Controller::extinfo->_update_cron_file($c);
     if($c->config->{'use_feature_reports'}) {
         Thruk::Utils::Reports::update_cron_file($c);
@@ -527,6 +528,7 @@ sub _cmd_installcron {
 sub _cmd_uninstallcron {
     my($c) = @_;
     $c->stats->profile(begin => "_cmd_uninstallcron()");
+    Thruk::Utils::switch_realuser($c);
     Thruk::Utils::update_cron_file($c);
     $c->stats->profile(end => "_cmd_uninstallcron()");
     return "cron entries removed\n";

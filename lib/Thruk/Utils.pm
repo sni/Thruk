@@ -1292,7 +1292,7 @@ sub set_user {
 
   switch_user($uid, $groups)
 
-switch real user and groups
+switch user and groups
 
 =cut
 
@@ -1302,6 +1302,26 @@ sub switch_user {
     # using POSIX::setuid here leads to
     # 'Insecure dependency in eval while running setgid'
     $> = $uid or confess("setuid failed: ".$!);
+    return;
+}
+
+##############################################
+
+=head2 switch_realuser
+
+  switch_realuser($uid, $groups)
+
+switch real user and groups
+
+=cut
+
+sub switch_realuser {
+    if($< != $>) {
+        $< = $> or confess("setuid failed: ".$!);
+    }
+    if($) != $() {
+        $( = $) or confess("setgid failed: ".$!);
+    }
     return;
 }
 
