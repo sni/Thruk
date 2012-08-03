@@ -1327,6 +1327,27 @@ sub switch_realuser {
 
 ##############################################
 
+=head2 check_pid_file
+
+  check_pid_file($c)
+
+check and write pid file if none exists
+
+=cut
+
+sub check_pid_file {
+    my($c) = @_;
+    my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI' and ! -f $pidfile) {
+        open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
+        print $fh $$."\n";
+        Thruk::Utils::IO::close($fh, $pidfile);
+    }
+    return;
+}
+
+##############################################
+
 =head2 get_cron_entries_from_param
 
   get_cron_entries_from_param($cronentry)

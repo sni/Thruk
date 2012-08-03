@@ -450,12 +450,7 @@ page: /thruk/side.html
 sub thruk_side_html : Regex('thruk\/side\.html$') :MyAction('AddSafeDefaults') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
-    my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI' and ! -f $pidfile) {
-        open(my $fh, '>', $pidfile) || warn("cannot write $pidfile: $!");
-        print $fh $$."\n";
-        Thruk::Utils::IO::close($fh, $pidfile);
-    }
+    Thruk::Utils::check_pid_file($c);
     Thruk::Utils::Menu::read_navigation($c) unless defined $c->stash->{'navigation'} and $c->stash->{'navigation'} ne '';
 
     $c->stash->{'use_frames'}     = 1;

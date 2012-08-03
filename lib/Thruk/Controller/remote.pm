@@ -34,6 +34,7 @@ page: /thruk/cgi-bin/remote.cgi
 sub remote_cgi : Regex('thruk\/cgi\-bin\/remote\.cgi') {
     my( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+    Thruk::Utils::check_pid_file($c);
     return $c->detach('/remote/index');
 }
 
