@@ -10,6 +10,10 @@ sub finalize_config {
     my $project_root = $c->config->{home};
 
     ###################################################
+    # set var dir
+    $c->config->{'var_path'} = './var' unless defined $c->config->{'var_path'};
+
+    ###################################################
     # switch user when running as root
     my $var_path = $c->config->{'var_path'} or die("no var path!");
     die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d $var_path.'/.';
@@ -92,12 +96,9 @@ sub finalize_config {
     $c->config->{'View::TT'}->{'PRE_DEFINE'}->{'themes'} = \@themes;
 
     ###################################################
-    # set var / tmp dir
     # use uid to make tmp dir more uniq
-    $c->config->{'var_path'} = './var'          unless defined $c->config->{'var_path'};
     $c->config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $c->config->{'tmp_path'};
-    my $tmp_dir = $c->config->{'tmp_path'};
-    $c->config->{'View::TT'}->{'COMPILE_DIR'} = $tmp_dir.'/ttc_'.$>;
+    $c->config->{'View::TT'}->{'COMPILE_DIR'} = $c->config->{'tmp_path'}.'/ttc_'.$>;
 
     return;
 }
