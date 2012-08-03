@@ -11,6 +11,10 @@
       <td class='dataVar'><a href="conf.cgi?sub=thruk">Thruk Settings</a></td>
       <td class='dataVal'>Thruks settings from the thruk_local.conf</td>
     </tr>
+    <tr>
+      <td class='dataVar'><a href="conf.cgi?sub=backends">Backends / Sites</a></td>
+      <td class='dataVal'>Configure Backends Connections</td>
+    </tr>
     [% END %]
     [% IF conf_config.exists('cgi.cfg') %]
     <tr>

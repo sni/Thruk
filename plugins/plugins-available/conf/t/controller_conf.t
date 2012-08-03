@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 1025;
+use Test::More tests => 1037;
 use JSON::XS;
 use Encode qw(encode_utf8 decode_utf8);
 
@@ -59,6 +59,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=listref&data.name='.$host,
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=start',
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=check_object_references',
+    '/thruk/cgi-bin/conf.cgi?sub=backends',
 ];
 
 for my $type (@{$Monitoring::Config::Object::Types}) {

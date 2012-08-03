@@ -1,0 +1,89 @@
+[% WRAPPER _conf_frame.tt %]
+
+<div align="center">
+<form action="conf.cgi" method="POST">
+<input type="hidden" name="sub" value="backends">
+<input type="hidden" name="action" value="save">
+Note: some options are not accessible here for security reasons.
+<table border="0" class='data conftoolusers' style="width:360px;">
+  <tr>
+    <th colspan=3 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
+  </tr>
+  [% x = 0 %]
+  [% FOREACH b = c.db.backends %]
+  [% x = x + 1 %]
+  [% PROCESS _conf_backends_backend.tt %]
+  [% END %]
+  <tr class="backend_conf_0_add">
+    <td colspan=3 style="text-align:left;">
+      <a href="#" onclick="conf_sites_add()">
+        <img src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" alt="add new connection" style="vertical-align: middle">
+        add new connection
+      </a>
+    </td>
+  </tr>
+  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', key => '', hidden => 0 } x = 0 %]
+  <tr>
+    <td colspan=3 style="text-align:center; padding-bottom: 7px;">
+      <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button">
+    </td>
+  </tr>
+</table>
+</form>
+</div>
+
+<script type="text/javascript">
+<!--
+  function conf_sites_add_hide() {
+    jQuery('.backend_conf_0').each(function() {
+      hideElement(this);
+    });
+    jQuery('.backend_conf_0_add').each(function() {
+      showElement(this);
+    });
+  }
+  conf_sites_add_hide();
+
+  function conf_sites_add() {
+    jQuery('.backend_conf_0_add').each(function() {
+      hideElement(this);
+    });
+    jQuery('.backend_conf_0').each(function() {
+      showElement(this);
+    });
+  }
+
+  var orig_src;
+  function conf_test_connection(btn) {
+    var nr  = btn.name.substr(4);
+    var con = jQuery('INPUT[name=peer'+nr+']').val();
+    var img = jQuery('#testimg'+nr)[0];
+    if(orig_src == undefined) {
+      orig_src = img.src;
+    } else {
+      img.src = orig_src;
+    }
+    img.title = 'checking connection...';
+    showElement(img);
+
+    jQuery.ajax({
+        url:  'conf.cgi?sub=backends&action=check_con&con='+con,
+        cache: false,
+        success: function(data) {
+          if(data.ok == 1) {
+            img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/accept.png';
+            img.title = 'test successful';
+          } else {
+            img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/error.png';
+            img.title = data.error;
+          }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/error.png';
+        }
+    });
+  }
+-->
+</script>
+
+[% END %]

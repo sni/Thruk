@@ -1348,6 +1348,25 @@ sub check_pid_file {
 
 ##############################################
 
+=head2 restart_later
+
+  restart_later($c)
+
+restart fcgi process
+
+=cut
+
+sub restart_later {
+    my($c) = @_;
+    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
+        my $pid = $$;
+        `sleep 2 && kill $pid`;
+    }
+    return;
+}
+
+##############################################
+
 =head2 get_cron_entries_from_param
 
   get_cron_entries_from_param($cronentry)

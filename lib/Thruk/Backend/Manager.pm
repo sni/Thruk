@@ -102,6 +102,36 @@ sub init {
 
 ##########################################################
 
+=head2 create_backend
+
+  create_backend()
+
+return a new backend class
+
+=cut
+
+sub create_backend {
+    my($self, $name, $type, $options, $config, $log) = @_;
+
+    my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
+    confess "unknown type in peer configuration" unless scalar @provider > 0;
+    my $class   = $provider[0];
+    my $require = $class;
+    $require =~ s/::/\//gmx;
+    require $require . ".pm";
+    $class->import;
+    $options->{'name'} = $name;
+
+    # disable keepalive for now, it does not work and causes lots of problems
+    $options->{'keepalive'} = 0 if defined $options->{'keepalive'};
+
+    my $obj = $class->new( $options, $config, $log );
+    return $obj;
+}
+
+
+##########################################################
+
 =head2 disable_hidden_backends
 
   disable_hidden_backends()
@@ -1144,7 +1174,7 @@ sub _initialise_backends {
 
     # initialize peers
     for my $peer_conf (@peer_configs) {
-        my $peer = $self->_initialise_peer( $peer_conf, $Thruk::Backend::Manager::Provider );
+        my $peer = $self->_initialise_peer( $peer_conf );
         push @{ $self->{'backends'} }, $peer if defined $peer;
     }
 
@@ -1155,23 +1185,9 @@ sub _initialise_backends {
 sub _initialise_peer {
     my $self     = shift;
     my $config   = shift;
-    my $provider = shift;
 
     confess "missing name in peer configuration" unless defined $config->{'name'};
     confess "missing type in peer configuration" unless defined $config->{'type'};
-
-    my @provider = grep { $_ =~ m/::$config->{'type'}$/mxi } @{$provider};
-    confess "unknown type in peer configuration" unless scalar @provider > 0;
-    my $class = $provider[0];
-
-    my $require = $class;
-    $require =~ s/::/\//gmx;
-    require $require . ".pm";
-    $class->import;
-    $config->{'options'}->{'name'} = $config->{'name'} unless defined $config->{'options'}->{'name'};
-
-    # disable keepalive for now, it does not work and causes lots of problems
-    $config->{'options'}->{'keepalive'} = 0 if defined $config->{'options'}->{'keepalive'};
 
     my $peer = {
         'name'          => $config->{'name'},
@@ -1180,10 +1196,11 @@ sub _initialise_peer {
         'groups'        => $config->{'groups'},
         'resource_file' => $config->{'options'}->{'resource_file'},
         'enabled'       => 1,
-        'class'         => $class->new( $config->{'options'},
-                                        $self->{'config'},
-                                        $self->{'backend_debug'} ? $self->{'log'} : undef
-                                    ),
+        'class'         => $self->create_backend($config->{'name'},
+                                                 $config->{'type'},
+                                                 $config->{'options'},
+                                                 $self->{'config'},
+                                                 $self->{'backend_debug'} ? $self->{'log'} : undef),
         'configtool'    => $config->{'configtool'} || {},
         'last_error'    => undef,
         'logcache'      => undef,

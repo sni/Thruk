@@ -64,6 +64,22 @@ sub conf_cgi : Regex('thruk\/cgi\-bin\/conf\.cgi') {
 sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     my ( $self, $c ) = @_;
 
+    # check permissions
+    unless( $c->check_user_roles( "authorized_for_configuration_information")
+        and $c->check_user_roles( "authorized_for_system_commands")) {
+        if(    !defined $c->{'db'}
+            or !defined $c->{'db'}->{'backends'}
+            or ref $c->{'db'}->{'backends'} ne 'ARRAY'
+            or scalar @{$c->{'db'}->{'backends'}} == 0 ) {
+            # no backends configured or thruk config not possible
+            if($c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'}) {
+                return $c->detach("/error/index/14");
+            }
+        }
+        # no permissions at all
+        return $c->detach('/error/index/8');
+    }
+
     $c->stash->{'no_auto_reload'}      = 1;
     $c->stash->{title}                 = 'Config Tool';
     $c->stash->{page}                  = 'config';
@@ -72,10 +88,6 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     $c->stash->{infoBoxTitle}          = 'Config Tool';
 
     Thruk::Utils::ssi_include($c);
-
-    # check permissions
-    return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
-    return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_system_commands" );
 
     # check if we have at least one file configured
     if(   !defined $c->config->{'Thruk::Plugin::ConfigTool'}
@@ -119,6 +131,9 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     }
     elsif($subcat eq 'plugins') {
         $self->_process_plugins_page($c);
+    }
+    elsif($subcat eq 'backends') {
+        $self->_process_backends_page($c);
     }
     elsif($subcat eq 'objects') {
         $c->stash->{'obj_model_changed'} = 1;
@@ -639,7 +654,7 @@ sub _process_users_page {
 }
 
 ##########################################################
-# create the users config page
+# create the plugins config page
 sub _process_plugins_page {
     my( $self, $c ) = @_;
 
@@ -686,6 +701,7 @@ sub _process_plugins_page {
                 }
             }
             Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully. Changes take effect after Restart.' );
+            Thruk::Utils::restart_later($c);
         }
     }
 
@@ -705,6 +721,78 @@ sub _process_plugins_page {
     $c->stash->{'plugins'}  = $plugins;
     $c->stash->{'subtitle'} = "Thruk Addons &amp; Plugin Manager";
     $c->stash->{'template'} = 'conf_plugins.tt';
+
+    return 1;
+}
+
+##########################################################
+# create the backends config page
+sub _process_backends_page {
+    my( $self, $c ) = @_;
+
+    my $file = $c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'};
+    return unless $file;
+
+    if($c->stash->{action} eq 'save') {
+        my $x=0;
+        my $backends = [];
+        my $new = 0;
+        while(defined $c->request->parameters->{'name'.$x}) {
+            my $backend = {
+                'name'   => $c->request->parameters->{'name'.$x},
+                'type'   => $c->request->parameters->{'type'.$x},
+                'id'     => $c->request->parameters->{'id'.$x},
+                'hidden' => $c->request->parameters->{'hidden'.$x},
+                'options' => {
+                    'peer'   => $c->request->parameters->{'peer'.$x},
+                },
+            };
+            $x++;
+            next unless defined $backend->{'name'};
+            next unless $backend->{'name'} ne '';
+            next unless defined $backend->{'options'}->{'peer'};
+            next unless $backend->{'options'}->{'peer'} ne '';
+            delete $backend->{'id'} if $backend->{'id'} eq '';
+
+            # add values from existing backend config
+            if(defined $backend->{'id'}) {
+                my $peer = $c->{'db'}->get_peer_by_key($backend->{'id'});
+                $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
+                $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
+                $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
+            }
+            $new = 1 if $x == 1;
+            push @{$backends}, $backend;
+        }
+        # put new one at the end
+        if($new) { push(@{$backends}, shift(@{$backends})) }
+        my $conf      = Config::General->new();
+        my $structure = { 'Component' =>  { 'peer' => $backends }};
+        my $string    = $conf->save_string($structure);
+        $string       =~ s/<Component>/<Component Thruk::Backend>/gmx;
+        Thruk::Utils::Conf::replace_block($file, $string, '<Component Thruk::Backend>', '</Component>');
+        Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully. Changes take effect after Restart.' );
+        Thruk::Utils::restart_later($c);
+    }
+    if($c->stash->{action} eq 'check_con') {
+        my $peer = $c->request->parameters->{'con'};
+        my $con  = Thruk::Backend::Manager->create_backend('test', 'livestatus', { peer => $peer});
+        my @test;
+        eval {
+            @test = $con->get_processinfo();
+        };
+        if(scalar @test == 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1) {
+            $c->stash->{'json'} = { ok => 1 };
+        } else {
+            my $error = $@;
+            $error =~ s/\s+at\s\/.*//gmx;
+            $c->stash->{'json'} = { ok => 0, error => $error };
+        }
+        return $c->forward('Thruk::View::JSON');
+    }
+
+    $c->stash->{'subtitle'} = "Thruk Backends Manager";
+    $c->stash->{'template'} = 'conf_backends.tt';
 
     return 1;
 }

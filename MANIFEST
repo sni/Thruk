@@ -152,6 +152,7 @@ plugins/plugins-available/conf/t/data/6/servicegroups_utf8.cfg
 plugins/plugins-available/conf/t/data/7/parser.cfg
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
+plugins/plugins-available/conf/templates/_conf_backends_backend.tt
 plugins/plugins-available/conf/templates/_conf_frame.tt
 plugins/plugins-available/conf/templates/_conf_object_edit.tt
 plugins/plugins-available/conf/templates/_conf_object_row.tt
@@ -163,6 +164,7 @@ plugins/plugins-available/conf/templates/_conf_wizard_command.tt
 plugins/plugins-available/conf/templates/_conf_wizard_commandline.tt
 plugins/plugins-available/conf/templates/_conf_wizard_list.tt
 plugins/plugins-available/conf/templates/conf.tt
+plugins/plugins-available/conf/templates/conf_backends.tt
 plugins/plugins-available/conf/templates/conf_data.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt
 plugins/plugins-available/conf/templates/conf_objects.tt

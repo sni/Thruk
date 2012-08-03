@@ -302,6 +302,20 @@ sub merge_conf {
 }
 
 
+######################################
+
+=head2 replace_block
+
+replace block in config file
+
+=cut
+
+sub replace_block {
+    my($file, $string, $start, $end) = @_;
+    return;
+}
+
+
 ##########################################################
 
 =head2 get_data_from_param

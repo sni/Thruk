@@ -19,6 +19,7 @@
                     <option value='all'[%    IF sub == 'all'   %] selected [% END %]>Overview</option>
                     [% IF conf_config.exists('thruk') %]
                     <option value='thruk'[%  IF sub == 'thruk' %] selected [% END %]>Thruk</option>
+                    <option value='backends'[%  IF sub == 'backends' %] selected [% END %]>Backends</option>
                     [% END %]
                     [% IF conf_config.exists('cgi.cfg') %]
                     <option value='cgi'[%    IF sub == 'cgi'   %] selected [% END %]>CGI &amp; Access</option>

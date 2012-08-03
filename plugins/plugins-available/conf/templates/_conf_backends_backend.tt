@@ -1,0 +1,34 @@
+<tr class="backend_conf_[% x %]">
+  <td class='dataVar' align="left">Name</td>
+  <td class='dataVal'>
+    <input type="hidden" name="id[% x %]" value="[% b.key %]">
+    <input type="text" name="name[% x %]" value="[% b.name %]" style="width: 200px;">
+  </td>
+  <td class='dataVal' onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
+    <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete">
+  </td>
+</tr>
+<tr class="backend_conf_[% x %]">
+  <td class='dataVar' align="left">Type</td>
+  <td class='dataVal' colspan=2>
+    <select name="type[% x %]" style="width: 200px;">
+      <option>livestatus</option>
+    </select>
+  </td>
+</tr>
+<tr class="backend_conf_[% x %]">
+  <td class='dataVar' align="left">Connection</td>
+  <td class='dataVal' colspan=2 nowrap>
+    <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;">
+    <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this)">
+    <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
+  </td>
+</tr>
+<tr class="backend_conf_[% x %]">
+  <td class='dataVar' align="left">Hidden</td>
+  <td class='dataVal' colspan=2>
+    <input type="radio" name="hidden[% x %]" value="0"[% IF b.hidden == 0 %] checked[% END %]> No
+    <input type="radio" name="hidden[% x %]" value="1"[% IF b.hidden == 1 %] checked[% END %]> Yes
+  </td>
+</tr>
+<tr class="backend_conf_[% x %]"><td colspan=3><hr></td></tr>
