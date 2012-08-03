@@ -11,8 +11,13 @@ sub finalize_config {
 
     ###################################################
     # switch user when running as root
+    my $var_path = $c->config->{'var_path'} or die("no var path!");
+    die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d $var_path.'/.';
+    my ($uid, $groups) = Thruk::Utils::get_user($var_path);
+    $ENV{'THRUK_USER_ID'}  = $uid;
+    $ENV{'THRUK_GROUP_ID'} = $groups->[0];
+    $ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'CLI') {
-        my($uid, $groups) = ($ENV{'THRUK_USER_ID'}, split(/,/mx, $ENV{'THRUK_GROUPS'}));
         if(defined $uid and $> == 0) {
             Thruk::Utils::switch_user($uid, $groups);
         }

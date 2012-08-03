@@ -250,11 +250,6 @@ __PACKAGE__->setup();
 ###################################################
 # save user/group id
 my $var_path = __PACKAGE__->config->{'var_path'} or die("no var path!");
-die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d $var_path.'/.';
-my ($uid, $groups) = Thruk::Utils::get_user($var_path);
-$ENV{'THRUK_USER_ID'}  = $uid;
-$ENV{'THRUK_GROUP_ID'} = $groups->[0];
-$ENV{'THRUK_GROUPS'}   = join(',', @{$groups});
 
 ###################################################
 # save pid
