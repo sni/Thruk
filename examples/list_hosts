@@ -1,4 +1,14 @@
-#!/usr/bin/perl
+#!/bin/sh
+# make example work in test and prod env
+if [ -e '/usr/lib/thruk/perl5' -a -e '/etc/thruk'  ]; then
+    export PERL5LIB="/usr/share/thruk/lib:/usr/lib/thruk/perl5:$PERL5LIB"
+    export CATALYST_CONFIG='/etc/thruk';
+fi
+eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
 
 use strict;
 use warnings;
