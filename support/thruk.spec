@@ -176,14 +176,14 @@ chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugi
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 /usr/bin/crontab -l -u apache 2>/dev/null | /usr/bin/crontab -u apache -
 %endif
-/usr/bin/thruk -a installcron > /dev/null
+/usr/bin/thruk -a installcron --local > /dev/null
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
 
 %preun
 if [ $1 = 0 ]; then
     # last version will be deinstalled
-    /usr/bin/thruk -a uninstallcron
+    /usr/bin/thruk -a uninstallcron --local
 fi
 /etc/init.d/thruk stop
 chkconfig --del thruk
