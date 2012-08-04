@@ -53,6 +53,13 @@ Note: some options are not accessible here for security reasons.
     });
   }
 
+  function delete_site_row(td) {
+    jQuery('.'+td.parentNode.className).each(function() {
+      var p = this.parentNode;
+      p.removeChild(this);
+    });
+  }
+
   var orig_src;
   function conf_test_connection(btn) {
     var nr  = btn.name.substr(4);

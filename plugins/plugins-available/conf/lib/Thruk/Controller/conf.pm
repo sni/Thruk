@@ -770,7 +770,7 @@ sub _process_backends_page {
         my $structure = { 'Component' =>  { 'peer' => $backends }};
         my $string    = $conf->save_string($structure);
         $string       =~ s/<Component>/<Component Thruk::Backend>/gmx;
-        Thruk::Utils::Conf::replace_block($file, $string, '<Component Thruk::Backend>', '</Component>');
+        Thruk::Utils::Conf::replace_block($file, $string, '<Component\s+Thruk::Backend>', '<\/Component>');
         Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully. Changes take effect after Restart.' );
         Thruk::Utils::restart_later($c);
     }

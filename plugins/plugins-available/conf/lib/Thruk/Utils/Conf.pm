@@ -312,7 +312,18 @@ replace block in config file
 
 sub replace_block {
     my($file, $string, $start, $end) = @_;
-    return;
+
+    my $content = read_file($file);
+
+    unless($content =~ s/$start.*?$end/$string/sxi) {
+        $content .= "\n\n".$string;
+    }
+
+    open(my $fh, ">", $file) or return("cannot update, failed to write to $file: $!");
+    print $fh $content;
+    Thruk::Utils::IO::close($fh, $file);
+
+    return 1;
 }
 
 
