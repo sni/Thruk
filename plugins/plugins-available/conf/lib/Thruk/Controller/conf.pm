@@ -742,7 +742,7 @@ sub _process_backends_page {
                 'name'   => $c->request->parameters->{'name'.$x},
                 'type'   => $c->request->parameters->{'type'.$x},
                 'id'     => $c->request->parameters->{'id'.$x},
-                'hidden' => $c->request->parameters->{'hidden'.$x},
+                'hidden' => defined $c->request->parameters->{'hidden'.$x} ? $c->request->parameters->{'hidden'.$x} : 0,
                 'options' => {
                     'peer'   => $c->request->parameters->{'peer'.$x},
                 },
