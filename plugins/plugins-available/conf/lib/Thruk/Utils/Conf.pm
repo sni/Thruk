@@ -315,9 +315,11 @@ sub replace_block {
 
     my $content = read_file($file);
 
+    ## no critic
     unless($content =~ s/$start.*?$end/$string/sxi) {
         $content .= "\n\n".$string;
     }
+    ## use critic
 
     open(my $fh, ">", $file) or return("cannot update, failed to write to $file: $!");
     print $fh $content;
