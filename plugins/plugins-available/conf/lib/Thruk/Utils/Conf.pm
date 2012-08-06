@@ -304,6 +304,44 @@ sub merge_conf {
 
 ######################################
 
+=head2 get_component_as_string
+
+return component config as string
+
+=cut
+
+sub get_component_as_string {
+    my($backends) = @_;
+    my $string = "<Component Thruk::Backend>\n";
+    for my $b (@{$backends}) {
+        $string .= "    <peer>\n";
+        $string .= "        name   = ".$b->{'name'}."\n";
+        $string .= "        id     = ".$b->{'id'}."\n" if defined $b->{'id'};
+        $string .= "        type   = ".$b->{'type'}."\n";
+        $string .= "        hidden = ".$b->{'hidden'}."\n" if $b->{'hidden'};
+        $string .= "        groups = ".$b->{'groups'}."\n" if $b->{'groups'};
+        $string .= "        <options>\n";
+        $string .= "            peer = ".$b->{'options'}->{'peer'}."\n";
+        $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if defined $b->{'options'}->{'resource_file'};
+        $string .= "        </options>\n";
+        if(defined $b->{'configtool'}) {
+            $string .= "        <configtool>\n";
+            $string .= "            core_type      = ".$b->{'configtool'}->{'core_type'}."\n" if defined $b->{'configtool'}->{'core_type'};
+            $string .= "            core_conf      = ".$b->{'configtool'}->{'core_conf'}."\n" if defined $b->{'configtool'}->{'core_conf'};
+            $string .= "            obj_check_cmd  = ".$b->{'configtool'}->{'obj_check_cmd'}."\n" if defined $b->{'configtool'}->{'obj_check_cmd'};
+            $string .= "            obj_reload_cmd = ".$b->{'configtool'}->{'obj_reload_cmd'}."\n" if defined $b->{'configtool'}->{'obj_reload_cmd'};
+            $string .= "            obj_readonly   = ".$b->{'configtool'}->{'obj_readonly'}."\n" if defined $b->{'configtool'}->{'obj_readonly'};
+            $string .= "        </configtool>\n";
+        }
+        $string .= "    </peer>\n";
+    }
+    $string .= "</Component>\n";
+    return $string;
+}
+
+
+######################################
+
 =head2 replace_block
 
 replace block in config file

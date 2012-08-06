@@ -1192,7 +1192,7 @@ sub _initialise_peer {
     my $peer = {
         'name'          => $config->{'name'},
         'type'          => $config->{'type'},
-        'hidden'        => $config->{'hidden'},
+        'hidden'        => defined $config->{'hidden'} ? $config->{'hidden'} : 0,
         'groups'        => $config->{'groups'},
         'resource_file' => $config->{'options'}->{'resource_file'},
         'enabled'       => 1,
@@ -1207,6 +1207,7 @@ sub _initialise_peer {
     };
     # shorten backend id
     $peer->{'key'} = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
+    $peer->{'key'} = $config->{'id'} if defined $config->{'id'};
     $peer->{'class'}->peer_key($peer->{'key'});
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
     if($self->{'backend_debug'} and Thruk->debug) {

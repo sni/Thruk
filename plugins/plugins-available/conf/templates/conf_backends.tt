@@ -9,8 +9,15 @@ Note: some options are not accessible here for security reasons.
   <tr>
     <th colspan=3 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
   </tr>
+  [% IF c.db.backends.size == 0 %]
+  <tr class="backend_conf_0_add">
+    <td colspan=3 style="text-align:center;">
+      <font color="red">There are no backends defined yet!</font>
+    </td>
+  </tr>
+  [% END %]
   [% x = 0 %]
-  [% FOREACH b = c.db.backends %]
+  [% FOREACH b = sites %]
   [% x = x + 1 %]
   [% PROCESS _conf_backends_backend.tt %]
   [% END %]
@@ -74,12 +81,18 @@ Note: some options are not accessible here for security reasons.
     showElement(img);
 
     jQuery.ajax({
-        url:  'conf.cgi?sub=backends&action=check_con&con='+con,
+        url:  'conf.cgi',
+        data: {
+                sub:    'backends',
+                action: 'check_con',
+                con:    con
+        },
+        type: 'POST',
         cache: false,
         success: function(data) {
           if(data.ok == 1) {
             img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/accept.png';
-            img.title = 'test successful';
+            img.title = 'connection test successful';
           } else {
             img.src = '[% url_prefix %]thruk/themes/[% theme %]/images/error.png';
             img.title = data.error;

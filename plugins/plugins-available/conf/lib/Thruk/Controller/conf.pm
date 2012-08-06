@@ -16,6 +16,8 @@ use Data::Dumper;
 use File::Slurp;
 use Socket;
 use Encode qw(decode_utf8);
+use Config::General qw(ParseConfig);
+use Digest::MD5 qw(md5_hex);
 
 =head1 NAME
 
@@ -766,13 +768,11 @@ sub _process_backends_page {
         }
         # put new one at the end
         if($new) { push(@{$backends}, shift(@{$backends})) }
-        my $conf      = Config::General->new();
-        my $structure = { 'Component' =>  { 'peer' => $backends }};
-        my $string    = $conf->save_string($structure);
-        $string       =~ s/<Component>/<Component Thruk::Backend>/gmx;
+        my $string    = Thruk::Utils::Conf::get_component_as_string($backends);
         Thruk::Utils::Conf::replace_block($file, $string, '<Component\s+Thruk::Backend>', '<\/Component>');
         Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully. Changes take effect after Restart.' );
         Thruk::Utils::restart_later($c);
+        return $c->response->redirect('conf.cgi?sub=backends');
     }
     if($c->stash->{action} eq 'check_con') {
         my $peer = $c->request->parameters->{'con'};
@@ -791,6 +791,24 @@ sub _process_backends_page {
         return $c->forward('Thruk::View::JSON');
     }
 
+    my $backends = [];
+    if(-f $file) {
+        my %conf = ParseConfig($file);
+        if(defined $conf{'Component'}->{'Thruk::Backend'}->{'peer'}) {
+            if(ref $conf{'Component'}->{'Thruk::Backend'}->{'peer'} eq 'ARRAY') {
+                $backends = $conf{'Component'}->{'Thruk::Backend'}->{'peer'};
+            } else {
+                push @{$backends}, $conf{'Component'}->{'Thruk::Backend'}->{'peer'};
+            }
+        }
+    }
+    # set ids
+    for my $b (@{$backends}) {
+        $b->{'key'}    = substr(md5_hex($b->{'options'}->{'peer'}." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
+        $b->{'addr'}   = $b->{'options'}->{'peer'};
+        $b->{'hidden'} = 0 unless defined $b->{'hidden'};
+    }
+    $c->stash->{'sites'}    = $backends;
     $c->stash->{'subtitle'} = "Thruk Backends Manager";
     $c->stash->{'template'} = 'conf_backends.tt';
 

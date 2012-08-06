@@ -89,19 +89,19 @@
  ######################################
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
-+    <peer>
-+        name   = Core
-+        type   = livestatus
-+        <options>
-+            peer          = /var/nagios/rw/live
-+            resource_file = /etc/nagios/resource.cfg
-+       </options>
-+       <configtool>
-+            core_conf      = /etc/nagios/nagios.cfg
-+            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg
-+            obj_reload_cmd = /etc/init.d/nagios reload
-+       </configtool>
-+    </peer>
++#    <peer>
++#        name   = Core
++#        type   = livestatus
++#        <options>
++#            peer          = /var/nagios/rw/live
++#            resource_file = /etc/nagios/resource.cfg
++#       </options>
++#       <configtool>
++#            core_conf      = /etc/nagios/nagios.cfg
++#            obj_check_cmd  = /usr/sbin/nagios -v /etc/nagios/nagios.cfg
++#            obj_reload_cmd = /etc/init.d/nagios reload
++#       </configtool>
++#    </peer>
 +
  #    <peer>
  #        name   = Local Nagios
