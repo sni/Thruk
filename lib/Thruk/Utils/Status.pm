@@ -282,7 +282,7 @@ sub classic_filter {
     my $servicegroupfilter = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
 
     # fill the host/service totals box
-    unless($errors || $c->stash->{'minimal'}) {
+    unless($errors or $c->stash->{'minimal'}) {
         Thruk::Utils::Status::fill_totals_box( $c, $hostfilter, $servicefilter ) if defined $c->{'stash'};
     }
 
@@ -379,7 +379,7 @@ sub do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    if(!$c->stash->{'has_error'} and ( $prefix eq 'dfl_' or $prefix eq '')) {
+    if(!$c->stash->{'has_error'} and !$c->stash->{'minimal'} and ( $prefix eq 'dfl_' or $prefix eq '')) {
         Thruk::Utils::Status::fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 
