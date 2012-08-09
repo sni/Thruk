@@ -1,6 +1,11 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.42     not yet released
+          - panorama view:
+            - link service details to service list
+
 1.40     Fri Aug  3 16:54:16 CEST 2012
+          - change backends in config tool
           - use wait feature for acks/downtimes
           - change backends in config tool
           - panorama view:

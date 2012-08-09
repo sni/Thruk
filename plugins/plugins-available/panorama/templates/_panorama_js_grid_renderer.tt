@@ -267,6 +267,12 @@ TP.render_service_icons = function(v, td, item, row, col, store, view) {
     return icons;
 }
 
+/* make service description clickable */
+TP.render_clickable_service = function(v, td, item, row, col, store, view) {
+    td.tdCls = 'clickable';
+    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletService', conf: { xdata: { host: '"+item.data.host_name+"', service: '"+item.data.description+"'}}})\">"+v+"<\/div>";
+}
+
 /* render url */
 TP.render_url = function(v, td, item, row, col, store, view) {
     return "<a href='"+v+"' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border='0' width='20' height='20' alt='Perform Extra Service Actions' title='Perform Extra Service Actions'><\/a>";

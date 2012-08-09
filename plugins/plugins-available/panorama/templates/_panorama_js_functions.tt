@@ -384,6 +384,15 @@ var TP = {
                     initial_backends[key].program_start = data.pi_detail[key].program_start;
                 }
             }
+            /* contains a message? */
+            var msg = Ext.util.Cookies.get('thruk_message');
+            if(msg) {
+                TP.Msg.msg(msg);
+                // clear message
+                var now = new Date();
+                var expires = new Date(now.getTime() - (10*365*86400*1000)); // let the cookie expire 10 year ago
+                Ext.util.Cookies.set('thruk_message', null, expires);
+            }
             return data;
         }
         debug("ERROR: " + response.status);
