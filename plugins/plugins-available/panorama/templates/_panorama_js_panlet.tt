@@ -68,12 +68,12 @@ Ext.define('TP.Panlet', {
                 handler: function() { TP.filterWindow(this.has_search_button, {setValue: function(v) { This.xdata.filter = v; This.refreshHandler() }, getValue: function() { return This.xdata.filter }}); }
             });
         }
-        this.tools.push({
+        this.tools.push(new Ext.panel.Tool({
             type:    'refresh',
             scope:    this,
             tooltip: 'reload content of this panlet',
             handler:  function() { this.manualRefresh() }
-        });
+        }));
         this.tools.push({
             type: 'gear',
             scope: this,

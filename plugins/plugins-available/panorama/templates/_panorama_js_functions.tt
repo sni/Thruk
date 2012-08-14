@@ -372,11 +372,11 @@ var TP = {
             try {
                 data = eval("("+response.responseText+")");
             } catch(e) {
-                if(refresh) { refresh.setType('broken') }
+                if(refresh.setType) { refresh.setType('broken') }
                 debug(e);
                 return data;
             }
-            if(refresh) { refresh.setType('refresh') }
+            if(refresh.setType) { refresh.setType('refresh') }
             /* extract pi details */
             if(data.pi_detail != undefined) {
                 for(var key in data.pi_detail) {
@@ -397,7 +397,7 @@ var TP = {
         }
         debug("ERROR: " + response.status);
         debug(response);
-        if(refresh) { refresh.setType('broken') }
+        if(refresh.setType) { refresh.setType('broken') }
         return false;
     },
     /* sets text for refresh slider */

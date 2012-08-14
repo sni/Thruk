@@ -31,6 +31,10 @@ Ext.define('TP.Pantab', {
                 }
             }
         },
+        afterrender: function(This, eOpts) {
+            var header = This.getDockedItems()[0];
+            if(header) { header.hide() }
+        },
         beforerender: function(This, eOpts) {
             for(nr in This.window_ids) {
                 var pantab = Ext.getCmp(This.window_ids[nr]);
