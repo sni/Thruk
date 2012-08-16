@@ -56,7 +56,9 @@ sub new {
     $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};
     $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
+    $options->{'remoteurl_specified'} = 1;
     unless(defined $options->{'remoteurl'}) {
+        $options->{'remoteurl_specified'} = 0;
         if(defined $ENV{'STARTURL'}) {
             $options->{'remoteurl'} = $ENV{'STARTURL'};
         }
@@ -180,7 +182,7 @@ sub _run {
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
     }
-    if(!$self->{'opt'}->{'local'} and !defined $result) {
+    if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
         _error("remote command failed:");
         _error($response);
         return 1;
