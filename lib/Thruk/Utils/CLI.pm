@@ -56,9 +56,20 @@ sub new {
     $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};
     $ENV{'THRUK_DEBUG'}     = $options->{'verbose'} if $options->{'verbose'};
-    $options->{'remoteurl'} = defined $ENV{'OMD_SITE'} ? 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi'
-                                                       : 'http://localhost/thruk/cgi-bin/remote.cgi'
-                              unless defined $options->{'remoteurl'};
+    unless(defined $options->{'remoteurl'}) {
+        if(defined $ENV{'STARTURL'}) {
+            $options->{'remoteurl'} = $ENV{'STARTURL'};
+        }
+        elsif(defined $ENV{'REMOTEURL'}) {
+            $options->{'remoteurl'} = $ENV{'REMOTEURL'};
+        }
+        elsif(defined $ENV{'OMD_SITE'}) {
+            $options->{'remoteurl'} = 'http://localhost/'.$ENV{'OMD_SITE'}.'/thruk/cgi-bin/remote.cgi';
+        }
+        else {
+            $options->{'remoteurl'} = 'http://localhost/thruk/cgi-bin/remote.cgi';
+        }
+    }
     $options->{'remoteurl'} =~ s|/thruk/*$||mx;
     $options->{'remoteurl'} = $options->{'remoteurl'}.'/thruk/cgi-bin/remote.cgi' if $options->{'remoteurl'} !~ m/remote\.cgi$/mx;
 
@@ -169,7 +180,7 @@ sub _run {
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
     }
-    if(!defined $result and $self->{'opt'}->{'remoteurl'} !~ m|/localhost/|mx) {
+    if(!$self->{'opt'}->{'local'} and !defined $result) {
         _error("remote command failed:");
         _error($response);
         return 1;

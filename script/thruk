@@ -1,4 +1,13 @@
-#!/usr/bin/perl
+#!/bin/sh
+# read rc file if exists
+if [ -e ~/.thruk  ]; then
+    . ~/.thruk
+fi
+eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
 
 use strict;
 use warnings;
