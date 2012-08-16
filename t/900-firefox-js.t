@@ -119,6 +119,7 @@ sub check_js_errors {
     for my $err (@_) {
         next if $err->{'message'} =~ m/JavaScript\ Warning:/mx;
         next if $err->{'message'} =~ m|modules/services-sync/resource.js|mx;
+        next if $err->{'message'} =~ m|MozRepl::|mx;
         fail($err->{'message'});
     }
     return;
