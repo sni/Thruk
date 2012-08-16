@@ -885,6 +885,7 @@ t/300-controller_status.t
 t/300-controller_summary.t
 t/300-controller_tac.t
 t/300-controller_trends.t
+t/400-recurring_downtime.t
 t/900-firefox-js.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js
