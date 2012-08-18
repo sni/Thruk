@@ -357,6 +357,7 @@ __PACKAGE__->config->{'omd_version'} = "";
 if(defined $ENV{'OMD_ROOT'} and -s $ENV{'OMD_ROOT'}."/version") {
     my $omdlink = readlink($ENV{'OMD_ROOT'}."/version");
     $omdlink    =~ s/.*?\///gmx;
+    $omdlink    =~ s/^(\d+)\.(\d+).(\d{4})(\d{2})(\d{2})/$1.$2~$3-$4-$5/gmx; # nicer snapshots
     __PACKAGE__->config->{'omd_version'} = $omdlink;
 }
 
