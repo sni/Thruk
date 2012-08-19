@@ -337,7 +337,7 @@ sub _process_json_page {
         }
     } else {
         for my $dat (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
-            my $name = $dat->get_long_name();
+            my $name = $dat->get_name();
             if(defined $name) {
                 push @{$objects}, $name
             } else {

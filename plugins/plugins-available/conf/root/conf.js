@@ -518,7 +518,7 @@ function init_conf_tool_list_wizard(id, type) {
     selected_members   = new Array();
     selected_members_h = new Object();
     var options = [];
-    var list = jQuery('#'+input_id).val().split(/,/);
+    var list = jQuery('#'+input_id).val().split(/\s*,\s*/);
     for(var x=0; x<list.length;x+=aggregate) {
         if(list[x] != '') {
             var val = list[x];
