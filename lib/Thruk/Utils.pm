@@ -549,6 +549,27 @@ sub set_message {
 
 ########################################
 
+=head2 append_message
+
+  append_message($text)
+
+append text to current message
+
+=cut
+sub append_message {
+    my($c, $txt) = @_;
+    if(defined $c->res->cookies->{'thruk_message'}) {
+        $c->res->cookies->{'thruk_message'}->{'value'} .= ' '.$txt
+    }
+    if(defined $c->stash->{'thruk_message'}) {
+        $c->stash->{'thruk_message'} .= ' '.$txt;
+    }
+    return 1;
+}
+
+
+########################################
+
 =head2 ssi_include
 
   ssi_include($c)
@@ -1350,17 +1371,22 @@ sub check_pid_file {
 
 =head2 restart_later
 
-  restart_later($c)
+  restart_later($c, $redirect_url)
 
-restart fcgi process
+restart fcgi process and redirects to given page
 
 =cut
 
 sub restart_later {
-    my($c) = @_;
+    my($c, $redirect) = @_;
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
         my $pid = $$;
-        `sleep 2 && kill $pid`;
+        system("sleep 1 && kill -HUP $pid &");
+        Thruk::Utils::append_message($c, 'Thruk has been restarted.');
+        return $c->response->redirect('../startup.html?wait#'.$redirect);
+    } else {
+        Thruk::Utils::append_message($c, 'Changes take effect after Restart.');
+        return $c->response->redirect($redirect);
     }
     return;
 }

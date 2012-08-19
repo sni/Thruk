@@ -115,6 +115,7 @@ my %config = ('name'                   => 'Thruk',
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
+                                          'starttime'      => time(),
                                           'debug_details'  => Thruk::Utils::get_debug_details(),
                                           'stacktrace'     => '',
                                           'backends'       => [],

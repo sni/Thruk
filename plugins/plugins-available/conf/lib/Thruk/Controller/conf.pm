@@ -702,8 +702,8 @@ sub _process_plugins_page {
                     }
                 }
             }
-            Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully. Changes take effect after Restart.' );
-            Thruk::Utils::restart_later($c);
+            Thruk::Utils::set_message( $c, 'success_message', 'Plugins changed successfully.' );
+            return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=plugins');
         }
     }
 
@@ -770,9 +770,8 @@ sub _process_backends_page {
         if($new) { push(@{$backends}, shift(@{$backends})) }
         my $string    = Thruk::Utils::Conf::get_component_as_string($backends);
         Thruk::Utils::Conf::replace_block($file, $string, '<Component\s+Thruk::Backend>', '<\/Component>');
-        Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully. Changes take effect after Restart.' );
-        Thruk::Utils::restart_later($c);
-        return $c->response->redirect('conf.cgi?sub=backends');
+        Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully.' );
+        return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=backends');
     }
     if($c->stash->{action} eq 'check_con') {
         my $peer = $c->request->parameters->{'con'};

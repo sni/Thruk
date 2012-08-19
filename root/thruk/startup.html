@@ -7,33 +7,55 @@
     <script type="text/javascript" src="javascript/jquery-1.7.2.min.js"></script>
     <script type="text/javascript">
     <!--
-      function debug(str) {
-        if (window.console != undefined) {
-          console.debug(str);
-        }
-      }
-      jQuery.noConflict();
-      jQuery(document).ready(function() {
-        jQuery.ajax({
-          url: 'side.html',
-          success: function() {
-            jQuery('#msg').html('<font color="green"><b>done.<\/b><\/font>');
-            var ref = window.location.search + window.location.hash;
-            ref = ref.replace(/^\?/, '');
-            ref = ref.replace(/\.cgi&/, '.cgi?');
-            if(ref != '') {
-              // breaks status.cgi urls with referer
-              //ref = unescape(ref);
-              // IE needs absolute URL
-              ref = window.location.protocol + '//' + window.location.host + ref;
-              window.location = ref;
+        function debug(str) {
+            if (window.console != undefined) {
+                console.debug(str);
             }
-          },
-          error: function() {
-            jQuery('#msg').html('<font color="red"><b>failed.<\/b><\/font><br>please have a look at the apache error log and the thruk error log.');
-          }
+        }
+        function check_reload() {
+            jQuery.ajax({
+                url: 'cgi-bin/remote.cgi',
+                success: function() {
+                    jQuery('#msg').html('<font color="green"><b>done.<\/b><\/font>');
+
+                    // reload navigation too
+                    if(parent.frames && parent.frames[0] != null) {
+                        var now = new Date();
+                        var href = parent.frames[0].location.href;
+                        if(href.indexOf('side.html') != -1) {
+                            href = href.replace(/\?.*$/, '');
+                            parent.frames[0].location = href + '?_=' + now.getTime();
+                        }
+                    }
+
+                    // extract referer
+                    var ref = window.location.search + window.location.hash;
+                    ref = ref.replace(/^\?wait#/, '?');
+                    ref = ref.replace(/^\?/, '');
+                    ref = ref.replace(/\.cgi&/, '.cgi?');
+                    if(ref != '') {
+                        // breaks status.cgi urls with referer
+                        //ref = unescape(ref);
+                        // IE needs absolute URL
+                        ref = window.location.protocol + '//' + window.location.host + ref;
+                        window.location = ref;
+                    }
+                },
+                error: function() {
+                    jQuery('#msg').html('<font color="red"><b>failed.<\/b><\/font><br>please have a look at the apache error log and the thruk error log.');
+                }
+            });
+        }
+
+        jQuery.noConflict();
+        jQuery(document).ready(function() {
+            var href = window.location.href;
+            if(href.indexOf('?wait#') != -1) {
+                window.setTimeout(check_reload, 1500);
+            } else {
+                check_reload();
+            }
         });
-      });
     -->
     </script>
   </head>
