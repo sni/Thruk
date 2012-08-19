@@ -321,6 +321,7 @@ sub _process_json_page {
     my $objects   = [];
     my $templates = [];
     my $filter    = $c->{'request'}->{'parameters'}->{'filter'};
+    my $use_long  = $c->{'request'}->{'parameters'}->{'long'};
     if(defined $filter) {
         my $types   = {};
         my $objects = $c->{'obj_db'}->get_objects_by_type($type,$filter);
@@ -337,7 +338,7 @@ sub _process_json_page {
         }
     } else {
         for my $dat (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
-            my $name = $dat->get_name();
+            my $name = $use_long ? $dat->get_long_name() : $dat->get_name();
             if(defined $name) {
                 push @{$objects}, $name
             } else {
