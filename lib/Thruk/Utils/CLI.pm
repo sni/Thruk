@@ -181,11 +181,12 @@ sub _run {
     _debug("_run(): ".Dumper($self->{'opt'}));
     unless($self->{'opt'}->{'local'}) {
         ($result,$response) = $self->_request($self->{'opt'}->{'credential'}, $self->{'opt'}->{'remoteurl'}, $self->{'opt'});
-    }
-    if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
-        _error("remote command failed:");
-        _error($response);
-        return 1;
+
+        if(!defined $result and $self->{'opt'}->{'remoteurl_specified'}) {
+            _error("remote command failed:");
+            _error($response);
+            return 1;
+        }
     }
 
     unless(defined $result) {
