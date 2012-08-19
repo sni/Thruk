@@ -775,16 +775,18 @@ sub _process_backends_page {
     }
     if($c->stash->{action} eq 'check_con') {
         my $peer = $c->request->parameters->{'con'};
-        my $con  = Thruk::Backend::Manager->create_backend('test', 'livestatus', { peer => $peer});
+        my $type = $c->request->parameters->{'type'};
         my @test;
         eval {
-            @test = $con->get_processinfo();
+            my $con = Thruk::Backend::Manager->create_backend('test', $type, { peer => $peer});
+            @test   = $con->get_processinfo();
         };
-        if(scalar @test == 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1) {
+        if(scalar @test == 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1 and scalar keys %{$test[0]->{(keys %{$test[0]})[0]}} > 0) {
             $c->stash->{'json'} = { ok => 1 };
         } else {
             my $error = $@;
             $error =~ s/\s+at\s\/.*//gmx;
+            $error = 'got no valid result' if $error eq '';
             $c->stash->{'json'} = { ok => 0, error => $error };
         }
         return $c->forward('Thruk::View::JSON');

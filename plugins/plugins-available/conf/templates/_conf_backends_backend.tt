@@ -12,7 +12,8 @@
   <td class='dataVar' align="left">Type</td>
   <td class='dataVal' colspan=2>
     <select name="type[% x %]" style="width: 200px;">
-      <option>livestatus</option>
+      <option value="livestatus"[% IF b.type == 'livestatus' %] selected[% END %]>livestatus</option>
+      <option value="mongodb"[%    IF b.type == 'mongodb'    %] selected[% END %]>mongo db</option>
     </select>
   </td>
 </tr>
