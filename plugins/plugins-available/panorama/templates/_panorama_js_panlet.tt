@@ -289,5 +289,13 @@ Ext.define('TP.Panlet', {
         if(this.loader != undefined) { this.loader.loadMask=true; }
         this.refreshHandler();
         if(this.loader != undefined) { this.loader.loadMask=false; }
+    },
+    getTool: function(name) {
+        for(var nr in this.tools) {
+            if(this.tools[nr].type == name) {
+                return(this.tools[nr]);
+            }
+        }
+        return null;
     }
 });

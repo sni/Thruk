@@ -358,14 +358,7 @@ var TP = {
     getResponse: function(panlet, response) {
         var refresh = {setType: Ext.emptyFn };
         if(panlet != undefined) {
-            for(var nr in panlet.tools) {
-                if(panlet.tools[nr].type == 'refresh') {
-                    refresh = panlet.tools[nr];
-                }
-                if(panlet.tools[nr].type == 'broken') {
-                    refresh = panlet.tools[nr];
-                }
-            }
+            refresh = panlet.getTool('refresh') || panlet.getTool('broken');
         }
         if(response.status == 200) {
             var data;

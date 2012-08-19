@@ -224,11 +224,13 @@ my %config = ('name'                   => 'Thruk',
               },
 );
 # set TT strict mode only for authors
+$config{'thruk_debug'} = 0;
 if(-f $project_root."/.author") {
     $config{'View::TT'}->{'STRICT'}     = 1;
     $config{'View::TT'}->{'CACHE_SIZE'} = 0;
     $config{'View::TT'}->{'STAT_TTL'}   = 5;
     $config{'View::TT'}->{'PRE_DEFINE'}->{'thruk_debug'} = 1;
+    $config{'thruk_debug'} = 1;
 }
 $config{'View::TT'}->{'PRE_DEFINE'}->{'released'}      = $config{released};
 $config{'View::Excel::Template::Plus'}->{'etp_config'} = $config{'View::TT'}; # use same config for View::Excel as in View::TT

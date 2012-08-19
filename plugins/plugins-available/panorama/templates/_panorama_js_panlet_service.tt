@@ -38,7 +38,7 @@ Ext.define('TP.PanletService', {
                     var d         = data.data;
                     var downtimes = data.downtimes;
                     var panel = this.items.getAt(1);
-                    panel.getComponent('current_status').update('<div class="extinfostate '+TP.render_service_status(d.state, {}, data).toUpperCase()+'">'+TP.render_service_status(d.state, {}, data).toUpperCase()+'</div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
+                    panel.getComponent('current_status').update('<div class="extinfostate '+TP.render_service_status(d.state, {}, data).toUpperCase()+'">'+TP.render_service_status(d.state, {}, data).toUpperCase()+'<\/div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
                     panel.getComponent('status_information').update(d.plugin_output);
                     panel.getComponent('perf_data').update(d.perf_data);
                     panel.getComponent('cur_attempt').update(d.current_attempt + '/' + d.max_check_attempts);
@@ -49,17 +49,17 @@ Ext.define('TP.PanletService', {
                     panel.getComponent('last_change').update(TP.date_format(d.last_state_change));
                     panel.getComponent('last_notification').update((d.last_notification == 0 ? 'N/A' : TP.date_format(d.last_notification)) + ' (notification '+d.current_notification_number+')');
                     if(d.flap_detection_enabled) {
-                        panel.getComponent('is_flapping').update('<div class="extinfo_noyes_'+d.is_flapping+'">'+ (d.is_flapping ? 'YES' : 'NO') +'</div> ('+d.percent_state_change.toFixed(3)+'% state change)');
+                        panel.getComponent('is_flapping').update('<div class="extinfo_noyes_'+d.is_flapping+'">'+ (d.is_flapping ? 'YES' : 'NO') +'<\/div> ('+d.percent_state_change.toFixed(3)+'% state change)');
                     } else {
                         panel.getComponent('is_flapping').update('N/A');
                     }
                     if(d.scheduled_downtime_depth==0) {
-                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_0">NO</div>');
+                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_0">NO<\/div>');
                     } else {
-                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES</div> ('+TP.date_format(downtimes[0].start_time)+' - '+TP.date_format(downtimes[0].end_time)+')');
+                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES<\/div> ('+TP.date_format(downtimes[0].start_time)+' - '+TP.date_format(downtimes[0].end_time)+')');
                     }
-                    panel.getComponent('in_check_period').update('<div class="extinfo_yesno_'+d.in_check_period+'">'+ (d.in_check_period>0 ? 'YES' : 'NO') +'</div>');
-                    panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'</div>');
+                    panel.getComponent('in_check_period').update('<div class="extinfo_yesno_'+d.in_check_period+'">'+ (d.in_check_period>0 ? 'YES' : 'NO') +'<\/div>');
+                    panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'<\/div>');
                     panel.getComponent('site').update(d.peer_name);
                     /* update acknowledged button */
                     var toolbar = panel.dockedItems.getAt(0);

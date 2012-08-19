@@ -34,7 +34,7 @@ Ext.define('TP.PanletPNP', {
             var panel  = this;
             var form   = this.down('form').getForm();
             var values = form.getValues();
-            if(values.graph != this.lastGraph) {
+            if(values.graph && values.graph != this.lastGraph) {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.request({
@@ -93,13 +93,17 @@ Ext.define('TP.PanletPNP', {
                 afterrender: function (me) {
                     me.el.on({
                         load: function (evt, ele, opts) {
-                            me.up('panel').tools['refresh'].setType('refresh');
-                            me.up('panel').adjustImgSize();
-                            me.up('panel').imgMask.hide();
+                            var panel = me.up('panel');
+                            var refresh = panel.getTool('refresh') || panel.getTool('broken');
+                            refresh.setType('refresh');
+                            panel.adjustImgSize();
+                            panel.imgMask.hide();
                         },
                         error: function (evt, ele, opts) {
-                            me.up('panel').tools['refresh'].setType('broken');
-                            me.up('panel').imgMask.hide();
+                            var panel = me.up('panel');
+                            var refresh = panel.getTool('refresh') || panel.getTool('broken');
+                            refresh.setType('broken');
+                            panel.imgMask.hide();
                         }
                     });
                 }

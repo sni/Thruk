@@ -137,13 +137,15 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         push @{$c->stash->{preload_img}}, $i;
     }
 
-    $c->stash->{template}  = 'panorama.tt';
+    $self->_js($c, 1) if $c->config->{'thruk_debug'};
+
+    $c->stash->{template} = 'panorama.tt';
     return 1;
 }
 
 ##########################################################
 sub _js {
-    my ( $self, $c ) = @_;
+    my ( $self, $c, $only_data ) = @_;
 
     my $stateprovider = $c->config->{'Thruk::Plugin::Panorama'}->{'state_provider'} || 'server';
     if($stateprovider ne 'cookie' and $stateprovider ne 'server') { $stateprovider = 'server'; }
@@ -162,10 +164,12 @@ sub _js {
     }
 
     my $data = Thruk::Utils::get_user_data($c);
-    $c->stash->{state}     = encode_json($data->{'panorama'}->{'state'} || {});
+    $c->stash->{state} = encode_json($data->{'panorama'}->{'state'} || {});
 
-    $c->res->content_type('text/javascript');
-    $c->stash->{template}  = 'panorama_js.tt';
+    unless($only_data) {
+        $c->res->content_type('text/javascript');
+        $c->stash->{template} = 'panorama_js.tt';
+    }
     return 1;
 }
 
