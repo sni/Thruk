@@ -651,6 +651,7 @@ plugins/plugins-available/panorama/root/images/chart_pie.png
 plugins/plugins-available/panorama/root/images/cog.png
 plugins/plugins-available/panorama/root/images/cog_add.png
 plugins/plugins-available/panorama/root/images/computer.png
+plugins/plugins-available/panorama/root/images/cup_key.png
 plugins/plugins-available/panorama/root/images/down.png
 plugins/plugins-available/panorama/root/images/exclamation.png
 plugins/plugins-available/panorama/root/images/exit.png
@@ -672,6 +673,7 @@ plugins/plugins-available/panorama/root/images/table_gear.png
 plugins/plugins-available/panorama/root/images/table_lightning.png
 plugins/plugins-available/panorama/root/images/text_align_left.png
 plugins/plugins-available/panorama/root/images/tool_broken.png
+plugins/plugins-available/panorama/root/images/user_suit.png
 plugins/plugins-available/panorama/root/panorama-1.40.css
 plugins/plugins-available/panorama/t/controller_panorama.t
 plugins/plugins-available/panorama/t/javascript.t

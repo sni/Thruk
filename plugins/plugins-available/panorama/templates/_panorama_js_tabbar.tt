@@ -16,17 +16,30 @@ Ext.define('TP.TabBar', {
             handler:  TP.test
         }, {
             id:       'bug_report',
-            closable: false,
-            minWidth: 28,
+            closable:  false,
+            minWidth:  28,
             iconCls:  'bug-tab',
             href:     '#',
             tooltip:  'Send Bug Report'
+        }, {
+            iconCls:  'user-tab',
+            closable:  false,
+            tooltip:  'user menu',
+            html:     '[% remote_user %]' /*,
+            menu: {
+                items: [{
+                        text: 'Switch User',
+                        icon: '[% url_prefix %]thruk/plugins/panorama/images/cup_key.png',
+                        handler: function() {}
+                }]
+            } */
         }, {
             title: '',
             closable: false,
             minWidth: 28,
             iconCls: 'gear-tab',
-            tooltip:  'Menu',
+            tooltip:  'add panlets',
+            html:     'add',
             menu: {
                 items: [{
                         text: 'About',

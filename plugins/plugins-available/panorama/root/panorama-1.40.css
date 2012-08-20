@@ -42,6 +42,11 @@ DIV.x-tab-default-over A.x-tab-close-btn {
     left: -4px;
     top: 0px;
 }
+.user-tab {
+    background-image: url("images/user_suit.png") !important;
+    left: -2px;
+    top: 0px;
+}
 
 /* make menu items align to icon */
 .x-menu-item-link {
