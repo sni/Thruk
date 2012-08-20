@@ -232,6 +232,9 @@ TABLE.x-form-item-hidden {
 
 
 /* messages */
+DIV.msg {
+  position: relative;
+}
 #msg-div {
     position:absolute;
     left:35%;
@@ -261,4 +264,12 @@ DIV.success_message h3 {
 }
 DIV.fail_message h3 {
     color: #FF0000;
+}
+
+/* show close button on fail messages */
+DIV.msg A.x-tab-close-btn {
+  display: inherit;
+  position: absolute;
+  top: 5px;
+  right: 6px;
 }

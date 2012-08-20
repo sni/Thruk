@@ -282,7 +282,7 @@ TP.Msg = function() {
     var msgCt;
 
     function createBox(cls, title, s){
-        return '<div class="msg '+cls+'"><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
+        return '<div class="msg '+cls+'"><a class="x-tab-close-btn" title="" href="#"><\/a><h3>' + title + '<\/h3><p>' + s + '<\/p><\/div>';
     }
     return {
         msg : function(s) {
@@ -295,13 +295,20 @@ TP.Msg = function() {
                 title = 'Error';
             }
             var m = Ext.DomHelper.append(msgCt, createBox(p[0], title, p[1]), true);
+            var btn = new Ext.Element(m.dom.firstChild);
+            btn.on("click", function() {
+                m.ghost("t", { remove: true});
+            });
+            m.show();
             m.hide();
             m.slideIn('t');
             if(p[0] == 'fail_message') {
-                m.ghost("t", { delay: 3000, remove: true});
+                debug(title + ': ' + p[1]);
+                delay = 30000;
             } else {
-                m.ghost("t", { delay: 1000, remove: true});
+                delay = 2500;
             }
+            window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
         }
     };
 }();
