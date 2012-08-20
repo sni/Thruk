@@ -34,7 +34,7 @@ Ext.define('TP.PanletPNP', {
             var panel  = this;
             var form   = this.down('form').getForm();
             var values = form.getValues();
-            if(values.graph && values.graph != this.lastGraph) {
+            if(values.graph && values.graph != this.lastGraph && values.graph.indexOf('host=') != -1) {
                 this.lastGraph = values.graph;
                 var url = values.graph.replace(/\/image\?/, '/json?');
                 Ext.Ajax.request({
