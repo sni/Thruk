@@ -10,7 +10,6 @@ Ext.define('TP.Panlet', {
     hideMode:  'visibility',
     autoShow:  true,
     stateful:  true,
-    saveDelay: 3000,             // delay savestate writes
     resizable: new Ext.Panel({   // make resize snap to grid
         widthIncrement:  TP.snap_x,
         heightIncrement: TP.snap_y

@@ -181,14 +181,20 @@ sub _stateprovider {
     my $value = $c->request->parameters->{'value'};
     my $name  = $c->request->parameters->{'name'};
 
-    if(defined $task and $task eq 'set') {
+    if(defined $task and ($task eq 'set' or $task eq 'update')) {
         my $data = Thruk::Utils::get_user_data($c);
-        if($value eq 'null') {
-            $c->log->debug("panorama: removed ".$name);
-            delete $data->{'panorama'}->{'state'}->{$name};
+        if($task eq 'update') {
+            $c->log->debug("panorama: update users data");
+            $data->{'panorama'}->{'state'} = $c->request->parameters;
+            delete $data->{'panorama'}->{'state'}->{'task'};
         } else {
-            $c->log->debug("panorama: set ".$name." to ".$self->_nice_ext_value($value));
-            $data->{'panorama'}->{'state'}->{$name} = $value;
+            if($value eq 'null') {
+                $c->log->debug("panorama: removed ".$name);
+                delete $data->{'panorama'}->{'state'}->{$name};
+            } else {
+                $c->log->debug("panorama: set ".$name." to ".$self->_nice_ext_value($value));
+                $data->{'panorama'}->{'state'}->{$name} = $value;
+            }
         }
         Thruk::Utils::store_user_data($c, $data);
 

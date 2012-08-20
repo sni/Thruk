@@ -27,14 +27,15 @@
  */
 Ext.state.HttpProvider = function(config){
     Ext.state.HttpProvider.superclass.constructor.call(this);
-    this.url = "";
+    this.url       = '';
+    this.saveDelay = 2000;
 
     Ext.apply(this, config);
     this.state = this.readValues();
 };
 
 Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
-    set : function(name, value) {
+    set: function(name, value) {
         if(typeof value == "undefined" || value === null) {
             this.clear(name);
             return;
@@ -43,12 +44,12 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         Ext.state.HttpProvider.superclass.set.call(this, name, value);
     },
 
-    clear : function(name) {
+    clear: function(name) {
         this.clearValue(name);
         Ext.state.HttpProvider.superclass.clear.call(this, name);
     },
 
-    readValues : function() {
+    readValues: function() {
         var state = {};
         for (var name in ExtState) {
             if(name!='remove') {
@@ -58,26 +59,18 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         return state;
     },
 
-    setValue : function(name, value) {
+    setValue: function(name, value) {
         encoded = this.encodeValue(value)
         if(ExtState[name] != undefined && ExtState[name] == encoded) {
             return;
         }
-        var conn = new Ext.data.Connection();
-        conn.request({
-            url: this.url,
-            params: {task: 'set', 'name': name, 'value': encoded }
-        });
         ExtState[name] = encoded;
+        this.queueChanges();
     },
 
-    clearValue : function(name) {
-        var conn = new Ext.data.Connection();
-        conn.request({
-            url: this.url,
-            params: {task: 'set', 'name': name, 'value': 'null' }
-        });
+    clearValue: function(name) {
         delete ExtState[name];
+        this.queueChanges();
     },
 
     /* clear all values */
@@ -92,12 +85,26 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         for(var key in data) {
             this.set(key, data[key]);
         }
+    },
+    /* queue save changes */
+    queueChanges: function() {
+        window.clearTimeout(this.interval);
+        this.interval = window.setTimeout(Ext.bind(this.saveChanges, this, []), this.saveDelay);
+    },
+    saveChanges: function() {
+        var params = { task:  'update' };
+        for (var name in ExtState) {
+            params[name] = ExtState[name];
+        }
+        var conn = new Ext.data.Connection();
+        conn.request({ url: this.url, params: params });
     }
 });
 
 
 /* create state provider */
 var cp = new Ext.state.HttpProvider({
-    url: '[% url_prefix %]thruk/cgi-bin/panorama.cgi?state'
+    url:      '[% url_prefix %]thruk/cgi-bin/panorama.cgi?state',
+    saveDelay: 3000
 });
 Ext.state.Manager.setProvider(cp);
