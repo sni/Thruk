@@ -7,6 +7,7 @@ Make sure the report does not contain confidential information.
 Url:        [%+ short_uri(c) +%]
 Browser:    [%+ IF c.request.exists('user_agent') %][% c.request.user_agent %][% END +%]
 Version:    [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %] / OMD [% c.config.omd_version %][% END +%]
+Source:     [% instsource +%]
 Backends:   [%+ FOREACH pd IN backends %][% UNLESS loop.first +%]
             [%+ END %]
             [% backend_detail.$pd.state %] / [% IF pi_detail.$pd.exists('program_version') %][% pi_detail.$pd.program_version %][% END %] / [% IF pi_detail.$pd.exists('data_source_version') %][% pi_detail.$pd.data_source_version %][% END %]

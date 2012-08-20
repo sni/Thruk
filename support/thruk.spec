@@ -177,6 +177,8 @@ chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugi
 /usr/bin/crontab -l -u apache 2>/dev/null | /usr/bin/crontab -u apache -
 %endif
 /usr/bin/thruk -a installcron --local > /dev/null
+# save pkg name
+sed -r "s/instsource\s*= '';/instsource   = '%{_rpmfilename}';/" -i /usr/share/thruk/lib/Thruk.pm
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
 

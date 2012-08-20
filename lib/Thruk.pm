@@ -68,7 +68,10 @@ our $VERSION = '1.40';
 # local deployment.
 my $project_root = __PACKAGE__->config->{home};
 my $branch       = '';
-$branch          = Thruk::Utils::get_git_name($project_root) unless $branch ne '';
+my $gitbranch    = Thruk::Utils::get_git_name($project_root);
+$branch          = $gitbranch unless $branch ne '';
+my $instsource   = '';
+$instsource      = 'git' if $gitbranch ne '' and  $instsource eq '';
 my %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'released'               => 'August 03, 2012',
@@ -115,6 +118,7 @@ my %config = ('name'                   => 'Thruk',
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,
+                                          'instsource'     => $instsource,
                                           'starttime'      => time(),
                                           'debug_details'  => Thruk::Utils::get_debug_details(),
                                           'stacktrace'     => '',
