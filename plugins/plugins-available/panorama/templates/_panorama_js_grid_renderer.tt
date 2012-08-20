@@ -97,7 +97,7 @@ TP.render_service_host = function(v, td, item, row, col, store, view) {
         if(item.data.host_state==1) { hstate = 'Unreachable'; }
         if(item.data.host_state==2) { hstate = 'Down';        }
         td.tdCls = 'BG_'+hstate.toUpperCase();
-        return v;
+        return TP.render_clickable_host(v, td, item, row, col, store, view);
     }
     return '';
 }
@@ -265,6 +265,13 @@ TP.render_service_icons = function(v, td, item, row, col, store, view) {
     if(d.notes_url_expanded )          { icons += "<a href='"+d.notes_url_expanded+"' target='_blank'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border='0' width='20' height='20' alt='View Extra Service Notes' title='View Extra Service Notes'><\/a>"; }
     if(d.icon_image_expanded )         { icons += "<img src='[% logo_path_prefix %]"+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     return icons;
+}
+
+/* make host clickable */
+TP.render_clickable_host = function(v, td, item, row, col, store, view) {
+    td.tdCls += ' clickable';
+    var host  = item.data.host_name ? item.data.host_name : item.data.name;
+    return "<div class='clickable' onClick=\"TP.add_panlet({type:'TP.PanletHost', conf: { xdata: { host: '"+host+"'}}})\">"+v+"<\/div>";
 }
 
 /* make service description clickable */

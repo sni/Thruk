@@ -306,7 +306,7 @@ TP.Msg = function() {
                 debug(title + ': ' + p[1]);
                 delay = 30000;
             } else {
-                delay = 2500;
+                delay = 3000;
             }
             window.setTimeout( function() { if(m && m.dom) { m.ghost("t", { remove: true}) }}, delay );
         }

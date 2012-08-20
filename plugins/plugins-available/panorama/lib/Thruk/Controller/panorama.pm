@@ -108,6 +108,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         elsif($task eq 'host_list') {
             return($self->_task_host_list($c));
         }
+        elsif($task eq 'host_detail') {
+            return($self->_task_host_detail($c));
+        }
         elsif($task eq 'service_list') {
             return($self->_task_service_list($c));
         }
@@ -495,7 +498,7 @@ sub _task_hosts {
 
     my $json = {
         columns => [
-            { 'header' => 'Hostname',               width => 120, dataIndex => 'name' },
+            { 'header' => 'Hostname',               width => 120, dataIndex => 'name',                                 renderer => 'TP.render_clickable_host' },
             { 'header' => 'Icons',                  width => 75,  dataIndex => 'icons',             align => 'right',  renderer => 'TP.render_host_icons' },
             { 'header' => 'Status',                 width => 80,  dataIndex => 'state',             align => 'center', renderer => 'TP.render_host_status' },
             { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',        align => 'center', renderer => 'TP.render_last_check' },
@@ -608,7 +611,6 @@ sub _task_services {
             { 'header' => 'Host Icon Image Alt',            dataIndex => 'host_icon_image_alt',           hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Host Custom Variable Names',     dataIndex => 'host_custom_variable_names',    hidden => JSON::XS::true, hideable => JSON::XS::false },
             { 'header' => 'Host Custom Variable Values',    dataIndex => 'host_custom_variable_values',   hidden => JSON::XS::true, hideable => JSON::XS::false },
-
 
             { 'header' => 'Last Time Ok',       dataIndex => 'last_time_ok',       hidden => JSON::XS::true, renderer => 'TP.render_date' },
             { 'header' => 'Last Time Warning',  dataIndex => 'last_time_warning',  hidden => JSON::XS::true, renderer => 'TP.render_date' },
@@ -857,6 +859,22 @@ sub _task_host_list {
 
     $data = Thruk::Backend::Manager::_sort({}, $data, 'name');
     $c->stash->{'json'} = { data => $data };
+    return $c->forward('Thruk::View::JSON');
+}
+
+##########################################################
+sub _task_host_detail {
+    my($self, $c) = @_;
+
+    my $host        = $c->request->parameters->{'host'}    || '';
+    $c->stash->{'json'} = {};
+    my $hosts     = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { name => $host }]);
+    my $downtimes = $c->{'db'}->get_downtimes(
+        filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $host }, { 'service_description' => '' } ],
+        sort => { 'DESC' => 'id' } );
+    if(defined $hosts and scalar @{$hosts} > 0) {
+        $c->stash->{'json'} = { data => $hosts->[0], downtimes => $downtimes };
+    }
     return $c->forward('Thruk::View::JSON');
 }
 

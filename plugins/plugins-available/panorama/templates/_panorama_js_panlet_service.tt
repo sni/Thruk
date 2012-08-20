@@ -5,6 +5,7 @@ Ext.define('TP.PanletService', {
     height: 420,
     width:  480,
     menusnr: 0,
+    type:   'service',
     initComponent: function() {
         this.callParent();
         this.xdata.url         = 'panorama.cgi?task=service_detail';
@@ -16,156 +17,8 @@ Ext.define('TP.PanletService', {
         };
 
         /* load service data */
-        this.loader = {
-            autoLoad: false,
-            renderer: 'data',
-            scope:    this,
-            ajaxOptions: { method: 'POST' },
-            loading:  false,
-            listeners: {
-                'beforeload': function(This, options, eOpts) {
-                    if(this.loading) {
-                        return false;
-                    }
-                    this.loading = true;
-                    return true;
-                }
-            },
-            callback: function(This, success, response, options) {
-                This.loading = false;
-                var data  = TP.getResponse(this, response);
-                if(data && data.data) {
-                    var d         = data.data;
-                    var downtimes = data.downtimes;
-                    var panel = this.items.getAt(1);
-                    panel.getComponent('current_status').update('<div class="extinfostate '+TP.render_service_status(d.state, {}, data).toUpperCase()+'">'+TP.render_service_status(d.state, {}, data).toUpperCase()+'<\/div> (for ' + TP.render_duration('', '', data)+')'+(d.acknowledged?' (<img src="[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom"> acknowledged)':''));
-                    panel.getComponent('status_information').update(d.plugin_output);
-                    panel.getComponent('perf_data').update(d.perf_data);
-                    panel.getComponent('cur_attempt').update(d.current_attempt + '/' + d.max_check_attempts);
-                    panel.getComponent('last_check_time').update(TP.date_format(d.last_check));
-                    panel.getComponent('check_type').update(d.check_type == 0 ? 'ACTIVE' : 'PASSIVE');
-                    panel.getComponent('check_latency').update(d.latency.toFixed(3) + ' / ' + d.execution_time.toFixed(3) + ' seconds');
-                    panel.getComponent('next_check').update(d.next_check ? TP.date_format(d.next_check) : 'N/A');
-                    panel.getComponent('last_change').update(TP.date_format(d.last_state_change));
-                    panel.getComponent('last_notification').update((d.last_notification == 0 ? 'N/A' : TP.date_format(d.last_notification)) + ' (notification '+d.current_notification_number+')');
-                    if(d.flap_detection_enabled) {
-                        panel.getComponent('is_flapping').update('<div class="extinfo_noyes_'+d.is_flapping+'">'+ (d.is_flapping ? 'YES' : 'NO') +'<\/div> ('+d.percent_state_change.toFixed(3)+'% state change)');
-                    } else {
-                        panel.getComponent('is_flapping').update('N/A');
-                    }
-                    if(d.scheduled_downtime_depth==0) {
-                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_0">NO<\/div>');
-                    } else {
-                        panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES<\/div> ('+TP.date_format(downtimes[0].start_time)+' - '+TP.date_format(downtimes[0].end_time)+')');
-                    }
-                    panel.getComponent('in_check_period').update('<div class="extinfo_yesno_'+d.in_check_period+'">'+ (d.in_check_period>0 ? 'YES' : 'NO') +'<\/div>');
-                    panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'<\/div>');
-                    panel.getComponent('site').update(d.peer_name);
-                    /* update acknowledged button */
-                    var toolbar = panel.dockedItems.getAt(0);
-                    if(d.acknowledged) {
-                        if(toolbar.items.get('ack')) {
-                            toolbar.remove(1);
-                            toolbar.insert(1, new Ext.button.Button({
-                                itemId: 'noack',
-                                text:   'Remove Ack.',
-                                icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_ack_remove.png',
-                                menu:    TP.service_ack_remove_menu()
-                            }));
-                        }
-                    } else {
-                        if(toolbar.items.get('noack')) {
-                            toolbar.remove(1);
-                            toolbar.insert(1, new Ext.button.Button({
-                                itemId:  'ack',
-                                text:    'Acknowledge',
-                                icon:    '[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png',
-                                menu:     TP.service_ack_menu(),
-                                disabled: d.state == 0 ? true : false
-                            }));
-                        } else {
-                            d.state == 0 ? toolbar.items.get('ack').disable() : toolbar.items.get('ack').enable();
-                        }
-                    }
-                }
-            }
-        };
-        this.add({
-            xtype:     'panel',
-            autoScroll: true,
-            border:     false,
-            layout: {
-                type:   'table',
-                columns: 2,
-                tableAttrs: {
-                    width:       '99%',
-                    cellpadding: '0',
-                    cellspacing: '1',
-                    border:      '1',
-                    bordercolor: '#D0D0D0'
-                },
-                tdAttrs: {
-                    valign: 'top'
-                }
-            },
-            defaults: {
-                bodyStyle: 'padding: 3px;',
-                cls: 'extinfo_val',
-                layout: 'fit',
-                border: false
-            },
-            items: [
-                    { html: 'Current Status' },             { cls: 'extinfo_var', html: '', itemId: 'current_status'  },
-                    { html: 'Status Information' },         { cls: 'extinfo_var', html: '', itemId: 'status_information' },
-                    { html: 'Performance Data' },           { cls: 'extinfo_var', html: '', itemId: 'perf_data' },
-                    { html: 'Current Attempt' },            { cls: 'extinfo_var', html: '', itemId: 'cur_attempt' },
-                    { html: 'Last Check Time' },            { cls: 'extinfo_var', html: '', itemId: 'last_check_time' },
-                    { html: 'Check Type' },                 { cls: 'extinfo_var', html: '', itemId: 'check_type' },
-                    { html: 'Check Latency / Duration' },   { cls: 'extinfo_var', html: '', itemId: 'check_latency' },
-                    { html: 'Next Scheduled Check' },       { cls: 'extinfo_var', html: '', itemId: 'next_check' },
-                    { html: 'Last State Change' },          { cls: 'extinfo_var', html: '', itemId: 'last_change' },
-                    { html: 'Last Notification' },          { cls: 'extinfo_var', html: '', itemId: 'last_notification' },
-                    { html: 'Is This Service Flapping?' },  { cls: 'extinfo_var', html: '', itemId: 'is_flapping' },
-                    { html: 'In Scheduled Downtime?' },     { cls: 'extinfo_var', html: '', itemId: 'in_downtime' },
-                    { html: 'In Check Period?' },           { cls: 'extinfo_var', html: '', itemId: 'in_check_period' },
-                    { html: 'In Notification Period?' },    { cls: 'extinfo_var', html: '', itemId: 'in_notification_period' },
-                    { html: 'Monitored by:' },              { cls: 'extinfo_var', html: '', itemId: 'site' },
-            ],
-            dockedItems: [{
-                xtype:  'toolbar',
-                dock:   'bottom',
-                ui:     'footer',
-                defaults: {
-                    width: 120,
-                    listeners: {
-                        mouseover: function( This, eOpts ) { if(This.menu) { This.menu.letItClose = true  }},
-                        mouseout: function(  This, eOpts ) { if(This.menu) { This.menu.letItClose = false }}
-                    }
-                },
-                buttonAlign: 'center',
-                items: [{
-                        /* Add New Downtime */
-                        itemId: 'downtime',
-                        text:   'Add Downtime',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_downtime.png',
-                        menu:    TP.service_downtime_menu()
-                    }, {
-                        /* Acknowledge */
-                        itemId: 'ack',
-                        text:   'Acknowledge',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_ack.png',
-                        menu:    TP.service_ack_menu()
-                    }, {
-                        /* Reschedule */
-                        itemId: 'reschedule',
-                        text:   'Reschedule',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/btn_delay.png',
-                        menu:    TP.service_reschedule_menu()
-                }]
-            }]
-        });
-
-
+        this.loader = TP.ExtinfoPanelLoader(this),
+        this.add(TP.ExtinfoPanel('service'));
 
         /* Settings */
         this.hosts_store = new Ext.data.Store({
@@ -344,27 +197,6 @@ TP.service_reschedule_menu = function() {
         value:      new Date()
     }];
     return TP.service_menu_command('Reschedule', 7, fields);
-}
-
-/* form submit handler */
-TP.cmd_form_handler = function() {
-    var menu  = this.up('menu');
-    var panel = menu.up('panel').up('panel');
-    var form  = this.up('menu').down('form').getForm();
-    if(form.isValid()) {
-        form.submit({
-            success: function(form, action) {
-                TP.getResponse(panel, action.response);
-                menu.letItClose=true;
-                menu.hide();
-                panel.manualRefresh();
-             },
-             failure: function(form, action) {
-                TP.getResponse(panel, action.response);
-             },
-             waitMsg: 'sending command...'
-        });
-    }
 }
 
 /* form for sending cmd */
