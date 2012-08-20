@@ -373,12 +373,14 @@ sub _task_stats_gearman_grid {
         data    => []
     };
     for my $queue (sort keys %{$data}) {
-            push @{$json->{'data'}}, {
-                name    => $queue,
-                worker  => $data->{$queue}->{'worker'},
-                running => $data->{$queue}->{'running'},
-                waiting => $data->{$queue}->{'waiting'},
-            };
+        # hide empty queues
+        next if($data->{$queue}->{'worker'} == 0 and $data->{$queue}->{'running'} == 0 and $data->{$queue}->{'waiting'} == 0);
+        push @{$json->{'data'}}, {
+            name    => $queue,
+            worker  => $data->{$queue}->{'worker'},
+            running => $data->{$queue}->{'running'},
+            waiting => $data->{$queue}->{'waiting'},
+        };
     }
 
     $c->stash->{'json'} = $json;

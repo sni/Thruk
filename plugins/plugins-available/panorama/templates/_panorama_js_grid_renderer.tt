@@ -280,6 +280,7 @@ TP.render_url = function(v, td, item, row, col, store, view) {
 
 /* render gearman queues */
 TP.render_gearman_queue = function(v, td, item, row, col, store, view) {
+    td.tdCls = '';
     if(item.data.worker * 10 <= item.data.waiting) {
         td.tdCls = 'BG_WARNING';
     }
@@ -288,6 +289,9 @@ TP.render_gearman_queue = function(v, td, item, row, col, store, view) {
     }
     if(item.data.worker == 0 && item.data.waiting > 0) {
         td.tdCls = 'BG_DOWN';
+    }
+    if(item.data.waiting == 0) {
+        td.tdCls = '';
     }
     return v;
 }
