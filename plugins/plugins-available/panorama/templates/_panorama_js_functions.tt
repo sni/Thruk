@@ -493,5 +493,13 @@ var TP = {
             return false;
         }
         return true;
+    },
+    /* called on body unload */
+    unload: function() {
+        try {
+            // try saving state
+            cp.saveChanges();
+        }
+        catch(e) {}
     }
 }

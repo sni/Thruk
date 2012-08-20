@@ -16,7 +16,7 @@
     <!-- <![ENDIF]-->
     [% END %]
 </head>
-<body>
+<body onunload="TP.unload()">
 [% IF thruk_debug %]
 <script type="text/javascript">
 <!--
