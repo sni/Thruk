@@ -321,6 +321,7 @@ var TP = {
                 panel.loader.baseParams = {};
             }
             var baseParams = Ext.merge(panel.loader.baseParams, panel.xdata);
+            delete baseParams['gridstate']; // not needed
             panel.loader.load({url:url, baseParams: baseParams});
         }
     },

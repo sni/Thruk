@@ -35,7 +35,26 @@ Ext.define('TP.PanletGridServerStats', {
     width:  200,
     initComponent: function() {
         this.callParent();
-        this.xdata.url       = 'panorama.cgi?task=server_stats';
+        this.xdata.url    = 'panorama.cgi?task=server_stats';
+        this.xdata.cpu    = true;
+        this.xdata.load   = true;
+        this.xdata.memory = true;
         TP.hideFormElements(this.down('form').getForm(), ['url', 'backends']);
+
+        this.down('form').add({
+            fieldLabel: 'CPU',
+            xtype:      'checkbox',
+            name:       'cpu'
+        });
+        this.down('form').add({
+            fieldLabel: 'Load',
+            xtype:      'checkbox',
+            name:       'load'
+        });
+        this.down('form').add({
+            fieldLabel: 'Memory',
+            xtype:      'checkbox',
+            name:       'memory'
+        });
     }
 });
