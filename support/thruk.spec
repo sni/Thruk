@@ -178,7 +178,11 @@ chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugi
 %endif
 /usr/bin/thruk -a installcron --local > /dev/null
 # save pkg name
-sed -r "s/instsource\s*= '';/instsource   = '%{_rpmfilename}';/" -i /usr/share/thruk/lib/Thruk.pm
+file=`/bin/ps auxww | tr ' ' '\n' | grep thruk | grep .rpm | sed -e 's/^.*\ \(.*\/thruk\-.*\.rpm\).*$/\1/'`
+if [ "$file" != "" ]; then
+    file=`basename $file`
+    [ "$file" != '\1' ] && sed -e "s|instsource\ *= '';|instsource   = '$file';|" -i /usr/share/thruk/lib/Thruk.pm
+fi
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
 

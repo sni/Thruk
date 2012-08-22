@@ -61,7 +61,11 @@ case "$1" in
         /usr/bin/thruk -a installcron --local > /dev/null
 
         # save pkg name
-        sed -r "s/instsource\s*= '';/instsource   = '$DPKG_MAINTSCRIPT_PACKAGE';/" -i /usr/share/thruk/lib/Thruk.pm
+        file=`/bin/ps auxww | tr ' ' '\n' | grep thruk | grep .deb | sed -e 's/^.*\ \(.*\/thruk\-.*\.deb\).*$/\1/'`
+        if [ "$file" != "" ]; then
+            file=`basename $file`
+            [ "$file" != '\1' ] && sed -e "s|instsource\ *= '';|instsource   = '$file';|" -i /usr/share/thruk/lib/Thruk.pm
+        fi
 
         echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
     ;;
