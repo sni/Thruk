@@ -407,8 +407,8 @@ sub get_url {
         $url = $url.'&nav=0';
     }
 
-    Thruk::Utils::CLI::_request_url($c, $url);
-    my $result = $ENV{'HTTP_RESULT'};
+    my @res = Thruk::Utils::CLI::_request_url($c, $url);
+    my $result = $res[1];
     if(defined $result and defined $result->{'headers'}) {
         $Thruk::Utils::PDF::ctype = $result->{'headers'}->{'Content-Type'};
         $Thruk::Utils::PDF::ctype =~ s/;.*$//mx;
