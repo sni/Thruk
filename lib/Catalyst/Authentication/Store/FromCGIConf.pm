@@ -50,6 +50,17 @@ sub find_user {
         }
     }
 
+    if($username eq '(cron)') {
+        $user->{'roles'} = [qw/authorized_for_all_hosts
+                               authorized_for_all_host_commands
+                               authorized_for_all_services
+                               authorized_for_all_service_commands
+                               authorized_for_configuration_information
+                               authorized_for_system_commands
+                               authorized_for_system_information
+                           /];
+    }
+
     return bless $user, "Catalyst::Authentication::User::Hash";
 }
 

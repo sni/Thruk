@@ -355,7 +355,7 @@ sub _run_commands {
 
     # downtime?
     elsif($action =~ /^downtimetask=(.*)$/mx) {
-        $data->{'output'} = _cmd_downtimetask($c, $1);
+        ($data->{'output'}, $data->{'rc'}) = _cmd_downtimetask($c, $1);
     }
 
     # install cron
@@ -445,6 +445,7 @@ sub _request_url {
     local $ENV{'REMOTE_ADDR'}      = '127.0.0.1' unless defined $ENV{'REMOTE_ADDR'};
     local $ENV{'SERVER_PORT'}      = '80'        unless defined $ENV{'SERVER_PORT'};
     local $ENV{'REMOTE_USER'}      = $c->stash->{'remote_user'} if(!$ENV{'REMOTE_USER'} and $c->stash->{'remote_user'});
+    local $ENV{'HTTP_RESULT'}      = {};
 
     # reset args, otherwise they will be interpreted as args for the script runner
     @ARGV = ();
@@ -474,7 +475,8 @@ sub _request_url {
             $x++;
         }
     }
-    elsif($result->{'code'} == 302
+
+    if($result->{'code'} == 302
           and defined $result->{'headers'}->{'Set-Cookie'}
           and $result->{'headers'}->{'Set-Cookie'} =~ m/^thruk_message=(.*)%7E%7E(.*);\ path=/mx
     ) {
@@ -485,14 +487,22 @@ sub _request_url {
         } else {
             $msg = 'FAILED';
         }
-        return $msg.' - '.$txt."\n";
+        $txt = $msg.' - '.$txt."\n";
+        return($result->{'code'}, $result, $txt) if wantarray;
+        return $txt;
     }
     elsif($result->{'code'} == 500) {
-        return 'request failed: '.$result->{'code'}."\ninternal error, please consult your logfiles\n";
+        my $txt = 'request failed: '.$result->{'code'}."\ninternal error, please consult your logfiles\n";
+        return($result->{'code'}, $result, $txt) if wantarray;
+        return $txt;
     }
     elsif($result->{'code'} != 200) {
-        return 'request failed: '.$result->{'code'}."\n".Dumper($result);
+        my $txt = 'request failed: '.$result->{'code'}."\n".Dumper($result);
+        return($result->{'code'}, $result, $txt) if defined wantarray;
+        return $txt;
     }
+
+    return($result->{'code'}, $result) if defined wantarray;
     return $result->{'result'};
 }
 
@@ -585,6 +595,9 @@ sub _cmd_downtimetask {
     my($c, $file) = @_;
     $c->stats->profile(begin => "_cmd_downtimetask()");
 
+    # do auth stuff
+    Thruk::Utils::set_user($c, '(cron)') unless $c->user_exists;
+
     my $downtime   = Thruk::Utils::read_data_file($file);
     my $default_rd = Thruk::Utils::_get_default_recurring_downtime($c);
     for my $key (keys %{$default_rd}) {
@@ -621,17 +634,19 @@ sub _cmd_downtimetask {
                      );
     my $old = $c->config->{'cgi_cfg'}->{'lock_author_names'};
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = 0;
-    _request_url($c, $url);
+    my @res = _request_url($c, $url);
     $c->config->{'cgi_cfg'}->{'lock_author_names'} = $old;
+    return("failed\n", 1) unless $res[0] == 200; # error is already printed
+
     if($downtime->{'service'}) {
-        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'service'}.' on '.$downtime->{'host'};
+        $output = 'scheduled'.$flexible.' downtime for service \''.$downtime->{'service'}.'\' on host \''.$downtime->{'host'}.'\'';
     } else {
-        $output = 'scheduled'.$flexible.' downtime for '.$downtime->{'host'};
+        $output = 'scheduled'.$flexible.' downtime for host \''.$downtime->{'host'}.'\'';
     }
     $output .= " (duration ".Thruk::Utils::Filter::duration($downtime->{'duration'}*60).")\n";
 
     $c->stats->profile(end => "_cmd_downtimetask()");
-    return $output;
+    return($output, 0);
 }
 
 ##############################################

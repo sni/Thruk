@@ -6,6 +6,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - link service details to service list
             - show messages from send commands
             - update to extjs 4.1.1
+          - Bug Fixes
+            - fixed authentication in recurring downtimes
 
 1.40     Fri Aug  3 16:54:16 CEST 2012
           - change backends in config tool
