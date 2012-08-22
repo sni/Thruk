@@ -26,7 +26,8 @@ Ext.define('TP.TabBar', {
             iconCls:  'user-tab',
             closable:  false,
             tooltip:  'user menu',
-            html:     '[% remote_user %]',
+            arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
+            html:     '[% remote_user %]&nbsp;&nbsp;',
             menu: {
                 items: [/*{
                         text: 'Switch User',
@@ -58,6 +59,8 @@ Ext.define('TP.TabBar', {
             minWidth: 28,
             iconCls: 'gear-tab',
             tooltip:  'add panlets',
+            arrowCls: 'arrow x-btn-arrow-right x-btn-arrow',
+            html:     ' ',
             menu: {
                 items: [{
                     /* Server */
