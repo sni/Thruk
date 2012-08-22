@@ -25,23 +25,14 @@ Ext.define('TP.TabBar', {
             iconCls:  'user-tab',
             closable:  false,
             tooltip:  'user menu',
-            html:     '[% remote_user %]' /*,
+            html:     '[% remote_user %]',
             menu: {
-                items: [{
+                items: [/*{
                         text: 'Switch User',
                         icon: '[% url_prefix %]thruk/plugins/panorama/images/cup_key.png',
                         handler: function() {}
-                }]
-            } */
-        }, {
-            title: '',
-            closable: false,
-            minWidth: 28,
-            iconCls: 'gear-tab',
-            tooltip:  'add panlets',
-            html:     'add',
-            menu: {
-                items: [{
+                }*/
+               {
                         text: 'About',
                         icon: '[% url_prefix %]thruk/plugins/panorama/images/information.png',
                         handler: function() { TP.aboutWindow() }
@@ -50,8 +41,25 @@ Ext.define('TP.TabBar', {
                         icon: '[% url_prefix %]thruk/plugins/panorama/images/cog.png',
                         handler: function() { TP.settingsWindow() }
                     },
+                    /* Exit */
+                    '-' , {
+                        text:   'Exit Panorama View',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
+                        handler: function() {
+                            window.location = '../';
+                        }
+                    }
+                ]
+            }
+        }, {
+            title: '',
+            closable: false,
+            minWidth: 28,
+            iconCls: 'gear-tab',
+            tooltip:  'add panlets',
+            menu: {
+                items: [{
                     /* Server */
-                    '-', {
                         text:   'Site Status',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/server.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletGridServer'}) }
@@ -125,14 +133,6 @@ Ext.define('TP.TabBar', {
                         text:    'Generic Url Panlet',
                         icon:    '[% url_prefix %]thruk/plugins/panorama/images/html_add.png',
                         handler: function() { TP.add_panlet({type:'TP.PanletUrl'}) }
-                    },
-                    /* Exit */
-                    '-' , {
-                        text:   'Exit Panorama View',
-                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
-                        handler: function() {
-                            window.location = '../';
-                        }
                     }
                 ]
             }
