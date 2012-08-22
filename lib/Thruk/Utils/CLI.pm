@@ -502,7 +502,7 @@ sub _request_url {
         return $txt;
     }
 
-    return($result->{'code'}, $result) if defined wantarray;
+    return($result->{'code'}, $result) if wantarray;
     return $result->{'result'};
 }
 
