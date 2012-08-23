@@ -303,6 +303,10 @@ sub _task_stats_check_metrics {
 sub _task_server_stats {
     my($self, $c) = @_;
 
+    my $show_load   = $c->request->parameters->{'load'}   || 'true';
+    my $show_cpu    = $c->request->parameters->{'cpu'}    || 'true';
+    my $show_memory = $c->request->parameters->{'memory'} || 'true';
+
     my $json = {
         columns => [
             { 'header' => 'Cat',    dataIndex => 'cat',   hidden => JSON::XS::true },
@@ -318,7 +322,7 @@ sub _task_server_stats {
     };
 
     my($cpu, $cpucount);
-    if($c->request->parameters->{'load'} eq 'true' or $c->request->parameters->{'cpu'} eq 'true') {
+    if($show_load eq 'true' or $show_cpu eq 'true') {
         my $lastcpu = $c->cache->get('panorama_sys_cpu');
         my $pcs  = Thruk::Utils::PanoramaCpuStats->new({sleep => 3, init => $lastcpu->{'init'}});
            $cpu  = $pcs->get();
@@ -330,21 +334,21 @@ sub _task_server_stats {
         $cpu     = $cpu->{'cpu'};
     }
 
-    if($c->request->parameters->{'load'} eq 'true') {
+    if($show_load eq 'true') {
         my @load = split(/\s+/mx,(read_file('/proc/loadavg')));
         push @{$json->{'data'}},
             { cat => 'Load',    type => 'load 1',   value => $load[0],            'warn' => $cpucount*2.5, crit => $cpucount*5.0, max => $cpucount*3, graph => '' },
             { cat => 'Load',    type => 'load 5',   value => $load[1],            'warn' => $cpucount*2.0, crit => $cpucount*3.0, max => $cpucount*3, graph => '' },
             { cat => 'Load',    type => 'load 15',  value => $load[2],            'warn' => $cpucount*1.5, crit => $cpucount*2,   max => $cpucount*3, graph => '' };
     }
-    if($c->request->parameters->{'cpu'} eq 'true') {
+    if($show_cpu eq 'true') {
         push @{$json->{'data'}},
             { cat => 'CPU',     type => 'User',     value => $cpu->{'user'},      'warn' => 70, crit => 90, max => 100, graph => '' },
             { cat => 'CPU',     type => 'Nice',     value => $cpu->{'nice'},      'warn' => 70, crit => 90, max => 100, graph => '' },
             { cat => 'CPU',     type => 'System',   value => $cpu->{'system'},    'warn' => 70, crit => 90, max => 100, graph => '' },
             { cat => 'CPU',     type => 'Wait IO',  value => $cpu->{'iowait'},    'warn' => 70, crit => 90, max => 100, graph => '' };
     }
-    if($c->request->parameters->{'memory'} eq 'true') {
+    if($show_memory eq 'true') {
         # gather system statistics
         my $mem = {};
         for my $line (split/\n/mx,(read_file('/proc/meminfo'))) {
