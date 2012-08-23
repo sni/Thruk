@@ -304,8 +304,11 @@ TP.render_gearman_queue = function(v, td, item, row, col, store, view) {
 }
 
 /* format timestamp */
-TP.date_format = function(t) {
+TP.date_format = function(t, f) {
     var d = new Date(t*1000);
+    if(f != undefined) {
+        return Ext.Date.format(d, f);
+    }
     if(Ext.Date.format(new Date(), "Y-m-d") == Ext.Date.format(d, "Y-m-d")) {
         return Ext.Date.format(d, "H:i:s");
     }

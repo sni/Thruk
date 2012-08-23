@@ -15,6 +15,14 @@ Ext.define('TP.TabBar', {
             tooltip:  'Test',
             handler:  TP.test
         }, {
+            xtype:    'label',
+            text:     '',
+            id:       'server_time',
+            tooltip:  'server time',
+            style:    'margin-top: 3px',
+            width:    35,
+            height:   16
+        }, {
             id:       'bug_report',
             closable:  false,
             minWidth:  28,
@@ -149,7 +157,8 @@ Ext.define('TP.TabBar', {
         this.xdata = {
             refresh:     60,
             rotate_tabs:  0,
-            backends:    []
+            backends:    [],
+            server_time: true
         }
         [%+ FOREACH b = backend_detail.keys %]
         [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]
@@ -161,6 +170,9 @@ Ext.define('TP.TabBar', {
             return TP.add_pantab();
         });
 
+        this.addListener('afterrender', function(This, eOpts) {
+            TP.startServerTime();
+        });
     },
     getState:   function() {
         var item_ids = [];
@@ -184,8 +196,9 @@ Ext.define('TP.TabBar', {
             };
             this.setActiveTab(state.activeTab);
             Ext.apply(this, state);
-            TP.startRotatingTabs();
         }
+        TP.startRotatingTabs();
+        TP.startServerTime();
     },
     items: [{
         title: '',

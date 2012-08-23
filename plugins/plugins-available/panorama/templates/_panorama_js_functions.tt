@@ -70,7 +70,7 @@ var TP = {
         }
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
-        if(!tb) {
+        if(!tb || !tb.window_ids) {
             tb = pan.setActiveTab(0);
         }
         if(!tb) {
@@ -250,6 +250,7 @@ var TP = {
                 f.setValue(v);
             }
             else if(f.inputType == 'checkbox') {
+                f.setValue(v);
                 f.originalValue = v;
             } else {
                 f.originalValue = [ v ];
@@ -407,11 +408,31 @@ var TP = {
     /* start tab rotation interval */
     startRotatingTabs: function() {
         var tabpan = Ext.getCmp('tabpan');
-        window.clearInterval(tabpan.interval);
+        window.clearInterval(tabpan.interval_rotatetabs);
         if(tabpan.xdata.rotate_tabs > 0) {
             debug("starting tab rotation every " + tabpan.xdata.rotate_tabs + "seconds");
-            tabpan.interval = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
+            tabpan.interval_rotatetabs = window.setInterval(TP.rotateTabs, tabpan.xdata.rotate_tabs * 1000);
         }
+    },
+    /* start server time */
+    startServerTime: function() {
+        var tabpan = Ext.getCmp('tabpan');
+        window.clearInterval(tabpan.interval_servertime);
+        var label = Ext.getCmp('server_time');
+        if(!tabpan.xdata.server_time) {
+            label.hide();
+            return;
+        }
+        label.show();
+        tabpan.interval_servertime = window.setInterval(TP.updateServerTime, 1000);
+    },
+    /* update server time */
+    updateServerTime: function() {
+        var label  = Ext.getCmp('server_time');
+        var client = new Date();
+        var time   = Math.floor((client.getTime() - delta_time) / 1000);
+        var date   = TP.date_format(time, 'H:i');
+        label.update(date);
     },
     /* stop tab rotation interval */
     stopRotatingTabs: function() {

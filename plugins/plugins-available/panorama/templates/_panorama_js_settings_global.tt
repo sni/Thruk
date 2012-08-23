@@ -9,7 +9,7 @@ TP.settingsWindow = function() {
         bodyPadding: 5,
         border:      0,
         defaults: {
-            labelWidth:  120,
+            labelWidth:  100,
             anchor: '99%'
         },
         items: [{
@@ -40,6 +40,11 @@ TP.settingsWindow = function() {
                 nameS:      'rotate_tabs',
                 nameL:      'rotate_tabs_txt'
             }
+        }, {
+            /* show server time */
+            xtype:      'checkbox',
+            fieldLabel: 'Show Server Time',
+            name:       'server_time'
         }, {
             /* Import / Export */
             xtype: 'panel',
@@ -113,6 +118,7 @@ TP.settingsWindow = function() {
             tab.saveState();
             win.destroy();
             TP.startRotatingTabs();
+            TP.startServerTime();
             /* start refresh for all panlets with global refresh rate */
             var panels = TP.getAllPanel();
             for(var nr in panels) {
