@@ -136,6 +136,7 @@ formats a time definition into date format
 sub date_format {
     my $c         = shift;
     my $timestamp = shift;
+    my $format    = shift;
     return "" unless defined $timestamp;
 
     # get today
@@ -156,6 +157,10 @@ sub date_format {
     if($@) {
         $c->log->warn("date_format($timestamp) failed: $@");
         return "err:$timestamp";
+    }
+
+    if(defined $format) {
+        return(Thruk::Utils::format_date($timestamp, $format));
     }
 
     if($t_year == $year and $t_month == $month and $t_day == $day) {

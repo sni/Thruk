@@ -16,7 +16,7 @@ Ext.define('TP.TabBar', {
             handler:  TP.test
         }, {
             xtype:    'label',
-            text:     '',
+            text:     '[% date_format(c, date.now, "%H:%M") %]',
             id:       'server_time',
             tooltip:  'server time',
             style:    'margin-top: 3px',
