@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - added host details panlet
             - link service details to service list
             - show messages from send commands
+            - add possibility to remove downtimes
             - show server time and login
             - update to extjs 4.1.1
           - Bug Fixes

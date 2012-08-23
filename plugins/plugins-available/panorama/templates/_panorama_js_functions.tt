@@ -390,6 +390,11 @@ var TP = {
                 var expires = new Date(now.getTime() - (10*365*86400*1000)); // let the cookie expire 10 year ago
                 Ext.util.Cookies.set('thruk_message', null, expires);
             }
+            if(data.errors) {
+                for(var nr in data.errors) {
+                    TP.Msg.msg("fail_message~~"+data.errors[nr].message);
+                }
+            }
             return data;
         }
         debug("ERROR: " + response.status);
@@ -525,5 +530,21 @@ var TP = {
             cp.saveChanges();
         }
         catch(e) {}
+    },
+    deleteDowntime: function(id, panelId, type) {
+        var panel = Ext.getCmp(panelId);
+        var fields = [{
+            fieldLabel: '',
+            xtype:      'displayfield',
+            value:      'no options needed',
+            name:       'display',
+            width:      240
+        }, {
+            xtype: 'hidden', name: 'down_id', value: id
+        }];
+        var menuCfg = TP.ext_menu_command('Remove', (type == 'host' ? 78 : 79), fields);
+        var menu = new Ext.menu.Menu(menuCfg);
+        panel.add(menu);
+        menu.show();
     }
 }
