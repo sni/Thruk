@@ -70,7 +70,7 @@ var TP = {
         }
         var pan = Ext.getCmp('tabpan');
         var tb  = pan.getActiveTab();
-        if(!tb || !tb.window_ids) {
+        if(!tb) {
             tb = pan.setActiveTab(0);
         }
         if(!tb) {
@@ -260,8 +260,9 @@ var TP = {
         });
 
         /* checkbox groups are different */
-        for(var i in form.items) {
-            var f = form.items[i];
+        var items = form.getFields().items;
+        for(var i in items) {
+            var f = items[i];
             if(f.xtype == 'checkboxgroup') {
                 f.removeAll();
                 for(var x in initial_backends) {
@@ -283,8 +284,9 @@ var TP = {
             data[key] = values[key];
         };
         /* checkboxgroups are different */
-        for(var i in form.items) {
-            var f = form.items[i];
+        var items = form.getFields().items;
+        for(var i in items) {
+            var f = items[i];
             if(f.xtype == 'checkboxgroup') {
                 var result = {};
                 var checked = f.getChecked();
