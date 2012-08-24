@@ -1139,7 +1139,6 @@ sub update_cron_file {
     my $errorlog = $c->config->{'var_path'}.'/cron.log';
     # ensure proper cron.log permission
     open(my $fh, '>>', $errorlog);
-    Thruk::Utils::IO::close($fh, $errorlog);
 
     if($c->config->{'cron_pre_edit_cmd'}) {
         my($fh2, $tmperror) = tempfile();
@@ -1162,6 +1161,7 @@ sub update_cron_file {
             }
         }
     }
+    Thruk::Utils::IO::close($fh, $errorlog);
 
     # read complete file
     my $sections = {};
