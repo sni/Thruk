@@ -1,7 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.44     not yet released
-          - ...
+          - Bug Fixes
+            - fixed adding report with empty crontab
 
 1.42     Thu Aug 23 17:55:54 CEST 2012
           - panorama view:

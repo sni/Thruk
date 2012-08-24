@@ -1142,15 +1142,24 @@ sub update_cron_file {
     Thruk::Utils::IO::close($fh, $errorlog);
 
     if($c->config->{'cron_pre_edit_cmd'}) {
-        my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$errorlog;
+        my($fh2, $tmperror) = tempfile();
+        Thruk::Utils::IO::close($fh2, $tmperror);
+        my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$tmperror;
         my $output = `$cmd`;
-        if ($? == -1) {
+        my $rc     = $?;
+        my $errors = read_file($tmperror);
+        unlink($tmperror);
+        print $fh $errors;
+        if ($rc == -1) {
             die("cron_pre_edit_cmd (".$cmd.") failed: ".$!);
-        } elsif ($? & 127) {
-            die(sprintf("cron_pre_edit_cmd (".$cmd.") died with signal %d:\n", ($? & 127), $output));
+        } elsif ($rc & 127) {
+            die(sprintf("cron_pre_edit_cmd (%s) died with signal %d: %s\n%s\n", $cmd, ($rc & 127), $output, $errors));
         } else {
-            my $rc = $? >> 8;
-            die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output)) if $rc != 0;
+            $rc = $rc >> 8;
+            # override know error with initial crontab
+            if($rc != 1 or $tmperror !~ m/no\crontab\ for/mx) {
+                die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n%s\n", $rc, $output, $errors)) if $rc != 0;
+            }
         }
     }
 
