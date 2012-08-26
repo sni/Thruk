@@ -330,7 +330,11 @@ sub get_component_as_string {
             $string .= "            core_conf      = ".$b->{'configtool'}->{'core_conf'}."\n" if defined $b->{'configtool'}->{'core_conf'};
             $string .= "            obj_check_cmd  = ".$b->{'configtool'}->{'obj_check_cmd'}."\n" if defined $b->{'configtool'}->{'obj_check_cmd'};
             $string .= "            obj_reload_cmd = ".$b->{'configtool'}->{'obj_reload_cmd'}."\n" if defined $b->{'configtool'}->{'obj_reload_cmd'};
-            $string .= "            obj_readonly   = ".$b->{'configtool'}->{'obj_readonly'}."\n" if defined $b->{'configtool'}->{'obj_readonly'};
+            if(defined $b->{'configtool'}->{'obj_readonly'}) {
+                for my $readonly (ref $b->{'configtool'}->{'obj_readonly'} eq 'ARRAY' ? @{$b->{'configtool'}->{'obj_readonly'}} : [$b->{'configtool'}->{'obj_readonly'}]) {
+                    $string .= "            obj_readonly   = ".$readonly."\n";
+                }
+            }
             $string .= "        </configtool>\n";
         }
         $string .= "    </peer>\n";
