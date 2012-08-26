@@ -288,9 +288,11 @@ sub get_hosts_by_servicequery {
     my @data = $self->_db->services
                          ->find($self->_get_filter($options{'filter'}))
                          ->fields({
-                               host_has_been_checked => 1,
-                               host_name             => 1,
-                               host_state            => 1,
+                               host_has_been_checked         => 1,
+                               host_name                     => 1,
+                               host_state                    => 1,
+                               host_scheduled_downtime_depth => 1,
+                               host_acknowledged             => 1,
                            })
                          ->all;
 

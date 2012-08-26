@@ -379,7 +379,7 @@ sub do_search {
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     # fill the host/service totals box
-    if(!$c->stash->{'has_error'} and !$c->stash->{'minimal'} and ( $prefix eq 'dfl_' or $prefix eq '')) {
+    if(!$c->stash->{'has_error'} and (!$c->stash->{'minimal'} or $c->stash->{'play_sounds'}) and ( $prefix eq 'dfl_' or $prefix eq '')) {
         Thruk::Utils::Status::fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
     }
 
@@ -431,10 +431,12 @@ sub fill_totals_box {
         # set host status from service query
         my $services = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
         $host_stats = {
-            'pending'     => 0,
-            'up'          => 0,
-            'down'        => 0,
-            'unreachable' => 0,
+            'pending'                   => 0,
+            'up'                        => 0,
+            'down'                      => 0,
+            'unreachable'               => 0,
+            'down_and_unhandled'        => 0,
+            'unreachable_and_unhandled' => 0,
         };
         my %hosts;
         for my $service (@{$services}) {
@@ -447,6 +449,9 @@ sub fill_totals_box {
                 $host_stats->{'up'}++          if $service->{'host_state'} == 0;
                 $host_stats->{'down'}++        if $service->{'host_state'} == 1;
                 $host_stats->{'unreachable'}++ if $service->{'host_state'} == 2;
+
+                $host_stats->{'down_and_unhandled'}++        if($service->{'host_state'} == 1 and $service->{'host_scheduled_downtime_depth'} >= 1 and $service->{'host_acknowledged'} == 1);
+                $host_stats->{'unreachable_and_unhandled'}++ if($service->{'host_state'} == 2 and $service->{'host_scheduled_downtime_depth'} >= 1 and $service->{'host_acknowledged'} == 1);
             }
         }
     } else {
@@ -1616,24 +1621,28 @@ sub set_audio_file {
 
     return unless $c->stash->{'play_sounds'};
 
+    # pages with host/service totals
     if(defined $c->stash->{'host_stats'} and defined $c->stash->{'service_stats'}) {
         for my $s (qw/unreachable down/) {
-            if($c->stash->{'host_stats'}->{$s} > 0 and defined $c->config->{'cgi_cfg'}->{'host_'.$s.'_sound'}) {
+            if($c->stash->{'host_stats'}->{$s.'_and_unhandled'} > 0 and defined $c->config->{'cgi_cfg'}->{'host_'.$s.'_sound'}) {
                 $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'host_'.$s.'_sound'};
                 return;
             }
         }
         for my $s (qw/critical warning unknown/) {
-            if($c->stash->{'service_stats'}->{$s} > 0 and defined $c->config->{'cgi_cfg'}->{'service_'.$s.'_sound'}) {
+            if($c->stash->{'service_stats'}->{$s.'_and_unhandled'} > 0 and defined $c->config->{'cgi_cfg'}->{'service_'.$s.'_sound'}) {
                 $c->stash->{'audiofile'} = $c->config->{'cgi_cfg'}->{'service_'.$s.'_sound'};
                 return;
             }
         }
     }
 
+    # get state from hosts and services (combined pages)
     elsif(defined $c->stash->{'hosts'} and defined $c->stash->{'services'}) {
         my $worst_host = 0;
         for my $h (@{$c->stash->{'hosts'}}) {
+            next if $h->{'scheduled_downtime_depth'} >= 1;
+            next if $h->{'acknowledged'} == 1;
             $worst_host = $h->{'state'} if $worst_host < $h->{'state'};
         }
         if($worst_host == 2 and defined $c->config->{'cgi_cfg'}->{'host_unreachable_sound'}) {
@@ -1647,6 +1656,8 @@ sub set_audio_file {
 
         my $worst_service = 0;
         for my $s (@{$c->stash->{'services'}}) {
+            next if $s->{'scheduled_downtime_depth'} >= 1;
+            next if $s->{'acknowledged'} == 1;
             my $state = $s->{'state'} + 1;
             $state = $state - 3 if $state == 4;
             $worst_service = $state if $worst_host < $state;
