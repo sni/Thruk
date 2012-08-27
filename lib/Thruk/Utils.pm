@@ -1445,6 +1445,7 @@ sub read_data_file {
     my($filename) = @_;
 
     my $cont = read_file($filename);
+    if ($cont =~ /\A(.*)\z/msx) { $cont = $1; } # make it untainted
     my $data;
     ## no critic
     eval('$data = '.$cont.';');
