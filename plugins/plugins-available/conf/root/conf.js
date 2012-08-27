@@ -167,6 +167,7 @@ function init_conf_tool_buttons() {
 
         jQuery.ajax({
             url: 'conf.cgi?action=json&amp;type=dig&host='+host,
+            type: 'POST',
             success: function(data) {
                 jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
             }
@@ -274,6 +275,7 @@ function update_command_line(id) {
 
     jQuery.ajax({
         url: 'conf.cgi?action=json&amp;type=commanddetails&command='+cmd_name,
+        type: 'POST',
         success: function(data) {
             hideElement(id + 'wait');
             var cmd_line = data[0].cmd_line;
@@ -440,6 +442,7 @@ function load_plugin_help(id, plugin) {
 
     jQuery.ajax({
         url: 'conf.cgi?action=json&amp;type=pluginhelp&plugin='+plugin,
+        type: 'POST',
         success: function(data) {
             hideElement(id + 'wait_help');
             var plugin_help = data[0].plugin_help;
@@ -473,6 +476,7 @@ function check_plugin_exec(id) {
 
     jQuery.ajax({
         url: 'conf.cgi?action=json&amp;type=pluginpreview&command='+command+'&host='+host+'&service='+service+'&args='+args,
+        type: 'POST',
         success: function(data) {
             hideElement(id + 'wait_run');
             var plugin_output = data[0].plugin_output;
@@ -539,6 +543,7 @@ function init_conf_tool_list_wizard(id, type) {
     jQuery("select#"+id+"available_members").html('<option disabled>loading...<\/option>');
     jQuery.ajax({
         url: 'conf.cgi?action=json&amp;type='+type,
+        type: 'POST',
         success: function(data) {
             var result = data[0]['data'];
             var options = [];

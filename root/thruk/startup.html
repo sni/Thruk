@@ -15,6 +15,7 @@
         function check_reload() {
             jQuery.ajax({
                 url: 'cgi-bin/remote.cgi',
+                type: 'POST',
                 success: function() {
                     jQuery('#msg').html('<font color="green"><b>done.<\/b><\/font>');
 

@@ -40,6 +40,7 @@
             }
             jQuery.ajax({
                 url: "job.cgi?job=[% job_id %]&json=1&_"+datestr,
+                type: 'POST',
                 dataType: 'json',
                 success: function(data, status, jqXHR) {
                     if(data.percent != 0) {

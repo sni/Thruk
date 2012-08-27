@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - play sounds only for unhandled problems
           - Bug Fixes
             - fixed adding report with empty crontab
+            - fixed looping startup.html
 
 1.42     Thu Aug 23 17:55:54 CEST 2012
           - panorama view:

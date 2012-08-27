@@ -610,6 +610,7 @@ function verify_time_do(id) {
 
     jQuery.ajax({
         url: url_prefix + 'thruk/cgi-bin/status.cgi?verify=time&time='+obj.value,
+        type: 'POST',
         success: function(data) {
             if(data.verified == "false") {
                 debug(data.error)
@@ -2647,6 +2648,7 @@ var ajax_search = {
              // fill data store
             jQuery.ajax({
                 url: search_url,
+                type: 'POST',
                 success: function(data) {
                     ajax_search.base = data;
                     if(ajax_search.autoopen == true) {
