@@ -2,6 +2,11 @@
 var thruk_errors = [];
 [%+ IF show_error_reports +%]
 window.onerror = function(msg, url, line) {
+  // skip some errors
+  if(msg.match(/cluetip is not a function /)) {
+    return false;
+  }
+
   try {
     thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);
 
