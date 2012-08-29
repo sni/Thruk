@@ -69,7 +69,7 @@ TD.slider_txt {
 }
 
 .x-boundlist-item img.chkCombo {
-  background: url("extjs-4.1.0/resources/themes/images/gray/form/checkbox.gif") no-repeat scroll 0 0 transparent;
+  background: url("extjs-4.1.1/resources/themes/images/gray/form/checkbox.gif") no-repeat scroll 0 0 transparent;
   border: 0 none;
   height: 13px;
   overflow: hidden;
