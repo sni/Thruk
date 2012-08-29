@@ -29,7 +29,7 @@ Don't forget to restart Thruk after changing plugins.
     <tr style="height:160px;">
       <td class='dataVar' align="left">[% name %]</td>
       <td class='dataVal'><img src="conf.cgi?sub=plugins&amp;action=preview&amp;pic=[% plugin.dir %]" alt="[% name %]"></td>
-      <td class='dataVal plugin_description'>[% plugin.description %]</td>
+      <td class='dataVal plugin_description'>[% plugin.description %][% IF plugin.url %]<br><br><a href="[% plugin.url %]">view plugin page</a>[% END %]</td>
       <td class='dataVal'>
         <div class="radioset">
             <input type="radio" value="1" id="[% plugin.dir %]_on"  name="plugin.[% plugin.dir %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir %]_on">On</label>

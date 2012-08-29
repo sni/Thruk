@@ -1,1 +1,3 @@
 The Statusmap plugin creates maps for all hosts as circular graph or map.
+
+Url: statusmap.cgi

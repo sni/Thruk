@@ -1,2 +1,4 @@
 Enables Shinken specific features like the Business View, special
 filter and the Impacts page.
+
+Url: shinken_status.cgi

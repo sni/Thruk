@@ -711,9 +711,13 @@ sub _process_plugins_page {
     my $plugins = {};
     for my $addon (glob($plugin_available_dir.'/*/')) {
         my($addon_name, $dir) = _nice_addon_name($addon);
-        $plugins->{$addon_name} = { enabled => 0, dir => $dir, description => '(no description available.)' };
+        $plugins->{$addon_name} = { enabled => 0, dir => $dir, description => '(no description available.)', url => '' };
         if(-e $plugin_available_dir.'/'.$dir.'/description.txt') {
-            $plugins->{$addon_name}->{'description'} = read_file($plugin_available_dir.'/'.$dir.'/description.txt');
+            my $description = read_file($plugin_available_dir.'/'.$dir.'/description.txt');
+            my $url         = "";
+            if($description =~ s/^Url:\s*(.*)$//gmx) { $url = $1; }
+            $plugins->{$addon_name}->{'description'} = $description;
+            $plugins->{$addon_name}->{'url'}         = $url;
         }
     }
     for my $addon (glob($plugin_enabled_dir.'/*/')) {

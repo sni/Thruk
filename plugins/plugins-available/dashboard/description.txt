@@ -1,2 +1,4 @@
 The 'dashboard' plugin shows a nice overview for host- and
 servicegroups.
+
+Url: status.cgi?style=dashboard

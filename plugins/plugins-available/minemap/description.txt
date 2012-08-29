@@ -1,2 +1,4 @@
 The minemap is perfect for visualization of service- or hostgroups
 with lots of common services.
+
+Url: status.cgi?style=minemap
