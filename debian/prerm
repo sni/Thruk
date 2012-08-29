@@ -8,7 +8,7 @@ set -e
 case "$1" in
   remove|deconfigure)
     /usr/bin/thruk -a uninstallcron --local
-    /etc/init.d/thruk stop || echo
+    invoke-rc.d thruk stop || echo
     rm -f /usr/share/thruk/root/thruk/plugins/*
   ;;
 
