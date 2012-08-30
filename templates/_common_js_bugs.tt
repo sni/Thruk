@@ -2,6 +2,10 @@
 var thruk_errors = [];
 [%+ IF show_error_reports +%]
 window.onerror = function(msg, url, line) {
+  if(window.location.protocol != 'http:' && window.location.protocol != 'https:') {
+    return false;
+  }
+
   // skip some errors
   if(msg.match(/cluetip is not a function /)) {
     return false;
