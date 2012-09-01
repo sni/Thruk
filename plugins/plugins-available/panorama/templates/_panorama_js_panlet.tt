@@ -239,6 +239,11 @@ Ext.define('TP.Panlet', {
                     }
                 }, undefined, undefined, This.title);
             });
+            /* make header show on mouseover only */
+            var div    = This.getEl();
+            var global = Ext.getCmp('tabpan');
+            div.on("mouseout", function()  { if(global.xdata.autohideheader) { This.header.hide() }});
+            div.on("mouseover", function() { This.header.show() });
         },
         afterrender: function(This, eOpts) {
             /* set initial form values */
@@ -251,6 +256,8 @@ Ext.define('TP.Panlet', {
             if(this.xdata.pinned) {
                 this.show();
             }
+            var global = Ext.getCmp('tabpan');
+            if(global.xdata.autohideheader) { this.header.hide() }
         }
     },
     setFormDefaults: function() {

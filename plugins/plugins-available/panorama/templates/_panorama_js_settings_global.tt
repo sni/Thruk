@@ -46,6 +46,11 @@ TP.settingsWindow = function() {
             fieldLabel: 'Show Server Time',
             name:       'server_time'
         }, {
+            /* auto hide panlet header */
+            xtype:      'checkbox',
+            fieldLabel: 'Autohide Panlet Header',
+            name:       'autohideheader'
+        }, {
             /* Import / Export */
             xtype: 'panel',
             layout: {
@@ -126,6 +131,7 @@ TP.settingsWindow = function() {
                 if(p.xdata.refresh == -1) {
                     p.startInterval();
                 }
+                if(tab.xdata.autohideheader) { p.header.hide() } else { p.header.show() }
             }
             return true;
         }

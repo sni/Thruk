@@ -156,10 +156,11 @@ Ext.define('TP.TabBar', {
 
         /* global default setttings */
         this.xdata = {
-            refresh:     60,
-            rotate_tabs:  0,
-            backends:    [],
-            server_time: true
+            refresh:        60,
+            rotate_tabs:     0,
+            backends:       [],
+            server_time:    true,
+            autohideheader: false
         }
         [%+ FOREACH b = backend_detail.keys %]
         [%+ IF backend_detail.$b.state == 0 || backend_detail.$b.state == 1 %]this.xdata.backends.push('[% b %]');[% END +%]

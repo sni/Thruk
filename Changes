@@ -1,7 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.46     not yet released
-          - ...
+          - panorama view:
+            - optional auto hiding panel header
 
 1.44     Mon Aug 27 15:17:31 CEST 2012
           - play sounds only for unhandled problems
