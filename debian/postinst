@@ -42,8 +42,12 @@ case "$1" in
         a2enmod rewrite
 
         # set permissions
-        mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
-        chown -R www-data: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
+        mkdir -p /var/lib/thruk /var/log/thruk /var/cache/thruk/reports
+        chown -R www-data: /var/lib/thruk \
+                           /var/cache/thruk \
+                           /var/log/thruk \
+                           /etc/thruk/plugins/plugins-enabled \
+                           /etc/thruk/thruk_local.conf
         chown 755 /usr/share/thruk/fcgid_env.sh
         chown 755 /usr/bin/thruk
 

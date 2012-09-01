@@ -162,7 +162,7 @@ if [ -d /tmp/thruk_update/ssi/. ]; then
   cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
 fi
 rm -rf /tmp/thruk_update
-mkdir -p /var/lib/thruk /var/cache/thruk /var/log/thruk
+mkdir -p /var/lib/thruk /var/cache/thruk/reports /var/log/thruk
 %if %{defined suse_version}
 chown -R wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
 a2enmod alias
