@@ -384,8 +384,7 @@ sub _process_hostgroup_cmd_page {
     my $groups = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ) , 'name' => $hostgroup ], limit => 1 );
     return $c->detach('/error/index/5') unless defined $groups->[0];
 
-    $c->stash->{'hostgroup'}       = $groups->[0]->{'name'};
-    $c->stash->{'hostgroup_alias'} = $groups->[0]->{'alias'};
+    $c->stash->{'hostgroup'}       = $groups->[0];
     return 1;
 }
 
@@ -500,8 +499,7 @@ sub _process_servicegroup_cmd_page {
 
     return $c->detach('/error/index/5') unless defined $groups->[0];
 
-    $c->stash->{'servicegroup'}       = $groups->[0]->{'name'};
-    $c->stash->{'servicegroup_alias'} = $groups->[0]->{'alias'};
+    $c->stash->{'servicegroup'}       = $groups->[0];
 
     return 1;
 }

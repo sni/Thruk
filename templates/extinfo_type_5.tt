@@ -8,20 +8,41 @@
           <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
             <tr>
               <td class='linkBox'>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail'>View Status Detail For This Hostgroup</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview'>View Status Overview For This Hostgroup</a><br>
-                <a href='status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid'>View Status Grid For This Hostgroup</a><br>
-                <a href='avail.cgi?hostgroup=[% hostgroup | uri %]'>View Availability For This Hostgroup</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup.name | uri %]&amp;style=detail'>View Status Detail For This Hostgroup</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup.name | uri %]&amp;style=overview'>View Status Overview For This Hostgroup</a><br>
+                <a href='status.cgi?hostgroup=[% hostgroup.name | uri %]&amp;style=grid'>View Status Grid For This Hostgroup</a><br>
+                <a href='avail.cgi?hostgroup=[% hostgroup.name | uri %]'>View Availability For This Hostgroup</a><br>
               </td>
             </tr>
           </table>
         </td>
         <td align="center" valign="middle" width="33%">
           <div class='data'>Hostgroup</div>
-          <div class='dataTitle'>[% hostgroup_alias %]</div>
-          <div class='dataTitle'>([% hostgroup %])</div>
+          <div class='dataTitle'>[% hostgroup.alias %]</div>
+          <div class='dataTitle'>([% hostgroup.name %])</div>
+          [% IF hostgroup.notes %]<p>[% hostgroup.notes %]</p>[% END %]
         </td>
         <td align="right" valign="bottom" width="33%">
+          <table border='0'>
+          [% IF hostgroup.action_url %]
+            <tr>
+              <td align='right'>
+                <a href='[% hostgroup.action_url %]' target='[% c.config.cgi_cfg.action_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/action.gif' border="0" alt='Perform Additional Actions On This Hostgroup' title='Perform Additional Actions On This Hostgroup' width="40" height="40"></a><br clear="all">
+                <font size="-1"><i>Extra Actions</i></font><br clear="all">
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          [% IF hostgroup.notes_url %]
+            <tr>
+              <td align='right'>
+                <a href='[% hostgroup.notes_url %]' target='[% c.config.cgi_cfg.notes_url_target %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notes.gif' border="0" alt='View Additional Notes For This Hostgroup' title='View Additional Notes For This Hostgroup' width="40" height="40"></a><br clear="all">
+                <font size="-1"><i>Extra Notes</i></font><br clear="all">
+                <br clear="all">
+              </td>
+            </tr>
+          [% END %]
+          </table>
           [% PROCESS _help.tt topic = "extinfo_5" %]
         </td>
       </tr>
@@ -36,49 +57,49 @@
               [% UNLESS c.config.command_disabled.exists('84') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Hosts In This Hostgroup' title='Schedule Downtime For All Hosts In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=84&amp;hostgroup=[% hostgroup | uri %]'>Schedule downtime for all hosts in this hostgroup</a></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=84&amp;hostgroup=[% hostgroup.name | uri %]'>Schedule downtime for all hosts in this hostgroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('85') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt='Schedule Downtime For All Services In This Hostgroup' title='Schedule Downtime For All Services In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=85&amp;hostgroup=[% hostgroup | uri %]'>Schedule downtime for all services in this hostgroup</a></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=85&amp;hostgroup=[% hostgroup.name | uri %]'>Schedule downtime for all services in this hostgroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('65') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Hosts In This Hostgroup' title='Enable Notifications For All Hosts In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=65&amp;hostgroup=[% hostgroup | uri %]'>Enable notifications for all hosts in this hostgroup</a></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=65&amp;hostgroup=[% hostgroup.name | uri %]'>Enable notifications for all hosts in this hostgroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('66') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Hosts In This Hostgroup' title='Disable Notifications For All Hosts In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=66&amp;hostgroup=[% hostgroup | uri %]'>Disable notifications for all hosts in this hostgroup</a> </td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=66&amp;hostgroup=[% hostgroup.name | uri %]'>Disable notifications for all hosts in this hostgroup</a> </td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('63') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/notify.gif' border="0" alt='Enable Notifications For All Services In This Hostgroup' title='Enable Notifications For All Services In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=63&amp;hostgroup=[% hostgroup | uri %]'>Enable notifications for all services in this hostgroup</a></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=63&amp;hostgroup=[% hostgroup.name | uri %]'>Enable notifications for all services in this hostgroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('64') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/ndisabled.gif' border="0" alt='Disable Notifications For All Services In This Hostgroup' title='Disable Notifications For All Services In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=64&amp;hostgroup=[% hostgroup | uri %]'>Disable notifications for all services in this hostgroup</a></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=64&amp;hostgroup=[% hostgroup.name | uri %]'>Disable notifications for all services in this hostgroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('67') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/enabled.gif' border="0" alt='Enable Active Checks Of All Services In This Hostgroup' title='Enable Active Checks Of All Services In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=67&amp;hostgroup=[% hostgroup | uri %]'>Enable active checks of all services in this hostgroup</a></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=67&amp;hostgroup=[% hostgroup.name | uri %]'>Enable active checks of all services in this hostgroup</a></td>
               </tr>
               [% END %]
               [% UNLESS c.config.command_disabled.exists('68') %]
               <tr class='command'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disabled.gif' border="0" alt='Disable Active Checks Of All Services In This Hostgroup' title='Disable Active Checks Of All Services In This Hostgroup' width="20" height="20"></td>
-                <td class='command'><a href='cmd.cgi?cmd_typ=68&amp;hostgroup=[% hostgroup | uri %]'>Disable active checks of all services in this hostgroup</a></td>
+                <td class='command'><a href='cmd.cgi?cmd_typ=68&amp;hostgroup=[% hostgroup.name | uri %]'>Disable active checks of all services in this hostgroup</a></td>
               </tr>
               [% END %]
             </table>
