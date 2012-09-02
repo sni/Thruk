@@ -324,6 +324,17 @@ sub begin : Private {
         }
     }
 
+    # favicon cookie set?
+    if(defined $c->request->cookie('thruk_favicon')) {
+        my $favicon_cookie = $c->request->cookie('thruk_favicon');
+        if(defined $favicon_cookie->value and $favicon_cookie->value eq 'off') {
+            $c->stash->{'fav_counter'} = 0;
+        }
+        if(defined $favicon_cookie->value and $favicon_cookie->value eq 'on') {
+            $c->stash->{'fav_counter'} = 1;
+        }
+    }
+
     # make private _ hash keys available
     $Template::Stash::PRIVATE = undef;
 

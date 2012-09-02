@@ -1686,6 +1686,51 @@ sub set_audio_file {
 
 ##############################################
 
+=head2 set_favicon_counter
+
+  set_favicon_counter($c)
+
+set favicon counter
+
+=cut
+sub set_favicon_counter {
+    my( $c ) = @_;
+
+    my($total_red, $total_yellow, $total_orange) = (0,0,0);
+
+    # pages with host/service totals
+    if(defined $c->stash->{'host_stats'} and defined $c->stash->{'service_stats'}) {
+        $total_red    =   $c->stash->{'host_stats'}->{'down'}
+                        + $c->stash->{'host_stats'}->{'unreachable'}
+                        + $c->stash->{'service_stats'}->{'critical'};
+        $total_yellow = $c->stash->{'service_stats'}->{'warning'};
+        $total_orange = $c->stash->{'service_stats'}->{'unknown'};
+    }
+
+    # get state from hosts and services (combined pages)
+    elsif(defined $c->stash->{'hosts'} and defined $c->stash->{'services'}) {
+        for my $h (@{$c->stash->{'hosts'}}) {
+            if($h->{'state'} != 0) { $total_red++ }
+        }
+
+        for my $s (@{$c->stash->{'services'}}) {
+            if($s->{'state'} == 1) { $total_yellow++; }
+            if($s->{'state'} == 2) { $total_red++; }
+            if($s->{'state'} == 3) { $total_orange++; }
+        }
+    }
+
+    my $totals = {
+            'red'    => $total_red,
+            'yellow' => $total_yellow,
+            'orange' => $total_orange
+    };
+
+    return $totals;
+}
+
+##############################################
+
 =head2 get_service_matrix
 
   get_service_matrix($c)

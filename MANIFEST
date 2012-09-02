@@ -1155,6 +1155,8 @@ themes/themes-available/Classic/images/enabled.gif
 themes/themes-available/Classic/images/error.png
 themes/themes-available/Classic/images/extinfo.gif
 themes/themes-available/Classic/images/favicon.ico
+themes/themes-available/Classic/images/favicon_counter.png
+themes/themes-available/Classic/images/favicon_nocounter.png
 themes/themes-available/Classic/images/flapping.gif
 themes/themes-available/Classic/images/folder.png
 themes/themes-available/Classic/images/folder_explore.png
@@ -1294,6 +1296,8 @@ themes/themes-available/Exfoliation/images/enabled.gif
 themes/themes-available/Exfoliation/images/error.png
 themes/themes-available/Exfoliation/images/extinfo.gif
 themes/themes-available/Exfoliation/images/favicon.ico
+themes/themes-available/Exfoliation/images/favicon_counter.png
+themes/themes-available/Exfoliation/images/favicon_nocounter.png
 themes/themes-available/Exfoliation/images/flapping.gif
 themes/themes-available/Exfoliation/images/folder.png
 themes/themes-available/Exfoliation/images/folder_explore.png
@@ -1490,6 +1494,8 @@ themes/themes-available/Nuvola/images/enabled.gif
 themes/themes-available/Nuvola/images/error.png
 themes/themes-available/Nuvola/images/extinfo.gif
 themes/themes-available/Nuvola/images/favicon.ico
+themes/themes-available/Nuvola/images/favicon_counter.png
+themes/themes-available/Nuvola/images/favicon_nocounter.png
 themes/themes-available/Nuvola/images/flapping.gif
 themes/themes-available/Nuvola/images/folder.png
 themes/themes-available/Nuvola/images/folder_explore.png
@@ -1679,6 +1685,8 @@ themes/themes-available/Thruk/images/enabled.gif
 themes/themes-available/Thruk/images/error.png
 themes/themes-available/Thruk/images/extinfo.gif
 themes/themes-available/Thruk/images/favicon.ico
+themes/themes-available/Thruk/images/favicon_counter.png
+themes/themes-available/Thruk/images/favicon_nocounter.png
 themes/themes-available/Thruk/images/flapping.gif
 themes/themes-available/Thruk/images/folder.png
 themes/themes-available/Thruk/images/folder_explore.png
@@ -1808,6 +1816,8 @@ themes/themes-available/Vautour/images/enabled.gif
 themes/themes-available/Vautour/images/error.png
 themes/themes-available/Vautour/images/extinfo.gif
 themes/themes-available/Vautour/images/favicon.ico
+themes/themes-available/Vautour/images/favicon_counter.png
+themes/themes-available/Vautour/images/favicon_nocounter.png
 themes/themes-available/Vautour/images/flapping.gif
 themes/themes-available/Vautour/images/folder.png
 themes/themes-available/Vautour/images/folder_explore.png
@@ -1994,6 +2004,8 @@ themes/themes-available/Wakizashi/images/enabled.gif
 themes/themes-available/Wakizashi/images/error.png
 themes/themes-available/Wakizashi/images/extinfo.gif
 themes/themes-available/Wakizashi/images/favicon.ico
+themes/themes-available/Wakizashi/images/favicon_counter.png
+themes/themes-available/Wakizashi/images/favicon_nocounter.png
 themes/themes-available/Wakizashi/images/flapping.gif
 themes/themes-available/Wakizashi/images/folder.png
 themes/themes-available/Wakizashi/images/folder_explore.png

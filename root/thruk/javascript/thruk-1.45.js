@@ -3182,3 +3182,70 @@ function init_buttons() {
         return confirm('really delete?');
     });
 }
+
+
+/*******************************************************************************
+88888888888 db  8b           d8 88   ,ad8888ba,   ,ad8888ba,   888b      88
+88         d88b `8b         d8' 88  d8"'    `"8b d8"'    `"8b  8888b     88
+88        d8'`8b `8b       d8'  88 d8'          d8'        `8b 88 `8b    88
+88aaaaa  d8'  `8b `8b     d8'   88 88           88          88 88  `8b   88
+88""""" d8YaaaaY8b `8b   d8'    88 88           88          88 88   `8b  88
+88     d8""""""""8b `8b d8'     88 Y8,          Y8,        ,8P 88    `8b 88
+88    d8'        `8b `888'      88  Y8a.    .a8P Y8a.    .a8P  88     `8888
+88   d8'          `8b `8'       88   `"Y8888Y"'   `"Y8888Y"'   88      `888
+*******************************************************************************/
+/* see https://github.com/antyrat/stackoverflow-favicon-counter for original source */
+function updateFaviconCounter(value, color) {
+    var faviconURL = url_prefix + 'thruk/themes/' + theme + '/images/favicon.ico';
+    var context    = window.parent.frames ? window.parent.document : window.document;
+    if(value > 0) {
+        var counterValue = ( value > 99 ) ? '\u221E' : value,
+            canvas       = document.createElement("canvas"),
+            ctx          = canvas.getContext('2d'),
+            faviconImage = new Image();
+
+        canvas.width  = 16;
+        canvas.height = 16;
+
+        faviconImage.onload = function() {
+            // draw original favicon
+            ctx.drawImage(faviconImage, 0, 0);
+
+            // draw counter rectangle holder
+            ctx.beginPath();
+            ctx.rect( 5, 6, 16, 10 );
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            // counter font settings
+            ctx.font      = "10px Normal Tahoma";
+            ctx.fillStyle = "#000000";
+
+            // get counter metrics
+            var metrics  = ctx.measureText(counterValue );
+            counterTextX = ( metrics.width == 10 ) ? 6 : 9, // detect counter value position
+
+            // draw counter on favicon
+            ctx.fillText( counterValue , counterTextX , 15, 16 );
+
+            // append new favicon to document head section
+            faviconURL = canvas.toDataURL();
+            jQuery('link[rel$=icon]', context).remove();
+            jQuery('head', context).append( jQuery('<link rel="shortcut icon" type="image/x-icon" href="' + faviconURL + '"/>' ) );
+        }
+        faviconImage.src = faviconURL; // create original favicon
+    } else {
+        // if there is no counter value we draw default favicon
+        jQuery('link[rel$=icon]', context).remove();
+        jQuery('head', context).append( jQuery('<link rel="shortcut icon" type="image/x-icon" href="' + faviconURL + '"/>' ) );
+    }
+}
+
+/* save settings in a cookie */
+function prefSubmitCounter(url, value) {
+  var now         = new Date();
+  var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
+  document.cookie = "thruk_favicon="+value+"; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
+  window.status   = "thruk preferences saved";
+  reloadPage();
+}

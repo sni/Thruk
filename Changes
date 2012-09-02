@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.46     not yet released
+          - optional favicon problem counter
           - display action/notes url on host/servicegroup pages
           - panorama view:
             - optional auto hiding panel header

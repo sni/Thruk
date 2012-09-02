@@ -114,7 +114,7 @@
                 <input type="button" name="submit" value="change" onClick="prefSubmit('[% escape_html(full_uri(c)) %]', '[% theme %]')">
               </td>
             </tr>
-            [% IF show_sounds %]
+          [% IF show_sounds %]
             <tr>
               <th>Sounds:</th>
               <td>
@@ -128,6 +128,29 @@
               </td>
             </tr>
           [% END %]
+            <tr>
+              <th>Favicon:</th>
+              <td>
+                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF fav_counter %]favicon_counter.png[% ELSE %]favicon_nocounter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
+                <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter('[% escape_html(full_uri(c)) %]', '[% IF fav_counter %]off[% ELSE %]on[% END %]')">
+                [% IF fav_counter %]
+                [% totals = set_favicon_counter(c) %]
+                <script type="text/javascript">
+                <!--
+                  [%+ IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 +%]
+                    updateFaviconCounter([% totals.red %], '#FF5B33');
+                  [%+ ELSIF totals.red == 0 && totals.yellow > 0 && totals.orange == 0 +%]
+                    updateFaviconCounter([% totals.yellow %], '#FFDE00');
+                  [%+ ELSIF totals.red == 0 && totals.yellow == 0 && totals.orange > 0 +%]
+                    updateFaviconCounter([% totals.orange %], '#FF9E00');
+                  [%+ ELSE +%]
+                    updateFaviconCounter([% totals.red + totals.yellow + totals.orange %], '#FF9E00');
+                  [%+ END +%]
+                -->
+                </script>
+                [% END %]
+              </td>
+            </tr>
           [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
             <tr>
               <th>Report:</th>
