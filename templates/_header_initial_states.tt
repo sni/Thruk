@@ -7,9 +7,9 @@ var initial_backends = {
         key:              '[% pd %]',
         name:             '[% backend_detail.$pd.name %]',
         state:            '[% backend_detail.$pd.state %]',
-        version:          '[% IF pi_detail.$pd.exists('program_version') %][% pi_detail.$pd.program_version %][% END %]',
-        data_src_version: '[% IF pi_detail.$pd.exists('data_source_version') %][% pi_detail.$pd.data_source_version %][% END %]',
-        program_start:    '[% IF pi_detail.$pd.exists('program_start') %][% pi_detail.$pd.program_start %][% END %]'
+        version:          '[% IF pi_detail.exists(pd) && pi_detail.$pd.exists('program_version') %][% pi_detail.$pd.program_version %][% END %]',
+        data_src_version: '[% IF pi_detail.exists(pd) && pi_detail.$pd.exists('data_source_version') %][% pi_detail.$pd.data_source_version %][% END %]',
+        program_start:    '[% IF pi_detail.exists(pd) && pi_detail.$pd.exists('program_start') %][% pi_detail.$pd.program_start %][% END %]'
       }[% UNLESS loop.last %],[% END +%]
     [% END +%]
 };
