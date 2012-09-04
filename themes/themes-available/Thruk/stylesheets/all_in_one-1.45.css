@@ -663,7 +663,6 @@ select#quick_command {
 }
 
 TABLE.minemap TD.minemap_head {
-    height:150px;
     vertical-align: bottom;
     overflow: hidden;
     white-space: nowrap;
@@ -811,7 +810,8 @@ TABLE.recurring_downtimes INPUT[type=text] {
 
 SPAN.required {
     color: red;
-}#currentversioninfo {
+}
+#currentversioninfo {
   font-size:14px;
 }
 
