@@ -18,6 +18,10 @@ var backendSelTimer;
 var lastRowSelected;
 var lastRowHighlighted;
 var verifyTimer;
+var iPhone           = false;
+if(navigator && navigator.userAgent) {
+    iPhone           = navigator.userAgent.match(/iPhone/i) ? true : false;
+}
 
 // needed to keep the order
 var hoststatustypes    = new Array( 1, 2, 4, 8 );
@@ -2538,8 +2542,10 @@ var ajax_search = {
         var type_selector_id = elem.id.replace('_value', '_ts');
         var selector = document.getElementById(type_selector_id);
         ajax_search.search_type = 'all';
-        addEvent(input, 'keyup', ajax_search.suggest);
-        addEvent(input, 'blur',  ajax_search.hide_results);
+        if(!iPhone) {
+            addEvent(input, 'keyup', ajax_search.suggest);
+            addEvent(input, 'blur',  ajax_search.hide_results);
+        }
 
         search_url = ajax_search.url;
         if(type != undefined) {
@@ -2565,8 +2571,10 @@ var ajax_search = {
         }
 
         input.setAttribute("autocomplete", "off");
-        input.blur();   // blur & focus the element, otherwise the first
-        input.focus();  // click would result in the browser autocomplete
+        if(!iPhone) {
+            input.blur();   // blur & focus the element, otherwise the first
+            input.focus();  // click would result in the browser autocomplete
+        }
 
         if(selector && selector.tagName == 'SELECT') {
             var search_type = selector.options[selector.selectedIndex].value;
@@ -2659,8 +2667,10 @@ var ajax_search = {
             });
         }
 
-        addEvent(document, 'keydown', ajax_search.arrow_keys);
-        addEvent(document, 'click', ajax_search.hide_results);
+        if(!iPhone) {
+            addEvent(document, 'keydown', ajax_search.arrow_keys);
+            addEvent(document, 'click', ajax_search.hide_results);
+        }
 
         return false;
     },

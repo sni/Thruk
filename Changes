@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - optional auto hiding panel header
           - Bug Fixes
             - fixed using multiple groups in cgi.cfg
+            - fixed search with iphone
 
 1.44     Mon Aug 27 15:17:31 CEST 2012
           - play sounds only for unhandled problems
