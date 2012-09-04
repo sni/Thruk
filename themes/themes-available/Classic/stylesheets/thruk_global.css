@@ -663,7 +663,6 @@ select#quick_command {
 }
 
 TABLE.minemap TD.minemap_head {
-    height:150px;
     vertical-align: bottom;
     overflow: hidden;
     white-space: nowrap;

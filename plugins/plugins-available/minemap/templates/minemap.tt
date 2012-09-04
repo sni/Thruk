@@ -50,7 +50,7 @@
   [% FOREACH svc = services.keys.sort %]
   [% SET class = 'statusEven' IF loop.even %]
   [% SET class = 'statusOdd'  IF loop.odd %]
-  <td class='[% class %] minemap_head' title="[% svc %]"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></td>
+  <td class='[% class %] minemap_head' title="[% svc %]" style="height:[% head_height %]px;"><div class="vertical"><a href='[% uri_with(c, service => svc).replace("minemap.cgi", "status.cgi") %]'>[% svc %]</a></div></td>
   [% END %]
 </tr>
 [% FOREACH hstname = hostnames.keys.sort %]
