@@ -497,7 +497,7 @@ sub set_dynamic_roles {
     for my $key (keys %{$possible_roles}) {
         my $role = $possible_roles->{$key};
         if(defined $c->config->{'cgi_cfg'}->{$key}) {
-            my %contactgroups = map { $_ => 1 } split/\+*,\*s/mx, $c->config->{'cgi_cfg'}->{$key};
+            my %contactgroups = map { $_ => 1 } split/\s*,\s*/mx, $c->config->{'cgi_cfg'}->{$key};
             for my $contactgroup (keys %{contactgroups}) {
                 push @{$c->request->{'user'}->{'roles'}}, $role if ( defined $groups->{$contactgroup} or $contactgroup eq '*' );
             }
