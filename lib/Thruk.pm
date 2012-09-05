@@ -264,7 +264,11 @@ Thruk::Utils::IO::mkdir(__PACKAGE__->config->{'tmp_path'});
 my $pidfile  = __PACKAGE__->config->{'tmp_path'}.'/thruk.pid';
 sub _remove_pid {
     if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'FastCGI') {
-        unlink($pidfile);
+        if(-f $pidfile) {
+            my $pid = read_file($pidfile);
+            chomp($pid);
+            unlink($pidfile) if $pid == $$;
+        }
     }
     return;
 }
