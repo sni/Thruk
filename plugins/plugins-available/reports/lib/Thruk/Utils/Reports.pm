@@ -297,6 +297,10 @@ sub generate_report {
     }
     local $ENV{'THRUK_BACKENDS'} = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
 
+    # need to update defaults backends
+    my($disabled_backends,$has_groups) = Thruk::Action::AddDefaults::_set_enabled_backends($c);
+    Thruk::Action::AddDefaults::_set_possible_backends($c, $disabled_backends);
+
     # set some defaults
     Thruk::Utils::PDF::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
     $c->{'request'}->{'parameters'}->{'show_log_entries'}           = 1;
