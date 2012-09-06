@@ -201,9 +201,14 @@ sub report_save {
     my($data) = Thruk::Utils::Reports::get_report_data_from_param($c->{'request'}->{'parameters'});
     my $msg = 'report updated';
     if($report_nr eq 'new') { $msg = 'report created'; }
-    if($report_nr = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
+    my $report;
+    if($report = Thruk::Utils::Reports::report_save($c, $report_nr, $data)) {
         if(Thruk::Utils::Reports::update_cron_file($c)) {
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
+            if(defined $report->{'var'}->{'opt_errors'}) {
+                Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "Error in Report Options:<br>".join("<br>", @{$report->{'var'}->{'opt_errors'}}) });
+            } else {
+                Thruk::Utils::set_message( $c, { style => 'success_message', msg => $msg });
+            }
         }
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });

@@ -2,16 +2,16 @@
 [% IF block == 'edit' %]
   [%
     required_fields = [
-        { 'servicegroup'            => [ 'Servicegroup',               'servicegroups',   ''                      ] },
-        { 'timeperiod'              => [ 'Timeperiod',                 'rptimeperiod',    'last12months'          ] },
-        { 'breakdown'               => [ 'Breakdown by',               'breakdowns',      'months'                ] },
-        { 'sla'                     => [ 'SLA %',                      'int',             '98'                    ] },
-        { 'assumeinitialstates'     => [ 'Assume Initial States',      'yes_no',          'yes'                   ] },
-        { 'initialassumedhoststate' => [ 'Initial Assumed State',      'hst_initialassumedstate',          '3'    ] },
-        { 'initialassumedservicestate'  => [ 'Initial Assumed State',  'svc_initialassumedstate',          '6'    ] },
-        { 'includesoftstates'       => [ 'Include Soft States',        'yes_no',          'no'                    ] },
-        { 'unavailable'             => [ 'Host Unavailable States',    'hst_unavailable', ['down', 'unreachable'] ] },
-        { 'unavailable'             => [ 'Service Unavailable States', 'svc_unavailable', ['critical', 'unknown'] ] },
+        { 'servicegroup'            => [ 'Servicegroup',               'servicegroups',   ''                      , '', 1 ] },
+        { 'timeperiod'              => [ 'Timeperiod',                 'rptimeperiod',    'last12months'                  ] },
+        { 'breakdown'               => [ 'Breakdown by',               'breakdowns',      'months'                        ] },
+        { 'sla'                     => [ 'SLA %',                      'int',             '98'                            ] },
+        { 'assumeinitialstates'     => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
+        { 'initialassumedhoststate' => [ 'Initial Assumed State',      'hst_initialassumedstate',          '3'            ] },
+        { 'initialassumedservicestate'  => [ 'Initial Assumed State',  'svc_initialassumedstate',          '6'            ] },
+        { 'includesoftstates'       => [ 'Include Soft States',        'yes_no',          'no'                            ] },
+        { 'unavailable'             => [ 'Host Unavailable States',    'hst_unavailable', ['down', 'unreachable']         ] },
+        { 'unavailable'             => [ 'Service Unavailable States', 'svc_unavailable', ['critical', 'unknown']         ] },
     ];
   %]
 [% END %]

@@ -1,0 +1,3 @@
+﻿[% USE Dumper %]
+[% PROCESS $temp %]
+[% Dumper.dump($var) %]

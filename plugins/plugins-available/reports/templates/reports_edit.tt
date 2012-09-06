@@ -85,7 +85,7 @@
     <td class="dataOdd" align="left" colspan=2><input type="text" name="cc" value="[% r.cc %]"></td>
   </tr>
   <tr>
-    <td class="dataEven" align="center" valign="top"><b>Send Report</b></td>
+    <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
     <td class="dataOdd" align="left" colspan=2>
         <table id="cron_entries">
           [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0 } %]
