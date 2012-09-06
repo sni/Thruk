@@ -19,8 +19,8 @@ var lastRowSelected;
 var lastRowHighlighted;
 var verifyTimer;
 var iPhone           = false;
-if(navigator && navigator.userAgent) {
-    iPhone           = navigator.userAgent.match(/iPhone/i) ? true : false;
+if(window.navigator && window.navigator.userAgent) {
+    iPhone           = window.navigator.userAgent.match(/iPhone/i) ? true : false;
 }
 
 // needed to keep the order
