@@ -76,6 +76,25 @@
 
 [% PROCESS _ajax_search.tt %]
 
+<script type="text/javascript">
+<!--
+    jQuery('DIV.navsectionlinks > UL > LI').click(function(ev) {
+        if(ev.target.tagName == 'LI') {
+            var target = jQuery(ev.target).find('A:first').attr('target');
+            var href   = jQuery(ev.target).find('A:first').attr('href');
+            if(target == '_parent') {
+                window.parent.location = href;
+            }
+            else if(target == 'main') {
+                window.frames[1].location = href;
+            } else {
+                window.location = href;
+            }
+        }
+    });
+-->
+</script>
+
 [% IF use_frames %]
   </body>
 </html>
