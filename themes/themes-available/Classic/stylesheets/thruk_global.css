@@ -811,3 +811,25 @@ TABLE.recurring_downtimes INPUT[type=text] {
 SPAN.required {
     color: red;
 }
+
+
+BODY.splashpage DIV.infoBoxTitle {
+    line-height: 8px;
+}
+
+BODY.splashpage TABLE.infoBox {
+    border-top: 1px solid #BBBBBB;
+    border-left: 1px solid #BBBBBB;
+}
+
+DIV.loginmask {
+    margin-top: 30px;
+}
+
+INPUT.logininput {
+    width: 200px;
+}
+
+INPUT.loginbutton {
+    width: 160px;
+}

@@ -799,6 +799,20 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddSafeDefaults') {
 
 ######################################
 
+=head2 login_cgi
+
+page: /thruk/cgi-bin/login.cgi
+
+=cut
+
+sub login_cgi : Regex('thruk\/cgi\-bin\/login\.cgi') {
+    my( $self, $c ) = @_;
+    return if defined $c->{'canceled'};
+    return $c->detach('/login/index');
+}
+
+######################################
+
 =head2 end
 
 check and display errors (if any)

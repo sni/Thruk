@@ -71,6 +71,7 @@ lib/Thruk/Controller/error.pm
 lib/Thruk/Controller/extinfo.pm
 lib/Thruk/Controller/histogram.pm
 lib/Thruk/Controller/history.pm
+lib/Thruk/Controller/login.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/remote.pm
@@ -900,6 +901,7 @@ t/TestUtils.pm
 templates/_add_bookmark.tt
 templates/_ajax_search.tt
 templates/_comments_table.tt
+templates/_common_css.tt
 templates/_common_js.tt
 templates/_common_js_bugs.tt
 templates/_cron_edit.tt
@@ -1087,6 +1089,7 @@ templates/extra_headers.tt
 templates/histogram_step_1.tt
 templates/history.tt
 templates/index.tt
+templates/login.tt
 templates/main.tt
 templates/notifications.tt
 templates/outages.tt
