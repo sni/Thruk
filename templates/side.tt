@@ -86,7 +86,7 @@
                 window.parent.location = href;
             }
             else if(target == 'main') {
-                window.frames[1].location = href;
+                window.parent.frames[1].location = href;
             } else {
                 window.location = href;
             }
