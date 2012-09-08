@@ -1,4 +1,4 @@
-[%+ UNLESS all_in_one_css %]
+﻿[%+ UNLESS all_in_one_css %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/common.css' />
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/themes/[% theme %]/stylesheets/[% page %].css' />
 [% END %]
