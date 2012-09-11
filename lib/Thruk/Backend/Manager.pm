@@ -513,7 +513,7 @@ sub set_backend_state_from_local_connections {
                 # find matching keys
                 my $key;
                 for my $state_key (keys %{$self->{'state_hosts'}}) {
-                    my $name = $self->{'state_hosts'}->{$state_key};
+                    my $name = $self->{'state_hosts'}->{$state_key}->{'source'};
                     $key = $state_key if $host->{'name'}    eq $name;
                     $key = $state_key if $host->{'address'} eq $name;
                     $key = $state_key if $host->{'alias'}   eq $name;
