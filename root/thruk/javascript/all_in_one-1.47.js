@@ -295,12 +295,18 @@ function reloadPage() {
         newUrl = newUrl + origHash;
     }
 
+    if(fav_counter) {
+        updateFaviconCounter('zZ', '#FFDE00', true, "10px Bold Tahoma", "#FF0000");
+    }
+
     /*
      * reload new url and replace history
      * otherwise history will contain every
      * single reload
+     * and give the browser some time to update refresh buttons
+     * and icons
      */
-    window.location.replace(newUrl);
+    window.setTimeout(window.location.replace, 100, newUrl);
 }
 
 /* set border color as mouse over for top row buttons*/
@@ -660,7 +666,7 @@ function reset_table_row_classes(table, c1, c2) {
 /* set icon src and refresh page */
 function refresh_button(btn) {
     btn.src = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
-    window.setTimeout("reloadPage()", 100);
+    reloadPage();
 }
 
 /* reverse a string */
@@ -3208,12 +3214,24 @@ function init_buttons() {
 88   d8'          `8b `8'       88   `"Y8888Y"'   `"Y8888Y"'   88      `888
 *******************************************************************************/
 /* see https://github.com/antyrat/stackoverflow-favicon-counter for original source */
-function updateFaviconCounter(value, color) {
+function updateFaviconCounter(value, color, fill, font, fontColor) {
     var faviconURL = url_prefix + 'thruk/themes/' + theme + '/images/favicon.ico';
     var context    = window.parent.frames ? window.parent.document : window.document;
-    if(value > 0) {
-        var counterValue = ( value > 99 ) ? '\u221E' : value,
-            canvas       = document.createElement("canvas"),
+    if(fill == undefined) { fill = true; }
+    if(!font)      { font      = "10px Normal Tahoma"; }
+    if(!fontColor) { fontColor = "#000000"; }
+
+    var counterValue = null;
+    if(jQuery.isNumeric(value)) {
+        if(value > 0) {
+            counterValue = ( value > 99 ) ? '\u221E' : value;
+        }
+    } else {
+        counterValue = value;
+    }
+
+    if(counterValue != null) {
+        var canvas       = document.createElement("canvas"),
             ctx          = canvas.getContext('2d'),
             faviconImage = new Image();
 
@@ -3225,18 +3243,20 @@ function updateFaviconCounter(value, color) {
             ctx.drawImage(faviconImage, 0, 0);
 
             // draw counter rectangle holder
-            ctx.beginPath();
-            ctx.rect( 5, 6, 16, 10 );
-            ctx.fillStyle = color;
-            ctx.fill();
+            if(fill) {
+                ctx.beginPath();
+                ctx.rect( 5, 6, 16, 10 );
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
 
             // counter font settings
-            ctx.font      = "10px Normal Tahoma";
-            ctx.fillStyle = "#000000";
+            ctx.font      = font;
+            ctx.fillStyle = fontColor;
 
             // get counter metrics
             var metrics  = ctx.measureText(counterValue );
-            counterTextX = ( metrics.width == 10 ) ? 6 : 9, // detect counter value position
+            counterTextX = ( metrics.width >= 10 ) ? 6 : 9, // detect counter value position
 
             // draw counter on favicon
             ctx.fillText( counterValue , counterTextX , 15, 16 );
