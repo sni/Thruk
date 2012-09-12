@@ -22,10 +22,7 @@
       var backend_chooser         = '[% backend_chooser %]';
       [% IF refresh_rate +%]
       var refresh_rate            = [% refresh_rate %];
-      [% END %]
-      [% IF fav_counter +%]
-      var fav_counter             = [% fav_counter %];
-      [% END %]
+      [% END +%]
       [% PROCESS _header_initial_states.tt %]
       /* create clone */
       var current_backend_states  = jQuery.extend(true, {}, initial_backend_states);
