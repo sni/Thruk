@@ -58,6 +58,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $c->stash->{subtitle}              = 'Reports';
     $c->stash->{infoBoxTitle}          = 'Reporting';
 
+    $Thruk::Utils::CLI::c              = $c;
+
     my $report_nr = $c->{'request'}->{'parameters'}->{'report'};
     my $action    = $c->{'request'}->{'parameters'}->{'action'} || 'show';
     my $refresh   = 0;
