@@ -20,7 +20,7 @@ var lastRowHighlighted;
 var verifyTimer;
 var iPhone           = false;
 if(window.navigator && window.navigator.userAgent) {
-    iPhone           = window.navigator.userAgent.match(/iPhone/i) ? true : false;
+    iPhone           = window.navigator.userAgent.match(/iPhone|iPad/i) ? true : false;
 }
 
 // needed to keep the order
