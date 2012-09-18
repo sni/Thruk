@@ -303,10 +303,18 @@ function reloadPage() {
      * and give the browser some time to update refresh buttons
      * and icons
      */
-    window.setTimeout(window.location.replace, 100, newUrl);
+    window.setTimeout(window_location_replace, 100, newUrl);
 }
 
-/* set border color as mouse over for top row buttons*/
+/* wrapper for window.location which results in
+ * Uncaught TypeError: Illegal invocation
+ * otherwise. (At least in chrome)
+ */
+function window_location_replace(url) {
+    window.location.replace(url);
+}
+
+/* set border color as mouse over for top row buttons */
 function button_over(button)
 {
    button.style.borderColor = "#555555";
