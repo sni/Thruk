@@ -7,9 +7,11 @@ window.onerror = function(msg, url, line) {
   }
 
   // skip some errors
-  if(msg.match(/cluetip is not a function /)) {
+  [%+ FOREACH skip = skip_js_errors.list %]
+  if(msg.match(/[% skip %]/)) {
     return false;
   }
+  [% END +%]
 
   try {
     thruk_errors.unshift("Url: "+url+" Line "+line+"\nError: " + msg);

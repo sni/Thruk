@@ -1351,7 +1351,16 @@ ex.:
 
 ==== show_error_reports
 Show link to bug reports when internal errors occur.
-show_error_reports = 1
+
+ex.:
+  show_error_reports = 1
+
+
+==== skip_js_errors
+don't report some known harmless javascript errors
+
+ex.:
+  skip_js_errors  = cluetip is not a function
 
 
 ==== no_external_job_forks
