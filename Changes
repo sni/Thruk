@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - Bug Fixes
             - fixed state hosts (Oliver Falk)
             - fixed search with ipad
+            - fixed action icons by custom vars servicegroup overview
 
 1.46     Tue Sep  4 15:42:15 CEST 2012
           - optional favicon problem counter
