@@ -323,7 +323,7 @@ function reloadPage() {
     }
 
     if(fav_counter) {
-        updateFaviconCounter('zZ', '#FFDE00', true, "10px Bold Tahoma", "#FF0000");
+        updateFaviconCounter('Zz', '#F7DA64', true, "10px Bold Tahoma", "#BA2610");
     }
 
     /*
