@@ -50,6 +50,7 @@ thruk_.*.changes
 thruk_.*.deb
 thruk_.*.dsc
 debian/thruk/.*
+debian/thruk.substvars
 build-stamp
 configure-stamp
 debian/files
