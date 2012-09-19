@@ -40,7 +40,7 @@ cgi_local.cfg
 cgi\.cfg\-.*
 # does not work for centos without F::C::R installed
 inc/File/Copy/Recursive.pm
-var
+^var/
 ^log4perl.conf$
 TODO
 docs/development

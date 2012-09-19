@@ -1086,6 +1086,7 @@ templates/extinfo_type_6_recurring_edit.tt
 templates/extinfo_type_7.tt
 templates/extinfo_type_8.tt
 templates/extra_headers.tt
+templates/get_variable.tt
 templates/histogram_step_1.tt
 templates/history.tt
 templates/index.tt
