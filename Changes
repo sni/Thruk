@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.48     not yet released
+          - save scroll state on sending commands and reloads
           - reports
             - added basic report option validation
           - Bug Fixes

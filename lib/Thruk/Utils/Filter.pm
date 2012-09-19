@@ -267,8 +267,10 @@ returns a url with referer removed
 =cut
 sub clean_referer {
     my $uri = shift;
-    $uri =~ s/&amp;referer=[^&]+//gmx;
-    $uri =~ s/&amp;bookmark=[^&]+//gmx;
+    for my $key (qw/referer bookmark scrollTo/) {
+        $uri =~ s/&amp;$key=[^&]+//gmx;
+        $uri =~ s/\?$key=[^&]+/?/gmx;
+    }
     return $uri;
 }
 

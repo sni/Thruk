@@ -16,6 +16,7 @@ var refreshPage      = 1;
 var cmdPaneState     = 0;
 var curRefreshVal    = 0;
 var additionalParams = new Object();
+var scrollToPos      = 0;
 var refreshTimer;
 var backendSelTimer;
 var lastRowSelected;
@@ -58,17 +59,40 @@ function init_page() {
         }));
     });
 
-    // remove ugly ?_=... from url
     var newUrl   = window.location.href;
+
+    var scroll = newUrl.match(/(\?|\&)scrollTo=(\d+)/);
+    if(scroll) {
+        scrollToPos = scroll[2];
+    }
+
+    // remove ugly ?_=... from url
     if (history.replaceState) {
         newUrl = newUrl.replace(/\?_=\d+/g, '?');
         newUrl = newUrl.replace(/\&_=\d+/g, '');
+        newUrl = newUrl.replace(/\?scrollTo=\d+/g, '?');
+        newUrl = newUrl.replace(/\&scrollTo=\d+/g, '');
         newUrl = newUrl.replace(/\?$/g, '');
         newUrl = newUrl.replace(/\?&/g, '?');
         try {
             history.replaceState({}, "", newUrl);
         } catch(e) { debug(e) }
     }
+}
+
+function bodyOnLoad(refresh) {
+    if(scrollToPos > 0) {
+        jQuery(window).scrollTop(scrollToPos);
+        scrollTop = 0;
+    }
+    if(refresh) {
+        setRefreshRate(refresh);
+    }
+}
+
+/* save scroll value */
+function saveScroll() {
+    additionalParams['scrollTo'] = jQuery(window).scrollTop();
 }
 
 /* hide a element by id */
@@ -274,6 +298,9 @@ function reloadPage() {
     var origHash = window.location.hash;
     var newUrl   = window.location.href;
     newUrl       = newUrl.replace(/#.*$/g, '');
+
+    // save scroll state
+    saveScroll();
 
     var urlArgs  = toQueryParams();
     for(key in additionalParams) {
@@ -1446,6 +1473,13 @@ function collectFormData(form_id) {
         });
         host_form = document.getElementById('selected_hosts');
         host_form.value = hosts.join(',');
+    }
+
+    // save scroll position to referer
+    var form_ref = document.getElementById('form_cmd_referer');
+    if(form_ref) {
+        var scrollTo = jQuery(window).scrollTop()
+        form_ref.value += '&scrollTo=' + scrollTo;
     }
 
     if(value == 1 ) { // reschedule
