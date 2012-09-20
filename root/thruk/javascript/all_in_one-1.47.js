@@ -82,8 +82,8 @@ function init_page() {
 
 function bodyOnLoad(refresh) {
     if(scrollToPos > 0) {
-        jQuery(window).scrollTop(scrollToPos);
-        scrollTop = 0;
+        window.scroll(0, scrollToPos);
+        scrollToPos = 0;
     }
     if(refresh) {
         setRefreshRate(refresh);
@@ -92,7 +92,7 @@ function bodyOnLoad(refresh) {
 
 /* save scroll value */
 function saveScroll() {
-    additionalParams['scrollTo'] = jQuery(window).scrollTop();
+    additionalParams['scrollTo'] = getPageScroll();
 }
 
 /* hide a element by id */
@@ -1478,8 +1478,7 @@ function collectFormData(form_id) {
     // save scroll position to referer
     var form_ref = document.getElementById('form_cmd_referer');
     if(form_ref) {
-        var scrollTo = jQuery(window).scrollTop()
-        form_ref.value += '&scrollTo=' + scrollTo;
+        form_ref.value += '&scrollTo=' + getPageScroll();
     }
 
     if(value == 1 ) { // reschedule
@@ -1492,6 +1491,19 @@ function collectFormData(form_id) {
     }
 
     return(true);
+}
+
+/* return scroll position */
+function getPageScroll() {
+    var yScroll;
+    if (self.pageYOffset) {
+        yScroll = self.pageYOffset;
+    } else if (document.documentElement && document.documentElement.scrollTop) {
+        yScroll = document.documentElement.scrollTop;
+    } else if (document.body) {
+        yScroll = document.body.scrollTop;
+    }
+    return yScroll
 }
 
 /* submit a form by id */
