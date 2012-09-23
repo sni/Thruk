@@ -218,7 +218,7 @@ my %config = ('name'                   => 'Thruk',
                   'error-template'    => 'error.tt',
                   'response-status'   => 500,
               },
-              'static'               => {
+              'Plugin::Static::Simple' => {
                   'ignore_extensions' => [ qw/tpl tt tt2/ ],
               },
               'Plugin::Cache'        => {
