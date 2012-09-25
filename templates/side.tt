@@ -25,9 +25,10 @@
     <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
 
     [% FOREACH section = navigation %]
+    [% section_name = section.name %]
     <div class="navsection">
-      <div class="navsectiontitle">[% section.name %]</div>
-      <div class="navsectionlinks">
+      <div class="navsectiontitle clickable">[% section.name %]</div>
+      <div class="navsectionlinks"[% IF menu_states.exists(section_name) && menu_states.$section_name == 0 %] style="display:none;"[% END %]>
       [%+ FOREACH link = section.links %]
         <ul class="navsectionlinks">
           [%+ IF link.href %]
@@ -91,6 +92,19 @@
                 window.location = href;
             }
         }
+    });
+
+    var menuState = [% menu_states_json %];
+    jQuery(document).ready(function() {
+        // make them toggle
+        jQuery('DIV.navsectiontitle').click(function() {
+            var title = this.innerHTML;
+            jQuery(this).parent().children("DIV.navsectionlinks").slideToggle('fast', function() {
+                menuState[title] = this.style.display == 'none' ? 0 : 1;
+                cookieSave('thruk_side', toQueryString(menuState));
+            });
+            return false;
+        });
     });
 -->
 </script>

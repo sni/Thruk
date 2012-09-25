@@ -175,24 +175,34 @@ function toggleElementCentered(id, obj) {
 /* save settings in a cookie */
 function prefSubmit(url, current_theme) {
   var sel         = document.getElementById('pref_theme')
-  var now         = new Date();
-  var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
   if(current_theme != sel.value) {
     additionalParams['theme']      = '';
     additionalParams['reload_nav'] = 1;
-    document.cookie = "thruk_theme="+sel.value + "; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
-    window.status   = "thruk preferences saved";
+    cookieSave('thruk_theme', sel.value);
     reloadPage();
   }
 }
 
 /* save settings in a cookie */
 function prefSubmitSound(url, value) {
-  var now         = new Date();
-  var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
-  document.cookie = "thruk_sounds="+value+"; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
-  window.status   = "thruk preferences saved";
+  cookieSave('thruk_sounds', value);
   reloadPage();
+}
+
+/* save something in a cookie */
+function cookieSave(name, value, expires) {
+  var now       = new Date();
+  var expirestr = '';
+
+  // let the cookie expire in 10 years by default
+  if(expires == undefined) { expires = 10*365*86400; }
+
+  if(expires > 0) {
+    expires   = new Date(now.getTime() + (expires*1000));
+    expirestr = " expires=" + expires.toGMTString() + ";";
+  }
+
+  document.cookie = name+"="+value+"; path="+cookie_path+";"+expirestr;
 }
 
 /* page refresh rate */
@@ -362,7 +372,7 @@ function toggleBackend(backend) {
   if(backend_chooser == 'switch') {
     jQuery('.button_peerUP').removeAttr('class').addClass('button_peerDIS');
     button.className = 'button_peerUP';
-    document.cookie = "thruk_conf="+backend+ "; path="+cookie_path+";";
+    cookieSave('thruk_conf', backend, 0);
     reloadPage();
     return;
   }
@@ -391,7 +401,7 @@ function toggleBackend(backend) {
   additionalParams['reload_nav'] = 1;
 
   /* save current selected backends in session cookie */
-  document.cookie = "thruk_backends="+toQueryString(current_backend_states)+ "; path="+cookie_path+";";
+  cookieSave('thruk_backends', toQueryString(current_backend_states), 0);
   window.clearTimeout(backendSelTimer);
   backendSelTimer  = window.setTimeout('reloadPage()', 1000);
   return;
@@ -3330,10 +3340,7 @@ function updateFaviconCounter(value, color, fill, font, fontColor) {
 
 /* save settings in a cookie */
 function prefSubmitCounter(url, value) {
-  var now         = new Date();
-  var expires     = new Date(now.getTime() + (10*365*86400*1000)); // let the cookie expire in 10 years
-  document.cookie = "thruk_favicon="+value+"; path="+cookie_path+"; expires=" + expires.toGMTString() + ";";
-  window.status   = "thruk preferences saved";
+  cookieSave('thruk_favicon', value);
   reloadPage();
 }
 /**

@@ -7,6 +7,7 @@ use parent 'Catalyst::Controller';
 use Data::Dumper;
 use URI::Escape;
 use File::Slurp;
+use JSON::XS;
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -335,6 +336,19 @@ sub begin : Private {
             $c->stash->{'fav_counter'} = 1;
         }
     }
+
+    # menu cookie set?
+    my $menu_states = {};
+    if( defined $c->request->cookie('thruk_side') ) {
+        my $cookie_val = $c->request->cookie('thruk_side')->{'value'};
+        if(ref $cookie_val ne 'ARRAY') { $cookie_val = [$cookie_val]; }
+        for my $state (@{$cookie_val}) {
+            my($k,$v) = split(/=/mx,$state,2);
+            $menu_states->{$k} = $v;
+        }
+    }
+    $c->stash->{'menu_states'}      = $menu_states;
+    $c->stash->{'menu_states_json'} = encode_json($menu_states);
 
     # make private _ hash keys available
     $Template::Stash::PRIVATE = undef;
