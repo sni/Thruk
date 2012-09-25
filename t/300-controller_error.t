@@ -3,8 +3,11 @@ use warnings;
 use Data::Dumper;
 use Test::More;
 
-plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
-plan tests => 264;
+BEGIN {
+    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan tests => 264;
+}
 
 BEGIN {
     use lib('t');

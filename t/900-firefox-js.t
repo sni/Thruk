@@ -11,9 +11,11 @@ BEGIN {
     import TestUtils;
 }
 
-plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR_JS} to a true value to run.' unless $ENV{TEST_AUTHOR_JS};
-eval "use WWW::Mechanize::Firefox";
-plan skip_all => 'WWW::Mechanize::Firefox required' if $@;
+BEGIN {
+    plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR_JS} to a true value to run.' unless $ENV{TEST_AUTHOR_JS};
+    eval "use WWW::Mechanize::Firefox";
+    plan skip_all => 'WWW::Mechanize::Firefox required' if $@;
+}
 
 my $pidfile  = getcwd."/test.pid";
 my $testport = 51234;

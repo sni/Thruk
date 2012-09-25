@@ -1,10 +1,15 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 367;
+use Test::More;
 use Data::Dumper;
 use Storable qw/ dclone /;
 use File::Slurp;
+
+BEGIN {
+    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan tests => 367;
+}
 
 BEGIN {
     use lib('t');

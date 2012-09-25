@@ -17,5 +17,5 @@ ok( $request->is_success, 'Request /thruk/side.html should succeed' ) or BAIL_OU
 SKIP: {
     skip 'external tests', 1 if defined $ENV{'CATALYST_SERVER'};
 
-    ok( request('/')->is_redirect, 'Request should redirect' );
+    ok( request('/')->is_redirect, 'Request / should redirect' );
 };

@@ -1,6 +1,11 @@
 use strict;
 use warnings;
-use Test::More tests => 140;
+use Test::More;
+
+BEGIN {
+    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan tests => 140;
+}
 
 BEGIN {
     use lib('t');

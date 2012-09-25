@@ -5,6 +5,9 @@ use Data::Dumper;
 
 eval "use Test::Cmd";
 plan skip_all => 'Test::Cmd required' if $@;
+BEGIN {
+    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+}
 
 BEGIN {
     use lib('t');

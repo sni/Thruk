@@ -5,6 +5,8 @@ use Test::More;
 $Data::Dumper::Sortkeys = 1;
 
 BEGIN {
+    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+
     use lib('t');
     require TestUtils;
     import TestUtils;

@@ -8,6 +8,7 @@ BEGIN {
     plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
     eval "use Test::JavaScript";
     plan skip_all => 'Test::JavaScript required' if $@;
+    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
 
     use lib('t');
     require TestUtils;
