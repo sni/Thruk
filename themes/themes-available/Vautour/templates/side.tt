@@ -27,7 +27,10 @@
 
 
     [% FOREACH section = navigation %]
-      <h2>[% section.name %]</h2>
+    [% section_name = section.name %]
+      <div>
+      <div class="navsectiontitle clickable"><h2>[% section.name %]</h2></div>
+      <div class="navsectionlinks"[% IF menu_states.exists(section_name) && menu_states.$section_name == 0 %] style="display:none;"[% END %]>
       <ul>
       [% FOREACH link = section.links %]
         [%+ IF link.href %]
@@ -59,10 +62,14 @@
         [% END %]
       [% END %]
       </ul>
+      </div>
+      </div>
     [% END %]
     </div>
 
 [% PROCESS _ajax_search.tt %]
+[% PROCESS _side_js.tt %]
+
 [% IF use_frames %]
   </body>
 </html>

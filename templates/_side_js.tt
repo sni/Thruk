@@ -1,0 +1,34 @@
+﻿<script type="text/javascript">
+<!--
+    jQuery('DIV.navsectionlinks > UL > LI').click(function(ev) {
+        if(ev.target.tagName == 'LI') {
+            var target = jQuery(ev.target).find('A:first').attr('target');
+            var href   = jQuery(ev.target).find('A:first').attr('href');
+            if(target == '_parent') {
+                window.parent.location = href;
+            }
+            else if(target == 'main') {
+                window.parent.frames[1].location = href;
+            }
+            else if(target == '_blank') {
+                window.open(href);
+            } else {
+                window.location = href;
+            }
+        }
+    });
+
+    var menuState = [% menu_states_json %];
+    jQuery(document).ready(function() {
+        // make them toggle
+        jQuery('DIV.navsectiontitle').click(function() {
+            var title = this.innerHTML.replace(/<[^>]+>/g, '');
+            jQuery(this).parent().children("DIV.navsectionlinks").slideToggle('fast', function() {
+                menuState[title] = this.style.display == 'none' ? 0 : 1;
+                cookieSave('thruk_side', toQueryString(menuState));
+            });
+            return false;
+        });
+    });
+-->
+</script>
