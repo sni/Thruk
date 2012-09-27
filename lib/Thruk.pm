@@ -150,6 +150,8 @@ my %config = ('name'                   => 'Thruk',
                                           'backend_chooser'       => 'select',
                                           'play_sounds'    => 0,
                                           'fav_counter'    => 0,
+                                          'menu_states'      => {},
+                                          'menu_states_json' => "{}",
                                           'uri_filter'     => {
                                                 'bookmark'      => undef,
                                                 'referer'       => undef,
