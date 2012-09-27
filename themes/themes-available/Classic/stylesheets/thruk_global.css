@@ -837,3 +837,9 @@ INPUT.logininput {
 INPUT.loginbutton {
     width: 160px;
 }
+
+DIV.health_bar_bg {
+    width:100px;
+    height: 20px;
+    background: #DDDDDD;
+}

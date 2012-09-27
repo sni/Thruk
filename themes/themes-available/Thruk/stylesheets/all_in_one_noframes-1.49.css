@@ -484,6 +484,7 @@ td.clickable {
 }
 .notclickable {
   cursor: default;
+  vertical-align: middle;
 }
 
 table.filter > tbody > tr > td {
@@ -835,6 +836,12 @@ INPUT.logininput {
 
 INPUT.loginbutton {
     width: 160px;
+}
+
+DIV.health_bar_bg {
+    width:100px;
+    height: 20px;
+    background: #DDDDDD;
 }/* navbar */
 div.navbar {
   background-color: black;

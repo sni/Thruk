@@ -127,7 +127,7 @@
                                 [% host_health_pic = 'thermcrit.png' %]
                                 [% health_perc = 5 %]
                                 [% END %]
-                                <td valign="top" width="100" class='healthBar'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% host_health_pic %]' border="0" width="[% health_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health'></td>
+                                <td valign="top" width="100" class='healthBar'><div class="health_bar_bg"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% host_health_pic %]' border="0" width="[% health_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% host_health %][% END %]% Health'></div></td>
                               </tr>
                               <tr>
                                 <td align="left" valign="middle" class='healthItem'>Service Health:</td>
@@ -147,7 +147,7 @@
                                 [% service_health_pic = 'thermcrit.png' %]
                                 [% service_perc = 5 %]
                                 [% END %]
-                                <td valign="top" width="100" class='healthBar'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% service_health_pic %]' border="0" width="[% service_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health'></td>
+                                <td valign="top" width="100" class='healthBar'><div class="health_bar_bg"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% service_health_pic %]' border="0" width="[% service_perc %]" height="20" alt='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health' title='[% FILTER format('%2.1f') %][% service_health %][% END %]% Health'></div></td>
                               </tr>
                             </table>
                           </td>
