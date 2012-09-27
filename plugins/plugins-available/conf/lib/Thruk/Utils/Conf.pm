@@ -355,7 +355,10 @@ replace block in config file
 sub replace_block {
     my($file, $string, $start, $end) = @_;
 
-    my $content = read_file($file);
+    my $content = "";
+    if(-f $file) {
+        $content = read_file($file);
+    }
 
     ## no critic
     unless($content =~ s/$start.*?$end/$string/sxi) {

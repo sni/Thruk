@@ -798,8 +798,15 @@ sub _process_backends_page {
     }
 
     my $backends = [];
+    my %conf;
     if(-f $file) {
-        my %conf = ParseConfig($file);
+        %conf = ParseConfig($file);
+    } else {
+        $file =~ s/thruk_local\.conf/thruk.conf/mx;
+        %conf = ParseConfig($file) if -f $file;
+    }
+
+    if(keys %conf > 0) {
         if(defined $conf{'Component'}->{'Thruk::Backend'}->{'peer'}) {
             if(ref $conf{'Component'}->{'Thruk::Backend'}->{'peer'} eq 'ARRAY') {
                 $backends = $conf{'Component'}->{'Thruk::Backend'}->{'peer'};
