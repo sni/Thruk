@@ -5,8 +5,12 @@ Ext.define('TP.Pantab', {
     tooltip:     'double click to rename',
     closable:    true,
     stateful:    true,
-    window_ids:  [],
+    window_ids:  false,
     stateEvents: ['add', 'titlechange'],
+    initComponent: function() {
+        this.callParent();
+        this.window_ids = [];
+    },
     listeners: {
         beforedestroy: function( This, eOpts ) {
             for(nr in This.window_ids) {
