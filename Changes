@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - make menu sections foldable
           - Bug Fixes
             - fixed reload in IE
+            - fixed minemap header in IE
 
 1.48     Fri Sep 21 11:24:48 CEST 2012
           - save scroll state on sending commands and reloads

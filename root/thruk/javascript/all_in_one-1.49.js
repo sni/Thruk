@@ -3294,48 +3294,51 @@ function updateFaviconCounter(value, color, fill, font, fontColor) {
         counterValue = value;
     }
 
-    if(counterValue != null) {
-        var canvas       = document.createElement("canvas"),
-            ctx          = canvas.getContext('2d'),
-            faviconImage = new Image();
+    // breaks on IE8 (and lower)
+    try {
+        if(counterValue != null) {
+            var canvas       = document.createElement("canvas"),
+                ctx          = canvas.getContext('2d'),
+                faviconImage = new Image();
 
-        canvas.width  = 16;
-        canvas.height = 16;
+            canvas.width  = 16;
+            canvas.height = 16;
 
-        faviconImage.onload = function() {
-            // draw original favicon
-            ctx.drawImage(faviconImage, 0, 0);
+            faviconImage.onload = function() {
+                // draw original favicon
+                ctx.drawImage(faviconImage, 0, 0);
 
-            // draw counter rectangle holder
-            if(fill) {
-                ctx.beginPath();
-                ctx.rect( 5, 6, 16, 10 );
-                ctx.fillStyle = color;
-                ctx.fill();
+                // draw counter rectangle holder
+                if(fill) {
+                    ctx.beginPath();
+                    ctx.rect( 5, 6, 16, 10 );
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                }
+
+                // counter font settings
+                ctx.font      = font;
+                ctx.fillStyle = fontColor;
+
+                // get counter metrics
+                var metrics  = ctx.measureText(counterValue );
+                counterTextX = ( metrics.width >= 10 ) ? 6 : 9, // detect counter value position
+
+                // draw counter on favicon
+                ctx.fillText( counterValue , counterTextX , 15, 16 );
+
+                // append new favicon to document head section
+                faviconURL = canvas.toDataURL();
+                jQuery('link[rel$=icon]', context).remove();
+                jQuery('head', context).append( jQuery('<link rel="shortcut icon" type="image/x-icon" href="' + faviconURL + '"/>' ) );
             }
-
-            // counter font settings
-            ctx.font      = font;
-            ctx.fillStyle = fontColor;
-
-            // get counter metrics
-            var metrics  = ctx.measureText(counterValue );
-            counterTextX = ( metrics.width >= 10 ) ? 6 : 9, // detect counter value position
-
-            // draw counter on favicon
-            ctx.fillText( counterValue , counterTextX , 15, 16 );
-
-            // append new favicon to document head section
-            faviconURL = canvas.toDataURL();
+            faviconImage.src = faviconURL; // create original favicon
+        } else {
+            // if there is no counter value we draw default favicon
             jQuery('link[rel$=icon]', context).remove();
             jQuery('head', context).append( jQuery('<link rel="shortcut icon" type="image/x-icon" href="' + faviconURL + '"/>' ) );
         }
-        faviconImage.src = faviconURL; // create original favicon
-    } else {
-        // if there is no counter value we draw default favicon
-        jQuery('link[rel$=icon]', context).remove();
-        jQuery('head', context).append( jQuery('<link rel="shortcut icon" type="image/x-icon" href="' + faviconURL + '"/>' ) );
-    }
+    } catch(e) { debug(e) }
 }
 
 /* save settings in a cookie */
