@@ -340,7 +340,7 @@ function reloadPage() {
      * and give the browser some time to update refresh buttons
      * and icons
      */
-    window.setTimeout(window_location_replace, 100, newUrl);
+    window.setTimeout("window_location_replace('"+newUrl+"')", 100);
 }
 
 /* wrapper for window.location which results in
