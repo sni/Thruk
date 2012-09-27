@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.50     not yet released
+1.50     Thu Sep 27 09:21:20 CEST 2012
           - make menu sections foldable
           - Bug Fixes
             - fixed reload in IE
