@@ -222,11 +222,12 @@ You may need the SLES sdk dvd for additional dependencies.
 === Install from Source
 ==== Requirements
 
-[TIP]
-.use packages
+[IMPORTANT]
+.Experienced Users Only
 =======
-Unless not possible, you should always prefer packages over source
-installation.
+Source installation is for experienced users only. Using
+packages/repositories should be the prefered solution in almost all
+situations. Especially for productional usage.
 =======
 
 
@@ -259,9 +260,9 @@ quick guide:
 
 -------
   %> su - thruk
-  %> wget http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.004009.tar.gz
-  %> tar zxf local-lib-1.004009.tar.gz
-  %> cd local-lib-1.004009
+  %> wget %http://search.cpan.org/CPAN/authors/id/A/AP/APEIRON/local-lib-1.008004.tar.gz
+  %> tar zxf local-lib-1.008004.tar.gz
+  %> cd local-lib-1.008004
   %> perl Makefile.PL --bootstrap && make install
 -------
 
@@ -301,7 +302,7 @@ logout and login again and verify that your perl env looks like this:
 ==== Git Clone Thruk
 
 -------
-    git clone http://github.com/sni/Thruk.git
+    git clone https://github.com/sni/Thruk.git
     cd Thruk
     perl Makefile.PL
 -------
