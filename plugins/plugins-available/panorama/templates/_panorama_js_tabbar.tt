@@ -191,16 +191,26 @@ Ext.define('TP.TabBar', {
         }
     },
     applyState: function(state) {
-        if(state) {
-            this.xdata = state.xdata;
-            for(nr in state.item_ids) {
-                TP.add_pantab(state.item_ids[nr]);
-            };
-            this.setActiveTab(state.activeTab);
-            Ext.apply(this, state);
+        try {
+            if(state) {
+                    this.xdata = state.xdata;
+                    for(nr in state.item_ids) {
+                        TP.add_pantab(state.item_ids[nr]);
+                    };
+                this.setActiveTab(state.activeTab);
+                Ext.apply(this, state);
+            }
+            TP.startRotatingTabs();
+            TP.startServerTime();
+        } catch(e) {
+            debug(e);
+            if(confirm("Errors while loading your saved settings:\n\n"+e+"\n\nStart over with a clean view?\nAll panorama view settings will be deleted.")) {
+                [%+ IF stateprovider == 'cookie' +%]
+                try { cp.clearAll(); } catch(e) {}
+                [%+ END +%]
+                window.location = 'panorama.cgi?clean=1';
+            }
         }
-        TP.startRotatingTabs();
-        TP.startServerTime();
     },
     items: [{
         title: '',
