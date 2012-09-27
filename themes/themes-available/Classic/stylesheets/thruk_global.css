@@ -484,6 +484,7 @@ td.clickable {
 }
 .notclickable {
   cursor: default;
+  vertical-align: middle;
 }
 
 table.filter > tbody > tr > td {
