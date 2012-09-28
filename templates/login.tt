@@ -12,7 +12,7 @@
   <br><br>
   [% PROCESS _message.tt %]
   <div align="center">
-    <div id="mainlogo"><a href="http://www.thruk.org" target="_blank"><img src="../themes/Thruk/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
+    <div id="mainlogo"><a href="http://www.thruk.org" target="_blank"><img class="mainlogo" src="../themes/[% theme %]/images/logo_thruk.png" border="0" alt="Thruk" title="Thruk" width="246" height="89"></a></div>
     <div class="loginmask">
       <form method="POST" action="login.cgi">
           <table class="infoBox">
