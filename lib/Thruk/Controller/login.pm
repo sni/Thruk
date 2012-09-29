@@ -84,7 +84,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             $referer =~ s#^//#/#gmx; # strip double slashes
             return $c->response->redirect($referer);
         } else {
-            $c->log->error("login failed for $login on $referer");
+            $referer =~ s#^//#/#gmx; # strip double slashes
+            $c->log->info("login failed for $login on $referer");
             Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?".$referer);
         }

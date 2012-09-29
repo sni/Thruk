@@ -29,7 +29,7 @@ my $prefix = '';
 $prefix   = $ENV{'OMD_SITE'}.'/' if defined $ENV{'OMD_SITE'};
 
 ##########################################################
-my $spath               = "tmp/thruk/sessions";
+my $spath               = Thruk->config->{'tmp_path'}."/sessions";
 my $loginurl            = Thruk->config->{'cookie_auth_login_url'}             || $prefix."thruk/cgi-bin/login.cgi";
 my $sessiontimeout      = Thruk->config->{'cookie_auth_session_timeout'}       || 86400;
 my $sessioncachetimeout = Thruk->config->{'cookie_auth_session_cache_timeout'} || 5;
