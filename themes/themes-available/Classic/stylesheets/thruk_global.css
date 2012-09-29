@@ -843,3 +843,7 @@ DIV.health_bar_bg {
     height: 20px;
     background: #DDDDDD;
 }
+
+BODY#splashpage.loginpage DIV#mainfooter {
+  margin-top: 30px;
+}

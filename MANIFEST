@@ -910,6 +910,7 @@ templates/_common_css.tt
 templates/_common_js.tt
 templates/_common_js_bugs.tt
 templates/_cron_edit.tt
+templates/_disclaimer.tt
 templates/_downtimes_recurring_table.tt
 templates/_downtimes_table.tt
 templates/_error_report.tt

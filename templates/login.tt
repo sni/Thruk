@@ -7,7 +7,7 @@
     [%+ PROCESS _common_css.tt use_frames=1 +%]
     [%+ PROCESS _common_js.tt +%]
   </head>
-  <body class='[% page %]' id='[% page %]'>
+  <body class='[% page %] loginpage' id='[% page %]'>
   <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010-2012 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
   <br><br>
   <br><br>
@@ -38,6 +38,13 @@
           </table>
       </form>
     </div>
+    <br>
+    <br>
+    <div id="currentversioninfo">
+    <div class="version">Version [% version %][% IF branch %]~[% branch %][% END %][% IF c.config.omd_version %]<br><font size="-3">OMD [% c.config.omd_version %]</font>[% END %]</div>
+    <div class="releasedate">[% released %]</div>
+    </div>
+    [% PROCESS _disclaimer.tt %]
   </div>
   <script type="text/javascript">
   <!--
