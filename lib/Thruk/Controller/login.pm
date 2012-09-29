@@ -60,7 +60,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         };
         if(defined $cookie and defined $cookie->value) {
             my $sessionid = $cookie->value;
-            if($sessionid =~ m/^\w+$/ and -f $sdir.'/'.$sessionid) {
+            if($sessionid =~ m/^\w+$/mx and -f $sdir.'/'.$sessionid) {
                 unlink($sdir.'/'.$sessionid);
             }
         }
