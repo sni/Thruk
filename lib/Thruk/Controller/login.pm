@@ -94,7 +94,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         Thruk::Utils::CookieAuth::clean_session_files($c->config);
     }
 
-    Thruk::Utils::ssi_include($c);
+    Thruk::Utils::ssi_include($c, 'login');
 
     return 1;
 }

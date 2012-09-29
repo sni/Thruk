@@ -579,11 +579,12 @@ puts the ssi templates into the stash
 
 =cut
 sub ssi_include {
-    my $c = shift;
+    my($c, $page) = @_;
+    $page = $c->stash->{'page'} unless defined $page;
     my $global_header_file = "common-header.ssi";
-    my $header_file        = $c->stash->{'page'}."-header.ssi";
+    my $header_file        = $page."-header.ssi";
     my $global_footer_file = "common-footer.ssi";
-    my $footer_file        = $c->stash->{'page'}."-footer.ssi";
+    my $footer_file        = $page."-footer.ssi";
 
     if ( defined $c->config->{ssi_includes}->{$global_header_file} ){
         $c->stash->{ssi_header} = Thruk::Utils::read_ssi($c, $global_header_file);
