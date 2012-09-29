@@ -1439,6 +1439,41 @@ ex.:
   logcache = localhost:27017/thruk_log_cache
 
 
+==== cookie_auth_login_url
+Specifies the url where non-authenticated users will be redirected
+too.
+
+ex.:
+
+  cookie_auth_login_url = thruk/cgi-bin/login.cgi
+
+
+==== cookie_auth_restricted_url
+Specifies the url against the cookie auth provider will verifys the
+credentials.
+
+ex.:
+
+  cookie_auth_restricted_url = http://localhost/thruk/cgi-bin/restricted.cgi
+
+
+==== cookie_auth_session_timeout
+Specifies the timeout for idle sessions.
+
+ex.:
+
+  cookie_auth_session_timeout       = 86400
+
+
+==== cookie_auth_session_cache_timeout
+Specifies the amount of seconds in which subsequent requests won't
+verify authentication again.
+
+ex.:
+
+  cookie_auth_session_cache_timeout = 5
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it

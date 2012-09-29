@@ -538,6 +538,7 @@ sub set_message {
 
     $c->res->cookies->{'thruk_message'} = {
         value => $style.'~~'.$message,
+        path  => $c->stash->{'cookie_path'}
     };
     $c->stash->{'thruk_message'}         = $style.'~~'.$message;
     $c->stash->{'thruk_message_details'} = $details;

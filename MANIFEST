@@ -75,6 +75,7 @@ lib/Thruk/Controller/login.pm
 lib/Thruk/Controller/notifications.pm
 lib/Thruk/Controller/outages.pm
 lib/Thruk/Controller/remote.pm
+lib/Thruk/Controller/restricted.pm
 lib/Thruk/Controller/Root.pm
 lib/Thruk/Controller/showlog.pm
 lib/Thruk/Controller/status.pm
@@ -86,6 +87,7 @@ lib/Thruk/Utils.pm
 lib/Thruk/Utils/Auth.pm
 lib/Thruk/Utils/Avail.pm
 lib/Thruk/Utils/CLI.pm
+lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
 lib/Thruk/Utils/IO.pm
@@ -821,6 +823,7 @@ root/thruk/startup.html
 root/thruk/themes
 script/append.make
 script/thruk
+script/thruk_auth
 script/thruk_cgi.pl
 script/thruk_create.pl
 script/thruk_create_combined_static_content.pl
@@ -847,6 +850,7 @@ support/menu_local.conf
 support/thruk.init
 support/thruk.logrotate
 support/thruk.spec
+support/thruk_cookie_auth.example
 support/thruk_local.conf.example
 t/001-app.t
 t/010-Thruk-Utils.t
@@ -877,6 +881,7 @@ t/200-view_TT.t
 t/300-controller_avail.t
 t/300-controller_cmd.t
 t/300-controller_config.t
+t/300-controller_cookie_auth.t
 t/300-controller_error.t
 t/300-controller_extinfo.t
 t/300-controller_histogram.t

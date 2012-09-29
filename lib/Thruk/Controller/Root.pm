@@ -146,6 +146,10 @@ sub begin : Private {
         'mobile_agent'                  => 'iPhone,Android,IEMobile',
         'show_error_reports'            => 1,
         'skip_js_errors'                => [ 'cluetip is not a function' ],
+        'cookie_auth_login_url'             => 'thruk/cgi-bin/login.cgi',
+        'cookie_auth_restricted_url'        => 'http://localhost/thruk/cgi-bin/restricted.cgi',
+        'cookie_auth_session_timeout'       => 86400,
+        'cookie_auth_session_cache_timeout' => 5,
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
@@ -349,6 +353,10 @@ sub begin : Private {
         if(defined $favicon_cookie->value and $favicon_cookie->value eq 'on') {
             $c->stash->{'fav_counter'} = 1;
         }
+    }
+
+    if( defined $c->request->cookie('thruk_auth') ) {
+        $c->stash->{'cookie_auth'} = 1;
     }
 
     # make private _ hash keys available
@@ -815,20 +823,6 @@ sub job_cgi : Regex('thruk\/cgi\-bin\/job.cgi') :MyAction('AddSafeDefaults') {
 
 ######################################
 
-=head2 login_cgi
-
-page: /thruk/cgi-bin/login.cgi
-
-=cut
-
-sub login_cgi : Regex('thruk\/cgi\-bin\/login\.cgi') {
-    my( $self, $c ) = @_;
-    return if defined $c->{'canceled'};
-    return $c->detach('/login/index');
-}
-
-######################################
-
 =head2 end
 
 check and display errors (if any)
@@ -850,6 +844,8 @@ sub end : ActionClass('RenderView') {
 
     return 1;
 }
+
+######################################
 
 =head1 AUTHOR
 

@@ -152,6 +152,7 @@ my %config = ('name'                   => 'Thruk',
                                           'fav_counter'    => 0,
                                           'menu_states'      => {},
                                           'menu_states_json' => "{}",
+                                          'cookie_auth'      => 0,
                                           'uri_filter'     => {
                                                 'bookmark'      => undef,
                                                 'referer'       => undef,

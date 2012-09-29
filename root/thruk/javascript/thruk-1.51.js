@@ -89,7 +89,10 @@ function bodyOnLoad(refresh) {
 
 /* save scroll value */
 function saveScroll() {
-    additionalParams['scrollTo'] = getPageScroll();
+    var scroll = getPageScroll();
+    if(scroll > 0) {
+        additionalParams['scrollTo'] = scroll;
+    }
 }
 
 /* hide a element by id */

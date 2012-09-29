@@ -9873,6 +9873,37 @@ when accessing logfiles, for example when creating reports.</p></div>
 <div class="content">
 <pre><tt>logcache = localhost:27017/thruk_log_cache</tt></pre>
 </div></div>
+<h4 id="_cookie_auth_login_url">cookie_auth_login_url</h4>
+<div class="paragraph"><p>Specifies the url where non-authenticated users will be redirected
+too.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>cookie_auth_login_url = thruk/cgi-bin/login.cgi</tt></pre>
+</div></div>
+<h4 id="_cookie_auth_restricted_url">cookie_auth_restricted_url</h4>
+<div class="paragraph"><p>Specifies the url against the cookie auth provider will verifys the
+credentials.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>cookie_auth_restricted_url = http://localhost/thruk/cgi-bin/restricted.cgi</tt></pre>
+</div></div>
+<h4 id="_cookie_auth_session_timeout">cookie_auth_session_timeout</h4>
+<div class="paragraph"><p>Specifies the timeout for idle sessions.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>cookie_auth_session_timeout       = 86400</tt></pre>
+</div></div>
+<h4 id="_cookie_auth_session_cache_timeout">cookie_auth_session_cache_timeout</h4>
+<div class="paragraph"><p>Specifies the amount of seconds in which subsequent requests won&#8217;t
+verify authentication again.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>cookie_auth_session_cache_timeout = 5</tt></pre>
+</div></div>
 <h4 id="_enable_shinken_features">enable_shinken_features</h4>
 <div class="paragraph"><p>This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it
@@ -10641,7 +10672,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-09-29 10:52:45 CEST
+Last updated 2012-09-29 15:15:33 CEST
 </div>
 </div>
 </body>

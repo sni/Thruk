@@ -71,6 +71,9 @@ sub add_defaults {
     $c->log->debug("checking auth");
     if($c->request->uri->path_query =~ m~^(/thruk|/\w+/thruk)/cgi-bin/remote\.cgi~mx) {
         $c->log->debug("remote.cgi does not use authentication");
+    }
+    elsif($c->request->uri->path_query =~ m~^(/thruk|/\w+/thruk)/cgi-bin/login\.cgi~mx) {
+        $c->log->debug("login.cgi does not use authentication");
     } else {
         unless ($c->user_exists) {
             $c->log->debug("user not authenticated yet");
