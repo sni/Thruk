@@ -53,7 +53,17 @@ Ext.define('TP.TabBar', {
                         handler: function() { TP.settingsWindow() }
                     },
                     /* Exit */
-                    '-' , {
+                    '-',
+                    [% IF cookie_auth %]
+                    {
+                        text:   'Logout',
+                        icon:   '[% url_prefix %]thruk/plugins/panorama/images/door_in.png',
+                        handler: function() {
+                            window.location = 'login.cgi?logout';
+                        }
+                    },
+                    [% END %]
+                    {
                         text:   'Exit Panorama View',
                         icon:   '[% url_prefix %]thruk/plugins/panorama/images/exit.png',
                         handler: function() {
