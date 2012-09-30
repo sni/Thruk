@@ -33,12 +33,12 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd   => './script/thruk_auth',
-    stdin => '///____/devel/thruk/startup.html',
-    like => ['/^\/pass\/devel\/thruk\/startup\.html$/'],
+    stdin => '///____/thruk/startup.html',
+    like => ['/^\/pass\/thruk\/startup\.html$/'],
 });
 
 TestUtils::test_command({
     cmd   => './script/thruk_auth',
-    stdin => '///____/devel/thruk/cgi-bin/tac.cgi',
-    like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi\?devel\/thruk\/cgi\-bin\/tac\.cgi$/'],
+    stdin => '///____/thruk/cgi-bin/tac.cgi',
+    like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi\?thruk\/cgi\-bin\/tac\.cgi$/'],
 });

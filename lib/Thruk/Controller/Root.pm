@@ -294,6 +294,8 @@ sub begin : Private {
            or $c->request->action =~ m|thruk\\\/\w+\\.html|mx
            or $c->request->action =~ m|thruk\\/cgi\\-bin\\/conf\\.cgi\?sub=backends|mx
            or $c->request->action =~ m|thruk\\/cgi\\-bin\\/remote\\.cgi|mx
+           or $c->request->action =~ m|thruk\\/cgi\\-bin\\/login\\.cgi|mx
+           or $c->request->action =~ m|thruk\\/cgi\\-bin\\/restricted\\.cgi|mx
            or $c->request->action =~ m|^/$|mx
            or $c->request->action eq 'thruk$'
            or $c->request->action eq 'thruk\\/docs\\/' ) {
