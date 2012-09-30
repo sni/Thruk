@@ -51,7 +51,7 @@ sub external_authentication {
                     $hash =~ s/^Basic\ //mx;
                     my $sessionfile = $sdir.'/'.$sessionid;
                     open(my $fh, '>', $sessionfile) or die('failed to open session file: '.$sessionfile.' '.$!);
-                    print $fh join('~~~', $hash, $address, $login);
+                    print $fh join('~~~', $hash, $address, $login), "\n";
                     Thruk::Utils::IO::close($fh, $sessionfile);
                     $success = $sessionid;
                 }
