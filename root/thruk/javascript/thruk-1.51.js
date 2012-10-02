@@ -2400,8 +2400,16 @@ Y8,            d8""""""""8b   88
   `"Y8888Y"' d8'          `8b 88888888888
 *******************************************************************************/
 
+var last_cal_hidden = undefined;
+var last_cal_id     = undefined;
 function show_cal(id) {
-  debug(id);
+  // make calendar toggle
+  var now = new Date;
+  if(last_cal_hidden != undefined && (now.getTime() - last_cal_hidden) < 150 && (last_cal_id == undefined || last_cal_id == id )) {
+    return;
+  }
+
+  last_cal_id   = id;
   var dateObj   = new Date();
   var date_val  = document.getElementById(id).value;
   var date_time = date_val.split(" ");
@@ -2430,7 +2438,8 @@ function show_cal(id) {
         } else {
             document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
         }
-        this.hide();
+        var now = new Date; last_cal_hidden = now.getTime();
+        jQuery('.DynarchCalendar-topCont').remove();
       },
       onBlur: function() {
         var newDateObj = new Date(this.selection.print('%Y'), (this.selection.print('%m')-1), this.selection.print('%d'), this.getHours(), this.getMinutes(), times[2]);
@@ -2440,6 +2449,8 @@ function show_cal(id) {
         } else {
             document.getElementById(id).value = Calendar.printDate(newDateObj, '%Y-%m-%d %H:%M:%S');
         }
+        var now = new Date; last_cal_hidden = now.getTime();
+        jQuery('.DynarchCalendar-topCont').remove();
       },
       onTimeChange: function(c, time) {
         time = time - time%5;
