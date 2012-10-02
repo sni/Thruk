@@ -69,25 +69,38 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi");
     }
 
-    my $login          = $c->request->parameters->{'login'}    || '';
-    my $pass           = $c->request->parameters->{'password'} || '';
-    my $submit         = $c->request->parameters->{'submit'}   || '';
-    my $referer        = $c->request->parameters->{'referer'}  || $c->stash->{'url_prefix'}.'thruk/';
+    if($c->req->query_keywords eq 'nocookie') {
+        Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies' );
+    }
+
+    my $login   = $c->request->parameters->{'login'}    || '';
+    my $pass    = $c->request->parameters->{'password'} || '';
+    my $submit  = $c->request->parameters->{'submit'}   || '';
+    my $referer = $c->request->parameters->{'referer'}  || $c->stash->{'url_prefix'}.'thruk/';
+    $referer    =~ s#^//#/#gmx; # strip double slashes
 
     if($submit ne '') {
-        my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'});
-        if($success) {
-            $c->res->cookies->{'thruk_auth'} = {
-                value => $success,
-                path  => $cookie_path,
-            };
-            $referer =~ s#^//#/#gmx; # strip double slashes
-            return $c->response->redirect($referer);
+        my $testcookie = $c->request->cookie('thruk_test');
+        $c->res->cookies->{'thruk_test'} = {
+            value   => '',
+            expires => '-1M',
+            path    => $cookie_path,
+        };
+        if(!defined $testcookie or !$testcookie->value) {
+            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?nocookie");
         } else {
-            $referer =~ s#^//#/#gmx; # strip double slashes
-            $c->log->info("login failed for $login on $referer");
-            Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
-            return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?".$referer);
+            my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'});
+            if($success) {
+                $c->res->cookies->{'thruk_auth'} = {
+                    value => $success,
+                    path  => $cookie_path,
+                };
+                return $c->response->redirect($referer);
+            } else {
+                $c->log->info("login failed for $login on $referer");
+                Thruk::Utils::set_message( $c, 'fail_message', 'login failed' );
+                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?".$referer);
+            }
         }
     }
     else {
@@ -95,6 +108,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     }
 
     Thruk::Utils::ssi_include($c, 'login');
+
+    # set test cookie
+    $c->res->cookies->{'thruk_test'} = {
+        value   => '****',
+        path    => $cookie_path,
+    };
 
     return 1;
 }
