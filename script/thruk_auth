@@ -22,7 +22,7 @@ eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 use File::Slurp;
-use Thruk;
+use Thruk::Config;
 use Thruk::Utils::CookieAuth;
 
 my $prefix    = '';
@@ -33,10 +33,11 @@ if(defined $ENV{'OMD_SITE'}) {
 }
 
 ##########################################################
-my $spath               = Thruk->config->{'tmp_path'}."/sessions";
-my $loginurl            = Thruk->config->{'cookie_auth_login_url'}             || $prefix."thruk/cgi-bin/login.cgi";
-my $sessiontimeout      = Thruk->config->{'cookie_auth_session_timeout'}       || 86400;
-my $sessioncachetimeout = Thruk->config->{'cookie_auth_session_cache_timeout'} || 5;
+my $config              = Thruk::Config::get_config();
+my $spath               = $config->{'tmp_path'}."/sessions";
+my $loginurl            = $config->{'cookie_auth_login_url'}             || $prefix."thruk/cgi-bin/login.cgi";
+my $sessiontimeout      = $config->{'cookie_auth_session_timeout'}       || 86400;
+my $sessioncachetimeout = $config->{'cookie_auth_session_cache_timeout'} || 5;
 my $sessioncache        = {};
 $loginurl               = "/redirect/".$loginurl;
 
@@ -50,10 +51,9 @@ while (<>) {
         my $cookies = $1;
         my $remote  = $2;
         my $path    = $3;
-        my $now     = time();
 
         # some urls must pass
-        if($path =~ m#^$urlprefix/(startup\.html|themes|javascript|cgi\-bin/login\.cgi|cgi\-bin/remote\.cgi|cgi\-bin/restricted\.cgi)#) {
+        if($path =~ m#^$urlprefix/(startup\.html|themes|javascript|cgi\-bin/(login|remote|restricted)\.cgi)#) {
             print "/pass/$path\n";
             next;
         }
@@ -66,6 +66,7 @@ while (<>) {
         my $auth = $1;
 
         # use session cache for a few seconds
+        my $now = time();
         if(defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} > $now - $sessioncachetimeout) {
             print "/loginok/", $sessioncache->{$auth}->{'login'} ,"/",$path,"\n";
             next;
@@ -97,7 +98,7 @@ while (<>) {
         #}
 
         # validate session data
-        if(!Thruk::Utils::CookieAuth::verify_basic_auth(Thruk->config, $basicauth, $user)) {
+        if(!Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user)) {
             unlink($sessionfile);
             print $loginurl, "?", $path, "\n";
             next;

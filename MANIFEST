@@ -12,6 +12,7 @@ debian/rules
 debian/thruk.lintian-overrides
 debian/thruk.logrotate
 debian/thruk.manpages
+dist.ini
 docs/FAQ.html
 docs/FAQ.txt
 docs/source/arch.graffle
@@ -64,6 +65,7 @@ lib/Thruk/Backend/Manager.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
 lib/Thruk/Backend/Provider/Mongodb.pm
+lib/Thruk/Config.pm
 lib/Thruk/Controller/avail.pm
 lib/Thruk/Controller/cmd.pm
 lib/Thruk/Controller/config.pm
@@ -854,6 +856,7 @@ support/thruk.spec
 support/thruk_cookie_auth.example
 support/thruk_local.conf.example
 t/001-app.t
+t/002-config.t
 t/010-Thruk-Utils.t
 t/011-Thruk-Backend.t
 t/020-Log-Log4perl.t

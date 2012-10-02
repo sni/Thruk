@@ -15,6 +15,7 @@ resources(
 requires 'parent'                                 => 0;     # required by Thruk
 requires 'JSON::XS'                               => 0;     # required by Thruk::View::JSON
 requires 'Config::General'                        => 0;     # required by Thruk::Utils
+requires 'Config::Any'                            => 0;     # required by Thruk::Config
 requires 'Class::Data::Inheritable'               => 0;     # required by Catalyst::Plugin::Thruk::RemoveNastyCharsFromHttpParam
 requires 'MRO::Compat'                            => 0;     # required by Catalyst::Plugin::Unicode::Encoding
 requires 'LWP::UserAgent'                         => 0;     # required by Thruk::Utils::CLI
@@ -37,6 +38,7 @@ requires 'Excel::Template::Plus'                  => 0;     # required by Thruk:
 requires 'Class::Accessor::Fast'                  => 0;     # required by Catalyst::Authentication::Credential::Thruk
 requires 'Catalyst'                               => 5.90010;
 requires 'Catalyst::Runtime'                      => 0;     # required by Thruk
+requires 'Catalyst::Utils'                        => 0;     # required by Thruk::Config
 requires 'Catalyst::Controller'                   => 0;     # required by Thruk::Controller::*
 requires 'Catalyst::Exception'                    => 0;     # required by Catalyst::View::GD
 requires 'Catalyst::ScriptRunner'                 => 0;     # required by Thruk::Utils::CLI

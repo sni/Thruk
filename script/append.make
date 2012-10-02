@@ -15,14 +15,15 @@ version:
 	date=`date "+%B %d, %Y"`; \
 	sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk.pm && \
 	debversion="$$newversion" && \
-	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk.pm script/thruk; debversion="$$newversion~$$branch"; fi && \
+	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk/Config.pm script/thruk; debversion="$$newversion~$$branch"; fi && \
 	dch --newversion "$$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"; \
 	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
 		sed -r "s/Version:\s*$(VERSION)/Version:       $$newversion/" -i support/thruk.spec && \
-		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i support/thruk.spec -i script/thruk && \
+		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i lib/Thruk/Config.pm -i support/thruk.spec -i script/thruk && \
 		sed -r "s/_$(VERSION)_/_$$newversion\_/" -i docs/THRUK_MANUAL.txt && \
 		sed -r "s/\-$(VERSION)\./-$$newversion\./" -i MANIFEST -i docs/THRUK_MANUAL.txt -i root/thruk/startup.html && \
 		sed -r "s/\-$(VERSION)\-/-$$newversion\-/" -i docs/THRUK_MANUAL.txt && \
+		sed -r "s/$(VERSION)/$$newversion/" -i dist.ini && \
 		if [ -e ".git" ]; then git="git"; else git=""; fi && \
 		$$git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).css plugins/plugins-available/mobile/root/mobile-$$newversion.css && \
 		$$git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).js plugins/plugins-available/mobile/root/mobile-$$newversion.js && \

@@ -38,6 +38,10 @@ sub read_navigation {
         $file = $ENV{'CATALYST_CONFIG'}.'/menu.conf'       if -e $ENV{'CATALYST_CONFIG'}.'/menu.conf';
         $file = $ENV{'CATALYST_CONFIG'}.'/menu_local.conf' if -e $ENV{'CATALYST_CONFIG'}.'/menu_local.conf';
     }
+    if(defined $ENV{'THRUK_CONFIG'}) {
+        $file = $ENV{'THRUK_CONFIG'}.'/menu.conf'       if -e $ENV{'THRUK_CONFIG'}.'/menu.conf';
+        $file = $ENV{'THRUK_CONFIG'}.'/menu_local.conf' if -e $ENV{'THRUK_CONFIG'}.'/menu_local.conf';
+    }
 
     _renew_navigation($c, $file);
 

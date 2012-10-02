@@ -1029,7 +1029,7 @@ sub get_pnp_url {
 
 =head2 expand_numeric_list
 
-  expand_numeric_list($c, $txt)
+  expand_numeric_list($txt, $c)
 
 return expanded list.
 ex.: converts '3,7-9,15' -> [3,7,8,9,15]
@@ -1037,8 +1037,8 @@ ex.: converts '3,7-9,15' -> [3,7,8,9,15]
 =cut
 
 sub expand_numeric_list {
-    my $c    = shift;
     my $txt  = shift;
+    my $c    = shift;
     my $list = {};
     return [] unless defined $txt;
 
@@ -1051,7 +1051,7 @@ sub expand_numeric_list {
             } elsif($block =~ m/^(\d+)$/gmx) {
                     $list->{$1} = 1;
             } else {
-                $c->log->error("'$block' is not a valid number or range");
+                $c->log->error("'$block' is not a valid number or range") if defined $c;
             }
         }
     }
