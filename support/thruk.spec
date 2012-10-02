@@ -13,9 +13,8 @@ Summary:       Monitoring Webinterface for Nagios/Icinga and Shinken
 AutoReqProv:   no
 Patch0:        0001-thruk.conf.patch
 Patch1:        0002-log4perl.conf.patch
-Patch2:        0003-thruk.pm.patch
-Patch3:        0004-thruk_fastcgi.pl.patch
-Patch4:        0005-thruk_script.patch
+Patch2:        0004-thruk_fastcgi.pl.patch
+Patch3:        0005-thruk_script.patch
 Requires(pre): shadow-utils
 Requires:      perl logrotate
 %if %{defined suse_version}
@@ -38,7 +37,6 @@ rm -rf %{buildroot}
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%patch4 -p1
 find . -name \*.orig -delete
 
 %build

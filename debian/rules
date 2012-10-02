@@ -19,7 +19,6 @@ build-stamp: configure-stamp
 	dh_testdir
 	patch -p1 < support/0001-thruk.conf.patch
 	patch -p1 < support/0002-log4perl.conf.patch
-	patch -p1 < support/0003-thruk.pm.patch
 	patch -p1 < support/0004-thruk_fastcgi.pl.patch
 	patch -p1 < support/0005-thruk_script.patch
 	find . -name \*.orig -delete
