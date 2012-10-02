@@ -398,8 +398,8 @@ sub _link_parent_hosts_and_services {
 
     return 0 if !defined $elt;
 
-    # avoid deep recursion, more than 3 levels isn't displayed anyway
-    return -1 if $level > 3;
+    # avoid deep recursion
+    return -1 if $level > 10;
 
     if(defined $elt->{'parent_dependencies'} and $elt->{'parent_dependencies'} ne '') {
         for my $parent (@{$elt->{'parent_dependencies'}}) {
