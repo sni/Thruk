@@ -1604,26 +1604,30 @@ function check_quick_command() {
 
     if(value == 1 ) { // reschedule
         jQuery.each(selectedServices, function(row_id, blah) {
-            cell           = document.getElementById(row_id + "_s_exec");
-            cell.innerHTML = '';
-            img            = document.createElement('img');
-            img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
-            img.height     = 20;
-            img.width      = 20;
-            img.title      = "This service is currently executing its servicecheck";
-            img.alt        = "This service is currently executing its servicecheck";
-            cell.appendChild(img);
+            var cell = document.getElementById(row_id + "_s_exec");
+            if(cell) {
+                cell.innerHTML = '';
+                img            = document.createElement('img');
+                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.height     = 20;
+                img.width      = 20;
+                img.title      = "This service is currently executing its servicecheck";
+                img.alt        = "This service is currently executing its servicecheck";
+                cell.appendChild(img);
+            }
         });
         jQuery.each(selectedHosts, function(row_id, blah) {
-            cell           = document.getElementById(row_id + "_h_exec");
-            cell.innerHTML = '';
-            img            = document.createElement('img');
-            img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
-            img.height     = 20;
-            img.width      = 20;
-            img.title      = "This host is currently executing its hostcheck";
-            img.alt        = "This host is currently executing its hostcheck";
-            cell.appendChild(img);
+            var cell = document.getElementById(row_id + "_h_exec");
+            if(cell) {
+                cell.innerHTML = '';
+                img            = document.createElement('img');
+                img.src        = url_prefix + 'thruk/themes/' + theme + '/images/waiting.gif';
+                img.height     = 20;
+                img.width      = 20;
+                img.title      = "This host is currently executing its hostcheck";
+                img.alt        = "This host is currently executing its hostcheck";
+                cell.appendChild(img);
+            }
         });
         var btn = document.getElementById('multi_cmd_submit_button');
         btn.value = "processing commands...";
