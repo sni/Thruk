@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.52     not yet released
           - added cookie based authentication and logout button
+          - Bug Fixes
+            - fixed scrolling to top on clicking calendar icon
 
 1.50     Thu Sep 27 09:21:20 CEST 2012
           - make menu sections foldable

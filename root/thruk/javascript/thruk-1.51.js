@@ -2447,7 +2447,9 @@ function show_cal(id) {
       }
   });
   cal.selection.set(Calendar.dateToInt(dateObj));
-  cal.popup(id);
+  var pos = ajax_search.get_coordinates(jQuery('#'+id)[0]);
+  cal.popup(id, "Br/ / /T/r");
+  jQuery('.DynarchCalendar-topCont').css('top', (pos[1]+20)+"px");
 }
 
 /*******************************************************************************

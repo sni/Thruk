@@ -77,11 +77,11 @@
     </tr>
     <tr id="row_start">
       <td class="statusOdd">Start:</td>
-      <td class="statusOdd"><a href="#" onclick="show_cal('start_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id)"></td>
+      <td class="statusOdd"><a href="#" onclick="show_cal('start_time'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:%S') %]" id="start_time" name="start_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_end">
       <td class="statusOdd">End:</td>
-      <td class="statusOdd"><a href="#" onclick="show_cal('end_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id)"></td>
+      <td class="statusOdd"><a href="#" onclick="show_cal('end_time'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:%S') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_downtime_options">
       <td class="statusOdd" valign="top">Options:</td>
@@ -125,7 +125,7 @@
     </tr>
     <tr id="row_expire">
       <td class="statusOdd">Expire:</td>
-      <td class="statusOdd"><a href="#" onclick="show_cal('expire_time')"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+expire_ack_duration, '%Y-%m-%d %H:%M:%S') %]" id="expire_time" name="expire_time" size="20" onkeyup="verify_time(this.id)"></td>
+      <td class="statusOdd"><a href="#" onclick="show_cal('expire_time'); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/calendar.png" width="16" height="16" alt="pick date" style="vertical-align: text-bottom"></a> <input type="text" value="[% format_date(date.now+expire_ack_duration, '%Y-%m-%d %H:%M:%S') %]" id="expire_time" name="expire_time" size="20" onkeyup="verify_time(this.id)"></td>
     </tr>
     <tr id="row_comment_options">
       <td class="statusOdd" valign="top">Options:</td>
