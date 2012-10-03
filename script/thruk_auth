@@ -25,6 +25,7 @@ use File::Slurp;
 use Thruk::Config;
 use Thruk::Utils::CookieAuth;
 
+$|            = 1;
 my $prefix    = '';
 my $urlprefix = "thruk";
 if(defined $ENV{'OMD_SITE'}) {
@@ -40,26 +41,27 @@ my $sessiontimeout      = $config->{'cookie_auth_session_timeout'}       || 8640
 my $sessioncachetimeout = $config->{'cookie_auth_session_cache_timeout'} || 5;
 my $sessioncache        = {};
 $loginurl               = "/redirect/".$loginurl;
-
-$| = 1;
+my $line_regex          = qr|^/(.*?)/(.*?)/____/(.*)$|mx;
+my $pass_regex          = qr#^$urlprefix/(startup\.html|themes|javascript|cgi\-bin/(login|remote|restricted)\.cgi)#mx;
+my $cookie_regex        = qr/thruk_auth=(\w+)/mx;
+my $session_split       = qr/~~~/mx;
+my $last_cache_clean    = time();
 
 ##########################################################
-while (<>) {
+while (<STDIN>) {
     chomp(my $in = $_);
 
-    if($in =~ m|^/(.*?)/(.*?)/____/(.*)$|mx) {
-        my $cookies = $1;
-        my $remote  = $2;
-        my $path    = $3;
+    if($in =~ $line_regex) {
+        my($cookies, $remote, $path) = ($1, $2, $3);
 
         # some urls must pass
-        if($path =~ m#^$urlprefix/(startup\.html|themes|javascript|cgi\-bin/(login|remote|restricted)\.cgi)#) {
+        if($path =~ $pass_regex) {
             print "/pass/$path\n";
             next;
         }
 
         # did we get a cookie
-        if($cookies eq '' or $cookies !~ m/thruk_auth=(\w+)/mx) {
+        if($cookies eq '' or $cookies !~ $cookie_regex) {
             print $loginurl."?".$path."\n";
             next;
         }
@@ -74,22 +76,22 @@ while (<>) {
 
         # does our sessionfile exist?
         my $sessionfile = $spath.'/'.$auth;
-        if(!-f $sessionfile) {
+        if(!-f $sessionfile or !defined $sessioncache->{$auth}) {
+            delete $sessioncache->{$auth};
             print $loginurl."?".$path."\n";
             next;
         }
 
         # session timeout reached?
-        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-           $atime,$mtime,$ctime,$blksize,$blocks) = stat($sessionfile);
-        if($mtime < $now - $sessiontimeout) {
+        if($sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
             unlink($sessionfile);
+            delete $sessioncache->{$auth};
             print $loginurl, "?", $path, "\n";
             next;
         }
 
         chomp(my $cont = read_file($sessionfile));
-        my($basicauth, $ip, $user) = split(/~~~/mx, $cont, 3);
+        my($basicauth, $ip, $user) = split($session_split, $cont, 3);
 
         # won't work in omds own apache mode
         #if($ip ne $remote) {
@@ -100,12 +102,15 @@ while (<>) {
         # validate session data
         if(!Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user)) {
             unlink($sessionfile);
+            delete $sessioncache->{$auth};
             print $loginurl, "?", $path, "\n";
             next;
         }
 
-        # touch session file and grant access
-        utime(undef, undef, $sessionfile);
+        # clean old session cache
+        clean_session_cache($sessioncache) if($last_cache_clean < $now - 3600);
+
+        # grant access
         $sessioncache->{$auth} = {
                 'login' => $user,
                 'time'  => $now,
@@ -116,4 +121,14 @@ while (<>) {
 
     # everything else redirects to login
     print $loginurl, "\n";
+}
+
+##########################################################
+sub clean_session_cache {
+    my($sessioncache) = @_;
+    my $clean_before = time() - $sessiontimeout - $sessioncachetimeout;
+    for my $key (keys %{$sessioncache}) {
+        delete $sessioncache->{$key} if $sessioncache->{$key}->{'time'} < $clean_before;
+    }
+    return;
 }
