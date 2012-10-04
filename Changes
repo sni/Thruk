@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.52     not yet released
           - added cookie based authentication and logout button
+          - added performance bar to host/service list
           - updated calendar popup
             - use mousewheel to change date / time
           - Bug Fixes

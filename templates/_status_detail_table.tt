@@ -1,4 +1,6 @@
-﻿    <table border="0" width="100%" class='status servicestatus' id="statusTable">
+﻿[% PROCESS custom_perf_bar_adjustments.tt %]
+
+    <table border="0" width="100%" class='status servicestatus' id="statusTable">
       <tr>
         <th class='status' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
         [% IF show_backends_in_table == 2 %]
@@ -97,27 +99,33 @@
               [% END %]
             </td>
           [% ELSE %]
+            <td align="left" class='[% serviceclass %]'
             [% IF s.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(s.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(s.long_plugin_output))) %]'><span class="has_long_plugin_output">[% escape_html(s.plugin_output) %]</span></td>
+                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(s.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(s.long_plugin_output))) %]'
                 [% ELSE %]
-                  <td align="left" class='[% serviceclass %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]'><span class="has_long_plugin_output">[% s.plugin_output %]</span></td>
+                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% s.host_display_name %] - [% s.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]'
                 [% END %]
-              [% ELSIF show_long_plugin_output == 'inline' %]
-                [% IF escape_html_tags %]
-                  <td align="left" class='[% serviceclass %]'>[% escape_html(s.plugin_output) %]<br>[% nl2br(escape_html(s.long_plugin_output)) %]</td>
-                [% ELSE %]
-                  <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]<br>[% nl2br(s.long_plugin_output) %]</td>
-                [% END %]
-              [% END %]
-            [% ELSE %]
-              [% IF escape_html_tags %]
-                <td align="left" class='[% serviceclass %]'>[% escape_html(s.plugin_output) %]</td>
-              [% ELSE %]
-                <td align="left" class='[% serviceclass %]'>[% s.plugin_output %]</td>
               [% END %]
             [% END %]
+            >
+            [% PROCESS _perfdata_table.tt write="true" state=s.state perfdata = s.perf_data check_command=s.check_command %]
+
+            [% IF s.long_plugin_output and show_long_plugin_output == 'popup' %]
+              [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(s.plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% s.plugin_output %]</span>[% END %]
+            [% ELSE %]
+              [% IF escape_html_tags %][% escape_html(s.plugin_output) %][% ELSE %][% s.plugin_output %][% END %]
+            [% END %]
+
+            [% IF s.long_plugin_output and show_long_plugin_output == 'inline' %]
+              [% IF escape_html_tags %]
+                <br>[% nl2br(escape_html(s.long_plugin_output)) %]
+              [% ELSE %]
+                <br>[% nl2br(s.long_plugin_output) %]
+              [% END %]
+            [% END %]
+            </td>
           [% END %]
       </tr>
       [% SET lasthost = s.host_name %]

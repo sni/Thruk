@@ -1296,6 +1296,20 @@ ex.:
   resource_file = /etc/nagios3/resource.cfg
 
 
+==== perf_bar_mode
+This option enables a performance bar inside the status/host list which
+create a graph from the performance data of the plugin output. Available
+options are 'first', 'all', 'worst' and 'off'.
+
+ all: graph all performance values available
+ first: graph only the first performance value
+ worst: graph only the graph for the worst state
+ off: graph no value at all
+
+ex.:
+
+  perf_bar_mode = first
+
 
 ==== shown_inline_pnp
 Show inline pnp graph if available. If a service or host has a

@@ -1,6 +1,8 @@
 ﻿[% USE date %]
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
+[% PROCESS custom_perf_bar_adjustments.tt %]
+
 [% SET peer_key      = service.peer_key %]
 [% SET program_start = pi_detail.$peer_key.program_start %]
 
@@ -162,7 +164,10 @@
                           </tr>
                           <tr>
                             <td class='dataVar' valign='top'>Performance Data:</td>
-                            <td class='dataVal'>[% service.perf_data %]</td>
+                            <td class='dataVal'>
+                                [% PROCESS _perfdata_table.tt write="true" state=service.state perfdata=service.perf_data check_command=service.check_command %]
+                                [% service.perf_data %]
+                            </td>
                           </tr>
                           <tr>
                             <td class='dataVar'>Current Attempt:</td>

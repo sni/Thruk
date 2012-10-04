@@ -936,6 +936,7 @@ templates/_message.tt
 templates/_notifications_log_line.tt
 templates/_overdiv.tt
 templates/_pager.tt
+templates/_perfdata_table.tt
 templates/_pnp_graph.tt
 templates/_service_command_box.tt
 templates/_service_command_box_full.tt
@@ -1078,6 +1079,7 @@ templates/config_hosts.tt
 templates/config_servicegroups.tt
 templates/config_services.tt
 templates/config_timeperiods.tt
+templates/custom_perf_bar_adjustments.tt
 templates/docs.tt
 templates/error.tt
 templates/excel/logs.tt

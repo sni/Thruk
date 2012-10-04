@@ -846,6 +846,22 @@ DIV.health_bar_bg {
 
 BODY#splashpage.loginpage DIV#mainfooter {
   margin-top: 30px;
+}
+
+
+DIV.perf_bar_bg {
+    height: 20px;
+    background: #C6C6C6;
+    float: right;
+    padding-right: 3px;
+}
+
+IMG.perf_bar {
+  height: 20px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  -webkit-border-radius: 3px;
+          border-radius: 3px;
 }/* navbar */
 div.navbar {
   background-color: black;

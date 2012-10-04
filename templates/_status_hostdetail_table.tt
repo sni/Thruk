@@ -1,4 +1,6 @@
-﻿      <table border="0" class='status' width="100%" id="hoststatusTable">
+﻿[% PROCESS custom_perf_bar_adjustments.tt %]
+
+      <table border="0" class='status' width="100%" id="hoststatusTable">
         <tr>
           [% IF show_backends_in_table == 2 %]
           <th class='status' nowrap>Site&nbsp;<a href='[% short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by site (ascending)' title='Sort by site (ascending)'></a><a href='[% short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 7) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by site (descending)' title='Sort by site (descending)'></a></th>
@@ -79,27 +81,33 @@
               [% END %]
             </td>
           [% ELSE %]
+            <td align="left" class='[% class %]'
             [% IF h.long_plugin_output and show_long_plugin_output != 'off' %]
               [% IF show_long_plugin_output == 'popup' %]
                 [% IF escape_html_tags %]
-                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(h.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(h.long_plugin_output))) %]'><span class="has_long_plugin_output">[% escape_html(h.plugin_output) %]</span></td>
+                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(escape_html(h.plugin_output)) %]<br>[% escape_html(nl2br(escape_html(h.long_plugin_output))) %]'
                 [% ELSE %]
-                  <td align="left" valign='middle' class='[% class %]' [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(h.plugin_output) %]<br>[% nl2br(escape_html(h.long_plugin_output)) %]'><span class="has_long_plugin_output">[% h.plugin_output %]</span></td>
+                  [% info_popup_event_type %]="return overlib(this.abbr,CAPTION,'[% h.display_name %]',WIDTH,600,[% c.config.info_popup_options %]);" abbr='[% escape_html(h.plugin_output) %]<br>[% nl2br(escape_html(h.long_plugin_output)) %]'
                 [% END %]
-              [% ELSIF show_long_plugin_output == 'inline' %]
-                [% IF escape_html_tags %]
-                  <td align="left" class='[% class %]'>[% escape_html(h.plugin_output) %]<br>[% nl2br(escape_html(h.long_plugin_output)) %]</td>
-                [% ELSE %]
-                  <td align="left" class='[% class %]'>[% h.plugin_output %]<br>[% nl2br(h.long_plugin_output) %]</td>
-                [% END %]
-              [% END %]
-            [% ELSE %]
-              [% IF escape_html_tags %]
-                <td  valign='middle' align="left" class='[% class %]'>[% escape_html(h.plugin_output) %]</td>
-              [% ELSE %]
-                <td  valign='middle' align="left" class='[% class %]'>[% h.plugin_output %]</td>
               [% END %]
             [% END %]
+            >
+            [% PROCESS _perfdata_table.tt write="true" state=h.state perfdata = h.perf_data check_command=h.check_command %]
+
+            [% IF h.long_plugin_output and show_long_plugin_output == 'popup' %]
+              [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(h.plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% h.plugin_output %]</span>[% END %]
+            [% ELSE %]
+              [% IF escape_html_tags %][% escape_html(h.plugin_output) %][% ELSE %][% h.plugin_output %][% END %]
+            [% END %]
+
+            [% IF h.long_plugin_output and show_long_plugin_output == 'inline' %]
+              [% IF escape_html_tags %]
+                <br>[% nl2br(escape_html(h.long_plugin_output)) %]
+              [% ELSE %]
+                <br>[% nl2br(h.long_plugin_output) %]
+              [% END %]
+            [% END %]
+            </td>
           [% END %]
         </tr>
         [% END %]

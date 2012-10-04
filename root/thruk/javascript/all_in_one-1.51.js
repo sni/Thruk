@@ -809,6 +809,81 @@ function add_cron_row(tbl_id) {
     tblBody.insertBefore(newRow, currentLastRow);
 }
 
+/* write/return table with performance data */
+function perf_table(write, state, perfdata, check_command) {
+    var matches   = perfdata.match(/([^\s]+|'[\w\s]+')=([^\s]*)/gi);
+    var result    = '';
+    var perf_data = [];
+    for(var nr in matches) {
+        var tmp = matches[nr].split(/=/);
+        tmp[1] += ';;;;';
+        var data = tmp[1].match(/^([\d\.\-]+)([\w]{0,2});([\d\.]*);([\d\.]*);([\d\.]*);([\d\.]*)/);
+        perf_data.push({
+            key:  tmp[0],
+            perf: tmp[1],
+            val:  (data != null && data[1] != '') ? parseFloat(data[1]) : '',
+            unit: data != null ? data[2] : '',
+            warn: (data != null && data[3] != '') ? parseFloat(data[3]) : '',
+            crit: (data != null && data[4] != '') ? parseFloat(data[4]) : '',
+            min:  (data != null && data[5] != '') ? parseFloat(data[5]) : '',
+            max:  (data != null && data[6] != '') ? parseFloat(data[6]) : ''
+        });
+    }
+    var res = parse_perf_data(check_command, state, perf_data);
+    if(res != null) {
+        for(var nr in res.reverse()) {
+            graph = res[nr];
+            if(graph != undefined) {
+                result += '<div class="perf_bar_bg notclickable" style="width:'+graph.div_width+'px;" title="'+graph.title+'"><img class="perf_bar" src="' + url_prefix + 'thruk/themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'"><\/div>';
+            }
+        }
+    }
+    if(write) {
+        document.write(result);
+    }
+    return result;
+}
+
+/* return human readable perfdata */
+function parse_perf_data(check_command, state, perfdata) {
+    var size   = 75;
+    var result = [];
+    var worst_graphs = {};
+    for(var nr in perfdata) {
+        var d = perfdata[nr];
+        if(d.max == '' && d.crit != '') { d.max = d.crit; }
+        if(d.max == '' && d.warn != '') { d.max = d.warn; }
+        if(d.val != '' && d.max != '') {
+            var perc       = (Math.abs(d.val) / d.max * 100).toFixed(2);
+            if(perc < 5) { perc = 5; }
+            var pic = 'thermok.png';
+            if(state == 1) { var pic = 'thermwarn.png'; }
+            if(state == 2) { var pic = 'thermcrit.png'; }
+            perc = Math.round(perc / 100 * size);
+            var graph = {
+                title:     d.key + ': ' + parseInt(d.val) + d.unit + ' / ' + parseInt(d.max) + d.unit,
+                div_width: size,
+                img_width: perc,
+                pic:       pic
+            };
+            if(worst_graphs[state] == undefined) { worst_graphs[state] = {}; }
+            worst_graphs[state][perc] = graph;
+            result.push(graph);
+        }
+    }
+    perf_bar_mode = custom_perf_bar_adjustments(perf_bar_mode, result, check_command, state, perfdata);
+    if(perf_bar_mode == 'worst') {
+        if(keys(worst_graphs).length == 0) { return([]); }
+        var sortedkeys   = keys(worst_graphs).sort().reverse();
+        var sortedgraphs = keys(worst_graphs[sortedkeys[0]]).sort().reverse();
+        return([worst_graphs[sortedkeys[0]][sortedgraphs[0]]]);
+    }
+    if(perf_bar_mode == 'first') {
+        return([result[0]]);
+    }
+    return result;
+}
+
 /*******************************************************************************
   ,ad8888ba,  88b           d88 88888888ba,
  d8"'    `"8b 888b         d888 88      `"8b
