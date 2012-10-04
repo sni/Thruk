@@ -236,7 +236,7 @@ sub get_config {
     for my $file (@files) {
         for my $key (keys %{$configs{$file}}) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
-                $config{$key} = { %{$configs{$file}->{$key}}, %{$config{$key}} };
+                $config{$key} = { %{$config{$key}}, %{$configs{$file}->{$key}} };
             } else {
                 $config{$key} = $configs{$file}->{$key};
             }

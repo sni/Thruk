@@ -27,4 +27,4 @@ for my $key (qw/cgi_cfg_stat
     delete $config->{$key};
 }
 
-is_deeply(Thruk->config, $config, 'config matches');
+is_deeply($config, Thruk->config, 'config matches');
