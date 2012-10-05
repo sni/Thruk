@@ -3238,7 +3238,13 @@ function set_png_img(start, end, id) {
     }
 
     if(id) {
-        window.location.hash = "#" + id + "/" + start + "/" + end;
+        // replace history otherwise we have to press back twice
+        var newhash = "#" + id + "/" + start + "/" + end;
+        if (history.replaceState) {
+            history.replaceState({}, "", '#'+newhash);
+        } else {
+            window.location.replace('#'+newhash);
+        }
     }
 
     // reset reload timer for page
