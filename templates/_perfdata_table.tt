@@ -1,4 +1,4 @@
-[% IF perf_bar_mode != 'off' %]
+﻿[% IF perf_bar_mode != 'off' %]
 <script type="text/javascript">
 <!--
 perf_table([% write %], [% state %],"[% escape_quotes(perfdata) %]", "[% escape_quotes(check_command) %]");
