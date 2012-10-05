@@ -751,6 +751,24 @@ ex.:
   allowed_frame_links = https://wiki.my-company.com
 
 
+==== initial_menu_state
+
+Set initial menu state.
+
+  closed  => 0
+  open    => 1
+
+ex.:
+
+  <initial_menu_state>
+    General        = 1
+    Current_Status = 1
+    Reports        = 1
+    System         = 1
+    Bookmarks      = 1
+  </initial_menu_state>
+
+
 ==== cgi_cfg
 
 The path to your cgi.cfg. See <<_cgi_cfg_2,cgi.cfg>> for details.
@@ -2021,4 +2039,3 @@ set downtimes automatically, schedule reports or change the objects
 of your monitoring core configuration.
 
 See http://thruk.org/api/Thruk/Utils/CLI.html for details and examples.
-

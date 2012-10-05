@@ -22,7 +22,7 @@
     jQuery(document).ready(function() {
         // make them toggle
         jQuery('DIV.navsectiontitle').click(function() {
-            var title = this.innerHTML.replace(/<[^>]+>/g, '');
+            var title = this.innerHTML.replace(/<[^>]+>/g, '').toLowerCase().replace(/ /g, '_');
             jQuery(this).parent().children("DIV.navsectionlinks").slideToggle('fast', function() {
                 menuState[title] = this.style.display == 'none' ? 0 : 1;
                 cookieSave('thruk_side', toQueryString(menuState));

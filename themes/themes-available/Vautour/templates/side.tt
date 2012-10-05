@@ -27,10 +27,10 @@
 
 
     [% FOREACH section = navigation %]
-    [% section_name = section.name %]
+      [% cookie_section_name = section.name.replace(' ', '_') | lower %]
       <div>
       <div class="navsectiontitle clickable"><h2>[% section.name %]</h2></div>
-      <div class="navsectionlinks"[% IF menu_states.exists(section_name) && menu_states.$section_name == 0 %] style="display:none;"[% END %]>
+      <div class="navsectionlinks"[% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
       <ul>
       [% FOREACH link = section.links %]
         [%+ IF link.href %]

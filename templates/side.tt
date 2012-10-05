@@ -25,10 +25,10 @@
     <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
 
     [% FOREACH section = navigation %]
-    [% section_name = section.name %]
+    [% cookie_section_name = section.name.replace(' ', '_') | lower %]
     <div class="navsection">
       <div class="navsectiontitle clickable">[% section.name %]</div>
-      <div class="navsectionlinks"[% IF menu_states.exists(section_name) && menu_states.$section_name == 0 %] style="display:none;"[% END %]>
+      <div class="navsectionlinks"[% IF menu_states.exists(cookie_section_name) && menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
       [%+ FOREACH link = section.links %]
         <ul class="navsectionlinks">
           [%+ IF link.href %]

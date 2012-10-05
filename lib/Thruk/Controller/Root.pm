@@ -129,14 +129,23 @@ sub begin : Private {
 
     # menu cookie set?
     my $menu_states = {};
+    for my $key (keys %{$c->config->{'initial_menu_state'}}) {
+        my $val = $c->config->{'initial_menu_state'}->{$key};
+        $key = lc $key;
+        $key =~ s/\ /_/gmx;
+        $menu_states->{$key} = $val;
+    }
     if( defined $c->request->cookie('thruk_side') ) {
         my $cookie_val = $c->request->cookie('thruk_side')->{'value'};
         if(ref $cookie_val ne 'ARRAY') { $cookie_val = [$cookie_val]; }
         for my $state (@{$cookie_val}) {
             my($k,$v) = split(/=/mx,$state,2);
+            $k = lc $k;
+            $k =~ s/\ /_/gmx;
             $menu_states->{$k} = $v;
         }
     }
+
     $c->stash->{'menu_states'}      = $menu_states;
     $c->stash->{'menu_states_json'} = encode_json($menu_states);
 
