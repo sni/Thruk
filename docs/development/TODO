@@ -18,9 +18,6 @@ general:
     - support more macros
     - include comments in export
 
-extinfo:
-    - finish performance data on extinfo type 4
-
 config:
     - add missing values
     - add excel export button
