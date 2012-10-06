@@ -48,7 +48,7 @@
         var patt   = new RegExp('^' + get_host(), 'gi');
         newloc     = newloc.replace(patt, '');
         if('#'+newloc != window.location.hash) {
-            debug('saved -> #'+newloc);
+            //debug('saved -> #'+newloc);
             if (history.replaceState) {
                 history.replaceState({}, "", '#'+newloc);
             } else {
@@ -72,7 +72,7 @@
     values.pop();
     var last   = values.pop();
     if(last == 'thruk' && newurl != 'main.html' && newurl != '') {
-        debug('go -> '+ newurl);
+        //debug('go -> '+ newurl);
         if(newurl.match(/^\w+:\/\//)) {
             framesrc = newurl;
         }
@@ -89,7 +89,7 @@
         nohashchange = 1;
         var newurl = e.newURL;
         newurl     = newurl.replace(/^.*#/, '');
-        debug('hashchange -> ' + newurl);
+        //debug('hashchange -> ' + newurl);
         window.frames[1].location.replace(newurl);
       }
       nohashchange = 0;

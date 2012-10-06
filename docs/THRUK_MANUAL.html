@@ -9757,10 +9757,11 @@ peer config.</p></div>
 <h4 id="_perf_bar_mode">perf_bar_mode</h4>
 <div class="paragraph"><p>This option enables a performance bar inside the status/host list which
 create a graph from the performance data of the plugin output. Available
-options are <em>first</em>, <em>all</em>, <em>worst</em> and <em>off</em>.</p></div>
+options are <em>match</em>, <em>first</em>, <em>all</em>, <em>worst</em> and <em>off</em>.</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>all: graph all performance values available
+<pre><tt>match: try to set graph which matches the output
+all: graph all performance values available
 first: graph only the first performance value
 worst: graph only the graph for the worst state
 off: graph no value at all</tt></pre>
@@ -9768,7 +9769,7 @@ off: graph no value at all</tt></pre>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>perf_bar_mode = first</tt></pre>
+<pre><tt>perf_bar_mode = match</tt></pre>
 </div></div>
 <h4 id="_shown_inline_pnp">shown_inline_pnp</h4>
 <div class="paragraph"><p>Show inline pnp graph if available. If a service or host has a
@@ -10706,7 +10707,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-10-05 16:58:28 CEST
+Last updated 2012-10-06 14:04:17 CEST
 </div>
 </div>
 </body>

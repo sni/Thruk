@@ -1299,8 +1299,9 @@ ex.:
 ==== perf_bar_mode
 This option enables a performance bar inside the status/host list which
 create a graph from the performance data of the plugin output. Available
-options are 'first', 'all', 'worst' and 'off'.
+options are 'match', 'first', 'all', 'worst' and 'off'.
 
+ match: try to set graph which matches the output
  all: graph all performance values available
  first: graph only the first performance value
  worst: graph only the graph for the worst state
@@ -1308,7 +1309,7 @@ options are 'first', 'all', 'worst' and 'off'.
 
 ex.:
 
-  perf_bar_mode = first
+  perf_bar_mode = match
 
 
 ==== shown_inline_pnp

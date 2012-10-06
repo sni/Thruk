@@ -110,7 +110,7 @@
               [% END %]
             [% END %]
             >
-            [% PROCESS _perfdata_table.tt write="true" state=s.state perfdata = s.perf_data check_command=s.check_command %]
+            [% PROCESS _perfdata_table.tt write="true" state=s.state plugin_output=s.plugin_output perfdata=s.perf_data check_command=s.check_command %]
 
             [% IF s.long_plugin_output and show_long_plugin_output == 'popup' %]
               [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(s.plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% s.plugin_output %]</span>[% END %]

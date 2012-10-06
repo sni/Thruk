@@ -165,7 +165,7 @@
                           <tr>
                             <td class='dataVar' valign='top'>Performance Data:</td>
                             <td class='dataVal'>
-                                [% PROCESS _perfdata_table.tt write="true" state=service.state perfdata=service.perf_data check_command=service.check_command %]
+                                [% PROCESS _perfdata_table.tt write="true" state=service.state plugin_output=service.plugin_output perfdata=service.perf_data check_command=service.check_command %]
                                 [% service.perf_data %]
                             </td>
                           </tr>

@@ -809,8 +809,18 @@ function add_cron_row(tbl_id) {
     tblBody.insertBefore(newRow, currentLastRow);
 }
 
+/*******************************************************************************
+ * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
+ * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b
+ * 88      ,8P 88          88      ,8P 88          88        `8b    d8'`8b      88      d8'`8b
+ * 88aaaaaa8P' 88aaaaa     88aaaaaa8P' 88aaaaa     88         88   d8'  `8b     88     d8'  `8b
+ * 88""""""'   88"""""     88""""88'   88"""""     88         88  d8YaaaaY8b    88    d8YaaaaY8b
+ * 88          88          88    `8b   88          88         8P d8""""""""8b   88   d8""""""""8b
+ * 88          88          88     `8b  88          88      .a8P d8'        `8b  88  d8'        `8b
+ * 88          88888888888 88      `8b 88          88888888Y"' d8'          `8b 88 d8'          `8b
+*******************************************************************************/
 /* write/return table with performance data */
-function perf_table(write, state, perfdata, check_command) {
+function perf_table(write, state, plugin_output, perfdata, check_command) {
     var matches   = perfdata.match(/([^\s]+|'[\w\s]+')=([^\s]*)/gi);
     var result    = '';
     var perf_data = [];
@@ -829,7 +839,7 @@ function perf_table(write, state, perfdata, check_command) {
             max:  (data != null && data[6] != '') ? parseFloat(data[6]) : ''
         });
     }
-    var res = parse_perf_data(check_command, state, perf_data);
+    var res = perf_parse_data(check_command, state, plugin_output, perf_data);
     if(res != null) {
         for(var nr in res.reverse()) {
             graph = res[nr];
@@ -845,7 +855,7 @@ function perf_table(write, state, perfdata, check_command) {
 }
 
 /* return human readable perfdata */
-function parse_perf_data(check_command, state, perfdata) {
+function perf_parse_data(check_command, state, plugin_output, perfdata) {
     var size   = 75;
     var result = [];
     var worst_graphs = {};
@@ -861,27 +871,84 @@ function parse_perf_data(check_command, state, perfdata) {
             if(state == 2) { var pic = 'thermcrit.png'; }
             perc = Math.round(perc / 100 * size);
             var graph = {
-                title:     d.key + ': ' + parseInt(d.val) + d.unit + ' / ' + parseInt(d.max) + d.unit,
+                title:     d.key + ': ' + perf_reduce(d.val, d.unit) + ' of ' + perf_reduce(d.max, d.unit),
                 div_width: size,
                 img_width: perc,
-                pic:       pic
+                pic:       pic,
+                field:     d.key,
+                val:       d.val
             };
             if(worst_graphs[state] == undefined) { worst_graphs[state] = {}; }
             worst_graphs[state][perc] = graph;
             result.push(graph);
         }
     }
-    perf_bar_mode = custom_perf_bar_adjustments(perf_bar_mode, result, check_command, state, perfdata);
-    if(perf_bar_mode == 'worst') {
+
+    var local_perf_bar_mode = custom_perf_bar_adjustments(perf_bar_mode, result, check_command, state, plugin_output, perfdata);
+
+    if(local_perf_bar_mode == 'worst') {
         if(keys(worst_graphs).length == 0) { return([]); }
         var sortedkeys   = keys(worst_graphs).sort().reverse();
         var sortedgraphs = keys(worst_graphs[sortedkeys[0]]).sort().reverse();
         return([worst_graphs[sortedkeys[0]][sortedgraphs[0]]]);
     }
-    if(perf_bar_mode == 'first') {
+    if(local_perf_bar_mode == 'match') {
+        // some hardcoded relations
+        if(check_command == 'check_mk-cpu.loads') { return(perf_get_graph_from_result('load15', result)); }
+        var matches = plugin_output.match(/([\d\.]+)/g);
+        if(matches != null) {
+            for(var nr in matches) {
+                var val = matches[nr];
+                for(var nr2 in result) {
+                    if(result[nr2].val == val) {
+                        return([result[nr2]]);
+                    }
+                }
+            }
+        }
+        // nothing matched, use first
+        local_perf_bar_mode = 'first';
+    }
+    if(local_perf_bar_mode == 'first') {
         return([result[0]]);
     }
     return result;
+}
+
+/* try to get only a specific key form our result */
+function perf_get_graph_from_result(key, result) {
+    for(var nr in result) {
+        if(result[nr].field == key) {
+            return([result[nr]]);
+        }
+    }
+    return(result);
+}
+
+/* try to make a smaller number */
+function perf_reduce(value, unit) {
+    if(value < 1000) { return(''+perf_round(value)+unit); }
+    if(value > 1500 && unit == 'KB') {
+        value = value / 1024;
+        unit  = 'MB';
+    }
+    if(value > 1500 && unit == 'MB') {
+        value = value / 1024;
+        unit  = 'GB';
+    }
+    if(value > 1500 && unit == 'ms') {
+        value = value / 1000;
+        unit  = 's';
+    }
+    return(''+perf_round(value)+unit);
+}
+
+/* round value to human readable */
+function perf_round(value) {
+    if(value >= 100) { return(value.toFixed(0)); }
+    if(value < 100)  { return(value.toFixed(1)); }
+    if(value <  10)  { return(value.toFixed(2)); }
+    return(value);
 }
 
 /*******************************************************************************
@@ -1836,7 +1903,7 @@ on status / host details page
 
 /* toggle the visibility of the filter pane */
 function toggleFilterPane(prefix) {
-  debug("toggleFilterPane(): " + toggleFilterPane.caller);
+  //debug("toggleFilterPane(): " + toggleFilterPane.caller);
   var pane = document.getElementById(prefix+'all_filter_table');
   var img  = document.getElementById(prefix+'filter_button');
   if(pane.style.display == 'none') {
@@ -3283,8 +3350,9 @@ var ajax_search = {
 *******************************************************************************/
 
 function set_png_img(start, end, id) {
+    id=id.replace(/^#/g, '');
     var newUrl = pnp_url + "&start=" + start + "&end=" + end;
-    debug(newUrl);
+    //debug(newUrl);
 
     jQuery('#pnpwaitimg').css('display', 'block');
     jQuery('#pnpimg').attr('src', newUrl);
@@ -3316,9 +3384,9 @@ function set_png_img(start, end, id) {
         // replace history otherwise we have to press back twice
         var newhash = "#" + id + "/" + start + "/" + end;
         if (history.replaceState) {
-            history.replaceState({}, "", '#'+newhash);
+            history.replaceState({}, "", newhash);
         } else {
-            window.location.replace('#'+newhash);
+            window.location.replace(newhash);
         }
     }
 

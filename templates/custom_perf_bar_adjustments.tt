@@ -1,7 +1,7 @@
 ﻿[% IF perf_bar_mode != 'off' %]
 <script type="text/javascript">
 <!--
-function custom_perf_bar_adjustments(perf_bar_mode, graphs, check_command, state, perfdata) {
+function custom_perf_bar_adjustments(perf_bar_mode, graphs, check_command, state, plugin_output, perfdata) {
     /* you may copy this template in your my_templates folder and adjust
      * all graphs here.
      * change graphs directly in the graphs list
