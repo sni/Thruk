@@ -852,7 +852,7 @@ DIV.perf_bar_bg {
     height: 19px;
     background: #C6C6C6;
     float: right;
-    padding-right: 3px;
+    margin-right: 3px;
     border-top: 1px solid #999999;
     border-right: 1px solid #999999;
     -webkit-border-radius: 3px;
@@ -866,6 +866,19 @@ IMG.perf_bar {
   margin-top: -1px;
   -webkit-border-radius: 3px;
           border-radius: 3px;
+  position: absolute;
+}
+
+DIV.perf_bar_warn {
+  border: 0;
+  border-right: 1px solid #DEDC10;
+  position: absolute;
+}
+
+DIV.perf_bar_crit {
+  border: 0;
+  border-right: 1px solid #B36969;
+  position: absolute;
 }
 #currentversioninfo {
   font-size:14px;

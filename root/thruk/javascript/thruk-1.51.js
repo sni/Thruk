@@ -841,7 +841,15 @@ function perf_table(write, state, plugin_output, perfdata, check_command) {
         for(var nr in res.reverse()) {
             graph = res[nr];
             if(graph != undefined) {
-                result += '<div class="perf_bar_bg notclickable" style="width:'+graph.div_width+'px;" title="'+graph.title+'"><img class="perf_bar" src="' + url_prefix + 'thruk/themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'"><\/div>';
+                result += '<div class="perf_bar_bg notclickable" style="width:'+graph.div_width+'px;" title="'+graph.title+'">';
+                if(graph.warn_width != null) {
+                    result += '<div class="perf_bar_warn notclickable" style="width:'+graph.warn_width+'px;">&nbsp;<\/div>';
+                }
+                if(graph.crit_width != null) {
+                    result += '<div class="perf_bar_crit notclickable" style="width:'+graph.crit_width+'px;">&nbsp;<\/div>';
+                }
+                result += '<img class="perf_bar" src="' + url_prefix + 'thruk/themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'">';
+                result += '<\/div>';
             }
         }
     }
@@ -867,13 +875,19 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
             if(state == 1) { var pic = 'thermwarn.png'; }
             if(state == 2) { var pic = 'thermcrit.png'; }
             perc = Math.round(perc / 100 * size);
+            var warn_perc = null;
+            if(d.warn != '' && d.warn < d.max) { warn_perc = Math.round((Math.abs(d.warn) / d.max * 100) / 100 * size); if(warn_perc == size) {warn_perc = null;}; }
+            var crit_perc = null;
+            if(d.crit != '' && d.crit < d.max) { crit_perc = Math.round((Math.abs(d.crit) / d.max * 100) / 100 * size); if(crit_perc == size) {crit_perc = null;}; if(crit_perc == warn_perc) {warn_perc = null;}; }
             var graph = {
-                title:     d.key + ': ' + perf_reduce(d.val, d.unit) + ' of ' + perf_reduce(d.max, d.unit),
-                div_width: size,
-                img_width: perc,
-                pic:       pic,
-                field:     d.key,
-                val:       d.val
+                title:      d.key + ': ' + perf_reduce(d.val, d.unit) + ' of ' + perf_reduce(d.max, d.unit),
+                div_width:  size,
+                img_width:  perc,
+                pic:        pic,
+                field:      d.key,
+                val:        d.val,
+                warn_width: warn_perc,
+                crit_width: crit_perc
             };
             if(worst_graphs[state] == undefined) { worst_graphs[state] = {}; }
             worst_graphs[state][perc] = graph;
