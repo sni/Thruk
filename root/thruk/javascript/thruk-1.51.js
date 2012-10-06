@@ -942,6 +942,7 @@ function perf_reduce(value, unit) {
 
 /* round value to human readable */
 function perf_round(value) {
+    if((value - parseInt(value)) == 0) { return(value); }
     if(value >= 100) { return(value.toFixed(0)); }
     if(value < 100)  { return(value.toFixed(1)); }
     if(value <  10)  { return(value.toFixed(2)); }
