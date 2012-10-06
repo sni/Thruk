@@ -135,8 +135,10 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
             }
             $c->stash->{'json'}->{'data'} = $data;
             my $program_starts = {};
-            for my $key (keys %{$c->stash->{'pi_detail'}}) {
-                $program_starts->{$key} = $c->stash->{'pi_detail'}->{$key}->{'program_start'};
+            if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH') {
+                for my $key (keys %{$c->stash->{'pi_detail'}}) {
+                    $program_starts->{$key} = $c->stash->{'pi_detail'}->{$key}->{'program_start'};
+                }
             }
             $c->stash->{'json'}->{program_starts}    = $program_starts;
             $c->stash->{'json'}->{connection_status} = $connection_status;
