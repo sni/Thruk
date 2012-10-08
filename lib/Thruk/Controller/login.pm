@@ -72,6 +72,12 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($c->req->query_keywords eq 'nocookie') {
         Thruk::Utils::set_message( $c, 'fail_message', 'login not possible without accepting cookies' );
     }
+    if($c->req->query_keywords eq 'expired') {
+        Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
+    }
+    if($c->req->query_keywords eq 'invalid') {
+        Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
+    }
 
     my $login   = $c->request->parameters->{'login'}    || '';
     my $pass    = $c->request->parameters->{'password'} || '';

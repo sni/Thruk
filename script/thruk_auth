@@ -78,7 +78,7 @@ while (<STDIN>) {
         my $sessionfile = $spath.'/'.$auth;
         if(!-f $sessionfile) {
             delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
-            print $loginurl."?".$path."\n";
+            print $loginurl."?expired&".$path."\n";
             next;
         }
 
@@ -86,7 +86,7 @@ while (<STDIN>) {
         if(defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
             unlink($sessionfile);
             delete $sessioncache->{$auth};
-            print $loginurl, "?", $path, "\n";
+            print $loginurl, "?expired&", $path, "\n";
             next;
         }
 
@@ -103,7 +103,7 @@ while (<STDIN>) {
         if(!Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user)) {
             unlink($sessionfile);
             delete $sessioncache->{$auth};
-            print $loginurl, "?", $path, "\n";
+            print $loginurl, "?invalid&", $path, "\n";
             next;
         }
 
