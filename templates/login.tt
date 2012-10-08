@@ -54,6 +54,8 @@
       top.location.href = '[% loginurl %]?'+ref;
     } else {
       var ref = window.location.search + window.location.hash;
+      ref = ref.replace(/^\?expired\&/, '?');
+      ref = ref.replace(/^\?invalid\&/, '?');
       ref = ref.replace(/^\?/, '/');
       jQuery('#referer').val(ref);
     }
