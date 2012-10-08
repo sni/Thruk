@@ -76,14 +76,14 @@ while (<STDIN>) {
 
         # does our sessionfile exist?
         my $sessionfile = $spath.'/'.$auth;
-        if(!-f $sessionfile or !defined $sessioncache->{$auth}) {
-            delete $sessioncache->{$auth};
+        if(!-f $sessionfile) {
+            delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
             print $loginurl."?".$path."\n";
             next;
         }
 
         # session timeout reached?
-        if($sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
+        if(defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
             unlink($sessionfile);
             delete $sessioncache->{$auth};
             print $loginurl, "?", $path, "\n";
