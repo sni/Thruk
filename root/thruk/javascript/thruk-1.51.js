@@ -836,17 +836,21 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
             max:  (data != null && data[6] != '') ? parseFloat(data[6]) : ''
         });
     }
+    var cls = 'notclickable';
+    if(pnp_url != '') {
+        cls = 'clickable';
+    }
     var res = perf_parse_data(check_command, state, plugin_output, perf_data);
     if(res != null) {
         for(var nr in res.reverse()) {
             graph = res[nr];
             if(graph != undefined) {
-                result += '<div class="perf_bar_bg notclickable" style="width:'+graph.div_width+'px;" title="'+graph.title+'">';
+                result += '<div class="perf_bar_bg '+cls+'" style="width:'+graph.div_width+'px;" title="'+graph.title+'">';
                 if(graph.warn_width != null) {
-                    result += '<div class="perf_bar_warn notclickable" style="width:'+graph.warn_width+'px;">&nbsp;<\/div>';
+                    result += '<div class="perf_bar_warn '+cls+'" style="width:'+graph.warn_width+'px;">&nbsp;<\/div>';
                 }
                 if(graph.crit_width != null) {
-                    result += '<div class="perf_bar_crit notclickable" style="width:'+graph.crit_width+'px;">&nbsp;<\/div>';
+                    result += '<div class="perf_bar_crit '+cls+'" style="width:'+graph.crit_width+'px;">&nbsp;<\/div>';
                 }
                 result += '<img class="perf_bar" src="' + url_prefix + 'thruk/themes/' +  theme + '/images/' + graph.pic + '" style="width:'+ graph.img_width +'px;" title="'+graph.title+'">';
                 result += '<\/div>';
