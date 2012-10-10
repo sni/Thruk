@@ -92,7 +92,8 @@
               [% END %]
             [% END %]
             >
-            [% PROCESS _perfdata_table.tt write="true" state=h.state plugin_output=h.plugin_output perfdata = h.perf_data check_command=h.check_command %]
+            [% pnp_url = get_pnp_url(c, h, 1) %]
+            [% PROCESS _perfdata_table.tt write="true" state=h.state plugin_output=h.plugin_output perfdata = h.perf_data check_command=h.check_command hst=h.name svc="_HOST_" %]
 
             [% IF h.long_plugin_output and show_long_plugin_output == 'popup' %]
               [% IF escape_html_tags %]<span class="has_long_plugin_output">[% escape_html(h.plugin_output) %]</span>[% ELSE %]<span class="has_long_plugin_output">[% h.plugin_output %]</span>[% END %]

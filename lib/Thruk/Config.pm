@@ -72,6 +72,7 @@ our %config = ('name'                   => 'Thruk',
                                           'logline_icon'        => \&Thruk::Utils::Filter::logline_icon,
                                           'calculate_first_notification_delay_remaining' => \&Thruk::Utils::Filter::calculate_first_notification_delay_remaining,
                                           'set_favicon_counter' => \&Thruk::Utils::Status::set_favicon_counter,
+                                          'get_pnp_url'         => \&Thruk::Utils::get_pnp_url,
 
                                           'version'        => $VERSION,
                                           'branch'         => $branch,

@@ -1,7 +1,11 @@
 ﻿[% IF perf_bar_mode != 'off' %]
 <script type="text/javascript">
 <!--
-perf_table([% write %], [% state %], "[% escape_quotes(plugin_output) %]", "[% escape_quotes(perfdata) %]", "[% escape_quotes(check_command) %]");
+var pnp_url = "";
+[%+ IF pnp_url %]
+  var pnp_url = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&source=0"
+[% END +%]
+perf_table([% write %], [% state %], "[% escape_quotes(plugin_output) %]", "[% escape_quotes(perfdata) %]", "[% escape_quotes(check_command) %]", pnp_url);
 -->
 </script>
 [% END %]

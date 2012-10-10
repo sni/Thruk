@@ -817,7 +817,7 @@ function add_cron_row(tbl_id) {
  * 88          88888888888 88      `8b 88          88888888Y"' d8'          `8b 88 d8'          `8b
 *******************************************************************************/
 /* write/return table with performance data */
-function perf_table(write, state, plugin_output, perfdata, check_command) {
+function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url) {
     var matches   = perfdata.match(/([^\s]+|'[\w\s]+')=([^\s]*)/gi);
     var result    = '';
     var perf_data = [];
@@ -854,7 +854,13 @@ function perf_table(write, state, plugin_output, perfdata, check_command) {
         }
     }
     if(write) {
+        if(result != '' && pnp_url != '') {
+            document.write("<a href='"+pnp_url+"'>");
+        }
         document.write(result);
+        if(result != '' && pnp_url != '') {
+            document.write("<\/a>");
+        }
     }
     return result;
 }
