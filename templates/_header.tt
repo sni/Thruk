@@ -87,7 +87,7 @@
               <th>Sounds:</th>
               <td>
                 [% IF has_cgi_sounds %]
-                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF play_sounds %]sound.png[% ELSE %]sound_mute.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF play_sounds %]sound_mute.png[% ELSE %]sound.png[% END %]" alt="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound('[% escape_html(full_uri(c)) %]', '[% IF play_sounds %]off[% ELSE %]on[% END %]')">
                 [% ELSE %]
                 <img src="[% url_prefix %]thruk/themes/[% theme %]/images/sound_mute.png" alt="sound is disabled" width=16 height=16 style="vertical-align:top;">
@@ -99,7 +99,7 @@
             <tr>
               <th>Favicon:</th>
               <td>
-                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF fav_counter %]favicon_counter.png[% ELSE %]favicon_nocounter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
+                <img src="[% url_prefix %]thruk/themes/[% theme %]/images/[% IF fav_counter %]favicon_nocounter.png[% ELSE %]favicon_counter.png[% END %]" alt="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" width=16 height=16 style="vertical-align:top;">
                 <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter('[% escape_html(full_uri(c)) %]', '[% IF fav_counter %]off[% ELSE %]on[% END %]')">
                 [% IF fav_counter %]
                 [% totals = set_favicon_counter(c) %]
