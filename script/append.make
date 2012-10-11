@@ -13,7 +13,7 @@ version:
 		newversion=`echo "$$newversion" | awk '{ print $$1 }'`; \
 	fi; \
 	date=`date "+%B %d, %Y"`; \
-	sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk.pm && \
+	sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk/Config.pm && \
 	debversion="$$newversion" && \
 	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk/Config.pm script/thruk; debversion="$$newversion~$$branch"; fi && \
 	dch --newversion "$$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"; \
