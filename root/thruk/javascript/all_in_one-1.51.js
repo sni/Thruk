@@ -862,7 +862,8 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
     }
     if(write) {
         if(result != '' && pnp_url != '') {
-            document.write("<a href='"+pnp_url+"'>");
+            var rel_url = pnp_url.replace('\/graph\?', '/popup?');
+            document.write("<a href='"+pnp_url+"' class='tips' rel='"+rel_url+"'>");
         }
         document.write(result);
         if(result != '' && pnp_url != '') {
