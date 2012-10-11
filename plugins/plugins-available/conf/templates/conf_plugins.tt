@@ -7,7 +7,7 @@
 <input type="hidden" name="sub" value="plugins">
 <input type="hidden" name="action" value="save">
 [% IF readonly %]
-Readonly: Make sure the plugins directory is writable!
+<font color="orange">Readonly: Make sure the plugins directory is writable!</font>
 [% ELSE %]
 <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"><br>
 Don't forget to restart Thruk after changing plugins.

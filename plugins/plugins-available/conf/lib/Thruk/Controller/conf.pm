@@ -389,6 +389,7 @@ sub _process_cgi_page {
 
     my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
     return unless defined $file;
+    $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     # create a default config from the current used cgi.cfg
     if(!-e $file and $file ne $c->config->{'cgi.cfg_effective'}) {
@@ -399,6 +400,11 @@ sub _process_cgi_page {
 
     # save changes
     if($c->stash->{action} eq 'store') {
+        if($c->stash->{'readonly'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
+            return $c->response->redirect('conf.cgi?sub=cgi');
+        }
+
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         # check for empty multi selects
         for my $key (keys %{$defaults}) {
@@ -481,9 +487,15 @@ sub _process_thruk_page {
     my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'};
     return unless defined $file;
     my $defaults = Thruk::Utils::Conf::Defaults->get_thruk_cfg($c);
+    $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     # save changes
     if($c->stash->{action} eq 'store') {
+        if($c->stash->{'readonly'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
+            return $c->response->redirect('conf.cgi?sub=thruk');
+        }
+
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         $self->_store_changes($c, $file, $data, $defaults, $c);
         return $c->response->redirect('conf.cgi?sub=thruk');
@@ -576,11 +588,16 @@ sub _process_users_page {
     my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
     return unless defined $file;
     my $defaults = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+    $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     # save changes to user
     my $user = $c->{'request'}->{'parameters'}->{'data.username'} || '';
     if($user ne '' and defined $file and $c->stash->{action} eq 'store') {
         my $redirect = 'conf.cgi?action=change&sub=users&data.username='.$user;
+        if($c->stash->{'readonly'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
+            return $c->response->redirect($redirect);
+        }
         my $msg      = $self->_update_password($c);
         if(defined $msg) {
             Thruk::Utils::set_message( $c, 'fail_message', $msg );
@@ -739,8 +756,14 @@ sub _process_backends_page {
 
     my $file = $c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'};
     return unless $file;
+    $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     if($c->stash->{action} eq 'save') {
+        if($c->stash->{'readonly'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
+            return $c->response->redirect('conf.cgi?sub=backends');
+        }
+
         my $x=0;
         my $backends = [];
         my $new = 0;

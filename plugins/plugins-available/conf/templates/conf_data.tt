@@ -5,6 +5,9 @@
 <input type="hidden" name="action" value="store">
 <input type="hidden" name="md5" value="[% md5 %]">
 <div align="center">
+[% IF readonly %]
+<br><font color="orange">Readonly: Make sure the config file is writable!</font>
+[% END %]
   <table border="0" class='data conftool'>
     [% FOREACH cat = keys %]
         [% UNLESS loop.first %]
@@ -83,7 +86,7 @@
     <tr>
       <td colspan=2 class="data dataSubmit">
         <input type="button" name="cancel" value="cancel" style="width:60px" onclick="window.location='conf.cgi'">
-        <input type="submit" name="send" value="save" style="width:80px">
+        <input type="submit" name="send" value="save" style="width:80px"[% IF readonly %] disabled[% END %]>
       </td>
     </tr>
   </table>

@@ -5,6 +5,9 @@
 <input type="hidden" name="sub" value="backends">
 <input type="hidden" name="action" value="save">
 Note: some options are not accessible here for security reasons.
+[% IF readonly %]
+<br><font color="orange">Readonly: Make sure the config file is writable!</font>
+[% END %]
 <table border="0" class='data conftoolusers' style="width:360px;">
   <tr>
     <th colspan=3 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
@@ -32,7 +35,7 @@ Note: some options are not accessible here for security reasons.
   [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', key => '', hidden => 0, type => 'livestatus' } x = 0 %]
   <tr>
     <td colspan=3 style="text-align:center; padding-bottom: 7px;">
-      <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button">
+      <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"[% IF readonly %] disabled[% END %]>
     </td>
   </tr>
 </table>
