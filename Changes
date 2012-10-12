@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.54     not yet released
+          - Bug Fixes
+            - fixed perf bars in IE
+
 1.52     Tue Oct  9 16:44:04 CEST 2012
           - added cookie based authentication and logout button
           - added performance bar to host/service list

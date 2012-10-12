@@ -822,22 +822,25 @@ function add_cron_row(tbl_id) {
 /* write/return table with performance data */
 function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url) {
     var matches   = perfdata.match(/([^\s]+|'[\w\s]+')=([^\s]*)/gi);
+    if(!matches) { return false; }
     var result    = '';
     var perf_data = [];
     for(var nr in matches) {
-        var tmp = matches[nr].split(/=/);
-        tmp[1] += ';;;;';
-        var data = tmp[1].match(/^([\d\.\-]+)([\w]{0,2});([\d\.]*);([\d\.]*);([\d\.]*);([\d\.]*)/);
-        perf_data.push({
-            key:  tmp[0],
-            perf: tmp[1],
-            val:  (data != null && data[1] != '') ? parseFloat(data[1]) : '',
-            unit: data != null ? data[2] : '',
-            warn: (data != null && data[3] != '') ? parseFloat(data[3]) : '',
-            crit: (data != null && data[4] != '') ? parseFloat(data[4]) : '',
-            min:  (data != null && data[5] != '') ? parseFloat(data[5]) : '',
-            max:  (data != null && data[6] != '') ? parseFloat(data[6]) : ''
-        });
+        try {
+            var tmp = matches[nr].split(/=/);
+            tmp[1] += ';;;;';
+            var data = tmp[1].match(/^([\d\.\-]+)([\w]{0,2});([\d\.]*);([\d\.]*);([\d\.]*);([\d\.]*)/);
+            perf_data.push({
+                key:  tmp[0],
+                perf: tmp[1],
+                val:  (data != null && data[1] != '') ? parseFloat(data[1]) : '',
+                unit: data != null ? data[2] : '',
+                warn: (data != null && data[3] != '') ? parseFloat(data[3]) : '',
+                crit: (data != null && data[4] != '') ? parseFloat(data[4]) : '',
+                min:  (data != null && data[5] != '') ? parseFloat(data[5]) : '',
+                max:  (data != null && data[6] != '') ? parseFloat(data[6]) : ''
+            });
+        } catch(e) {}
     }
     var cls = 'notclickable';
     if(pnp_url != '') {
