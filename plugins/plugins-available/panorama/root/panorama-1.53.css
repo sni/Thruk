@@ -278,3 +278,43 @@ DIV.msg A.x-tab-close-btn {
   top: 5px;
   right: 6px;
 }
+
+
+DIV.perf_bar_bg {
+    height: 19px;
+    background: #C6C6C6;
+    border-top: 1px solid #999999;
+    border-right: 1px solid #999999;
+    -webkit-border-radius: 3px;
+            border-radius: 3px;
+    position: relative;
+}
+
+IMG.perf_bar {
+  height: 19px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  margin-top: -1px;
+  -webkit-border-radius: 3px;
+          border-radius: 3px;
+  position: absolute;
+}
+
+DIV.perf_bar_warn {
+  height: 19px;
+  border: 0;
+  border-right: 1px solid #DEDC10;
+  position: absolute;
+}
+
+DIV.perf_bar_crit {
+  height: 19px;
+  border: 0;
+  border-right: 1px solid #B36969;
+  position: absolute;
+}
+
+TD.less_padding DIV.x-grid-cell-inner {
+  padding-left: 2px;
+  padding-right: 2px;
+}

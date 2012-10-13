@@ -4,9 +4,11 @@
   <head>
     <script type="text/javascript">
     <!--
-    var server_time = new Date([% date.now * 1000 %]);
-    var client_time = new Date();
-    var delta_time  = client_time.getTime() - server_time.getTime();
+    var server_time   = new Date([% date.now * 1000 %]);
+    var client_time   = new Date();
+    var delta_time    = client_time.getTime() - server_time.getTime();
+    var url_prefix    = '[% url_prefix %]';
+    var perf_bar_mode = '[% perf_bar_mode %]';
     -->
     </script>
     <title>[% title_prefix %]Thruk Panorama</title>
@@ -16,12 +18,15 @@
     <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/panorama/panorama-[% version %].css' />
     [% IF thruk_debug %]
     <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.1/ext-all-debug.js"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk-[% version %].js"></script>
     [% ELSE %]
-    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.1/ext-all.js"></script>
     <!--[IF !IE]> -->
+    <script type="text/javascript" charset="UTF-8" src="[% url_prefix %]thruk/plugins/panorama/extjs-4.1.1/ext-all.js"></script>
     <script type="text/javascript" charset="UTF-8" src="panorama.cgi?js=1&amp;_dc=[% date.now %]"></script>
+    <script type="text/javascript" src="[% url_prefix %]thruk/javascript/thruk-[% version %].js"></script>
     <!-- <![ENDIF]-->
     [% END %]
+    [% PROCESS custom_perf_bar_adjustments.tt %]
 </head>
 <body onunload="TP.unload()">
 [% IF thruk_debug %]
