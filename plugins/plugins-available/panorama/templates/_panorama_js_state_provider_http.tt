@@ -79,6 +79,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         for(var key in ExtState) {
             this.clear(key);
         }
+        this.saveChanges();
     },
 
     /* set state from object */
@@ -86,6 +87,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         for(var key in data) {
             this.set(key, data[key]);
         }
+        this.saveChanges();
     },
     /* queue save changes */
     queueChanges: function() {

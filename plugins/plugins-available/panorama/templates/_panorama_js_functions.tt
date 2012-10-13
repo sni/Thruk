@@ -356,7 +356,7 @@ var TP = {
         cp.clearAll();
         cp.loadData(data);
         Ext.getCmp('viewport').add(new TP.TabBar());
-        window.location.reload();
+        window.setTimeout("window.location.reload()", 1000);
     },
     /* eval response data */
     getResponse: function(panlet, response) {
