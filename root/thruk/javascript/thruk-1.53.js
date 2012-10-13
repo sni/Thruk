@@ -884,7 +884,8 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
         if(d.max == '' && d.warn != '') { d.max = d.warn; }
         if(d.val != '' && d.max != '') {
             var perc       = (Math.abs(d.val) / d.max * 100).toFixed(2);
-            if(perc < 5) { perc = 5; }
+            if(perc < 5)   { perc = 5;   }
+            if(perc > 100) { perc = 100; }
             var pic = 'thermok.png';
             if(state == 1) { var pic = 'thermwarn.png'; }
             if(state == 2) { var pic = 'thermcrit.png'; }
