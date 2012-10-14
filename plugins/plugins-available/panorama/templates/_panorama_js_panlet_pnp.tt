@@ -13,7 +13,7 @@ Ext.define('TP.PanletPNP', {
     title: 'PNPGraph',
     height: 240,
     width:  420,
-    maximizable: true,
+    //maximizable: true, // does not work stateful
     initComponent: function() {
         this.callParent();
         this.xdata.url      = '';

@@ -4,7 +4,7 @@ Ext.define('TP.PanletGridServices', {
     title:  'Services',
     width:  900,
     height: 200,
-    maximizable: true,
+    //maximizable: true, // does not work stateful
     has_search_button: 'service',
     initComponent: function() {
         this.callParent();
