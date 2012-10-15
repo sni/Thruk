@@ -1170,6 +1170,10 @@ sub _check_files_changed {
 
 ##########################################################
 # check if file has changed
+# returns:
+#   0 if file did not change
+#   1 if file is new / created
+#   2 if md5 sum changed
 sub _check_file_changed {
     my $self = shift;
     my $file = shift;
@@ -1183,7 +1187,7 @@ sub _check_file_changed {
        $atime,$mtime,$ctime,$blksize,$blocks)
        = stat($file->{'path'});
 
-    if(!defined $ino) {
+    if(!defined $ino or !defined $file->{'inode'}) {
         return 1;
     }
     else {
