@@ -527,7 +527,7 @@ var TP = {
     unload: function() {
         try {
             // try saving state
-            cp.saveChanges();
+            cp.saveChanges(false);
         }
         catch(e) {}
     },

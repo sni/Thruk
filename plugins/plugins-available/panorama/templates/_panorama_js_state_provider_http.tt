@@ -28,7 +28,7 @@
 Ext.state.HttpProvider = function(config){
     Ext.state.HttpProvider.superclass.constructor.call(this);
     this.url       = '';
-    this.saveDelay = 2000;
+    this.saveDelay = 500;
 
     this.lastdata  = "";
     Ext.apply(this, config);
@@ -94,7 +94,8 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
         window.clearTimeout(this.interval);
         this.interval = window.setTimeout(Ext.bind(this.saveChanges, this, []), this.saveDelay);
     },
-    saveChanges: function() {
+    saveChanges: function(async) {
+        if(async == undefined) { async = true; }
         var sum = Ext.JSON.encode(ExtState);
         if(sum == this.lastdata) {
             return;
@@ -105,7 +106,7 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
             params[name] = ExtState[name];
         }
         var conn = new Ext.data.Connection();
-        conn.request({ url: this.url, params: params });
+        conn.request({ url: this.url, params: params, async: async });
     }
 });
 
@@ -113,7 +114,6 @@ Ext.extend(Ext.state.HttpProvider, Ext.state.Provider, {
 /* create state provider */
 var cp = new Ext.state.HttpProvider({
     url:      '[% url_prefix %]thruk/cgi-bin/panorama.cgi?state',
-    saveDelay: 3000,
     lastdata:  Ext.JSON.encode(ExtState)
 });
 Ext.state.Manager.setProvider(cp);
