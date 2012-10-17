@@ -803,16 +803,16 @@ sub set_custom_vars {
 
     my $x = 0;
     while(defined $data->{'custom_variable_names'}->[$x]) {
-        my $cust_name  = '_'.$data->{'custom_variable_names'}->[$x];
-        my $cust_value = '_'.$data->{'custom_variable_values'}->[$x];
+        my $cust_name  = $data->{'custom_variable_names'}->[$x];
+        my $cust_value = $data->{'custom_variable_values'}->[$x];
         my $found      = 0;
-        if(defined $test->{$cust_name}) {
+        if(defined $test->{$cust_name} or defined $test->{'_'.$cust_name}) {
             $found = 1;
         } else {
             for my $v (keys %{$test}) {
                 next if CORE::index($v, '*') == -1;
                 $v =~ s/\*/.*/gmx;
-                if($cust_name =~ m/^$v$/mx) {
+                if($cust_name =~ m/^$v$/mx or '_'.$cust_name =~ m/^$v$/mx) {
                     $found = 1;
                     last;
                 }
