@@ -2,7 +2,7 @@
   <td class='dataVar' align="left">Name</td>
   <td class='dataVal'>
     <input type="hidden" name="id[% x %]" value="[% b.key %]">
-    <input type="text" name="name[% x %]" value="[% b.name %]" style="width: 200px;">
+    <input type="text" name="name[% x %]" value="[% b.name %]" style="width: 200px;" placeholder="connection name">
   </td>
   <td class='dataVal' onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
     <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/remove.png" name="delete">
@@ -20,7 +20,7 @@
 <tr class="backend_conf_[% x %]">
   <td class='dataVar' align="left">Connection</td>
   <td class='dataVal' colspan=2 nowrap>
-    <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;">
+    <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;" placeholder="server:6557 or socket">
     <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this)">
     <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
   </td>
