@@ -99,6 +99,11 @@ img.pref_pane_button {
   right: 4px;
   z-index: 100;
 }
+DIV.pref_pane_shadow {
+  height: 6px;
+  left: 6px;
+  top: 0px;
+}
 table.top_nav {
   border: 0px none;
   font-size: 10pt;
@@ -880,6 +885,7 @@ DIV.perf_bar_crit {
   border-right: 1px solid #B36969;
   position: absolute;
 }
+
 #currentversioninfo {
   font-size:14px;
 }
