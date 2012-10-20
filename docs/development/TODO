@@ -1,7 +1,12 @@
 Todo & Wish List:
 =========================================================
 
-Bugs: none
+Bugs:
+    - $c->cache->{'contactgroups'} cached to long, should be refreshed after core reload
+
+Packages:
+  - security issue with chown in postinst:
+    http://lists.debian.org/debian-devel/2012/05/msg00533.html
 
 Features:
 
@@ -17,6 +22,10 @@ general:
     - add go back button on error page
     - support more macros
     - include comments in export
+    - add recurring downtimes for host/servicegruppen
+    - add hosteventhandler to config as soon as it its in mklive: http://www.shinken-monitoring.org/forum/index.php?topic=304.new;topicseen#new
+    - suggest custom variables?
+    - search hosts without services: http://monitoring-portal.org/wbb/index.php?page=Thread&postID=176677#post176677
 
 config:
     - add missing values
@@ -50,6 +59,17 @@ reports:
     - flexible report output
         HTML, Text, CVS, XML, PDF
         CSV output for single hosts/services,hostgroups/servicegroups
+    - use mongodb with cursors
+    - in sla graph 90 konfigurierbar machen
+    - utf-8 mails: https://rt.cpan.org/Public/Bug/Display.html?id=42481
+    - replace text in pdfs: http://search.cpan.org/dist/CAM-PDF/lib/CAM/PDF.pm
+      http://search.cpan.org/dist/CAM-PDF/bin/changepagestring.pl
+    - put pnp graphs into report
+      - cd etc/pnp4nagios/ && \
+        REQUEST_URI='image?host=localhost&srv=_HOST_&view=1&source=0' \
+        php ~/share/pnp4nagios/htdocs/index.php 'image?host=localhost&srv=_HOST_&view=1&source=0' \
+        > /tmp/blah.png
+
 
 status:
     - add flexible selector, ex.: select multiple hostgroups by comma
@@ -72,4 +92,11 @@ addons:
     - template usage with +object ( in resolve and template tt view)
     - wizards: new host, scan services
     - sync multiple backend with config tool
+    - show back references, used commands etc...
 
+  panorama:
+    - allow multiple filter
+
+
+Themes:
+    - only include Thruk theme and make others downloadable
