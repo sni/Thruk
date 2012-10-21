@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use strict;
-use Test::More tests => 32;
+use Test::More tests => 35;
 use Data::Dumper;
 
 BEGIN {
@@ -134,6 +134,7 @@ SKIP: {
     isnt($dir,   undef,   "got dir");
 };
 
+#########################
 
 is(Thruk::Utils::version_compare('1.0',         '1.0'),     1, 'version_compare: 1.0 vs. 1.0');
 is(Thruk::Utils::version_compare('1.0.0',       '1.0'),     1, 'version_compare: 1.0.0 vs. 1.0');
@@ -143,3 +144,13 @@ is(Thruk::Utils::version_compare('1.0.1',       '1.0.0'),   1, 'version_compare:
 is(Thruk::Utils::version_compare('1.0.0',       '1.0.1b1'), 0, 'version_compare: 1.0.0 vs. 1.0.1b1');
 is(Thruk::Utils::version_compare('1.0.1b1',     '1.0.1b2'), 0, 'version_compare: 1.0.1b1 vs. 1.0.1b2');
 is(Thruk::Utils::version_compare('2.0-shinken', '1.1.3'),   1, 'version_compare: 2.0-shinken vs. 1.1.3');
+
+#########################
+my $bm       = Thruk::Backend::Manager->new();
+isa_ok($bm, 'Thruk::Backend::Manager');
+my $str      = '$USER1$/test -a $ARG1$ -b $ARG2$ -c $HOSTNAME$';
+my $macros   = {'$USER1$' => '/opt', '$ARG1$' => 'a', '$HOSTNAME$' => 'host' };
+my($replaced,$rc) = $bm->_get_replaced_string($str, $macros);
+my $expected = '/opt/test -a a -b  -c host';
+is($rc, 1, 'macro replacement with empty args succeeds');
+is($replaced, $expected, 'macro replacement with empty args string');

@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - panorama view:
             - added performance bar to host/service list
           - Bug Fixes
+            - undefined ARG macros will be replaced with empty string
             - fixed perf bars in IE
 
 1.52     Tue Oct  9 16:44:04 CEST 2012

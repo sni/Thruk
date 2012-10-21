@@ -646,8 +646,9 @@ sub _get_replaced_string {
     for my $block (split/(\$[\w\d_:]+\$)/mx, $string) {
         next if $block eq '';
         if(substr($block,0,1) eq '$' and substr($block, -1) eq '$') {
-            if(defined $macros->{$block}) {
+            if(defined $macros->{$block} or $block =~ m/^\$ARG\d+\$/mx) {
                 my $replacement = $macros->{$block};
+                $replacement    = '' unless defined $replacement;
                 if(!$skip_args and $block =~ m/\$ARG\d+\$$/mx) {
                     my $sub_rc;
                     ($replacement, $sub_rc) = $self->_get_replaced_string($replacement, $macros, 1);
