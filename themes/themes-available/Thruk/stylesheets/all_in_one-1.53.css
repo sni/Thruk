@@ -858,7 +858,7 @@ DIV.perf_bar_bg {
     background: #C6C6C6;
     float: right;
     margin-right: 3px;
-    padding-left: 3px;
+    margin-left: 3px;
     border-top: 1px solid #999999;
     border-right: 1px solid #999999;
     -webkit-border-radius: 3px;
