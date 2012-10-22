@@ -812,7 +812,7 @@ sub set_custom_vars {
             for my $v (keys %{$test}) {
                 next if CORE::index($v, '*') == -1;
                 $v =~ s/\*/.*/gmx;
-                if($cust_name =~ m/^$v$/mx or '_'.$cust_name =~ m/^$v$/mx) {
+                if($cust_name =~ m/^$v$/mx or ('_'.$cust_name) =~ m/^$v$/mx) {
                     $found = 1;
                     last;
                 }
