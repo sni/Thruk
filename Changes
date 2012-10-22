@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.56     not yet released
+          - ...
+
 1.54     Mon Oct 22 15:08:26 CEST 2012
           - added support for setting custum variables without _ now
           - added link to all services with same name on extinfo 2 page
@@ -8,6 +11,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - Bug Fixes
             - undefined ARG macros will be replaced with empty string
             - fixed perf bars in IE
+            - fixed perf bars growing over maximum
 
 1.52     Tue Oct  9 16:44:04 CEST 2012
           - added cookie based authentication and logout button
