@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.54     not yet released
           - added support for setting custum variables without _ now
+          - added link to all services with same name on extinfo 2 page
           - panorama view:
             - added performance bar to host/service list
           - Bug Fixes
