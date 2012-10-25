@@ -141,6 +141,29 @@ plugins/plugins-available/conf/root/ace/mode/monitoring.js
 plugins/plugins-available/conf/root/ace/mode/monitoring_highlight_rules.js
 plugins/plugins-available/conf/root/conf.css
 plugins/plugins-available/conf/root/conf.js
+plugins/plugins-available/conf/root/images/file.xcf
+plugins/plugins-available/conf/root/images/file_cfg.png
+plugins/plugins-available/conf/root/jstree/jquery.jstree.js
+plugins/plugins-available/conf/root/jstree/jstree.min.js
+plugins/plugins-available/conf/root/jstree/themes/apple/bg.jpg
+plugins/plugins-available/conf/root/jstree/themes/apple/d.png
+plugins/plugins-available/conf/root/jstree/themes/apple/dot_for_ie.gif
+plugins/plugins-available/conf/root/jstree/themes/apple/style.css
+plugins/plugins-available/conf/root/jstree/themes/apple/throbber.gif
+plugins/plugins-available/conf/root/jstree/themes/classic/d.gif
+plugins/plugins-available/conf/root/jstree/themes/classic/d.png
+plugins/plugins-available/conf/root/jstree/themes/classic/dot_for_ie.gif
+plugins/plugins-available/conf/root/jstree/themes/classic/style.css
+plugins/plugins-available/conf/root/jstree/themes/classic/throbber.gif
+plugins/plugins-available/conf/root/jstree/themes/default-rtl/d.gif
+plugins/plugins-available/conf/root/jstree/themes/default-rtl/d.png
+plugins/plugins-available/conf/root/jstree/themes/default-rtl/dots.gif
+plugins/plugins-available/conf/root/jstree/themes/default-rtl/style.css
+plugins/plugins-available/conf/root/jstree/themes/default-rtl/throbber.gif
+plugins/plugins-available/conf/root/jstree/themes/default/d.gif
+plugins/plugins-available/conf/root/jstree/themes/default/d.png
+plugins/plugins-available/conf/root/jstree/themes/default/style.css
+plugins/plugins-available/conf/root/jstree/themes/default/throbber.gif
 plugins/plugins-available/conf/scripts/thruk_set_highlights.sh
 plugins/plugins-available/conf/t/conf_utils.t
 plugins/plugins-available/conf/t/controller_conf.t
@@ -158,6 +181,7 @@ plugins/plugins-available/conf/t/data/7/parser.cfg
 plugins/plugins-available/conf/t/model_Objects.t
 plugins/plugins-available/conf/templates/_conf_action_menu.tt
 plugins/plugins-available/conf/templates/_conf_backends_backend.tt
+plugins/plugins-available/conf/templates/_conf_bare.tt
 plugins/plugins-available/conf/templates/_conf_frame.tt
 plugins/plugins-available/conf/templates/_conf_object_edit.tt
 plugins/plugins-available/conf/templates/_conf_object_row.tt
@@ -180,6 +204,8 @@ plugins/plugins-available/conf/templates/conf_objects_host_list_services.tt
 plugins/plugins-available/conf/templates/conf_objects_listref.tt
 plugins/plugins-available/conf/templates/conf_objects_move.tt
 plugins/plugins-available/conf/templates/conf_objects_tools.tt
+plugins/plugins-available/conf/templates/conf_objects_tree.tt
+plugins/plugins-available/conf/templates/conf_objects_tree_objects.tt
 plugins/plugins-available/conf/templates/conf_plugins.tt
 plugins/plugins-available/dashboard/description.txt
 plugins/plugins-available/dashboard/lib/Thruk/Backend/Provider/DashboardLivestatus.pm
@@ -1175,6 +1201,7 @@ themes/themes-available/Classic/images/favicon_counter.png
 themes/themes-available/Classic/images/favicon_nocounter.png
 themes/themes-available/Classic/images/flapping.gif
 themes/themes-available/Classic/images/folder.png
+themes/themes-available/Classic/images/folder_brick.png
 themes/themes-available/Classic/images/folder_explore.png
 themes/themes-available/Classic/images/github.png
 themes/themes-available/Classic/images/greendot.gif
@@ -1316,6 +1343,7 @@ themes/themes-available/Exfoliation/images/favicon_counter.png
 themes/themes-available/Exfoliation/images/favicon_nocounter.png
 themes/themes-available/Exfoliation/images/flapping.gif
 themes/themes-available/Exfoliation/images/folder.png
+themes/themes-available/Exfoliation/images/folder_brick.png
 themes/themes-available/Exfoliation/images/folder_explore.png
 themes/themes-available/Exfoliation/images/github.png
 themes/themes-available/Exfoliation/images/graph.gif
@@ -1514,6 +1542,7 @@ themes/themes-available/Nuvola/images/favicon_counter.png
 themes/themes-available/Nuvola/images/favicon_nocounter.png
 themes/themes-available/Nuvola/images/flapping.gif
 themes/themes-available/Nuvola/images/folder.png
+themes/themes-available/Nuvola/images/folder_brick.png
 themes/themes-available/Nuvola/images/folder_explore.png
 themes/themes-available/Nuvola/images/github.png
 themes/themes-available/Nuvola/images/green.gif
@@ -1705,6 +1734,7 @@ themes/themes-available/Thruk/images/favicon_counter.png
 themes/themes-available/Thruk/images/favicon_nocounter.png
 themes/themes-available/Thruk/images/flapping.gif
 themes/themes-available/Thruk/images/folder.png
+themes/themes-available/Thruk/images/folder_brick.png
 themes/themes-available/Thruk/images/folder_explore.png
 themes/themes-available/Thruk/images/github.png
 themes/themes-available/Thruk/images/green.gif
@@ -1836,6 +1866,7 @@ themes/themes-available/Vautour/images/favicon_counter.png
 themes/themes-available/Vautour/images/favicon_nocounter.png
 themes/themes-available/Vautour/images/flapping.gif
 themes/themes-available/Vautour/images/folder.png
+themes/themes-available/Vautour/images/folder_brick.png
 themes/themes-available/Vautour/images/folder_explore.png
 themes/themes-available/Vautour/images/github.png
 themes/themes-available/Vautour/images/greendot.gif
@@ -2024,6 +2055,7 @@ themes/themes-available/Wakizashi/images/favicon_counter.png
 themes/themes-available/Wakizashi/images/favicon_nocounter.png
 themes/themes-available/Wakizashi/images/flapping.gif
 themes/themes-available/Wakizashi/images/folder.png
+themes/themes-available/Wakizashi/images/folder_brick.png
 themes/themes-available/Wakizashi/images/folder_explore.png
 themes/themes-available/Wakizashi/images/form_background.png
 themes/themes-available/Wakizashi/images/github.png

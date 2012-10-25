@@ -211,6 +211,12 @@ sub get_objects {
 
 Returns list of L<Monitoring::Config::Object|Monitoring::Config::Object> objects for a type.
 
+filter is verified against the name if its a scalar value. Otherwise it has to be like
+
+ $filter = {
+    attribute => value
+ };
+
 =cut
 sub get_objects_by_type {
     my $self   = shift;
@@ -219,7 +225,7 @@ sub get_objects_by_type {
 
     return [] unless defined $self->{'objects'}->{'byname'}->{$type};
 
-    if(defined $filter) {
+    if(defined $filter and ref $filter eq '') {
         if(defined $self->{'objects'}->{'byname'}->{$type}->{$filter}) {
             return $self->{'objects'}->{'byname'}->{$type}->{$filter};
         }
@@ -230,7 +236,32 @@ sub get_objects_by_type {
     for my $id (@{$self->{'objects'}->{'bytype'}->{$type}}) {
         my $obj = $self->get_object_by_id($id);
         die($id) unless defined $obj;
-        push @{$objs}, $obj;
+
+        if(defined $filter and ref $filter eq 'HASH') {
+            my $ok = 1;
+            for my $attr (keys %{$filter}) {
+                if(!defined $obj->{'conf'}->{$attr}) {
+                    $ok = 0;
+                }
+                elsif(ref $obj->{'conf'}->{$attr} eq '') {
+                    $ok = 0 unless $obj->{'conf'}->{$attr} eq $filter->{$attr};
+                }
+                elsif(ref $obj->{'conf'}->{$attr} eq 'ARRAY') {
+                    my $found = 0;
+                    for my $el (@{$obj->{'conf'}->{$attr}}) {
+                        if($el eq $filter->{$attr}) {
+                            $found = 1;
+                            last;
+                        }
+                    }
+                    $ok = 0 unless $found;
+                }
+                last unless $ok;
+            }
+            push @{$objs}, $obj if $ok;
+        } else {
+            push @{$objs}, $obj;
+        }
     }
 
     return $objs;

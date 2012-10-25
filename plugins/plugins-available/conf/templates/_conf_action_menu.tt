@@ -62,6 +62,10 @@
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/folder_explore.png' border="0" alt='Browse filesystem' title='Browse filesystem' width="16" height="16"></td>
                 <td class='command'><a href='conf.cgi?sub=objects&amp;action=browser[% IF file_link %]#[% file_link %][% END %]'>Browse filesystem</a></td>
               </tr>
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/folder_brick.png' border="0" alt='Objects Tree' title='Objects Tree' width="16" height="16"></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;action=tree[% IF file_link %]#[% file_link %][% END %]'>Objects Tree</a></td>
+              </tr>
             </table>
           </td>
         </tr>

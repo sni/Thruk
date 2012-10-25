@@ -1,0 +1,97 @@
+[% WRAPPER _conf_objects_frame.tt %]
+
+<table style="height:600px;" border=1 width=1100>
+  <tr>
+    <td valign="top" id="container" style="height:100%;  text-align: left;" width=200>
+      <ul>
+        <li id="o_commands">
+          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command" target="content_frame">Commands</a>
+          <ul>
+            <li id="o_commands_checks"><a href="#">Checks</a></li>
+            <li id="o_commands_eventhandler"><a href="#">Eventhandler</a></li>
+            <li id="o_commands_notifications"><a href="#">Notifications</a></li>
+          </ul>
+        </li>
+        <li id="o_contacts"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contact" target="content_frame">Contacts</a></li>
+        <li id="o_contactgroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contactgroup" target="content_frame">Contactgroups</a></li>
+        <li id="o_hosts">
+          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=host" target="content_frame">Hosts</a>
+          [% BLOCK child %]
+            [% IF childs.size > 0 %]
+            <ul>
+            [% FOREACH tname = childs.keys.sort %]
+              [% t = childs.$tname %]
+              <li>
+                <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=[% type %]&amp;template=[% tname %]" target="content_frame">[% tname %]</a>
+                [% IF t.exists('child_templates') %][% INCLUDE child childs=t.child_templates %][% END %]
+              </li>
+            [% END %]
+            </ul>
+            [% END %]
+          [% END %]
+          [% PROCESS child childs=hosttemplates type="host" %]
+        </li>
+        <li id="o_hostgroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=hostgroup" target="content_frame">Hostgroups</a></li>
+        <li id="o_services">
+          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=service" target="content_frame">Services</a>
+          [% PROCESS child childs=servicetemplates type="service" %]
+        </li>
+        <li id="o_servicegroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=servicegroup" target="content_frame">Servicegroups</a></li>
+        <li id="o_timeperiods"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=timeperiod" target="content_frame">Timeperiods</a></li>
+      </ul>
+    </td>
+    <td valign="top" style="border-left: 1px solid grey;">
+      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" width=900 style="border: 0; height: 100%;"></iframe>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+<!--
+
+jQuery(function($) {
+  jQuery('#container').jstree({
+    plugins: [ "themes", "dnd", "contextmenu" ],
+    core:    {
+      animation: 0
+    },
+    themes: {
+      theme: 'classic',
+      dots: true
+    },
+    dnd: {
+      drag_target: '.jstree-draggable',
+        "drop_finish" : function () {
+          alert("DROP");
+        },
+        "drag_check" : function (data) {
+          if(data.r.attr("id") == "phtml_1") {
+            return false;
+          }
+          return {
+            after : false,
+            before : false,
+            inside : true
+          };
+        },
+        "drag_finish" : function (data) {
+          alert("DRAG OK");
+      }
+    },
+    contextmenu: {
+      select_node: true,
+      items: {
+        "rename" : {
+          "label"             : "Rename",
+          "action"            : function (obj) { this.rename(obj); },
+          "icon"              : false
+        }
+      }
+    }
+  });
+});
+
+-->
+</script>
+
+[% END %]

@@ -1,4 +1,5 @@
-[% WRAPPER _conf_objects_frame.tt %]
+[% IF bare %][% wrapper="_conf_bare.tt" %][% ELSE %][% wrapper="_conf_objects_frame.tt" %][% END %]
+[% WRAPPER $wrapper %]
 
 [% IF show_object %]
 
@@ -17,7 +18,7 @@
 <input type="hidden" name="type" value="[% type %]">
 <input type="hidden" name="data.id" value="[% object.get_id() %]">
 <input type="hidden" name="action" value="store">
-  <table border="0" class='data conftoolobj'>
+  <table border="0" class='data conftoolobj'[% IF bare %] width="100%"[% END %]>
     <tr>
       <th class='data[% IF subcat == 'config'    %] confSelected[% END %]' style="width:33%" id="sub_1" onclick="window.location.hash='#config';set_sub(1)"><a href="#config">Config</a></th>
       <th class='data[% IF subcat == 'templates' %] confSelected[% END %]' style="width:33%" id="sub_2" onclick="window.location.hash='#templates';set_sub(2)"><a href="#templates">Templates</a></th>
@@ -134,7 +135,7 @@
     [% IF ! object.defined('file') || ! object.file.readonly %]
     <tr style="[% IF subcat != 'config' %]display:none[% END %]" class="sub_1">
       <td colspan=3 class="data dataSubmit">
-        [% IF object.get_id() != 'new' %]
+        [% IF object.get_id() != 'new' && ! bare %]
         <input type="submit" name="send" value="raw edit" style="width:90px" class="conf_button">
         [% END %]
         <button class="conf_save_button conf_button" style="width:90px">save</button>

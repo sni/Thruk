@@ -41,6 +41,7 @@ our %config = ('name'                   => 'Thruk',
                   TEMPLATE_EXTENSION => '.tt',
                   ENCODING           => 'utf8',
                   INCLUDE_PATH       => $project_root.'/templates',
+                  RECURSION          => 1,
                   FILTERS            => {
                                           'duration'            => \&Thruk::Utils::Filter::duration,
                                           'nl2br'               => \&Thruk::Utils::Filter::nl2br,

@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+    <title>[% title_prefix %][% title %]</title>
+    <link rel="shortcut icon" href="[% url_prefix %]thruk/themes/[% theme %]/images/favicon.ico" type="image/ico" />
+
+    <!-- stylesheets -->
+    [%+ PROCESS _common_css.tt use_frames=1 %]
+    [%+ PROCESS _common_js.tt %]
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]thruk/plugins/conf/conf.css' />
+    <script type="text/javascript" src="[% url_prefix %]thruk/plugins/conf/conf.js"></script>
+  </head>
+  <body id="conf" style="background: inherit;">
+  [% content %]
+
+<script type="text/javascript">
+<!--
+jQuery('INPUT.conf_button').button();
+jQuery('BUTTON.conf_button').button();
+jQuery('.radioset').buttonset();
+-->
+</script>
+
+  </body>
+</html>

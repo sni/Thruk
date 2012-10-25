@@ -1,0 +1,34 @@
+[% WRAPPER "_conf_bare.tt" %]
+
+  <div style="width:100%; height: 22px; position: relative; z-index: 1000;">
+    <input type="text" style="position: fixed; right: 5px;" onkeyup="filter_objects(this.value)" placeholder="filter objects">
+  </div>
+
+  [% FOREACH o = objects %]
+  [% fullname = o.get_primary_name() %]
+  [% name = fullname %]
+  [% IF name.length > 15 %][% name = name.substr(0,15) _ '..' %][% END %]
+  <div style="height: 65px; width: 100px; float: left; margin: 5px; z-index: 10; -moz-user-select: none; position: relative;" class="jstree-draggable clickable object" ondblclick="window.location='conf.cgi?bare=1&sub=objects&type=[% o.get_type() %]&data.id=[% o.get_id() %]'" title="[% fullname %]">
+    <img src="/thruk/plugins/conf/images/file_cfg.png" style="-moz-user-select: none; margin-left: 27px;">
+    <div style="white-space: nowrap; -moz-user-select: none; position: absolute; bottom: 0px; width: 100%; height: 18px; text-align: center; overflow: visible;">[% name %]</div>
+  </div>
+  [% END %]
+
+<script type="text/javascript">
+<!--
+function filter_objects(val) {
+    debug(val);
+    jQuery('DIV.object').each(function(nr, e){
+        if(e.title.match(val)) {
+            e.style.display="inherit";
+        } else {
+            e.style.display="none";
+        }
+    });
+}
+-->
+</script>
+
+
+
+[% END %]

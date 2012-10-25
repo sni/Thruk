@@ -867,6 +867,7 @@ sub _process_objects_page {
     $c->stash->{'template'}        = 'conf_objects.tt';
     $c->stash->{'file_link'}       = "";
     $c->stash->{'coretype'}        = $c->{'obj_db'}->{'coretype'};
+    $c->stash->{'bare'}            = $c->{'request'}->{'parameters'}->{'bare'} || 0;
 
     # apply changes?
     if(defined $c->{'request'}->{'parameters'}->{'apply'}) {
@@ -927,6 +928,16 @@ sub _process_objects_page {
     # browse files
     elsif($c->stash->{action} eq 'browser') {
         return if $self->_file_browser($c);
+    }
+
+    # object tree
+    elsif($c->stash->{action} eq 'tree') {
+        return if $self->_object_tree($c);
+    }
+
+    # object tree content
+    elsif($c->stash->{action} eq 'tree_objects') {
+        return if $self->_object_tree_objects($c);
     }
 
     # file editor
@@ -1628,7 +1639,6 @@ sub _file_editor {
     return;
 }
 
-
 ##########################################################
 sub _file_browser {
     my $self = shift;
@@ -1636,6 +1646,63 @@ sub _file_browser {
 
     $self->_set_files_stash($c);
     $c->stash->{'template'} = 'conf_objects_filebrowser.tt';
+    return;
+}
+
+##########################################################
+sub _object_tree {
+    my($self, $c) = @_;
+
+    # create list of host templates
+    my $hosttemplates = {};
+    my $objs = $c->{'obj_db'}->get_templates_by_type('host');
+    for my $h (@{$objs}) {
+        if(!defined $h->{'conf'}->{'use'}) {
+            $hosttemplates->{$h->get_template_name()} = $h;
+        } else {
+            for my $tname (@{$h->{'conf'}->{'use'}}) {
+                my $t = $c->{'obj_db'}->get_template_by_name('host', $tname);
+                $t->{'child_templates'} = {} unless defined $t->{'child_templates'};
+                $t->{'child_templates'}->{$h->get_template_name()} = $h;
+            }
+        }
+    }
+    $c->stash->{'hosttemplates'} = $hosttemplates;
+
+    # create list of service templates
+    my $servicetemplates = {};
+    $objs = $c->{'obj_db'}->get_templates_by_type('service');
+    for my $s (@{$objs}) {
+        if(!defined $s->{'conf'}->{'use'}) {
+            $servicetemplates->{$s->get_template_name()} = $s;
+        } else {
+            for my $tname (@{$s->{'conf'}->{'use'}}) {
+                my $t = $c->{'obj_db'}->get_template_by_name('service', $tname);
+                $t->{'child_templates'} = {} unless defined $t->{'child_templates'};
+                $t->{'child_templates'}->{$s->get_template_name()} = $s;
+            }
+        }
+    }
+    $c->stash->{'servicetemplates'} = $servicetemplates;
+
+    $c->stash->{'template'} = 'conf_objects_tree.tt';
+    return;
+}
+
+##########################################################
+sub _object_tree_objects {
+    my($self, $c) = @_;
+
+    my $type     = $c->{'request'}->{'parameters'}->{'type'}     || '';
+    my $template = $c->{'request'}->{'parameters'}->{'template'} || '';
+    my $objs = [];
+    if($type) {
+        my $filter = {};
+        $filter->{'use'} = $template if $template;
+        $objs = $c->{'obj_db'}->get_objects_by_type($type, $filter);
+    }
+    $c->stash->{'objects'}  = $objs;
+    $c->stash->{'template'} = 'conf_objects_tree_objects.tt';
     return;
 }
 
