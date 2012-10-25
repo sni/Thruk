@@ -826,7 +826,7 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
         try {
             var tmp = matches[nr].split(/=/);
             tmp[1] += ';;;;';
-            var data = tmp[1].match(/^([\d\.\-]+)([\w]{0,2});([\d\.]*);([\d\.]*);([\d\.]*);([\d\.]*)/);
+            var data = tmp[1].match(/^([\d\.\-]+)([\w%]{0,2});([\d\.]*);([\d\.]*);([\d\.]*);([\d\.]*)/);
             perf_data.push({
                 key:  tmp[0],
                 perf: tmp[1],
