@@ -1680,12 +1680,16 @@ sub _object_tree_objects {
     my($self, $c) = @_;
 
     my $type     = $c->{'request'}->{'parameters'}->{'type'}     || '';
-    my $template = $c->{'request'}->{'parameters'}->{'template'} || '';
+    my $template = $c->{'request'}->{'parameters'}->{'template'};
+    my $origin   = $c->{'request'}->{'parameters'}->{'origin'};
     my $objs = [];
     if($type) {
-        my $filter = {};
-        $filter->{'use'} = $template if $template;
-        $objs = $c->{'obj_db'}->get_objects_by_type($type, $filter);
+        my $filter;
+        if(defined $template) {
+            $filter = {};
+            $filter->{'use'} = $template
+        }
+        $objs = $c->{'obj_db'}->get_objects_by_type($type, $filter, $origin);
     }
     $c->stash->{'objects'}  = $objs;
     $c->stash->{'template'} = 'conf_objects_tree_objects.tt';

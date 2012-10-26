@@ -7,9 +7,9 @@
         <li id="o_commands">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command" target="content_frame">Commands</a>
           <ul>
-            <li id="o_commands_checks"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;subtype=checks" target="content_frame">Checks</a></li>
-            <li id="o_commands_eventhandler"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;subtype=eventhandler" target="content_frame">Eventhandler</a></li>
-            <li id="o_commands_notifications"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;subtype=notifications" target="content_frame">Notifications</a></li>
+            <li id="o_commands_checks"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=check" target="content_frame">Checks</a></li>
+            <li id="o_commands_eventhandler"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=eventhandler" target="content_frame">Eventhandler</a></li>
+            <li id="o_commands_notifications"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=notification" target="content_frame">Notifications</a></li>
           </ul>
         </li>
         <li id="o_contacts">

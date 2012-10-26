@@ -13,6 +13,7 @@
     <script type="text/javascript" src="[% url_prefix %]thruk/plugins/conf/conf.js"></script>
   </head>
   <body id="conf" style="background: inherit;">
+  <div style="display:none;" id="search-results"></div>
   [% content %]
 
 <script type="text/javascript">

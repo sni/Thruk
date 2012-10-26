@@ -207,7 +207,7 @@ sub get_objects {
 
 =head2 get_objects_by_type
 
-    $list = get_objects_by_type($type, [ $filter ])
+    $list = get_objects_by_type($type, [ $filter ], [ $origin])
 
 Returns list of L<Monitoring::Config::Object|Monitoring::Config::Object> objects for a type.
 
@@ -217,11 +217,14 @@ filter is verified against the name if its a scalar value. Otherwise it has to b
     attribute => value
  };
 
+ origin is used for commands and can be 'check', 'eventhandler' or 'notification'
+
 =cut
 sub get_objects_by_type {
     my $self   = shift;
     my $type   = shift;
     my $filter = shift;
+    my $origin = shift;
 
     return [] unless defined $self->{'objects'}->{'byname'}->{$type};
 
@@ -262,6 +265,49 @@ sub get_objects_by_type {
         } else {
             push @{$objs}, $obj;
         }
+    }
+
+    # filter by origin?
+    if($type eq 'command' and defined $origin) {
+        my $command_list = {};
+        if($origin eq 'check') {
+            for my $otype (qw/host service/) {
+                my $os = $self->get_objects_by_type($otype);
+                for my $o (@{$os}) {
+                    next unless defined $o->{'conf'}->{'check_command'};
+                    my($cmd, $args) = split(/\!/, $o->{'conf'}->{'check_command'}, 2);
+                    $command_list->{$cmd} = 1;
+                }
+            }
+        }
+        if($origin eq 'notification') {
+            my $os = $self->get_objects_by_type('contact');
+            for my $o (@{$os}) {
+                if(defined $o->{'conf'}->{'host_notification_commands'}) {
+                    for my $cmd (@{$o->{'conf'}->{'host_notification_commands'}}) {
+                        $command_list->{$cmd} = 1;
+                    }
+                }
+                if(defined $o->{'conf'}->{'service_notification_commands'}) {
+                    for my $cmd (@{$o->{'conf'}->{'service_notification_commands'}}) {
+                        $command_list->{$cmd} = 1;
+                    }
+                }
+            }
+        }
+        if($origin eq 'eventhandler') {
+            for my $otype (qw/host service/) {
+                my $os = $self->get_objects_by_type($otype);
+                for my $o (@{$os}) {
+                    next unless defined $o->{'conf'}->{'event_handler'};
+                    for my $cmd (@{$o->{'conf'}->{'event_handler'}}) {
+                        $command_list->{$cmd} = 1;
+                    }
+                }
+            }
+        }
+        # reduce object list by origin filter
+        @{$objs} = grep { defined $command_list->{$_->get_primary_name()} } @{$objs};
     }
 
     return $objs;

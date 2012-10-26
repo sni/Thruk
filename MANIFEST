@@ -143,6 +143,17 @@ plugins/plugins-available/conf/root/conf.css
 plugins/plugins-available/conf/root/conf.js
 plugins/plugins-available/conf/root/images/file.xcf
 plugins/plugins-available/conf/root/images/file_cfg.png
+plugins/plugins-available/conf/root/images/file_empty.xcf
+'plugins/plugins-available/conf/root/images/Filetype PDF.png'
+plugins/plugins-available/conf/root/images/obj_command.png
+plugins/plugins-available/conf/root/images/obj_contact.png
+plugins/plugins-available/conf/root/images/obj_contactgroup.png
+plugins/plugins-available/conf/root/images/obj_host.png
+plugins/plugins-available/conf/root/images/obj_hostgroup.png
+plugins/plugins-available/conf/root/images/obj_service.png
+plugins/plugins-available/conf/root/images/obj_servicegroup.png
+plugins/plugins-available/conf/root/images/obj_template.xcf
+plugins/plugins-available/conf/root/images/obj_timeperiod.png
 plugins/plugins-available/conf/root/jstree/jquery.jstree.js
 plugins/plugins-available/conf/root/jstree/jstree.min.js
 plugins/plugins-available/conf/root/jstree/themes/apple/bg.jpg
