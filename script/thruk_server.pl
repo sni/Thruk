@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Catalyst::ScriptRunner;
+$ENV{'THRUK_SRC'} = 'DebugServer';
 Catalyst::ScriptRunner->run('Thruk', 'Server');
 
 1;
