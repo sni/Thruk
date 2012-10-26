@@ -18,7 +18,6 @@
 <script type="text/javascript">
 <!--
 function filter_objects(val) {
-    debug(val);
     jQuery('DIV.browser_file_item').each(function(nr, e){
         if(e.title.match(val)) {
             e.style.display="inherit";
@@ -29,7 +28,5 @@ function filter_objects(val) {
 }
 -->
 </script>
-
-
 
 [% END %]
