@@ -275,7 +275,7 @@ sub get_objects_by_type {
                 my $os = $self->get_objects_by_type($otype);
                 for my $o (@{$os}) {
                     next unless defined $o->{'conf'}->{'check_command'};
-                    my($cmd, $args) = split(/\!/, $o->{'conf'}->{'check_command'}, 2);
+                    my($cmd, $args) = split(/\!/mx, $o->{'conf'}->{'check_command'}, 2);
                     $command_list->{$cmd} = 1;
                 }
             }
