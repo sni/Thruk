@@ -1653,37 +1653,23 @@ sub _file_browser {
 sub _object_tree {
     my($self, $c) = @_;
 
-    # create list of host templates
-    my $hosttemplates = {};
-    my $objs = $c->{'obj_db'}->get_templates_by_type('host');
-    for my $h (@{$objs}) {
-        if(!defined $h->{'conf'}->{'use'}) {
-            $hosttemplates->{$h->get_template_name()} = $h;
-        } else {
-            for my $tname (@{$h->{'conf'}->{'use'}}) {
-                my $t = $c->{'obj_db'}->get_template_by_name('host', $tname);
-                $t->{'child_templates'} = {} unless defined $t->{'child_templates'};
-                $t->{'child_templates'}->{$h->get_template_name()} = $h;
+    # create list of templates
+    for my $type (qw/host service contact/) {
+        my $templates = {};
+        my $objs = $c->{'obj_db'}->get_templates_by_type($type);
+        for my $o (@{$objs}) {
+            if(!defined $o->{'conf'}->{'use'}) {
+                $templates->{$o->get_template_name()} = $o;
+            } else {
+                for my $tname (@{$o->{'conf'}->{'use'}}) {
+                    my $t = $c->{'obj_db'}->get_template_by_name($type, $tname);
+                    $t->{'child_templates'} = {} unless defined $t->{'child_templates'};
+                    $t->{'child_templates'}->{$o->get_template_name()} = $o;
+                }
             }
         }
+        $c->stash->{$type.'templates'} = $templates;
     }
-    $c->stash->{'hosttemplates'} = $hosttemplates;
-
-    # create list of service templates
-    my $servicetemplates = {};
-    $objs = $c->{'obj_db'}->get_templates_by_type('service');
-    for my $s (@{$objs}) {
-        if(!defined $s->{'conf'}->{'use'}) {
-            $servicetemplates->{$s->get_template_name()} = $s;
-        } else {
-            for my $tname (@{$s->{'conf'}->{'use'}}) {
-                my $t = $c->{'obj_db'}->get_template_by_name('service', $tname);
-                $t->{'child_templates'} = {} unless defined $t->{'child_templates'};
-                $t->{'child_templates'}->{$s->get_template_name()} = $s;
-            }
-        }
-    }
-    $c->stash->{'servicetemplates'} = $servicetemplates;
 
     $c->stash->{'template'} = 'conf_objects_tree.tt';
     return;

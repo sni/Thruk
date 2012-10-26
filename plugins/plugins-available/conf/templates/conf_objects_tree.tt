@@ -7,12 +7,15 @@
         <li id="o_commands">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command" target="content_frame">Commands</a>
           <ul>
-            <li id="o_commands_checks"><a href="#">Checks</a></li>
-            <li id="o_commands_eventhandler"><a href="#">Eventhandler</a></li>
-            <li id="o_commands_notifications"><a href="#">Notifications</a></li>
+            <li id="o_commands_checks"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;subtype=checks" target="content_frame">Checks</a></li>
+            <li id="o_commands_eventhandler"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;subtype=eventhandler" target="content_frame">Eventhandler</a></li>
+            <li id="o_commands_notifications"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;subtype=notifications" target="content_frame">Notifications</a></li>
           </ul>
         </li>
-        <li id="o_contacts"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contact" target="content_frame">Contacts</a></li>
+        <li id="o_contacts">
+          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contact" target="content_frame">Contacts</a>
+          [% PROCESS child childs=contacttemplates type="contact" %]
+        </li>
         <li id="o_contactgroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contactgroup" target="content_frame">Contactgroups</a></li>
         <li id="o_hosts">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=host" target="content_frame">Hosts</a>

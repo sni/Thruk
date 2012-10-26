@@ -134,3 +134,30 @@ TD.plugin_description {
     width: 170px;
     white-space: normal;
 }
+
+/* object browser */
+DIV.browser_file_item {
+  height: 65px;
+  width: 100px;
+  float: left;
+  margin: 5px;
+  z-index: 10;
+  -moz-user-select: none;
+  position: relative;
+}
+
+DIV.browser_file_item IMG {
+  -moz-user-select: none;
+  margin-left: 27px;
+}
+
+DIV.browser_file_title {
+  white-space: nowrap;
+  -moz-user-select: none;
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  height: 18px;
+  text-align: center;
+  overflow: visible;
+}

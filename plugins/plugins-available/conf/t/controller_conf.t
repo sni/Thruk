@@ -6,7 +6,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1037;
+    plan tests => 1061;
 }
 
 BEGIN {
@@ -64,6 +64,8 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=listref&data.name='.$host,
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=start',
     '/thruk/cgi-bin/conf.cgi?sub=objects&tools=check_object_references',
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=tree',
+    '/thruk/cgi-bin/conf.cgi?sub=objects&action=tree_objects&type=command',
     '/thruk/cgi-bin/conf.cgi?sub=backends',
 ];
 

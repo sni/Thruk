@@ -8,9 +8,9 @@
   [% fullname = o.get_primary_name() %]
   [% name = fullname %]
   [% IF name.length > 15 %][% name = name.substr(0,15) _ '..' %][% END %]
-  <div style="height: 65px; width: 100px; float: left; margin: 5px; z-index: 10; -moz-user-select: none; position: relative;" class="jstree-draggable clickable object" ondblclick="window.location='conf.cgi?bare=1&sub=objects&type=[% o.get_type() %]&data.id=[% o.get_id() %]'" title="[% fullname %]">
-    <img src="/thruk/plugins/conf/images/file_cfg.png" style="-moz-user-select: none; margin-left: 27px;">
-    <div style="white-space: nowrap; -moz-user-select: none; position: absolute; bottom: 0px; width: 100%; height: 18px; text-align: center; overflow: visible;">[% name %]</div>
+  <div class="jstree-draggable clickable browser_file_item" ondblclick="window.location='conf.cgi?bare=1&sub=objects&type=[% o.get_type() %]&data.id=[% o.get_id() %]'" title="[% fullname %]">
+    <img src="/thruk/plugins/conf/images/file_cfg.png" alt="config item">
+    <div class="browser_file_title">[% name %]</div>
   </div>
   [% END %]
 
@@ -18,7 +18,7 @@
 <!--
 function filter_objects(val) {
     debug(val);
-    jQuery('DIV.object').each(function(nr, e){
+    jQuery('DIV.browser_file_item').each(function(nr, e){
         if(e.title.match(val)) {
             e.style.display="inherit";
         } else {
