@@ -745,16 +745,16 @@ sub single_search {
             push @servicefilter,       { host_parents => { $listop => $value } };
             push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
-        # Impacts are only available in Shinken
-        elsif ( $filter->{'type'} eq 'impact' && $c->stash->{'enable_shinken_features'}) {
+        # Root Problems are only available in Shinken
+        elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,          { source_problems      => { $listop => $value } };
             push @hosttotalsfilter,    { source_problems      => { $listop => $value } };
             push @servicefilter,       { source_problems      => { $listop => $value } };
             push @servicetotalsfilter, { source_problems      => { $listop => $value } };
         }
-        # Root Problems are only available in Shinken
-        elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
+        # Impacts are only available in Shinken
+        elsif ( $filter->{'type'} eq 'impact' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,          { impacts      => { $listop => $value } };
             push @hosttotalsfilter,    { impacts      => { $listop => $value } };
@@ -762,7 +762,7 @@ sub single_search {
             push @servicetotalsfilter, { impacts      => { $listop => $value } };
         }
         # Business Impact (criticity) is only available in Shinken
-        elsif ( $filter->{'type'} eq 'business impact' ) {
+        elsif ( $filter->{'type'} eq 'business impact' || $filter->{'type'} eq 'priority' ) {
             next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,    { criticity => { $op => $value } };
             push @servicefilter, { criticity => { $op => $value } };
