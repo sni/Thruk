@@ -24,6 +24,7 @@ $Monitoring::Config::Object::Servicedependency::Defaults = {
 
     'dependent_host_name'           => { type => 'LIST', 'link' => 'host' },
     'dependent_hostgroup_name'      => { type => 'LIST', 'link' => 'hostgroup' },
+    'dependent_servicegroup_name'   => { type => 'LIST', 'link' => 'servicegroup' },
     'dependent_service_description' => { type => 'STRING' },
     'host_name'                     => { type => 'LIST', 'link' => 'host' },
     'hostgroup_name'                => { type => 'LIST', 'link' => 'hostgroup' },
