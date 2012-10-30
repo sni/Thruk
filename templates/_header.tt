@@ -125,7 +125,7 @@
               <th>Report:</th>
               <td>
                 <img src="[% url_prefix %]thruk/themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='reports.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% short_uri(c).replace('&amp;', '&') | uri %]'; return false;">
+                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='reports.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% ELSE %][% short_uri(c).replace('&amp;', '&') | uri %][% END %]'; return false;">
               </td>
             </tr>
           [% END %]
