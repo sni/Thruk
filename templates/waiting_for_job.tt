@@ -17,6 +17,7 @@
 
     <div align="center">
     [% IF job_id %]
+    <!-- thruk: waiting for job [% job_id %] -->
     [% IF job_message %][% job_message %][% ELSE %]please stand by while your job is being processed...[% END %]<br>
     <div id="progressbar" style="width: 400px; color: inherit;"><div align="center" id="job_time" style="z-index: 100;  line-height: 24px; position: absolute; width: 400px; color: inherit;">[% job_time %]s</div></div>
     <script type="text/javascript">

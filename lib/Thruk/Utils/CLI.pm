@@ -461,11 +461,11 @@ sub _request_url {
        and $result->{'headers'}->{'Location'} =~ m|/thruk/cgi\-bin/job\.cgi\?job=(.*)$|mx) {
         my $jobid = $1;
         my $x = 0;
-        while($result->{'code'} == 302) {
+        while($result->{'code'} == 302 or $result->{'result'} =~ m/thruk:\ waiting\ for\ job\ $jobid/mx) {
             my $sleep = 0.1 * $x;
             $sleep = 1 if $x > 10;
             sleep($sleep);
-            $url = $result->{'headers'}->{'Location'};
+            $url = $result->{'headers'}->{'Location'} if defined $result->{'headers'}->{'Location'};
             local $ENV{'REQUEST_URI'}      = $url;
             local $ENV{'SCRIPT_NAME'}      = $url;
                   $ENV{'SCRIPT_NAME'}      =~ s/\?(.*)$//gmx;

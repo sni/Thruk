@@ -956,8 +956,8 @@ sub _replace_img {
         if($url =~ m|^\w+\.cgi|gmx) {
             $url = '/thruk/cgi-bin/'.$url;
         }
-        Thruk::Utils::CLI::_request_url($c, $url);
-        my $result = $ENV{'HTTP_RESULT'};
+        my @res = Thruk::Utils::CLI::_request_url($c, $url);
+        my $result = $res[1];
         my $text = "data:image/png;base64,".encode_base64($result->{'result'}, '');
         return $a.$b.$text.$d.$e;
     }
