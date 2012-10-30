@@ -758,6 +758,7 @@ plugins/plugins-available/reports/root/reports.css
 plugins/plugins-available/reports/root/reports.js
 plugins/plugins-available/reports/t/controller_reports.t
 plugins/plugins-available/reports/t/reports_cli.t
+plugins/plugins-available/reports/t/reports_utils.t
 plugins/plugins-available/reports/templates/passthrough_pdf.tt
 plugins/plugins-available/reports/templates/pdf/defaults/mail.tt
 plugins/plugins-available/reports/templates/pdf/defaults/prepare.tt

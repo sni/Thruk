@@ -1461,6 +1461,14 @@ ex.:
   report_nice_level = 5
 
 
+==== report_base_url
+Url used to replace relative links in html reports.
+
+ex.:
+
+  report_base_url = http://host.local/thruk/cgi-bin/
+
+
 ==== logcache
 Enables caching logfiles for faster access. Cache supports MongoDB
 only. Format is a MongoDB connection string like 'hostname:port/db'.

@@ -430,6 +430,7 @@ sub get_url {
         }
         if($Thruk::Utils::PDF::ctype eq 'text/html') {
             $result->{'result'} = _replace_css_and_images($result->{'result'});
+            $result->{'result'} = _replace_links($result->{'result'}, $url, $c->config->{'report_base_url'});
         }
         my $attachment = $c->stash->{'attachment'};
         open(my $fh, '>', $attachment);
@@ -940,6 +941,47 @@ sub _replace_css_and_images {
                ([^>]*>)
               /&_replace_img($1,$2,$3,$4,$5)/gemx;
     return $text;
+}
+
+##########################################################
+sub _replace_links {
+    my($text, $url, $baseurl) = @_;
+    return $text unless defined $baseurl;
+    $baseurl =~ s|/thruk/.*||gmx;
+    $baseurl =~ s|/$||gmx;
+    $baseurl .= '/thruk/cgi-bin/';
+    $text =~ s/(<a[^>]*href=)
+               ("|')
+               ([^'"]*)
+               ("|')
+               ([^>]*>)
+              /&_replace_link($baseurl,$1,$2,$3,$4,$5)/gemx;
+
+    $text =~ s/(<form[^>]*action=)
+               ("|')
+               ([^'"]*)
+               ("|')
+               ([^>]*>)
+              /&_replace_link($baseurl,$1,$2,$3,$4,$5)/gemx;
+
+    return $text;
+}
+
+##########################################################
+sub _replace_link {
+    my($baseurl,$a,$b,$url,$d,$e) = @_;
+    if($url !~ m|^\w+://|mx and $url !~ m|^\#|mx) {
+        # absolute url
+        if($url =~ m/^\//mx) {
+            $baseurl =~ s|/thruk/cgi\-bin/$||mx;
+            $url = $baseurl.$url;
+        }
+        # relative url
+        else {
+            $url = $baseurl.$url;
+        }
+    }
+    return $a.$b.$url.$d.$e;
 }
 
 ##########################################################
