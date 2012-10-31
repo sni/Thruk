@@ -1,7 +1,12 @@
 use strict;
 use warnings;
-use Test::More tests => 4;
+use Test::More;
 use Data::Dumper;
+
+BEGIN {
+    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+    plan tests => 4;
+}
 
 BEGIN {
     use lib('t');
