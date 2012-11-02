@@ -968,6 +968,10 @@ sub _process_objects_page {
         $c->stash->{'data_name'}      = $obj->get_name();
         $c->stash->{'type'}           = $obj->get_type();
         $c->stash->{'used_templates'} = $obj->get_used_templates($c->{'obj_db'});
+        # make sure object has either a real file or none
+        if(!defined $obj->{'file'} || !defined $obj->{'file'}->{'path'}) {
+            delete $obj->{'file'};
+        }
         $c->stash->{'file_link'}      = $obj->{'file'}->{'path'} if defined $obj->{'file'};
     }
 
