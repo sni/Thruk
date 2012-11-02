@@ -632,3 +632,13 @@ function on_empty_click(inp) {
     newin.name = 'obj.'+td.value;
     return false;
 }
+
+/* validate objects edit form */
+function conf_validate_object_form(f) {
+    var fileselect = jQuery(f).find('#fileselect').first().val();
+    if(fileselect != undefined && fileselect == "") {
+        alert("please enter filename for this object.");
+        return false;
+    }
+    return true;
+}

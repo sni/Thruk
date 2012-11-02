@@ -12,7 +12,7 @@
 [% END %]
 
 [% duplicate_keys = {} %]
-<form action="conf.cgi" method="POST">
+<form action="conf.cgi" method="POST" onsubmit="return conf_validate_object_form(this);">
 <input type="submit" name="send" value="save" style="display:none">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="type" value="[% type %]">
@@ -42,7 +42,7 @@
                   [% object.file.path %] [% IF object.line > 0 %] line [% object.line %][% END %][% IF object.file.readonly %] <span style="color: #EB6900"> (read-only)</span>[% END %]
                 [% ELSE %]
                   <span style="[% IF subcat != 'config' %]display:none;[% END %]" class="sub_1">
-                  save to: <input type="text" class="deletable" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', { striped:false, autosubmit:false, templates:false, data:data, emptymsg:'file will be created'})">
+                  save to: <input type="text" class="deletable" placeholder="enter filename" name="data.file" id="fileselect" value="[% new_file %]" onclick="ajax_search.init(this, 'file', { striped:false, autosubmit:false, templates:false, data:data, emptymsg:'file will be created'})">
                   </span>
                 [% END %]
               </span>
