@@ -89,7 +89,7 @@ return new object
 sub BUILD {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
-    if($coretype eq 'shinken') {
+    if($coretype eq 'any' or $coretype eq 'shinken') {
         $Monitoring::Config::Object::Service::Defaults->{'business_impact'}             = { type => 'CHOOSE', values => [5,4,3,2,1,0], keys => [ 'Business Critical', 'Top Production', 'Production', 'Standard', 'Testing', 'Development' ], cat => 'Extended' };
         $Monitoring::Config::Object::Service::Defaults->{'criticity'}                   = { type => 'ALIAS', 'name' => 'business_impact' };
         $Monitoring::Config::Object::Service::Defaults->{'maintenance_period'}          = { type => 'STRING', 'link' => 'timeperiod', cat => 'Checks' };

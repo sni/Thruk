@@ -1,0 +1,220 @@
+#!/bin/sh
+# read rc file if exists
+if [ -e ~/.thruk  ]; then
+    . ~/.thruk
+fi
+
+if [ ! -f $(dirname $0)/../thruk.conf ]; then
+  export PERL5LIB=$PERL5LIB:/usr/lib/thruk/perl5:/usr/share/thruk/lib;
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+use Thruk::Utils;
+use lib '/usr/share/thruk/lib/plugins/plugins-available/conf/lib/';
+use lib 'plugins/plugins-available/conf/lib/';
+use Monitoring::Config;
+use Monitoring::Config::File;
+
+our $VERSION = '1.55';
+my $branch   = '';
+$branch      = Thruk::Utils::get_git_name() unless $branch ne '';
+
+my $options = {
+    'verbose'  => 0,
+    'files'    => [],
+    'inline'   => 0,
+    'coretype' => 'any',
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+GetOptions (
+   "h|help"             => \$options->{'help'},
+   "v|verbose"          => \$options->{'verbose'},
+   "V|version"          => \$options->{'version'},
+   "c|core=s"           => \$options->{'coretype'},
+   "i"                  => \$options->{'inline'},
+   "r"                  => \$options->{'recursive'},
+   "<>"                 => sub { push @{$options->{'files'}}, $_[0] },
+) or pod2usage( { -verbose => 2, -message => 'error in options' } );
+
+if($options->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
+pod2usage( { -verbose => 2, -exit => 1 } ) if $options->{'help'};
+
+##############################################
+# make sure we don't touch owner and permissions
+local $ENV{'THRUK_NO_TOUCH_PERM'} = 1;
+
+my $errors = 0;
+
+# attached to a terminal?
+if (!-t STDIN and scalar @{$options->{'files'}} == 0) {
+    my $file = Monitoring::Config::File->new('virt.cfg', [], $options->{'coretype'});
+    my $text = "";
+    while(<STDIN>) {
+        $text .= $_;
+        if($_ =~ m/^\s*}\s*$/mx) {
+            $file->update_objects_from_text($text);
+            $errors += _print_errors($file);
+            print $file->_get_new_file_content();
+            $text = '';
+        }
+    }
+    $file->update_objects_from_text($text);
+    $errors += _print_errors($file);
+    print $file->_get_new_file_content();
+    exit $errors;
+}
+
+pod2usage( { -verbose => 2, -exit => 1 } ) if scalar @{$options->{'files'}} == 0;
+
+# iterate all given files
+for my $filename (@{$options->{'files'}}) {
+    $errors += _process_file($filename);
+}
+
+exit $errors;
+
+
+##############################################
+# SUBS
+##############################################
+sub _process_file {
+    my($filename) = @_;
+    if(!-e $filename) {
+        print STDERR "ERROR: ", $filename, " ", $!, "\n";
+        return 1;
+    }
+    if(-d $filename) {
+        if(!$options->{'recursive'}) {
+            print STDERR "ERROR: won't process directory unless -r specified\n";
+            return 1;
+        } else {
+            my $errors = 0;
+            my $files = Monitoring::Config->_get_files_for_folder($filename);
+            for my $f (@{$files}) {
+                $errors += _process_file($f);
+            }
+            return $errors;
+        }
+    }
+
+    print STDERR "parsing ", $filename, "\n" if $options->{'verbose'};
+    my $file = Monitoring::Config::File->new($filename, [], $options->{'coretype'});
+    die("could not create file object") unless defined $file;
+    $file->update_objects();
+    return 1 if _print_errors($file);
+    if($options->{'inline'}) {
+        $file->save();
+        print STDERR "wrote ", $filename, "\n";
+    } else {
+        print $file->_get_new_file_content();
+    }
+    return 0;
+}
+
+##############################################
+sub _print_errors {
+    my($file) = @_;
+    if(scalar @{$file->{'parse_errors'}} > 0) {
+        for my $err (@{$file->{'parse_errors'}}) { _print_error($err); }
+        return 1;
+    }
+    if(scalar @{$file->{'errors'}} > 0) {
+        for my $err (@{$file->{'errors'}}) { _print_error($err); }
+        return 1;
+    }
+    return 0;
+}
+
+##############################################
+sub _print_error {
+    my($err) = @_;
+    $err =~ s/\ in\ <a\ href.*?<\/a>//gmx;
+    print STDERR "ERROR: ", $err, "\n";
+    return;
+}
+
+1;
+
+##############################################
+
+=head1 NAME
+
+naglint - beautify nagios config files
+
+=head1 SYNOPSIS
+
+Usage: naglint [options] <file> [<files...>]
+
+Options:
+  -h, --help                    Show this help message and exit
+  -v, --verbose                 Print verbose output
+  -V, --version                 Print version
+  -i                            replace content inline instead of printing to stdout
+
+=head1 DESCRIPTION
+
+This script beautifies nagios config files.
+
+=head1 OPTIONS
+
+naglint has the following arguments:
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-v> , B<--verbose>
+
+    print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
+
+=item B<-c> , B<--core>
+
+    use specific config type. can be 'nagios', 'icinga' or 'shinken'.
+    enables core type specific attributes.
+
+=item B<-i>
+
+    edit given files inline and overwrite them with their beautified objects
+
+=item B<-r>
+
+    read directories recursivly
+
+=back
+
+=head1 RETURN VALUE
+
+returns 0 on success then number of errors otherwise
+
+=head1 EXAMPLES
+
+Beautify single config file
+
+  %> naglint objects.cfg
+
+Process objects from STDIN
+
+  %> cat objects.cfg | naglint > beauty.cfg
+
+=head1 AUTHOR
+
+2012, Sven Nierlein, <sven@nierlein.de>
+
+=cut

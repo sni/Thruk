@@ -14,7 +14,6 @@ AutoReqProv:   no
 Patch0:        0001-thruk.conf.patch
 Patch1:        0002-log4perl.conf.patch
 Patch2:        0004-thruk_fastcgi.pl.patch
-Patch3:        0005-thruk_script.patch
 Requires(pre): shadow-utils
 Requires:      perl logrotate gd
 %if %{defined suse_version}
@@ -36,7 +35,6 @@ rm -rf %{buildroot}
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 find . -name \*.orig -delete
 
 %build
@@ -111,6 +109,7 @@ cp %{buildroot}%{_sysconfdir}/thruk/ssi/status-header.ssi     %{buildroot}%{_sys
 mv %{buildroot}%{_datadir}/thruk/support/thruk_local.conf.example %{buildroot}%{_sysconfdir}/thruk/thruk_local.conf
 mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/thruk/fcgid_env.sh
 mv %{buildroot}%{_datadir}/thruk/script/thruk %{buildroot}%{_bindir}/thruk
+mv %{buildroot}%{_datadir}/thruk/script/naglint %{buildroot}%{_bindir}/naglint
 %if %{defined suse_version}
 mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/thruk.conf
 %else

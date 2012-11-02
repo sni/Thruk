@@ -41,7 +41,7 @@ sub BUILD {
     my $class    = shift || __PACKAGE__;
     my $coretype = shift;
 
-    return unless $coretype eq 'icinga';
+    return unless($coretype eq 'any' or $coretype eq 'icinga');
 
     my $self = {
         'type'        => 'module',

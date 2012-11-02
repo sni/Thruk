@@ -55,7 +55,7 @@ $Monitoring::Config::Object::Types = [
 =head2 new
 
     new({
-        coretype => coretype,  # can be nagios, icinga or shinken
+        coretype => coretype,  # can be nagios, icinga, shinken or any
         type     => type,
         line     => nr,
         file     => file object,

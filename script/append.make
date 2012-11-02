@@ -15,11 +15,11 @@ version:
 	date=`date "+%B %d, %Y"`; \
 	sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk/Config.pm && \
 	debversion="$$newversion" && \
-	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk/Config.pm script/thruk; debversion="$$newversion~$$branch"; fi && \
+	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk/Config.pm -i script/thruk -i script/naglint; debversion="$$newversion~$$branch"; fi && \
 	dch --newversion "$$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"; \
 	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
 		sed -r "s/Version:\s*$(VERSION)/Version:       $$newversion/" -i support/thruk.spec && \
-		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i lib/Thruk/Config.pm -i support/thruk.spec -i script/thruk && \
+		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i lib/Thruk/Config.pm -i support/thruk.spec -i script/thruk -i  script/naglint && \
 		sed -r "s/_$(VERSION)_/_$$newversion\_/" -i docs/THRUK_MANUAL.txt && \
 		sed -r "s/\-$(VERSION)\./-$$newversion\./" -i MANIFEST -i docs/THRUK_MANUAL.txt -i root/thruk/startup.html && \
 		sed -r "s/\-$(VERSION)\-/-$$newversion\-/" -i docs/THRUK_MANUAL.txt && \

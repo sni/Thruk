@@ -15,6 +15,7 @@ debian/thruk.manpages
 dist.ini
 docs/FAQ.html
 docs/FAQ.txt
+docs/naglint.3
 docs/source/arch.graffle
 docs/source/arch.png
 docs/source/arch_preview.png
@@ -863,6 +864,7 @@ root/thruk/media/warning.wav
 root/thruk/startup.html
 root/thruk/themes
 script/append.make
+script/naglint
 script/thruk
 script/thruk_auth
 script/thruk_cgi.pl
@@ -882,7 +884,6 @@ ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
 support/0002-log4perl.conf.patch
 support/0004-thruk_fastcgi.pl.patch
-support/0005-thruk_script.patch
 support/apache_fcgid.conf
 support/fcgid_env.sh
 support/htpasswd
@@ -911,7 +912,8 @@ t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mongodb.t
 t/100-backend_shinken.t
-t/100-cli.t
+t/100-cli-naglint.t
+t/100-cli-thruk.t
 t/100-model_Thruk.t
 t/100-themes.t
 t/200-view_Excel.t

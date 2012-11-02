@@ -3,6 +3,12 @@
 if [ -e ~/.thruk  ]; then
     . ~/.thruk
 fi
+
+if [ ! -f $(dirname $0)/../thruk.conf ]; then
+  export PERL5LIB=$PERL5LIB:/usr/lib/thruk/perl5:/usr/share/thruk/lib;
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+fi
+
 eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
     if 0;
 
@@ -62,6 +68,7 @@ Usage: thruk [options] | url]
 Options:
   -h, --help                    Show this help message and exit
   -v, --verbose                 Print verbose output
+  -V, --version                 Print version
 
   -b, --backend=<backend>       Comma seperated list of backends/sites
                                 which should be used for querys.
@@ -98,6 +105,10 @@ script has the following arguments
 =item B<-v> , B<--verbose>
 
     print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
 
 =item B<-b> I<backend>, B<--backend>=I<backend>
 

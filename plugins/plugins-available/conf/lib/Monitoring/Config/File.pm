@@ -8,6 +8,7 @@ use Monitoring::Config::Object;
 use File::Slurp;
 use utf8;
 use Encode qw(encode_utf8 decode);
+use Thruk::Utils::Conf;
 use Thruk::Utils::IO;
 
 =head1 NAME

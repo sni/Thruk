@@ -66,6 +66,8 @@ sub ensure_permissions {
     my($mode, $path) = @_;
     return unless -e $path;
 
+    return if defined $ENV{'THRUK_NO_TOUCH_PERM'};
+
     my @stat = stat($path);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
