@@ -235,11 +235,6 @@ sub index :Path :Args(1) :ActionClass('RenderView') {
             cluck($c->stash->{errorMessage});
         }
     }
-    if(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'DebugServer') {
-        print STDERR $c->stash->{errorMessage}, "\n" if $c->stash->{errorMessage};
-        print STDERR $c->stash->{errorDetails}, "\n" if $c->stash->{errorDetails};
-        print STDERR $c->stash->{stacktrace}, "\n"   if $c->stash->{stacktrace};
-    }
 
     return 1;
 }
