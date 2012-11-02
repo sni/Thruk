@@ -2902,7 +2902,7 @@ var ajax_search = {
         while(tmpElem && tmpElem.parentNode) {
             tmpElem = tmpElem.parentNode;
             if(tmpElem.tagName == 'FORM') {
-                tmpElem.onsubmit = ajax_search.hide_results;
+                addEvent(tmpElem, 'submit', ajax_search.hide_results);
                 tmpElem.setAttribute("autocomplete", "off");
             }
         }
