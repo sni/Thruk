@@ -1469,7 +1469,14 @@ sub _object_save {
             Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' saved with errors', $obj->{'file'}->{'errors'} );
             return; # return, otherwise details would not be displayed
         } else {
-            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully' );
+            # does the object have a name?
+            if(!defined $c->stash->{'data_name'} or $c->stash->{'data_name'} eq '') {
+                $obj->set_name('undefined');
+                $c->{'obj_db'}->_rebuild_index();
+                Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' saved without a name' );
+            } else {
+                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully' );
+            }
         }
         return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
     }

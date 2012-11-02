@@ -7,6 +7,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - fixed creating e-mail reports for availability pages
           - config tool:
             - added object browser
+            - show warning when saving objects without a name
 
 1.54     Mon Oct 22 15:08:26 CEST 2012
           - added support for setting custum variables without _ now

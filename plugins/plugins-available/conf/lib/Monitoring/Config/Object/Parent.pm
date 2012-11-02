@@ -604,6 +604,32 @@ sub set_uniq_id {
 
 ##########################################################
 
+=head2 set_name
+
+sets new name for this object
+
+=cut
+sub set_name {
+    my($self, $newname) = @_;
+
+    die("no new name!") unless defined $newname;
+
+    my $conf = $self->{'conf'};
+    if(defined $conf->{'register'} and $conf->{'register'} == 0) {
+        $conf->{'name'} = $newname;
+        return;
+    }
+
+    if(ref $self->{'primary_key'} eq '') {
+        $conf->{$self->{'primary_key'}} = $newname;
+    }
+
+    return;
+}
+
+
+##########################################################
+
 =head2 _sort_by_object_keys
 
 sort function for object keys
