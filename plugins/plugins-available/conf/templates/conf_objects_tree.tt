@@ -97,4 +97,5 @@ jQuery(function($) {
 -->
 </script>
 
+[% type="" %]
 [% END %]
