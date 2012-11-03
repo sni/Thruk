@@ -452,11 +452,11 @@ sub _get_filter {
         push @hostfilter,    { current_host_groups => { '>=' => $hostgroup }};
         push @servicefilter, { current_host_groups => { '>=' => $hostgroup }};
     }
-    elsif(defined $host and $host ne 'all') {
+    if(defined $host and $host ne 'all') {
         push @hostfilter,    { host_name => $host };
         push @servicefilter, { host_name => $host };
     }
-    elsif(defined $servicegroup and $servicegroup ne 'all') {
+    if(defined $servicegroup and $servicegroup ne 'all') {
         push @hostfilter,    { current_service_groups => { '>=' => $servicegroup }};
         push @servicefilter, { current_service_groups => { '>=' => $servicegroup }};
     }
