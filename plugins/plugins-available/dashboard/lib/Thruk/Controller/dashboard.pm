@@ -171,6 +171,8 @@ sub _process_dashboard_page {
                 push (@{$filter_service{'-or'}}, {host_name => $hostname});
             }
             my $stats;
+            delete $filter_host{'-or'}    if scalar @{$filter_host{'-or'}} == 0;
+            delete $filter_service{'-or'} if scalar @{$filter_service{'-or'}} == 0;
             $stats->{'hosts'} = $c->{'db'}->get_host_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), \%filter_host]);
             $stats->{'services'} = $c->{'db'}->get_service_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), \%filter_service]);
             $stats->{'name'} = $name;
@@ -210,6 +212,8 @@ sub _process_dashboard_page {
 
 
             my $stats;
+            delete $filter_host{'-or'}    if scalar @{$filter_host{'-or'}} == 0;
+            delete $filter_service{'-or'} if scalar @{$filter_service{'-or'}} == 0;
             $stats->{'services'} = $c->{'db'}->get_service_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), \%filter_service]);
             $stats->{'hosts'} = $c->{'db'}->get_host_stats_dashboard(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), \%filter_host]);
             $stats->{'name'} = $name;
