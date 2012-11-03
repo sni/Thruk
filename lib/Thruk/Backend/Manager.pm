@@ -1440,6 +1440,9 @@ sub _sum_answer {
                 if( !defined $return->{$key} ) {
                     $return->{$key} = $data->{$peername}->{$key};
                 }
+                elsif($key eq 'peer_key') {
+                    $return->{$key} .= ','.$data->{$peername}->{$key};
+                }
                 elsif ( looks_like_number( $data->{$peername}->{$key} ) ) {
                     $return->{$key} += $data->{$peername}->{$key};
                 }
