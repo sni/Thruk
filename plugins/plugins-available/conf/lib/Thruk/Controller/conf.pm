@@ -983,6 +983,7 @@ sub _process_objects_page {
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
+    $c->stash->{'referer'}           = $c->{'request'}->{'parameters'}->{'referer'} || '';
     return 1;
 }
 
@@ -1478,7 +1479,11 @@ sub _object_save {
                 Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully' );
             }
         }
-        return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
+        if($c->{'request'}->{'parameters'}->{'referer'}) {
+            return $c->response->redirect($c->{'request'}->{'parameters'}->{'referer'});
+        } else {
+            return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
+        }
     }
 
     return;

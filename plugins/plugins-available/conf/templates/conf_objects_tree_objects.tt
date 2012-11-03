@@ -9,7 +9,7 @@
   [% name = fullname %]
   [% type = o.get_type() %]
   [% IF name.length > 15 %][% name = name.substr(0,15) _ '..' %][% END %]
-  <div class="jstree-draggable clickable browser_file_item" ondblclick="window.location='conf.cgi?bare=1&amp;sub=objects&amp;type=[% type %]&amp;data.id=[% o.get_id() %]'" title="[% fullname %]">
+  <div class="jstree-draggable clickable browser_file_item" ondblclick="window.location='conf.cgi?bare=1&amp;sub=objects&amp;type=[% type %]&amp;data.id=[% o.get_id() %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]'" title="[% fullname %]">
     <img src="/thruk/plugins/conf/images/obj_[% type %].png" alt="config item">
     <div class="browser_file_title">[% name %]</div>
   </div>

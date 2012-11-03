@@ -14,6 +14,7 @@
   </head>
   <body id="conf" style="background: inherit;">
   <div style="display:none;" id="search-results"></div>
+  [% PROCESS _message.tt %]
   [% content %]
 
 <script type="text/javascript">
