@@ -736,9 +736,15 @@ sub _set_service_macros {
 
 =head2 _do_on_peers
 
-  _do_on_peers
+  _do_on_peers($function, $options)
 
-returns a result for a sub called on all peers
+returns a result for a sub called for all peers
+
+  $function is the name of the sub called on our peers
+  $options is a hash:
+  {
+    backend => []     # array of backends where this sub should be called
+  }
 
 =cut
 
