@@ -6,6 +6,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - reports:
             - replace links in html reports
             - fixed creating e-mail reports for availability pages
+            - fixed sending first e-mail attachment always as report.pdf
           - config tool:
             - added object browser
             - show warning when saving objects without a name

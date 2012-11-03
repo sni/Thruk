@@ -107,6 +107,7 @@ sub report_send {
     $c->stash->{'r'} = $report;
 
     my $attachment = generate_report($c, $nr, $report);
+    $report        = _read_report_file($c, $nr); # update report data, attachment would be wrong otherwise
     if(defined $attachment) {
 
         $c->stash->{'block'} = 'mail';
