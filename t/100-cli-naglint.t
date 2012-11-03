@@ -13,7 +13,13 @@ BEGIN {
     import TestUtils;
 }
 
-my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/naglint';
+my $BIN = './script/naglint';
+if(defined $ENV{'THRUK_BIN'}) {
+    $BIN = $ENV{'THRUK_BIN'};
+    $BIN =~ s/thruk$/naglint/mx;
+}
+
+ok(-f $BIN, "naglint exists: $BIN") or BAIL_OUT("no binary found");
 
 # create test file
 my($fh, $filename) = tempfile(TEMPLATE => 'tempXXXXX', SUFFIX => '.cfg');

@@ -207,6 +207,7 @@ exit 0
 
 %files
 %attr(755,root,root) %{_bindir}/thruk
+%attr(755,root,root) %{_bindir}/naglint
 %attr(755,root,root) %{_initrddir}/thruk
 %config %{_sysconfdir}/thruk/thruk.conf
 %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
