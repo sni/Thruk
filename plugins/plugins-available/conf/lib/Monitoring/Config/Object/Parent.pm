@@ -69,7 +69,11 @@ sub parse {
             if($self->{'type'} eq 'timeperiod' and $value =~ m/^\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}/gmx) {
                 $self->{'conf'}->{$attr} = $value;
             } else {
-                push @{$parse_errors}, "unknown attribute: $attr in ".Thruk::Utils::Conf::_link_obj($self);
+                if($self->{'disabled'}) {
+                    push @{$self->{'comments'}}, $attr.' '.$value;
+                } else {
+                    push @{$parse_errors}, "unknown attribute: $attr in ".Thruk::Utils::Conf::_link_obj($self);
+                }
             }
         }
     }
@@ -95,13 +99,13 @@ sub as_text {
     my $text             = "";
     my $nr_object_lines  = 0;
     for my $line (@{$self->{'comments'}}) {
-        $line =~ s/^#\s+//gmxo;
-        $line =~ s/^;\s+//gmxo;
-        unless(substr($line,0,1) eq '#' or substr($line,0,1) eq ';') {
-            $line = '# '.$line;
+        $line =~ s/^\#\s*//gmxo;
+        $line =~ s/^;\s*//gmxo;
+        unless(substr($line,0,1) eq '#') {
+            $line = ' '.$line;
         }
         $line =~ s/\s+$//gmx;
-        $text .= $line."\n";
+        $text .= '#'.$line."\n";
     }
     my $nr_comment_lines = scalar @{$self->{'comments'}};
 

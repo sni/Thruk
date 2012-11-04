@@ -914,6 +914,7 @@ t/100-backend_icinga.t
 t/100-backend_mongodb.t
 t/100-backend_shinken.t
 t/100-cli-naglint.t
+t/100-cli-naglint2.t
 t/100-cli-thruk.t
 t/100-model_Thruk.t
 t/100-themes.t
@@ -943,6 +944,10 @@ t/900-firefox-js.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js
 t/data/log4perl.conf
+t/data/naglint/comments/in.cfg
+t/data/naglint/comments/out.cfg
+t/data/naglint/module/in.cfg
+t/data/naglint/module/out.cfg
 t/data/resource.cfg
 t/data/resource2.cfg
 t/perlcriticrc
