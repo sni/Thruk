@@ -97,6 +97,7 @@ sub new {
     $current_object->{'file'}     = $conf->{'file'} if defined $conf->{'file'};
     $current_object->{'comments'} = [];
     $current_object->{'id'}       = 'new';
+    $current_object->{'disabled'} = defined $conf->{'disabled'} ? $conf->{'disabled'} : 0;
 
     if(defined $conf->{'name'}) {
         if(ref $current_object->{'primary_key'} eq 'ARRAY') {

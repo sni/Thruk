@@ -1375,6 +1375,8 @@ sub _update_obj_in_index {
     # by id
     $objects->{'byid'}->{$obj->{'id'}} = $obj;
 
+    return 1 if $obj->{'disabled'};
+
     # by template name
     if(defined $tname) {
         my $existing_id = $objects->{'byname'}->{'templates'}->{$obj->{'type'}}->{$tname};
@@ -1479,6 +1481,7 @@ sub _check_references {
     my @parse_errors;
     $self->_all_object_links_callback(sub {
         my($file, $obj, $attr, $link, $val) = @_;
+        return if $obj->{'disabled'};
         if($attr eq 'use') {
             if(!defined $self->{'objects'}->{'byname'}->{'templates'}->{$link}->{$val}) {
                 push @parse_errors, "referenced template '$val' does not exist in ".Thruk::Utils::Conf::_link_obj($obj);

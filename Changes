@@ -10,6 +10,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - config tool:
             - added object browser
             - show warning when saving objects without a name
+            - recognize disabled (commented) objects
           - Bug Fixes
             - fixed limit to groups in alert summary
 

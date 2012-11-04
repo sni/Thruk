@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 368;
+    plan tests => 373;
 }
 
 BEGIN {
@@ -289,3 +289,15 @@ $objects->init();
 $objs = $objects->get_objects();
 is(scalar @{$objects->{'errors'}}, 0, "number of errors") or diag(Dumper($objects->{'errors'}));
 is(scalar @{$objs}, 2, "number of objects");
+
+###########################################################
+# commented objects
+$objects = Monitoring::Config->new({ obj_dir => './t/xt/conf/data/8/' });
+$objects->init();
+$objs = $objects->get_objects();
+is(scalar @{$objects->{'errors'}}, 0, "number of errors") or diag(Dumper($objects->{'errors'}));
+is(scalar @{$objects->{'parse_errors'}}, 0, "number of parse errors") or diag(Dumper($objects->{'parse_errors'}));
+is(scalar @{$objs}, 2, "number of objects");
+@{$objs} = sort {uc($a->get_name()) cmp uc($b->get_name())} @{$objs};
+is($objs->[0]->{'disabled'}, 0, "first object is enabled");
+is($objs->[1]->{'disabled'}, 1, "second object is disabled");

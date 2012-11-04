@@ -112,6 +112,7 @@ sub _process_file {
     my $file = Monitoring::Config::File->new($filename, [], $options->{'coretype'});
     die("could not create file object") unless defined $file;
     $file->update_objects();
+    $file->{'changed'} = 1; # otherwise same file would be returned
     return 1 if _print_errors($file);
     if($options->{'inline'}) {
         $file->save();

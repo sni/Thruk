@@ -89,6 +89,8 @@ in list context, returns [$text, $nr_comment_lines, $nr_object_lines]
 sub as_text {
     my($self) = @_;
 
+    my $disabled = $self->{'disabled'} ? '#' : '';
+
     # save comments
     my $text             = "";
     my $nr_object_lines  = 0;
@@ -104,6 +106,7 @@ sub as_text {
     my $nr_comment_lines = scalar @{$self->{'comments'}};
 
     # save object itself
+    $text .= $disabled;
     $text .= "define ".$self->{'type'}." {\n"; $nr_object_lines++;
 
     for my $key (@{$self->get_sorted_keys()}) {
@@ -119,9 +122,11 @@ sub as_text {
         }
         # empty values are valid syntax
         $value = '' unless defined $value;
+        $text .= $disabled;
         $text .= sprintf "  %-30s %s\n", $key, $value;
         $nr_object_lines++
     }
+    $text .= $disabled;
     $text .= "}\n\n";
     $nr_object_lines += 2;
 

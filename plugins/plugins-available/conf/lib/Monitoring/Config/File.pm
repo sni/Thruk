@@ -98,6 +98,7 @@ sub update_objects {
 
     my $current_object;
     my $in_unknown_object;
+    my $in_disabled_object;
     my $comments            = [];
     $self->{'objects'}      = [];
     $self->{'errors'}       = [];
@@ -116,8 +117,8 @@ sub update_objects {
             StripLSpace($newline);
             $line = substr($line, 0, -1).$newline;
         }
-        ($current_object, $in_unknown_object, $comments)
-            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments);
+        ($current_object, $in_unknown_object, $comments, $in_disabled_object)
+            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $in_disabled_object);
     }
 
     if(defined $current_object or $in_unknown_object) {
@@ -153,6 +154,7 @@ sub update_objects_from_text {
     my $current_object;
     my $object_at_line;
     my $in_unknown_object;
+    my $in_disabled_object;
     my $comments            = [];
     $self->{'objects'}      = [];
     $self->{'errors'}       = [];
@@ -174,8 +176,8 @@ sub update_objects_from_text {
             $line   = $buffer.$line;
             $buffer = '';
         }
-        ($current_object, $in_unknown_object, $comments)
-            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $linenr);
+        ($current_object, $in_unknown_object, $comments, $in_disabled_object)
+            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $in_disabled_object, $linenr);
         if(defined $lastline and $lastline ne '' and !defined $object_at_line) {
             if($linenr >= $lastline) {
                 $object_at_line = $current_object;
@@ -209,47 +211,53 @@ parse a single config line
 
 =cut
 sub _parse_line {
-    my ( $self, $line, $current_object, $in_unknown_object, $comments, $linenr ) = @_;
+    my ( $self, $line, $current_object, $in_unknown_object, $comments, $in_disabled_object, $linenr) = @_;
 
     chomp($line);
 
     # strip whitespaces
     StripLTSpace($line);
 
+    # skip empty lines;
+    return($current_object, $in_unknown_object, $comments, $in_disabled_object) if $line eq '';
+
     # full line comments
-    if(substr($line, 0, 1) eq '#' or substr($line, 0, 1) eq ';') {
+    if(!$in_disabled_object
+       and (   substr($line, 0, 1) eq '#'
+            or substr($line, 0, 1) eq ';')
+       and $line !~ m/^(;|\#)\s*define\s+/mxo
+    ) {
         push @{$comments}, $line;
-        return($current_object, $in_unknown_object, $comments);
+        return($current_object, $in_unknown_object, $comments, $in_disabled_object);
     }
 
-    # skip empty lines;
-    return($current_object, $in_unknown_object, $comments) if $line eq '';
-
     # inline comments only with ; not with #
-    if($line =~ s/^(.*?)\s*([\;].*)$//gmxo) {
+    if($line =~ s/^(.+?)\s*([\;].*)$//gmxo) {
         # remove inline comments
         #push @{$comments}, $2;
         $line = $1;
     }
 
     $linenr = $. unless defined $linenr;
-    $self->{'lines'} = $linenr;
+    $self->{'lines'} = $linenr; # increase line counter
 
     # new object starts
-    if(substr($line, 0, 7) eq 'define ' and $line =~ m/^define\s+(\w+)(\s|{|$)/gmxo) {
-        $current_object = Monitoring::Config::Object->new(type => $1, file => $self, line => $linenr, 'coretype' => $self->{'coretype'});
+    if($line =~ m/^(\#|\s*)define\s+(\w+)(\s|{|$)/mxo) {
+        $in_disabled_object = 0;
+        $in_disabled_object = 1 if $1;
+        $current_object = Monitoring::Config::Object->new(type => $2, file => $self, line => $linenr, 'coretype' => $self->{'coretype'}, disabled => $in_disabled_object);
         unless(defined $current_object) {
-            push @{$self->{'parse_errors'}}, "unknown object type '".$1."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
-            $in_unknown_object = 1;
-            return($current_object, $in_unknown_object, $comments);
+            push @{$self->{'parse_errors'}}, "unknown object type '".$2."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
+            $in_unknown_object  = 1;
+            return($current_object, $in_unknown_object, $comments, $in_disabled_object);
         }
     }
 
     # old object finished
-    elsif($line eq '}') {
+    elsif($line eq '}' or ($in_disabled_object and $line =~ m/^(;|\#)\s*}$/mxo)) {
         unless(defined $current_object) {
             push @{$self->{'parse_errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
-            return($current_object, $in_unknown_object, $comments);
+            return($current_object, $in_unknown_object, $comments, $in_disabled_object);
         }
         $current_object->{'comments'} = $comments;
         $current_object->{'line2'}    = $linenr;
@@ -268,6 +276,7 @@ sub _parse_line {
 
     # in an object definition
     elsif(defined $current_object) {
+        if($in_disabled_object) { $line =~ s/^(\#|;)\s*//gmx; }
         my($key, $value) = split(/\s+/mxo, $line, 2);
         # different parsing for timeperiods
         if($current_object->{'type'} eq 'timeperiod'
@@ -279,7 +288,7 @@ sub _parse_line {
            and $key ne 'exclude'
         ) {
             my($timedef, $timeranges);
-            if($line =~ /^(.*?)\s+(\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}[\d,:\-\s]*)/gmxo) {
+            if($line =~ m/^(.*?)\s+(\d{1,2}:\d{1,2}\-\d{1,2}:\d{1,2}[\d,:\-\s]*)/mxo) {
                 $timedef    = $1;
                 $timeranges = $2;
             }
@@ -308,7 +317,7 @@ sub _parse_line {
         push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
     }
 
-    return($current_object, $in_unknown_object, $comments);
+    return($current_object, $in_unknown_object, $comments, $in_disabled_object);
 }
 
 ##########################################################
