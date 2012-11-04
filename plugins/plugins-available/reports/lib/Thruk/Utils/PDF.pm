@@ -970,7 +970,10 @@ sub _replace_links {
 ##########################################################
 sub _replace_link {
     my($baseurl,$a,$b,$url,$d,$e) = @_;
-    if($url !~ m|^\w+://|mx and $url !~ m|^\#|mx) {
+    if(    $url !~ m|^\w+://|mx
+       and $url !~ m|^\#|mx
+       and $url !~ m|^mailto:|mx
+      ) {
         # absolute url
         if($url =~ m/^\//mx) {
             $baseurl =~ s|/thruk/cgi\-bin/$||mx;
