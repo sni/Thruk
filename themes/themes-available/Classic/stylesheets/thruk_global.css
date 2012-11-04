@@ -757,6 +757,12 @@ SPAN.deleteicon INPUT {
 .ui-l-arrow-button {
   background-image: url(../images/arrow_left.png) !important;
 }
+.ui-applist-button {
+  background-image: url(../images/application_view_list.png) !important;
+}
+.ui-appicons-button {
+  background-image: url(../images/application_view_icons.png) !important;
+}
 button.ui-button span.ui-button-text {
   line-height: 1.0 !important;
 }

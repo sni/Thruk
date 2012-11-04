@@ -1707,7 +1707,26 @@ sub _object_tree_objects {
             $filter->{'use'} = $template
         }
         $objs = $c->{'obj_db'}->get_objects_by_type($type, $filter, $origin);
+        $c->stash->{'objects_type'} = $type;
+    } else {
+        $objs = $c->{'obj_db'}->get_objects();
+        $c->stash->{'objects_type'} = 'all';
     }
+
+    # sort by name
+    @{$objs} = sort {uc($a->get_name()) cmp uc($b->get_name())} @{$objs};
+
+    $c->stash->{'tree_objects_layout'} = 'table';
+    if(defined $c->request->cookie('thruk_obj_layout')) {
+        $c->stash->{'tree_objects_layout'} = $c->request->cookie('thruk_obj_layout')->value();
+    }
+
+    my $all_files  = $c->{'obj_db'}->get_files();
+    my $files_tree = $self->_files_to_path($c, $all_files);
+    my $files_root = $files_tree->{'path'};
+    $c->stash->{'files_tree'} = $files_tree;
+    $c->stash->{'files_root'} = $files_root;
+
     $c->stash->{'objects'}  = $objs;
     $c->stash->{'template'} = 'conf_objects_tree_objects.tt';
     return;

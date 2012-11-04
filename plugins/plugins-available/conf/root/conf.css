@@ -18,6 +18,10 @@ body.config TABLE.conftoolobj INPUT#id_check_command_2 {
 body.config TABLE.conftoolobj INPUT[type=text].attrkey {
   width: 170px;
 }
+BODY.bare_tree {
+  background-color: white;
+  margin-top: 34px;
+}
 
 /* input fields with wizards */
 INPUT.obj_command_line, INPUT.obj_address, INPUT.obj_servicegroup_members, INPUT.obj_host_hostgroups {
@@ -136,7 +140,11 @@ TD.plugin_description {
 }
 
 /* object browser */
-DIV.browser_file_item {
+/* icons layout */
+DIV.layout_icons.browser_file_item:hover {
+  background-color:#FFF8CC;
+}
+DIV.layout_icons.browser_file_item {
   height: 65px;
   width: 100px;
   float: left;
@@ -145,13 +153,11 @@ DIV.browser_file_item {
   -moz-user-select: none;
   position: relative;
 }
-
-DIV.browser_file_item IMG {
+DIV.layout_icons.browser_file_item IMG {
   -moz-user-select: none;
   margin-left: 27px;
 }
-
-DIV.browser_file_title {
+DIV.layout_icons DIV.browser_file_shorttitle {
   white-space: nowrap;
   -moz-user-select: none;
   position: absolute;
@@ -160,4 +166,79 @@ DIV.browser_file_title {
   height: 18px;
   text-align: center;
   overflow: visible;
+}
+DIV.layout_icons DIV.browser_file_longtitle {
+  display: none;
+}
+DIV.layout_icons DIV.browser_file_type {
+  display: none;
+}
+DIV.layout_icons DIV.browser_file_filename {
+  display: none;
+}
+DIV.layout_icons DIV.browser_file_linenr {
+  display: none;
+}
+DIV.layout_icons DIV.browser_file_comments {
+  display: none;
+}
+DIV.layout_icons.browser_file_menu {
+  display: none;
+}
+
+/* table layout */
+DIV.layout_table.browser_file_menu {
+  font-weight: bold;
+  height: 20px;
+}
+DIV.layout_table.browser_file_item {
+  margin-top: 2px;
+  -moz-user-select: none;
+  height: 20px;
+}
+DIV.layout_table.browser_file_item:hover {
+  background-color:#FFF8CC;
+}
+DIV.layout_table.browser_file_item IMG {
+  width: 18px;
+  height: 18px;
+  float: left;
+  clear: both;
+}
+DIV.layout_table DIV.browser_file_image {
+  width: 18px;
+  float: left;
+  clear: both;
+}
+DIV.layout_table DIV.browser_file_shorttitle {
+  display: none;
+}
+DIV.layout_table DIV.browser_file_longtitle {
+  width: 250px;
+  float: left;
+  margin-left: 5px;
+  overflow: hidden;
+}
+DIV.layout_table DIV.browser_file_type {
+  width: 70px;
+  overflow: hidden;
+  float: left;
+}
+DIV.layout_table DIV.browser_file_filename {
+  width: 290px;
+  overflow: hidden;
+  float: left;
+}
+DIV.layout_table DIV.browser_file_linenr {
+  width: 30px;
+  overflow: hidden;
+  float: left;
+  text-align: right;
+}
+DIV.layout_table DIV.browser_file_comments {
+  margin-left: 5px;
+  width: 150px;
+  height: 20px;
+  overflow: hidden;
+  float: left;
 }

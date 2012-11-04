@@ -1,46 +1,51 @@
 [% WRAPPER _conf_objects_frame.tt %]
 
-<table style="height:600px;" border=1 width=1100>
+<table style="height:600px; background: white;" border=1 width=1100>
   <tr>
     <td valign="top" id="container" style="height:100%;  text-align: left;" width=200>
       <ul>
-        <li id="o_commands">
-          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command" target="content_frame">Commands</a>
+        <li id="o_objects" class="jstree-open">
+          <a href="conf.cgi?sub=objects&amp;action=tree_objects" target="content_frame">Objects</a>
           <ul>
-            <li id="o_commands_checks"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=check" target="content_frame">Checks</a></li>
-            <li id="o_commands_eventhandler"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=eventhandler" target="content_frame">Eventhandler</a></li>
-            <li id="o_commands_notifications"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=notification" target="content_frame">Notifications</a></li>
+            <li id="o_commands">
+              <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command" target="content_frame">Commands</a>
+              <ul>
+                <li id="o_commands_checks"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=check" target="content_frame">Checks</a></li>
+                <li id="o_commands_eventhandler"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=eventhandler" target="content_frame">Eventhandler</a></li>
+                <li id="o_commands_notifications"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=command&amp;origin=notification" target="content_frame">Notifications</a></li>
+              </ul>
+            </li>
+            <li id="o_contacts">
+              <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contact" target="content_frame">Contacts</a>
+              [% PROCESS child childs=contacttemplates type="contact" %]
+            </li>
+            <li id="o_contactgroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contactgroup" target="content_frame">Contactgroups</a></li>
+            <li id="o_hosts">
+              <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=host" target="content_frame">Hosts</a>
+              [% BLOCK child %]
+                [% IF childs.size > 0 %]
+                <ul>
+                [% FOREACH tname = childs.keys.sort %]
+                  [% t = childs.$tname %]
+                  <li>
+                    <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=[% type %]&amp;template=[% tname %]" target="content_frame">[% tname %]</a>
+                    [% IF t.exists('child_templates') %][% INCLUDE child childs=t.child_templates %][% END %]
+                  </li>
+                [% END %]
+                </ul>
+                [% END %]
+              [% END %]
+              [% PROCESS child childs=hosttemplates type="host" %]
+            </li>
+            <li id="o_hostgroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=hostgroup" target="content_frame">Hostgroups</a></li>
+            <li id="o_services">
+              <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=service" target="content_frame">Services</a>
+              [% PROCESS child childs=servicetemplates type="service" %]
+            </li>
+            <li id="o_servicegroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=servicegroup" target="content_frame">Servicegroups</a></li>
+            <li id="o_timeperiods"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=timeperiod" target="content_frame">Timeperiods</a></li>
           </ul>
         </li>
-        <li id="o_contacts">
-          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contact" target="content_frame">Contacts</a>
-          [% PROCESS child childs=contacttemplates type="contact" %]
-        </li>
-        <li id="o_contactgroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=contactgroup" target="content_frame">Contactgroups</a></li>
-        <li id="o_hosts">
-          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=host" target="content_frame">Hosts</a>
-          [% BLOCK child %]
-            [% IF childs.size > 0 %]
-            <ul>
-            [% FOREACH tname = childs.keys.sort %]
-              [% t = childs.$tname %]
-              <li>
-                <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=[% type %]&amp;template=[% tname %]" target="content_frame">[% tname %]</a>
-                [% IF t.exists('child_templates') %][% INCLUDE child childs=t.child_templates %][% END %]
-              </li>
-            [% END %]
-            </ul>
-            [% END %]
-          [% END %]
-          [% PROCESS child childs=hosttemplates type="host" %]
-        </li>
-        <li id="o_hostgroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=hostgroup" target="content_frame">Hostgroups</a></li>
-        <li id="o_services">
-          <a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=service" target="content_frame">Services</a>
-          [% PROCESS child childs=servicetemplates type="service" %]
-        </li>
-        <li id="o_servicegroups"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=servicegroup" target="content_frame">Servicegroups</a></li>
-        <li id="o_timeperiods"><a href="conf.cgi?sub=objects&amp;action=tree_objects&amp;type=timeperiod" target="content_frame">Timeperiods</a></li>
       </ul>
     </td>
     <td valign="top" style="border-left: 1px solid grey;">
@@ -54,7 +59,7 @@
 
 jQuery(function($) {
   jQuery('#container').jstree({
-    plugins: [ "themes", "dnd", "contextmenu" ],
+    plugins: [ "themes", "dnd"/*, "contextmenu"*/ ],
     core:    {
       animation: 0
     },
@@ -80,7 +85,7 @@ jQuery(function($) {
         "drag_finish" : function (data) {
           alert("DRAG OK");
       }
-    },
+    }/*,
     contextmenu: {
       select_node: true,
       items: {
@@ -90,7 +95,7 @@ jQuery(function($) {
           "icon"              : false
         }
       }
-    }
+    }*/
   });
 });
 
