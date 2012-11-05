@@ -140,7 +140,7 @@ sub _print_errors {
 ##############################################
 sub _print_error {
     my($err) = @_;
-    $err =~ s/\ in\ <a\ href.*?<\/a>//gmx;
+    $err =~ s/\ in\ <a\ href.*?>([^<]*)<\/a>/in $1/gmx;
     print STDERR "ERROR: ", $err, "\n";
     return;
 }

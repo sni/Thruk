@@ -944,8 +944,16 @@ t/900-firefox-js.t
 t/900-javascript_utils.t
 t/data/javascript_tests.js
 t/data/log4perl.conf
+t/data/naglint/basic/in.cfg
+t/data/naglint/basic/out.cfg
 t/data/naglint/comments/in.cfg
 t/data/naglint/comments/out.cfg
+t/data/naglint/comments2/in.cfg
+t/data/naglint/comments2/out.cfg
+t/data/naglint/duplicate/in.cfg
+t/data/naglint/duplicate/out.cfg
+t/data/naglint/missing_parenthesis/in.cfg
+t/data/naglint/missing_parenthesis/out.cfg
 t/data/naglint/module/in.cfg
 t/data/naglint/module/out.cfg
 t/data/resource.cfg

@@ -107,7 +107,14 @@ sub as_text {
         $line =~ s/\s+$//gmx;
         $text .= '#'.$line."\n";
     }
+
     my $nr_comment_lines = scalar @{$self->{'comments'}};
+
+    # remove completly empty comments
+    if(join('', @{$self->{'comments'}}) =~ /^\s*$/mx) {
+        $nr_comment_lines = 0;
+        $text = "";
+    }
 
     # save object itself
     $text .= $disabled;

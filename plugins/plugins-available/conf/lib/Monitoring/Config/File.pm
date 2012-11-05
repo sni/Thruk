@@ -242,7 +242,7 @@ sub _parse_line {
     $self->{'lines'} = $linenr; # increase line counter
 
     # new object starts
-    if($line =~ m/^(\#|\s*)define\s+(\w+)(\s|{|$)/mxo) {
+    if($line =~ m/^(;|\#|)\s*define\s+(\w+)(\s|{|$)/mxo) {
         $in_disabled_object = 0;
         $in_disabled_object = 1 if $1;
         $current_object = Monitoring::Config::Object->new(type => $2, file => $self, line => $linenr, 'coretype' => $self->{'coretype'}, disabled => $in_disabled_object);
@@ -267,7 +267,8 @@ sub _parse_line {
         push @{$self->{'objects'}}, $current_object;
         undef $current_object;
         $comments = [];
-        $in_unknown_object = 0;
+        $in_unknown_object  = 0;
+        $in_disabled_object = 0;
     }
 
     elsif($in_unknown_object) {
@@ -276,7 +277,7 @@ sub _parse_line {
 
     # in an object definition
     elsif(defined $current_object) {
-        if($in_disabled_object) { $line =~ s/^(\#|;)\s*//gmx; }
+        if($in_disabled_object) { $line =~ s/^(\#|;)\s*//mxo; }
         my($key, $value) = split(/\s+/mxo, $line, 2);
         # different parsing for timeperiods
         if($current_object->{'type'} eq 'timeperiod'
@@ -293,7 +294,7 @@ sub _parse_line {
                 $timeranges = $2;
             }
             if(defined $timedef) {
-                if(defined $current_object->{'conf'}->{$timedef}) {
+                if(defined $current_object->{'conf'}->{$timedef} and $current_object->{'conf'}->{$timedef} ne $timeranges) {
                     push @{$self->{'parse_errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
                 }
                 $current_object->{'conf'}->{$timedef} = $timeranges;
@@ -302,7 +303,7 @@ sub _parse_line {
             }
         }
         else {
-            if(defined $current_object->{'conf'}->{$key}) {
+            if(defined $current_object->{'conf'}->{$key} and $current_object->{'conf'}->{$key} ne $value) {
                 push @{$self->{'parse_errors'}}, "duplicate attribute $key in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
             $current_object->{'conf'}->{$key} = $value;
