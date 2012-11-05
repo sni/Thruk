@@ -48,7 +48,7 @@ var objects_type        = "[% objects_type %]";
   <div class="browser_file_type" title="[% type %]">[% type %]</div>
   <div class="browser_file_filename" title="[% o.file.path %]">[% filepath %]</div>
   <div class="browser_file_linenr">[% o.line %]</div>
-  <div class="browser_file_comments" title="[% escape_html(o.comments.join('_-xXx-_')).replace('_-xXx-_','&#10;') %]">[% o.comments.join(' ') %]</div>
+  <div class="browser_file_comments" title="[% escape_html(o.comments.join('_-xXx-_')).replace('_-xXx-_','&#10;') %]">[% escape_html(o.comments.join(' ')) %]</div>
 </div>
 [% END %]
 
