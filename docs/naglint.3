@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "naglint 3"
-.TH naglint 3 "2012-11-02" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH naglint 3 "2012-11-06" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -139,6 +139,9 @@ Options:
   \-h, \-\-help                    Show this help message and exit
   \-v, \-\-verbose                 Print verbose output
   \-V, \-\-version                 Print version
+  \-i                            replace content inline instead of printing to stdout
+  \-c, \-\-core                    core type can be nagios, icinga or shinken. Will be
+                                autodetected unless specified.
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 This script beautifies nagios config files.
@@ -160,15 +163,38 @@ naglint has the following arguments:
 .Vb 1
 \&    print version and exit
 .Ve
+.IP "\fB\-c\fR , \fB\-\-core\fR" 4
+.IX Item "-c , --core"
+.Vb 3
+\&    use specific config type. can be \*(Aqnagios\*(Aq, \*(Aqicinga\*(Aq or \*(Aqshinken\*(Aq.
+\&    enables core type specific attributes. Will be autodetected unless
+\&    specified.
+.Ve
+.IP "\fB\-i\fR" 4
+.IX Item "-i"
+.Vb 1
+\&    edit given files inline and overwrite them with their beautified objects
+.Ve
+.IP "\fB\-r\fR" 4
+.IX Item "-r"
+.Vb 1
+\&    read directories recursivly
+.Ve
 .SH "RETURN VALUE"
 .IX Header "RETURN VALUE"
-returns 0 on success and >= 1 otherwise
+returns 0 on success then number of errors otherwise
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Beautify single config file
 .PP
 .Vb 1
 \&  %> naglint objects.cfg
+.Ve
+.PP
+Process objects from \s-1STDIN\s0
+.PP
+.Vb 1
+\&  %> cat objects.cfg |A\*^\ naglint > beauty.cfg
 .Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"

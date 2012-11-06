@@ -162,6 +162,8 @@ Options:
   -v, --verbose                 Print verbose output
   -V, --version                 Print version
   -i                            replace content inline instead of printing to stdout
+  -c, --core                    core type can be nagios, icinga or shinken. Will be
+                                autodetected unless specified.
 
 =head1 DESCRIPTION
 
@@ -188,7 +190,8 @@ naglint has the following arguments:
 =item B<-c> , B<--core>
 
     use specific config type. can be 'nagios', 'icinga' or 'shinken'.
-    enables core type specific attributes.
+    enables core type specific attributes. Will be autodetected unless
+    specified.
 
 =item B<-i>
 
