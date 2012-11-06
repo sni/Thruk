@@ -315,13 +315,14 @@ sub get_component_as_string {
     my $string = "<Component Thruk::Backend>\n";
     for my $b (@{$backends}) {
         $string .= "    <peer>\n";
-        $string .= "        name   = ".$b->{'name'}."\n";
-        $string .= "        id     = ".$b->{'id'}."\n" if defined $b->{'id'};
-        $string .= "        type   = ".$b->{'type'}."\n";
-        $string .= "        hidden = ".$b->{'hidden'}."\n" if $b->{'hidden'};
-        $string .= "        groups = ".$b->{'groups'}."\n" if $b->{'groups'};
+        $string .= "        name    = ".$b->{'name'}."\n";
+        $string .= "        id      = ".$b->{'id'}."\n" if defined $b->{'id'};
+        $string .= "        type    = ".$b->{'type'}."\n";
+        $string .= "        hidden  = ".$b->{'hidden'}."\n" if $b->{'hidden'};
+        $string .= "        groups  = ".$b->{'groups'}."\n" if $b->{'groups'};
+        $string .= "        section = ".$b->{'section'}."\n" if $b->{'section'};
         $string .= "        <options>\n";
-        $string .= "            peer = ".$b->{'options'}->{'peer'}."\n";
+        $string .= "            peer          = ".$b->{'options'}->{'peer'}."\n";
         $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if defined $b->{'options'}->{'resource_file'};
         $string .= "        </options>\n";
         if(defined $b->{'configtool'}) {

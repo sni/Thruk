@@ -32,4 +32,10 @@
     <input type="radio" name="hidden[% x %]" value="1"[% IF b.hidden == 1 %] checked[% END %]> Yes
   </td>
 </tr>
+<tr class="backend_conf_[% x %]">
+  <td class='dataVar' align="left">Section</td>
+  <td class='dataVal' colspan=2>
+    <input type="text" name="section[% x %]" value="[% b.section %]" style="width: 200px;" placeholder="group sites by sections">
+  </td>
+</tr>
 <tr class="backend_conf_[% x %]"><td colspan=3><hr></td></tr>

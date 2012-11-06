@@ -769,10 +769,11 @@ sub _process_backends_page {
         my $new = 0;
         while(defined $c->request->parameters->{'name'.$x}) {
             my $backend = {
-                'name'   => $c->request->parameters->{'name'.$x},
-                'type'   => $c->request->parameters->{'type'.$x},
-                'id'     => $c->request->parameters->{'id'.$x},
-                'hidden' => defined $c->request->parameters->{'hidden'.$x} ? $c->request->parameters->{'hidden'.$x} : 0,
+                'name'    => $c->request->parameters->{'name'.$x},
+                'type'    => $c->request->parameters->{'type'.$x},
+                'id'      => $c->request->parameters->{'id'.$x},
+                'hidden'  => defined $c->request->parameters->{'hidden'.$x} ? $c->request->parameters->{'hidden'.$x} : 0,
+                'section' => $c->request->parameters->{'section'.$x},
                 'options' => {
                     'peer'   => $c->request->parameters->{'peer'.$x},
                 },
@@ -841,9 +842,10 @@ sub _process_backends_page {
     }
     # set ids
     for my $b (@{$backends}) {
-        $b->{'key'}    = substr(md5_hex($b->{'options'}->{'peer'}." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
-        $b->{'addr'}   = $b->{'options'}->{'peer'};
-        $b->{'hidden'} = 0 unless defined $b->{'hidden'};
+        $b->{'key'}     = substr(md5_hex($b->{'options'}->{'peer'}." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
+        $b->{'addr'}    = $b->{'options'}->{'peer'};
+        $b->{'hidden'}  = 0 unless defined $b->{'hidden'};
+        $b->{'section'} = '' unless defined $b->{'section'};
     }
     $c->stash->{'sites'}    = $backends;
     $c->stash->{'subtitle'} = "Thruk Backends Manager";

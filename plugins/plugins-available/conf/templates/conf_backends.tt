@@ -32,7 +32,7 @@ Note: some options are not accessible here for security reasons.
       </a>
     </td>
   </tr>
-  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', key => '', hidden => 0, type => 'livestatus' } x = 0 %]
+  [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', key => '', hidden => 0, type => 'livestatus', section => '' } x = 0 %]
   <tr>
     <td colspan=3 style="text-align:center; padding-bottom: 7px;">
       <input type="submit" name="send" value="Save Changes" style="width:120px" class="conf_button"[% IF readonly %] disabled[% END %]>
