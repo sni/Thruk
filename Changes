@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.56     not yet released
           - added naglint tool to beautify nagios config files
+          - added sites panel when grouping backends by section
           - show perf bar for percentages too
           - reports:
             - replace links in html reports

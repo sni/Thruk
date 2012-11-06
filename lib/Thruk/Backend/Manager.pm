@@ -51,6 +51,7 @@ sub new {
         'local_hosts'         => {},
         'backends'            => [],
         'backend_debug'       => 0,
+        'sections'            => {},
     };
     bless $self, $class;
     return $self;
@@ -227,6 +228,21 @@ sub peer_key {
         push @keys, $peer->{'key'};
     }
     return \@keys;
+}
+
+##########################################################
+
+=head2 sections
+
+  sections()
+
+returns all sections
+
+=cut
+
+sub sections {
+    my $self = shift;
+    return $self->{'sections'};
 }
 
 ##########################################################
@@ -1202,6 +1218,7 @@ sub _initialise_peer {
         'hidden'        => defined $config->{'hidden'} ? $config->{'hidden'} : 0,
         'groups'        => $config->{'groups'},
         'resource_file' => $config->{'options'}->{'resource_file'},
+        'section'       => $config->{'section'} || 'Default',
         'enabled'       => 1,
         'class'         => $self->create_backend($config->{'name'},
                                                  $config->{'type'},
@@ -1231,6 +1248,9 @@ sub _initialise_peer {
                                             });
         $peer->{'class'}->{'logcache'} = $peer->{'logcache'};
     }
+
+    # sort by section
+    $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = $peer;
 
     return $peer;
 }

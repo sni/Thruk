@@ -977,6 +977,7 @@ templates/_footer.tt
 templates/_get_content.tt
 templates/_header.tt
 templates/_header_initial_states.tt
+templates/_header_site_panel.tt
 templates/_help.tt
 templates/_host_command_box.tt
 templates/_host_command_box_full.tt

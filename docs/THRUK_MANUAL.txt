@@ -1581,17 +1581,19 @@ livestatus is supported. The port is the port from the
 xinetd.conf. You can enter local unix sockets too.
 
   * peer
-         ** name      name for this connection
-         ** type      type of this connection. Only 'livestatus' possible at the
+         ** name     name for this connection
+         ** type     type of this connection. Only 'livestatus' possible at the
                      moment
-         ** hidden    should this peer be hidden initially ( can be reenabled
+         ** hidden   should this peer be hidden initially ( can be reenabled
                      via gui switch ) Only useful with more than one
                      backend.
-         ** groups    if set, only contacts from these groups have access. You
+         ** groups   if set, only contacts from these groups have access. You
                      may add multiple groups seperated by comma. Users
                      without the right contactgroup don't even see
                      that there is a backend. Note that this implies
                      one extra backend request per page.
+         ** section  to group backends/sites by different sections, enter a
+                     section.
          ** options
             *** peer            address of this connection.
             *** resource_file   resource_file for this peer (used for macro replacement)

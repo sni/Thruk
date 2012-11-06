@@ -173,31 +173,7 @@
 <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010-2012 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
 <table border="0" cellpadding=0 cellspacing=0 class="top_nav">
   <tr>
-    <td width="100%">
-      <table border=0 cellpadding=0 cellspacing=0>
-        <tr>
-          <td>
-          [% IF hide_backends_chooser == 0 && backends && backends.size > 1 %]
-          [% FOREACH pd IN backends %]
-          <div class='backend'>
-            [% SET name  = 'unknown'                                         %]
-            [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
-
-            [% SET class = 'button_peerDOWN'                                    %]
-            [% SET class = 'button_peerUP'  IF backend_detail.$pd.running       %]
-            [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %][%# hidden by user #%]
-            [% SET class = 'button_peerHID' IF backend_detail.$pd.disabled == 3 %][%# hidden by backend param #%]
-            [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
-            [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 6 %]
-            [% SET class = 'button_peerUP'  IF backend_detail.$pd.disabled == 7 %]
-            <input type="button" id='button_[% pd %]' class="[% class %]" value="[% name %]" title="[% IF backend_detail.$pd.last_error %][% escape_js(backend_detail.$pd.last_error) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleBackend('[% pd %]')"[% IF backend_detail.$pd.disabled == 5 %] disabled[% END %]>
-          </div>
-          [% END %]
-          [% END %]
-          </td>
-        </tr>
-      </table>
-    </td>
+    <td width="100%">[% PROCESS _header_site_panel.tt %]</td>
     <td class="hidden noprint" id="bug_report">
       [% IF show_error_reports%]
       <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report"></a>
