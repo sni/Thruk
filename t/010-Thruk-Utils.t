@@ -97,7 +97,7 @@ SKIP: {
     # external cmd
     Thruk::Utils::External::cmd($c, { cmd => "sleep 1; echo 'test'; echo \"err\" >&2;" });
     my $id = $c->stash->{'job_id'};
-    isnt($id, undef, "got an id");
+    isnt($id, undef, "got an id: ".$id);
 
     # wait for completion
     for(1..5) {
@@ -105,7 +105,7 @@ SKIP: {
         sleep(1);
     }
 
-    is(Thruk::Utils::External::is_running($c, $id), 0, "job finished");
+    is(Thruk::Utils::External::is_running($c, $id), 0, "job finished") or BAIL_OUT("job did not finish");
     my($out, $err, $time, $dir) = Thruk::Utils::External::get_result($c, $id);
 
     is($out,  "test\n", "got result");

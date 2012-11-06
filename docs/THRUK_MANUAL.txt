@@ -1585,6 +1585,17 @@ ex.:
   backend_debug = 1
 
 
+==== connection_pool_size
+Use connection pool when accessing multiple sites.
+Increases the performance because backends will be queried
+parallel but uses around 50mb of memory per pool member.
+Disabled when set to 0. (experimental feature)
+
+ex.:
+
+  connection_pool_size = 0
+
+
 ==== Component Thruk::Backend
 Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the

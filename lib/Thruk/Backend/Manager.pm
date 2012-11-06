@@ -25,12 +25,6 @@ Manager of backend connections
 =cut
 
 ##########################################################
-# use static list instead of slow module find
-$Thruk::Backend::Manager::Provider = [
-          'Thruk::Backend::Provider::Livestatus',
-          'Thruk::Backend::Provider::Mongodb',
-          'Thruk::Backend::Provider::ConfigOnly',
-];
 $Thruk::Backend::Manager::stats = undef;
 
 ##########################################################
@@ -69,21 +63,13 @@ initialize this model
 sub init {
     my( $self, %options ) = @_;
 
-    return if $self->{'initialized'} == 1;
-
-    for my $opt_key ( keys %options ) {
-        if( exists $self->{$opt_key} ) {
-            $self->{$opt_key} = $options{$opt_key};
-        }
-        else {
-            croak("unknown option: $opt_key");
-        }
+    for my $key (%options) {
+        $self->{$key} = $options{$key};
     }
 
-    return unless defined $self->{'config'}->{'Thruk::Backend'};
-    return unless defined $self->{'config'}->{'Thruk::Backend'}->{'peer'};
+    return if $self->{'initialized'} == 1;
 
-    $self->_initialise_backends( $self->{'config'}->{'Thruk::Backend'}->{'peer'} );
+    @{$self->{'backends'}} = values %{$Thruk::peers};
 
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;
@@ -95,40 +81,13 @@ sub init {
         } else {
             $self->{'local_hosts'}->{$peer->{'key'}} = 1;
         }
+        $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = [] unless defined $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}};
+        push @{$self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}}}, $peer;
     }
 
     $self->{'initialized'} = 1;
 
     return 1;
-}
-
-##########################################################
-
-=head2 create_backend
-
-  create_backend()
-
-return a new backend class
-
-=cut
-
-sub create_backend {
-    my($self, $name, $type, $options, $config, $log) = @_;
-
-    my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
-    confess "unknown type in peer configuration" unless scalar @provider > 0;
-    my $class   = $provider[0];
-    my $require = $class;
-    $require =~ s/::/\//gmx;
-    require $require . ".pm";
-    $class->import;
-    $options->{'name'} = $name;
-
-    # disable keepalive for now, it does not work and causes lots of problems
-    $options->{'keepalive'} = 0 if defined $options->{'keepalive'};
-
-    my $obj = $class->new( $options, $config, $log );
-    return $obj;
 }
 
 
@@ -356,6 +315,45 @@ sub enable_backends {
     }
     return;
 }
+
+##########################################################
+
+=head2 get_scheduling_queue
+
+  get_scheduling_queue
+
+returns the scheduling queue
+
+=cut
+sub get_scheduling_queue {
+    my($self, $c, %options) = @_;
+
+    my($services) = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'),
+                                                 { '-or' => [{ 'active_checks_enabled' => '1' },
+                                                            { 'check_options' => { '!=' => '0' }}]
+                                                 }
+                                                 ]
+                                      );
+    my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                              { '-or' => [{ 'active_checks_enabled' => '1' },
+                                                         { 'check_options' => { '!=' => '0' }}]
+                                              }
+                                              ],
+                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => sub { return ''; } } }
+                                    );
+
+    my $queue = [];
+    if(defined $services) {
+        push @{$queue}, @{$services};
+    }
+    if(defined $hosts) {
+        push @{$queue}, @{$hosts};
+    }
+    $queue = $self->_sort( $queue, $options{'sort'} );
+    $self->_page_data( $c, $queue );
+    return $queue;
+}
+
 
 ########################################
 
@@ -776,7 +774,7 @@ sub _do_on_peers {
     $Thruk::Backend::Manager::stats->profile( begin => '_do_on_peers('.$function.')') if defined $Thruk::Backend::Manager::stats;
 
     # do we have to send the query to all backends or just a few?
-    my(%arg, $backends);
+    my(%arg, $backends, $pager);
     if(     ( $function =~ m/^get_/mx or $function eq 'send_command')
         and ref $arg eq 'ARRAY'
         and scalar @{$arg} % 2 == 0 )
@@ -794,15 +792,16 @@ sub _do_on_peers {
                 }
             }
         }
+        $pager = delete $arg{'pager'};
+        @{$arg} = %arg;
     }
     $self->{'log'}->debug($function)         if defined $self->{'log'};
     $self->{'log'}->debug(Dumper($backends)) if defined $self->{'log'} and defined $backends;
 
     # send query to selected backends
-    my( $result, $type, $size );
-    my $totalsize = 0;
     my $selected_backends = 0;
     my $last_error;
+    my $get_results_for = [];
     for my $peer ( @{ $self->get_peers() } ) {
         if(defined $backends) {
             next unless defined $backends->{$peer->{'key'}};
@@ -811,53 +810,12 @@ sub _do_on_peers {
             $self->{'log'}->debug("skipped peer: ".$peer->{'name'}) if defined $self->{'log'};
             next;
         }
-
-        $peer->{'last_error'} = undef;
-        $Thruk::Backend::Manager::stats->profile( begin => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
         $selected_backends++;
-        my $errors = 0;
-        while($errors < 3) {
-            eval {
-                my( $data, $typ, $size ) = $peer->{'class'}->$function( @{$arg} );
-                if(defined $data and !defined $size) {
-                    if(ref $data eq 'ARRAY') {
-                        $size = scalar @{$data};
-                    }
-                    elsif(ref $data eq 'HASH') {
-                        $size = scalar keys %{$data};
-                    }
-                }
-                $size = 0 unless defined $size;
-                $type = $typ if defined $typ;
-                $totalsize += $size;
-                $result->{ $peer->{'key'} } = $data;
-            };
-            if($@) {
-                $peer->{'last_error'} = $@;
-                $peer->{'last_error'} =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
-                $peer->{'last_error'} = "ERROR: ".$peer->{'last_error'};
-                $last_error = $peer->{'last_error'};
-                $errors++;
-                if($last_error =~ m/can't\ get\ db\ response,\ not\ connected\ at/mx) {
-                    $peer->{'class'}->reconnect();
-                } else {
-                    last;
-                }
-            } else {
-                last;
-            }
-        }
-        $Thruk::Backend::Manager::stats->profile( end => "_do_on_peers() - " . $peer->{'name'} ) if defined $Thruk::Backend::Manager::stats;
+        push @{$get_results_for}, $peer->{'key'};
     }
+
+    my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg);
     if(!defined $result and $selected_backends != 0) {
-        local $Data::Dumper::Sortkeys = sub {
-            my @keys;
-            for my $key (sort keys %{$_[0]}) {
-                next if $key eq 'pager';
-                push @keys, $key;
-            }
-            return \@keys;
-        };
         local $Data::Dumper::Deepcopy = 1;
         confess("Error in _do_on_peers: ".$@."called as ".Dumper($function)."with args: ".Dumper(\%arg));
     }
@@ -905,8 +863,8 @@ sub _do_on_peers {
             $data = $self->_limit( $data, $arg{'limit'} );
         }
 
-        if( $arg{'pager'} ) {
-            $data = $self->_page_data( $arg{'pager'}, $data, undef, $totalsize );
+        if( $pager ) {
+            $data = $self->_page_data( $pager, $data, undef, $totalsize );
         }
     }
 
@@ -964,6 +922,152 @@ sub _do_on_peers {
     $Thruk::Backend::Manager::stats->profile( end => '_do_on_peers('.$function.')') if defined $Thruk::Backend::Manager::stats;
 
     return $data;
+}
+
+########################################
+
+=head2 _remove_duplicates
+
+  _remove_duplicates($data)
+
+removes duplicate entries from a array of hashes
+
+=cut
+
+sub _get_result {
+    my($self, $peers, $function, $arg) = @_;
+    if($ENV{'THRUK_NO_CONNECTION_POOL'}
+       or scalar @{$peers} <= 1
+       or $function eq 'renew_logcache'
+       or $function eq 'set_stash')
+    {
+        return $self->_get_result_serial($peers, $function, $arg);
+    }
+    return $self->_get_result_parallel($peers, $function, $arg);
+}
+
+########################################
+
+=head2 _get_result_serial
+
+  _get_result_serial($peers, $function, $arguments)
+
+returns result for given function
+
+=cut
+
+sub _get_result_serial {
+    my($self,$peers, $function, $arg) = @_;
+    my ($totalsize, $result, $type) = (0);
+
+    for my $key (@{$peers}) {
+        $Thruk::Backend::Manager::stats->profile( begin => "_get_result_serial($key)") if defined $Thruk::Backend::Manager::stats;
+        my @res = _do_on_peer($key, $function, $arg);
+        my $res = shift @res;
+        my($typ, $size, $data, $last_error) = @{$res};
+        if(!$last_error and defined $size) {
+            $totalsize += $size;
+            $type       = $typ;
+            $result->{ $key } = $data;
+        }
+        my $peer = $self->get_peer_by_key($key);
+        $peer->{'last_error'} = $last_error;
+        $Thruk::Backend::Manager::stats->profile( end => "_get_result_serial($key)") if defined $Thruk::Backend::Manager::stats;
+    }
+    return($result, $type, $totalsize);
+}
+
+########################################
+
+=head2 _get_result_parallel
+
+  _get_result_parallel($peers, $function, $arguments)
+
+returns result for given function and args using the worker pool
+
+=cut
+
+sub _get_result_parallel {
+    my($self, $peers, $function, $arg) = @_;
+    my ($totalsize, $result, $type) = (0);
+
+    $Thruk::Backend::Manager::stats->profile( begin => "_get_result_parallel(".join(',', @{$peers}).")") if defined $Thruk::Backend::Manager::stats;
+
+    my %ids;
+    for my $key (@{$peers}) {
+        my $id;
+        eval {
+            $id = $Thruk::pool->add($key, $function, $arg);
+        };
+        confess($@) if $@;
+        $ids{$id} = $key;
+    }
+
+    for my $id (keys %ids) {
+        my @res = $Thruk::pool->remove($id);
+        my $res = shift @res;
+        my($typ, $size, $data, $last_error) = @{$res};
+        my $key = $ids{$id};
+        my $peer = $self->get_peer_by_key($key);
+        $peer->{'last_error'} = $last_error;
+        if(!$last_error and defined $size) {
+            $totalsize += $size;
+            $type       = $typ;
+            $result->{ $key } = $data;
+        }
+    }
+
+    $Thruk::Backend::Manager::stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")") if defined $Thruk::Backend::Manager::stats;
+    return($result, $type, $totalsize);
+}
+
+
+########################################
+
+=head2 _remove_duplicates
+
+  _remove_duplicates($data)
+
+removes duplicate entries from a array of hashes
+
+=cut
+
+sub _do_on_peer {
+    my($key, $function, $arg) = @_;
+
+    my $peer = $Thruk::peers->{$key};
+    confess("no peer for key: $key") unless defined $peer;
+    my($type, $size, $data, $last_error);
+    my $errors = 0;
+    while($errors < 3) {
+        eval {
+            ($data,$type,$size) = $peer->{'class'}->$function( @{$arg} );
+            if(defined $data and !defined $size) {
+                if(ref $data eq 'ARRAY') {
+                    $size = scalar @{$data};
+                }
+                elsif(ref $data eq 'HASH') {
+                    $size = scalar keys %{$data};
+                }
+            }
+            $size = 0 unless defined $size;
+        };
+        if($@) {
+            $last_error = $@;
+            $last_error =~ s/\s+at\s+.*?\s+line\s+\d+//gmx;
+            $last_error =~ s/thread\s+\d+//gmx;
+            $last_error = "ERROR: ".$last_error;
+            $errors++;
+            if($last_error =~ m/can't\ get\ db\ response,\ not\ connected\ at/mx) {
+                $peer->{'class'}->reconnect();
+            } else {
+                last;
+            }
+        } else {
+            last;
+        }
+    }
+    return([$type, $size, $data, $last_error]);
 }
 
 ########################################
@@ -1180,93 +1284,6 @@ destroy this
 =cut
 
 sub DESTROY {
-}
-
-##########################################################
-sub _initialise_backends {
-    my $self   = shift;
-    my $config = shift;
-
-    confess "no backend config" unless defined $config;
-
-    # did we get a single peer or a list of peers?
-    my @peer_configs;
-    if( ref $config eq 'HASH' ) {
-        push @peer_configs, $config;
-    }
-    elsif ( ref $config eq 'ARRAY' ) {
-        @peer_configs = @{$config};
-    }
-    else {
-        confess "invalid backend config, must be hash or an array of hashes";
-    }
-
-    # initialize peers
-    for my $peer_conf (@peer_configs) {
-        my $peer = $self->_initialise_peer( $peer_conf );
-        push @{ $self->{'backends'} }, $peer if defined $peer;
-    }
-
-    return;
-}
-
-##########################################################
-sub _initialise_peer {
-    my $self     = shift;
-    my $config   = shift;
-
-    confess "missing name in peer configuration" unless defined $config->{'name'};
-    confess "missing type in peer configuration" unless defined $config->{'type'};
-
-    my $peer = {
-        'name'          => $config->{'name'},
-        'type'          => $config->{'type'},
-        'hidden'        => defined $config->{'hidden'} ? $config->{'hidden'} : 0,
-        'groups'        => $config->{'groups'},
-        'resource_file' => $config->{'options'}->{'resource_file'},
-        'section'       => $config->{'section'} || 'Default',
-        'enabled'       => 1,
-        'class'         => $self->create_backend($config->{'name'},
-                                                 $config->{'type'},
-                                                 $config->{'options'},
-                                                 $self->{'config'},
-                                                 $self->{'backend_debug'} ? $self->{'log'} : undef),
-        'configtool'    => $config->{'configtool'} || {},
-        'last_error'    => undef,
-        'logcache'      => undef,
-    };
-    # shorten backend id
-    my $key = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
-    $key    = $config->{'id'} if defined $config->{'id'};
-
-    # make sure id is uniq
-    my $x      = 0;
-    my $tmpkey = $key;
-    while($x < 100 && $self->get_peer_by_key($tmpkey)) { $tmpkey = $key.$x; $x++; }
-    $peer->{'key'} = $tmpkey;
-
-    $peer->{'class'}->peer_key($peer->{'key'});
-    $peer->{'addr'} = $peer->{'class'}->peer_addr();
-    if($self->{'backend_debug'} and Thruk->debug) {
-        $peer->{'class'}->set_verbose(1);
-    }
-
-    # log cache?
-    if(defined $self->{'config'}->{'logcache'} and $config->{'type'} eq 'livestatus') {
-        require Thruk::Backend::Provider::Mongodb;
-        Thruk::Backend::Provider::Mongodb->import;
-        $peer->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
-                                                peer     => $self->{'config'}->{'logcache'},
-                                                peer_key => $peer->{'key'},
-                                            });
-        $peer->{'class'}->{'logcache'} = $peer->{'logcache'};
-    }
-
-    # sort by section
-    $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = [] unless defined $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}};
-    push @{$self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}}}, $peer;
-
-    return $peer;
 }
 
 ##########################################################
@@ -1679,6 +1696,21 @@ sub _read_resource_file {
         }
     }
     return $macros;
+}
+
+########################################
+
+=head2 _do_thread
+
+  _do_thread()
+
+do the work on threads
+
+=cut
+
+sub _do_thread {
+    my($key, $function, $arg) = @_;
+    return(_do_on_peer($key, $function, $arg));
 }
 
 

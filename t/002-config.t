@@ -27,6 +27,15 @@ for my $key (qw/cgi_cfg_stat
     delete $config->{$key};
 }
 
+# name will be set upon initialization
+if(defined Thruk->config->{'Thruk::Backend'}->{'peer'}) {
+    my $backends = Thruk->config->{'Thruk::Backend'}->{'peer'};
+    if(ref $backends ne 'ARRAY') { $backends = [$backends]; }
+    for my $backend (@{$backends}) {
+        delete $backend->{options}->{name};
+    }
+}
+
 is_deeply($config, Thruk->config, 'config matches');
 
 $config = Thruk::Config::get_config('t/data/test_c_style.conf');

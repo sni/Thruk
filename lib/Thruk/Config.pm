@@ -35,7 +35,6 @@ our %config = ('name'                   => 'Thruk',
               'image_path'             => $project_root.'/root/thruk/images',
               'project_root'           => $project_root,
               'home'                   => $project_root,
-              'min_livestatus_version' => '1.1.3',
               'default_view'           => 'TT',
               'View::TT'               => {
                   TEMPLATE_EXTENSION => '.tt',
@@ -224,7 +223,6 @@ make config available without loading complete catalyst
 
 sub get_config {
     my @files = @_;
-
     if(scalar @files == 0) {
         for my $path ('.', $ENV{'CATALYST_CONFIG'}, $ENV{'THRUK_CONFIG'}) {
             next unless defined $path;
@@ -267,6 +265,7 @@ sub set_default_config {
         bug_email_rcpt                  => 'bugs@thruk.org',
         home_link                       => 'http://www.thruk.org',
         backend_debug                   => 0,
+        connection_pool_size            => 0,
         use_ajax_search                 => 1,
         ajax_search_hosts               => 1,
         ajax_search_hostgroups          => 1,

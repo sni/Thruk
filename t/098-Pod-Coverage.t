@@ -25,6 +25,7 @@ eval "use Test::Pod::Coverage 1.00";
 
 my @modules = all_modules('lib', glob("plugins/plugins-enabled/*/lib"));
 for my $module (@modules) {
+    next if $module eq 'Thruk::Pool::Simple';
 
     $module =~ s/plugins::plugins\-enabled::\w+::lib:://gmx;
 

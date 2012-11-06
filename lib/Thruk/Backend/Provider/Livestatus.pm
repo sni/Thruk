@@ -120,8 +120,6 @@ return the process info
 =cut
 sub get_processinfo {
     my $self  = shift;
-    my $cache = shift;
-
     my $data  =  $self->{'live'}
                   ->table('status')
                   ->columns(qw/
@@ -134,16 +132,6 @@ sub get_processinfo {
                   ->options({AddPeer => 1, rename => { 'livestatus_version' => 'data_source_version' }})
                   ->hashref_pk('peer_key');
 
-    # do the livestatus version check
-    if(defined $cache) {
-        my $cached_already_warned_about_livestatus_version = $cache->get('already_warned_about_livestatus_version');
-        if(!defined $cached_already_warned_about_livestatus_version and defined $self->{'config'}->{'min_livestatus_version'}) {
-            unless(Thruk::Utils::version_compare($data->{$self->peer_key()}->{'data_source_version'}, $self->{'config'}->{'min_livestatus_version'})) {
-                $cache->set('already_warned_about_livestatus_version', 1);
-                $self->{'log'}->warn("backend '".$self->peer_name()."' uses too old livestatus version: '".$data->{$self->peer_key()}->{'data_source_version'}."', minimum requirement is at least '".$self->{'config'}->{'min_livestatus_version'}."'. Upgrade if you experience problems.");
-            }
-        }
-    }
     $data->{$self->peer_key()}->{'data_source_version'} = "Livestatus ".$data->{$self->peer_key()}->{'data_source_version'};
 
     $self->{'last_program_start'} = $data->{$self->peer_key()}->{'program_start'};
@@ -658,41 +646,6 @@ sub get_contact_names {
         confess("get_contact_names() should not be called in scalar context");
     }
     return($keys, 'uniq');
-}
-
-##########################################################
-
-=head2 get_scheduling_queue
-
-  get_scheduling_queue
-
-returns the scheduling queue
-
-=cut
-sub get_scheduling_queue {
-    my($self, %options) = @_;
-    my($services) = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'services'),
-                                                 { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                            { 'check_options' => { '!=' => '0' }}]
-                                                 }
-                                                 ]
-                                      );
-    my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'hosts'),
-                                              { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                         { 'check_options' => { '!=' => '0' }}]
-                                              }
-                                              ],
-                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => sub { return ''; } } }
-                                    );
-
-    my $queue = [];
-    if(defined $services) {
-        push @{$queue}, @{$services};
-    }
-    if(defined $hosts) {
-        push @{$queue}, @{$hosts};
-    }
-    return $queue;
 }
 
 ##########################################################

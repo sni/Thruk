@@ -12,13 +12,6 @@ Note: some options are not accessible here for security reasons.
   <tr>
     <th colspan=3 class='data conftoolheader' style="text-align:center">Backends Configuration</th>
   </tr>
-  [% IF c.db.backends.size == 0 %]
-  <tr class="backend_conf_0_add">
-    <td colspan=3 style="text-align:center;">
-      <font color="red">There are no backends defined yet!</font>
-    </td>
-  </tr>
-  [% END %]
   [% x = 0 %]
   [% FOREACH b = sites %]
   [% x = x + 1 %]

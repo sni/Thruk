@@ -164,8 +164,6 @@ return the process info
 =cut
 sub get_processinfo {
     my $self  = shift;
-    my $cache = shift;
-
     my $data = {
         $self->peer_key() => $self->_db->status
                                        ->find_one()
@@ -693,42 +691,6 @@ sub get_contact_names {
     my @result = ();
     for my $d (@data) { push @result, $d->{name} }
     return(\@result, 'uniq');
-}
-
-##########################################################
-
-=head2 get_scheduling_queue
-
-  get_scheduling_queue
-
-returns the scheduling queue
-
-=cut
-sub get_scheduling_queue {
-    my($self, %options) = @_;
-    my($services) = $self->get_services(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'services'),
-                                                 { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                            { 'check_options' => { '!=' => '0' }}]
-                                                 }
-                                                 ]
-                                      );
-    my($hosts)    = $self->get_hosts(filter => [Thruk::Utils::Auth::get_auth_filter($options{'c'}, 'hosts'),
-                                              { '-or' => [{ 'active_checks_enabled' => '1' },
-                                                         { 'check_options' => { '!=' => '0' }}]
-                                              }
-                                              ],
-                                    # TODO: fix
-                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => sub { return ''; } } }
-                                    );
-
-    my $queue = [];
-    if(defined $services) {
-        push @{$queue}, @{$services};
-    }
-    if(defined $hosts) {
-        push @{$queue}, @{$hosts};
-    }
-    return $queue;
 }
 
 ##########################################################

@@ -294,20 +294,6 @@ sub get_host_names {
 
 ##########################################################
 
-=head2 get_scheduling_queue
-
-  get_scheduling_queue
-
-returns a list of queued checks
-
-=cut
-
-sub get_scheduling_queue {
-    return;
-}
-
-##########################################################
-
 =head2 get_servicegroups
 
   get_servicegroups

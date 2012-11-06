@@ -352,7 +352,7 @@ sub _any_backend_enabled {
 sub _set_processinfo {
     my($c, $cache, $cached_data) = @_;
     my $last_program_restart     = 0;
-    my $processinfo              = $c->{'db'}->get_processinfo($cache);
+    my $processinfo              = $c->{'db'}->get_processinfo();
     return unless defined $processinfo;
     my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
     $c->stash->{'pi'}            = $overall_processinfo;

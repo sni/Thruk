@@ -364,6 +364,9 @@ sub _do_child_stuff {
 
     delete $ENV{'THRUK_SRC'};
 
+    # don't use connection pool after forking
+    $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
+
     # close open filehandles
     for my $fd (0..1024) {
         POSIX::close($fd);
