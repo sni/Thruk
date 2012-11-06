@@ -1230,8 +1230,15 @@ sub _initialise_peer {
         'logcache'      => undef,
     };
     # shorten backend id
-    $peer->{'key'} = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
-    $peer->{'key'} = $config->{'id'} if defined $config->{'id'};
+    my $key = substr(md5_hex($peer->{'class'}->peer_addr." ".$peer->{'class'}->peer_name), 0, 5);
+    $key    = $config->{'id'} if defined $config->{'id'};
+
+    # make sure id is uniq
+    my $x      = 0;
+    my $tmpkey = $key;
+    while($x < 100 && $self->get_peer_by_key($tmpkey)) { $tmpkey = $key.$x; $x++; }
+    $peer->{'key'} = $tmpkey;
+
     $peer->{'class'}->peer_key($peer->{'key'});
     $peer->{'addr'} = $peer->{'class'}->peer_addr();
     if($self->{'backend_debug'} and Thruk->debug) {
@@ -1250,7 +1257,8 @@ sub _initialise_peer {
     }
 
     # sort by section
-    $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = $peer;
+    $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}} = [] unless defined $self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}};
+    push @{$self->{'sections'}->{$peer->{'section'}}->{$peer->{'name'}}}, $peer;
 
     return $peer;
 }

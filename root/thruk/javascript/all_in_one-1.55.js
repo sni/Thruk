@@ -149,7 +149,7 @@ function toggleElement(id, icon) {
     if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElement(): " + id); }
     return false;
   }
-
+  resetRefresh();
   if(pane.style.visibility == "hidden" || pane.style.display == 'none') {
     showElement(id, icon);
     return true;
@@ -369,7 +369,7 @@ function button_out(button)
 
 /* toggle querys for this backend */
 function toggleBackend(backend) {
-
+  resetRefresh();
   var button        = document.getElementById('button_' + backend);
 
   if(backend_chooser == 'switch') {

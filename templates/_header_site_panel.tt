@@ -22,26 +22,37 @@
 <table border=0 cellpadding=0 cellspacing=0>
   <tr>
     <td>
-    [% IF hide_backends_chooser == 0 && c.db.sections.keys.size > 1 %]
+    [% IF hide_backends_chooser == 0 && ( c.db.sections.keys.size > 1 || backends.size > 9 ) %]
     [% popup = BLOCK %]
     <div id="site_panel" style="position: fixed; z-index: 5000; top: 35px; left: 195px; display: none;">
     <div class="shadow"><div class="shadowcontent">
-    <table cellspacing=2 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black; padding: 5px;">
+    <table cellspacing=0 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black; padding: 5px;">
         <tr>
             <th colspan=2>Choose your sites</th>
         </tr>
         <tr>
             [% FOREACH section IN c.db.sections.keys.sort %]
-            <th>[% section %]</th>
+            <th style="[% UNLESS loop.first %]border-left: 1px solid grey; padding-left: 5px; [% END %]padding-right: 3px; border-bottom: 1px solid grey;">
+                [% section %]
+            </th>
             [% END %]
         </tr>
         <tr>
             [% FOREACH section IN c.db.sections.keys.sort %]
+            <td valign="top" style="[% UNLESS loop.first %]border-left: 1px solid grey; padding-left: 5px; [% END %]padding-right: 3px; padding-top: 4px;">
+            <table cellpadding=0 cellspacing=0 border=0><tr>
             <td valign="top">
+            [% count = 0 %]
             [% FOREACH bname IN c.db.sections.$section.keys.sort %]
-                [% pd = c.db.sections.$section.$bname.key %]
+                [% FOREACH p IN c.db.sections.$section.$bname %]
+                [% pd = p.key %]
                 [% PROCESS site style="clear: both;" %]
+                [% count = count + 1 %]
+                [% IF count > 15 %][% count = 0 %]</td><td valign="top">[% END %]
+                [% END %]
             [% END %]
+            </td>
+            </tr></table>
             </td>
             [% END %]
         </tr>
@@ -50,7 +61,7 @@
     </div>
     [% END %]
       <input type="button" class="[% IF up > 0 %]button_peerUP[% ELSE %]button_peerDIS[% END %]" value="[% up %] up"         onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('site_panel')">[%
-    %]<input type="button" class="button_peerDIS" value="[% disabled %] disabled" onMouseOver="button_over(this)"            onMouseOut="button_out(this)" onClick="toggleElement('site_panel')">[%
+    %]<input type="button" class="button_peerDIS" value="[% disabled %] disabled"                                            onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('site_panel')">[%
     %]<input type="button" class="[% IF down > 0 %]button_peerDOWN[% ELSE %]button_peerDIS[% END %]" value="[% down %] down" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('site_panel')">
     [% popup %]
     [% ELSIF hide_backends_chooser == 0 %]
