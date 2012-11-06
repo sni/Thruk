@@ -21,6 +21,7 @@ sub prepare_uploads {
         next if $key eq 'selected_services';
         next if $key eq 'service';
         next if $key eq 'pattern';
+        next if $key eq 'exclude_pattern';
         next if $key eq 'conf_comment';
         next if $key eq 'content';
         next if $key eq 'filter';
