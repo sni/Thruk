@@ -227,7 +227,7 @@ sub _renew_navigation {
     my $additional_subitems = defined $Thruk::Utils::Menu::additional_subitems ? dclone($Thruk::Utils::Menu::additional_subitems) : [];
 
     ## no critic
-    eval(read_file($file));
+    eval("#line 1 $file\n".read_file($file));
     ## use critic
     if($@) {
         $c->log->error("error while loading navigation from ".$file.": ".$@);
