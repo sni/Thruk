@@ -145,6 +145,7 @@ Options:
   -v, --verbose                 Print verbose output
   -V, --version                 Print version
   -i                            replace content inline instead of printing to stdout
+  -r                            read directories recursivly
   -c, --core                    core type can be nagios, icinga or shinken. Will be
                                 autodetected unless specified.
 
