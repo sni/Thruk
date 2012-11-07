@@ -153,7 +153,7 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
 sub _process_json_page {
     my( $self, $c ) = @_;
 
-    return unless $self->_update_objects_config($c);
+    return unless Thruk::Utils::Conf::set_object_model($c);
 
     my $type = $c->{'request'}->{'parameters'}->{'type'} || 'hosts';
     $type    =~ s/s$//gmxo;
@@ -862,7 +862,7 @@ sub _process_objects_page {
     $c->stash->{'last_changed'} = 0;
     $c->stash->{'needs_commit'} = 0;
 
-    return unless $self->_update_objects_config($c);
+    return unless Thruk::Utils::Conf::set_object_model($c);
 
     _check_external_reload($c);
 
@@ -1178,14 +1178,6 @@ sub _cmd {
     }
     return 1;
 }
-
-
-##########################################################
-sub _update_objects_config {
-    my ( $self, $c ) = @_;
-    return Thruk::Utils::Conf::set_object_model($c);
-}
-
 
 ##########################################################
 sub _find_files {
