@@ -665,6 +665,8 @@ sub _sort_by_object_keys {
         "servicegroup_name",
         "command_name",
         "alias",
+        "address",
+        "parents",
         "use",
         "monday",
         "tuesday",
