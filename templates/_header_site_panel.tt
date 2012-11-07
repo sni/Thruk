@@ -24,22 +24,22 @@
     <td>
     [% IF hide_backends_chooser == 0 && ( c.db.sections.keys.size > 1 || backends.size >= 10 ) %]
       [% popup = BLOCK %]
-      <div id="site_panel" style="position: fixed; z-index: 5000; top: 35px; left: 195px; display: none;">
+      <div id="site_panel" style="display: none;">
       <div class="shadow"><div class="shadowcontent">
-      <table cellspacing=0 cellpadding=0 width="100%" style="background: #F0F1EE; border: 1px solid black; padding: 5px;">
+      <table class="site_panel" cellspacing=0 cellpadding=0 width="100%">
         <tr>
             <th colspan=2>Choose your sites</th>
         </tr>
         <tr>
             [% FOREACH section IN c.db.sections.keys.sort %]
-            <th style="[% UNLESS loop.first %]border-left: 1px solid grey; padding-left: 5px; [% END %]padding-right: 3px; border-bottom: 1px solid grey;">
+            <th class="site_panel [% UNLESS loop.first %]notfirst[% END %]">
                 [% section %]
             </th>
             [% END %]
         </tr>
         <tr>
             [% FOREACH section IN c.db.sections.keys.sort %]
-            <td valign="top" style="[% UNLESS loop.first %]border-left: 1px solid grey; padding-left: 5px; [% END %]padding-right: 3px; padding-top: 4px;">
+            <td valign="top" class="site_panel[% UNLESS loop.first %] notfirst[% END %]">
             <table cellpadding=0 cellspacing=0 border=0><tr>
             <td valign="top">
             [% count = 0 %]
