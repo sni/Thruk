@@ -1,4 +1,4 @@
-[% up = 0; disabled = 0; down = 0; %]
+﻿[% up = 0; disabled = 0; down = 0; %]
 [% BLOCK site %]
     <div class='backend' style="[% style %]">
       [% SET name  = 'unknown'                                         %]
