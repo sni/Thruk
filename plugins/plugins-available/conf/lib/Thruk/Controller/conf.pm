@@ -1237,7 +1237,7 @@ sub _get_context_object {
         $obj = Monitoring::Config::Object->new( type     => $c->stash->{'type'},
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
-        my $files_root = $self->_set_files_stash($c);
+        my $files_root = $self->_set_files_stash($c, 1);
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
         $new_file      =~ s/^\///gmx;
         my $file       = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
@@ -1374,14 +1374,14 @@ sub _files_to_path {
 
 ##########################################################
 sub _set_files_stash {
-    my $self = shift;
-    my $c    = shift;
+    my($self, $c, $skip_readonly_files) = @_;
 
     my $all_files  = $c->{'obj_db'}->get_files();
     my $files_tree = $self->_files_to_path($c, $all_files);
     my $files_root = $files_tree->{'path'};
     my @filenames;
     for my $file (@{$all_files}) {
+        next if($skip_readonly_files and $file->{'readonly'});
         my $filename = $file->{'path'};
         $filename    =~ s/^$files_root/\//gmx;
         push @filenames, $filename;
@@ -1489,7 +1489,7 @@ sub _object_move {
     my $c    = shift;
     my $obj  = shift;
 
-    my $files_root = $self->_set_files_stash($c);
+    my $files_root = $self->_set_files_stash($c, 1);
     if($c->stash->{action} eq 'movefile') {
         my $new_file = $c->{'request'}->{'parameters'}->{'newfile'};
         $new_file    =~ s/^\///gmx;
@@ -1515,7 +1515,7 @@ sub _object_clone {
     my $c    = shift;
     my $obj  = shift;
 
-    my $files_root          = $self->_set_files_stash($c);
+    my $files_root          = $self->_set_files_stash($c, 1);
     $c->stash->{'new_file'} = $obj->{'file'}->{'path'};
     $c->stash->{'new_file'} =~ s/^$files_root/\//gmx;
     $obj = Monitoring::Config::Object->new(type     => $obj->get_type(),
@@ -1530,7 +1530,7 @@ sub _object_new {
     my $self = shift;
     my $c    = shift;
 
-    $self->_set_files_stash($c);
+    $self->_set_files_stash($c, 1);
     $c->stash->{'new_file'} = '';
     my $obj = Monitoring::Config::Object->new(type     => $c->stash->{'type'},
                                               name     => $c->stash->{'data_name'},
@@ -1604,7 +1604,7 @@ sub _file_save {
     if(defined $file) {
         $lastobj = $file->update_objects_from_text($content, $lastline);
         $c->{'obj_db'}->_rebuild_index();
-        my $files_root                   = $self->_set_files_stash($c);
+        my $files_root                   = $self->_set_files_stash($c, 1);
         $c->{'obj_db'}->{'needs_commit'} = 1;
         $c->stash->{'file_name'}         = $file->{'path'};
         $c->stash->{'file_name'}         =~ s/^$files_root//gmx;
