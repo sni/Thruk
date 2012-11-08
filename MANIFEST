@@ -960,6 +960,10 @@ t/data/naglint/comments2/in.cfg
 t/data/naglint/comments2/out.cfg
 t/data/naglint/duplicate/in.cfg
 t/data/naglint/duplicate/out.cfg
+t/data/naglint/empty_attr/in.cfg
+t/data/naglint/empty_attr/out.cfg
+t/data/naglint/long_commands/in.cfg
+t/data/naglint/long_commands/out.cfg
 t/data/naglint/missing_parenthesis/in.cfg
 t/data/naglint/missing_parenthesis/out.cfg
 t/data/naglint/module/in.cfg

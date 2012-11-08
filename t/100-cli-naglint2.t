@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use File::Temp qw/ tempfile /;
 
-if(scalar @ARGV == 0) { plan(tests => 45); }
+if(scalar @ARGV == 0) { plan(tests => 59); }
 
 my $BIN = './script/naglint';
 if(defined $ENV{'THRUK_BIN'}) {

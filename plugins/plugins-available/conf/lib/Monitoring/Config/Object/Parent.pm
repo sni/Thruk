@@ -131,11 +131,55 @@ sub as_text {
         } else {
             $value = $self->{'conf'}->{$key};
         }
+
         # empty values are valid syntax
         $value = '' unless defined $value;
-        $text .= $disabled;
-        $text .= sprintf "  %-30s %s\n", $key, $value;
-        $nr_object_lines++
+
+        # break very long lines
+        if($key eq 'command_line' and length($key) + length($value) > 120) {
+            my @chunks = split(/(\s+[\-]{1,2}\w+)/mx ,$value);
+            my $first = shift @chunks;
+            Monitoring::Config::File::StripTSpace($first);
+            $text .= sprintf("  %-30s %s \\\n", $key, $first);
+            my $size = scalar @chunks;
+            my $arg  = 1;
+            my $x    = 0;
+            while($x < $size) {
+                my $chunk = $chunks[$x];
+                if($arg) {
+                    Monitoring::Config::File::StripLSpace($chunk);
+                    $text .= sprintf "%-35s %s", '', $chunk;
+                    $arg   = 0;
+                } else {
+                    $text .= $chunk;
+                    if($chunk =~ m/['"]+/mx) {
+                        # append all chunks till our quotes are balanced
+                        my($sq, $dq) = _count_quotes($chunk, 0, 0);
+                        while($sq > 0 or $dq > 0) {
+                            last unless defined $chunks[$x+1];
+                            $x++;
+                            $chunk = $chunks[$x];
+                            $text .= $chunk;
+                            ($sq, $dq) = _count_quotes($chunk, $sq, $dq);
+                        }
+                    }
+
+                    $arg   = 1;
+                    $text .= " \\" unless $x == $size-1;
+                    $text .= "\n";
+                    $nr_object_lines++;
+                }
+                $x++;
+            }
+        } else {
+            $text .= $disabled;
+            if($value ne '') {
+                $text .= sprintf "  %-30s %s\n", $key, $value;
+            } else {
+                $text .= sprintf "  %s\n", $key;
+            }
+            $nr_object_lines++;
+        }
     }
     $text .= $disabled;
     $text .= "}\n\n";
@@ -760,7 +804,29 @@ sub _make_id {
     return $digest;
 }
 
-
+##########################################################
+sub _count_quotes {
+    my($string, $single_quotes, $double_quotes) = @_;
+    my @chars = split//mx, $_[0];
+    my $size  = scalar @chars - 1;
+    for my $x (0..$size) {
+        if($chars[$x] eq "'" and $chars[$x-1] ne '\\') {
+            if($single_quotes) {
+                $single_quotes--;
+            } else {
+                $single_quotes++;
+            }
+        }
+        if($chars[$x] eq '"' and $chars[$x-1] ne '\\') {
+            if($double_quotes) {
+                $double_quotes--;
+            } else {
+                $double_quotes++;
+            }
+        }
+    }
+    return($single_quotes, $double_quotes);
+}
 ##########################################################
 
 =head1 AUTHOR
