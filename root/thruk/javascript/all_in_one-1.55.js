@@ -230,7 +230,7 @@ function setRefreshRate(rate) {
 
 /* reset refresh interval */
 function resetRefresh() {
-  if( typeof refresh_rate != "undefined" ) {
+  if( typeof refresh_rate == "number" ) {
     setRefreshRate(refresh_rate);
   }
 }
