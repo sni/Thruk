@@ -29,14 +29,15 @@ var objects_type        = "[% objects_type %]";
   <div class="browser_file_image">&nbsp;</div>
   <div class="browser_file_longtitle">Name</div>
   <div class="browser_file_type">Type</div>
+  <div class="browser_file_template">Template</div>
   <div class="browser_file_filename">File</div>
   <div class="browser_file_linenr">Line</div>
+  <div class="browser_file_comments">Comments</div>
 </div>
 
 <!-- object elements -->
 [% FOREACH o = objects %]
-[% NEXT IF o.is_template() %]
-[% fullname = o.get_primary_name() %]
+[% fullname  = o.get_long_name('&nbsp;') %]
 [% shortname = fullname %]
 [% type = o.get_type() %]
 [% IF shortname.length > 15 %][% shortname = shortname.substr(0,15) _ '..' %][% END %]
@@ -46,6 +47,7 @@ var objects_type        = "[% objects_type %]";
   <div class="browser_file_shorttitle">[% shortname %]</div>
   <div class="browser_file_longtitle">[% fullname %]</div>
   <div class="browser_file_type" title="[% type %]">[% type %]</div>
+  <div class="browser_file_template">[% IF o.is_template() %]yes[% ELSE %]no[% END %]</div>
   <div class="browser_file_filename" title="[% o.file.path %]">[% filepath %]</div>
   <div class="browser_file_linenr">[% o.line %]</div>
   <div class="browser_file_comments" title="[% escape_html(o.comments.join('_-xXx-_')).replace('_-xXx-_','&#10;') %]">[% escape_html(o.comments.join(' ')) %]</div>

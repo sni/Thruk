@@ -151,8 +151,15 @@ plugins/plugins-available/conf/root/images/obj_command.png
 plugins/plugins-available/conf/root/images/obj_contact.png
 plugins/plugins-available/conf/root/images/obj_contactgroup.png
 plugins/plugins-available/conf/root/images/obj_host.png
+plugins/plugins-available/conf/root/images/obj_hostdependency.png
+plugins/plugins-available/conf/root/images/obj_hostescalation.png
+plugins/plugins-available/conf/root/images/obj_hostextinfo.png
 plugins/plugins-available/conf/root/images/obj_hostgroup.png
+plugins/plugins-available/conf/root/images/obj_module.png
 plugins/plugins-available/conf/root/images/obj_service.png
+plugins/plugins-available/conf/root/images/obj_servicedependency.png
+plugins/plugins-available/conf/root/images/obj_serviceescalation.png
+plugins/plugins-available/conf/root/images/obj_serviceextinfo.png
 plugins/plugins-available/conf/root/images/obj_servicegroup.png
 plugins/plugins-available/conf/root/images/obj_template.xcf
 plugins/plugins-available/conf/root/images/obj_timeperiod.png

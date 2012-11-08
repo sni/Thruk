@@ -173,6 +173,9 @@ DIV.layout_icons DIV.browser_file_longtitle {
 DIV.layout_icons DIV.browser_file_type {
   display: none;
 }
+DIV.layout_icons DIV.browser_file_template {
+  display: none;
+}
 DIV.layout_icons DIV.browser_file_filename {
   display: none;
 }
@@ -220,9 +223,14 @@ DIV.layout_table DIV.browser_file_longtitle {
   overflow: hidden;
 }
 DIV.layout_table DIV.browser_file_type {
-  width: 70px;
+  width: 75px;
   overflow: hidden;
   float: left;
+}
+DIV.layout_table DIV.browser_file_template {
+  width: 70px;
+  float: left;
+  text-align: center;
 }
 DIV.layout_table DIV.browser_file_filename {
   width: 290px;
@@ -237,7 +245,7 @@ DIV.layout_table DIV.browser_file_linenr {
 }
 DIV.layout_table DIV.browser_file_comments {
   margin-left: 5px;
-  width: 150px;
+  width: 130px;
   height: 20px;
   overflow: hidden;
   float: left;

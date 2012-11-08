@@ -228,9 +228,12 @@ return the primary objects name
 
 =cut
 sub get_primary_name {
-    my $self = shift;
-    my $full = shift || 0;
-    my $conf = shift || $self->{'conf'};
+    my $self     = shift;
+    my $full     = shift || 0;
+    my $conf     = shift || $self->{'conf'};
+    my $fallback = shift;
+
+    return $fallback if defined $fallback;
 
     return if defined $conf->{'register'} and $conf->{'register'} == 0;
 
@@ -262,6 +265,18 @@ sub get_primary_name {
     return([$primary, $secondary]);
 }
 
+##########################################################
+
+=head2 get_primary_name_as_text
+
+return the primary name as text
+
+=cut
+
+sub get_primary_name_as_text {
+    my($self, $fallback) = @_;
+    return $fallback;
+}
 
 ##########################################################
 
@@ -271,12 +286,12 @@ return the objects name plus alias
 
 =cut
 sub get_long_name {
-    my $self = shift;
+    my($self, $fallback) = @_;
     my $name =  $self->get_name();
     if(defined $self->{'conf'}->{'alias'} and $self->{'conf'}->{'alias'} ne $name) {
         return $name." - ".$self->{'conf'}->{'alias'};
     }
-    return $name;
+    return $name || $fallback;
 }
 
 

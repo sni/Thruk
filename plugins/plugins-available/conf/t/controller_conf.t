@@ -6,7 +6,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1061;
+    plan tests => 1076;
 }
 
 BEGIN {
@@ -70,7 +70,9 @@ my $pages = [
 ];
 
 for my $type (@{$Monitoring::Config::Object::Types}) {
-    push @{$pages}, '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type,
+    push @{$pages}, '/thruk/cgi-bin/conf.cgi?sub=objects&type='.$type;
+    my $img = "plugins/plugins-available/conf/root/images/obj_".$type.".png";
+    ok(-f $img, "object image $img exists");
 }
 
 for my $url (@{$pages}) {
