@@ -104,6 +104,9 @@ function init_conf_tool_buttons() {
     jQuery('.conf_save_button').button({
         icons: {primary: 'ui-save-button'}
     });
+    jQuery('.conf_back_button').button({
+        icons: {primary: 'ui-l-arrow-button'}
+    });
 
     jQuery('.conf_preview_button').button({
         icons: {primary: 'ui-preview-button'}

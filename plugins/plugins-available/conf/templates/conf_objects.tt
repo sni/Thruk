@@ -29,7 +29,11 @@
       <td colspan=3>
         <table style="width:100%">
           <tr>
-            <td style="width: 50px;" class="sub_1"></td>
+            <td style="width: 50px;" class="data dataSubmit sub_1">
+              [% IF referer %]
+              <button class="conf_back_button conf_button" onclick="window.location='[% referer %]'; return false;">back</button>
+              [% END %]
+            </td>
             <td class='dataVar dataUserVar'>
               [% IF object.defined('file') %]
                 [% object.get_type() | ucfirst %][% IF object.conf.defined('register') && object.conf.register == 0 %]&nbsp;Template[% END %]:&nbsp;
@@ -48,11 +52,11 @@
                 [% END %]
               </span>
             </td>
-            [% IF ! object.defined('file') || ! object.file.readonly %]
             <td style="width: 50px;" class="data dataSubmit sub_1">
+              [% IF ! object.defined('file') || ! object.file.readonly %]
               <button class="conf_save_button conf_button">save</button>
+              [% END %]
             </td>
-            [% END %]
           </tr>
         </table>
       </td>
