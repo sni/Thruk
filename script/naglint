@@ -48,6 +48,13 @@ Options:
 
 This script beautifies nagios config files.
 
+  - clean whitespace
+  - clean indention
+  - remove deprecated attributes
+  - validate duplicate or invalid attributes
+  - break long command lines into shorter pieces
+  - sort attributes naturally
+
 =head1 OPTIONS
 
 naglint has the following arguments:

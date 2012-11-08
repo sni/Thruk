@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "naglint 3"
-.TH naglint 3 "2012-11-07" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH naglint 3 "2012-11-08" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -146,6 +146,15 @@ Options:
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 This script beautifies nagios config files.
+.PP
+.Vb 6
+\&  \- clean whitespace
+\&  \- clean indention
+\&  \- remove deprecated attributes
+\&  \- validate duplicate or invalid attributes
+\&  \- break long command lines into shorter pieces
+\&  \- sort attributes naturally
+.Ve
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 naglint has the following arguments:
@@ -183,7 +192,7 @@ naglint has the following arguments:
 .Ve
 .SH "RETURN VALUE"
 .IX Header "RETURN VALUE"
-returns 0 on success then number of errors otherwise
+returns 0 on success or number of errors otherwise
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Beautify single config file
