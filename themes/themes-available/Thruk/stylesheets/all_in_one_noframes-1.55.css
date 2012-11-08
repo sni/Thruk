@@ -133,7 +133,6 @@ td.top_nav_pref {
 DIV#site_panel {
  position: fixed;
  z-index: 5000;
- top: 30px;
  left: 195px;
  font-size:11px;
 }

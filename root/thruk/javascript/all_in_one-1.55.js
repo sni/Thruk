@@ -367,6 +367,15 @@ function button_out(button)
    button.style.borderColor = "#999999";
 }
 
+/* toggle site panel */
+/* $%&$&% site panel position depends on the button height */
+function toggleSitePanel() {
+    toggleElement('site_panel');
+    var divs = jQuery('DIV.backend');
+    var panel = document.getElementById('site_panel');
+    panel.style.top = (divs[0].offsetHeight + 11) + 'px';
+}
+
 /* toggle querys for this backend */
 function toggleBackend(backend) {
   resetRefresh();
