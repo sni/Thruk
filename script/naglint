@@ -128,7 +128,7 @@ use Thruk::Utils::Scripts;
 use Monitoring::Config;
 use Monitoring::Config::File;
 
-our $VERSION = '1.56';
+our $VERSION = '1.57';
 my $branch   = '';
 $branch      = Thruk::Utils::get_git_name() unless $branch ne '';
 

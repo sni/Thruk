@@ -20,7 +20,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '1.56';
+our $VERSION = '1.57';
 
 my $project_root = Catalyst::Utils::home('Thruk::Config');
 my $branch       = '';
@@ -29,7 +29,7 @@ $branch          = $gitbranch unless $branch ne '';
 
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
-              'released'               => 'November 07, 2012',
+              'released'               => 'November 09, 2012',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
