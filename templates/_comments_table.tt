@@ -19,7 +19,7 @@
     [%  FOREACH com = comments %]
     [% SET class = 'commentOdd'  IF loop.even %]
     [% SET class = 'commentEven' IF loop.odd %]
-    <tr class='[% class %] clickable' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% com.id %]">
+    <tr class='[% class %] clickable' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% com.id %]_[% com.peer_key %]">
       [% IF names %]
       <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% com.host_name | uri %]'>[% com.host_name %]</a></td>
       [% IF type == 'service' %]

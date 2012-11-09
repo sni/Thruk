@@ -8,6 +8,7 @@ BEGIN {
 }
 
 BEGIN {
+    $ENV{'THRUK_TEST_CMD_NO_LOG'} = 1;
     use lib('t');
     require TestUtils;
     import TestUtils;

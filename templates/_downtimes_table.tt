@@ -21,7 +21,7 @@
     [%  FOREACH d = downtimes %]
     [% SET class = 'downtimeOdd' IF loop.even %]
     [% SET class = 'downtimeEven'  IF loop.odd %]
-    <tr class='[% class %] clickable' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% d.id %]">
+    <tr class='[% class %] clickable' id="[% IF type == 'host' %]hst[% ELSE %]svc[% END %]_[% d.id %]_[% d.peer_key %]">
       [% IF names %]
       <td class='[% class %]'><a href='extinfo.cgi?type=1&amp;host=[% d.host_name | uri %]'>[% d.host_name %]</a></td>
       [% IF type == 'service' %]

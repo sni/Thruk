@@ -34,7 +34,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{no_auto_reload}  = 1;
     $c->stash->{page}            = 'cmd';
     $c->stash->{'form_errors'}   = [];
-    $c->stash->{'commands2send'} = [];
+    $c->stash->{'commands2send'} = {};
 
     # fill in some defaults
     for my $param (qw/send_notification plugin_output performance_data sticky_ack force_notification broadcast_notification fixed ahas com_data persistent hostgroup host service force_check childoptions ptc use_expire servicegroup backend/) {
@@ -153,7 +153,8 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 
         # comments / downtimes quick commands
         for my $id (@idsdata) {
-            my($typ, $id) = split(/_/m,$id, 2);
+            my($typ, $id, $backend) = split(/_/m,$id, 3);
+            $c->{'request'}->{'parameters'}->{'backend'} = $backend;
             if($typ eq 'hst' and defined $host_quick_commands->{$quick_command} ) {
                 $cmd_typ = $host_quick_commands->{$quick_command};
             }
@@ -279,10 +280,7 @@ sub _remove_all_downtimes {
 
     # send the command
     my $options = {};
-    if( defined $backends ) {
-        $c->log->debug( "sending to backends: " . Dumper($backends) );
-        $options->{backend} = $backends;
-    }
+    $options->{backend}  = $backends if defined $backends;
     $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), host_name => $host, service_description => $service ];
 
     # active downtimes
@@ -367,6 +365,11 @@ sub _redirect_or_success {
         $c->log->debug("bulk sending commands succeeded");
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'Sending Commands failed' );
+        $wait = 0;
+    }
+
+    # no need to wait when no command was sent
+    if(defined $ENV{'THRUK_NO_COMMANDS'} or $c->request->parameters->{'test_only'}) {
         $wait = 0;
     }
 
@@ -602,9 +605,12 @@ sub _do_send_command {
         }
     }
 
+    my $backends      = $c->{'request'}->{'parameters'}->{'backend'};
+    my $backends_list = ref $backends eq 'ARRAY' ? $backends : [ $backends ];
     for my $cmd_line ( split /\n/mx, $cmd ) {
         $cmd_line = 'COMMAND [' . time() . '] ' . $cmd_line;
-        push @{$c->stash->{'commands2send'}}, $cmd_line;
+        my $joined_backends = join(',', @{$backends_list});
+        push @{$c->stash->{'commands2send'}->{$joined_backends}}, $cmd_line;
     }
 
     $c->stash->{'start_time_unix'} = $start_time_unix;
@@ -621,28 +627,22 @@ sub _bulk_send {
     my $c            = shift;
     my @errors;
 
-    my $backends = $c->{'request'}->{'parameters'}->{'backend'};
+    for my $backends (keys %{$c->stash->{'commands2send'}}) {
+        my $options = {};
+        # remove duplicate commands
+        my $commands2send     = Thruk::Utils::array_uniq($c->stash->{'commands2send'}->{$backends});
+        $options->{'command'} = join("\n\n", @{$commands2send});
+        $options->{'backend'} = [ split(/,/mx, $backends) ];
+        return 1 if $options->{'command'} eq '';
 
-    # send the command
-    my $options = {};
-    if( defined $backends ) {
-        $c->log->debug( "sending to backends: " . Dumper($backends) );
-        $options->{backend} = $backends;
-    }
-
-    # remove duplicate commands
-    $c->stash->{'commands2send'} = Thruk::Utils::array_uniq($c->stash->{'commands2send'});
-
-    $options->{'command'} = join("\n\n", @{$c->stash->{'commands2send'}});
-
-    return 1 if $options->{'command'} eq '';
-
-    if($c->request->parameters->{'test_only'}) {
-        $c->log->debug( 'not sending (TESTMODE): ' . $options->{'command'} );
-    } else {
-        $c->log->debug( 'sending ' . $options->{'command'} );
-        $c->{'db'}->send_command( %{$options} );
-        map { $c->log->info( '[' . $c->user->username . '] cmd: ' . $_ ) } @{$c->stash->{'commands2send'}};
+        my $backends_string = ref $backends eq 'ARRAY' ? join(',', @{$backends}) : $backends;
+        $backends_string    = 'all' unless $backends_string;
+        if(defined $ENV{'THRUK_NO_COMMANDS'} or $c->request->parameters->{'test_only'}) {
+            map { $c->log->info( 'TESTMODE: [' . $c->user->username . ']['.$backends_string.'] cmd: ' . $_ ) } @{$commands2send} unless $ENV{'THRUK_TEST_CMD_NO_LOG'};
+        } else {
+            $c->{'db'}->send_command( %{$options} );
+            map { $c->log->info( '[' . $c->user->username . ']['.$backends_string.'] cmd: ' . $_ ) } @{$commands2send};
+        }
     }
 
     return 1;
@@ -686,7 +686,7 @@ sub _generate_spread_startdates {
 
 
 ######################################
-# generate spreaded start dates
+# should this command be redirected?
 sub _check_reschedule_alias {
     my( $self, $c ) = @_;
 
