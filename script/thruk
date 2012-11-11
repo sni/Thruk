@@ -5,7 +5,7 @@ if [ -e ~/.thruk  ]; then
 fi
 
 if [ ! -f $(dirname $0)/../thruk.conf ]; then
-  export PERL5LIB=$PERL5LIB:/usr/lib/thruk/perl5:/usr/share/thruk/lib;
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
 fi
 
