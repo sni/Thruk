@@ -205,6 +205,7 @@ sub get_status {
     if($is_running == 0) {
         $percent = 100;
         my @end  = stat($dir."/stdout");
+        $end[9]  = time() unless defined $end[9];
         $time    = $end[9] - $start[9];
     } elsif(-f $dir."/status") {
         $percent = read_file($dir."/status");
@@ -286,6 +287,10 @@ sub get_result {
         @end = stat($dir."/stdout")
     } elsif(-f $dir."/stderr") {
         @end = stat($dir."/stderr")
+    }
+    unless(defined $end[9]) {
+        $end[9] = time();
+        $err    = 'job was killed';
     }
 
     my $time = $end[9] - $start[9];
