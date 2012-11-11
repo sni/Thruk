@@ -22,5 +22,14 @@ if ( $EVAL_ERROR ) {
 
 my $rcfile = File::Spec->catfile( 't', 'perlcriticrc' );
 Test::Perl::Critic->import( -profile => $rcfile );
-my $dirs = [ 'lib', glob("plugins/plugins-enabled/*/lib") ];
-all_critic_ok(@{$dirs});
+
+if(scalar @ARGV > 0) {
+   plan( tests => scalar @ARGV );
+    for my $file (@ARGV) {
+        critic_ok($file);
+    }
+}
+else {
+    my $dirs = [ 'lib', glob("plugins/plugins-enabled/*/lib") ];
+    all_critic_ok(@{$dirs});
+}
