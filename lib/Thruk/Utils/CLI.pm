@@ -283,7 +283,7 @@ sub _from_fcgi {
        or $c->config->{'secret_key'} ne $data->{'credential'}) {
         $res = {
             'version' => $c->config->{'version'},
-            'output'  => "authorization failed\n",
+            'output'  => "authorization failed, ". $c->request->uri." doesnot accept this key.\n",
             'rc'      => 1,
         };
     } else {
