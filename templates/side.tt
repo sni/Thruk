@@ -22,7 +22,7 @@
   </head>
   <body class='navbar'>
 [% END %]
-    <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
+    <a href="[% home_link %]" target="_blank"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/logo_thruk_small.png" border="0" alt="Thruk" title="Thruk" width="130" height="40" class="nav_small_logo" /></a>
 
     [% FOREACH section = navigation %]
     [% cookie_section_name = section.name.replace(' ', '_') | lower %]
