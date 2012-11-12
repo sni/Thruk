@@ -24,21 +24,31 @@
       <table class="weekly_days">
       <tr>
         <td rowspan=2 valign="middle">on</td>
+        [% IF first_day_of_week == 0 %]
+        <td>Sun</td>
+        [% END %]
         <td>Mon</td>
         <td>Tue</td>
         <td>Wed</td>
         <td>Thu</td>
         <td>Fri</td>
         <td>Sat</td>
+        [% IF first_day_of_week != 0 %]
         <td>Sun</td>
+        [% END %]
       </tr><tr>
+        [% IF first_day_of_week == 0 %]
+        <td><input type="checkbox" name="week_day_[% nr %]" value="0"[% IF lookup.exists('0') %] checked[% END %]></td>
+        [% END %]
         <td><input type="checkbox" name="week_day_[% nr %]" value="1"[% IF lookup.exists('1') %] checked[% END %]></td>
         <td><input type="checkbox" name="week_day_[% nr %]" value="2"[% IF lookup.exists('2') %] checked[% END %]></td>
         <td><input type="checkbox" name="week_day_[% nr %]" value="3"[% IF lookup.exists('3') %] checked[% END %]></td>
         <td><input type="checkbox" name="week_day_[% nr %]" value="4"[% IF lookup.exists('4') %] checked[% END %]></td>
         <td><input type="checkbox" name="week_day_[% nr %]" value="5"[% IF lookup.exists('5') %] checked[% END %]></td>
         <td><input type="checkbox" name="week_day_[% nr %]" value="6"[% IF lookup.exists('6') %] checked[% END %]></td>
+        [% IF first_day_of_week != 0 %]
         <td><input type="checkbox" name="week_day_[% nr %]" value="0"[% IF lookup.exists('0') %] checked[% END %]></td>
+        [% END %]
       </tr>
       </table>
   </div>

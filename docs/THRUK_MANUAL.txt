@@ -1469,6 +1469,16 @@ ex.:
   report_base_url = http://host.local/thruk/cgi-bin/
 
 
+==== first_day_of_week
+Set first day of week. Used in reports.
+ Sunday: 0
+ Monday: 1
+
+ex.:
+
+  first_day_of_week = 0
+
+
 ==== logcache
 Enables caching logfiles for faster access. Cache supports MongoDB
 only. Format is a MongoDB connection string like 'hostname:port/db'.

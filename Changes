@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.58     not yet released
+          - added new config option first_day_of_week
           - Bug Fixes
             - fixed sending commands to all backends
 

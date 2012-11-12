@@ -315,7 +315,11 @@ sub get_start_end_for_timeperiod {
         # start on last sunday 0:00 till now
         my @today  = Today();
         my @monday = Monday_of_Week(Week_of_Year(@today));
-        $start     = Mktime(@monday,  0,0,0) - 86400;
+        if($c->config->{'first_day_of_week'} == 1) {
+            $start = Mktime(@monday,  0,0,0);
+        } else {
+            $start = Mktime(@monday,  0,0,0) - 86400;
+        }
         $end       = time();
     }
     elsif($timeperiod eq 'last7days') {
@@ -326,7 +330,11 @@ sub get_start_end_for_timeperiod {
         # start on last weeks sunday 0:00 till last weeks saturday 24:00
         my @today  = Today();
         my @monday = Monday_of_Week(Week_of_Year(@today));
-        $end       = Mktime(@monday,  0,0,0) - 86400;
+        if($c->config->{'first_day_of_week'} == 1) {
+            $end   = Mktime(@monday,  0,0,0);
+        } else {
+            $end   = Mktime(@monday,  0,0,0) - 86400;
+        }
         $start     = $end - 7*86400;
     }
     elsif($timeperiod eq 'thismonth') {

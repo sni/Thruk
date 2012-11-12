@@ -358,6 +358,7 @@ sub set_default_config {
         thruk_init                          => '/etc/init.d/thruk',
         thruk_shell                         => '/bin/bash -l -c',
         report_nice_level                   => 5,
+        first_day_of_week                   => 0,
         weekdays                        => {
                     '0'                     => 'Sunday',
                     '1'                     => 'Monday',
