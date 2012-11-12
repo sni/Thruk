@@ -36,7 +36,7 @@ window.onerror = function(msg, url, line) {
         for(var nr in thruk_errors) {
             text = text + thruk_errors[nr]+"\n";
         }
-        link.href="mailto:bugs@thruk.org?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
+        link.href="mailto:[% bug_email_rcpt %]?subject="+encodeURIComponent("Thruk JS Error Report")+"&body="+encodeURIComponent(text);
     }
     showBugReport('bug_report');
   }

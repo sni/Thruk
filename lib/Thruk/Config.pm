@@ -265,6 +265,7 @@ sub set_default_config {
     $config->{'url_prefix'} = exists $config->{'url_prefix'} ? $config->{'url_prefix'} : '/';
     my $defaults = {
         'cgi.cfg'                       => 'cgi.cfg',
+        bug_email_rcpt                  => 'bugs@thruk.org',
         backend_debug                   => 0,
         use_ajax_search                 => 1,
         ajax_search_hosts               => 1,
