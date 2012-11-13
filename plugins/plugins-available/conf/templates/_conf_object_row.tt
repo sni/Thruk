@@ -28,7 +28,7 @@
   [% IF cmd.size == 0 %][% cmd = ['',''] %][% END %]
   [% IF edit %]
     <table cellpadding=0 cellspacing=0 border=0 width="100%"><tr>
-    <td><input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]></td>
+    <td style="width: 160px;"><input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]></td>
     <td align="right">&nbsp;&nbsp;args:&nbsp;</td>
     <td>
       <input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; escape_html(cmd.join('!')) %]">

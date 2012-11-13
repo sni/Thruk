@@ -589,6 +589,7 @@ td.stateInfoTable1 .dataVal {
   overflow: hidden;
   z-index: 2000;
   text-align: left;
+  font-weight: normal;
 }
 
 #search-results ul{
