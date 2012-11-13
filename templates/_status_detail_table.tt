@@ -1,6 +1,6 @@
 ﻿[% PROCESS custom_perf_bar_adjustments.tt %]
 
-    <table border="0" width="100%" class='status servicestatus' id="statusTable">
+    <table border="0" width="100%" class='status servicestatus' id="statusTable" onmouseout='reset_all_hosts_and_services();'>
       <tr>
         <th class='status' nowrap>Host&nbsp;<a href='[%       short_uri(c, ${"sorttype$sortprefix"} => 1, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/up.gif' border="0" alt='Sort by host name (ascending)' title='Sort by host name (ascending)'></a><a href='[%             short_uri(c, ${"sorttype$sortprefix"} => 2, ${"sortoption$sortprefix"} => 1) %]'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/down.gif' border="0" alt='Sort by host name (descending)' title='Sort by host name (descending)'></a></th>
         [% IF show_backends_in_table == 2 %]

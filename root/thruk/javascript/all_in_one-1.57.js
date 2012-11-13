@@ -382,33 +382,37 @@ function toggleBackend(backend) {
   var button        = document.getElementById('button_' + backend);
 
   if(backend_chooser == 'switch') {
-    jQuery('.button_peerUP').removeAttr('class').addClass('button_peerDIS');
-    button.className = 'button_peerUP';
+    jQuery('INPUT.button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
+    jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
     cookieSave('thruk_conf', backend, 0);
     reloadPage();
     return;
   }
 
   initial_state = initial_backend_states[backend];
-  if(button.className == "button_peerDIS") {
+  var newClass  = undefined;
+  if(jQuery(button).hasClass("button_peerDIS")) {
     if(initial_state == 1) {
-      button.className = 'button_peerDOWN';
+      newClass = "button_peerDOWN";
     }
     else if(initial_state == 3) {
-      button.className = 'button_peerHID';
+      newClass = "button_peerHID";
     }
     else {
-        button.className = 'button_peerUP';
+      newClass = "button_peerUP";
     }
     current_backend_states[backend] = 0;
-  } else if(button.className == "button_peerHID") {
-    button.className = 'button_peerUP';
+  } else if(jQuery(button).hasClass("button_peerHID")) {
+    newClass = "button_peerUP";
     current_backend_states[backend] = 0;
     delete additionalParams['backend'];
   } else {
-    button.className = "button_peerDIS";
+    newClass = "button_peerDIS";
     current_backend_states[backend] = 2;
   }
+
+  /* remove all and set new class */
+  jQuery(button).removeClass("button_peerDIS button_peerHID button_peerUP").addClass(newClass);
 
   additionalParams['reload_nav'] = 1;
 
@@ -1026,10 +1030,7 @@ function addRowSelector(id, type) {
     }
 
     // reset all current highlighted rows
-    jQuery('td.tableRowHover').each(function(i, e) {
-        resetHostRow(e);
-        resetServiceRow(e);
-    });
+    reset_all_hosts_and_services();
 
     if(type == 'host') {
       pagetype = 'hostdetail'
@@ -1058,19 +1059,34 @@ function addRowSelector(id, type) {
             addEventHandler(cells[cell_nr], 'service');
         }
     }
-    if(is_host) {
-        appendRowStyle(id, 'tableRowHover', 'host');
-    } else {
-        appendRowStyle(id, 'tableRowHover', 'service');
-    }
 
     // initial mouseover highlights host&service, reset class here
     if(pagetype == "servicedetail") {
-        jQuery('td.tableRowHover').each(function(i, e) {
-            resetHostRow(e);
-        });
+        reset_all_hosts_and_services(true, false);
+    }
+
+    if(is_host) {
+        //addEvent(row, 'mouseout', resetHostRow);
+        appendRowStyle(id, 'tableRowHover', 'host');
+    } else {
+        //addEvent(row, 'mouseout', resetServiceRow);
+        appendRowStyle(id, 'tableRowHover', 'service');
     }
     return true;
+}
+
+/* reset all current hosts and service rows */
+function reset_all_hosts_and_services(hosts, services) {
+    var rows = Array();
+    jQuery('td.tableRowHover').each(function(i, e) {
+        rows.push(e.parentNode);
+    });
+
+    jQuery.unique(rows);
+    jQuery(rows).each(function(i, e) {
+        resetHostRow(e);
+        resetServiceRow(e);
+    });
 }
 
 /* set right pagetype */
@@ -1085,14 +1101,12 @@ function set_pagetype_servicedetail() {
 function addEventHandler(elem, type) {
     if(type == 'host') {
         addEvent(elem, 'mouseover', highlightHostRow);
-        addEvent(elem, 'mouseout',  resetHostRow);
         if(!elem.onclick) {
             elem.onclick = selectHost;
         }
     }
     if(type == 'service') {
         addEvent(elem, 'mouseover', highlightServiceRow);
-        addEvent(elem, 'mouseout',  resetServiceRow);
         if(!elem.onclick) {
             elem.onclick = selectService;
         }
@@ -1326,44 +1340,37 @@ function styleElementsFF(elems, style, force) {
 }
 
 /* this is the mouseover function for services */
-function highlightServiceRow()
-{
-    // reset all current highlighted rows
-    jQuery('td.tableRowHover').each(function(i, e) {
-        resetHostRow(e);
-        resetServiceRow(e);
-    });
-
+function highlightServiceRow() {
     // find id of current row
     var row_id = getFirstParentId(this);
     if(!row_id) {
       return;
     }
+
+    // reset all current highlighted rows
+    reset_all_hosts_and_services();
+
     lastRowHighlighted = row_id;
     appendRowStyle(row_id, 'tableRowHover', 'service');
 }
 
 /* this is the mouseover function for hosts */
-function highlightHostRow()
-{
-    // reset all current highlighted rows
-    jQuery('td.tableRowHover').each(function(i, e) {
-        resetHostRow(e);
-        resetServiceRow(e);
-    });
-
+function highlightHostRow() {
     // find id of current row
     var row_id = getFirstParentId(this);
     if(!row_id) {
       return;
     }
+
+    // reset all current highlighted rows
+    reset_all_hosts_and_services();
+
     lastRowHighlighted = row_id;
     appendRowStyle(row_id, 'tableRowHover', 'host');
 }
 
 /* select this service */
-function selectService(event, state)
-{
+function selectService(event, state) {
     unselectCurrentSelection();
     var row_id;
     // find id of current row
@@ -1571,13 +1578,11 @@ function selectHostById(row_id, state) {
 
 
 /* reset row style unless it has been clicked */
-function resetServiceRow(event)
-{
+function resetServiceRow(event) {
     var row_id;
     if(!event) {
         event = this;
     }
-
     // find id of current row
     if(event.target) {
         row_id = getFirstParentId(event.target);
@@ -1596,8 +1601,7 @@ function resetServiceRow(event)
 }
 
 /* reset row style unless it has been clicked */
-function resetHostRow(event)
-{
+function resetHostRow(event) {
     var row_id;
     if(!event) {
         event = this;
