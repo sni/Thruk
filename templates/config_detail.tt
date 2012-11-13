@@ -2,10 +2,14 @@
 
     <table border="0" width="100%" cellspacing="0" cellpadding="0">
       <tr>
-        <td align="left" valign="top" width="50%">
+        <td align="left" valign="top" width="20%">
           [% PROCESS _infobox.tt %]
         </td>
-        <td align="right" valign="bottom" width="50%">
+        <td align="center" valign="bottom" width="60%">
+          <div align="center" class='dataTitle'>[% dataTitle %]</div>
+          <br>
+        </td>
+        <td align="right" valign="bottom" width="20%">
           <form method="get" action="config.cgi">
             <table border="0">
               <tr>
@@ -40,13 +44,11 @@
         <td>
           <table border="0">
             <tr>
-              <th>
-                Columns
-              </th>
+              <td align="left" class='reportSelectSubTitle'>Columns:</td>
             </tr>
             <tr>
              <td>
-                <select style="height: 150px;" name='columns' multiple='multiple' onchange="toggleVis(this)">
+                <select style="height: 120px;" name='columns' multiple='multiple' onchange="toggleVis(this)">
                 </select>
               </td>
            </tr>
@@ -54,9 +56,6 @@
        </td>
       </tr>
     </table>
-    <br>
-    <div align="center" class='dataTitle'>[% dataTitle %]</div>
-    <br>
 
     <div align="center">[% PROCESS _pager.tt %]</div>
 
@@ -66,14 +65,14 @@
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Entries Displayed</div>
 
-    <script language="javascript">
+    <script type="text/javascript">
+    <!--
 
 tables = document.getElementsByTagName("table")
 for (var i = 0; i < tables.length; i++) {
     if ( tables[i].getAttribute("class") == "data" ) {
         table = tables[i];
     }
-
 }
 
 column_select = document.getElementsByName("columns")[0];
@@ -109,9 +108,7 @@ function toggleVis(sel){
         h = lines[k].getElementsByTagName('th');
         if (h.length == sel.options.length) {
             for (var i = 0; i < sel.options.length; i++) {
-//              console.log(sel.options[i].innerText);
                 if (sel.options[i].selected == true) {
-//                  console.log(sel.options[i].value);
                     h[i].style.display = showMode;
                 }
                 else {
@@ -124,9 +121,7 @@ function toggleVis(sel){
         c = lines[k].getElementsByTagName('td');
         if (c.length == sel.options.length) {
             for (var i = 0; i < sel.options.length; i++) {
-//          console.log(sel.options[i].innerText);
                 if (sel.options[i].selected == true) {
-//                    console.log(sel.options[i].value);
                     c[i].style.display = showMode;
                 }
                 else {
@@ -137,6 +132,7 @@ function toggleVis(sel){
     }
 
 }
+    -->
     </script>
 
 [% PROCESS _footer.tt %]
