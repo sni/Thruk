@@ -122,14 +122,6 @@ th.status a:hover {
   text-decoration: underline;
 }
 
-.tableRowHover {
-  background-color:#88BBD8;
-}
-.tableRowSelected {
-  background-color:#609FD2;
-  height: 22px;
-}
-
 /* fix for navigation table header */
 div.tree td {
   line-height: 3px;

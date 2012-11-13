@@ -1041,9 +1041,10 @@ function addRowSelector(id, type) {
     }
 
     // for each cell in a row
+    var is_host = false;
     for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
         if(pagetype == "hostdetail" || (cell_nr == 0 && cells[0].innerHTML != '')) {
-            setRowStyle(id, 'tableRowHover', 'host');
+            is_host = true;
             if(pagetype == 'hostdetail') {
                 addEvent(cells[cell_nr], 'mouseover', set_pagetype_hostdetail);
             } else {
@@ -1052,10 +1053,15 @@ function addRowSelector(id, type) {
             addEventHandler(cells[cell_nr], 'host');
         }
         else if(cell_nr >= 1) {
+            is_host = false;
             addEvent(cells[cell_nr], 'mouseover', set_pagetype_servicedetail);
-            setRowStyle(id, 'tableRowHover', 'service');
             addEventHandler(cells[cell_nr], 'service');
         }
+    }
+    if(is_host) {
+        appendRowStyle(id, 'tableRowHover', 'host');
+    } else {
+        appendRowStyle(id, 'tableRowHover', 'service');
     }
 
     // initial mouseover highlights host&service, reset class here
@@ -1134,7 +1140,7 @@ function getFirstParentId(elem) {
 }
 
 /* set style for each cell */
-function setRowStyle(row_id, style, type, force ) {
+function setRowStyle(row_id, style, type, force) {
 
     var row = document.getElementById(row_id);
     if(!row) {
@@ -1164,6 +1170,96 @@ function setRowStyle(row_id, style, type, force ) {
         }
     }
     return true;
+}
+
+/* set style for each cell */
+function appendRowStyle(row_id, style, type, recursive) {
+    var row = document.getElementById(row_id);
+    if(!row) {
+        if(thruk_debug_js) { alert("ERROR: got no row in appendRowStyle(): " + row_id); }
+        return false;
+    }
+    // for each cells in this row
+    var cells = row.cells;
+    if(!cells) {
+        return false;
+    }
+    if(recursive == undefined) { recursive = false; }
+    for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
+        // only the first cell for hosts
+        // all except the first cell for services
+        if((type == 'host' && pagetype == 'hostdetail') || (type == 'host' && cell_nr == 0) || (type == 'service' && cell_nr >= 1)) {
+            // set style for cell itself
+            addStyle(cells[cell_nr], style)
+
+            if(recursive) {
+                // and for all row elements below
+                var elems = cells[cell_nr].getElementsByTagName('TR');
+                addStyle(elems, style)
+
+                // and for all cell elements below
+                var elems = cells[cell_nr].getElementsByTagName('TD');
+                addStyle(elems, style)
+            }
+        }
+    }
+    return true;
+}
+
+/* remove style for each cell */
+function removeRowStyle(row_id, styles, type) {
+
+    var row = document.getElementById(row_id);
+    if(!row) {
+        if(thruk_debug_js) { alert("ERROR: got no row in appendRowStyle(): " + row_id); }
+        return false;
+    }
+    // for each cells in this row
+    var cells = row.cells;
+    if(!cells) {
+        return false;
+    }
+    for(var cell_nr = 0; cell_nr < cells.length; cell_nr++) {
+        // only the first cell for hosts
+        // all except the first cell for services
+        if((type == 'host' && pagetype == 'hostdetail') || (type == 'host' && cell_nr == 0) || (type == 'service' && cell_nr >= 1)) {
+            // set style for cell itself
+            removeStyle(cells[cell_nr], styles)
+
+            // and for all row elements below
+            var elems = cells[cell_nr].getElementsByTagName('TR');
+            removeStyle(elems, styles)
+
+            // and for all cell elements below
+            var elems = cells[cell_nr].getElementsByTagName('TD');
+            removeStyle(elems, styles)
+        }
+    }
+    return true;
+}
+
+/* add style to given element(s) */
+function addStyle(elems, style) {
+    if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
+        elems = new Array(elems);
+    }
+    jQuery.each(elems, function(nr, e) {
+        jQuery(e).addClass(style);
+    });
+    return;
+}
+
+/* remove style to given element(s) */
+function removeStyle(elems, styles) {
+    if (elems == null || ( typeof(elems) != "object" && typeof(elems) != "function" ) || typeof(elems.length) != "number") {
+        elems = new Array(elems);
+    }
+    jQuery.each(elems, function(nr, e) {
+        jQuery.each(styles, function(nr, s) {
+            jQuery(e).removeClass(s);
+        });
+    });
+    return;
 }
 
 /* save current style and change it*/
@@ -1244,7 +1340,7 @@ function highlightServiceRow()
       return;
     }
     lastRowHighlighted = row_id;
-    setRowStyle(row_id, 'tableRowHover', 'service');
+    appendRowStyle(row_id, 'tableRowHover', 'service');
 }
 
 /* this is the mouseover function for hosts */
@@ -1262,7 +1358,7 @@ function highlightHostRow()
       return;
     }
     lastRowHighlighted = row_id;
-    setRowStyle(row_id, 'tableRowHover', 'host');
+    appendRowStyle(row_id, 'tableRowHover', 'host');
 }
 
 /* select this service */
@@ -1358,10 +1454,10 @@ function selectServiceById(row_id, state) {
     }
 
     if(targetState) {
-        setRowStyle(row_id, 'tableRowSelected', 'service', true);
+        appendRowStyle(row_id, 'tableRowSelected', 'service', true);
         selectedServices[row_id] = 1;
     } else {
-        setRowStyle(row_id, 'original', 'service', true);
+        removeRowStyle(row_id, ['tableRowSelected', 'tableRowHover'], 'service');
         delete selectedServices[row_id];
     }
     return true;
@@ -1464,10 +1560,10 @@ function selectHostById(row_id, state) {
     }
 
     if(targetState) {
-        setRowStyle(row_id, 'tableRowSelected', 'host', true);
+        appendRowStyle(row_id, 'tableRowSelected', 'host', true);
         selectedHosts[row_id] = 1;
     } else {
-        setRowStyle(row_id, 'original', 'host', true);
+        removeRowStyle(row_id, ['tableRowSelected', 'tableRowHover'], 'host');
         delete selectedHosts[row_id];
     }
     return true;
@@ -1496,7 +1592,7 @@ function resetServiceRow(event)
         }
         return;
     }
-    setRowStyle(row_id, 'original', 'service');
+    removeRowStyle(row_id, ['tableRowHover'], 'service');
 }
 
 /* reset row style unless it has been clicked */
@@ -1520,7 +1616,7 @@ function resetHostRow(event)
         }
         return;
     }
-    setRowStyle(row_id, 'original', 'host');
+    removeRowStyle(row_id, ['tableRowHover'], 'host');
 }
 
 /* select or deselect all services */
@@ -1900,7 +1996,7 @@ function selectCommentById(row_id, state) {
     var row   = document.getElementById(row_id);
     if(!row) {
         if(thruk_debug_js) { alert("ERROR: unknown id in selectCommentById(): " + row_id); }
-        return;
+        return false;
     }
     var elems = row.getElementsByTagName('TD');
 

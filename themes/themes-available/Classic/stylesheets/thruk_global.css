@@ -327,7 +327,6 @@ body.summary table.data {
 
 /* mouse over classes for inline command selection in status page */
 .tableRowHover {
-  background-color:#88BBD8;
   cursor: pointer;
 }
 .tableRowSelected {
@@ -915,4 +914,13 @@ DIV.perf_bar_crit {
   border: 0;
   border-right: 1px solid #B36969;
   position: absolute;
+}
+
+TD.tableRowHover, TH.tableRowHover {
+  filter: alpha(opacity = 70); /* IE 6, 7, 8 */
+  -ms-filter: "alpha(opacity = 70)"; /* ab IE 8 zusätzlich möglich */
+  opacity: .70; /* alle anderen Browser einschließlich IE 9 */
+}
+TD.tableRowSelected, TH.tableRowSelected {
+  background-color:#C3D9FF !important;
 }

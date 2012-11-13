@@ -158,13 +158,8 @@ DIV.infoMessage {
   background-color:#FF9E00;
 }
 
-td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:hover, .tableRowHover,td.newfilter:hover {
+td.filterValue:hover,#search-results a.ajax_search_selected,#search-results a:hover, td.newfilter:hover {
   background-color:#FFEB66;
-}
-
-.tableRowSelected {
-  background:#C3D9FF;
-  height:22px;
 }
 
 DIV.blockHead,DIV.commandTitle {
