@@ -3,6 +3,8 @@
 <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_maximize.gif" style="display:[% IF show_filter_table %]none[% ELSE %][% END %];" class="filter_button" id="[% paneprefix %]filter_button" alt="filter" onClick="toggleFilterPane('[% paneprefix %]'); return false;">
 [% IF show_form %]
 <form action="" method="GET" id="[% paneprefix %]filterForm">
+[%# make sure IE can submit form by pressing enter #%]
+<input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="nav" value="[% nav %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries %]">[% END %]
 <input type="hidden" name="hidesearch" id="hidesearch" value="[% hidesearch %]">
