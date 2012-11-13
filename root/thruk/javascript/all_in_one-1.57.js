@@ -3064,7 +3064,6 @@ var ajax_search = {
         catch(e) {
             // doesnt matter
         }
-
         var panel = document.getElementById(ajax_search.result_pan);
         if(!panel) { return; }
         /* delay hiding a little moment, otherwise the click
@@ -3291,6 +3290,8 @@ var ajax_search = {
         showElement(panel);
         ajax_search.stop_events = true;
         window.setTimeout("ajax_search.stop_events=false;", 200);
+        ajax_search.dont_hide=true;
+        window.setTimeout("ajax_search.dont_hide=false", 500);
         input.focus();
     },
 
@@ -3304,8 +3305,6 @@ var ajax_search = {
     set_result: function(value) {
         if(value == 'more' || (value == undefined && ajax_search.res.length == ajax_search.cur_select)) {
             window.clearTimeout(ajax_search.hideTimer);
-            ajax_search.dont_hide=true;
-            window.setTimeout("ajax_search.dont_hide=false", 500);
             var panel = document.getElementById(ajax_search.result_pan);
             if(panel) {
                 panel.style.overflowY="scroll";
@@ -3476,7 +3475,6 @@ var ajax_search = {
         }
     }
 }
-
 /*******************************************************************************
 88888888ba  888b      88 88888888ba
 88      "8b 8888b     88 88      "8b
