@@ -228,6 +228,7 @@ input.button_peerHID {
 div.navbarsearch form fieldset {
   border: 0px;
   padding-top: 0px;
+  padding-left: 7px;
   padding-bottom: 0px;
 }
 
