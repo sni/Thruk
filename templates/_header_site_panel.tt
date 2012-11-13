@@ -11,7 +11,7 @@
       [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
       [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 6 %]
       [% SET class = 'button_peerUP'  IF backend_detail.$pd.disabled == 7 %]
-      <input type="button"[%IF use_id == 1 %] id='button_[% pd %]'[% END %] class="[% class %]" value="[% name %]" title="[% IF backend_detail.$pd.last_error %][% escape_js(backend_detail.$pd.last_error) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)"[% IF backend_detail.$pd.disabled == 5 %] disabled[% ELSE %] onClick="[% onclick %]"[% END %]>
+      <input type="button"[%IF use_id == 1 %] id='button_[% pd %]'[% END %] class="[% class %] backend_[% pd %]" value="[% name %]" title="[% IF backend_detail.$pd.last_error %][% escape_js(backend_detail.$pd.last_error) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)"[% IF backend_detail.$pd.disabled == 5 %] disabled[% ELSE %] onClick="[% onclick %]"[% END %]>
       [% IF class == 'button_peerUP'   %][% up       = up       + 1 %][% END %]
       [% IF class == 'button_peerHID'  %][% disabled = disabled + 1 %][% END %]
       [% IF class == 'button_peerDIS'  %][% disabled = disabled + 1 %][% END %]
