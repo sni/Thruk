@@ -64,6 +64,9 @@
 <!--
     <th class='data'>Retention Options</th>
 -->
+    [% IF enable_shinken_features %]
+        <th class='data'>Poller Tag</th>
+    [% END %]
   </tr>
 
   [% FOREACH d = data %]
@@ -132,6 +135,9 @@
 <!--
     <td class='[% class %]'></td>
 -->
+    [% IF enable_shinken_features %]
+        <td class='[% class %]'>[% d.poller_tag %]</td>
+    [% END %]
   </tr>
   [% END %]
 </table>
