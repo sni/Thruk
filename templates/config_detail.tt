@@ -37,6 +37,23 @@
             </table>
           </form>
         </td>
+        <td>
+          <table border="0">
+            <tr>
+              <th>
+                Columns
+              </th>
+            </tr>
+            <tr>
+              <td>
+                <select style="height: 150px;" name='columns' multiple='multiple' onchange="toggleVis(this)">
+                </select>
+              </td>
+           </tr>
+         </table>
+       </td>
+
+
       </tr>
     </table>
     <br>
@@ -50,5 +67,78 @@
     <div align="center">[% PROCESS _pager.tt %]</div>
     <br>
     <div class='itemTotalsTitle'>[% IF data.size %][% data.size %] of [% pager.total_entries %][% ELSE %]0[% END %] Matching Entries Displayed</div>
+
+<script language="javascript">
+
+tables = document.getElementsByTagName("table")
+for (var i = 0; i < tables.length; i++) {
+    if ( tables[i].getAttribute("class") == "data" ) {
+        table = tables[i];
+    }
+
+}
+
+column_select = document.getElementsByName("columns")[0];
+tmp_columns = table.getElementsByTagName('th');
+columns = new Array();
+for (var i = 0; i < tmp_columns.length; i++) {
+    text = tmp_columns[i].innerHTML;
+    if (text != 'Service') {
+        columns[i] = text;
+        var o = new Option(text, i);
+        column_select.options.add(o, null);
+        o.setAttribute("selected","true");
+    }
+}
+
+// Set the default "show" mode to that specified by W3C DOM
+// compliant browsers
+
+var showMode = 'table-cell';
+
+// However, IE5 at least does not render table cells correctly
+// using the style 'table-cell', but does when the style 'block'
+// is used, so handle this
+
+if (document.all) showMode='block';
+
+// This is the function that actually does the manipulation
+function toggleVis(sel){
+    lines = table.getElementsByTagName('tr');
+
+    for ( k = 0; k < lines.length; k++) {
+        // Headers
+        h = lines[k].getElementsByTagName('th');
+        if (h.length == sel.options.length) {
+            for (var i = 0; i < sel.options.length; i++) {
+//              console.log(sel.options[i].innerText);
+                if (sel.options[i].selected == true) {
+//                  console.log(sel.options[i].value);
+                    h[i].style.display = showMode;
+                }
+                else {
+                    h[i].style.display = 'none';
+                }
+           }
+        }
+
+        // Rows
+        c = lines[k].getElementsByTagName('td');
+        if (c.length == sel.options.length) {
+            for (var i = 0; i < sel.options.length; i++) {
+//          console.log(sel.options[i].innerText);
+                if (sel.options[i].selected == true) {
+//                    console.log(sel.options[i].value);
+                    c[i].style.display = showMode;
+                }
+                else {
+                    c[i].style.display = 'none';
+                }
+            }
+        }
+    }
+
+}
+</script>
 
 [% PROCESS _footer.tt %]
