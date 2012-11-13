@@ -249,7 +249,7 @@ sub get_hosts {
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
-            push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
+            push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem realm poller_tag
                                              got_business_rule parent_dependencies/;
         }
         if(defined $options{'extra_columns'}) {
@@ -398,7 +398,7 @@ sub get_services {
         /];
 
         if($self->{'stash'}->{'enable_shinken_features'}) {
-            push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem
+            push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem poller_tag
                                              got_business_rule parent_dependencies/;
         }
         if(defined $options{'extra_columns'}) {
