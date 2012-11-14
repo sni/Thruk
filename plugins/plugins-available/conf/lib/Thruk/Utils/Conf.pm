@@ -316,16 +316,16 @@ sub get_component_as_string {
     for my $b (@{$backends}) {
         $string .= "    <peer>\n";
         $string .= "        name    = ".$b->{'name'}."\n";
-        $string .= "        id      = ".$b->{'id'}."\n" if defined $b->{'id'};
+        $string .= "        id      = ".$b->{'id'}."\n"      if $b->{'id'};
         $string .= "        type    = ".$b->{'type'}."\n";
-        $string .= "        hidden  = ".$b->{'hidden'}."\n" if $b->{'hidden'};
-        $string .= "        groups  = ".$b->{'groups'}."\n" if $b->{'groups'};
+        $string .= "        hidden  = ".$b->{'hidden'}."\n"  if $b->{'hidden'};
+        $string .= "        groups  = ".$b->{'groups'}."\n"  if $b->{'groups'};
         $string .= "        section = ".$b->{'section'}."\n" if $b->{'section'};
         $string .= "        <options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         $string .= "            peer          = ".$b->{'options'}->{'peer'}."\n"          if $b->{'options'}->{'peer'};
         $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if $b->{'options'}->{'resource_file'};
         $string .= "        </options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
-        if(defined $b->{'configtool'}) {
+        if(defined $b->{'configtool'} and scalar keys %{$b->{'configtool'}} > 0) {
             $string .= "        <configtool>\n";
             $string .= "            core_type      = ".$b->{'configtool'}->{'core_type'}."\n"      if $b->{'configtool'}->{'core_type'};
             $string .= "            core_conf      = ".$b->{'configtool'}->{'core_conf'}."\n"      if $b->{'configtool'}->{'core_conf'};
@@ -706,27 +706,30 @@ sub _get_backends_with_obj_config {
     my $firstpeer;
     $c->stash->{'param_backend'} = '';
 
+    # first hide all of them
+    for my $peer (@{$c->{'db'}->get_peers(1)}) {
+        if(scalar keys %{$peer->{'configtool'}} > 0) {
+            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
+        } else {
+            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5
+        }
+    }
+
     # first non hidden peer with object config enabled
     for my $peer (@{$c->{'db'}->get_peers(1)}) {
-        $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
         next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
             $firstpeer = $peer->{'key'} unless defined $firstpeer;
             $backends->{$peer->{'key'}} = $peer->{'configtool'}
-        } else {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5;
         }
     }
 
     # first peer with object config enabled
     if(!defined $firstpeer) {
         for my $peer (@{$c->{'db'}->get_peers(1)}) {
-            $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;
                 $backends->{$peer->{'key'}} = $peer->{'configtool'}
-            } else {
-                $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 5;
             }
         }
     }
