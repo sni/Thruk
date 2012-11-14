@@ -1,5 +1,19 @@
-﻿[% up = 0; disabled = 0; down = 0; %]
+﻿[% up = 0; disabled = 0; down = 0; sections = {} %]
+
+[% FOREACH section IN c.db.sections.keys.sort %]
+  [% FOREACH bname IN c.db.sections.$section.keys.sort %]
+    [% FOREACH p IN c.db.sections.$section.$bname %]
+      [% pd = p.key %]
+      [% IF backend_detail.exists(pd) && backend_detail.$pd.disabled != 5 %]
+        [% IF ! sections.exists(section) %][% sections.$section = [] %][% END %]
+        [% sections.$section.push(pd); %]
+      [% END %]
+    [% END %]
+  [% END %]
+[% END %]
+
 [% BLOCK site %]
+    [% IF backend_detail.exists(pd) && backend_detail.$pd.disabled != 5 %][%# config tool and no config available #%]
     <div class='backend' style="[% style %]">
       [% SET name  = 'unknown'                                         %]
       [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
@@ -9,20 +23,21 @@
       [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 2 %][%# hidden by user #%]
       [% SET class = 'button_peerHID' IF backend_detail.$pd.disabled == 3 %][%# hidden by backend param #%]
       [% SET class = 'button_peerHID' IF param_backend && pd != param_backend %]
-      [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 6 %]
-      [% SET class = 'button_peerUP'  IF backend_detail.$pd.disabled == 7 %]
+      [% SET class = 'button_peerDIS' IF backend_detail.$pd.disabled == 6 %][%# hidden by config tool #%]
+      [% SET class = 'button_peerUP'  IF backend_detail.$pd.disabled == 7 %][%# active by config tool #%]
       <input type="button"[%IF use_id == 1 %] id='button_[% pd %]'[% END %] class="[% class %] backend_[% pd %]" value="[% name %]" title="[% IF backend_detail.$pd.last_error %][% escape_js(backend_detail.$pd.last_error) %][% ELSE %][% name %][% END %]" onMouseOver="button_over(this)" onMouseOut="button_out(this)"[% IF backend_detail.$pd.disabled == 5 %] disabled[% ELSE %] onClick="[% onclick %]"[% END %]>
       [% IF class == 'button_peerUP'   %][% up       = up       + 1 %][% END %]
       [% IF class == 'button_peerHID'  %][% disabled = disabled + 1 %][% END %]
       [% IF class == 'button_peerDIS'  %][% disabled = disabled + 1 %][% END %]
       [% IF class == 'button_peerDOWN' %][% down     = down     + 1 %][% END %]
     </div>
+    [% END %]
 [% END %]
 
 <table border=0 cellpadding=0 cellspacing=0>
   <tr>
     <td>
-    [% IF hide_backends_chooser == 0 && ( c.db.sections.keys.size > 1 || backends.size >= 10 ) %]
+    [% IF hide_backends_chooser == 0 && ( sections.size > 1 || backends.size >= 10 ) %]
       [% popup = BLOCK %]
       <div id="site_panel" style="display: none;">
       <div class="shadow"><div class="shadowcontent">
@@ -31,25 +46,22 @@
             <th colspan=2>Choose your sites</th>
         </tr>
         <tr>
-            [% FOREACH section IN c.db.sections.keys.sort %]
+            [% FOREACH section IN sections.keys.sort %]
             <th class="site_panel [% UNLESS loop.first %]notfirst[% END %]">
                 [% section %]
             </th>
             [% END %]
         </tr>
         <tr>
-            [% FOREACH section IN c.db.sections.keys.sort %]
+            [% FOREACH section IN sections.keys.sort %]
             <td valign="top" class="site_panel[% UNLESS loop.first %] notfirst[% END %]">
             <table cellpadding=0 cellspacing=0 border=0><tr>
             <td valign="top">
             [% count = 0 %]
-            [% FOREACH bname IN c.db.sections.$section.keys.sort %]
-                [% FOREACH p IN c.db.sections.$section.$bname %]
-                [% pd = p.key %]
+            [% FOREACH pd IN sections.$section %]
                 [% PROCESS site style="clear: both;" onclick="toggleBackend('" _ pd _ "')" use_id=1 %]
                 [% count = count + 1 %]
                 [% IF count > 15 %][% count = 0 %]</td><td valign="top">[% END %]
-                [% END %]
             [% END %]
             </td>
             </tr></table>

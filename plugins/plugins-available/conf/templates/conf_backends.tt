@@ -108,6 +108,26 @@ Note: some options are not accessible here for security reasons.
         }
     });
   }
+
+  /* change visibility of backend attributes */
+  function check_backends_config(sel) {
+    var value = jQuery(sel).val();
+    var nr    = sel.name.replace('type', '');
+    if(value == 'configonly') {
+      jQuery('.backend_conf_'+nr+'_connection').hide();
+      jQuery('.backend_conf_'+nr+'_hidden').hide();
+    } else {
+      jQuery('.backend_conf_'+nr+'_connection').show();
+      jQuery('.backend_conf_'+nr+'_hidden').show();
+    }
+  }
+
+  [% x = 0 %]
+  [% FOREACH b = sites %]
+  [% x = x + 1 +%]
+  var sel = document.getElementById('sel_type[% x %]');
+  check_backends_config(sel);
+  [%+ END %]
 -->
 </script>
 

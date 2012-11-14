@@ -321,16 +321,16 @@ sub get_component_as_string {
         $string .= "        hidden  = ".$b->{'hidden'}."\n" if $b->{'hidden'};
         $string .= "        groups  = ".$b->{'groups'}."\n" if $b->{'groups'};
         $string .= "        section = ".$b->{'section'}."\n" if $b->{'section'};
-        $string .= "        <options>\n";
-        $string .= "            peer          = ".$b->{'options'}->{'peer'}."\n";
-        $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if defined $b->{'options'}->{'resource_file'};
-        $string .= "        </options>\n";
+        $string .= "        <options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
+        $string .= "            peer          = ".$b->{'options'}->{'peer'}."\n"          if $b->{'options'}->{'peer'};
+        $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if $b->{'options'}->{'resource_file'};
+        $string .= "        </options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         if(defined $b->{'configtool'}) {
             $string .= "        <configtool>\n";
-            $string .= "            core_type      = ".$b->{'configtool'}->{'core_type'}."\n" if defined $b->{'configtool'}->{'core_type'};
-            $string .= "            core_conf      = ".$b->{'configtool'}->{'core_conf'}."\n" if defined $b->{'configtool'}->{'core_conf'};
-            $string .= "            obj_check_cmd  = ".$b->{'configtool'}->{'obj_check_cmd'}."\n" if defined $b->{'configtool'}->{'obj_check_cmd'};
-            $string .= "            obj_reload_cmd = ".$b->{'configtool'}->{'obj_reload_cmd'}."\n" if defined $b->{'configtool'}->{'obj_reload_cmd'};
+            $string .= "            core_type      = ".$b->{'configtool'}->{'core_type'}."\n"      if $b->{'configtool'}->{'core_type'};
+            $string .= "            core_conf      = ".$b->{'configtool'}->{'core_conf'}."\n"      if $b->{'configtool'}->{'core_conf'};
+            $string .= "            obj_check_cmd  = ".$b->{'configtool'}->{'obj_check_cmd'}."\n"  if $b->{'configtool'}->{'obj_check_cmd'};
+            $string .= "            obj_reload_cmd = ".$b->{'configtool'}->{'obj_reload_cmd'}."\n" if $b->{'configtool'}->{'obj_reload_cmd'};
             if(defined $b->{'configtool'}->{'obj_readonly'}) {
                 for my $readonly (ref $b->{'configtool'}->{'obj_readonly'} eq 'ARRAY' ? @{$b->{'configtool'}->{'obj_readonly'}} : [$b->{'configtool'}->{'obj_readonly'}]) {
                     $string .= "            obj_readonly   = ".$readonly."\n";
@@ -707,7 +707,7 @@ sub _get_backends_with_obj_config {
     $c->stash->{'param_backend'} = '';
 
     # first non hidden peer with object config enabled
-    for my $peer (@{$c->{'db'}->get_peers()}) {
+    for my $peer (@{$c->{'db'}->get_peers(1)}) {
         $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
         next if defined $peer->{'hidden'} and $peer->{'hidden'} == 1;
         if(scalar keys %{$peer->{'configtool'}} > 0) {
@@ -720,7 +720,7 @@ sub _get_backends_with_obj_config {
 
     # first peer with object config enabled
     if(!defined $firstpeer) {
-        for my $peer (@{$c->{'db'}->get_peers()}) {
+        for my $peer (@{$c->{'db'}->get_peers(1)}) {
             $c->stash->{'backend_detail'}->{$peer->{'key'}}->{'disabled'} = 6;
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $firstpeer = $peer->{'key'} unless defined $firstpeer;

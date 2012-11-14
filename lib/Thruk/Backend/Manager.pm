@@ -29,6 +29,7 @@ Manager of backend connections
 $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::Livestatus',
           'Thruk::Backend::Provider::Mongodb',
+          'Thruk::Backend::Provider::ConfigOnly',
 ];
 $Thruk::Backend::Manager::stats = undef;
 
@@ -168,8 +169,13 @@ returns all configured peers
 =cut
 
 sub get_peers {
-    my $self  = shift;
-    my @peers = @{ $self->{'backends'} };
+    my($self, $all) = @_;
+    return \@{$self->{'backends'}} if $all;
+
+    my @peers;
+    for my $b (@{$self->{'backends'}}) {
+        push @peers, $b if $b->{'addr'};
+    }
     return \@peers;
 }
 
@@ -186,7 +192,7 @@ returns peer by key
 sub get_peer_by_key {
     my $self = shift;
     my $key  = shift;
-    for my $peer ( @{ $self->get_peers() } ) {
+    for my $peer (@{$self->{'backends'}}) {
         return $peer if($peer->{'key'} eq $key or $peer->{'name'} eq $key);
     }
     return;

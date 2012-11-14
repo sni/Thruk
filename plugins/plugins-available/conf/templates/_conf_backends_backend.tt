@@ -11,13 +11,14 @@
 <tr class="backend_conf_[% x %]">
   <td class='dataVar' align="left">Type</td>
   <td class='dataVal' colspan=2>
-    <select name="type[% x %]" style="width: 200px;">
+    <select name="type[% x %]" id="sel_type[% x %]" style="width: 200px;" onchange="check_backends_config(this)">
       <option value="livestatus"[% IF b.type == 'livestatus' %] selected[% END %]>livestatus</option>
       <option value="mongodb"[%    IF b.type == 'mongodb'    %] selected[% END %]>mongo db</option>
+      <option value="configonly"[% IF b.type == 'configonly' %] selected[% END %]>config only</option>
     </select>
   </td>
 </tr>
-<tr class="backend_conf_[% x %]">
+<tr class="backend_conf_[% x %] backend_conf_[% x %]_connection">
   <td class='dataVar' align="left">Connection</td>
   <td class='dataVal' colspan=2 nowrap>
     <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;" placeholder="server:6557 or socket">
@@ -25,7 +26,7 @@
     <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
   </td>
 </tr>
-<tr class="backend_conf_[% x %]">
+<tr class="backend_conf_[% x %] backend_conf_[% x %]_hidden">
   <td class='dataVar' align="left">Hidden</td>
   <td class='dataVal' colspan=2>
     <input type="radio" name="hidden[% x %]" value="0"[% IF b.hidden == 0 %] checked[% END %]> No

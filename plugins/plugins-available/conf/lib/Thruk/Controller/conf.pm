@@ -54,6 +54,7 @@ page: /thruk/cgi-bin/conf.cgi
 sub conf_cgi : Regex('thruk\/cgi\-bin\/conf\.cgi') {
     my ( $self, $c ) = @_;
     return if defined $c->{'canceled'};
+    $c->stash->{'config_backends_only'} = 1;
     return $c->detach('/conf/index');
 }
 
@@ -774,15 +775,12 @@ sub _process_backends_page {
                 'id'      => $c->request->parameters->{'id'.$x},
                 'hidden'  => defined $c->request->parameters->{'hidden'.$x} ? $c->request->parameters->{'hidden'.$x} : 0,
                 'section' => $c->request->parameters->{'section'.$x},
-                'options' => {
-                    'peer'   => $c->request->parameters->{'peer'.$x},
-                },
+                'options' => {},
             };
+            $backend->{'options'}->{'peer'} = $c->request->parameters->{'peer'.$x} if $c->request->parameters->{'peer'.$x};
             $x++;
             next unless defined $backend->{'name'};
             next unless $backend->{'name'} ne '';
-            next unless defined $backend->{'options'}->{'peer'};
-            next unless $backend->{'options'}->{'peer'} ne '';
             delete $backend->{'id'} if $backend->{'id'} eq '';
 
             # add values from existing backend config
@@ -798,7 +796,7 @@ sub _process_backends_page {
         # put new one at the end
         if($new) { push(@{$backends}, shift(@{$backends})) }
         my $string    = Thruk::Utils::Conf::get_component_as_string($backends);
-        Thruk::Utils::Conf::replace_block($file, $string, '<Component\s+Thruk::Backend>', '<\/Component>');
+        Thruk::Utils::Conf::replace_block($file, $string, '<Component\s+Thruk::Backend>', '<\/Component>\s*');
         Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully.' );
         return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=backends');
     }
@@ -842,10 +840,11 @@ sub _process_backends_page {
     }
     # set ids
     for my $b (@{$backends}) {
-        $b->{'key'}     = substr(md5_hex($b->{'options'}->{'peer'}." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
-        $b->{'addr'}    = $b->{'options'}->{'peer'};
+        $b->{'key'}     = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
+        $b->{'addr'}    = $b->{'options'}->{'peer'} || '';
         $b->{'hidden'}  = 0 unless defined $b->{'hidden'};
         $b->{'section'} = '' unless defined $b->{'section'};
+        $b->{'type'}    = lc($b->{'type'});
     }
     $c->stash->{'sites'}    = $backends;
     $c->stash->{'subtitle'} = "Thruk Backends Manager";

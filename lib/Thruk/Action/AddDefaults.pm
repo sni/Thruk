@@ -204,7 +204,7 @@ sub add_defaults {
        and $c->check_user_roles("authorized_for_system_commands")
       ) {
         # get backends with object config
-        for my $peer (@{$c->{'db'}->get_peers()}) {
+        for my $peer (@{$c->{'db'}->get_peers(1)}) {
             if(scalar keys %{$peer->{'configtool'}} > 0) {
                 $c->stash->{'show_config_edit_buttons'} = $c->config->{'show_config_edit_buttons'};
                 $c->stash->{'backends_with_obj_config'}->{$peer->{'key'}} = 1;
@@ -269,7 +269,11 @@ after 'execute' => sub {
 sub _set_possible_backends {
     my ($c,$disabled_backends) = @_;
 
-    my @possible_backends = @{$c->{'db'}->peer_key()};
+    my @possible_backends;
+    for my $b (@{$c->{'db'}->get_peers($c->stash->{'config_backends_only'} || 0)}) {
+        push @possible_backends, $b->{'key'};
+    }
+
     my %backend_detail;
     my @new_possible_backends;
 
