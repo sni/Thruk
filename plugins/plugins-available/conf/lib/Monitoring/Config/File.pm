@@ -246,8 +246,7 @@ sub _parse_line {
 
     # new object starts
     if($line =~ m/^(;|\#|)\s*define\s+(\w+)(\s|{|$)/mxo) {
-        $in_disabled_object = 0;
-        $in_disabled_object = 1 if $1;
+        $in_disabled_object = $1 ? 1 : 0;
         $current_object = Monitoring::Config::Object->new(type => $2, file => $self, line => $linenr, 'coretype' => $self->{'coretype'}, disabled => $in_disabled_object);
         unless(defined $current_object) {
             push @{$self->{'parse_errors'}}, "unknown object type '".$2."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
@@ -468,7 +467,7 @@ sub _get_new_file_content {
 
     return read_file($self->{'path'}) unless $self->{'changed'};
 
-    my $linenr = 0;
+    my $linenr = 1;
 
     # sort by line number, but put line 0 at the end
     for my $obj (sort { $b->{'line'} > 0 <=> $a->{'line'} > 0 || $a->{'line'} <=> $b->{'line'} } @{$self->{'objects'}}) {
