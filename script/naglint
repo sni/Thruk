@@ -5,10 +5,10 @@ if [ -e ~/.thruk  ]; then
 fi
 
 if [ -e $(dirname $0)/../lib ]; then
-  export PERL5LIB=$PERL5LIB:$(dirname $0)/../lib;
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
 else
-  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
 fi
 
@@ -121,10 +121,6 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
-use lib 'lib';
-use lib 'plugins/plugins-available/conf/lib/';
-use lib '/usr/share/thruk/lib';
-use lib '/usr/share/thruk/plugins/plugins-available/conf/lib';
 use Thruk::Utils;
 use Thruk::Utils::Scripts;
 use Monitoring::Config;
