@@ -2795,6 +2795,7 @@ var ajax_search = {
     onselect        : undefined,
     onemptyclick    : undefined,
     filter          : undefined,
+    regex_matching  : false,
 
     /* initialize search
      *
@@ -2916,6 +2917,16 @@ var ajax_search = {
         if(!iPhone) {
             addEvent(input, 'keyup', ajax_search.suggest);
             addEvent(input, 'blur',  ajax_search.hide_results);
+        }
+
+        var op_selector_id = elem.id.replace('_value', '_to');
+        var op_sel         = document.getElementById(op_selector_id);
+        ajax_search.regex_matching = false;
+        if(op_sel != undefined) {
+            var val = jQuery(op_sel).val();
+            if(val == '~' || val == '!~') {
+                ajax_search.regex_matching = true;
+            }
         }
 
         search_url = ajax_search.url;
@@ -3167,6 +3178,7 @@ var ajax_search = {
                       var found = 0;
                       jQuery.each(pattern, function(i, sub_pattern) {
                           var index = data.toLowerCase().indexOf(sub_pattern.toLowerCase());
+                          var re    = new RegExp(sub_pattern, "gi");
                           if(index != -1) {
                               found++;
                               if(index == 0) { // perfect match, starts with pattern
@@ -3174,6 +3186,9 @@ var ajax_search = {
                               } else {
                                   result_obj.relevance += 1;
                               }
+                          } else if(ajax_search.regex_matching && data.match(re)) {
+                              found++;
+                              result_obj.relevance += 1;
                           }
                       });
                       // additional filter?
@@ -3227,7 +3242,11 @@ var ajax_search = {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
                     var name = data.display;
                     jQuery.each(pattern, function(index, sub_pattern) {
-                        name = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
+                        name   = name.toLowerCase().replace(sub_pattern.toLowerCase(), "<b>" + sub_pattern + "<\/b>");
+                        if(ajax_search.regex_matching) {
+                            var re = new RegExp('('+sub_pattern+')', "gi");
+                            name = name.replace(re, "<b>$1<\/b>");
+                        }
                     });
                     var classname = "item";
                     if(selected != -1 && selected == x) {

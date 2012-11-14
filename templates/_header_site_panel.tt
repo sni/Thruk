@@ -14,7 +14,7 @@
 
 [% BLOCK site %]
     [% IF backend_detail.exists(pd) && backend_detail.$pd.disabled != 5 %][%# config tool and no config available #%]
-    <div class='backend' style="[% style %]">
+    <div class='backend' style="[% styles %]">
       [% SET name  = 'unknown'                                         %]
       [% SET name = backend_detail.$pd.name IF backend_detail.$pd.name %]
 
@@ -59,7 +59,7 @@
             <td valign="top">
             [% count = 0 %]
             [% FOREACH pd IN sections.$section %]
-                [% PROCESS site style="clear: both;" onclick="toggleBackend('" _ pd _ "')" use_id=1 %]
+                [% PROCESS site styles="clear: both;" onclick="toggleBackend('" _ pd _ "')" use_id=1 %]
                 [% count = count + 1 %]
                 [% IF count > 15 %][% count = 0 %]</td><td valign="top">[% END %]
             [% END %]
@@ -73,7 +73,7 @@
       </div>
       [% END %]
       [% IF backend_chooser == 'switch' && param_backend %]
-        [% PROCESS site style="" pd=param_backend onclick="toggleSitePanel()" use_id=0 %]
+        [% PROCESS site styles="" pd=param_backend onclick="toggleSitePanel()" use_id=0 %]
       [% ELSE %]
         <div class='backend'><input type="button" class="[% IF up > 0 %]button_peerUP[% ELSE %]button_peerDIS[% END %]" value="[% up %] up"         onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleSitePanel()"></div>[%
       %]<div class='backend'><input type="button" class="button_peerDIS" value="[% disabled %] disabled"                                            onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleSitePanel()"></div>[%
@@ -83,7 +83,7 @@
 
     [% ELSIF hide_backends_chooser == 0 && backends.size > 1 %]
       [% FOREACH pd IN backends %]
-        [% PROCESS site style="" onclick="toggleBackend('" _ pd _ "')" use_id=1 %]
+        [% PROCESS site styles="" onclick="toggleBackend('" _ pd _ "')" use_id=1 %]
       [% END %]
     [% END %]
     </td>
