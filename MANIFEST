@@ -1220,6 +1220,8 @@ themes/themes-available/Classic/images/command.png
 themes/themes-available/Classic/images/comment.gif
 themes/themes-available/Classic/images/config.png
 themes/themes-available/Classic/images/contexthelp1.gif
+themes/themes-available/Classic/images/control_pause_blue.png
+themes/themes-available/Classic/images/control_play_blue.png
 themes/themes-available/Classic/images/critical.png
 themes/themes-available/Classic/images/criticity_0.png
 themes/themes-available/Classic/images/criticity_1.png
@@ -1364,6 +1366,8 @@ themes/themes-available/Exfoliation/images/command.png
 themes/themes-available/Exfoliation/images/comment.gif
 themes/themes-available/Exfoliation/images/config.png
 themes/themes-available/Exfoliation/images/contexthelp1.gif
+themes/themes-available/Exfoliation/images/control_pause_blue.png
+themes/themes-available/Exfoliation/images/control_play_blue.png
 themes/themes-available/Exfoliation/images/critical.png
 themes/themes-available/Exfoliation/images/criticity_0.png
 themes/themes-available/Exfoliation/images/criticity_1.png
@@ -1565,6 +1569,8 @@ themes/themes-available/Nuvola/images/command.png
 themes/themes-available/Nuvola/images/comment.gif
 themes/themes-available/Nuvola/images/config.png
 themes/themes-available/Nuvola/images/contexthelp1.gif
+themes/themes-available/Nuvola/images/control_pause_blue.png
+themes/themes-available/Nuvola/images/control_play_blue.png
 themes/themes-available/Nuvola/images/critical.png
 themes/themes-available/Nuvola/images/criticity_0.png
 themes/themes-available/Nuvola/images/criticity_1.png
@@ -1759,6 +1765,8 @@ themes/themes-available/Thruk/images/command.png
 themes/themes-available/Thruk/images/comment.gif
 themes/themes-available/Thruk/images/config.png
 themes/themes-available/Thruk/images/contexthelp1.gif
+themes/themes-available/Thruk/images/control_pause_blue.png
+themes/themes-available/Thruk/images/control_play_blue.png
 themes/themes-available/Thruk/images/critical.png
 themes/themes-available/Thruk/images/criticity_0.png
 themes/themes-available/Thruk/images/criticity_1.png
@@ -1893,6 +1901,8 @@ themes/themes-available/Vautour/images/command.png
 themes/themes-available/Vautour/images/comment.gif
 themes/themes-available/Vautour/images/config.png
 themes/themes-available/Vautour/images/contexthelp1.gif
+themes/themes-available/Vautour/images/control_pause_blue.png
+themes/themes-available/Vautour/images/control_play_blue.png
 themes/themes-available/Vautour/images/critical.png
 themes/themes-available/Vautour/images/criticity_0.png
 themes/themes-available/Vautour/images/criticity_1.png
@@ -2084,6 +2094,8 @@ themes/themes-available/Wakizashi/images/contextlink.png
 themes/themes-available/Wakizashi/images/contextlink_hi.png
 themes/themes-available/Wakizashi/images/contextlink_hot.png
 themes/themes-available/Wakizashi/images/contextlink_hot_hi.png
+themes/themes-available/Wakizashi/images/control_pause_blue.png
+themes/themes-available/Wakizashi/images/control_play_blue.png
 themes/themes-available/Wakizashi/images/critical.png
 themes/themes-available/Wakizashi/images/criticity_0.png
 themes/themes-available/Wakizashi/images/criticity_1.png

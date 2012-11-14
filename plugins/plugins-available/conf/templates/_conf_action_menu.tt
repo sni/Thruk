@@ -34,6 +34,17 @@
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_copy.png' border="0" alt='Clone this [% type %]' title='Clone this [% type %]' width="16" height="16"></td>
                 <td class='command'><a href='conf.cgi?sub=objects&amp;action=clone&amp;data.id=[% object.get_id() %]'>Clone this [% type %]</a></td>
               </tr>
+              [% IF obj.disabled %]
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/control_play_blue.png' border="0" alt='Enable this [% type %]' title='Enable this [% type %]' width="16" height="16"></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;action=enable&amp;data.id=[% object.get_id() %]'>Enable this [% type %]</a></td>
+              </tr>
+              [% ELSE %]
+              <tr class='data'>
+                <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/control_pause_blue.png' border="0" alt='Disable this [% type %] temporarily' title='Disable this [% type %] temporarily' width="16" height="16"></td>
+                <td class='command'><a href='conf.cgi?sub=objects&amp;action=disable&amp;data.id=[% object.get_id() %]'>Disable this [% type %] temporarily</a></td>
+              </tr>
+              [% END %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/delete.gif' border="0" alt='Delete this [% type %]' title='Delete this [% type %]' width="20" height="20"></td>
                 <td class='command'><a href='conf.cgi?sub=objects&amp;action=delete&amp;data.id=[% object.get_id() %]'>Delete this [% type %]</a></td>

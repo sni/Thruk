@@ -895,6 +895,16 @@ sub _process_objects_page {
             return if $self->_object_save($c, $obj);
         }
 
+        # disable this object temporarily
+        elsif($c->stash->{action} eq 'disable') {
+            return if $self->_object_disable($c, $obj);
+        }
+
+        # enable this object
+        elsif($c->stash->{action} eq 'enable') {
+            return if $self->_object_enable($c, $obj);
+        }
+
         # delete this object
         elsif($c->stash->{action} eq 'delete') {
             return if $self->_object_delete($c, $obj);
@@ -1413,6 +1423,32 @@ sub _object_revert {
             Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' reverted successfully' );
         }
     }
+
+    return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
+}
+
+##########################################################
+sub _object_disable {
+    my($self, $c, $obj) = @_;
+
+    my $id = $obj->get_id();
+    $obj->{'disabled'}               = 1;
+    $obj->{'file'}->{'changed'}      = 1;
+    $c->{'obj_db'}->{'needs_commit'} = 1;
+    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
+
+    return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
+}
+
+##########################################################
+sub _object_enable {
+    my($self, $c, $obj) = @_;
+
+    my $id = $obj->get_id();
+    $obj->{'disabled'}               = 0;
+    $obj->{'file'}->{'changed'}      = 1;
+    $c->{'obj_db'}->{'needs_commit'} = 1;
+    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
 
     return $c->response->redirect('conf.cgi?sub=objects&data.id='.$obj->get_id());
 }

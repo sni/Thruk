@@ -38,6 +38,7 @@
               [% IF object.defined('file') %]
                 [% object.get_type() | ucfirst %][% IF object.conf.defined('register') && object.conf.register == 0 %]&nbsp;Template[% END %]:&nbsp;
                 [% object.get_long_name('&nbsp;') %]
+                [% IF object.disabled %]<span style="color: #EB6900"> (disabled)</span>[% END %]
               [% ELSE %]
                 new [% type %]
               [% END %]
