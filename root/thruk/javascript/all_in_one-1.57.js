@@ -3300,9 +3300,9 @@ var ajax_search = {
         panel.innerHTML = resultHTML;
 
         var style = panel.style;
-        var coords    = ajax_search.get_coordinates(input);
-        style.left    = coords[0] + "px";
-        style.top     = (coords[1] + input.offsetHeight + 2) + "px";
+        var coords    = jQuery(input).position();
+        style.left    = coords.left + "px";
+        style.top     = (coords.top + input.offsetHeight + 2) + "px";
         style.display = "block";
         style.width   = ( ajax_search.size -2 ) + "px";
 
