@@ -171,13 +171,29 @@ sub as_text {
                 }
                 $x++;
             }
+            if($self->{'inl_comments'}->{$key}) {
+                chomp($text);
+                my $ind      = rindex($text, "\n");
+                my $lastline = substr($text, $ind+1);
+                $text        = substr($text, 0, $ind);
+                $text       .= "\n";
+                $text       .= sprintf "%-68s %s\n", $lastline, $self->{'inl_comments'}->{$key};
+            }
         } else {
             $text .= $disabled;
+            my $line;
             if($value ne '') {
-                $text .= sprintf "  %-30s %s\n", $key, $value;
+                $line = sprintf "  %-30s %s", $key, $value;
             } else {
-                $text .= sprintf "  %s\n", $key;
+                # empty values are allowed
+                $line = sprintf "  %s", $key;
             }
+            if($self->{'inl_comments'}->{$key}) {
+                $text .= sprintf "%-68s %s", $line, $self->{'inl_comments'}->{$key};
+            } else {
+                $text .= $line;
+            }
+            $text .= "\n";
             $nr_object_lines++;
         }
     }

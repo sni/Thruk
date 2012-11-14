@@ -100,6 +100,7 @@ sub update_objects {
     my $in_unknown_object;
     my $in_disabled_object;
     my $comments            = [];
+    my $inl_comments        = {};
     $self->{'objects'}      = [];
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
@@ -117,8 +118,8 @@ sub update_objects {
             StripLSpace($newline);
             $line = substr($line, 0, -1).$newline;
         }
-        ($current_object, $in_unknown_object, $comments, $in_disabled_object)
-            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $in_disabled_object);
+        ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
+            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
     }
 
     if(defined $current_object or $in_unknown_object) {
@@ -156,6 +157,7 @@ sub update_objects_from_text {
     my $in_unknown_object;
     my $in_disabled_object;
     my $comments            = [];
+    my $inl_comments        = {};
     $self->{'objects'}      = [];
     $self->{'errors'}       = [];
     $self->{'parse_errors'} = [];
@@ -176,8 +178,8 @@ sub update_objects_from_text {
             $line   = $buffer.$line;
             $buffer = '';
         }
-        ($current_object, $in_unknown_object, $comments, $in_disabled_object)
-            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $in_disabled_object, $linenr);
+        ($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object)
+            = $self->_parse_line($line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr);
         if(defined $lastline and $lastline ne '' and !defined $object_at_line) {
             if($linenr >= $lastline) {
                 $object_at_line = $current_object;
@@ -211,7 +213,7 @@ parse a single config line
 
 =cut
 sub _parse_line {
-    my ( $self, $line, $current_object, $in_unknown_object, $comments, $in_disabled_object, $linenr) = @_;
+    my ( $self, $line, $current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object, $linenr) = @_;
 
     chomp($line);
 
@@ -219,7 +221,7 @@ sub _parse_line {
     StripLTSpace($line);
 
     # skip empty lines;
-    return($current_object, $in_unknown_object, $comments, $in_disabled_object) if $line eq '';
+    return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object) if $line eq '';
 
     # full line comments
     if(!$in_disabled_object
@@ -228,14 +230,15 @@ sub _parse_line {
        and $line !~ m/^(;|\#)\s*define\s+/mxo
     ) {
         push @{$comments}, $line;
-        return($current_object, $in_unknown_object, $comments, $in_disabled_object);
+        return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
     }
 
     # inline comments only with ; not with #
     if($line =~ s/^(.+?)\s*([\;].*)$//gmxo) {
-        # remove inline comments
-        #push @{$comments}, $2;
         $line = $1;
+        # save inline comments if possible
+        my($key, $value) = split(/\s+/mxo, $line, 2);
+        $inl_comments->{$key} = $2 if defined $key;
     }
 
     $linenr = $. unless defined $linenr;
@@ -249,7 +252,7 @@ sub _parse_line {
         unless(defined $current_object) {
             push @{$self->{'parse_errors'}}, "unknown object type '".$2."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             $in_unknown_object  = 1;
-            return($current_object, $in_unknown_object, $comments, $in_disabled_object);
+            return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
         }
     }
 
@@ -257,16 +260,18 @@ sub _parse_line {
     elsif($line eq '}' or ($in_disabled_object and $line =~ m/^(;|\#)\s*}$/mxo)) {
         unless(defined $current_object) {
             push @{$self->{'parse_errors'}}, "unexpected end of object in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
-            return($current_object, $in_unknown_object, $comments, $in_disabled_object);
+            return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
         }
-        $current_object->{'comments'} = $comments;
+        $current_object->{'comments'}     = $comments;
+        $current_object->{'inl_comments'} = $inl_comments;
         $current_object->{'line2'}    = $linenr;
         my $parse_errors = $current_object->parse();
         if(scalar @{$parse_errors} > 0) { push @{$self->{'parse_errors'}}, @{$parse_errors} }
         $current_object->{'id'} = $current_object->_make_id();
         push @{$self->{'objects'}}, $current_object;
         undef $current_object;
-        $comments = [];
+        $comments     = [];
+        $inl_comments = {};
         $in_unknown_object  = 0;
         $in_disabled_object = 0;
     }
@@ -318,7 +323,7 @@ sub _parse_line {
         push @{$self->{'parse_errors'}}, "syntax invalid: '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
     }
 
-    return($current_object, $in_unknown_object, $comments, $in_disabled_object);
+    return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
 }
 
 ##########################################################

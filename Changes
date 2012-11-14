@@ -5,6 +5,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added column filter in configuration page (Thibault Cohen)
           - faster and more useably mouseover in host/service lists
           - added configuration only backends
+          - config tool:
+            - preserve inline comments if possible
           - Bug Fixes
             - fixed sending commands to all backends
             - usability improvements for Internet Explorer

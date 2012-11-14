@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use File::Temp qw/ tempfile /;
 
-if(scalar @ARGV == 0) { plan(tests => 59); }
+if(scalar @ARGV == 0) { plan(tests => 123); }
 
 my $BIN = './script/naglint';
 if(defined $ENV{'THRUK_BIN'}) {
@@ -59,5 +59,18 @@ sub check_dir {
     my $diff = `$diff_cmd`;
     is($?, 0, 'diff returned: '.$?);
     is($diff, '', 'diff should be empty');
+
+    # now reverse check that file
+    $cmd = "$BIN $filename > ".$filename.".2 2>&1";
+    ok($cmd, 'cmd: '.$cmd);
+    `$cmd`;
+    is($?, 0, 'second naglint returned: '.$?);
+
+    $diff_cmd = "/usr/bin/diff -u $filename ".$filename.".2";
+    ok($cmd, 'cmd: '.$cmd);
+    $diff = `$diff_cmd`;
+    is($?, 0, 'second diff returned: '.$?);
+    is($diff, '', 'second diff should be empty');
+    unlink($filename.".2");
     return;
 }

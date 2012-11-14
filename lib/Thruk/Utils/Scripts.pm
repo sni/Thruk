@@ -27,11 +27,11 @@ print errors for given file and replace html links to human readable cli output
 sub print_errors {
     my($file) = @_;
     if(scalar @{$file->{'parse_errors'}} > 0) {
-        for my $err (@{$file->{'parse_errors'}}) { _print_error($err); }
+        for my $err (@{$file->{'parse_errors'}}) { print_error($err); }
         return 1;
     }
     if(scalar @{$file->{'errors'}} > 0) {
-        for my $err (@{$file->{'errors'}}) { _print_error($err); }
+        for my $err (@{$file->{'errors'}}) { print_error($err); }
         return 1;
     }
     return 0;
