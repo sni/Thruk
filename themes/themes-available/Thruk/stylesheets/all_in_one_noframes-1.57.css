@@ -330,12 +330,19 @@ body.summary table.data {
 .tableRowHover {
   cursor: pointer;
 }
-.tableRowSelected {
-  background-color:#609FD2;
-  cursor: pointer;
-}
 .has_long_plugin_output {
   color: #0000FF;
+}
+TD.tableRowHover, TH.tableRowHover {
+  filter: alpha(opacity = 70); /* IE 6, 7, 8 */
+  -ms-filter: "alpha(opacity = 70)"; /* ab IE 8 zusätzlich möglich */
+  opacity: .70; /* alle anderen Browser einschließlich IE 9 */
+}
+TD.tableRowSelected, TH.tableRowSelected {
+  cursor: pointer;
+  background: none;
+  background-color:#609FD2;
+  background-image: none;
 }
 
 /* command pane */
@@ -916,15 +923,6 @@ DIV.perf_bar_crit {
   border: 0;
   border-right: 1px solid #B36969;
   position: absolute;
-}
-
-TD.tableRowHover, TH.tableRowHover {
-  filter: alpha(opacity = 70); /* IE 6, 7, 8 */
-  -ms-filter: "alpha(opacity = 70)"; /* ab IE 8 zusätzlich möglich */
-  opacity: .70; /* alle anderen Browser einschließlich IE 9 */
-}
-TD.tableRowSelected, TH.tableRowSelected {
-  background-color:#C3D9FF !important;
 }
 /* navbar */
 div.navbar {
@@ -2086,4 +2084,8 @@ body.avail TD.hostUP, body.avail TD.hostDOWN, body.avail TD.hostUNREACHABLE, bod
 }
 body.avail TD.dataOdd, body.avail TD.dataEven {
     min-width: 160px;
+}
+
+TD.tableRowSelected, TH.tableRowSelected {
+  background-color:#D8BFD8;
 }
