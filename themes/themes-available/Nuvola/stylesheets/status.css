@@ -133,21 +133,18 @@ background-repeat: repeat-x;
 background-position: bottom;
 }
 
-TD.status
-{
+TD.status {
 padding: 0px;
 }
 
-TD.statusOdd
-{
+TD.statusOdd {
 background-color: #E7E5DD;
-height: 22px;
+/*height: 22px;*/
 }
 
-TD.statusEven
-{
+TD.statusEven {
 background-color: #DEDBD2;
-height: 22px;
+/*height: 22px;*/
 }
 
 TABLE#statusTable tbody > tr > TD {

@@ -136,7 +136,7 @@ TD.statusEven {
  border-bottom: solid 1px #ddd;
 }
 TD.statusEven TD, TD.statusOdd TD {
- background: none;
+ /*background: none;*/
  border: none;
 }
 
