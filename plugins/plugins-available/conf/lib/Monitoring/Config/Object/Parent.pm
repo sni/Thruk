@@ -418,11 +418,11 @@ sub get_computed_config {
     # remove + signs
     for my $key (keys %{$conf}) {
         if( defined $self->{'default'}->{$key}
-                and $self->{'default'}->{$key}->{'type'} eq 'LIST')
+                and $self->{'default'}->{$key}->{'type'} eq 'LIST'
+                and defined $conf->{$key}->[0]
+                and substr($conf->{$key}->[0], 0, 1) eq '+')
         {
-            if(substr($conf->{$key}->[0], 0, 1) eq '+') {
-                $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
-            }
+            $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
         }
     }
 
