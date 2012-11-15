@@ -400,19 +400,31 @@ sub get_computed_config {
                     $conf->{$key} = $t->{'conf'}->{$key};
                 }
                 elsif( defined $self->{'default'}->{$key}
-                      and $self->{'default'}->{$key}->{'type'} eq 'LIST'
-                      and substr($t->{'conf'}->{$key}->[0], 0, 1) eq '+'
-                ) {
+                      and $self->{'default'}->{$key}->{'type'} eq 'LIST')
+                {
+                    if(substr($conf->{$key}->[0], 0, 1) eq '+') {
                         # merge uniq list elements together
-                        my $list         = dclone($t->{'conf'}->{$key});
-                        $list->[0]       = substr($list->[0], 1);
-                        $conf->{$key}    = [] unless defined $conf->{$key};
-                        @{$conf->{$key}} = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
+                        my $list           = dclone($t->{'conf'}->{$key});
+                        $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
+                        @{$conf->{$key}}   = sort @{Thruk::Utils::array_uniq([@{$list}, @{$conf->{$key}}])};
+                        $conf->{$key}->[0] = '+'.$conf->{$key}->[0];
+                    }
                 }
             }
         }
     }
     delete $conf->{'use'};
+
+    # remove + signs
+    for my $key (keys %{$conf}) {
+        if( defined $self->{'default'}->{$key}
+                and $self->{'default'}->{$key}->{'type'} eq 'LIST')
+        {
+            if(substr($conf->{$key}->[0], 0, 1) eq '+') {
+                $conf->{$key}->[0] = substr($conf->{$key}->[0], 1);
+            }
+        }
+    }
 
     my @keys = sort _sort_by_object_keys keys %{$conf};
     $self->{'cache'}->{'computed'}->{$self->{'id'}} = [\@keys, $conf];

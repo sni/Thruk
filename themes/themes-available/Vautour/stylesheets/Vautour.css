@@ -23,3 +23,7 @@ body.navbar {
 th.data a {
   color: white;
 }
+
+TD.tableRowSelected, TH.tableRowSelected {
+  background-color:#72C3FB;
+}

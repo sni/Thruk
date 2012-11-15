@@ -151,9 +151,11 @@ SELECT#dfl_s0_style_selector, INPUT#dfl_s0_btn_accept_search {
   width: 120px;
 }
 
+/*
 .tableRowHover {
     height: 22px;
 }
+*/
 
 input#NavBarSearchItem {
   width:105px;
@@ -246,4 +248,8 @@ TABLE.extdetails DIV.flapdetectionDISABLED,
 TABLE.extdetails DIV.flapdetectionENABLED
 {
   text-align: center;
+}
+
+.tableRowSelected {
+  background-color:#609FD2d;
 }

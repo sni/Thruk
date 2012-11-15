@@ -5,8 +5,8 @@ TABLE
  border-collapse: collapse; looks better with MSIE
  comment/uncomment the one you want to use
 *****************************************************/
-/* border-spacing: 0px; */
-border-collapse: collapse;
+border-spacing: 0px;
+/*border-collapse: collapse;*/
 /****************************************************/
 border: none;
 padding: 0px;
@@ -227,20 +227,25 @@ TD.statusBGCRITICAL,TD.statusBGCRITICALACK,TD.statusBGCRITICALSCHED,TD.statusBGD
 {
 /* padding: 1px; */
 background-color: #FFEBEB;
-height: 22px;
+/*height: 22px;*/
 }
 
-TD.statusUNKNOWN,TD.statusBGUNKNOWN,TD.statusBGUNKNOWNACK,TD.statusBGUNKNOWNSCHED
+TD.statusUNKNOWN
 {
 /* padding: 1px; */
 height: 22px;
+}
+TD.statusBGUNKNOWN,TD.statusBGUNKNOWNACK,TD.statusBGUNKNOWNSCHED
+{
+/* padding: 1px; */
+/*height: 22px;*/
 }
 
 TD.statusBGWARNING,TD.statusBGWARNINGACK,TD.statusBGWARNINGSCHED
 {
 /* padding: 1px; */
 background-color: #FFFFEB;
-height: 22px;
+/*height: 22px;*/
 }
 
 TD.miniStatusUP,TD.miniStatusOK

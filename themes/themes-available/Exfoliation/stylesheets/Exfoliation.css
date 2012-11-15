@@ -11,12 +11,10 @@
 
 /* mouse over classes for inline command selection in status page */
 .tableRowHover {
-  background-color:#88BBD8;
   line-height: 150%;
   border:1px none;
 }
 .tableRowSelected {
-  background-color:#609FD2;
   line-height: 150%;
   border:1px none;
 }

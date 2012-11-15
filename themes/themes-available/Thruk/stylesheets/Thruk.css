@@ -1135,3 +1135,7 @@ body.avail TD.hostUP, body.avail TD.hostDOWN, body.avail TD.hostUNREACHABLE, bod
 body.avail TD.dataOdd, body.avail TD.dataEven {
     min-width: 160px;
 }
+
+TD.tableRowSelected, TH.tableRowSelected {
+  background-color:#D8BFD8;
+}
