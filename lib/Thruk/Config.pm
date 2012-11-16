@@ -190,6 +190,9 @@ our %config = ('name'                   => 'Thruk',
                     'class'            => "Catalyst::Plugin::Cache::Backend::Memory",
                   },
               },
+              'Plugin::ConfigLoader'  => {
+                driver => { General => { '-CComments' => 0  } }
+              }
 );
 # set TT strict mode only for authors
 $config{'thruk_debug'} = 0;
@@ -219,23 +222,18 @@ make config available without loading complete catalyst
 =cut
 
 sub get_config {
-    my @files;
-    for my $path ('.', $ENV{'CATALYST_CONFIG'}, $ENV{'THRUK_CONFIG'}) {
-        next unless defined $path;
-        push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
-        push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
-    }
-    my $cfg   = Config::Any->load_files({
-            files       => \@files,
-            filter      => \&Catalyst::Plugin::ConfigLoader::_fix_syntax,
-            use_ext     => 1
+    my @files = @_;
+
+    if(scalar @files == 0) {
+        for my $path ('.', $ENV{'CATALYST_CONFIG'}, $ENV{'THRUK_CONFIG'}) {
+            next unless defined $path;
+            push @files, $path.'/thruk.conf'       if -f $path.'/thruk.conf';
+            push @files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
         }
-    );
+    }
 
-    # map the array of hashrefs to a simple hash
-    my %configs = map { %$_ } @$cfg;
-
-    my %config = %Thruk::Config::config;
+    my %configs = %{_load_any(\@files)};
+    my %config  = %Thruk::Config::config;
     for my $file (@files) {
         for my $key (keys %{$configs{$file}}) {
             if(defined $config{$key} and ref $config{$key} eq 'HASH') {
@@ -416,6 +414,23 @@ sub set_default_config {
     }
 
     return;
+}
+
+######################################
+sub _load_any {
+    my ($files) = @_;
+    my $cfg   = Config::Any->load_files({
+            files       => $files,
+            filter      => \&Catalyst::Plugin::ConfigLoader::_fix_syntax,
+            use_ext     => 1,
+            driver_args => $Thruk::Config::config{'Plugin::ConfigLoader'}->{'driver'},
+        }
+    );
+
+    # map the array of hashrefs to a simple hash
+    my %configs = map { %$_ } @$cfg;
+
+    return \%configs;
 }
 
 ######################################

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 use_ok("Thruk");
 use_ok("Thruk::Config");
@@ -28,3 +28,6 @@ for my $key (qw/cgi_cfg_stat
 }
 
 is_deeply($config, Thruk->config, 'config matches');
+
+$config = Thruk::Config::get_config('t/data/test_c_style.conf');
+is($config->{'Thruk::Backend'}->{'peer'}->{'configtool'}->{'obj_readonly'}, '^(?!.*/test)', 'parsing c style comments');

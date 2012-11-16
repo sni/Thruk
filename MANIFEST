@@ -33,6 +33,7 @@ docs/thruk8.txt
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
 examples/list_hosts
+examples/objectcache2csv
 get_version
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
@@ -976,6 +977,7 @@ t/data/naglint/module/in.cfg
 t/data/naglint/module/out.cfg
 t/data/resource.cfg
 t/data/resource2.cfg
+t/data/test_c_style.conf
 t/perlcriticrc
 t/TestUtils.pm
 templates/_add_bookmark.tt
