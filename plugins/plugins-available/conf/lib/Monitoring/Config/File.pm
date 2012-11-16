@@ -31,7 +31,7 @@ return new host
 
 =cut
 sub new {
-    my ( $class, $file, $readonlypattern, $coretype ) = @_;
+    my ( $class, $file, $readonlypattern, $coretype, $force ) = @_;
     my $self = {
         'path'         => $file,
         'mtime'        => undef,
@@ -54,7 +54,12 @@ sub new {
     confess('no core type!') unless defined $coretype;
 
     # dont save relative paths
-    if($file =~ m/\.\./mx or $file !~ m/\.cfg$/mx) {
+    if($file =~ m/\.\./mx) {
+        return;
+    }
+
+    # config files must end on .cfg
+    if(!$force && $file !~ m/\.cfg$/mx) {
         return;
     }
 

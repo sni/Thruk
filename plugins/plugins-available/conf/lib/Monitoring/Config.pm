@@ -915,10 +915,11 @@ sub get_references {
     get_default_keys($type, [ $options ])
 
  $options = {
-     no_alias => 0,   # skip alias definitions
+     no_alias => 0,   # skip alias definitions and only return real config attributes
+     sort     => 0,   # sort by default attribute order
  }
 
-return the sorted default config keys for a type of object
+return the default config keys for a type of object
 
 =cut
 sub get_default_keys {
@@ -933,6 +934,11 @@ sub get_default_keys {
         next if $obj->{'default'}->{$key}->{'type'} eq 'DEPRECATED';
         push @keys, $key;
     }
+
+    if($options->{'sort'}) {
+        @keys = @{Monitoring::Config::Object::Parent::get_sorted_keys(undef, \@keys)};
+    }
+
     return \@keys;
 }
 
@@ -1135,7 +1141,7 @@ sub _get_files {
     my @files;
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
-        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
+        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $self->{'config'}->{'force'});
         if(defined $file) {
             push @files, $file;
         } else {

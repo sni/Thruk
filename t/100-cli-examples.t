@@ -16,11 +16,17 @@ BEGIN {
 ###########################################################
 my @files;
 if(scalar @ARGV == 0) {
-    plan(tests => 4);
+    plan(tests => 8);
     @files = glob('examples/*');
 } else {
     @files = @ARGV;
 }
+
+###########################################################
+# some
+my $args = {
+    'examples/objectcache2csv'  => 't/data/naglint/basic/in.cfg hostgroup',
+};
 
 ###########################################################
 for my $file (@files) {
@@ -37,11 +43,10 @@ exit;
 ###########################################################
 sub check_example {
     my($file) = @_;
-    ok($file, "testing : $file");
+    my $cmd = sprintf("%s%s", $file, defined $args->{$file} ? ' '.$args->{$file} : '');
+    ok($cmd, "testing : ".$cmd);
     TestUtils::test_command({
-        cmd     => $file,
-        #like    => ['/^$/'],
-        #errlike => ['/^/'],
+        cmd     => $cmd,
     });
     return;
 }

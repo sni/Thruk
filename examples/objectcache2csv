@@ -1,0 +1,87 @@
+#!/bin/sh
+# read rc file if exists
+if [ -e ~/.thruk  ]; then
+    . ~/.thruk
+fi
+
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 21
+
+use strict;
+use warnings;
+use Pod::Usage;
+use Monitoring::Config;
+
+if(!defined $ARGV[0]) {
+    pod2usage( { -verbose => 2,  -exit => 3, -message => "\nERROR: missing argument: object.cache\n\n" } );
+}
+if(!defined $ARGV[1]) {
+    pod2usage( { -verbose => 2,  -exit => 3, -message => "\nERROR: missing argument: object type\n\n" } );
+}
+if(!-f $ARGV[0]) {
+    pod2usage( { -verbose => 2,  -exit => 3, -message => "\nERROR: ".$ARGV[0].': '.$!."\n\n" } );
+}
+
+my $odb  = Monitoring::Config->new({ obj_file => $ARGV[0], 'force' => 1 })->init();
+my $objs = $odb->get_objects_by_type($ARGV[1]);
+my $def  = $odb->get_default_keys($ARGV[1], { no_alias => 1, sort => 1 });
+
+# print header
+for my $attr (@{$def}) {
+    print ucfirst($attr), ";";
+}
+print "\n";
+
+# print data
+for my $o (@{$objs}) {
+    for my $attr (@{$def}) {
+        if(!defined $o->{'conf'}->{$attr}) {
+            print ";";
+        } else {
+            if(ref $o->{'conf'}->{$attr} eq 'ARRAY') {
+                print join(',', @{$o->{'conf'}->{$attr}}), ";";
+            } else {
+                print $o->{'conf'}->{$attr}, ";";
+            }
+        }
+    }
+    print "\n";
+}
+
+exit 0;
+
+##############################################
+
+=head1 NAME
+
+objectcache2csv - Command Line Utility which converts a object.cache file into csv
+
+=head1 SYNOPSIS
+
+Usage: objectcache2csv .../object.cache type
+
+=head1 DESCRIPTION
+
+This script coverts a object.cache file into csv
+
+=head1 EXAMPLE
+
+objectcache2csv /tmp/object.cache type host > /tmp/hosts.csv
+
+=head1 AUTHOR
+
+2012, Sven Nierlein, <sven@consol.de>
+
+=cut
