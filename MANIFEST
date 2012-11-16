@@ -922,6 +922,7 @@ t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mongodb.t
 t/100-backend_shinken.t
+t/100-cli-examples.t
 t/100-cli-naglint.t
 t/100-cli-naglint2.t
 t/100-cli-thruk.t
