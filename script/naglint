@@ -158,10 +158,10 @@ sub run {
        "i"                  => \$self->{'opt'}->{'inline'},
        "r"                  => \$self->{'opt'}->{'recursive'},
        "<>"                 => sub { push @{$self->{'opt'}->{'files'}}, $_[0] },
-    ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
+    ) or pod2usage( { -verbose => 2, -exit => 3, -message => 'error in options' } );
 
     if($self->{'opt'}->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
-    pod2usage( { -verbose => 2, -exit => 1 } ) if $self->{'opt'}->{'help'};
+    pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
 
     ##############################################
     # make sure we don't touch owner and permissions
@@ -188,7 +188,7 @@ sub run {
         exit $errors;
     }
 
-    pod2usage( { -verbose => 2, -exit => 1 } ) if scalar @{$self->{'opt'}->{'files'}} == 0;
+    pod2usage( { -verbose => 2, -exit => 3 } ) if scalar @{$self->{'opt'}->{'files'}} == 0;
 
     # iterate all given files
     for my $filename (@{$self->{'opt'}->{'files'}}) {

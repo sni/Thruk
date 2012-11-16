@@ -47,11 +47,11 @@ GetOptions (
    "A|auth=s"           => \$options->{'auth'},
    "a|action=s"         => \$options->{'action'},
    "<>"                 => sub { $options->{'url'} = "".shift },
-) or pod2usage( { -verbose => 2, -message => 'error in options' } );
+) or pod2usage( { -verbose => 2, -exit => 3, -message => 'error in options' } );
 
 if($options->{'version'}) { print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0; }
-pod2usage( { -verbose => 2, -exit => 1 } ) if $options->{'help'};
-pod2usage( { -verbose => 2, -exit => 1 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
+pod2usage( { -verbose => 2, -exit => 3 } ) if $options->{'help'};
+pod2usage( { -verbose => 2, -exit => 3 } ) if !$options->{'action'} and !$options->{'url'} and !$options->{'listbackends'};
 
 use Thruk::Utils::CLI;
 my $cli = Thruk::Utils::CLI->new($options);
