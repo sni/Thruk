@@ -1350,19 +1350,33 @@ sub _files_to_path {
     my $files  = shift;
     my $folder = { 'dirs' => {}, 'files' => {}, 'path' => '', 'date' => '' };
 
+    my $ro_pattern = $c->{'obj_db'}->{'config'}->{'obj_readonly'};
+    if(ref $ro_pattern eq '') { $ro_pattern = [$ro_pattern]; }
+
     for my $file (@{$files}) {
         my @parts    = split(/\//mx, $file->{'path'});
         my $filename = pop @parts;
         my $subdir = $folder;
         for my $dir (@parts) {
             $dir = $dir."/";
-            my @stat = stat($subdir->{'path'}.$dir);
-            $subdir->{'dirs'}->{$dir} = {
-                                         'dirs'  => {},
-                                         'files' => {},
-                                         'path'  => $subdir->{'path'}.$dir,
-                                         'date'  => Thruk::Utils::Filter::date_format($c, $stat[9]),
-                                        } unless defined $subdir->{'dirs'}->{$dir};
+            unless(defined $subdir->{'dirs'}->{$dir}) {
+                my $readonly = 0;
+                my $fulldir = $subdir->{'path'}.$dir;
+                for my $p (@{$ro_pattern}) {
+                    if($fulldir =~ m/$p/mx) {
+                        $readonly = 1;
+                        last;
+                    }
+                }
+                my @stat = stat($fulldir);
+                $subdir->{'dirs'}->{$dir} = {
+                                             'dirs'     => {},
+                                             'files'    => {},
+                                             'path'     => $fulldir,
+                                             'date'     => Thruk::Utils::Filter::date_format($c, $stat[9]),
+                                             'readonly' => $readonly,
+                                            };
+            }
             $subdir = $subdir->{'dirs'}->{$dir};
         }
         $subdir->{'files'}->{$filename} = {

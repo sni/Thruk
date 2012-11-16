@@ -1256,6 +1256,7 @@ themes/themes-available/Classic/images/flapping.gif
 themes/themes-available/Classic/images/folder.png
 themes/themes-available/Classic/images/folder_brick.png
 themes/themes-available/Classic/images/folder_explore.png
+themes/themes-available/Classic/images/folder_key.png
 themes/themes-available/Classic/images/github.png
 themes/themes-available/Classic/images/greendot.gif
 themes/themes-available/Classic/images/help.png
@@ -1402,6 +1403,7 @@ themes/themes-available/Exfoliation/images/flapping.gif
 themes/themes-available/Exfoliation/images/folder.png
 themes/themes-available/Exfoliation/images/folder_brick.png
 themes/themes-available/Exfoliation/images/folder_explore.png
+themes/themes-available/Exfoliation/images/folder_key.png
 themes/themes-available/Exfoliation/images/github.png
 themes/themes-available/Exfoliation/images/graph.gif
 themes/themes-available/Exfoliation/images/greendot.gif
@@ -1605,6 +1607,7 @@ themes/themes-available/Nuvola/images/flapping.gif
 themes/themes-available/Nuvola/images/folder.png
 themes/themes-available/Nuvola/images/folder_brick.png
 themes/themes-available/Nuvola/images/folder_explore.png
+themes/themes-available/Nuvola/images/folder_key.png
 themes/themes-available/Nuvola/images/github.png
 themes/themes-available/Nuvola/images/green.gif
 themes/themes-available/Nuvola/images/greendot.gif
@@ -1801,6 +1804,7 @@ themes/themes-available/Thruk/images/flapping.gif
 themes/themes-available/Thruk/images/folder.png
 themes/themes-available/Thruk/images/folder_brick.png
 themes/themes-available/Thruk/images/folder_explore.png
+themes/themes-available/Thruk/images/folder_key.png
 themes/themes-available/Thruk/images/github.png
 themes/themes-available/Thruk/images/green.gif
 themes/themes-available/Thruk/images/greendot.gif
@@ -1937,6 +1941,7 @@ themes/themes-available/Vautour/images/flapping.gif
 themes/themes-available/Vautour/images/folder.png
 themes/themes-available/Vautour/images/folder_brick.png
 themes/themes-available/Vautour/images/folder_explore.png
+themes/themes-available/Vautour/images/folder_key.png
 themes/themes-available/Vautour/images/github.png
 themes/themes-available/Vautour/images/greendot.gif
 themes/themes-available/Vautour/images/help.png
@@ -2130,6 +2135,7 @@ themes/themes-available/Wakizashi/images/flapping.gif
 themes/themes-available/Wakizashi/images/folder.png
 themes/themes-available/Wakizashi/images/folder_brick.png
 themes/themes-available/Wakizashi/images/folder_explore.png
+themes/themes-available/Wakizashi/images/folder_key.png
 themes/themes-available/Wakizashi/images/form_background.png
 themes/themes-available/Wakizashi/images/github.png
 themes/themes-available/Wakizashi/images/greendot.gif

@@ -84,15 +84,16 @@
             html += "<ul class='obj_browse'>";
 
             if(path != root) {
-                var top_dir = path.replace(/[^\/]+\/$/, '');
-                html += html_dir(top_dir, "..", "");
+                var top_dir     = path.replace(/[^\/]+\/$/, '');
+                var top_dir_obj = get_dir_for_path(all_files, top_dir)
+                html += html_dir(top_dir, "..", "", top_dir_obj.readonly);
             }
 
             /* set dirs for folder */
             var dirs = dir['dirs'];
             jQuery.each(keys(dirs).sort(), function(index, name) {
                 d = dirs[name];
-                html += html_dir(d.path, name, d.date);
+                html += html_dir(d.path, name, d.date, d.readonly);
             });
 
             /* set files for folder */
@@ -108,12 +109,16 @@
     }
 
     /* return list element for folder */
-    function html_dir(path, name, date) {
+    function html_dir(path, name, date, readonly) {
+        var icon = "folder.png";
+        if(readonly) {
+            icon = "folder_key.png";
+        }
         var html = "";
         html += "<li>";
         html += "<input type='checkbox' name='files' value='"+ path +"' class='obj_browse_box'>";
         html += "<a href='#"+ path +"' onclick='setdir(\""+ path +"\")'>";
-        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/folder.png' border='0' alt='folder' title='folder' width='16' height='16'> ";
+        html += "<img src='" + url_prefix + "thruk/themes/" + theme + "/images/"+icon+"' border='0' alt='folder' title='folder' width='16' height='16'> ";
         html += "<div class='obj_browse_name'>" + name + "<\/div>";
         html += "<div class='obj_browse_date'>"+ date + "<\/div>";
         html += "<\/a>";
@@ -206,7 +211,7 @@
             jQuery.each(keys(sorted).sort(), function(index, name) {
                 o = sorted[name];
                 if(o['type'] == 'dir') {
-                    html += html_dir(o['path'], o['name'], o['date']);
+                    html += html_dir(o['path'], o['name'], o['date'], o['readonly']);
                 }
                 if(o['type'] == 'file') {
                     html += html_file(o['path'], o['name'], o['date'], o['deleted'], o['readonly']);
