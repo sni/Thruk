@@ -886,6 +886,7 @@ script/thruk_extract_template_keys.sh
 script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
 script/thruk_link_images.sh
+script/thruk_optimize_images.sh
 script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
