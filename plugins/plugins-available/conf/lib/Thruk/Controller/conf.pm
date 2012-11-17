@@ -1351,6 +1351,7 @@ sub _files_to_path {
     my $folder = { 'dirs' => {}, 'files' => {}, 'path' => '', 'date' => '' };
 
     my $ro_pattern = $c->{'obj_db'}->{'config'}->{'obj_readonly'};
+    $ro_pattern = [] unless defined $ro_pattern;
     if(ref $ro_pattern eq '') { $ro_pattern = [$ro_pattern]; }
 
     for my $file (@{$files}) {
