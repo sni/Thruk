@@ -22,8 +22,7 @@ general:
     - add go back button on error page
     - support more macros
     - include comments in export
-    - add recurring downtimes for host/servicegruppen
-    - add hosteventhandler to config as soon as it its in mklive: http://www.shinken-monitoring.org/forum/index.php?topic=304.new;topicseen#new
+    - add recurring downtimes for host/servicegroups
     - suggest custom variables?
     - search hosts without services: http://monitoring-portal.org/wbb/index.php?page=Thread&postID=176677#post176677
 
@@ -89,9 +88,8 @@ addons:
       contacts)
     - nagios.cfg editor (with omd support)
     - resource.cfg editor
-    - template usage with +object ( in resolve and template tt view)
     - wizards: new host, scan services
-    - sync multiple backend with config tool
+    - sync multiple backends with config tool
     - show back references, used commands etc...
 
   panorama:
@@ -100,3 +98,4 @@ addons:
 
 Themes:
     - only include Thruk theme and make others downloadable
+    - same for plugins

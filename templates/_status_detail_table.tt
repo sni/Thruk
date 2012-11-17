@@ -133,3 +133,18 @@
       [% END %]
 
     </table>
+
+    [% IF data.size == 0 && num_hosts > 0 %]
+      <div style="text-align: center;">
+      <a href="[% uri_with(c, 'style' => 'hostdetail') %]" style="color: red;">
+      Found 0 matching services, but there
+      [% IF num_hosts == 1 %]
+      is 1 matching host.
+      [% ELSE %]
+      are [% num_hosts %] matching hosts.
+      [% END %]
+      </a>
+      <br>
+      </div>
+      <br>
+    [% END %]
