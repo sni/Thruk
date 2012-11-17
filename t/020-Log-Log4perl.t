@@ -13,6 +13,7 @@ BEGIN {
     if(-e 'log4perl.conf') {
         plan skip_all => 'there is a log4perl.conf already, cannot test';
     }
+    $ENV{'THRUK_SRC'} = 'TEST';
 }
 
 plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
