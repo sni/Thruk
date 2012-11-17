@@ -33,6 +33,7 @@ if(defined Thruk->config->{'Thruk::Backend'}->{'peer'}) {
     if(ref $backends ne 'ARRAY') { $backends = [$backends]; }
     for my $backend (@{$backends}) {
         delete $backend->{options}->{name};
+        delete $backend->{options} if scalar keys %{$backend->{options}} == 0;
     }
 }
 
