@@ -395,8 +395,12 @@ sub set_default_config {
         $config->{'command_disabled'} = Thruk::Utils::array2hash(Thruk::Utils::expand_numeric_list($config->{'command_disabled'}));
     }
 
+    $ENV{'THRUK_SRC'} = 'SCRIPTS' unless defined $ENV{'THRUK_SRC'};
     # external jobs can be disabled by env
-    if(defined $ENV{'NO_EXTERNAL_JOBS'}) {
+    if(defined $ENV{'NO_EXTERNAL_JOBS'}
+       or $ENV{'THRUK_SRC'} eq 'SCRIPTS'
+       or $ENV{'THRUK_SRC'} eq 'CLI')
+    {
         $config->{'no_external_job_forks'} = 1;
     }
 

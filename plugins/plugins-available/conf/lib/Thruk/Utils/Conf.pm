@@ -28,7 +28,7 @@ put objects model into stash
 
 =cut
 sub set_object_model {
-    my ( $c ) = @_;
+    my ( $c, $no_recursion ) = @_;
 
     $c->stash->{has_obj_conf} = scalar keys %{_get_backends_with_obj_config($c)};
 
@@ -63,6 +63,10 @@ sub set_object_model {
                                         );
             $model->currently_parsing($c->stash->{'param_backend'}, $c->stash->{'job_id'});
             $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
+            if($c->config->{'no_external_job_forks'} == 1 and !$no_recursion) {
+                # should be parsed now
+                return set_object_model($c, 1);
+            }
             return;
         }
         return 0;
