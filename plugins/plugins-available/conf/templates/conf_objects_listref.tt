@@ -11,7 +11,11 @@
       <ul>
       [% FOREACH name = data.$t.keys.sort %]
         [% oid = data.$t.$name %]
+        [% IF oid %]
         <li><a href="conf.cgi?sub=objects&amp;data.id=[% oid %]">[% name %]</a></li>
+        [% ELSE %]
+        <li><a href="conf.cgi?sub=objects&amp;type=[% t %]&amp;data.name=[% name %]">[% name %]</a></li>
+        [% END %]
       [% END %]
       </ul>
     </td>

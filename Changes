@@ -10,6 +10,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - config tool:
             - preserve inline comments if possible
             - added enable/disable actions
+            - show forward references on ref page too
             - fix computed config display of additive inheritance
           - Bug Fixes
             - fixed sending commands to all backends

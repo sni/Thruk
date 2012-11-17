@@ -1792,11 +1792,25 @@ sub _list_references {
     my($self, $c, $obj) = @_;
     my $refs = $c->{'obj_db'}->get_references($obj);
     my $data = {};
+    # references from other objects
     for my $type (keys %{$refs}) {
         $data->{$type} = {};
         for my $id (keys %{$refs->{$type}}) {
             my $obj = $c->{'obj_db'}->get_object_by_id($id);
             $data->{$type}->{$obj->get_name()} = $id;
+        }
+    }
+    # references from this to other objects
+    my $resolved = $obj->get_resolved_config($c->{'obj_db'});
+    for my $attr (keys %{$resolved}) {
+        my $refs = $resolved->{$attr};
+        if(ref $refs eq '') { $refs = [$refs]; }
+        if($obj->{'default'}->{$attr}->{'link'}) {
+            my $type = $obj->{'default'}->{$attr}->{'link'};
+            for my $r (@{$refs}) {
+                if($type eq 'command') { $r =~ s/\!.*$//mx; }
+                $data->{$type}->{$r} = '';
+            }
         }
     }
     $c->stash->{'data'}     = $data;
