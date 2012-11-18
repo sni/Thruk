@@ -192,6 +192,9 @@ sub get_changed_files {
     for my $file (@{$self->{'files'}}) {
         push @files, $file if $file->{'changed'} == 1;
     }
+    if(scalar @files == 0) {
+        $self->{'needs_commit'} = 0;
+    }
     return \@files;
 }
 
