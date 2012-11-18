@@ -64,14 +64,7 @@ sub new {
     }
 
     # readonly file?
-    if(defined $readonlypattern) {
-        for my $p ( ref $readonlypattern eq 'ARRAY' ? @{$readonlypattern} : ($readonlypattern) ) {
-            if($file =~ m|$p|mx) {
-                $self->{'readonly'} = 1;
-                last;
-            }
-        }
-    }
+    $self->update_readonly_status($readonlypattern);
 
     # new file?
     unless(-f $self->{'path'}) {
@@ -207,6 +200,27 @@ sub update_objects_from_text {
 
     return $object_at_line if defined $lastline;
     return;
+}
+
+
+##########################################################
+
+=head2 update_readonly_status
+
+updates the readonly status for this file
+
+=cut
+sub update_readonly_status {
+    my($self, $readonlypattern) = @_;
+    if(defined $readonlypattern) {
+        for my $p ( ref $readonlypattern eq 'ARRAY' ? @{$readonlypattern} : ($readonlypattern) ) {
+            if($self->{'path'} =~ m|$p|mx) {
+                $self->{'readonly'} = 1;
+                last;
+            }
+        }
+    }
+    return $self->{'readonly'};
 }
 
 

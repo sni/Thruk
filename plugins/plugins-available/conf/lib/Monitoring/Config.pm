@@ -70,7 +70,16 @@ sub init {
     $self->{'stats'} = $stats if defined $stats;
 
     # update readonly config
-    $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
+    my $readonly_changed = 0;
+    if(Thruk::Utils::array_diff($self->{'config'}->{'obj_readonly'}, $config->{'obj_readonly'})) {
+        $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
+        $readonly_changed = 1;
+
+        # update all readonly file settings
+        for my $file (@{$self->{'files'}}) {
+            $file->update_readonly_status($self->{'config'}->{'obj_readonly'});
+        }
+    }
 
     return $self unless $self->{'initialized'} == 0;
     $self->{'initialized'} = 1;
