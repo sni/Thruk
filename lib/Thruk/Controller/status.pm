@@ -74,6 +74,7 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
     $c->stash->{page}          = 'status';
     $c->stash->{show_top_pane} = 1;
     $c->stash->{style}         = $style;
+    $c->stash->{'num_hosts'}   = 0;
 
     $c->stash->{substyle}     = undef;
     if($c->stash->{'hostgroup'}) {
@@ -309,7 +310,6 @@ sub _process_details_page {
     # get all services
     my $services = $c->{'db'}->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => $c );
 
-    $c->stash->{'num_hosts'} = 0;
     if(scalar @{$services} == 0) {
         # try to find matching hosts, maybe we got some hosts without service
         my $host_stats = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
