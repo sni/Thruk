@@ -21,7 +21,7 @@ sub _do_finalize_config {
     ###################################################
     # switch user when running as root
     my $var_path = $config->{'var_path'} or die("no var path!");
-    if($> != 0 and !-d ($var_path.'/.')) { mkdir($var_path); }
+    if($> != 0 and !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
     die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
     my ($uid, $groups) = Thruk::Utils::get_user($var_path);
     $ENV{'THRUK_USER_ID'}  = $uid;
