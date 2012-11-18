@@ -1808,7 +1808,7 @@ sub _list_references {
     for my $attr (keys %{$resolved}) {
         my $refs = $resolved->{$attr};
         if(ref $refs eq '') { $refs = [$refs]; }
-        if($obj->{'default'}->{$attr}->{'link'}) {
+        if(defined $obj->{'default'}->{$attr} && $obj->{'default'}->{$attr}->{'link'}) {
             my $type = $obj->{'default'}->{$attr}->{'link'};
             for my $r (@{$refs}) {
                 if($type eq 'command') { $r =~ s/\!.*$//mx; }
@@ -1816,6 +1816,13 @@ sub _list_references {
             }
         }
     }
+    # add used templates
+    if(defined $obj->{'conf'}->{'use'}) {
+        for my $t (@{$obj->{'conf'}->{'use'}}) {
+            $outgoing->{$obj->get_type()}->{$t} = '';
+        }
+    }
+
     $c->stash->{'incoming'} = $incoming;
     $c->stash->{'outgoing'} = $outgoing;
     $c->stash->{'template'} = 'conf_objects_listref.tt';
