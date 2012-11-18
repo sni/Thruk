@@ -564,7 +564,7 @@ sub update {
     $self->{'needs_update'} = 0;
     $self->{'last_changed'} = 0;
 
-    $self->_reset_errors(1);
+    $self->_reset_errors();
     $self->_set_config();
     $self->_set_files();
     $self->_read_objects();
@@ -585,8 +585,6 @@ sub check_files_changed {
     my $self   = shift;
     my $reload = shift || 0;
 
-    # reset errors
-    $self->_reset_errors();
     my $errors1 = scalar @{$self->{'errors'}};
 
     $self->{'needs_update'} = 0;
@@ -631,9 +629,6 @@ sub update_object {
     return unless defined $obj;
 
     my $oldname = $obj->get_name();
-
-    # reset errors
-    $self->_reset_errors();
 
     my $file = $obj->{'file'};
 
@@ -1463,11 +1458,9 @@ sub _update_obj_in_index {
 
 ##########################################################
 sub _reset_errors {
-    my($self,$force) = @_;
-    if($force) {
-        $self->{'errors'}           = [];
-        $self->{'parse_errors'}     = [];
-    }
+    my($self) = @_;
+    $self->{'errors'}           = [];
+    $self->{'parse_errors'}     = [];
     return;
 }
 
