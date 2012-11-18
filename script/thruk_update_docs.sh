@@ -22,14 +22,19 @@ if [ FAQ.txt -nt FAQ.html ]; then
     $DOS2UNIX FAQ.html
 fi
 
-
+# man pages from asciidoc
 if [ thruk8.txt -nt thruk.8 ]; then
     a2x -d manpage -f manpage thruk8.txt
     chmod 644 thruk.8
     $DOS2UNIX thruk.8
 fi
 
-[ thruk   -nt thruk.3 ]   && pod2man -s 3 -n thruk   ../script/thruk   > thruk.3
-[ naglint -nt naglint.3 ] && pod2man -s 3 -n naglint ../script/naglint > naglint.3
+# man pages for scripts
+FILES="thruk
+       naglint
+"
+for file in $FILES; do
+    [ $file -nt $file.3 ] && pod2man -s 3 -n $file ../script/$file > $file.3
+done
 
 exit 0
