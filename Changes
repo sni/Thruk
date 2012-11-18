@@ -15,6 +15,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - Bug Fixes
             - fixed sending commands to all backends
             - usability improvements for Internet Explorer
+            - fixed renewing contactgroups cache after backend reload
 
 1.56     Wed Nov  7 22:14:06 CET 2012
           - added naglint tool to beautify nagios config files

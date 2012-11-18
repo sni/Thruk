@@ -366,12 +366,12 @@ returns a list of contactgroups by contact
 =cut
 
 sub get_contactgroups_by_contact {
-    my( $self, $c, $username ) = @_;
+    my( $self, $c, $username, $reload ) = @_;
 
     my $cache       = $c->cache;
     my $cached_data = {};
     $cached_data    = $cache->get($username) if defined $username;
-    if( defined $cached_data->{'contactgroups'} ) {
+    if( !$reload && defined $cached_data->{'contactgroups'} ) {
         return $cached_data->{'contactgroups'};
     }
 

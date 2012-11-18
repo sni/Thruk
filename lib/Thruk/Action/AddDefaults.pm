@@ -373,7 +373,7 @@ sub _set_processinfo {
        or $cached_data->{'prev_last_program_restart'} < $last_program_restart
       ) {
         if(defined $c->stash->{'remote_user'}) {
-            my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'});
+            my $contactgroups = $c->{'db'}->get_contactgroups_by_contact($c, $c->stash->{'remote_user'}, 1);
 
             $cached_data = {
                 'prev_last_program_restart' => $last_program_restart,

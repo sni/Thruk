@@ -1,9 +1,6 @@
 Todo & Wish List:
 =========================================================
 
-Bugs:
-    - $c->cache->{'contactgroups'} cached to long, should be refreshed after core reload
-
 Packages:
   - security issue with chown in postinst:
     http://lists.debian.org/debian-devel/2012/05/msg00533.html
