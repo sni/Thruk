@@ -746,36 +746,6 @@ sub array2hash {
 
 ########################################
 
-=head2 array_diff
-
-  array_diff($list1, $list2)
-
-returns if both lists differ
-
-=cut
-sub array_diff {
-    my($list1, $list2) = @_;
-    return 0 if(!defined $list1 and !defined $list2);
-    return 1 if !defined $list1;
-    return 1 if !defined $list2;
-
-    my $nr1 = scalar @{$list1} - 1;
-    my $nr2 = scalar @{$list2} - 1;
-    return 1 if $nr1 != $nr2;
-
-    for my $x (0..$nr1) {
-        next if(!defined $list1->[$x] and !defined $list2->[$x]);
-        return 1 if !defined $list1->[$x];
-        return 1 if !defined $list2->[$x];
-        return 1 if $list1->[$x] ne $list2->[$x];
-    }
-
-    return 0;
-}
-
-
-########################################
-
 =head2 set_paging_steps
 
   set_paging_steps($c, $data)

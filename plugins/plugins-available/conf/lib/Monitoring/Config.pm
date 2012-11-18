@@ -71,7 +71,7 @@ sub init {
 
     # update readonly config
     my $readonly_changed = 0;
-    if(Thruk::Utils::array_diff($self->{'config'}->{'obj_readonly'}, $config->{'obj_readonly'})) {
+    if($self->_array_diff($self->{'config'}->{'obj_readonly'}, $config->{'obj_readonly'})) {
         $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
         $readonly_changed = 1;
 
@@ -1613,6 +1613,28 @@ sub _resolve_relative_path {
         while( $x < 10 && $file =~ s|/[^/]+/\.\./|/|gmx) { $x++ };
     }
     return $file;
+}
+
+
+##########################################################
+sub _array_diff {
+    my($self, $list1, $list2) = @_;
+    return 0 if(!defined $list1 and !defined $list2);
+    return 1 if !defined $list1;
+    return 1 if !defined $list2;
+
+    my $nr1 = scalar @{$list1} - 1;
+    my $nr2 = scalar @{$list2} - 1;
+    return 1 if $nr1 != $nr2;
+
+    for my $x (0..$nr1) {
+        next if(!defined $list1->[$x] and !defined $list2->[$x]);
+        return 1 if !defined $list1->[$x];
+        return 1 if !defined $list2->[$x];
+        return 1 if $list1->[$x] ne $list2->[$x];
+    }
+
+    return 0;
 }
 
 ##########################################################
