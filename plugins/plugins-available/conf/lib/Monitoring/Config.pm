@@ -447,9 +447,7 @@ Get object by location. Returns L<Monitoring::Config::Object|Monitoring::Config:
 
 =cut
 sub get_object_by_location {
-    my $self = shift;
-    my $path = shift;
-    my $line = shift;
+    my($self, $path, $line) = @_;
 
     for my $file (@{$self->{'files'}}) {
         next unless $file->{'path'} eq $path;

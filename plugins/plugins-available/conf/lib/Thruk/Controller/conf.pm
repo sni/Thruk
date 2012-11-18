@@ -1286,7 +1286,7 @@ sub _get_context_object {
     }
 
     # link from file to an object?
-    if(!defined $obj && defined $c->stash->{'file_name'} && defined $c->stash->{'file_line'}) {
+    if(!defined $obj && defined $c->stash->{'file_name'} && defined $c->stash->{'file_line'} and $c->stash->{'file_line'} =~ m/^\d+$/mx) {
         $obj = $c->{'obj_db'}->get_object_by_location($c->stash->{'file_name'}, $c->stash->{'file_line'});
         unless(defined $obj) {
             Thruk::Utils::set_message( $c, 'fail_message', 'No such object found in this file' );
