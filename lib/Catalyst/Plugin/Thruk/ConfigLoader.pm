@@ -16,11 +16,13 @@ sub _do_finalize_config {
     ###################################################
     # set var dir
     $config->{'var_path'} = $config->{'home'}.'/var' unless defined $config->{'var_path'};
+    $config->{'var_path'} =~ s|/$||mx;
 
     ###################################################
     # switch user when running as root
     my $var_path = $config->{'var_path'} or die("no var path!");
-    die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d $var_path.'/.';
+    if($> != 0 and !-d ($var_path.'/.')) { mkdir($var_path); }
+    die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
     my ($uid, $groups) = Thruk::Utils::get_user($var_path);
     $ENV{'THRUK_USER_ID'}  = $uid;
     $ENV{'THRUK_GROUP_ID'} = $groups->[0];
@@ -102,6 +104,7 @@ sub _do_finalize_config {
     ###################################################
     # use uid to make tmp dir more uniq
     $config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $config->{'tmp_path'};
+    $config->{'tmp_path'} =~ s|/$||mx;
     $config->{'View::TT'}->{'COMPILE_DIR'} = $config->{'tmp_path'}.'/ttc_'.$>;
 
     $config->{'ssi_path'} = $config->{'ssi_path'} || $config->{home}.'/ssi';
