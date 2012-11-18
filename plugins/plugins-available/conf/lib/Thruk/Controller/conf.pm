@@ -873,12 +873,12 @@ sub _process_objects_page {
 
     # apply changes?
     if(defined $c->{'request'}->{'parameters'}->{'apply'}) {
-        return $self->_apply_config_changes($c);
+        return if $self->_apply_config_changes($c);
     }
 
     # tools menu
     if(defined $c->{'request'}->{'parameters'}->{'tools'}) {
-        return $self->_process_tools_page($c);
+        return if $self->_process_tools_page($c);
     }
 
     # get object from params
@@ -923,12 +923,12 @@ sub _process_objects_page {
 
         # list services for host
         elsif($c->stash->{action} eq 'listservices' and $obj->get_type() eq 'host') {
-            $self->_host_list_services($c, $obj);
+            return if $self->_host_list_services($c, $obj);
         }
 
         # list references
         elsif($c->stash->{action} eq 'listref') {
-            $self->_list_references($c, $obj);
+            return if $self->_list_references($c, $obj);
         }
     }
 
@@ -995,6 +995,7 @@ sub _process_objects_page {
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
     $c->stash->{'referer'}           = $c->{'request'}->{'parameters'}->{'referer'} || '';
+    $c->{'obj_db'}->_reset_errors();
     return 1;
 }
 
