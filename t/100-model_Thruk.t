@@ -40,13 +40,6 @@ my $disabled_backends = $b->disable_hidden_backends();
 $b->disable_backends($disabled_backends);
 
 ################################################################################
-# set verbose mode
-for my $backend ( @{$b->{'backends'}} ) {
-    #$backend->{'class'}->{'live'}->{'backend_obj'}->{'verbose'} = 1;
-    #$backend->{'class'}->{'live'}->{'backend_obj'}->{'logger'}  = $logger;
-}
-
-################################################################################
 # get testdata
 my($hostname,$servicename) = TestUtils::get_test_service();
 
@@ -84,7 +77,14 @@ unlike($cmd->{'line_expanded'}, qr/SERVICEDESC/, 'expanded command line must not
 
 ################################################################################
 # now set a ressource file
+################################################################################
+# set resource file
 $b->{'config'}->{'resource_file'} = 't/data/resource.cfg';
+for my $backend ( @{$b->{'backends'}} ) {
+    if(defined $backend->{'resource_file'}) {
+        $backend->{'resource_file'} = $b->{'config'}->{'resource_file'};
+    }
+}
 $cmd = $b->expand_command(
     'host'    => $hosts->[0],
     'command' => {

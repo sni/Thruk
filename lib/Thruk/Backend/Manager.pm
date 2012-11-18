@@ -1642,10 +1642,7 @@ sets the USER1-256 macros from a resource file
 =cut
 
 sub _set_user_macros {
-    my $self     = shift;
-    my $peer_key = shift;
-    my $macros   = shift;
-    my $file     = shift;
+    my($self, $peer_key, $macros, $file) = @_;
 
     my $res;
     if(defined $file) {
@@ -1682,11 +1679,10 @@ returns a hash with all USER1-32 macros
 =cut
 
 sub _read_resource_file {
-    my $self   = shift;
-    my $file   = shift;
-    my $macros = shift || {};
+    my($self, $file, $macros) = @_;
     return unless defined $file;
     return unless -f $file;
+    $macros = {} unless defined $macros;
     my %macros = Config::General::ParseConfig($file);
     for my $key (keys %macros) {
         if(ref $macros{$key} eq 'ARRAY') {
