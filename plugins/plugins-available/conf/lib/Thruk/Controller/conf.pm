@@ -1790,17 +1790,20 @@ sub _host_list_services {
 ##########################################################
 sub _list_references {
     my($self, $c, $obj) = @_;
-    my $refs = $c->{'obj_db'}->get_references($obj);
-    my $data = {};
+
     # references from other objects
+    my $refs = $c->{'obj_db'}->get_references($obj);
+    my $incoming = {};
     for my $type (keys %{$refs}) {
-        $data->{$type} = {};
+        $incoming->{$type} = {};
         for my $id (keys %{$refs->{$type}}) {
             my $obj = $c->{'obj_db'}->get_object_by_id($id);
-            $data->{$type}->{$obj->get_name()} = $id;
+            $incoming->{$type}->{$obj->get_name()} = $id;
         }
     }
+
     # references from this to other objects
+    my $outgoing = {};
     my $resolved = $obj->get_resolved_config($c->{'obj_db'});
     for my $attr (keys %{$resolved}) {
         my $refs = $resolved->{$attr};
@@ -1809,11 +1812,12 @@ sub _list_references {
             my $type = $obj->{'default'}->{$attr}->{'link'};
             for my $r (@{$refs}) {
                 if($type eq 'command') { $r =~ s/\!.*$//mx; }
-                $data->{$type}->{$r} = '';
+                $outgoing->{$type}->{$r} = '';
             }
         }
     }
-    $c->stash->{'data'}     = $data;
+    $c->stash->{'incoming'} = $incoming;
+    $c->stash->{'outgoing'} = $outgoing;
     $c->stash->{'template'} = 'conf_objects_listref.tt';
     return;
 }
