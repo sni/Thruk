@@ -32,4 +32,4 @@ fi
 [ thruk   -nt thruk.3 ]   && pod2man -s 3 -n thruk   ../script/thruk   > thruk.3
 [ naglint -nt naglint.3 ] && pod2man -s 3 -n naglint ../script/naglint > naglint.3
 
-exit
+exit 0
