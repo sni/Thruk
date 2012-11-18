@@ -978,6 +978,8 @@ t/data/naglint/missing_parenthesis/in.cfg
 t/data/naglint/missing_parenthesis/out.cfg
 t/data/naglint/module/in.cfg
 t/data/naglint/module/out.cfg
+t/data/naglint/timeperiods/in.cfg
+t/data/naglint/timeperiods/out.cfg
 t/data/resource.cfg
 t/data/resource2.cfg
 t/data/test_c_style.conf

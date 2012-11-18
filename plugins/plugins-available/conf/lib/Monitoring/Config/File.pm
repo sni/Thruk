@@ -321,6 +321,9 @@ sub _parse_line {
                     push @{$self->{'parse_errors'}}, "duplicate attribute $timedef in '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
                 }
                 $current_object->{'conf'}->{$timedef} = $timeranges;
+                if(defined $inl_comments->{$key} and $key ne $timedef) {
+                    $inl_comments->{$timedef} = delete $inl_comments->{$key};
+                }
             } else {
                 push @{$self->{'parse_errors'}}, "unknown time definition '".$line."' in ".Thruk::Utils::Conf::_link_obj($self->{'path'}, $linenr);
             }
