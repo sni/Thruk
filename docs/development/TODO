@@ -90,7 +90,6 @@ addons:
     - resource.cfg editor
     - wizards: new host, scan services
     - sync multiple backends with config tool
-    - show back references, used commands etc...
 
   panorama:
     - allow multiple filter
