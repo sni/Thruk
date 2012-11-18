@@ -353,7 +353,8 @@ sub _set_processinfo {
     my($c, $cache, $cached_data) = @_;
     my $last_program_restart     = 0;
     my $processinfo              = $c->{'db'}->get_processinfo();
-    return unless defined $processinfo;
+    $processinfo                 = {} unless defined $processinfo;
+    $processinfo                 = {} if(ref $processinfo eq 'ARRAY' && scalar @{$processinfo} == 0);
     my $overall_processinfo      = Thruk::Utils::calculate_overall_processinfo($processinfo);
     $c->stash->{'pi'}            = $overall_processinfo;
     $c->stash->{'pi_detail'}     = $processinfo;
