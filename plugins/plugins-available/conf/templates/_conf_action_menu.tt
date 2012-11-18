@@ -60,7 +60,7 @@
               [% IF type == 'contact' %]
               <tr class='data'>
                 <td><img src='[% url_prefix %]thruk/themes/[% theme %]/images/edit.png' border="0" alt='Edit CGI Permissions' title='Edit CGI Permissions' width="16" height="16"></td>
-                <td class='command'><a href='conf.cgi?sub=users&action=change&data.username=[% object.get_name() %]'>Edit CGI Permissions</a></td>
+                <td class='command'><a href='conf.cgi?sub=users&amp;action=change&amp;data.username=[% object.get_name() %]'>Edit CGI Permissions</a></td>
               </tr>
               [% END %]
             [% END %]
