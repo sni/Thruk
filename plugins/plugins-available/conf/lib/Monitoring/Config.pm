@@ -71,7 +71,7 @@ sub init {
 
     # update readonly config
     my $readonly_changed = 0;
-    if($self->_array_diff($self->{'config'}->{'obj_readonly'}, $config->{'obj_readonly'})) {
+    if($self->_array_diff($self->_list($self->{'config'}->{'obj_readonly'}), $self->_list($config->{'obj_readonly'}))) {
         $self->{'config'}->{'obj_readonly'} = $config->{'obj_readonly'};
         $readonly_changed = 1;
 
@@ -1635,6 +1635,14 @@ sub _array_diff {
     }
 
     return 0;
+}
+
+##########################################################
+# convert anything to a list
+sub _list {
+    $_[1] = [] unless defined $_[1];
+    if(ref $_[1] ne 'ARRAY') { $_[1] = [$_[1]]; }
+    return;
 }
 
 ##########################################################
