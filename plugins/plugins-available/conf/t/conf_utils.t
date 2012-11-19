@@ -70,17 +70,17 @@ is($got, $conf_exp, "merge config II");
 
 ###########################################################
 # _array_diff
-my $a = [1]; my $b = [];
-is(Monitoring::Config->_array_diff($a, $b), 0, '_list 1');
+my $a1 = [1]; my $a2 = [];
+is(Monitoring::Config->_array_diff($a1, $a2), 1, '_list 1');
 
-$a = [1]; $b = undef;
-is(Monitoring::Config->_array_diff($a, $b), 0, '_list 2');
+$a1 = [1]; $a2 = undef;
+is(Monitoring::Config->_array_diff($a1, $a2), 1, '_list 2');
 
-$a = [1]; $b = [1,2];
-is(Monitoring::Config->_array_diff($a, $b), 0, '_list 3');
+$a1 = [1]; $a2 = [1,2];
+is(Monitoring::Config->_array_diff($a1, $a2), 1, '_list 3');
 
-$a = [1,2]; $b = [1,2];
-is(Monitoring::Config->_array_diff($a, $b), 1, '_list 4');
+$a1 = [1,2]; $a2 = [1,2];
+is(Monitoring::Config->_array_diff($a1, $a2), 0, '_list 4');
 
 ###########################################################
 # test reading htpasswd
