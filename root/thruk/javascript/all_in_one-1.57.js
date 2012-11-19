@@ -2267,6 +2267,7 @@ function add_new_filter(search_prefix, table) {
                              'Latency',
                              'Next Check',
                              'Notification Period',
+                             'Number of Services',
                              'Parent',
                              'Service',
                              'Servicegroup',
@@ -2620,6 +2621,7 @@ function verify_op(event) {
       if(   selValue != 'next check'
          && selValue != 'last check'
          && selValue != 'latency'
+         && selValue != 'number of services'
          && selValue != 'current attempt'
          && selValue != 'execution time'
          && selValue != '% state change'
@@ -2985,6 +2987,7 @@ var ajax_search = {
                || search_type == 'next check'
                || search_type == 'last check'
                || search_type == 'latency'
+               || search_type == 'number of services'
                || search_type == 'current attempt'
                || search_type == 'execution time'
                || search_type == '% state change'

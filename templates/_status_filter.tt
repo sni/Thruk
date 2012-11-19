@@ -378,6 +378,7 @@
               <option value="latency"[% IF s.type == 'latency' %] selected[% END %]>Latency</option>
               <option value="next check"[% IF s.type == 'next check' %] selected[% END %]>Next Check</option>
               <option value="notification period"[% IF s.type == 'notification period' %] selected[% END %]>Notification Period</option>
+              <option value="number of services"[% IF s.type == 'number of services' %] selected[% END %]>Number of Services</option>
               <option value="parent"[% IF s.type == 'parent' %] selected[% END %]>Parent</option>
               <option value="service"[% IF s.type == 'service' %] selected[% END %]>Service</option>
               <option value="servicegroup"[% IF s.type == 'servicegroup' %] selected[% END %]>Servicegroup</option>

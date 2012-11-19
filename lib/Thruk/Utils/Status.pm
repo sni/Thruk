@@ -710,6 +710,10 @@ sub single_search {
                 push @servicefilter, { next_check => { $dateop => $date } };
             }
         }
+        elsif ( $filter->{'type'} eq 'number of services' ) {
+            push @hostfilter,    { num_services => { $op => $value } };
+            push @servicefilter, { host_num_services => { $op => $value } };
+        }
         elsif ( $filter->{'type'} eq 'latency' ) {
             push @hostfilter,    { latency => { $op => $value } };
             push @servicefilter, { latency => { $op => $value } };
