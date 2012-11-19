@@ -6,7 +6,7 @@ use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1028;
+    plan tests => 1043;
 }
 
 BEGIN {
@@ -128,6 +128,7 @@ $pages = [
     '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&view_mode=xls',
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=xls',
     '/thruk/cgi-bin/status.cgi?style=hostdetail&hostgroup=all&view_mode=xls',
+    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems&view_mode=xls',
 ];
 
 for my $url (@{$pages}) {
@@ -138,7 +139,7 @@ for my $url (@{$pages}) {
 }
 
 $pages = [
-# view_mode json export
+# view_mode json export which result in an Array
     '/thruk/cgi-bin/status.cgi?host=all&view_mode=json',
     '/thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&view_mode=json',
     '/thruk/cgi-bin/status.cgi?host=all&type=detail&hoststatustypes=3&serviceprops=42&servicestatustypes=28&view_mode=json',
@@ -153,6 +154,21 @@ for my $url (@{$pages}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'ARRAY', "json result is an array");
 }
+
+$pages = [
+# view_mode json export which result in a hash
+    '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All+Unhandled+Problems&view_mode=json',
+];
+
+for my $url (@{$pages}) {
+    my $page = TestUtils::test_page(
+        'url'          => $url,
+        'content_type' => 'application/json; charset=utf-8',
+    );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'HASH', "json result is a hash");
+}
+
 
 $pages = [
 # json export

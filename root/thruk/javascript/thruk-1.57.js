@@ -2525,14 +2525,14 @@ function toggleFilterCheckBox(id) {
 }
 
 /* toogle all checkbox for attribute filter */
-function toggleAllFilterCheckBox() {
-  var box = document.getElementById("ht0");
+function toggleAllFilterCheckBox(prefix) {
+  var box = document.getElementById(prefix+"ht0");
   var state = false;
   if(box.checked) {
     state = true;
   }
   for(var x = 0; x <= 99; x++) {
-      var el = document.getElementById('ht'+x);
+      var el = document.getElementById(prefix+'ht'+x);
       if(!el) { break; }
       el.checked = state;
   }

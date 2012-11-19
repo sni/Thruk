@@ -1356,20 +1356,23 @@ set selected columns for the excel export
 =cut
 sub set_selected_columns {
     my($c) = @_;
-    my $columns = {};
-    my $last_col = 30;
-    for my $x (0..30) { $columns->{$x} = 1; }
-    if(defined $c->{'request'}->{'parameters'}->{'columns'}) {
-        $last_col = 0;
-        for my $x (0..30) { $columns->{$x} = 0; }
-        my $cols = $c->{'request'}->{'parameters'}->{'columns'};
-        for my $nr (ref $cols eq 'ARRAY' ? @{$cols} : ($cols)) {
-            $columns->{$nr} = 1;
-            $last_col++;
+
+    for my $prefix ('', 'host_', 'service_') {
+        my $columns = {};
+        my $last_col = 30;
+        for my $x (0..30) { $columns->{$x} = 1; }
+        if(defined $c->{'request'}->{'parameters'}->{$prefix.'columns'}) {
+            $last_col = 0;
+            for my $x (0..30) { $columns->{$x} = 0; }
+            my $cols = $c->{'request'}->{'parameters'}->{$prefix.'columns'};
+            for my $nr (ref $cols eq 'ARRAY' ? @{$cols} : ($cols)) {
+                $columns->{$nr} = 1;
+                $last_col++;
+            }
         }
+        $c->stash->{$prefix.'last_col'} = chr(65+$last_col-1);
+        $c->stash->{$prefix.'columns'}  = $columns;
     }
-    $c->stash->{'last_col'} = chr(65+$last_col-1);
-    $c->stash->{'columns'}  = $columns;
     return;
 }
 

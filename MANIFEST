@@ -1162,8 +1162,11 @@ templates/config_timeperiods.tt
 templates/custom_perf_bar_adjustments.tt
 templates/docs.tt
 templates/error.tt
+templates/excel/_status_detail_worksheet.tt
+templates/excel/_status_hostdetail_worksheet.tt
 templates/excel/logs.tt
 templates/excel/notifications.tt
+templates/excel/status_combined.tt
 templates/excel/status_detail.tt
 templates/excel/status_hostdetail.tt
 templates/extinfo_type_0.tt

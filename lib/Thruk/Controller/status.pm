@@ -319,8 +319,7 @@ sub _process_details_page {
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
     if( defined $view_mode and $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
-        my $filename = 'status.xls';
-        $c->res->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
+        $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
         $c->stash->{'template'} = 'excel/status_detail.tt';
         return $c->detach('View::Excel');
@@ -836,6 +835,23 @@ sub _process_combined_page {
     $c->stash->{'hosts'} = $hosts;
     $c->stash->{'show_host_attempts'} = 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
+
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    if( defined $view_mode and $view_mode eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c);
+        $c->res->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
+        $c->stash->{'hosts'}    = $hosts;
+        $c->stash->{'services'} = $services;
+        $c->stash->{'template'} = 'excel/status_combined.tt';
+        return $c->detach('View::Excel');
+    }
+    if ( defined $view_mode and $view_mode eq 'json' ) {
+        $c->stash->{'json'} = {
+            'hosts'    => $hosts,
+            'services' => $services,
+        };
+        return $c->detach('View::JSON');
+    }
 
     # set audio file to play
     Thruk::Utils::Status::set_audio_file($c);
