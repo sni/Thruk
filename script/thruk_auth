@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # read rc files if exist
 [ -e ~/.thruk   ] && . ~/.thruk
