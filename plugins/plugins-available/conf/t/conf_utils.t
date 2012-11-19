@@ -8,7 +8,7 @@ use File::Slurp;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 373;
+    plan tests => 377;
 }
 
 BEGIN {
@@ -67,6 +67,20 @@ blub=5
 $data = { test => ["1","4","5"], blub => "5" };
 $got  = Thruk::Utils::Conf::merge_conf($conf_in, $data);
 is($got, $conf_exp, "merge config II");
+
+###########################################################
+# _array_diff
+my $a = [1]; my $b = [];
+is(Monitoring::Config->_array_diff($a, $b), 0, '_list 1');
+
+$a = [1]; $b = undef;
+is(Monitoring::Config->_array_diff($a, $b), 0, '_list 2');
+
+$a = [1]; $b = [1,2];
+is(Monitoring::Config->_array_diff($a, $b), 0, '_list 3');
+
+$a = [1,2]; $b = [1,2];
+is(Monitoring::Config->_array_diff($a, $b), 1, '_list 4');
 
 ###########################################################
 # test reading htpasswd
