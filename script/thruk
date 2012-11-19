@@ -1,10 +1,13 @@
 #!/bin/sh
-# read rc file if exists
-if [ -e ~/.thruk  ]; then
-    . ~/.thruk
-fi
 
-if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+# read rc files if exist
+[ -e ~/.thruk   ] && . ~/.thruk
+[ -e ~/.profile ] && . ~/.profile
+
+if [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
+elif [ -e $(dirname $0)/../lib/Thruk.pm ]; then
   export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib";
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
 else
@@ -17,7 +20,7 @@ eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
 
 #! -*- perl -*-
 # vim: expandtab:ts=4:sw=4:syntax=perl
-#line 21
+#line 24
 
 use strict;
 use warnings;
