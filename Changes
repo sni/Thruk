@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.58     not yet released
+1.58     Wed Nov 21 12:51:29 CET 2012
           - use regex matching in search preview too
           - added new config option first_day_of_week
           - added column filter in configuration page (Thibault Cohen)

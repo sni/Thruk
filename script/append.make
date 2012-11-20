@@ -9,6 +9,7 @@ version:
 	if [ "$$NEWVERSION" = "" ]; then newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)"); else newversion="$$NEWVERSION"; fi; \
 	if [ -n "$$newversion" ]; then \
 		date=`date "+%B %d, %Y"`; \
+		fulldate=`date`; \
 		branch=`echo "$$newversion" | awk '{ print $$2 }'`; \
 		newversion=`echo "$$newversion" | awk '{ print $$1 }'`; \
 	fi; \
@@ -23,6 +24,7 @@ version:
 		sed -r "s/_$(VERSION)_/_$$newversion\_/" -i docs/THRUK_MANUAL.txt && \
 		sed -r "s/\-$(VERSION)\./-$$newversion\./" -i MANIFEST -i docs/THRUK_MANUAL.txt -i root/thruk/startup.html && \
 		sed -r "s/\-$(VERSION)\-/-$$newversion\-/" -i docs/THRUK_MANUAL.txt && \
+		sed -r "s/$(VERSION)\s*not yet released/$$newversion     $$fulldate/" -i Changes && \
 		sed -r "s/$(VERSION)/$$newversion/" -i dist.ini && \
 		if [ -e ".git" ]; then git="git"; else git=""; fi && \
 		$$git mv plugins/plugins-available/mobile/root/mobile-$(VERSION).css plugins/plugins-available/mobile/root/mobile-$$newversion.css && \
