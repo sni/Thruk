@@ -234,6 +234,7 @@ div.navbarsearch form fieldset {
 
 div.navsection {
   margin:0px 0 8px;
+  position: relative;
 }
 
 div.navsectionlinks {

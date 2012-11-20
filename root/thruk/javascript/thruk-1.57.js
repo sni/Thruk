@@ -3299,13 +3299,8 @@ var ajax_search = {
 
         panel.innerHTML = resultHTML;
 
-        var coords;
-        var style = panel.style;
-        if(input.className == 'NavBarSearchItem') {
-            coords    = jQuery(input).position();
-        } else {
-            coords    = jQuery(input).offset();
-        }
+        var style     = panel.style;
+        var coords    = jQuery(input).position();
         style.left    = coords.left + "px";
         style.top     = (coords.top + input.offsetHeight + 2) + "px";
         style.display = "block";

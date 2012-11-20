@@ -157,10 +157,6 @@ SELECT#dfl_s0_style_selector, INPUT#dfl_s0_btn_accept_search {
 }
 */
 
-input#NavBarSearchItem {
-  width:105px;
-}
-
 div.dTreeNode {
     white-space: nowrap;
 }
@@ -252,4 +248,11 @@ TABLE.extdetails DIV.flapdetectionENABLED
 
 .tableRowSelected {
   background-color:#609FD2d;
+}
+
+#search-results {
+  line-height: 12px;
+}
+input.NavBarSearchItem {
+  width:105px;
 }

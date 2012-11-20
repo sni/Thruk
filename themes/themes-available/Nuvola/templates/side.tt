@@ -113,7 +113,7 @@
           [%+ menu_name %].add([% index %],[% parent_index %],'[% sublink.name %]','[% sublink.href %]','','[% sublink.target %]','[% icon %]');
         [% END %]
       [% ELSIF link.search +%]
-        [%+ menu_name %].add([% index %],0,"<nobr><form style='padding: 0px; margin:0px; display:inline;' method='get' action='[% url_prefix %]thruk/cgi-bin/status.cgi' target='[% link.target %]'>[% IF use_new_search%]<input type='hidden' name='hidesearch' value='2' /><input type='hidden' name='s0_op' value='~' /><input type='hidden' name='s0_type' value='search' /><input type='text' name='s0_value' id='NavBarSearchItem' size=10 style='font-size:10'>[% ELSE %]<input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' id='NavBarSearchItem' size=10 style='font-size:10'>[% END %]<\/form><\/nobr>",'','','','[% url_prefix %]thruk/themes/Nuvola/side/icons/search.gif');
+        [%+ menu_name %].add([% index %],0,"<nobr><form style='padding: 0px; margin:0px; display:inline;' method='get' action='[% url_prefix %]thruk/cgi-bin/status.cgi' target='[% link.target %]'>[% IF use_new_search%]<input type='hidden' name='hidesearch' value='2' /><input type='hidden' name='s0_op' value='~' /><input type='hidden' name='s0_type' value='search' /><input type='text' name='s0_value' id='s0_value' class='NavBarSearchItem' size=10 style='font-size:10'>[% ELSE %]<input type='hidden' name='navbarsearch' value='1'><input type='text' name='host' id='NavBarSearchItem' size=10 style='font-size:10'>[% END %]<\/form><\/nobr>",'','','','[% url_prefix %]thruk/themes/Nuvola/side/icons/search.gif');
       [% END %]
   [% END %]
 document.write([% menu_name %]);

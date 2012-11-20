@@ -50,7 +50,7 @@
             <input type='hidden' name='hidesearch' value='2' />
             <input type='hidden' name='s0_op' value='~' />
             <input type='hidden' name='s0_type' value='search' />
-            <input type='text' name='s0_value' id="NavBarSearchItem" />
+            <input type='text' name='s0_value' id="s0_value" class="NavBarSearchItem" />
             [% ELSE %]
             <input id="search" name="host" type="text" />
             <input type="hidden" name="navbarsearch" id="NavBarSearchItem" value="1" />
