@@ -1909,7 +1909,7 @@ sub _get_plugin_preview {
         }
     }
 
-    if(defined $service and $service ne '') {
+    if(defined $service and $service ne '' and $service ne 'undefined') {
         my $objects = $c->{'obj_db'}->get_objects_by_name('service', $service, 0, 'ho:'.$host);
         if(defined $objects->[0]) {
             $macros = $objects->[0]->get_macros($c->{'obj_db'}, $macros);
