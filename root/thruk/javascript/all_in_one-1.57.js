@@ -3302,15 +3302,24 @@ var ajax_search = {
 
         panel.innerHTML = resultHTML;
 
+        var coords;
         var style = panel.style;
-        var coords    = jQuery(input).position();
+        if(input.className == 'NavBarSearchItem') {
+            coords    = jQuery(input).position();
+        } else {
+            coords    = jQuery(input).offset();
+        }
         style.left    = coords.left + "px";
         style.top     = (coords.top + input.offsetHeight + 2) + "px";
         style.display = "block";
         style.width   = ( ajax_search.size -2 ) + "px";
 
         /* move dom node to make sure it scrolls with the input field */
-        jQuery('#'+ajax_search.result_pan).insertAfter(input);
+        if(input.className == 'NavBarSearchItem') {
+            jQuery('#'+ajax_search.result_pan).insertAfter(input);
+        } else {
+            jQuery('#'+ajax_search.result_pan).appendTo('BODY');
+        }
 
         showElement(panel);
         ajax_search.stop_events = true;
