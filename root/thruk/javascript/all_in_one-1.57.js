@@ -3394,7 +3394,7 @@ var ajax_search = {
 
         if(( ajax_search.autosubmit == undefined
              && (
-                    ajax_search.input_field == "NavBarSearchItem"
+                    input.className == "NavBarSearchItem"
                  || ajax_search.input_field == "data.username"
                  || ajax_search.input_field == "data.name"
                  )
