@@ -5,13 +5,14 @@ use Test::More;
 $Data::Dumper::Sortkeys = 1;
 
 BEGIN {
+    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
+
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
 use Catalyst::Test 'Thruk';
-
-plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
