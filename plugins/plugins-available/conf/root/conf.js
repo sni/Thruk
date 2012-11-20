@@ -263,7 +263,7 @@ function update_command_line(id) {
     // not a full command
     if(ajax_search && ajax_search.base && ajax_search.base[0] && ajax_search.base[0].data) {
         var found = 0;
-        ajax_search.base[0].data.each(function(elem) {
+        jQuery.each(ajax_search.base[0].data, function(nr, elem) {
             if(elem == cmd_name) { found++; }
         });
         if(found == 0) {

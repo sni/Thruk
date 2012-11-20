@@ -16,6 +16,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - show forward references on ref page too
             - fix computed config display of additive inheritance
             - fix ignoring changes to readonly pattern in config
+            - fix auto submit when pressing some wizards
           - Bug Fixes
             - fixed sending commands to all backends
             - usability improvements for Internet Explorer
