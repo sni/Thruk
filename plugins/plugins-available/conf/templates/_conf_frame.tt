@@ -47,12 +47,12 @@
       </tr>
     </table>
 
-    <div align="center" class='dataTitle'>[% subtitle %]</div>
-    <br>
-
+    [% IF action != "tree" %]
+    <div align="center" class='dataTitle' style="padding-top: 4px; padding-bottom: 4px;">[% subtitle %]</div>
+    [% END %]
     [% content %]
 
-[% IF action != "editor" %]
+[% IF action != "editor" && action != "tree" %]
 <br><br>
 [% END %]
 

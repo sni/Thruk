@@ -32,8 +32,8 @@
             // editor needs fixed size
             var edit_pane = document.getElementById('editor_pane');
 
-            var w = edit_pane.offsetWidth - 30, h = window.innerHeight - edit_pane.offsetTop - 40;
-            edit_pane.style.width = w + 'px';
+            var w = edit_pane.offsetWidth - 30, h = jQuery(window).height() - edit_pane.offsetTop - 40;
+            edit_pane.style.width  = w + 'px';
             edit_pane.style.height = h + 'px';
 
             jQuery('#editor').css('width',  w + 'px')

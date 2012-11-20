@@ -63,6 +63,7 @@ UL.obj_browse LI {
   text-align: left;
   clear: both;
   display: inline-block;
+  width: 420px;
 }
 
 UL.obj_browse LI:hover {
@@ -78,15 +79,15 @@ DIV.obj_browse_name {
   width: 250px;
   white-space: nowrap;
   overflow: hidden;
-  display:inline-block;
   max-width: 50%;
+  float: left;
 }
 
 DIV.obj_browse_date {
   width: 120px;
   text-align: right;
-  display:inline-block;
   max-width: 50%;
+  float: left;
 }
 INPUT.obj_browse_box {
   float: left;

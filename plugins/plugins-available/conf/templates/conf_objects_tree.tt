@@ -1,6 +1,11 @@
-[% WRAPPER _conf_objects_frame.tt %]
+[% WRAPPER _conf_frame.tt %]
 
-<table style="height:600px; background: white;" border=1 width=1100>
+<div class="dataTitle" style="padding-top: 4px; padding-bottom: 4px;">
+  <a href="conf.cgi?sub=objects" style="float:left;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='go back' title='go back' width="16" height="16" style="vertical-align: middle;"> back</a>
+  Objects Browser
+</div>
+
+<table style="background: white;" border=1 id="treetable" width="100%">
   <tr>
     <td valign="top" id="container" style="height:100%;  text-align: left;" width=200>
       <ul>
@@ -49,7 +54,7 @@
       </ul>
     </td>
     <td valign="top" style="border-left: 1px solid grey;">
-      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" width=900 style="border: 0; height: 100%;"></iframe>
+      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" style="border: 0;" id="cont_iframe"></iframe>
     </td>
   </tr>
 </table>
@@ -58,6 +63,17 @@
 <!--
 
 jQuery(function($) {
+
+    // adjust size of iframe and tree browser
+    var treetable = document.getElementById('treetable');
+    var w = treetable.offsetWidth, h = jQuery(window).height() - treetable.offsetTop;
+    treetable.style.width  = (w-50) + 'px';
+    treetable.style.height = (h-10) + 'px';
+
+    var cont_iframe = document.getElementById('cont_iframe');
+    cont_iframe.style.width  = (w-150) + 'px';
+    cont_iframe.style.height = (h-20)  + 'px';
+
   jQuery('#container').jstree({
     plugins: [ "themes", "dnd"/*, "contextmenu"*/ ],
     core:    {
