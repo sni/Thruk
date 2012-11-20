@@ -27,14 +27,9 @@
   [% END %]
   [% IF cmd.size == 0 %][% cmd = ['',''] %][% END %]
   [% IF edit %]
-    <table cellpadding=0 cellspacing=0 border=0 width="100%"><tr>
-    <td style="width: 160px;"><input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]></td>
-    <td align="right">&nbsp;&nbsp;args:&nbsp;</td>
-    <td>
-      <input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; escape_html(cmd.join('!')) %]">
-      [% PROCESS _conf_wizard_command.tt id="id_" _ key _ "_wzd" _ nr inp1="id_" _ key _ "_1" inp2="id_" _ key _ "_2" %]
-    </td>
-    </tr></table>
+    <input type="text" name="obj.[% key %].1" id="id_[% key %]_1" value="[% cmd.0 %]"[% IF use_ajax_search && defaults.$key.exists('link') %] onfocus="this.click()" onclick="ajax_search.init(this, '[% defaults.$key.link %]', {url:'conf.cgi?action=json&amp;type=[% defaults.$key.link %]', striped:true, autosubmit:false})"[% END %]>
+    [% PROCESS _conf_wizard_command.tt id="id_" _ key _ "_wzd" _ nr inp1="id_" _ key _ "_1" inp2="id_" _ key _ "_2" %]<br>
+    <input type="text" name="obj.[% key %].2" id="id_[% key %]_2" value="[% blah = cmd.shift; escape_html(cmd.join('!')) %]">
   [% ELSE %]
     [% IF defaults.$key.exists('link') %]
         <a href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% cmd.0 | uri %]">[% value %]</a>

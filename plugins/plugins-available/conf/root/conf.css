@@ -10,10 +10,10 @@ body.config TABLE.conftoolobj TEXTAREA {
   width: 100%;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_1 {
-  width: 160px;
+  width: 375px;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_2 {
-  width: 170px;
+  width: 400px;
 }
 body.config TABLE.conftoolobj INPUT[type=text].attrkey {
   width: 170px;
