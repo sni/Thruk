@@ -314,6 +314,7 @@ sub set_default_config {
         info_popup_event_type           => 'onclick',
         info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',
         cmd_quick_status                => {
+                    default                => 'reschedule next check',
                     reschedule             => 1,
                     downtime               => 1,
                     comment                => 1,

@@ -8,6 +8,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - added configuration only backends
           - show link to hostdetails when no services match
           - added filter by number of services
+          - added config option to select default quick command
           - added excel export for problems page
           - added json export for problems page
           - config tool:
