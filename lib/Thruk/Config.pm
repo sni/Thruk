@@ -20,7 +20,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '1.58';
+our $VERSION = '1.59';
 
 my $project_root = Catalyst::Utils::home('Thruk::Config');
 my $branch       = '';
