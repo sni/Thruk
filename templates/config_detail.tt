@@ -48,7 +48,7 @@
             </tr>
             <tr>
              <td>
-                <select style="height: 120px;" name='columns' multiple='multiple' onchange="toggleVis(this)">
+                <select style="height: 120px;" id='columns_sel' multiple='multiple' onchange="toggleVis(this)">
                 </select>
               </td>
            </tr>
@@ -68,25 +68,15 @@
     <script type="text/javascript">
     <!--
 
-tables = document.getElementsByTagName("table")
-for (var i = 0; i < tables.length; i++) {
-    if ( tables[i].getAttribute("class") == "data" ) {
-        table = tables[i];
+var column_select = document.getElementById("columns_sel");
+var columns = new Array();
+jQuery('TH.data').each(function(i, col) {
+    if(i != 0 || col.innerHTML != 'Service') {
+      columns.push(col.innerHTML);
     }
-}
-
-column_select = document.getElementsByName("columns")[0];
-tmp_columns = table.getElementsByTagName('th');
-columns = new Array();
-for (var i = 0; i < tmp_columns.length; i++) {
-    text = tmp_columns[i].innerHTML;
-    if (text != 'Service') {
-        columns[i] = text;
-        var o = new Option(text, i);
-        column_select.options.add(o, null);
-        o.setAttribute("selected","true");
-    }
-}
+});
+add_options(columns_sel, columns);
+jQuery("#columns_sel option").attr('selected',true);
 
 // Set the default "show" mode to that specified by W3C DOM
 // compliant browsers
@@ -101,11 +91,19 @@ if (document.all) showMode='block';
 
 // This is the function that actually does the manipulation
 function toggleVis(sel){
+    var table = jQuery('TABLE.data')[0];
     lines = table.getElementsByTagName('tr');
 
     for ( k = 0; k < lines.length; k++) {
         // Headers
         h = lines[k].getElementsByTagName('th');
+        if (h.length == 2 && k == 0) {
+          if(sel.options[1].selected && sel.options[2].selected) {
+            lines[0].style.display = "";
+          } else {
+            lines[0].style.display = "none";
+          }
+        }
         if (h.length == sel.options.length) {
             for (var i = 0; i < sel.options.length; i++) {
                 if (sel.options[i].selected == true) {
