@@ -140,6 +140,7 @@ $Monitoring::Config::Help::helpdata = {
                       'resultmodulations' => 'This variable is used to link with resultmodulations objects. It will allow such modulation to apply, like change a warning in critical for this host.',
                       'escalations' => 'This variable is used to link with escalations objects. It will allow such escalations rules to appy. Look at escalations objects for more details.',
                       'business_impact_modulations' => 'This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a payd server, it will be important only in a specific timeperiod: near the payd day). Look at business_impact_modulations objects for more details.',
+                      'icon_set' => 'This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server',
                     },
           'hostdependency' => {
                                 'dependency_period' => 'This directive is used to specify the short name of the time period during which this dependency is valid.  If this directive is not specified, the dependency is considered to be valid during all times.',
@@ -231,6 +232,7 @@ $Monitoring::Config::Help::helpdata = {
                          'escalations' => 'This variable is used to link with escalations objects. It will allow such escalations rules to appy. Look at escalations objects for more details.',
                          'business_impact_modulations' => 'This variable is used to link with business_impact_modulations objects. It will allow such modulation to apply (for example if the host is a payd server, it will be important only in a specific timeperiod: near the payd day). Look at business_impact_modulations objects for more details.',
                          'service_dependencies' => 'This variable is used to define services that this serice is dependent of for notifications. It\'s a comma separated list of service like host,service_description. For each service a service_dependency will be created with default values (notification_failure_criteria as \'u,c,w\' and no dependency_period). By default this value is void so there is no linked dependencies.',
+                         'icon_set' => 'This variable is used to set the icon in the Shinken Webui. For now, values are only : database, disk, network_service, server',
                        },
           'servicedependency' => {
                                    'dependency_period' => 'This directive is used to specify the short name of the time period during which this dependency is valid.  If this directive is not specified, the dependency is considered to be valid during all times.',

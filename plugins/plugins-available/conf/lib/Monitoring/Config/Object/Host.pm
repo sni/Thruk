@@ -101,6 +101,7 @@ sub BUILD {
         $Monitoring::Config::Object::Host::Defaults->{'resultmodulations'}           = { type => 'STRING', cat => 'Extended' };
         $Monitoring::Config::Object::Host::Defaults->{'business_impact_modulations'} = { type => 'STRING', cat => 'Extended' };
         $Monitoring::Config::Object::Host::Defaults->{'escalations'}                 = { type => 'STRING', cat => 'Extended' };
+        $Monitoring::Config::Object::Host::Defaults->{'icon_set'}                    = { type => 'STRING', cat => 'Extended' };
     } else {
         delete $Monitoring::Config::Object::Host::Defaults->{'business_impact'};
         delete $Monitoring::Config::Object::Host::Defaults->{'criticity'};
@@ -111,6 +112,7 @@ sub BUILD {
         delete $Monitoring::Config::Object::Host::Defaults->{'resultmodulations'};
         delete $Monitoring::Config::Object::Host::Defaults->{'business_impact_modulations'};
         delete $Monitoring::Config::Object::Host::Defaults->{'escalations'};
+        delete $Monitoring::Config::Object::Host::Defaults->{'icon_set'};
     }
 
     if($coretype eq 'any' or $coretype eq 'icinga') {
