@@ -31,6 +31,7 @@ $Thruk::Backend::Manager::Provider = [
           'Thruk::Backend::Provider::Livestatus',
           'Thruk::Backend::Provider::Mongodb',
           'Thruk::Backend::Provider::ConfigOnly',
+          'Thruk::Backend::Provider::HTTP',
 ];
 
 ##########################################################
@@ -63,7 +64,7 @@ return a new backend class
 =cut
 
 sub _create_backend {
-    my($self, $name, $type, $options, $config, $log) = @_;
+    my($self, $name, $type, $options, $config) = @_;
 
     my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
     if(scalar @provider == 0) {
@@ -81,7 +82,7 @@ sub _create_backend {
     # disable keepalive for now, it does not work and causes lots of problems
     $options->{'keepalive'} = 0 if defined $options->{'keepalive'};
 
-    my $obj = $class->new( $options, $config, $log );
+    my $obj = $class->new( $options, $config );
     return $obj;
 }
 
@@ -104,7 +105,7 @@ sub _initialise_peer {
                                                       $config->{'type'},
                                                       $config->{'options'},
                                                       $self->{'config'},
-                                                      undef); # log
+                                                      );
     $self->{'configtool'}    = $config->{'configtool'} || {};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;

@@ -29,6 +29,7 @@ $branch          = $gitbranch unless $branch ne '';
 
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
+              'branch'                 => $branch,
               'released'               => 'November 21, 2012',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',

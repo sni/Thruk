@@ -7,6 +7,7 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 my $replace = {
     'Log::Log4perl::Catalyst' => 'Log::Log4perl',
+    'LWP::ConnCache'          => 'LWP::UserAgent',
 };
 
 # first get all we have already

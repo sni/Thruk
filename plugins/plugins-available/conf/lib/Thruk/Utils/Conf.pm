@@ -328,6 +328,7 @@ sub get_component_as_string {
         $string .= "        <options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         $string .= "            peer          = ".$b->{'options'}->{'peer'}."\n"          if $b->{'options'}->{'peer'};
         $string .= "            resource_file = ".$b->{'options'}->{'resource_file'}."\n" if $b->{'options'}->{'resource_file'};
+        $string .= "            auth          = ".$b->{'options'}->{'auth'}."\n"          if $b->{'options'}->{'auth'};
         $string .= "        </options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         if(defined $b->{'configtool'} and scalar keys %{$b->{'configtool'}} > 0) {
             $string .= "        <configtool>\n";

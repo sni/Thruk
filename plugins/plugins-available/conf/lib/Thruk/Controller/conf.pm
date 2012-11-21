@@ -778,6 +778,7 @@ sub _process_backends_page {
                 'options' => {},
             };
             $backend->{'options'}->{'peer'} = $c->request->parameters->{'peer'.$x} if $c->request->parameters->{'peer'.$x};
+            $backend->{'options'}->{'auth'} = $c->request->parameters->{'auth'.$x} if $c->request->parameters->{'auth'.$x};
             $x++;
             next unless defined $backend->{'name'};
             next unless $backend->{'name'} ne '';
@@ -801,18 +802,19 @@ sub _process_backends_page {
         return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=backends');
     }
     if($c->stash->{action} eq 'check_con') {
-        my $peer = $c->request->parameters->{'con'};
+        my $peer = $c->request->parameters->{'peer'};
         my $type = $c->request->parameters->{'type'};
+        my $auth = $c->request->parameters->{'auth'};
         my @test;
         eval {
             my $con = Thruk::Backend::Peer->new({
                                                  type    => $type,
                                                  name    => 'test connection',
-                                                 options => { peer => $peer },
+                                                 options => { peer => $peer, auth => $auth },
                                                 });
             @test   = $con->{'class'}->get_processinfo();
         };
-        if(scalar @test == 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1 and scalar keys %{$test[0]->{(keys %{$test[0]})[0]}} > 0) {
+        if(scalar @test >= 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1 and scalar keys %{$test[0]->{(keys %{$test[0]})[0]}} > 0) {
             $c->stash->{'json'} = { ok => 1 };
         } else {
             my $error = $@;
@@ -846,6 +848,7 @@ sub _process_backends_page {
     for my $b (@{$backends}) {
         $b->{'key'}     = substr(md5_hex(($b->{'options'}->{'peer'} || '')." ".$b->{'name'}), 0, 5) unless defined $b->{'key'};
         $b->{'addr'}    = $b->{'options'}->{'peer'} || '';
+        $b->{'auth'}    = $b->{'options'}->{'auth'} || '';
         $b->{'hidden'}  = 0 unless defined $b->{'hidden'};
         $b->{'section'} = '' unless defined $b->{'section'};
         $b->{'type'}    = lc($b->{'type'});

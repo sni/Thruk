@@ -28,7 +28,7 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config, $log ) = @_;
+    my( $class, $peer_config, $config ) = @_;
 
     die("need at least one peer. Minimal options are <options>peer = mongodb_host:port/dbname</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
@@ -50,7 +50,6 @@ sub new {
         'dbname'      => $dbname,
         'config'      => $config,
         'peer_config' => $peer_config,
-        'log'         => $log,
         'stash'       => undef,
         'verbose'     => 0,
     };

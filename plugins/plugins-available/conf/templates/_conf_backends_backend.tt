@@ -13,7 +13,10 @@
   <td class='dataVal' colspan=2>
     <select name="type[% x %]" id="sel_type[% x %]" style="width: 200px;" onchange="check_backends_config(this)">
       <option value="livestatus"[% IF b.type == 'livestatus' %] selected[% END %]>livestatus</option>
+      <option value="http"[% IF       b.type == 'http'       %] selected[% END %]>http</option>
+      [% IF b.type == 'mongodb' %]
       <option value="mongodb"[%    IF b.type == 'mongodb'    %] selected[% END %]>mongo db</option>
+      [% END %]
       <option value="configonly"[% IF b.type == 'configonly' %] selected[% END %]>config only</option>
     </select>
   </td>
@@ -24,6 +27,9 @@
     <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;" placeholder="server:6557 or socket">
     <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this)">
     <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
+    <div class="backend_conf_[% x %]_http"[% IF b.type != 'http' %]style="display:none"[% END %]>
+    <input type="text" name="auth[% x %]" value="[% b.auth %]" style="width: 200px;" placeholder="authkey">
+    </div>
   </td>
 </tr>
 <tr class="backend_conf_[% x %] backend_conf_[% x %]_hidden">

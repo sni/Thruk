@@ -25,6 +25,9 @@ Manager of backend connections
 =cut
 
 ##########################################################
+$Thruk::Backend::Manager::callbacks = {
+                            'empty_callback' => sub { return '' },
+};
 ##########################################################
 
 =head2 new
@@ -339,7 +342,7 @@ sub get_scheduling_queue {
                                                          { 'check_options' => { '!=' => '0' }}]
                                               }
                                               ],
-                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => sub { return ''; } } }
+                                    options => { rename => { 'name' => 'host_name' }, callbacks => { 'description' => 'empty_callback' } }
                                     );
 
     my $queue = [];
@@ -769,7 +772,7 @@ returns a result for a sub called for all peers
 =cut
 
 sub _do_on_peers {
-    my( $self, $function, $arg ) = @_;
+    my( $self, $function, $arg) = @_;
 
     $self->{'c'}->stats->profile( begin => '_do_on_peers('.$function.')');
 
@@ -1048,7 +1051,7 @@ sub _do_on_peer {
     my($key, $function, $arg) = @_;
 
     my $peer = $Thruk::peers->{$key};
-    confess("no peer for key: $key") unless defined $peer;
+    confess("no peer for key: $key, got: ".join(', ', keys %{$Thruk::peers})) unless defined $peer;
     my($type, $size, $data, $last_error);
     my $errors = 0;
     while($errors < 3) {

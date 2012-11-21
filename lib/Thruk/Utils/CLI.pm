@@ -263,7 +263,7 @@ sub _from_local {
     my($self, $c, $options) = @_;
     _debug("_from_local()");
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
-    return _run_commands($c, $options);
+    return _run_commands($c, $options, 'local');
 }
 
 ##############################################
@@ -281,13 +281,17 @@ sub _from_fcgi {
     if(   !defined $c->config->{'secret_key'}
        or !defined $data->{'credential'}
        or $c->config->{'secret_key'} ne $data->{'credential'}) {
+        my $msg = "authorization failed, ". $c->request->uri." does not accept this key.\n";
+        if(!defined $data->{'credential'} or $data->{'credential'} eq '') {
+            $msg = "authorization failed, no auth key specified for ". $c->request->uri."\n";
+        }
         $res = {
             'version' => $c->config->{'version'},
-            'output'  => "authorization failed, ". $c->request->uri." doesnot accept this key.\n",
+            'output'  => $msg,
             'rc'      => 1,
         };
     } else {
-        $res = _run_commands($c, $data->{'options'});
+        $res = _run_commands($c, $data->{'options'}, 'fcgi');
     }
 
     return encode_json($res);
@@ -295,7 +299,7 @@ sub _from_fcgi {
 
 ##############################################
 sub _run_commands {
-    my($c, $opt) = @_;
+    my($c, $opt, $src) = @_;
 
     if(defined $opt->{'auth'}) {
         Thruk::Utils::set_user($c, $opt->{'auth'});
@@ -328,8 +332,14 @@ sub _run_commands {
 
     $c->stats->profile(begin => "_run_commands($action)");
 
+    # raw query
+    if($action eq 'raw') {
+        die('no local raw requests!') if $src ne 'fcgi';
+        ($data->{'output'}, $data->{'rc'}) = _cmd_raw($c, $opt);
+    }
+
     # list backends
-    if($action eq 'listbackends') {
+    elsif($action eq 'listbackends') {
         $data->{'output'} = _cmd_listbackends($c);
     }
 
@@ -369,14 +379,14 @@ sub _run_commands {
     }
 
     # import mongodb logs
-    elsif($action =~ /^importlogs$/mx) {
+    elsif($action eq 'importlogs') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import');
     }
-    elsif($action =~ /^updatelogs$/mx) {
+    elsif($action eq 'updatelogs') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update');
     }
     else {
-        $data->{'output'} = "FAILED - no such command\n";
+        $data->{'output'} = "FAILED - no such command: ".$action."\n";
         $data->{'rc'}     = 1;
     }
 
@@ -684,6 +694,31 @@ sub _cmd_import_logs {
 
     $c->stats->profile(end => "_cmd_import_logs()");
     return('OK - imported '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
+}
+
+##############################################
+sub _cmd_raw {
+    my($c, $opt) = @_;
+    my $sub  = $opt->{'sub'};
+
+    unless(defined $c->stash->{'defaults_added'}) {
+        Thruk::Action::AddDefaults::add_defaults(1, undef, "Thruk::Controller::remote", $c);
+    }
+    my @keys = keys %{$Thruk::peers};
+    my $key = $keys[0];
+    die("no backends...") unless $key;
+    if($sub eq 'get_logs') {
+        $c->{'db'}->renew_logcache($c);
+    }
+    my @res = Thruk::Backend::Manager::_do_on_peer($key, $sub, $opt->{'args'});
+    my $res = shift @res;
+
+    # add proxy version to processinfo
+    if($sub eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
+        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
+    }
+
+    return($res, 0);
 }
 
 ##############################################

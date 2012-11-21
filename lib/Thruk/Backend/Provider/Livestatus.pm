@@ -27,14 +27,13 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config, $log ) = @_;
+    my( $class, $peer_config, $config ) = @_;
 
     die("need at least one peer. Minimal options are <options>peer = /path/to/your/socket</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
 
     my $self = {
         'live'   => Monitoring::Livestatus::Class->new($peer_config),
         'config' => $config,
-        'log'    => $log,
         'stash'  => undef,
     };
     bless $self, $class;
@@ -147,8 +146,7 @@ returns if this user is allowed to submit commands
 
 =cut
 sub get_can_submit_commands {
-    my $self = shift;
-    my $user = shift;
+    my($self, $user) = @_;
     confess("no user") unless defined $user;
     my $data = $self->{'live'}
                  ->table('contacts')
@@ -205,6 +203,8 @@ returns a list of hosts
 =cut
 sub get_hosts {
     my($self, %options) = @_;
+
+    $self->_replace_callbacks($options{'options'}->{'callbacks'});
 
     # try to reduce the amount of transfered data
     my($size, $limit);
@@ -1072,6 +1072,19 @@ sub renew_logcache {
     if(!defined $self->{'lastcacheupdate'} or $self->{'lastcacheupdate'} < time()-5) {
         $self->{'lastcacheupdate'} = time();
         $self->{'logcache'}->_import_logs($c, 'update');
+    }
+    return;
+}
+
+##########################################################
+sub _replace_callbacks {
+    my($self,$callbacks) = @_;
+    return unless defined $callbacks;
+    for my $key (keys %{$callbacks}) {
+        next if ref $callbacks->{$key} eq 'CODE';
+        my $callback = $Thruk::Backend::Manager::callbacks->{$callbacks->{$key}};
+        confess("no callback for ".$key." -> ".$callbacks->{$key}) unless defined $callback;
+        $callbacks->{$key} = $callback;
     }
     return;
 }

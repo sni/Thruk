@@ -238,7 +238,7 @@
                       <td class='dataVar' nowrap>Data Source:</td>
                       [% FOREACH pd IN tmpbackends %]
                       <td class='dataVal dataSource'>
-                        [% IF backend_detail.$pd.type == 'livestatus' %]ls[% ELSE %][% backend_detail.$pd.type %][% END %]:[% backend_detail.$pd.addr %]
+                        [% IF backend_detail.$pd.type == 'livestatus' %]live:[% ELSIF backend_detail.$pd.type == 'http' %][% ELSE %][% backend_detail.$pd.type %]:[% END %][% backend_detail.$pd.addr %]
                       </td>
                       [% END %]
                     </tr>
@@ -247,7 +247,7 @@
                       [% FOREACH pd IN tmpbackends %]
                       <td class='dataVal dataValBackendVersion'>
                         [% IF backend_detail.$pd.running %]
-                          [% pi_detail.$pd.data_source_version %]
+                          [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
                         [% ELSE %]
                           [% backend_detail.$pd.last_error %]
                         [% END %]

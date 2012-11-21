@@ -67,6 +67,7 @@ lib/Thruk/Backend/Manager.pm
 lib/Thruk/Backend/Peer.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/ConfigOnly.pm
+lib/Thruk/Backend/Provider/HTTP.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
 lib/Thruk/Backend/Provider/Mongodb.pm
 lib/Thruk/Config.pm

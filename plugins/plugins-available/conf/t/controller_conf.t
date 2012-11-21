@@ -50,8 +50,12 @@ if(ref $config->{'Thruk::Backend'}->{'peer'} eq 'HASH') { $config->{'Thruk::Back
 for my $p (@{$config->{'Thruk::Backend'}->{'peer'}}) {
     if(!$p->{'hidden'} and lc($p->{'type'}) ne 'configonly') { $firstbackend = $p; last }
 }
+my $options = "";
+for my $opt (keys %{$firstbackend->{'options'}}) {
+    $options .= '&'.$opt.'='.$firstbackend->{'options'}->{$opt};
+}
 TestUtils::test_page(
-    'url'     => '/thruk/cgi-bin/conf.cgi?action=check_con&sub=backends&con='.$firstbackend->{'options'}->{'peer'}.'&type='.$firstbackend->{'type'},
+    'url'     => '/thruk/cgi-bin/conf.cgi?action=check_con&sub=backends&type='.$firstbackend->{'type'}.$options,
     'like'    => '"ok" : 1',
 );
 

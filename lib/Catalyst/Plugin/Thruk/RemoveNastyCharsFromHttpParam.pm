@@ -16,6 +16,7 @@ sub prepare_uploads {
     my $enc = $c->encoding;
 
     for my $key ( keys %{ $c->request->{'parameters'} } ) {
+        next if $key eq 'data';
         next if $key eq 'referer';
         next if $key eq 'selected_hosts';
         next if $key eq 'selected_services';
