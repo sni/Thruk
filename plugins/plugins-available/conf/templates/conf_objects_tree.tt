@@ -5,9 +5,9 @@
   Objects Browser
 </div>
 
-<table style="background: white;" border=1 id="treetable" width="100%">
+<table style="background: white; table-layout: fixed;" border=1 id="treetable" width="100%">
   <tr>
-    <td valign="top" id="container" style="height:100%;  text-align: left;" width=200>
+    <td valign="top" id="container" style="height:100%; text-align: left; width: 200px; overflow: scroll;">
       <ul>
         <li id="o_objects" class="jstree-open">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects" target="content_frame">Objects</a>
@@ -54,7 +54,7 @@
       </ul>
     </td>
     <td valign="top" style="border-left: 1px solid grey;">
-      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" style="border: 0;" id="cont_iframe"></iframe>
+      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" style="border: 0;" id="content_frame"></iframe>
     </td>
   </tr>
 </table>
@@ -67,11 +67,11 @@ jQuery(function($) {
     // adjust size of iframe and tree browser
     var treetable = document.getElementById('treetable');
     var w = treetable.offsetWidth, h = jQuery(window).height() - treetable.offsetTop;
-    treetable.style.width  = (w-50) + 'px';
+    treetable.style.width  = (w-10) + 'px';
     treetable.style.height = (h-10) + 'px';
 
-    var cont_iframe = document.getElementById('cont_iframe');
-    cont_iframe.style.width  = (w-150) + 'px';
+    var cont_iframe = document.getElementById('content_frame');
+    cont_iframe.style.width  = (w-220) + 'px';
     cont_iframe.style.height = (h-20)  + 'px';
 
   jQuery('#container').jstree({

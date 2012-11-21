@@ -194,11 +194,14 @@ DIV.layout_icons.browser_file_menu {
 DIV.layout_table.browser_file_menu {
   font-weight: bold;
   height: 20px;
+  width: 880px;
 }
 DIV.layout_table.browser_file_item {
   margin-top: 2px;
   -moz-user-select: none;
   height: 20px;
+  width: 880px;
+  overflow: hidden;
 }
 DIV.layout_table.browser_file_item:hover {
   background-color:#FFF8CC;
@@ -219,27 +222,32 @@ DIV.layout_table DIV.browser_file_shorttitle {
 }
 DIV.layout_table DIV.browser_file_longtitle {
   width: 250px;
+  height: 20px;
   float: left;
   margin-left: 5px;
   overflow: hidden;
 }
 DIV.layout_table DIV.browser_file_type {
   width: 75px;
+  height: 20px;
   overflow: hidden;
   float: left;
 }
 DIV.layout_table DIV.browser_file_template {
   width: 70px;
+  height: 20px;
   float: left;
   text-align: center;
 }
 DIV.layout_table DIV.browser_file_filename {
   width: 290px;
+  height: 20px;
   overflow: hidden;
   float: left;
 }
 DIV.layout_table DIV.browser_file_linenr {
   width: 30px;
+  height: 20px;
   overflow: hidden;
   float: left;
   text-align: right;

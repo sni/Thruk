@@ -11,14 +11,14 @@ var objects_type        = "[% objects_type %]";
 <!-- view switch and filter -->
 <table style="width:100%; position: fixed; top: 0; left: 0; z-index: 1000; background: white; border-bottom: 1px solid grey;">
   <tr>
-    <td align="left">
+    <td align="left" width="30%">
       <div id="layout_set">
         <input type="radio" name="layout" id="layout_icons"><label for="layout_icons">I</label>
         <input type="radio" name="layout" id="layout_table"><label for="layout_table">T</label>
       </div>
     </td>
     <td></td>
-    <td align="right">
+    <td align="right" width="30%">
       <input type="text" id="search_filter" onkeyup="filter_objects(this.id)" onchange="filter_objects(this.id)" placeholder="filter objects" class="deletable">
     </td>
   </tr>
