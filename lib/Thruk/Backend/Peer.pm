@@ -66,7 +66,11 @@ sub _create_backend {
     my($self, $name, $type, $options, $config, $log) = @_;
 
     my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
-    confess "unknown type in peer configuration" unless scalar @provider > 0;
+    if(scalar @provider == 0) {
+        my $list = join(', ', @{$Thruk::Backend::Manager::Provider});
+        $list =~ s/Thruk::Backend::Provider:://gmx;
+        die('unknown type in peer configuration, choose from: '.$list);
+    }
     my $class   = $provider[0];
     my $require = $class;
     $require =~ s/::/\//gmx;
