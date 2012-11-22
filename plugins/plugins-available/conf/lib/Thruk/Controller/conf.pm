@@ -810,7 +810,6 @@ sub _process_backends_page {
                                                  name    => 'test connection',
                                                  options => { peer => $peer },
                                                 });
-            #my $con = Thruk::Backend::Manager->create_backend('test', $type, { peer => $peer});
             @test   = $con->{'class'}->get_processinfo();
         };
         if(scalar @test == 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1 and scalar keys %{$test[0]->{(keys %{$test[0]})[0]}} > 0) {
