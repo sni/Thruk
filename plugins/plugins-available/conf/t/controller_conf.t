@@ -6,7 +6,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1076;
+    plan tests => 1083;
 }
 
 BEGIN {
@@ -39,6 +39,18 @@ TestUtils::test_page(
     'follow'          => 1,
     'like'            => 'Config Tool',
     'fail_message_ok' => 1,
+);
+
+###########################################################
+# test connection check
+my $config = Thruk::Config::get_config();
+my $firstbackend;
+for my $p (@{$config->{'Thruk::Backend'}->{'peer'}}) {
+    if(!$p->{'hidden'} and lc($p->{'type'}) ne 'configonly') { $firstbackend = $p; last }
+}
+TestUtils::test_page(
+    'url'     => '/thruk/cgi-bin/conf.cgi?action=check_con&sub=backends&con='.$firstbackend->{'options'}->{'peer'}.'&type='.$firstbackend->{'type'},
+    'like'    => '"ok" : 1',
 );
 
 ###########################################################

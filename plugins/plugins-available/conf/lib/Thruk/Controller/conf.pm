@@ -805,8 +805,13 @@ sub _process_backends_page {
         my $type = $c->request->parameters->{'type'};
         my @test;
         eval {
-            my $con = Thruk::Backend::Manager->create_backend('test', $type, { peer => $peer});
-            @test   = $con->get_processinfo();
+            my $con = Thruk::Backend::Peer->new({
+                                                 type    => $type,
+                                                 name    => 'test connection',
+                                                 options => { peer => $peer },
+                                                });
+            #my $con = Thruk::Backend::Manager->create_backend('test', $type, { peer => $peer});
+            @test   = $con->{'class'}->get_processinfo();
         };
         if(scalar @test == 2 and ref $test[0] eq 'HASH' and scalar keys %{$test[0]} == 1 and scalar keys %{$test[0]->{(keys %{$test[0]})[0]}} > 0) {
             $c->stash->{'json'} = { ok => 1 };

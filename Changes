@@ -1,7 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.60     not yet released
-          - ...
+          - Bug Fixes
+            - fixed connection test for new backends
 
 1.58     Wed Nov 21 12:51:29 CET 2012
           - use regex matching in search preview too
