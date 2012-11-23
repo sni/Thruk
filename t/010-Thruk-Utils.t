@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use strict;
-use Test::More tests => 36;
+use Test::More tests => 37;
 use Data::Dumper;
 
 BEGIN {
@@ -57,6 +57,7 @@ my $sorted_by_abc_exp = [
 #########################
 # initialize backend manager
 my $m;
+use_ok 'Thruk::Model::Thruk';
 $m = Thruk::Model::Thruk->new();
 isa_ok($m, 'Thruk::Model::Thruk');
 my $b = $m->{'obj'};

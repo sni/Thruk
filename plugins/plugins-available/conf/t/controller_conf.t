@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use JSON::XS;
+use Thruk::Config;
 use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
@@ -45,6 +46,7 @@ TestUtils::test_page(
 # test connection check
 my $config = Thruk::Config::get_config();
 my $firstbackend;
+if(ref $config->{'Thruk::Backend'}->{'peer'} eq 'HASH') { $config->{'Thruk::Backend'}->{'peer'} = [$config->{'Thruk::Backend'}->{'peer'}]; }
 for my $p (@{$config->{'Thruk::Backend'}->{'peer'}}) {
     if(!$p->{'hidden'} and lc($p->{'type'}) ne 'configonly') { $firstbackend = $p; last }
 }
