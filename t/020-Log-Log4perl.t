@@ -11,7 +11,9 @@ BEGIN {
         plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
     }
     if(-e 'log4perl.conf') {
-        plan skip_all => 'there is a log4perl.conf already, cannot test';
+        `diff t/data/log4perl.conf log4perl.conf`;
+        my $rc = $?>>8;
+        plan skip_all => 'there is a log4perl.conf already, cannot test' if $rc != 0;
     }
     $ENV{'THRUK_SRC'} = 'TEST';
 }
