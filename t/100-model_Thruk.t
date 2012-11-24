@@ -28,6 +28,9 @@ isa_ok($m, 'Thruk::Model::Thruk');
 my $b = $m->{'obj'};
 isa_ok($b, 'Thruk::Backend::Manager');
 
+my $c = TestUtils::get_c();
+$b->init( 'c' => $c );
+
 Log::Log4perl->easy_init($INFO);
 my $logger = Log::Log4perl->get_logger();
 $b->init(

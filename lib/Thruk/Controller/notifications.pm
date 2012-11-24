@@ -114,7 +114,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         $c->stats->profile(end   => "notifications::updatecache");
 
         $c->stats->profile(begin => "notifications::fetch");
-        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => $c);
+        $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1);
         $c->stats->profile(end => "notifications::fetch");
     }
 

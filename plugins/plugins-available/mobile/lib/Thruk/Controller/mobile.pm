@@ -71,7 +71,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                             ]
             };
 
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => $c, sort => {'DESC' => 'time'});
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => 1, sort => {'DESC' => 'time'});
         }
         elsif($type eq 'alerts') {
             my $filter = {
@@ -86,7 +86,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                 ]
                             }]
             };
-            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => $c, sort => {'DESC' => 'time'});
+            $data = $c->{'db'}->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter], pager => 1, sort => {'DESC' => 'time'});
         }
         elsif($type eq 'host_stats') {
             $data = $c->{'db'}->get_host_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts')]);
@@ -105,7 +105,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                 filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $c->{'request'}->{'parameters'}->{'host'} }, { 'service_description' => undef } ],
                                 sort => { 'DESC' => 'id' } );
             }
-            $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => $c);
+            $data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ], pager => 1);
             if(defined $c->{'request'}->{'parameters'}->{'host'} and defined $data->[0]) {
                 $pnp_url = Thruk::Utils::get_pnp_url($c, $data->[0]);
             }
@@ -122,7 +122,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
                                     filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'host_name' => $c->{'request'}->{'parameters'}->{'host'} }, { 'service_description' => $c->{'request'}->{'parameters'}->{'service'} } ],
                                     sort => { 'DESC' => 'id' } );
             }
-            $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => $c);
+            $data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ], pager => 1);
             if(defined $c->{'request'}->{'parameters'}->{'host'} and defined $data->[0]) {
                 $pnp_url = Thruk::Utils::get_pnp_url($c, $data->[0]);
             }

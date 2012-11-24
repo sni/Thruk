@@ -118,10 +118,8 @@ sub begin : Private {
         $c->{'db'} = $c->model('Thruk');
         if( defined $c->{'db'} ) {
             $c->{'db'}->init(
-                'stats'               => $c->stats,
-                'log'                 => $c->log,
-                'config'              => $c->config,
-                'backend_debug'       => $c->config->{'backend_debug'},
+                'c'             => $c,
+                'backend_debug' => $c->config->{'backend_debug'},
             );
         }
     }

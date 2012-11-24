@@ -212,7 +212,7 @@ sub get_hosts {
         ($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
         if(defined $size) {
             # then set the limit for the real query
-            $options{'options'}->{'limit'} = $limit + 50;
+            $options{'options'}->{'limit'} = $limit + 1;
         }
     }
 
@@ -355,7 +355,7 @@ sub get_services {
         ($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
         if(defined $size) {
             # then set the limit for the real query
-            $options{'options'}->{'limit'} = $limit + 50;
+            $options{'options'}->{'limit'} = $limit + 1;
         }
     }
 
@@ -1030,7 +1030,6 @@ sub _get_query_size {
     elsif ( $options->{'pager'}->{'first'} )    { $page = 1; }
     elsif ( $options->{'pager'}->{'last'} )     { $page = $pages; }
     if( $page < 0 ) { $page = 1; }
-
     unless(wantarray) {
         confess("_get_query_size() should not be called in scalar context");
     }
