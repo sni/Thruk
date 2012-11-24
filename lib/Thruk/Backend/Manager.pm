@@ -69,7 +69,11 @@ sub init {
 
     return if $self->{'initialized'} == 1;
 
-    @{$self->{'backends'}} = values %{$Thruk::peers};
+    # retain order
+    $self->{'backends'} = [];
+    for my $key (@{$Thruk::peer_order}) {
+        push @{$self->{'backends'}}, $Thruk::peers->{$key};
+    }
 
     # check if we initialized at least one backend
     return if scalar @{ $self->{'backends'} } == 0;

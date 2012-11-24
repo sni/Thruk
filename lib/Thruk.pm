@@ -78,12 +78,14 @@ $peer_configs    = [] unless defined $peer_configs;
 my $num_peers    = scalar @{$peer_configs};
 my $pool_size    = __PACKAGE__->config->{'connection_pool_size'};
 if($num_peers > 0) {
-    my $peer_keys    = {};
+    my  $peer_keys   = {};
+    our $peer_order  = [];
     our $peers       = {};
     for my $peer_config (@{$peer_configs}) {
         my $peer = Thruk::Backend::Peer->new( $peer_config, __PACKAGE__->config->{'logcache'}, $peer_keys );
         $peer_keys->{$peer->{'key'}} = 1;
         $peers->{$peer->{'key'}}     = $peer;
+        push @{$peer_order}, $peer->{'key'};
     }
     if($num_peers > 1 and $pool_size > 1) {
         $Storable::Eval    = 1;
