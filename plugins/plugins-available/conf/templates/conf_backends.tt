@@ -19,7 +19,7 @@ Note: some options are not accessible here for security reasons.
   [% END %]
   <tr class="backend_conf_0_add">
     <td colspan=3 style="text-align:left;">
-      <a href="#" onclick="conf_sites_add()">
+      <a href="#" onclick="conf_sites_add(); return false;">
         <img src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" alt="add new connection" style="vertical-align: middle">
         add new connection
       </a>
