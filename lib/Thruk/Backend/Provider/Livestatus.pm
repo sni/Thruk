@@ -208,7 +208,7 @@ sub get_hosts {
 
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(defined $options{'pager'} and $options{'pager'}->stash->{'use_paging'}) {
+    if(defined $options{'pager'}) {
         ($size, $limit) = $self->_get_query_size('hosts', \%options, 'name', 'name');
         if(defined $size) {
             # then set the limit for the real query
@@ -235,7 +235,6 @@ sub get_hosts {
             last_time_down last_time_unreachable last_time_up display_name
             in_check_period in_notification_period
         /];
-
         if($self->{'stash'}->{'enable_shinken_features'}) {
             push @{$options{'columns'}},  qw/is_impact source_problems impacts criticity is_problem realm poller_tag
                                              got_business_rule parent_dependencies/;
@@ -352,7 +351,7 @@ sub get_services {
 
     # try to reduce the amount of transfered data
     my($size, $limit);
-    if(defined $options{'pager'} and $options{'pager'}->stash->{'use_paging'}) {
+    if(defined $options{'pager'}) {
         ($size, $limit) = $self->_get_query_size('services', \%options, 'description', 'host_name', 'description');
         if(defined $size) {
             # then set the limit for the real query
@@ -1010,8 +1009,7 @@ sub _get_query_size {
         return if defined $sortby1 and $options->{'sort'}->{'ASC'} ne $sortby1;
     }
 
-    my $c = $options->{'pager'};
-    my $entries = $c->{'request'}->{'parameters'}->{'entries'} || $c->stash->{'default_page_size'};
+    my $entries = $options->{'pager'}->{'entries'};
     return if $entries !~ m/^\d+$/mx;
 
     my $stats = [
@@ -1023,14 +1021,14 @@ sub _get_query_size {
     return unless defined $size;
 
     my $pages = 0;
-    my $page  = $c->{'request'}->{'parameters'}->{'page'} || 1;
+    my $page  = $options->{'pager'}->{'page'};
     if( $entries > 0 ) {
         $pages = POSIX::ceil( $size / $entries );
     }
-    if( exists $c->{'request'}->{'parameters'}->{'next'} )         { $page++; }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'previous'} ) { $page--; }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'first'} )    { $page = 1; }
-    elsif ( exists $c->{'request'}->{'parameters'}->{'last'} )     { $page = $pages; }
+    if( $options->{'pager'}->{'next'} )         { $page++; }
+    elsif ( $options->{'pager'}->{'previous'} ) { $page--; }
+    elsif ( $options->{'pager'}->{'first'} )    { $page = 1; }
+    elsif ( $options->{'pager'}->{'last'} )     { $page = $pages; }
     if( $page < 0 ) { $page = 1; }
 
     unless(wantarray) {

@@ -796,7 +796,19 @@ sub _do_on_peers {
                 }
             }
         }
-        $pager = delete $arg{'pager'};
+        if(exists $arg{'pager'}) {
+            $pager = delete $arg{'pager'};
+            if($pager->stash->{'use_paging'}) {
+                $arg{'pager'} = {
+                    entries  => $pager->{'request'}->{'parameters'}->{'entries'} || $pager->stash->{'default_page_size'},
+                    page     => $pager->{'request'}->{'parameters'}->{'page'} || 1,
+                    next     => exists $pager->{'request'}->{'parameters'}->{'next'},
+                    previous => exists $pager->{'request'}->{'parameters'}->{'previous'},
+                    first    => exists $pager->{'request'}->{'parameters'}->{'first'},
+                    last     => exists $pager->{'request'}->{'parameters'}->{'last'},
+                };
+            }
+        }
         @{$arg} = %arg;
     }
     $self->{'log'}->debug($function)         if defined $self->{'log'};
