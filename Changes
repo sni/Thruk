@@ -4,6 +4,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - Bug Fixes
             - fixed connection test for new backends
             - retain order of backends when not using sections
+            - fixed deselecting unavailable backends
 
 1.58     Wed Nov 21 12:51:29 CET 2012
           - use regex matching in search preview too

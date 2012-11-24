@@ -409,7 +409,7 @@ function toggleBackend(backend) {
   }
 
   /* remove all and set new class */
-  jQuery(button).removeClass("button_peerDIS button_peerHID button_peerUP").addClass(newClass);
+  jQuery(button).removeClass("button_peerDIS button_peerHID button_peerUP button_peerDOWN").addClass(newClass);
 
   additionalParams['reload_nav'] = 1;
 
