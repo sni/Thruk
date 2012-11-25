@@ -64,7 +64,11 @@ return a new backend class
 =cut
 
 sub _create_backend {
-    my($self, $name, $type, $options, $config) = @_;
+    my($self, $config, $peerconfig) = @_;
+
+    my $name    = $config->{'name'};
+    my $type    = $config->{'type'};
+    my $options = $config->{'options'};
 
     my @provider = grep { $_ =~ m/::$type$/mxi } @{$Thruk::Backend::Manager::Provider};
     if(scalar @provider == 0) {
@@ -82,7 +86,7 @@ sub _create_backend {
     # disable keepalive for now, it does not work and causes lots of problems
     $options->{'keepalive'} = 0 if defined $options->{'keepalive'};
 
-    my $obj = $class->new( $options, $config );
+    my $obj = $class->new( $options, $peerconfig, $config );
     return $obj;
 }
 
@@ -101,12 +105,9 @@ sub _initialise_peer {
     $self->{'resource_file'} = $config->{'options'}->{'resource_file'};
     $self->{'section'}       = $config->{'section'} || 'Default';
     $self->{'enabled'}       = 1;
-    $self->{'class'}         = $self->_create_backend($config->{'name'},
-                                                      $config->{'type'},
-                                                      $config->{'options'},
-                                                      $self->{'config'},
-                                                      );
-    $self->{'configtool'}    = $config->{'configtool'} || {};
+    $config->{'configtool'}  = {} unless defined $config->{'configtool'};
+    $self->{'class'}         = $self->_create_backend($config, $self->{'config'});
+    $self->{'configtool'}    = $config->{'configtool'};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
 

@@ -28,18 +28,19 @@ create new manager
 
 =cut
 sub new {
-    my( $class, $peer_config, $config ) = @_;
+    my( $class, $options, $peerconfig, $config ) = @_;
 
-    die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($peer_config)) unless defined $peer_config->{'peer'};
+    die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
     my $self = {
-        'config'    => $config,
-        'key'       => '',
-        'name'      => $peer_config->{'name'},
-        'addr'      => $peer_config->{'peer'},
-        'auth'      => $peer_config->{'auth'},
-        'proxy'     => $peer_config->{'proxy'},
-        'remotekey' => '',
+        'config'     => $config,
+        'peerconfig' => $peerconfig,
+        'key'        => '',
+        'name'       => $options->{'name'},
+        'addr'       => $options->{'peer'},
+        'auth'       => $options->{'auth'},
+        'proxy'      => $options->{'proxy'},
+        'remotekey'  => '',
     };
     bless $self, $class;
 
@@ -191,6 +192,16 @@ sub get_processinfo {
         }
         $data->{$self->{'key'}} = delete $data->{$self->{'remotekey'}};
         $data->{$self->{'key'}}->{'peer_key'} = $self->{'key'};
+
+        # update configtool settings
+        for my $key (keys %{$self->{'config'}->{'configtool'}}) {
+            delete $self->{'config'}->{'configtool'}->{$key};
+        }
+        if($data->{$self->{'key'}}->{'configtool'}) {
+            for my $key (keys %{$data->{$self->{'key'}}->{'configtool'}}) {
+                $self->{'config'}->{'configtool'}->{$key} = $data->{$self->{'key'}}->{'configtool'}->{$key};
+            }
+        }
     }
     return($data, $typ, $size);
 }
