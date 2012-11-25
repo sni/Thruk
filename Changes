@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.60     not yet released
+          - added http backend type which connects to another thruk instance
           - Bug Fixes
             - fixed connection test for new backends
             - retain order of backends when not using sections

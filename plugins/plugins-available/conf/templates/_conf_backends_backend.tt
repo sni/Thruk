@@ -21,18 +21,27 @@
     </select>
   </td>
 </tr>
-<tr class="backend_conf_[% x %] backend_conf_[% x %]_connection">
+<tr class="backend_conf_[% x %] backend_connection">
   <td class='dataVar' align="left">Connection</td>
   <td class='dataVal' colspan=2 nowrap>
     <input type="text" name="peer[% x %]" value="[% b.addr %]" style="width: 200px;" placeholder="server:6557 or socket">
     <input type="button" name="test[% x %]" value="test" class="conf_button" onclick="conf_test_connection(this)">
     <img id="testimg[% x %]" class="hidden" src="[% url_prefix %]thruk/themes/[% theme %]/images/waiting.gif" alt="checking connection" style="vertical-align: text-bottom; width: 16px; height: 16px;">
-    <div class="backend_conf_[% x %]_http"[% IF b.type != 'http' %]style="display:none"[% END %]>
-    <input type="text" name="auth[% x %]" value="[% b.auth %]" style="width: 200px;" placeholder="authkey">
-    </div>
   </td>
 </tr>
-<tr class="backend_conf_[% x %] backend_conf_[% x %]_hidden">
+<tr class="backend_conf_[% x %] backend_auth">
+  <td class='dataVar' align="left">Auth-Key</td>
+  <td class='dataVal' colspan=2 nowrap>
+    <input type="text" name="auth[% x %]" value="[% b.auth %]" style="width: 200px;" placeholder="authkey">
+  </td>
+</tr>
+<tr class="backend_conf_[% x %] backend_proxy">
+  <td class='dataVar' align="left">Proxy</td>
+  <td class='dataVal' colspan=2 nowrap>
+    <input type="text" name="proxy[% x %]" value="[% b.proxy %]" style="width: 200px;" placeholder="http://proxyhost:proxyport">
+  </td>
+</tr>
+<tr class="backend_conf_[% x %] backend_hidden">
   <td class='dataVar' align="left">Hidden</td>
   <td class='dataVal' colspan=2>
     <input type="radio" name="hidden[% x %]" value="0"[% IF b.hidden == 0 %] checked[% END %]> No

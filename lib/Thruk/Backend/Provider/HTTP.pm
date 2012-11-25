@@ -38,6 +38,7 @@ sub new {
         'name'      => $peer_config->{'name'},
         'addr'      => $peer_config->{'peer'},
         'auth'      => $peer_config->{'auth'},
+        'proxy'     => $peer_config->{'proxy'},
         'remotekey' => '',
     };
     bless $self, $class;
@@ -47,6 +48,9 @@ sub new {
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->conn_cache(LWP::ConnCache->new());
     $self->{'ua'}->agent('Thruk ');
+    if($self->{'proxy'}) {
+        $self->{'ua'}->proxy(['http', 'https'], $self->{'proxy'});
+    }
     push @{ $self->{'ua'}->requests_redirectable }, 'POST';
 
     return $self;
@@ -605,6 +609,9 @@ sub _req {
             $data = decode_json($data_str);
         };
         die($@) if $@;
+        if($data->{'rc'} == 1) {
+            die($data->{'output'});
+        }
         if(ref $data->{'output'} eq 'ARRAY') {
             # type, size, data
             if($data->{'output'}->[3]) {
@@ -615,6 +622,7 @@ sub _req {
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
+    die(Dumper($response));
     return;
 }
 
