@@ -38,13 +38,13 @@ sub set_object_model {
 
     $c->stats->profile(begin => "_update_objects_config()");
     my $model                    = $c->model('Objects');
-    my $peer_conftool            = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
-    $peer_conftool               = Thruk::Utils::Conf::get_default_peer_config($peer_conftool);
-    $c->stash->{'peer_conftool'} = $peer_conftool;
+    my $peer_conftool            = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
+    Thruk::Utils::Conf::get_default_peer_config($peer_conftool->{'configtool'});
+    $c->stash->{'peer_conftool'} = $peer_conftool->{'configtool'};
 
     # already parsed?
     if(    Thruk::Utils::Conf::get_model_retention($c)
-       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool, $model)
+       and Thruk::Utils::Conf::init_cached_config($c, $peer_conftool->{'configtool'}, $model)
     ) {
         # objects initialized
     }
@@ -71,7 +71,8 @@ sub set_object_model {
         }
         return 0;
     }
-    $c->{'obj_db'}->{'stats'} = $c->{'stats'};
+    $c->{'obj_db'}->{'stats'}      = $c->{'stats'};
+    $c->{'obj_db'}->{'remotepeer'} = $peer_conftool if lc($peer_conftool->{'type'}) eq 'http';
 
     if($c->{'obj_db'}->{'cached'}) {
         $c->stats->profile(begin => "checking objects");
@@ -112,11 +113,11 @@ sub read_objects {
     my $c             = shift;
     $c->stats->profile(begin => "read_objects()");
     my $model         = $c->model('Objects');
-    my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'};
-    my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool, undef, $c->{'stats'});
+    my $peer_conftool = $c->{'db'}->get_peer_by_key($c->stash->{'param_backend'});
+    my $obj_db        = $model->init($c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, undef, $c->{'stats'}, $peer_conftool);
     store_model_retention($c);
     $c->stash->{model_type} = 'Objects';
-    $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool, $obj_db, $c->{'stats'} ];
+    $c->stash->{model_init} = [ $c->stash->{'param_backend'}, $peer_conftool->{'configtool'}, $obj_db, $c->{'stats'} ];
     $c->stats->profile(end => "read_objects()");
     return;
 }

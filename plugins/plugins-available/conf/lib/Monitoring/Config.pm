@@ -45,6 +45,7 @@ sub new {
         'needs_index_update' => 0,
         'coretype'           => 'nagios',
         'cache'              => {},
+        'remotepeer'         => undef,
     };
 
     bless $self, $class;
@@ -63,11 +64,11 @@ initialize configs
 
 =cut
 sub init {
-    my $self   = shift;
-    my $config = shift;
-    my $stats  = shift;
-
-    $self->{'stats'} = $stats if defined $stats;
+    my($self, $config, $stats, $remotepeer) = @_;
+    if(defined $remotepeer and lc($remotepeer->{'type'}) eq 'http') {
+        $self->{'remotepeer'} = $remotepeer;
+    }
+    $self->{'stats'}      = $stats if defined $stats;
 
     # update readonly config
     my $readonly_changed = 0;
@@ -100,6 +101,8 @@ sub init {
                     '^icinga.cfg$'
         ];
     }
+
+    delete $self->{'remotepeer'};
 
     return $self;
 }

@@ -46,11 +46,7 @@ initialize configs
 
 =cut
 sub init {
-    my $self   = shift;
-    my $key    = shift;
-    my $config = shift;
-    my $data   = shift;
-    my $stats  = shift;
+    my($self, $key, $config, $data, $stats, $remotepeer) = @_;
 
     $stats->profile(begin => "M::C::M::init()") if defined $stats;
 
@@ -68,7 +64,7 @@ sub init {
     }
 
     $self->{'configs'}->{$key} = Monitoring::Config->new(@_);
-    $self->{'configs'}->{$key}->init($config, $stats);
+    $self->{'configs'}->{$key}->init($config, $stats, $remotepeer);
 
     $stats->profile(end => "M::C::M::init()") if defined $stats;
     return $self->{'configs'}->{$key};
