@@ -696,6 +696,34 @@ sub _cmd_import_logs {
     return('OK - imported '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
 }
 
+##########################################################
+sub _cmd_configtool {
+    my($c, $peerkey, $opt) = @_;
+    my $res        = undef;
+    my $last_error = undef;
+    my $peer       = $Thruk::peers->{$peerkey};
+    $c->stash->{'param_backend'} = $peerkey;
+use Data::Dumper; print STDERR Dumper($opt);
+
+    if(!Thruk::Utils::Conf::set_object_model($c)) {
+        $last_error = "failed to set objects model";
+    }
+    elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {
+        $c->{'obj_db'}->check_files_changed();
+        my $transfer    = {};
+        my $remotefiles = $opt->{'args'}->{'args'}->{'files'};
+        for my $f (@{$c->{'obj_db'}->{'files'}}) {
+            $transfer->{$f->{'path'}} = { mtime => $f->{'mtime'} };
+            if(!defined $remotefiles->{$f->{'path'}}->{'mtime'}
+               or $f->{'mtime'} != $remotefiles->{$f->{'path'}}->{'mtime'}) {
+                $transfer->{$f->{'path'}}->{'content'} = read_file($f->{'path'});
+            }
+        }
+        $res = $transfer;
+    }
+    return([undef, 1, $res, $last_error], 0);
+}
+
 ##############################################
 sub _cmd_raw {
     my($c, $opt) = @_;
@@ -710,12 +738,27 @@ sub _cmd_raw {
     if($sub eq 'get_logs') {
         $c->{'db'}->renew_logcache($c);
     }
+
+    # config tool commands
+    elsif($sub eq 'configtool') {
+        return _cmd_configtool($c, $key, $opt);
+    }
+
     my @res = Thruk::Backend::Manager::_do_on_peer($key, $sub, $opt->{'args'});
     my $res = shift @res;
 
     # add proxy version to processinfo
     if($sub eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'version'}.($c->config->{'branch'}? '~'.$c->config->{'branch'} : '').')';
+
+        # add config tool settings
+        if($Thruk::peers->{$key}->{'config'}->{'configtool'}) {
+            $res->[2]->{$key}->{'configtool'} = {
+                'obj_readonly'   => $Thruk::peers->{$key}->{'config'}->{'configtool'}->{'obj_readonly'},
+                'obj_check_cmd'  => exists $Thruk::peers->{$key}->{'config'}->{'configtool'}->{'obj_check_cmd'},
+                'obj_reload_cmd' => exists $Thruk::peers->{$key}->{'config'}->{'configtool'}->{'obj_reload_cmd'},
+            };
+        }
     }
 
     return($res, 0);
