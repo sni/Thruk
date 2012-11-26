@@ -3,6 +3,7 @@ package Thruk::Utils::Conf;
 use strict;
 use warnings;
 use POSIX qw(tzset);
+use Carp;
 use File::Slurp;
 use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
@@ -73,6 +74,7 @@ sub set_object_model {
     }
     $c->{'obj_db'}->{'stats'}      = $c->{'stats'};
     $c->{'obj_db'}->{'remotepeer'} = $peer_conftool if lc($peer_conftool->{'type'}) eq 'http';
+    $c->{'obj_db'}->sync_remote($c);
 
     if($c->{'obj_db'}->{'cached'}) {
         $c->stats->profile(begin => "checking objects");
@@ -541,6 +543,11 @@ sub store_model_retention {
 
     # try to save retention data
     eval {
+        # delete some useless references
+        for my $conf (values %{$model->{'configs'}}) {
+            delete $conf->{'stats'};
+            delete $conf->{'remotepeer'};
+        }
         my $data = {
             'configs'      => $model->{'configs'},
             'release_date' => $c->config->{'released'},

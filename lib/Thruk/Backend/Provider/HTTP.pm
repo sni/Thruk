@@ -606,6 +606,8 @@ sub _req {
         'sub'    => $sub,
         'args'   => $args,
     };
+    $options->{'auth'} = $args->{'auth'} if defined $args and ref $args eq 'HASH' and defined $args->{'auth'};
+
     my $response = $self->{'ua'}->post($self->{'addr'}.'/thruk/cgi-bin/remote.cgi', {
         data => encode_json({
             credential => $self->{'auth'},

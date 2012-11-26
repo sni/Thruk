@@ -31,9 +31,10 @@ return new host
 
 =cut
 sub new {
-    my ( $class, $file, $readonlypattern, $coretype, $force ) = @_;
+    my ( $class, $file, $readonlypattern, $coretype, $force, $remotepath ) = @_;
     my $self = {
         'path'         => $file,
+        'display'      => $remotepath || $file,
         'mtime'        => undef,
         'md5'          => undef,
         'inode'        => 0,

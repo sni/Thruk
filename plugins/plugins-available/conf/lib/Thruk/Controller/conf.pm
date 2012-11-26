@@ -993,7 +993,7 @@ sub _process_objects_page {
         if(!defined $obj->{'file'} || !defined $obj->{'file'}->{'path'}) {
             delete $obj->{'file'};
         }
-        $c->stash->{'file_link'}      = $obj->{'file'}->{'path'} if defined $obj->{'file'};
+        $c->stash->{'file_link'} = $obj->{'file'}->{'display'} if defined $obj->{'file'};
     }
 
     # set default type for start page
@@ -1366,7 +1366,7 @@ sub _files_to_path {
     if(ref $ro_pattern eq '') { $ro_pattern = [$ro_pattern]; }
 
     for my $file (@{$files}) {
-        my @parts    = split(/\//mx, $file->{'path'});
+        my @parts    = split(/\//mx, $file->{'display'});
         my $filename = pop @parts;
         my $subdir = $folder;
         for my $dir (@parts) {
@@ -1417,7 +1417,7 @@ sub _set_files_stash {
     my @filenames;
     for my $file (@{$all_files}) {
         next if($skip_readonly_files and $file->{'readonly'});
-        my $filename = $file->{'path'};
+        my $filename = $file->{'display'};
         $filename    =~ s/^$files_root/\//gmx;
         push @filenames, $filename;
     }
@@ -1519,7 +1519,7 @@ sub _object_save {
 
     # only save or continue to raw edit?
     if(defined $c->{'request'}->{'parameters'}->{'send'} and $c->{'request'}->{'parameters'}->{'send'} eq 'raw edit') {
-        return $c->response->redirect('conf.cgi?sub=objects&action=editor&file='.$obj->{'file'}->{'path'}.'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
+        return $c->response->redirect('conf.cgi?sub=objects&action=editor&file='.$obj->{'file'}->{'display'}.'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
     } else {
         if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
             Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' saved with errors', $obj->{'file'}->{'errors'} );
@@ -1577,7 +1577,7 @@ sub _object_clone {
     my $obj  = shift;
 
     my $files_root          = $self->_set_files_stash($c, 1);
-    $c->stash->{'new_file'} = $obj->{'file'}->{'path'};
+    $c->stash->{'new_file'} = $obj->{'file'}->{'display'};
     $c->stash->{'new_file'} =~ s/^$files_root/\//gmx;
     $obj = Monitoring::Config::Object->new(type     => $obj->get_type(),
                                            conf     => $obj->{'conf'},
@@ -1667,7 +1667,7 @@ sub _file_save {
         $c->{'obj_db'}->_rebuild_index();
         my $files_root                   = $self->_set_files_stash($c, 1);
         $c->{'obj_db'}->{'needs_commit'} = 1;
-        $c->stash->{'file_name'}         = $file->{'path'};
+        $c->stash->{'file_name'}         = $file->{'display'};
         $c->stash->{'file_name'}         =~ s/^$files_root//gmx;
         if(scalar @{$file->{'errors'}} > 0) {
             Thruk::Utils::set_message( $c,
@@ -1685,7 +1685,7 @@ sub _file_save {
     if(defined $lastobj) {
         return $c->response->redirect('conf.cgi?sub=objects&data.id='.$lastobj->get_id());
     }
-    return $c->response->redirect('conf.cgi?sub=objects&action=browser#'.$file->{'path'});
+    return $c->response->redirect('conf.cgi?sub=objects&action=browser#'.$file->{'display'});
 }
 
 ##########################################################
@@ -1700,8 +1700,8 @@ sub _file_editor {
         $c->stash->{'file'}          = $file;
         $c->stash->{'line'}          = $c->{'request'}->{'parameters'}->{'line'} || 1;
         $c->stash->{'back'}          = $c->{'request'}->{'parameters'}->{'back'} || '';
-        $c->stash->{'file_link'}     = $file->{'path'};
-        $c->stash->{'file_name'}     = $file->{'path'};
+        $c->stash->{'file_link'}     = $file->{'display'};
+        $c->stash->{'file_name'}     = $file->{'display'};
         $c->stash->{'file_name'}     =~ s/^$files_root//gmx;
         $c->stash->{'file_content'}  = $file->_get_new_file_content();
         $c->stash->{'template'}      = 'conf_objects_fileeditor.tt';

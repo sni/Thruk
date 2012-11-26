@@ -46,6 +46,7 @@ sub new {
         'coretype'           => 'nagios',
         'cache'              => {},
         'remotepeer'         => undef,
+        'localdir'           => undef,
     };
 
     bless $self, $class;
@@ -174,7 +175,7 @@ sub get_file_by_path {
     my $self = shift;
     my $path = shift;
     for my $file (@{$self->{'files'}}) {
-        return $file if $file->{'path'} eq $path;
+        return $file if($file->{'path'} eq $path or $file->{'display'} eq $path);
     }
     return;
 }
@@ -1149,7 +1150,7 @@ sub _get_files {
     my @files;
     my $filenames = $self->_get_files_names();
     for my $filename (@{$filenames}) {
-        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $self->{'config'}->{'force'});
+        my $file = Monitoring::Config::File->new($filename, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, $self->{'config'}->{'force'}, $self->{'file_trans'}->{$filename});
         if(defined $file) {
             push @files, $file;
         } else {
@@ -1166,6 +1167,19 @@ sub _get_files_names {
     my ( $self ) = @_;
     my $files    = {};
     my $config   = $self->{'config'};
+    $self->{'file_trans'} = {};
+
+    if($self->{'localdir'}) {
+        my $localdir = $self->{'localdir'};
+        for my $file (@{$self->_get_files_for_folder($localdir, '\.cfg$')}) {
+            my $display     = $file;
+            $display        =~ s/^$localdir//mx;
+            $files->{$file} = 1;
+            $self->{'file_trans'}->{$file} = $display;
+        }
+        my @uniqfiles = keys %{$files};
+        return \@uniqfiles;
+    }
 
     # single folders
     if(defined $config->{'obj_dir'}) {
@@ -1250,7 +1264,7 @@ sub _check_files_changed {
 
     for my $file (@{$self->_get_files_names()}) {
         if(!defined $oldfiles->{$file}) {
-            push @{$self->{'files'}}, Monitoring::Config::File->new($file, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'});
+            push @{$self->{'files'}}, Monitoring::Config::File->new($file, $self->{'config'}->{'obj_readonly'}, $self->{'coretype'}, undef, $self->{'file_trans'}->{$file});
             $self->{'needs_index_update'} = 1;
         }
     }
@@ -1641,6 +1655,63 @@ sub _array_diff {
 sub _list {
     $_[1] = [] unless defined $_[1];
     if(ref $_[1] ne 'ARRAY') { $_[1] = [$_[1]]; }
+    return;
+}
+
+##########################################################
+
+=head2 sync_remote
+
+    sync_remote()
+
+syncronize files from remote
+
+=cut
+sub sync_remote {
+    my($self, $c) = @_;
+    $self->{'localdir'} = undef;
+    return unless defined $self->{'remotepeer'};
+    my $files = {};
+    for my $f (@{$self->{'files'}}) {
+        $files->{$f->{'display'}} = {
+            'mtime'        => $f->{'mtime'},
+            'md5'          => $f->{'md5'},
+        };
+    }
+    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
+    $self->{'localdir'} = $localdir;
+    Thruk::Utils::IO::mkdir_r($localdir);
+    my $res = $self->{'remotepeer'}
+                   ->{'class'}
+                   ->_req('configtool', {
+                            auth => $c->stash->{'remote_user'},
+                            sub  => 'syncfiles',
+                            args => { files => $files },
+                    });
+    die("bogus result: ".Dumper($res)) if(!defined $res or !defined $res->[2]);
+    my $remotefiles = $res->[2];
+    for my $path (keys %{$remotefiles}) {
+        my $f = $remotefiles->{$path};
+        if(defined $f->{'content'}) {
+            my $localpath = $localdir.$path;
+            $c->log->debug('updating file: '.$path);
+            my $dir       = $localpath;
+            $dir          =~ s/\/[^\/]+$//mx;
+            Thruk::Utils::IO::mkdir_r($dir);
+            Thruk::Utils::IO::write($localpath, $f->{'content'}, $f->{'mtime'});
+            $c->{'request'}->{'parameters'}->{'refresh'} = 1; # must be set to save changes to tmp obj retention
+        }
+    }
+    for my $f (@{$self->{'files'}}) {
+        $c->log->debug('checking file: '.$f->{'display'});
+        if(!defined $remotefiles->{$f->{'display'}}) {
+            $c->log->debug('deleting file: '.$f->{'display'});
+            $c->{'request'}->{'parameters'}->{'refresh'} = 1; # must be set to save changes to tmp obj retention
+            unlink($f->{'path'});
+        } else {
+            $c->log->debug('keeping file: '.$f->{'display'});
+        }
+    }
     return;
 }
 

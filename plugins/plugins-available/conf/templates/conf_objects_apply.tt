@@ -60,7 +60,7 @@
         The following files have been changed:<br><br>
         <div style="float: left; position: relative; left: 50%;"><div style="float: left; position: relative; left: -50%; text-align: left;">
         [% FOREACH f = changed_files %]
-          [% f.path %]<br>
+          [% f.display %]<br>
         [% END %]
         </div></div>
         <br style="clear: both"><br>

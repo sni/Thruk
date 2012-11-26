@@ -54,6 +54,46 @@ sub mkdir {
 
 ##############################################
 
+=head2 mkdir_r
+
+  mkdir_r($dirname)
+
+create folder recursive
+
+=cut
+
+sub mkdir_r {
+    for my $dirname (@_) {
+        my $path = "";
+        for my $part (split/(\/)/mx, $dirname) {
+            $path .= $part;
+            Thruk::Utils::IO::mkdir($path) unless -d $path;
+        }
+    }
+    return 1;
+}
+
+##############################################
+
+=head2 write
+
+  write($path, $content, [ $mtime ])
+
+creates file and ensure permissions
+
+=cut
+
+sub write {
+    my($path,$content,$mtime) = @_;
+    open(my $fh, '>', $path) or die('cannot create file '.$path.': '.$!);
+    print $fh $content;
+    Thruk::Utils::IO::close($fh, $path);
+    utime($mtime, $mtime, $path) if $mtime;
+    return 1;
+}
+
+##############################################
+
 =head2 ensure_permissions
 
   ensure_permissions($mode, $path)
