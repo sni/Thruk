@@ -31,12 +31,14 @@ verify authentication by external login into external url
 sub external_authentication {
     my($config, $login, $pass, $address) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
-    my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
     my $sdir     = $config->{'tmp_path'}.'/sessions';
+    my $success  = 0;
 
-    my $success = 0;
-    my $ua = get_user_agent();
-    my $res = $ua->post($authurl);
+    my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
+    my $ua       = get_user_agent();
+    # bypass ssl host verfication on localhost
+    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/localhost/mx or $authurl =~ m/^127\./mx);
+    my $res      = $ua->post($authurl);
     if($res->code == 401) {
         my $realm = $res->header('www-authenticate');
         if($realm =~ m/Basic\ realm=\"([^"]+)\"/mx) {
@@ -55,8 +57,14 @@ sub external_authentication {
                     Thruk::Utils::IO::close($fh, $sessionfile);
                     $success = $sessionid;
                 }
+            } else {
+                print STDERR 'authorization failed for user ', $login,' got rc ', $res->code;
             }
+        } else {
+            print STDERR 'auth: realm does not match, got ', $realm;
         }
+    } else {
+        print STDERR 'auth: expected code 401, got ', $res->code;
     }
     return $success;
 }
@@ -73,9 +81,11 @@ verify authentication by sending request with basic auth header
 sub verify_basic_auth {
     my($config, $basic_auth, $login) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
+    my $success  = 0;
 
-    my $success = 0;
     my $ua = get_user_agent();
+    # bypass ssl host verfication on localhost
+    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/localhost/mx or $authurl =~ m/^127\./mx);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
     my $res = $ua->post($authurl);
     if($res->code == 200 and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
@@ -98,7 +108,7 @@ returns user agent used for external requests
 sub get_user_agent {
     my $ua = LWP::UserAgent->new;
     $ua->timeout(30);
-    $ua->agent("");
+    $ua->agent("thruk_auth");
     return $ua;
 }
 
