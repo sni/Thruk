@@ -877,6 +877,7 @@ root/thruk/media/warning.wav
 root/thruk/startup.html
 root/thruk/themes
 script/append.make
+script/nagexp
 script/naglint
 script/thruk
 script/thruk_auth

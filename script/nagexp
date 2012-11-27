@@ -1,0 +1,431 @@
+#!/usr/bin/perl
+# vim: expandtab:ts=4:sw=4:syntax=perl
+
+##############################################
+use strict;
+use warnings;
+
+our $VERSION = '1.59';
+
+my $nagexp = Thruk::nagexp->new();
+exit $nagexp->run();
+##############################################
+
+=head1 NAME
+
+nagexp - create export of your nagios installation used for later import in OMD
+
+=head1 SYNOPSIS
+
+Usage: nagexp [options] <nagios.cfg>
+
+Options:
+  -h, --help                    Show this help message and exit
+  -v, --verbose                 Print verbose output
+  -V, --version                 Print version
+  -f, --file                    export output file
+  -a, --all                     export all types, synonym for -pclAs
+  -s, --status                  export status files
+  -p, --plugins                 export plugins
+  -c, --config                  export config files
+  -l, --logfile                 export current logfile
+  -A, --archive                 export logfile archive
+
+=head1 DESCRIPTION
+
+This script exports your nagios installation for later import in OMD.
+
+=head1 OPTIONS
+
+nagexp has the following arguments:
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-v> , B<--verbose>
+
+    print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
+
+=item B<-f> , B<--file>
+
+    export file. Will generate a generic filename like
+    export-2012-11-08.tgz otherwise.
+
+=item B<-a> , B<--all>
+
+    export all types, synonym for -pclAs
+
+=item B<-s> , B<--status>
+
+    export status files like status.dat and retention.dat.
+
+=item B<-p> , B<--plugins>
+
+    export plugins. Export will contain the complete folder for found plugins.
+
+=item B<-c> , B<--config>
+
+    export config files. This will contain config object configuration and
+    general config files like resource.cfg.
+
+=item B<-l> , B<--logfile>
+
+    export logfile
+
+=item B<-A> , B<--archive>
+
+    export logfile archive
+
+=back
+
+=head1 RETURN VALUE
+
+returns 0 on successful export or number of errors otherwise
+
+=head1 EXAMPLES
+
+export everything
+
+  %> nagexp -a -f /tmp/export.tgz /etc/nagios3/nagios.cfg
+
+export everything except logfile archive
+
+  %> nagexp -lpc /etc/nagios3/nagios.cfg
+
+=head1 AUTHOR
+
+2012, Sven Nierlein, <sven@nierlein.de>
+
+=cut
+
+##############################################
+
+package Thruk::nagexp;
+
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+use Data::Dumper;
+use POSIX qw( strftime );
+use File::Temp qw(tempdir);
+use Cwd;
+
+##############################################
+sub new {
+    my($class) = @_;
+    my $self = {};
+    bless $self, $class;
+    return $self;
+}
+
+##############################################
+sub run {
+    my($self) = @_;
+    my $vers  = "Thruk Version ".$VERSION;
+    my $host  = `hostname`;
+    chomp($host);
+    $self->{'opt'} = {
+        'verbose'  => 0,
+        'files'    => [],
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    GetOptions (
+       "h|help"         => \$self->{'opt'}->{'help'},
+       "v|verbose"      => \$self->{'opt'}->{'verbose'},
+       "V|version"      => \$self->{'opt'}->{'version'},
+       "f|file=s"       => \$self->{'opt'}->{'file'},
+       "a|all"          => \$self->{'opt'}->{'all'},
+       "c|config"       => \$self->{'opt'}->{'config'},
+       "s|status"       => \$self->{'opt'}->{'status'},
+       "p|plugins"      => \$self->{'opt'}->{'plugins'},
+       "l|logfile"      => \$self->{'opt'}->{'logfile'},
+       "A|archive"      => \$self->{'opt'}->{'archive'},
+       "<>"             => sub { push @{$self->{'opt'}->{'files'}}, $_[0] },
+    ) or pod2usage( { -verbose => 2, -message => 'error in options' } );
+
+    if($self->{'opt'}->{'version'}) { print $vers,"\n"; exit 0; }
+    pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
+    pod2usage( { -verbose => 2, -exit => 3, -message => 'missing input file' } )   if scalar @{$self->{'opt'}->{'files'}} == 0;
+    pod2usage( { -verbose => 2, -exit => 3, -message => 'too many input files' } ) if scalar @{$self->{'opt'}->{'files'}} >  1;
+
+    # create export file name if non given
+    my $tarball = $self->{'opt'}->{'file'};
+    if(!$tarball) {
+        $tarball = 'export-'.$host.'-'.strftime("%Y-%m-%d", localtime);
+        if(-e $tarball.'.tgz') {
+            my $x = 1;
+            while(-e $tarball.'.'.$x.'.tgz') {
+                $x++;
+            }
+            $tarball .= '.'.$x;
+        }
+        $tarball .= '.tgz';
+    }
+
+    # create empty file
+    open(my $fh, '>', $tarball) or die('cannot create tarball '.$tarball.': '.$!);
+    close($fh);
+
+    # create archive
+    my $tempdir = tempdir();
+    open($fh, '>', $tempdir.'/index');
+    print $fh Dumper({
+        args    => $0.' '.join(' ', @ARGV),
+        date    => scalar localtime,
+        options => $self->{'opt'},
+        version => $vers,
+        host    => $host,
+    });
+    close($fh);
+    $self->_cmd('tar cf '.$tempdir.'/export.tar'.' -C '.$tempdir.' index');
+
+    my @submodules = qw/config plugins logfile archive status/;
+    if($self->{'opt'}->{'all'}) {
+        for my $sub (@submodules) {
+            $self->{'opt'}->{$sub}  = 1;
+        }
+    }
+    my $sum = 0;
+    for my $sub (@submodules) {
+        $sum += $self->{'opt'}->{$sub} ? 1 : 0;
+    }
+    if($sum == 0) {
+        _fatal("no submodules selected, use -a for all.");
+    }
+
+    $self->_export($tempdir.'/export.tar', $self->{'opt'}->{'files'}->[0]);
+    $self->_expand_links($tempdir.'/export.tar');
+    $self->_cmd('gzip -9 '.$tempdir.'/export.tar');
+    $self->_cmd('mv '.$tempdir.'/export.tar.gz '.$tarball);
+
+    _out($tarball." created");
+
+    # cleanup
+    $self->_cmd('rm -rf '.$tempdir);
+    return 0;
+}
+
+
+##############################################
+# SUBS
+##############################################
+sub _fatal {
+    my($msg) = @_;
+    chomp($msg);
+    print STDERR 'ERROR: ', $msg, "\n";
+    exit 1;
+}
+
+##############################################
+sub _info {
+    my($msg) = @_;
+    chomp($msg);
+    print 'INFO: ', $msg, "\n";
+    return;
+}
+
+##############################################
+sub _out {
+    my($msg) = @_;
+    chomp($msg);
+    print $msg, "\n";
+    return;
+}
+
+##############################################
+sub _cmd {
+    my($self, $cmd) = @_;
+    _info('running cmd: '.$cmd) if $self->{'opt'}->{'verbose'};
+    return `$cmd`;
+}
+
+##############################################
+sub _export {
+    my($self, $tarball, $filename) = @_;
+    if(!-e $filename) {
+        print STDERR "ERROR: ", $filename, " ", $!, "\n";
+        return 1;
+    }
+
+    # omd?
+    if($filename =~ m|/omd/sites/([^/]+)/etc/(\w+)/(\w+).cfg|mx and -d "/omd/sites/$1/etc/$2/$3.d") {
+        $filename = [ glob("/omd/sites/$1/etc/$2/$3.d/*.cfg"), $filename ];
+    }
+
+    # parse config
+    my $mainconf  = $self->_parse_conf($filename);
+
+    # export sub modules
+    $self->_export_mainconfig($tarball, $mainconf, $filename) if($self->{'opt'}->{'config'});
+    $self->_export_logfiles($tarball, $mainconf)              if($self->{'opt'}->{'logfile'});
+    $self->_export_logfile_archive($tarball, $mainconf)       if($self->{'opt'}->{'archive'});
+    $self->_export_plugins($tarball, $mainconf)               if($self->{'opt'}->{'plugins'});
+    $self->_export_status($tarball, $mainconf)                if($self->{'opt'}->{'plugins'});
+
+    return;
+}
+
+##############################################
+sub _parse_conf {
+    my($self, $filename) = @_;
+    my $conf = {};
+    if(ref $filename ne 'ARRAY') { $filename = [$filename]; }
+
+    for my $file (@{$filename}) {
+        open(my $fh, '<', $file) or die("cannot open ".$file.": ".$!);
+        while(my $line = <$fh>) {
+            chomp($line);
+            $line =~ s/^\s*//gmx;
+            $line =~ s/\s*$//gmx;
+            my($key,$value) = split/\s*=\s*/mx, $line;
+            next unless defined $value;
+            if(!exists $conf->{$key}) {
+                $conf->{$key}   = $value;
+            } else {
+                if(ref $conf->{$key} ne 'ARRAY') {
+                    $conf->{$key} = [$conf->{$key}];
+                }
+                push @{$conf->{$key}}, $value;
+            }
+        }
+        close($fh);
+    }
+    return $conf;
+}
+
+##############################################
+sub _tar_append {
+    my($self, $tarball, @files) = @_;
+    # make file relative
+    my @relativefiles;
+    for my $file (@files) {
+        if(ref $file ne 'ARRAY') { $file = [$file]; }
+        for my $f (@{$file}) {
+            if($f !~ m/\//mx) {
+                $f = '.'.getcwd.'/'.$f;
+            } else {
+                $f = '.'.$f;
+            }
+            push @relativefiles, $f;
+        }
+    }
+    $self->_cmd('tar uf '.$tarball.' -C / '.join(' ', @relativefiles));
+    return;
+}
+
+##############################################
+# expand links in tarball
+sub _expand_links {
+    my($self, $tarball) = @_;
+
+    my $added     = 1;
+    my $processed = {};
+    while($added > 0) {
+        $added = 0;
+        my $files = $self->_cmd('tar tvf '.$tarball);
+        for my $line (split/\n/mx, $files) {
+            my($mode,$user,$size,$date,$time,$path,$wurscht,$link) = split/\s+/mx, $line;
+            if(defined $link) {
+                if(!defined $processed->{$link}) {
+                    # absolute link
+                    if($link =~ m/^\//mx) {
+                        $added++;
+                        $self->_tar_append($tarball, $link);
+                    } else {
+                        my $src = $path;
+                        $src =~ s/^\.//mx;
+                        $src =~ s/\/[^\/]+$//mx;
+                        $added++;
+                        my $dst = $src.'/'.$link;
+                        while($dst =~ s|/[^/]+/\.\./|/|gmx) {}
+                        $self->_tar_append($tarball, $dst);
+                    }
+                }
+                $processed->{$link} = 1;
+            }
+        }
+    }
+    return;
+}
+
+##############################################
+# export configuration files
+sub _export_mainconfig {
+    my($self, $tarball, $mainconf, $mainfile) = @_;
+    _info('exporting config') if $self->{'opt'}->{'verbose'};
+
+    # nagios.cfg
+    $self->_tar_append($tarball, $mainfile);
+
+    # resource.cfg
+    $self->_tar_append($tarball, $mainconf->{'resource_file'}) if $mainconf->{'resource_file'};
+
+    # object files
+    if(defined $mainconf->{'cfg_dir'}) {
+        $self->_tar_append($tarball, $mainconf->{'cfg_dir'}) if $mainconf->{'cfg_dir'};
+    }
+    if(defined $mainconf->{'cfg_file'}) {
+        $self->_tar_append($tarball, $mainconf->{'cfg_file'}) if $mainconf->{'cfg_file'};
+    }
+
+    return;
+}
+
+##############################################
+# export current logfile
+sub _export_logfiles {
+    my($self, $tarball, $mainconf) = @_;
+    _info('exporting logfile') if $self->{'opt'}->{'verbose'};
+    $self->_tar_append($tarball, $mainconf->{'log_file'}) if $mainconf->{'log_file'};
+    return;
+}
+
+##############################################
+# export logfile archive
+sub _export_logfile_archive {
+    my($self, $tarball, $mainconf) = @_;
+    _info('exporting logfile archive') if $self->{'opt'}->{'verbose'};
+    $self->_tar_append($tarball, $mainconf->{'log_archive_path'}) if $mainconf->{'log_archive_path'};
+    return;
+}
+
+##############################################
+# export status files
+sub _export_status {
+    my($self, $tarball, $mainconf) = @_;
+    _info('exporting status files') if $self->{'opt'}->{'verbose'};
+    $self->_tar_append($tarball, $mainconf->{'state_retention_file'}) if $mainconf->{'state_retention_file'};
+    $self->_tar_append($tarball, $mainconf->{'status_file'}) if $mainconf->{'status_file'};
+    return;
+}
+
+##############################################
+# export plugins
+sub _export_plugins {
+    my($self, $tarball, $mainconf) = @_;
+    return unless defined $mainconf->{'resource_file'};
+    _info('exporting plugins') if $self->{'opt'}->{'verbose'};
+    my $res = $self->_parse_conf($mainconf->{'resource_file'});
+    for my $var (keys %{$res}) {
+        if($var =~ m/^\$(USER[\d]+)\$/mx) {
+            my $src = $res->{$var};
+            next unless -d $src;
+            next if $src =~ m|^/omd/sites/\w+$|mx;
+            $self->_tar_append($tarball, $src);
+        }
+    }
+    return;
+}
+
+##############################################
+
+1;
