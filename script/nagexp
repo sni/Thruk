@@ -6,6 +6,7 @@ use strict;
 use warnings;
 
 our $VERSION = '1.59';
+my $branch   = '';
 
 my $nagexp = Thruk::nagexp->new();
 exit $nagexp->run();
@@ -129,7 +130,7 @@ sub new {
 ##############################################
 sub run {
     my($self) = @_;
-    my $vers  = "Thruk Version ".$VERSION;
+    my $vers  = "Thruk Version ".$VERSION.($branch ne '' ? '~'.$branch : '');
     my $host  = `hostname`;
     chomp($host);
     $self->{'opt'} = {
