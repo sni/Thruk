@@ -25,6 +25,7 @@ eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 use File::Slurp;
+use Time::HiRes qw( gettimeofday tv_interval );
 use Thruk::Config;
 use Thruk::Utils::CookieAuth;
 
@@ -35,6 +36,8 @@ if(defined $ENV{'OMD_SITE'}) {
     $prefix    = $ENV{'OMD_SITE'}.'/';
     $urlprefix = "[^/]+/thruk";
 }
+my $verbose = 0;
+$verbose = 1 if$ENV{'THRUK_COOKIE_AUTH_VERBOSE'};
 
 ##########################################################
 my $config              = Thruk::Config::get_config();
@@ -54,43 +57,53 @@ my $last_cache_clean    = time();
 while (<STDIN>) {
     chomp(my $in = $_);
 
+    my $t0 = [gettimeofday];
+    print process($in);
+    my $elapsed = tv_interval ( $t0 );
+    printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
+}
+
+##########################################################
+sub process {
+    my($in) = @_;
+
     if($in =~ $line_regex) {
         my($cookies, $remote, $path) = ($1, $2, $3);
 
         # some urls must pass
         if($path =~ $pass_regex) {
-            print "/pass/$path\n";
-            next;
+            print STDERR "thruk_auth: pass $path" if $verbose;
+            return "/pass/$path\n";
         }
 
         # did we get a cookie
         if($cookies eq '' or $cookies !~ $cookie_regex) {
-            print $loginurl."?".$path."\n";
-            next;
+            print STDERR "thruk_auth: no cookie $path" if $verbose;
+            return $loginurl."?".$path."\n";;
         }
         my $auth = $1;
 
         # use session cache for a few seconds
         my $now = time();
         if(defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} > $now - $sessioncachetimeout) {
-            print "/loginok/", $sessioncache->{$auth}->{'login'} ,"/",$path,"\n";
-            next;
+            print STDERR "thruk_auth: login by cache hit: ".$sessioncache->{$auth}->{'login'} if $verbose;
+            return "/loginok/", $sessioncache->{$auth}->{'login'} ,"/",$path,"\n";
         }
 
         # does our sessionfile exist?
         my $sessionfile = $spath.'/'.$auth;
         if(!-f $sessionfile) {
+            print STDERR "thruk_auth: session expired: ".($sessioncache->{$auth}->{'login'} || '?') if $verbose;
             delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
-            print $loginurl."?expired&".$path."\n";
-            next;
+            return $loginurl."?expired&".$path."\n";
         }
 
         # session timeout reached?
         if(defined $sessioncache->{$auth} and $sessioncache->{$auth}->{'time'} < $now - $sessiontimeout) {
+            print STDERR "thruk_auth: session timeout: ".$sessioncache->{$auth}->{'login'} if $verbose;
             unlink($sessionfile);
             delete $sessioncache->{$auth};
-            print $loginurl, "?expired&", $path, "\n";
-            next;
+            return $loginurl, "?expired&", $path, "\n";
         }
 
         chomp(my $cont = read_file($sessionfile));
@@ -98,19 +111,18 @@ while (<STDIN>) {
 
         # won't work in omds own apache mode
         #if($ip ne $remote) {
-        #    print $loginurl, "?", $path, "\n";
-        #    next;
+        #    return $loginurl, "?", $path, "\n";
         #}
 
         # validate session data
         if(!Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user)) {
+            print STDERR "thruk_auth: basic auth verify failed for ".$user if $verbose;
             unlink($sessionfile);
             delete $sessioncache->{$auth};
-            print $loginurl, "?invalid&", $path, "\n";
-            next;
+            return $loginurl, "?invalid&", $path, "\n";
         }
 
-        # clean old session cache
+        # clean old session cache every hour
         clean_session_cache($sessioncache) if($last_cache_clean < $now - 3600);
 
         # grant access
@@ -118,12 +130,13 @@ while (<STDIN>) {
                 'login' => $user,
                 'time'  => $now,
         };
-        print "/loginok/", $user, "/", $path, "\n";
-        next;
+        print STDERR "thruk_auth: basic auth ok for ".$user if $verbose;
+        return "/loginok/", $user, "/", $path, "\n";
     }
 
     # everything else redirects to login
-    print $loginurl, "\n";
+    print STDERR "thruk_auth: unknown url ".$in if $verbose;
+    return $loginurl, "\n";
 }
 
 ##########################################################
