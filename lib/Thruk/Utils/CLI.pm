@@ -703,7 +703,6 @@ sub _cmd_configtool {
     my $last_error = undef;
     my $peer       = $Thruk::peers->{$peerkey};
     $c->stash->{'param_backend'} = $peerkey;
-use Data::Dumper; print STDERR Dumper($opt);
 
     if(!Thruk::Utils::Conf::set_object_model($c)) {
         $last_error = "failed to set objects model";
