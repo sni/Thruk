@@ -39,7 +39,6 @@ if(defined $ENV{'OMD_SITE'}) {
 my $verbose = 0;
 $verbose = 1 if$ENV{'THRUK_COOKIE_AUTH_VERBOSE'};
 
-
 ##########################################################
 my $config              = Thruk::Config::get_config();
 my $spath               = $config->{'tmp_path'}."/sessions";
@@ -61,7 +60,7 @@ while (<STDIN>) {
     my $t0 = [gettimeofday];
     print process($in);
     my $elapsed = tv_interval ( $t0 );
-    printf(STDERR "thruk_auth: processed in %.3f sec\n",$elapsed) if $verbose;
+    printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
 }
 
 ##########################################################
