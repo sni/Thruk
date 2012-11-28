@@ -261,6 +261,7 @@ DIV.layout_table DIV.browser_file_comments {
 }
 
 /* make expanded tree not overlap */
-.jstree-classic li.jstree-last {
-  overflow: hidden;
+TD#container > UL {
+  height: 100%;
+  overflow-x: auto;
 }
