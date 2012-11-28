@@ -265,3 +265,11 @@ TD#container > UL {
   height: 100%;
   overflow-x: auto;
 }
+
+/* objects should always be open */
+LI#o_objects > INS {
+  display: none;
+}
+LI#o_objects > UL {
+  margin-left: -17px;
+}
