@@ -896,8 +896,9 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
     var worst_graphs = {};
     for(var nr in perfdata) {
         var d = perfdata[nr];
-        if(d.max == '' && d.crit != '') { d.max = d.crit; }
-        if(d.max == '' && d.warn != '') { d.max = d.warn; }
+        if(d.max == '' && d.unit == '%') { d.max = 100;    }
+        if(d.max == '' && d.crit != '')  { d.max = d.crit; }
+        if(d.max == '' && d.warn != '')  { d.max = d.warn; }
         if(d.val != '' && d.max != '') {
             var perc       = (Math.abs(d.val) / d.max * 100).toFixed(2);
             if(perc < 5)   { perc = 5;   }
