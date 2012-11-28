@@ -8,7 +8,7 @@
 <table style="background: white; table-layout: fixed;" border=1 id="treetable" width="100%">
   <tr>
     <td valign="top" id="container" style="height:100%; text-align: left; width: 200px; overflow: scroll;">
-      <ul>
+      <ul style="height:100%; overflow-x: auto;">
         <li id="o_objects" class="jstree-open">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects" target="content_frame">Objects</a>
           <ul>
