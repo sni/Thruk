@@ -497,6 +497,12 @@ sub _set_enabled_backends {
 }
 
 ########################################
+
+=head2 die_when_no_backends
+
+    die unless there are any backeds defined and enabled
+
+=cut
 sub die_when_no_backends {
     my($c) = @_;
     if(!defined $c->stash->{'pi_detail'} and _any_backend_enabled($c)) {

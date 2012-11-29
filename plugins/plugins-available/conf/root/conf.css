@@ -24,6 +24,7 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
 BODY.bare_tree {
   background-color: white;
   margin-top: 34px;
+  border: none;
 }
 
 /* input fields with wizards */
@@ -264,7 +265,7 @@ DIV.layout_table DIV.browser_file_comments {
 }
 
 /* make expanded tree not overlap */
-TD#container > UL {
+DIV#container > UL {
   height: 100%;
   overflow-x: auto;
 }

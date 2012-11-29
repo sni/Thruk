@@ -7,7 +7,14 @@
 
 <table style="background: white; table-layout: fixed;" border=1 id="treetable" width="100%">
   <tr>
-    <td valign="top" id="container" style="height:100%; text-align: left; width: 200px; overflow: scroll;">
+    <td valign="top" style="text-align: left; width: 200px;">
+      <div style="width: 200px; height: 34px; background: white; border-bottom: 1px solid grey;">
+        <div id="tool_set">
+          <input type="radio" name="expand" id="tool_collapse"><label for="tool_collapse">C</label>
+          <input type="radio" name="expand" id="tool_expand"><label for="tool_expand">E</label>
+        </div>
+      </div>
+      <div id="container">
       <ul>
         <li id="o_objects" class="jstree-open">
           <a href="conf.cgi?sub=objects&amp;action=tree_objects" target="content_frame">Objects</a>
@@ -52,9 +59,10 @@
           </ul>
         </li>
       </ul>
+      </div>
     </td>
     <td valign="top" style="border-left: 1px solid grey;">
-      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" style="border: 0;" id="content_frame"></iframe>
+      <iframe name="content_frame" src="conf.cgi?sub=objects&amp;action=tree_objects" style="border: 0;" frameborder=0 id="content_frame"></iframe>
     </td>
   </tr>
 </table>
@@ -73,6 +81,29 @@ jQuery(function($) {
     var cont_iframe = document.getElementById('content_frame');
     cont_iframe.style.width  = (w-220) + 'px';
     cont_iframe.style.height = (h-20)  + 'px';
+
+    var container = document.getElementById('container');
+    container.style.width  = 200 + 'px';
+    container.style.height = (h-55)  + 'px';
+
+    jQuery("#tool_set").buttonset();
+    jQuery('#tool_collapse').button({
+        icons: {primary: 'ui-appsidelist-button'},
+        text: false,
+        label: 'collapse all folder'
+    }).click(function() {
+        jQuery('#container').jstree('close_all');
+        jQuery('#container').jstree('open_node', '#o_objects');
+        return;
+    });
+    jQuery('#tool_expand').button({
+        icons: {primary: 'ui-appsidetree-button'},
+        text: false,
+        label: 'expand all folder'
+    }).click(function() {
+        jQuery('#container').jstree('open_all');
+        return;
+    });
 
   jQuery('#container').jstree({
     plugins: [ "themes", "dnd"/*, "contextmenu"*/ ],
