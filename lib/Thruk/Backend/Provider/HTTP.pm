@@ -52,6 +52,7 @@ sub new {
     if($self->{'proxy'}) {
         $self->{'ua'}->proxy(['http', 'https'], $self->{'proxy'});
     }
+    $self->{'ua'}->env_proxy();
     push @{ $self->{'ua'}->requests_redirectable }, 'POST';
 
     return $self;
