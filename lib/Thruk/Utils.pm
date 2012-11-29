@@ -1492,7 +1492,7 @@ sub write_data_file {
 
   get_git_name()
 
-write data to datafile
+return git branch name
 
 =cut
 

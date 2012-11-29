@@ -647,6 +647,11 @@ sub update_object {
     $file->{'changed'}      = 1;
     $self->{'needs_commit'} = 1;
 
+    # unify comments
+    for my $com (@{$obj->{'comments'}}) {
+        $com =~ s/^\s+//gmx
+    }
+
     push @{$file->{'objects'}}, $obj;
 
     my $newname = $obj->get_name();

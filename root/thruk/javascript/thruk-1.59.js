@@ -734,22 +734,50 @@ function reverse(s){
 
 /* set selection in text input */
 function setSelectionRange(input, selectionStart, selectionEnd) {
-  if (input.setSelectionRange) {
-    input.focus();
-    input.setSelectionRange(selectionStart, selectionEnd);
-  }
-  else if (input.createTextRange) {
-    var range = input.createTextRange();
-    range.collapse(true);
-    range.moveEnd('character', selectionEnd);
-    range.moveStart('character', selectionStart);
-    range.select();
-  }
+    if (input.setSelectionRange) {
+        input.focus();
+        input.setSelectionRange(selectionStart, selectionEnd);
+    }
+    else if (input.createTextRange) {
+        var range = input.createTextRange();
+        range.collapse(true);
+        range.moveEnd('character', selectionEnd);
+        range.moveStart('character', selectionStart);
+        range.select();
+    }
 }
 
 /* set cursor position in text input */
 function setCaretToPos(input, pos) {
-  setSelectionRange(input, pos, pos);
+    setSelectionRange(input, pos, pos);
+}
+
+/* set cursor line in textarea */
+function setCaretToLine(input, line) {
+
+    setSelectionRange(input, pos, pos);
+}
+
+/* get cursor position in text input */
+function getCaret(el) {
+    if (el.selectionStart) {
+        return el.selectionStart;
+    } else if (document.selection) {
+        el.focus();
+
+        var r = document.selection.createRange();
+        if (r == null) {
+            return 0;
+        }
+
+        var re = el.createTextRange(),
+            rc = re.duplicate();
+        re.moveToBookmark(r.getBookmark());
+        rc.setEndPoint('EndToStart', re);
+
+        return rc.text.length;
+    }
+    return 0;
 }
 
 /* generic sort function */
@@ -893,8 +921,9 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
     var worst_graphs = {};
     for(var nr in perfdata) {
         var d = perfdata[nr];
-        if(d.max == '' && d.crit != '') { d.max = d.crit; }
-        if(d.max == '' && d.warn != '') { d.max = d.warn; }
+        if(d.max == '' && d.unit == '%') { d.max = 100;    }
+        if(d.max == '' && d.crit != '')  { d.max = d.crit; }
+        if(d.max == '' && d.warn != '')  { d.max = d.warn; }
         if(d.val != '' && d.max != '') {
             var perc       = (Math.abs(d.val) / d.max * 100).toFixed(2);
             if(perc < 5)   { perc = 5;   }

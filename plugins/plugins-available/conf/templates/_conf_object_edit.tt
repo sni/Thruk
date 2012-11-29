@@ -102,7 +102,7 @@
     </td>
   </tr>
   <tr>
-    <td class='dataVal [% loopclass %] conf_row' colspan=5><textarea rows=8 name="conf_comment" style='white-space: nowrap; word-wrap: normal; width: 100%'>[% obj.comments.join("\n") %]</textarea></td>
+    <td class='dataVal [% loopclass %] conf_row' colspan=5><textarea rows=8 name="conf_comment" wrap="off">[% obj.comments.join("\n") %]</textarea></td>
   </tr>
 
 </table>

@@ -5,8 +5,11 @@ body.config TABLE.conftoolobj INPUT[type=text] {
   width: 400px;
 }
 body.config TABLE.conftoolobj TEXTAREA {
+/*
   white-space: nowrap;
   word-wrap: normal;
+*/
+  white-space: pre-wrap; /* needed for IE8 */
   width: 100%;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_1 {
@@ -21,6 +24,7 @@ body.config TABLE.conftoolobj INPUT[type=text].attrkey {
 BODY.bare_tree {
   background-color: white;
   margin-top: 34px;
+  border: none;
 }
 
 /* input fields with wizards */
@@ -258,4 +262,18 @@ DIV.layout_table DIV.browser_file_comments {
   height: 20px;
   overflow: hidden;
   float: left;
+}
+
+/* make expanded tree not overlap */
+DIV#container > UL {
+  height: 100%;
+  overflow-x: auto;
+}
+
+/* objects should always be open */
+LI#o_objects > INS {
+  display: none;
+}
+LI#o_objects > UL {
+  margin-left: -17px;
 }

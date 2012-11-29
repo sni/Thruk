@@ -142,10 +142,6 @@ plugins/plugins-available/conf/lib/Thruk/Model/Objects.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Defaults.pm
 plugins/plugins-available/conf/preview.png
-plugins/plugins-available/conf/root/ace/ace.js
-plugins/plugins-available/conf/root/ace/mode/matching_brace_outdent.js
-plugins/plugins-available/conf/root/ace/mode/monitoring.js
-plugins/plugins-available/conf/root/ace/mode/monitoring_highlight_rules.js
 plugins/plugins-available/conf/root/conf.css
 plugins/plugins-available/conf/root/conf.js
 plugins/plugins-available/conf/root/images/file.xcf
@@ -189,7 +185,9 @@ plugins/plugins-available/conf/root/jstree/themes/default/d.gif
 plugins/plugins-available/conf/root/jstree/themes/default/d.png
 plugins/plugins-available/conf/root/jstree/themes/default/style.css
 plugins/plugins-available/conf/root/jstree/themes/default/throbber.gif
-plugins/plugins-available/conf/scripts/thruk_set_highlights.sh
+plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea-license.txt
+plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.css
+plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.js
 plugins/plugins-available/conf/t/conf_utils.t
 plugins/plugins-available/conf/t/controller_conf.t
 plugins/plugins-available/conf/t/data/1/host.cfg
@@ -1218,6 +1216,8 @@ themes/themes-available/Classic/images/ack.gif
 themes/themes-available/Classic/images/action.gif
 themes/themes-available/Classic/images/action_pnp.png
 themes/themes-available/Classic/images/add.png
+themes/themes-available/Classic/images/application_side_list.png
+themes/themes-available/Classic/images/application_side_tree.png
 themes/themes-available/Classic/images/application_view_icons.png
 themes/themes-available/Classic/images/application_view_list.png
 themes/themes-available/Classic/images/arrow_left.png
@@ -1365,6 +1365,8 @@ themes/themes-available/Exfoliation/images/action-orig.gif
 themes/themes-available/Exfoliation/images/action.gif
 themes/themes-available/Exfoliation/images/action_pnp.png
 themes/themes-available/Exfoliation/images/add.png
+themes/themes-available/Exfoliation/images/application_side_list.png
+themes/themes-available/Exfoliation/images/application_side_tree.png
 themes/themes-available/Exfoliation/images/application_view_icons.png
 themes/themes-available/Exfoliation/images/application_view_list.png
 themes/themes-available/Exfoliation/images/arrow_left.png
@@ -1566,6 +1568,8 @@ themes/themes-available/Nuvola/images/ack.gif
 themes/themes-available/Nuvola/images/action.gif
 themes/themes-available/Nuvola/images/action_pnp.png
 themes/themes-available/Nuvola/images/add.png
+themes/themes-available/Nuvola/images/application_side_list.png
+themes/themes-available/Nuvola/images/application_side_tree.png
 themes/themes-available/Nuvola/images/application_view_icons.png
 themes/themes-available/Nuvola/images/application_view_list.png
 themes/themes-available/Nuvola/images/arrow_left.png
@@ -1762,6 +1766,8 @@ themes/themes-available/Thruk/images/ack.gif
 themes/themes-available/Thruk/images/action.gif
 themes/themes-available/Thruk/images/action_pnp.png
 themes/themes-available/Thruk/images/add.png
+themes/themes-available/Thruk/images/application_side_list.png
+themes/themes-available/Thruk/images/application_side_tree.png
 themes/themes-available/Thruk/images/application_view_icons.png
 themes/themes-available/Thruk/images/application_view_list.png
 themes/themes-available/Thruk/images/arrow_left.png
@@ -1903,6 +1909,8 @@ themes/themes-available/Vautour/images/ack.gif
 themes/themes-available/Vautour/images/action.gif
 themes/themes-available/Vautour/images/action_pnp.png
 themes/themes-available/Vautour/images/add.png
+themes/themes-available/Vautour/images/application_side_list.png
+themes/themes-available/Vautour/images/application_side_tree.png
 themes/themes-available/Vautour/images/application_view_icons.png
 themes/themes-available/Vautour/images/application_view_list.png
 themes/themes-available/Vautour/images/arrow_left.png
@@ -2082,6 +2090,8 @@ themes/themes-available/Wakizashi/images/alert_warn.png
 themes/themes-available/Wakizashi/images/alpha_green.png
 themes/themes-available/Wakizashi/images/alpha_orange.png
 themes/themes-available/Wakizashi/images/alpha_red.png
+themes/themes-available/Wakizashi/images/application_side_list.png
+themes/themes-available/Wakizashi/images/application_side_tree.png
 themes/themes-available/Wakizashi/images/application_view_icons.png
 themes/themes-available/Wakizashi/images/application_view_list.png
 themes/themes-available/Wakizashi/images/arrow_left.png

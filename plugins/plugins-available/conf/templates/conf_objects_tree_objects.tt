@@ -13,8 +13,8 @@ var objects_type        = "[% objects_type %]";
   <tr>
     <td align="left" width="30%">
       <div id="layout_set">
-        <input type="radio" name="layout" id="layout_icons"><label for="layout_icons">I</label>
-        <input type="radio" name="layout" id="layout_table"><label for="layout_table">T</label>
+        <input type="radio" name="layout" id="layout_icons"[% IF tree_objects_layout == "icons" %] checked[% END %]><label for="layout_icons">I</label>
+        <input type="radio" name="layout" id="layout_table"[% IF tree_objects_layout == "table" %] checked[% END %]><label for="layout_table">T</label>
       </div>
     </td>
     <td></td>
@@ -119,8 +119,8 @@ function init_tree_buttons() {
         return true;
     }
 
-    if(tree_objects_layout == 'icons') { jQuery('#layout_icons').click(); }
-    if(tree_objects_layout == 'table') { jQuery('#layout_table').click(); }
+    if(tree_objects_layout == 'icons') { set_tree_layout('icons', 'table') }
+    if(tree_objects_layout == 'table') { set_tree_layout('table', 'icons') }
 }
 
 -->
