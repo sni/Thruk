@@ -757,6 +757,14 @@ sub _process_backends_page {
 
     my $file = $c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'};
     return unless $file;
+    # non existing file gives readonly, so try to create it
+    if(!-e $file) {
+        open(my $fh, '>', $file);
+        if($fh) {
+            print $fh '';
+            close($fh);
+        }
+    }
     $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
 
     if($c->stash->{action} eq 'save') {
@@ -779,9 +787,13 @@ sub _process_backends_page {
             };
             $backend->{'options'}->{'peer'} = $c->request->parameters->{'peer'.$x} if $c->request->parameters->{'peer'.$x};
             $x++;
-            next unless defined $backend->{'name'};
-            next unless $backend->{'name'} ne '';
+            $backend->{'name'} = 'backend '.$x if(!$backend->{'name'} and $backend->{'options'}->{'peer'});
+            next unless $backend->{'name'};
             delete $backend->{'id'} if $backend->{'id'} eq '';
+
+            if($backend->{'options'}->{'peer'} and $backend->{'type'} eq 'livestatus' and $backend->{'options'}->{'peer'} =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
+                $backend->{'options'}->{'peer'} .= ':6557';
+            }
 
             # add values from existing backend config
             if(defined $backend->{'id'}) {

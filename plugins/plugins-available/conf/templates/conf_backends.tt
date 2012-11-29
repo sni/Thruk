@@ -3,6 +3,8 @@
 <div align="center">
 <form action="conf.cgi" method="POST">
 <input type="hidden" name="sub" value="backends">
+[%# make sure IE can submit form by pressing enter #%]
+<input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="action" value="save">
 Note: some options are not accessible here for security reasons.
 [% IF readonly %]
