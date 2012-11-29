@@ -125,8 +125,8 @@ sub add_defaults {
     }
     if($@) {
         # side.html and some other pages should not be redirect to the error page on backend errors
-        return if $safe;
         _set_possible_backends($c, $disabled_backends);
+        return if $safe;
         $c->log->error("data source error: $@");
         return $c->detach('/error/index/9');
     }
@@ -146,10 +146,8 @@ sub add_defaults {
     _set_possible_backends($c, $disabled_backends);
 
     ###############################
-    if(!defined $c->stash->{'pi_detail'} and _any_backend_enabled($c)) {
-        $c->log->error("got no result from any backend, please check backend connection and logfiles");
-        return $c->detach('/error/index/9');
-    }
+    die_when_no_backends($c);
+
     $c->stats->profile(end => "AddDefaults::get_proc_info");
 
     ###############################
@@ -343,7 +341,10 @@ sub _disable_backends_by_group {
 sub _any_backend_enabled {
     my ($c) = @_;
     for my $peer_key (keys %{$c->stash->{'backend_detail'}}) {
-        return 1 if $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0;
+        return 1 if(
+             $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 0
+          or $c->stash->{'backend_detail'}->{$peer_key}->{'disabled'} == 5);
+
     }
     return;
 }
@@ -494,6 +495,17 @@ sub _set_enabled_backends {
     $c->log->debug('disabled_backends: '.Dumper($disabled_backends));
     return($disabled_backends, $has_groups);
 }
+
+########################################
+sub die_when_no_backends {
+    my($c) = @_;
+    if(!defined $c->stash->{'pi_detail'} and _any_backend_enabled($c)) {
+        $c->log->error("got no result from any backend, please check backend connection and logfiles");
+        return $c->detach('/error/index/9');
+    }
+    return;
+}
+
 
 ########################################
 __PACKAGE__->meta->make_immutable;

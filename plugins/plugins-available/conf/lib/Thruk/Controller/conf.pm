@@ -124,12 +124,14 @@ sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
 
     # show settings page
     if($subcat eq 'cgi') {
+        return if Thruk::Action::AddDefaults::die_when_no_backends($c);
         $self->_process_cgi_page($c);
     }
     elsif($subcat eq 'thruk') {
         $self->_process_thruk_page($c);
     }
     elsif($subcat eq 'users') {
+        return if Thruk::Action::AddDefaults::die_when_no_backends($c);
         $self->_process_users_page($c);
     }
     elsif($subcat eq 'plugins') {
