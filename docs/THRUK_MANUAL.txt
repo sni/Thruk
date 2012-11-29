@@ -59,6 +59,17 @@ image:source/arch_preview.png[Thruk Architecture]
 There are a couple of cool things in Thruk. A few of them are listed
 here.
 
+=== Multi Site Support
+
+Thruk connects to as many cores as you want. You could even combine
+Nagios, Icinga and Shinken instances into one big combined view. That
+way you get the advantage of several independant locations and still
+have the overview about all your installations. Sites can be put into
+groups for better arrangment.
+
+image:source/multi_site.png[Multi Site]
+
+
 === Excel Export and Bookmarks
 
 The Bookmarks feature allows you to save your searches and add them as
@@ -341,16 +352,33 @@ run perl Makefile.PL again to see if all dependecies are now installed properly.
 -------
 
 
-==== Install Livestatus
+=== Livestatus
+
+Livestatus is a addon for Nagios or Icinga which provides realtime
+status data. Contrary to database addons it adds very litte overhead to the
+nagios core which makes livestatus based gui fast and realtime.
+
+[TIP]
+.shinken
+=======
+Shinken has livestatus support builtin and does not require additional
+modules.
+=======
 
 Refer to http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus
-on how to install livestatus onto your monitoring box.
+on how to install livestatus onto your monitoring box. The
+<<_labs_consol_repository,Lab Consol Repository>> has livestatus rpm
+packages. For debian based linux systems just use the provided
+packages of your distribution.
 
 Basically you have to build the NDO addon and add it to your nagios/icinga.cfg.
 
 -------
  broker_module=/opt/local/livestatus/livestatus.o /tmp/live.sock
 -------
+
+Then use the socket as 'peer' parameter in your backend configuration.
+
 
 
 ==== Configuration
