@@ -218,7 +218,15 @@ close($fh);
 print "patched Makefile\n";
 
 # create combined javascript/css files
-print `./script/thruk_create_combined_static_content.pl`;
-print "created cached js/css files\n";
+eval {
+  require Config::General;
+};
+if ($@) {
+  print "*NOT* creating cached js/css files, missing modules\n";
+}
+else {
+  print `./script/thruk_create_combined_static_content.pl`;
+  print "created cached js/css files\n";
+}
 
 print "finished\n";
