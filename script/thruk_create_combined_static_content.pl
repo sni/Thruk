@@ -8,7 +8,8 @@ use lib 'lib';
 use Thruk::Config;
 
 my $dos2unix = "/usr/bin/dos2unix";
-$dos2unix    = "/usr/bin/fromdos" if -x "/usr/bin/fromdos";
+$dos2unix    = "/usr/bin/fromdos"        if -x "/usr/bin/fromdos";
+$dos2unix    = "/opt/local/bin/dos2unix" if -x "/opt/local/bin/dos2unix";
 my $config   = Thruk::Config::get_config();
 
 my $cmds = [
