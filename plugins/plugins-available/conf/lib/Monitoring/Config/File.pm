@@ -248,6 +248,7 @@ sub _parse_line {
             or substr($line, 0, 1) eq ';')
        and $line !~ m/^(;|\#)\s*define\s+/mxo
     ) {
+        $line =~ s/^(;|\#)\s+//mx;
         push @{$comments}, $line;
         return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object);
     }
