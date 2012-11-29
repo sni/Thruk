@@ -764,7 +764,7 @@ sub _process_backends_page {
         open(my $fh, '>', $file);
         if($fh) {
             print $fh '';
-            close($fh);
+            Thruk::Utils::IO::close($fh, $file);
         }
     }
     $c->stash->{'readonly'} = (-w $file) ? 0 : 1;
