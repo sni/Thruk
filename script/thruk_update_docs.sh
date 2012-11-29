@@ -14,12 +14,14 @@ if [ THRUK_MANUAL.txt -nt THRUK_MANUAL.html ]; then
     asciidoc --unsafe -a toc -a toclevels=2 -a icons -a data-uri -a max-width=800 THRUK_MANUAL.txt
     chmod 644 THRUK_MANUAL.html
     $DOS2UNIX THRUK_MANUAL.html
+    ../script/thruk_replace_doc_toc.pl THRUK_MANUAL.html
 fi
 
 if [ FAQ.txt -nt FAQ.html ]; then
     asciidoc --unsafe -a toc -a toclevels=2 -a icons -a data-uri -a max-width=800 FAQ.txt
     chmod 644 FAQ.html
     $DOS2UNIX FAQ.html
+    ../script/thruk_replace_doc_toc.pl FAQ.html
 fi
 
 # man pages from asciidoc
