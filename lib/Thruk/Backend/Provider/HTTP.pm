@@ -33,14 +33,15 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
     my $self = {
-        'config'     => $config,
-        'peerconfig' => $peerconfig,
-        'key'        => '',
-        'name'       => $options->{'name'},
-        'addr'       => $options->{'peer'},
-        'auth'       => $options->{'auth'},
-        'proxy'      => $options->{'proxy'},
-        'remotekey'  => '',
+        'config'               => $config,
+        'peerconfig'           => $peerconfig,
+        'key'                  => '',
+        'name'                 => $options->{'name'},
+        'addr'                 => $options->{'peer'},
+        'auth'                 => $options->{'auth'},
+        'proxy'                => $options->{'proxy'},
+        'remotekey'            => '',
+        'min_backend_version'  => 1.59,
     };
     bless $self, $class;
 
@@ -624,6 +625,12 @@ sub _req {
         };
         die($@) if $@;
         if($data->{'rc'} == 1) {
+            if($data->{'output'} =~ m/no\ such\ command/mx) {
+                die('backend too old, version returned: '.$data->{'version'});
+            }
+            if($data->{'version'} < $self->{'min_backend_version'}) {
+                die('backend too old, version returned: '.$data->{'version'});
+            }
             die($data->{'output'});
         }
         if(ref $data->{'output'} eq 'ARRAY') {
