@@ -5,8 +5,11 @@ body.config TABLE.conftoolobj INPUT[type=text] {
   width: 400px;
 }
 body.config TABLE.conftoolobj TEXTAREA {
+/*
   white-space: nowrap;
   word-wrap: normal;
+*/
+  white-space: pre-wrap; /* needed for IE8 */
   width: 100%;
 }
 body.config TABLE.conftoolobj INPUT#id_check_command_1 {

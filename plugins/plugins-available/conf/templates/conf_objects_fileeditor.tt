@@ -1,4 +1,5 @@
 [% WRAPPER _conf_frame.tt %]
+<script src="[% url_prefix %]thruk/plugins/conf/linedtextarea/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
 <form action="conf.cgi" method="POST" id="saveform">
 <input type="hidden" name="sub" value="objects">
 <input type="hidden" name="action" value="savefile">
@@ -9,58 +10,36 @@
 [% END %]
 <input type="hidden" name="line" value="" id="fileline">
 <div id="editor_pane" style="margin-left: 10px; margin-right: 10px;">
-<table border="0" class='data conftoolobj' style="width: 100%; height: 100%;">
+<table border="0" class='data conftoolobj'>
   <tr>
-    <th class='data' style="width: 40px;"><a href='[% IF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
-    <th class='data'><span  style="font-size: larger;">/[% file_name %]</span>[% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]</th>
-    <th class='data' style="width: 40px;">[% UNLESS file.readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
+    <th class='data' width="5%" align="left"><a href='[% IF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link %][% END %]' onclick="return confirm_discard_changes()"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='discard changes' title='discard changes' width="16" height="16" style="vertical-align: middle;"> back</a></th>
+    <th class='data' width="90%"><span  style="font-size: larger;">/[% file_name %]</span>[% IF file.readonly %]<span style="color: #EB6900"> (read-only)</span>[% END %]</th>
+    <th class='data' width="5%" align="right">[% UNLESS file.readonly %]<a href='#' onClick="save_file(); return false;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/disk.png' border="0" alt='save changes' title='save changes' width="16" height="16" style="vertical-align: middle;"> save</a>[% END %]</th>
   </tr>
   <tr>
     <td class="dataVar" colspan=3>
-        <div id="editor" style="visibility: hidden;">[% escape_html(file_content) %]</div>
-        <script src="[% url_prefix %]thruk/plugins/conf/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/monitoring.js" type="text/javascript" charset="utf-8"></script>
-        <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/monitoring_highlight_rules.js" type="text/javascript" charset="utf-8"></script>
-        <script src="[% url_prefix %]thruk/plugins/conf/ace/mode/matching_brace_outdent.js" type="text/javascript" charset="utf-8"></script>
+        <textarea id="texteditor" name="texteditor" cols=40 wrap="off"[% IF file.readonly %] readonly[% END %] style="line-height: 15px;">
+        [% escape_html(file_content) %]
+        </textarea>
         <script type="text/javascript">
         var editor;
         var original_value;
         window.onload = function() {
+            editor = document.getElementById('texteditor');
+
             // save original value decoded
-            original_value = jQuery('#editor').text();
+            original_value = editor.value;
 
-            // editor needs fixed size
-            var edit_pane = document.getElementById('editor_pane');
+            var w = editor.offsetWidth - 10, h = jQuery(window).height() - 200;
+            editor.style.width  = w + 'px';
+            editor.style.height = h + 'px';
 
-            var w = edit_pane.offsetWidth - 30, h = jQuery(window).height() - edit_pane.offsetTop - 40;
-            edit_pane.style.width  = w + 'px';
-            edit_pane.style.height = h + 'px';
+            jQuery('#texteditor').css('width',  w + 'px')
+                                 .css('height', h + 'px');
 
-            jQuery('#editor').css('width',  w + 'px')
-                             .css('height', h + 'px');
-
-            // start editor
-            editor = ace.edit("editor");
-
-            // enable highlighting
-            var MonitoringMode = require("ace/mode/monitoring").Mode;
-            editor.getSession().setMode(new MonitoringMode());
-
-            // some editor settings
-            editor.getSession().setTabSize(2);
-            editor.getSession().setUseSoftTabs(true);
-
-            [% IF file.readonly %]
-            // readonly
-            editor.setReadOnly(true);
-            [% END %]
-
-            // set line
-            editor.gotoLine([% line %]);
-
-            // make editor visible
-            jQuery("DIV.ace_scroller").css("overflow-x", "auto");
-            jQuery("#editor").css("visibility", "visible");
+            jQuery("#texteditor").linedtextarea(
+               {selectedLine: [% line %]}
+            );
         };
 
         /* intercept when there are unsaved changes */
@@ -69,10 +48,14 @@
                 return confirm("File has been changed. Really discard changes?");
             }
             return true;
-        };
+        }
+
+        function get_current_line() {
+            return(editor.value.substr(0, getCaret(editor)).split("\n").length);
+        }
 
         function has_changed() {
-            if(editor.getSession().getValue() != original_value) {
+            if(editor.value != original_value) {
                 return true;
             }
             return false;
@@ -80,14 +63,16 @@
 
         function save_file() {
             form = document.getElementById('saveform');
-            document.getElementById('filecontent').value = editor.getSession().getValue();
+            document.getElementById('filecontent').value = editor.value;
             [%+ IF show_object && back == "edit" +%]
-            document.getElementById('fileline').value    = editor.getCursorPosition().row;
+            document.getElementById('fileline').value    = get_current_line();
             [%+ END +%]
 
             form.submit();
         }
         </script>
+        <!--[IF IE]>
+        <![ENDIF]-->
     </td>
   </tr>
 </table>

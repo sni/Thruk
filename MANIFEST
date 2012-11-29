@@ -141,10 +141,6 @@ plugins/plugins-available/conf/lib/Thruk/Model/Objects.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Defaults.pm
 plugins/plugins-available/conf/preview.png
-plugins/plugins-available/conf/root/ace/ace.js
-plugins/plugins-available/conf/root/ace/mode/matching_brace_outdent.js
-plugins/plugins-available/conf/root/ace/mode/monitoring.js
-plugins/plugins-available/conf/root/ace/mode/monitoring_highlight_rules.js
 plugins/plugins-available/conf/root/conf.css
 plugins/plugins-available/conf/root/conf.js
 plugins/plugins-available/conf/root/images/file.xcf
@@ -188,7 +184,9 @@ plugins/plugins-available/conf/root/jstree/themes/default/d.gif
 plugins/plugins-available/conf/root/jstree/themes/default/d.png
 plugins/plugins-available/conf/root/jstree/themes/default/style.css
 plugins/plugins-available/conf/root/jstree/themes/default/throbber.gif
-plugins/plugins-available/conf/scripts/thruk_set_highlights.sh
+plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea-license.txt
+plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.css
+plugins/plugins-available/conf/root/linedtextarea/jquery-linedtextarea.js
 plugins/plugins-available/conf/t/conf_utils.t
 plugins/plugins-available/conf/t/controller_conf.t
 plugins/plugins-available/conf/t/data/1/host.cfg
