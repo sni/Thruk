@@ -16,11 +16,19 @@ version:
 	date=`date "+%B %d, %Y"`; \
 	sed -r "s/'released'\s*=>\s*'.*',/'released'               => '$$date',/" -i lib/Thruk/Config.pm && \
 	debversion="$$newversion" && \
-	if [ "$$branch" != "" ]; then sed -r "s/branch\s*= '';/branch = '$$branch';/" -i lib/Thruk/Config.pm -i script/thruk -i script/naglint; debversion="$$newversion~$$branch"; fi && \
+	if [ "$$branch" != "" ]; then \
+		sed -r "s/branch\s*= '';/branch = '$$branch';/" \
+			-i lib/Thruk/Config.pm \
+			-i script/thruk \
+			-i script/naglint \
+			-i script/nagexp \
+		; \
+		debversion="$$newversion~$$branch"; \
+	fi && \
 	dch --newversion "$$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"; \
 	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
 		sed -r "s/Version:\s*$(VERSION)/Version:       $$newversion/" -i support/thruk.spec && \
-		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i lib/Thruk/Config.pm -i support/thruk.spec -i script/thruk -i  script/naglint && \
+		sed -r "s/'$(VERSION)'/'$$newversion'/" -i lib/Thruk.pm -i lib/Thruk/Config.pm -i support/thruk.spec -i script/thruk -i script/naglint -i script/nagexp && \
 		sed -r "s/_$(VERSION)_/_$$newversion\_/" -i docs/THRUK_MANUAL.txt && \
 		sed -r "s/\-$(VERSION)\./-$$newversion\./" -i MANIFEST -i docs/THRUK_MANUAL.txt -i root/thruk/startup.html && \
 		sed -r "s/\-$(VERSION)\-/-$$newversion\-/" -i docs/THRUK_MANUAL.txt && \
@@ -37,7 +45,7 @@ version:
 	fi;
 	./script/thruk_update_docs.sh > /dev/null
 	yes n | perl Makefile.PL > /dev/null
-	git add MANIFEST support/thruk.spec docs/THRUK_MANUAL.txt docs/THRUK_MANUAL.html lib/Thruk.pm docs/thruk.3 root/thruk/startup.html script/thruk dist.ini lib/Thruk/Config.pm script/naglint
+	git add MANIFEST support/thruk.spec docs/THRUK_MANUAL.txt docs/THRUK_MANUAL.html lib/Thruk.pm docs/thruk.3 root/thruk/startup.html script/thruk dist.ini lib/Thruk/Config.pm script/naglint script/nagexp
 	git co docs/FAQ.html
 	git status
 
