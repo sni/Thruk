@@ -132,6 +132,7 @@ sub run {
     my($self) = @_;
     my $vers  = "Thruk Version ".$VERSION.($branch ne '' ? '~'.$branch : '');
     my $host  = `hostname`;
+    my $args  = $0.' '.join(' ', @ARGV);
     chomp($host);
     $self->{'opt'} = {
         'verbose'  => 0,
@@ -155,8 +156,8 @@ sub run {
 
     if($self->{'opt'}->{'version'}) { print $vers,"\n"; exit 0; }
     pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
-    pod2usage( { -verbose => 2, -exit => 3, -message => 'missing input file' } )   if scalar @{$self->{'opt'}->{'files'}} == 0;
-    pod2usage( { -verbose => 2, -exit => 3, -message => 'too many input files' } ) if scalar @{$self->{'opt'}->{'files'}} >  1;
+    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: missing input file\n" } )   if scalar @{$self->{'opt'}->{'files'}} == 0;
+    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: too many input files\”" } ) if scalar @{$self->{'opt'}->{'files'}} >  1;
 
     # create export file name if non given
     my $tarball = $self->{'opt'}->{'file'};
@@ -180,7 +181,7 @@ sub run {
     my $tempdir = tempdir();
     open($fh, '>', $tempdir.'/index');
     print $fh Dumper({
-        args    => $0.' '.join(' ', @ARGV),
+        args    => $args,
         date    => scalar localtime,
         options => $self->{'opt'},
         version => $vers,
