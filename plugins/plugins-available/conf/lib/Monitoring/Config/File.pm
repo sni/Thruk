@@ -303,6 +303,7 @@ sub _parse_line {
     elsif(defined $current_object) {
         if($in_disabled_object) { $line =~ s/^(\#|;)\s*//mxo; }
         my($key, $value) = split(/\s+/mxo, $line, 2);
+        return($current_object, $in_unknown_object, $comments, $inl_comments, $in_disabled_object) if($in_disabled_object and !defined $key);
         # different parsing for timeperiods
         if($current_object->{'type'} eq 'timeperiod'
            and $key ne 'use'

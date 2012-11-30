@@ -969,6 +969,8 @@ t/data/naglint/comments2/in.cfg
 t/data/naglint/comments2/out.cfg
 t/data/naglint/comments3/in.cfg
 t/data/naglint/comments3/out.cfg
+t/data/naglint/disabled/in.cfg
+t/data/naglint/disabled/out.cfg
 t/data/naglint/duplicate/in.cfg
 t/data/naglint/duplicate/out.cfg
 t/data/naglint/empty_attr/in.cfg
