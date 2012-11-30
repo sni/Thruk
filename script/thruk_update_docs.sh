@@ -34,9 +34,10 @@ fi
 # man pages for scripts
 FILES="thruk
        naglint
+       nagexp
 "
 for file in $FILES; do
-    [ $file -nt $file.3 ] && pod2man -s 3 -n $file ../script/$file > $file.3
+    [ ! -e $file.3 -o $file -nt $file.3 ] && pod2man -s 3 -n $file ../script/$file > $file.3
 done
 
 exit 0

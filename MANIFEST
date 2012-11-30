@@ -15,6 +15,7 @@ debian/thruk.manpages
 dist.ini
 docs/FAQ.html
 docs/FAQ.txt
+docs/nagexp.3
 docs/naglint.3
 docs/source/arch.graffle
 docs/source/arch.png
