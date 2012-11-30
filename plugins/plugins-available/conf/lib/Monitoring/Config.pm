@@ -46,8 +46,9 @@ sub new {
         'coretype'           => 'nagios',
         'cache'              => {},
         'remotepeer'         => undef,
-        'localdir'           => undef,
     };
+
+    $self->{'config'}->{'localdir'} =~ s/\/$//gmx if defined $self->{'config'}->{'localdir'};
 
     bless $self, $class;
 
@@ -91,6 +92,7 @@ sub init {
     }
     $self->update();
     $self->{'cached'}      = 0;
+    $self->{'config'}->{'localdir'} =~ s/\/$//gmx if defined $self->{'config'}->{'localdir'};
 
     # set default excludes when defined manual paths
     if(!defined $self->{'config'}->{'obj_exclude'}
@@ -1025,6 +1027,7 @@ sub _update_core_conf {
     $self->{'_corefile'}->{'conf'} = {};
     while(my $line = <$fh>) {
         chomp($line);
+        next if $line =~ m/^\s*\#/mx;
         my($key,$value) = split/\s*=\s*/mx, $line, 2;
         next unless defined $value;
         $key   =~ s/^\s*(.*?)\s*$/$1/mx;
@@ -1133,6 +1136,13 @@ sub _get_files_for_folder {
             next unless $test =~ m/$match/mx;
         }
 
+        my $localdir = $self->{'config'}->{'localdir'};
+        if($localdir) {
+            my $display = $file;
+            $display    =~ s/^$localdir//mx;
+            $self->{'file_trans'}->{$file} = $display;
+        }
+
         push @files, $dir."/".$file;
     }
 
@@ -1174,21 +1184,10 @@ sub _get_files_names {
     my $config   = $self->{'config'};
     $self->{'file_trans'} = {};
 
-    if($self->{'localdir'}) {
-        my $localdir = $self->{'localdir'};
-        for my $file (@{$self->_get_files_for_folder($localdir, '\.cfg$')}) {
-            my $display     = $file;
-            $display        =~ s/^$localdir//mx;
-            $files->{$file} = 1;
-            $self->{'file_trans'}->{$file} = $display;
-        }
-        my @uniqfiles = keys %{$files};
-        return \@uniqfiles;
-    }
-
     # single folders
     if(defined $config->{'obj_dir'}) {
         for my $dir ( ref $config->{'obj_dir'} eq 'ARRAY' ? @{$config->{'obj_dir'}} : ($config->{'obj_dir'}) ) {
+            $dir = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
             for my $file (@{$self->_get_files_for_folder($dir, '\.cfg$')}) {
                 $files->{$file} = 1;
             }
@@ -1211,6 +1210,11 @@ sub _get_files_names {
     # single files
     if(defined $config->{'obj_file'}) {
         for my $file ( ref $config->{'obj_file'} eq 'ARRAY' ? @{$config->{'obj_file'}} : ($config->{'obj_file'}) ) {
+            if($self->{'config'}->{'localdir'}) {
+                my $display = $file;
+                $file       = $self->{'config'}->{'localdir'}.'/'.$file;
+                $self->{'file_trans'}->{$file} = $display;
+            }
             $files->{$file} = 1;
         }
     }
@@ -1674,7 +1678,6 @@ syncronize files from remote
 =cut
 sub sync_remote {
     my($self, $c) = @_;
-    $self->{'localdir'} = undef;
     return unless defined $self->{'remotepeer'};
     my $files = {};
     for my $f (@{$self->{'files'}}) {
@@ -1683,9 +1686,6 @@ sub sync_remote {
             'md5'          => $f->{'md5'},
         };
     }
-    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
-    $self->{'localdir'} = $localdir;
-    Thruk::Utils::IO::mkdir_r($localdir);
     my $res = $self->{'remotepeer'}
                    ->{'class'}
                    ->_req('configtool', {
@@ -1695,6 +1695,11 @@ sub sync_remote {
                     });
     die("bogus result: ".Dumper($res)) if(!defined $res or !defined $res->[2]);
     my $remotefiles = $res->[2];
+
+    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
+    $self->{'config'}->{'localdir'} = $localdir;
+    $self->{'config'}->{'obj_dir'}  = '/';
+    Thruk::Utils::IO::mkdir_r($localdir);
     for my $path (keys %{$remotefiles}) {
         my $f = $remotefiles->{$path};
         if(defined $f->{'content'}) {
