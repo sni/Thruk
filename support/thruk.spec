@@ -110,6 +110,7 @@ mv %{buildroot}%{_datadir}/thruk/support/thruk_local.conf.example %{buildroot}%{
 mv %{buildroot}%{_datadir}/thruk/support/fcgid_env.sh %{buildroot}%{_datadir}/thruk/fcgid_env.sh
 mv %{buildroot}%{_datadir}/thruk/script/thruk %{buildroot}%{_bindir}/thruk
 mv %{buildroot}%{_datadir}/thruk/script/naglint %{buildroot}%{_bindir}/naglint
+mv %{buildroot}%{_datadir}/thruk/script/nagexp %{buildroot}%{_bindir}/nagexp
 %if %{defined suse_version}
 mv %{buildroot}%{_datadir}/thruk/support/apache_fcgid.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/thruk.conf
 %else
@@ -122,6 +123,8 @@ mv %{buildroot}%{_datadir}/thruk/support/thruk.logrotate %{buildroot}%{_sysconfd
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/support
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.3 %{buildroot}%{_mandir}/man3/thruk.3
 mv %{buildroot}%{_datadir}/thruk/docs/thruk.8 %{buildroot}%{_mandir}/man8/thruk.8
+mv %{buildroot}%{_datadir}/thruk/docs/naglint.3 %{buildroot}%{_mandir}/man3/naglint.3
+mv %{buildroot}%{_datadir}/thruk/docs/nagexp.3 %{buildroot}%{_mandir}/man3/nagexp.3
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/debian
 %{__rm} -rf %{buildroot}%{_sysconfdir}/thruk/ssi/README
 %{__rm} -rf %{buildroot}%{_datadir}/thruk/root/thruk/plugins
@@ -208,6 +211,7 @@ exit 0
 %files
 %attr(755,root,root) %{_bindir}/thruk
 %attr(755,root,root) %{_bindir}/naglint
+%attr(755,root,root) %{_bindir}/nagexp
 %attr(755,root,root) %{_initrddir}/thruk
 %config %{_sysconfdir}/thruk/thruk.conf
 %config(noreplace) %{_sysconfdir}/thruk/thruk_local.conf
