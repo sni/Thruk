@@ -136,7 +136,7 @@ sub ensure_permissions {
     }
 
     # change group
-    chown($uid, $ENV{'THRUK_GROUP_ID'}, $path);
+    chown($uid, $ENV{'THRUK_GROUP_ID'}, $path) if defined $ENV{'THRUK_GROUP_ID'};
     return;
 }
 

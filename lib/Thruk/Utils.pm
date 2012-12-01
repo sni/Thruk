@@ -1035,6 +1035,23 @@ sub get_pnp_url {
 
 ########################################
 
+=head2 list
+
+  list($ref)
+
+return list of ref unless it is already a list
+
+=cut
+
+sub list {
+    my($d) = @_;
+    return [] unless defined $d;
+    return $d if ref $d eq 'ARRAY';
+    return([$d]);
+}
+
+########################################
+
 =head2 expand_numeric_list
 
   expand_numeric_list($txt, $c)

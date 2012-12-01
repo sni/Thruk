@@ -964,6 +964,8 @@ t/data/javascript_tests.js
 t/data/log4perl.conf
 t/data/naglint/basic/in.cfg
 t/data/naglint/basic/out.cfg
+t/data/naglint/commands/in.cfg
+t/data/naglint/commands/out.cfg
 t/data/naglint/comments/in.cfg
 t/data/naglint/comments/out.cfg
 t/data/naglint/comments2/in.cfg

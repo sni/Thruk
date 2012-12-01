@@ -632,6 +632,55 @@ sub get_model_retention {
 
 ##########################################################
 
+=head2 get_root_folder
+
+return root folder for given files
+
+ex.: get_root_folder(['/etc/nagios/conf.d/test.cfg',
+                      '/etc/nagios/conf.d/test/blah.cfg'
+                     ])
+
+returns '/etc/nagios/conf.d'
+
+=cut
+sub get_root_folder {
+    my($files) = @_;
+    my $splited = {};
+    for my $file (@{$files}) {
+        my @paths = split(/\//mx, $file);
+        $splited->{$file} = \@paths;
+    }
+    my $root = "";
+    my $x = 0;
+    while($x < 100) {
+        my $cur   = undef;
+        my $equal = 1;
+        for my $paths (values %{$splited}) {
+            if(!defined $paths->[$x]) {
+                $equal = 0;
+                last;
+            }
+            elsif(!defined $cur) {
+                $cur = $paths->[$x];
+            }
+            elsif($cur ne $paths->[$x]) {
+                $equal = 0;
+                last;
+            }
+        }
+        if($equal) {
+            $root .= $cur.'/';
+        } else {
+            last;
+        }
+        $x++;
+    }
+    $root =~ s/\/$//mx;
+    return $root;
+}
+
+##########################################################
+
 =head2 init_cached_config
 
 set current obj_db from cached config

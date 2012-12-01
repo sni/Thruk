@@ -239,13 +239,11 @@ filter is verified against the name if its a scalar value. Otherwise it has to b
 
 =cut
 sub get_objects_by_type {
-    my $self   = shift;
-    my $type   = shift;
-    my $filter = shift;
-    my $origin = shift;
+    my($self, $type, $filter, $origin) = @_;
 
     return [] unless defined $self->{'objects'}->{'byname'}->{$type};
 
+    # scalar filter by name only
     if(defined $filter and ref $filter eq '') {
         if(defined $self->{'objects'}->{'byname'}->{$type}->{$filter}) {
             return $self->{'objects'}->{'byname'}->{$type}->{$filter};
@@ -410,8 +408,7 @@ Get templates by type. Returns list of L<Monitoring::Config::Object|Monitoring::
 
 =cut
 sub get_templates_by_type {
-    my $self   = shift;
-    my $type   = shift;
+    my($self, $type) = @_;
 
     return [] unless defined $self->{'objects'}->{'byname'}->{'templates'}->{$type};
 
@@ -632,6 +629,7 @@ sub update_object {
     my $comment = shift || '';
     my $rebuild = shift;
     $rebuild = 1 unless defined $rebuild;
+    if(ref $comment eq 'ARRAY') { $comment = join("\n", @{$comment}); }
 
     return unless defined $obj;
 
@@ -802,6 +800,19 @@ sub file_undelete {
     return;
 }
 
+##########################################################
+
+=head2 rebuild_index
+
+    rebuild_index()
+
+rebuild object index
+
+=cut
+sub rebuild_index {
+    my($self) = @_;
+    return $self->_rebuild_index();
+}
 
 ##########################################################
 
