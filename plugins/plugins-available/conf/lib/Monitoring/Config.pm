@@ -969,6 +969,20 @@ sub get_default_keys {
     return \@keys;
 }
 
+##########################################################
+
+=head2 get_files_for_folder
+
+    get_files_for_folder($dir, [ $regex ])
+
+return all files below this folder (matching the regex)
+
+=cut
+sub get_files_for_folder {
+    my ( $self, $dir, $match ) = @_;
+    return $self->_get_files_for_folder($dir, $match);
+}
+
 
 ##########################################################
 # INTERNAL SUBS

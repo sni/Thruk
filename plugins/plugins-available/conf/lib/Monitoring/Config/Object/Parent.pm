@@ -83,6 +83,21 @@ sub parse {
 
 ##########################################################
 
+=head2 disable
+
+disable this object
+
+=cut
+sub disable {
+    my($self, $val) = @_;
+    $val = 1 unless defined $val;
+    $self->{'file'}->{'changed'} = 1 if $self->{'disabled'} != $val;
+    $self->{'disabled'} = $val;
+    return;
+}
+
+##########################################################
+
 =head2 as_text
 
 in scalar context returns this object as text.
@@ -822,7 +837,7 @@ sub _count_quotes {
 sub _break_long_command {
     my($self,$key,$value) = @_;
     my @text;
-    my @chunks = split(/(\s+[\-]{1,2}\w+|\s+[\|]{1}\s+)/mx ,$value);
+    my @chunks = split(/(\s+[\-]{1,2}\w+|\s+[\|]{1}\s+|\s+>>\s*)/mx ,$value);
     my $first = shift @chunks;
     Monitoring::Config::File::StripTSpace($first);
     push @text, sprintf("  %-30s %s", $key, $first);
@@ -835,6 +850,7 @@ sub _break_long_command {
         if($arg) {
             Monitoring::Config::File::StripLSpace($chunk);
             if(index($chunk, '-') == 0) { $chunk = '  '.$chunk; }
+            if(index($chunk, '>') == 0) { $chunk = '  '.$chunk; }
             $line .= sprintf "%-33s %s", '', $chunk;
             $arg   = 0;
         } else {

@@ -1661,16 +1661,16 @@ sub _set_user_macros {
 
     my $res;
     if(defined $file) {
-        $res = $self->_read_resource_file($file);
+        $res = Thruk::Utils::read_resource_file($file);
     }
     if(!defined $res and defined $peer_key) {
         my $backend = $self->get_peer_by_key($peer_key);
         if(defined $backend->{'resource_file'}) {
-            $res = $self->_read_resource_file($backend->{'resource_file'});
+            $res = Thruk::Utils::read_resource_file($backend->{'resource_file'});
         }
     }
     unless(defined $res) {
-        $res = $self->_read_resource_file($self->{'c'}->config->{'resource_file'});
+        $res = Thruk::Utils::read_resource_file($self->{'c'}->config->{'resource_file'});
     }
 
     if(defined $res) {
@@ -1682,32 +1682,6 @@ sub _set_user_macros {
     return $macros;
 }
 
-
-########################################
-
-=head2 _read_resource_file
-
-  _read_resource_file($file)
-
-returns a hash with all USER1-32 macros
-
-=cut
-
-sub _read_resource_file {
-    my($self, $file, $macros) = @_;
-    return unless defined $file;
-    return unless -f $file;
-    $macros = {} unless defined $macros;
-    my %macros = Config::General::ParseConfig($file);
-    for my $key (keys %macros) {
-        if(ref $macros{$key} eq 'ARRAY') {
-            $macros->{$key} = $macros{$key}[$#{$macros{$key}}];
-        } else {
-            $macros->{$key} = $macros{$key};
-        }
-    }
-    return $macros;
-}
 
 ########################################
 

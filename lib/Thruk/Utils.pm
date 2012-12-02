@@ -639,6 +639,42 @@ sub read_ssi {
     return "";
 }
 
+########################################
+
+=head2 read_resource_file
+
+  read_resource_file($file, [ $macros ])
+
+returns a hash with all USER1-32 macros. macros can
+be a predefined hash.
+
+=cut
+
+sub read_resource_file {
+    my($file, $macros) = @_;
+    my $comments    = {};
+    my $lastcomment = "";
+    return unless defined $file;
+    return unless -f $file;
+    $macros   = {} unless defined $macros;
+    open(my $fh, '<', $file) or die("cannot read file ".$file.": ".$!);
+    while(my $line = <$fh>) {
+        if($line =~ m/^\s*(\$USER\d+\$)\s*=\s*(.*)$/mx) {
+            $macros->{$1}   = $2;
+            $comments->{$1} = $lastcomment;
+            $lastcomment    = "";
+        }
+        elsif($line =~ m/^(\#.*$)/mx) {
+            $lastcomment .= $1;
+        }
+        elsif($line =~ m/^\s*$/mx) {
+            $lastcomment = '';
+        }
+    }
+    Thruk::Utils::IO::close($fh, $file, 1);
+    return($macros, $comments);
+}
+
 
 ########################################
 
