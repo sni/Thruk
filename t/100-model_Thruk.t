@@ -115,6 +115,6 @@ is($cmd->{'line_expanded'}, '/tmp/check_test ', 'expanded command: '.$cmd->{'lin
 is($cmd->{'note'}, '', 'note should be empty');
 
 ################################################################################
-my $res1 = $b->_read_resource_file('t/data/resource.cfg');
-my $res2 = $b->_read_resource_file('t/data/resource2.cfg');
+my $res1 = Thruk::Utils::read_resource_file('t/data/resource.cfg');
+my $res2 = Thruk::Utils::read_resource_file('t/data/resource2.cfg');
 is_deeply($res1, $res2, 'parsing resource.cfg');

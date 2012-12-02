@@ -643,7 +643,7 @@ sub read_ssi {
 
 =head2 read_resource_file
 
-  read_resource_file($file, [ $macros ])
+  read_resource_file($file, [ $macros ], [$with_comments])
 
 returns a hash with all USER1-32 macros. macros can
 be a predefined hash.
@@ -651,7 +651,7 @@ be a predefined hash.
 =cut
 
 sub read_resource_file {
-    my($file, $macros) = @_;
+    my($file, $macros, $with_comments) = @_;
     my $comments    = {};
     my $lastcomment = "";
     return unless defined $file;
@@ -672,6 +672,7 @@ sub read_resource_file {
         }
     }
     Thruk::Utils::IO::close($fh, $file, 1);
+    return($macros) unless $with_comments;
     return($macros, $comments);
 }
 
