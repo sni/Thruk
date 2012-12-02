@@ -18,9 +18,9 @@ nagexp - create export of your nagios installation used for later import in OMD
 
 =head1 SYNOPSIS
 
-Usage: nagexp [options] <nagios.cfg>
+  Usage: nagexp [options] <nagios.cfg>
 
-Options:
+  Options:
   -h, --help                    Show this help message and exit
   -v, --verbose                 Print verbose output
   -V, --version                 Print version

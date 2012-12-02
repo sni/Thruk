@@ -4,12 +4,12 @@
 [ -e ~/.thruk   ] && . ~/.thruk
 [ -e ~/.profile ] && . ~/.profile
 
-if [ ! -z $OMD_ROOT ]; then
-  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
-  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
-elif [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
   export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib";
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
 else
   export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
@@ -70,9 +70,9 @@ thruk - Command Line Utility for Thruk Monitoring Gui
 
 =head1 SYNOPSIS
 
-Usage: thruk [options] | url]
+  Usage: thruk [options] | url]
 
-Options:
+  Options:
   -h, --help                    Show this help message and exit
   -v, --verbose                 Print verbose output
   -V, --version                 Print version
