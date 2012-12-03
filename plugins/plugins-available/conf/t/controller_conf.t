@@ -6,7 +6,7 @@ use Thruk::Config;
 use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-f 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
+    plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
     plan tests => 1083;
 }
 
