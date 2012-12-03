@@ -861,9 +861,11 @@ function add_cron_row(tbl_id) {
  * 88          88888888888 88      `8b 88          88888888Y"' d8'          `8b 88 d8'          `8b
 *******************************************************************************/
 /* write/return table with performance data */
-function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url) {
+function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url, is_host) {
     var matches   = perfdata.match(/([^\s]+|'[\w\s]+')=([^\s]*)/gi);
     if(!matches) { return false; }
+    if(is_host == undefined) { is_host = false; }
+    if(is_host && state == 1) { state = 2; } // set critical state for host checks
     var result    = '';
     var perf_data = [];
     for(var nr in matches) {
@@ -875,7 +877,7 @@ function perf_table(write, state, plugin_output, perfdata, check_command, pnp_ur
                 key:  tmp[0],
                 perf: tmp[1],
                 val:  (data != null && data[1] != '') ? parseFloat(data[1]) : '',
-                unit: data != null ? data[2] : '',
+                unit:  data != null  ? data[2]  : '',
                 warn: (data != null && data[3] != '') ? parseFloat(data[3]) : '',
                 crit: (data != null && data[4] != '') ? parseFloat(data[4]) : '',
                 min:  (data != null && data[5] != '') ? parseFloat(data[5]) : '',
@@ -927,7 +929,7 @@ function perf_parse_data(check_command, state, plugin_output, perfdata) {
         if(d.max == '' && d.unit == '%') { d.max = 100;    }
         if(d.max == '' && d.crit != '')  { d.max = d.crit; }
         if(d.max == '' && d.warn != '')  { d.max = d.warn; }
-        if(d.val != '' && d.max != '') {
+        if(d.val != '' && d.max  != '')  {
             var perc       = (Math.abs(d.val) / d.max * 100).toFixed(2);
             if(perc < 5)   { perc = 5;   }
             if(perc > 100) { perc = 100; }
