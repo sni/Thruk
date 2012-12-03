@@ -159,6 +159,11 @@ sub run {
     pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: missing input file\n" } )   if scalar @{$self->{'opt'}->{'files'}} == 0;
     pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: too many input files\”" } ) if scalar @{$self->{'opt'}->{'files'}} >  1;
 
+    my $maincfg = $self->{'opt'}->{'files'}->[0];
+
+    # try to find the cgi.cfg
+    my $cgicfg = $self->_find_cgi_cfg($maincfg);
+
     # create export file name if non given
     my $tarball = $self->{'opt'}->{'file'};
     if(!$tarball) {
@@ -186,6 +191,7 @@ sub run {
         options => $self->{'opt'},
         version => $vers,
         host    => $host,
+        cgi     => $cgicfg,
     });
     close($fh);
     $self->_cmd('tar cf '.$tempdir.'/export.tar'.' -C '.$tempdir.' index');
@@ -204,7 +210,7 @@ sub run {
         _fatal("no submodules selected, use -a for all.");
     }
 
-    $self->_export($tempdir.'/export.tar', $self->{'opt'}->{'files'}->[0]);
+    $self->_export($tempdir.'/export.tar', $maincfg, $cgicfg);
     $self->_expand_links($tempdir.'/export.tar');
     $self->_cmd('gzip -9 '.$tempdir.'/export.tar');
     $self->_cmd('mv '.$tempdir.'/export.tar.gz '.$tarball);
@@ -252,11 +258,13 @@ sub _cmd {
 
 ##############################################
 sub _export {
-    my($self, $tarball, $filename) = @_;
+    my($self, $tarball, $filename, $cgicfg) = @_;
     if(!-e $filename) {
         print STDERR "ERROR: ", $filename, " ", $!, "\n";
         return 1;
     }
+
+    $self->_tar_append($tarball, $cgicfg) if $cgicfg;
 
     # omd?
     if($filename =~ m|/omd/sites/([^/]+)/etc/(\w+)/(\w+).cfg|mx and -d "/omd/sites/$1/etc/$2/$3.d") {
@@ -356,6 +364,17 @@ sub _expand_links {
             }
         }
     }
+    return;
+}
+
+##############################################
+# try to find cgi.cfg
+sub _find_cgi_cfg {
+    my($self,$mainpath) = @_;
+    my $basepath = $mainpath;
+    $basepath    =~ s/[^\/]+$//mx;
+    my @places = split(/\n/mx,$self->_cmd('find '.$basepath.' -name cgi.cfg'));
+    return $places[0] if defined $places[0];
     return;
 }
 
