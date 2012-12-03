@@ -232,6 +232,7 @@ exit 0
 /usr/lib/thruk/perl5
 %doc %{_mandir}/man8/thruk.*
 %doc %{_mandir}/man3/thruk.*
+%doc %{_mandir}/man3/nag*.*
 
 %if %{defined suse_version}
 %attr(755,wwwrun,root) %{_localstatedir}/lib/thruk
