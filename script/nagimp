@@ -1,0 +1,604 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.thruk   ] && . ~/.thruk
+[ -e ~/.profile ] && . ~/.profile
+
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 24
+
+##############################################
+use strict;
+use warnings;
+
+our $VERSION = '1.59';
+my $branch   = '';
+
+my $nagimp = Thruk::nagimp->new();
+exit $nagimp->run();
+##############################################
+
+=head1 NAME
+
+nagimp - import site into OMD created by a nagexp export
+
+=head1 SYNOPSIS
+
+  Usage: nagimp [options] <export.tgz>
+
+  Options:
+  -h, --help                    Show this help message and exit
+  -v, --verbose                 Print verbose output
+  -V, --version                 Print version
+      --exclude=folder          Exclude directory from macro/plugin processing
+      --replace=search##replace Replace text in object config
+  -dn,--disable-notifications   Import with notifications disabled
+  -dh,--disable-hostchecks      Import with active hostchecks disabled
+  -ds,--disable-servicechecks   Import with active servicechecks disabled
+  -de,--disable-eventhandler    Import with eventhandler disabled
+
+=head1 DESCRIPTION
+
+This script imports a previously created export into OMD. Run this script
+as site user only.
+
+=head1 OPTIONS
+
+nagimp has the following arguments:
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-v> , B<--verbose>
+
+    print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
+
+=item B<--exclude=folder>
+
+    Exclude directory from macro/plugin processing
+
+=item B<--replace=search##replace>
+
+    Replace text in object config. Search is a regular expression. Replace value
+    is seperated by '##'.
+
+=item B<-dn> , B<--disable-notifications>
+
+    Import with notifications disabled
+
+=item B<-dh> , B<--disable-hostchecks>
+
+    Import with active hostchecks disabled
+
+=item B<-ds> , B<--disable-servicechecks>
+
+    Import with active servicechecks disabled
+
+=item B<-de> , B<--disable-eventhandler>
+
+    Import with eventhandler disabled
+
+=back
+
+=head1 RETURN VALUE
+
+returns 0 on successful import or number of errors otherwise
+
+=head1 EXAMPLES
+
+import site into OMD
+
+  %> nagimp /tmp/export.tgz
+
+import and remove old LD_LIBRARY_PATH settings
+
+  %> nagimp /tmp/export.tgz --replace="LD_LIBRARY_PATH=/opt/lib"
+
+=head1 AUTHOR
+
+2012, Sven Nierlein, <sven@consol.de>
+
+=cut
+
+##############################################
+
+package Thruk::nagimp;
+
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+use Data::Dumper;
+use File::Slurp qw/read_file/;
+use File::Copy;
+use Thruk::Utils;
+use Thruk::Utils::Conf;
+use Thruk::Utils::IO;
+use Thruk::Utils::Conf::Defaults;
+use Thruk::Backend::Manager;
+use Monitoring::Config;
+
+##############################################
+sub new {
+    my($class) = @_;
+    my $self = {};
+    bless $self, $class;
+    return $self;
+}
+
+##############################################
+sub run {
+    my($self) = @_;
+    $| = 1;
+    my $vers  = "Thruk Version ".$VERSION.($branch ne '' ? '~'.$branch : '');
+    $self->{'opt'} = {
+        'verbose'  => 0,
+        'files'    => [],
+        'disable'  => {
+                    'hostchecks'    => 0,
+                    'servicechecks' => 0,
+                    'notifications' => 0,
+                    'eventhandler'  => 0,
+                },
+        'exclude'  => {},
+        'replace'  => {},
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    GetOptions (
+       "h|help"                  => \$self->{'opt'}->{'help'},
+       "v|verbose"               => \$self->{'opt'}->{'verbose'},
+       "V|version"               => \$self->{'opt'}->{'version'},
+       "disable-hostchecks"      => \$self->{'opt'}->{'disable'}->{'hostchecks'},
+       "disable-servicechecks"   => \$self->{'opt'}->{'disable'}->{'servicechecks'},
+       "disable-notifications"   => \$self->{'opt'}->{'disable'}->{'notifications'},
+       "disable-eventhandler"    => \$self->{'opt'}->{'disable'}->{'eventhandler'},
+       "d=s"                     => sub {
+            $self->{'opt'}->{'disable'}->{'hostchecks'}    = 1 if "".$_[1] eq 'h';
+            $self->{'opt'}->{'disable'}->{'servicechecks'} = 1 if "".$_[1] eq 's';
+            $self->{'opt'}->{'disable'}->{'notifications'} = 1 if "".$_[1] eq 'n';
+            $self->{'opt'}->{'disable'}->{'eventhandler'}  = 1 if "".$_[1] eq 'e';
+        },
+       "exclude=s"               => sub { $self->{'opt'}->{'exclude'}->{$_[1]} = 1 },
+       "replace=s"               => sub { my($s, $r)=split(/\#\#/mx,$_[1],2); $self->{'opt'}->{'replace'}->{$s} = $r },
+       "<>"                      => sub { push @{$self->{'opt'}->{'files'}}, "".$_[0] },
+    ) or
+        pod2usage( { -verbose => 2, -message => 'error in options' } );
+
+    if($self->{'opt'}->{'version'}) { print $vers,"\n"; exit 0; }
+    pod2usage( { -verbose => 2, -exit => 3 } ) if $self->{'opt'}->{'help'};
+    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: missing export file\n" } )     if scalar @{$self->{'opt'}->{'files'}} == 0;
+    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: too many export files\n" } )   if scalar @{$self->{'opt'}->{'files'}} >  1;
+    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: please run as site user\n" } ) if ! $ENV{'OMD_ROOT'};
+    pod2usage( { -verbose => 2, -exit => 3, -message => "ERROR: please run as site user\n" } ) if ! $ENV{'OMD_SITE'};
+
+    chdir($ENV{'OMD_ROOT'}) or die("cannot change directory ".$ENV{'OMD_ROOT'}.": ".$!);
+
+    # could be read from core config...
+    $self->{'loc'} = {
+        'core'          => 'etc/nagios/nagios.cfg',
+        'core.d'        => 'etc/nagios/nagios.d',
+        'conf.d'        => 'etc/nagios/conf.d',
+        'resource_file' => 'etc/nagios/resource.cfg',
+        'cgi.cfg'       => 'etc/nagios/cgi.cfg',
+        'logfile'       => 'var/nagios/nagios.log',
+        'archive'       => 'var/nagios/archive',
+        'status.dat'    => 'var/nagios/status.dat',
+        'retention.dat' => 'var/nagios/retention.dat',
+        'plugins'       => 'local/lib/nagios/plugins',
+        'tmpcore'       => 'tmp/nagios/nagios.cfg',
+        'plugins'       => 'lib/nagios/plugins',
+        'usr_plugins'   => 'local/lib/nagios/plugins',
+    };
+
+    return $self->_import();
+}
+
+
+##############################################
+# SUBS
+##############################################
+sub _fatal {
+    my($msg) = @_;
+    chomp($msg);
+    print STDERR 'ERROR: ', $msg, "\n";
+    exit 1;
+}
+
+##############################################
+sub _info {
+    my($msg) = @_;
+    chomp($msg);
+    print 'INFO: ', $msg, "\n";
+    return;
+}
+
+##############################################
+sub _cmd {
+    my($self, $cmd) = @_;
+    _info('running cmd: '.$cmd) if $self->{'opt'}->{'verbose'};
+    return `$cmd`;
+}
+
+##############################################
+sub _import {
+    my($self) = @_;
+    my $export  = $self->{'opt'}->{'files'}->[0];
+    _fatal('cannot import '.$export.': '.$!) unless -e $export;
+    _info('starting import for '.$export);
+    my $tempdir = 'tmp/nagimp';
+    $self->_cmd('rm -rf '.$tempdir);
+    mkdir($tempdir) or die("failed to create $tempdir: $!");
+
+    $self->_verify_tarball($export);
+    $self->_unpack_tarball($export, $tempdir);
+
+    my $index    = $self->_readindex($tempdir);
+    $self->_printexport_info($index) if $self->{'opt'}->{'verbose'};
+    my $mainfile = $index->{'options'}->{'files'}->[0];
+    _fatal('no main config file found in index') unless $mainfile;
+    $self->_cmd('rm -rf '.$self->{'loc'}->{'conf.d'}.'/imp/ '.$self->{'loc'}->{'tmpcore'});
+    my $impobjs = Monitoring::Config->new({ core_conf => $tempdir.$mainfile, localdir => $tempdir });
+    $impobjs->update();
+
+    my $curobj    = $self->_import_config($impobjs, $tempdir, $index);
+    my $oldmacros = $self->_import_objects($impobjs, $tempdir, $curobj);
+    $self->_import_logfile($impobjs, $tempdir);
+    $self->_import_archive($impobjs, $tempdir);
+    $self->_import_status($impobjs, $tempdir);
+    $self->_import_retention($impobjs, $tempdir);
+    $self->_import_plugins($impobjs, $curobj, $tempdir, $oldmacros);
+
+    _info("import finished");
+    $self->_cmd('rm -rf '.$tempdir);
+    return 0;
+}
+##############################################
+sub _import_logfile {
+    my($self, $impobjs, $tempdir) = @_;
+    my $dst = $self->{'loc'}->{'logfile'};
+    if($impobjs->{'_corefile'}->{'conf'}->{'log_file'} and -e $tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'log_file'}) {
+        _info('restored '.$dst.' from '.$impobjs->{'_corefile'}->{'conf'}->{'log_file'});
+        copy($tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'log_file'}, $dst) or die("copy failed: ".$!);
+    }
+    return;
+}
+
+##############################################
+sub _import_archive {
+    my($self, $impobjs, $tempdir) = @_;
+    my $dst = $self->{'loc'}->{'archive'};
+    if($impobjs->{'_corefile'}->{'conf'}->{'log_archive_path'} and -d $tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'log_archive_path'}) {
+        _info('restored '.$dst.' from '.$impobjs->{'_corefile'}->{'conf'}->{'log_archive_path'});
+        for my $file (glob($tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'log_archive_path'}.'/*.log')) {
+            copy($file, $dst) or die("copy failed: ".$!);
+        }
+    }
+    return;
+}
+
+##############################################
+sub _import_config {
+    my($self, $impobjs, $tempdir, $index) = @_;
+
+    if($index->{'cgi'}) {
+        my $cgi_defaults          = Thruk::Utils::Conf::Defaults->get_cgi_cfg();
+        my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($tempdir.$index->{'cgi'}, $cgi_defaults);
+        my $newdata = {};
+        for my $key (keys %{$data}) {
+            $newdata->{$key} = $data->{$key}->[1];
+        }
+        Thruk::Utils::Conf::update_conf($self->{'loc'}->{'cgi.cfg'}, $newdata, undef, $cgi_defaults);
+        _info('restored '.$self->{'loc'}->{'cgi.cfg'});
+    }
+
+    # empty old core conf
+    $self->_strip_file($self->{'loc'}->{'core'}, 7);
+    $self->_strip_file($self->{'loc'}->{'resource_file'}, 10);
+
+    my $tmpcore = $tempdir."/core.cfg";
+    my $cmd     = "merge-nagios-config ".$self->{'loc'}->{'core.d'}."/*.cfg ".$self->{'loc'}->{'core'}." > ".$tmpcore;
+    $self->_cmd($cmd);
+
+    my $curobjs = Monitoring::Config->new({ core_conf => $tmpcore });
+    $curobjs->update();
+    open(my $fh, '>>', $self->{'loc'}->{'core'}) or die("cannot open ".$self->{'loc'}->{'core'}.": ".$!);
+    for my $key (sort keys %{$impobjs->{'_corefile'}->{'conf'}}) {
+        if(!defined $curobjs->{'_corefile'}->{'conf'}->{$key} or $curobjs->{'_corefile'}->{'conf'}->{$key} ne $impobjs->{'_corefile'}->{'conf'}->{$key}) {
+            next if $key =~ m/_file$/mx;
+            next if $key =~ m/_path$/mx;
+            next if $key =~ m/_dir$/mx;
+            next if $key =~ m/_user$/mx;
+            next if $key =~ m/_group$/mx;
+            next if $key eq 'broker_module';
+            print $fh $key.'='.$impobjs->{'_corefile'}->{'conf'}->{$key}."\n";
+        }
+    }
+    # write disabled attributes to nagios.cfg, otherwise it won't work if use_retention is disabled
+    print $fh "enable_notifications=0\n"    if $self->{'opt'}->{'disable'}->{'notifications'};
+    print $fh "enable_event_handlers=0\n"   if $self->{'opt'}->{'disable'}->{'eventhandler'};
+    print $fh "execute_service_checks=0\n"  if $self->{'opt'}->{'disable'}->{'servicechecks'};
+    print $fh "execute_host_checks=0\n"     if $self->{'opt'}->{'disable'}->{'hostchecks'};
+    close($fh);
+
+    _info('restored '.$self->{'loc'}->{'core'});
+    return $curobjs;
+}
+
+##############################################
+sub _import_objects {
+    my($self, $impobjs, $tempdir, $curobjs) = @_;
+    my @files;
+
+    # remove duplicate objects for some types
+    for my $type (qw/command timeperiod/) {
+        for my $o (@{$impobjs->get_objects_by_type($type)}) {
+            my $name = $o->get_primary_name();
+            my $old  = $curobjs->get_objects_by_name($type, $name);
+            if(scalar @{$old} > 0) {
+                _info('removed duplicate '.$type.' '.$name);
+                $old->[0]->disable();
+            }
+        }
+    }
+    $curobjs->rebuild_index();
+
+    # remove duplicate templates for some types
+    for my $type (qw/service host contact/) {
+        for my $o (@{$impobjs->get_templates_by_type($type)}) {
+            my $name = $o->get_template_name();
+            my $old  = $curobjs->get_objects_by_name($type, $name, 1);
+            if(scalar @{$old} > 0) {
+                _info('removed duplicate '.$type.' template '.$name);
+                $old->[0]->disable();
+            }
+        }
+    }
+
+    $curobjs->rebuild_index();
+    $curobjs->commit();
+
+    # copy new config files
+    for my $file (@{$impobjs->{'files'}}) {
+        push @files, $file->{path};
+    }
+    my $root = Thruk::Utils::Conf::get_root_folder(\@files);
+    for my $file (@{$impobjs->{'files'}}) {
+        my $path    = $file->{'path'};
+        $path       =~ s/^$root//mx;
+        my $newpath = $self->{'loc'}->{'conf.d'}.'/imp'.$path;
+        if(-e $newpath) { $newpath =~ s/\.cfg$/_imported.cfg/mx; }
+        _info('restored '.$newpath.' from '.$file->{'path'});
+        my $dirname = $newpath;
+        $dirname    =~ s/\/[^\/]+$//mx;
+        Thruk::Utils::IO::mkdir_r($dirname);
+        copy($file->{'path'}, $newpath) or die("copy $newpath failed: ".$!);
+    }
+
+    $curobjs->rebuild_index();
+    $curobjs->commit();
+    $curobjs->update();
+
+    # adjust user macros
+    my $oldmacros = $self->_replace_user_macros($impobjs, $tempdir, $curobjs);
+    $curobjs->update();
+    return $oldmacros;
+}
+
+##############################################
+sub _import_status {
+    my($self, $impobjs, $tempdir) = @_;
+    my $dst = $self->{'loc'}->{'status.dat'};
+    if($impobjs->{'_corefile'}->{'conf'}->{'status_file'} and -e $tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'status_file'}) {
+        _info('restored '.$dst.' from '.$impobjs->{'_corefile'}->{'conf'}->{'status_file'});
+        copy($tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'status_file'}, $dst) or die("copy failed: ".$!);
+    }
+    return;
+}
+
+##############################################
+sub _import_retention {
+    my($self, $impobjs, $tempdir) = @_;
+    my $dst = $self->{'loc'}->{'retention.dat'};
+    if($impobjs->{'_corefile'}->{'conf'}->{'state_retention_file'} and -e $tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'state_retention_file'}) {
+        _info('restored '.$dst.' from '.$impobjs->{'_corefile'}->{'conf'}->{'state_retention_file'});
+        copy($tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'state_retention_file'}, $dst) or die("copy failed: ".$!);
+    }
+
+    # disable some options after import?
+    $self->_replace_inline($dst, 'active_host_checks_enabled=1',    'active_host_checks_enabled=0')    if $self->{'opt'}->{'disable'}->{'hostchecks'};
+    $self->_replace_inline($dst, 'active_service_checks_enabled=1', 'active_service_checks_enabled=0') if $self->{'opt'}->{'disable'}->{'servicechecks'};
+    $self->_replace_inline($dst, 'enable_notifications=1',          'enable_notifications=0')          if $self->{'opt'}->{'disable'}->{'notifications'};
+    $self->_replace_inline($dst, 'enable_event_handlers=1',         'enable_event_handlers=0')         if $self->{'opt'}->{'disable'}->{'eventhandler'};
+
+    return;
+}
+
+##############################################
+sub _import_plugins {
+    my($self, $impobjs, $curobj, $tempdir, $oldmacros) = @_;
+    my $imppath          = $self->{'loc'}->{'conf.d'}.'/imp';
+    my $shipedpluginpath = $self->{'loc'}->{'plugins'};
+    my $usrpluginpath    = $self->{'loc'}->{'usr_plugins'};
+    my $synced_dirs      = {};
+    for my $o (@{$curobj->get_objects()}) {
+        next unless $o->{'file'}->{'path'} =~ m/$imppath/mx;
+        for my $attr (keys %{$o->{'conf'}}) {
+            my $value = $o->{'conf'}->{$attr};
+            for my $search (keys %{$self->{'opt'}->{'replace'}}) {
+                my $replace = $self->{'opt'}->{'replace'}->{$search} || '';
+                next unless defined $o->{'conf'}->{$attr};
+                if($o->{'conf'}->{$attr} =~ s#$search#$replace#gmx) {
+                    $o->{'file'}->{'changed'} = 1;
+                }
+            }
+
+            for my $path (@{$oldmacros}) {
+                if(defined $o->{'conf'}->{$attr} and $o->{'conf'}->{$attr} =~ m/\Q$path\E([^\s\;]+)/mx) {
+                    if($attr eq 'command_line' or $attr eq 'check_command') {
+                        my $pluginname = $1;
+                        $pluginname =~ s/^\///mx;
+                        my $pluginpath = $path.'/'.$pluginname;
+                        if(-e $shipedpluginpath.'/'.$pluginname) {
+                            $o->{'conf'}->{$attr} =~ s|\Q$pluginpath\E|\$USER1\$/$pluginname|gmx;
+                        } else {
+                            $o->{'conf'}->{$attr} =~ s|\Q$path\E|\$USER2\$|gmx;
+                            my $dirname = $pluginname;
+                            $dirname =~ s/[^\/]+$//mx;
+                            # copy hole directory if its a subdir
+                            if($dirname ne '') {
+                                next if defined $synced_dirs->{$dirname};
+                                Thruk::Utils::IO::mkdir_r($usrpluginpath.'/'.$dirname);
+                                my $src = $tempdir.'/'.$path.'/'.$dirname;
+                                $self->_cmd('rsync -av '.$src.'. '.$usrpluginpath.'/'.$dirname.'.') if -e $src;
+                                $synced_dirs->{$dirname} = 1;
+                            } else {
+                                copy($tempdir.'/'.$pluginpath, $usrpluginpath.'/'.$dirname) or die("failed to copy: ".$!);
+                                chmod(0750, $usrpluginpath.'/'.$dirname.'/'.$pluginname)
+                            }
+                        }
+                        $o->{'file'}->{'changed'} = 1;
+                    }
+                    else {
+                        die("don't know how to import: ".$attr);
+                    }
+                }
+            }
+        }
+    }
+    $curobj->commit();
+    return;
+}
+
+##############################################
+sub _verify_tarball {
+    my($self, $export) = @_;
+    my $files = $self->_cmd('tar ztvf '.$export);
+    _fatal('cannot find index file in tarball') unless($files =~ m/\s+index$/mx);
+    return;
+}
+
+##############################################
+sub _unpack_tarball {
+    my($self, $export, $tempdir) = @_;
+    $self->_cmd('tar zxf '.$export.' -C '.$tempdir);
+}
+
+##############################################
+sub _readindex {
+    my($self, $tempdir) = @_;
+    my $cont = read_file($tempdir.'/index') or _fatal('cannot read index file: '.$!);
+    my $VAR1;
+    eval($cont);
+    return $VAR1;
+}
+
+##############################################
+sub _printexport_info {
+    my($self, $index) = @_;
+    _info('export details:');
+    _info('    date: '.$index->{'date'});
+    _info('    host: '.$index->{'host'});
+    return;
+}
+
+##############################################
+sub _replace_inline {
+    my($self,$files,$search,$replace,$regex) = @_;
+    $regex = 1 unless defined $regex;
+    $files = Thruk::Utils::list($files);
+    for my $file (@{$files}) {
+        my $cont = read_file($file);
+        if($regex) {
+            $cont    =~ s/$search/$replace/gmx;
+        } else {
+            $cont    =~ s/\Q$search\E/$replace/gmx;
+        }
+        open(my $fh, '>', $file);
+        print $fh $cont;
+        close($fh);
+    }
+    return;
+}
+
+##############################################
+sub _strip_file {
+    my($self,$file,$keeplines) = @_;
+    $self->_cmd('cp -p '.$file.' '.$file.'.new');
+    $self->_cmd('head -n '.$keeplines.' '.$file.'.new > '.$file.'.new2');
+    $self->_cmd('cp -p '.$file.'.new2 '.$file);
+    unlink($file.'.new2', $file.'.new');
+    return;
+}
+
+##############################################
+sub _replace_user_macros {
+    my($self, $impobjs, $tempdir, $curobjs) = @_;
+    my $curmacros = Thruk::Utils::read_resource_file($self->{'loc'}->{'resource_file'});
+    my $imppath   = $self->{'loc'}->{'conf.d'}.'/imp';
+    my $newfiles  = $curobjs->get_files_for_folder($imppath, '\.cfg$');
+    my $oldmacros = [];
+
+    open(my $fh, '>>', $self->{'loc'}->{'resource_file'}) or die("cannot open ".$self->{'loc'}->{'resource_file'}.": ".$!);
+    print $fh "\n";
+    my $resource_file = $tempdir.'/'.$impobjs->{'_corefile'}->{'conf'}->{'resource_file'};
+    my($impmacros, $impmacrocomments) = Thruk::Utils::read_resource_file($resource_file, {}, 1);
+    my $translate_macros = [];
+
+    for my $x (1..256) {
+        my $macro     = '$USER'.$x.'$';
+        my $origmacro = $macro;
+        next unless defined $impmacrocomments->{$macro};
+
+        # replace directories with their path
+        if(-d $tempdir.'/'.$impmacros->{$macro} and !defined $self->{'opt'}->{'exclude'}->{$impmacros->{$macro}}) {
+            $self->_replace_inline($newfiles, $macro, $impmacros->{$macro}, 0);
+            push @{$oldmacros}, $impmacros->{$macro};
+            next;
+        }
+
+        # does this number exist already?
+        if(defined $curmacros->{$macro}) {
+            my $nextfree = 1;
+            while(defined $curmacros->{'$USER'.$nextfree.'$'}) { $nextfree++; }
+            $macro = '$USER'.$nextfree.'$';
+            $curmacros->{$macro} = $impmacros->{$origmacro};
+            push @{$translate_macros}, [$origmacro, $macro];
+        }
+        print $fh $impmacrocomments->{$origmacro},"\n" if $impmacrocomments->{$origmacro};
+        print $fh $macro.'='.$impmacros->{$origmacro},"\n\n";
+    }
+    close($fh);
+
+    for my $repl (@{$translate_macros}) {
+        $self->_replace_inline($newfiles, $repl->[0], $repl->[1], 0);
+    }
+
+    return $oldmacros;
+}
+
+##############################################
+
+1;

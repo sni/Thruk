@@ -35,6 +35,7 @@ fi
 FILES="thruk
        naglint
        nagexp
+       nagimp
 "
 for file in $FILES; do
     [ ! -e $file.3 -o $file -nt $file.3 ] && pod2man -s 3 -n $file ../script/$file > $file.3

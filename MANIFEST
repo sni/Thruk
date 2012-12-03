@@ -879,6 +879,7 @@ root/thruk/startup.html
 root/thruk/themes
 script/append.make
 script/nagexp
+script/nagimp
 script/naglint
 script/thruk
 script/thruk_auth
