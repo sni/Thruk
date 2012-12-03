@@ -5,6 +5,7 @@ use warnings;
 use Carp qw/cluck/;
 use Monitoring::Config::File;
 use Data::Dumper;
+use Carp;
 
 =head1 NAME
 
@@ -1141,7 +1142,7 @@ sub _get_files_for_folder {
     $dir =~ s/\/$//gmxo;
 
     my @tmpfiles;
-    opendir(my $dh, $dir) or die("cannot open directory $dir: $!");
+    opendir(my $dh, $dir) or confess("cannot open directory $dir: $!");
     while(my $file = readdir $dh) {
         next if $file eq '.';
         next if $file eq '..';
@@ -1163,9 +1164,9 @@ sub _get_files_for_folder {
 
         my $localdir = $self->{'config'}->{'localdir'};
         if($localdir) {
-            my $display = $file;
-            $display    =~ s/^$localdir//mx;
-            $self->{'file_trans'}->{$file} = $display;
+            my $display = $dir."/".$file;
+            $display    =~ s/^$localdir\///mx;
+            $self->{'file_trans'}->{$dir."/".$file} = $display;
         }
 
         push @files, $dir."/".$file;
@@ -1212,8 +1213,9 @@ sub _get_files_names {
     # single folders
     if(defined $config->{'obj_dir'}) {
         for my $dir ( ref $config->{'obj_dir'} eq 'ARRAY' ? @{$config->{'obj_dir'}} : ($config->{'obj_dir'}) ) {
-            $dir = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
-            for my $file (@{$self->_get_files_for_folder($dir, '\.cfg$')}) {
+            my $path = $dir;
+            $path = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
+            for my $file (@{$self->_get_files_for_folder($path, '\.cfg$')}) {
                 $files->{$file} = 1;
             }
         }
