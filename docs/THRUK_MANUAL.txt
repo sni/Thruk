@@ -2065,6 +2065,15 @@ Description: Sets refresh timer to a custom value.
 Example: /thruk/cgi-bin/status.cgi?refresh=30
 
 
+==== columns
+
+Pages: status overview
+
+Description: Sets the number of columns
+
+Example: /thruk/cgi-bin/status.cgi?hostgroup=all&style=overview&columns=5
+
+
 
 === SLA Reporting
 

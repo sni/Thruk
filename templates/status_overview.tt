@@ -157,8 +157,9 @@
               </table>
             </div>
           </td>
-          [%# every 3rd group is in a new table row #%]
-          [% IF loop.index % 3 == 2 and ! loop.last %]
+          [%# every x group is in a new table row #%]
+          [% columns_prev = columns - 1 %]
+          [% IF loop.index % columns == columns_prev and ! loop.last %]
             </tr>
             <tr>
           [% END %]

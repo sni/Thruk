@@ -395,6 +395,8 @@ sub _process_hostdetails_page {
 sub _process_overview_page {
     my( $self, $c ) = @_;
 
+    $c->stash->{'columns'} = $c->{'request'}->{'parameters'}->{'columns'} || 3;
+
     # which host to display?
     my( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = Thruk::Utils::Status::do_filter($c);
     return if $c->stash->{'has_error'};
