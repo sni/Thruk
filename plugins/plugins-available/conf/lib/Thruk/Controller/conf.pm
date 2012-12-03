@@ -1593,6 +1593,8 @@ sub _object_clone {
     my $files_root          = $self->_set_files_stash($c, 1);
     $c->stash->{'new_file'} = $obj->{'file'}->{'display'};
     $c->stash->{'new_file'} =~ s/^$files_root/\//gmx;
+    # if cloned from a readonly file, keep new_file empty
+    if($obj->{'file'}->{'readonly'}) { $c->stash->{'new_file'} = ''; }
     $obj = Monitoring::Config::Object->new(type     => $obj->get_type(),
                                            conf     => $obj->{'conf'},
                                            coretype => $c->{'obj_db'}->{'coretype'});
