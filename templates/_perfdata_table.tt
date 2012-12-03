@@ -5,8 +5,7 @@ var pnp_url = "";
 [%+ IF pnp_url %]
   var pnp_url = "[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]"
 [% END +%]
-  var is_host = [% IF svc == '_HOST_' %]true[% ELSE %]false[% END %];
-perf_table([% write %], [% state %], '[% escape_quotes(escape_bslash(plugin_output)).replace('/', '\\/') %]', '[% escape_quotes(escape_bslash(perfdata)) %]', '[% escape_quotes(escape_bslash(check_command)) %]', pnp_url);
+perf_table([% write %], [% state %], '[% escape_quotes(escape_bslash(plugin_output)).replace('/', '\\/') %]', '[% escape_quotes(escape_bslash(perfdata)) %]', '[% escape_quotes(escape_bslash(check_command)) %]', pnp_url, [% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]);
 -->
 </script>
 [% END %]
