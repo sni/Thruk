@@ -58,6 +58,8 @@
       ref = ref.replace(/^\?expired$/,  '');
       ref = ref.replace(/^\?invalid\&/, '?');
       ref = ref.replace(/^\?invalid$/,  '');
+      ref = ref.replace(/^\?problem\&/, '?');
+      ref = ref.replace(/^\?problem$/,  '');
       ref = ref.replace(/^\?/, '/');
       jQuery('#referer').val(ref);
     }

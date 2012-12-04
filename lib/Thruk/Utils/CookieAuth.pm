@@ -32,7 +32,6 @@ sub external_authentication {
     my($config, $login, $pass, $address) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
     my $sdir     = $config->{'tmp_path'}.'/sessions';
-    my $success  = 0;
 
     my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
     my $ua       = get_user_agent();
@@ -55,10 +54,11 @@ sub external_authentication {
                     open(my $fh, '>', $sessionfile) or die('failed to open session file: '.$sessionfile.' '.$!);
                     print $fh join('~~~', $hash, $address, $login), "\n";
                     Thruk::Utils::IO::close($fh, $sessionfile);
-                    $success = $sessionid;
+                    return $sessionid;
                 }
             } else {
                 print STDERR 'authorization failed for user ', $login,' got rc ', $res->code;
+                return 0;
             }
         } else {
             print STDERR 'auth: realm does not match, got ', $realm;
@@ -66,7 +66,7 @@ sub external_authentication {
     } else {
         print STDERR 'auth: expected code 401, got ', $res->code;
     }
-    return $success;
+    return -1;
 }
 
 ##############################################

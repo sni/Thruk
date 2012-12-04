@@ -115,7 +115,18 @@ sub process {
         #}
 
         # validate session data
-        if(!Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user)) {
+        my $rc;
+        eval {
+            $rc = Thruk::Utils::CookieAuth::verify_basic_auth($config, $basicauth, $user);
+        };
+        if($rc == -1 or $@) {
+            print STDERR "thruk_auth: technical problem during login for ".$user if $verbose;
+            print STDERR "thruk_auth: ".$@ if $@;
+            unlink($sessionfile);
+            delete $sessioncache->{$auth};
+            return $loginurl, "?problem&", $path, "\n";
+        }
+        if($rc == 0) {
             print STDERR "thruk_auth: basic auth verify failed for ".$user if $verbose;
             unlink($sessionfile);
             delete $sessioncache->{$auth};

@@ -78,6 +78,9 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     if($c->req->query_keywords =~ /^invalid\&(.*)$/mx or $c->req->query_keywords eq 'invalid') {
         Thruk::Utils::set_message( $c, 'fail_message', 'session is not valid (anymore)' );
     }
+    if($c->req->query_keywords =~ /^problem\&(.*)$/mx or $c->req->query_keywords eq 'problem') {
+        Thruk::Utils::set_message( $c, 'fail_message', 'technical problem during login, please have a look at the logfiles.' );
+    }
 
     my $login   = $c->request->parameters->{'login'}    || '';
     my $pass    = $c->request->parameters->{'password'} || '';
