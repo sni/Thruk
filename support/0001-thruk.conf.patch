@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-07-16 11:18:45.075701128 +0200
-+++ b/thruk.conf	2012-07-16 11:18:39.743666302 +0200
+--- a/thruk.conf	2012-12-04 17:13:25.000000000 +0100
++++ b/thruk.conf	2012-12-04 17:14:45.000000000 +0100
 @@ -63,11 +63,11 @@
  
  ######################################
@@ -14,7 +14,7 @@
  
  ######################################
  # normally passive checks would be marked as disabled.
-@@ -134,27 +134,27 @@
+@@ -134,11 +134,11 @@
  
  ######################################
  # temporary directory, used for template cache...
@@ -25,6 +25,10 @@
  # var directory, used to store user settings
 -#var_path = ./var
 +var_path = /var/lib/thruk
+ 
+ ######################################
+ # mode used when creating or saving files
+@@ -147,19 +147,19 @@
  
  ######################################
  # server side includes
@@ -47,7 +51,7 @@
  
  ######################################
  # custom templates
-@@ -162,7 +162,7 @@
+@@ -167,7 +167,7 @@
  
  ######################################
  # log4perl config
@@ -56,7 +60,7 @@
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -343,23 +343,23 @@
+@@ -354,23 +354,23 @@
  # Specifiy a file which is then completly under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
@@ -85,11 +89,10 @@
  
  # execute regular scheduled reports with this nice level
  #report_nice_level = 5
-@@ -396,6 +396,20 @@
- ######################################
+@@ -450,6 +450,20 @@
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
-+#    <peer>
+ #    <peer>
 +#        name   = Core
 +#        type   = livestatus
 +#        <options>
@@ -103,10 +106,11 @@
 +#       </configtool>
 +#    </peer>
 +
- #    <peer>
++#    <peer>
  #        name   = Local Nagios
  #        type   = livestatus
-@@ -445,9 +459,9 @@
+ #        hidden = 1             # make this backend hidden by default
+@@ -498,9 +512,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
