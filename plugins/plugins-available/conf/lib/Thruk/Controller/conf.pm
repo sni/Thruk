@@ -15,7 +15,7 @@ use Storable qw/dclone/;
 use Data::Dumper;
 use File::Slurp;
 use Socket;
-use Encode qw(decode_utf8);
+use Encode qw(decode_utf8 encode_utf8);
 use Config::General qw(ParseConfig);
 use Digest::MD5 qw(md5_hex);
 
@@ -1437,7 +1437,7 @@ sub _set_files_stash {
     }
 
     $c->stash->{'filenames_json'} = encode_json([{ name => 'files', data => [ sort @filenames ]}]);
-    $c->stash->{'files_json'}     = encode_json($files_tree);
+    $c->stash->{'files_json'}     = JSON::XS->new->encode($files_tree); # no encoding here, filenames are encoded already
     return $files_root;
 }
 
@@ -1533,7 +1533,7 @@ sub _object_save {
 
     # only save or continue to raw edit?
     if(defined $c->{'request'}->{'parameters'}->{'send'} and $c->{'request'}->{'parameters'}->{'send'} eq 'raw edit') {
-        return $c->response->redirect('conf.cgi?sub=objects&action=editor&file='.$obj->{'file'}->{'display'}.'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
+        return $c->response->redirect('conf.cgi?sub=objects&action=editor&file='.encode_utf8($obj->{'file'}->{'display'}).'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
     } else {
         if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
             Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' saved with errors', $obj->{'file'}->{'errors'} );
@@ -1719,7 +1719,7 @@ sub _file_editor {
         $c->stash->{'file_link'}     = $file->{'display'};
         $c->stash->{'file_name'}     = $file->{'display'};
         $c->stash->{'file_name'}     =~ s/^$files_root//gmx;
-        $c->stash->{'file_content'}  = $file->_get_new_file_content();
+        $c->stash->{'file_content'}  = decode_utf8($file->_get_new_file_content());
         $c->stash->{'template'}      = 'conf_objects_fileeditor.tt';
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
