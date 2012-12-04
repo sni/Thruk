@@ -6,7 +6,22 @@
 <input type="hidden" name="md5" value="[% md5 %]">
 <div align="center">
 [% IF readonly %]
-<br><font color="orange">Readonly: Make sure the config file is writable!</font>
+<style>
+  .alert {
+    padding: 8px 35px 8px 14px;
+    margin-bottom: 18px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    border: 1px solid #FBEED5;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    display: inline-block;
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+</style>
+<br><div class="alert"><b>Readonly!</b> Make sure the config file is writable</div>
 [% END %]
   <table border="0" class='data conftool'>
     [% FOREACH cat = keys %]
