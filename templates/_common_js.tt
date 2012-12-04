@@ -7,8 +7,10 @@
   var has_expire_acks        = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
   var fav_counter            = [% IF fav_counter +%]true[% ELSE %]false[% END %];
   var perf_bar_mode          = '[% perf_bar_mode %]';
+  var internetExplorer       = false;
 -->
 </script>
+<!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
 [%+ UNLESS thruk_debug %]
 <script type="text/javascript" src="[% url_prefix %]thruk/javascript/all_in_one-[% version %].js"></script>
 [% ELSE %]

@@ -2989,7 +2989,7 @@ var ajax_search = {
         }
 
         input.setAttribute("autocomplete", "off");
-        if(!iPhone) {
+        if(!iPhone && !internetExplorer) {
             input.blur();   // blur & focus the element, otherwise the first
             input.focus();  // click would result in the browser autocomplete
         }
