@@ -265,6 +265,8 @@ sub set_default_config {
         'cgi.cfg'                       => 'cgi.cfg',
         bug_email_rcpt                  => 'bugs@thruk.org',
         home_link                       => 'http://www.thruk.org',
+        mode_file                       => '0660',
+        mode_dir                        => '0770',
         backend_debug                   => 0,
         connection_pool_size            => 0,
         use_ajax_search                 => 1,

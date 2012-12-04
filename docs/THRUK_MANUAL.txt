@@ -894,6 +894,24 @@ ex.:
   user_template_path = ./my_templates
 
 
+==== mode_file
+
+Mode used when creating or saving files.
+
+ex.:
+
+  mode_file = 0660
+
+
+==== mode_file
+
+Mode used when creating folders
+
+ex.:
+
+  mode_dir = 0770
+
+
 ==== delay_pages_after_backend_reload
 
 Delay the page delivery until the backends uptime is at least this

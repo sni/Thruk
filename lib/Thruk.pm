@@ -68,6 +68,7 @@ __PACKAGE__->config(%Thruk::Config::config);
 # accessible
 # override config in Catalyst::Plugin::Thruk::ConfigLoader
 __PACKAGE__->setup();
+$Thruk::Utils::IO::config = __PACKAGE__->config;
 
 ###################################################
 # create connection pool

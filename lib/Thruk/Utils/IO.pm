@@ -15,6 +15,8 @@ use warnings;
 use Carp;
 use Fcntl ':mode';
 
+$Thruk::Utils::IO::config = undef;
+
 ##############################################
 =head1 METHODS
 
@@ -111,16 +113,18 @@ sub ensure_permissions {
     my @stat = stat($path);
     my $cur  = sprintf "%04o", S_IMODE($stat[2]);
 
+    $Thruk::Utils::IO::config = Thruk::Config::get_config() unless defined $Thruk::Utils::IO::config;
+    my $config = $Thruk::Utils::IO::config;
     # set modes
     if($mode eq 'file') {
-        if($cur ne '0660') {
-            chmod(0660, $path)
+        if($cur ne $config->{'mode_file'}) {
+            chmod(oct($config->{'mode_file'}), $path)
                 or warn("failed to ensure permissions (0660/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
         }
     }
     elsif($mode eq 'dir') {
-        if($cur ne '0770') {
-            chmod(0770, $path)
+        if($cur ne $config->{'mode_dir'}) {
+            chmod(oct($config->{'mode_dir'}), $path)
                 or warn("failed to ensure permissions (0770/$cur) with uid: ".$>." - ".$<." for ".$path.": ".$!."\n".`ls -dn $path`);
         }
     }
