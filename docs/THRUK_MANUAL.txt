@@ -903,7 +903,7 @@ ex.:
   mode_file = 0660
 
 
-==== mode_file
+==== mode_dir
 
 Mode used when creating folders
 
