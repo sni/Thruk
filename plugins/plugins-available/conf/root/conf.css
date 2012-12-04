@@ -136,7 +136,7 @@ body.config TABLE.filter {
 }
 
 TABLE.confPanel {
-  min-width: 200px;
+  min-width: 210px;
 }
 
 TD.plugin_description {
