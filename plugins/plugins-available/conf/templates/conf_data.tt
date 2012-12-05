@@ -6,7 +6,7 @@
 <input type="hidden" name="md5" value="[% md5 %]">
 <div align="center">
 [% IF readonly %]
-<br><font color="orange">Readonly: Make sure the config file is writable!</font>
+<br><div class="alert"><b>Readonly!</b> Make sure the config file is writable</div>
 [% END %]
   <table border="0" class='data conftool'>
     [% FOREACH cat = keys %]

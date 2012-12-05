@@ -8,7 +8,7 @@
 <input type="hidden" name="action" value="save">
 Note: some options are not accessible here for security reasons.
 [% IF readonly %]
-<br><font color="orange">Readonly: Make sure the config file is writable!</font>
+<br><div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
 [% END %]
 <table border="0" class='data conftoolusers' style="width:360px;">
   <tr>

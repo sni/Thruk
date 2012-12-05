@@ -5,7 +5,7 @@
 <input type="hidden" name="sub" value="users">
 <input type="hidden" name="action" value="change">
 [% IF readonly %]
-<br><font color="orange">Readonly: Make sure the config file is writable!</font>
+<br><div class="alert"><b>Readonly:</b> Make sure the config file is writable!</div>
 [% END %]
   <table border="0" class='data conftoolusers'>
     <tr>

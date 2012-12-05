@@ -414,6 +414,20 @@ div.thruk_message table {
   color: #FF0000;
 }
 
+.alert {
+  padding: 8px 35px 8px 14px;
+  margin-bottom: 18px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid #FBEED5;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  display: inline-block;
+  color: #b94a48;
+  background-color: #f2dede;
+  border-color: #eed3d7;
+}
+
 /* show log filter */
 body.showlog .filter { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
 body.showlog .filterTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold;  background-color: #DBDBDB; }
