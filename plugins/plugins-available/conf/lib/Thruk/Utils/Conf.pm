@@ -135,7 +135,7 @@ update inline config
 
     $file       file to change
     $data       new data
-    $md5        md5 sum from the file when we read it
+    $md5        md5 sum from the file when we read it. (use -1 to disable check)
     $defaults   defaults for this file
     $update_c   update c so thruk does not need to be restarted
 
@@ -144,7 +144,7 @@ sub update_conf {
     my($file, $data, $md5, $defaults, $update_c) = @_;
 
     my($old_content, $old_data, $old_md5) = read_conf($file, $defaults);
-    if($md5 and $md5 ne $old_md5) {
+    if($md5 ne '-1' and $md5 ne $old_md5) {
         return("cannot update, file has been changed since reading it.");
     }
 

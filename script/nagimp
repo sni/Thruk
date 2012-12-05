@@ -310,7 +310,7 @@ sub _import_config {
         for my $key (keys %{$data}) {
             $newdata->{$key} = $data->{$key}->[1];
         }
-        Thruk::Utils::Conf::update_conf($self->{'loc'}->{'cgi.cfg'}, $newdata, undef, $cgi_defaults);
+        Thruk::Utils::Conf::update_conf($self->{'loc'}->{'cgi.cfg'}, $newdata, -1, $cgi_defaults);
         _info('restored '.$self->{'loc'}->{'cgi.cfg'});
     }
 
