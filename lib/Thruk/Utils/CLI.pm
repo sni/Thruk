@@ -287,6 +287,7 @@ sub _from_fcgi {
         }
         $res = {
             'version' => $c->config->{'version'},
+            'branch'  => $c->config->{'branch'},
             'output'  => $msg,
             'rc'      => 1,
         };

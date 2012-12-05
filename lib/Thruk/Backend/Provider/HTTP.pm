@@ -625,11 +625,13 @@ sub _req {
         };
         die($@) if $@;
         if($data->{'rc'} == 1) {
+            my $remote_version = $data->{'version'};
+            $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
             if($data->{'output'} =~ m/no\ such\ command/mx) {
-                die('backend too old, version returned: '.$data->{'version'});
+                die('backend too old, version returned: '.$remote_version;
             }
             if($data->{'version'} < $self->{'min_backend_version'}) {
-                die('backend too old, version returned: '.$data->{'version'});
+                die('backend too old, version returned: '.$remote_version;
             }
             die($data->{'output'});
         }
