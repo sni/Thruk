@@ -341,7 +341,7 @@ sub _process_json_page {
         }
     } else {
         for my $dat (@{$c->{'obj_db'}->get_objects_by_type($type)}) {
-            my $name = $use_long ? $dat->get_long_name() : $dat->get_name();
+            my $name = $use_long ? $dat->get_long_name(undef, '  -  ') : $dat->get_name();
             if(defined $name) {
                 push @{$objects}, $name
             } else {
@@ -1235,7 +1235,7 @@ sub _get_context_object {
     $c->stash->{'data_id'}       = $c->{'request'}->{'parameters'}->{'data.id'}    || '';
     $c->stash->{'file_name'}     = $c->{'request'}->{'parameters'}->{'file'};
     $c->stash->{'file_line'}     = $c->{'request'}->{'parameters'}->{'line'};
-    $c->stash->{'data_name'}     =~ s/^(.*)\ \-\ .*$/$1/gmx;
+    $c->stash->{'data_name'}     =~ s/^(.*)\ \ \-\ \ .*$/$1/gmx;
     $c->stash->{'type'}          = lc $c->stash->{'type'};
     $c->stash->{'show_object'}   = 0;
     $c->stash->{'show_secondary_select'} = 0;

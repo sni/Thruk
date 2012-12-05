@@ -330,10 +330,11 @@ return the objects name plus alias
 
 =cut
 sub get_long_name {
-    my($self, $fallback) = @_;
+    my($self, $fallback, $seperator) = @_;
+    $seperator = ' - ' unless defined $seperator;
     my $name =  $self->get_name();
     if(defined $self->{'conf'}->{'alias'} and $self->{'conf'}->{'alias'} ne $name) {
-        return $name." - ".$self->{'conf'}->{'alias'};
+        return $name.$seperator.$self->{'conf'}->{'alias'};
     }
     return $name || $fallback;
 }
