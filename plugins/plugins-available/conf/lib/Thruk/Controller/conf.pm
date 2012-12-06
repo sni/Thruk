@@ -1449,8 +1449,9 @@ sub _set_files_stash {
         }
     }
 
-    $c->stash->{'filenames_json'} = encode_json([{ name => 'files', data => [ sort @filenames ]}]);
-    $c->stash->{'files_json'}     = JSON::XS->new->encode($files_tree); # no encoding here, filenames are encoded already
+    # no encoding here, filenames are encoded already
+    $c->stash->{'filenames_json'} = JSON::XS->new->encode([{ name => 'files', data => [ sort @filenames ]}]);
+    $c->stash->{'files_json'}     = JSON::XS->new->encode($files_tree);
     return $files_root;
 }
 
