@@ -754,7 +754,12 @@ sub _link_obj {
     } else {
         $line = $obj->{'line'};
         $path = $obj->{'file'}->{'path'};
-        $link = 'data.id='.$obj->get_id();
+        my $id = $obj->get_id();
+        if($id eq 'new') {
+            $link = 'file='.$path.'&amp;line='.$line;
+        } else {
+            $link = 'data.id='.$obj->get_id();
+        }
     }
     my $shortpath = $path;
     $shortpath =~ s/.*\///gmx;
