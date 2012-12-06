@@ -377,9 +377,10 @@ function toggleSitePanel() {
 }
 
 /* toggle querys for this backend */
-function toggleBackend(backend) {
+function toggleBackend(backend, state) {
   resetRefresh();
   var button        = document.getElementById('button_' + backend);
+  if(state == undefined) { state = -1; }
 
   if(backend_chooser == 'switch') {
     jQuery('INPUT.button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
@@ -391,18 +392,18 @@ function toggleBackend(backend) {
 
   initial_state = initial_backend_states[backend];
   var newClass  = undefined;
-  if(jQuery(button).hasClass("button_peerDIS")) {
-    if(initial_state == 1) {
-      newClass = "button_peerDOWN";
-    }
-    else if(initial_state == 3) {
+  if(jQuery(button).hasClass("button_peerDIS") || state == 1) {
+    if(initial_state == 3 || state == 0) {
       newClass = "button_peerHID";
+    }
+    else if(initial_state == 1) {
+      newClass = "button_peerDOWN";
     }
     else {
       newClass = "button_peerUP";
     }
     current_backend_states[backend] = 0;
-  } else if(jQuery(button).hasClass("button_peerHID")) {
+  } else if(jQuery(button).hasClass("button_peerHID") && state != 1) {
     newClass = "button_peerUP";
     current_backend_states[backend] = 0;
     delete additionalParams['backend'];
@@ -415,12 +416,28 @@ function toggleBackend(backend) {
   jQuery(button).removeClass("button_peerDIS button_peerHID button_peerUP button_peerDOWN").addClass(newClass);
 
   additionalParams['reload_nav'] = 1;
-
   /* save current selected backends in session cookie */
   cookieSave('thruk_backends', toQueryString(current_backend_states), 0);
   window.clearTimeout(backendSelTimer);
-  backendSelTimer  = window.setTimeout('reloadPage()', 1000);
+  backendSelTimer  = window.setTimeout('reloadPage()', 2500);
   return;
+}
+
+/* toggle all backends for this section */
+function toggleSection(section) {
+    section = section.replace(' ', '_');
+    var first_state = undefined;
+    jQuery('INPUT[type=button].section_'+section).each(function(i, b) {
+        var id = b.id.replace(/^button_/, '');
+        if(first_state == undefined) {
+            if(jQuery(b).hasClass("button_peerUP") || jQuery(b).hasClass("button_peerDOWN")) {
+                first_state = 0;
+            } else {
+                first_state = 1;
+            }
+        }
+        toggleBackend(id, first_state);
+    });
 }
 
 /* toogle checkbox by id */
