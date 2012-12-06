@@ -1019,7 +1019,7 @@ sub _process_objects_page {
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
     $c->stash->{'referer'}           = $c->{'request'}->{'parameters'}->{'referer'} || '';
-    $c->{'obj_db'}->_reset_errors();
+    $c->{'obj_db'}->_reset_errors(1);
     return 1;
 }
 

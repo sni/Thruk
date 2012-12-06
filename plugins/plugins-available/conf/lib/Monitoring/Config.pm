@@ -1508,9 +1508,9 @@ sub _update_obj_in_index {
 
 ##########################################################
 sub _reset_errors {
-    my($self) = @_;
-    $self->{'errors'}           = [];
-    $self->{'parse_errors'}     = [];
+    my($self, $no_parse) = @_;
+    $self->{'errors'}       = [];
+    $self->{'parse_errors'} = [] unless $no_parse;
     return;
 }
 
