@@ -1272,6 +1272,11 @@ sub _get_context_object {
                                                 coretype => $c->{'obj_db'}->{'coretype'},
                                               );
         my $files_root = $self->_set_files_stash($c, 1);
+        if($files_root eq '') {
+            $c->stash->{'new_file'} = '';
+            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: please set at least one directory in your obj config.' );
+            return $obj;
+        }
         my $new_file   = $c->{'request'}->{'parameters'}->{'data.file'} || '';
         $new_file      =~ s/^\///gmx;
         my $file       = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
@@ -1434,6 +1439,14 @@ sub _set_files_stash {
         my $filename = $file->{'display'};
         $filename    =~ s/^$files_root/\//gmx;
         push @filenames, $filename;
+    }
+
+    # file root is empty when there are no files (yet)
+    if($files_root eq '') {
+        my $dirs = Thruk::Utils::list($c->{'obj_db'}->{'config'}->{'obj_dir'});
+        if(defined $dirs->[0]) {
+            $files_root = $dirs->[0];
+        }
     }
 
     $c->stash->{'filenames_json'} = encode_json([{ name => 'files', data => [ sort @filenames ]}]);
