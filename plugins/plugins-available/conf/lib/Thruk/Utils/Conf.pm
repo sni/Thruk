@@ -8,6 +8,7 @@ use File::Slurp;
 use Digest::MD5 qw(md5_hex);
 use Storable qw/store retrieve/;
 use Data::Dumper;
+use Encode qw(decode);
 
 =head1 NAME
 
@@ -72,6 +73,7 @@ sub set_object_model {
         }
         return 0;
     }
+
     $c->{'obj_db'}->{'stats'}      = $c->{'stats'};
     $c->{'obj_db'}->{'remotepeer'} = $peer_conftool if lc($peer_conftool->{'type'}) eq 'http';
     $c->{'obj_db'}->sync_remote($c);
@@ -728,6 +730,21 @@ sub get_default_peer_config {
     $config->{'obj_dir'}        = [] unless defined $config->{'obj_dir'};
     $config->{'obj_file'}       = [] unless defined $config->{'obj_file'};
     return $config;
+}
+
+##########################################################
+
+=head2 decode_any
+
+read and decode string from either utf-8 or iso-8859-1
+
+=cut
+sub decode_any {
+    eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
+    if ( $@ ) { # input was not utf8
+        $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
+    }
+    return $_[0];
 }
 
 ##########################################################

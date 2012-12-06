@@ -32,8 +32,8 @@ return new host
 =cut
 sub new {
     my ( $class, $file, $readonlypattern, $coretype, $force, $remotepath ) = @_;
-    _decode($file);
-    _decode($remotepath);
+    Thruk::Utils::Conf::decode_any($file);
+    Thruk::Utils::Conf::decode_any($remotepath);
     my $self = {
         'path'         => $file,
         'display'      => $remotepath || $file,
@@ -108,7 +108,7 @@ sub update_objects {
 
     open(my $fh, '<', $self->{'path'}) or die("cannot open file ".$self->{'path'}.": ".$!);
     while(my $line = <$fh>) {
-        _decode($line);
+        Thruk::Utils::Conf::decode_any($line);
         chomp($line);
         while(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
             my $newline = <$fh>;
@@ -547,21 +547,6 @@ sub StripLTSpace {
     $_[0] =~ s/^\s+//mx;
     $_[0] =~ s/\s+$//mx;
     return;
-}
-
-##########################################################
-
-=head2 _decode
-
-read and decode string from either utf-8 or iso-8859-1
-
-=cut
-sub _decode {
-    eval { $_[0] = decode( "utf8", $_[0], Encode::FB_CROAK ) };
-    if ( $@ ) { # input was not utf8
-        $_[0] = decode( "iso-8859-1", $_[0], Encode::FB_WARN );
-    }
-    return $_[0];
 }
 
 ##########################################################

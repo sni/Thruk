@@ -610,6 +610,7 @@ sub check_files_changed {
         $self->{'needs_update'} = 0;
         $self->update();
     }
+
     return 1;
 }
 
@@ -1019,6 +1020,8 @@ sub _set_config {
         }
 
         $self->_update_core_conf($core_conf);
+    } else {
+        $self->{'_corefile'} = undef;
     }
 
     $self->_set_coretype();
@@ -1216,6 +1219,7 @@ sub _get_files_names {
             my $path = $dir;
             $path = $self->{'config'}->{'localdir'}.'/'.$dir if $self->{'config'}->{'localdir'};
             for my $file (@{$self->_get_files_for_folder($path, '\.cfg$')}) {
+                Thruk::Utils::Conf::decode_any($file);
                 $files->{$file} = 1;
             }
         }
@@ -1237,6 +1241,7 @@ sub _get_files_names {
     # single files
     if(defined $config->{'obj_file'}) {
         for my $file ( ref $config->{'obj_file'} eq 'ARRAY' ? @{$config->{'obj_file'}} : ($config->{'obj_file'}) ) {
+            Thruk::Utils::Conf::decode_any($file);
             if($self->{'config'}->{'localdir'}) {
                 my $display = $file;
                 $file       = $self->{'config'}->{'localdir'}.'/'.$file;
@@ -1263,7 +1268,6 @@ sub _check_files_changed {
     my $oldfiles = {};
     my @newfiles;
     for my $file ( @{$self->{'files'}} ) {
-
         # don' report newly added files as deleted
         if($file->{'is_new_file'}) {
             push @newfiles, $file;
@@ -1278,6 +1282,7 @@ sub _check_files_changed {
                 push @newfiles, $file;
                 push @{$self->{'errors'}}, "file ".$file->{'path'}." has been deleted.";
                 $self->{'needs_index_update'} = 1;
+                next;
             }
         }
         elsif($check == 2) {
