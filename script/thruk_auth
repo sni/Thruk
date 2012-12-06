@@ -37,7 +37,7 @@ if(defined $ENV{'OMD_SITE'}) {
     $urlprefix = "[^/]+/thruk";
 }
 my $verbose = 0;
-$verbose = 1 if$ENV{'THRUK_COOKIE_AUTH_VERBOSE'};
+$verbose = $ENV{'THRUK_COOKIE_AUTH_VERBOSE'} if $ENV{'THRUK_COOKIE_AUTH_VERBOSE'};
 
 ##########################################################
 my $config              = Thruk::Config::get_config();
@@ -58,6 +58,7 @@ while (<STDIN>) {
     chomp(my $in = $_);
 
     my $t0 = [gettimeofday];
+    print STDERR "thruk_auth: url '$in'" if $verbose > 1;
     print process($in);
     my $elapsed = tv_interval ( $t0 );
     printf(STDERR " (took %.3f sec)\n",$elapsed) if $verbose;
