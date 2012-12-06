@@ -459,7 +459,14 @@ sub diff {
     print $fh $content;
     Thruk::Utils::IO::close($fh, $filename);
 
-    my $diff = `diff -wuN "$self->{'path'}" "$filename" 2>&1`;
+    my $diff = "";
+    my $cmd = 'diff -wuN "'.$self->{'path'}.'" "'.$filename.'" 2>&1';
+    open(my $ph, '-|', $cmd);
+    while(<$ph>) {
+        my $line = $_;
+        Thruk::Utils::Conf::decode_any($line);
+        $diff .= $line;
+    }
 
     unlink($filename);
     return $diff;
