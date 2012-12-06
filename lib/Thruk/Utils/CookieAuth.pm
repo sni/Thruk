@@ -13,6 +13,7 @@ to logout again.
 
 use warnings;
 use strict;
+use Data::Dumper;
 use LWP::UserAgent;
 use Digest::MD5 qw(md5_hex);
 use Thruk::Utils::IO;
@@ -36,7 +37,7 @@ sub external_authentication {
     my $netloc   = Thruk::Utils::CookieAuth::get_netloc($authurl);
     my $ua       = get_user_agent();
     # bypass ssl host verfication on localhost
-    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/localhost/mx or $authurl =~ m/^127\./mx);
+    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     my $res      = $ua->post($authurl);
     if($res->code == 401) {
         my $realm = $res->header('www-authenticate');
@@ -64,7 +65,7 @@ sub external_authentication {
             print STDERR 'auth: realm does not match, got ', $realm;
         }
     } else {
-        print STDERR 'auth: expected code 401, got ', $res->code;
+        print STDERR 'auth: expected code 401, got ', $res->code, "\n", Dumper($res);
     }
     return -1;
 }
@@ -81,19 +82,18 @@ verify authentication by sending request with basic auth header
 sub verify_basic_auth {
     my($config, $basic_auth, $login) = @_;
     my $authurl  = $config->{'cookie_auth_restricted_url'};
-    my $success  = 0;
 
     my $ua = get_user_agent();
     # bypass ssl host verfication on localhost
-    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/localhost/mx or $authurl =~ m/^127\./mx);
+    $ua->ssl_opts('verify_hostname' => 0 ) if($authurl =~ m/^(http|https):\/\/localhost/mx or $authurl =~ m/^(http|https):\/\/127\./mx);
     $ua->default_header( 'Authorization' => 'Basic '.$basic_auth );
     my $res = $ua->post($authurl);
     if($res->code == 200 and $res->decoded_content =~ m/^OK:\ (.*)$/mx) {
         if($1 eq $login) {
-            $success = 1;
+            return 1;
         }
     }
-    return $success;
+    return 0;
 }
 
 ##############################################
