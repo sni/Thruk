@@ -28,6 +28,12 @@ use Thruk::Utils::IO;
 
 verify authentication by external login into external url
 
+return:
+
+    sid  if login was ok
+    0    if login failed
+   -1    on technical problems
+
 =cut
 sub external_authentication {
     my($config, $login, $pass, $address) = @_;

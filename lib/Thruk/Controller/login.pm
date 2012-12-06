@@ -35,8 +35,10 @@ sub login_cgi : Regex('thruk\/cgi\-bin\/login\.cgi') {
 =head2 index
 
 =cut
-sub index :Path :Args(0) :MyAction('AddDefaults') {
+sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
+
+    $c->stats->profile(begin => "login::index");
 
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'theme'}          = $c->config->{'default_theme'} unless defined $c->stash->{'theme'};
@@ -98,8 +100,13 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         if(!defined $testcookie or !$testcookie->value) {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?nocookie");
         } else {
+            $c->stats->profile(begin => "login::external_authentication");
             my $success = Thruk::Utils::CookieAuth::external_authentication($c->config, $login, $pass, $c->req->{'address'});
-            if($success) {
+            $c->stats->profile(end => "login::external_authentication");
+            if($success ne '-1') {
+                return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?problem&".$referer);
+            }
+            elsif($success) {
                 $c->res->cookies->{'thruk_auth'} = {
                     value => $success,
                     path  => $cookie_path,
@@ -123,6 +130,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         value   => '****',
         path    => $cookie_path,
     };
+
+    $c->stats->profile(end => "login::index");
 
     return 1;
 }
