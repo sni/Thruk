@@ -19,6 +19,16 @@ use Digest::MD5 qw(md5_hex);
 use Thruk::Utils::IO;
 
 ##############################################
+BEGIN {
+    eval {
+        # required for new IO::Socket::SSL versions
+        require IO::Socket::SSL;
+        IO::Socket::SSL->import();
+        IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+    };
+};
+
+##############################################
 
 =head1 METHODS
 
