@@ -46,14 +46,17 @@ sub new {
     bless $self, $class;
 
     $self->{'ua'} = LWP::UserAgent->new;
-    $self->{'ua'}->timeout(15);
+    $self->{'ua'}->timeout(30);
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->conn_cache(LWP::ConnCache->new());
     $self->{'ua'}->agent('Thruk ');
     if($self->{'proxy'}) {
-        $self->{'ua'}->proxy(['http', 'https'], $self->{'proxy'});
+        $self->{'ua'}->proxy(['http'], $self->{'proxy'});
     }
-    $self->{'ua'}->env_proxy();
+    # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
+    $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
+    # env proxy breaks the ssl proxy above
+    #$self->{'ua'}->env_proxy();
     push @{ $self->{'ua'}->requests_redirectable }, 'POST';
 
     return $self;
@@ -628,10 +631,10 @@ sub _req {
             my $remote_version = $data->{'version'};
             $remote_version = $remote_version.'~'.$data->{'branch'} if $data->{'branch'};
             if($data->{'output'} =~ m/no\ such\ command/mx) {
-                die('backend too old, version returned: '.$remote_version;
+                die('backend too old, version returned: '.$remote_version);
             }
             if($data->{'version'} < $self->{'min_backend_version'}) {
-                die('backend too old, version returned: '.$remote_version;
+                die('backend too old, version returned: '.$remote_version);
             }
             die($data->{'output'});
         }
