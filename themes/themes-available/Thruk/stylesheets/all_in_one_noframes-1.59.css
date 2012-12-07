@@ -789,6 +789,9 @@ SPAN.deleteicon INPUT {
 .ui-save-button {
   background-image: url(../images/disk.png) !important;
 }
+.ui-apply-button {
+  background-image: url(../images/tick.png) !important;
+}
 .ui-remove-button {
   background-image: url(../images/delete.png) !important;
 }
