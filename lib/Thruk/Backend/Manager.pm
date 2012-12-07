@@ -806,6 +806,8 @@ sub _do_on_peers {
                     first    => exists $self->{'c'}->{'request'}->{'parameters'}->{'first'}     || $self->{'c'}->{'request'}->{'parameters'}->{'first.x'},
                     last     => exists $self->{'c'}->{'request'}->{'parameters'}->{'last'}      || $self->{'c'}->{'request'}->{'parameters'}->{'last.x'},
                 };
+            } else {
+                $arg{'pager'} = {};
             }
         }
         @{$arg} = %arg;
