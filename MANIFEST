@@ -35,6 +35,7 @@ docs/thruk.8
 docs/thruk8.txt
 docs/THRUK_MANUAL.html
 docs/THRUK_MANUAL.txt
+examples/contacts2csv
 examples/list_hosts
 examples/objectcache2csv
 get_version

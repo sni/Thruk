@@ -31,27 +31,34 @@ use Monitoring::Config;
 if(!defined $ARGV[0]) {
     pod2usage( { -verbose => 2,  -exit => 3, -message => "\nERROR: missing argument: object.cache\n\n" } );
 }
-if(!defined $ARGV[1]) {
-    pod2usage( { -verbose => 2,  -exit => 3, -message => "\nERROR: missing argument: object type\n\n" } );
-}
 if(!-f $ARGV[0]) {
     pod2usage( { -verbose => 2,  -exit => 3, -message => "\nERROR: ".$ARGV[0].': '.$!."\n\n" } );
 }
 
-my $odb  = Monitoring::Config->new({ obj_file => $ARGV[0], 'force' => 1 })->init();
-my $objs = $odb->get_objects_by_type($ARGV[1]);
-my $def  = $odb->get_default_keys($ARGV[1], { no_alias => 1, sort => 1 });
+my $odb      = Monitoring::Config->new({ obj_file => $ARGV[0], 'force' => 1 })->init();
+my $contacts = $odb->get_objects_by_type('contact');
+my $groups   = $odb->get_objects_by_type('contactgroup');
+my $def      = $odb->get_default_keys('contact', { no_alias => 1, sort => 1 });
+
+# convert groups
+my $groups_by_contact = {};
+for my $g (@{$groups}) {
+    my $name = $g->{'conf'}->{'contactgroup_name'};
+    for my $m (@{$g->{'conf'}->{'members'}}) {
+        $groups_by_contact->{$m}->{$name} = 1;
+    }
+}
 
 # print header
-print join(';', map(ucfirst, @{$def})), "\n";
+print join(';', map(ucfirst, @{$def})), ";Groups\n";
 
 # print data
-for my $o (@{$objs}) {
+for my $o (@{$contacts}) {
     my $first = 1;
     for my $attr (@{$def}) {
         if(!defined $o->{'conf'}->{$attr}) {
             print ";" unless $first;
-            $first = 0;
+            $first = 1;
         } else {
             if(ref $o->{'conf'}->{$attr} eq 'ARRAY') {
                 print join(',', @{$o->{'conf'}->{$attr}}), ";";
@@ -60,6 +67,8 @@ for my $o (@{$objs}) {
             }
         }
     }
+    my $name = $o->{'conf'}->{'contact_name'};
+    print join(',', keys %{$groups_by_contact->{$name}});
     print "\n";
 }
 
@@ -69,19 +78,19 @@ exit 0;
 
 =head1 NAME
 
-objectcache2csv - Command Line Utility which converts a object.cache file into csv
+contacts2csv - Command Line Utility which converts contacts from a object.cache file into csv
 
 =head1 SYNOPSIS
 
-Usage: objectcache2csv .../object.cache type
+Usage: contacts2csv .../object.cache
 
 =head1 DESCRIPTION
 
-This script coverts a object.cache file into csv
+This script coverts contacts from a object.cache file into csv
 
 =head1 EXAMPLE
 
-objectcache2csv /tmp/object.cache host > /tmp/hosts.csv
+contacts2csv /tmp/object.cache > /tmp/contacts.csv
 
 =head1 AUTHOR
 

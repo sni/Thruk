@@ -16,7 +16,7 @@ BEGIN {
 ###########################################################
 my @files;
 if(scalar @ARGV == 0) {
-    plan(tests => 8);
+    plan(tests => 12);
     @files = glob('examples/*');
 } else {
     @files = @ARGV;
@@ -26,6 +26,7 @@ if(scalar @ARGV == 0) {
 # some
 my $args = {
     'examples/objectcache2csv'  => 't/data/naglint/basic/in.cfg hostgroup',
+    'examples/contacts2csv'     => 't/data/naglint/basic/in.cfg',
 };
 
 ###########################################################
