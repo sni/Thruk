@@ -4,12 +4,12 @@
 [ -e ~/.thruk   ] && . ~/.thruk
 [ -e ~/.profile ] && . ~/.profile
 
-if [ ! -z $OMD_ROOT ]; then
-  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
-  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
-elif [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
   export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib:$(dirname $0)/../plugins/plugins-available/conf/lib";
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$OMD_ROOT/share/thruk/plugins/plugins-available/conf/lib:$PERL5LIB
+  if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG="$OMD_ROOT/etc/thruk"; fi
 else
   export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/share/thruk/plugins/plugins-available/conf/lib:/usr/lib/thruk/perl5;
   if [ -z $CATALYST_CONFIG ]; then export CATALYST_CONFIG='/etc/thruk'; fi
@@ -22,6 +22,7 @@ eval 'exec /usr/bin/perl -x $0 ${1+"$@"} ;'
 # vim: expandtab:ts=4:sw=4:syntax=perl
 #line 24
 
+##############################################
 use strict;
 use warnings;
 use Pod::Usage;
