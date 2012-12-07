@@ -55,7 +55,7 @@
             </td>
             <td style="width: 50px;" class="data dataSubmit sub_1">
               [% IF ! object.defined('file') || ! object.file.readonly %]
-              <button class="conf_save_button conf_button">save</button>
+              <button class="conf_apply_button conf_button">apply</button>
               [% END %]
             </td>
           </tr>
@@ -144,7 +144,7 @@
         [% IF object.get_id() != 'new' && ! bare %]
         <input type="submit" name="send" value="raw edit" style="width:90px" class="conf_button">
         [% END %]
-        <button class="conf_save_button conf_button" style="width:90px">save</button>
+        <button class="conf_apply_button conf_button" style="width:90px">apply</button>
       </td>
     </tr>
     [% END %]

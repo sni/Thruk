@@ -1550,16 +1550,16 @@ sub _object_save {
         return $c->response->redirect('conf.cgi?sub=objects&action=editor&file='.encode_utf8($obj->{'file'}->{'display'}).'&line='.$obj->{'line'}.'&data.id='.$obj->get_id().'&back=edit');
     } else {
         if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
-            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' saved with errors', $obj->{'file'}->{'errors'} );
+            Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed with errors', $obj->{'file'}->{'errors'} );
             return; # return, otherwise details would not be displayed
         } else {
             # does the object have a name?
             if(!defined $c->stash->{'data_name'} or $c->stash->{'data_name'} eq '') {
                 $obj->set_name('undefined');
                 $c->{'obj_db'}->_rebuild_index();
-                Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' saved without a name' );
+                Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed without a name' );
             } else {
-                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully' );
+                Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' changed successfully' );
             }
         }
         if($c->{'request'}->{'parameters'}->{'referer'}) {
