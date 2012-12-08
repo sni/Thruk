@@ -50,6 +50,7 @@ open($ph, '-|', 'bash -c "find {templates/,root/,plugins/,themes/} -type l" 2>&1
 while(<$ph>) {
     my $line = $_;
     chomp($line);
+    $line =~ s|//|/|gmx;
     my $dst = readlink($line);
     if($dst =~ m|/root$|) {
         if(defined $manifest->{$line}) {
