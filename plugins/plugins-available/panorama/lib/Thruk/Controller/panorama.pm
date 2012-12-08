@@ -328,6 +328,8 @@ sub _task_server_stats {
         data  => [],
         group => 'cat',
     };
+    $c->stash->{'json'} = $json;
+    return $c->forward('Thruk::View::JSON') unless -e '/proc'; # all beyond is linux only
 
     my($cpu, $cpucount);
     if($show_load eq 'true' or $show_cpu eq 'true') {
@@ -373,7 +375,6 @@ sub _task_server_stats {
             { cat => 'Memory',  type => 'cached',   value => $mem->{'Cached'},    'warn' => $mem->{'MemTotal'}*0.8, crit => $mem->{'MemTotal'}*0.9, max => $mem->{'MemTotal'}, graph => '' };
     }
 
-    $c->stash->{'json'} = $json;
     return $c->forward('Thruk::View::JSON');
 }
 

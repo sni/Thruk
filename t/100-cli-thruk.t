@@ -43,7 +43,7 @@ TestUtils::test_command({
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/crontab -l '.$cronuser.' | grep "THIS PART IS WRITTEN BY THRUK" | wc -l',
-    like => ['/^1$/' ],
+    like => ['/^\s*1$/' ],
 });
 
 # update crontab
@@ -53,7 +53,7 @@ TestUtils::test_command({
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/crontab -l '.$cronuser.' | grep "THIS PART IS WRITTEN BY THRUK" | wc -l',
-    like => ['/^1$/' ],
+    like => ['/^\s*1$/' ],
 });
 
 # remove recurring downtime
@@ -79,7 +79,7 @@ TestUtils::test_command({
 });
 TestUtils::test_command({
     cmd  => '/usr/bin/crontab -l '.$cronuser.' | grep "THIS PART IS WRITTEN BY THRUK" | wc -l',
-    like => ['/^0$/' ],
+    like => ['/^\s*0$/' ],
 });
 
 done_testing();
