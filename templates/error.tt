@@ -50,5 +50,12 @@
     Help making Thruk better and send a bug report</a>.<br>
   </div>
   [% END %]
+[% IF make_test_mode %]
+<!--error:
+[%+ errorMessage +%]
+[%+ errorDetails +%]
+[%+ stacktrace +%]
+:error-->
+[% END %]
 [% PROCESS _footer.tt %]
 [% END %]

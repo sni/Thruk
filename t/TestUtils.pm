@@ -31,7 +31,7 @@ sub get_test_servicegroup {
     if($page =~ m/extinfo\.cgi\?type=8&amp;servicegroup=(.*?)'>(.*?)<\/a>/) {
         $group = $1;
     }
-    isnt($group, undef, "got a servicegroup from config.cgi") or BAIL_OUT('got no test servicegroup, cannot test.'.diag(Dumper($request)));
+    isnt($group, undef, "got a servicegroup from config.cgi") or bail_out_req('got no test servicegroup, cannot test.', $request);
     return($group);
 }
 
@@ -44,7 +44,7 @@ sub get_test_hostgroup {
     if($page =~ m/'extinfo\.cgi\?type=5&amp;hostgroup=(.*?)'>(.*?)<\/a>/) {
         $group = $1;
     }
-    isnt($group, undef, "got a hostgroup from config.cgi") or BAIL_OUT('got no test hostgroup, cannot test.'.diag(Dumper($request)));
+    isnt($group, undef, "got a hostgroup from config.cgi") or bail_out_req('got no test hostgroup, cannot test.', $request);
     return($group);
 }
 
@@ -57,7 +57,7 @@ sub get_test_user {
     if($page =~ m/Logged in as <i>(.*?)<\/i>/) {
         $user = $1;
     }
-    isnt($user, undef, "got a user from config.cgi") or BAIL_OUT('got no test user, cannot test.'.diag(Dumper($request)));
+    isnt($user, undef, "got a user from config.cgi") or bail_out_req('got no test user, cannot test.', $request);
     return($user);
 }
 
@@ -72,8 +72,8 @@ sub get_test_service {
         $host    = $1;
         $service = $2;
     }
-    isnt($host, undef, "got a host from status.cgi") or BAIL_OUT('got no test host, cannot test.'.diag(Dumper($request)));
-    isnt($service, undef, "got a service from status.cgi") or BAIL_OUT('got no test service, cannot test.'.diag(Dumper($request)));
+    isnt($host, undef, "got a host from status.cgi") or bail_out_req('got no test host, cannot test.', $request);
+    isnt($service, undef, "got a service from status.cgi") or bail_out_req('got no test service, cannot test.', $request);
     $service = uri_unescape($service);
     $host    = uri_unescape($host);
     return($host, $service);
@@ -88,7 +88,7 @@ sub get_test_timeperiod {
     if($page =~ m/id="timeperiod_.*?">\s*<td\ class='dataOdd'>([^<]+)<\/td>/gmx) {
         $timeperiod = $1;
     }
-    isnt($timeperiod, undef, "got a timeperiod from config.cgi") or BAIL_OUT('got no test config, cannot test.'.diag(Dumper($request)));
+    isnt($timeperiod, undef, "got a timeperiod from config.cgi") or bail_out_req('got no test config, cannot test.', $request);
     return($timeperiod);
 }
 
@@ -119,7 +119,7 @@ sub test_page {
             $redirects++;
             last if $redirects > 10;
         }
-        ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or BAIL_OUT(Dumper($request));
+        ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request);
     }
 
     if(!defined $opts->{'fail_message_ok'}) {
@@ -137,7 +137,7 @@ sub test_page {
         $return->{'content'} = $request->content;
         if($request->is_error) {
             fail('Request '.$location.' should succeed');
-            BAIL_OUT(Dumper($request));
+            bail_out_req('request failed', $request);
         }
     }
     elsif(defined $opts->{'fail'}) {
@@ -161,10 +161,10 @@ sub test_page {
         $return->{'content'} = $request->content;
         if($request->is_error) {
             fail('Request '.$location.' should succeed');
-            BAIL_OUT(Dumper($request));
+            bail_out_req('request failed', $request);
         }
     } else {
-        ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or BAIL_OUT(Dumper($request));
+        ok( $request->is_success, 'Request '.$opts->{'url'}.' should succeed' ) or bail_out_req('request failed', $request);
     }
 
     # text that should appear
@@ -452,6 +452,19 @@ sub _set_test_page_defaults {
         $opts->{'unlike'} = [ 'internal server error', 'HASH', 'ARRAY' ];
     }
     return $opts;
+}
+
+#########################
+sub bail_out_req {
+    my($msg, $req) = @_;
+    my $page    = $req->content;
+    my $error   = "";
+    if($page =~ m/<!--error:(.*?):error-->/smx) {
+        $error = $1;
+        BAIL_OUT(Dumper([$msg, $error]));
+    }
+    BAIL_OUT(Dumper([$msg, $req]));
+    return;
 }
 
 #########################
