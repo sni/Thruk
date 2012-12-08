@@ -1010,6 +1010,7 @@ sub _get_query_size {
     }
 
     my $entries = $options->{'pager'}->{'entries'};
+    return unless defined $entries;
     return if $entries !~ m/^\d+$/mx;
 
     my $stats = [
