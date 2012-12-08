@@ -33,6 +33,8 @@ sub new {
     die("need at least one peer. Minimal options are <options>peer = http://hostname/thruk</options>\ngot: ".Dumper($options)) unless defined $options->{'peer'};
 
     my $self = {
+        'timeout'              => 10,
+        'logs_timeout'         => 120,
         'config'               => $config,
         'peerconfig'           => $peerconfig,
         'key'                  => '',
@@ -46,7 +48,7 @@ sub new {
     bless $self, $class;
 
     $self->{'ua'} = LWP::UserAgent->new;
-    $self->{'ua'}->timeout(30);
+    $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
     $self->{'ua'}->conn_cache(LWP::ConnCache->new());
     $self->{'ua'}->agent('Thruk ');
@@ -445,8 +447,11 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, @options) = @_;
+    # increased timeout for logs
+    $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);
     my($typ, $size, $data) = @{$res};
+    $self->{'ua'}->timeout($self->{'timeout'});
     return $data;
 }
 
