@@ -200,6 +200,12 @@ case "$*" in
   1)
     # POSTUPDATE
     rm -rf %{_localstatedir}/cache/thruk/*
+    mkdir -p /var/cache/thruk/reports
+%if %{defined suse_version}
+chown -R wwwrun: /var/cache/thruk
+%else
+chown -R apache: /var/cache/thruk
+%endif
     ;;
   *) echo case "$*" not handled in preun
 esac
