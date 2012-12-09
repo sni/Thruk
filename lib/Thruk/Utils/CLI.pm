@@ -701,7 +701,7 @@ sub _cmd_import_logs {
 ##########################################################
 sub _cmd_configtool {
     my($c, $peerkey, $opt) = @_;
-    my $res        = undef;
+    my $res        = "unknown configtool command";
     my $last_error = undef;
     my $peer       = $Thruk::peers->{$peerkey};
     $c->stash->{'param_backend'} = $peerkey;
@@ -709,6 +709,7 @@ sub _cmd_configtool {
     if(!Thruk::Utils::Conf::set_object_model($c)) {
         $last_error = "failed to set objects model";
     }
+    # outgoing file sync
     elsif($opt->{'args'}->{'sub'} eq 'syncfiles') {
         $c->{'obj_db'}->check_files_changed();
         my $transfer    = {};
@@ -722,11 +723,45 @@ sub _cmd_configtool {
         }
         $res = $transfer;
     }
+    # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         $res = _cmd($c, $c->{'obj_db'}->{'config'}->{'obj_check_cmd'});
     }
+    # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         $res = _cmd($c, $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'});
+    }
+    # save incoming config changes
+    elsif($opt->{'args'}->{'sub'} eq 'configsave') {
+        my $changed = $opt->{'args'}->{'args'}->{'changed'};
+        # changed and new files
+        for my $f (@{$changed}) {
+            my($path,$content, $mtime) = @{$f};
+            next if $path =~ m|/../|gmx; # no relative paths
+            my $file = $c->{'obj_db'}->get_file_by_path($path);
+            if($file and !$file->readonly()) {
+                # update file
+                Thruk::Utils::IO::write($path, $content, $mtime);
+            } elsif(!$file) {
+                # new file
+                my $filesroot = $c->{'obj_db'}->get_files_root();
+                if($path =~ m/^\Q$filesroot\E/mx) {
+                    $file = Monitoring::Config::File->new($path, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
+                    if(defined $file and !$file->readonly()) {
+                        Thruk::Utils::IO::write($path, $content, $mtime);
+                    }
+                }
+            }
+        }
+        # deleted files
+        my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
+        for my $f (@{$changed}) {
+            my $file = $c->{'obj_db'}->get_file_by_path($f);
+            if($file and !$file->readonly()) {
+                unlink($f);
+            }
+        }
+        $res = "saved";
     }
     return([undef, 1, $res, $last_error], 0);
 }
