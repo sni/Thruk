@@ -755,7 +755,7 @@ sub _cmd_configtool {
         }
         # deleted files
         my $deleted = $opt->{'args'}->{'args'}->{'deleted'};
-        for my $f (@{$changed}) {
+        for my $f (@{$deleted}) {
             my $file = $c->{'obj_db'}->get_file_by_path($f);
             if($file and !$file->readonly()) {
                 unlink($f);
