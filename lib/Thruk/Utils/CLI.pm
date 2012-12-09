@@ -19,6 +19,7 @@ use LWP::UserAgent;
 use JSON::XS;
 use File::Slurp;
 use URI::Escape;
+use Encode qw(decode_utf8);
 use Thruk::Utils::IO;
 
 $Thruk::Utils::CLI::verbose = 0;
@@ -721,6 +722,12 @@ sub _cmd_configtool {
         }
         $res = $transfer;
     }
+    elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
+        $res = _cmd($c, $c->{'obj_db'}->{'config'}->{'obj_check_cmd'});
+    }
+    elsif($opt->{'args'}->{'sub'} eq 'configreload') {
+        $res = _cmd($c, $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'});
+    }
     return([undef, 1, $res, $last_error], 0);
 }
 
@@ -762,6 +769,24 @@ sub _cmd_raw {
     }
 
     return($res, 0);
+}
+
+##############################################
+sub _cmd {
+    my ( $c, $cmd ) = @_;
+
+    local $SIG{CHLD}='';
+    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
+    $c->log->debug( "running cmd: ". $cmd );
+    my $rc = $?;
+    my $output = `$cmd 2>&1`;
+    if($? == -1) {
+        $output .= "[".$!."]";
+    } else {
+        $rc = $?>>8;
+    }
+
+    return([$rc, decode_utf8($output)]);
 }
 
 ##############################################
