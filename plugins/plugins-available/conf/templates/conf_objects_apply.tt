@@ -117,7 +117,7 @@
       </td>
       <td class='dataVar'></td>
       <td class='dataVal' style="text-align: center;">
-        <input type="submit" name="refresh" value="discard all unsaved changes" style="width:250px" onclick="return confirm('really discard all unsaved changes?')" class="conf_button">
+        <input type="submit" name="discard" value="discard all unsaved changes" style="width:250px" onclick="return confirm('really discard all unsaved changes?')" class="conf_button">
       </td>
     </tr>
     [% END %]

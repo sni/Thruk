@@ -132,7 +132,7 @@ sub commit {
         unless($file->save()) {
             $rc = 0;
         }
-        push @{$files->{'changed'}}, [ $file->{'display'}, "".$file->get_new_file_content(), $file->{'mtime'} ];
+        push @{$files->{'changed'}}, [ $file->{'display'}, "".$file->get_new_file_content(), $file->{'mtime'} ] unless $file->{'deleted'};
     }
 
     # remove deleted files from files
