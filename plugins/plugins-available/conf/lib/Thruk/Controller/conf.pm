@@ -1036,8 +1036,13 @@ sub _apply_config_changes {
 
     # get diff of changed files
     if(defined $c->{'request'}->{'parameters'}->{'diff'}) {
+        $c->stash->{'output'} .= "<ul>\n";
         for my $file (@{$c->stash->{'changed_files'}}) {
-            $c->stash->{'output'} .= "<hr><pre>\n";
+            $c->stash->{'output'} .= "<li><a href='#".Thruk::Utils::Filter::name2id($file->{'display'})."'>".$file->{'display'}."</a></li>\n";
+        }
+        $c->stash->{'output'} .= "</ul>\n";
+        for my $file (@{$c->stash->{'changed_files'}}) {
+            $c->stash->{'output'} .= "<hr><a id='".Thruk::Utils::Filter::name2id($file->{'display'})."'></a><pre>\n";
             $c->stash->{'output'} .= Thruk::Utils::Filter::escape_html($file->diff());
             $c->stash->{'output'} .= "</pre><br>\n";
         }
