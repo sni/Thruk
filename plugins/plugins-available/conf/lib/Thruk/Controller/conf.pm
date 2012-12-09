@@ -1093,7 +1093,7 @@ sub _apply_config_changes {
         $c->{'stash'}->{'output'} =~ s/^\+(.*)$/<font color="green">+$1<\/font>/gmx;
     }
 
-    if($c->{'request'}->{'parameters'}->{'refresh'}) {
+    if($c->{'request'}->{'parameters'}->{'discard'}) {
         Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
         return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
     }
