@@ -1078,7 +1078,7 @@ sub _apply_config_changes {
 
     # save changes to file
     elsif(defined $c->{'request'}->{'parameters'}->{'save'}) {
-        if($c->{'obj_db'}->commit()) {
+        if($c->{'obj_db'}->commit($c)) {
             Thruk::Utils::set_message( $c, 'success_message', 'Changes saved to disk successfully' );
         }
         return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
@@ -1286,7 +1286,7 @@ sub _get_context_object {
         $new_file      =~ s/^\///gmx;
         my $file       = $c->{'obj_db'}->get_file_by_path($files_root.$new_file);
         if(defined $file) {
-            if(defined $file and $file->{'readonly'}) {
+            if(defined $file and $file->readonly()) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'File matches readonly pattern' );
                 $c->stash->{'new_file'} = '/'.$new_file;
                 return $obj;
@@ -1295,7 +1295,7 @@ sub _get_context_object {
         } else {
             # new file
             my $file = Monitoring::Config::File->new($files_root.$new_file, $c->{'obj_db'}->{'config'}->{'obj_readonly'}, $c->{'obj_db'}->{'coretype'});
-            if(defined $file and $file->{'readonly'}) {
+            if(defined $file and $file->readonly()) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Failed to create new file: file matches readonly pattern' );
                 $c->stash->{'new_file'} = '/'.$new_file;
                 return $obj;

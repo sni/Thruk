@@ -116,19 +116,23 @@ sub init {
 
 =head2 commit
 
-    commit()
+    commit([$c])
 
 Commit changes to disk. Returns 1 on success.
 
+$c is only needed when syncing with remote sites.
+
 =cut
 sub commit {
-    my $self = shift;
-    my $rc   = 1;
+    my($self, $c) = @_;
+    my $rc    = 1;
+    my $files = { changed => [], deleted => []};
     my $changed_files = $self->get_changed_files();
     for my $file (@{$changed_files}) {
         unless($file->save()) {
             $rc = 0;
         }
+        push @{$files->{'changed'}}, [ $file->{'display'}, "".$file->get_new_file_content(), $file->{'mtime'} ];
     }
 
     # remove deleted files from files
@@ -136,15 +140,22 @@ sub commit {
     for my $f (@{$self->{'files'}}) {
         if(!$f->{'deleted'} or -f $f->{'path'}) {
             push @new_files, $f;
+        } else {
+            push @{$files->{'deleted'}}, $f->{'display'};
         }
     }
-    $self->{'files'}        = \@new_files;
+    $self->{'files'} = \@new_files;
     if($rc == 1) {
         $self->{'needs_commit'} = 0;
         $self->{'last_changed'} = time() if scalar @{$changed_files} > 0;
     }
 
     $self->_collect_errors();
+
+    if($self->is_remote()) {
+        confess("no c") unless $c;
+        $self->remote_file_save($c, $files);
+    }
 
     return $rc;
 }
@@ -987,6 +998,24 @@ sub get_files_for_folder {
 
 
 ##########################################################
+
+=head2 get_files_root
+
+    get_files_root()
+
+return root folder for config files
+
+=cut
+sub get_files_root {
+    my ( $self ) = @_;
+    my $files = [];
+    for my $file (@{$self->{'files'}}) {
+        push @{$files}, $file->{'path'};
+    }
+    return Thruk::Utils::Conf::get_root_folder($files);
+}
+
+##########################################################
 # INTERNAL SUBS
 ##########################################################
 sub _set_config {
@@ -1811,6 +1840,22 @@ sub remote_config_reload {
     my($rc, $output) = @{$self->_remote_do($c, 'configreload')};
     $c->{'stash'}->{'output'} = $output;
     return !$rc;
+}
+
+##########################################################
+
+=head2 remote_file_save
+
+    remote_file_save()
+
+save files to remote site
+
+=cut
+sub remote_file_save {
+    my($self, $c, $files) = @_;
+    return unless $self->is_remote();
+    my $res = $self->_remote_do($c, 'configsave', $files);
+    return;
 }
 
 ##########################################################

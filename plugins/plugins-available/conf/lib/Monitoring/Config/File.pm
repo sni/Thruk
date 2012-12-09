@@ -202,6 +202,17 @@ sub update_objects_from_text {
     return;
 }
 
+##########################################################
+
+=head2 readonly
+
+return true if file is readonly
+
+=cut
+sub readonly {
+    my($self) = @_;
+    return $self->{'readonly'};
+}
 
 ##########################################################
 
@@ -484,6 +495,18 @@ sub _update_meta_data {
     $self->{'mtime'} = $meta->{'mtime'};
     $self->{'inode'} = $meta->{'inode'};
     return $meta;
+}
+
+##########################################################
+
+=head2 get_new_file_content
+
+returns the current raw file content
+
+=cut
+sub get_new_file_content {
+    my $self = shift;
+    return $self->_get_new_file_content();
 }
 
 ##########################################################
