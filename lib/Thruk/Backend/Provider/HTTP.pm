@@ -47,19 +47,7 @@ sub new {
     };
     bless $self, $class;
 
-    $self->{'ua'} = LWP::UserAgent->new;
-    $self->{'ua'}->timeout($self->{'timeout'});
-    $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
-    $self->{'ua'}->conn_cache(LWP::ConnCache->new());
-    $self->{'ua'}->agent('Thruk ');
-    if($self->{'proxy'}) {
-        $self->{'ua'}->proxy(['http'], $self->{'proxy'});
-    }
-    # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
-    $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
-    # env proxy breaks the ssl proxy above
-    #$self->{'ua'}->env_proxy();
-    push @{ $self->{'ua'}->requests_redirectable }, 'POST';
+    $self->reconnect();
 
     return $self;
 }
@@ -116,12 +104,27 @@ sub peer_name {
 
 =head2 reconnect
 
-recreate database connection
+recreate lwp object
 
 =cut
 sub reconnect {
+    my($self) = @_;
+    $self->{'ua'} = LWP::UserAgent->new;
+    $self->{'ua'}->timeout(30);
+    $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
+    $self->{'ua'}->conn_cache(LWP::ConnCache->new());
+    $self->{'ua'}->agent('Thruk ');
+    if($self->{'proxy'}) {
+        $self->{'ua'}->proxy(['http'], $self->{'proxy'});
+    }
+    # ssl proxy only works this way, see http://community.activestate.com/forum-topic/lwp-https-requests-proxy
+    $ENV{'HTTPS_PROXY'} = $self->{'proxy'} if $self->{'proxy'};
+    # env proxy breaks the ssl proxy above
+    #$self->{'ua'}->env_proxy();
+    push @{ $self->{'ua'}->requests_redirectable }, 'POST';
     return;
 }
+
 ##########################################################
 
 =head2 set_verbose

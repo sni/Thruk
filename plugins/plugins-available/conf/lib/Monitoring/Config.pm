@@ -1700,17 +1700,47 @@ sub _list {
 }
 
 ##########################################################
+# do something on remote site
+sub _remote_do {
+    my($self, $c, $sub, $args) = @_;
+    my $res = $self->{'remotepeer'}
+                   ->{'class'}
+                   ->_req('configtool', {
+                            auth => $c->stash->{'remote_user'},
+                            sub  => $sub,
+                            args => $args,
+                    });
+    die("bogus result: ".Dumper($res)) if(!defined $res or !defined $res->[2]);
+    return $res->[2];
+}
 
-=head2 sync_remote
+##########################################################
 
-    sync_remote()
+=head2 is_remote
+
+    is_remote()
+
+return true if this backend has a remote connection
+
+=cut
+sub is_remote {
+    my($self) = @_;
+    return 1 if defined $self->{'remotepeer'};
+    return 0;
+}
+
+##########################################################
+
+=head2 remote_file_sync
+
+    remote_file_sync()
 
 syncronize files from remote
 
 =cut
-sub sync_remote {
+sub remote_file_sync {
     my($self, $c) = @_;
-    return unless defined $self->{'remotepeer'};
+    return unless $self->is_remote();
     my $files = {};
     for my $f (@{$self->{'files'}}) {
         $files->{$f->{'display'}} = {
@@ -1718,15 +1748,7 @@ sub sync_remote {
             'md5'          => $f->{'md5'},
         };
     }
-    my $res = $self->{'remotepeer'}
-                   ->{'class'}
-                   ->_req('configtool', {
-                            auth => $c->stash->{'remote_user'},
-                            sub  => 'syncfiles',
-                            args => { files => $files },
-                    });
-    die("bogus result: ".Dumper($res)) if(!defined $res or !defined $res->[2]);
-    my $remotefiles = $res->[2];
+    my $remotefiles = $self->_remote_do($c, 'syncfiles', { files => $files });
 
     my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
     $self->{'config'}->{'localdir'} = $localdir;
@@ -1755,6 +1777,40 @@ sub sync_remote {
         }
     }
     return;
+}
+
+##########################################################
+
+=head2 remote_config_check
+
+    remote_config_check()
+
+do config check on remote site
+
+=cut
+sub remote_config_check {
+    my($self, $c) = @_;
+    return unless $self->is_remote();
+    my($rc, $output) = @{$self->_remote_do($c, 'configcheck')};
+    $c->{'stash'}->{'output'} = $output;
+    return !$rc;
+}
+
+##########################################################
+
+=head2 remote_config_reload
+
+    remote_config_reload()
+
+do a config reload on remote site
+
+=cut
+sub remote_config_reload {
+    my($self, $c) = @_;
+    return unless $self->is_remote();
+    my($rc, $output) = @{$self->_remote_do($c, 'configreload')};
+    $c->{'stash'}->{'output'} = $output;
+    return !$rc;
 }
 
 ##########################################################

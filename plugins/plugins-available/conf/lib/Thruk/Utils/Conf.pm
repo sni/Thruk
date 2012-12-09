@@ -76,7 +76,7 @@ sub set_object_model {
 
     $c->{'obj_db'}->{'stats'}      = $c->{'stats'};
     $c->{'obj_db'}->{'remotepeer'} = $peer_conftool if lc($peer_conftool->{'type'}) eq 'http';
-    $c->{'obj_db'}->sync_remote($c);
+    $c->{'obj_db'}->remote_file_sync($c);
 
     if($c->{'obj_db'}->{'cached'}) {
         $c->stats->profile(begin => "checking objects");

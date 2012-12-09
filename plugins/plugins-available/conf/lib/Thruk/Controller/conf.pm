@@ -1986,8 +1986,11 @@ sub _get_plugin_preview {
 ##########################################################
 sub _config_check {
     my($c) = @_;
-    if(_cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
-        Thruk::Utils::set_message( $c, 'success_message', 'config check successfully' );
+    if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_check($c)) {
+        Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
+    }
+    elsif(!$c->{'obj_db'}->is_remote() and _cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_check_cmd'})) {
+        Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
     }
@@ -2002,16 +2005,23 @@ sub _config_check {
 ##########################################################
 sub _config_reload {
     my($c) = @_;
-    if(_cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
+
+    if($c->{'obj_db'}->is_remote() and $c->{'obj_db'}->remote_config_reload($c)) {
+        Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
+        $c->stash->{'last_changed'} = 0;
+        $c->stash->{'needs_commit'} = 0;
+    }
+    elsif(!$c->{'obj_db'}->is_remote() and _cmd(undef, $c, $c->stash->{'peer_conftool'}->{'obj_reload_cmd'})) {
         Thruk::Utils::set_message( $c, 'success_message', 'config reloaded successfully' );
         $c->stash->{'last_changed'} = 0;
         $c->stash->{'needs_commit'} = 0;
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
     }
+
     _nice_check_output($c);
 
-    # wait until core responds
+    # wait until core responds again
     for(1..30) {
         sleep(1);
         eval {
