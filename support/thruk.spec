@@ -17,9 +17,9 @@ Patch2:        0004-thruk_fastcgi.pl.patch
 Requires(pre): shadow-utils
 Requires:      perl logrotate gd
 %if %{defined suse_version}
-Requires: apache2 apache2-mod_fcgid cron
+Requires: apache2 apache2-mod_fcgid cron cairo wget
 %else
-Requires: httpd mod_fcgid
+Requires: httpd mod_fcgid cairo wget
 %endif
 
 %description
@@ -175,6 +175,12 @@ a2enmod rewrite
 chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 /usr/bin/crontab -l -u apache 2>/dev/null | /usr/bin/crontab -u apache -
+if [ "$(getenforce 2>/dev/null)" = "Enforcing" ];
+  echo "******************************************";
+  echo "Thruk will not work when SELinux is enabled";
+  echo "SELinux: "$(getenforce);
+  echo "******************************************";
+fi
 %endif
 /usr/bin/thruk -a installcron --local > /dev/null
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
