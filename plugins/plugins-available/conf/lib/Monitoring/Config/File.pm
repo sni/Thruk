@@ -481,7 +481,7 @@ sub diff {
     unlink($filename);
 
     # nice file path
-    $diff =~ s/\Q$self->{'path'}\E/$self->{'display'}/;
+    $diff =~ s/\Q$self->{'path'}\E/$self->{'display'}/mx;
 
     return $diff;
 }
