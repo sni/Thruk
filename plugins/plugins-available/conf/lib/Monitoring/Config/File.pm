@@ -467,8 +467,11 @@ sub diff {
         Thruk::Utils::Conf::decode_any($line);
         $diff .= $line;
     }
-
     unlink($filename);
+
+    # nice file path
+    $diff =~ s/\Q$self->{'path'}\E/$self->{'display'}/;
+
     return $diff;
 }
 
