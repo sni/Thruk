@@ -175,7 +175,7 @@ a2enmod rewrite
 chown -R apache: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
 /etc/init.d/httpd restart || /etc/init.d/httpd start
 /usr/bin/crontab -l -u apache 2>/dev/null | /usr/bin/crontab -u apache -
-if [ "$(getenforce 2>/dev/null)" = "Enforcing" ];
+if [ "$(getenforce 2>/dev/null)" = "Enforcing" ]; then
   echo "******************************************";
   echo "Thruk will not work when SELinux is enabled";
   echo "SELinux: "$(getenforce);
