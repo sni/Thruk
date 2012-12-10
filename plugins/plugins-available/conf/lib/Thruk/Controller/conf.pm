@@ -501,7 +501,7 @@ sub _process_thruk_page {
 
         my $data = Thruk::Utils::Conf::get_data_from_param($c->{'request'}->{'parameters'}, $defaults);
         $self->_store_changes($c, $file, $data, $defaults, $c);
-        return $c->response->redirect('conf.cgi?sub=thruk');
+        return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'thruk/cgi-bin/conf.cgi?sub=thruk');
     }
 
     my($content, $data, $md5) = Thruk::Utils::Conf::read_conf($file, $defaults);
