@@ -422,7 +422,8 @@ sub fill_totals_box {
     return 1 if($c->stash->{'no_totals'} and !$force);
 
     # host status box
-    my $host_stats = {};
+    my $host_stats    = {};
+    my $service_stats = {};
     if(   defined $c->stash->{style} and $c->stash->{style} eq 'detail'
        or ( $c->stash->{'servicegroup'}
             and ( $c->stash->{style} eq 'overview' or $c->stash->{style} eq 'grid' or $c->stash->{style} eq 'summary' )
@@ -430,6 +431,13 @@ sub fill_totals_box {
       ) {
         # set host status from service query
         my $services = $c->{'db'}->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+        $service_stats = {
+            'pending'         => 0,
+            'ok'              => 0,
+            'warning'         => 0,
+            'unknown'         => 0,
+            'critical'        => 0,
+        };
         $host_stats = {
             'pending'                   => 0,
             'up'                        => 0,
@@ -440,6 +448,15 @@ sub fill_totals_box {
         };
         my %hosts;
         for my $service (@{$services}) {
+            if($service->{'has_been_checked'} == 1) {
+                $service_stats->{'ok'}++        if $service->{'state'} == 0;
+                $service_stats->{'warning'}++   if $service->{'state'} == 1;
+                $service_stats->{'critical'}++  if $service->{'state'} == 2;
+                $service_stats->{'unknown'}++   if $service->{'state'} == 3;
+            }
+            if($service->{'has_been_checked'} == 0) {
+                $service_stats->{'pending'}++;
+            }
             next if defined $hosts{$service->{'host_name'}};
             $hosts{$service->{'host_name'}} = 1;
 
@@ -455,12 +472,13 @@ sub fill_totals_box {
             }
         }
     } else {
-        $host_stats = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+        $host_stats    = $c->{'db'}->get_host_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+        $service_stats = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
     }
     $c->stash->{'host_stats'} = $host_stats;
 
     # services status box
-    $c->stash->{'service_stats'} = $c->{'db'}->get_service_stats( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+    $c->stash->{'service_stats'} = $service_stats;
 
     # set audio file to play
     Thruk::Utils::Status::set_audio_file($c);

@@ -267,7 +267,7 @@ sub get_hosts_by_servicequery {
     my($self, %options) = @_;
 
     $options{'columns'} = [qw/
-        host_has_been_checked host_name host_state host_scheduled_downtime_depth host_acknowledged
+        host_has_been_checked host_name host_state host_scheduled_downtime_depth host_acknowledged has_been_checked state
         /];
 
     my $data = $self->_get_table('services', \%options);
