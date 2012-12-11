@@ -176,7 +176,7 @@
     <td width="100%" valign="top">[% PROCESS _header_site_panel.tt %]</td>
     <td class="hidden noprint" id="bug_report">
       [% IF show_error_reports%]
-      <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report"></a>
+      <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report" width="16" height="16"></a>
       [% END %]
     </td>
     [% UNLESS minimal %]
