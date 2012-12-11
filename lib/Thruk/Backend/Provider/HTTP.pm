@@ -652,12 +652,42 @@ sub _req {
                 die($data->{'output'}->[3]);
             }
             $self->_replace_peer_key($data->{'output'}->[2]);
+
+            if(defined $args and ref $args eq 'HASH' and $args->{'wait'} and $data->{'output'}->[2] =~ m/^jobid:(.*)$/mx) {
+                return $self->_wait_for_remote_job($1);
+            }
+
             return $data->{'output'};
         }
         die("not an array ref, got ".ref($data->{'output'}));
     }
     die(Dumper($response));
     return;
+}
+
+##########################################################
+
+=head2 _wait_for_remote_job
+
+  _wait_for_remote_job($jobid)
+
+wait till remote job is finished and return that data
+
+=cut
+sub _wait_for_remote_job {
+    my($self, $jobid) = @_;
+    my $res = $self->_req('job', $jobid);
+    if($res->[2] =~ m/jobid:([^:]+):0/mx) {
+        sleep(1);
+        return $self->_wait_for_remote_job($jobid);
+    } else {
+        my $last_error = "";
+        return([undef,
+                1,
+                [$res->[2]->{'rc'}, $res->[2]->{'out'}],
+                $last_error]
+        );
+    }
 }
 
 ##########################################################

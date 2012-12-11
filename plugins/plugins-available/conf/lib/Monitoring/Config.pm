@@ -468,7 +468,7 @@ sub get_object_by_location {
     my($self, $path, $line) = @_;
 
     for my $file (@{$self->{'files'}}) {
-        next unless $file->{'path'} eq $path;
+        next unless($file->{'path'} eq $path or $file->{'display'} eq $path);
         for my $obj (@{$file->{'objects'}}) {
             if(defined $obj->{'line'} and defined $obj->{'line2'}
                and $obj->{'line'} ne '' and $obj->{'line2'} ne ''
@@ -1739,7 +1739,23 @@ sub _remote_do {
                             sub  => $sub,
                             args => $args,
                     });
-    die("bogus result: ".Dumper($res)) if(!defined $res or !defined $res->[2]);
+    die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
+    return $res->[2];
+}
+
+##########################################################
+# do something on remote site in background
+sub _remote_do_bg {
+    my($self, $c, $sub, $args) = @_;
+    my $res = $self->{'remotepeer'}
+                   ->{'class'}
+                   ->_req('configtool', {
+                            auth => $c->stash->{'remote_user'},
+                            sub  => $sub,
+                            args => $args,
+                            wait => 1,
+                    });
+    die("bogus result: ".Dumper($res)) if(!defined $res or ref $res ne 'ARRAY' or !defined $res->[2]);
     return $res->[2];
 }
 
@@ -1820,7 +1836,7 @@ do config check on remote site
 sub remote_config_check {
     my($self, $c) = @_;
     return unless $self->is_remote();
-    my($rc, $output) = @{$self->_remote_do($c, 'configcheck')};
+    my($rc, $output) = @{$self->_remote_do_bg($c, 'configcheck')};
     $c->{'stash'}->{'output'} = $output;
     return !$rc;
 }
@@ -1837,7 +1853,7 @@ do a config reload on remote site
 sub remote_config_reload {
     my($self, $c) = @_;
     return unless $self->is_remote();
-    my($rc, $output) = @{$self->_remote_do($c, 'configreload')};
+    my($rc, $output) = @{$self->_remote_do_bg($c, 'configreload')};
     $c->{'stash'}->{'output'} = $output;
     return !$rc;
 }
