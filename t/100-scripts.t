@@ -24,7 +24,7 @@ sub check_script {
     ok($cmd, "testing : ".$cmd);
     TestUtils::test_command({
         cmd     => $cmd,
-        like    => '/Thruk\ Version\ '.$Thruk::VERSION.'/',
+        like    => '/Thruk\ Version\ '.($Thruk::VERSION || '\d').'/',
     });
     return;
 }

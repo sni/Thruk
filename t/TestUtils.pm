@@ -104,10 +104,12 @@ sub test_page {
     my $request = _request($opts->{'url'});
 
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
-        diag("got startup link: ".$1);
+        my $link = $1;
+        diag("got startup link: ".$link);
         # startup fcgid
-        fail("startup url does not match") if $1 ne $opts->{'url'};
-        _request('/thruk/side.html');
+        fail("startup url does not match: '".$link."' ne '".$opts->{'url'}."'") if ($link ne $opts->{'url'} and $link !~ m/^wait\#/mx);
+        _request('/thruk/cgi-bin/remote.cgi');
+        $link =~ s/^wait\#//mx;
         $request = _request($opts->{'url'});
     }
 
