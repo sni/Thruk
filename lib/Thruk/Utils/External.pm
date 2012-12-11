@@ -31,6 +31,8 @@ use POSIX ":sys_wait_h";
             allow        => all|user,
             wait_message => "display message while running the job"
             forward      => "forward on success"
+            background   => "return $jobid if set, or redirect otherwise"
+            no_shell     => "wrap command in a shell unless no_shell is set"
         }
     );
 
@@ -64,6 +66,8 @@ sub cmd {
 
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
+
+        $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
 
         exec($cmd);
         exit(1); # just to be sure
@@ -157,11 +161,12 @@ return true if process is still running
 
 =cut
 sub is_running {
-    my $c   = shift;
-    my $id  = shift;
+    my $c      = shift;
+    my $id     = shift;
+    my $nouser = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
-    if( -f $dir."/user" ) {
+    if(!$nouser && -f $dir."/user" ) {
         my $user = read_file($dir."/user");
         chomp($user);
         carp('no remote_user') unless defined $c->stash->{'remote_user'};
@@ -265,11 +270,12 @@ return result of a job
 
 =cut
 sub get_result {
-    my $c   = shift;
-    my $id  = shift;
+    my $c       = shift;
+    my $id      = shift;
+    my $nouser  = shift;
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
 
-    if(-f $dir."/user") {
+    if(!$nouser && -f $dir."/user") {
         my $user = read_file($dir."/user");
         chomp($user);
         carp('no remote_user') unless defined $c->stash->{'remote_user'};
@@ -298,7 +304,11 @@ sub get_result {
     my $stash;
     $stash = retrieve($dir."/stash") if -f $dir."/stash";
 
-    return($out,$err,$time, $dir,$stash);
+    my $rc;
+    $rc = read_file($dir."/rc") if -f $dir."/rc";
+    chomp($rc) if defined $rc;
+
+    return($out,$err,$time, $dir,$stash,$rc);
 }
 
 ##############################################
@@ -421,7 +431,7 @@ sub _do_parent_stuff {
     }
 
     $c->stash->{'job_id'} = $id;
-    if(! defined $conf->{'background'}) {
+    if(!$conf->{'background'}) {
         return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/job.cgi?job=".$id);
     }
     return $id;

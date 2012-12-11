@@ -725,11 +725,13 @@ sub _cmd_configtool {
     }
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
-        $res = _cmd($c, $c->{'obj_db'}->{'config'}->{'obj_check_cmd'});
+        my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_check_cmd'}." 2>&1", 'background' => 1 });
+        $res = 'jobid:'.$jobid;
     }
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
-        $res = _cmd($c, $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'});
+        my $jobid = Thruk::Utils::External::cmd($c, { cmd => $c->{'obj_db'}->{'config'}->{'obj_reload_cmd'}." 2>&1", 'background' => 1 });
+        $res = 'jobid:'.$jobid;
     }
     # save incoming config changes
     elsif($opt->{'args'}->{'sub'} eq 'configsave') {
@@ -786,6 +788,11 @@ sub _cmd_raw {
         return _cmd_configtool($c, $key, $opt);
     }
 
+    # result for external job
+    elsif($sub eq 'job') {
+        return _cmd_ext_job($c, $key, $opt);
+    }
+
     my @res = Thruk::Backend::Manager::_do_on_peer($key, $sub, $opt->{'args'});
     my $res = shift @res;
 
@@ -807,21 +814,26 @@ sub _cmd_raw {
 }
 
 ##############################################
-sub _cmd {
-    my ( $c, $cmd ) = @_;
-
-    local $SIG{CHLD}='';
-    local $ENV{REMOTE_USER}=$c->stash->{'remote_user'};
-    $c->log->debug( "running cmd: ". $cmd );
-    my $rc = $?;
-    my $output = `$cmd 2>&1`;
-    if($? == -1) {
-        $output .= "[".$!."]";
-    } else {
-        $rc = $?>>8;
+sub _cmd_ext_job {
+    my($c, $key, $opt) = @_;
+    my $jobid       = $opt->{'args'};
+    my $res         = "";
+    my $last_error  = "";
+    if(Thruk::Utils::External::is_running($c, $jobid, 1)) {
+        $res = "jobid:".$jobid.":0";
     }
-
-    return([$rc, decode_utf8($output)]);
+    else {
+        my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $jobid, 1);
+        $res = {
+            'out'   => $out,
+            'err'   => $err,
+            'time'  => $time,
+            'dir'   => $dir,
+            'stash' => $stash,
+            'rc'    => $rc,
+        };
+    }
+    return([undef, 1, $res, $last_error], 0);
 }
 
 ##############################################
