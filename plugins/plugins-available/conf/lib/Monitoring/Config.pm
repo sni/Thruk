@@ -1795,7 +1795,7 @@ sub remote_file_sync {
     }
     my $remotefiles = $self->_remote_do($c, 'syncfiles', { files => $files });
 
-    my $localdir = $c->config->{'var_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
+    my $localdir = $c->config->{'tmp_path'}."/localconfcache/".$self->{'remotepeer'}->{'key'};
     $self->{'config'}->{'localdir'} = $localdir;
     $self->{'config'}->{'obj_dir'}  = '/';
     Thruk::Utils::IO::mkdir_r($localdir);
