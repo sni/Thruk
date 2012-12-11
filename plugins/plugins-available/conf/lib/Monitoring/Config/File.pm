@@ -522,7 +522,7 @@ sub _get_new_file_content {
 
     return $new_content if $self->{'deleted'};
 
-    return read_file($self->{'path'}) unless $self->{'changed'};
+    return encode_utf8(read_file($self->{'path'})) unless $self->{'changed'};
 
     my $linenr = 1;
 

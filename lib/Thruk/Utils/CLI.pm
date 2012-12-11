@@ -829,7 +829,6 @@ sub _cmd_ext_job {
             'err'   => $err,
             'time'  => $time,
             'dir'   => $dir,
-            'stash' => $stash,
             'rc'    => $rc,
         };
     }

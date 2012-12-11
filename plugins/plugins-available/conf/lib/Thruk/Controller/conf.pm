@@ -1738,7 +1738,7 @@ sub _file_editor {
         $c->stash->{'file_link'}     = $file->{'display'};
         $c->stash->{'file_name'}     = $file->{'display'};
         $c->stash->{'file_name'}     =~ s/^$files_root//gmx;
-        $c->stash->{'file_content'}  = decode_utf8($file->_get_new_file_content());
+        $c->stash->{'file_content'}  = decode_utf8($file->get_new_file_content());
         $c->stash->{'template'}      = 'conf_objects_fileeditor.tt';
     } else {
         Thruk::Utils::set_message( $c, 'fail_message', 'File does not exist' );
