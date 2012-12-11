@@ -101,17 +101,7 @@ sub test_page {
 
     ok($opts->{'url'}, $opts->{'url'});
 
-    my $request = _request($opts->{'url'});
-
-    if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
-        my $link = $1;
-        diag("got startup link: ".$link);
-        # startup fcgid
-        fail("startup url does not match: '".$link."' ne '".$opts->{'url'}."'") if ($link ne $opts->{'url'} and $link !~ m/^wait\#/mx);
-        _request('/thruk/cgi-bin/remote.cgi');
-        $link =~ s/^wait\#//mx;
-        $request = _request($opts->{'url'});
-    }
+    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'});
 
     if(defined $opts->{'follow'}) {
         my $redirects = 0;
@@ -446,15 +436,23 @@ sub _relative_url {
 
 #########################
 sub _request {
-    my $url     = shift;
+    my($url, $start_to) = @_;
     my $request = request($url);
     if($request->is_redirect and $request->{'_headers'}->{'location'} =~ m/\/startup\.html\?(.*)$/) {
-        diag("starting up... $1");
+        my $link = $1;
+        $link    =~ s/^wait\#//mx;
+        #diag("starting up... ".$link);
+        is($link, $start_to, "startup url points to: ".$link) if defined $start_to;
         # startup fcgid
-        my $r = request('/thruk/side.html');
+        my $r = request('/thruk/cgi-bin/remote.cgi');
+        #diag("startup request:");
+        #diag(Dumper($r));
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
         fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
-        $request = request($url);
+        sleep(1);
+        $request = request($link);
+        #diag("original request:");
+        #diag(Dumper($request));
     }
     return $request;
 }
@@ -475,9 +473,13 @@ sub bail_out_req {
     my $error   = "";
     if($page =~ m/<!--error:(.*?):error-->/smx) {
         $error = $1;
-        BAIL_OUT(Dumper([$msg, $error]));
+        diag(Dumper($msg));
+        diag(Dumper($error));
+        BAIL_OUT($msg);
     }
-    BAIL_OUT(Dumper([$msg, $req]));
+    diag(Dumper($msg));
+    diag(Dumper($req));
+    BAIL_OUT($msg);
     return;
 }
 

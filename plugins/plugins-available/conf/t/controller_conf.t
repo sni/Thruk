@@ -7,7 +7,7 @@ use Encode qw(encode_utf8 decode_utf8);
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 1083;
+    plan tests => 1087;
 }
 
 BEGIN {
@@ -85,6 +85,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=tree',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=tree_objects&type=command',
     '/thruk/cgi-bin/conf.cgi?sub=backends',
+    { url => '/thruk/cgi-bin/conf.cgi?sub=thruk&action=store', 'startup_to_url' => '/thruk/cgi-bin/conf.cgi?sub=thruk' }
 ];
 
 for my $type (@{$Monitoring::Config::Object::Types}) {
@@ -100,7 +101,6 @@ for my $url (@{$pages}) {
 
 my $redirects = [
     '/thruk/cgi-bin/conf.cgi?sub=cgi&action=store',
-    '/thruk/cgi-bin/conf.cgi?sub=thruk&action=store',
     '/thruk/cgi-bin/conf.cgi?sub=users&action=store&data.username=testuser',
     '/thruk/cgi-bin/conf.cgi?sub=objects&action=revert&type=host&data.name='.$host,
 ];
