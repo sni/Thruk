@@ -79,6 +79,7 @@ return the peers address
 sub peer_addr {
     my($self, $new_val) = @_;
     if(defined $new_val) {
+        $self->reconnect();
         $self->{'addr'} = $new_val;
     }
     return $self->{'addr'};
@@ -109,6 +110,16 @@ recreate lwp object
 =cut
 sub reconnect {
     my($self) = @_;
+
+    # correct address
+    $self->{'addr'} =~ s|remote\.cgi$||mx;
+    $self->{'addr'} =~ s|/$||mx;
+    $self->{'addr'} =~ s|cgi-bin$||mx;
+    $self->{'addr'} =~ s|/$||mx;
+    $self->{'addr'} =~ s|thruk$||mx;
+    $self->{'addr'} =~ s|/$||mx;
+    $self->{'addr'} .= '/thruk/cgi-bin/remote.cgi';
+
     $self->{'ua'} = LWP::UserAgent->new;
     $self->{'ua'}->timeout(30);
     $self->{'ua'}->protocols_allowed( [ 'http', 'https'] );
@@ -613,7 +624,8 @@ returns result for given request
 
 =cut
 sub _req {
-    my($self, $sub, $args) = @_;
+    my($self, $sub, $args, $redirects) = @_;
+    $redirects = 0 unless defined $redirects;
     my $options = {
         'action' => 'raw',
         'sub'    => $sub,
@@ -621,12 +633,19 @@ sub _req {
     };
     $options->{'auth'} = $args->{'auth'} if defined $args and ref $args eq 'HASH' and defined $args->{'auth'};
 
-    my $response = $self->{'ua'}->post($self->{'addr'}.'/thruk/cgi-bin/remote.cgi', {
+    my $response = $self->{'ua'}->post($self->{'addr'}, {
         data => encode_json({
             credential => $self->{'auth'},
             options    => $options,
         })
     });
+
+    if($response->{'_request'}->{'_uri'} =~ m/job\.cgi\?job=(.*)$/) {
+        $self->_wait_for_remote_job($1);
+        $redirects++;
+        die("too many redirects") if $redirects > 2;
+        return $self->_req($sub, $args, $redirects);
+    }
 
     if($response->is_success) {
         my $data_str = $response->decoded_content;
