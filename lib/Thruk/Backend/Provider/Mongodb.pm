@@ -1616,7 +1616,7 @@ sub _log_stats {
     $c->stats->profile(begin => "Mongodb::_log_stats");
 
     Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
-    my $output = sprintf("%-20s %-15s %s\n", 'Backend', 'Index Size', 'Data Size');
+    my $output = sprintf("%-20s %-15s %-13s %s\n", 'Backend', 'Index Size', 'Data Size', 'Items');
     for my $key (@{$c->stash->{'backends'}}) {
         my $table = 'logs_'.$key;
         my $peer  = $c->{'db'}->get_peer_by_key($key);
@@ -1624,9 +1624,10 @@ sub _log_stats {
         my $db    = $peer->{'logcache'}->_db;
         my $stats = $db->run_command({collStats => $table});
         if(ref $stats eq 'HASH') {
+            # http://docs.mongodb.org/manual/reference/collection-statistics/
             my($val1,$unit1) = Thruk::Utils::reduce_number($stats->{'totalIndexSize'}, 'B', 1000);
             my($val2,$unit2) = Thruk::Utils::reduce_number($stats->{'size'}, 'B', 1000);
-            $output .= sprintf("%-20s %5.1f %-9s %5.1f %s\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2);
+            $output .= sprintf("%-20s %5.1f %-9s %5.1f %-7s %d\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2, $stats->{'count'});
         }
     }
 
