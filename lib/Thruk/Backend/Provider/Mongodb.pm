@@ -1583,14 +1583,15 @@ returns the min/max timestamp for given logs
 sub _get_logs_start_end {
     my($self, %options) = @_;
     my(@data, $start, $end);
-    @data = $self->_db->logs
+    my $collection= $options{'collection'} || 'logs';
+    @data = $self->_db->$collection
                       ->find($self->_get_filter($options{'filter'}))
                       ->fields({ 'time' => 1 })
                       ->sort({'time' => 1})
                       ->limit(1)
                       ->all();
     $start = $data[0]->{'time'} if defined $data[0];
-    @data = $self->_db->logs
+    @data = $self->_db->$collection
                       ->find($self->_get_filter($options{'filter'}))
                       ->fields({ 'time' => 1 })
                       ->sort({'time' => -1})
@@ -1666,7 +1667,7 @@ sub _import_logs {
         if($mode eq 'import') {
             $db->run_command({drop => $table});
         }
-        print "running ".$mode." for ".$c->stash->{'backend_detail'}->{$key}->{'name'} if $verbose;
+        print "running ".$mode." for ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
         # get start / end timestamp
         my($mstart, $mend);
@@ -1676,26 +1677,27 @@ sub _import_logs {
             $c->stats->profile(begin => "get last mongo timestamp");
             # get last timestamp from mongodb
             my $mfilter = [];
-            push @{$mfilter}, {peer_key => $key};
-            ($mstart, $mend) = $peer->{'logcache'}->_get_logs_start_end(filter => $mfilter);
+            ($mstart, $mend) = $peer->{'logcache'}->_get_logs_start_end(filter => $mfilter, collection => $table);
             if(defined $mend) {
+                print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
                 push @{$filter}, {time => { '>=' => $mend }};
-                $start = $mend;
             }
             $c->stats->profile(end => "get last mongo timestamp");
         }
         $c->stats->profile(begin => "get livestatus timestamp");
         ($start, $end) = $peer->{'class'}->_get_logs_start_end(filter => $filter);
+        print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
         $c->stats->profile(end => "get livestatus timestamp");
-        print "\nimporting ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
+        print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
         my $time = $start;
         my $col = $db->$table;
-        $col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
+        #$col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
+        $col->ensure_index(Tie::IxHash->new('time' => 1));
         while($time <= $end) {
             my $stime = scalar localtime $time;
             $c->stats->profile(begin => $stime);
             my $lookup = {};
-            print "\n",scalar localtime $time if $verbose;
+            print scalar localtime $time if $verbose;
             my($logs) = $peer->{'class'}->get_logs(nocache => 1,
                                                     filter  => [{ '-and' => [
                                                                             { time => { '>=' => $time } },
@@ -1724,10 +1726,11 @@ sub _import_logs {
                 $col->insert($l, {safe => 1});
             }
             $c->stats->profile(end => $stime);
+            print "\n" if $verbose;
         }
         $c->stats->profile(end => "$key");
+        print "\n" if $verbose;
     }
-    print "\n" if $verbose;
 
     $c->stats->profile(end => "Mongodb::_import_logs($mode)");
     return($backend_count, $log_count);
