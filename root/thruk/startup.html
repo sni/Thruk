@@ -17,7 +17,7 @@
                 url: 'cgi-bin/remote.cgi',
                 type: 'POST',
                 success: function() {
-                    jQuery('#msg').html('<font color="green"><b>done.<\/b><\/font>');
+                    jQuery('#msg').html(' <font color="green"><b>done.<\/b><\/font><br>You will be redirected...');
 
                     // reload navigation too
                     if(parent.frames && parent.frames[0] != null) {
@@ -71,8 +71,7 @@
       <div class="product">Thruk Monitoring Webinterface</div>
 
       <div class="whatsnew warmup">
-        Please stand by, Thruks FastCGI Daemon is warming up.<br>
-        You will be redirected in a few seconds...<span id="msg"></span><br>
+        Please stand by, Thruks FastCGI Daemon is warming up.<span id="msg">..</span><br>
       </div>
     </div>
   </body>
