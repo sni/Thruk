@@ -281,18 +281,25 @@ sub diag_lint_errors_and_remove_some_exceptions {
     my @return;
     for my $error ( $lint->errors ) {
         my $err_str = $error->as_string;
+        next if $err_str =~ m/<IMG\ SRC=".*command.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*critical.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*flapping.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*recovery.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*restart.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*start.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*icon_minimize\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*right\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*left\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*right\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*up\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*down\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*down\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*json\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*waiting\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*downtime\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*info\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+
         next if $err_str =~ m/<IMG\ SRC=".*\/conf\/images\/obj_.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*icon_minimize\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*right\.png*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*left\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*right\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*up\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*down\.png*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*down\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*json\.png*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*waiting\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*downtime\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
-        next if $err_str =~ m/<IMG\ SRC=".*info\.png*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*\/logos\/.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC="[^"]*\.cgi[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/Unknown\ attribute\ "data\-\w+"\ for\ tag/imx;
