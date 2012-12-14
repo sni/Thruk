@@ -293,6 +293,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/<IMG\ SRC=".*waiting\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*downtime\.gif*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*info\.png*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*\/logos\/.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC="[^"]*\.cgi[^"]*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/Unknown\ attribute\ "data\-\w+"\ for\ tag/imx;
         next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imx;
