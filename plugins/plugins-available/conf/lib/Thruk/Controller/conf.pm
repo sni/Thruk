@@ -1093,11 +1093,13 @@ sub _apply_config_changes {
         $c->{'stash'}->{'output'} =~ s/^\+(.*)$/<font color="green">+$1<\/font>/gmx;
     }
 
+    # discard changes
     if($c->{'request'}->{'parameters'}->{'discard'}) {
+        $c->{'obj_db'}->discard_changes();
         Thruk::Utils::set_message( $c, 'success_message', 'Changes have been discarded' );
         return $c->response->redirect('conf.cgi?sub=objects&apply=yes');
     }
-    $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
+    $c->stash->{'obj_model_changed'} = 0 unless ($c->{'request'}->{'parameters'}->{'refresh'} || $c->{'request'}->{'parameters'}->{'discard'});
     $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
     $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
     $c->stash->{'files'}             = $c->{'obj_db'}->get_files();

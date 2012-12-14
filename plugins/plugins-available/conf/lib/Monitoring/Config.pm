@@ -114,6 +114,22 @@ sub init {
 
 ##########################################################
 
+=head2 discard_changes
+
+    discard_changes()
+
+Forget all changes made so far and not yet saved to disk
+
+=cut
+sub discard_changes {
+    my($self) = @_;
+    $self->check_files_changed(1);
+    return;
+}
+
+
+##########################################################
+
 =head2 commit
 
     commit([$c])
