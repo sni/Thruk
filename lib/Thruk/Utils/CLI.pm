@@ -382,10 +382,13 @@ sub _run_commands {
 
     # import mongodb logs
     elsif($action eq 'importlogs') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import');
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src);
     }
     elsif($action eq 'updatelogs') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update');
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src);
+    }
+    elsif($action eq 'logcachestats') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'stats', $src);
     }
     else {
         $data->{'output'} = "FAILED - no such command: ".$action."\n";
@@ -677,8 +680,15 @@ sub _cmd_url {
 
 ##############################################
 sub _cmd_import_logs {
-    my($c, $mode) = @_;
+    my($c, $mode, $src) = @_;
     $c->stats->profile(begin => "_cmd_import_logs()");
+
+    if($src ne 'local' and $mode eq 'import') {
+        return("ERROR - please run the initial import with --local\n", 1);
+    }
+
+    my $verbose = 0;
+    $verbose = 1 if $src eq 'local';
 
     eval {
         require Thruk::Backend::Provider::Mongodb;
@@ -692,10 +702,15 @@ sub _cmd_import_logs {
         return("FAILED - logcache is not enabled\n", 1);
     }
 
-    my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode);
-
-    $c->stats->profile(end => "_cmd_import_logs()");
-    return('OK - imported '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
+    if($mode eq 'stats') {
+        my $stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        $c->stats->profile(end => "_cmd_import_logs()");
+        return($stats."\n", 0);
+    } else {
+        my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose);
+        $c->stats->profile(end => "_cmd_import_logs()");
+        return('OK - imported '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
+    }
 }
 
 ##########################################################

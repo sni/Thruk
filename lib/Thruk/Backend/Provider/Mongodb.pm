@@ -584,7 +584,8 @@ sub get_logs {
     if(defined $options{'sort'}->{'DESC'} and $options{'sort'}->{'DESC'} eq 'time') {
         $sort = {'time' => -1};
     }
-    @data = $self->_db->logs
+    my $collection= $options{'collection'} || 'logs';
+    @data = $self->_db->$collection
                       ->find($self->_get_filter($options{'filter'}))
                       ->sort($sort)
                       ->all;
@@ -1601,6 +1602,40 @@ sub _get_logs_start_end {
 
 ##########################################################
 
+=head2 _log_stats
+
+  _log_stats
+
+gather log statistics
+
+=cut
+
+sub _log_stats {
+    my($self, $c) = @_;
+
+    $c->stats->profile(begin => "Mongodb::_log_stats");
+
+    Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
+    my $output = sprintf("%-20s %-15s %s\n", 'Backend', 'Index Size', 'Data Size');
+    for my $key (@{$c->stash->{'backends'}}) {
+        my $table = 'logs_'.$key;
+        my $peer  = $c->{'db'}->get_peer_by_key($key);
+        $peer->{'logcache'}->reconnect();
+        my $db    = $peer->{'logcache'}->_db;
+        my $stats = $db->run_command({collStats => $table});
+        if(ref $stats eq 'HASH') {
+            my($val1,$unit1) = Thruk::Utils::reduce_number($stats->{'totalIndexSize'}, 'B', 1000);
+            my($val2,$unit2) = Thruk::Utils::reduce_number($stats->{'size'}, 'B', 1000);
+            $output .= sprintf("%-20s %5.1f %-9s %5.1f %s\n", $c->stash->{'backend_detail'}->{$key}->{'name'}, $val1, $unit1, $val2, $unit2);
+        }
+    }
+
+    $c->stats->profile(end => "Mongodb::_log_stats");
+    return $output;
+}
+
+##########################################################
+
 =head2 _import_logs
 
   _import_logs
@@ -1610,7 +1645,7 @@ imports logs into mongodb
 =cut
 
 sub _import_logs {
-    my($self, $c, $mode) = @_;
+    my($self, $c, $mode, $verbose) = @_;
 
     $c->stats->profile(begin => "Mongodb::_import_logs($mode)");
 
@@ -1619,19 +1654,18 @@ sub _import_logs {
 
     Thruk::Action::AddDefaults::_set_possible_backends($c, {}) unless defined $c->stash->{'backends'};
 
-    my $table = 'logs'; # must be logs, otherwise mongodb.pm does not find the table
-    my $dropped = 0;
     for my $key (@{$c->stash->{'backends'}}) {
+        my $table = 'logs_'.$key;
         my $peer = $c->{'db'}->get_peer_by_key($key);
         next unless $peer->{'enabled'};
         $c->stats->profile(begin => "$key");
         $backend_count++;
         $peer->{'logcache'}->reconnect();
         my $db = $peer->{'logcache'}->_db;
-        if($mode eq 'import' and !$dropped) {
+        if($mode eq 'import') {
             $db->run_command({drop => $table});
-            $dropped = 1;
         }
+        print "running ".$mode." for ".$c->stash->{'backend_detail'}->{$key}->{'name'} if $verbose;
 
         # get start / end timestamp
         my($mstart, $mend);
@@ -1652,7 +1686,7 @@ sub _import_logs {
         $c->stats->profile(begin => "get livestatus timestamp");
         ($start, $end) = $peer->{'class'}->_get_logs_start_end(filter => $filter);
         $c->stats->profile(end => "get livestatus timestamp");
-        #print "\nimporting ", scalar localtime $start, " till ", scalar localtime $end, "\n";
+        print "\nimporting ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
         my $time = $start;
         my $col = $db->$table;
         $col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
@@ -1660,7 +1694,7 @@ sub _import_logs {
             my $stime = scalar localtime $time;
             $c->stats->profile(begin => $stime);
             my $lookup = {};
-            #print "\n",scalar localtime $time;
+            print "\n",scalar localtime $time if $verbose;
             my($logs) = $peer->{'class'}->get_logs(nocache => 1,
                                                     filter  => [{ '-and' => [
                                                                             { time => { '>=' => $time } },
@@ -1685,14 +1719,14 @@ sub _import_logs {
                     next if defined $lookup->{$l->{'message'}};
                 }
                 $log_count++;
-                #print '.' if $log_count%100 == 0;
+                print '.' if $log_count%100 == 0 and $verbose;
                 $col->insert($l, {safe => 1});
             }
             $c->stats->profile(end => $stime);
         }
         $c->stats->profile(end => "$key");
     }
-    #print "\n";
+    print "\n" if $verbose;
 
     $c->stats->profile(end => "Mongodb::_import_logs($mode)");
     return($backend_count, $log_count);

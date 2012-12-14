@@ -1601,6 +1601,39 @@ EOT
 }
 
 ########################################
+
+=head2 reduce_number
+
+  reduce_number($number, $unit, [$divisor])
+
+return reduced number, ex 1024B -> 1KB
+
+=cut
+
+sub reduce_number {
+    my($number, $unit, $divisor) = @_;
+    $divisor = 1000 unless defined $divisor;
+    my $unitprefix = '';
+    if($number > ($divisor*$divisor*$divisor*$divisor)) {
+        $unitprefix = 'T';
+        $number     = $number / ($divisor*$divisor*$divisor*$divisor);
+    }
+    if($number > ($divisor*$divisor*$divisor)) {
+        $unitprefix = 'G';
+        $number     = $number / ($divisor*$divisor*$divisor);
+    }
+    if($number > ($divisor*$divisor)) {
+        $unitprefix = 'M';
+        $number     = $number / ($divisor*$divisor);
+    }
+    elsif($number > $divisor) {
+        $unitprefix = 'K';
+        $number     = $number / $divisor;
+    }
+    return($number, $unitprefix.$unit);
+}
+
+########################################
 sub _initialassumedservicestate_to_state {
     my $initialassumedservicestate = shift;
 

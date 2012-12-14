@@ -84,6 +84,9 @@ thruk - Command Line Utility for Thruk Monitoring Gui
                                   - url=<url>        output url result
                                   - report=<nr>      generate report
                                   - reportmail=<nr>  send report by mail
+                                  - importlogs       initial logcache import
+                                  - updatelogs       update logcache
+                                  - logcachestats    print logcache statistics
 
   -A, --auth=<auth>             Set username for querys
 

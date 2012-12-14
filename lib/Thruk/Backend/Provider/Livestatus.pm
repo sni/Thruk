@@ -532,8 +532,7 @@ returns logfile entries
 sub get_logs {
     my($self, %options) = @_;
     if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
-        $options{'filter'} = [] unless defined $options{'filter'};
-        push @{$options{'filter'}}, {peer_key => $self->peer_key()};
+        $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'logcache'}->get_logs(%options);
     }
     $options{'columns'} = [qw/
