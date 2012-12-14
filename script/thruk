@@ -84,9 +84,22 @@ thruk - Command Line Utility for Thruk Monitoring Gui
                                   - url=<url>        output url result
                                   - report=<nr>      generate report
                                   - reportmail=<nr>  send report by mail
+
+                               Mongodb Logcache:
                                   - importlogs       initial logcache import
                                   - updatelogs       update logcache
                                   - logcachestats    print logcache statistics
+
+                               Internal Commands
+                                  - installcron      update cronjobs for downtimes and reports
+                                                     (only needed during package installation)
+                                  - uninstallcron    remove all thruk cronjobs
+                                                     (only needed during package deinstallation)
+                               Testing Commands
+                                  - listbackends     list all backends
+                                  - listhosts        list hostnames
+                                  - listhostgroups   list hostgroupnames
+
 
   -A, --auth=<auth>             Set username for querys
 

@@ -38,7 +38,7 @@ FILES="thruk
        nagimp
 "
 for file in $FILES; do
-    [ ! -e $file.3 -o $file -nt $file.3 ] && pod2man -s 3 -n $file ../script/$file > $file.3
+    [ ! -e $file.3 -o ../script/$file -nt $file.3 ] && pod2man -s 3 -n $file ../script/$file > $file.3
 done
 
 exit 0
