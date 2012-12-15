@@ -84,6 +84,8 @@ sub cmd {
             allow        => all|user,
             wait_message => "display message while running the job"
             forward      => "forward on success"
+            backends     => "list of selected backends (keys)"
+            nofork       => "don't fork"
         }
     )
 
@@ -94,7 +96,11 @@ sub perl {
     my $c         = shift;
     my $conf      = shift;
 
-    if($c->config->{'no_external_job_forks'}) {
+    if($c->config->{'no_external_job_forks'} or $conf->{'nofork'}) {
+        if(defined $conf->{'backends'}) {
+            $c->{'db'}->disable_backends();
+            $c->{'db'}->enable_backends($conf->{'backends'});
+        }
         ## no critic
         my $rc = eval($conf->{'expr'});
         ## use critic
@@ -110,6 +116,10 @@ sub perl {
     if ($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
+        if(defined $conf->{'backends'}) {
+            $c->{'db'}->disable_backends();
+            $c->{'db'}->enable_backends($conf->{'backends'});
+        }
         eval {
             _do_child_stuff($c, $dir);
             $ENV{REMOTE_USER} = $c->stash->{'remote_user'};

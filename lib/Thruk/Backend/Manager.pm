@@ -578,6 +578,54 @@ sub set_backend_state_from_local_connections {
 
 ########################################
 
+=head2 renew_logcache
+
+  renew_logcache($c)
+
+update the logcache
+
+=cut
+
+sub renew_logcache {
+    my $self    = shift;
+    my $c       = $_[0];
+    my $noforks = $_[1] || 0;
+    return unless defined $c->config->{'logcache'};
+
+    # check if this is the first import at all
+    # and do a external import in that case
+    my($get_results_for, $arg_array, $arg_hash) = $self->_select_backends('renew_logcache', \@_);
+    my $check = 0;
+    $self->{'logcache_checked'} = {} unless defined $self->{'logcache_checked'};
+    for my $key (@{$get_results_for}) {
+        if(!defined $self->{'logcache_checked'}->{$key}) {
+            $self->{'logcache_checked'}->{$key} = 1;
+            $check = 1;
+        }
+    }
+
+    if($check) {
+        my @stats = Thruk::Backend::Provider::Mongodb->_log_stats($c);
+        my $stats = Thruk::Utils::array2hash(\@stats, 'key');
+        my $backends2import = [];
+        for my $key (@{$get_results_for}) {
+            push @{$backends2import}, $key unless defined $stats->{$key};
+        }
+        if(scalar @{$backends2import} > 0) {
+            return Thruk::Utils::External::perl($c, { expr      => 'Thruk::Backend::Provider::Mongodb->_import_logs($c, "import")',
+                                                      message   => 'please stand by while your logfiles will be imported...',
+                                                      forward   => $c->request->uri(),
+                                                      backends  => $backends2import,
+                                                      nofork    => $noforks,
+                                                    });
+        }
+    }
+    $self->_do_on_peers( 'renew_logcache', \@_, 1);
+    return;
+}
+
+########################################
+
 =head2 _get_macros
 
   _get_macros
@@ -772,66 +820,21 @@ returns a result for a sub called for all peers
 =cut
 
 sub _do_on_peers {
-    my( $self, $function, $arg) = @_;
+    my( $self, $function, $arg, $force_serial) = @_;
 
     $self->{'c'}->stats->profile( begin => '_do_on_peers('.$function.')');
 
-    # do we have to send the query to all backends or just a few?
-    my(%arg, $backends, $pager);
-    if(     ( $function =~ m/^get_/mx or $function eq 'send_command')
-        and ref $arg eq 'ARRAY'
-        and scalar @{$arg} % 2 == 0 )
-    {
-        %arg = @{$arg};
+    my($get_results_for, $arg_array, $arg_hash) = $self->_select_backends($function, $arg);
+    my %arg = %{$arg_hash};
+    $arg = $arg_array;
 
-        if( $arg{'backend'} ) {
-            if(ref $arg{'backend'} eq 'ARRAY') {
-                for my $b (@{$arg{'backend'}}) {
-                    $backends->{$b} = 1;
-                }
-            } else {
-                for my $b (split(/,/mx,$arg{'backend'})) {
-                    $backends->{$b} = 1;
-                }
-            }
-        }
-        if(exists $arg{'pager'}) {
-            delete $arg{'pager'};
-            if($self->{'c'}->stash->{'use_pager'}) {
-                $arg{'pager'} = {
-                    entries  => $self->{'c'}->{'request'}->{'parameters'}->{'entries'} || $self->{'c'}->stash->{'default_page_size'},
-                    page     => $self->{'c'}->{'request'}->{'parameters'}->{'page'} || 1,
-                    next     => exists $self->{'c'}->{'request'}->{'parameters'}->{'next'}      || $self->{'c'}->{'request'}->{'parameters'}->{'next.x'},
-                    previous => exists $self->{'c'}->{'request'}->{'parameters'}->{'previous'}  || $self->{'c'}->{'request'}->{'parameters'}->{'previous.x'},
-                    first    => exists $self->{'c'}->{'request'}->{'parameters'}->{'first'}     || $self->{'c'}->{'request'}->{'parameters'}->{'first.x'},
-                    last     => exists $self->{'c'}->{'request'}->{'parameters'}->{'last'}      || $self->{'c'}->{'request'}->{'parameters'}->{'last.x'},
-                };
-            } else {
-                $arg{'pager'} = {};
-            }
-        }
-        @{$arg} = %arg;
-    }
     $self->{'c'}->log->debug($function);
-    $self->{'c'}->log->debug(Dumper($backends)) if defined $backends;
+    $self->{'c'}->log->debug(Dumper($get_results_for));
 
     # send query to selected backends
-    my $selected_backends = 0;
+    my $selected_backends = scalar @{$get_results_for};
     my $last_error;
-    my $get_results_for = [];
-    for my $peer ( @{ $self->get_peers() } ) {
-        if(defined $backends) {
-            next unless defined $backends->{$peer->{'key'}};
-        }
-        unless($peer->{'enabled'} == 1) {
-            $self->{'c'}->log->debug("skipped peer: ".$peer->{'name'});
-            next;
-        }
-        $selected_backends++;
-        push @{$get_results_for}, $peer->{'key'};
-    }
-
-    my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg);
+    my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     if(!defined $result and $selected_backends != 0) {
         local $Data::Dumper::Deepcopy = 1;
         confess("Error in _do_on_peers: ".$@."called as ".Dumper($function)."with args: ".Dumper(\%arg));
@@ -943,19 +946,85 @@ sub _do_on_peers {
 
 ########################################
 
-=head2 _remove_duplicates
+=head2 _select_backends
 
-  _remove_duplicates($data)
+  _select_backends($function, $args)
 
-removes duplicate entries from a array of hashes
+select backends we want to run functions on
+
+=cut
+
+sub _select_backends {
+    my( $self, $function, $arg) = @_;
+
+    # do we have to send the query to all backends or just a few?
+    my(%arg, $backends);
+    if(     ( $function =~ m/^get_/mx or $function eq 'send_command')
+        and ref $arg eq 'ARRAY'
+        and scalar @{$arg} % 2 == 0 )
+    {
+        %arg = @{$arg};
+
+        if( $arg{'backend'} ) {
+            if(ref $arg{'backend'} eq 'ARRAY') {
+                for my $b (@{$arg{'backend'}}) {
+                    $backends->{$b} = 1;
+                }
+            } else {
+                for my $b (split(/,/mx,$arg{'backend'})) {
+                    $backends->{$b} = 1;
+                }
+            }
+        }
+        if(exists $arg{'pager'}) {
+            delete $arg{'pager'};
+            if($self->{'c'}->stash->{'use_pager'}) {
+                $arg{'pager'} = {
+                    entries  => $self->{'c'}->{'request'}->{'parameters'}->{'entries'} || $self->{'c'}->stash->{'default_page_size'},
+                    page     => $self->{'c'}->{'request'}->{'parameters'}->{'page'} || 1,
+                    next     => exists $self->{'c'}->{'request'}->{'parameters'}->{'next'}      || $self->{'c'}->{'request'}->{'parameters'}->{'next.x'},
+                    previous => exists $self->{'c'}->{'request'}->{'parameters'}->{'previous'}  || $self->{'c'}->{'request'}->{'parameters'}->{'previous.x'},
+                    first    => exists $self->{'c'}->{'request'}->{'parameters'}->{'first'}     || $self->{'c'}->{'request'}->{'parameters'}->{'first.x'},
+                    last     => exists $self->{'c'}->{'request'}->{'parameters'}->{'last'}      || $self->{'c'}->{'request'}->{'parameters'}->{'last.x'},
+                };
+            } else {
+                $arg{'pager'} = {};
+            }
+        }
+        @{$arg} = %arg;
+    }
+
+    # send query to selected backends
+    my $get_results_for = [];
+    for my $peer ( @{ $self->get_peers() } ) {
+        if(defined $backends) {
+            next unless defined $backends->{$peer->{'key'}};
+        }
+        unless($peer->{'enabled'} == 1) {
+            $self->{'c'}->log->debug("skipped peer: ".$peer->{'name'});
+            next;
+        }
+        push @{$get_results_for}, $peer->{'key'};
+    }
+    return($get_results_for, $arg, \%arg);
+}
+
+
+########################################
+
+=head2 _get_result
+
+  _get_result($peers, $function, $args)
+
+run function on several peers and collect result.
 
 =cut
 
 sub _get_result {
-    my($self, $peers, $function, $arg) = @_;
+    my($self, $peers, $function, $arg, $force_serial) = @_;
     if($ENV{'THRUK_NO_CONNECTION_POOL'}
+       or $force_serial
        or scalar @{$peers} <= 1
-       or $function eq 'renew_logcache'
        or $function eq 'set_stash')
     {
         return $self->_get_result_serial($peers, $function, $arg);

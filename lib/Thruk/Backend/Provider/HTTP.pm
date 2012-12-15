@@ -111,6 +111,10 @@ recreate lwp object
 sub reconnect {
     my($self) = @_;
 
+    if(defined $self->{'logcache'}) {
+        $self->{'logcache'}->reconnect();
+    }
+
     # correct address
     $self->{'addr'} =~ s|remote\.cgi$||mx;
     $self->{'addr'} =~ s|/$||mx;
@@ -177,6 +181,13 @@ renew logcache
 
 =cut
 sub renew_logcache {
+    my($self, $c) = @_;
+    return unless defined $self->{'logcache'};
+    # renew cache?
+    if(!defined $self->{'lastcacheupdate'} or $self->{'lastcacheupdate'} < time()-5) {
+        $self->{'lastcacheupdate'} = time();
+        $self->{'logcache'}->_import_logs($c, 'update', 0, $self->peer_key());
+    }
     return;
 }
 
@@ -461,6 +472,10 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, @options) = @_;
+    if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
+        $options{'collection'} = 'logs_'.$self->peer_key();
+        return $self->{'logcache'}->get_logs(@options);
+    }
     # increased timeout for logs
     $self->{'ua'}->timeout($self->{'logs_timeout'});
     my $res = $self->_req('get_logs', \@options);

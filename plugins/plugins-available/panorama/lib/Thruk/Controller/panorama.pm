@@ -436,7 +436,7 @@ sub _task_show_logs {
     }
     my $total_filter = Thruk::Utils::combine_filter('-and', $filter);
 
-    $c->{'db'}->renew_logcache($c);
+    return if $c->{'db'}->renew_logcache($c);
     my $data = $c->{'db'}->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
 
     my $json = {

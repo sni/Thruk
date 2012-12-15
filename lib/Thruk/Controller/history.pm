@@ -146,7 +146,7 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
         return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::logs2xls($c)', message => 'please stand by while your report is being generated...' });
     } else {
         $c->stats->profile(begin => "history::updatecache");
-        $c->{'db'}->renew_logcache($c);
+        return if $c->{'db'}->renew_logcache($c);
         $c->stats->profile(end   => "history::updatecache");
 
         $c->stats->profile(begin => "history::fetch");

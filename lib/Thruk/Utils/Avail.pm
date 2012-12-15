@@ -432,7 +432,7 @@ sub calculate_availability {
     my $filter = [ $logfilter, { -or => [ @typefilter ] } ];
 
     $c->stats->profile(begin => "avail.pm updatecache");
-    $c->{'db'}->renew_logcache($c);
+    $c->{'db'}->renew_logcache($c, 1);
     $c->stats->profile(end   => "avail.pm updatecache");
     $c->stats->profile(begin => "avail.pm fetchlogs");
     $logs = $c->{'db'}->get_logs(filter => $filter, columns => [ qw/time type options/ ]);

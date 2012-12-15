@@ -128,7 +128,7 @@ sub _initialise_peer {
     }
 
     # log cache?
-    if(defined $logcache and $config->{'type'} eq 'livestatus') {
+    if(defined $logcache and ($config->{'type'} eq 'livestatus' or $config->{'type'} eq 'http')) {
         require Thruk::Backend::Provider::Mongodb;
         Thruk::Backend::Provider::Mongodb->import;
         $self->{'logcache'} = Thruk::Backend::Provider::Mongodb->new({
