@@ -632,6 +632,21 @@ sub get_extra_perf_stats {
 
 ##########################################################
 
+=head2 _get_logs_start_end
+
+  _get_logs_start_end
+
+returns first and last logfile entry
+
+=cut
+sub _get_logs_start_end {
+    my($self, @options) = @_;
+    my $res = $self->_req('_get_logs_start_end', \@options);
+    return($res->[0], $res->[2]);
+}
+
+##########################################################
+
 =head2 _req
 
   _req($sub, $options)

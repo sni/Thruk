@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 19;
+use Test::More tests => 20;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mongodb');
@@ -146,6 +146,13 @@ test_filter(
     'tripple filter',
     { '-and' => [ { 'type' => 'SERVICE ALERT' }, { 'service_description' => { '!=' => undef },   'state' => 1 } ] },
     { '$and' => [ { 'type' => 'SERVICE ALERT' }, { 'service_description' => { '$ne' => '' } }, { 'state' => 1 } ] },
+);
+
+#####################################################################
+test_filter(
+    'auth hash',
+    [ '-or',   [ { '-and' => [   'current_service_contacts',      { '>=' => 'thrukadmin' },       'service_description', { '!=' => undef } ] },   { 'current_host_contacts' => { '>='    => 'thrukadmin' } } ] ],
+    { '$or' => [ { '$and' => [ { 'current_service_contacts' => { '$in' => [ 'thrukadmin' ] } }, { 'service_description' => { '$ne' => '' } } ] }, { 'current_host_contacts' => { '$in' => [ 'thrukadmin' ] } } ] }
 );
 
 #####################################################################

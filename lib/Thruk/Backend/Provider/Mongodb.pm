@@ -1457,7 +1457,16 @@ sub _get_subfilter {
         my $x   = 0;
         my $num = scalar @{$inp};
         while($x < $num) {
+            # [ '-or', { 'key' => 'value' } ]
             if(exists $inp->[$x+1] and ref $inp->[$x] eq '' and ref $inp->[$x+1] eq 'HASH') {
+                my $key = $inp->[$x];
+                my $val = $inp->[$x+1];
+                push @{$filter}, $self->_get_subfilter({$key => $val});
+                $x=$x+2;
+                next;
+            }
+            # [ '-or', [ 'key' => 'value' ] ]
+            if(exists $inp->[$x+1] and ref $inp->[$x] eq '' and ref $inp->[$x+1] eq 'ARRAY') {
                 my $key = $inp->[$x];
                 my $val = $inp->[$x+1];
                 push @{$filter}, $self->_get_subfilter({$key => $val});
