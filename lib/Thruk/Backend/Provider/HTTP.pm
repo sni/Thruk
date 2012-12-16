@@ -472,6 +472,7 @@ returns logfile entries
 =cut
 sub get_logs {
     my($self, @options) = @_;
+    my %options = @options;
     if(defined $self->{'logcache'} and !defined $options{'nocache'}) {
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'logcache'}->get_logs(@options);
