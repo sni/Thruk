@@ -11,6 +11,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - retain order of backends when not using sections
             - fixed deselecting unavailable backends
             - fixed jumping cursor in search input in IE
+            - fixed mongodb logcache authorization
 
 1.58     Wed Nov 21 12:51:29 CET 2012
           - use regex matching in search preview too

@@ -1110,11 +1110,11 @@ sub _get_result_parallel {
 
 ########################################
 
-=head2 _remove_duplicates
+=head2 _do_on_peer
 
-  _remove_duplicates($data)
+  _do_on_peer($key, $function, $args)
 
-removes duplicate entries from a array of hashes
+run a function on a backend peer
 
 =cut
 

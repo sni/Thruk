@@ -1725,12 +1725,16 @@ sub _import_logs {
             my $lookup = {};
             print scalar localtime $time if $verbose;
             my($logs) = $peer->{'class'}->get_logs(nocache => 1,
-                                                    filter  => [{ '-and' => [
+                                                   filter  => [{ '-and' => [
                                                                             { time => { '>=' => $time } },
                                                                             { time => { '<'  => $time + 86400 } }
-                                                               ]}]
+                                                              ]}],
+                                                   columns => [qw/
+                                                                class time type state host_name service_description plugin_output message options contact_name command_name state_type current_service_contacts current_host_contacts
+                                                             /],
                                                   );
             if($mode eq 'update') {
+                # get already stored logs to filter duplicates
                 my($mlogs) = $peer->{'class'}->get_logs(
                                                     filter  => [{ '-and' => [
                                                                             { time => { '>=' => $time } },
