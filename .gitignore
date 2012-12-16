@@ -25,6 +25,7 @@ t/xt
 cgi_local.cfg
 ssi_local
 cgi.cfg-*
+cgi.cfg.*
 htpasswd
 var
 log4perl.conf
