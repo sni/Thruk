@@ -249,7 +249,7 @@ after 'execute' => sub {
 
 =head2 _set_possible_backends
 
-  _set_possible_backends()
+  _set_possible_backends($c, $disabled_backends)
 
   possible values are:
     0 = reachable
@@ -422,8 +422,14 @@ sub _set_enabled_backends {
         for my $peer (@{$c->{'db'}->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = 2; # set all hidden
         }
-        for my $b (split(/,/mx, $backends)) {
-            $disabled_backends->{$b} = 0;
+        if(ref $backends eq '') {
+            @{$backends} = split(/\s*,\s*/mx, $backends);
+        }
+        for my $b (@{$backends}) {
+            # peer key can be name too
+            my $peer = $c->{'db'}->get_peer_by_key($b);
+            die("got no peer for: ".$b) unless defined $peer;
+            $disabled_backends->{$peer->peer_key()} = 0;
         }
     }
     ###############################

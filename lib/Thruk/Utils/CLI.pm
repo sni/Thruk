@@ -52,7 +52,7 @@ sub new {
     bless $self, $class;
 
     # set some env defaults
-    $ENV{'THRUK_SRC'} = 'CLI';
+    $ENV{'THRUK_SRC'}       = 'CLI';
     $ENV{'REMOTE_USER'}     = $options->{'auth'} if defined $options->{'auth'};
     $ENV{'THRUK_BACKENDS'}  = join(',', @{$options->{'backends'}}) if(defined $options->{'backends'} and scalar @{$options->{'backends'}} > 0);
     $ENV{'THRUK_VERBOSE'}   = $options->{'verbose'} if $options->{'verbose'};

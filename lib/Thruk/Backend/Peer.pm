@@ -55,6 +55,19 @@ sub new {
 
 ##########################################################
 
+=head2 peer_key
+
+return peer key
+
+=cut
+
+sub peer_key {
+    my($self) = @_;
+    return $self->{'class'}->peer_key();
+}
+
+##########################################################
+
 =head2 create_backend
 
   create_backend()

@@ -1690,74 +1690,11 @@ sub _import_logs {
         $backend_count++;
         $peer->{'logcache'}->reconnect();
         my $db = $peer->{'logcache'}->_db;
-        if($mode eq 'import') {
-            $db->run_command({drop => $table});
-        }
+
         print "running ".$mode." for ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
-        # get start / end timestamp
-        my($mstart, $mend);
-        my($start, $end);
-        my $filter = [];
-        if($mode eq 'update') {
-            $c->stats->profile(begin => "get last mongo timestamp");
-            # get last timestamp from mongodb
-            my $mfilter = [];
-            ($mstart, $mend) = $peer->{'logcache'}->_get_logs_start_end(filter => $mfilter, collection => $table);
-            if(defined $mend) {
-                print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
-                push @{$filter}, {time => { '>=' => $mend }};
-            }
-            $c->stats->profile(end => "get last mongo timestamp");
-        }
-        $c->stats->profile(begin => "get livestatus timestamp");
-        ($start, $end) = $peer->{'class'}->_get_logs_start_end(filter => $filter);
-        print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
-        $c->stats->profile(end => "get livestatus timestamp");
-        print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
-        my $time = $start;
-        my $col = $db->$table;
-        #$col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
-        $col->ensure_index(Tie::IxHash->new('time' => 1));
-        while($time <= $end) {
-            my $stime = scalar localtime $time;
-            $c->stats->profile(begin => $stime);
-            my $lookup = {};
-            print scalar localtime $time if $verbose;
-            my($logs) = $peer->{'class'}->get_logs(nocache => 1,
-                                                   filter  => [{ '-and' => [
-                                                                            { time => { '>=' => $time } },
-                                                                            { time => { '<'  => $time + 86400 } }
-                                                              ]}],
-                                                   columns => [qw/
-                                                                class time type state host_name service_description plugin_output message options contact_name command_name state_type current_service_contacts current_host_contacts
-                                                             /],
-                                                  );
-            if($mode eq 'update') {
-                # get already stored logs to filter duplicates
-                my($mlogs) = $peer->{'class'}->get_logs(
-                                                    filter  => [{ '-and' => [
-                                                                            { time => { '>=' => $time } },
-                                                                            { time => { '<=' => $time + 86400 } }
-                                                               ]}]
-                                          );
-                for my $l (@{$mlogs}) {
-                    $lookup->{$l->{'message'}} = 1;
-                }
-            }
+        $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose);
 
-            $time = $time + 86400;
-            for my $l (@{$logs}) {
-                if($mode eq 'update') {
-                    next if defined $lookup->{$l->{'message'}};
-                }
-                $log_count++;
-                print '.' if $log_count%100 == 0 and $verbose;
-                $col->insert($l, {safe => 1});
-            }
-            $c->stats->profile(end => $stime);
-            print "\n" if $verbose;
-        }
         $c->stats->profile(end => "$key");
         print "\n" if $verbose;
     }
@@ -1765,6 +1702,83 @@ sub _import_logs {
     $c->stats->profile(end => "Mongodb::_import_logs($mode)");
     return($backend_count, $log_count);
 }
+
+##########################################################
+sub _update_logcache {
+    my($self, $c, $mode, $peer, $db, $table, $verbose) = @_;
+
+    my $log_count = 0;
+
+    if($mode eq 'import') {
+        $db->run_command({drop => $table});
+    }
+
+    # get start / end timestamp
+    my($mstart, $mend);
+    my($start, $end);
+    my $filter = [];
+    if($mode eq 'update') {
+        $c->stats->profile(begin => "get last mongo timestamp");
+        # get last timestamp from mongodb
+        my $mfilter = [];
+        ($mstart, $mend) = $peer->{'logcache'}->_get_logs_start_end(filter => $mfilter, collection => $table);
+        if(defined $mend) {
+            print "latest entry in logcache: ", scalar localtime $mend, "\n" if $verbose;
+            push @{$filter}, {time => { '>=' => $mend }};
+        }
+        $c->stats->profile(end => "get last mongo timestamp");
+    }
+    $c->stats->profile(begin => "get livestatus timestamp");
+    ($start, $end) = $peer->{'class'}->_get_logs_start_end(filter => $filter);
+    print "latest entry in logfile:  ", scalar localtime $end, "\n" if $verbose;
+    $c->stats->profile(end => "get livestatus timestamp");
+    print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
+    my $time = $start;
+    my $col = $db->$table;
+    #$col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
+    $col->ensure_index(Tie::IxHash->new('time' => 1));
+    while($time <= $end) {
+        my $stime = scalar localtime $time;
+        $c->stats->profile(begin => $stime);
+        my $lookup = {};
+        print scalar localtime $time if $verbose;
+        my($logs) = $peer->{'class'}->get_logs(nocache => 1,
+                                               filter  => [{ '-and' => [
+                                                                        { time => { '>=' => $time } },
+                                                                        { time => { '<'  => $time + 86400 } }
+                                                          ]}],
+                                               columns => [qw/
+                                                            class time type state host_name service_description plugin_output message options contact_name command_name state_type current_service_contacts current_host_contacts
+                                                         /],
+                                              );
+        if($mode eq 'update') {
+            # get already stored logs to filter duplicates
+            my($mlogs) = $peer->{'class'}->get_logs(
+                                                filter  => [{ '-and' => [
+                                                                        { time => { '>=' => $time } },
+                                                                        { time => { '<=' => $time + 86400 } }
+                                                           ]}]
+                                      );
+            for my $l (@{$mlogs}) {
+                $lookup->{$l->{'message'}} = 1;
+            }
+        }
+
+        $time = $time + 86400;
+        for my $l (@{$logs}) {
+            if($mode eq 'update') {
+                next if defined $lookup->{$l->{'message'}};
+            }
+            $log_count++;
+            print '.' if $log_count%100 == 0 and $verbose;
+            $col->insert($l, {safe => 1});
+        }
+        $c->stats->profile(end => $stime);
+        print "\n" if $verbose;
+    }
+    return $log_count;
+}
+
 
 ##########################################################
 
