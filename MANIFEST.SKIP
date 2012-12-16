@@ -38,7 +38,7 @@ cgi_local.cfg
 ^htpasswd
 .*\.gz
 cgi\.cfg\-.*
-cgi.cfg.*
+cgi\.cfg\..*
 # does not work for centos without F::C::R installed
 inc/File/Copy/Recursive.pm
 ^var/
