@@ -390,8 +390,8 @@ sub _run_commands {
     elsif($action eq 'logcachestats') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'stats', $src);
     }
-    elsif($action eq 'logcacheauth') {
-        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'auth', $src);
+    elsif($action eq 'logcacheauthupdate') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'authupdate', $src);
     }
     else {
         $data->{'output'} = "FAILED - no such command: ".$action."\n";
@@ -720,7 +720,9 @@ sub _cmd_import_logs {
     } else {
         my($backend_count, $log_count) = Thruk::Backend::Provider::Mongodb->_import_logs($c, $mode, $verbose);
         $c->stats->profile(end => "_cmd_import_logs()");
-        return('OK - imported '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
+        my $action = "imported";
+        $action    = "updated" if $mode eq 'authupdate';
+        return('OK - '.$action.' '.$log_count.' log items from '.$backend_count.' site'.($backend_count == 1 ? '' : 's')." successfully\n", 0);
     }
 }
 

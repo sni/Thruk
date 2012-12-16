@@ -1691,9 +1691,14 @@ sub _import_logs {
         $peer->{'logcache'}->reconnect();
         my $db = $peer->{'logcache'}->_db;
 
-        print "running ".$mode." for ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
+        print "running ".$mode." for site ".$c->stash->{'backend_detail'}->{$key}->{'name'},"\n" if $verbose;
 
-        $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose);
+        if($mode eq 'update' or $mode eq 'import') {
+            $log_count += $self->_update_logcache($c, $mode, $peer, $db, $table, $verbose);
+        }
+        elsif($mode eq 'authupdate') {
+            $log_count += $self->_update_logcache_auth($c, $peer, $db, $table, $verbose);
+        }
 
         $c->stats->profile(end => "$key");
         print "\n" if $verbose;
@@ -1735,8 +1740,7 @@ sub _update_logcache {
     print "importing ", scalar localtime $start, " till ", scalar localtime $end, "\n" if $verbose;
     my $time = $start;
     my $col = $db->$table;
-    #$col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
-    $col->ensure_index(Tie::IxHash->new('time' => 1));
+    $self->_ensure_index($col);
     while($time <= $end) {
         my $stime = scalar localtime $time;
         $c->stats->profile(begin => $stime);
@@ -1779,6 +1783,58 @@ sub _update_logcache {
     return $log_count;
 }
 
+
+##########################################################
+sub _update_logcache_auth {
+    my($self, $c, $peer, $db, $table, $verbose) = @_;
+
+    my $col       = $db->$table;
+    my $log_count = 0;
+    $self->_ensure_index($col);
+
+    # update hosts
+    my($hosts)    = $peer->{'class'}->get_hosts(columns => [qw/name contacts/]);
+    print "hosts" if $verbose;
+    for my $host (@{$hosts}) {
+        $col->update(
+                {'host_name' => $host->{'name'}, 'service_description' => ''},     # filter
+                {'$set'      => {'current_host_contacts' => $host->{'contacts'}}}, # operation
+                {'multiple'  => 1}                                                 # change all
+        );
+        my $err = $db->last_error({w => 1});
+        $log_count += $err->{'n'} if $err->{'ok'} == 1;
+        print "." if $verbose;
+    }
+    print "\n" if $verbose;
+
+    # update services
+    print "services" if $verbose;
+    my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description contacts host_contacts/]);
+    for my $service (@{$services}) {
+        $col->update(
+                {'host_name' => $service->{'host_name'}, 'service_description' => $service->{'description'}}, # filter
+                {'$set'      => {'current_host_contacts'    => $service->{'host_contacts'},                   # operation
+                                 'current_service_contacts' => $service->{'contacts'}}
+                },
+                {'multiple'  => 1}
+        );
+        my $err = $db->last_error({w => 1});
+        $log_count += $err->{'n'} if $err->{'ok'} == 1;
+        print "." if $verbose;
+    }
+    print "\n" if $verbose;
+
+    return $log_count;
+}
+
+##########################################################
+sub _ensure_index {
+    my($self, $col) = @_;
+    #$col->ensure_index(Tie::IxHash->new('time' => 1, 'host_name' => 1, 'service_description' => 1));
+    $col->ensure_index(Tie::IxHash->new('time' => 1));
+    $col->ensure_index(Tie::IxHash->new('host_name' => 1, 'service_description' => 1));
+    return;
+}
 
 ##########################################################
 
