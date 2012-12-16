@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 140;
+    plan tests => 152;
 }
 
 BEGIN {
@@ -26,6 +26,7 @@ my $pages = [
     '/thruk/cgi-bin/history.cgi?archive=1&host=all&noflapping=0&nodowntime=0&nosystem=0&type=0&statetype=1',
     '/thruk/cgi-bin/history.cgi?start=2010-03-02+00%3A00%3A00&end=2010-03-03+00%3A00%3A00',
     '/thruk/cgi-bin/history.cgi?start=2010-03-02+00%3A00%3A00&end=2010-03-03+00%3A00%3A00&oldestfirst=on',
+    '/thruk/cgi-bin/history.cgi?entries=100&start=2012-12-16+00%3A00&end=2012-12-17+00%3A00&archive=&host=all&statetype=0&type=4',
 ];
 
 for my $url (@{$pages}) {

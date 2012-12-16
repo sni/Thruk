@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use Test::More tests => 18;
+use Test::More tests => 19;
 $Data::Dumper::Sortkeys = 1;
 
 use_ok('Thruk::Backend::Provider::Mongodb');
@@ -139,6 +139,13 @@ test_filter(
     'undef in list',
     { '-and' => [ { 'type' => 'SERVICE ALERT' }, undef ] },
     { 'type' => 'SERVICE ALERT' },
+);
+
+#####################################################################
+test_filter(
+    'tripple filter',
+    { '-and' => [ { 'type' => 'SERVICE ALERT' }, { 'service_description' => { '!=' => undef },   'state' => 1 } ] },
+    { '$and' => [ { 'type' => 'SERVICE ALERT' }, { 'service_description' => { '$ne' => '' } }, { 'state' => 1 } ] },
 );
 
 #####################################################################

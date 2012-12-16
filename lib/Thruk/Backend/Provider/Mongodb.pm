@@ -1473,7 +1473,12 @@ sub _get_subfilter {
                 next;
             }
             if(defined $inp->[$x]) {
-                push @{$filter}, $self->_get_subfilter($inp->[$x]);
+                my $newfilter = $self->_get_subfilter($inp->[$x]);
+                if(ref $newfilter eq 'ARRAY') {
+                    @{$filter} = (@{$filter}, @{$newfilter});
+                } else {
+                    push @{$filter}, $newfilter;
+                }
             }
             $x++;
         }
