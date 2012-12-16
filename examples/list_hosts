@@ -32,7 +32,7 @@ my $hosts = $odb->get_objects_by_type('host');
 printf("%-20s   %s\n", "Host", "File");
 print("===========================================================\n");
 for my $h (@{$hosts}) {
-    printf("%-20s - %s:%d\n", $h->get_primary_name(), $h->{'file'}->{'path'}, $h->{'line'});
+    printf("%-20s   %s:%d\n", $h->get_primary_name(), $h->{'file'}->{'display'}, $h->{'line'});
 }
 exit 0;
 
