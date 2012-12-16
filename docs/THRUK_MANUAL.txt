@@ -458,19 +458,19 @@ logfilecache:
 
 Initial import:
 -------
-    %> thruk -a importlogs
+    %> thruk -a logcacheimport
 -------
 
-Be careful, the 'importlogs' deletes all current cached data, so only
+Be careful, the 'logcacheimport' deletes all current cached data, so only
 do that once.
 
 
 Logfile Cache Update
 -------
-    %> thruk -a updatelogs
+    %> thruk -a logcacheupdate
 -------
 
-The updatelogs imports the delta since the last update. Thats pretty
+The logcacheupdate imports the delta since the last update. Thats pretty
 fast and done automatically whenever you access logfiles via Thruk.
 
 There is also a command to check the current usage statistics of your

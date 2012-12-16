@@ -86,8 +86,9 @@ thruk - Command Line Utility for Thruk Monitoring Gui
                                   - reportmail=<nr>  send report by mail
 
                                Mongodb Logcache:
-                                  - importlogs       initial logcache import
-                                  - updatelogs       update logcache
+                                  - logcacheimport   initial logcache import
+                                  - logcacheupdate   update logcache
+                                  - logcacheauth     update logcache authorization information
                                   - logcachestats    print logcache statistics
 
                                Internal Commands

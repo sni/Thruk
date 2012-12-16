@@ -381,14 +381,17 @@ sub _run_commands {
     }
 
     # import mongodb logs
-    elsif($action eq 'importlogs') {
+    elsif($action eq 'logcacheimport') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'import', $src);
     }
-    elsif($action eq 'updatelogs') {
+    elsif($action eq 'logcacheupdate') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'update', $src);
     }
     elsif($action eq 'logcachestats') {
         ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'stats', $src);
+    }
+    elsif($action eq 'logcacheauth') {
+        ($data->{'output'}, $data->{'rc'}) = _cmd_import_logs($c, 'auth', $src);
     }
     else {
         $data->{'output'} = "FAILED - no such command: ".$action."\n";
@@ -685,6 +688,14 @@ sub _cmd_import_logs {
 
     if($src ne 'local' and $mode eq 'import') {
         return("ERROR - please run the initial import with --local\n", 1);
+    }
+    if($mode eq 'import') {
+        print "import removes current data and imports all logfile data, continue? [n]: ";
+        my $buf;
+        sysread STDIN, $buf, 1;
+        if($buf !~ m/^(y|j)/mxi) {
+            return("canceled\n", 1);
+        }
     }
 
     my $verbose = 0;
