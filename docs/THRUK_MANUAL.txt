@@ -1647,6 +1647,19 @@ ex.:
   cookie_auth_session_cache_timeout = 5
 
 
+==== cookie_auth_domain
+
+Cookie domain is usually set automatically. Use this option
+to override the default value. Domains have to contain at least
+two periods.
+
+ex.:
+
+  cookie_auth_domain = .domain.com
+
+
+
+
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
 Currently it will only work with shinken backends. Dont enable it

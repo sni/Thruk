@@ -59,6 +59,7 @@ sub index :Path :Args(0) {
             value   => '',
             expires => '-1M',
             path    => $cookie_path,
+            domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
         };
         if(defined $cookie and defined $cookie->value) {
             my $sessionid = $cookie->value;
@@ -96,6 +97,7 @@ sub index :Path :Args(0) {
             value   => '',
             expires => '-1M',
             path    => $cookie_path,
+            domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
         };
         if(!defined $testcookie or !$testcookie->value) {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/login.cgi?nocookie");
@@ -129,6 +131,7 @@ sub index :Path :Args(0) {
     $c->res->cookies->{'thruk_test'} = {
         value   => '****',
         path    => $cookie_path,
+        domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
     };
 
     $c->stats->profile(end => "login::index");

@@ -2031,6 +2031,8 @@ sub _config_reload {
         };
         last unless $@;
     }
+
+    # reload navigation, probably some names have changed
     $c->stash->{'reload_nav'} = 1;
 
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
