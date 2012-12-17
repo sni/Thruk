@@ -49,8 +49,8 @@
   </div>
   <script type="text/javascript">
   <!--
-    if ( top.location.href!= window.location.href ) {
-      var ref = top.location.pathname + top.location.search + top.location.hash;
+    if ( top.location != location ) {
+      var ref = document.location.pathname + document.location.search + document.location.hash;
       top.location.href = '[% loginurl %]?'+ref;
     } else {
       var ref = window.location.search + window.location.hash;
