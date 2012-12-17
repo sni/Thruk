@@ -282,6 +282,8 @@ sub diag_lint_errors_and_remove_some_exceptions {
     for my $error ( $lint->errors ) {
         my $err_str = $error->as_string;
         next if $err_str =~ m/<IMG\ SRC=".*command.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*warning.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*unknown.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*critical.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*flapping.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*recovery.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
