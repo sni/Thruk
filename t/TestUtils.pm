@@ -457,7 +457,7 @@ sub _request {
         #diag(Dumper($r));
         fail("startup failed: ".Dumper($r)) unless $r->is_success;
         fail("startup failed, no pid: ".Dumper($r)) unless -f '/var/cache/thruk/thruk.pid';
-        sleep(1);
+        sleep(3);
         $request = request($link);
         #diag("original request:");
         #diag(Dumper($request));
