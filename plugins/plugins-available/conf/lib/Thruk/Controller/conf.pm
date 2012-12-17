@@ -1067,7 +1067,7 @@ sub _apply_config_changes {
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
             Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
-                                               message => 'please stand by while configuration is beeing reloaded...'
+                                               message => 'please stand by while configuration is beeing reloaded...',
                                               }
                                         );
             return;
@@ -2031,6 +2031,7 @@ sub _config_reload {
         };
         last unless $@;
     }
+    $c->stash->{'reload_nav'} = 1;
 
     $c->stash->{'obj_model_changed'} = 0 unless $c->{'request'}->{'parameters'}->{'refresh'};
     return;
