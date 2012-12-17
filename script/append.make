@@ -25,6 +25,8 @@ version:
 			-i script/nagimp \
 		; \
 		debversion="$$newversion~$$branch"; \
+        shortbranch=`echo $$branch | tr -d '-'`; \
+        sed -i support/thruk.spec -e 's/^Release:.*$$/Release: '$$shortbranch'%{?dist}/'; \
 	fi && \
 	dch --newversion "$$debversion" --package "thruk" -D "UNRELEASED" "new upstream release"; \
 	if [ -n "$$newversion" -a "$$newversion" != "$(VERSION)" ]; then \
