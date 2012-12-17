@@ -72,8 +72,9 @@ function add_conf_attribute(table, key, rt) {
     // return id of new added input
     if(rt != undefined && rt == true) {
         var inp     = newObj.cells[2].innerHTML;
-        var matches = inp.match(/id="(.*?)"/);
+        var matches = inp.match(/id=([^\s]+?)\s/);
         if(matches != null) {
+            var id = matches[1].replace('"', '');
             return matches[1];
         }
     }
