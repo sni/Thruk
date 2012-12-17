@@ -19,10 +19,13 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=thruk
 PIDFILE=/var/cache/thruk/thruk.pid
 STARTURL="http://localhost/thruk/cgi-bin/remote.cgi"
+STARTTIMEOUT=15
+STARTLOG="/tmp/thrukstart.log"
 WGET="/usr/bin/wget"
 
 if [ ! -z $OMD_SITE ]; then
     STARTURL="http://localhost/$OMD_SITE/thruk/cgi-bin/remote.cgi"
+    STARTLOG="$OMD_ROOT/tmp/thrukstart.log"
     PIDFILE=$OMD_ROOT/tmp/thruk/thruk.pid
     . $OMD_ROOT/etc/omd/site.conf
     if [ -e $OMD_ROOT/.thruk ]; then
@@ -50,7 +53,7 @@ fi
 
 # make it possible to override startcmd by sysconfig
 if [ -z "$STARTCMD" ]; then
-  STARTCMD="$WGET --no-proxy --no-check-certificate --post-data='' -q -O /dev/null $STARTURL"
+  STARTCMD="$WGET --no-proxy --no-check-certificate --post-data='' -t 1 --debug --timeout=$STARTTIMEOUT -O - $STARTURL"
 fi
 
 case "$1" in
@@ -66,19 +69,23 @@ case "$1" in
               fi
             fi
             echo -n "Starting $NAME..."
-            $STARTCMD > /dev/null 2>&1 &
-            for x in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
+            $STARTCMD >$STARTLOG 2>&1 &
+            WGETPID=$!
+            for x in $(seq $STARTTIMEOUT); do
                 echo -n "."
-                test -f $PIDFILE && break;
+                kill -0 $WGETPID >/dev/null 2>&1 || break;
                 sleep 1
             done
             test -f $PIDFILE
             if [ $? -eq 0 ]; then
                 pid=`cat $PIDFILE 2>/dev/null`
                 echo "($pid) OK"
+                rm -f $STARTLOG
                 exit 0;
             else
                 echo "failed"
+                cat $STARTLOG
+                rm -f $STARTLOG
                 exit 1;
             fi
         fi
