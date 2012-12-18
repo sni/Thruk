@@ -302,6 +302,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/<IMG\ SRC=".*info\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*problem\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*criticity_\d\.png">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
+        next if $err_str =~ m/<IMG\ SRC=".*stop\.gif">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
 
         next if $err_str =~ m/<IMG\ SRC=".*\/conf\/images\/obj_.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
         next if $err_str =~ m/<IMG\ SRC=".*\/logos\/.*">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imx;
