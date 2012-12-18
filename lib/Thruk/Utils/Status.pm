@@ -589,6 +589,7 @@ sub single_search {
             if($1 eq 'se') { $filter->{'type'} = 'service';      }
             if($1 eq 'sg') { $filter->{'type'} = 'servicegroup'; }
             $filter->{'value'} = substr($filter->{'value'}, 3);
+            $filter->{'op'}    = '=';
         }
 
         my $value  = $filter->{'value'};
