@@ -220,7 +220,7 @@ sub _process_json_page {
             push @{$objects}, ('$ARG1$', '$ARG2$', '$ARG3$', '$ARG4$', '$ARG5$');
         }
         if(defined $c->{'request'}->{'parameters'}->{'withuser'}) {
-            my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
+            my $user_macros = Thruk::Utils::read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
             push @{$objects}, keys %{$user_macros};
         }
         for my $type (qw/host service/) {
@@ -1881,7 +1881,7 @@ sub _list_references {
 sub _get_plugins {
     my($self, $c) = @_;
 
-    my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
+    my $user_macros = Thruk::Utils::read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
     my $objects         = {};
     for my $macro (keys %{$user_macros}) {
         my $dir = $user_macros->{$macro};
@@ -1914,13 +1914,15 @@ sub _set_plugins_for_directory {
 ##########################################################
 sub _get_plugin_help {
     my($self, $c, $name) = @_;
+    my $help = 'help is only available for plugins!';
+    return $help unless defined $name;
 
     my $cmd;
     my $plugins         = $self->_get_plugins($c);
     my $objects         = $c->{'obj_db'}->get_objects_by_name('command', $name);
     if(defined $objects->[0]) {
         my($file,$args) = split/\s+/mx, $objects->[0]->{'conf'}->{'command_line'}, 2;
-        my $user_macros = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
+        my $user_macros = Thruk::Utils::read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'});
         ($file)         = $c->{'db'}->_get_replaced_string($file, $user_macros);
         if(-x $file and ( $file =~ m|/plugins/|mx or $file =~ m|/libexec/|mx)) {
             $cmd = $file;
@@ -1929,7 +1931,6 @@ sub _get_plugin_help {
     if(defined $plugins->{$name}) {
         $cmd = $plugins->{$name};
     }
-    my $help = 'help is only available for plugins!';
     if(defined $cmd) {
         eval {
             local $SIG{ALRM} = sub { die('alarm'); };
@@ -1946,8 +1947,11 @@ sub _get_plugin_help {
 sub _get_plugin_preview {
     my($self,$c,$command,$args,$host,$service) = @_;
 
+    my $output = 'plugin preview is only available for plugins!';
+    return $output unless defined $args;
+
     my $macros = $c->{'db'}->_get_macros({skip_user => 1, args => [split/\!/mx, $args]});
-    $macros    = $c->{'db'}->_read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'}, $macros);
+    $macros    = Thruk::Utils::read_resource_file($c->{'obj_db'}->{'config'}->{'obj_resource_file'}, $macros);
 
     if(defined $host and $host ne '') {
         my $objects = $c->{'obj_db'}->get_objects_by_name('host', $host);
@@ -1972,7 +1976,6 @@ sub _get_plugin_preview {
             ($cmd) = $c->{'db'}->_get_replaced_string($objects->[0]->{'conf'}->{'command_line'}, $macros);
         }
     }
-    my $output = 'plugin preview is only available for plugins!';
     if(defined $cmd) {
         eval {
             local $SIG{ALRM} = sub { die('alarm'); };
