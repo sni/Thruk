@@ -25,6 +25,9 @@ docs/source/backends.png
 docs/source/Bookmarks_and_excel_export.png
 docs/source/Config_Tool.png
 docs/source/Filter.png
+docs/source/livestatus.png
+docs/source/livestatus_http.png
+docs/source/livestatus_mongodb.png
 docs/source/MineMap.png
 docs/source/Mobile.png
 docs/source/multi_site.png
