@@ -3,9 +3,10 @@
 <!--
 var pnp_url = "";
 [%+ IF pnp_url %]
-  var pnp_url = "[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]"
+  var pnp_url = "[% pnp_url %]/graph?host=[% hst | uri %]&srv=[% svc | uri %]";
 [% END +%]
-perf_table([% write %], [% state %], '[% escape_quotes(escape_bslash(plugin_output)).replace('/', '\\/') %]', '[% escape_quotes(escape_bslash(perfdata)) %]', '[% escape_quotes(escape_bslash(check_command)) %]', pnp_url, [% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]);
+var data = [% json_encode(plugin_output, perfdata, check_command) %];
+perf_table([% write %], [% state %], data[0], data[1], data[2], pnp_url, [% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]);
 -->
 </script>
 [% END %]

@@ -876,7 +876,7 @@ function add_cron_row(tbl_id) {
 *******************************************************************************/
 /* write/return table with performance data */
 function perf_table(write, state, plugin_output, perfdata, check_command, pnp_url, is_host) {
-    var matches   = perfdata.match(/([^\s]+|'[\w\s]+')=([^\s]*)/gi);
+    var matches   = perfdata.match(/([^\s]+|'[^']+')=([^\s]*)/gi);
     if(!matches) { return false; }
     if(is_host == undefined) { is_host = false; }
     if(is_host && state == 1) { state = 2; } // set critical state for host checks

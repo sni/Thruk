@@ -17,6 +17,7 @@ use Data::Dumper;
 use Date::Calc qw/Localtime Today/;
 use Date::Manip;
 use URI::Escape;
+use JSON::XS;
 
 ##############################################
 
@@ -362,6 +363,18 @@ sub escape_quotes {
     return $string;
 }
 
+########################################
+
+=head2 json_encode
+
+  json_encode(...)
+
+returns json encoded string
+
+=cut
+sub json_encode {
+    return JSON::XS::encode_json([@_]);
+}
 
 ########################################
 
