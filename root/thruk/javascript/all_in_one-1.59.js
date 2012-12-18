@@ -46,7 +46,7 @@ Y8,        88 88          88    `8b 88 88          88    `8b   88 Y8,
 
 /* send debug output to firebug console */
 function debug(str) {
-    if (window.console != undefined) {
+    if (thruk_debug_js && window.console != undefined) {
         console.debug(str);
     }
 }
