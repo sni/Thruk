@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.60     not yet released
           - added http backend type which connects to another thruk instance
+          - made sitepanel configurable
           - config tool:
             - changed source editor to linedtextarea because of IE compatibility
           - logcache:

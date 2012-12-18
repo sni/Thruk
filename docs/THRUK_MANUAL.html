@@ -14545,6 +14545,18 @@ Disabled when set to 0. (experimental feature)</p></div>
 <div class="content">
 <pre><tt>connection_pool_size = 0</tt></pre>
 </div></div>
+<h4 id="_sitepanel">sitepanel</h4>
+<div class="paragraph"><p>The sitepanel is used to display multiple backends/sites at a glance.
+With than 10 or more sites, the list of backends will be combined
+into the combined site panel which just displays the totals of
+available / down / disabled sites.
+Set sitepanel to list/compact/auto/off to change the default
+behaviour.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>sitepanel = auto</tt></pre>
+</div></div>
 <h4 id="_component_thruk_backend">Component Thruk::Backend</h4>
 <div class="paragraph"><p>Enter your backend connection settings here. At the moment only
 livestatus is supported. The port is the port from the
@@ -15268,7 +15280,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-12-17 16:36:57 CEST
+Last updated 2012-12-18 17:56:29 CEST
 </div>
 </div>
 </body>

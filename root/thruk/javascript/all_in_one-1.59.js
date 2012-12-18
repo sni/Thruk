@@ -385,7 +385,7 @@ function toggleBackend(backend, state) {
   if(backend_chooser == 'switch') {
     jQuery('INPUT.button_peerUP').removeClass('button_peerUP').addClass('button_peerDIS');
     jQuery(button).removeClass('button_peerDIS').addClass('button_peerUP');
-    cookieSave('thruk_conf', backend, 0);
+    cookieSave('thruk_conf', backend);
     reloadPage();
     return;
   }
@@ -417,7 +417,7 @@ function toggleBackend(backend, state) {
 
   additionalParams['reload_nav'] = 1;
   /* save current selected backends in session cookie */
-  cookieSave('thruk_backends', toQueryString(current_backend_states), 0);
+  cookieSave('thruk_backends', toQueryString(current_backend_states));
   window.clearTimeout(backendSelTimer);
   backendSelTimer  = window.setTimeout('reloadPage()', 2500);
   return;

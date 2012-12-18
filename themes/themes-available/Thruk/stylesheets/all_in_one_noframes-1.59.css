@@ -133,7 +133,7 @@ td.top_nav_pref {
 DIV#site_panel {
  position: fixed;
  z-index: 5000;
- left: 195px;
+ left: 17px;
  font-size:11px;
 }
 TABLE.site_panel {
@@ -972,7 +972,10 @@ body {
   margin: 0px;
   margin-left: 183px;
 }
-#currentversioninfo {
+
+DIV#site_panel {
+  left: 195px;
+}#currentversioninfo {
   font-size:14px;
 }
 

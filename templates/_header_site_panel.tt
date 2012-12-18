@@ -34,10 +34,21 @@
     [% END %]
 [% END %]
 
+[% show_sitepanel = 'list' %]
+[% IF    hide_backends_chooser != 0 %][% show_sitepanel = 'off'   %]
+[% ELSIF sitepanel == 'list' %][%        show_sitepanel = 'list'  %]
+[% ELSIF sitepanel == 'compact' %][%     show_sitepanel = 'panel' %]
+[% ELSIF sitepanel == 'off' %][%         show_sitepanel = 'off'   %]
+[% ELSIF sitepanel == 'auto' %]
+    [% IF ( sections.size > 1 || backends.size >= 10 ) %][% show_sitepanel = 'panel' %]
+    [% ELSE %][% show_sitepanel = 'list' %]
+    [% END %]
+[% END %]
+
 <table border=0 cellpadding=0 cellspacing=0>
   <tr>
     <td>
-    [% IF hide_backends_chooser == 0 && ( sections.size > 1 || backends.size >= 10 ) %]
+    [% IF show_sitepanel == 'panel' %]
       [% popup = BLOCK %]
       <div id="site_panel" style="display: none;">
       <div class="shadow"><div class="shadowcontent">
@@ -81,7 +92,7 @@
       [% END %]
       [% popup %]
 
-    [% ELSIF hide_backends_chooser == 0 && backends.size > 1 %]
+    [% ELSIF show_sitepanel == 'list' %]
       [% section = '' %]
       [% FOREACH pd IN backends %]
         [% PROCESS site styles="" onclick="toggleBackend('" _ pd _ "')" use_id=1 %]

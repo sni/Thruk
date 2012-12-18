@@ -381,6 +381,7 @@ sub set_default_config {
         'cookie_auth_session_timeout'       => 86400,
         'cookie_auth_session_cache_timeout' => 5,
         'perf_bar_mode'                     => 'match',
+        'sitepanel'                         => 'auto',
     };
     $defaults->{'thruk_bin'} = 'script/thruk' if -f 'script/thruk';
     for my $key (keys %{$defaults}) {
