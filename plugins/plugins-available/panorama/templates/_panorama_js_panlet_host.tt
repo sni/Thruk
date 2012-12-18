@@ -198,7 +198,7 @@ TP.ExtinfoPanel = function(type) {
                 { html: 'In Scheduled Downtime?' },     { cls: 'extinfo_var', html: '', itemId: 'in_downtime' },
                 { html: 'In Check Period?' },           { cls: 'extinfo_var', html: '', itemId: 'in_check_period' },
                 { html: 'In Notification Period?' },    { cls: 'extinfo_var', html: '', itemId: 'in_notification_period' },
-                { html: 'Monitored by:' },              { cls: 'extinfo_var', html: '', itemId: 'site' },
+                { html: 'Monitored by:' },              { cls: 'extinfo_var', html: '', itemId: 'site' }
         ],
         dockedItems: [{
             xtype:  'toolbar',
@@ -387,7 +387,7 @@ TP.ext_menu_command = function(btn_text, cmd_typ, fields, defaults) {
                     start_time:         new Date(),
                     sticky_ack:         [% IF c.config.cmd_defaults.sticky_ack %]true[% ELSE %]false[% END %],
                     send_notification:  [% IF c.config.cmd_defaults.send_notification %]true[% ELSE %]false[% END %],
-                    persistent:         [% IF c.config.cmd_defaults.persistent_ack %]true[% ELSE %]false[% END %],
+                    persistent:         [% IF c.config.cmd_defaults.persistent_ack %]true[% ELSE %]false[% END %]
                 });
                 panel.menusnr = panel.menusnr + 1;
                 return true;

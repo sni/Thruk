@@ -37,7 +37,7 @@
             { "#problems":      { handler: 'page_problems',       events: 'bs' } },
             { "#options":       { handler: 'page_options',        events: 'bs' } },
             { "#alerts":        { handler: 'page_alerts',         events: 'bs' } },
-            { "#notifications": { handler: 'page_notifications',  events: 'bs' } },
+            { "#notifications": { handler: 'page_notifications',  events: 'bs' } }
     ], ThrukMobile, { ajaxApp: true} );
     </script>
   </head>
