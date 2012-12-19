@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+1.62     not yet released
+          - Bug Fixes
+            - hide site panel with only one backend
+
 1.60     Tue Dec 18 18:26:47 CET 2012
           - added http backend type which connects to another thruk instance
           - made sitepanel configurable

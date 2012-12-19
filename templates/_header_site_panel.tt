@@ -41,6 +41,7 @@
 [% ELSIF sitepanel == 'off' %][%         show_sitepanel = 'off'   %]
 [% ELSIF sitepanel == 'auto' %]
     [% IF ( sections.size > 1 || backends.size >= 10 ) %][% show_sitepanel = 'panel' %]
+    [% ELSIF backends.size == 1 %][% show_sitepanel = 'off' %]
     [% ELSE %][% show_sitepanel = 'list' %]
     [% END %]
 [% END %]
