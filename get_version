@@ -16,6 +16,7 @@ fi
 # if we are not on a exact tag, use the last tag and add the date
 version=`git tag -l | sed -e 's/^v//g' | sort -n | tail -n 1`
 if [ $? -eq 0 ]; then
+  version=`echo "$version" | awk -F "-" '{ print $1 }'`
   date=`date +%Y-%m-%d`
   major=` echo $version | cut -d . -f 1`
   minor=`echo $version | cut -d . -f 2`

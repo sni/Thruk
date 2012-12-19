@@ -903,6 +903,7 @@ script/thruk_server.pl
 script/thruk_test.pl
 script/thruk_update.sh
 script/thruk_update_help.pl
+script/thruk_version.sh
 ssi/README
 ssi/status-header.ssi-pnp
 support/0001-thruk.conf.patch
