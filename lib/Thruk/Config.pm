@@ -30,7 +30,7 @@ $branch          = $gitbranch unless $branch ne '';
 our %config = ('name'                   => 'Thruk',
               'version'                => $VERSION,
               'branch'                 => $branch,
-              'released'               => 'December 18, 2012',
+              'released'               => 'December 19, 2012',
               'compression_format'     => 'gzip',
               'ENCODING'               => 'utf-8',
               'image_path'             => $project_root.'/root/thruk/images',
