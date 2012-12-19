@@ -167,7 +167,11 @@ for my $url (@{$other_json}) {
         ok(scalar @{$data} == 1, "json result size is: ".(scalar @{$data}));
     }
 
-    if(ref $data eq 'ARRAY' and defined $data->[0]->{'name'} and $data->[0]->{'name'} eq 'plugins') {
+    if(ref $data eq 'ARRAY' 
+       and defined $data->[0]->{'name'} 
+       and $data->[0]->{'name'} eq 'plugins'
+       and defined $data->[0]->{'data'}->[0]
+    ) {
         $plugin = $data->[0]->{'data'}->[0];
     }
 }
