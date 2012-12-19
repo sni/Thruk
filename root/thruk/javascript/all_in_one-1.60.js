@@ -1018,13 +1018,20 @@ function perf_get_graph_from_result(key, result) {
 /* try to make a smaller number */
 function perf_reduce(value, unit) {
     if(value < 1000) { return(''+perf_round(value)+unit); }
+    if(value > 1500 && unit == 'B') {
+        value = value / 1000;
+        unit  = 'KB';
     if(value > 1500 && unit == 'KB') {
-        value = value / 1024;
+        value = value / 1000;
         unit  = 'MB';
     }
     if(value > 1500 && unit == 'MB') {
-        value = value / 1024;
+        value = value / 1000;
         unit  = 'GB';
+    }
+    if(value > 1500 && unit == 'GB') {
+        value = value / 1000;
+        unit  = 'TB';
     }
     if(value > 1500 && unit == 'ms') {
         value = value / 1000;
