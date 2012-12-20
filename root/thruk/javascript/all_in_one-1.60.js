@@ -1021,6 +1021,7 @@ function perf_reduce(value, unit) {
     if(value > 1500 && unit == 'B') {
         value = value / 1000;
         unit  = 'KB';
+    }
     if(value > 1500 && unit == 'KB') {
         value = value / 1000;
         unit  = 'MB';
@@ -2877,7 +2878,6 @@ var ajax_search = {
      *   filter:            run this function as additional filter
      * }
      */
-    //init: function(elem, type, url, striped, autosubmit, list, templates, data) {
     init: function(elem, type, options) {
         if(elem && elem.id) {
         } else if(this.id) {
@@ -3564,6 +3564,7 @@ var ajax_search = {
         }
     }
 }
+
 /*******************************************************************************
 88888888ba  888b      88 88888888ba
 88      "8b 8888b     88 88      "8b
@@ -3741,6 +3742,7 @@ function prefSubmitCounter(url, value) {
   cookieSave('thruk_favicon', value);
   reloadPage();
 }
+
 /**
  *                                                        ____   _____
  *  Dynarch Calendar -- JSCal2, version 1.9               \  /_  /   /
