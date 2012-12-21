@@ -147,7 +147,7 @@ our %config = ('name'                   => 'Thruk',
                   POST_CHOMP         => 1,
                   TRIM               => 1,
                   COMPILE_EXT        => '.ttc',
-                  STAT_TTL           => 3600,
+                  STAT_TTL           => 604800, # template do not change in production
                   STRICT             => 0,
                   render_die         => 1,
               },
