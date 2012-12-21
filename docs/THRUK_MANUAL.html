@@ -16093,11 +16093,20 @@ verify authentication again.</p></div>
 <h4 id="_cookie_auth_domain">cookie_auth_domain</h4>
 <div class="paragraph"><p>Cookie domain is usually set automatically. Use this option
 to override the default value. Domains have to contain at least
-two periods.</p></div>
+two periods. Useful for single sign on environments.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>cookie_auth_domain = .domain.com</tt></pre>
+</div></div>
+<h4 id="_cookie_auth_login_hook">cookie_auth_login_hook</h4>
+<div class="paragraph"><p>Hook script which is called on every successful login. The REMOTE_USER
+environment variable will be set to the username of the current logged
+in user. Useful to do magic stuff on each login.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>cookie_auth_login_hook = ./bin/hook.sh</tt></pre>
 </div></div>
 <h4 id="_enable_shinken_features">enable_shinken_features</h4>
 <div class="paragraph"><p>This one activates all problem/impact and criticity features.
@@ -16900,7 +16909,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-12-18 19:26:53 CEST
+Last updated 2012-12-21 19:17:06 CEST
 </div>
 </div>
 </body>

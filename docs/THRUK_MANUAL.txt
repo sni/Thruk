@@ -1660,11 +1660,23 @@ ex.:
 
 Cookie domain is usually set automatically. Use this option
 to override the default value. Domains have to contain at least
-two periods.
+two periods. Useful for single sign on environments.
 
 ex.:
 
   cookie_auth_domain = .domain.com
+
+
+==== cookie_auth_login_hook
+
+Hook script which is called on every successful login. The REMOTE_USER
+environment variable will be set to the username of the current logged
+in user. Useful to do magic stuff on each login.
+
+ex.:
+
+  cookie_auth_login_hook = ./bin/hook.sh
+
 
 
 
