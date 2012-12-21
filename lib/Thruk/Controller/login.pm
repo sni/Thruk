@@ -115,7 +115,7 @@ sub index :Path :Args(0) {
                     domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
                 };
                 # call a script hook after successful login?
-                `REMOTE_USER="$login" $config->{'cookie_auth_login_hook'} &` if $config->{'cookie_auth_login_hook'};
+                `REMOTE_USER="$login" $c->config->{'cookie_auth_login_hook'} &` if $c->config->{'cookie_auth_login_hook'};
                 return $c->response->redirect($referer);
             } else {
                 $c->log->info("login failed for $login on $referer");
