@@ -110,8 +110,9 @@ sub index :Path :Args(0) {
             }
             elsif($success) {
                 $c->res->cookies->{'thruk_auth'} = {
-                    value => $success,
-                    path  => $cookie_path,
+                    value   => $success,
+                    path    => $cookie_path,
+                    domain  => ($c->config->{'cookie_auth_domain'} ? $c->config->{'cookie_auth_domain'} : ''),
                 };
                 return $c->response->redirect($referer);
             } else {
