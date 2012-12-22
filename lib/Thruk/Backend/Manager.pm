@@ -482,11 +482,16 @@ sub expand_command {
     }
 
     my $rc;
-    ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args });
+    eval {
+        ($expanded,$rc) = $self->_replace_macros({string => $expanded, host => $host, service => $service, args => \@com_args });
+    };
 
     # does it still contain macros?
     my $note = "";
-    unless($rc) {
+    if($@) {
+        $note = $@;
+        $note =~ s/\s+at\s+\/.*?$//mx;
+    } elsif(!$rc) {
         $note = "could not expand all macros!";
     }
 
