@@ -613,8 +613,15 @@ image:source/livestatus.png[Livestatus Architecture]
 A HTTP connection is possible between multiple Thruk installations. A
 HTTP connection not only makes live data available, it also offers a
 secure way to manage object configuration from remote. To authenticate
-the origin of the querys, you need to provide the secret key from the
-slave instance.
+the central Thruk installation, you need to provide the secret key from the
+slave instance. This setup is perfect for managing several independent
+installations from a central point of view.
+
+[TIP]
+.use SSL
+=======
+It's strongly recommended to use HTTPS for remote connections.
+=======
 
 -------
     # package installation
@@ -1660,11 +1667,23 @@ ex.:
 
 Cookie domain is usually set automatically. Use this option
 to override the default value. Domains have to contain at least
-two periods.
+two periods. Useful for single sign on environments.
 
 ex.:
 
   cookie_auth_domain = .domain.com
+
+
+==== cookie_auth_login_hook
+
+Hook script which is called on every successful login. The REMOTE_USER
+environment variable will be set to the username of the current logged
+in user. Useful to do magic stuff on each login.
+
+ex.:
+
+  cookie_auth_login_hook = ./bin/hook.sh
+
 
 
 

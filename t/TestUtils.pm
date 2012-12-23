@@ -443,7 +443,7 @@ sub _relative_url {
     my $newloc = $url;
     $newloc    =~ s/^(.*\/).*$/$1/gmx;
     $newloc    .= $location;
-    while($newloc =~ s|/[^\/]+/../|/|gmx) {}
+    while($newloc =~ s|/[^\/]+/\.\./|/|gmx) {}
     return $newloc;
 }
 

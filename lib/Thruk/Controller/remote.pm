@@ -41,7 +41,7 @@ sub remote_cgi : Regex('thruk\/cgi\-bin\/remote\.cgi') {
 ##########################################################
 sub index :Path :Args(0) :MyAction('AddSafeDefaults') {
     my ( $self, $c ) = @_;
-    $c->stash->{'text'} = '';
+    $c->stash->{'text'} = 'OK';
     if(defined $c->{'request'}->{'parameters'}->{'data'}) {
         $c->stash->{'text'} = Thruk::Utils::CLI::_from_fcgi($c, $c->{'request'}->{'parameters'}->{'data'});
     }
