@@ -613,8 +613,15 @@ image:source/livestatus.png[Livestatus Architecture]
 A HTTP connection is possible between multiple Thruk installations. A
 HTTP connection not only makes live data available, it also offers a
 secure way to manage object configuration from remote. To authenticate
-the origin of the querys, you need to provide the secret key from the
-slave instance.
+the central Thruk installation, you need to provide the secret key from the
+slave instance. This setup is perfect for managing several independent
+installations from a central point of view.
+
+[TIP]
+.use SSL
+=======
+It's strongly recommended to use HTTPS for remote connections.
+=======
 
 -------
     # package installation
