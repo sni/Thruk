@@ -1543,10 +1543,10 @@ sub _get_subfilter {
                 }
             }
             elsif($key eq '>=') {
-                $filter->{'$gte'} = $val;
+                $filter->{'$gte'} = $val+=0; # ensure we have a number here
             }
             elsif($key eq '<=') {
-                $filter->{'$lte'} = $val;
+                $filter->{'$lte'} = $val+=0; # ensure we have a number here
             }
             elsif($key eq '!>=') {
                 $filter->{'$nin'} = [ $val ];
