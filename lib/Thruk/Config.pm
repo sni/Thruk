@@ -315,8 +315,6 @@ sub set_default_config {
         use_new_search                  => 1,
         use_new_command_box             => 1,
         all_problems_link               => $config->{'url_prefix'}."thruk/cgi-bin/status.cgi?style=combined&amp;hst_s0_hoststatustypes=4&amp;hst_s0_servicestatustypes=31&amp;hst_s0_hostprops=10&amp;hst_s0_serviceprops=0&amp;svc_s0_hoststatustypes=3&amp;svc_s0_servicestatustypes=28&amp;svc_s0_hostprops=10&amp;svc_s0_serviceprops=10&amp;svc_s0_hostprop=2&amp;svc_s0_hostprop=8&amp;title=All+Unhandled+Problems",
-        statusmap_default_groupby       => 'address',
-        statusmap_default_type          => 'table',
         show_long_plugin_output         => 'popup',
         info_popup_event_type           => 'onclick',
         info_popup_options              => 'STICKY,CLOSECLICK,HAUTO,MOUSEOFF',

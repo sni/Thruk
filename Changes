@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 1.62     not yet released
+          - moved plugins config items in component sections of config
           - changed first day of week to monday, can be reverted by setting first_day_of_week=0
           - new reporting module
             - put both reports edit steps into one page
