@@ -25,7 +25,7 @@ requires 'URI::Escape'                            => 0;     # required by Thruk:
 requires 'Moose'                                  => 0;     # required by Thruk::Action::AddDefaults
 requires 'Monitoring::Livestatus'                 => 0.74;
 requires 'Monitoring::Livestatus::Class'          => 0.03;
-requires 'Monitoring::Availability'               => 0.36;  # required by Thruk::Controller::avail
+requires 'Monitoring::Availability'               => 0.40;  # required by Thruk::Controller::avail
 requires 'GD'                                     => 2.44;  # required by Thruk::Utils::Trends
 requires 'Template'                               => 0;     # required by Thruk
 requires 'Template::Plugin::Date'                 => 0;     # required by Thruk::Utils
@@ -99,6 +99,13 @@ feature     ('plugin_reports',
   'Chart::Clicker::Renderer::Pie'                 => 0,
   'Chart::Clicker::Renderer::StackedBar'          => 0,
   'Graphics::Color::RGB'                          => 0,
+);
+
+# reporting2 plugin
+feature     ('plugin_reports2',
+  -default                                        => 0,
+  'MIME::Lite'                                    => 0,
+  'Class::Inspector'                              => 0,
 );
 
 # requirements test requirements

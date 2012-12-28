@@ -48,7 +48,7 @@ TestUtils::test_command({
 
 # update crontab
 TestUtils::test_command({
-    cmd  => $BIN.' "reports.cgi?action=updatecron"',
+    cmd  => $BIN.' "reports2.cgi?action=updatecron"',
     like => ['/^OK - updated crontab$/'],
 });
 TestUtils::test_command({

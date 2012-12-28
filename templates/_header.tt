@@ -125,7 +125,7 @@
               <th>Report:</th>
               <td>
                 <img src="[% url_prefix %]thruk/themes/[% theme %]/images/email_attach.png" alt="configure e-mail report" width=16 height=16 style="vertical-align:top;">
-                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='reports.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% ELSE %][% short_uri(c).replace('&amp;', '&') | uri %][% END %]'; return false;">
+                <input type="button" name="submit" value="Create E-Mail Report for this Page" onClick="window.location='[% c.config.use_feature_reports %]?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url=[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% ELSE %][% short_uri(c).replace('&amp;', '&') | uri %][% END %]'; return false;">
               </td>
             </tr>
           [% END %]
@@ -171,6 +171,7 @@
   [% END %]
 
 <!-- Produced by Thruk (http://www.thruk.org). Copyright (c) 2010-2012 Thruk Developer Team. Copyright (c) 2009 Nagios Core Development Team and Community Contributors. Copyright (c) 1999-2009 Ethan Galstad. -->
+[% UNLESS minimal %]
 <table border="0" cellpadding=0 cellspacing=0 class="top_nav">
   <tr>
     <td width="100%" valign="top">[% PROCESS _header_site_panel.tt %]</td>
@@ -179,17 +180,14 @@
       <a href="#" id="bug_report-btnEl"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/bug_error.png" class="top_bug_button noprint" alt="Send Bug Report" title="Send Bug Report" width="16" height="16"></a>
       [% END %]
     </td>
-    [% UNLESS minimal %]
     <td>
       <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/arrow_refresh.png" class="top_refresh_button noprint" onClick="refresh_button(this)" alt="refresh this page" title="refresh this page">
     </td>
     <td class="top_nav_pref">
       <input type="button" class="top_nav_pref_button noprint" value="preferences" title="preferences" onMouseOver="button_over(this)" onMouseOut="button_out(this)" onClick="toggleElement('pref_pane'); return false;">
     </td>
-    [% END %]
   </tr>
 </table>
-[% UNLESS minimal %]
 [% IF show_top_pane %]
 <a href="#" onClick="toggleTopPane(); return false;"><img src="[% url_prefix %]thruk/themes/[% theme %]/images/icon_minimize.gif" class="btn_toggle_top_pane" id="btn_toggle_top_pane" alt="toggle header"></a>
 [% END %]

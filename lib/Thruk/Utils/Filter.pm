@@ -378,6 +378,19 @@ sub json_encode {
 
 ########################################
 
+=head2 encode_json_obj
+
+  encode_json_obj(array)
+
+returns json encoded object
+
+=cut
+sub encode_json_obj {
+    return JSON::XS::encode_json($_[0]);
+}
+
+########################################
+
 =head2 escape_js
 
   escape_js($text)
@@ -453,6 +466,23 @@ sub name2id {
         $return = $opt_prefix."_".$return;
     }
     return($return);
+}
+
+
+########################################
+
+=head2 uniqnumber
+
+  uniqnumber()
+
+return uniq number which can be used in html ids
+
+=cut
+sub uniqnumber {
+    our $uniqnumber;
+    $uniqnumber = 0 unless defined $uniqnumber;
+    $uniqnumber++;
+    return $uniqnumber;
 }
 
 

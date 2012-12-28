@@ -1,0 +1,15 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <title>[% r.name %]</title>
+  [% PROCESS 'reports/style/css.tt' %]
+  <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-1.7.2.min.js"></script>
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/flot-d7c58b5/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/flot-d7c58b5/jquery.flot.time.js"></script>
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]thruk/plugins/reports2/strftime-min.js"></script>
+</head>
+<body>
+[% content %]
+</body>
+</html>

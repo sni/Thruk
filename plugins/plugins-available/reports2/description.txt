@@ -1,0 +1,5 @@
+The 'reports2' plugin creates SLA or Event reports in PDF and HTML format.
+Reports can be send by mail regularly. Besides that, you may create reports
+from any page within Thruk.
+
+Url: reports2.cgi

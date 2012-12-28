@@ -27,6 +27,7 @@ for my $cmd (@{$cmds}) {
        or $line =~ m|extjs\-.*\.css|mx
        or $line =~ m|/conf/jstree/|mx
        or $line =~ m|/conf/root/jstree/|mx
+       or $line =~ m|jquery\.flot\.|mx
     ) {
       next;
     }

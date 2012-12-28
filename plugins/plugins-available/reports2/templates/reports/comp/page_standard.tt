@@ -1,0 +1,22 @@
+[% current_page = current_page() %]
+<a name="page[% current_page %]"></a>
+<div class="page content_page">
+  <table class="page">
+    <tr>
+      <td class="header">
+        <div class="title">
+          <div class="titletext">[% title %]</div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="subtitle">[% pagetitle %]</div>
+        <div class="content">[% content %]</div>
+      </td>
+    </tr>
+    <tr>
+      <td class="footer"><span>[% current_page %]</span></td>
+    </tr>
+  </table>
+</div>

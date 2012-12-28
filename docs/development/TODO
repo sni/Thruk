@@ -52,10 +52,7 @@ reports:
         HTML, Text, CVS, XML, PDF
         CSV output for single hosts/services,hostgroups/servicegroups
     - use mongodb with cursors
-    - make 90% in sla graphs configurable
     - utf-8 mails: https://rt.cpan.org/Public/Bug/Display.html?id=42481
-    - replace text in pdfs: http://search.cpan.org/dist/CAM-PDF/lib/CAM/PDF.pm
-      http://search.cpan.org/dist/CAM-PDF/bin/changepagestring.pl
     - put pnp graphs into report
       - cd etc/pnp4nagios/ && \
         REQUEST_URI='image?host=localhost&srv=_HOST_&view=1&source=0' \

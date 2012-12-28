@@ -1,0 +1,54 @@
+[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'servicegroup'            => [ 'Servicegroup',               'servicegroups',   ''                      , '', 1 ] },
+        { 'timeperiod'              => [ 'Timeperiod',                 'rptimeperiod',    'last12months'                  ] },
+        { 'breakdown'               => [ 'Breakdown by',               'breakdowns',      'months'                        ] },
+        { 'sla'                     => [ 'SLA %',                      'int',             '98'                    , '', 1 ] },
+        { 'graph_min_sla'           => [ 'Graph SLA %',                'int',             '90'                    , '', 1 ] },
+        { 'decimals'                => [ 'Decimal Points',             'int',             '2'                     , '', 1 ] },
+        { 'assumeinitialstates'     => [ 'Assume Initial States',      'yes_no',          'yes'                           ] },
+        { 'initialassumedhoststate' => [ 'Initial Assumed State',      'hst_initialassumedstate',          '3'            ] },
+        { 'initialassumedservicestate'  => [ 'Initial Assumed State',  'svc_initialassumedstate',          '6'            ] },
+        { 'includesoftstates'       => [ 'Include Soft States',        'yes_no',          'no'                            ] },
+        { 'unavailable'             => [ 'Host Unavailable States',    'hst_unavailable', ['down', 'unreachable']         ] },
+        { 'unavailable'             => [ 'Service Unavailable States', 'svc_unavailable', ['critical', 'unknown']         ] },
+    ];
+  %]
+[% END %]
+
+[%# MAIL LAYOUT #%]
+[% PROCESS 'reports/comp/mail.tt' %]
+
+[%# PREPARE REPORT #%]
+[% PROCESS 'reports/comp/sla_prepare.tt' %]
+
+[%# REPORT LAYOUT #%]
+[% IF block == 'render' %]
+  [%# report settings #%]
+  [% PROCESS 'reports/locale/en.tt' %]
+  [%
+    title        = 'SLA Report'
+    subtitle     = r.name
+    coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat),
+                     'Hostgroup:', param.servicegroup,
+                   ]
+  %]
+
+  [% WRAPPER 'reports/comp/report.tt' %]
+    [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+
+    [% FOREACH hst = avail_data.services.keys.sort %]
+      [% FOREACH svc = avail_data.services.$hst.keys.sort %]
+        [% c.request.parameters.host    = hst %]
+        [% c.request.parameters.service = svc %]
+        [% pagetitle                    = "Service: " _ svc _ ' on ' _ hst %]
+
+        [% WRAPPER 'reports/comp/page_standard.tt' %]
+          [% PROCESS 'reports/comp/sla_graph_page.tt' %]
+        [% END %]
+      [% END %]
+    [% END %]
+  [% END %][%# report wrapper #%]
+[% END %][%# render block #%]

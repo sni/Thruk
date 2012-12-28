@@ -5,6 +5,9 @@ package TestUtils;
 #########################
 # Test Utils
 #########################
+BEGIN {
+  $ENV{'THRUK_SRC'} = 'TEST';
+}
 
 use strict;
 use Data::Dumper;
@@ -227,8 +230,10 @@ sub test_page {
 
     # check for missing images / css or js
     if($content_type =~ 'text\/html') {
-        my @matches1 = $return->{'content'} =~ m/\s+(src|href)='(.+?)'/gi;
-        my @matches2 = $return->{'content'} =~ m/\s+(src|href)="(.+?)"/gi;
+        my $content = $return->{'content'};
+        $content =~ s/<script[^>]*>.*?<\/script>//gsmxi;
+        my @matches1 = $content =~ m/\s+(src|href)='(.+?)'/gi;
+        my @matches2 = $content =~ m/\s+(src|href)="(.+?)"/gi;
         my $links_to_check;
         my $x=0;
         for my $match (@matches1, @matches2) {
