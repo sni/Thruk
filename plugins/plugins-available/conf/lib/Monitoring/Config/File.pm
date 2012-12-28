@@ -163,7 +163,7 @@ sub update_objects_from_text {
     my $linenr = 1;
     my $buffer = '';
     for my $line (split/\n/mx, $text) {
-        chomp($line);
+        StripTSpace($line);
         if(substr($line, -1) eq '\\' and substr($line, 0, 1) ne '#') {
             StripLSpace($line);
             $line    = substr($line, 0, -1);
