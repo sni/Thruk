@@ -3,9 +3,9 @@ Thruk Users Guide
 
 == Introduction
 
-Thruk is a multibackend monitoring webinterface which currently
+Thruk is a multibackend monitoring web interface which currently
 supports Nagios, Icinga and Shinken as backend using the Livestatus
-API. It is designed to be a 'dropin' replacement and covers almost
+API. It is designed to be a 'drop in' replacement and covers almost
 all of the original features plus adds additional enhancements for
 large installations.
 
@@ -15,13 +15,13 @@ Main Features / Advantages
   * faster, no need to parse status.dat for every request
   * less cpu usage
   * display live data, no delay between core and gui
-  * independant from monitoring core, can be installed on remote host
+  * independent from monitoring core, can be installed on remote host
   * clusterable, can be clustered over hosts
   * change status.cgi filter inline
   * extended logfile search
   * better logging, uses log4perl (who submitted which command?)
   * valid HTML code
-  * no frames ( can be reenabled for better addon integration)
+  * no frames ( can be re-enabled for better addon integration)
   * easy to extend with plugins
   * 100% Perl (using Catalyst Framework)
   * paging ( can be disabled and customized )
@@ -48,7 +48,7 @@ Perl Module. Thruk itself is running as a fastcgi process.
 Availability will be calculated with
 http://search.cpan.org/dist/Monitoring-Availability[Monitoring::Availability].
 Authentication is provided by the Apache webserver (For example with
-mod_auth).
+mod_auth_basic, mod_auth_ldap, mod_auth_mysql, ...).
 
 .Thruk Architecture
 image:source/arch_preview.png[Thruk Architecture]
@@ -63,9 +63,9 @@ here.
 
 Thruk connects to as many cores as you want. You could even combine
 Nagios, Icinga and Shinken instances into one big combined view. That
-way you get the advantage of several independant locations and still
+way you get the advantage of several independent locations and still
 have the overview about all your installations. Sites can be put into
-groups for better arrangment.
+groups for better arrangement.
 
 image:source/multi_site.png[Multi Site]
 
@@ -74,7 +74,7 @@ image:source/multi_site.png[Multi Site]
 
 The Bookmarks feature allows you to save your searches and add them as
 your personal menu item. Besides the bookmarks, you can adjust the
-menu easiely with the menu_local.conf for all users.
+menu easily with the menu_local.conf for all users.
 
 The Excel export creates real Excel files which can be send by mail or
 used to extract hostnames.
@@ -127,7 +127,7 @@ image:source/PNP4nagios.png[PNP4Nagios]
 
 When your check returns multiple lines of plugin output. Thruk marks
 the output in blue and a click on it displays the complete output.
-This is especially usefull for check_multi checks. In addition to
+This is especially useful for check_multi checks. In addition to
 that, the comments and downtimes also have a small popup with their
 data. So you don't have to open the host/service page just to see who
 set a comment and when there is a downtime.
@@ -138,7 +138,7 @@ image:source/PluginOutput.png[Multiple Lines of Plugin Output]
 === Mine Map
 
 The Mine Map is the perfect tool to get a quick overview. It is
-especially usefull if you have a lot of common services across your
+especially useful if you have a lot of common services across your
 hosts. Otherwise use hostgroups or servicegroups for nice results.
 Normal filtering is possible too.
 
@@ -167,12 +167,12 @@ Tools like Mod-Gearman. Just follow the guide on the labs page for
 your distribution.
 
 
-=== Use OMD
-An easy way of installing thruk is using OMD from
+=== OMD
+An easy way of installing Thruk is using OMD from
 http://omdistro.org[omdistro.org]. There are Debian, Ubuntu, Centos
 and Suse Packages containing preconfigured latest versions of Nagios
-and Thruk. The package also includes icinga, shinken, pnp4nagios,
-check_mk and nagvis. OMD is the recommended way of installing new
+and Thruk. The package also includes Icinga, Shinken, pnp4nagios,
+check_mk and Nagvis. OMD is the recommended way of installing new
 Nagios / Thruk setups when you want to install several addons at once.
 
 
@@ -185,10 +185,10 @@ Download packages from http://www.thruk.org/files/pkg/
 All packages have the following filesystem structure:
 
 -------
-  /etc/thruk                       thruks config
-  /etc/httpd/conf.d/thruk.conf     apache config
+  /etc/thruk                       Thruks config
+  /etc/httpd/conf.d/thruk.conf     Apache config
   /usr/share/thruk                 shared files
-  /usr/lib/thruk/perl5             perl librarys
+  /usr/lib/thruk/perl5             Perl libraries
   /var/cache/thruk                 temporary files
   /var/lib/thruk                   stored user settings
 -------
@@ -196,11 +196,11 @@ All packages have the following filesystem structure:
 After installation, Thruk is available at http://your-host/thruk/ and
 has a default user 'thrukadmin' with password 'thrukadmin' configured.
 You may need to change backend configuration. This should be done in
-the thruk_local.conf where all settings can be overriden.
+the thruk_local.conf where all settings can be overridden.
 
 
 
-=== Debian / Ubuntu
+==== Debian / Ubuntu
 
 -------
   #> dpkg -i thruk_1.60_debian6_amd64.deb
@@ -210,7 +210,7 @@ In case of dependency errors, run 'apt-get -f install' and try the
 'dpkg -i...' again.
 
 
-=== Centos / Redhat
+==== Centos / Redhat
 
 -------
   #> yum install --nogpgcheck thruk-1.60-1.rhel6.x86_64.rpm
@@ -220,7 +220,7 @@ You may need to include an external repository for mod_fastcgi module.
 Epel or Rpmforge should do it.
 
 
-=== SLES
+==== SLES
 
 -------
   #> zypper install thruk-1.60-1.sles11.x86_64.rpm
@@ -237,8 +237,8 @@ You may need the SLES sdk dvd for additional dependencies.
 .Experienced Users Only
 =======
 Source installation is for experienced users only. Using
-packages/repositories should be the prefered solution in almost all
-situations. Especially for productional usage.
+packages/repositories should be the preferred solution in almost all
+situations. Especially for production environments.
 =======
 
 
@@ -251,7 +251,7 @@ will need the following:
 - Apache Webserver (optional for fastcgi only)
 
 ==== Create New User
-refer to your systems manual on howto add new user.
+refer to your systems manual on how to add new user.
 This guide uses the following:
 
 -------
@@ -345,7 +345,7 @@ Press <y> at this questions:
   Do you want to use the XS Stash by default? [y]
 -------
 
-run perl Makefile.PL again to see if all dependecies are now installed properly.
+run perl Makefile.PL again to see if all dependencies are now installed properly.
 
 -------
     perl Makefile.PL
@@ -365,7 +365,7 @@ overwritten.
 
 Edit 'cgi.conf' and adjust settings to your needs.
 
-See the <<Thruk Configuration>> section for detailed explaination of configuration options.
+See the <<Thruk Configuration>> section for detailed explanation of configuration options.
 
 
 
@@ -385,7 +385,7 @@ Open your browser and open http://<your_host>:3000
 == Apache Configuration
 
 Integration in the Apache webserver is done by fastcgi.  There are two
-fastcgi modules for apache at the moment. Choose the one which fits
+fastcgi modules for Apache at the moment. Choose the one which fits
 best into your environment. If unsure, use <<_mod_fcgid,mod_fcgid>>.
 The main difference is, that mod_fcgid starts the fastcgi process upon
 the first request whereas in mod_fastcgi you have to start the fastcgi
@@ -395,12 +395,56 @@ Do not use the port 3000 thruk server in production, it's only for
 testing and development. It cannot handle authentication and is slower
 than the fastcgi variants.
 
+
 [TIP]
 .lighthttpd
 =======
 Francois Ponsard wrote an article on how to integrate Thruk in Lighthttpd:
 http://www.dahwa.fr/dotclear/index.php?post/2011/03/15/Thruk-in-Lighttpd
 =======
+
+
+=== mod_fcgid
+
+IMPORTANT: Thruk runs with the webserver user in this scenario, make
+sure the webserver user has access to all Thruk files and perl modules.
+
+.Apache configuration with mod_fcgid
+-------
+LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
+<VirtualHost *:80>
+    ServerName   thruk.company.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    <Directory /home/thruk/Thruk/root/>
+        Options FollowSymLinks
+        AllowOverride All
+        order allow,deny
+        allow from all
+    </Directory>
+
+    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
+    <Location /thruk>
+        Options ExecCGI
+        Order allow,deny
+        Allow from all
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Require valid-user
+    </Location>
+
+    <IfModule mod_fcgid.c>
+      AddHandler fcgid-script .pl
+      MaxRequestsPerProcess 100
+    </IfModule>
+
+</VirtualHost>
+-------
+
 
 === mod_fastcgi
 
@@ -425,8 +469,6 @@ Or create a custom init.d script (additional modules required) with:
 -------
 
 
-
-==== Apache Configuration
 
 use this apache example configuration:
 
@@ -526,71 +568,32 @@ use this apache example configuration:
 </VirtualHost>
 -------
 
-=== mod_fcgid
-
-IMPORTANT: Thruk runs with the webserver user in this scenario, make
-sure the webserver user has access to all Thruk files and perl modules.
-
-.Apache configuration with mod_fcgid
--------
-LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
-<VirtualHost *:80>
-    ServerName   thruk.company.local
-
-    DocumentRoot /home/thruk/Thruk/root/
-    CustomLog    /home/thruk/Thruk/logs/access.log combined
-    ErrorLog     /home/thruk/Thruk/logs/error.log
-
-    <Directory /home/thruk/Thruk/root/>
-        Options FollowSymLinks
-        AllowOverride All
-        order allow,deny
-        allow from all
-    </Directory>
-
-    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
-    <Location /thruk>
-        Options ExecCGI
-        Order allow,deny
-        Allow from all
-        AuthName "Monitoring Access"
-        AuthType Basic
-        AuthUserFile /home/thruk/Thruk/htpasswd.users
-        Require valid-user
-    </Location>
-
-    <IfModule mod_fcgid.c>
-      AddHandler fcgid-script .pl
-      MaxRequestsPerProcess 100
-    </IfModule>
-
-</VirtualHost>
--------
-
-
 
 
 
 
 == Backend Configuration
 
+You may connect multiple backends into one Thruk interface. Just specify
+multiple 'peer' items.
+
 === Livestatus
 
-Livestatus is a addon for Nagios or Icinga which provides realtime
-status data. Contrary to database addons it adds very litte overhead to the
-nagios core which makes livestatus based gui fast and realtime.
+Livestatus is a addon for Nagios or Icinga which provides real time
+status data. Contrary to database addons it adds very little overhead to the
+Nagios core which makes livestatus based gui fast and real time.
 
 [TIP]
 .Shinken
 =======
-Shinken has livestatus support builtin and does not require additional
+Shinken has livestatus support built-in and does not require additional
 modules.
 =======
 
 Refer to http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus
 on how to install livestatus onto your monitoring box. The
 <<_labs_consol_repository,Lab Consol Repository>> has livestatus rpm
-packages. For debian based linux systems just use the provided
+packages. For debian based Linux systems just use the provided
 packages of your distribution.
 
 Basically you have to build the NEB module and add it to your nagios/icinga.cfg.
@@ -606,6 +609,7 @@ image:source/backends.png[Thruk Backends Manager]
 
 .Livestatus Architecture
 image:source/livestatus.png[Livestatus Architecture]
+
 
 
 === HTTP
@@ -635,9 +639,10 @@ It's strongly recommended to use HTTPS for remote connections.
 image:source/livestatus_http.png[HTTP Architecture]
 
 
+
 === MongoDB
 A MongoDB can be used to faster access logfiles. Livestatus caches
-logfile data used for querys. This increases the size of the nagios
+logfile data used for queries. This increases the size of the nagios
 process, slows down the monitoring and increases the overall load on
 your monitoring host. Therefor Thruk may use a MongoDB as logfile
 cache.
@@ -648,7 +653,7 @@ ex.:
 
 
 .MongoDB Architecture
-image:source/livestatus_mongodb.png[Mongodb Architecture]
+image:source/livestatus_mongodb.png[MongoDB Architecture]
 
 For maximum performance, the MongoDB should be installed on the same
 server as Thruk itself.
@@ -670,7 +675,7 @@ Logfile Cache Update
     %> thruk -a logcacheupdate
 -------
 
-The logcacheupdate imports the delta since the last update. Thats pretty
+The logcacheupdate imports the delta since the last update. That's pretty
 fast and done automatically whenever you access logfiles via Thruk.
 
 There is also a command to check the current usage statistics of your
@@ -689,6 +694,8 @@ logfile cache:
 
 == Thruk Configuration
 
+=== Config Files
+
 Configuration is managed mainly in these configuration files.
 
   * thruk.conf
@@ -698,19 +705,21 @@ Configuration is managed mainly in these configuration files.
   * menu.conf
   * menu_local.conf
 
-
-=== thruk.conf
+==== thruk.conf
 
 The thruk.conf contains the shipped defaults. You should not edit this
 file directly. Overwrite your settings in your thruk_local.conf
 instead.
 
 
-=== thruk_local.conf
+==== thruk_local.conf
 
 The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
 The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.
+
+
+=== General Settings
 
 
 ==== use_timezone
@@ -777,7 +786,7 @@ ex.:
 Change path to your host action icons. You may use
 relative paths to specify completely different location.
 You also may want to use 'action_pnp.png' when using pnp.
-Icon can be overriden by a custom variable '_ACTION_ICON'.
+Icon can be overridden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
@@ -789,7 +798,7 @@ ex.:
 Change path to your service action icons. You may use
 relative paths to specify completely different location.
 You also may want to use 'action_pnp.png' when using pnp.
-Icon can be overriden by a custom variable '_ACTION_ICON'.
+Icon can be overridden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
@@ -801,7 +810,7 @@ ex.:
 When set to a true value, every contact will only see the hosts where
 he is contact for plus the services where he is contact for. When
 disabled, a host contact will see all services for this host
-regardless of wheter he is a service contact or not.
+regardless of whether he is a service contact or not.
 
 ex.:
 
@@ -850,7 +859,7 @@ ex.:
 ==== all_problems_link
 
 Customizable link for the 'problems' link in side menu. Can be useful
-to reflect your companys process of error handling.
+to reflect your companies process of error handling.
 
 ex.:
 
@@ -1125,7 +1134,7 @@ ex.:
 
 ==== default_theme
 
-Default theme to use for all users. Must be a valid subdirectory in
+Default theme to use for all users. Must be a valid sub directory in
 the themes folder.
 
 ex.:
@@ -1356,7 +1365,7 @@ ex.:
 
 
 ==== info_popup_event_type
-On which event should the comments / downtime or longpluginout popup
+On which event should the comments / downtime or longpluginoutput popup
 show up. Valid values are onclick or onmouseover.
 
 ex.:
@@ -1474,24 +1483,6 @@ ex.:
 
 
 
-==== statusmap_default_type
-You may change the default map type of the statusmap here. Valid
-types are: 'table' and 'circle'
-
-ex.:
-
-  statusmap_default_type = table
-
-
-==== statusmap_default_groupby
-And the statusmap default group by which has to be one of:
-'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
-
-ex.:
-
-  statusmap_default_groupby = address
-
-
 ==== use_wait_feature
 Waiting is a livestatus feature. When enabled, Thruk will wait
 after rescheduling hosts/services checks until the
@@ -1547,7 +1538,7 @@ ex.:
 
 
 ==== cron_file
-Specifiy a file which is then completly under the control of Thruk.
+Specify a file which is then completely under the control of Thruk.
 It will be used to store cronjobs, ex. for reports. The file has to be
 writable by Thruk.
 
@@ -1591,22 +1582,6 @@ ex.:
   thruk_init = /etc/init.d/thruk
 
 
-==== report_nice_level
-Execute regular scheduled reports with this nice level.
-
-ex.:
-
-  report_nice_level = 5
-
-
-==== report_base_url
-Url used to replace relative links in html reports.
-
-ex.:
-
-  report_base_url = http://host.local/thruk/cgi-bin/
-
-
 ==== first_day_of_week
 Set first day of week. Used in reports.
  Sunday: 0
@@ -1638,7 +1613,7 @@ ex.:
 
 
 ==== cookie_auth_restricted_url
-Specifies the url against the cookie auth provider will verifys the
+Specifies the url against the cookie auth provider will verify its
 credentials.
 
 ex.:
@@ -1690,7 +1665,7 @@ ex.:
 
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
-Currently it will only work with shinken backends. Dont enable it
+Currently it will only work with shinken backends. Don't enable it
 unless all your backends are shinken.
 If not set, it will be automatically enabled when using only
 shinken backends.
@@ -1719,7 +1694,7 @@ ex.:
 ==== enable_icinga_features
 This one activates all icinga specific features.
 If not set, Thruk will try to auto-detect your backends.
-Currently autodetection will only work within OMD. Dont enable it
+Currently auto detection will only work within OMD. Don't enable it
 unless all your backends are icinga.
 
 ex.:
@@ -1765,55 +1740,54 @@ With than 10 or more sites, the list of backends will be combined
 into the combined site panel which just displays the totals of
 available / down / disabled sites.
 Set sitepanel to list/compact/auto/off to change the default
-behaviour.
+behavior.
 
 ex.:
 
   sitepanel = auto
 
 
-==== Component Thruk::Backend
-Enter your backend connection settings here. At the moment only
-livestatus is supported. The port is the port from the
-xinetd.conf. You can enter local unix sockets too.
+=== Component Thruk::Backend
+Enter your backend connection settings here. See <<_backend_configuration,Backend Configuration>>
+for details.
 
-  * peer
-         ** name     name for this connection
-         ** type     type of this connection. Only 'livestatus' possible at the
-                     moment
-         ** hidden   should this peer be hidden initially ( can be reenabled
-                     via gui switch ) Only useful with more than one
-                     backend.
-         ** groups   if set, only contacts from these groups have access. You
-                     may add multiple groups seperated by comma. Users
-                     without the right contactgroup don't even see
-                     that there is a backend. Note that this implies
-                     one extra backend request per page.
-         ** section  to group backends/sites by different sections, enter a
-                     section.
-         ** options
-            *** peer            address of this connection.
-            *** resource_file   resource_file for this peer (used for macro replacement)
-         ** configtool
-            *** core_type       Give the config parser a hint about
-                                your config. Can be 'nagios', 'icinga'
-                                or 'shinken'.
-            *** core_conf       Path to your nagios.cfg / icinga.cfg. Read all
-                                object directories and files from this config
-                                file.
-            *** obj_check_cmd   Commandline to verify the config.
-            *** obj_reload_cmd  Commandline to reload the config.
-            *** obj_readonly    Filename pattern to define readonly objects.
-                                For example for generated config files.
-            *** obj_dir         Path to your objects. Enables the objects editor.
-                                Reads all *.cfg from this folder and all subfolders.
-                                (only needed when not using 'core_conf')
-            *** obj_file        Path to a single objects file. Enables the objects
-                                editor. Both 'obj_dir' and 'obj_file' can be
-                                specified more than once.
-                                (only needed when not using 'core_conf')
-            *** obj_exclude     Specify some exection pattern for the obj_dir.
-                                (only needed when not using 'core_conf')
+==== peer
+
+     ** name     name for this connection
+     ** type     type of this connection. Can be 'livestatus', 'http' or 'mongodb'
+     ** hidden   should this peer be hidden initially ( can be reenabled
+                 via gui switch ) Only useful with more than one
+                 backend.
+     ** groups   if set, only contacts from these groups have access. You
+                 may add multiple groups separated by comma. Users
+                 without the right contactgroup don't even see
+                 that there is a backend. Note that this implies
+                 one extra backend request per page.
+     ** section  to group backends/sites by different sections, enter a
+                 section.
+     ** options
+        *** peer            address of this connection.
+        *** resource_file   resource_file for this peer (used for macro replacement)
+     ** configtool
+        *** core_type       Give the config parser a hint about
+                            your config. Can be 'nagios', 'icinga'
+                            or 'shinken'.
+        *** core_conf       Path to your nagios.cfg / icinga.cfg. Read all
+                            object directories and files from this config
+                            file.
+        *** obj_check_cmd   Commandline to verify the config.
+        *** obj_reload_cmd  Commandline to reload the config.
+        *** obj_readonly    Filename pattern to define readonly objects.
+                            For example for generated config files.
+        *** obj_dir         Path to your objects. Enables the objects editor.
+                            Reads all *.cfg from this folder and all subfolders.
+                            (only needed when not using 'core_conf')
+        *** obj_file        Path to a single objects file. Enables the objects
+                            editor. Both 'obj_dir' and 'obj_file' can be
+                            specified more than once.
+                            (only needed when not using 'core_conf')
+        *** obj_exclude     Specify some exception pattern for the obj_dir.
+                            (only needed when not using 'core_conf')
 
 ex.:
 
@@ -1851,7 +1825,7 @@ ex.:
 
 
 
-==== Component Thruk::Plugin::ConfigTool
+=== Component Thruk::Plugin::ConfigTool
 
 Enable config tool by setting path to different components config
 files. Users with the roles 'authorized_for_configuration_information'
@@ -1859,20 +1833,6 @@ and 'authorized_for_system_commands' will then have access to the
 config tool.
 You don't have to restart Thruk when changing the config with the
 config tool.
-
-  * general options for the config tool
-      - show_plugin_syntax_helper    Enable/Disable the plugin syntax
-                                     helper. When enabled, Thruk will
-                                     run the plugins with "plugin -h"
-                                     to get the help information.
-
-  * you can manage different types of files with the config tool:
-      - thruk               Path to your thruk_local.conf. Enables
-                            adjusting Thruks config if set.
-      - cgi.cfg             Path to your cgi.cfg. Enables adjusting the
-                            cgi.cfg if set.
-      - htpasswd            Path to your htpasswd. Enables user management
-                            based an apaches basic auth with htpasswd.
 
 ex.:
 
@@ -1884,19 +1844,26 @@ ex.:
   </Component>
 
 
-==== Component Thruk::Plugin::Panorama
+==== show_plugin_syntax_helper
+
+Enable/Disable the plugin syntax helper. When enabled, Thruk will
+run the plugins with "plugin -h" to get the help information.
+
+==== thruk
+Path to your thruk_local.conf. Enables adjusting Thruks config if set.
+
+==== cgi.cfg
+Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.
+
+==== htpasswd
+Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.
+
+
+
+=== Component Thruk::Plugin::Panorama
 
 The 'Panorama' plugin is a nice, fully customizable dashboard allowing
 you to build your own panorama views.
-
-  * general options for the config tool
-      - state_provider    Sets the way states between reloads are
-                          preserved.
-                          Valid options are 'cookie' or 'server'.
-                          Cookie store is usefull for demo systems
-                          where lot people share the same account.
-      - default_view      Can be either the string of an exported
-                          view or path to a file with exported view.
 
 ex.:
 
@@ -1904,6 +1871,67 @@ ex.:
     state_provider  = server
     default_view    = /var/lib/thruk/default_panorama_view
   </Component>
+
+
+==== state_provider
+Sets the way states between reloads are preserved.
+Valid options are 'cookie' or 'server'. Cookie store is useful for demo systems
+where lot people share the same account.
+
+==== default_view
+Can be either the string of an exported view or path to a file with exported view.
+
+
+
+=== Component Thruk::Plugin::Reports2
+
+The 'Reports2' plugin creates sla reports in html or pdf format. You
+probably have to download the wkhtmltopdf binary in a recent version.
+
+ex.:
+
+  <Component Thruk::Plugin::Reports2>
+    report_nice_level = 5
+    report_base_url   = http://host.local/thruk/cgi-bin/
+    wkhtmltopdf       = /usr/bin/wkhtmltopdf
+  </Component>
+
+==== report_nice_level
+Execute regular scheduled reports with this nice level.
+
+==== report_base_url
+Url used to replace relative links in html reports.
+
+
+==== wkhtmltopdf
+wkhtmltopdf is used to convert html pages into pdf. You will need
+at least version 0.11. Get wkhtmltopdf from http://code.google.com/p/wkhtmltopdf/
+
+
+
+
+=== Component Thruk::Plugin::Statusmap
+
+The Statusmap plugin gives an overview over your network.
+
+ex.:
+
+  <Component Thruk::Plugin::Statusmap>
+    statusmap_default_groupby = address
+    statusmap_default_type    = table
+  </Component>
+
+
+==== statusmap_default_type
+You may change the default map type of the statusmap here. Valid
+types are: 'table' and 'circle'
+
+
+==== statusmap_default_groupby
+And the statusmap default group by which has to be one of:
+'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
+
+
 
 
 
@@ -2059,13 +2087,13 @@ ex.:
 
 
 
-=== log4perl.conf
+== Logfiles
 
-This file contains the log4perl configuration. You can configure whatever is
+Logging configuration takes place in the log4perl.conf. You can do whatever is
 possible in log4perl. Refer to the log4perl manual for detailed
 information:
 http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html
-There is a log4perl.conf.example file shiped with the package.
+There is a log4perl.conf.example file shipped with the package.
 
 ex.:
 
@@ -2088,21 +2116,21 @@ ex.: log4perl.appender.ErrorLog.Threshold=INFO
 
 
 
+== Menu Configuration
 
-=== menu.conf
+Navigation configuration is split in two files
 
-This file contains the default side menu configuration. Do not change
+ * menu.conf
+ * menu_local.conf
+
+The menu.conf contains the default side menu configuration. Do not change
 it as this file will be overwritten with every update. If you want to
 create a complete custom navigation, just copy this file to
-menu_local.conf and adjust it to your needs. See 'menu_local.conf' on
+menu_local.conf and adjust it to your needs. See the next chapter on
 how to add just add a few links without having to copy the complete
 file.
 
-
-
-=== menu_local.conf
-
-This file contains the user configuration for the side menu. See the
+The menu_local.conf contains the user configuration for the side menu. See the
 http://www.thruk.org/faq.html#_how_to_change_the_side_menu[FAQ] for
 some examples.
 
@@ -2119,7 +2147,7 @@ on a test instance first.
 =======
 
 
-If you just want to add a few entrys, create a empty menu_local.conf
+If you just want to add a few entries, create a empty menu_local.conf
 and put these lines into it:
 
 -------
@@ -2130,7 +2158,7 @@ insert_item('General', { 'href' => 'http://labs.consol.de', 'name' => 'Labs', ta
 
 
 
-=== Server Side Includes
+== Server Side Includes
 
 You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
@@ -2157,17 +2185,13 @@ as content.
 
 
 
-== Examples
-
-Here is a list of common tasks and configurations.
-
-=== CGI Parameters
+== CGI Parameters
 
 Most of the CGI Parameters can be changed with buttons, but there are
 some which are only accessible by adding them directly to the url.
 
 
-==== hidetop
+=== hidetop
 
 Pages: status pages
 
@@ -2176,16 +2200,16 @@ Description: Show/Hide the status totals header.
 Example: /thruk/cgi-bin/status.cgi?hidetop=1
 
 
-==== nav
+=== nav
 
 Pages: all pages
 
-Description: Show/Hide the navigation. Only usefull in non-frames mode.
+Description: Show/Hide the navigation. Only useful in non-frames mode.
 
 Example: /thruk/cgi-bin/tac.cgi?nav=0
 
 
-==== noheader
+=== noheader
 
 Pages: status pages
 
@@ -2194,17 +2218,17 @@ Description: Show/Hide the status totals header.
 Example: /thruk/cgi-bin/status.cgi?noheader
 
 
-==== minimal
+=== minimal
 
 Pages: status page
 
-Description: Hides almost any user interface buttons. Usefull for
+Description: Hides almost any user interface buttons. Useful for
 monitor screens where only the current problems should be displayed.
 
 Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1
 
 
-==== refresh
+=== refresh
 
 Pages: all pages
 
@@ -2213,7 +2237,7 @@ Description: Sets refresh timer to a custom value.
 Example: /thruk/cgi-bin/status.cgi?refresh=30
 
 
-==== columns
+=== columns
 
 Pages: status overview
 
@@ -2223,39 +2247,48 @@ Example: /thruk/cgi-bin/status.cgi?hostgroup=all&style=overview&columns=5
 
 
 
-=== SLA Reporting
+== SLA Reporting
 
-SLA Reporting consists of several parts.
+SLA Reporting consists of several steps.
 
  - report configuration
- - master pdf
- - template (contains mail text and pdf content)
+ - report template
+ - converting html report into pdf
+ - optionally send report by mail
 
-==== Report Configuration
+=== Report Configuration
 
-You can create and adjust report setttings on the 'Reporting' page.
+You can create and adjust report settings on the 'Reporting' page.
 Make sure the plugin is enabled. After selecting a template for your
 report you have to set specific types of input fields on the second
-page. If you make you report public, eveyone can view and refresh the
+page. If you make you report public, everyone can view and refresh the
 report.
 
-==== Master PDF
+=== Report Templates
 
-The master pdf is used as source for the pdf report and used together
-with the values filled in from the 'template' to generate the pdf
-file. You may adjust the shipped 'sla.pdf' to your needs and put it
-into a 'pdf' subfolder of the 'user_template_path'.
+All templates used for reports can be found in
+'plugins/plugins-enabled/reports2/templates/reports'.
+You may adjust or override all templates to your needs and put them
+into a 'reports' subfolder of the 'user_template_path'.
 
-==== Template
+  * reports     contains the selectable reports
+  ** comp       contains components used in reports
+  ** locale     contains localization settings
+  ** style      contains css used to make reports pretty
 
-The template defines the dynamic content of the sla report. You may
-copy the 'sla.tt' file into a 'pdf' subfolder of the
-'user_template_path' and adjust it to your needs.
-
-See http://thruk.org/api/Thruk/Utils/PDF.html for details on
+See http://thruk.org/api/Thruk/Utils/Reports/Render.html for details on
 available functions and examples.
 
-==== Sending Reports By Mail
+=== Converting
+
+The generated HTML report will be converted into a pdf file using wkhtml2pdf
+together with xvfb. Both tools must be installed on Thruks host. There is
+a binary download for wkhtml2pdf on http://code.google.com/p/wkhtmltopdf/.
+Use at least the 0.11 version or later.
+
+
+
+=== Sending Reports By Mail
 
 It's quite easy to setup sla reports by mail. All you need is to
 create send option in the report configuration. It is even possible to
@@ -2263,7 +2296,7 @@ send one report at multiple times.
 
 
 
-=== CLI Tool & Scripting
+== CLI Tool & Scripting
 
 It is possible to do comprehensive scripting with Thruk. For example
 set downtimes automatically, schedule reports or change the objects

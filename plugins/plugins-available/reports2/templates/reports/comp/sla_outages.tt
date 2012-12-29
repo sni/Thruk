@@ -1,0 +1,16 @@
+[% outages = outages(logs, start, end) %]
+[% IF outages.size == 0 %]
+  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Outages' %]
+    no outages during this timeperiod
+  [% END %]
+[% ELSE %]
+
+  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Latest Outages' %]
+    [% PROCESS 'reports/comp/sla_outages_latest.tt' %]
+  [% END %]
+
+  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Worst Outages' %]
+    [% PROCESS 'reports/comp/sla_outages_worst.tt' %]
+  [% END %]
+
+[% END %]

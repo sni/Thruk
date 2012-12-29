@@ -1,0 +1,20 @@
+[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'url'     => [ 'Report from Url',     'url',    '',                       '(will be attached to report)' ] },
+        { 'theme'   => [ 'Used Theme',          'themes', c.config.default_theme,   '(html only)' ] },
+        { 'minimal' => [ 'Minmal Layout',       'yes_no', 'yes',                    '(html only)' ] },
+        { 'nav'     => [ 'Include Navigation',  'yes_no', 'no',                     '(html only)' ] },
+        { 'js'      => [ 'Include Javascript',  'yes_no', 'no',                     '(html only)' ] },
+    ];
+  %]
+[% END %]
+
+[%# MAIL LAYOUT #%]
+[% PROCESS 'reports/comp/mail.tt' %]
+
+[%# REPORT LAYOUT #%]
+[% IF block == 'render' %]
+  [% get_url(); %]
+[% END %]

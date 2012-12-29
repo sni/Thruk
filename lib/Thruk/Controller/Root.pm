@@ -101,7 +101,10 @@ sub begin : Private {
     else {
         $c->stash->{additional_template_paths} = [ $c->config->{themes_path}.'/themes-enabled/'.$theme.'/templates' ];
     }
-    $c->stash->{all_in_one_css} = 1 if $theme eq 'Thruk';
+    $c->stash->{all_in_one_css} = 0;
+    if($theme eq 'Thruk') {
+        $c->stash->{all_in_one_css} = 1;
+    }
 
     if(exists $c->{'request'}->{'parameters'}->{'noheader'}) {
         $c->{'request'}->{'parameters'}->{'hidetop'}  = 1;
@@ -111,7 +114,6 @@ sub begin : Private {
     # minmal custom monitor screen
     $c->stash->{minimal}               = $c->{'request'}->{'parameters'}->{'minimal'} || '';
     $c->stash->{show_nav_button}       = 0 if $c->stash->{minimal};
-    $c->stash->{hide_backends_chooser} = 1 if $c->stash->{minimal};
 
     # initialize our backends
     unless ( defined $c->{'db'} ) {

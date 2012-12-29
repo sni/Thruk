@@ -1,0 +1,39 @@
+[% USE date %]
+[% current_page = current_page(0) %]
+<a name="page[% current_page %]"></a>
+<div class="page cover">
+  <table class="page">
+    <tr>
+      <td class="header">
+        <div class="title">
+          <div class="titletext">[% title %]</div>
+        </div>
+        <div class="title_bar"></div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="content">
+          <div class="date">[% format_date(date.now, reportDateFormat) %]</div>
+          <div>
+            <div class="title">[% subtitle %]</div>
+            <div class="details">
+              <table>
+              [% WHILE coverdetails.size > 0 %]
+                [% details = coverdetails.splice(0, 2) %]
+                <tr>
+                  <th>[% details.0 %]</th>
+                  <td>[% details.1 %]</td>
+                </tr>
+              [% END %]
+              </table>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="footer"><span>[% current_page %]</span></td>
+    </tr>
+  </table>
+</div>

@@ -1,5 +1,6 @@
 The 'reports' plugin create SLA reports as PDF file which can be send
 by mail regularly. Besides that, you may create a report from any page
 within Thruk.
+This plugin is deprecated, please use 'reports2' instead.
 
 Url: reports.cgi

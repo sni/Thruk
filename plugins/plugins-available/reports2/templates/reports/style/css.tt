@@ -1,0 +1,209 @@
+<style type="text/css">
+
+/* general page design */
+BODY {
+  font-family: Helvetica, Arial, sans-serif;
+  color: #595959;
+  font-size: 16px;
+}
+TABLE.page > tbody > tr > td {
+  vertical-align: top;
+}
+TD.header {
+  height: 10px;
+}
+TD.footer {
+  height: 10px;
+  border-top: 1px solid grey;
+  padding-top: 5px;
+  text-align: center;
+}
+DIV.content {
+  padding-top: 15px;
+}
+DIV.page.content_page TD.header DIV.title {
+  height: 40px;
+}
+DIV.page.content_page TD.header DIV.titletext {
+  font-size: 20px;
+  color: white;
+  bottom: 0px;
+  left: 3px;
+  position: absolute;
+}
+DIV.subtitle {
+  border-bottom: 1px solid grey;
+  padding-top: 20px;
+  padding-bottom: 5px;
+  font-size: 20px;
+}
+
+
+/* Cover Design */
+TD.header DIV.title {
+  position: relative;
+  height: 200px;
+  background: #6393c1;
+  background: -moz-linear-gradient(45deg, #6393c1 0%, #cfe7fa 100%);
+  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#6393c1), color-stop(100%,#cfe7fa));
+  background: -webkit-linear-gradient(45deg, #6393c1 0%,#cfe7fa 100%);
+}
+DIV.cover TD.header DIV.titletext {
+  font-size: 30px;
+  color: white;
+  bottom: 0px;
+  left: 3px;
+  position: absolute;
+}
+DIV.cover TD.header DIV.title_bar {
+  margin-top: 1px;
+  background-color: #B3BEC8;
+}
+DIV.cover TD.header {
+  border-bottom: 0;
+}
+DIV.cover TD.footer SPAN {
+  display: none;
+}
+DIV.cover DIV.content DIV.date {
+  position: absolute;
+  top: 300px;
+  right: 45px;
+  color: #595959;
+  font-weight: bold;
+}
+DIV.cover DIV.content DIV.title {
+  margin-top: 100px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #6393c1;
+}
+DIV.cover DIV.content DIV.details {
+  margin-top: 40px;
+  font-weight: bold;
+}
+DIV.cover DIV.content DIV.details TH {
+  text-align: left;
+}
+DIV.cover DIV.content DIV.details TD {
+  padding-left: 10px;
+}
+
+
+/* Event Report */
+TABLE.legendtable {
+  margin-top: 10px;
+  width: 300px;
+  border-collapse: collapse;
+}
+TABLE.legendtable TD, TABLE.legendtable TH {
+  border: 1px solid grey;
+  padding: 3px;
+}
+TABLE.legendtable TD.totals {
+  width: 55px;
+  text-align: right;
+}
+TABLE.legendtable TH.totals {
+  width: 55px;
+  text-align: center;
+}
+TABLE.legendtable TD.img {
+  text-align: center;
+}
+DIV.logoptions {
+  font-size: 14px;
+  height: 14px;
+  line-height: 14px;
+  overflow: hidden;
+  padding-bottom: 10px;
+  padding-top: 2px;
+  white-space: nowrap;
+}
+SPAN.logtype {
+  width: 220px;
+  white-space: nowrap;
+  float: right;
+  overflow: hidden;
+}
+DIV.logdate IMG {
+  vertical-align: bottom;
+  padding-right: 5px;
+}
+
+
+/* SLA Report */
+DIV.output {
+  white-space: nowrap;
+  padding-top: 2px;
+  padding-bottom: 10px;
+  font-size: 14px;
+}
+SPAN.duration {
+  float: right;
+}
+TABLE.availability_details {
+  margin-top: 40px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+TABLE.availability_details TD, TABLE.availability_details TH {
+  border: 1px solid grey;
+}
+TABLE.availability_details TD {
+  text-align: right;
+}
+TD.sla_nok {
+  color: red;
+}
+DIV.flotgraph {
+  width:530px;
+  height:300px
+}
+DIV.axis_y {
+  position: relative;
+  left: -2px;
+}
+
+/* page sizing */
+BODY {
+  margin: 0;
+  border:0;
+  width: 619px;
+}
+DIV.page {
+  border: 1px solid white;
+  height: 874px;
+  page-break-after: always;
+  position: relative;
+}
+TABLE.page {
+  height: 810px;
+  border-spacing: 0px;
+  border-collapse: collapse;
+  border: 0;
+  margin: 40px;
+}
+DIV.content {
+  overflow: hidden;
+  width: 535px;
+}
+
+/* preview styles */
+BODY.preview DIV.page {
+  border: 1px solid grey;
+  margin: 10px;
+}
+BODY.preview {
+  width:639px;
+}
+BODY.preview {
+  background-color: #CCCCCC;
+}
+BODY.preview DIV.page {
+  background-color: #FFFFFF;
+  -webkit-box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.5);
+  box-shadow: 3px 3px 3px 3px rgba(0, 0, 0, 0.5);
+}
+
+</style>

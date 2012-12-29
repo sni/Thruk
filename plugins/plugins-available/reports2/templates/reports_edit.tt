@@ -1,0 +1,125 @@
+[% PROCESS _header.tt css="thruk/plugins/reports2/reports.css" js="thruk/plugins/reports2/reports.js" %]
+[% PROCESS _message.tt %]
+[% USE date %]
+
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="left" valign="top" width="33%">
+      [% PROCESS _infobox.tt %]
+    </td>
+    <td align="center" valign="top" width="33%">
+      <br><br>
+      <div align="center" class='dataTitle'>
+        Reporting
+      </div>
+    </td>
+    <td align="right" valign="bottom" width="33%">
+      [% PROCESS _help.tt topic = "reports" %]
+    </td>
+  </tr>
+</table>
+<br><br>
+
+<form action="reports2.cgi" method="POST">
+<input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
+<input type="hidden" name="action" value="save">
+<input type="hidden" name="report" value="[% r.nr %]">
+<table border="1" class='data reports'>
+  <tr>
+    <th class='data' style="width:125px;"><a href='reports2.cgi'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/arrow_left.png' border="0" alt='back' title='back' width="16" height="16" style="vertical-align: middle;"></a></th>
+    <th class="data" nowrap>[% IF r.nr != "new" %]Edit[% ELSE%]Create[% END %] Report</th>
+    <th class='data' style="width:125px;"></th>
+  </tr>
+  <tr class="firstrow">
+    <td class="dataEven" align="center"><b>Name</b><span class="required">*</span></td>
+    <td class="dataOdd" align="left" colspan=2><input type="text" name="name" value="[% r.name %]"></td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Description</b></td>
+    <td class="dataOdd" align="left" colspan=2><textarea name="desc">[% r.desc %]</textarea></td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Public</b></td>
+    <td class="dataOdd" align="left" colspan=2><input type="radio" name="is_public" value="1"[% IF r.is_public %] checked[% END %]> yes  <input type="radio" name="is_public" value="0"[% IF !r.is_public %] checked[% END %]> no</td>
+  </tr>
+  [% IF backends.size > 1 %]
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Backends</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <select id="backends" name="backends" multiple style="min-width: 180px;">
+        [% FOREACH b = backends %]
+        <option value="[% b %]"[% FOREACH rb = r.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+        [% END %]
+      </select>
+    </td>
+  </tr>
+  [% END %]
+  <tr>
+    <td class="dataEven" align="center" colspan=3><b>E-Mail Settings:</b></td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>To</b></td>
+    <td class="dataOdd" align="left" colspan=2><input type="text" name="to" value="[% r.to %]"></td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Cc</b></td>
+    <td class="dataOdd" align="left" colspan=2><input type="text" name="cc" value="[% r.cc %]"></td>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center" valign="top"><b>Schedule</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+        <table id="cron_entries">
+          [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0 } %]
+          [% PROCESS _cron_edit.tt nr = 0 %]
+          [% FOREACH cr = r.send_types %]
+              [% nr = loop.index + 1 %]
+              [% PROCESS _cron_edit.tt %]
+          [% END %]
+          <tr>
+            <td colspan=3 class='newfilter' onclick="add_cron_row('cron_entries'); return false;" style="min-width:100px;" nowrap>
+                <input type="image" src="[% url_prefix %]thruk/themes/[% theme %]/images/down.png" name="add">
+                add more
+            </td>
+          </tr>
+        </table>
+    </td>
+  </tr>
+</table>
+<br>
+
+<table border="1" class='data reports'>
+  <tr>
+    <th class='data' style="width:125px;"></th>
+    <th class="data" nowrap>Report Type</th>
+    <th class='data' style="width:125px;"></th>
+  </tr>
+  <tr>
+    <td class="dataEven" align="center"><b>Type</b></td>
+    <td class="dataOdd" align="left" colspan=2>
+      <select name="template" style="min-width: 180px;" onchange="update_reports_type([% r.nr %], this.value)">
+        [% FOREACH file = templates.keys.sort %]
+        <option value="[% file %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
+        [% END %]
+      </select>
+    </td>
+  </tr>
+  <tr id="new_reports_options">
+    <td class="dataEven" align="center" colspan=3><b>Report Options:</b></td>
+  </tr>
+  [% PROCESS reports_edit_step2.tt %]
+  <tr>
+    <td class="dataEven" align="center" colspan=3>
+      <span class="required" style="float: left;">* - required</span>
+      [% IF r.nr != "new" %]<a href="reports2.cgi?action=remove&amp;report=[% r.nr %]" class="report_remove_button report_button" style="width: 80px;">Delete</a>[% END %]
+      <button class="report_save_button report_button" style="width: 160px;">[% IF r.nr != "new" %]Save[% ELSE%]Create[% END %] Report</button>
+    </td>
+  </tr>
+</table>
+</form>
+
+
+<script type="text/javascript">
+<!--
+  init_report_tool_buttons();
+-->
+</script>

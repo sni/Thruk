@@ -28,7 +28,7 @@ Thruk::Utils::Menu::insert_item('Reports', {
                          });
 
 # enable reporting features if this plugin is loaded
-Thruk->config->{'use_feature_reports'} = 1;
+Thruk->config->{'use_feature_reports'} = 'reports.cgi';
 
 ######################################
 

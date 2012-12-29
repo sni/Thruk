@@ -13,7 +13,7 @@ while(my $line = <$fh>) {
     $cont .= $line;
     if($line =~ m/<h(\d+)\ id="([^"]+)">([^<]+)</mx) {
         my($lvl,$link,$name) = ($1,$2,$3);
-        if($lvl <= 3) {
+        if($lvl <= 4) {
             $lvl--;
             $toc .= "<div class='toclevel".$lvl."'><a href='#".$link."'>".$name."</a></div>\n";
         }

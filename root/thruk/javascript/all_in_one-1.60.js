@@ -2857,6 +2857,7 @@ var ajax_search = {
     onemptyclick    : undefined,
     filter          : undefined,
     regex_matching  : false,
+    backend_select  : false,
 
     /* initialize search
      *
@@ -2876,6 +2877,7 @@ var ajax_search = {
      *   onselect:          run this function after selecting something
      *   onemptyclick:      when clicking on the empty button
      *   filter:            run this function as additional filter
+     *   backend_select:    append value of this backend selector
      * }
      */
     init: function(elem, type, options) {
@@ -2924,6 +2926,12 @@ var ajax_search = {
             append_value_of = options.append_value_of;
         } else {
             append_value_of = ajax_search.append_value_of;
+        }
+
+        if(options.backend_select != undefined) {
+            backend_select = options.backend_select;
+        } else {
+            backend_select = ajax_search.backend_select;
         }
 
         ajax_search.empty = false;
@@ -3011,6 +3019,12 @@ var ajax_search = {
                 appended_value = '';
             }
         }
+        if(backend_select) {
+            var backends = jQuery('#'+backend_select).val();
+            jQuery.each(backends, function(i, val) {
+                search_url = search_url + '&backend=' + val;
+            });
+        }
 
         input.setAttribute("autocomplete", "off");
         if(!iPhone && !internetExplorer) {
@@ -3066,6 +3080,7 @@ var ajax_search = {
            && (    append_value_of == undefined && ajax_search.initialized_t == type
                || (append_value_of != undefined && ajax_search.initialized_a == appended_value )
               )
+           && ajax_search.initialized_u == search_url
         ) {
             ajax_search.suggest();
             return false;
@@ -3077,6 +3092,7 @@ var ajax_search = {
         if(append_value_of) {
             ajax_search.initialized_a = appended_value;
         }
+        ajax_search.initialized_u = search_url;
 
         // disable autocomplete
         var tmpElem = input;
@@ -3742,7 +3758,6 @@ function prefSubmitCounter(url, value) {
   cookieSave('thruk_favicon', value);
   reloadPage();
 }
-
 /**
  *                                                        ____   _____
  *  Dynarch Calendar -- JSCal2, version 1.9               \  /_  /   /

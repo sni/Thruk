@@ -35,7 +35,8 @@ sub _do_finalize_config {
 
     ###################################################
     # get installed plugins
-    my $plugin_dir = $config->{'plugin_path'} || $config->{home}."/plugins";
+    $config->{'plugin_path'} = $config->{home}.'/plugins' unless defined $config->{'plugin_path'};
+    my $plugin_dir = $config->{'plugin_path'};
     $plugin_dir = $plugin_dir.'/plugins-enabled/*/';
 
     print STDERR "using plugins: ".$plugin_dir."\n" if $ENV{'THRUK_PLUGIN_DEBUG'};

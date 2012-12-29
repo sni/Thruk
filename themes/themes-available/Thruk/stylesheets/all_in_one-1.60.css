@@ -795,6 +795,9 @@ SPAN.deleteicon INPUT {
 .ui-remove-button {
   background-image: url(../images/delete.png) !important;
 }
+.ui-edit-button {
+  background-image: url(../images/edit.png) !important;
+}
 .ui-preview-button {
   background-image: url(../images/lightning_go.png) !important;
 }

@@ -1,0 +1,105 @@
+[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'timeperiod'              => [ 'Timeperiod',        'rptimeperiod', 'last24hours' ] },
+        { 'reverse'                 => [ 'Reverse Logs',      'option',       0             ] },
+        { 'pattern'                 => [ 'Pattern',           'pattern',      ''            ] },
+        { 'exclude_pattern'         => [ 'Exclude Pattern',   'pattern',      ''            ] },
+        { 'event_types'             => [ 'Event Type Filter', 'logclasses',   ''            ] },
+    ];
+  %]
+[% END %]
+
+[%# MAIL LAYOUT #%]
+[% PROCESS 'reports/comp/mail.tt' %]
+
+[%# PREPARE REPORT #%]
+[% IF block == 'prepare' %]
+  [% get_events() %]
+[% END %]
+
+[%# REPORT LAYOUT #%]
+[% IF block == 'render' %]
+
+  [%# report settings #%]
+  [% PROCESS 'reports/locale/en.tt' %]
+  [%
+    title        = 'Event Report'
+    subtitle     = r.name
+    totals       = count_event_totals(logs)
+    coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat) ]
+  %]
+
+  [% WRAPPER 'reports/comp/report.tt' %]
+
+    [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+
+    [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Legend' %]
+      <table class="legendtable">
+        <tr>
+          <th></th><th>Host Alert</th><th class="totals">Totals</th>
+        </tr>
+        <tr>
+          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/recovery.png"></td><td>Up</td>
+          <td class="totals">[% totals.host.up %]</td>
+        </tr>
+        <tr>
+          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/critical.png"></td><td>Down</td>
+          <td class="totals">[% totals.host.down %]</td>
+        </tr>
+        <tr>
+          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/critical.png"></td><td>Unreachable</td>
+          <td class="totals">[% totals.host.unreachable %]</td>
+        </tr>
+      </table>
+
+      <table class="legendtable">
+        <tr>
+          <th></th><th>Service Alert</th><th class="totals">Totals</th>
+        </tr>
+        <tr>
+          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/recovery.png"></td><td>Ok</td>
+          <td class="totals">[% totals.service.ok %]</td>
+        </tr>
+        <tr>
+          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/warning.png"></td><td>Warning</td>
+          <td class="totals">[% totals.service.warning %]</td>
+        </tr>
+        <tr>
+          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/unknown.png"></td><td>Unknown</td>
+          <td class="totals">[% totals.service.unknown %]</td>
+        </tr>
+        <tr>
+          <td class="img"><img src="[% url_prefix %]thruk/themes/Thruk/images/critical.png"></td><td>Critical</td>
+          <td class="totals">[% totals.service.critical %]</td>
+        </tr>
+      </table>
+    [% END %]
+
+    [% IF logs.size == 0 %]
+      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Events' %]
+      no events during this timeperiod.
+      [% END %]
+    [% ELSE %]
+      [% counter = 0 %]
+      [% WHILE logs.size > 0 %]
+        [% logblock = logs.splice(0, 14) %][%# Items per page #%]
+        [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Events' %]
+            [% FOREACH l = logblock %]
+              [% PROCESS _logs_line.tt %]
+              <div class="logdate">
+                <img src="[% url_prefix %]thruk/themes/Thruk/images/[% pic %]">
+                [% format_date(l.time, reportDateTimeFormat) %]
+                <span class="logtype">[% IF has_type %][% l.type %][% END %]</span>
+              </div>
+              <div class="logoptions">[% IF has_type %][% l.options.substr(,0, 130) %][% ELSE %][% message.substr(,0, 130) %][% END %]</div>
+            [% END %]
+        [% END %]
+        [% counter = counter + 1 %]
+        [% LAST IF counter >= 100 %][%# max out at page 100 #%]
+      [% END %]
+    [% END %]
+
+  [% END %][%# report wrapper #%]
+[% END %][%# render block #%]

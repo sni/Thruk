@@ -1,0 +1,24 @@
+<table class="availability_details">
+  <tr>
+    [% FOREACH key = available.keys %]
+    <th>
+      [% IF param.breakdown == 'months' %]
+        [% get_month_name(key.1, monthNames) %]
+      [% ELSIF param.breakdown == 'weeks' %]
+        [% get_week_name(key.1, weekAbbr) %]
+      [% ELSIF param.breakdown == 'days' %]
+        [% get_day_name(key.1, monthNames) %]
+      [% ELSE %]
+        [% key.1 %]
+      [% END %]
+    </th>
+    [% END %]
+  </tr>
+  <tr>
+    [% FOREACH val = available.values %]
+    [% format = '%0.' _ param.decimals _ 'f' %]
+    [% value  = sprintf(format, val.1) %]
+    <td class="[% IF value < param.sla %]sla_nok[% END %]">[% value %]%</td>
+    [% END %]
+  </tr>
+</table>

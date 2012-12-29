@@ -435,40 +435,183 @@ div#toc a:visited { color: blue; }
 <div class='toclevel2'><a href='#_mobile_interface'>Mobile Interface</a></div>
 <div class='toclevel1'><a href='#_installation'>Installation</a></div>
 <div class='toclevel2'><a href='#_labs_consol_repository'>Labs Consol Repository</a></div>
-<div class='toclevel2'><a href='#_use_omd'>Use OMD</a></div>
+<div class='toclevel2'><a href='#_omd'>OMD</a></div>
 <div class='toclevel2'><a href='#_use_packages'>Use Packages</a></div>
-<div class='toclevel2'><a href='#_debian_ubuntu'>Debian / Ubuntu</a></div>
-<div class='toclevel2'><a href='#_centos_redhat'>Centos / Redhat</a></div>
-<div class='toclevel2'><a href='#_sles'>SLES</a></div>
+<div class='toclevel3'><a href='#_debian_ubuntu'>Debian / Ubuntu</a></div>
+<div class='toclevel3'><a href='#_centos_redhat'>Centos / Redhat</a></div>
+<div class='toclevel3'><a href='#_sles'>SLES</a></div>
 <div class='toclevel2'><a href='#_install_from_source'>Install from Source</a></div>
+<div class='toclevel3'><a href='#_requirements'>Requirements</a></div>
+<div class='toclevel3'><a href='#_create_new_user'>Create New User</a></div>
+<div class='toclevel3'><a href='#_install_local_lib'>Install Local::Lib</a></div>
+<div class='toclevel3'><a href='#_install_module_install'>Install Module::Install</a></div>
+<div class='toclevel3'><a href='#_git_clone_thruk'>Git Clone Thruk</a></div>
+<div class='toclevel3'><a href='#_configuration'>Configuration</a></div>
+<div class='toclevel3'><a href='#_start_server'>Start Server</a></div>
 <div class='toclevel1'><a href='#_apache_configuration'>Apache Configuration</a></div>
-<div class='toclevel2'><a href='#_mod_fastcgi'>mod_fastcgi</a></div>
 <div class='toclevel2'><a href='#_mod_fcgid'>mod_fcgid</a></div>
+<div class='toclevel2'><a href='#_mod_fastcgi'>mod_fastcgi</a></div>
 <div class='toclevel1'><a href='#_backend_configuration'>Backend Configuration</a></div>
 <div class='toclevel2'><a href='#_livestatus'>Livestatus</a></div>
 <div class='toclevel2'><a href='#_http'>HTTP</a></div>
 <div class='toclevel2'><a href='#_mongodb'>MongoDB</a></div>
 <div class='toclevel1'><a href='#_thruk_configuration'>Thruk Configuration</a></div>
-<div class='toclevel2'><a href='#_thruk_conf'>thruk.conf</a></div>
-<div class='toclevel2'><a href='#_thruk_local_conf'>thruk_local.conf</a></div>
-<div class='toclevel2'><a href='#_cgi_cfg_2'>cgi.cfg</a></div>
-<div class='toclevel2'><a href='#_log4perl_conf_2'>log4perl.conf</a></div>
-<div class='toclevel2'><a href='#_menu_conf'>menu.conf</a></div>
-<div class='toclevel2'><a href='#_menu_local_conf'>menu_local.conf</a></div>
-<div class='toclevel2'><a href='#_server_side_includes'>Server Side Includes</a></div>
-<div class='toclevel1'><a href='#_examples'>Examples</a></div>
-<div class='toclevel2'><a href='#_cgi_parameters'>CGI Parameters</a></div>
-<div class='toclevel2'><a href='#_sla_reporting'>SLA Reporting</a></div>
-<div class='toclevel2'><a href='#_cli_tool_amp_scripting'>CLI Tool &amp; Scripting</a></div>
+<div class='toclevel2'><a href='#_config_files'>Config Files</a></div>
+<div class='toclevel3'><a href='#_thruk_conf'>thruk.conf</a></div>
+<div class='toclevel3'><a href='#_thruk_local_conf'>thruk_local.conf</a></div>
+<div class='toclevel2'><a href='#_general_settings'>General Settings</a></div>
+<div class='toclevel3'><a href='#_use_timezone'>use_timezone</a></div>
+<div class='toclevel3'><a href='#_title_prefix'>title_prefix</a></div>
+<div class='toclevel3'><a href='#_url_prefix'>url_prefix</a></div>
+<div class='toclevel3'><a href='#_logo_path_prefix'>logo_path_prefix</a></div>
+<div class='toclevel3'><a href='#_physical_logo_path'>physical_logo_path</a></div>
+<div class='toclevel3'><a href='#_host_action_icon'>host_action_icon</a></div>
+<div class='toclevel3'><a href='#_service_action_icon'>service_action_icon</a></div>
+<div class='toclevel3'><a href='#_use_strict_host_authorization'>use_strict_host_authorization</a></div>
+<div class='toclevel3'><a href='#_make_auth_user_lowercase'>make_auth_user_lowercase</a></div>
+<div class='toclevel3'><a href='#_make_auth_user_uppercase'>make_auth_user_uppercase</a></div>
+<div class='toclevel3'><a href='#_start_page'>start_page</a></div>
+<div class='toclevel3'><a href='#_documentation_link'>documentation_link</a></div>
+<div class='toclevel3'><a href='#_all_problems_link'>all_problems_link</a></div>
+<div class='toclevel3'><a href='#_allowed_frame_links'>allowed_frame_links</a></div>
+<div class='toclevel3'><a href='#_initial_menu_state'>initial_menu_state</a></div>
+<div class='toclevel3'><a href='#_cgi_cfg'>cgi_cfg</a></div>
+<div class='toclevel3'><a href='#_log4perl_conf'>log4perl_conf</a></div>
+<div class='toclevel3'><a href='#_plugin_path'>plugin_path</a></div>
+<div class='toclevel3'><a href='#_themes_path'>themes_path</a></div>
+<div class='toclevel3'><a href='#_var_path'>var_path</a></div>
+<div class='toclevel3'><a href='#_tmp_path'>tmp_path</a></div>
+<div class='toclevel3'><a href='#_ssi_path'>ssi_path</a></div>
+<div class='toclevel3'><a href='#_user_template_path'>user_template_path</a></div>
+<div class='toclevel3'><a href='#_mode_file'>mode_file</a></div>
+<div class='toclevel3'><a href='#_mode_dir'>mode_dir</a></div>
+<div class='toclevel3'><a href='#_delay_pages_after_backend_reload'>delay_pages_after_backend_reload</a></div>
+<div class='toclevel3'><a href='#_use_frames'>use_frames</a></div>
+<div class='toclevel3'><a href='#_strict_passive_mode'>strict_passive_mode</a></div>
+<div class='toclevel3'><a href='#_use_new_search'>use_new_search</a></div>
+<div class='toclevel3'><a href='#_use_new_command_box'>use_new_command_box</a></div>
+<div class='toclevel3'><a href='#_use_ajax_search'>use_ajax_search</a></div>
+<div class='toclevel3'><a href='#_ajax_search_hosts'>ajax_search_hosts</a></div>
+<div class='toclevel3'><a href='#_ajax_search_hostgroups'>ajax_search_hostgroups</a></div>
+<div class='toclevel3'><a href='#_ajax_search_services'>ajax_search_services</a></div>
+<div class='toclevel3'><a href='#_ajax_search_servicegroups'>ajax_search_servicegroups</a></div>
+<div class='toclevel3'><a href='#_ajax_search_timeperiods'>ajax_search_timeperiods</a></div>
+<div class='toclevel3'><a href='#_default_theme'>default_theme</a></div>
+<div class='toclevel3'><a href='#_cookie_path'>cookie_path</a></div>
+<div class='toclevel3'><a href='#_use_pager'>use_pager</a></div>
+<div class='toclevel3'><a href='#_paging_steps'>paging_steps</a></div>
+<div class='toclevel3'><a href='#_group_paging_overview'>group_paging_overview</a></div>
+<div class='toclevel3'><a href='#_group_paging_summary'>group_paging_summary</a></div>
+<div class='toclevel3'><a href='#_group_paging_grid'>group_paging_grid</a></div>
+<div class='toclevel3'><a href='#_can_submit_commands'>can_submit_commands</a></div>
+<div class='toclevel3'><a href='#_command_disabled'>command_disabled</a></div>
+<div class='toclevel3'><a href='#_cmd_defaults'>cmd_defaults</a></div>
+<div class='toclevel3'><a href='#_downtime_duration'>downtime_duration</a></div>
+<div class='toclevel3'><a href='#_expire_ack_duration'>expire_ack_duration</a></div>
+<div class='toclevel3'><a href='#_cmd_quick_status'>cmd_quick_status</a></div>
+<div class='toclevel3'><a href='#_command_reschedule_alias'>command_reschedule_alias</a></div>
+<div class='toclevel3'><a href='#_datetime_format'>datetime_format</a></div>
+<div class='toclevel3'><a href='#_datetime_format_long'>datetime_format_long</a></div>
+<div class='toclevel3'><a href='#_datetime_format_log'>datetime_format_log</a></div>
+<div class='toclevel3'><a href='#_datetime_format_trends'>datetime_format_trends</a></div>
+<div class='toclevel3'><a href='#_datetime_format_today'>datetime_format_today</a></div>
+<div class='toclevel3'><a href='#_show_long_plugin_output'>show_long_plugin_output</a></div>
+<div class='toclevel3'><a href='#_show_modified_attributes'>show_modified_attributes</a></div>
+<div class='toclevel3'><a href='#_info_popup_event_type'>info_popup_event_type</a></div>
+<div class='toclevel3'><a href='#_info_popup_options'>info_popup_options</a></div>
+<div class='toclevel3'><a href='#_show_notification_number'>show_notification_number</a></div>
+<div class='toclevel3'><a href='#_show_backends_in_table'>show_backends_in_table</a></div>
+<div class='toclevel3'><a href='#_show_config_edit_buttons'>show_config_edit_buttons</a></div>
+<div class='toclevel3'><a href='#_show_full_commandline'>show_full_commandline</a></div>
+<div class='toclevel3'><a href='#_resource_file'>resource_file</a></div>
+<div class='toclevel3'><a href='#_perf_bar_mode'>perf_bar_mode</a></div>
+<div class='toclevel3'><a href='#_shown_inline_pnp'>shown_inline_pnp</a></div>
+<div class='toclevel3'><a href='#_show_custom_vars'>show_custom_vars</a></div>
+<div class='toclevel3'><a href='#_use_wait_feature'>use_wait_feature</a></div>
+<div class='toclevel3'><a href='#_wait_timeout'>wait_timeout</a></div>
+<div class='toclevel3'><a href='#_mobile_agent'>mobile_agent</a></div>
+<div class='toclevel3'><a href='#_show_error_reports'>show_error_reports</a></div>
+<div class='toclevel3'><a href='#_skip_js_errors'>skip_js_errors</a></div>
+<div class='toclevel3'><a href='#_no_external_job_forks'>no_external_job_forks</a></div>
+<div class='toclevel3'><a href='#_cron_file'>cron_file</a></div>
+<div class='toclevel3'><a href='#_cron_pre_edit_cmd'>cron_pre_edit_cmd</a></div>
+<div class='toclevel3'><a href='#_cron_post_edit_cmd'>cron_post_edit_cmd</a></div>
+<div class='toclevel3'><a href='#_thruk_bin'>thruk_bin</a></div>
+<div class='toclevel3'><a href='#_thruk_init'>thruk_init</a></div>
+<div class='toclevel3'><a href='#_first_day_of_week'>first_day_of_week</a></div>
+<div class='toclevel3'><a href='#_logcache'>logcache</a></div>
+<div class='toclevel3'><a href='#_cookie_auth_login_url'>cookie_auth_login_url</a></div>
+<div class='toclevel3'><a href='#_cookie_auth_restricted_url'>cookie_auth_restricted_url</a></div>
+<div class='toclevel3'><a href='#_cookie_auth_session_timeout'>cookie_auth_session_timeout</a></div>
+<div class='toclevel3'><a href='#_cookie_auth_session_cache_timeout'>cookie_auth_session_cache_timeout</a></div>
+<div class='toclevel3'><a href='#_cookie_auth_domain'>cookie_auth_domain</a></div>
+<div class='toclevel3'><a href='#_cookie_auth_login_hook'>cookie_auth_login_hook</a></div>
+<div class='toclevel3'><a href='#_enable_shinken_features'>enable_shinken_features</a></div>
+<div class='toclevel3'><a href='#_priorities'>priorities</a></div>
+<div class='toclevel3'><a href='#_enable_icinga_features'>enable_icinga_features</a></div>
+<div class='toclevel3'><a href='#_check_local_states'>check_local_states</a></div>
+<div class='toclevel3'><a href='#_backend_debug'>backend_debug</a></div>
+<div class='toclevel3'><a href='#_connection_pool_size'>connection_pool_size</a></div>
+<div class='toclevel3'><a href='#_sitepanel'>sitepanel</a></div>
+<div class='toclevel2'><a href='#_component_thruk_backend'>Component Thruk::Backend</a></div>
+<div class='toclevel3'><a href='#_peer'>peer</a></div>
+<div class='toclevel2'><a href='#_component_thruk_plugin_configtool'>Component Thruk::Plugin::ConfigTool</a></div>
+<div class='toclevel3'><a href='#_show_plugin_syntax_helper'>show_plugin_syntax_helper</a></div>
+<div class='toclevel3'><a href='#_thruk'>thruk</a></div>
+<div class='toclevel3'><a href='#_cgi_cfg_2'>cgi.cfg</a></div>
+<div class='toclevel3'><a href='#_htpasswd'>htpasswd</a></div>
+<div class='toclevel2'><a href='#_component_thruk_plugin_panorama'>Component Thruk::Plugin::Panorama</a></div>
+<div class='toclevel3'><a href='#_state_provider'>state_provider</a></div>
+<div class='toclevel3'><a href='#_default_view'>default_view</a></div>
+<div class='toclevel2'><a href='#_component_thruk_plugin_reports2'>Component Thruk::Plugin::Reports2</a></div>
+<div class='toclevel3'><a href='#_report_nice_level'>report_nice_level</a></div>
+<div class='toclevel3'><a href='#_report_base_url'>report_base_url</a></div>
+<div class='toclevel3'><a href='#_wkhtmltopdf'>wkhtmltopdf</a></div>
+<div class='toclevel2'><a href='#_component_thruk_plugin_statusmap'>Component Thruk::Plugin::Statusmap</a></div>
+<div class='toclevel3'><a href='#_statusmap_default_type'>statusmap_default_type</a></div>
+<div class='toclevel3'><a href='#_statusmap_default_groupby'>statusmap_default_groupby</a></div>
+<div class='toclevel2'><a href='#_cgi_cfg_3'>cgi.cfg</a></div>
+<div class='toclevel3'><a href='#_show_context_help'>show_context_help</a></div>
+<div class='toclevel3'><a href='#_use_authentication'>use_authentication</a></div>
+<div class='toclevel3'><a href='#_use_ssl_authentication'>use_ssl_authentication</a></div>
+<div class='toclevel3'><a href='#_default_user_name'>default_user_name</a></div>
+<div class='toclevel3'><a href='#_authorized_for_system_information'>authorized_for_system_information</a></div>
+<div class='toclevel3'><a href='#_authorized_for_configuration_information'>authorized_for_configuration_information</a></div>
+<div class='toclevel3'><a href='#_authorized_for_system_commands'>authorized_for_system_commands</a></div>
+<div class='toclevel3'><a href='#_authorized_for_all_services'>authorized_for_all_services</a></div>
+<div class='toclevel3'><a href='#_authorized_for_all_hosts'>authorized_for_all_hosts</a></div>
+<div class='toclevel3'><a href='#_authorized_for_all_service_commands'>authorized_for_all_service_commands</a></div>
+<div class='toclevel3'><a href='#_authorized_for_all_host_commands'>authorized_for_all_host_commands</a></div>
+<div class='toclevel3'><a href='#_refresh_rate'>refresh_rate</a></div>
+<div class='toclevel3'><a href='#_escape_html_tags'>escape_html_tags</a></div>
+<div class='toclevel3'><a href='#_action_url_target'>action_url_target</a></div>
+<div class='toclevel3'><a href='#_notes_url_target'>notes_url_target</a></div>
+<div class='toclevel3'><a href='#_lock_author_names'>lock_author_names</a></div>
+<div class='toclevel1'><a href='#_logfiles'>Logfiles</a></div>
+<div class='toclevel1'><a href='#_menu_configuration'>Menu Configuration</a></div>
+<div class='toclevel1'><a href='#_server_side_includes'>Server Side Includes</a></div>
+<div class='toclevel1'><a href='#_cgi_parameters'>CGI Parameters</a></div>
+<div class='toclevel2'><a href='#_hidetop'>hidetop</a></div>
+<div class='toclevel2'><a href='#_nav'>nav</a></div>
+<div class='toclevel2'><a href='#_noheader'>noheader</a></div>
+<div class='toclevel2'><a href='#_minimal'>minimal</a></div>
+<div class='toclevel2'><a href='#_refresh'>refresh</a></div>
+<div class='toclevel2'><a href='#_columns'>columns</a></div>
+<div class='toclevel1'><a href='#_sla_reporting'>SLA Reporting</a></div>
+<div class='toclevel2'><a href='#_report_configuration'>Report Configuration</a></div>
+<div class='toclevel2'><a href='#_report_templates'>Report Templates</a></div>
+<div class='toclevel2'><a href='#_converting'>Converting</a></div>
+<div class='toclevel2'><a href='#_sending_reports_by_mail'>Sending Reports By Mail</a></div>
+<div class='toclevel1'><a href='#_cli_tool_amp_scripting'>CLI Tool &amp; Scripting</a></div>
 </div>
 
 </div>
 <div id="content">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Thruk is a multibackend monitoring webinterface which currently
+<div class="paragraph"><p>Thruk is a multibackend monitoring web interface which currently
 supports Nagios, Icinga and Shinken as backend using the Livestatus
-API. It is designed to be a <em>dropin</em> replacement and covers almost
+API. It is designed to be a <em>drop in</em> replacement and covers almost
 all of the original features plus adds additional enhancements for
 large installations.</p></div>
 <div class="paragraph"><p>Main Features / Advantages</p></div>
@@ -495,7 +638,7 @@ display live data, no delay between core and gui
 </li>
 <li>
 <p>
-independant from monitoring core, can be installed on remote host
+independent from monitoring core, can be installed on remote host
 </p>
 </li>
 <li>
@@ -525,7 +668,7 @@ valid HTML code
 </li>
 <li>
 <p>
-no frames ( can be reenabled for better addon integration)
+no frames ( can be re-enabled for better addon integration)
 </p>
 </li>
 <li>
@@ -605,7 +748,7 @@ Perl Module. Thruk itself is running as a fastcgi process.
 Availability will be calculated with
 <a href="http://search.cpan.org/dist/Monitoring-Availability">Monitoring::Availability</a>.
 Authentication is provided by the Apache webserver (For example with
-mod_auth).</p></div>
+mod_auth_basic, mod_auth_ldap, mod_auth_mysql, &#8230;).</p></div>
 <div class="paragraph"><div class="title">Thruk Architecture</div><p><span class="image">
 <img alt="Thruk Architecture" src="data:image/png;base64,
 iVBORw0KGgoAAAANSUhEUgAAASwAAAF4CAIAAABhAFPDAAAKQ2lDQ1BJQ0MgcHJvZmlsZQAAeNqd
@@ -1525,9 +1668,9 @@ here.</p></div>
 <h3 id="_multi_site_support">Multi Site Support</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Thruk connects to as many cores as you want. You could even combine
 Nagios, Icinga and Shinken instances into one big combined view. That
-way you get the advantage of several independant locations and still
+way you get the advantage of several independent locations and still
 have the overview about all your installations. Sites can be put into
-groups for better arrangment.</p></div>
+groups for better arrangement.</p></div>
 <div class="paragraph"><p><span class="image">
 <img alt="Multi Site" src="data:image/png;base64,
 iVBORw0KGgoAAAANSUhEUgAAAooAAAHACAYAAAAlX0kbAAAMFWlDQ1BJQ0MgUHJvZmlsZQAASA2t
@@ -4385,7 +4528,7 @@ dmA/YV0fHOkAAAAASUVORK5CYII=" />
 <h3 id="_excel_export_and_bookmarks">Excel Export and Bookmarks</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The Bookmarks feature allows you to save your searches and add them as
 your personal menu item. Besides the bookmarks, you can adjust the
-menu easiely with the menu_local.conf for all users.</p></div>
+menu easily with the menu_local.conf for all users.</p></div>
 <div class="paragraph"><p>The Excel export creates real Excel files which can be send by mail or
 used to extract hostnames.</p></div>
 <div class="paragraph"><p><span class="image">
@@ -7883,7 +8026,7 @@ EDQjyWShvx7EgTowBP3/9fwHtqdlrMwAAAAASUVORK5CYII=" />
 <h3 id="_multiple_lines_of_plugin_output">Multiple Lines of Plugin Output</h3><div style="clear:left"></div>
 <div class="paragraph"><p>When your check returns multiple lines of plugin output. Thruk marks
 the output in blue and a click on it displays the complete output.
-This is especially usefull for check_multi checks. In addition to
+This is especially useful for check_multi checks. In addition to
 that, the comments and downtimes also have a small popup with their
 data. So you don&#8217;t have to open the host/service page just to see who
 set a comment and when there is a downtime.</p></div>
@@ -8624,7 +8767,7 @@ X3z8+AGQy76+A7vHgMZBdkEG7r0HbHN8AOxjSTpMF0zXBO//Hwz2/qKDrT13AAAAAElFTkSuQmCC" />
 </span></p></div>
 <h3 id="_mine_map">Mine Map</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The Mine Map is the perfect tool to get a quick overview. It is
-especially usefull if you have a lot of common services across your
+especially useful if you have a lot of common services across your
 hosts. Otherwise use hostgroups or servicegroups for nice results.
 Normal filtering is possible too.</p></div>
 <div class="paragraph"><p><span class="image">
@@ -10682,12 +10825,12 @@ Cw0a7wOAqkBYoC2Q9/8BdKlrQBojuEAAAAAASUVORK5CYII=" />
 latest Thruk releases (including daily development builds) and other
 Tools like Mod-Gearman. Just follow the guide on the labs page for
 your distribution.</p></div>
-<h3 id="_use_omd">Use OMD</h3><div style="clear:left"></div>
-<div class="paragraph"><p>An easy way of installing thruk is using OMD from
+<h3 id="_omd">OMD</h3><div style="clear:left"></div>
+<div class="paragraph"><p>An easy way of installing Thruk is using OMD from
 <a href="http://omdistro.org">omdistro.org</a>. There are Debian, Ubuntu, Centos
 and Suse Packages containing preconfigured latest versions of Nagios
-and Thruk. The package also includes icinga, shinken, pnp4nagios,
-check_mk and nagvis. OMD is the recommended way of installing new
+and Thruk. The package also includes Icinga, Shinken, pnp4nagios,
+check_mk and Nagvis. OMD is the recommended way of installing new
 Nagios / Thruk setups when you want to install several addons at once.</p></div>
 <h3 id="_use_packages">Use Packages</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Standalone installation from a binary package is another easy way
@@ -10696,32 +10839,32 @@ to get Thruk running.</p></div>
 <div class="paragraph"><p>All packages have the following filesystem structure:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>  /etc/thruk                       thruks config
-  /etc/httpd/conf.d/thruk.conf     apache config
+<pre><tt>  /etc/thruk                       Thruks config
+  /etc/httpd/conf.d/thruk.conf     Apache config
   /usr/share/thruk                 shared files
-  /usr/lib/thruk/perl5             perl librarys
+  /usr/lib/thruk/perl5             Perl libraries
   /var/cache/thruk                 temporary files
   /var/lib/thruk                   stored user settings</tt></pre>
 </div></div>
 <div class="paragraph"><p>After installation, Thruk is available at <a href="http://your-host/thruk/">http://your-host/thruk/</a> and
 has a default user <em>thrukadmin</em> with password <em>thrukadmin</em> configured.
 You may need to change backend configuration. This should be done in
-the thruk_local.conf where all settings can be overriden.</p></div>
-<h3 id="_debian_ubuntu">Debian / Ubuntu</h3><div style="clear:left"></div>
+the thruk_local.conf where all settings can be overridden.</p></div>
+<h4 id="_debian_ubuntu">Debian / Ubuntu</h4>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  #&gt; dpkg -i thruk_1.60_debian6_amd64.deb</tt></pre>
 </div></div>
 <div class="paragraph"><p>In case of dependency errors, run <em>apt-get -f install</em> and try the
 <em>dpkg -i&#8230;</em> again.</p></div>
-<h3 id="_centos_redhat">Centos / Redhat</h3><div style="clear:left"></div>
+<h4 id="_centos_redhat">Centos / Redhat</h4>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  #&gt; yum install --nogpgcheck thruk-1.60-1.rhel6.x86_64.rpm</tt></pre>
 </div></div>
 <div class="paragraph"><p>You may need to include an external repository for mod_fastcgi module.
 Epel or Rpmforge should do it.</p></div>
-<h3 id="_sles">SLES</h3><div style="clear:left"></div>
+<h4 id="_sles">SLES</h4>
 <div class="listingblock">
 <div class="content">
 <pre><tt>  #&gt; zypper install thruk-1.60-1.sles11.x86_64.rpm</tt></pre>
@@ -10790,8 +10933,8 @@ EQn3XQAAAABJRU5ErkJggg==" />
 <td class="content">
 <div class="title">Experienced Users Only</div>
 <div class="paragraph"><p>Source installation is for experienced users only. Using
-packages/repositories should be the prefered solution in almost all
-situations. Especially for productional usage.</p></div>
+packages/repositories should be the preferred solution in almost all
+situations. Especially for production environments.</p></div>
 </td>
 </tr></table>
 </div>
@@ -10820,7 +10963,7 @@ Apache Webserver (optional for fastcgi only)
 </li>
 </ul></div>
 <h4 id="_create_new_user">Create New User</h4>
-<div class="paragraph"><p>refer to your systems manual on howto add new user.
+<div class="paragraph"><p>refer to your systems manual on how to add new user.
 This guide uses the following:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -11067,7 +11210,7 @@ yes. (yes | make)</p></div>
 <pre><tt>  Do you want to build the XS Stash module? [y]
   Do you want to use the XS Stash by default? [y]</tt></pre>
 </div></div>
-<div class="paragraph"><p>run perl Makefile.PL again to see if all dependecies are now installed properly.</p></div>
+<div class="paragraph"><p>run perl Makefile.PL again to see if all dependencies are now installed properly.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>    perl Makefile.PL</tt></pre>
@@ -11082,7 +11225,7 @@ yes. (yes | make)</p></div>
 thruk_local.conf contains the local overrides and will never be
 overwritten.</p></div>
 <div class="paragraph"><p>Edit <em>cgi.conf</em> and adjust settings to your needs.</p></div>
-<div class="paragraph"><p>See the <a href="#Thruk Configuration">[Thruk Configuration]</a> section for detailed explaination of configuration options.</p></div>
+<div class="paragraph"><p>See the <a href="#Thruk Configuration">[Thruk Configuration]</a> section for detailed explanation of configuration options.</p></div>
 <h4 id="_start_server">Start Server</h4>
 <div class="paragraph"><p>After running these steps successfully, you should be able to test your
 installation:</p></div>
@@ -11095,7 +11238,7 @@ installation:</p></div>
 <h2 id="_apache_configuration">Apache Configuration</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Integration in the Apache webserver is done by fastcgi.  There are two
-fastcgi modules for apache at the moment. Choose the one which fits
+fastcgi modules for Apache at the moment. Choose the one which fits
 best into your environment. If unsure, use <a href="#_mod_fcgid">mod_fcgid</a>.
 The main difference is, that mod_fcgid starts the fastcgi process upon
 the first request whereas in mod_fastcgi you have to start the fastcgi
@@ -11163,6 +11306,105 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 </td>
 </tr></table>
 </div>
+<h3 id="_mod_fcgid">mod_fcgid</h3><div style="clear:left"></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Important" src="data:image/png;base64,
+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
+EQn3XQAAAABJRU5ErkJggg==" />
+</td>
+<td class="content">Thruk runs with the webserver user in this scenario, make
+sure the webserver user has access to all Thruk files and perl modules.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="title">Apache configuration with mod_fcgid</div>
+<div class="content">
+<pre><tt>LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
+&lt;VirtualHost *:80&gt;
+    ServerName   thruk.company.local
+
+    DocumentRoot /home/thruk/Thruk/root/
+    CustomLog    /home/thruk/Thruk/logs/access.log combined
+    ErrorLog     /home/thruk/Thruk/logs/error.log
+
+    &lt;Directory /home/thruk/Thruk/root/&gt;
+        Options FollowSymLinks
+        AllowOverride All
+        order allow,deny
+        allow from all
+    &lt;/Directory&gt;
+
+    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
+    &lt;Location /thruk&gt;
+        Options ExecCGI
+        Order allow,deny
+        Allow from all
+        AuthName "Monitoring Access"
+        AuthType Basic
+        AuthUserFile /home/thruk/Thruk/htpasswd.users
+        Require valid-user
+    &lt;/Location&gt;
+
+    &lt;IfModule mod_fcgid.c&gt;
+      AddHandler fcgid-script .pl
+      MaxRequestsPerProcess 100
+    &lt;/IfModule&gt;
+
+&lt;/VirtualHost&gt;</tt></pre>
+</div></div>
 <h3 id="_mod_fastcgi">mod_fastcgi</h3><div style="clear:left"></div>
 <div class="paragraph"><p>start your fcgi server:</p></div>
 <div class="listingblock">
@@ -11183,7 +11425,6 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 <div class="content">
 <pre><tt>    %&gt; ./script/thruk_create.pl FastCGI::ExternalServer l=/tmp/thruk_fastcgi.socket n=5 p=/tmp/thruk_fastcgi.pid</tt></pre>
 </div></div>
-<h4 id="_apache_configuration_2">Apache Configuration</h4>
 <div class="paragraph"><p>use this apache example configuration:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -11296,112 +11537,15 @@ make sure the /home/thruk/Thruk/logs/ directory exists
     RewriteRule ^/(.*)$ /tmp/thruk_fastcgi.fcgi/$1 [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},QSA,L]
 &lt;/VirtualHost&gt;</tt></pre>
 </div></div>
-<h3 id="_mod_fcgid">mod_fcgid</h3><div style="clear:left"></div>
-<div class="admonitionblock">
-<table><tr>
-<td class="icon">
-<img alt="Important" src="data:image/png;base64,
-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
-EQn3XQAAAABJRU5ErkJggg==" />
-</td>
-<td class="content">Thruk runs with the webserver user in this scenario, make
-sure the webserver user has access to all Thruk files and perl modules.</td>
-</tr></table>
-</div>
-<div class="listingblock">
-<div class="title">Apache configuration with mod_fcgid</div>
-<div class="content">
-<pre><tt>LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
-&lt;VirtualHost *:80&gt;
-    ServerName   thruk.company.local
-
-    DocumentRoot /home/thruk/Thruk/root/
-    CustomLog    /home/thruk/Thruk/logs/access.log combined
-    ErrorLog     /home/thruk/Thruk/logs/error.log
-
-    &lt;Directory /home/thruk/Thruk/root/&gt;
-        Options FollowSymLinks
-        AllowOverride All
-        order allow,deny
-        allow from all
-    &lt;/Directory&gt;
-
-    AliasMatch /thruk/(.*\.cgi|.*\.html)  /home/thruk/Thruk/script/thruk_fastcgi.pl/thruk/$1
-    &lt;Location /thruk&gt;
-        Options ExecCGI
-        Order allow,deny
-        Allow from all
-        AuthName "Monitoring Access"
-        AuthType Basic
-        AuthUserFile /home/thruk/Thruk/htpasswd.users
-        Require valid-user
-    &lt;/Location&gt;
-
-    &lt;IfModule mod_fcgid.c&gt;
-      AddHandler fcgid-script .pl
-      MaxRequestsPerProcess 100
-    &lt;/IfModule&gt;
-
-&lt;/VirtualHost&gt;</tt></pre>
-</div></div>
 </div>
 <h2 id="_backend_configuration">Backend Configuration</h2>
 <div class="sectionbody">
+<div class="paragraph"><p>You may connect multiple backends into one Thruk interface. Just specify
+multiple <em>peer</em> items.</p></div>
 <h3 id="_livestatus">Livestatus</h3><div style="clear:left"></div>
-<div class="paragraph"><p>Livestatus is a addon for Nagios or Icinga which provides realtime
-status data. Contrary to database addons it adds very litte overhead to the
-nagios core which makes livestatus based gui fast and realtime.</p></div>
+<div class="paragraph"><p>Livestatus is a addon for Nagios or Icinga which provides real time
+status data. Contrary to database addons it adds very little overhead to the
+Nagios core which makes livestatus based gui fast and real time.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -11457,7 +11601,7 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 </td>
 <td class="content">
 <div class="title">Shinken</div>
-<div class="paragraph"><p>Shinken has livestatus support builtin and does not require additional
+<div class="paragraph"><p>Shinken has livestatus support built-in and does not require additional
 modules.</p></div>
 </td>
 </tr></table>
@@ -11465,7 +11609,7 @@ modules.</p></div>
 <div class="paragraph"><p>Refer to <a href="http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus">http://mathias-kettner.de/checkmk_livestatus.html#H1:%20Setting%20up%20and%20using%20Livestatus</a>
 on how to install livestatus onto your monitoring box. The
 <a href="#_labs_consol_repository">Lab Consol Repository</a> has livestatus rpm
-packages. For debian based linux systems just use the provided
+packages. For debian based Linux systems just use the provided
 packages of your distribution.</p></div>
 <div class="paragraph"><p>Basically you have to build the NEB module and add it to your nagios/icinga.cfg.</p></div>
 <div class="listingblock">
@@ -14649,7 +14793,7 @@ CAAAAAAAAAAYGYgIAAAAAAAAABgZiAgAAAAAAAAAGBn/HyeZfane+RwpAAAAAElFTkSuQmCCDQo=" />
 </span></p></div>
 <h3 id="_mongodb">MongoDB</h3><div style="clear:left"></div>
 <div class="paragraph"><p>A MongoDB can be used to faster access logfiles. Livestatus caches
-logfile data used for querys. This increases the size of the nagios
+logfile data used for queries. This increases the size of the nagios
 process, slows down the monitoring and increases the overall load on
 your monitoring host. Therefor Thruk may use a MongoDB as logfile
 cache.</p></div>
@@ -14659,7 +14803,7 @@ cache.</p></div>
 <pre><tt>logcache = localhost:27017/thruk_logs</tt></pre>
 </div></div>
 <div class="paragraph"><div class="title">MongoDB Architecture</div><p><span class="image">
-<img alt="Mongodb Architecture" src="data:image/png;base64,
+<img alt="MongoDB Architecture" src="data:image/png;base64,
 iVBORw0KGgoAAAANSUhEUgAABDgAAAIsCAYAAAAXhxk4AAB7JUlEQVR42uzdy29b953/f/0BRZxt
 F514NUCEgg3QXbiIufh9wRQDMIC0SAFa9aYU8AVqESiiAYHGMVhlQbtAxbZjs00M2h6oLsAYNT2t
 hLGrSpE9HboNbZm1y6ihbMoxE4dpGYPfBRdcvH/nc248vEmUREq8PB/IG7F4OSTPjee8+Pl8zpgA
@@ -15232,7 +15376,7 @@ do that once.</p></div>
 <div class="content">
 <pre><tt>    %&gt; thruk -a logcacheupdate</tt></pre>
 </div></div>
-<div class="paragraph"><p>The logcacheupdate imports the delta since the last update. Thats pretty
+<div class="paragraph"><p>The logcacheupdate imports the delta since the last update. That&#8217;s pretty
 fast and done automatically whenever you access logfiles via Thruk.</p></div>
 <div class="paragraph"><p>There is also a command to check the current usage statistics of your
 logfile cache:</p></div>
@@ -15245,6 +15389,7 @@ logfile cache:</p></div>
 </div>
 <h2 id="_thruk_configuration">Thruk Configuration</h2>
 <div class="sectionbody">
+<h3 id="_config_files">Config Files</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Configuration is managed mainly in these configuration files.</p></div>
 <div class="ulist"><ul>
 <li>
@@ -15278,14 +15423,15 @@ menu_local.conf
 </p>
 </li>
 </ul></div>
-<h3 id="_thruk_conf">thruk.conf</h3><div style="clear:left"></div>
+<h4 id="_thruk_conf">thruk.conf</h4>
 <div class="paragraph"><p>The thruk.conf contains the shipped defaults. You should not edit this
 file directly. Overwrite your settings in your thruk_local.conf
 instead.</p></div>
-<h3 id="_thruk_local_conf">thruk_local.conf</h3><div style="clear:left"></div>
+<h4 id="_thruk_local_conf">thruk_local.conf</h4>
 <div class="paragraph"><p>The thruk_local.conf is a copy of the thruk.conf. Both files are used by thruk.
 The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.</p></div>
+<h3 id="_general_settings">General Settings</h3><div style="clear:left"></div>
 <h4 id="_use_timezone">use_timezone</h4>
 <div class="paragraph"><p>Changes the timezone from the systems default to this timezone.
 Only set this if you have trouble with displaying the right timestamps.</p></div>
@@ -15339,7 +15485,7 @@ the corresponding filesystem path.</p></div>
 <div class="paragraph"><p>Change path to your host action icons. You may use
 relative paths to specify completely different location.
 You also may want to use <em>action_pnp.png</em> when using pnp.
-Icon can be overriden by a custom variable <em>_ACTION_ICON</em>.</p></div>
+Icon can be overridden by a custom variable <em>_ACTION_ICON</em>.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -15349,7 +15495,7 @@ Icon can be overriden by a custom variable <em>_ACTION_ICON</em>.</p></div>
 <div class="paragraph"><p>Change path to your service action icons. You may use
 relative paths to specify completely different location.
 You also may want to use <em>action_pnp.png</em> when using pnp.
-Icon can be overriden by a custom variable <em>_ACTION_ICON</em>.</p></div>
+Icon can be overridden by a custom variable <em>_ACTION_ICON</em>.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -15359,7 +15505,7 @@ Icon can be overriden by a custom variable <em>_ACTION_ICON</em>.</p></div>
 <div class="paragraph"><p>When set to a true value, every contact will only see the hosts where
 he is contact for plus the services where he is contact for. When
 disabled, a host contact will see all services for this host
-regardless of wheter he is a service contact or not.</p></div>
+regardless of whether he is a service contact or not.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -15398,7 +15544,7 @@ if you don&#8217;t want a documentation link in the menu at all.</p></div>
 </div></div>
 <h4 id="_all_problems_link">all_problems_link</h4>
 <div class="paragraph"><p>Customizable link for the <em>problems</em> link in side menu. Can be useful
-to reflect your companys process of error handling.</p></div>
+to reflect your companies process of error handling.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -15638,7 +15784,7 @@ notification period.</p></div>
 <pre><tt>ajax_search_timeperiods = 1</tt></pre>
 </div></div>
 <h4 id="_default_theme">default_theme</h4>
-<div class="paragraph"><p>Default theme to use for all users. Must be a valid subdirectory in
+<div class="paragraph"><p>Default theme to use for all users. Must be a valid sub directory in
 the themes folder.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
@@ -15863,7 +16009,7 @@ Choose between popup, inline and off</p></div>
 <pre><tt>show_modified_attributes = 1</tt></pre>
 </div></div>
 <h4 id="_info_popup_event_type">info_popup_event_type</h4>
-<div class="paragraph"><p>On which event should the comments / downtime or longpluginout popup
+<div class="paragraph"><p>On which event should the comments / downtime or longpluginoutput popup
 show up. Valid values are onclick or onmouseover.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
@@ -15986,22 +16132,6 @@ variables. Use * as wildcard, ex.: _VAR*</p></div>
 <div class="content">
 <pre><tt>show_custom_vars = _VAR1</tt></pre>
 </div></div>
-<h4 id="_statusmap_default_type">statusmap_default_type</h4>
-<div class="paragraph"><p>You may change the default map type of the statusmap here. Valid
-types are: <em>table</em> and <em>circle</em></p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>statusmap_default_type = table</tt></pre>
-</div></div>
-<h4 id="_statusmap_default_groupby">statusmap_default_groupby</h4>
-<div class="paragraph"><p>And the statusmap default group by which has to be one of:
-<em>parent</em>, <em>address</em>, <em>domain</em>, <em>hostgroup</em>, <em>servicegroup</em></p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>statusmap_default_groupby = address</tt></pre>
-</div></div>
 <h4 id="_use_wait_feature">use_wait_feature</h4>
 <div class="paragraph"><p>Waiting is a livestatus feature. When enabled, Thruk will wait
 after rescheduling hosts/services checks until the
@@ -16047,7 +16177,7 @@ within 40seconds which is the default fcgi timeout.</p></div>
 <pre><tt>no_external_job_forks = 1</tt></pre>
 </div></div>
 <h4 id="_cron_file">cron_file</h4>
-<div class="paragraph"><p>Specifiy a file which is then completly under the control of Thruk.
+<div class="paragraph"><p>Specify a file which is then completely under the control of Thruk.
 It will be used to store cronjobs, ex. for reports. The file has to be
 writable by Thruk.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -16086,20 +16216,6 @@ file.</p></div>
 <div class="content">
 <pre><tt>thruk_init = /etc/init.d/thruk</tt></pre>
 </div></div>
-<h4 id="_report_nice_level">report_nice_level</h4>
-<div class="paragraph"><p>Execute regular scheduled reports with this nice level.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>report_nice_level = 5</tt></pre>
-</div></div>
-<h4 id="_report_base_url">report_base_url</h4>
-<div class="paragraph"><p>Url used to replace relative links in html reports.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>report_base_url = http://host.local/thruk/cgi-bin/</tt></pre>
-</div></div>
 <h4 id="_first_day_of_week">first_day_of_week</h4>
 <div class="paragraph"><p>Set first day of week. Used in reports.
  Sunday: 0
@@ -16128,7 +16244,7 @@ too.</p></div>
 <pre><tt>cookie_auth_login_url = thruk/cgi-bin/login.cgi</tt></pre>
 </div></div>
 <h4 id="_cookie_auth_restricted_url">cookie_auth_restricted_url</h4>
-<div class="paragraph"><p>Specifies the url against the cookie auth provider will verifys the
+<div class="paragraph"><p>Specifies the url against the cookie auth provider will verify its
 credentials.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
@@ -16170,7 +16286,7 @@ in user. Useful to do magic stuff on each login.</p></div>
 </div></div>
 <h4 id="_enable_shinken_features">enable_shinken_features</h4>
 <div class="paragraph"><p>This one activates all problem/impact and criticity features.
-Currently it will only work with shinken backends. Dont enable it
+Currently it will only work with shinken backends. Don&#8217;t enable it
 unless all your backends are shinken.
 If not set, it will be automatically enabled when using only
 shinken backends.</p></div>
@@ -16197,7 +16313,7 @@ will only work with shinken backends.</p></div>
 <h4 id="_enable_icinga_features">enable_icinga_features</h4>
 <div class="paragraph"><p>This one activates all icinga specific features.
 If not set, Thruk will try to auto-detect your backends.
-Currently autodetection will only work within OMD. Dont enable it
+Currently auto detection will only work within OMD. Don&#8217;t enable it
 unless all your backends are icinga.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
@@ -16239,21 +16355,16 @@ With than 10 or more sites, the list of backends will be combined
 into the combined site panel which just displays the totals of
 available / down / disabled sites.
 Set sitepanel to list/compact/auto/off to change the default
-behaviour.</p></div>
+behavior.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>sitepanel = auto</tt></pre>
 </div></div>
-<h4 id="_component_thruk_backend">Component Thruk::Backend</h4>
-<div class="paragraph"><p>Enter your backend connection settings here. At the moment only
-livestatus is supported. The port is the port from the
-xinetd.conf. You can enter local unix sockets too.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-peer
-</p>
+<h3 id="_component_thruk_backend">Component Thruk::Backend</h3><div style="clear:left"></div>
+<div class="paragraph"><p>Enter your backend connection settings here. See <a href="#_backend_configuration">Backend Configuration</a>
+for details.</p></div>
+<h4 id="_peer">peer</h4>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -16262,30 +16373,29 @@ name     name for this connection
 </li>
 <li>
 <p>
-type     type of this connection. Only <em>livestatus</em> possible at the
-                     moment
+type     type of this connection. Can be <em>livestatus</em>, <em>http</em> or <em>mongodb</em>
 </p>
 </li>
 <li>
 <p>
 hidden   should this peer be hidden initially ( can be reenabled
-                     via gui switch ) Only useful with more than one
-                     backend.
+                 via gui switch ) Only useful with more than one
+                 backend.
 </p>
 </li>
 <li>
 <p>
 groups   if set, only contacts from these groups have access. You
-                     may add multiple groups seperated by comma. Users
-                     without the right contactgroup don&#8217;t even see
-                     that there is a backend. Note that this implies
-                     one extra backend request per page.
+                 may add multiple groups separated by comma. Users
+                 without the right contactgroup don&#8217;t even see
+                 that there is a backend. Note that this implies
+                 one extra backend request per page.
 </p>
 </li>
 <li>
 <p>
 section  to group backends/sites by different sections, enter a
-                     section.
+                 section.
 </p>
 </li>
 <li>
@@ -16313,15 +16423,15 @@ configtool
 <li>
 <p>
 core_type       Give the config parser a hint about
-                                your config. Can be <em>nagios</em>, <em>icinga</em>
-                                or <em>shinken</em>.
+                            your config. Can be <em>nagios</em>, <em>icinga</em>
+                            or <em>shinken</em>.
 </p>
 </li>
 <li>
 <p>
 core_conf       Path to your nagios.cfg / icinga.cfg. Read all
-                                object directories and files from this config
-                                file.
+                            object directories and files from this config
+                            file.
 </p>
 </li>
 <li>
@@ -16337,31 +16447,29 @@ obj_reload_cmd  Commandline to reload the config.
 <li>
 <p>
 obj_readonly    Filename pattern to define readonly objects.
-                                For example for generated config files.
+                            For example for generated config files.
 </p>
 </li>
 <li>
 <p>
 obj_dir         Path to your objects. Enables the objects editor.
-                                Reads all *.cfg from this folder and all subfolders.
-                                (only needed when not using <em>core_conf</em>)
+                            Reads all *.cfg from this folder and all subfolders.
+                            (only needed when not using <em>core_conf</em>)
 </p>
 </li>
 <li>
 <p>
 obj_file        Path to a single objects file. Enables the objects
-                                editor. Both <em>obj_dir</em> and <em>obj_file</em> can be
-                                specified more than once.
-                                (only needed when not using <em>core_conf</em>)
+                            editor. Both <em>obj_dir</em> and <em>obj_file</em> can be
+                            specified more than once.
+                            (only needed when not using <em>core_conf</em>)
 </p>
 </li>
 <li>
 <p>
-obj_exclude     Specify some exection pattern for the obj_dir.
-                                (only needed when not using <em>core_conf</em>)
+obj_exclude     Specify some exception pattern for the obj_dir.
+                            (only needed when not using <em>core_conf</em>)
 </p>
-</li>
-</ul></div>
 </li>
 </ul></div>
 </li>
@@ -16401,55 +16509,13 @@ obj_exclude     Specify some exection pattern for the obj_dir.
   &lt;/peer&gt;
 &lt;/Component&gt;</tt></pre>
 </div></div>
-<h4 id="_component_thruk_plugin_configtool">Component Thruk::Plugin::ConfigTool</h4>
+<h3 id="_component_thruk_plugin_configtool">Component Thruk::Plugin::ConfigTool</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Enable config tool by setting path to different components config
 files. Users with the roles <em>authorized_for_configuration_information</em>
 and <em>authorized_for_system_commands</em> will then have access to the
 config tool.
 You don&#8217;t have to restart Thruk when changing the config with the
 config tool.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-general options for the config tool
-</p>
-<div class="ulist"><ul>
-<li>
-<p>
-show_plugin_syntax_helper    Enable/Disable the plugin syntax
-                                     helper. When enabled, Thruk will
-                                     run the plugins with "plugin -h"
-                                     to get the help information.
-</p>
-</li>
-</ul></div>
-</li>
-<li>
-<p>
-you can manage different types of files with the config tool:
-</p>
-<div class="ulist"><ul>
-<li>
-<p>
-thruk               Path to your thruk_local.conf. Enables
-                            adjusting Thruks config if set.
-</p>
-</li>
-<li>
-<p>
-cgi.cfg             Path to your cgi.cfg. Enables adjusting the
-                            cgi.cfg if set.
-</p>
-</li>
-<li>
-<p>
-htpasswd            Path to your htpasswd. Enables user management
-                            based an apaches basic auth with htpasswd.
-</p>
-</li>
-</ul></div>
-</li>
-</ul></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -16460,33 +16526,18 @@ htpasswd            Path to your htpasswd. Enables user management
   htpasswd                  = .../htpasswd
 &lt;/Component&gt;</tt></pre>
 </div></div>
-<h4 id="_component_thruk_plugin_panorama">Component Thruk::Plugin::Panorama</h4>
+<h4 id="_show_plugin_syntax_helper">show_plugin_syntax_helper</h4>
+<div class="paragraph"><p>Enable/Disable the plugin syntax helper. When enabled, Thruk will
+run the plugins with "plugin -h" to get the help information.</p></div>
+<h4 id="_thruk">thruk</h4>
+<div class="paragraph"><p>Path to your thruk_local.conf. Enables adjusting Thruks config if set.</p></div>
+<h4 id="_cgi_cfg_2">cgi.cfg</h4>
+<div class="paragraph"><p>Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.</p></div>
+<h4 id="_htpasswd">htpasswd</h4>
+<div class="paragraph"><p>Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.</p></div>
+<h3 id="_component_thruk_plugin_panorama">Component Thruk::Plugin::Panorama</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The <em>Panorama</em> plugin is a nice, fully customizable dashboard allowing
 you to build your own panorama views.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-general options for the config tool
-</p>
-<div class="ulist"><ul>
-<li>
-<p>
-state_provider    Sets the way states between reloads are
-                          preserved.
-                          Valid options are <em>cookie</em> or <em>server</em>.
-                          Cookie store is usefull for demo systems
-                          where lot people share the same account.
-</p>
-</li>
-<li>
-<p>
-default_view      Can be either the string of an exported
-                          view or path to a file with exported view.
-</p>
-</li>
-</ul></div>
-</li>
-</ul></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -16495,7 +16546,48 @@ default_view      Can be either the string of an exported
   default_view    = /var/lib/thruk/default_panorama_view
 &lt;/Component&gt;</tt></pre>
 </div></div>
-<h3 id="_cgi_cfg_2">cgi.cfg</h3><div style="clear:left"></div>
+<h4 id="_state_provider">state_provider</h4>
+<div class="paragraph"><p>Sets the way states between reloads are preserved.
+Valid options are <em>cookie</em> or <em>server</em>. Cookie store is useful for demo systems
+where lot people share the same account.</p></div>
+<h4 id="_default_view">default_view</h4>
+<div class="paragraph"><p>Can be either the string of an exported view or path to a file with exported view.</p></div>
+<h3 id="_component_thruk_plugin_reports2">Component Thruk::Plugin::Reports2</h3><div style="clear:left"></div>
+<div class="paragraph"><p>The <em>Reports2</em> plugin creates sla reports in html or pdf format. You
+probably have to download the wkhtmltopdf binary in a recent version.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Component Thruk::Plugin::Reports2&gt;
+  report_nice_level = 5
+  report_base_url   = http://host.local/thruk/cgi-bin/
+  wkhtmltopdf       = /usr/bin/wkhtmltopdf
+&lt;/Component&gt;</tt></pre>
+</div></div>
+<h4 id="_report_nice_level">report_nice_level</h4>
+<div class="paragraph"><p>Execute regular scheduled reports with this nice level.</p></div>
+<h4 id="_report_base_url">report_base_url</h4>
+<div class="paragraph"><p>Url used to replace relative links in html reports.</p></div>
+<h4 id="_wkhtmltopdf">wkhtmltopdf</h4>
+<div class="paragraph"><p>wkhtmltopdf is used to convert html pages into pdf. You will need
+at least version 0.11. Get wkhtmltopdf from <a href="http://code.google.com/p/wkhtmltopdf/">http://code.google.com/p/wkhtmltopdf/</a></p></div>
+<h3 id="_component_thruk_plugin_statusmap">Component Thruk::Plugin::Statusmap</h3><div style="clear:left"></div>
+<div class="paragraph"><p>The Statusmap plugin gives an overview over your network.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Component Thruk::Plugin::Statusmap&gt;
+  statusmap_default_groupby = address
+  statusmap_default_type    = table
+&lt;/Component&gt;</tt></pre>
+</div></div>
+<h4 id="_statusmap_default_type">statusmap_default_type</h4>
+<div class="paragraph"><p>You may change the default map type of the statusmap here. Valid
+types are: <em>table</em> and <em>circle</em></p></div>
+<h4 id="_statusmap_default_groupby">statusmap_default_groupby</h4>
+<div class="paragraph"><p>And the statusmap default group by which has to be one of:
+<em>parent</em>, <em>address</em>, <em>domain</em>, <em>hostgroup</em>, <em>servicegroup</em></p></div>
+<h3 id="_cgi_cfg_3">cgi.cfg</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga but not all
 values are used.</p></div>
 <h4 id="_show_context_help">show_context_help</h4>
@@ -16627,12 +16719,14 @@ commands.</p></div>
 <div class="content">
 <pre><tt>lock_author_names = 1</tt></pre>
 </div></div>
-<h3 id="_log4perl_conf_2">log4perl.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>This file contains the log4perl configuration. You can configure whatever is
+</div>
+<h2 id="_logfiles">Logfiles</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Logging configuration takes place in the log4perl.conf. You can do whatever is
 possible in log4perl. Refer to the log4perl manual for detailed
 information:
 <a href="http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html">http://log4perl.sourceforge.net/releases/Log-Log4perl/docs/html/Log/Log4perl/Config.html</a>
-There is a log4perl.conf.example file shiped with the package.</p></div>
+There is a log4perl.conf.example file shipped with the package.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -16704,15 +16798,29 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 </td>
 </tr></table>
 </div>
-<h3 id="_menu_conf">menu.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>This file contains the default side menu configuration. Do not change
+</div>
+<h2 id="_menu_configuration">Menu Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Navigation configuration is split in two files</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+menu.conf
+</p>
+</li>
+<li>
+<p>
+menu_local.conf
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The menu.conf contains the default side menu configuration. Do not change
 it as this file will be overwritten with every update. If you want to
 create a complete custom navigation, just copy this file to
-menu_local.conf and adjust it to your needs. See <em>menu_local.conf</em> on
+menu_local.conf and adjust it to your needs. See the next chapter on
 how to add just add a few links without having to copy the complete
 file.</p></div>
-<h3 id="_menu_local_conf">menu_local.conf</h3><div style="clear:left"></div>
-<div class="paragraph"><p>This file contains the user configuration for the side menu. See the
+<div class="paragraph"><p>The menu_local.conf contains the user configuration for the side menu. See the
 <a href="http://www.thruk.org/faq.html#_how_to_change_the_side_menu">FAQ</a> for
 some examples.</p></div>
 <div class="paragraph"><p>The file itself is perl syntax, so you can do whatever perl can do.
@@ -16782,14 +16890,16 @@ menu_local.conf syntax OK</tt></pre>
 </td>
 </tr></table>
 </div>
-<div class="paragraph"><p>If you just want to add a few entrys, create a empty menu_local.conf
+<div class="paragraph"><p>If you just want to add a few entries, create a empty menu_local.conf
 and put these lines into it:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>do '/usr/share/thruk/menu.conf';
 insert_item('General', { 'href' =&gt; 'http://labs.consol.de', 'name' =&gt; 'Labs', target =&gt; '_blank' });</tt></pre>
 </div></div>
-<h3 id="_server_side_includes">Server Side Includes</h3><div style="clear:left"></div>
+</div>
+<h2 id="_server_side_includes">Server Side Includes</h2>
+<div class="sectionbody">
 <div class="paragraph"><p>You can place static include files or executables in the ssi folder.
 The static files will be place right after the body or just before the
 end of the body.</p></div>
@@ -16887,39 +16997,39 @@ ssi/status-header.ssi
 output. Executables will be executed and the output will then be used
 as content.</p></div>
 </div>
-<h2 id="_examples">Examples</h2>
+<h2 id="_cgi_parameters">CGI Parameters</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Here is a list of common tasks and configurations.</p></div>
-<h3 id="_cgi_parameters">CGI Parameters</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Most of the CGI Parameters can be changed with buttons, but there are
 some which are only accessible by adding them directly to the url.</p></div>
-<h4 id="_hidetop">hidetop</h4>
+<h3 id="_hidetop">hidetop</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Pages: status pages</p></div>
 <div class="paragraph"><p>Description: Show/Hide the status totals header.</p></div>
 <div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?hidetop=1</p></div>
-<h4 id="_nav">nav</h4>
+<h3 id="_nav">nav</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Pages: all pages</p></div>
-<div class="paragraph"><p>Description: Show/Hide the navigation. Only usefull in non-frames mode.</p></div>
+<div class="paragraph"><p>Description: Show/Hide the navigation. Only useful in non-frames mode.</p></div>
 <div class="paragraph"><p>Example: /thruk/cgi-bin/tac.cgi?nav=0</p></div>
-<h4 id="_noheader">noheader</h4>
+<h3 id="_noheader">noheader</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Pages: status pages</p></div>
 <div class="paragraph"><p>Description: Show/Hide the status totals header.</p></div>
 <div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?noheader</p></div>
-<h4 id="_minimal">minimal</h4>
+<h3 id="_minimal">minimal</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Pages: status page</p></div>
-<div class="paragraph"><p>Description: Hides almost any user interface buttons. Usefull for
+<div class="paragraph"><p>Description: Hides almost any user interface buttons. Useful for
 monitor screens where only the current problems should be displayed.</p></div>
 <div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?host=all&amp;servicestatustypes=28&amp;minimal=1</p></div>
-<h4 id="_refresh">refresh</h4>
+<h3 id="_refresh">refresh</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Pages: all pages</p></div>
 <div class="paragraph"><p>Description: Sets refresh timer to a custom value.</p></div>
 <div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?refresh=30</p></div>
-<h4 id="_columns">columns</h4>
+<h3 id="_columns">columns</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Pages: status overview</p></div>
 <div class="paragraph"><p>Description: Sets the number of columns</p></div>
 <div class="paragraph"><p>Example: /thruk/cgi-bin/status.cgi?hostgroup=all&amp;style=overview&amp;columns=5</p></div>
-<h3 id="_sla_reporting">SLA Reporting</h3><div style="clear:left"></div>
-<div class="paragraph"><p>SLA Reporting consists of several parts.</p></div>
+</div>
+<h2 id="_sla_reporting">SLA Reporting</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>SLA Reporting consists of several steps.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -16928,37 +17038,69 @@ report configuration
 </li>
 <li>
 <p>
-master pdf
+report template
 </p>
 </li>
 <li>
 <p>
-template (contains mail text and pdf content)
+converting html report into pdf
+</p>
+</li>
+<li>
+<p>
+optionally send report by mail
 </p>
 </li>
 </ul></div>
-<h4 id="_report_configuration">Report Configuration</h4>
-<div class="paragraph"><p>You can create and adjust report setttings on the <em>Reporting</em> page.
+<h3 id="_report_configuration">Report Configuration</h3><div style="clear:left"></div>
+<div class="paragraph"><p>You can create and adjust report settings on the <em>Reporting</em> page.
 Make sure the plugin is enabled. After selecting a template for your
 report you have to set specific types of input fields on the second
-page. If you make you report public, eveyone can view and refresh the
+page. If you make you report public, everyone can view and refresh the
 report.</p></div>
-<h4 id="_master_pdf">Master PDF</h4>
-<div class="paragraph"><p>The master pdf is used as source for the pdf report and used together
-with the values filled in from the <em>template</em> to generate the pdf
-file. You may adjust the shipped <em>sla.pdf</em> to your needs and put it
-into a <em>pdf</em> subfolder of the <em>user_template_path</em>.</p></div>
-<h4 id="_template">Template</h4>
-<div class="paragraph"><p>The template defines the dynamic content of the sla report. You may
-copy the <em>sla.tt</em> file into a <em>pdf</em> subfolder of the
-<em>user_template_path</em> and adjust it to your needs.</p></div>
-<div class="paragraph"><p>See <a href="http://thruk.org/api/Thruk/Utils/PDF.html">http://thruk.org/api/Thruk/Utils/PDF.html</a> for details on
+<h3 id="_report_templates">Report Templates</h3><div style="clear:left"></div>
+<div class="paragraph"><p>All templates used for reports can be found in
+<em>plugins/plugins-enabled/reports2/templates/reports</em>.
+You may adjust or override all templates to your needs and put them
+into a <em>reports</em> subfolder of the <em>user_template_path</em>.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+reports     contains the selectable reports
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+comp       contains components used in reports
+</p>
+</li>
+<li>
+<p>
+locale     contains localization settings
+</p>
+</li>
+<li>
+<p>
+style      contains css used to make reports pretty
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+<div class="paragraph"><p>See <a href="http://thruk.org/api/Thruk/Utils/Reports/Render.html">http://thruk.org/api/Thruk/Utils/Reports/Render.html</a> for details on
 available functions and examples.</p></div>
-<h4 id="_sending_reports_by_mail">Sending Reports By Mail</h4>
+<h3 id="_converting">Converting</h3><div style="clear:left"></div>
+<div class="paragraph"><p>The generated HTML report will be converted into a pdf file using wkhtml2pdf
+together with xvfb. Both tools must be installed on Thruks host. There is
+a binary download for wkhtml2pdf on <a href="http://code.google.com/p/wkhtmltopdf/">http://code.google.com/p/wkhtmltopdf/</a>.
+Use at least the 0.11 version or later.</p></div>
+<h3 id="_sending_reports_by_mail">Sending Reports By Mail</h3><div style="clear:left"></div>
 <div class="paragraph"><p>It&#8217;s quite easy to setup sla reports by mail. All you need is to
 create send option in the report configuration. It is even possible to
 send one report at multiple times.</p></div>
-<h3 id="_cli_tool_amp_scripting">CLI Tool &amp; Scripting</h3><div style="clear:left"></div>
+</div>
+<h2 id="_cli_tool_amp_scripting">CLI Tool &amp; Scripting</h2>
+<div class="sectionbody">
 <div class="paragraph"><p>It is possible to do comprehensive scripting with Thruk. For example
 set downtimes automatically, schedule reports or change the objects
 of your monitoring core configuration.</p></div>
@@ -16969,7 +17111,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-12-23 13:26:42 CEST
+Last updated 2012-12-29 20:45:30 CEST
 </div>
 </div>
 </body>

@@ -1,0 +1,110 @@
+[% nr = uniqnumber() %]
+<div id="flotgraph[% nr %]" class="flotgraph"></div>
+<script type="text/javascript">
+  var d1 = {
+      label: "Available",
+      color: "rgb(82, 167, 82)",
+      lines: {
+        fill:  true,
+        steps: true,
+        fillColor: { colors: [ { opacity: 0.6 }, { opacity: 0.9 } ] }
+      },
+      data: [% encode_json_obj(data.tvalues) %]
+  }
+  var d2 = {
+      color: "rgb(236, 193, 77)",
+      lines: { show: true },
+      data: [[d1.data[0][0], [% param.sla %]], [d1.data[d1.data.length-1][0], [% param.sla %]]]
+  }
+  var tmp      = calc_time_markings_and_ticks(d1.data, '[% param.breakdown %]');
+  var ticks    = tmp[0];
+  var markings = tmp[1];
+  $.plot($("#flotgraph[% nr %]"), [d1,d2], {
+      series: {
+          lines: { show:  true }
+      },
+      xaxis: {
+        mode: "time",
+        dayNames:   [% encode_json_obj(dayNames) %],
+        ticks:      ticks
+      },
+      yaxis: {
+        ticks: 10,
+        min:   [% param.graph_min_sla %],
+        max:  100,
+        tickFormatter: function(val, axis) { return val + '%'}
+      },
+      grid: { markings: markings },
+      legend: { position: 'se' }
+  });
+
+  function calc_time_markings_and_ticks(data, breakdown) {
+    var monthNames = [% encode_json_obj(monthNames) %];
+    var ticks      = [];
+    var markings   = [];
+
+    /* calculate ticks when using breakdown month by days */
+    if(breakdown == 'days' && data.length < 40) {
+      jQuery.each(data, function(i, pt) {
+        var ts  = pt[0];
+        var d   = new Date(ts);
+        var day = d.getUTCDate()+1;
+        if(day-1 == 1) {
+          ticks.push([ts-86400000, monthNames[d.getUTCMonth()]]);
+          markings.push({ xaxis: { from: ts-86400000, to: ts-86400000 }, color: "#FF0000", lineWidth: 2 });
+        }
+        if(day%5 == 0 && day != 30) {
+          ticks.push([ts, day]);
+          markings.push({ xaxis: { from: ts, to: ts }, color: "#000000" });
+        } else {
+          ticks.push([ts, '']);
+        }
+      });
+    }
+
+    /* calculate ticks when using breakdown by year by days/weeks */
+    var lastmonth = -1;
+    var lastyear  = -1;
+    if(breakdown == 'weeks' || (breakdown == 'days' && data.length >= 40)) {
+      jQuery.each(data, function(i, pt) {
+        var ts  = pt[0];
+        var d   = new Date(ts);
+        var month = d.getUTCMonth();
+        var year  = d.strftime("%Y");
+        if(year != lastyear && lastyear != -1) {
+          ticks.push([ts, year]);
+          markings.push({ xaxis: { from: ts, to: ts}, color: "#FF0000", lineWidth: 2 });
+        }
+        if(lastmonth != -1 && month != lastmonth) {
+          // get ts for first day of month
+          var first = new Date(ts);
+          first.setDate(1);
+          if(month == 0) {
+            ticks.push([first.getTime(), ""]);
+          } else {
+            ticks.push([first.getTime(), monthNames[d.getUTCMonth()]]);
+          }
+        }
+        lastmonth = month;
+        lastyear  = year;
+      });
+    }
+    return([ticks, markings]);
+  }
+</script>
+
+[% IF param.breakdown == 'days' && data.tvalues.size < 40 %]
+<style type="text/css">
+DIV.axis_x {
+  left: 6px;
+  position: relative;
+}
+</style>
+[% ELSIF param.breakdown == 'weeks' || (param.breakdown == 'days' && data.tvalues.size >= 40) %]
+<style type="text/css">
+DIV.axis_x {
+  left: 10px;
+  position: relative;
+}
+</style>
+[% END %]

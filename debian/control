@@ -10,7 +10,7 @@ Vcs-Git: git://github.com/sni/Thruk.git
 
 Package: thruk
 Architecture: any
-Depends: ${shlibs:Depends}, ${perl:Depends}, apache2, libapache2-mod-fcgid, cron, logrotate
+Depends: ${shlibs:Depends}, ${perl:Depends}, apache2, libapache2-mod-fcgid, cron, logrotate, xvfb
 Description: Monitoring Webinterface for Nagios/Icinga and Shinken
  Thruk is a multibackend monitoring webinterface which currently
  supports Nagios, Icinga and Shinken as backend using the Livestatus

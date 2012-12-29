@@ -543,8 +543,6 @@ sub _process_thruk_page {
                         show_full_commandline
                         shown_inline_pnp
                         show_modified_attributes
-                        statusmap_default_type
-                        statusmap_default_groupby
                         datetime_format
                         datetime_format_today
                         datetime_format_long

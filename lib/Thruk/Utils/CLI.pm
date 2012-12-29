@@ -19,7 +19,7 @@ use LWP::UserAgent;
 use JSON::XS;
 use File::Slurp;
 use URI::Escape;
-use Encode qw(decode_utf8);
+use Encode qw(encode_utf8);
 use Thruk::Utils::IO;
 
 $Thruk::Utils::CLI::verbose = 0;
@@ -271,7 +271,8 @@ sub _from_local {
 sub _from_fcgi {
     my($c, $data_str) = @_;
     confess('no data?') unless defined $data_str;
-    my $data = decode_json($data_str);
+    $data_str = encode_utf8($data_str);
+    my $data  = decode_json($data_str);
     confess('corrupt data?') unless ref $data eq 'HASH';
     $Thruk::Utils::CLI::verbose = $data->{'options'}->{'verbose'} if defined $data->{'options'}->{'verbose'};
     $Thruk::Utils::CLI::c       = $c;
@@ -596,11 +597,11 @@ sub _cmd_report {
             return("cannot send mail\n", 1)
         }
     } else {
-        my $pdf_file = Thruk::Utils::Reports::generate_report($c, $nr);
-        if(defined $pdf_file) {
-            $output = read_file($pdf_file);
+        my $report_file = Thruk::Utils::Reports::generate_report($c, $nr);
+        if(defined $report_file and -f $report_file) {
+            $output = read_file($report_file);
         } else {
-            return("generating pdf failed\n", 1)
+            return("generating report failed. please have a look at the logfile: ".$c->config->{'tmp_path'}.'/reports/'.$nr.'.log'."\n", 1)
         }
     }
 

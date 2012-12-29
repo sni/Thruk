@@ -1,0 +1,50 @@
+[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'hostgroup'               => [ 'Hostgroup',             'hostgroups',      ''                    , '' , 1 ] },
+        { 'timeperiod'              => [ 'Timeperiod',            'rptimeperiod',    'last12months'                 ] },
+        { 'breakdown'               => [ 'Breakdown by',          'breakdowns',      'months'                       ] },
+        { 'sla'                     => [ 'SLA %',                 'int',             '98'                  , '', 1  ] },
+        { 'graph_min_sla'           => [ 'Graph SLA %',           'int',             '90'                  , '', 1  ] },
+        { 'decimals'                => [ 'Decimal Points',        'int',             '2'                   , '', 1  ] },
+        { 'assumeinitialstates'     => [ 'Assume Initial States', 'yes_no',          'yes'                          ] },
+        { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '3'           ] },
+        { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                           ] },
+        { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable']        ] },
+    ];
+  %]
+[% END %]
+
+[%# MAIL LAYOUT #%]
+[% PROCESS 'reports/comp/mail.tt' %]
+
+[%# PREPARE REPORT #%]
+[% PROCESS 'reports/comp/sla_prepare.tt' %]
+
+[%# REPORT LAYOUT #%]
+[% IF block == 'render' %]
+  [%# report settings #%]
+  [% PROCESS 'reports/locale/en.tt' %]
+  [%
+    title        = 'SLA Report'
+    subtitle     = r.name
+    coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat),
+                     'Hostgroup:', param.hostgroup,
+                   ]
+  %]
+
+  [% WRAPPER 'reports/comp/report.tt' %]
+    [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+
+    [% FOREACH hst = avail_data.hosts.keys.sort %]
+      [% c.request.parameters.host    = hst %]
+      [% c.request.parameters.service = "" %]
+      [% pagetitle                    = "Host: " _ hst %]
+
+      [% WRAPPER 'reports/comp/page_standard.tt' %]
+        [% PROCESS 'reports/comp/sla_graph_page.tt' %]
+      [% END %]
+    [% END %]
+  [% END %][%# report wrapper #%]
+[% END %][%# render block #%]

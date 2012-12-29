@@ -340,7 +340,7 @@ sub get_component_as_string {
         $string .= "            auth          = ".$b->{'options'}->{'auth'}."\n"          if $b->{'options'}->{'auth'};
         $string .= "            proxy         = ".$b->{'options'}->{'proxy'}."\n"         if $b->{'options'}->{'proxy'};
         $string .= "        </options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
-        if(defined $b->{'configtool'} and scalar keys %{$b->{'configtool'}} > 0) {
+        if(defined $b->{'configtool'} and scalar keys %{$b->{'configtool'}} > 0 and $b->{'type'} ne 'http') {
             $string .= "        <configtool>\n";
             $string .= "            core_type      = ".$b->{'configtool'}->{'core_type'}."\n"      if $b->{'configtool'}->{'core_type'};
             $string .= "            core_conf      = ".$b->{'configtool'}->{'core_conf'}."\n"      if $b->{'configtool'}->{'core_conf'};
