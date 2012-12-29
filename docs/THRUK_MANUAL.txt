@@ -1901,6 +1901,15 @@ ex.:
   report_base_url = http://host.local/thruk/cgi-bin/
 
 
+==== wkhtmltopdf
+wkhtmltopdf is used to convert html pages into pdf. You will need
+at least version 0.11. Get wkhtmltopdf from http://code.google.com/p/wkhtmltopdf/
+
+ex.:
+
+  wkhtmltopdf = /usr/bin/wkhtmltopdf
+
+
 
 
 === Component Thruk::Plugin::Statusmap
