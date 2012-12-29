@@ -20,7 +20,7 @@ use Thruk::Utils::CLI;
 use Thruk::Utils::Reports::Render;
 use MIME::Lite;
 use File::Copy;
-use Encode qw(encode_utf8);
+use Encode qw(encode_utf8 decode_utf8);
 
 ##########################################################
 
@@ -77,7 +77,7 @@ sub report_show {
         $c->stash->{'template'} = 'passthrough.tt';
         if($c->{'request'}->{'parameters'}->{'html'}) {
             my $html_file   = $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
-            my $report_text = read_file($html_file);
+            my $report_text = decode_utf8(read_file($html_file));
             $report_text    =~ s/^<body>/<body class="preview">/mx;
             $c->stash->{'text'} = $report_text;
         }
