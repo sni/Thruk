@@ -399,14 +399,14 @@ sub count_event_totals {
 
 ##########################################################
 
-=head2 get_availablitiy_percents
+=head2 get_availability_percents
 
-  get_availablitiy_percents()
+  get_availability_percents()
 
 return list of availability percent as json list
 
 =cut
-sub get_availablitiy_percents {
+sub get_availability_percents {
     my $c = $Thruk::Utils::Reports::Render::c or die("not initialized!");
 
     my $host           = $c->{'request'}->{'parameters'}->{'host'};
@@ -424,43 +424,8 @@ sub get_availablitiy_percents {
     my $values = {};
     for my $name (sort keys %{$avail->{'breakdown'}}) {
         my $t = $avail->{'breakdown'}->{$name};
-        my $time = {
-            'available'    => 0,
-            'unavailable'  => 0,
-            'undetermined' => 0,
-        };
-        for my $s ( keys %{$t} ) {
-            for my $state (qw/ok warning critical unknown up down unreachable/) {
-                if($s eq 'time_'.$state) {
-                    if(defined $u->{$state}) {
-                        $time->{'unavailable'} += $t->{'time_'.$state};
-                    } else {
-                        $time->{'available'}   += $t->{'time_'.$state};
-                    }
-                }
-                elsif($s eq 'scheduled_time_'.$state) {
-                    if(defined $u->{$state.'_downtime'}) {
-                        $time->{'unavailable'} += $t->{'scheduled_time_'.$state};
-                    } else {
-                        $time->{'available'}   += $t->{'scheduled_time_'.$state};
-                    }
-                }
-            }
-            $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'}         || 0;
-            $time->{'undetermined'} += $t->{'time_indeterminate_nodata'}             || 0;
-            $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'} || 0;
-        }
 
-        # in case we have some data for this period, undetermined is available too
-        if($time->{'undetermined'} > 0 and ($time->{'available'} > 0 or $time->{'unavailable'} > 0)) {
-            $time->{'available'}   += $time->{'undetermined'};
-            $time->{'undetermined'} = 0;
-        }
-
-        my $percent = 0;
-        if($time->{'available'} + $time->{'unavailable'} > 0) {
-            $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;
-        }
+        my($percent, $time) = _sum_availability($t, $u);
         $values->{$name} = [
             $t->{'timestamp'}*1000,
             $percent,
@@ -468,13 +433,19 @@ sub get_availablitiy_percents {
     }
 
     my $x = 1;
-    my $json = {keys => [], values => []};
+    my $json = {keys => [], values => [], tvalues => []};
     for my $key (sort keys %{$values}) {
         push @{$json->{'keys'}},    [$x, $key];
         push @{$json->{'values'}},  [$x, $values->{$key}->[1]+=0 ];
         push @{$json->{'tvalues'}}, [$values->{$key}->[0], $values->{$key}->[1]+=0 ];
         $x++;
     }
+
+    my($percent, $time) = _sum_availability($avail, $u);
+    $json->{'total'} = {
+        'percent' => $percent,
+        'time'    => $time,
+    };
     return $json;
 }
 
@@ -701,6 +672,49 @@ sub _read_static_content_file {
     }
     croak("_read_static_content_file($url) $file: $!");
     return "";
+}
+
+##############################################
+sub _sum_availability {
+    my($t, $u) = @_;
+    my $time = {
+        'available'    => 0,
+        'unavailable'  => 0,
+        'undetermined' => 0,
+    };
+    for my $s ( keys %{$t} ) {
+        for my $state (qw/ok warning critical unknown up down unreachable/) {
+            if($s eq 'time_'.$state) {
+                if(defined $u->{$state}) {
+                    $time->{'unavailable'} += $t->{'time_'.$state} - $t->{'scheduled_time_'.$state};
+                } else {
+                    $time->{'available'}   += $t->{'time_'.$state} - $t->{'scheduled_time_'.$state};
+                }
+            }
+            elsif($s eq 'scheduled_time_'.$state) {
+                if(defined $u->{$state.'_downtime'}) {
+                    $time->{'unavailable'} += $t->{'scheduled_time_'.$state};
+                } else {
+                    $time->{'available'}   += $t->{'scheduled_time_'.$state};
+                }
+            }
+        }
+        $time->{'undetermined'} += $t->{'time_indeterminate_notrunning'}         || 0;
+        $time->{'undetermined'} += $t->{'time_indeterminate_nodata'}             || 0;
+        $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'} || 0;
+    }
+
+    # in case we have some data for this period, undetermined is available too
+    if($time->{'undetermined'} > 0 and ($time->{'available'} > 0 or $time->{'unavailable'} > 0)) {
+        $time->{'available'}   += $time->{'undetermined'};
+        $time->{'undetermined'} = 0;
+    }
+
+    my $percent = 0;
+    if($time->{'available'} + $time->{'unavailable'} > 0) {
+        $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;
+    }
+    return($percent, $time);
 }
 
 ##############################################
