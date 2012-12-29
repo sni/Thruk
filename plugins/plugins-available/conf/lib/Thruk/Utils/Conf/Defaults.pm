@@ -26,14 +26,11 @@ return defaults for the thruk_local.conf
 sub get_thruk_cfg {
     my ( $self, $c ) = @_;
     my $conf = {
-#                url_prefix
                 title_prefix                            => ['STRING', ''],
                 use_timezone                            => ['STRING', 'CET'],
                 use_strict_host_authorization           => ['BOOL',   '0'],
-#                cgi.cfg
                 use_frames                              => ['BOOL',   '0'],
                 strict_passive_mode                     => ['BOOL',   '1'],
-#                delay_pages_after_backend_reload
                 start_page                              => ['STRING', ''],
                 documentation_link                      => ['STRING', ''],
                 all_problems_link                       => ['STRING', ''],
@@ -50,7 +47,6 @@ sub get_thruk_cfg {
                 ssi_path                                => ['STRING', ''],
                 plugin_path                             => ['STRING', ''],
                 user_template_path                      => ['STRING', ''],
-#                log4perl_conf
                 use_pager                               => ['BOOL',   '1'],
                 paging_steps                            => ['ARRAY',  []],
                 group_paging_overview                   => ['ARRAY',  []],
@@ -68,17 +64,13 @@ sub get_thruk_cfg {
                 show_custom_vars                        => ['ARRAY',  []],
                 use_new_command_box                     => ['BOOL',   '1'],
                 can_submit_commands                     => ['BOOL',   '1'],
-#                command_disabled
                 datetime_format                         => ['STRING', ''],
                 datetime_format_today                   => ['STRING', ''],
                 datetime_format_long                    => ['STRING', ''],
                 datetime_format_log                     => ['STRING', ''],
                 datetime_format_trends                  => ['STRING', ''],
-                statusmap_default_type                  => ['LIST', '', Thruk::Utils::array2hash([qw/circle table/]) ],
-                statusmap_default_groupby               => ['LIST', '', Thruk::Utils::array2hash([qw/parent address domain hostgroup servicegroup/]) ],
                 use_wait_feature                        => ['BOOL',   '1'],
                 wait_timeout                            => ['STRING',   '10'],
-#                check_local_states
     };
 
     # search useful defaults
