@@ -2,6 +2,7 @@
   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>[% r.name %]</title>
   [% PROCESS 'reports/style/css.tt' %]
   <script type="text/javascript" src="[% url_prefix %]thruk/javascript/jquery-1.7.2.min.js"></script>

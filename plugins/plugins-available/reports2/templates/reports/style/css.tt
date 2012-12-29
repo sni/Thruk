@@ -144,8 +144,9 @@ SPAN.duration {
 }
 TABLE.availability_details {
   margin-top: 40px;
+  margin-left: 10px;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 10px;
 }
 TABLE.availability_details TD, TABLE.availability_details TH {
   border: 1px solid grey;
