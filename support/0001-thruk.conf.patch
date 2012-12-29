@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-12-04 17:13:25.000000000 +0100
-+++ b/thruk.conf	2012-12-04 17:14:45.000000000 +0100
+--- a/thruk.conf	2012-12-29 20:46:11.000000000 +0100
++++ b/thruk.conf	2012-12-29 21:47:33.000000000 +0100
 @@ -63,11 +63,11 @@
  
  ######################################
@@ -60,7 +60,7 @@
  
  ######################################
  # use paged data instead of all data in one huge page
-@@ -354,23 +354,23 @@
+@@ -344,23 +344,23 @@
  # Specifiy a file which is then completly under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
@@ -87,8 +87,8 @@
 -#thruk_init = /etc/init.d/thruk
 +thruk_init = /etc/init.d/thruk
  
- # execute regular scheduled reports with this nice level
- #report_nice_level = 5
+ # Set first day of week. Used in reports.
+ # Sunday: 0
 @@ -450,6 +450,20 @@
  # Backend Configuration, enter your backends here
  <Component Thruk::Backend>
@@ -110,13 +110,13 @@
  #        name   = Local Nagios
  #        type   = livestatus
  #        hidden = 1             # make this backend hidden by default
-@@ -498,9 +512,9 @@
+@@ -501,9 +515,9 @@
  <Component Thruk::Plugin::ConfigTool>
      show_plugin_syntax_helper = 1
  
 -    thruk    = ./thruk_local.conf
 -    cgi.cfg  = ./cgi.cfg
--#    htpasswd = ./htpasswd
+-    #htpasswd = ./htpasswd
 +    thruk    = /etc/thruk/thruk_local.conf
 +    cgi.cfg  = /etc/thruk/cgi.cfg
 +    htpasswd = /etc/thruk/htpasswd
