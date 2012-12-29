@@ -1834,6 +1834,16 @@ config tool.
 You don't have to restart Thruk when changing the config with the
 config tool.
 
+ex.:
+
+  <Component Thruk::Plugin::ConfigTool>
+    show_plugin_syntax_helper = 1
+    thruk                     = .../thruk_local.conf
+    cgi.cfg                   = .../cgi.cfg
+    htpasswd                  = .../htpasswd
+  </Component>
+
+
 ==== show_plugin_syntax_helper
 
 Enable/Disable the plugin syntax helper. When enabled, Thruk will
@@ -1848,29 +1858,12 @@ Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.
 ==== htpasswd
 Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.
 
-ex.:
-
-  <Component Thruk::Plugin::ConfigTool>
-    show_plugin_syntax_helper = 1
-    thruk                     = .../thruk_local.conf
-    cgi.cfg                   = .../cgi.cfg
-    htpasswd                  = .../htpasswd
-  </Component>
-
 
 
 === Component Thruk::Plugin::Panorama
 
 The 'Panorama' plugin is a nice, fully customizable dashboard allowing
 you to build your own panorama views.
-
-==== state_provider
-Sets the way states between reloads are preserved.
-Valid options are 'cookie' or 'server'. Cookie store is useful for demo systems
-where lot people share the same account.
-
-==== default_view
-Can be either the string of an exported view or path to a file with exported view.
 
 ex.:
 
@@ -1880,56 +1873,64 @@ ex.:
   </Component>
 
 
+==== state_provider
+Sets the way states between reloads are preserved.
+Valid options are 'cookie' or 'server'. Cookie store is useful for demo systems
+where lot people share the same account.
+
+==== default_view
+Can be either the string of an exported view or path to a file with exported view.
+
+
 
 === Component Thruk::Plugin::Reports2
 
-The 'Reports2' plugin creates sla reports in html or pdf format.
+The 'Reports2' plugin creates sla reports in html or pdf format. You
+probably have to download the wkhtmltopdf binary in a recent version.
+
+ex.:
+
+  <Component Thruk::Plugin::Reports2>
+    report_nice_level = 5
+    report_base_url   = http://host.local/thruk/cgi-bin/
+    wkhtmltopdf       = /usr/bin/wkhtmltopdf
+  </Component>
 
 ==== report_nice_level
 Execute regular scheduled reports with this nice level.
 
-ex.:
-
-  report_nice_level = 5
-
-
 ==== report_base_url
 Url used to replace relative links in html reports.
-
-ex.:
-
-  report_base_url = http://host.local/thruk/cgi-bin/
 
 
 ==== wkhtmltopdf
 wkhtmltopdf is used to convert html pages into pdf. You will need
 at least version 0.11. Get wkhtmltopdf from http://code.google.com/p/wkhtmltopdf/
 
-ex.:
-
-  wkhtmltopdf = /usr/bin/wkhtmltopdf
-
 
 
 
 === Component Thruk::Plugin::Statusmap
 
-==== statusmap_default_type
-You may change the default map type of the statusmap here. Valid
-types are: 'table' and 'circle'
+The Statusmap plugin gives an overview over your network.
 
 ex.:
 
-  statusmap_default_type = table
+  <Component Thruk::Plugin::Statusmap>
+    statusmap_default_groupby = address
+    statusmap_default_type    = table
+  </Component>
+
+
+==== statusmap_default_type
+You may change the default map type of the statusmap here. Valid
+types are: 'table' and 'circle'
 
 
 ==== statusmap_default_groupby
 And the statusmap default group by which has to be one of:
 'parent', 'address', 'domain', 'hostgroup', 'servicegroup'
 
-ex.:
-
-  statusmap_default_groupby = address
 
 
 

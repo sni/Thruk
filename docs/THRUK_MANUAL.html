@@ -16516,15 +16516,6 @@ and <em>authorized_for_system_commands</em> will then have access to the
 config tool.
 You don&#8217;t have to restart Thruk when changing the config with the
 config tool.</p></div>
-<h4 id="_show_plugin_syntax_helper">show_plugin_syntax_helper</h4>
-<div class="paragraph"><p>Enable/Disable the plugin syntax helper. When enabled, Thruk will
-run the plugins with "plugin -h" to get the help information.</p></div>
-<h4 id="_thruk">thruk</h4>
-<div class="paragraph"><p>Path to your thruk_local.conf. Enables adjusting Thruks config if set.</p></div>
-<h4 id="_cgi_cfg_2">cgi.cfg</h4>
-<div class="paragraph"><p>Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.</p></div>
-<h4 id="_htpasswd">htpasswd</h4>
-<div class="paragraph"><p>Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -16535,15 +16526,18 @@ run the plugins with "plugin -h" to get the help information.</p></div>
   htpasswd                  = .../htpasswd
 &lt;/Component&gt;</tt></pre>
 </div></div>
+<h4 id="_show_plugin_syntax_helper">show_plugin_syntax_helper</h4>
+<div class="paragraph"><p>Enable/Disable the plugin syntax helper. When enabled, Thruk will
+run the plugins with "plugin -h" to get the help information.</p></div>
+<h4 id="_thruk">thruk</h4>
+<div class="paragraph"><p>Path to your thruk_local.conf. Enables adjusting Thruks config if set.</p></div>
+<h4 id="_cgi_cfg_2">cgi.cfg</h4>
+<div class="paragraph"><p>Path to your cgi.cfg. Enables adjusting the cgi.cfg if set.</p></div>
+<h4 id="_htpasswd">htpasswd</h4>
+<div class="paragraph"><p>Path to your htpasswd. Enables user management based an Apaches basic auth with htpasswd.</p></div>
 <h3 id="_component_thruk_plugin_panorama">Component Thruk::Plugin::Panorama</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The <em>Panorama</em> plugin is a nice, fully customizable dashboard allowing
 you to build your own panorama views.</p></div>
-<h4 id="_state_provider">state_provider</h4>
-<div class="paragraph"><p>Sets the way states between reloads are preserved.
-Valid options are <em>cookie</em> or <em>server</em>. Cookie store is useful for demo systems
-where lot people share the same account.</p></div>
-<h4 id="_default_view">default_view</h4>
-<div class="paragraph"><p>Can be either the string of an exported view or path to a file with exported view.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -16552,47 +16546,47 @@ where lot people share the same account.</p></div>
   default_view    = /var/lib/thruk/default_panorama_view
 &lt;/Component&gt;</tt></pre>
 </div></div>
+<h4 id="_state_provider">state_provider</h4>
+<div class="paragraph"><p>Sets the way states between reloads are preserved.
+Valid options are <em>cookie</em> or <em>server</em>. Cookie store is useful for demo systems
+where lot people share the same account.</p></div>
+<h4 id="_default_view">default_view</h4>
+<div class="paragraph"><p>Can be either the string of an exported view or path to a file with exported view.</p></div>
 <h3 id="_component_thruk_plugin_reports2">Component Thruk::Plugin::Reports2</h3><div style="clear:left"></div>
-<div class="paragraph"><p>The <em>Reports2</em> plugin creates sla reports in html or pdf format.</p></div>
+<div class="paragraph"><p>The <em>Reports2</em> plugin creates sla reports in html or pdf format. You
+probably have to download the wkhtmltopdf binary in a recent version.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Component Thruk::Plugin::Reports2&gt;
+  report_nice_level = 5
+  report_base_url   = http://host.local/thruk/cgi-bin/
+  wkhtmltopdf       = /usr/bin/wkhtmltopdf
+&lt;/Component&gt;</tt></pre>
+</div></div>
 <h4 id="_report_nice_level">report_nice_level</h4>
 <div class="paragraph"><p>Execute regular scheduled reports with this nice level.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>report_nice_level = 5</tt></pre>
-</div></div>
 <h4 id="_report_base_url">report_base_url</h4>
 <div class="paragraph"><p>Url used to replace relative links in html reports.</p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>report_base_url = http://host.local/thruk/cgi-bin/</tt></pre>
-</div></div>
 <h4 id="_wkhtmltopdf">wkhtmltopdf</h4>
 <div class="paragraph"><p>wkhtmltopdf is used to convert html pages into pdf. You will need
 at least version 0.11. Get wkhtmltopdf from <a href="http://code.google.com/p/wkhtmltopdf/">http://code.google.com/p/wkhtmltopdf/</a></p></div>
+<h3 id="_component_thruk_plugin_statusmap">Component Thruk::Plugin::Statusmap</h3><div style="clear:left"></div>
+<div class="paragraph"><p>The Statusmap plugin gives an overview over your network.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>wkhtmltopdf = /usr/bin/wkhtmltopdf</tt></pre>
+<pre><tt>&lt;Component Thruk::Plugin::Statusmap&gt;
+  statusmap_default_groupby = address
+  statusmap_default_type    = table
+&lt;/Component&gt;</tt></pre>
 </div></div>
-<h3 id="_component_thruk_plugin_statusmap">Component Thruk::Plugin::Statusmap</h3><div style="clear:left"></div>
 <h4 id="_statusmap_default_type">statusmap_default_type</h4>
 <div class="paragraph"><p>You may change the default map type of the statusmap here. Valid
 types are: <em>table</em> and <em>circle</em></p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>statusmap_default_type = table</tt></pre>
-</div></div>
 <h4 id="_statusmap_default_groupby">statusmap_default_groupby</h4>
 <div class="paragraph"><p>And the statusmap default group by which has to be one of:
 <em>parent</em>, <em>address</em>, <em>domain</em>, <em>hostgroup</em>, <em>servicegroup</em></p></div>
-<div class="paragraph"><p>ex.:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><tt>statusmap_default_groupby = address</tt></pre>
-</div></div>
 <h3 id="_cgi_cfg_3">cgi.cfg</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga but not all
 values are used.</p></div>
@@ -17117,7 +17111,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2012-12-29 18:55:36 CEST
+Last updated 2012-12-29 20:45:30 CEST
 </div>
 </div>
 </body>
