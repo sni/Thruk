@@ -2270,6 +2270,11 @@ All templates used for reports can be found in
 You may adjust or override all templates to your needs and put them
 into a 'reports' subfolder of the 'user_template_path'.
 
+  * reports     contains the selectable reports
+  ** comp       contains components used in reports
+  ** locale     contains localization settings
+  ** style      contains css used to make reports pretty
+
 See http://thruk.org/api/Thruk/Utils/Reports/Render.html for details on
 available functions and examples.
 

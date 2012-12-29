@@ -6,25 +6,11 @@
 [% ELSE %]
 
   [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Latest Outages' %]
-    [% FOREACH o = outages %]
-    <div class="outages">
-      [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
-      <span class="duration">([% duration(o.duration) %])</span>
-    </div>
-    <div class="output">[% o.plugin_output %]</div>
-    [% LAST IF loop.index == 13 %]
-    [% END %]
+    [% PROCESS 'reports/comp/sla_outages_latest.tt' %]
   [% END %]
 
-  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Longest Outages' %]
-    [% FOREACH o = sort_by_key(outages, 'duration').reverse %]
-    <div class="outages">
-      [% format_date(o.start, reportDateTimeFormat) %] - [% format_date(o.real_end, reportDateTimeFormat) %]
-      <span class="duration">([% duration(o.duration) %])</span>
-    </div>
-    <div class="output">[% o.plugin_output %]</div>
-    [% LAST IF loop.index == 13 %]
-    [% END %]
+  [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'Worst Outages' %]
+    [% PROCESS 'reports/comp/sla_outages_worst.tt' %]
   [% END %]
 
 [% END %]

@@ -838,6 +838,8 @@ plugins/plugins-available/reports2/templates/reports/comp/sla_graph_by_time.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_fixed.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_graph_page.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_outages.tt
+plugins/plugins-available/reports2/templates/reports/comp/sla_outages_latest.tt
+plugins/plugins-available/reports2/templates/reports/comp/sla_outages_worst.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_prepare.tt
 plugins/plugins-available/reports2/templates/reports/comp/sla_table.tt
 plugins/plugins-available/reports2/templates/reports/eventlog.tt
