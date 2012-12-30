@@ -2,7 +2,7 @@
 <div id="flotgraph[% nr %]" class="flotgraph"></div>
 <script type="text/javascript">
   var d1 = {
-      label: "Available",
+      label: "Availability",
       color: "rgb(82, 167, 82)",
       lines: {
         fill:  true,
