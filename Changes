@@ -5,6 +5,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - changed first day of week to monday, can be reverted by setting first_day_of_week=0
           - new reporting module
             - put both reports edit steps into one page
+            - select multiple hosts/services/groups seperated by comma
             - changed report templates to html
             - changed to flot graphing library
             - changed to wkhtml2pdf as pdf generator

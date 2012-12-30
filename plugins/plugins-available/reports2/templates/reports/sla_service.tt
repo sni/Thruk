@@ -39,9 +39,19 @@
 
   [% WRAPPER 'reports/comp/report.tt' %]
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
-    [% WRAPPER 'reports/comp/page_standard.tt' pagetitle = 'SLA' %]
-      [% PROCESS 'reports/comp/sla_graph_page.tt' %]
+
+    [% FOREACH hst = avail_data.services.keys.sort %]
+      [% FOREACH svc = avail_data.services.$hst.keys.sort %]
+        [% c.request.parameters.host    = hst %]
+        [% c.request.parameters.service = svc %]
+        [% pagetitle                    = "Service: " _ svc _ ' on ' _ hst %]
+
+        [% WRAPPER 'reports/comp/page_standard.tt'  %]
+          [% PROCESS 'reports/comp/sla_graph_page.tt' %]
+        [% END %]
+        [% PROCESS 'reports/comp/sla_outages.tt' %]
+      [% END %]
     [% END %]
-    [% PROCESS 'reports/comp/sla_outages.tt' %]
+
   [% END %][%# report wrapper #%]
 [% END %][%# render block #%]

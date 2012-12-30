@@ -33,7 +33,7 @@
     title        = 'SLA Report'
     subtitle     = r.name
     coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat),
-                     'Hostgroup:', param.servicegroup,
+                     'Servicegroup:', param.servicegroup,
                    ]
   %]
 

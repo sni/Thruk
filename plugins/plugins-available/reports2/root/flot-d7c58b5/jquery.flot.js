@@ -1710,7 +1710,7 @@ Licensed under the MIT license.
                 var box = axis.box, f = axis.font;
                 // placeholder.append('<div style="position:absolute;opacity:0.10;background-color:red;left:' + box.left + 'px;top:' + box.top + 'px;width:' + box.width +  'px;height:' + box.height + 'px"></div>') // debug
                 placeholder.append('<div class="axis_' + axis.direction + '" style="font-size:' + f.size + 'px;font-family:' + f.family + ';font-style:' + f.style + 'font-weight:' + f.weight + ';font-variant:' + f.variant + ';color:'+axis.options.color+';"></div>');
-                var axisplaceholder = $(".axis_"+axis.direction).first();
+                var axisplaceholder = placeholder.find(".axis_"+axis.direction).first();
 
                 for (var i = 0; i < axis.ticks.length; ++i) {
                     var tick = axis.ticks[i];

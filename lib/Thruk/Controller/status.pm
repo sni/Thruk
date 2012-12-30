@@ -159,8 +159,12 @@ sub _process_raw_request {
             elsif($type eq 'service' or $type eq 'services') {
                 my $host = $c->{'request'}->{'parameters'}->{'host'};
                 my $additional_filter;
+                my @hostfilter;
                 if(defined $host and $host ne '') {
-                    $additional_filter = { 'host_name' => $host };
+                    for my $h (split(/\s*,\s*/mx, $host)) {
+                        push @hostfilter, { 'host_name' => $h };
+                    }
+                    $additional_filter = Thruk::Utils::combine_filter('-or', \@hostfilter);
                 }
                 $data = $c->{'db'}->get_service_names( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $additional_filter ] );
             }

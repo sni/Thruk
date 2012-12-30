@@ -199,24 +199,26 @@ sub calculate_availability {
             time => { '<=' => $end },
     ]};
 
-    # a single service
-    if(defined $service and $service ne 'all') {
-        unless($c->check_permissions('service', $service, $host)) {
-            return $c->detach('/error/index/15');
+    # services
+    if(defined $service) {
+        my $all_services;
+        my @servicefilter;
+        my @hostfilter;
+        if($service ne 'all') {
+            for my $h (split(/\s*,\s*/mx, $host)) {
+                push @hostfilter, { 'host_name' => $h };
+            }
+            for my $s (split(/\s*,\s*/mx, $service)) {
+                push @servicefilter, { 'description' => $s };
+            }
+            $servicefilter = {
+                '-and' => [
+                    Thruk::Utils::combine_filter('-or', \@hostfilter),
+                    Thruk::Utils::combine_filter('-or', \@servicefilter)
+                ]
+            };
         }
-        $logserviceheadfilter = { service_description => $service };
-        $loghostheadfilter    = { host_name => $host };
-        push @{$services}, { 'host' => $host, 'service' => $service };
-
-        if($initialassumedservicestate == -1) {
-            my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), description => $service, host_name => $host ], limit => 1);
-            $initial_states->{'services'}->{$host}->{$service} = $service_data->[0]->{'state'};
-        }
-    }
-
-    # all services
-    elsif(defined $service and $service eq 'all') {
-        my $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services') ]);
+        $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         my $services_data;
         for my $service (@{$all_services}) {
             $services_data->{$service->{'host_name'}}->{$service->{'description'}} = 1;
@@ -225,32 +227,42 @@ sub calculate_availability {
                 $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
             }
         }
+        if(scalar keys %{$services_data} == 0) {
+            return $c->detach('/error/index/15');
+        }
         $c->stash->{'services'} = $services_data;
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
     }
 
-    # a single host
+    # single/multiple hosts
     elsif(defined $host and $host ne 'all') {
-        unless($c->check_permissions('host', $host)) {
-            return $c->detach('/error/index/5');
+        my @servicefilter;
+        my @hostfilter;
+        for my $h (split(/\s*,\s*/mx, $host)) {
+            push @hostfilter,    { 'name' => $h };
+            push @servicefilter, { 'host_name' => $h };
         }
-        my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), host_name => $host ]);
-        $service_data = Thruk::Utils::array2hash($service_data, 'description');
-        $c->stash->{'services'}->{$host} = $service_data;
-        $loghostheadfilter = { host_name => $host };
+        my $service_data = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), Thruk::Utils::combine_filter('-or', \@servicefilter) ]);
+        for my $service (@{$service_data}) {
+            $c->stash->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = 1;
+            push @{$services}, { 'host' => $service->{'host_name'}, 'service' => $service->{'description'} };
+        }
+        $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter);
 
-        for my $description (keys %{$service_data}) {
-            push @{$services}, { 'host' => $host, 'service' => $description };
-        }
         if($initialassumedservicestate == -1) {
             for my $servicename (keys %{$service_data}) {
                 $initial_states->{'services'}->{$host}->{$servicename} = $service_data->{$servicename}->{'state'};
             }
         }
+        my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), Thruk::Utils::combine_filter('-or', \@hostfilter) ]);
         if($initialassumedhoststate == -1) {
-            my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), name => $host ], limit => 1);
-            $initial_states->{'hosts'}->{$host} = $host_data->[0]->{'state'};
+            for my $host (@{$host_data}) {
+                $initial_states->{'hosts'}->{$host->{'name'}} = $host->{'state'};
+            }
         }
-        push @{$hosts}, $host;
+        for my $host (@{$host_data}) {
+            push @{$hosts}, $host->{'name'};
+        }
     }
 
     # all hosts
@@ -265,25 +277,34 @@ sub calculate_availability {
                 $initial_states->{'hosts'}->{$host} = $host_data->{$host}->{'state'};
             }
         }
+        if(scalar keys %{$host_data} == 0) {
+            return $c->detach('/error/index/15');
+        }
     }
 
-    # one or all hostgroups
+    # multiple or all hostgroups
     elsif(defined $hostgroup and $hostgroup ne '') {
+        my @hostfilter;
+        my @groupfilter;
         if($hostgroup ne '' and $hostgroup ne 'all') {
-            $hostfilter        = { groups => { '>=' => $hostgroup }};
+            for my $hg (split(/\s*,\s*/mx, $hostgroup)) {
+                push @hostfilter,       { groups => { '>=' => $hg }};
+                push @groupfilter,      { name   => $hg };
+            }
+            $hostfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
         }
+
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $hostfilter ]);
         $host_data    = Thruk::Utils::array2hash($host_data, 'name');
         if($hostgroup ne '' and $hostgroup ne 'all') {
-            $groupfilter       = { name => $hostgroup };
-            $loghostheadfilter = { current_host_groups => { '>=' => $hostgroup }};
+            $groupfilter       = Thruk::Utils::combine_filter('-or', \@groupfilter);
             my @hosts_from_groups = ();
             for my $hostname (keys %{$host_data}) {
                 push @hosts_from_groups, { host_name => $hostname };
             }
             $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hosts_from_groups);
         }
-        my $groups    = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $groupfilter ]);
+        my $groups = $c->{'db'}->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hostgroups'), $groupfilter ]);
 
         # join our groups together
         my %joined_groups;
@@ -320,13 +341,20 @@ sub calculate_availability {
     }
 
 
-    # one or all servicegroups
+    # multiple or all servicegroups
     elsif(defined $servicegroup and $servicegroup ne '') {
+        my @servicefilter;
+        my @groupfilter;
         if($servicegroup ne '' and $servicegroup ne 'all') {
-            $groupfilter          = { name => $servicegroup };
-            $servicefilter        = { groups => { '>=' => $servicegroup }};
+            for my $sg (split(/\s*,\s*/mx, $servicegroup)) {
+                push @servicefilter,    { groups => { '>=' => $sg }};
+                push @groupfilter,      { name   => $sg };
+            }
         }
-        my $all_services = $c->{'db'}->get_services(filter => [ $servicefilter, Thruk::Utils::Auth::get_auth_filter($c, 'services') ]);
+        $groupfilter          = Thruk::Utils::combine_filter('-or', \@groupfilter);
+        $servicefilter        = Thruk::Utils::combine_filter('-or', \@servicefilter);
+
+        my $all_services = $c->{'db'}->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter ]);
         my $groups       = $c->{'db'}->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'servicegroups'), $groupfilter ]);
 
         my $service_data;
@@ -379,7 +407,6 @@ sub calculate_availability {
 
         # which services?
         if($servicegroup ne '' and $servicegroup ne 'all') {
-            $logserviceheadfilter = { current_service_groups => { '>=' => $servicegroup }};
             my @services_from_groups = ();
             for my $data (@{$services}) {
                 push @services_from_groups, { '-and' => [ { host_name => $data->{'host'}}, { service_description => $data->{'service'}} ] };
