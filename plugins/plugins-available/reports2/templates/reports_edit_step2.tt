@@ -42,6 +42,13 @@
           <option value="weeks"[%  IF value == 'weeks'  %] selected[% END %]>Weeks</option>
           <option value="days"[%   IF value == 'days'   %] selected[% END %]>Days</option>
         </select>
+      [% ELSIF type == 'rpttimeperiod' %]
+        <select name="params.[% key %]">
+          <option value="">None</option>
+          [% FOREACH t = timeperiods %]
+          <option value="[% t.name %]"[% IF value == t.name %] selected[% END %]>[% t.name %]</option>
+          [% END %]
+        </select>
       [% ELSIF type == 'option' %]
         <input type="checkbox" name="params.[% key %]" value="1"[% IF value %] checked[% END %]>
       [% ELSIF type == 'hst_unavailable' %]

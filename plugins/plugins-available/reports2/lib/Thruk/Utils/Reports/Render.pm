@@ -704,12 +704,6 @@ sub _sum_availability {
         $time->{'undetermined'} += $t->{'time_indeterminate_outside_timeperiod'} || 0;
     }
 
-    # in case we have some data for this period, undetermined is available too
-    if($time->{'undetermined'} > 0 and ($time->{'available'} > 0 or $time->{'unavailable'} > 0)) {
-        $time->{'available'}   += $time->{'undetermined'};
-        $time->{'undetermined'} = 0;
-    }
-
     my $percent = -1;
     if($time->{'available'} + $time->{'unavailable'} > 0) {
         $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;

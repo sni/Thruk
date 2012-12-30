@@ -5,6 +5,7 @@
         { 'hostgroup'               => [ 'Hostgroup',             'hostgroups',      ''                    , '' , 1 ] },
         { 'timeperiod'              => [ 'Timeperiod',            'rptimeperiod',    'last12months'                 ] },
         { 'breakdown'               => [ 'Breakdown by',          'breakdowns',      'months'                       ] },
+        { 'rpttimeperiod'           => [ 'Report Timeperiod',     'rpttimeperiod',   ''                             ] },
         { 'sla'                     => [ 'SLA %',                 'int',             '98'                  , '', 1  ] },
         { 'graph_min_sla'           => [ 'Graph SLA %',           'int',             '90'                  , '', 1  ] },
         { 'decimals'                => [ 'Decimal Points',        'int',             '2'                   , '', 1  ] },

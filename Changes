@@ -9,6 +9,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - changed to flot graphing library
             - changed to wkhtml2pdf as pdf generator
             - changed default initial state to unspecified
+            - added timeperiod support in sla reports
             - added html preview of pdf reports
             - added new report option for sla decimal points and graph min sla
           - Bug Fixes

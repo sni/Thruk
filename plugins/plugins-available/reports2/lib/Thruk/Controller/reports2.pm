@@ -161,6 +161,8 @@ sub report_edit {
     }
     $c->stash->{templates} = $templates;
 
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
+
     Thruk::Utils::ssi_include($c);
     $c->stash->{template} = 'reports_edit.tt';
     return;
@@ -184,6 +186,8 @@ sub report_edit_step2 {
             return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
         }
     }
+
+    $c->stash->{timeperiods} = $c->{'db'}->get_timeperiods(filter => [Thruk::Utils::Auth::get_auth_filter($c, 'timeperiods')], remove_duplicates => 1, sort => 'name');
 
     my $template = $c->{'request'}->{'parameters'}->{'template'};
     $r->{'template'}      = $template if defined $template;
