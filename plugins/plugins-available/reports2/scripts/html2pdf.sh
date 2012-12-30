@@ -20,7 +20,7 @@ while [ -f /tmp/.X${DISP}-lock ];do
   let "DISP %= 500";
 done;
 XAUTHORITY=`tempfile`;
-Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP 2>&1 | grep -v 'Could not init font path element' &
+Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP > /dev/null 2>&1 &
 xpid=$!
 
 DISPLAY=:$DISP $WKHTMLTOPDF \
