@@ -17,6 +17,7 @@ TD.footer {
   border-top: 1px solid grey;
   padding-top: 5px;
   text-align: center;
+  font-size: 12px;
 }
 DIV.content {
   padding-top: 15px;
@@ -154,12 +155,18 @@ TABLE.availability_details TD, TABLE.availability_details TH {
 TABLE.availability_details TD {
   text-align: right;
 }
+TABLE.availability_details.months12 TH {
+  min-width: 39px;
+}
+TABLE.availability_details.weeks5 TH, TABLE.availability_details.weeks4 TH {
+  min-width: 50px;
+}
 TD.sla_nok {
   color: red;
 }
 DIV.flotgraph {
   width:530px;
-  height:300px
+  height:300px;
 }
 DIV.axis_y {
   position: relative;

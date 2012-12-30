@@ -318,8 +318,10 @@ sub generate_report {
     Thruk::Utils::Reports::Render::set_unavailable_states([qw/DOWN UNREACHABLE CRITICAL UNKNOWN/]);
     $c->{'request'}->{'parameters'}->{'show_log_entries'}           = 1;
     $c->{'request'}->{'parameters'}->{'assumeinitialstates'}        = 'yes';
-    $c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 3; # UP
-    $c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 6; # OK
+    #$c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 3; # UP
+    #$c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 6; # OK
+    $c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 0; # Unspecified
+    $c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 0; # Unspecified
 
     # set some defaults
     $c->stash->{'page'} = 1;

@@ -1,4 +1,4 @@
-<table class="availability_details">
+<table class="availability_details [% param.breakdown +%] [%+ param.breakdown %][% available.keys.size %]">
   <tr>
     [% FOREACH key = available.keys %]
     <th>
@@ -18,7 +18,7 @@
     [% FOREACH val = available.values %]
     [% format = '%0.' _ param.decimals _ 'f' %]
     [% value  = sprintf(format, val.1) %]
-    <td class="[% IF value < param.sla %]sla_nok[% END %]">[% value %]%</td>
+    <td class="[% IF value < param.sla %]sla_nok[% END %]">[% IF val.1 == -1 %]&nbsp;[% ELSE %][% value %]%[% END %]</td>
     [% END %]
   </tr>
 </table>

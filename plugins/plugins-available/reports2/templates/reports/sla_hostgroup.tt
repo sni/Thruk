@@ -9,7 +9,7 @@
         { 'graph_min_sla'           => [ 'Graph SLA %',           'int',             '90'                  , '', 1  ] },
         { 'decimals'                => [ 'Decimal Points',        'int',             '2'                   , '', 1  ] },
         { 'assumeinitialstates'     => [ 'Assume Initial States', 'yes_no',          'yes'                          ] },
-        { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '3'           ] },
+        { 'initialassumedhoststate' => [ 'Initial Assumed State', 'hst_initialassumedstate',          '0'           ] },
         { 'includesoftstates'       => [ 'Include Soft States',   'yes_no',          'no'                           ] },
         { 'unavailable'             => [ 'Unavailable States',    'hst_unavailable', ['down', 'unreachable']        ] },
     ];

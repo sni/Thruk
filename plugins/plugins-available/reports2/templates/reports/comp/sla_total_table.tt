@@ -3,7 +3,7 @@
     <th>Average Availability</th>
     [% format = '%0.' _ param.decimals _ 'f' %]
     [% value  = sprintf(format, data.percent) %]
-    <td class="[% IF value < param.sla %]sla_nok[% END %]">[% value %]%</td>
+    <td class="[% IF value < param.sla %]sla_nok[% END %]">[% IF data.percent == -1 %]&nbsp;[% ELSE %][% value %]%[% END %]</td>
   </tr>
   <tr>
     <th>Total Uptime</th>

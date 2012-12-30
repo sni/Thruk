@@ -710,7 +710,7 @@ sub _sum_availability {
         $time->{'undetermined'} = 0;
     }
 
-    my $percent = 0;
+    my $percent = -1;
     if($time->{'available'} + $time->{'unavailable'} > 0) {
         $percent = $time->{'available'} / ($time->{'available'} + $time->{'unavailable'}) * 100;
     }
