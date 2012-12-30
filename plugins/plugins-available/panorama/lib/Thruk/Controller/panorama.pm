@@ -955,7 +955,10 @@ sub _get_gearman_stats {
         PeerAddr => $host,
         PeerPort => $port,
     )
-    or do { $c->log->warn("can't connect to port $port on $host: $!"); return $data; };
+    or do {
+        $c->log->warn("can't connect to port $port on $host: $!") unless(defined $ENV{'THRUK_SRC'} and $ENV{'THRUK_SRC'} eq 'TEST');
+        return $data;
+    };
     $handle->autoflush(1);
 
     print $handle "status\n";
