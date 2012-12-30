@@ -3314,6 +3314,7 @@ var ajax_search = {
             var cur_count = 0;
             var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
             if(type.results.length == 1) { name = name.substring(0, name.length -1); }
+            name = name.replace(/ss$/, 's');
             resultHTML += '<li><b><i>' + ( type.results.length ) + ' ' + name + '<\/i><\/b><\/li>';
             jQuery.each(type.results, function(index, data) {
                 if(ajax_search.show_all || cur_count <= results_per_type) {
