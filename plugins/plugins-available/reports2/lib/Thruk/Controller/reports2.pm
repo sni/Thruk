@@ -122,7 +122,11 @@ sub report_edit {
     $c->stash->{'params'} = {};
     if($report_nr eq 'new') {
         $r = Thruk::Utils::Reports::_get_new_report($c);
-        $r->{'backends'} = [ keys %{$c->stash->{'backend_detail'}} ];
+        # set currently enabled backends
+        $r->{'backends'} = [];
+        for my $b (keys %{$c->stash->{'backend_detail'}}) {
+            push @{$r->{'backends'}}, $b if $c->stash->{'backend_detail'}->{$b}->{'disabled'} == 0;
+        }
         for my $key (keys %{$c->{'request'}->{'parameters'}}) {
             if($key =~ m/^params\.(.*)$/mx) {
                 $c->stash->{'params'}->{$1} = $c->{'request'}->{'parameters'}->{$key};
