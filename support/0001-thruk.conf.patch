@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-12-29 20:46:11.000000000 +0100
-+++ b/thruk.conf	2012-12-29 21:47:33.000000000 +0100
+--- a/thruk.conf	2012-12-30 12:52:55.638234886 +0100
++++ b/thruk.conf	2012-12-30 12:53:44.726249560 +0100
 @@ -63,11 +63,11 @@
  
  ######################################
@@ -123,3 +123,12 @@
  </Component>
  
  ######################################
+@@ -527,7 +541,7 @@
+     #report_base_url=http://host.local/thruk/cgi-bin/
+ 
+     # wkhtmltopdf is used to convert html pages into pdf
+-    #wkhtmltopdf = /path/to/wkhtmltopdf
++    wkhtmltopdf = /usr/share/thruk/script/wkhtmltopdf
+ </Component>
+ 
+ #####################################

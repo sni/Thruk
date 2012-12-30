@@ -6,6 +6,7 @@ Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol
 URL:           http://thruk.org
 Source0:       thruk-%{version}.tar.gz
+Source1:       wkhtmltopdf
 Group:         Applications/Monitoring
 BuildRoot:     %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 BuildRequires: autoconf, automake, perl
@@ -36,6 +37,7 @@ rm -rf %{buildroot}
 %patch1 -p1
 %patch2 -p1
 find . -name \*.orig -delete
+cp %{SOURCE1} script/
 
 %build
 yes n | perl Makefile.PL

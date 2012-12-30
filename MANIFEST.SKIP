@@ -29,6 +29,7 @@ script/thruk.lib
 script/thruk_update_docs.sh
 script/thruk_update_table_docs.pl
 script/thruk_extract_cmd_templates.pl
+script/wkhtmltopdf
 t/xt
 root/thruk/plugins/.*
 root/shinken

@@ -134,7 +134,7 @@ binary-arch: build install
 #	dh_installinfo
 	dh_installman
 	dh_link
-	dh_strip
+	dh_strip --exclude=wkhtmltopdf
 	dh_compress
 	dh_fixperms
 	chmod 755 $(CURDIR)/debian/thruk/usr/share/thruk/fcgid_env.sh

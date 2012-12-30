@@ -19,7 +19,7 @@ while [ -f /tmp/.X${DISP}-lock ];do
   DISP=$RANDOM
   let "DISP %= 500";
 done;
-XAUTHORITY=`tempfile`;
+XAUTHORITY=`mktemp`;
 Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP > /dev/null 2>&1 &
 xpid=$!
 

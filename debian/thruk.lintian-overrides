@@ -1,4 +1,7 @@
 thruk: possible-gpl-code-linked-with-openssl
+# Debian 6
+thruk: arch-dependent-file-in-usr-share ./usr/share/thruk/script/wkhtmltopdf
+thruk: statically-linked-binary ./usr/share/thruk/script/wkhtmltopdf
 # Debian 6 32
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/i486-linux-gnu-thread-multi/auto/Cairo/Cairo.so /usr/lib
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/i486-linux-gnu-thread-multi/auto/GD/GD.so /usr/lib

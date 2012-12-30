@@ -93,14 +93,14 @@
   }
 </script>
 
-[% IF param.breakdown == 'days' && data.tvalues.size < 40 %]
+[% IF param.breakdown == 'days' && data.tvalues.size < 40 %]
 <style type="text/css">
 DIV.axis_x {
   left: 6px;
   position: relative;
 }
 </style>
-[% ELSIF param.breakdown == 'weeks' || (param.breakdown == 'days' && data.tvalues.size >= 40) %]
+[% ELSIF param.breakdown == 'weeks' || (param.breakdown == 'days' && data.tvalues.size >= 40) %]
 <style type="text/css">
 DIV.axis_x {
   left: 10px;
