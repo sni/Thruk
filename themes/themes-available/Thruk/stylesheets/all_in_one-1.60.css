@@ -334,7 +334,7 @@ body.summary table.data {
 .has_long_plugin_output {
   color: #0000FF;
 }
-TD.tableRowHover, TH.tableRowHover {
+TD.tableRowHover, TH.tableRowHover, TABLE.hoverable TR:hover TD {
   filter: alpha(opacity = 70); /* IE 6, 7, 8 */
   -ms-filter: "alpha(opacity = 70)"; /* ab IE 8 zusätzlich möglich */
   opacity: .70; /* alle anderen Browser einschließlich IE 9 */

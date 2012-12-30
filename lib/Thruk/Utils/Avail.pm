@@ -250,8 +250,8 @@ sub calculate_availability {
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@servicefilter);
 
         if($initialassumedservicestate == -1) {
-            for my $servicename (keys %{$service_data}) {
-                $initial_states->{'services'}->{$host}->{$servicename} = $service_data->{$servicename}->{'state'};
+            for my $service (@{$service_data}) {
+                $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
             }
         }
         my $host_data = $c->{'db'}->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), Thruk::Utils::combine_filter('-or', \@hostfilter) ]);

@@ -62,7 +62,7 @@
       });
     }
 
-    /* calculate ticks when using breakdown by year by days/weeks */
+    /* calculate ticks when using breakdown year by days/weeks */
     var lastmonth = -1;
     var lastyear  = -1;
     if(breakdown == 'weeks' || (breakdown == 'days' && data.length >= 40)) {
@@ -73,7 +73,7 @@
         var year  = d.strftime("%Y");
         if(year != lastyear && lastyear != -1) {
           ticks.push([ts, year]);
-          markings.push({ xaxis: { from: ts, to: ts}, color: "#FF0000", lineWidth: 2 });
+          markings.push({ xaxis: { from: ts, to: ts}, color: "#333333", lineWidth: 1 });
         }
         if(lastmonth != -1 && month != lastmonth) {
           // get ts for first day of month
