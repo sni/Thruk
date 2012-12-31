@@ -323,9 +323,6 @@ sub generate_report {
     $c->{'request'}->{'parameters'}->{'initialassumedhoststate'}    = 0; # Unspecified
     $c->{'request'}->{'parameters'}->{'initialassumedservicestate'} = 0; # Unspecified
 
-    # set some defaults
-    $c->stash->{'page'} = 1;
-
     # add default params
     my $fields = _get_required_fields($c, $options);
     for my $f (@{$fields}) {
