@@ -12,6 +12,9 @@ thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/x86_64-linux-gnu-thre
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/GD/GD.so /usr/lib
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/Time/HiRes/HiRes.so /lib
 thruk: binary-or-shlib-defines-rpath ./usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/XML/Parser/Expat/Expat.so /usr/lib
+# Debian 7 / Ubuntu
+thruk: arch-dependent-file-in-usr-share usr/share/thruk/script/wkhtmltopdf
+thruk: statically-linked-binary usr/share/thruk/script/wkhtmltopdf
 # Debian 7 32
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i486-linux-gnu-thread-multi-64int/auto/Cairo/Cairo.so /usr/lib/i386-linux-gnu
 thruk: binary-or-shlib-defines-rpath usr/lib/thruk/perl5/i486-linux-gnu-thread-multi-64int/auto/GD/GD.so /usr/lib/i386-linux-gnu
