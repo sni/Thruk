@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# read rc files if exist
+[ -e ~/.thruk   ] && . ~/.thruk
+[ -e ~/.profile ] && . ~/.profile
+
 LOGFILE="$3";
 if [ "$LOGFILE" != "" ]; then
   exec > $LOGFILE 2>&1
