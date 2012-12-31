@@ -30,6 +30,9 @@ API. It is designed to be a 'dropin' replacement and covers almost
 all of the original features plus adds additional enhancements for
 large installations.
 
+# disable binary striping
+%global __os_install_post %{nil}
+
 %prep
 rm -rf %{buildroot}
 %setup -q
