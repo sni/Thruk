@@ -3021,9 +3021,11 @@ var ajax_search = {
         }
         if(backend_select) {
             var backends = jQuery('#'+backend_select).val();
-            jQuery.each(backends, function(i, val) {
-                search_url = search_url + '&backend=' + val;
-            });
+            if(backends != undefined) {
+                jQuery.each(backends, function(i, val) {
+                    search_url = search_url + '&backend=' + val;
+                });
+            }
         }
 
         input.setAttribute("autocomplete", "off");
