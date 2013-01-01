@@ -83,9 +83,9 @@
         [% ELSIF r.var.ctype != ''                      %][% icon = 'page_white_text.png' %]
         [% END %]
         [% IF r.var.ctype == 'html2pdf' %]
-          <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0&amp;html=1" target="_blank" style="padding-right: 3px;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
+          <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0&amp;html=1" target="_blank" style="padding-left: 3px;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/page_world.png' border="0" alt='View Report Preview' title='View Report Preview' width=16 height=16></a>
         [% END %]
-        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
+        <a href="reports2.cgi?report=[% r.nr %]&amp;refresh=0" style="padding-left: 3px; padding-right: 3px;"><img src='[% url_prefix %]thruk/themes/[% theme %]/images/[% icon %]' border="0" alt='View Report' title='View Report' width=16 height=16></a>
       [% END %]
     </td>
   </tr>
