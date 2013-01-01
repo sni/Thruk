@@ -21,7 +21,7 @@ set -e
 
 case "$1" in
     remove)
-        rm -rf /var/cache/thruk/*
+        rm -rf /var/cache/thruk
     ;;
     upgrade)
         rm -rf /var/cache/thruk/*

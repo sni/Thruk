@@ -204,7 +204,7 @@ exit 0
 case "$*" in
   0)
     # POSTUN
-    rm -rf %{_localstatedir}/cache/thruk/*
+    rm -rf %{_localstatedir}/cache/thruk
     rm -f %{_datadir}/thruk/root/thruk/plugins/*
     %{insserv_cleanup}
     ;;
@@ -218,7 +218,7 @@ chown -R wwwrun: /var/cache/thruk
 chown -R apache: /var/cache/thruk
 %endif
     ;;
-  *) echo case "$*" not handled in preun
+  *) echo case "$*" not handled in postun
 esac
 exit 0
 
