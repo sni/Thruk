@@ -734,6 +734,7 @@ sub _convert_to_pdf {
     my $cmd = $c->config->{plugin_path}.'/plugins-enabled/reports2/scripts/html2pdf.sh "'.$htmlfile.'" "'.$attachment.'.pdf" "'.$logfile.'" "'.$wkhtmltopdf.'"';
     `$cmd`;
     move($attachment.'.pdf', $attachment);
+    Thruk::Utils::IO::ensure_permissions('file', $attachment);
     return;
 }
 
