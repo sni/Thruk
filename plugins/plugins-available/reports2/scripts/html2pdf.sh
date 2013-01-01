@@ -42,5 +42,12 @@ DISPLAY=:$DISP $WKHTMLTOPDF \
 
 [ -e "$OUTPUT" ] || cat $TMPLOG
 
+# ensure file is not owned by root
+if [ -e $OUTPUT -a $UID == 0 ]; then
+    usr=`ls -la "$INPUT" | awk '{ print $3 }'`
+    grp=`ls -la "$INPUT" | awk '{ print $4 }'`
+    chown $usr:$grp $OUTPUT
+fi
+
 kill $xpid >/dev/null 2>&1
 rm -f $TMPLOG
