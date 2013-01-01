@@ -24,9 +24,11 @@ while [ -f /tmp/.X${DISP}-lock ];do
   let "DISP %= 500";
 done;
 XAUTHORITY=`mktemp`;
-Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP > /dev/null 2>&1 &
+TMPLOG=`mktemp`;
+Xvfb -screen 0 1024x768x24 -dpi 60 -terminate -auth $XAUTHORITY -nolisten tcp :$DISP >$TMPLOG 2>&1 &
 xpid=$!
 
+rm -f $OUTPUT
 DISPLAY=:$DISP $WKHTMLTOPDF \
         --use-xserver \
         -l \
@@ -38,4 +40,7 @@ DISPLAY=:$DISP $WKHTMLTOPDF \
         $INPUT $OUTPUT 2>&1 | \
     grep -v 'QPixmap: Cannot create a QPixmap when no GUI is being used'
 
+[ -e "$OUTPUT" ] || cat $TMPLOG
+
 kill $xpid >/dev/null 2>&1
+rm -f $TMPLOG
