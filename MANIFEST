@@ -1101,6 +1101,7 @@ templates/_status_filter.tt
 templates/_status_host_attributes.tt
 templates/_status_hostdetail_table.tt
 templates/_status_service_attributes.tt
+templates/_table_search_field.tt
 templates/avail_report_form_box.tt
 templates/avail_report_host.tt
 templates/avail_report_hostgroup.tt
@@ -1233,8 +1234,14 @@ templates/config_timeperiods.tt
 templates/custom_perf_bar_adjustments.tt
 templates/docs.tt
 templates/error.tt
+templates/excel/_comment_host_worksheet.tt
+templates/excel/_comment_service_worksheet.tt
+templates/excel/_downtime_host_worksheet.tt
+templates/excel/_downtime_service_worksheet.tt
 templates/excel/_status_detail_worksheet.tt
 templates/excel/_status_hostdetail_worksheet.tt
+templates/excel/comments.tt
+templates/excel/downtimes.tt
 templates/excel/logs.tt
 templates/excel/notifications.tt
 templates/excel/status_combined.tt

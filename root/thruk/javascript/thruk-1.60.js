@@ -864,6 +864,47 @@ function add_cron_row(tbl_id) {
     tblBody.insertBefore(newRow, currentLastRow);
 }
 
+/* filter table content by search field */
+var table_search_input_id, table_search_table_ids, table_search_timer;
+function table_search(input_id, table_ids) {
+    table_search_input_id  = input_id;
+    table_search_table_ids = table_ids;
+    clearTimeout(table_search_timer);
+    table_search_timer = window.setTimeout('do_table_search()', 300);
+}
+/* do the search work */
+function do_table_search() {
+    var ids      = table_search_table_ids;
+    var value    = jQuery('#'+table_search_input_id).val();
+    jQuery.each(ids, function(nr, id) {
+        var table = document.getElementById(id);
+        /* make tables fixed witdh to avoid flickering */
+        table.width = table.offsetWidth;
+        jQuery.each(table.rows, function(nr, row) {
+            if(nr > 0) {
+                var found = 0;
+                jQuery.each(row.cells, function(nr, cell) {
+                    /* if regex matching fails, use normal matching */
+                    try {
+                        if(cell.innerHTML.match(value)) {
+                            found = 1;
+                        }
+                    } catch(e) {
+                        if(cell.innerHTML.indexOf(value) != -1) {
+                            found = 1;
+                        }
+                    }
+                });
+                if(found == 0) {
+                    hideElement(row);
+                } else {
+                    showElement(row);
+                }
+            }
+        });
+    });
+}
+
 /*******************************************************************************
  * 88888888ba  88888888888 88888888ba  88888888888 88888888ba,        db   888888888888   db
  * 88      "8b 88          88      "8b 88          88      `"8b      d88b       88       d88b

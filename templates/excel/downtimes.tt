@@ -1,0 +1,4 @@
+﻿<workbook>
+  [% PROCESS "excel/_downtime_host_worksheet.tt"    data=hostdowntimes     name="Hosts"    columns=host_columns    last_col=host_last_col %]
+  [% PROCESS "excel/_downtime_service_worksheet.tt" data=servicedowntimes  name="Services" columns=service_columns last_col=service_last_col %]
+</workbook>

@@ -2,10 +2,11 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Test::More;
+use JSON::XS;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'CATALYST_SERVER'});
-    plan tests => 184;
+    plan tests => 218;
 }
 
 BEGIN {
@@ -44,4 +45,33 @@ for my $url (@{$pages}) {
     } else {
         TestUtils::test_page( 'url' => $url );
     }
+}
+
+# json pages
+$pages = [
+    '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=json',
+    '/thruk/cgi-bin/extinfo.cgi?type=6&view_mode=json',
+];
+
+for my $url (@{$pages}) {
+    my $page = TestUtils::test_page(
+        'url'          => $url,
+        'content_type' => 'application/json; charset=utf-8',
+    );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'HASH', "json result is an array: ".$url);
+}
+
+# excel pages
+$pages = [
+    '/thruk/cgi-bin/extinfo.cgi?type=3&view_mode=xls',
+    '/thruk/cgi-bin/extinfo.cgi?type=6&view_mode=xls',
+];
+
+for my $url (@{$pages}) {
+    my $page = TestUtils::test_page(
+        'url'          => $url,
+        'content_type' => 'application/x-msexcel',
+        'like'         => [ 'Arial1', 'Tahoma1' ],
+    );
 }

@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='comment' style="min-width: 700px;">
+  <table border="0" class='comment hoverable' style="min-width: 700px;" id="[% type %]_comments_table">
     <tr class='comment'>
       [% IF names %]
       <th class='comment'>Host Name</th>

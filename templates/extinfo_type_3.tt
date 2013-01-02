@@ -27,17 +27,37 @@
       <img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=1'>Add a new host comment</a>
       [% END %]
     </div><br>
-    <div class="hint">mark host / services comments with leftclick. Select multiple with shift + mouse.</div>
-    [% PROCESS _comments_table.tt comments = hostcomments type='host' names=1 %]
+
+    <div align="center">
+    <table border=0 cellpadding=0 cellspacing=0>
+      <tr>
+        <td width="220"></td>
+        <td align="center">
+          <div class="hint">mark host comments with leftclick. Select multiple with shift + mouse.</div>
+        </td>
+        <td width="220" align="right" class="toolbar">
+          [% style="comments" %]
+          [% PROCESS _table_search_field.tt ids=["host_comments_table", "service_comments_table"] %]
+          [% PROCESS _json_export.tt %]
+          [% columns=[ 'Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ] %]
+          [% PROCESS _excel_export.tt columns=columns %]
+        </td>
+      </tr>
+      <tr>
+        <td colspan=3>
+          [% PROCESS _comments_table.tt comments = hostcomments type='host' names=1 %]
+        </td>
+      </tr>
+    </table>
+    </div>
     <br>
     <br>
     <br>
     <a name="SERVICECOMMENTS" id="SERVICECOMMENTS"></a>
     <div class='commentTitle'>Service Comments</div>
     [% UNLESS c.config.command_disabled.exists('3') %]
-    <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div><br>
+    <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div>
     [% END %]
-    <div class="hint">mark host / services comments with leftclick. Select multiple with shift + mouse.</div>
     [% PROCESS _comments_table.tt comments = servicecomments type='service' names=1 %]
 <br>
 

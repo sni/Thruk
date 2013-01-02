@@ -1,5 +1,5 @@
 ﻿<div align="center">
-  <table border="0" class='downtime' style="min-width: 900px;">
+  <table border="0" class='downtime hoverable' style="min-width: 900px;" id="[% type %]_downtimes_table">
     <tr class='downtime'>
       [% IF names %]
       <th class='downtime'>Host Name</th>

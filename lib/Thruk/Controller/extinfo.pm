@@ -86,11 +86,27 @@ sub index : Path : Args(0) : MyAction('AddDefaults') {
 ##########################################################
 
 ##########################################################
-# create the downtimes page
+# create the comments page
 sub _process_comments_page {
     my( $self, $c ) = @_;
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+
     $c->stash->{'hostcomments'}    = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ] );
     $c->stash->{'servicecomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ] );
+
+    if( defined $view_mode and $view_mode eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c);
+        $c->res->header( 'Content-Disposition', 'attachment; filename="comments.xls"' );
+        $c->stash->{'template'} = 'excel/comments.tt';
+        return $c->detach('View::Excel');
+    }
+    if($view_mode eq 'json') {
+        $c->stash->{'json'} = {
+            'host'    => $c->stash->{'hostcomments'},
+            'service' => $c->stash->{'servicecomments'},
+        };
+        return $c->detach('View::JSON');
+    }
     return 1;
 }
 
@@ -98,8 +114,24 @@ sub _process_comments_page {
 # create the downtimes page
 sub _process_downtimes_page {
     my( $self, $c ) = @_;
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+
     $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
     $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
+
+    if( defined $view_mode and $view_mode eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c);
+        $c->res->header( 'Content-Disposition', 'attachment; filename="downtimes.xls"' );
+        $c->stash->{'template'} = 'excel/downtimes.tt';
+        return $c->detach('View::Excel');
+    }
+    if($view_mode eq 'json') {
+        $c->stash->{'json'} = {
+            'host'    => $c->stash->{'hostdowntimes'},
+            'service' => $c->stash->{'servicedowntimes'},
+        };
+        return $c->detach('View::JSON');
+    }
     return 1;
 }
 

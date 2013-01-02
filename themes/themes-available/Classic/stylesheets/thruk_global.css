@@ -770,7 +770,7 @@ SPAN.deleteicon SPAN {
   position: absolute;
   display: block;
   top: -1px;
-  right: 3px;
+  right: 5px;
   width: 14px;
   height: 14px;
   background: url('../images/btn_close_small.png');
@@ -950,4 +950,8 @@ DIV.perf_bar_crit {
   border: 0;
   border-right: 1px solid #B36969;
   position: absolute;
+}
+
+TD.toolbar IMG {
+  vertical-align: text-bottom;
 }

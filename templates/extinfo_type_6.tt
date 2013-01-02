@@ -23,17 +23,37 @@
     [% UNLESS c.config.command_disabled.exists('55') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=55'>Schedule host downtime</a></div><br>
     [% END %]
-    <div class="hint">mark host / services downtimes with leftclick. Select multiple with shift + mouse.</div>
-    [% PROCESS _downtimes_table.tt downtimes = hostdowntimes type='host' names=1 %]
+    <div align="center">
+    <table border=0 cellpadding=0 cellspacing=0>
+      <tr>
+        <td width="220"></td>
+        <td align="center">
+          <div class="hint">mark host / service downtimes with leftclick. Select multiple with shift + mouse.</div>
+        </td>
+        <td width="220" align="right" class="toolbar">
+          [% style="comments" %]
+          [% PROCESS _table_search_field.tt ids=["host_downtimes_table", "service_downtimes_table"] %]
+          [% PROCESS _json_export.tt %]
+          [% columns=[ 'Hostname', 'Service', 'Entry Time', 'Author', 'Comment', 'Start Time', 'End Time', 'Type', 'Duration', 'Downtime ID', 'Trigger ID' ] %]
+          [% PROCESS _excel_export.tt columns=columns %]
+        </td>
+      </tr>
+      <tr>
+        <td colspan=3>
+          [% PROCESS _downtimes_table.tt downtimes = hostdowntimes type='host' names=1 %]
+        </td>
+      </tr>
+    </table>
+    </div>
+
     <br>
     <br>
     <br>
     <a name="SERVICEDOWNTIME" id="SERVICEDOWNTIME"></a>
     <div class='downtimeTitle'>Scheduled Service Downtime</div>
     [% UNLESS c.config.command_disabled.exists('56') %]
-    <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div><br>
+    <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div>
     [% END %]
-    <div class="hint">mark host / services downtimes with leftclick. Select multiple with shift + mouse.</div>
     [% PROCESS _downtimes_table.tt downtimes = servicedowntimes type='service' names=1 %]
 <br>
 

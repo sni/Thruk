@@ -1,0 +1,4 @@
+﻿<workbook>
+  [% PROCESS "excel/_comment_host_worksheet.tt"    data=hostcomments     name="Hosts"    columns=host_columns    last_col=host_last_col %]
+  [% PROCESS "excel/_comment_service_worksheet.tt" data=servicecomments  name="Services" columns=service_columns last_col=service_last_col %]
+</workbook>

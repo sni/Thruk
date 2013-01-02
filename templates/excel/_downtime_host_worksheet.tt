@@ -1,0 +1,33 @@
+﻿[% USE date %]
+[% size = 1 %]
+[% IF data %][% size = data.size + 1 %][% END %]
+  <worksheet name='[% name %]' autofilter='A1:[% last_col %][% size %]'>
+    <row>
+      <format bold='1' bg_color='silver' align='center'>
+        [% IF columns.1  %]<cell width='30'>Hostname</cell>[% END %]
+        [% IF columns.2  %]<cell width='20'>Entry Time</cell>[% END %]
+        [% IF columns.3  %]<cell width='16'>Author</cell>[% END %]
+        [% IF columns.4  %]<cell width='40'>Comment</cell>[% END %]
+        [% IF columns.5  %]<cell width='20'>Start Time</cell>[% END %]
+        [% IF columns.6  %]<cell width='20'>End Time</cell>[% END %]
+        [% IF columns.7  %]<cell width='14'>Type</cell>[% END %]
+        [% IF columns.8  %]<cell width='14'>Duration</cell>[% END %]
+        [% IF columns.9  %]<cell width='16'>Downtime ID</cell>[% END %]
+        [% IF columns.10 %]<cell width='16'>Trigger ID</cell>[% END %]
+      </format>
+    </row>
+    [% FOREACH d = data %]
+      <row>
+        [% IF columns.1  %]<cell>[% d.host_name %]</cell>[% END %]
+        [% IF columns.2  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.entry_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
+        [% IF columns.3  %]<cell>[% d.author %]</cell>[% END %]
+        [% IF columns.4  %]<cell>[% escape_xml(d.comment) %]</cell>[% END %]
+        [% IF columns.5  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.start_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
+        [% IF columns.6  %]<format num_format='yyyy-mm-dd hh:mm:ss'><cell>[% format_date(d.end_time, '%Y-%m-%dT%H:%M:%S') %]</cell></format>[% END %]
+        [% IF columns.7  %]<cell>[% IF d.fixed %]Fixed[% ELSE%]Flexible[% END %]</cell>[% END %]
+        [% IF columns.8  %]<cell>[% IF d.fixed %][% duration(d.end_time - d.start_time) %][% ELSE%][% duration(d.duration) %][% END %]</cell>[% END %]
+        [% IF columns.9  %]<cell>[% d.id %]</cell>[% END %]
+        [% IF columns.10 %]<cell>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</cell>[% END %]
+      </row>
+    [% END %]
+  </worksheet>
