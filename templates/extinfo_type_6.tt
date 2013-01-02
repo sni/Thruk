@@ -40,7 +40,7 @@
       </tr>
       <tr>
         <td colspan=3>
-          [% PROCESS _downtimes_table.tt downtimes = hostdowntimes type='host' names=1 %]
+          [% PROCESS _downtimes_table.tt downtimes = hostdowntimes type='host' names=1 sortprefix='_hst' %]
         </td>
       </tr>
     </table>
@@ -54,7 +54,7 @@
     [% UNLESS c.config.command_disabled.exists('56') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/downtime.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=56'>Schedule service downtime</a></div>
     [% END %]
-    [% PROCESS _downtimes_table.tt downtimes = servicedowntimes type='service' names=1 %]
+    [% PROCESS _downtimes_table.tt downtimes = servicedowntimes type='service' names=1 sortprefix='_svc' %]
 <br>
 
 [% PROCESS _footer.tt %]

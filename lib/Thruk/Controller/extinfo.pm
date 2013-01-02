@@ -91,8 +91,41 @@ sub _process_comments_page {
     my( $self, $c ) = @_;
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
 
-    $c->stash->{'hostcomments'}    = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ] );
-    $c->stash->{'servicecomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ] );
+    # services
+    my $svc_sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_svc'}   || 1;
+    my $svc_sortoption = $c->{'request'}->{'parameters'}->{'sortoption_svc'} || 1;
+    my $svc_order      = "ASC";
+    $svc_order = "DESC" if $svc_sorttype == 2;
+    my $sortoptions = {
+        '1' => [ [ 'host_name',   'service_description' ], 'host name' ],
+        '2' => [ [ 'service_description' ],                'service name' ],
+        '3' => [ [ 'entry_time' ],                         'entry time' ],
+        '4' => [ [ 'author' ],                             'author' ],
+        '5' => [ [ 'comment' ],                            'comment' ],
+        '6' => [ [ 'id' ],                                 'id' ],
+        '7' => [ [ 'persistent' ],                         'persistent' ],
+        '8' => [ [ 'entry_type' ],                         'entry_type' ],
+        '9' => [ [ 'expires' ],                            'expires' ],
+    };
+    $svc_sortoption = 1 if !defined $sortoptions->{$svc_sortoption};
+    $c->stash->{'svc_orderby'}  = $sortoptions->{$svc_sortoption}->[1];
+    $c->stash->{'svc_orderdir'} = $svc_order;
+
+    # hosts
+    my $hst_sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_hst'}   || 1;
+    my $hst_sortoption = $c->{'request'}->{'parameters'}->{'sortoption_hst'} || 1;
+    my $hst_order      = "ASC";
+    $hst_order = "DESC" if $hst_sorttype == 2;
+    $hst_sortoption = 1 if !defined $sortoptions->{$hst_sortoption};
+    $c->stash->{'hst_orderby'}  = $sortoptions->{$hst_sortoption}->[1];
+    $c->stash->{'hst_orderdir'} = $hst_order;
+
+    $c->stash->{'hostcomments'}    = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => undef } ],
+                                                               sort   => { $hst_order => $sortoptions->{$hst_sortoption}->[0] },
+                                                              );
+    $c->stash->{'servicecomments'} = $c->{'db'}->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { 'service_description' => { '!=' => undef } } ],
+                                                               sort   => { $svc_order => $sortoptions->{$svc_sortoption}->[0] },
+                                                              );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);
@@ -116,8 +149,43 @@ sub _process_downtimes_page {
     my( $self, $c ) = @_;
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
 
-    $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ], sort => 'host_name' );
-    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ], sort => ['host_name', 'service_description'] );
+    # services
+    my $svc_sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_svc'}   || 1;
+    my $svc_sortoption = $c->{'request'}->{'parameters'}->{'sortoption_svc'} || 1;
+    my $svc_order      = "ASC";
+    $svc_order = "DESC" if $svc_sorttype == 2;
+    my $sortoptions = {
+        '1' => [ [ 'host_name',   'service_description' ], 'host name' ],
+        '2' => [ [ 'service_description' ],                'service name' ],
+        '3' => [ [ 'entry_time' ],                         'entry time' ],
+        '4' => [ [ 'author' ],                             'author' ],
+        '5' => [ [ 'comment' ],                            'comment' ],
+        '6' => [ [ 'start_time' ],                         'start time' ],
+        '7' => [ [ 'end_time' ],                           'end time' ],
+        '8' => [ [ 'fixed' ],                              'type' ],
+        '9' => [ [ 'duration' ],                           'duration' ],
+        '10' =>[ [ 'id' ],                                 'id' ],
+        '11' =>[ [ 'triggered_by' ],                       'trigger id' ],
+    };
+    $svc_sortoption = 1 if !defined $sortoptions->{$svc_sortoption};
+    $c->stash->{'svc_orderby'}  = $sortoptions->{$svc_sortoption}->[1];
+    $c->stash->{'svc_orderdir'} = $svc_order;
+
+    # hosts
+    my $hst_sorttype   = $c->{'request'}->{'parameters'}->{'sorttype_hst'}   || 1;
+    my $hst_sortoption = $c->{'request'}->{'parameters'}->{'sortoption_hst'} || 1;
+    my $hst_order      = "ASC";
+    $hst_order = "DESC" if $hst_sorttype == 2;
+    $hst_sortoption = 1 if !defined $sortoptions->{$hst_sortoption};
+    $c->stash->{'hst_orderby'}  = $sortoptions->{$hst_sortoption}->[1];
+    $c->stash->{'hst_orderdir'} = $hst_order;
+
+    $c->stash->{'hostdowntimes'}    = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => undef } ],
+                                                               sort   => { $hst_order => $sortoptions->{$hst_sortoption}->[0] },
+                                                              );
+    $c->stash->{'servicedowntimes'} = $c->{'db'}->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { 'service_description' => { '!=' => undef } } ],
+                                                               sort   => { $svc_order => $sortoptions->{$svc_sortoption}->[0] },
+                                                              );
 
     if( defined $view_mode and $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c);

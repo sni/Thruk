@@ -45,7 +45,7 @@
       </tr>
       <tr>
         <td colspan=3>
-          [% PROCESS _comments_table.tt comments = hostcomments type='host' names=1 %]
+          [% PROCESS _comments_table.tt comments = hostcomments type='host' names=1 sortprefix='_hst' %]
         </td>
       </tr>
     </table>
@@ -58,7 +58,7 @@
     [% UNLESS c.config.command_disabled.exists('3') %]
     <div class='comment'><img src='[% url_prefix %]thruk/themes/[% theme %]/images/comment.gif' border="0" alt="#########" width="20" height="20">&nbsp;<a href='cmd.cgi?cmd_typ=3'>Add a new service comment</a></div>
     [% END %]
-    [% PROCESS _comments_table.tt comments = servicecomments type='service' names=1 %]
+    [% PROCESS _comments_table.tt comments = servicecomments type='service' names=1 sortprefix='_svc' %]
 <br>
 
 [% PROCESS _footer.tt %]
