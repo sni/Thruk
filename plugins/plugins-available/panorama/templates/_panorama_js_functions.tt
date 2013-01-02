@@ -377,8 +377,8 @@ var TP = {
             /* extract pi details */
             if(data.pi_detail != undefined) {
                 for(var key in data.pi_detail) {
-                    initial_backends[key].state         = data.pi_detail[key].state;
-                    initial_backends[key].program_start = data.pi_detail[key].program_start;
+                    initial_backends[key].state         = data.pi_detail[key]['state'];
+                    initial_backends[key].program_start = data.pi_detail[key]['program_start'];
                 }
             }
             /* contains a message? */
