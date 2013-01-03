@@ -40,6 +40,12 @@
   [% WRAPPER 'reports/comp/report.tt' %]
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
 
+    [% IF avail_data.services > 1 %]
+      [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="SLA Graph Overview" %]
+        [% PROCESS 'reports/comp/sla_total_graph.tt' type='service' %]
+      [% END %]
+    [% END %]
+
     [% FOREACH hst = avail_data.services.keys.sort %]
       [% FOREACH svc = avail_data.services.$hst.keys.sort %]
         [% c.request.parameters.host    = hst %]

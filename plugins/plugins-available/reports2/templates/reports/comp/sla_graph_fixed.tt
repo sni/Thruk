@@ -10,7 +10,6 @@
   var d2 = {
       color: "rgb(236, 193, 77)",
       lines: { show: true },
-      stack: false,
       data: [[0, [% param.sla %]], [9999, [% param.sla %]]]
   }
   $.plot($("#flotgraph[% nr %]"), [d1, d2], {

@@ -161,7 +161,7 @@ TABLE.availability_details.months12 TH {
 TABLE.availability_details.weeks5 TH, TABLE.availability_details.weeks4 TH {
   min-width: 50px;
 }
-TD.sla_nok {
+TD.sla_nok, SPAN.sla_nok {
   color: red;
 }
 DIV.flotgraph {
@@ -171,6 +171,35 @@ DIV.flotgraph {
 DIV.axis_y {
   position: relative;
   left: -2px;
+}
+SPAN.graph_hst_legend {
+  left: 20px;
+  position: absolute;
+  width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+SPAN.graph_svc_hst_legend {
+  left: 20px;
+  position: absolute;
+  width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+SPAN.graph_svc_legend {
+  left: 170px;
+  position: absolute;
+  width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+SPAN.graph_percent_legend {
+  left: 345px;
+  position: absolute;
+  width: 65px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: right;
 }
 
 /* page sizing */

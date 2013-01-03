@@ -498,6 +498,20 @@ sub get_day_name {
 }
 
 ##########################################################
+
+=head2 dump
+
+  dump(...)
+
+dump variables to stderr
+
+=cut
+sub dump {
+    print STDERR  Dumper(@_);
+    return "";
+}
+
+##########################################################
 # INTERNAL SUBS
 ##########################################################
 sub _replace_css_and_images {
