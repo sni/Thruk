@@ -40,7 +40,7 @@
   [% WRAPPER 'reports/comp/report.tt' %]
     [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
 
-    [% IF avail_data.services > 1 %]
+    [% IF avail_data.services.size > 1 %]
       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="SLA Graph Overview" %]
         [% PROCESS 'reports/comp/sla_total_graph.tt' type='service' %]
       [% END %]
