@@ -189,7 +189,6 @@ sub _process_outagespbimp {
     $c->stash->{title}          = 'Problems and Impacts';
     $c->stash->{infoBoxTitle}   = 'Problems and Impacts';
     $c->stash->{page}           = 'status';
-    $c->stash->{show_top_pane}  = 1;
     $c->stash->{template}       = 'shinken_outagespbimp.tt';
 
     return 1;

@@ -17,7 +17,7 @@ plan skip_all => 'internal test only' if defined $ENV{'CATALYST_SERVER'};
 
 my($res, $c) = ctx_request('/thruk/side.html');
 if($c->stash->{'enable_shinken_features'}) {
-    plan tests => 52;
+    plan tests => 64;
 } else {
     plan skip_all => 'pure shinken backend required'
 }
@@ -38,6 +38,7 @@ for my $url (@{$pages}) {
 # get a problem host
 my($host,$service) = TestUtils::get_test_service();
 $pages = [
+    '/thruk/cgi-bin/shinken_status.cgi',
     '/thruk/cgi-bin/shinken_status.cgi?style=bothtypes&s0_type=impact&s0_op=%3D&s0_value='.$host.'&title=Impacts of '.$host,
     '/thruk/cgi-bin/shinken_status.cgi?style=bothtypes&s0_type=rootproblem&s0_op=%3D&s0_value='.$host.'/'.$service.'&title=Root%20problem%20of%20'.$host.'/'.$service,
 ];
