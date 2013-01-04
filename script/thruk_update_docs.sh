@@ -15,6 +15,7 @@ if [ THRUK_MANUAL.txt -nt THRUK_MANUAL.html ]; then
     chmod 644 THRUK_MANUAL.html
     $DOS2UNIX THRUK_MANUAL.html
     ../script/thruk_replace_doc_toc.pl THRUK_MANUAL.html
+    ../script/thruk_replace_doc_css.pl THRUK_MANUAL.html flask.css
 fi
 
 if [ FAQ.txt -nt FAQ.html ]; then
@@ -22,6 +23,7 @@ if [ FAQ.txt -nt FAQ.html ]; then
     chmod 644 FAQ.html
     $DOS2UNIX FAQ.html
     ../script/thruk_replace_doc_toc.pl FAQ.html
+    ../script/thruk_replace_doc_css.pl FAQ.html flask.css
 fi
 
 # man pages from asciidoc

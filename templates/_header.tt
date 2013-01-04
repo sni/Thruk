@@ -60,7 +60,7 @@
     [% IF extra_header %][% extra_header %][% END %]
   </head>
 
-  <body class='[% page %]' id='[% page %]' onLoad="bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %])">
+  <body class='[% page %][% IF extrabodyclass +%] [%+ extrabodyclass %][% END %]' id='[% page %]' onLoad="bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %])">
   [% ssi_header %]
   <div style="display:none;" id="search-results"></div>
 

@@ -15,6 +15,7 @@ debian/thruk.manpages
 dist.ini
 docs/FAQ.html
 docs/FAQ.txt
+docs/flask.css
 docs/nagexp.3
 docs/nagimp.3
 docs/naglint.3
@@ -34,6 +35,7 @@ docs/source/multi_site.png
 docs/source/PluginOutput.png
 docs/source/PNP4nagios.png
 docs/source/Reschedule.png
+docs/source/sla_reporting.png
 docs/thruk.3
 docs/thruk.8
 docs/thruk8.txt
@@ -952,6 +954,7 @@ script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
 script/thruk_link_images.sh
 script/thruk_optimize_images.sh
+script/thruk_replace_doc_css.pl
 script/thruk_replace_doc_toc.pl
 script/thruk_server.pl
 script/thruk_test.pl

@@ -212,8 +212,9 @@ for.
 /usr/bin/perl: symbol lookup error: /usr/lib/thruk/perl5/x86_64-linux-gnu-thread-multi/auto/List/Util/Util.so: undefined symbol: Perl_Istack_sp_ptr
 ------------------
 
-The solution is simple, use the right package or source installation
-if no package is available for your platform.
+The solution is simple: use the right package for your distribution.
+If there is no package is available for your platform, use the source
+installation.
 
 
 === Broken PDF Reports in Centos/Rhel 5
@@ -222,3 +223,6 @@ PDF reports won't work with libcairo < 1.8.8. Therefor you may use the
 prepared packages for cairo 1.8.8 on rhel/centos 5 on the
 http://thruk.org/download.html[download
 page].
+
+The new 'reports2' module should work fine, even on older Redhat
+boxes.

@@ -12,18 +12,20 @@
 <br>
 
 <table border="0" width="800">
-   <tr><td>
-  <h2>Thruk Documentation</h2>
-  <br>
-  Thruks documentation itself is located in your project root under the /docs/ folder.<br>
-  <br>
-  To replace this link with a valid documentation of your monitoring tool<br>
-  change the <i>documentation_link</i> setting in your thruk_local.conf<br>
-  <br>
-  If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
-  <br>
-  For installation information look at the <a href="[% url_prefix %]thruk/documentation.html">Documentation</a>
-  </td></tr>
+   <tr>
+     <td>
+      <h2>Thruk Documentation</h2>
+      <br>
+      Thruks documentation itself is located in your project root under the <a href="[% url_prefix %]thruk/documentation.html">/docs/</a> folder.<br>
+      <br>
+      To replace this link with the documentation of your monitoring tool<br>
+      add a <i>documentation_link</i> config item to your thruk_local.conf<br>
+      <br>
+      If you don't need a documentation link at all, set the <i>documentation_link</i> option to a blank value.<br>
+      <br>
+      For installation information and general Thruk help look at the <a href="[% url_prefix %]thruk/documentation.html">Documentation</a>
+    </td>
+  </tr>
 </table>
 
 [% PROCESS _footer.tt %]

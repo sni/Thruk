@@ -38,7 +38,7 @@ Main Features / Advantages
 
 
 
-== How it works
+=== How it works
 
 Thruk is written in Perl using the
 http://www.catalystframework.org[Catalyst Framework]. Backend
@@ -54,66 +54,75 @@ mod_auth_basic, mod_auth_ldap, mod_auth_mysql, ...).
 image:source/arch_preview.png[Thruk Architecture]
 
 
-== What makes Thruk cool
+=== Reasons to choose Thruk
 
 There are a couple of cool things in Thruk. A few of them are listed
 here.
 
-=== Multi Site Support
+==== Multi Site Support
 
 Thruk connects to as many cores as you want. You could even combine
 Nagios, Icinga and Shinken instances into one big combined view. That
 way you get the advantage of several independent locations and still
-have the overview about all your installations. Sites can be put into
+have an overview about all your installations. Sites can be put into
 groups for better arrangement.
 
 image:source/multi_site.png[Multi Site]
 
 
-=== Excel Export and Bookmarks
+==== SLA Reports
+The 'reporting' plugin creates comprehensive SLA reports in HTML and PDF format
+which may be send by mail at regular intervals. Besides that you may turn any
+page in Thruk into a regular E-Mail report.
+
+image:source/sla_reporting.png[SLA Reporting]
+
+
+==== Excel Export and Bookmarks
 
 The Bookmarks feature allows you to save your searches and add them as
 your personal menu item. Besides the bookmarks, you can adjust the
 menu easily with the menu_local.conf for all users.
 
 The Excel export creates real Excel files which can be send by mail or
-used to extract hostnames.
+used to extract hostnames and other information.
 
 image:source/Bookmarks_and_excel_export.png[Bookmarks and Excel Export]
 
 
-=== Config Tool
+==== Config Tool
 
-The Config Tool is great to make quick changes to your Thruk
-configuration. It is also possible to manage access with htpasswd
-files as well as adjusting your cgi.cfg.
+The Config Tool makes is very easy to change object configuration of
+your monitoring solution. It also allows you to make quick changes to your
+Thruk configuration, as well as managing user access via htpasswd
+files or adjusting your cgi.cfg.
 
 image:source/Config_Tool.png[Config Tool]
 
 
-=== Sending Multiple Commands
+==== Sending Multiple Commands
 
-The new status pages make it very convenient to send multiple commands
+The new status pages makes it very convenient to send multiple commands
 at once. It is even possible to send host and service commands at the
 same time. When rescheduling hosts and services, Thruk will wait until
-your check is finished and display the result as soon as the check is
-over.
+your check is finished and display the result as soon as the check has
+come back.
 
 image:source/Reschedule.png[Multiple Commands]
 
 
-=== Easy Filtering
+==== Easy Filtering
 
 Remember the days when you had to guess numbers in the url to filter
 hosts or services. With Thruk it's possible to quickly change your
 display filter. You can combine multiple filter to create whatever
 views you like. An Ajax search supports you, so you don't have to
-guess host or service names.
+guess host or service names, plus you get the power of regular expressions.
 
 image:source/Filter.png[Easy Filtering]
 
 
-=== PNP4Nagios Graphs
+==== PNP4Nagios Graphs
 
 When your action_url contains /pnp4nagios/, there will be automatically
 a graph displayed for your host and service. This gives you a quick
@@ -123,7 +132,7 @@ PNP4Nagios to get detailed information.
 image:source/PNP4nagios.png[PNP4Nagios]
 
 
-=== Multiple Lines of Plugin Output
+==== Multiple Lines of Plugin Output
 
 When your check returns multiple lines of plugin output. Thruk marks
 the output in blue and a click on it displays the complete output.
@@ -135,7 +144,7 @@ set a comment and when there is a downtime.
 image:source/PluginOutput.png[Multiple Lines of Plugin Output]
 
 
-=== Mine Map
+==== Mine Map
 
 The Mine Map is the perfect tool to get a quick overview. It is
 especially useful if you have a lot of common services across your
@@ -145,7 +154,7 @@ Normal filtering is possible too.
 image:source/MineMap.png[Mine Map]
 
 
-=== Mobile Interface
+==== Mobile Interface
 
 The Mobile interface gives you access to the most important things
 and allows you to quickly view and acknowledge problems.
@@ -231,7 +240,8 @@ You may need the SLES sdk dvd for additional dependencies.
 
 
 === Install from Source
-==== Requirements
+==== Installation Steps
+===== Requirements
 
 [IMPORTANT]
 .Experienced Users Only
@@ -250,7 +260,7 @@ will need the following:
 - compiler tools: automake, make, g++, gcc
 - Apache Webserver (optional for fastcgi only)
 
-==== Create New User
+===== Create New User
 refer to your systems manual on how to add new user.
 This guide uses the following:
 
@@ -262,7 +272,7 @@ This guide uses the following:
 
 IMPORTANT: all following steps should be done by the thruk user.
 
-==== Install Local::Lib
+===== Install Local::Lib
 
 
 Follow the steps on http://search.cpan.org/perldoc?local::lib#The_bootstrapping_technique
@@ -304,13 +314,13 @@ logout and login again and verify that your perl env looks like this:
 -------
 
 
-==== Install Module::Install
+===== Install Module::Install
 -------
   perl -MCPAN -e 'install Module::Install::Catalyst'
 -------
 
 
-==== Git Clone Thruk
+===== Git Clone Thruk
 
 -------
     git clone https://github.com/sni/Thruk.git
@@ -352,7 +362,7 @@ run perl Makefile.PL again to see if all dependencies are now installed properly
 -------
 
 
-==== Configuration
+===== Configuration
 
 Copy 'thruk.conf' to 'thruk_local.conf' and adjust the livestatus settings to your needs.
 -------
@@ -369,7 +379,7 @@ See the <<Thruk Configuration>> section for detailed explanation of configuratio
 
 
 
-==== Start Server
+===== Start Server
 After running these steps successfully, you should be able to test your
 installation:
 
@@ -694,16 +704,20 @@ logfile cache:
 
 == Thruk Configuration
 
-=== Config Files
-
 Configuration is managed mainly in these configuration files.
 
-  * thruk.conf
-  * thruk_local.conf
-  * cgi.cfg
-  * log4perl.conf
-  * menu.conf
-  * menu_local.conf
+-------
+  * thruk.conf          # shipped default Thruk config
+  * thruk_local.conf    # local override of Thruks settings
+  * cgi.cfg             # Nagios cgi.cfg
+  * log4perl.conf       # Logging configuration
+  * menu.conf           # Thruks default side navigation
+  * menu_local.conf     # local override for the navigation
+-------
+
+%subtoc%
+
+=== Config Files
 
 ==== thruk.conf
 
@@ -719,17 +733,10 @@ The idea is, that the thruk.conf is provided with the packaged defaults and the
 thruk_local.conf is to override these settings where needed.
 
 
+
+
+
 === General Settings
-
-
-==== use_timezone
-
-Changes the timezone from the systems default to this timezone.
-Only set this if you have trouble with displaying the right timestamps.
-
-ex.:
-
-  use_timezone = CET
 
 
 ==== title_prefix
@@ -754,85 +761,43 @@ ex.:
   url_prefix = /
 
 
-==== logo_path_prefix
+==== use_timezone
 
-Changes the path to your logo images. Default is
-$url_prefix+'thruk/themes/'+$current_theme+'/images/logos/' and
-therefor relative to the current selected theme. You could set a fixed
-path here.
-Like usual, paths starting with a / will be absolute from your
-webserver root directory. Paths starting without a / will be relative
-to the cgi directory.
+Changes the timezone from the systems default to this timezone.
+Only set this if you have trouble with displaying the right timestamps.
 
 ex.:
 
-  logo_path_prefix = /icons/
+  use_timezone = CET
 
 
-==== physical_logo_path
-
-Location of your logos in your filesystem. This directory should be
-mapped to your 'logo_path_prefix' directory where 'logo_path_prefix' is
-the path relative to your webserver root directory and 'physical_logo_path' is
-the corresponding filesystem path.
+==== mobile_agent
+Specify user agents which will be redirected to the mobile plugin (if
+enabled).
 
 ex.:
 
-  physical_logo_path = /usr/share/icons/
+  mobile_agent=iPhone,Android,IEMobile
 
 
-==== host_action_icon
+==== default_theme
 
-Change path to your host action icons. You may use
-relative paths to specify completely different location.
-You also may want to use 'action_pnp.png' when using pnp.
-Icon can be overridden by a custom variable '_ACTION_ICON'.
+Default theme to use for all users. Must be a valid sub directory in
+the themes folder.
 
 ex.:
 
-  host_action_icon = action.gif
+  default_theme = Thruk
 
 
-==== service_action_icon
-
-Change path to your service action icons. You may use
-relative paths to specify completely different location.
-You also may want to use 'action_pnp.png' when using pnp.
-Icon can be overridden by a custom variable '_ACTION_ICON'.
+==== first_day_of_week
+Set first day of week. Used in reports.
+ Sunday: 0
+ Monday: 1
 
 ex.:
 
-  service_action_icon = action.gif
-
-
-==== use_strict_host_authorization
-
-When set to a true value, every contact will only see the hosts where
-he is contact for plus the services where he is contact for. When
-disabled, a host contact will see all services for this host
-regardless of whether he is a service contact or not.
-
-ex.:
-
-  use_strict_host_authorization = 1
-
-
-==== make_auth_user_lowercase
-
-Convert authenticated username to lowercase.
-
-ex.:
-
-  make_auth_user_lowercase = 1
-
-
-==== make_auth_user_uppercase
-
-Convert authenticated username to uppercase.
-
-ex.:
-
-  make_auth_user_uppercase = 1
+  first_day_of_week = 0
 
 
 ==== start_page
@@ -880,23 +845,69 @@ ex.:
   allowed_frame_links = https://wiki.my-company.com
 
 
-==== initial_menu_state
 
-Set initial menu state.
 
-  closed  => 0
-  open    => 1
+
+=== Authorization Settings
+
+
+==== can_submit_commands
+Set this if a contact should be allowed to send commands unless defined for the
+contact itself. This is the default value for all contacts unless the user has
+a can_submit_commands setting in your monitoring configuration.
 
 ex.:
 
-  <initial_menu_state>
-    General        = 1
-    Current_Status = 1
-    Reports        = 1
-    System         = 1
-    Bookmarks      = 1
-  </initial_menu_state>
+  can_submit_commands = 1
 
+
+==== command_disabled
+Use this to disabled specific commands. Can be use multiple times to disabled
+multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
+links to the command page.
+You may use ranges here.
+
+ex.:
+
+  command_disabled = 14
+  command_disabled = 35
+  command_disabled = 17-34,50-65
+
+
+==== make_auth_user_lowercase
+
+Convert authenticated username to lowercase.
+
+ex.:
+
+  make_auth_user_lowercase = 1
+
+
+==== make_auth_user_uppercase
+
+Convert authenticated username to uppercase.
+
+ex.:
+
+  make_auth_user_uppercase = 1
+
+
+==== use_strict_host_authorization
+
+When set to a true value, every contact will only see the hosts where
+he is contact for plus the services where he is contact for. When
+disabled, a host contact will see all services for this host
+regardless of whether he is a service contact or not.
+
+ex.:
+
+  use_strict_host_authorization = 1
+
+
+
+
+
+=== Path Settings
 
 ==== cgi_cfg
 
@@ -995,6 +1006,33 @@ ex.:
   user_template_path = ./my_templates
 
 
+==== logo_path_prefix
+
+Changes the path to your logo images. Default is
+$url_prefix+'thruk/themes/'+$current_theme+'/images/logos/' and
+therefor relative to the current selected theme. You could set a fixed
+path here.
+Like usual, paths starting with a / will be absolute from your
+webserver root directory. Paths starting without a / will be relative
+to the cgi directory.
+
+ex.:
+
+  logo_path_prefix = /icons/
+
+
+==== physical_logo_path
+
+Location of your logos in your filesystem. This directory should be
+mapped to your 'logo_path_prefix' directory where 'logo_path_prefix' is
+the path relative to your webserver root directory and 'physical_logo_path' is
+the corresponding filesystem path.
+
+ex.:
+
+  physical_logo_path = /usr/share/icons/
+
+
 ==== mode_file
 
 Mode used when creating or saving files.
@@ -1012,47 +1050,22 @@ ex.:
 
   mode_dir = 0770
 
-
-==== delay_pages_after_backend_reload
-
-Delay the page delivery until the backends uptime is at least this
-amount of seconds. Displaying pages soon after backend restarts
-may display wrong results and all services are pending. Enable this if
-you experience problems with pending services after reloading your
-backend.
-Should be obsolete with Livestatus versions greater than 1.2
-ex.: setting this to 10 would start serving pages 10 seconds
-after the backend reload
+==== resource_file
+Set a general resource file. Make sure it does not contain any
+passwords or any other data which should not be displayed. Instead of
+using a general 'resource_file' you could define one file per peer in your
+peer config.
 
 ex.:
 
-  delay_pages_after_backend_reload = 10
+  resource_file = /etc/nagios3/resource.cfg
 
 
-==== use_frames
-
-Set whether you want to use a framed navigation or not. With using frames it's
-sometimes easier to include addons.
-See allowed_frame_links option for how to integrate addons.
-
-ex.:
-
-  use_frames = 0
 
 
-==== strict_passive_mode
 
-Normally passive checks would be marked as disabled. With this
-option set, disabled checks will only be displayed as disabled if their
-last result was active. Otherwise they would be marked as passive
-checks. This option also changes the passive icon only to be shown
-when the last check was passive, otherwise the disabled icon will be
-displayed.
 
-ex.:
-
-  strict_passive_mode = 1
-
+=== Search Settings
 
 ==== use_new_search
 
@@ -1063,15 +1076,6 @@ example: plugin_output, groups, names, descriptions
 ex.:
 
   use_new_search = 1
-
-
-==== use_new_command_box
-Show the new split command box on the host / service details page.
-
-ex.:
-
-  use_new_command_box = 1
-
 
 ==== use_ajax_search
 
@@ -1132,24 +1136,10 @@ ex.:
   ajax_search_timeperiods = 1
 
 
-==== default_theme
-
-Default theme to use for all users. Must be a valid sub directory in
-the themes folder.
-
-ex.:
-
-  default_theme = Thruk
 
 
-==== cookie_path
 
-Path used for cookies. Do not change unless you have weird url
-rewrites which breaks setting cookies.
-
-ex.:
-
-  cookie_path = /
+=== Paging Settings
 
 
 ==== use_pager
@@ -1195,28 +1185,410 @@ ex.:
   group_paging_grid = *5,  10, 50,  all
 
 
-==== can_submit_commands
-Set this if a contact should be allowed to send commands unless defined for the
-contact itself. This is the default value for all contacts unless the user has
-a can_submit_commands setting in your monitoring configuration.
+
+
+
+=== Display Settings
+
+
+==== host_action_icon
+
+Change path to your host action icons. You may use
+relative paths to specify completely different location.
+You also may want to use 'action_pnp.png' when using pnp.
+Icon can be overridden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
-  can_submit_commands = 1
+  host_action_icon = action.gif
 
 
-==== command_disabled
-Use this to disabled specific commands. Can be use multiple times to disabled
-multiple commands. The number can be found in the 'cmd_typ' cgi parameter from
-links to the command page.
-You may use ranges here.
+==== service_action_icon
+
+Change path to your service action icons. You may use
+relative paths to specify completely different location.
+You also may want to use 'action_pnp.png' when using pnp.
+Icon can be overridden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
-  command_disabled = 14
-  command_disabled = 35
-  command_disabled = 17-34,50-65
+  service_action_icon = action.gif
 
+
+==== initial_menu_state
+
+Set initial menu state.
+
+  closed  => 0
+  open    => 1
+
+ex.:
+
+  <initial_menu_state>
+    General        = 1
+    Current_Status = 1
+    Reports        = 1
+    System         = 1
+    Bookmarks      = 1
+  </initial_menu_state>
+
+
+==== use_frames
+
+Set whether you want to use a framed navigation or not. With using frames it's
+sometimes easier to include addons.
+See allowed_frame_links option for how to integrate addons.
+
+ex.:
+
+  use_frames = 0
+
+==== use_new_command_box
+Show the new split command box on the host / service details page.
+
+ex.:
+
+  use_new_command_box = 1
+
+
+==== datetime_format
+Default timeformat. Use POSIX format.
+
+ex.:
+
+  datetime_format = %Y-%m-%d  %H:%M:%S
+
+
+==== datetime_format_long
+Default long timeformat.
+
+ex.:
+
+  datetime_format_long = %a %b %e %H:%M:%S %Z %Y
+
+
+==== datetime_format_log
+Default log timeformat.
+
+ex.:
+
+  datetime_format_log = %B %d, %Y  %H
+
+
+==== datetime_format_trends
+Default trends timeformat.
+
+ex.:
+
+  datetime_format_trends = %a %b %e %H:%M:%S %Y
+
+
+==== datetime_format_today
+Default timeformat for todays date. Can be useful if you want a
+shorter date format for today.
+
+ex.:
+
+  datetime_format_today = %H:%M:%S
+
+
+==== info_popup_event_type
+On which event should the comments / downtime or longpluginoutput popup
+show up. Valid values are onclick or onmouseover.
+
+ex.:
+
+  info_popup_event_type = onmouseover
+
+
+==== info_popup_options
+Options for the popup window used for long pluginoutput, downtimes and
+comments.
+See http://www.bosrup.com/web/overlib/?Command_Reference for
+what options are available
+
+ex.:
+
+  info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF
+
+
+==== show_notification_number
+Display the current number of notification after the current / max
+attempts on the status details page.
+
+ex.:
+
+  show_notification_number = 0
+
+
+==== show_backends_in_table
+Display the backend/site name in the status table.
+This is useful if you have same hosts or services on different
+backends and need to know which one returns an error.
+Valid values are:
+
+ 1 - show site name at the end
+ 2 - put site name in front
+
+ex.:
+
+  show_backends_in_table = 0
+
+
+==== show_config_edit_buttons
+Show links to config tool for each host / service.
+You need to have the config tool plugin enabled
+and you need proper permissions for the link to appear.
+
+ex.:
+
+  show_config_edit_buttons = 1
+
+
+==== show_full_commandline
+Display the full command line for host / service checks .
+Be warned, the command line could contain passwords and other confidential data.
+In order to replace the user macros for commands, you have to set the
+'resource_file' in your peer config or the general 'resource_file' option.
+
+ * 0 = off, don't show the command line at all
+ * 1 = show them for contacts with the role: authorized_for_configuration_information
+ * 2 = show them for everyone
+
+ex.:
+
+  show_full_commandline = 0
+
+
+==== show_long_plugin_output
+
+When a plugin returns more than one line of output, the
+output can be displayed directly in the status table, as
+popup or not at all.
+Choose between popup, inline and off
+
+ex.:
+
+  show_long_plugin_output = popup
+
+
+==== show_modified_attributes
+
+Show if a host / service has modified attributes.
+
+ex.:
+
+  show_modified_attributes = 1
+
+
+==== perf_bar_mode
+This option enables a performance bar inside the status/host list which
+create a graph from the performance data of the plugin output. Available
+options are 'match', 'first', 'all', 'worst' and 'off'.
+
+ match: try to set graph which matches the output
+ all: graph all performance values available
+ first: graph only the first performance value
+ worst: graph only the graph for the worst state
+ off: graph no value at all
+
+ex.:
+
+  perf_bar_mode = match
+
+
+==== shown_inline_pnp
+Show inline pnp graph if available. If a service or host has a
+pnp4nagios action or notes url set. Thruk will show a inline graph on the
+extinfo page.
+This works for /pnp4nagios/ urls and /pnp/.
+
+ex.:
+
+  shown_inline_pnp = 1
+
+
+
+==== show_custom_vars
+Show custom vars in host / service ext info. List variable names to
+display in the host and service extinfo details page. Can be specified
+more than once to define multiple variables. You may use html in your
+variables. Use * as wildcard, ex.: _VAR*
+
+ex.:
+
+  show_custom_vars = _VAR1
+
+
+==== show_error_reports
+Show link to bug reports when internal errors occur.
+
+ex.:
+  show_error_reports = 1
+
+
+==== skip_js_errors
+don't report some known harmless javascript errors
+
+ex.:
+  skip_js_errors  = cluetip is not a function
+
+==== strict_passive_mode
+
+Normally passive checks would be marked as disabled. With this
+option set, disabled checks will only be displayed as disabled if their
+last result was active. Otherwise they would be marked as passive
+checks. This option also changes the passive icon only to be shown
+when the last check was passive, otherwise the disabled icon will be
+displayed.
+
+ex.:
+
+  strict_passive_mode = 1
+
+
+==== sitepanel
+The sitepanel is used to display multiple backends/sites at a glance.
+With than 10 or more sites, the list of backends will be combined
+into the combined site panel which just displays the totals of
+available / down / disabled sites.
+Set sitepanel to list/compact/auto/off to change the default
+behavior.
+
+ex.:
+
+  sitepanel = auto
+
+
+
+
+
+=== Connection Settings
+
+==== check_local_states
+Get the status for remote backends from local instances. This can
+increase performance when using multiple remote sites. It is enabled
+by default when using more than one site. You have to define
+hostchecks in any local backend (using unix sockets) with a name or
+alias of the address of your remote backends.
+
+ex.:
+
+  check_local_states = 1
+
+
+==== backend_debug
+Set logging of backend in verbose mode. This only
+makes sense when debug logging is activated.
+
+ex.:
+
+  backend_debug = 1
+
+
+==== connection_pool_size
+Use connection pool when accessing multiple sites.
+Increases the performance because backends will be queried
+parallel but uses around 50mb of memory per pool member.
+Disabled when set to 0. (experimental feature)
+
+ex.:
+
+  connection_pool_size = 0
+
+
+==== logcache
+Enables caching logfiles for faster access. Cache supports MongoDB
+only. Format is a MongoDB connection string like 'hostname:port/db'.
+Using a cache dramatically decreases cpu and memory usage of Thruk
+when accessing logfiles, for example when creating reports.
+
+ex.:
+
+  logcache = localhost:27017/thruk_log_cache
+
+==== delay_pages_after_backend_reload
+
+Delay the page delivery until the backends uptime is at least this
+amount of seconds. Displaying pages soon after backend restarts
+may display wrong results and all services are pending. Enable this if
+you experience problems with pending services after reloading your
+backend.
+Should be obsolete with Livestatus versions greater than 1.2
+ex.: setting this to 10 would start serving pages 10 seconds
+after the backend reload
+
+ex.:
+
+  delay_pages_after_backend_reload = 10
+
+
+
+
+
+=== Cookie Authentication Settings
+
+==== cookie_auth_login_url
+Specifies the url where non-authenticated users will be redirected
+too.
+
+ex.:
+
+  cookie_auth_login_url = thruk/cgi-bin/login.cgi
+
+
+==== cookie_auth_restricted_url
+Specifies the url against the cookie auth provider will verify its
+credentials.
+
+ex.:
+
+  cookie_auth_restricted_url = http://localhost/thruk/cgi-bin/restricted.cgi
+
+
+==== cookie_auth_session_timeout
+Specifies the timeout for idle sessions.
+
+ex.:
+
+  cookie_auth_session_timeout       = 86400
+
+
+==== cookie_auth_session_cache_timeout
+Specifies the amount of seconds in which subsequent requests won't
+verify authentication again.
+
+ex.:
+
+  cookie_auth_session_cache_timeout = 5
+
+
+==== cookie_auth_domain
+
+Cookie domain is usually set automatically. Use this option
+to override the default value. Domains have to contain at least
+two periods. Useful for single sign on environments.
+
+ex.:
+
+  cookie_auth_domain = .domain.com
+
+
+==== cookie_auth_login_hook
+
+Hook script which is called on every successful login. The REMOTE_USER
+environment variable will be set to the username of the current logged
+in user. Useful to do magic stuff on each login.
+
+ex.:
+
+  cookie_auth_login_hook = ./bin/hook.sh
+
+
+
+
+
+=== Command Settings
 
 ==== cmd_defaults
 Set the default checked state for command options.
@@ -1302,187 +1674,6 @@ ex.:
   command_reschedule_alias = ^check_mk\-(?!inventory);Check_MK
 
 
-==== datetime_format
-Default timeformat. Use POSIX format.
-
-ex.:
-
-  datetime_format = %Y-%m-%d  %H:%M:%S
-
-
-==== datetime_format_long
-Default long timeformat.
-
-ex.:
-
-  datetime_format_long = %a %b %e %H:%M:%S %Z %Y
-
-
-==== datetime_format_log
-Default log timeformat.
-
-ex.:
-
-  datetime_format_log = %B %d, %Y  %H
-
-
-==== datetime_format_trends
-Default trends timeformat.
-
-ex.:
-
-  datetime_format_trends = %a %b %e %H:%M:%S %Y
-
-
-==== datetime_format_today
-Default timeformat for todays date. Can be useful if you want a
-shorter date format for today.
-
-ex.:
-
-  datetime_format_today = %H:%M:%S
-
-
-==== show_long_plugin_output
-
-When a plugin returns more than one line of output, the
-output can be displayed directly in the status table, as
-popup or not at all.
-Choose between popup, inline and off
-
-ex.:
-
-  show_long_plugin_output = popup
-
-
-==== show_modified_attributes
-
-Show if a host / service has modified attributes.
-
-ex.:
-
-  show_modified_attributes = 1
-
-
-==== info_popup_event_type
-On which event should the comments / downtime or longpluginoutput popup
-show up. Valid values are onclick or onmouseover.
-
-ex.:
-
-  info_popup_event_type = onmouseover
-
-
-==== info_popup_options
-Options for the popup window used for long pluginoutput, downtimes and
-comments.
-See http://www.bosrup.com/web/overlib/?Command_Reference for
-what options are available
-
-ex.:
-
-  info_popup_options = STICKY,CLOSECLICK,HAUTO,MOUSEOFF
-
-
-==== show_notification_number
-Display the current number of notification after the current / max
-attempts on the status details page.
-
-ex.:
-
-  show_notification_number = 0
-
-
-==== show_backends_in_table
-Display the backend/site name in the status table.
-This is useful if you have same hosts or services on different
-backends and need to know which one returns an error.
-Valid values are:
-
- 1 - show site name at the end
- 2 - put site name in front
-
-ex.:
-
-  show_backends_in_table = 0
-
-
-==== show_config_edit_buttons
-Show links to config tool for each host / service.
-You need to have the config tool plugin enabled
-and you need proper permissions for the link to appear.
-
-ex.:
-
-  show_config_edit_buttons = 1
-
-
-==== show_full_commandline
-Display the full command line for host / service checks .
-Be warned, the command line could contain passwords and other confidential data.
-In order to replace the user macros for commands, you have to set the
-'resource_file' in your peer config or the general 'resource_file' option.
-
- * 0 = off, don't show the command line at all
- * 1 = show them for contacts with the role: authorized_for_configuration_information
- * 2 = show them for everyone
-
-ex.:
-
-  show_full_commandline = 0
-
-
-==== resource_file
-Set a general resource file. Make sure it does not contain any
-passwords or any other data which should not be displayed. Instead of
-using a general 'resource_file' you could define one file per peer in your
-peer config.
-
-ex.:
-
-  resource_file = /etc/nagios3/resource.cfg
-
-
-==== perf_bar_mode
-This option enables a performance bar inside the status/host list which
-create a graph from the performance data of the plugin output. Available
-options are 'match', 'first', 'all', 'worst' and 'off'.
-
- match: try to set graph which matches the output
- all: graph all performance values available
- first: graph only the first performance value
- worst: graph only the graph for the worst state
- off: graph no value at all
-
-ex.:
-
-  perf_bar_mode = match
-
-
-==== shown_inline_pnp
-Show inline pnp graph if available. If a service or host has a
-pnp4nagios action or notes url set. Thruk will show a inline graph on the
-extinfo page.
-This works for /pnp4nagios/ urls and /pnp/.
-
-ex.:
-
-  shown_inline_pnp = 1
-
-
-
-==== show_custom_vars
-Show custom vars in host / service ext info. List variable names to
-display in the host and service extinfo details page. Can be specified
-more than once to define multiple variables. You may use html in your
-variables. Use * as wildcard, ex.: _VAR*
-
-ex.:
-
-  show_custom_vars = _VAR1
-
-
-
 ==== use_wait_feature
 Waiting is a livestatus feature. When enabled, Thruk will wait
 after rescheduling hosts/services checks until the
@@ -1503,38 +1694,10 @@ ex.:
   wait_timeout = 10
 
 
-==== mobile_agent
-Specify user agents which will be redirected to the mobile plugin (if
-enabled).
-
-ex.:
-
-  mobile_agent=iPhone,Android,IEMobile
 
 
-==== show_error_reports
-Show link to bug reports when internal errors occur.
 
-ex.:
-  show_error_reports = 1
-
-
-==== skip_js_errors
-don't report some known harmless javascript errors
-
-ex.:
-  skip_js_errors  = cluetip is not a function
-
-
-==== no_external_job_forks
-Normally reports will be generated in an external process to avoid
-timeouts on long running reports. Use this switch to turn external
-jobs off and generate reports directly. Make sure they are finished
-within 40seconds which is the default fcgi timeout.
-
-ex.:
-
-  no_external_job_forks = 1
+=== Cron Settings
 
 
 ==== cron_file
@@ -1574,94 +1737,26 @@ ex.:
   thruk_bin = /usr/bin/thruk
 
 
-==== thruk_init
-Path to your thruk init script. Will be used to restart thruk.
+
+
+
+=== Icinga Settings
+
+==== enable_icinga_features
+This one activates all icinga specific features.
+If not set, Thruk will try to auto-detect your backends.
+Currently auto detection will only work within OMD. Don't enable it
+unless all your backends are icinga.
 
 ex.:
 
-  thruk_init = /etc/init.d/thruk
-
-
-==== first_day_of_week
-Set first day of week. Used in reports.
- Sunday: 0
- Monday: 1
-
-ex.:
-
-  first_day_of_week = 0
-
-
-==== logcache
-Enables caching logfiles for faster access. Cache supports MongoDB
-only. Format is a MongoDB connection string like 'hostname:port/db'.
-Using a cache dramatically decreases cpu and memory usage of Thruk
-when accessing logfiles, for example when creating reports.
-
-ex.:
-
-  logcache = localhost:27017/thruk_log_cache
-
-
-==== cookie_auth_login_url
-Specifies the url where non-authenticated users will be redirected
-too.
-
-ex.:
-
-  cookie_auth_login_url = thruk/cgi-bin/login.cgi
-
-
-==== cookie_auth_restricted_url
-Specifies the url against the cookie auth provider will verify its
-credentials.
-
-ex.:
-
-  cookie_auth_restricted_url = http://localhost/thruk/cgi-bin/restricted.cgi
-
-
-==== cookie_auth_session_timeout
-Specifies the timeout for idle sessions.
-
-ex.:
-
-  cookie_auth_session_timeout       = 86400
-
-
-==== cookie_auth_session_cache_timeout
-Specifies the amount of seconds in which subsequent requests won't
-verify authentication again.
-
-ex.:
-
-  cookie_auth_session_cache_timeout = 5
-
-
-==== cookie_auth_domain
-
-Cookie domain is usually set automatically. Use this option
-to override the default value. Domains have to contain at least
-two periods. Useful for single sign on environments.
-
-ex.:
-
-  cookie_auth_domain = .domain.com
-
-
-==== cookie_auth_login_hook
-
-Hook script which is called on every successful login. The REMOTE_USER
-environment variable will be set to the username of the current logged
-in user. Useful to do magic stuff on each login.
-
-ex.:
-
-  cookie_auth_login_hook = ./bin/hook.sh
+  enable_icinga_features = 1
 
 
 
 
+
+=== Shinken Settings
 
 ==== enable_shinken_features
 This one activates all problem/impact and criticity features.
@@ -1691,60 +1786,42 @@ ex.:
   </priorities>
 
 
-==== enable_icinga_features
-This one activates all icinga specific features.
-If not set, Thruk will try to auto-detect your backends.
-Currently auto detection will only work within OMD. Don't enable it
-unless all your backends are icinga.
+
+
+
+=== Other Settings
+
+==== no_external_job_forks
+Normally reports will be generated in an external process to avoid
+timeouts on long running reports. Use this switch to turn external
+jobs off and generate reports directly. Make sure they are finished
+within 40seconds which is the default fcgi timeout.
 
 ex.:
 
-  enable_icinga_features = 1
+  no_external_job_forks = 1
 
 
-==== check_local_states
-Get the status for remote backends from local instances. This can
-increase performance when using multiple remote sites. It is enabled
-by default when using more than one site. You have to define
-hostchecks in any local backend (using unix sockets) with a name or
-alias of the address of your remote backends.
+
+==== thruk_init
+Path to your thruk init script. Will be used to restart thruk.
 
 ex.:
 
-  check_local_states = 1
+  thruk_init = /etc/init.d/thruk
 
 
-==== backend_debug
-Set logging of backend in verbose mode. This only
-makes sense when debug logging is activated.
+==== cookie_path
 
-ex.:
-
-  backend_debug = 1
-
-
-==== connection_pool_size
-Use connection pool when accessing multiple sites.
-Increases the performance because backends will be queried
-parallel but uses around 50mb of memory per pool member.
-Disabled when set to 0. (experimental feature)
+Path used for cookies. Do not change unless you have weird url
+rewrites which breaks setting cookies.
 
 ex.:
 
-  connection_pool_size = 0
+  cookie_path = /
 
 
-==== sitepanel
-The sitepanel is used to display multiple backends/sites at a glance.
-With than 10 or more sites, the list of backends will be combined
-into the combined site panel which just displays the totals of
-available / down / disabled sites.
-Set sitepanel to list/compact/auto/off to change the default
-behavior.
 
-ex.:
-
-  sitepanel = auto
 
 
 === Component Thruk::Backend
@@ -1825,6 +1902,8 @@ ex.:
 
 
 
+
+
 === Component Thruk::Plugin::ConfigTool
 
 Enable config tool by setting path to different components config
@@ -1860,6 +1939,8 @@ Path to your htpasswd. Enables user management based an Apaches basic auth with 
 
 
 
+
+
 === Component Thruk::Plugin::Panorama
 
 The 'Panorama' plugin is a nice, fully customizable dashboard allowing
@@ -1880,6 +1961,8 @@ where lot people share the same account.
 
 ==== default_view
 Can be either the string of an exported view or path to a file with exported view.
+
+
 
 
 
@@ -1906,6 +1989,7 @@ Url used to replace relative links in html reports.
 ==== wkhtmltopdf
 wkhtmltopdf is used to convert html pages into pdf. You will need
 at least version 0.11. Get wkhtmltopdf from http://code.google.com/p/wkhtmltopdf/
+
 
 
 
@@ -2190,8 +2274,11 @@ as content.
 Most of the CGI Parameters can be changed with buttons, but there are
 some which are only accessible by adding them directly to the url.
 
+=== List of Parameters
 
-=== hidetop
+%subtocnotitle%
+
+==== hidetop
 
 Pages: status pages
 
@@ -2200,7 +2287,7 @@ Description: Show/Hide the status totals header.
 Example: /thruk/cgi-bin/status.cgi?hidetop=1
 
 
-=== nav
+==== nav
 
 Pages: all pages
 
@@ -2209,7 +2296,7 @@ Description: Show/Hide the navigation. Only useful in non-frames mode.
 Example: /thruk/cgi-bin/tac.cgi?nav=0
 
 
-=== noheader
+==== noheader
 
 Pages: status pages
 
@@ -2218,17 +2305,17 @@ Description: Show/Hide the status totals header.
 Example: /thruk/cgi-bin/status.cgi?noheader
 
 
-=== minimal
+==== minimal
 
 Pages: status page
 
-Description: Hides almost any user interface buttons. Useful for
+Description: Hides almost all user interface buttons. Useful for
 monitor screens where only the current problems should be displayed.
 
 Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1
 
 
-=== refresh
+==== refresh
 
 Pages: all pages
 
@@ -2237,7 +2324,7 @@ Description: Sets refresh timer to a custom value.
 Example: /thruk/cgi-bin/status.cgi?refresh=30
 
 
-=== columns
+==== columns
 
 Pages: status overview
 
@@ -2249,6 +2336,8 @@ Example: /thruk/cgi-bin/status.cgi?hostgroup=all&style=overview&columns=5
 
 == SLA Reporting
 
+=== How it works
+
 SLA Reporting consists of several steps.
 
  - report configuration
@@ -2256,7 +2345,7 @@ SLA Reporting consists of several steps.
  - converting html report into pdf
  - optionally send report by mail
 
-=== Report Configuration
+==== Report Configuration
 
 You can create and adjust report settings on the 'Reporting' page.
 Make sure the plugin is enabled. After selecting a template for your
@@ -2264,22 +2353,24 @@ report you have to set specific types of input fields on the second
 page. If you make you report public, everyone can view and refresh the
 report.
 
-=== Report Templates
+==== Report Templates
 
 All templates used for reports can be found in
 'plugins/plugins-enabled/reports2/templates/reports'.
 You may adjust or override all templates to your needs and put them
 into a 'reports' subfolder of the 'user_template_path'.
 
-  * reports     contains the selectable reports
-  ** comp       contains components used in reports
-  ** locale     contains localization settings
-  ** style      contains css used to make reports pretty
+------
+  | reports     contains the selectable reports
+  |- comp       contains components used in reports
+  |- locale     contains localization settings
+  |- style      contains css used to make reports pretty
+------
 
 See http://thruk.org/api/Thruk/Utils/Reports/Render.html for details on
 available functions and examples.
 
-=== Converting
+==== Converting
 
 The generated HTML report will be converted into a pdf file using wkhtml2pdf
 together with xvfb. Both tools must be installed on Thruks host. There is
@@ -2288,12 +2379,122 @@ Use at least the 0.11 version or later.
 
 
 
-=== Sending Reports By Mail
+==== Sending Reports By Mail
 
 It's quite easy to setup sla reports by mail. All you need is to
 create send option in the report configuration. It is even possible to
 send one report at multiple times.
 
+
+=== Customized Reports
+Reports can be customized with some HTML and CSS knowledge. Reports in general
+have several blocks which specify the steps done to produce the report.
+
+  * edit
+  * prepare
+  * render
+  * mail
+
+==== Edit Block
+The edit block contains configuration items used for this report. They create
+the edit page when someone chooses to create or edit a report of this type.
+Basically this block contains all required and optional fields used for this
+report.
+
+For example:
+
+------
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'host'       => [ 'Host',        'hosts',         ''              , '', 1 ] },
+        { 'timeperiod' => [ 'Timeperiod',  'rptimeperiod',  'last12months'          ] },
+    ];
+  %]
+[% END %]
+------
+
+The key in that hash defines the parameter by which that value can be accessed
+later. Each field has to point to an array with at least 3 values. The required
+flag is optional.
+
+  * Name
+  * Type
+  * Default value
+  * Required Flag
+
+
+
+==== Prepare Block
+The prepare block is used to gather data used in the report. Usually it's been
+used to get availability data via livestatus or fetch events from logfiles.
+
+For example:
+
+------
+[% IF block == 'prepare' %]
+  [%
+    set_unavailable_states(param.unavailable);
+    calculate_availability();
+  %]
+[% END %]
+------
+
+You may use all functions available from the http://thruk.org/api/Thruk/Utils/Reports/Render.html[Render Helper]
+
+
+==== Render Block
+The render block defines the layout of the report.
+
+For example:
+
+------
+[% IF block == 'render' %]
+  [% PROCESS 'reports/locale/en.tt' %]
+  [%
+    title        = 'Hello World Report'
+    subtitle     = r.name
+    coverdetails = [ 'Report Timeperiod:', get_report_timeperiod(start, end, reportDateFormat),
+                     'Host:', param.host,
+                   ]
+  %]
+
+  [% WRAPPER 'reports/comp/report.tt' %]
+    [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+    [% WRAPPER 'reports/comp/page_standard.tt' %]
+      <b>hello world</b>
+    [% END %]
+  [% END %]
+[% END %]
+------
+
+This report would contain 2 pages. First you wrap everything into the report.tt
+which defines the basic report layout and contains the stylesheets.
+Then you have to define some settings used by the cover page. 'r' is a reference
+to the report object, in this example we just use that as subtitle. 'coverdetails'
+is a list of name / value pairs used in the details list on the cover page.
+Finally we wrap a 'hello world' in a standard page. The content could contain
+standard HTML tags like tables and images as well.
+
+
+==== Mail Block
+Finally we define a mail block which is used for the mail layout if a report
+is sent by e-mail.
+
+For example:
+
+------
+[% IF block == 'mail' +%]
+SUBJECT: Report: [% r.name %]
+
+Your report is attached.
+
+[% IF r.desc %]Description: [%+ r.desc %][% END %]
+[%+ END %]
+------
+
+We use the report name 'r.name' as subject and put the report description 'r.desc'
+in the body.
 
 
 == CLI Tool & Scripting

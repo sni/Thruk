@@ -2122,3 +2122,7 @@ body.avail TD.dataOdd, body.avail TD.dataEven {
 TD.tableRowSelected, TH.tableRowSelected {
   background-color:#D8BFD8;
 }
+
+BODY.docs DIV.infoBoxTitle {
+  line-height: 13px;
+}

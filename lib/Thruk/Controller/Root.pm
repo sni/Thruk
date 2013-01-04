@@ -493,7 +493,8 @@ sub thruk_docs : Regex('thruk\/docs\/') :MyAction('AddDefaults') {
     $c->stash->{'no_auto_reload'}        = 1;
     $c->stash->{'hide_backends_chooser'} = 1;
     $c->stash->{'template'}              = 'docs.tt';
-    $c->stash->{page}                    = 'splashpage';
+    $c->stash->{'extrabodyclass'}        = 'docs';
+    $c->stash->{'page'}                  = 'splashpage';
 
     return 1;
 }
