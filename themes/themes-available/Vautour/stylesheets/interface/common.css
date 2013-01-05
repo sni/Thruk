@@ -74,7 +74,7 @@ ul {
 	background-color: #fff;
 }
 
-#NavBarSearchItem {
+.NavBarSearchItem {
 	float: left;
 	width: 130px;
 	height: 18px;

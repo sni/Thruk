@@ -27,3 +27,20 @@ th.data a {
 TD.tableRowSelected, TH.tableRowSelected {
   background-color:#72C3FB;
 }
+
+.filter_button_mini {
+  position:relative;
+  left: -3px;
+  top: -4px;
+}
+
+BODY.status INPUT.filter_button {
+  top: 4px;
+  left: 0px;
+  position: relative;
+}
+
+BODY.status TABLE.filter {
+  margin-top: 4px;
+  border: 1px solid grey;
+}
