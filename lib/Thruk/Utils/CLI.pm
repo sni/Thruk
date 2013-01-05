@@ -601,7 +601,8 @@ sub _cmd_report {
         if(defined $report_file and -f $report_file) {
             $output = read_file($report_file);
         } else {
-            return("generating report failed. please have a look at the logfile: ".$c->config->{'tmp_path'}.'/reports/'.$nr.'.log'."\n", 1)
+            my $errors = read_file($c->config->{'tmp_path'}.'/reports/'.$nr.'.log');
+            return("generating report failed:\n".$errors, 1)
         }
     }
 

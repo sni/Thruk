@@ -89,6 +89,14 @@
       [% END %]
     </td>
   </tr>
+  [% IF r.failed %]
+  <tr>
+    <td class="status [% rowclass %]"></td>
+    <td class="status [% rowclass %]" colspan=9 style="color: red; text-align: left;">
+      [% r.error | nl2br %]
+    </td>
+  </tr>
+  [% END %]
   [% END %]
   [% IF reports.size == 0 %]
   <tr class="firstrow">
