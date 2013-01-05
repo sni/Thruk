@@ -1,5 +1,5 @@
---- a/thruk.conf	2012-12-30 12:52:55.638234886 +0100
-+++ b/thruk.conf	2012-12-30 12:53:44.726249560 +0100
+--- a/thruk.conf	2013-01-05 19:10:10.000000000 +0100
++++ b/thruk.conf	2013-01-05 22:13:09.000000000 +0100
 @@ -63,11 +63,11 @@
  
  ######################################
@@ -129,6 +129,6 @@
      # wkhtmltopdf is used to convert html pages into pdf
 -    #wkhtmltopdf = /path/to/wkhtmltopdf
 +    wkhtmltopdf = /usr/share/thruk/script/wkhtmltopdf
- </Component>
  
- #####################################
+     # pnp export script is used to export pnp graphs into reports
+     #pnp_export = /path/to/pnp_export.sh

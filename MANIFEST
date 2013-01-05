@@ -827,7 +827,8 @@ plugins/plugins-available/reports2/root/flot-d7c58b5/LICENSE.txt
 plugins/plugins-available/reports2/root/reports.css
 plugins/plugins-available/reports2/root/reports.js
 plugins/plugins-available/reports2/root/strftime-min.js
-plugins/plugins-available/reports2/scripts/html2pdf.sh
+plugins/plugins-available/reports2/script/html2pdf.sh
+plugins/plugins-available/reports2/script/pnp_export.sh
 plugins/plugins-available/reports2/t/controller_reports.t
 plugins/plugins-available/reports2/t/reports_cli.t
 plugins/plugins-available/reports2/t/reports_utils.t

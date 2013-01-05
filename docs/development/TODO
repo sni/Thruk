@@ -53,11 +53,6 @@ reports:
         CSV output for single hosts/services,hostgroups/servicegroups
     - use mongodb with cursors
     - utf-8 mails: https://rt.cpan.org/Public/Bug/Display.html?id=42481
-    - put pnp graphs into report
-      - cd etc/pnp4nagios/ && \
-        REQUEST_URI='image?host=localhost&srv=_HOST_&view=1&source=0' \
-        php ~/share/pnp4nagios/htdocs/index.php 'image?host=localhost&srv=_HOST_&view=1&source=0' \
-        > /tmp/blah.png
 
 histogram:
     - missing completly

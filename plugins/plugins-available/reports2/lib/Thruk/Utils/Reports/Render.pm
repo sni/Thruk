@@ -497,6 +497,44 @@ sub get_day_name {
     return(get_month_name($1.'-'.$2, $months).' '.$3);
 }
 
+
+##########################################################
+
+=head2 get_pnp_image
+
+  get_pnp_image(hst, svc, start, end, width, height)
+
+return base64 encoded pnp image if possible.
+A string will be returned if no PNP graph can be exported.
+
+=cut
+sub get_pnp_image {
+    my($hst, $svc, $start, $end, $width, $height) = @_;
+    my $c        = $Thruk::Utils::Reports::Render::c or die("not initialized!");
+    my $exporter = $c->config->{'Thruk::Plugin::Reports2'}->{'pnp_export'} || $c->config->{plugin_path}.'/plugins-enabled/reports2/script/pnp_export.sh';
+    my $pnpurl   = "";
+
+    if($svc) {
+        my $svcdata = $c->{'db'}->get_services(filter => [{ host_name => $hst, description => $svc }]);
+        $pnpurl     = Thruk::Utils::get_pnp_url($c, $svcdata->[0], 1);
+    } else {
+        my $hstdata = $c->{'db'}->get_hosts(filter => [{ name => $hst }]);
+        $pnpurl     = Thruk::Utils::get_pnp_url($c, $hstdata->[0], 1);
+        $svc = '_HOST_';
+    }
+
+    my($fh, $filename) = tempfile();
+    my $cmd = $exporter.' "'.$hst.'" "'.$svc.'" "'.$width.'" "'.$height.'" "'.$start.'" "'.$end.'" "'.$pnpurl.'" "'.$filename.'"';
+    `$cmd`;
+    if(-s $filename) {
+        my $imgdata  = read_file($filename);
+        return 'data:image/png;base64,'.encode_base64($imgdata);
+    }
+    unlink($filename);
+    return "";
+}
+
+
 ##########################################################
 
 =head2 dump

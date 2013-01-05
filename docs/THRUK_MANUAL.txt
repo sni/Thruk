@@ -1977,6 +1977,7 @@ ex.:
     report_nice_level = 5
     report_base_url   = http://host.local/thruk/cgi-bin/
     wkhtmltopdf       = /usr/bin/wkhtmltopdf
+    pnp_export        = plugins/plugins-enabled/reports2/script/pnp_export.sh
   </Component>
 
 ==== report_nice_level
@@ -1985,12 +1986,32 @@ Execute regular scheduled reports with this nice level.
 ==== report_base_url
 Url used to replace relative links in html reports.
 
-
 ==== wkhtmltopdf
 wkhtmltopdf is used to convert html pages into pdf. You will need
 at least version 0.11. Get wkhtmltopdf from http://code.google.com/p/wkhtmltopdf/
 
+==== pnp_export
+pnp_export defines a script which exports a PNP4nagios graph into a
+local file which then can be included in reports. PNP4nagios images
+are either exported localy by executing php or remotly fetched with
+wget. This works automatically in OMD, but only for local sites of
+course. To make this work without OMD, set the variable 'PNP_ETC' and
+'PNP_INDEX' in the ~/.thruk file of your webserver. The PNP4nagios url
+is taken from the action url or from the notes url.
 
+ex.:
+
+  export PNP_ETC="/etc/pnp4nagios"
+  export PNP_INDEX="/usr/share/pnp4nagios/htdocs/index.php"
+
+Remote PNP4nagios graphs will be fetched by wget and usually the
+graphs are password protected, so you may want to set a different wget
+command to specify a username and password. This can to be set by the
+'PNP_WGET' variable in the ~/.thruk file of the webserver user.
+
+ex.:
+
+  export PNP_WGET="wget -q --user=admin --password=secret"
 
 
 

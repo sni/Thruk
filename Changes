@@ -16,6 +16,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - added timeperiod support in sla reports
             - added html preview of pdf reports
             - added new report option for sla decimal points and graph min sla
+            - added pnp graph to reports
           - Bug Fixes
             - fixed problem when using logfilecache in combination with connection pool
 

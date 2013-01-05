@@ -18657,6 +18657,8 @@ logfile cache:</p></div>
 
 <div class='toclevel4'><a href='#_wkhtmltopdf'>wkhtmltopdf</a></div>
 
+<div class='toclevel4'><a href='#_pnp_export'>pnp_export</a></div>
+
 <div class='toclevel3'><a href='#_component_thruk_plugin_statusmap'>Component Thruk::Plugin::Statusmap</a></div>
 
 <div class='toclevel4'><a href='#_statusmap_default_type'>statusmap_default_type</a></div>
@@ -19849,6 +19851,7 @@ probably have to download the wkhtmltopdf binary in a recent version.</p></div>
   report_nice_level = 5
   report_base_url   = http://host.local/thruk/cgi-bin/
   wkhtmltopdf       = /usr/bin/wkhtmltopdf
+  pnp_export        = plugins/plugins-enabled/reports2/script/pnp_export.sh
 &lt;/Component&gt;</tt></pre>
 </div></div>
 <h4 id="_report_nice_level">report_nice_level</h4>
@@ -19858,6 +19861,29 @@ probably have to download the wkhtmltopdf binary in a recent version.</p></div>
 <h4 id="_wkhtmltopdf">wkhtmltopdf</h4>
 <div class="paragraph"><p>wkhtmltopdf is used to convert html pages into pdf. You will need
 at least version 0.11. Get wkhtmltopdf from <a href="http://code.google.com/p/wkhtmltopdf/">http://code.google.com/p/wkhtmltopdf/</a></p></div>
+<h4 id="_pnp_export">pnp_export</h4>
+<div class="paragraph"><p>pnp_export defines a script which exports a PNP4nagios graph into a
+local file which then can be included in reports. PNP4nagios images
+are either exported localy by executing php or remotly fetched with
+wget. This works automatically in OMD, but only for local sites of
+course. To make this work without OMD, set the variable <em>PNP_ETC</em> and
+<em>PNP_INDEX</em> in the ~/.thruk file of your webserver. The PNP4nagios url
+is taken from the action url or from the notes url.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>export PNP_ETC="/etc/pnp4nagios"
+export PNP_INDEX="/usr/share/pnp4nagios/htdocs/index.php"</tt></pre>
+</div></div>
+<div class="paragraph"><p>Remote PNP4nagios graphs will be fetched by wget and usually the
+graphs are password protected, so you may want to set a different wget
+command to specify a username and password. This can to be set by the
+<em>PNP_WGET</em> variable in the ~/.thruk file of the webserver user.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>export PNP_WGET="wget -q --user=admin --password=secret"</tt></pre>
+</div></div>
 <h3 id="_component_thruk_plugin_statusmap">Component Thruk::Plugin::Statusmap</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The Statusmap plugin gives an overview over your network.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
@@ -20522,7 +20548,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-01-04 18:36:28 CEST
+Last updated 2013-01-05 21:40:13 CEST
 </div>
 </div>
 </body>

@@ -144,10 +144,13 @@ SPAN.duration {
   float: right;
 }
 TABLE.availability_details {
-  margin-top: 40px;
+  margin-top: 30px;
   margin-left: 10px;
   border-collapse: collapse;
   font-size: 10px;
+}
+TABLE.availability_details.totals {
+  margin-top: 15px;
 }
 TABLE.availability_details TD, TABLE.availability_details TH {
   border: 1px solid grey;
@@ -200,6 +203,9 @@ SPAN.graph_percent_legend {
   white-space: nowrap;
   overflow: hidden;
   text-align: right;
+}
+IMG.pnpimage {
+  margin-top: 5px;
 }
 
 /* page sizing */
