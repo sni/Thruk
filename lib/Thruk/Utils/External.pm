@@ -68,7 +68,7 @@ sub cmd {
         open STDOUT, '>', $dir."/stdout";
 
         # some db drivers need reconnect after forking
-        $c->{'db'}->reconnect();
+        _reconnect($c);
 
         $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
 
@@ -135,7 +135,7 @@ sub perl {
                 open STDOUT, '>', $dir."/stdout";
 
                 # some db drivers need reconnect after forking
-                $c->{'db'}->reconnect();
+                _reconnect($c);
 
                 eval($conf->{'expr'});
                 ## use critic
@@ -569,6 +569,18 @@ sub _clean_code_refs {
         delete $var->{$key} if ref $var->{$key} eq 'CODE';
     }
     return $var;
+}
+
+##############################################
+sub _reconnect {
+    my($c) = @_;
+    $c->{'db'}->reconnect() or do {
+        my $err = $@;
+        $err =~ s/\s+at\s+[\w\/\.\-]+\.pm\s+line\s+\d+\.//gmx;
+        print STDERR "reconnect failed: $err";
+        kill($$);
+    };
+    return;
 }
 
 ##############################################

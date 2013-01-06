@@ -234,12 +234,8 @@ sub report_remove {
     return unless defined $report->{'readonly'};
     return unless $report->{'readonly'} == 0;
 
-    my @files;
-    push @files, $c->config->{'var_path'}.'/reports/'.$nr.'.rpt'  if -e $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
-    push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat'  if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
-    push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.log'  if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
-    push @files, $c->config->{'tmp_path'}.'/reports/'.$nr.'.html' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
-    return 1 if unlink @files;
+    unlink($c->config->{'var_path'}.'/reports/'.$nr.'.rpt') if -e $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
+    clean_report_tmp_files($c, $nr);
 
     # remove cron entries
     Thruk::Utils::Reports::update_cron_file($c);
@@ -465,14 +461,32 @@ update running state of report
 
 =cut
 sub set_running {
-    my($c, $nr, $val, $start, $end) = @_;
+    my($c, $nr, $val, $start, $end, $job) = @_;
     my $options = _read_report_file($c, $nr);
-    $options->{'var'}->{'is_running'} = $val;
+    $options->{'var'}->{'is_running'} = $val   if defined $val;
     $options->{'var'}->{'start_time'} = $start if defined $start;
     $options->{'var'}->{'end_time'}   = $end   if defined $end;
+    $options->{'var'}->{'job'}        = $job   if defined $job;
     $options->{'var'}->{'attachment'} = $Thruk::Utils::PDF::attachment if $Thruk::Utils::PDF::attachment;
     $options->{'var'}->{'ctype'}      = $Thruk::Utils::PDF::ctype      if $Thruk::Utils::PDF::ctype;
     _report_save($c, $nr, $options);
+    return;
+}
+
+##########################################################
+
+=head2 clean_report_tmp_files
+
+  clean_report_tmp_files($c, $nr)
+
+remove any tmp files from this report
+
+=cut
+sub clean_report_tmp_files {
+    my($c, $nr) = @_;
+    unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat'  if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.dat';
+    unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.log'  if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    unlink $c->config->{'tmp_path'}.'/reports/'.$nr.'.html' if -e $c->config->{'tmp_path'}.'/reports/'.$nr.'.html';
     return;
 }
 
@@ -595,6 +609,13 @@ sub _read_report_file {
         $report->{'failed'} = 1;
         $report->{'error'}  = read_file($log);
         $report->{'var'}->{'is_running'} = 0;
+
+        # nice error message
+        if($report->{'error'} =~ m/\[ERROR\]\s+(.*?)\s+at\s+[\w\/\.\-]+\.pm\s+line\s+\d+\./gmx) {
+            $report->{'error'} = $1;
+            $report->{'error'} =~ s/^'//mx;
+            $report->{'error'} =~ s/\\'/'/gmx;
+        }
     }
 
 

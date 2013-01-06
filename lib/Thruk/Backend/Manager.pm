@@ -441,6 +441,27 @@ sub get_servicegroup_names_from_services {
 
 ########################################
 
+=head2 reconnect
+
+  reconnect
+
+runs reconnect on all peers
+
+=cut
+
+sub reconnect {
+    my( $self ) = @_;
+    eval {
+        $self->_do_on_peers( 'reconnect', \@_);
+    };
+    if($@) {
+        return;
+    }
+    return 1;
+}
+
+########################################
+
 =head2 expand_command
 
   expand_command
@@ -841,8 +862,14 @@ sub _do_on_peers {
     my $last_error;
     my($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     if(!defined $result and $selected_backends != 0) {
-        local $Data::Dumper::Deepcopy = 1;
-        confess("Error in _do_on_peers: ".$@."called as ".Dumper($function)."with args: ".Dumper(\%arg));
+        # we don't need a full stacktrace for known errors
+        my $err = $@;
+        if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
+            die($1);
+        } else {
+            local $Data::Dumper::Deepcopy = 1;
+            confess("Error in _do_on_peers: ".$err."called as ".Dumper($function)."with args: ".Dumper(\%arg));
+        }
     }
     $type = '' unless defined $type;
 
