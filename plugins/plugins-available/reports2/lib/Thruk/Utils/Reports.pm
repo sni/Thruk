@@ -241,7 +241,7 @@ sub report_remove {
     # remove cron entries
     Thruk::Utils::Reports::update_cron_file($c);
 
-    return;
+    return 1;
 }
 
 ##########################################################
