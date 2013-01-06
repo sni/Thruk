@@ -57,15 +57,18 @@ sub cmd {
     my ($id,$dir) = _init_external($c);
     return unless $id;
     my $pid       = fork();
+    die "fork() failed: $!" unless defined $pid;
 
     if ($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
     } else {
         _do_child_stuff($c, $dir);
-        $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
         open STDERR, '>', $dir."/stderr";
         open STDOUT, '>', $dir."/stdout";
+
+        # some db drivers need reconnect after forking
+        $c->{'db'}->reconnect();
 
         $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
 
@@ -112,6 +115,7 @@ sub perl {
     my ($id,$dir) = _init_external($c);
     return unless $id;
     my $pid       = fork();
+    die "fork() failed: $!" unless defined $pid;
 
     if ($pid) {
         return _do_parent_stuff($c, $dir, $pid, $id, $conf);
@@ -122,7 +126,6 @@ sub perl {
         }
         eval {
             _do_child_stuff($c, $dir);
-            $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
 
             do {
                 ## no critic
@@ -130,6 +133,10 @@ sub perl {
                 local *STDERR;
                 open STDERR, '>', $dir."/stderr";
                 open STDOUT, '>', $dir."/stdout";
+
+                # some db drivers need reconnect after forking
+                $c->{'db'}->reconnect();
+
                 eval($conf->{'expr'});
                 ## use critic
 
@@ -387,15 +394,16 @@ sub _do_child_stuff {
     # don't use connection pool after forking
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
 
+    # make remote user available
+    $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
+
+    $|=1; # autoflush
+
     # close open filehandles
     for my $fd (0..1024) {
         POSIX::close($fd);
     }
 
-    # some db drivers need reconnect after forking
-    $c->{'db'}->reconnect();
-
-    $|=1; # autoflush
     return;
 }
 
