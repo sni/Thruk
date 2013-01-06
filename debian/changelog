@@ -1,8 +1,14 @@
+thruk (1.62) UNRELEASED; urgency=low
+
+  * new upstream release
+
+ --  <sven@consol.de>  Sun, 06 Jan 2013 21:20:19 +0100
+
 thruk (1.60-2) UNRELEASED; urgency=low
 
   * new upstream release
 
- --  <build@mon-build-master.virt.consol.de>  Wed, 19 Dec 2012 11:24:16 +0100
+ --  <sven@consol.de>  Wed, 19 Dec 2012 11:24:16 +0100
 
 thruk (1.60) UNRELEASED; urgency=low
 

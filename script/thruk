@@ -28,7 +28,7 @@ use Getopt::Long;
 use Pod::Usage;
 use Thruk::Utils;
 
-our $VERSION = '1.60';
+our $VERSION = '1.62';
 my $branch   = '';
 $branch      = Thruk::Utils::get_git_name() unless $branch ne '';
 

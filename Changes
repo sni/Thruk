@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-1.62     not yet released
+1.62     Sun Jan  6 21:20:16 CET 2013
           - added filter to comments / downtimes page
           - added json / excel export to comments / downtimes page
           - moved plugins config items in component sections of config
