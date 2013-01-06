@@ -61,7 +61,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
     $Thruk::Utils::CLI::c              = $c;
 
     my $report_nr = $c->{'request'}->{'parameters'}->{'report'};
-    my $action    = $c->{'request'}->{'parameters'}->{'action'} || 'show';
+    my $action    = $c->{'request'}->{'parameters'}->{'action'}    || 'show';
+    my $highlight = $c->{'request'}->{'parameters'}->{'highlight'} || '';
     my $refresh   = 0;
     $refresh = $c->{'request'}->{'parameters'}->{'refresh'} if exists $c->{'request'}->{'parameters'}->{'refresh'};
 
@@ -103,7 +104,8 @@ sub index :Path :Args(0) :MyAction('AddDefaults') {
 
     # show list of configured reports
     $c->stash->{'no_auto_reload'} = 0;
-    $c->stash->{reports} = Thruk::Utils::Reports::get_report_list($c);
+    $c->stash->{'highlight'}      = $highlight;
+    $c->stash->{'reports'}        = Thruk::Utils::Reports::get_report_list($c);
 
     Thruk::Utils::ssi_include($c);
 
@@ -224,7 +226,7 @@ sub report_save {
     } else {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such report', code => 404 });
     }
-    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi");
+    return $c->response->redirect($c->stash->{'url_prefix'}."thruk/cgi-bin/reports2.cgi?highlight=".$report_nr);
 }
 
 ##########################################################

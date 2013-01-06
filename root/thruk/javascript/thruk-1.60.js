@@ -317,6 +317,10 @@ function reloadPage() {
         urlArgs[key] = additionalParams[key];
     }
 
+    if(urlArgs['highlight'] != undefined) {
+        delete urlArgs['highlight'];
+    }
+
     // make url uniq, otherwise we would to do a reload
     // which reloads all images / css / js too
     urlArgs['_'] = (new Date()).getTime();

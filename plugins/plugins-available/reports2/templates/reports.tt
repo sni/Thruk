@@ -39,7 +39,7 @@
   [% FOREACH r = reports %]
   [% SET rowclass = 'statusOdd'  IF loop.even %]
   [% SET rowclass = 'statusEven' IF loop.odd %]
-  <tr[% IF loop.first %] class="firstrow"[% END %]>
+  <tr class="report[% r.nr +%] [%+ IF loop.first +%] firstrow[% END %]">
     <td class="status [% rowclass %]" align="left">[% r.name %]</td>
     <td class="status [% rowclass %]" align="left">[% IF r.desc.length > 50 %]<span title="[% r.desc %]">[% r.desc.substr(0,50) %]...</span>[% ELSE %][% r.desc %][% END %]</td>
     <td class="status [% rowclass %]">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
@@ -114,6 +114,9 @@
   [% IF running > 0 %]
   window.clearInterval(update_reports_status_int);
   update_reports_status_int = window.setInterval("update_reports_status()", 1000);
+  [%+ END +%]
+  [% IF highlight %]
+  jQuery('TR.report[% highlight +%] TD').effect('highlight', {}, 2000);
   [%+ END +%]
 -->
 </script>
