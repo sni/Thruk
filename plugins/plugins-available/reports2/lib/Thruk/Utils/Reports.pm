@@ -21,6 +21,7 @@ use Thruk::Utils::Reports::Render;
 use MIME::Lite;
 use File::Copy;
 use Encode qw(encode_utf8 decode_utf8);
+use Storable qw/dclone/;
 
 ##########################################################
 
@@ -525,7 +526,8 @@ sub _get_new_report {
 
 ##########################################################
 sub _report_save {
-    my($c, $nr, $report) = @_;
+    my($c, $nr, $r) = @_;
+    my $report = dclone($r);
     Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     if($nr eq 'new') {
@@ -592,18 +594,34 @@ sub _read_report_file {
     $report->{'is_public'}  = 0 unless defined $report->{'is_public'};
 
     # check if its really running
+    my $needs_save = 0;
     if($report->{'var'}->{'is_running'} and kill(0, $report->{'var'}->{'is_running'}) != 1) {
         $report->{'var'}->{'is_running'} = 0;
+        $needs_save = 1;
     }
     if($report->{'var'}->{'is_running'} == -1 and $report->{'var'}->{'start_time'} < time() - 10) {
         $report->{'var'}->{'is_running'} = 0;
+        $needs_save = 1;
     }
     if($report->{'var'}->{'end_time'} < $report->{'var'}->{'start_time'}) {
         $report->{'var'}->{'end_time'} = $report->{'var'}->{'start_time'};
+        $needs_save = 1;
+    }
+
+    my $log = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
+    if(!$report->{'var'}->{'is_running'} and $report->{'var'}->{'job'}) {
+        my $jobid = delete $report->{'var'}->{'job'};
+        my($out,$err,$time, $dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $jobid, 1);
+        if($err) {
+            # append job error to report logfile
+            open(my $fh, '>>', $log);
+            print $fh $err;
+            Thruk::Utils::IO::close($fh, $log);
+        }
+        $needs_save = 1;
     }
 
     # failed?
-    my $log = $c->config->{'tmp_path'}.'/reports/'.$nr.'.log';
     $report->{'failed'} = 0;
     if(-s $log) {
         $report->{'failed'} = 1;
@@ -616,6 +634,7 @@ sub _read_report_file {
             $report->{'error'} =~ s/^'//mx;
             $report->{'error'} =~ s/\\'/'/gmx;
         }
+        $needs_save = 1;
     }
 
 
@@ -625,6 +644,8 @@ sub _read_report_file {
             $report->{$key} = $rdata->{$key};
         }
     }
+
+    _report_save($c, $nr, $report) if $needs_save;
 
     return $report;
 }
