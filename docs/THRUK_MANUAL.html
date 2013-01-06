@@ -19878,11 +19878,13 @@ export PNP_INDEX="/usr/share/pnp4nagios/htdocs/index.php"</tt></pre>
 <div class="paragraph"><p>Remote PNP4nagios graphs will be fetched by wget and usually the
 graphs are password protected, so you may want to set a different wget
 command to specify a username and password. This can to be set by the
-<em>PNP_WGET</em> variable in the ~/.thruk file of the webserver user.</p></div>
+<em>PNP_WGET</em> variable in the ~/.thruk file of the webserver user. You
+may force to use wget by setting <em>PNP_URL_PREFIX</em>.</p></div>
 <div class="paragraph"><p>ex.:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>export PNP_WGET="wget -q --user=admin --password=secret"</tt></pre>
+<pre><tt>export PNP_WGET="wget -q --user=admin --password=secret"
+export PNP_URL_PREFIX="http://demo.thruk.org"</tt></pre>
 </div></div>
 <h3 id="_component_thruk_plugin_statusmap">Component Thruk::Plugin::Statusmap</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The Statusmap plugin gives an overview over your network.</p></div>
@@ -20548,7 +20550,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-01-05 21:40:13 CEST
+Last updated 2013-01-06 02:37:07 CEST
 </div>
 </div>
 </body>

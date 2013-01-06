@@ -2007,11 +2007,13 @@ ex.:
 Remote PNP4nagios graphs will be fetched by wget and usually the
 graphs are password protected, so you may want to set a different wget
 command to specify a username and password. This can to be set by the
-'PNP_WGET' variable in the ~/.thruk file of the webserver user.
+'PNP_WGET' variable in the ~/.thruk file of the webserver user. You
+may force to use wget by setting 'PNP_URL_PREFIX'.
 
 ex.:
 
   export PNP_WGET="wget -q --user=admin --password=secret"
+  export PNP_URL_PREFIX="http://demo.thruk.org"
 
 
 

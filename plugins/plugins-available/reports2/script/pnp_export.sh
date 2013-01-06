@@ -27,6 +27,10 @@ END=$6
 PNPURL=$7
 TEMPFILE=$8
 
+if [ "$PNPURL" != "" ]; then
+  PNPURL="$PNP_URL_PREFIX$PNPURL"
+fi
+
 export REQUEST_URI="image?host=$HOST&srv=$SERVICE&view=1&source=0&graph_width=$WIDTH&graph_height=$HEIGHT&start=$START&end=$END"
 if [ "${PNPURL:0:5}" != "http:" -a "${PNPURL:0:6}" != "https:" ]; then
   # export graph with local php
