@@ -883,6 +883,7 @@ function table_search(input_id, table_ids) {
 function do_table_search() {
     var ids      = table_search_table_ids;
     var value    = jQuery('#'+table_search_input_id).val();
+    value        = value.toLowerCase();
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
         /* make tables fixed witdh to avoid flickering */
@@ -893,11 +894,11 @@ function do_table_search() {
                 jQuery.each(row.cells, function(nr, cell) {
                     /* if regex matching fails, use normal matching */
                     try {
-                        if(cell.innerHTML.match(value)) {
+                        if(cell.innerHTML.toLowerCase().match(value)) {
                             found = 1;
                         }
                     } catch(e) {
-                        if(cell.innerHTML.indexOf(value) != -1) {
+                        if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
                             found = 1;
                         }
                     }
