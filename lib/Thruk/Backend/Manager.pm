@@ -866,6 +866,9 @@ sub _do_on_peers {
         my $err = $@;
         if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
             die($1);
+        }
+        elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
+            die($1);
         } else {
             local $Data::Dumper::Deepcopy = 1;
             confess("Error in _do_on_peers: ".$err."called as ".Dumper($function)."with args: ".Dumper(\%arg));
