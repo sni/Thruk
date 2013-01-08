@@ -562,6 +562,11 @@ sub _finished_job_page {
             $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
             return $c->response->redirect($forward);
         }
+
+        if(defined $c->stash->{json}) {
+            $c->forward('Thruk::View::JSON');
+        }
+
         return;
     }
     $c->stash->{text}     = $out;

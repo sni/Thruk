@@ -509,6 +509,13 @@ sub calculate_availability {
         'start' => $c->stash->{'start'},
         'end'   => $c->stash->{'end'},
     };
+
+    # json export
+    my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
+    if($view_mode eq 'json') {
+        $c->stash->{'json'} = $return;
+    }
+
     return $return;
 }
 

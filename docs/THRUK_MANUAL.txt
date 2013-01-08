@@ -2367,6 +2367,47 @@ Example: /thruk/cgi-bin/status.cgi?refresh=30
 
 
 
+
+== JSON Exporting
+
+There are several pages which offer json exports.
+
+=== List of Pages
+
+==== Status Data
+
+Example: /thruk/cgi-bin/status.cgi?view_mode=json&host=all
+
+Parameters: all usual status page parameters and filter. Use the gui filter
+and then json export link for maximum convenience.
+
+
+==== Availability Data
+
+Example: /thruk/cgi-bin/avail.cgi?view_mode=json&host=all
+
+Parameters:
+
+------
+    t1=1357575984                       # start timestamp
+    t2=1357662384                       # end timestamp
+    host=hostname                       # hostname
+    assumestateretention=yes            # assume state retention or not
+    assumeinitialstates=yes             # assume initial state or not
+    assumestatesduringnotrunning=yes    # assume state during core not running or not
+    initialassumedhoststate=0           # initial assumed host state
+    initialassumedservicestate=0        # initial assumed service state
+    full_log_entries                    # include full logs
+    showscheduleddowntime=
+    rpttimeperiod=
+------
+
+See http://search.cpan.org/~nierlein/Monitoring-Availability-0.40/lib/Monitoring/Availability.pm#CONSTRUCTOR[Monitoring::Availability]
+for a detailed description of all parameters.
+
+
+
+
 == SLA Reporting
 
 === How it works
@@ -2528,6 +2569,9 @@ Your report is attached.
 
 We use the report name 'r.name' as subject and put the report description 'r.desc'
 in the body.
+
+
+
 
 
 == CLI Tool & Scripting
