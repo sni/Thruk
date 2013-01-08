@@ -32,6 +32,7 @@ use POSIX ":sys_wait_h";
             wait_message => "display message while running the job"
             forward      => "forward on success"
             background   => "return $jobid if set, or redirect otherwise"
+            nofork       => "don't fork"
             no_shell     => "wrap command in a shell unless no_shell is set"
         }
     );
@@ -48,7 +49,10 @@ sub cmd {
         $cmd = $conf->{'cmd'};
     }
 
-    if($c->config->{'no_external_job_forks'}) {
+    if(   $c->config->{'no_external_job_forks'}
+       or $conf->{'nofork'}
+       or exists $c->{'request'}->{'parameters'}->{'noexternalforks'}
+    ) {
         local $ENV{REMOTE_USER} = $c->stash->{'remote_user'};
         my $out = `$cmd`;
         return _finished_job_page($c, $c->stash, undef, $out);
@@ -99,7 +103,10 @@ sub perl {
     my $c         = shift;
     my $conf      = shift;
 
-    if($c->config->{'no_external_job_forks'} or $conf->{'nofork'}) {
+    if(   $c->config->{'no_external_job_forks'}
+       or $conf->{'nofork'}
+       or exists $c->{'request'}->{'parameters'}->{'noexternalforks'}
+    ) {
         if(defined $conf->{'backends'}) {
             $c->{'db'}->disable_backends();
             $c->{'db'}->enable_backends($conf->{'backends'});

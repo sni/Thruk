@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - added noexternalforks parameter to skip forks
           - Bug Fixes
             - fixed js error in conf tool
 

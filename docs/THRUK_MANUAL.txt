@@ -2301,6 +2301,15 @@ some which are only accessible by adding them directly to the url.
 
 %subtocnotitle%
 
+==== columns
+
+Pages: status overview
+
+Description: Sets the number of columns
+
+Example: /thruk/cgi-bin/status.cgi?hostgroup=all&style=overview&columns=5
+
+
 ==== hidetop
 
 Pages: status pages
@@ -2308,24 +2317,6 @@ Pages: status pages
 Description: Show/Hide the status totals header.
 
 Example: /thruk/cgi-bin/status.cgi?hidetop=1
-
-
-==== nav
-
-Pages: all pages
-
-Description: Show/Hide the navigation. Only useful in non-frames mode.
-
-Example: /thruk/cgi-bin/tac.cgi?nav=0
-
-
-==== noheader
-
-Pages: status pages
-
-Description: Show/Hide the status totals header.
-
-Example: /thruk/cgi-bin/status.cgi?noheader
 
 
 ==== minimal
@@ -2338,6 +2329,33 @@ monitor screens where only the current problems should be displayed.
 Example: /thruk/cgi-bin/status.cgi?host=all&servicestatustypes=28&minimal=1
 
 
+==== nav
+
+Pages: all pages
+
+Description: Show/Hide the navigation. Only useful in non-frames mode.
+
+Example: /thruk/cgi-bin/tac.cgi?nav=0
+
+
+==== noexternalforks
+
+Pages: all pages
+
+Description: Skip external page generation. Used primarily in reports.
+
+Example: /thruk/cgi-bin/avail.cgi?noexternalforks
+
+
+==== noheader
+
+Pages: status pages
+
+Description: Show/Hide the status totals header.
+
+Example: /thruk/cgi-bin/status.cgi?noheader
+
+
 ==== refresh
 
 Pages: all pages
@@ -2346,14 +2364,6 @@ Description: Sets refresh timer to a custom value.
 
 Example: /thruk/cgi-bin/status.cgi?refresh=30
 
-
-==== columns
-
-Pages: status overview
-
-Description: Sets the number of columns
-
-Example: /thruk/cgi-bin/status.cgi?hostgroup=all&style=overview&columns=5
 
 
 
