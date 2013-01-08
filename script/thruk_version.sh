@@ -64,7 +64,8 @@ if [ -n "$newversion" -a "$newversion" != "$VERSION" ]; then
                 -i docs/THRUK_MANUAL.txt \
                 -i root/thruk/startup.html
     sed -r "s/\-$VERSION\-/-$newversion\-/" -i docs/THRUK_MANUAL.txt
-    sed -r "s/$VERSION\s*not yet released/$newversion     $fulldate/" -i Changes
+    sed -r "s/$VERSION\s*not yet released/$newversion     $fulldate/"    -i Changes
+    sed -r "s/^next:\s*not yet released/$newversion     $fulldate/"      -i Changes
     sed -r "s/$newversion\s*not yet released/$newversion     $fulldate/" -i Changes
     sed -r "s/$VERSION/$newversion/" -i dist.ini
     git mv plugins/plugins-available/mobile/root/mobile-$VERSION.css plugins/plugins-available/mobile/root/mobile-$newversion.css
