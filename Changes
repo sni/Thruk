@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Bug Fixes
+            - fixed js error in conf tool
+
 1.62     Sun Jan  6 21:20:16 CET 2013
           - added filter to comments / downtimes page
           - added json / excel export to comments / downtimes page
