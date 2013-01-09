@@ -617,9 +617,9 @@ function new_attr_filter(str) {
 /* new attribute onselect */
 var newid, inp;
 function on_attr_select() {
-    newid = add_conf_attribute('attr_table', jQuery('#newattr').val(),true);
+    newid = "#"+add_conf_attribute('attr_table', jQuery('#newattr').val(),true).replace(/"/g, '');
     ajax_search.reset();
-    window.setTimeout('jQuery(\'#\'+newid).focus()', 300);
+    window.setTimeout('ajax_search.hide_results(null, 1);jQuery(\''+newid+'\').focus();', 300);
     return newid;
 }
 
