@@ -120,6 +120,7 @@ our %config = ('name'                   => 'Thruk',
                                           'menu_states'      => {},
                                           'menu_states_json' => "{}",
                                           'cookie_auth'      => 0,
+                                          'space'          => ' ',
                                           'uri_filter'     => {
                                                 'bookmark'      => undef,
                                                 'referer'       => undef,
