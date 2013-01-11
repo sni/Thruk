@@ -1381,6 +1381,16 @@ ex.:
   show_modified_attributes = 1
 
 
+==== show_host_attempts
+
+Show check attempts for hosts too. The default is to show
+them on the problems page only. Use this value to force a value.
+
+ex.:
+
+  show_host_attempts = 1
+
+
 ==== perf_bar_mode
 This option enables a performance bar inside the status/host list which
 create a graph from the performance data of the plugin output. Available

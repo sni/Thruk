@@ -389,7 +389,7 @@ sub _process_hostdetails_page {
 
     $c->stash->{'orderby'}            = $sortoptions->{$sortoption}->[1];
     $c->stash->{'orderdir'}           = $order;
-    $c->stash->{'show_host_attempts'} = 0;
+    $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
 
     return 1;
 }
@@ -839,7 +839,7 @@ sub _process_combined_page {
                                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
                                                   pager  => 1 );
     $c->stash->{'hosts'} = $hosts;
-    $c->stash->{'show_host_attempts'} = 1;
+    $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
     my $view_mode = $c->{'request'}->{'parameters'}->{'view_mode'} || 'html';
