@@ -422,7 +422,9 @@ sub set_default_config {
 
     # additional user template paths?
     if(defined $config->{'user_template_path'}) {
-        unshift @{$config->{templates_paths}}, $config->{'user_template_path'};
+        if(scalar @{$config->{templates_paths}} == 0 || $config->{templates_paths}->[0] ne $config->{'user_template_path'}) {
+            unshift @{$config->{templates_paths}}, $config->{'user_template_path'};
+        }
     }
 
     return;
