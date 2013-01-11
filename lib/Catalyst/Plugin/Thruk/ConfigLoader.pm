@@ -5,11 +5,39 @@ use Thruk::Utils;
 use Thruk::Config;
 use base 'Catalyst::Plugin::ConfigLoader';
 
+########################################
+
+=head2 finalize_config
+
+    adjust config items which have to be set before anything else
+
+=cut
+
 sub finalize_config {
     my($c)= @_;
     return _do_finalize_config($c->config);
 }
 
+########################################
+
+=head2 finalize
+
+    restore used specific settings from global hash
+
+=cut
+
+sub finalize {
+    my $c = shift;
+    # restore user adjusted config
+    if($c->stash->{'config_adjustments'}) {
+        for my $key (keys %{$c->stash->{'config_adjustments'}}) {
+            $c->config->{$key} = $c->stash->{'config_adjustments'}->{$key};
+        }
+    }
+    return $c->next::method(@_);
+}
+
+########################################
 sub _do_finalize_config {
     my($config) = @_;
 
@@ -115,6 +143,7 @@ sub _do_finalize_config {
 
     return;
 }
+
 
 1;
 

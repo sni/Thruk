@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - added user & group specific config overrides
           - added json export for availability data
           - added noexternalforks parameter to skip forks
           - added show_host_attempts config option

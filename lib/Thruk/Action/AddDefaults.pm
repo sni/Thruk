@@ -28,6 +28,10 @@ before 'execute' => sub {
     add_defaults(0, @_);
 };
 
+after 'execute' => sub {
+    after_execute(@_);
+};
+
 
 ########################################
 
@@ -225,12 +229,44 @@ sub add_defaults {
     }
 
     ###############################
+    # user / group specific config?
+    if($c->stash->{'remote_user'}) {
+        $c->stash->{'config_adjustments'} = {};
+        for my $group (sort keys %{$c->cache->get($c->stash->{'remote_user'})->{'contactgroups'}}) {
+            if(defined $c->config->{'Group'}->{$group}) {
+                for my $key (keys %{$c->config->{'Group'}->{$group}}) {
+                    $c->stash->{'config_adjustments'}->{$key} = $c->config->{$key} unless defined $c->stash->{'config_adjustments'}->{$key};
+                    $c->config->{$key} = $c->config->{'Group'}->{$group}->{$key};
+                }
+            }
+        }
+        if(defined $c->config->{'User'}->{$c->stash->{'remote_user'}}) {
+            for my $key (keys %{$c->config->{'User'}->{$c->stash->{'remote_user'}}}) {
+                $c->stash->{'config_adjustments'}->{$key} = $c->config->{$key} unless defined $c->stash->{'config_adjustments'}->{$key};
+                $c->config->{$key} = $c->config->{'User'}->{$c->stash->{'remote_user'}}->{$key};
+            }
+        }
+
+        # reapply config defaults and config conversions
+        if(scalar keys %{$c->stash->{'config_adjustments'}} > 0) {
+            Thruk::Config::set_default_config($c->config);
+        }
+    }
+
+    ###############################
     $c->stats->profile(end => "AddDefaults::add_defaults");
     return;
 }
 
 ########################################
-after 'execute' => sub {
+
+=head2 after_execute
+
+    last chance to change stash
+
+=cut
+
+sub after_execute {
     my ( $self, $controller, $c, $test ) = @_;
 
     $c->stats->profile(begin => "AddDefaults::after");
@@ -241,7 +277,8 @@ after 'execute' => sub {
     $c->stash->{'refresh_rate'} = $c->{'request'}->{'parameters'}->{'refresh'} if defined $c->{'request'}->{'parameters'}->{'refresh'};
 
     $c->stats->profile(end => "AddDefaults::after");
-};
+    return;
+}
 
 
 

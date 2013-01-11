@@ -653,6 +653,7 @@ DIV.subtoc div.toclevel4 {
 <div class='toclevel3'><a href='#_component_thruk_plugin_panorama'>Component Thruk::Plugin::Panorama</a></div>
 <div class='toclevel3'><a href='#_component_thruk_plugin_reports2'>Component Thruk::Plugin::Reports2</a></div>
 <div class='toclevel3'><a href='#_component_thruk_plugin_statusmap'>Component Thruk::Plugin::Statusmap</a></div>
+<div class='toclevel3'><a href='#_user_amp_group_specific_overrides'>User &amp; Group Specific Overrides</a></div>
 <div class='toclevel3'><a href='#_cgi_cfg_3'>cgi.cfg</a></div>
 <div class='toclevel2'><a href='#_logfiles'>Logfiles</a></div>
 <div class='toclevel2'><a href='#_menu_configuration'>Menu Configuration</a></div>
@@ -17494,6 +17495,12 @@ logfile cache:</p></div>
 
 <div class='toclevel4'><a href='#_statusmap_default_groupby'>statusmap_default_groupby</a></div>
 
+<div class='toclevel3'><a href='#_user_amp_group_specific_overrides'>User &amp; Group Specific Overrides</a></div>
+
+<div class='toclevel4'><a href='#_groups'>Groups</a></div>
+
+<div class='toclevel4'><a href='#_users'>Users</a></div>
+
 <div class='toclevel3'><a href='#_cgi_cfg_3'>cgi.cfg</a></div>
 
 <div class='toclevel4'><a href='#_show_context_help'>show_context_help</a></div>
@@ -18739,6 +18746,48 @@ types are: <em>table</em> and <em>circle</em></p></div>
 <h4 id="_statusmap_default_groupby">statusmap_default_groupby</h4>
 <div class="paragraph"><p>And the statusmap default group by which has to be one of:
 <em>parent</em>, <em>address</em>, <em>domain</em>, <em>hostgroup</em>, <em>servicegroup</em></p></div>
+<h3 id="_user_amp_group_specific_overrides">User &amp; Group Specific Overrides</h3><div style="clear:left"></div>
+<div class="paragraph"><p>Both, the <em>Users</em> and the <em>Groups</em> directive override default settings for
+single users or groups. In theory it&#8217;s possible to override each and every
+config setting from the thruk.conf but you will get funny results if you
+override fundamental settings like backends, paths and such things.</p></div>
+<h4 id="_groups">Groups</h4>
+<div class="paragraph"><p>The groups directive overrides specific config settings for one group only.
+Group overrides are applied in alphabetical order. For example, if you have
+a user in group <em>Admins</em> and in <em>Superadmins</em>, he will get all overrides from
+both groups, but the <em>Admins</em> overrides will be superseded by the <em>Superadmins</em>.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt># disable all commands, except reschedule for all users
+command_disabled = 0-6,8-95,97-999</tt></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;Group admins&gt;
+    # enable commands for admins again
+    command_disabled =
+&lt;/Group&gt;</tt></pre>
+</div></div>
+<h4 id="_users">Users</h4>
+<div class="paragraph"><p>The users directive overrides specific config settings for one user only.</p></div>
+<div class="paragraph"><p>ex.:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>&lt;User guest&gt;
+    # override single configuration item
+    show_error_reports  = 0
+    can_submit_commands = 0</tt></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><tt>    # also available for nested components
+    &lt;Component Thruk::Plugin::Panorama&gt;
+      state_provider  = server
+      default_view    = /etc/thruk/default_panorama_view_guest
+    &lt;/Component&gt;
+&lt;/User&gt;</tt></pre>
+</div></div>
 <h3 id="_cgi_cfg_3">cgi.cfg</h3><div style="clear:left"></div>
 <div class="paragraph"><p>The cgi.cfg is mainly the same as in Nagios or Icinga but not all
 values are used.</p></div>
@@ -19421,7 +19470,7 @@ of your monitoring core configuration.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-01-11 11:46:37 CEST
+Last updated 2013-01-11 13:34:20 CEST
 </div>
 </div>
 </body>

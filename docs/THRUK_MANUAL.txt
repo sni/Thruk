@@ -2050,6 +2050,48 @@ And the statusmap default group by which has to be one of:
 
 
 
+=== User & Group Specific Overrides
+Both, the 'Users' and the 'Groups' directive override default settings for
+single users or groups. In theory it's possible to override each and every
+config setting from the thruk.conf but you will get funny results if you
+override fundamental settings like backends, paths and such things.
+
+==== Groups
+The groups directive overrides specific config settings for one group only.
+Group overrides are applied in alphabetical order. For example, if you have
+a user in group 'Admins' and in 'Superadmins', he will get all overrides from
+both groups, but the 'Admins' overrides will be superseded by the 'Superadmins'.
+
+ex.:
+
+    # disable all commands, except reschedule for all users
+    command_disabled = 0-6,8-95,97-999
+
+    <Group admins>
+        # enable commands for admins again
+        command_disabled =
+    </Group>
+
+
+==== Users
+The users directive overrides specific config settings for one user only.
+
+ex.:
+
+    <User guest>
+        # override single configuration item
+        show_error_reports  = 0
+        can_submit_commands = 0
+
+        # also available for nested components
+        <Component Thruk::Plugin::Panorama>
+          state_provider  = server
+          default_view    = /etc/thruk/default_panorama_view_guest
+        </Component>
+    </User>
+
+
+
 
 
 === cgi.cfg
