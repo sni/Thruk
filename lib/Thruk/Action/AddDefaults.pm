@@ -161,7 +161,7 @@ sub add_defaults {
     ###############################
     # do we have only shinken backends?
     unless(exists $c->config->{'enable_shinken_features'}) {
-        if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH') {
+        if(defined $c->stash->{'pi_detail'} and ref $c->stash->{'pi_detail'} eq 'HASH' and scalar keys %{$c->stash->{'pi_detail'}} > 0) {
             $c->stash->{'enable_shinken_features'} = 1;
             for my $b (values %{$c->stash->{'pi_detail'}}) {
                 next unless defined $b->{'peer_key'};
