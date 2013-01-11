@@ -662,6 +662,9 @@ sub update_object {
 
     return unless defined $obj;
 
+    my $oldchanged = $obj->{'file'}->{'changed'};
+    my $oldcommit  = $self->{'needs_commit'};
+
     my $oldname = $obj->get_name();
 
     my $file = $obj->{'file'};
@@ -673,8 +676,6 @@ sub update_object {
     $obj->{'conf'}          = $data;
     $obj->{'cache'}         = {};
     $obj->{'comments'}      = [ split/\n/mx, $comment ];
-    $file->{'changed'}      = 1;
-    $self->{'needs_commit'} = 1;
 
     # unify comments
     for my $com (@{$obj->{'comments'}}) {
@@ -687,6 +688,15 @@ sub update_object {
 
     if(defined $oldname and defined $newname and $oldname ne $newname) {
         $self->rename_dependencies($obj, $oldname, $newname);
+    }
+
+    # restore old status if file hasn't changed
+    if($file->diff() eq '') {
+        $obj->{'file'}->{'changed'} = $oldchanged;
+        $self->{'needs_commit'}     = $oldcommit;
+    } else {
+        $file->{'changed'}      = 1;
+        $self->{'needs_commit'} = 1;
     }
 
     $self->_rebuild_index() if $rebuild;
