@@ -75,7 +75,7 @@ jQuery('TH.data').each(function(i, col) {
       columns.push(col.innerHTML);
     }
 });
-add_options(columns_sel, columns);
+add_options(column_select, columns);
 jQuery("#columns_sel option").attr('selected',true);
 
 // Set the default "show" mode to that specified by W3C DOM
