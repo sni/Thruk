@@ -153,20 +153,6 @@ exit 0
 
 %post
 chkconfig --add thruk
-# restore themes and plugins
-if [ -d /tmp/thruk_update/themes/. ]; then
-  rm -f /etc/thruk/themes/themes-enabled/*
-  cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
-fi
-if [ -d /tmp/thruk_update/plugins/. ]; then
-  rm -f /etc/thruk/plugins/plugins-enabled/*
-  cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
-fi
-if [ -d /tmp/thruk_update/ssi/. ]; then
-  rm -f /etc/thruk/ssi/*
-  cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
-fi
-rm -rf /tmp/thruk_update
 mkdir -p /var/lib/thruk /var/cache/thruk/reports /var/log/thruk
 %if %{defined suse_version}
 chown -R wwwrun: /var/lib/thruk /var/cache/thruk /var/log/thruk /etc/thruk/plugins/plugins-enabled /etc/thruk/thruk_local.conf
@@ -191,13 +177,30 @@ fi
 echo "Thruk has been configured for http://$(hostname)/thruk/. User and password is 'thrukadmin'."
 exit 0
 
+%posttrans
+# restore themes and plugins
+if [ -d /tmp/thruk_update/themes/. ]; then
+  rm -f /etc/thruk/themes/themes-enabled/*
+  cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
+fi
+if [ -d /tmp/thruk_update/plugins/. ]; then
+  rm -f /etc/thruk/plugins/plugins-enabled/*
+  cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
+fi
+ls -la /etc/thruk/plugins/plugins-enabled/
+if [ -d /tmp/thruk_update/ssi/. ]; then
+  rm -f /etc/thruk/ssi/*
+  cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
+fi
+rm -rf /tmp/thruk_update
+
 %preun
 if [ $1 = 0 ]; then
     # last version will be deinstalled
     /usr/bin/thruk -a uninstallcron --local
 fi
 /etc/init.d/thruk stop
-chkconfig --del thruk
+chkconfig --del thruk >/dev/null 2>&1
 exit 0
 
 %postun
