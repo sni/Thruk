@@ -53,10 +53,7 @@ sub begin : Private {
         $c->stash->{$key} = $c->config->{$key};
     }
 
-    # username?
-    if($c->user_exists) {
-        $c->stash->{'remote_user'}  = $c->user->get('username');
-    }
+    # user data
     $c->stash->{'user_data'} = { bookmarks => {} };
 
     # frame options
