@@ -727,8 +727,13 @@ sub _verify_fields {
         my $key = (keys %{$d})[0];
         my $f   = $d->{$key};
 
+        # fill in default
+        if(defined $f->[4] and $f->[2] and !$report->{'params'}->{$key}) {
+            $report->{'params'}->{$key} = $f->[2];
+        }
+
         # required fields
-        if(defined $f->[4] and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
+        if(defined $f->[4] and !$f->[2] and (!defined $report->{'params'}->{$key} or $report->{'params'}->{$key} =~ m/^\s*$/mx)) {
             push @errors, $f->[0].': required field';
         }
 
